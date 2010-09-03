@@ -1,0 +1,115 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>CCC playground</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="Base.js"></script>
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="jquery.ui.js"></script>
+    <script type="text/javascript" src="jquery.blockUI.js"></script>
+    <script type="text/javascript" src="jquery.tooltip.js"></script>
+    <script type="text/javascript" src="jquery.dropshadow.js"></script>
+    <script type="text/javascript" src="jquery.fixedheadertable-1.1.2.js"></script>
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="protovis-d3.2.js"></script>
+    <script type="text/javascript" src="Dashboards.js"></script>
+    <script type="text/javascript" src="CoreComponents.js"></script>
+    <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+    <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
+    <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+    <link type="text/css" rel="stylesheet" href="theme/ecommera-theme/jquery-ui-1.8.4.custom.css"/>
+    <!--    <link type="text/css" rel="stylesheet" href="jquery.fixedheadertable-1.1.2.css"/>-->
+  </head>
+  <body>
+
+    <h1>
+      CCC playground
+    </h1>
+
+
+    <div id="pvcObject"></div>
+
+
+
+    <script type="text/javascript">
+
+
+      
+
+      
+      var textElement =
+        {
+        name: "regionSelector",
+        type: "textComponent",
+        listeners:[],
+        expression: function(){return "My text generated in " + new Date()},
+        htmlObject: "sampleObject",
+        executeAtStart: true
+      };
+
+
+      var ecoImpactTable =
+        {
+        name: "ecoImpactTable",
+        type: "ecoImpactTable",
+        listeners:[],
+        htmlObject: "ecoImpactTableObject",
+        executeAtStart: true,
+        parameter: "q04_03.resultset",
+        ecoParameters: "parameters",
+        widthExpression: "$('#ecoImpactTableObject').width() - 16"
+      };
+
+      Dashboards.init([textElement]);
+      
+
+      // Test of pov in standalone mode
+      var charts = new pvc.XYAbstract({
+        // legendPosition: "left",
+        canvas: "pvcObject",
+        width: 600,
+        height: 400,
+        title: "O meu título",
+        titlePosition: "left",
+        titleSize: 40,
+        legend: true,
+        legendPosition: "right",
+        legendSize: 150,
+        extensionPoints: {
+          base_fillStyle: "red",
+          title_fillStyle: "yellow",
+          titleLabel_font: "16px sans-serif",
+          // title_strokeStyle: "black",
+          // titleLabel_bottom: 0,
+          // titleLabel_textAlign: "left",
+          legend_fillStyle: "green"
+        }
+        
+      });
+
+      charts.setData(q01_01);
+      charts.render();
+
+
+      Dashboards.log("Value: " + charts.options.legendPosition)
+
+
+      /*
+      var charts2 = new pvc.XYAbstract();
+      Dashboards.log("Value2: " + charts2.options.legendPosition)
+       */
+
+    </script>
+
+
+
+
+
+  </body>
+</html>
