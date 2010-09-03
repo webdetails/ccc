@@ -13,6 +13,9 @@ pvc.DataEngine = Base.extend({
   seriesInRows: false,
   crosstabMode: true,
   translator: null,
+  series: null,
+  categories: null,
+  values: null,
 
   constructor: function(chart,metadata, resultset){
 
@@ -34,7 +37,6 @@ pvc.DataEngine = Base.extend({
       this.translator = new pvc.RelationalTranslator();
     }
 
-    this.translator.setTranspose(this.seriesInRows);
     this.translator.setData(this.metadata, this.resultset);
 
   },
@@ -55,20 +57,47 @@ pvc.DataEngine = Base.extend({
   },
 
   getSeries: function(){
-    return this.translator.getSeries();
+    return this.series || (this.series = this.seriesInRows?this.translator.getRows():this.translator.getColumns());
   },
 
   getCategories: function(){
-    return this.translator.getCategories();
+    return this.categories || ( this.categories =  this.seriesInRows?this.translator.getColumns():this.translator.getRows());
   },
 
+  getValues: function(){
+  
+    if (this.values == null){
+      this.values = this.seriesInRows?pv.transpose(this.translator.getValues()):this.translator.getValues();
+    }
+    return this.values;
+
+  },
+
+
   getSeriesSize: function(){
-    return this.translator.getSeries().length;
+    return this.getSeries().length;
   },
 
   getCategoriesSize: function(){
-    return this.translator.getCategories().length;
+    return this.getCategories().length;
   },
+
+
+  getCategoriesMaxSum: function(){
+
+
+  },
+
+  getCategoriesAbsoluteMax: function(){
+
+
+  },
+
+  getCategoriesAbsoluteMin: function(){
+
+
+  },
+
 
   setCrosstabMode: function(crosstabMode){
     this.crosstabMode = crosstabMode;
@@ -84,22 +113,22 @@ pvc.DataEngine = Base.extend({
 
   isSeriesInRows: function(){
     return this.seriesInRows;
+  },
+
+  resetDataCache: function(){
+    this.series = null;
+    this.categories = null;
+    this.values = null;
   }
-
-
 
 });
 
 
+
 pvc.DataTranslator = Base.extend({
 
-  series: [],
-  categories: [],
-  values: [],
   metadata: null,
   resultset: null,
-  transpose: false,
-
 
   constructor: function(){
   },
@@ -110,29 +139,16 @@ pvc.DataTranslator = Base.extend({
     this.resultset = resultset;
   },
 
-  setTranspose: function(transpose){
-
-    this.transpose = transpose;
-  },
-
-  getSeries: function(){
-    return this.transpose?this.getRows():this.getColumns();
-  },
-
-  getCategories: function(){
-    return this.transpose?this.getColumns():this.getRows();
-  },
-  
   getValues: function(){
-    return this.values;
+    // override me
   },
 
   getColumns: function(){
-  // override me
+    // override me
   },
 
   getRows: function(){
-  // override me
+    // override me
   }
 
 
@@ -172,14 +188,14 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
   getColumns: function(){
 
-    if(this.resultSet.length == 2){
+    if(this.metadata.length == 2){
       return ['Serie'];
     }
     else{
       // First column of every row
-      return this.resultset.map(function(d){
+      return pv.uniq(this.resultset.map(function(d){
         return d[0];
-      })
+      }))
     }
 
     // In crosstab mode, series are on the metadata, skipping first row
@@ -192,17 +208,17 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
   getRows: function(){
 
-    if(this.resultSet.length == 3){
+    if(this.metadata.length == 3){
       // Second column of every row
-      return this.resultset.map(function(d){
+      return pv.uniq(this.resultset.map(function(d){
         return d[1];
-      })
+      }))
     }
     else{
       // First column of every row
-      return this.resultset.map(function(d){
+      return pv.uniq(this.resultset.map(function(d){
         return d[0];
-      })
+      }))
     }
 
   }

@@ -12,7 +12,7 @@ pvc.BasePanel = Base.extend({
   type: pv.Panel, // default one
   height: null,
   width: null,
-  anchor: "center",
+  anchor: "top",
   pvPanel: null,
   fillColor: "red",
   margins:{
@@ -320,3 +320,4 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
 
 });
+

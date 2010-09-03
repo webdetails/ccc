@@ -63,13 +63,9 @@ var relational_02 = {
   "metadata":[{
     "colIndex":0,
     "colType":"String",
-    "colName":"Series"
-  },{
-    "colIndex":1,
-    "colType":"String",
     "colName":"Categories"
   },{
-    "colIndex":2,
+    "colIndex":1,
     "colType":"Numeric",
     "colName":"Value"
   }]

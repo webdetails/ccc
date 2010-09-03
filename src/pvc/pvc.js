@@ -33,10 +33,13 @@ pvc.ev = function(x){
 pvc.Base = Base.extend({
 
   options: {},
-  resultset:[],
-  metadata: [],
   isPreRendered: false,
 
+  // data
+  dataEngine: null,
+  resultset:[],
+  metadata: [],
+  
   // panels
   basePanel: null,
   titlePanel: null,
@@ -224,3 +227,4 @@ pvc.XYAbstract = pvc.Base.extend({
 
 }
 )
+
