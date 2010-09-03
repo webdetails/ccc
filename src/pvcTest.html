@@ -13,18 +13,16 @@ and open the template in the editor.
     <script type="text/javascript" src="jquery.blockUI.js"></script>
     <script type="text/javascript" src="jquery.tooltip.js"></script>
     <script type="text/javascript" src="jquery.dropshadow.js"></script>
-    <script type="text/javascript" src="jquery.fixedheadertable-1.1.2.js"></script>
     <script type="text/javascript" src="data/q01-01.js"></script>
     <script type="text/javascript" src="protovis-d3.2.js"></script>
     <script type="text/javascript" src="Dashboards.js"></script>
     <script type="text/javascript" src="CoreComponents.js"></script>
     <script type="text/javascript" src="pvc/pvc.js"></script>
     <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcData.js"></script>
     <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
     <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
     <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
-    <link type="text/css" rel="stylesheet" href="theme/ecommera-theme/jquery-ui-1.8.4.custom.css"/>
-    <!--    <link type="text/css" rel="stylesheet" href="jquery.fixedheadertable-1.1.2.css"/>-->
   </head>
   <body>
 
@@ -53,19 +51,6 @@ and open the template in the editor.
         executeAtStart: true
       };
 
-
-      var ecoImpactTable =
-        {
-        name: "ecoImpactTable",
-        type: "ecoImpactTable",
-        listeners:[],
-        htmlObject: "ecoImpactTableObject",
-        executeAtStart: true,
-        parameter: "q04_03.resultset",
-        ecoParameters: "parameters",
-        widthExpression: "$('#ecoImpactTableObject').width() - 16"
-      };
-
       Dashboards.init([textElement]);
       
 
@@ -75,7 +60,7 @@ and open the template in the editor.
         canvas: "pvcObject",
         width: 600,
         height: 400,
-        title: "O meu título",
+        title: "My title",
         titlePosition: "left",
         titleSize: 40,
         legend: true,
@@ -93,7 +78,7 @@ and open the template in the editor.
         
       });
 
-      charts.setData(q01_01);
+      charts.setData(q01_01, {crosstabMode: true, seriesInRows: false});
       charts.render();
 
 

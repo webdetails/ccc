@@ -20,7 +20,6 @@ pvc.DataEngine = Base.extend({
     this.metadata = metadata;
     this.resultset = resultset;
 
-    this.createTranslator();
     
   },
 
@@ -28,8 +27,8 @@ pvc.DataEngine = Base.extend({
   createTranslator: function(){
 
     // Create the appropriate translator
-    if(this.crossTabMode){
-      this.translator = new pvc.CrossTabTranslator();
+    if(this.crosstabMode){
+      this.translator = new pvc.CrosstabTranslator();
     }
     else{
       this.translator = new pvc.RelationalTranslator();
@@ -38,7 +37,39 @@ pvc.DataEngine = Base.extend({
     this.translator.setTranspose(this.seriesInRows);
     this.translator.setData(this.metadata, this.resultset);
 
+  },
+
+
+
+  getInfo: function(){
+
+    var out = "------------------------------------------\n";
+    out+= "Dataset Information\n";
+
+    out+= "  Series ( "+ this.getSeries().length +"   ): " + this.getSeries().slice(0,10) +"\n";
+    out+= "  Categories ( "+ this.getCategories().length +"   ): " + this.getCategories().slice(0,10) +"\n";
+    out+= "------------------------------------------\n";
+
+    return out;
+
+  },
+
+  setCrosstabMode: function(crosstabMode){
+    this.crosstabMode = crosstabMode;
+  },
+
+  isCrosstabMode: function(){
+    return this.crosstabMode;
+  },
+
+  setSeriesInRows: function(seriesInRows){
+    this.seriesInRows = seriesInRows;
+  },
+
+  isSeriesInRows: function(){
+    return this.seriesInRows;
   }
+
 
 
 });

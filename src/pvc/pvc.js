@@ -50,6 +50,9 @@ pvc.Base = Base.extend({
       height: 300,
       originalWidth: 400,
       originalHeight: 300,
+      crosstabMode: true,
+      seriesInRows: false,
+
       title: null,
       titlePosition: "top", // options: bottom || left || right
       titleAlign: "center", // left / right / center
@@ -76,7 +79,14 @@ pvc.Base = Base.extend({
 
     pvc.log("Prerendering in pvc");
 
-    // Firt thing, we need to
+    // Firt thing, we need to create the data engine nad initialize the translator
+    this.dataEngine = new pvc.DataEngine(this,this.metadata,this.resultset);
+    this.dataEngine.setCrosstabMode(this.options.crosstabMode);
+    this.dataEngine.setSeriesInRows(this.options.seriesInRows);
+    this.dataEngine.createTranslator();
+
+    pvc.log(this.dataEngine.getInfo());
+
 
     // create the basePanel. Since we don't have a parent panel we need to
     // manually create the points
@@ -138,9 +148,11 @@ pvc.Base = Base.extend({
    * comes from the CDA: {metadata: [], resultset: []}
    */
 
-  setData: function(data){
+  setData: function(data, options){
     this.setResultset(data.resultset);
     this.setMetadata(data.metadata);
+
+    $.extend(this.options,options);
   },
 
 
