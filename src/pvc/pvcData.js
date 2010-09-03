@@ -46,12 +46,28 @@ pvc.DataEngine = Base.extend({
     var out = "------------------------------------------\n";
     out+= "Dataset Information\n";
 
-    out+= "  Series ( "+ this.getSeries().length +"   ): " + this.getSeries().slice(0,10) +"\n";
-    out+= "  Categories ( "+ this.getCategories().length +"   ): " + this.getCategories().slice(0,10) +"\n";
+    out+= "  Series ( "+ this.getSeriesSize() +" ): " + this.getSeries().slice(0,10) +"\n";
+    out+= "  Categories ( "+ this.getCategoriesSize() +" ): " + this.getCategories().slice(0,10) +"\n";
     out+= "------------------------------------------\n";
 
     return out;
 
+  },
+
+  getSeries: function(){
+    return this.translator.getSeries();
+  },
+
+  getCategories: function(){
+    return this.translator.getCategories();
+  },
+
+  getSeriesSize: function(){
+    return this.translator.getSeries().length;
+  },
+
+  getCategoriesSize: function(){
+    return this.translator.getCategories().length;
   },
 
   setCrosstabMode: function(crosstabMode){
@@ -85,8 +101,7 @@ pvc.DataTranslator = Base.extend({
   transpose: false,
 
 
-  constructor: function(data){
-    this.transformData(data);
+  constructor: function(){
   },
 
 
@@ -101,30 +116,51 @@ pvc.DataTranslator = Base.extend({
   },
 
   getSeries: function(){
-    return this.series;
-
+    return this.transpose?this.getRows():this.getColumns();
   },
 
   getCategories: function(){
-    return this.categories;
+    return this.transpose?this.getColumns():this.getRows();
   },
   
-  getSeriesSize: function(){
-    return this.series.length;
-
-  },
-
-  getCategoriesSize: function(){
-    return this.categories.length;
-  },
-
   getValues: function(){
     return this.values;
+  },
+
+  getColumns: function(){
+  // override me
+  },
+
+  getRows: function(){
+  // override me
   }
 
 
-
-
-
-
 })
+
+
+pvc.CrosstabTranslator = pvc.DataTranslator.extend({
+
+  getColumns: function(){
+
+    // In crosstab mode, series are on the metadata, skipping first row
+    return this.metadata.slice(1).map(function(d){
+      return d.colName;
+    })
+
+  },
+
+  getRows: function(){
+
+    return this.resultset.map(function(d){
+      return d[0];
+    })
+  }
+  
+});
+
+
+pvc.RelationalTranslator = pvc.DataTranslator.extend({
+
+
+  });
