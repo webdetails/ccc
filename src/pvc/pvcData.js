@@ -152,6 +152,7 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
 
   getRows: function(){
 
+    // First column of every row
     return this.resultset.map(function(d){
       return d[0];
     })
@@ -162,5 +163,48 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
 
 pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
+  /*
+   * 2 options: 3 rows or 2 rows only. On 3 rows, we have series on the first.
+   * With 2 rows we have no series (or single serie)
+   *
+   */
 
-  });
+
+  getColumns: function(){
+
+    if(this.resultSet.length == 2){
+      return ['Serie'];
+    }
+    else{
+      // First column of every row
+      return this.resultset.map(function(d){
+        return d[0];
+      })
+    }
+
+    // In crosstab mode, series are on the metadata, skipping first row
+    return this.metadata.slice(1).map(function(d){
+      return d.colName;
+    })
+
+  },
+  
+
+  getRows: function(){
+
+    if(this.resultSet.length == 3){
+      // Second column of every row
+      return this.resultset.map(function(d){
+        return d[1];
+      })
+    }
+    else{
+      // First column of every row
+      return this.resultset.map(function(d){
+        return d[0];
+      })
+    }
+
+  }
+
+});
