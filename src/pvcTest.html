@@ -68,7 +68,9 @@ and open the template in the editor.
         legendPosition: "right",
         legendSize: 150,
 
-        innerGap: 1,
+        innerGap: 0.75,
+        numberPosition: 0,
+
         extensionPoints: {
           base_fillStyle: "red",
           title_fillStyle: "yellow",
@@ -77,18 +79,18 @@ and open the template in the editor.
           // titleLabel_bottom: 0,
           // titleLabel_textAlign: "left",
           legend_fillStyle: "green",
-          chart_fillStyle: "#eee"
+          chart_fillStyle: "#eee",
+          pie_strokeStyle: "black"
+          //pie_innerRadius: 30
         }
         
       });
 
-      charts.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
+      charts.setData(relational_02, {crosstabMode: true, seriesInRows: false});
       charts.render();
 
 
-      Dashboards.log("Value: " + charts.options.legendPosition)
-
-
+      /*
       // Testing some other datasets:
       var relational = new pvc.XYAbstract({});
       relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
@@ -97,11 +99,9 @@ and open the template in the editor.
       var relational2 = new pvc.XYAbstract({});
       relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
       relational2.preRender();
+      
+      */
 
-      /*
-      var charts2 = new pvc.XYAbstract();
-      Dashboards.log("Value2: " + charts2.options.legendPosition)
-       */
 
     </script>
 

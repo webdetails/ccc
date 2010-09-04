@@ -33,8 +33,8 @@ pvc.PieChart = pvc.Base.extend({
 
 
     this.pieChartPanel = new pvc.PieChartPanel(this, {
-      
-      });
+      innerGap: this.options.innerGap
+    });
 
     this.pieChartPanel.appendTo(this.basePanel); // Add it
 
@@ -44,15 +44,25 @@ pvc.PieChart = pvc.Base.extend({
 );
 
 
+/*
+   * Legend panel. Generates the legend. Specific options are:
+   * <i>legend</i> - text. Default: false
+   * <i>legendPosition</i> - top / bottom / left / right. Default: bottom
+   * <i>legendSize</i> - The size of the legend in pixels. Default: 25
+   *
+   * Has the following protovis extension points:
+   *
+   * <i>legend_</i> - for the main legend Panel
+   */
 
 
 pvc.PieChartPanel = pvc.BasePanel.extend({
 
   _parent: null,
-  pvPanel: null,
-
+  pvPie: null,
+  pvPieLabel: null,
+  
   innerGap: 0.8,
-
 
 
   constructor: function(chart, options){
@@ -74,27 +84,38 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
 
     // Add the chart!
 
-    var r = pv.min([this.width, this.height],pv.naturalOrder)/2 * this.innerGap;
+    var r = pv.min([this.width, this.height])/2 * this.innerGap;
 
-    /*
-    a = pv.Scale.linear(0, pv.sum(data)).range(0, 2 * Math.PI);
+    var sum = this.chart.dataEngine.getSeriesMaxSum();
+    pvc.log("Radius: "+ r + "; Maximum sum: " + sum);
 
+    var a = pv.Scale.linear(0, sum).range(0, 2 * Math.PI);
 
-
-    vis.add(pv.Wedge)
-    .data(data.sort(pv.reverseOrder))
-    .bottom(w / 2)
-    .left(w / 2)
-    //.innerRadius(r - 40)
+    this.pvPie = this.pvPanel.add(pv.Wedge)
+    .data(this.chart.dataEngine.getValues()[0])
+    .bottom(this.height / 2)
+    .left(this.width / 2)
+    .strokeStyle("white")
     .outerRadius(r)
     .angle(a)
-    .anchor("center").add(pv.Label)
+    .cursor("pointer")
+    .event("click",function(d){
+      pvc.log("You clicked on index " + this.index + ", value " + d)
+    });
+
+    // Extend pie
+    this.extend(this.pvPie,"pie_");
+
+
+    this.pvPieLabel = this.pvPie.anchor("center").add(pv.Label)
     .textAngle(0)
     .text(function(d){
       return d.toFixed(2)
-      });
+    });
 
-      */
+    // Extend pieLabel
+    this.extend(this.pvPieLabel,"pieLabel_");
+
 
     // Extend body
     this.extend(this.pvPanel,"chart_");

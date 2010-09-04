@@ -26,6 +26,9 @@ pvc.DataEngine = Base.extend({
     
   },
 
+  /**
+   * Creates the appropriate translator
+   */
 
   createTranslator: function(){
 
@@ -38,10 +41,13 @@ pvc.DataEngine = Base.extend({
     }
 
     this.translator.setData(this.metadata, this.resultset);
+    this.translator.prepare();
 
   },
 
-
+  /*
+   * Returns some information on the data points
+   */
 
   getInfo: function(){
 
@@ -56,16 +62,31 @@ pvc.DataEngine = Base.extend({
 
   },
 
+  /*
+   * Returns the series on the underlying data
+   *
+   */
+
   getSeries: function(){
     return this.series || (this.series = this.seriesInRows?this.translator.getRows():this.translator.getColumns());
   },
+
+  /*
+   * Returns the categories on the underlying data
+   *
+   */
 
   getCategories: function(){
     return this.categories || ( this.categories =  this.seriesInRows?this.translator.getColumns():this.translator.getRows());
   },
 
+  /*
+   * Returns the values for the dataset
+   */
+
   getValues: function(){
-  
+
+
     if (this.values == null){
       this.values = this.seriesInRows?pv.transpose(this.translator.getValues()):this.translator.getValues();
     }
@@ -73,18 +94,33 @@ pvc.DataEngine = Base.extend({
 
   },
 
+  /*
+   * Returns how many series we have
+   */
 
   getSeriesSize: function(){
     return this.getSeries().length;
   },
 
+  /*
+   * Returns how many categories, or data points, we have
+   */
   getCategoriesSize: function(){
     return this.getCategories().length;
   },
 
+  /**
+   * For every serie in the data, get the maximum of the sum of the category
+   * values. If only one serie, gets the sum of the value. Useful to build
+   * pieCharts
+   *
+   */
 
-  getCategoriesMaxSum: function(){
+  getSeriesMaxSum: function(){
 
+    return pv.max(this.getValues().map(function(a){
+      return pv.sum(a);
+    }))
 
   },
 
@@ -140,15 +176,19 @@ pvc.DataTranslator = Base.extend({
   },
 
   getValues: function(){
-    // override me
+  // override me
   },
 
   getColumns: function(){
-    // override me
+  // override me
   },
 
   getRows: function(){
-    // override me
+  // override me
+  },
+
+  prepare: function(){
+  // Specific code goes here - override me
   }
 
 
@@ -172,6 +212,16 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
     return this.resultset.map(function(d){
       return d[0];
     })
+  },
+
+  getValues: function(){
+
+    // Remove the first entry from each line
+
+    return pv.transpose(this.resultset.map(function(a){
+      return a.slice(1)
+    }));
+
   }
   
 });
@@ -185,10 +235,21 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
    *
    */
 
+  singleSerie: true,
+
+  prepare: function(){
+
+    if(this.metadata.length == 2){
+      this.singleSerie = true;
+    }
+    else{
+      this.singleSerie = false;
+    }
+  },
 
   getColumns: function(){
 
-    if(this.metadata.length == 2){
+    if(this.singleSerie){
       return ['Serie'];
     }
     else{
@@ -198,27 +259,41 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
       }))
     }
 
-    // In crosstab mode, series are on the metadata, skipping first row
-    return this.metadata.slice(1).map(function(d){
-      return d.colName;
-    })
-
   },
   
 
   getRows: function(){
 
-    if(this.metadata.length == 3){
+    if(this.singleSerie){
+      // First column of every row
+      return pv.uniq(this.resultset.map(function(d){
+        return d[0];
+      }))
+    }
+    else{
+
       // Second column of every row
       return pv.uniq(this.resultset.map(function(d){
         return d[1];
       }))
     }
+
+  },
+
+
+  getValues: function(){
+
+    if(this.singleSerie){
+
+      // Only one series, data is on 2rd row
+      return [this.resultset.map(function(d){
+        return d[2];
+      })]
+
+
+    }
     else{
-      // First column of every row
-      return pv.uniq(this.resultset.map(function(d){
-        return d[0];
-      }))
+        alert("getValues on RelationalTranslator with singleSerie == false not done yet")
     }
 
   }
