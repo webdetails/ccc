@@ -44,6 +44,10 @@ pvc.DataEngine = Base.extend({
 
     this.translator.setData(this.metadata, this.resultset);
     this.translator.prepare();
+    if( this.seriesInRows ){
+      pv.transpose(this.translator.getValues())
+    }
+
 
   },
 
@@ -90,10 +94,21 @@ pvc.DataEngine = Base.extend({
 
 
     if (this.values == null){
-      this.values = this.seriesInRows?pv.transpose(this.translator.getValues()):this.translator.getValues();
+      this.values = this.translator.getValues();
     }
     return this.values;
 
+  },
+
+  /*
+   * Returns the values for a given series idx
+   *
+   */
+
+  getValuesForSeriesIdx: function(idx){
+    return this.getValues().map(function(a){
+      return a[idx];
+    })
   },
 
   /*
@@ -120,10 +135,10 @@ pvc.DataEngine = Base.extend({
 
   getSeriesMaxSum: function(){
 
-    return pv.max(this.getValues().map(function(a){
-      return pv.sum(a);
-    }))
-
+    var myself=this;
+    return pv.max(pv.range(0,this.getSeriesSize()).map(function(idx){
+      return pv.sum(myself.getValuesForSeriesIdx(idx))
+    }));
   },
 
   getCategoriesAbsoluteMax: function(){
@@ -181,7 +196,12 @@ pvc.DataTranslator = Base.extend({
 
   getValues: function(){
 
-    pvc.log("TODO!!!!!!!!!");
+
+    // Skips first row, skips first col.
+    return this.values.slice(1).map(function(a){
+      return a.slice(1);
+    });
+      
 
   },
 
@@ -253,13 +273,13 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
     var tree = pv.tree(this.resultset).keys(function(d){
       return [d[0],d[1]]
-      }).map();
+    }).map();
 
     // Now, get series and categories:
     var numeratedSeries = pv.numerate(pv.keys(tree));
     var numeratedCategories = pv.numerate(pv.uniq(pv.blend(pv.values(tree).map(function(d){
       return pv.keys(d)
-      }))))
+    }))))
 
     // Finally, itetate through the resultset and build the new values
 
@@ -276,7 +296,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
     this.resultset.map(function(l){
 
       myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]] + 1] =
-        pv.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
+      pv.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
     })
 
     // Create an inicial line with the categories

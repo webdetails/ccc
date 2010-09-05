@@ -82,17 +82,18 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     .height(this.height)
 
 
-    // Add the chart!
+    // Add the chart. For a pie chart we have one series only
 
     var r = pv.min([this.width, this.height])/2 * this.innerGap;
 
     var sum = this.chart.dataEngine.getSeriesMaxSum();
+    
     pvc.log("Radius: "+ r + "; Maximum sum: " + sum);
 
     var a = pv.Scale.linear(0, sum).range(0, 2 * Math.PI);
 
     this.pvPie = this.pvPanel.add(pv.Wedge)
-    .data(this.chart.dataEngine.getValues()[0])  // Todo: Access this differently
+    .data(this.chart.dataEngine.getValuesForSeriesIdx(0))
     .bottom(this.height / 2)
     .left(this.width / 2)
     .strokeStyle("white")

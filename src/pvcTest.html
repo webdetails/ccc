@@ -54,8 +54,7 @@ and open the template in the editor.
 
       Dashboards.init([textElement]);
       
-      /*
-       *
+
       // Test of pov in standalone mode
       var charts = new pvc.PieChart({
         // legendPosition: "left",
@@ -87,9 +86,9 @@ and open the template in the editor.
         
       });
 
-      charts.setData(relational_02, {crosstabMode: true, seriesInRows: false});
+      charts.setData(relational_02, {crosstabMode: false, seriesInRows: false});
       charts.render();
-      */
+      
 
       var crosstab01 = new pvc.XYAbstract({});
       crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
