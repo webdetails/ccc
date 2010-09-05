@@ -54,7 +54,8 @@ and open the template in the editor.
 
       Dashboards.init([textElement]);
       
-
+      /*
+       *
       // Test of pov in standalone mode
       var charts = new pvc.PieChart({
         // legendPosition: "left",
@@ -62,11 +63,11 @@ and open the template in the editor.
         width: 600,
         height: 400,
         title: "My title",
-        titlePosition: "left",
+        titlePosition: "top",
         titleSize: 40,
         legend: true,
-        legendPosition: "right",
-        legendSize: 150,
+        legendPosition: "left",
+        legendSize: 50,
 
         innerGap: 0.75,
         numberPosition: 0,
@@ -80,7 +81,7 @@ and open the template in the editor.
           // titleLabel_textAlign: "left",
           legend_fillStyle: "green",
           chart_fillStyle: "#eee",
-          pie_strokeStyle: "black"
+          //pie_strokeStyle: "black"
           //pie_innerRadius: 30
         }
         
@@ -88,19 +89,23 @@ and open the template in the editor.
 
       charts.setData(relational_02, {crosstabMode: true, seriesInRows: false});
       charts.render();
+      */
 
+      var crosstab01 = new pvc.XYAbstract({});
+      crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
+      crosstab01.preRender();
 
-      /*
+      
       // Testing some other datasets:
       var relational = new pvc.XYAbstract({});
       relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
       relational.preRender();
 
+
       var relational2 = new pvc.XYAbstract({});
       relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
       relational2.preRender();
       
-      */
 
 
     </script>

@@ -92,7 +92,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     var a = pv.Scale.linear(0, sum).range(0, 2 * Math.PI);
 
     this.pvPie = this.pvPanel.add(pv.Wedge)
-    .data(this.chart.dataEngine.getValues()[0])
+    .data(this.chart.dataEngine.getValues()[0])  // Todo: Access this differently
     .bottom(this.height / 2)
     .left(this.width / 2)
     .strokeStyle("white")

@@ -34,9 +34,11 @@ pvc.DataEngine = Base.extend({
 
     // Create the appropriate translator
     if(this.crosstabMode){
+      pvc.log("Creating CrosstabTranslator");
       this.translator = new pvc.CrosstabTranslator();
     }
     else{
+      pvc.log("Creating RelationalTranslator");
       this.translator = new pvc.RelationalTranslator();
     }
 
@@ -165,6 +167,7 @@ pvc.DataTranslator = Base.extend({
 
   metadata: null,
   resultset: null,
+  values: null,
 
   constructor: function(){
   },
@@ -175,20 +178,37 @@ pvc.DataTranslator = Base.extend({
     this.resultset = resultset;
   },
 
+
   getValues: function(){
-  // override me
+
+    pvc.log("TODO!!!!!!!!!");
+
   },
 
   getColumns: function(){
-  // override me
+
+    // First column of every row, skipping 1st entry
+    return this.values[0].slice(1);
   },
 
   getRows: function(){
-  // override me
+
+
+    // first element of every row, skipping 1st one
+    return this.values.slice(1).map(function(d){
+      return d[0];
+    })
+
+
   },
+
 
   prepare: function(){
   // Specific code goes here - override me
+  },
+
+  sort: function(sortFunc){
+  // Specify the sorting data - override me
   }
 
 
@@ -197,30 +217,19 @@ pvc.DataTranslator = Base.extend({
 
 pvc.CrosstabTranslator = pvc.DataTranslator.extend({
 
-  getColumns: function(){
 
-    // In crosstab mode, series are on the metadata, skipping first row
-    return this.metadata.slice(1).map(function(d){
+  prepare: function(){
+    
+    // All we need to do is to prepend to the result's matrix the series
+    // line
+
+    var a1 = this.metadata.slice(1).map(function(d){
       return d.colName;
-    })
+    });
+    a1.splice(0,0,"x");
 
-  },
-
-  getRows: function(){
-
-    // First column of every row
-    return this.resultset.map(function(d){
-      return d[0];
-    })
-  },
-
-  getValues: function(){
-
-    // Remove the first entry from each line
-
-    return pv.transpose(this.resultset.map(function(a){
-      return a.slice(1)
-    }));
+    this.values = this.resultset;
+    this.values.splice(0,0,a1);
 
   }
   
@@ -229,73 +238,54 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
 
 pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
-  /*
-   * 2 options: 3 rows or 2 rows only. On 3 rows, we have series on the first.
-   * With 2 rows we have no series (or single serie)
-   *
-   */
 
-  singleSerie: true,
 
   prepare: function(){
 
+    var myself = this;
+
     if(this.metadata.length == 2){
-      this.singleSerie = true;
-    }
-    else{
-      this.singleSerie = false;
-    }
-  },
-
-  getColumns: function(){
-
-    if(this.singleSerie){
-      return ['Serie'];
-    }
-    else{
-      // First column of every row
-      return pv.uniq(this.resultset.map(function(d){
-        return d[0];
-      }))
+      // Adding a static serie
+      this.resultset.map(function(d){
+        d.splice(0,0,"Serie");
+      })
     }
 
-  },
-  
+    var tree = pv.tree(this.resultset).keys(function(d){
+      return [d[0],d[1]]
+      }).map();
 
-  getRows: function(){
+    // Now, get series and categories:
+    var numeratedSeries = pv.numerate(pv.keys(tree));
+    var numeratedCategories = pv.numerate(pv.uniq(pv.blend(pv.values(tree).map(function(d){
+      return pv.keys(d)
+      }))))
 
-    if(this.singleSerie){
-      // First column of every row
-      return pv.uniq(this.resultset.map(function(d){
-        return d[0];
-      }))
-    }
-    else{
+    // Finally, itetate through the resultset and build the new values
 
-      // Second column of every row
-      return pv.uniq(this.resultset.map(function(d){
-        return d[1];
-      }))
-    }
+    this.values = [];
+    var categoriesLength = pv.keys(numeratedCategories).length;
+    var seriesLength = pv.keys(numeratedSeries).length;
 
-  },
+    // Initialize array
+    pv.range(0,categoriesLength).map(function(d){
+      myself.values[d] = new Array(seriesLength + 1);
+      myself.values[d][0] = pv.keys(numeratedCategories)[d]
+    })
 
+    this.resultset.map(function(l){
 
-  getValues: function(){
+      myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]] + 1] =
+        pv.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
+    })
 
-    if(this.singleSerie){
+    // Create an inicial line with the categories
+    var l1 = pv.keys(numeratedSeries);
+    l1.splice(0,0,"x");
+    this.values.splice(0,0, l1)
 
-      // Only one series, data is on 2rd row
-      return [this.resultset.map(function(d){
-        return d[2];
-      })]
-
-
-    }
-    else{
-        alert("getValues on RelationalTranslator with singleSerie == false not done yet")
-    }
 
   }
+
 
 });
