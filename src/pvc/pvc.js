@@ -199,7 +199,7 @@ pvc.Base = Base.extend({
  * xyAbstract is the base class for XY charts.
  */
 
-pvc.XYAbstract = pvc.Base.extend({
+pvc.YAbstract = pvc.Base.extend({
 
   xyPanel : null,
 

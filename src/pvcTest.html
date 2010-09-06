@@ -95,18 +95,18 @@ and open the template in the editor.
       charts.render();
       
 
-      var crosstab01 = new pvc.XYAbstract({});
+      var crosstab01 = new pvc.YAbstract({});
       crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
       crosstab01.preRender();
 
       
       // Testing some other datasets:
-      var relational = new pvc.XYAbstract({});
+      var relational = new pvc.YAbstract({});
       relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
       relational.preRender();
 
 
-      var relational2 = new pvc.XYAbstract({});
+      var relational2 = new pvc.YAbstract({});
       relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
       relational2.preRender();
       

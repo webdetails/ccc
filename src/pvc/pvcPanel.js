@@ -96,7 +96,7 @@ pvc.BasePanel = Base.extend({
    *
    * This is the method to be used for the extension points for the specific
    * contents of the chart.
-   *
+   *already ge a pie chart!
    * Goes through the list of options and, if it matches the prefix, execute that
    * method on the mark. WARNING: It's user's reponsability to make sure some
    * unexisting method won't blow this
