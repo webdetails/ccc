@@ -15,7 +15,8 @@ pvc.PieChart = pvc.Base.extend({
     var _defaults = {
       showValues: true,
       innerGap: 0.9,
-      explodedSliceRadius: 0
+      explodedSliceRadius: 0,
+      explodedSliceIndex: null
     };
 
 
@@ -36,6 +37,7 @@ pvc.PieChart = pvc.Base.extend({
     this.pieChartPanel = new pvc.PieChartPanel(this, {
       innerGap: this.options.innerGap,
       explodedSliceRadius: this.options.explodedSliceRadius,
+      explodedSliceIndex: this.options.explodedSliceIndex,
       showValues: this.options.showValues
     });
 
@@ -50,8 +52,10 @@ pvc.PieChart = pvc.Base.extend({
 /*
    * Pie chart panel. Generates a pie chart. Specific options are:
    * <i>showValues</i> - Show or hide slice value. Default: false
-   * <i>explodedSliceRadius</i> - If one wants a pie with an exploded effect,
-   *  specify a value in pixels here. Default: 0
+   *  <i>explodedSliceIndex</i> - Index of the slice to explode. Default: null
+   *  <i>explodedSliceRadius</i> - If one wants a pie with an exploded effect,
+   *  specify a value in pixels here. If above argument is specified, explodes
+   *  only one slice. Else explodes all. Default: 0
    * <i>innerGap</i> - The size of the legend in pixels. Default: 25
    *
    * Has the following protovis extension points:
@@ -71,6 +75,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
 
   innerGap: 0.9,
   explodedSliceRadius: 0,
+  explodedSliceIndex: null,
   showValues: true,
 
 
@@ -106,10 +111,10 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     this.pvPie = this.pvPanel.add(pv.Wedge)
     .data(this.chart.dataEngine.getValuesForSeriesIdx(0))
     .bottom(function(d){
-      return myself.explodeSlice("cos",myself.explodedSliceRadius, a, this.index);
+      return myself.explodeSlice("cos", a, this.index);
     })
     .left(function(d){
-      return myself.explodeSlice("sin", myself.explodedSliceRadius, a, this.index);
+      return myself.explodeSlice("sin", a, this.index);
     })
     .outerRadius(r)
     .angle(a)
@@ -145,12 +150,20 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     var arr = this.data.slice(0,idx);
     arr.push(this.data[idx]/2);
     var angle = a(pv.sum(arr));
+    pvc.log("angle " + idx + ": " + angle/Math.PI*180)
     return angle;
 
   },
 
-  explodeSlice: function(fun, size, a, idx){
+  explodeSlice: function(fun, a, idx){
 
+    var size = 0;
+    if(this.explodedSliceIndex == null){
+      size = this.explodedSliceRadius
+    }
+    else{
+      size = this.explodedSliceIndex==idx?this.explodedSliceRadius:0;
+    }
     return (fun=="cos"?this.height:this.width)/2 + size*Math[fun](this.accumulateAngle(a,idx));
 
   }
