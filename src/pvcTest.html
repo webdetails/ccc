@@ -20,6 +20,7 @@ and open the template in the editor.
     <script type="text/javascript" src="pvc/pvc.js"></script>
     <script type="text/javascript" src="pvc/pvcPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcPie.js"></script>
+    <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcData.js"></script>
     <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
     <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
@@ -32,7 +33,9 @@ and open the template in the editor.
     </h1>
 
 
-    <div id="pvcObject"></div>
+    <div id="pvcBar"></div>
+
+    <div id="pvcPie"></div>
 
 
 
@@ -55,10 +58,48 @@ and open the template in the editor.
       Dashboards.init([textElement]);
       
 
-      // Test of pov in standalone mode
-      var charts = new pvc.PieChart({
+      // Test of pvc in standalone mode
+      var bar = new pvc.TimeseriesAbstract({
         // legendPosition: "left",
-        canvas: "pvcObject",
+        canvas: "pvcBar",
+        width: 600,
+        height: 400,
+        title: "Bar chart",
+        titlePosition: "top",
+        titleSize: 40,
+        legend: true,
+        legendPosition: "bottom",
+        legendSize: 50,
+
+        showAllTimeseries: true,
+        allTimeseriesPosition: "bottom",
+        allTimeseriesSize: 50,
+
+        extensionPoints: {
+          base_fillStyle: "red",
+          title_fillStyle: "yellow",
+          titleLabel_font: "16px sans-serif",
+          // title_strokeStyle: "black",
+          // titleLabel_bottom: 0,
+          // titleLabel_textAlign: "left",
+          legend_fillStyle: "green",
+          chart_fillStyle: "#eee",
+          allTimeseries_fillStyle: "blue"
+          //pie_strokeStyle: "white"
+          //pie_innerRadius: 10
+          //pieLabel_textAngle: "0"
+        }
+
+      });
+
+      bar.setData(relational_02, {crosstabMode: false, seriesInRows: false});
+      //bar.render();
+
+
+      /* Pie chart */
+      var pie = new pvc.PieChart({
+        // legendPosition: "left",
+        canvas: "pvcPie",
         width: 600,
         height: 400,
         title: "My title",
@@ -91,22 +132,22 @@ and open the template in the editor.
         
       });
 
-      charts.setData(relational_02, {crosstabMode: false, seriesInRows: false});
-      charts.render();
+      pie.setData($.extend(true, {},relational_02), {crosstabMode: false, seriesInRows: false});
+      pie.render();
       
 
-      var crosstab01 = new pvc.YAbstract({});
+      var crosstab01 = new pvc.TimeseriesAbstract({});
       crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
       crosstab01.preRender();
 
       
       // Testing some other datasets:
-      var relational = new pvc.YAbstract({});
+      var relational = new pvc.TimeseriesAbstract({});
       relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
       relational.preRender();
 
 
-      var relational2 = new pvc.YAbstract({});
+      var relational2 = new pvc.TimeseriesAbstract({});
       relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
       relational2.preRender();
       

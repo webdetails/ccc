@@ -1,7 +1,8 @@
 
 
+
 /**
- * xyAbstract is the base class for XY charts.
+ * PieChart is the main class for generating... pie charts (surprise!).
  */
 
 pvc.PieChart = pvc.Base.extend({
@@ -28,7 +29,6 @@ pvc.PieChart = pvc.Base.extend({
 
   preRender: function(){
 
-    // TODO: Build it
     this.base();
 
     pvc.log("Prerendering in pieChart");
