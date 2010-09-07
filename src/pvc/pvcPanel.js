@@ -181,12 +181,7 @@ pvc.BasePanel = Base.extend({
   anchor: "top",
   pvPanel: null,
   fillColor: "red",
-  margins:{
-    top:0,
-    right: 0,
-    bottom: 0,
-    left: 0
-  },
+  margins: null,
 
 
 
@@ -195,6 +190,13 @@ pvc.BasePanel = Base.extend({
 
     this.chart = chart;
     $.extend(this,options);
+
+    this.margins = {
+      top:0,
+      right: 0,
+      bottom: 0,
+      left: 0
+    }
 
   },
 
@@ -322,6 +324,27 @@ pvc.BasePanel = Base.extend({
     bottom: "left",
     left: "bottom",
     right: "bottom"
+  },
+
+  oppositeAnchor:{
+    top: "bottom",
+    bottom: "top",
+    left: "right",
+    right: "left"
+  },
+
+  paralelLength:{
+    top: "width",
+    bottom: "width",
+    right: "height",
+    left: "height"
+  },
+
+  orthogonalLength:{
+    top: "height",
+    bottom: "height",
+    right: "width",
+    left: "width"
   }
 
 })

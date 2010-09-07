@@ -21,6 +21,7 @@ and open the template in the editor.
     <script type="text/javascript" src="pvc/pvcPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcPie.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcData.js"></script>
     <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
     <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
@@ -33,8 +34,11 @@ and open the template in the editor.
     </h1>
 
 
+
+    <h1>Bar</h1>
     <div id="pvcBar"></div>
 
+    <h1>Pie</h1>
     <div id="pvcPie"></div>
 
 
@@ -59,7 +63,7 @@ and open the template in the editor.
       
 
       // Test of pvc in standalone mode
-      var bar = new pvc.TimeseriesAbstract({
+      var bar = new pvc.CategoricalAbstract({
         // legendPosition: "left",
         canvas: "pvcBar",
         width: 600,
@@ -71,10 +75,16 @@ and open the template in the editor.
         legendPosition: "bottom",
         legendSize: 50,
 
+        yAxisPosition: "left",
+        yAxisSize: 30,
+        xAxisPosition: "bottom",
+        xAxisSize: 30,
+        
+        /*
         showAllTimeseries: true,
         allTimeseriesPosition: "bottom",
         allTimeseriesSize: 50,
-
+         */
         extensionPoints: {
           base_fillStyle: "red",
           title_fillStyle: "yellow",
@@ -82,9 +92,16 @@ and open the template in the editor.
           // title_strokeStyle: "black",
           // titleLabel_bottom: 0,
           // titleLabel_textAlign: "left",
+          
           legend_fillStyle: "green",
           chart_fillStyle: "#eee",
-          allTimeseries_fillStyle: "blue"
+          allTimeseries_fillStyle: "blue",
+          xAxis_fillStyle: "#eee",
+          yAxis_fillStyle: "#bbb",
+
+          xAxisRule_strokeStyle:"blue",
+          yAxisRule_strokeStyle:"blue"
+          
           //pie_strokeStyle: "white"
           //pie_innerRadius: 10
           //pieLabel_textAngle: "0"
@@ -92,8 +109,8 @@ and open the template in the editor.
 
       });
 
-      bar.setData(relational_02, {crosstabMode: false, seriesInRows: false});
-      //bar.render();
+      bar.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      bar.render();
 
 
       /* Pie chart */
@@ -149,7 +166,7 @@ and open the template in the editor.
 
       var relational2 = new pvc.TimeseriesAbstract({});
       relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
-      relational2.preRender();
+      //relational2.preRender();
       
 
 
