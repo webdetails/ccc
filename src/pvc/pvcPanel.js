@@ -467,13 +467,17 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   _parent: null,
   pvLabel: null,
   anchor: "bottom",
+  align: "left",
   legendPanel: null,
   legend: null,
   legendSize: 25,
   font: "9px sans-serif",
-  minMargin: 8,
+  minMarginX: 8,
+  minMarginY: 8,
   textMargin: 2,
   padding: 20,
+  textAdjust: 7,
+  shape: "square",
 
 
 
@@ -487,69 +491,96 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   create: function(){
     var myself = this;
     var c = pv.Colors.category20();
+    var x,y;
+
+
+    pvc.log("Debug PMartins");
+
+    var data = this.chart.dataEngine.getCategories();
+
+    //determine the size of the biggest cell
+    var maxtext = 0;
+    for (i in data){
+      maxtext = maxtext < data[i].length?data[i].length:maxtext;
+    }
+    var cellsize = 15 + maxtext*this.textAdjust; //15 is the marker size
+    pvc.log("cellsize:"  + cellsize);
+
+    var realxsize, realysize;
     // Size will depend on positioning and font size mainly
 
     if (this.anchor == "top" || this.anchor == "bottom"){
       this.width = this._parent.width;
       this.height = this.legendSize;
+      var maxperline = data.length;
+      if(data.length*(cellsize + this.padding) - this.padding + 2*myself.minMarginX> this.width){
+        maxperline = Math.floor((this.width+this.padding + 2*myself.minMarginX)/(cellsize + this.padding));
+      }
+      realxsize = maxperline*(cellsize + this.padding + 2*myself.minMarginX) - this.padding;
+      realysize = myself.padding*(Math.ceil(data.length/maxperline));
+
+      pvc.log("debug realxsize" + realxsize + " realy: " + realysize);
+      
+      pvc.log("parentwidth:" + this._parent.width);
+
+      if(this.align == "right"){
+        myself.minMarginX = this.width - realxsize;
+      }
+      else if (this.align == "center"){
+        myself.minMarginX = (this.width - realxsize)/2;
+      }
+      pvc.log("debug minXmargin: " + myself.minMarginX);
+      x = function(){
+        var n = Math.ceil(this.index/maxperline);
+        return (this.index%maxperline)*(cellsize + myself.padding) + myself.minMarginX;
+      }
+      myself.minMarginY = (myself.height - realysize)/2;
+      y = function(){
+        var n = Math.floor(this.index/maxperline); 
+        var ret = myself.height  - n*myself.padding - myself.minMarginY;
+        pvc.log("debug rety: " + ret)
+        return myself.height  - n*myself.padding - myself.minMarginY - myself.padding/2;
+      }
+
     }
     else{
       this.height = this._parent.height;
       this.width = this.legendSize;
+      realxsize = cellsize;
+      realysize = myself.padding*data.length;
+      if(this.align == "center"){
+        myself.minMarginY = (myself.height - realysize + myself.padding)/2  ;
+      }
+      else if (this.align == "bottom"){
+        myself.minMarginY = myself.height - realysize;
+      }
+      x = myself.minMarginX;
+      y = function(){return myself.height - this.index*myself.padding - myself.minMarginY;}
     }
 
-
+    pvc.log("real x size:"  + realxsize + " real y size:"  + realysize);
     this.pvPanel = this._parent.getPvPanel().add(this.type)
     .width(this.width)
     .height(this.height)
 
+    pvc.log("X:" + this.width + " Y:" + this.height);
 
-    pvc.log("Debug PMartins");
+    this.pvPanel.add(pv.Dot)
+    .data(data)
+    .shape(this.shape)
+    .lineWidth(0)
+    .fillStyle(function(){return c(this.index);})
+    //.left(function(){return typeof x == "function"? x(this) : x;})
+    .left(x)
+    .bottom(y)
+    .anchor("right").add(pv.Label)
+    .textMargin(myself.textMargin)
+    .font(this.font)
+    //.textAlign("center")
+    //.left(this.width/2)
+    .textStyle("white");
 
-    if(this.anchor == "top" || this.anchor == "bottom"){
-      this.pvPanel.add(pv.Dot)
-      .data(this.chart.dataEngine.getCategories())
-      .shape("square")
-      //.strokeStyle("#000")
-      .lineWidth(0)
-      .fillStyle(function(){return c(this.index);})
-      .left(function(){return this.index*3*myself.padding + myself.minMargin;})
-      .bottom(myself.height - myself.minMargin)
-      .anchor("left").add(pv.Rule)
-      .left(function(){ return this.index*3*myself.padding; })
-      .width(15)
-      //                .strokeStyle(function(d) {return d;})
-      .strokeStyle("black")
-      .anchor("right").add(pv.Label)
-      //.text("debug")
-      .textMargin(myself.textMargin)
-      .font(this.font)
-      //.textAlign("center")
-      //.left(this.width/2)
-      .textStyle("white");
-    }
-    else{
-      this.pvPanel.add(pv.Dot)
-      .data(this.chart.dataEngine.getCategories())
-      .shape("square")
-      //.strokeStyle("#000")
-      .lineWidth(0)
-      .fillStyle(function(){return c(this.index);})
-      .bottom(function(){ return myself.height - this.index*myself.padding - myself.minMargin;})
-      .left(myself.minMargin)
-      .anchor("left").add(pv.Rule)
-      .left(0)
-      .width(15)
-      //                .strokeStyle(function(d) {return d;})
-      .strokeStyle("black")
-      .anchor("right").add(pv.Label)
-      //.text("debug")
-      .textMargin(myself.textMargin)
-      .font(this.font)
-      //.textAlign("center")
-      //.left(this.width/2)
-      .textStyle("white");
-    }
+
 
     // Extend legend
     this.extend(this.pvPanel,"legend_");
