@@ -466,6 +466,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     create: function(){
         var myself = this;
+        var c = pv.Colors.category20();
         // Size will depend on positioning and font size mainly
 
         if (this.anchor == "top" || this.anchor == "bottom"){
@@ -488,11 +489,17 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         if(this.anchor == "top" || this.anchor == "bottom"){
             this.pvPanel.add(pv.Dot)
                 .data(this.chart.dataEngine.getCategories())
+                .shape("square")
                 .strokeStyle("#000")
                 .lineWidth(1)
-                .fillStyle(function(d){return d;})
-                .left(function() this.index*3*myself.padding + myself.minMargin)
+                .fillStyle(function(){return c(this.index);})
+                .left(function(){return this.index*3*myself.padding + myself.minMargin;})
                 .bottom(myself.height - myself.minMargin)
+            .anchor("left").add(pv.Rule)
+                .left(function(){ return this.index*3*myself.padding; })
+                .width(15)
+//                .strokeStyle(function(d) {return d;})
+                .strokeStyle("black")
             .anchor("right").add(pv.Label)
                 //.text("debug")
                 .textMargin(myself.textMargin)
@@ -504,11 +511,17 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         else{
             this.pvPanel.add(pv.Dot)
                 .data(this.chart.dataEngine.getCategories())
+                .shape("square")
                 .strokeStyle("#000")
                 .lineWidth(1)
-                .fillStyle(function(d){return d;})
-                .bottom(function() myself.height - this.index*myself.padding - myself.minMargin)
+                .fillStyle(function(){return c(this.index);})
+                .bottom(function(){ return myself.height - this.index*myself.padding - myself.minMargin;})
                 .left(myself.minMargin)
+            .anchor("left").add(pv.Rule)
+                .left(0)
+                .width(15)
+//                .strokeStyle(function(d) {return d;})
+                .strokeStyle("black")
             .anchor("right").add(pv.Label)
                 //.text("debug")
                 .textMargin(myself.textMargin)

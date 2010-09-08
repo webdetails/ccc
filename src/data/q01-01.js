@@ -70,3 +70,32 @@ var relational_02 = {
     "colName":"Value"
   }]
   };
+
+  var relational_03 = {
+  "resultset":[
+    ["Green",74],
+    ["Red",48],
+    ["Orange",37],
+    ["Cyan",27],
+    ["Black",22],
+    ["White",19],
+    ["Magenta",18],
+    ["Blue",41],
+    ["John",7],
+    ["Mary",48],
+    ["Alex",27],
+    ["Filipa",76],
+    ["James",21],
+    ["Ikaruga",30],
+    ["Bird",50],
+    ["Bender",41]],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"Categories"
+  },{
+    "colIndex":1,
+    "colType":"Numeric",
+    "colName":"Value"
+  }]
+  };
