@@ -173,6 +173,7 @@ pvc.Base = Base.extend({
  */
 pvc.BasePanel = Base.extend({
 
+<<<<<<< HEAD
     chart: null,
     _parent: null,
     type: pv.Panel, // default one
@@ -187,6 +188,17 @@ pvc.BasePanel = Base.extend({
         bottom: 0,
         left: 0
     },
+=======
+  chart: null,
+  _parent: null,
+  type: pv.Panel, // default one
+  height: null,
+  width: null,
+  anchor: "top",
+  pvPanel: null,
+  fillColor: "red",
+  margins: null,
+>>>>>>> 77e0ff7993b4edae4f316dc55f967f16e1df86ad
 
 
 
@@ -196,7 +208,18 @@ pvc.BasePanel = Base.extend({
         this.chart = chart;
         $.extend(this,options);
 
+<<<<<<< HEAD
     },
+=======
+    this.margins = {
+      top:0,
+      right: 0,
+      bottom: 0,
+      left: 0
+    }
+
+  },
+>>>>>>> 77e0ff7993b4edae4f316dc55f967f16e1df86ad
 
 
     create: function(){
@@ -314,6 +337,7 @@ pvc.BasePanel = Base.extend({
 
 
 },{
+<<<<<<< HEAD
     // determine what is the associated method to call to position the labels
     // correctly
 
@@ -323,6 +347,38 @@ pvc.BasePanel = Base.extend({
         left: "bottom",
         right: "bottom"
     }
+=======
+  // determine what is the associated method to call to position the labels
+  // correctly
+
+  relativeAnchor: {
+    top: "left",
+    bottom: "left",
+    left: "bottom",
+    right: "bottom"
+  },
+
+  oppositeAnchor:{
+    top: "bottom",
+    bottom: "top",
+    left: "right",
+    right: "left"
+  },
+
+  paralelLength:{
+    top: "width",
+    bottom: "width",
+    right: "height",
+    left: "height"
+  },
+
+  orthogonalLength:{
+    top: "height",
+    bottom: "height",
+    right: "width",
+    left: "width"
+  }
+>>>>>>> 77e0ff7993b4edae4f316dc55f967f16e1df86ad
 
 })
 
@@ -490,8 +546,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             this.pvPanel.add(pv.Dot)
                 .data(this.chart.dataEngine.getCategories())
                 .shape("square")
-                .strokeStyle("#000")
-                .lineWidth(1)
+                //.strokeStyle("#000")
+                .lineWidth(0)
                 .fillStyle(function(){return c(this.index);})
                 .left(function(){return this.index*3*myself.padding + myself.minMargin;})
                 .bottom(myself.height - myself.minMargin)
@@ -512,8 +568,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             this.pvPanel.add(pv.Dot)
                 .data(this.chart.dataEngine.getCategories())
                 .shape("square")
-                .strokeStyle("#000")
-                .lineWidth(1)
+                //.strokeStyle("#000")
+                .lineWidth(0)
                 .fillStyle(function(){return c(this.index);})
                 .bottom(function(){ return myself.height - this.index*myself.padding - myself.minMargin;})
                 .left(myself.minMargin)
