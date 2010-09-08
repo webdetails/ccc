@@ -200,7 +200,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return false;
       }
       // also, hide the first and last ones
-      if( myself.scale(d) == myself.scale.range()[0] || myself.scale(d) == myself.scale.range()[1] ){
+      if( myself.scale(d) == 0  || myself.scale(d) == myself.scale.range()[1] ){
         return false;
       }
       return true;
