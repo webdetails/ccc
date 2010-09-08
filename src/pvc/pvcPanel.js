@@ -173,22 +173,6 @@ pvc.Base = Base.extend({
  */
 pvc.BasePanel = Base.extend({
 
-<<<<<<< HEAD
-    chart: null,
-    _parent: null,
-    type: pv.Panel, // default one
-    height: null,
-    width: null,
-    anchor: "top",
-    pvPanel: null,
-    fillColor: "red",
-    margins:{
-        top:0,
-        right: 0,
-        bottom: 0,
-        left: 0
-    },
-=======
   chart: null,
   _parent: null,
   type: pv.Panel, // default one
@@ -198,19 +182,12 @@ pvc.BasePanel = Base.extend({
   pvPanel: null,
   fillColor: "red",
   margins: null,
->>>>>>> 77e0ff7993b4edae4f316dc55f967f16e1df86ad
 
+  constructor: function(chart,options){
 
+    this.chart = chart;
+    $.extend(this,options);
 
-
-    constructor: function(chart,options){
-
-        this.chart = chart;
-        $.extend(this,options);
-
-<<<<<<< HEAD
-    },
-=======
     this.margins = {
       top:0,
       right: 0,
@@ -219,28 +196,27 @@ pvc.BasePanel = Base.extend({
     }
 
   },
->>>>>>> 77e0ff7993b4edae4f316dc55f967f16e1df86ad
 
 
-    create: function(){
+  create: function(){
 
-        if(this._parent == null){
-            // Should be created for the vis panel only
-            this.pvPanel = new pv.Panel();
-            this.extend(this.pvPanel,"base_");
-        }
-        else{
-            this.pvPanel = this._parent.pvPanel.add(this.type);
-        }
+    if(this._parent == null){
+      // Should be created for the vis panel only
+      this.pvPanel = new pv.Panel();
+      this.extend(this.pvPanel,"base_");
+    }
+    else{
+      this.pvPanel = this._parent.pvPanel.add(this.type);
+    }
 
-        this.pvPanel
-        .width(this.width)
-        .height(this.height);
+    this.pvPanel
+    .width(this.width)
+    .height(this.height);
 
-    },
+  },
 
 
-    /*
+  /*
    *  Create the panel, appending it to the previous one using a specified anchor.
    *
    *  Will:
@@ -250,38 +226,38 @@ pvc.BasePanel = Base.extend({
    *
    */
 
-    appendTo: function(_parent){
+  appendTo: function(_parent){
 
-        this._parent = _parent;
-        this.create();
+    this._parent = _parent;
+    this.create();
 
-        // Reduce size and update margins
-        var a = this.anchor;
-        if(a == "top" || a == "bottom"){
-            this._parent.height -= this.height;
-        }
-        else{
-            this._parent.width -= this.width;
-        }
+    // Reduce size and update margins
+    var a = this.anchor;
+    if(a == "top" || a == "bottom"){
+      this._parent.height -= this.height;
+    }
+    else{
+      this._parent.width -= this.width;
+    }
 
 
     
-        // See where to attach it.
-        this.pvPanel[a](this._parent.margins[a]);
-        this.pvPanel[pvc.BasePanel.relativeAnchor[a]](this._parent.margins[pvc.BasePanel.relativeAnchor[a]]);
+    // See where to attach it.
+    this.pvPanel[a](this._parent.margins[a]);
+    this.pvPanel[pvc.BasePanel.relativeAnchor[a]](this._parent.margins[pvc.BasePanel.relativeAnchor[a]]);
 
-        // update margins
-        if(a == "top" || a == "bottom"){
-            this._parent.margins[this.anchor] += this.height;
-        }
-        else{
-            this._parent.margins[a] += this.width;
-        }
+    // update margins
+    if(a == "top" || a == "bottom"){
+      this._parent.margins[this.anchor] += this.height;
+    }
+    else{
+      this._parent.margins[a] += this.width;
+    }
 
-    },
+  },
 
 
-    /**
+  /**
    *
    * This is the method to be used for the extension points for the specific
    * contents of the chart.
@@ -292,62 +268,51 @@ pvc.BasePanel = Base.extend({
    *
    */
 
-    extend: function(mark, prefix){
+  extend: function(mark, prefix){
 
-        for (p in this.chart.options.extensionPoints){
-            if (p.indexOf(prefix) == 0){
-                var m = p.substring(prefix.length);
-                mark[m](pvc.ev(this.chart.options.extensionPoints[p]));
-            }
+    for (p in this.chart.options.extensionPoints){
+      if (p.indexOf(prefix) == 0){
+        var m = p.substring(prefix.length);
+        mark[m](pvc.ev(this.chart.options.extensionPoints[p]));
+      }
 
-        }
+    }
 
-    },
+  },
 
-    /*
+  /*
    * Sets the size for the panel, when he parent panel is undefined
    */
 
-    setSize: function(w,h){
-        this.width = w;
-        this.height = h;
+  setSize: function(w,h){
+    this.width = w;
+    this.height = h;
 
-    },
+  },
 
-    /*
+  /*
    * returns the width of the Panel
    */
-    getWidth: function(){
-        return this.width
-    },
+  getWidth: function(){
+    return this.width
+  },
 
-    /*
+  /*
    * returns the height of the Panel
    */
-    getHeight: function(){
-        return this.height
-    },
+  getHeight: function(){
+    return this.height
+  },
 
-    /*
+  /*
    * Returns the underlying protovis Panel
    */
-    getPvPanel: function(){
-        return this.pvPanel
-    }
+  getPvPanel: function(){
+    return this.pvPanel
+  }
 
 
 },{
-<<<<<<< HEAD
-    // determine what is the associated method to call to position the labels
-    // correctly
-
-    relativeAnchor: {
-        top: "left",
-        bottom: "left",
-        left: "bottom",
-        right: "bottom"
-    }
-=======
   // determine what is the associated method to call to position the labels
   // correctly
 
@@ -378,7 +343,6 @@ pvc.BasePanel = Base.extend({
     right: "width",
     left: "width"
   }
->>>>>>> 77e0ff7993b4edae4f316dc55f967f16e1df86ad
 
 })
 
@@ -396,91 +360,91 @@ pvc.BasePanel = Base.extend({
  */
 pvc.TitlePanel = pvc.BasePanel.extend({
   
-    _parent: null,
-    pvLabel: null,
-    anchor: "top",
-    titlePanel: null,
-    title: null,
-    titleSize: 25,
-    titleAlign: "center",
-    font: "14px sans-serif",
+  _parent: null,
+  pvLabel: null,
+  anchor: "top",
+  titlePanel: null,
+  title: null,
+  titleSize: 25,
+  titleAlign: "center",
+  font: "14px sans-serif",
 
 
 
-    constructor: function(chart, options){
+  constructor: function(chart, options){
 
-        this.base(chart,options);
+    this.base(chart,options);
 
-    },
+  },
 
-    create: function(){
+  create: function(){
 
-        // Size will depend on positioning and font size mainly
+    // Size will depend on positioning and font size mainly
     
-        if (this.anchor == "top" || this.anchor == "bottom"){
-            this.width = this._parent.width;
-            this.height = this.titleSize;
-        }
-        else{
-            this.height = this._parent.height;
-            this.width = this.titleSize;
-        }
-
-
-        this.pvPanel = this._parent.getPvPanel().add(this.type)
-        .width(this.width)
-        .height(this.height)
-
-        // Extend title
-        this.extend(this.pvPanel,"title_");
-
-        var rotation = {
-            top: 0,
-            right: Math.PI/2,
-            bottom: 0,
-            left: -Math.PI/2
-        };
-
-        // label
-        this.pvLabel = this.pvPanel.add(pv.Label)
-        .text(this.title)
-        .font(this.font)
-        .textAlign("center")
-        .textBaseline("middle")
-        .bottom(this.height/2)
-        .left(this.width/2)
-        .textAngle(rotation[this.anchor]);
-
-        // Cases:
-        if(this.titleAlign == "center"){
-            this.pvLabel
-            .bottom(this.height/2)
-            .left(this.width/2)
-        }
-        else{
-
-            this.pvLabel.textAlign(this.titleAlign);
-
-            if ( this.anchor == "top" || this.anchor == "bottom"){
-
-                this.pvLabel.bottom(null).left(null); // reset
-                this.pvLabel[this.titleAlign](0)
-                .bottom(this.height/2)
-
-            }
-            else if (this.anchor == "right"){
-                this.titleAlign=="left"?this.pvLabel.bottom(null).top(0):this.pvLabel.bottom(0);
-            }
-            else if (this.anchor == "left"){
-                this.titleAlign=="right"?this.pvLabel.bottom(null).top(0):this.pvLabel.bottom(0);
-            }
-        }
-
-
-        // Extend title label
-        this.extend(this.pvLabel,"titleLabel_");
-
+    if (this.anchor == "top" || this.anchor == "bottom"){
+      this.width = this._parent.width;
+      this.height = this.titleSize;
     }
+    else{
+      this.height = this._parent.height;
+      this.width = this.titleSize;
+    }
+
+
+    this.pvPanel = this._parent.getPvPanel().add(this.type)
+    .width(this.width)
+    .height(this.height)
+
+    // Extend title
+    this.extend(this.pvPanel,"title_");
+
+    var rotation = {
+      top: 0,
+      right: Math.PI/2,
+      bottom: 0,
+      left: -Math.PI/2
+    };
+
+    // label
+    this.pvLabel = this.pvPanel.add(pv.Label)
+    .text(this.title)
+    .font(this.font)
+    .textAlign("center")
+    .textBaseline("middle")
+    .bottom(this.height/2)
+    .left(this.width/2)
+    .textAngle(rotation[this.anchor]);
+
+    // Cases:
+    if(this.titleAlign == "center"){
+      this.pvLabel
+      .bottom(this.height/2)
+      .left(this.width/2)
+    }
+    else{
+
+      this.pvLabel.textAlign(this.titleAlign);
+
+      if ( this.anchor == "top" || this.anchor == "bottom"){
+
+        this.pvLabel.bottom(null).left(null); // reset
+        this.pvLabel[this.titleAlign](0)
+        .bottom(this.height/2)
+
+      }
+      else if (this.anchor == "right"){
+        this.titleAlign=="left"?this.pvLabel.bottom(null).top(0):this.pvLabel.bottom(0);
+      }
+      else if (this.anchor == "left"){
+        this.titleAlign=="right"?this.pvLabel.bottom(null).top(0):this.pvLabel.bottom(0);
+      }
+    }
+
+
+    // Extend title label
+    this.extend(this.pvLabel,"titleLabel_");
+
+  }
 
 
 });
@@ -489,109 +453,109 @@ pvc.TitlePanel = pvc.BasePanel.extend({
 
 
 /*
-   * Legend panel. Generates the legend. Specific options are:
-   * <i>legend</i> - text. Default: false
-   * <i>legendPosition</i> - top / bottom / left / right. Default: bottom
-   * <i>legendSize</i> - The size of the legend in pixels. Default: 25
-   *
-   * Has the following protovis extension points:
-   *
-   * <i>legend_</i> - for the main legend Panel
-   */
+ * Legend panel. Generates the legend. Specific options are:
+ * <i>legend</i> - text. Default: false
+ * <i>legendPosition</i> - top / bottom / left / right. Default: bottom
+ * <i>legendSize</i> - The size of the legend in pixels. Default: 25
+ *
+ * Has the following protovis extension points:
+ *
+ * <i>legend_</i> - for the main legend Panel
+ */
 pvc.LegendPanel = pvc.BasePanel.extend({
 
-    _parent: null,
-    pvLabel: null,
-    anchor: "bottom",
-    legendPanel: null,
-    legend: null,
-    legendSize: 25,
-    font: "9px sans-serif",
-    minMargin: 8,
-    textMargin: 2,
-    padding: 20,
+  _parent: null,
+  pvLabel: null,
+  anchor: "bottom",
+  legendPanel: null,
+  legend: null,
+  legendSize: 25,
+  font: "9px sans-serif",
+  minMargin: 8,
+  textMargin: 2,
+  padding: 20,
 
 
 
 
-    constructor: function(chart, options){
+  constructor: function(chart, options){
 
-        this.base(chart,options);
+    this.base(chart,options);
 
-    },
+  },
 
-    create: function(){
-        var myself = this;
-        var c = pv.Colors.category20();
-        // Size will depend on positioning and font size mainly
+  create: function(){
+    var myself = this;
+    var c = pv.Colors.category20();
+    // Size will depend on positioning and font size mainly
 
-        if (this.anchor == "top" || this.anchor == "bottom"){
-            this.width = this._parent.width;
-            this.height = this.legendSize;
-        }
-        else{
-            this.height = this._parent.height;
-            this.width = this.legendSize;
-        }
-
-
-        this.pvPanel = this._parent.getPvPanel().add(this.type)
-        .width(this.width)
-        .height(this.height)
-
-
-        pvc.log("Debug PMartins");
-
-        if(this.anchor == "top" || this.anchor == "bottom"){
-            this.pvPanel.add(pv.Dot)
-                .data(this.chart.dataEngine.getCategories())
-                .shape("square")
-                //.strokeStyle("#000")
-                .lineWidth(0)
-                .fillStyle(function(){return c(this.index);})
-                .left(function(){return this.index*3*myself.padding + myself.minMargin;})
-                .bottom(myself.height - myself.minMargin)
-            .anchor("left").add(pv.Rule)
-                .left(function(){ return this.index*3*myself.padding; })
-                .width(15)
-//                .strokeStyle(function(d) {return d;})
-                .strokeStyle("black")
-            .anchor("right").add(pv.Label)
-                //.text("debug")
-                .textMargin(myself.textMargin)
-                .font(this.font)
-                //.textAlign("center")
-                //.left(this.width/2)
-                .textStyle("white");
-        }
-        else{
-            this.pvPanel.add(pv.Dot)
-                .data(this.chart.dataEngine.getCategories())
-                .shape("square")
-                //.strokeStyle("#000")
-                .lineWidth(0)
-                .fillStyle(function(){return c(this.index);})
-                .bottom(function(){ return myself.height - this.index*myself.padding - myself.minMargin;})
-                .left(myself.minMargin)
-            .anchor("left").add(pv.Rule)
-                .left(0)
-                .width(15)
-//                .strokeStyle(function(d) {return d;})
-                .strokeStyle("black")
-            .anchor("right").add(pv.Label)
-                //.text("debug")
-                .textMargin(myself.textMargin)
-                .font(this.font)
-                //.textAlign("center")
-                //.left(this.width/2)
-                .textStyle("white");
-        }
-
-        // Extend legend
-        this.extend(this.pvPanel,"legend_");
-
-
+    if (this.anchor == "top" || this.anchor == "bottom"){
+      this.width = this._parent.width;
+      this.height = this.legendSize;
     }
+    else{
+      this.height = this._parent.height;
+      this.width = this.legendSize;
+    }
+
+
+    this.pvPanel = this._parent.getPvPanel().add(this.type)
+    .width(this.width)
+    .height(this.height)
+
+
+    pvc.log("Debug PMartins");
+
+    if(this.anchor == "top" || this.anchor == "bottom"){
+      this.pvPanel.add(pv.Dot)
+      .data(this.chart.dataEngine.getCategories())
+      .shape("square")
+      //.strokeStyle("#000")
+      .lineWidth(0)
+      .fillStyle(function(){return c(this.index);})
+      .left(function(){return this.index*3*myself.padding + myself.minMargin;})
+      .bottom(myself.height - myself.minMargin)
+      .anchor("left").add(pv.Rule)
+      .left(function(){ return this.index*3*myself.padding; })
+      .width(15)
+      //                .strokeStyle(function(d) {return d;})
+      .strokeStyle("black")
+      .anchor("right").add(pv.Label)
+      //.text("debug")
+      .textMargin(myself.textMargin)
+      .font(this.font)
+      //.textAlign("center")
+      //.left(this.width/2)
+      .textStyle("white");
+    }
+    else{
+      this.pvPanel.add(pv.Dot)
+      .data(this.chart.dataEngine.getCategories())
+      .shape("square")
+      //.strokeStyle("#000")
+      .lineWidth(0)
+      .fillStyle(function(){return c(this.index);})
+      .bottom(function(){ return myself.height - this.index*myself.padding - myself.minMargin;})
+      .left(myself.minMargin)
+      .anchor("left").add(pv.Rule)
+      .left(0)
+      .width(15)
+      //                .strokeStyle(function(d) {return d;})
+      .strokeStyle("black")
+      .anchor("right").add(pv.Label)
+      //.text("debug")
+      .textMargin(myself.textMargin)
+      .font(this.font)
+      //.textAlign("center")
+      //.left(this.width/2)
+      .textStyle("white");
+    }
+
+    // Extend legend
+    this.extend(this.pvPanel,"legend_");
+
+
+  }
 
 
 });
