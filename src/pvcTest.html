@@ -19,9 +19,10 @@ and open the template in the editor.
     <script type="text/javascript" src="CoreComponents.js"></script>
     <script type="text/javascript" src="pvc/pvc.js"></script>
     <script type="text/javascript" src="pvc/pvcPanel.js"></script>
-    <script type="text/javascript" src="pvc/pvcPie.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcPie.js"></script>
+    <script type="text/javascript" src="pvc/pvcBar.js"></script>
     <script type="text/javascript" src="pvc/pvcData.js"></script>
     <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
     <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
@@ -63,7 +64,7 @@ and open the template in the editor.
 
 
       // Test of pvc in standalone mode
-      var bar = new pvc.CategoricalAbstract({
+      var bar = new pvc.BarChart({
         // legendPosition: "left",
         canvas: "pvcBar",
         width: 600,
@@ -75,10 +76,14 @@ and open the template in the editor.
         legendPosition: "bottom",
         legendSize: 50,
 
+        panelWidthPercentage: 1,
+
         yAxisPosition: "left",
         yAxisSize: 30,
         xAxisPosition: "bottom",
         xAxisSize: 30,
+        xAxisFullGrid: false,
+        yAxisFullGrid: true,
         
         /*
         showAllTimeseries: true,
@@ -86,7 +91,7 @@ and open the template in the editor.
         allTimeseriesSize: 50,
          */
         extensionPoints: {
-          base_fillStyle: "red",
+          //base_fillStyle: "red",
           title_fillStyle: "yellow",
           titleLabel_font: "16px sans-serif",
           // title_strokeStyle: "black",
@@ -99,7 +104,8 @@ and open the template in the editor.
           xAxis_fillStyle: "#eee",
           yAxis_fillStyle: "#bbb",
 
-          xAxisRule_strokeStyle:"blue",
+          //xAxisRule_strokeStyle:"yellow",
+          //xAxisRuleGrid_strokeStyle:"#eee",
           yAxisRule_strokeStyle:"blue"
           
           //pie_strokeStyle: "white"
@@ -109,7 +115,7 @@ and open the template in the editor.
 
       });
 
-      bar.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      bar.setData(relational_02, {crosstabMode: false, seriesInRows: false});
       bar.render();
 
 

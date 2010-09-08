@@ -74,7 +74,7 @@ pvc.DataEngine = Base.extend({
    */
 
   getSeries: function(){
-    return this.series || (this.series = this.seriesInRows?this.translator.getRows():this.translator.getColumns());
+    return this.series || this.translator.getColumns();
   },
 
   /*
@@ -83,7 +83,7 @@ pvc.DataEngine = Base.extend({
    */
 
   getCategories: function(){
-    return this.categories || ( this.categories =  this.seriesInRows?this.translator.getColumns():this.translator.getRows());
+    return this.categories || this.translator.getRows();
   },
 
   /*
@@ -141,13 +141,27 @@ pvc.DataEngine = Base.extend({
     }));
   },
 
-  getCategoriesAbsoluteMax: function(){
+  /*
+   * Get the maximum value in all series
+   */
+  getSeriesAbsoluteMax: function(){
 
+    var myself=this;
+    return pv.max(pv.range(0,this.getSeriesSize()).map(function(idx){
+      return pv.max(myself.getValuesForSeriesIdx(idx))
+    }));
 
   },
 
-  getCategoriesAbsoluteMin: function(){
+  /*
+   * Get the minimum value in all series
+   */
+  getSeriesAbsoluteMin: function(){
 
+    var myself=this;
+    return pv.min(pv.range(0,this.getSeriesSize()).map(function(idx){
+      return pv.min(myself.getValuesForSeriesIdx(idx))
+    }));
 
   },
 
