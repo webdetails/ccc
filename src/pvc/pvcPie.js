@@ -52,11 +52,11 @@ pvc.PieChart = pvc.Base.extend({
 /*
    * Pie chart panel. Generates a pie chart. Specific options are:
    * <i>showValues</i> - Show or hide slice value. Default: false
-   *  <i>explodedSliceIndex</i> - Index of the slice to explode. Default: null
-   *  <i>explodedSliceRadius</i> - If one wants a pie with an exploded effect,
+   * <i>explodedSliceIndex</i> - Index of the slice to explode. Default: null
+   * <i>explodedSliceRadius</i> - If one wants a pie with an exploded effect,
    *  specify a value in pixels here. If above argument is specified, explodes
    *  only one slice. Else explodes all. Default: 0
-   * <i>innerGap</i> - The size of the legend in pixels. Default: 25
+   * <i>innerGap</i> - The percentage of the inner area used by the pie. Default: 0.9 (90%)
    *
    * Has the following protovis extension points:
    *

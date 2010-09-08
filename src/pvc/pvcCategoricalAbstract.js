@@ -22,7 +22,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
       yAxisPosition: "left",
       xAxisPosition: "bottom",
       yAxisSize: 50,
-      xAxisSize: 50
+      xAxisSize: 50,
+      xAxisFullGrid: false,
+      yAxisFullGrid: false
     };
 
 
@@ -58,31 +60,52 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     this.yScale = this.getYScale().range(0, this.basePanel.height - this.options.xAxisSize);
 
 
-
-
     // Generate axis
+
+    this.generateXAxis();
+    this.generateYAxis();
+
+
+  },
+
+
+  /*
+   * Generates the X axis. It's in a separate function to allow overriding this value
+   */
+
+  generateXAxis: function(){
 
     if (this.options.showXScale){
       this.xAxisPanel = new pvc.XAxisPanel(this, {
         showAllTimeseries: false,
         anchor: this.options.xAxisPosition,
         axisSize: this.options.xAxisSize,
-        oppositeAxisSize: this.options.yAxisSize
+        oppositeAxisSize: this.options.yAxisSize,
+        fullGrid:  this.options.xAxisFullGrid
       });
 
       this.xAxisPanel.setScale(this.xScale);
       this.xAxisPanel.appendTo(this.basePanel); // Add it
-      
 
     }
 
+
+  },
+
+
+  /*
+   * Generates the Y axis. It's in a separate function to allow overriding this value
+   */
+
+  generateYAxis: function(){
 
     if (this.options.showYScale){
       this.yAxisPanel = new pvc.YAxisPanel(this, {
         showAllTimeseries: false,
         anchor: this.options.yAxisPosition,
         axisSize: this.options.yAxisSize,
-        oppositeAxisSize: this.options.xAxisSize
+        oppositeAxisSize: this.options.xAxisSize,
+        fullGrid:  this.options.yAxisFullGrid
       });
 
       this.yAxisPanel.setScale(this.yScale);
@@ -115,7 +138,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
 
 /*
- * AxisPanel panel. 
+ * AxisPanel panel.
  *
  * 
  */
@@ -124,13 +147,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
   _parent: null,
   pvRule: null,
   pvRuleLabel: null,
+  pvRuleGrid: null,
 
+  ordinal: false,
   anchor: "bottom",
   axisSize: 50,
   tickLength: 6,
   oppositeAxisSize: 50,
   panelName: "axis", // override
   scale: null,
+  fullGrid: false,
+  elements: [], // To be used in ordinal scales
 
 
   constructor: function(chart, options){
@@ -164,6 +191,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     this.extend(this.pvPanel, this.panelName + "_");
     this.extend(this.pvRule, this.panelName + "Rule_");
     this.extend(this.pvRuleLabel, this.panelName + "RuleLabel_");
+    this.extend(this.pvRuleGrid, this.panelName + "RuleGrid_");
 
   },
 
@@ -174,14 +202,59 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
   renderAxis: function(){
 
-    var myself = this;
-
     this.pvRule = this.pvPanel
     .add(pv.Rule)
     .strokeStyle("#aaa")
     [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
-    [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale(0))
+    [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale.range()[0])
     [pvc.BasePanel.paralelLength[this.anchor]](this.scale.range()[1])
+
+    if (this.ordinal == true){
+      this.renderOrdinalAxis();
+    }
+    else{
+      this.renderLinearAxis();
+      
+    }
+    
+  },
+  
+
+  renderOrdinalAxis: function(){
+
+    var myself = this;
+    
+    this.pvRuleLabel = this.pvRule.add(pv.Rule)
+    .data(this.elements)
+    [pvc.BasePanel.paralelLength[this.anchor]](null)
+    [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
+    [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
+      return myself.scale(this.index);
+    })
+    [pvc.BasePanel.orthogonalLength[this.anchor]](function(d){
+      return myself.tickLength/(this.index%2 + 1)
+    })
+    .anchor(this.anchor)
+    .add(pv.Label)
+    .text(pv.identity)
+    .visible(function(d){
+      // mini grids
+      if (this.index % 2){
+        return false;
+      }
+      // also, hide the first and last ones
+      if( myself.scale(d) == 0  || myself.scale(d) == myself.scale.range()[1] ){
+        return false;
+      }
+      return true;
+    })
+
+  },
+
+
+  renderLinearAxis: function(){
+
+    var myself = this;
 
     this.pvRuleLabel = this.pvRule.add(pv.Rule)
     .data(this.scale.ticks(20))
@@ -205,6 +278,32 @@ pvc.AxisPanel = pvc.BasePanel.extend({
       }
       return true;
     })
+
+
+    // Now do the full grids
+    if(this.fullGrid){
+      this.pvRuleGrid = this.pvRule.add(pv.Rule)
+      .data(this.scale.ticks(20))
+      .strokeStyle("#f0f0f0")
+      [pvc.BasePanel.paralelLength[this.anchor]](null)
+      [pvc.BasePanel.oppositeAnchor[this.anchor]](- this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] +
+        this[pvc.BasePanel.orthogonalLength[this.anchor]])
+      [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale)
+      [pvc.BasePanel.orthogonalLength[this.anchor]](this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] -
+        this[pvc.BasePanel.orthogonalLength[this.anchor]])
+      .visible(function(d){
+        // mini grids
+        if (this.index % 2){
+          return false;
+        }
+        // also, hide the first and last ones
+        if( myself.scale(d) == 0  || myself.scale(d) == myself.scale.range()[1] ){
+          return false;
+        }
+        return true;
+      })
+    }
+
 
   }
 
