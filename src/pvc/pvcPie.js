@@ -8,6 +8,7 @@
 pvc.PieChart = pvc.Base.extend({
 
   pieChartPanel : null,
+  legendSource: "categories",
 
   constructor: function(o){
 
