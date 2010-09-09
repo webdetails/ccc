@@ -74,7 +74,7 @@ and open the template in the editor.
         titleSize: 40,
         legend: true,
         legendPosition: "bottom",
-        legendSize: 50,
+        legendSize: null,
 
         panelWidthPercentage: 1,
 
@@ -129,9 +129,19 @@ and open the template in the editor.
         titlePosition: "left",
         titleSize: 40,
         legend: true,
-        legendPosition: "bottom",
-        //legendAlign: "top",
-        legendSize: 60,
+        legendPosition: "top", //top, bottom, left, right
+        legendAlign: "right", //left, center, right || top, middle, bottom
+        // legendSize: null,
+        legendDrawLine: true,
+        legendDrawMarker: true,
+        legendFont: "9px sans-serif",
+        //legendMinMarginX: 8,
+        //legendMinMarginY: 8,
+        //legendTextMargin: 4,
+        legendPadding: 20,
+        legendTextAdjust: 7,
+        //legendShape: "square",
+        //legendMarkerSize: 15,
 
         innerGap: 0.9,
         showValues: true,
