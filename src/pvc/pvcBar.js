@@ -16,8 +16,8 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
     var _defaults = {
       showValues: true,
       stackedBarChart: false,
-      panelWidthPercentage: 1,
-      innerBandWidthPercentage: 1,
+      panelWidthRatio: 1,
+      innerBandWidthRatio: 1,
       maxBarSize: 2000,
       originIsZero: true
     };
@@ -38,8 +38,8 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
 
     this.barChartPanel = new pvc.BarChartPanel(this, {
       stacked: this.options.stackedBarChart,
-      panelWidthPercentage: this.options.panelWidthPercentage,
-      barWidthPercentage: this.options.barWidthPercentage,
+      panelWidthRatio: this.options.panelWidthRatio,
+      barWidthRatio: this.options.barWidthRatio,
       maxBarSize: this.options.maxBarSize,
       showValues: this.options.showValues
     });
@@ -54,9 +54,17 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
 
   getXScale: function(){
 
-    return new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()))
-    .splitBanded(0, this.basePanel.width, this.options.panelWidthPercentage);
 
+    var scale = new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()));
+
+    if(this.options.yAxisPosition == "left"){
+      scale.splitBanded( this.options.yAxisSize , this.basePanel.width, this.options.panelWidthRatio);
+    }
+    else{
+      scale.splitBanded(0, this.basePanel.width - this.options.yAxisSize, this.options.panelWidthRatio);
+    }
+
+    return scale;
   },
 
   /*
@@ -80,6 +88,9 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
   generateXAxis: function(){
 
     if (this.options.showXScale){
+
+      this.xScale = this.getXScale(); // Get it again, since the ranges were overwritten
+      
       this.xAxisPanel = new pvc.XAxisPanel(this, {
         ordinal: true,
         showAllTimeseries: false,
@@ -106,8 +117,8 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
    * Bar chart panel. Generates a bar chart. Specific options are:
    * <i>showValues</i> - Show or hide bar value. Default: false
    * <i>stackedBarChart</i> -  Stacked? Default: false
-   * <i>panelWidthPercentage</i> - Percentage of the band occupied by the pane;. Default: 0.5 (50%)
-   * <i>barWidthPercentage</i> - In multiple series, percentage of inner
+   * <i>panelWidthRatio</i> - Ratio of the band occupied by the pane;. Default: 0.5 (50%)
+   * <i>barWidthRatio</i> - In multiple series, percentage of inner
    * band occupied by bars. Default: 0.5 (50%)
    * <i>maxBarSize</i> - Maximum size of a bar in pixels. Default: 2000
    *
@@ -127,9 +138,9 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
   data: null,
 
   stacked: false,
-  panelWidthPercentage: 1,
-  barWidthPercentage: 0.5,
-  maxBarSize: 2000,
+  panelWidthRatio: 1,
+  barWidthRatio: 0.5,
+  maxBarSize: 200,
   showValues: true,
 
 
@@ -141,7 +152,6 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
   create: function(){
 
-    var myself=this;
     this.width = this._parent.width;
     this.height = this._parent.height;
 
@@ -151,36 +161,50 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     // Extend body
 
-    var y = this.chart.getYScale().range(0,this.height);
-    var x = this.chart.getXScale();
+    var y = this.chart.yScale;
+    var x = this.chart.getXScale()
+    .splitBanded(0, this.chart.basePanel.width, this.chart.options.panelWidthRatio);
 
     // 1 - single series
+
+    // We need to take into account the maxValue if our band is higher than that
+    var maxBarSize = x.range().band;
+    var barPositionOffset = 0;
+    if (maxBarSize > this.maxBarSize){
+      barPositionOffset = (maxBarSize - this.maxBarSize)/2 ;
+      maxBarSize = this.maxBarSize;
+    }
 
     this.pvBar = this.pvPanel.add(pv.Bar)
     .data(this.chart.dataEngine.getValuesForSeriesIdx(0))
     .left(function(d){
-      pvc.log("Left position: " + x(this.index));
-      return x(this.index)
+      return x(this.index) + barPositionOffset;
     })
     .bottom(0)
-    .width(x.range().band)
+    .width(maxBarSize)
     .height(y)
 
     // Labels:
 
-    this.pvBar
-    .anchor("bottom")
-    .add(pv.Label)
-    .bottom(0)
-    .text(function(d){
-      return myself.chart.dataEngine.getCategories()[this.index]
-    })
+    if(this.showValues){
+      this.pvBarLabel = this.pvBar
+      .anchor("center")
+      .add(pv.Label)
+      .bottom(0)
+      .text(pv.identity)
+
+      this.extend(this.pvBarLabel,"barLabel_");
+    }
+
+    // Extend bar
+    this.extend(this.pvBar,"bar_");
     
-    
+    // Extend barLabel
+    this.extend(this.pvBarLabel,"barLabel_");
 
 
-  //this.extend(this.pvPanel,"chart_");
-
+    // Extend body
+    this.extend(this.pvPanel,"chart_");
 
   }
 

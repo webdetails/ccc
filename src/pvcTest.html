@@ -76,11 +76,14 @@ and open the template in the editor.
         legendPosition: "bottom",
         legendSize: 50,
 
-        panelWidthPercentage: 1,
+        maxBarSize: 20,
 
-        yAxisPosition: "left",
+        panelWidthRatio: 0.5,
+
+        showValues: true,
+        yAxisPosition: "right",
         yAxisSize: 30,
-        xAxisPosition: "bottom",
+        xAxisPosition: "top",
         xAxisSize: 30,
         xAxisFullGrid: false,
         yAxisFullGrid: true,
@@ -106,11 +109,13 @@ and open the template in the editor.
 
           //xAxisRule_strokeStyle:"yellow",
           //xAxisRuleGrid_strokeStyle:"#eee",
-          yAxisRule_strokeStyle:"blue"
+          yAxisRule_strokeStyle:"blue",
           
           //pie_strokeStyle: "white"
           //pie_innerRadius: 10
           //pieLabel_textAngle: "0"
+
+          barLabel_textStyle: "red"
         }
 
       });

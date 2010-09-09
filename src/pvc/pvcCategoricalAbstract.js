@@ -44,7 +44,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
   preRender: function(){
 
-    // TODO: Build it
+
     this.base();
 
     pvc.log("Prerendering in CategoricalAbstract");
@@ -224,31 +224,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     var myself = this;
     
-    this.pvRuleLabel = this.pvRule.add(pv.Rule)
+    this.pvRuleLabel = this.pvRule.add(pv.Label)
     .data(this.elements)
     [pvc.BasePanel.paralelLength[this.anchor]](null)
-    [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
+    [pvc.BasePanel.oppositeAnchor[this.anchor]](5)
     [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
-      return myself.scale(this.index);
+      return myself.scale(this.index) + myself.scale.range().band/2;
     })
-    [pvc.BasePanel.orthogonalLength[this.anchor]](function(d){
-      return myself.tickLength/(this.index%2 + 1)
-    })
-    .anchor(this.anchor)
-    .add(pv.Label)
+    .textAlign("center")
     .text(pv.identity)
-    .visible(function(d){
-      // mini grids
-      if (this.index % 2){
-        return false;
-      }
-      // also, hide the first and last ones
-      if( myself.scale(d) == 0  || myself.scale(d) == myself.scale.range()[1] ){
-        return false;
-      }
-      return true;
-    })
-
   },
 
 
