@@ -488,7 +488,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   font: "9px sans-serif",
   minMarginX: 8,
   minMarginY: 8,
-  textMargin: 4,
+  textMargin: 6,
   padding: 20,
   textAdjust: 7,
   shape: "square",
