@@ -39,6 +39,8 @@ pvc.Base = Base.extend({
       legendPosition: "bottom"
 
     };
+    
+    this.options = {},
 
     // Apply options
     $.extend(this.options, _defaults);
@@ -95,7 +97,6 @@ pvc.Base = Base.extend({
         anchor: this.options.legendPosition,
         legendSize: this.options.legendSize,
         align: this.options.legendAlign,
-        font: this.options.legendFont,
         minMarginX: this.options.legendMinMarginX,
         minMarginY: this.options.legendMinMarginY,
         textMargin: this.options.legendTextMargin,
@@ -474,18 +475,25 @@ pvc.TitlePanel = pvc.BasePanel.extend({
  *
  * Has the following protovis extension points:
  *
- * <i>legend_</i> - for the main legend Panel
+ * <i>legend_</i> - for the legend Panel
+ * <i>legendRule_</i> - for the legend line (when applicable)
+ * <i>legendDot_</i> - for the legend marker (when applicable)
+ * <i>legendLabel_</i> - for the legend label
+ * 
  */
 pvc.LegendPanel = pvc.BasePanel.extend({
 
   _parent: null,
+  pvRule: null,
+  pvDot: null,
   pvLabel: null,
+
+
   anchor: "bottom",
   align: "left",
   legendPanel: null,
   legend: null,
   legendSize: null,
-  font: "9px sans-serif",
   minMarginX: 8,
   minMarginY: 8,
   textMargin: 4,
@@ -541,9 +549,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       realxsize = maxperline*(cellsize + this.padding) + myself.minMarginX - this.padding;
       realysize = myself.padding*(Math.ceil(data.length/maxperline));
 
-     if(this.heigth == null){
-       this.height = realysize;
-     }
+      if(this.heigth == null){
+        this.height = realysize;
+      }
 
       //changing margins if the alignment is not "left"
       if(this.align == "right"){
@@ -579,9 +587,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       y = function(){return myself.height - this.index*myself.padding - myself.minMarginY;}
     }
 
-   if(this.width == null){
-     this.width = realxsize;
-   }
+    if(this.width == null){
+      this.width = realxsize;
+    }
 
     this.pvPanel = this._parent.getPvPanel().add(this.type)
     .width(this.width)
@@ -589,39 +597,43 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     //********** Markers and Lines ***************************
 
+
     if(this.drawLine == true && this.drawMarker == true){
-      this.pvPanel.add(pv.Rule)
-        .data(data)
-        .width(this.markerSize)
-        .lineWidth(1)
-        .strokeStyle(function(){return c(this.index);})
-        .left(x)
-        .bottom(y)
-      .anchor("center").add(pv.Dot)
-        .size(this.markerSize)
-        .shape(this.shape)
-        .lineWidth(0)
-        .fillStyle(function(){return c(this.index);})
-      .anchor("right").add(pv.Label)
-        .textMargin(myself.textMargin)
-        .font(this.font)
-        .textStyle("white");
+      
+      this.pvRule = this.pvPanel.add(pv.Rule)
+      .data(data)
+      .width(this.markerSize)
+      .lineWidth(1)
+      .strokeStyle(function(){return c(this.index);})
+      .left(x)
+      .bottom(y)
+
+      this.pvDot = this.pvRule.anchor("center").add(pv.Dot)
+      .size(this.markerSize)
+      .shape(this.shape)
+      .lineWidth(0)
+      .fillStyle(function(){return c(this.index);})
+
+      this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
+      .textMargin(myself.textMargin)
+      .font("9px sans-serif")
     }
     else if(this.drawLine == true){
-      this.pvPanel.add(pv.Rule)
-        .data(data)
-        .width(this.markerSize)
-        .lineWidth(1)
-        .strokeStyle(function(){return c(this.index);})
-        .left(x)
-        .bottom(y)
-      .anchor("right").add(pv.Label)
-        .textMargin(myself.textMargin)
-        .font(this.font)
-        .textStyle("white");
+      
+      this.pvRule = this.pvPanel.add(pv.Rule)
+      .data(data)
+      .width(this.markerSize)
+      .lineWidth(1)
+      .strokeStyle(function(){return c(this.index);})
+      .left(x)
+      .bottom(y)
+
+      this.pvLabel = this.pvRule.anchor("right").add(pv.Label)
+      .textMargin(myself.textMargin)
+      .font("9px sans-serif")
     }
     else if(this.drawMarker == true){
-      this.pvPanel.add(pv.Dot)
+      this.pvDot = this.pvPanel.add(pv.Dot)
       .data(data)
       .size(this.markerSize)
       .shape(this.shape)
@@ -629,18 +641,19 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       .fillStyle(function(){return c(this.index);})
       .left(x)
       .bottom(y)
-      .anchor("right").add(pv.Label)
-        .data(data)
-        .textMargin(myself.textMargin)
-        .font(this.font)
-        .textStyle("white");
-        //.textAlign("center")
-        //.left(this.width/2)
+
+      this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
+      .data(data)
+      .textMargin(myself.textMargin)
+      .font("9px sans-serif")
     }
 
 
     // Extend legend
     this.extend(this.pvPanel,"legend_");
+    this.extend(this.pvRule,"legendRule_");
+    this.extend(this.pvDot,"legendDot_");
+    this.extend(this.pvLabel,"legendLabel_");
 
 
   }

@@ -76,16 +76,19 @@ and open the template in the editor.
         legendPosition: "bottom",
         legendSize: null,
 
-        maxBarSize: 20,
+        maxBarSize: 100,
 
-        panelWidthRatio: 0.5,
+        panelWidthRatio: 0.7,
+        barWidthRatio: 0.75,
 
-        showValues: true,
-        yAxisPosition: "right",
+        showValues: false,
+        showXScale: true,
+        showYScale: true,
+        yAxisPosition: "left",
         yAxisSize: 30,
-        xAxisPosition: "top",
+        xAxisPosition: "bottom",
         xAxisSize: 30,
-        xAxisFullGrid: false,
+        xAxisFullGrid: true,
         yAxisFullGrid: true,
         
         /*
@@ -102,7 +105,7 @@ and open the template in the editor.
           // titleLabel_textAlign: "left",
           
           legend_fillStyle: "green",
-          chart_fillStyle: "#eee",
+          chart_fillStyle: "#fff",
           allTimeseries_fillStyle: "blue",
           xAxis_fillStyle: "#eee",
           yAxis_fillStyle: "#bbb",
@@ -115,12 +118,12 @@ and open the template in the editor.
           //pie_innerRadius: 10
           //pieLabel_textAngle: "0"
 
-          barLabel_textStyle: "red"
+          //barLabel_textStyle: "red"
         }
 
       });
 
-      bar.setData(relational_02, {crosstabMode: false, seriesInRows: false});
+      bar.setData(relational_01, {crosstabMode: false, seriesInRows: false});
       bar.render();
 
 
@@ -134,12 +137,11 @@ and open the template in the editor.
         titlePosition: "left",
         titleSize: 40,
         legend: true,
-        legendPosition: "top", //top, bottom, left, right
+        legendPosition: "right", //top, bottom, left, right
         legendAlign: "right", //left, center, right || top, middle, bottom
         // legendSize: null,
         legendDrawLine: true,
-        legendDrawMarker: true,
-        legendFont: "9px sans-serif",
+        legendDrawMarker: false,
         //legendMinMarginX: 8,
         //legendMinMarginY: 8,
         //legendTextMargin: 4,
@@ -154,7 +156,7 @@ and open the template in the editor.
         explodedSliceRadius: 15,
 
         numberPosition: 0,
-
+        /*
         extensionPoints: {
           base_fillStyle: "red",
           title_fillStyle: "yellow",
@@ -167,7 +169,7 @@ and open the template in the editor.
           //pie_strokeStyle: "white"
           //pie_innerRadius: 10
           //pieLabel_textAngle: "0"
-        }
+        }*/
 
       });
 

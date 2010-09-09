@@ -112,6 +112,16 @@ pvc.DataEngine = Base.extend({
   },
 
   /*
+   * Returns the values for a given category idx
+   *
+   */
+
+  getValuesForCategoryIdx: function(idx){
+    return this.getValues()[idx];
+  },
+
+
+  /*
    * Returns how many series we have
    */
 
