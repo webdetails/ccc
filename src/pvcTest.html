@@ -19,6 +19,7 @@ and open the template in the editor.
     <script type="text/javascript" src="CoreComponents.js"></script>
     <script type="text/javascript" src="pvc/pvc.js"></script>
     <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcLegend.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcPie.js"></script>
@@ -65,6 +66,7 @@ and open the template in the editor.
 
       // Test of pvc in standalone mode
       var bar = new pvc.BarChart({
+//      var bar = new pvc.CategoricalAbstract({
         // legendPosition: "left",
         canvas: "pvcBar",
         width: 600,
@@ -86,7 +88,7 @@ and open the template in the editor.
         showYScale: true,
         yAxisPosition: "left",
         yAxisSize: 30,
-        xAxisPosition: "bottom",
+        xAxisPosition: "top",
         xAxisSize: 30,
         xAxisFullGrid: true,
         yAxisFullGrid: true,
@@ -105,7 +107,7 @@ and open the template in the editor.
           // titleLabel_textAlign: "left",
           
           legend_fillStyle: "green",
-          chart_fillStyle: "#fff",
+          //chart_fillStyle: "#fff",
           allTimeseries_fillStyle: "blue",
           xAxis_fillStyle: "#eee",
           yAxis_fillStyle: "#bbb",

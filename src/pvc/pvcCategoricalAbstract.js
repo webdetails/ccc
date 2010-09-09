@@ -227,11 +227,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     this.pvRuleLabel = this.pvRule.add(pv.Label)
     .data(this.elements)
     [pvc.BasePanel.paralelLength[this.anchor]](null)
-    [pvc.BasePanel.oppositeAnchor[this.anchor]](5)
+    [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
     [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
       return myself.scale(this.index) + myself.scale.range().band/2;
     })
     .textAlign("center")
+    .textBaseline("middle")
     .text(pv.identity)
   },
 
@@ -266,6 +267,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     // Now do the full grids
     if(this.fullGrid){
+
+      pvc.log("TODO: Currently the full grids disappear under the main panel. Fix it")
       this.pvRuleGrid = this.pvRule.add(pv.Rule)
       .data(this.scale.ticks(20))
       .strokeStyle("#f0f0f0")
