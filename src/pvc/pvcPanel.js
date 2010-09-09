@@ -513,9 +513,11 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     //pvc.log("Debug PMartins");
 
-    var data = this.chart.labelSource=="series"?
+    var data = this.chart.legendSource=="series"?
       this.chart.dataEngine.getSeries():
       this.chart.dataEngine.getCategories();
+
+
 
     //determine the size of the biggest cell
     //Size will depend on positioning and font size mainly
