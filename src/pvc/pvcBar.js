@@ -8,6 +8,8 @@
 pvc.BarChart = pvc.CategoricalAbstract.extend({
 
   barChartPanel : null,
+  linearScale: null,
+  ordinalScale: null,
 
   constructor: function(o){
 
@@ -16,11 +18,11 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
     var _defaults = {
       showValues: true,
       stackedBarChart: false,
-      panelWidthRatio: 1,
+      panelSizeRatio: 1,
       innerBandWidthRatio: 1,
       maxBarSize: 2000,
       originIsZero: true,
-      orientation: "vertical"
+      barOrientation: "vertical"
     };
 
 
@@ -39,11 +41,11 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
 
     this.barChartPanel = new pvc.BarChartPanel(this, {
       stacked: this.options.stackedBarChart,
-      panelWidthRatio: this.options.panelWidthRatio,
-      barWidthRatio: this.options.barWidthRatio,
+      panelSizeRatio: this.options.panelSizeRatio,
+      barSizeRatio: this.options.barSizeRatio,
       maxBarSize: this.options.maxBarSize,
       showValues: this.options.showValues,
-      orientation: this.options.orientation
+      barOrientation: this.options.barOrientation
     });
 
     this.barChartPanel.appendTo(this.basePanel); // Add it
@@ -51,85 +53,131 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
   },
 
   /*
-   * Generic xx scale for testing purposes. Needs to be overriden per chart
+   * xx scale for bar chart
    */
 
   getXScale: function(){
 
+    return this.options.barOrientation == "vertical"?
+    this.getOrdinalScale():
+    this.getLinearScale();
 
-    var scale = new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()));
-
-    if(this.options.yAxisPosition == "left"){
-      scale.splitBanded( this.options.yAxisSize , this.basePanel.width, this.options.panelWidthRatio);
-    }
-    else{
-      scale.splitBanded(0, this.basePanel.width - this.options.yAxisSize, this.options.panelWidthRatio);
-    }
-
-    return scale;
   },
 
   /*
-   * Generic yy scale for testing purposes. Needs to be overriden per chart
+   * yy scale for bar chart
    */
 
   getYScale: function(){
 
-    var max = this.dataEngine.getSeriesAbsoluteMax();
-    var min = this.dataEngine.getSeriesAbsoluteMin();
-    if(min > 0 && this.options.originIsZero){
-      min = 0
-    }
-    return new pv.Scale.linear(min,max);
+    return this.options.barOrientation == "vertical"?
+    this.getLinearScale():
+    this.getOrdinalScale();
   },
 
   /*
-   * Generates the X axis. It's in a separate function to allow overriding this value
+   * Scale for the ordinal axis. xx if barOrientation is vertical, yy otherwise
+   *
    */
+  getOrdinalScale: function(){
 
-  generateXAxis: function(){
+    if ( true && this.ordinalScale == null){ // TODO: FIX
 
-    if (this.options.showXScale){
 
-      this.xScale = this.getXScale(); // Get it again, since the ranges were overwritten
-      
-      this.xAxisPanel = new pvc.XAxisPanel(this, {
-        ordinal: true,
-        showAllTimeseries: false,
-        anchor: this.options.xAxisPosition,
-        axisSize: this.options.xAxisSize,
-        oppositeAxisSize: this.options.yAxisSize,
-        fullGrid:  this.options.xAxisFullGrid,
-        elements: this.dataEngine.getCategories()
-      });
 
-      this.xAxisPanel.setScale(this.xScale);
-      this.xAxisPanel.appendTo(this.basePanel); // Add it
+      var scale = new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()));
 
+      var size = this.options.barOrientation=="vertical"?this.basePanel.width:this.basePanel.height;
+
+      if(this.options.barOrientation=="vertical" && this.options.yAxisPosition == "left"){
+        scale.splitBanded( this.options.yAxisSize , size, this.options.panelSizeRatio);
+      }
+      else if(this.options.barOrientation=="vertical" && this.options.yAxisPosition == "right"){
+        scale.splitBanded(0, size - this.options.yAxisSize, this.options.panelSizeRatio);
+      }
+      else{
+        scale.splitBanded(0, size - this.options.xAxisSize, this.options.panelSizeRatio);
+      }
+
+      this.ordinalScale = scale;
     }
 
+    return this.ordinalScale;
 
+
+  },
+
+  /*
+   * Scale for the linear axis. yy if barOrientation is vertical, xx otherwise
+   *
+   */
+  getLinearScale: function(){
+
+
+    if (true && this.linearScale == null){ // TODO: FIX
+      var size = this.options.barOrientation=="vertical"?
+      this.basePanel.height - this.options.xAxisSize:
+      this.basePanel.width;
+    
+      var max = this.dataEngine.getSeriesAbsoluteMax();
+      var min = this.dataEngine.getSeriesAbsoluteMin();
+      if(min > 0 && this.options.originIsZero){
+        min = 0
+      }
+      this.linearScale = new pv.Scale.linear(min,max).range(0, size );
+    }
+
+    return this.linearScale;
+  },
+
+  /*
+   * Indicates if xx is an ordinal scale
+   */
+
+  isXAxisOrdinal: function(){
+    return this.options.barOrientation == "vertical";
+  },
+
+
+  /*
+   * Indicates if yy is an ordinal scale
+   */
+
+  isYAxisOrdinal: function(){
+    return this.options.barOrientation == "horizontal";
+  },
+
+  /*
+   *  List of elements to use in the axis ordinal
+   *
+   */
+  getAxisOrdinalElements: function(){
+    return this.dataEngine.getCategories();
   }
+
+
 
 }
 );
 
 
 /*
-   * Bar chart panel. Generates a bar chart. Specific options are:
-   * <i>showValues</i> - Show or hide bar value. Default: false
-   * <i>stackedBarChart</i> -  Stacked? Default: false
-   * <i>panelWidthRatio</i> - Ratio of the band occupied by the pane;. Default: 0.5 (50%)
-   * <i>barWidthRatio</i> - In multiple series, percentage of inner
-   * band occupied by bars. Default: 0.5 (50%)
-   * <i>maxBarSize</i> - Maximum size of a bar in pixels. Default: 2000
-   *
-   * Has the following protovis extension points:
-   *
-   * <i>chart_</i> - for the main chart Panel
-   * <i>bar_</i> - for the main bar wedge
-   * <i>barLabel_</i> - for the main bar label
-   */
+ * Bar chart panel. Generates a bar chart. Specific options are:
+ * <i>barOrientation</i> - horizontal or vertical. Default: vertical
+ * <i>showValues</i> - Show or hide bar value. Default: false
+ * <i>stackedBarChart</i> -  Stacked? Default: false
+ * <i>panelSizeRatio</i> - Ratio of the band occupied by the pane;. Default: 0.5 (50%)
+ * <i>barSizeRatio</i> - In multiple series, percentage of inner
+ * band occupied by bars. Default: 0.5 (50%)
+ * <i>maxBarSize</i> - Maximum size of a bar in pixels. Default: 2000
+ *
+ * Has the following protovis extension points:
+ *
+ * <i>chart_</i> - for the main chart Panel
+ * <i>bar_</i> - for the actual bar
+ * <i>barPanel_</i> - for the panel where the bars sit
+ * <i>barLabel_</i> - for the main bar label
+ */
 
 
 pvc.BarChartPanel = pvc.BasePanel.extend({
@@ -141,11 +189,11 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
   data: null,
 
   stacked: false,
-  panelWidthRatio: 1,
-  barWidthRatio: 0.5,
+  panelSizeRatio: 1,
+  barSizeRatio: 0.5,
   maxBarSize: 200,
   showValues: true,
-  orientation: "vertical",
+  barOrientation: "vertical",
 
 
   constructor: function(chart, options){
@@ -164,19 +212,19 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     .width(this.width)
     .height(this.height)
 
+    var anchor = this.barOrientation == "vertical"?"bottom":"left";
+
     // Extend body
 
-    var y = this.chart.yScale;
-    var x = this.chart.getXScale()
-    .splitBanded(0, this.chart.basePanel.width, this.panelWidthRatio);
+    var lScale = this.chart.getLinearScale();
+    var oScale = this.chart.getOrdinalScale();
 
-    var xx = new pv.Scale.ordinal(pv.range(0,this.chart.dataEngine.getSeriesSize()))
-    .splitBanded(0, x.range().band, this.barWidthRatio);
+    var bScale = new pv.Scale.ordinal(pv.range(0,this.chart.dataEngine.getSeriesSize()))
+    .splitBanded(0, oScale.range().band, this.barSizeRatio);
 
-    // 1 - single series
 
     // We need to take into account the maxValue if our band is higher than that
-    var maxBarSize = xx.range().band;
+    var maxBarSize = bScale.range().band;
     var barPositionOffset = 0;
     if (maxBarSize > this.maxBarSize){
       barPositionOffset = (maxBarSize - this.maxBarSize)/2 ;
@@ -185,38 +233,27 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     this.pvBarPanel = this.pvPanel.add(pv.Panel)
     .data(pv.range(0,this.chart.dataEngine.getCategoriesSize()))
-    .left(function(d){
-      return x(this.index) + barPositionOffset;
+    [pvc.BasePanel.relativeAnchor[anchor]](function(d){
+      return oScale(this.index) + barPositionOffset;
     })
-    .bottom(0)
-    .width(x.range().band)
-    .height(this.height)
+    [anchor](0)
+    [pvc.BasePanel.paralelLength[anchor]](oScale.range().band)
+    [pvc.BasePanel.orthogonalLength[anchor]](this[pvc.BasePanel.orthogonalLength[anchor]])
 
     this.pvBar = this.pvBarPanel.add(pv.Bar)
     .data(function(d){
       return myself.chart.dataEngine.getValuesForCategoryIdx(d)
-    })
+      })
     .fillStyle(pv.Colors.category20().by(pv.index))
-    .left(function(d){
-      return xx(this.index) + barPositionOffset;
+    [pvc.BasePanel.relativeAnchor[anchor]](function(d){
+      return bScale(this.index) + barPositionOffset;
     })
-    .bottom(0)
-    .height(y)
-    .width(maxBarSize)
+    [anchor](0)
+    [pvc.BasePanel.orthogonalLength[anchor]](lScale)
+    [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
 
 
 
-    /*
-    this.pvBarPanel = this.pvPanel.add(pv.Panel)
-    .data(pv.range(0,chart.dataEngine.getCategoriesSize()))
-    .left(function(d){
-      return x(this.index) + barPositionOffset;
-    })
-    .bottom(0)
-    .width(maxBarSize)
-    .height(y)
-    */
-   
     // Labels:
 
     if(this.showValues){
@@ -226,15 +263,14 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       .bottom(0)
       .text(pv.identity)
 
+      // Extend barLabel
       this.extend(this.pvBarLabel,"barLabel_");
     }
 
-    // Extend bar
+    // Extend bar and barPanel
+    this.extend(this.pvBar,"barPanel_");
     this.extend(this.pvBar,"bar_");
     
-    // Extend barLabel
-    this.extend(this.pvBarLabel,"barLabel_");
-
 
     // Extend body
     this.extend(this.pvPanel,"chart_");
