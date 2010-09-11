@@ -8,8 +8,6 @@
 pvc.BarChart = pvc.CategoricalAbstract.extend({
 
   barChartPanel : null,
-  linearScale: null,
-  ordinalScale: null,
 
   constructor: function(o){
 
@@ -81,28 +79,22 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
    */
   getOrdinalScale: function(){
 
-    if ( true && this.ordinalScale == null){ // TODO: FIX
+    var scale = new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()));
 
+    var size = this.options.barOrientation=="vertical"?this.basePanel.width:this.basePanel.height;
 
-
-      var scale = new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()));
-
-      var size = this.options.barOrientation=="vertical"?this.basePanel.width:this.basePanel.height;
-
-      if(this.options.barOrientation=="vertical" && this.options.yAxisPosition == "left"){
-        scale.splitBanded( this.options.yAxisSize , size, this.options.panelSizeRatio);
-      }
-      else if(this.options.barOrientation=="vertical" && this.options.yAxisPosition == "right"){
-        scale.splitBanded(0, size - this.options.yAxisSize, this.options.panelSizeRatio);
-      }
-      else{
-        scale.splitBanded(0, size - this.options.xAxisSize, this.options.panelSizeRatio);
-      }
-
-      this.ordinalScale = scale;
+    if(this.options.barOrientation=="vertical" && this.options.yAxisPosition == "left"){
+      scale.splitBanded( this.options.yAxisSize , size, this.options.panelSizeRatio);
+    }
+    else if(this.options.barOrientation=="vertical" && this.options.yAxisPosition == "right"){
+      scale.splitBanded(0, size - this.options.yAxisSize, this.options.panelSizeRatio);
+    }
+    else{
+      scale.splitBanded(0, size - this.options.xAxisSize, this.options.panelSizeRatio);
     }
 
-    return this.ordinalScale;
+    return scale;
+
 
 
   },
@@ -114,20 +106,18 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
   getLinearScale: function(){
 
 
-    if (true && this.linearScale == null){ // TODO: FIX
-      var size = this.options.barOrientation=="vertical"?
-      this.basePanel.height - this.options.xAxisSize:
-      this.basePanel.width;
+    var size = this.options.barOrientation=="vertical"?
+    this.basePanel.height - this.options.xAxisSize:
+    this.basePanel.width;
     
-      var max = this.dataEngine.getSeriesAbsoluteMax();
-      var min = this.dataEngine.getSeriesAbsoluteMin();
-      if(min > 0 && this.options.originIsZero){
-        min = 0
-      }
-      this.linearScale = new pv.Scale.linear(min,max).range(0, size );
+    var max = this.dataEngine.getSeriesAbsoluteMax();
+    var min = this.dataEngine.getSeriesAbsoluteMin();
+    if(min > 0 && this.options.originIsZero){
+      min = 0
     }
+    return new pv.Scale.linear(min,max).range(0, size );
+    
 
-    return this.linearScale;
   },
 
   /*
@@ -214,7 +204,9 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     var anchor = this.barOrientation == "vertical"?"bottom":"left";
 
-    // Extend body
+    // Extend body, resetting axisSizes
+    this.chart.options.yAxisSize = 0;
+    this.chart.options.xAxisSize = 0;
 
     var lScale = this.chart.getLinearScale();
     var oScale = this.chart.getOrdinalScale();
