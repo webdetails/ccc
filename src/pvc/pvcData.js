@@ -320,7 +320,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
     this.resultset.map(function(l){
 
       myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]] + 1] =
-      pv.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
+      pvc.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
     })
 
     // Create an inicial line with the categories
