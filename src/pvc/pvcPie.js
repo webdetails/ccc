@@ -151,7 +151,6 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     var arr = this.data.slice(0,idx);
     arr.push(this.data[idx]/2);
     var angle = a(pv.sum(arr));
-    pvc.log("angle " + idx + ": " + angle/Math.PI*180)
     return angle;
 
   },

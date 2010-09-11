@@ -50,14 +50,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     pvc.log("Prerendering in CategoricalAbstract");
 
     this.xScale = this.getXScale();
-    if(this.options.yAxisPosition == "left"){
-      this.xScale.range( this.options.yAxisSize , this.basePanel.width);
-    }
-    else{
-      this.xScale.range(0, this.basePanel.width - this.options.yAxisSize);
-    }
-
-    this.yScale = this.getYScale().range(0, this.basePanel.height - this.options.xAxisSize);
+    this.yScale = this.getYScale()
 
 
     // Generate axis
@@ -77,11 +70,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     if (this.options.showXScale){
       this.xAxisPanel = new pvc.XAxisPanel(this, {
+        ordinal: this.isXAxisOrdinal(),
         showAllTimeseries: false,
         anchor: this.options.xAxisPosition,
         axisSize: this.options.xAxisSize,
         oppositeAxisSize: this.options.yAxisSize,
-        fullGrid:  this.options.xAxisFullGrid
+        fullGrid:  this.options.xAxisFullGrid,
+        elements: this.getAxisOrdinalElements()
       });
 
       this.xAxisPanel.setScale(this.xScale);
@@ -101,11 +96,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     if (this.options.showYScale){
       this.yAxisPanel = new pvc.YAxisPanel(this, {
+        ordinal: this.isYAxisOrdinal(),
         showAllTimeseries: false,
         anchor: this.options.yAxisPosition,
         axisSize: this.options.yAxisSize,
         oppositeAxisSize: this.options.xAxisSize,
-        fullGrid:  this.options.yAxisFullGrid
+        fullGrid:  this.options.yAxisFullGrid,
+        elements: this.getAxisOrdinalElements()
       });
 
       this.yAxisPanel.setScale(this.yScale);
@@ -115,12 +112,50 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
   },
 
+
+  /*
+   * Indicates if xx is an ordinal scale
+   */
+
+  isXAxisOrdinal: function(){
+    return false;
+  },
+
+
+  /*
+   * Indicates if yy is an ordinal scale
+   */
+
+  isYAxisOrdinal: function(){
+    return false;
+  },
+
+
+  /*
+   *  if one of the axis is ordinal, we need to override this with the list of
+   *  elements to use.
+   *
+   */
+  getAxisOrdinalElements: function(){
+    return null;
+  },
+
   /*
    * Generic xx scale for testing purposes. Needs to be overriden per chart
    */
 
   getXScale: function(){
-    return new pv.Scale.linear(0,10);
+
+    var xScale = new pv.Scale.linear(0,10);
+
+    if(this.options.yAxisPosition == "left"){
+      xScale.range( this.options.yAxisSize , this.basePanel.width);
+    }
+    else{
+      xScale.range(0, this.basePanel.width - this.options.yAxisSize);
+    }
+
+    return xScale;
   },
 
   /*
@@ -128,7 +163,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
    */
 
   getYScale: function(){
-    return new pv.Scale.linear(0,20);
+    return new pv.Scale.linear(0,20).range(0, this.basePanel.height - this.options.xAxisSize);
+
   }
 
 
