@@ -168,7 +168,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     else if(this.drawMarker == true){
       this.pvDot = this.pvPanel.add(pv.Dot)
       .data(data)
-      //.size(this.markerSize)
+      .shapeSize(this.markerSize)
       .shape(this.shape)
       .lineWidth(0)
       .fillStyle(function(){return c(this.index);})

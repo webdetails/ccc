@@ -131,12 +131,12 @@ pvc.Base = Base.extend({
     pvc.log("TODO: Rendering in pvc, canvas: " + this.options.canvas);
     this.basePanel.getPvPanel().render();
 
+
     pvc.transitionRatio = 1;
-    this.basePanel.getPvPanel().render();
 
     // Animate
     this.basePanel.getPvPanel().transition()
-    .duration( 500)
+    .duration( 2000)
     .ease("cubic-in-out")
     .start();
 

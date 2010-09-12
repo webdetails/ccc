@@ -117,8 +117,8 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     .left(function(d){
       return myself.explodeSlice("sin", a, this.index);
     })
-    .outerRadius(r)
-    .angle(a)
+    .outerRadius(function(d){return r * pvc.transitionRatio})
+    .angle(function(d){return a(d)})
     .cursor("pointer")
     .event("click",function(d){
       pvc.log("You clicked on index " + this.index + ", value " + d + ", angle: " + myself.accumulateAngle(a,this.index));

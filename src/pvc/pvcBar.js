@@ -241,7 +241,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       return bScale(this.index) + barPositionOffset;
     })
     [anchor](0)
-    [pvc.BasePanel.orthogonalLength[anchor]](lScale)
+    [pvc.BasePanel.orthogonalLength[anchor]](function(d){return lScale(d) * pvc.transitionRatio})
     [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
 
 
