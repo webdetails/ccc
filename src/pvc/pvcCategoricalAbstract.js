@@ -276,6 +276,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
   renderLinearAxis: function(){
 
     var myself = this;
+    
+    var scale = this.scale;
 
     this.pvRuleLabel = this.pvRule.add(pv.Rule)
     .data(this.scale.ticks(20))
@@ -287,14 +289,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     })
     .anchor(this.anchor)
     .add(pv.Label)
-    .text(this.scale.tickFormat)
+    .text(scale.tickFormat)
     .visible(function(d){
       // mini grids
       if (this.index % 2){
         return false;
       }
       // also, hide the first and last ones
-      if( myself.scale(d) == 0  || myself.scale(d) == myself.scale.range()[1] ){
+      if( scale(d) == 0  || scale(d) == scale.range()[1] ){
         return false;
       }
       return true;
@@ -306,12 +308,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
       pvc.log("TODO: Currently the full grids disappear under the main panel. Fix it")
       this.pvRuleGrid = this.pvRule.add(pv.Rule)
-      .data(this.scale.ticks(20))
+      .data(scale.ticks(20))
       .strokeStyle("#f0f0f0")
       [pvc.BasePanel.paralelLength[this.anchor]](null)
       [pvc.BasePanel.oppositeAnchor[this.anchor]](- this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] +
         this[pvc.BasePanel.orthogonalLength[this.anchor]])
-      [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale)
+      [pvc.BasePanel.relativeAnchor[this.anchor]](scale)
       [pvc.BasePanel.orthogonalLength[this.anchor]](this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] -
         this[pvc.BasePanel.orthogonalLength[this.anchor]])
       .visible(function(d){
@@ -320,7 +322,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
           return false;
         }
         // also, hide the first and last ones
-        if( myself.scale(d) == 0  || myself.scale(d) == myself.scale.range()[1] ){
+        if( scale(d) == 0  || scale(d) == scale.range()[1] ){
           return false;
         }
         return true;

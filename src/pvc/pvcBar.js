@@ -210,7 +210,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     var lScale = this.chart.getLinearScale();
     var oScale = this.chart.getOrdinalScale();
-
+    
     var bScale = new pv.Scale.ordinal(pv.range(0,this.chart.dataEngine.getSeriesSize()))
     .splitBanded(0, oScale.range().band, this.barSizeRatio);
 
@@ -241,8 +241,16 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       return bScale(this.index) + barPositionOffset;
     })
     [anchor](0)
-    [pvc.BasePanel.orthogonalLength[anchor]](function(d){return lScale(d) * pvc.transitionRatio})
+    [pvc.BasePanel.orthogonalLength[anchor]](function(d){
+      return myself.chart.animate(0, lScale(d))
+    })
     [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+    .title(function(d){return  d.toFixed(1)})
+    .event("mouseover", pv.Behavior.tipsy({
+      gravity: "s",
+      fade: true
+    }));
+
 
 
 

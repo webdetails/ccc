@@ -7,6 +7,7 @@ pvc.Base = Base.extend({
 
   options: {},
   isPreRendered: false,
+  isAnimating: false,
 
   // data
   dataEngine: null,
@@ -31,6 +32,7 @@ pvc.Base = Base.extend({
       originalHeight: 300,
       crosstabMode: true,
       seriesInRows: false,
+      animate: true,
 
       title: null,
       titlePosition: "top", // options: bottom || left || right
@@ -132,13 +134,14 @@ pvc.Base = Base.extend({
     this.basePanel.getPvPanel().render();
 
 
-    pvc.transitionRatio = 1;
-
-    // Animate
-    this.basePanel.getPvPanel().transition()
-    .duration( 2000)
-    .ease("cubic-in-out")
-    .start();
+    
+    if(this.options.animate == true ){
+      this.isAnimating = true;
+      this.basePanel.getPvPanel().transition()
+      .duration( 2000)
+      .ease("cubic-in-out")
+      .start();
+    }
 
 
 
@@ -182,6 +185,21 @@ pvc.Base = Base.extend({
     this.metadata = metadata;
     if (metadata.length == 0){
       pvc.log("Warning: Metadata is empty")
+    }
+
+  },
+
+  /*
+   * Animation
+   */
+
+  animate: function(start, end){
+
+    if (this.options.animate == false || this.isAnimating == true){
+      return end;
+    }
+    else{
+      return start
     }
 
   }

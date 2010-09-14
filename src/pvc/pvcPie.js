@@ -117,12 +117,24 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     .left(function(d){
       return myself.explodeSlice("sin", a, this.index);
     })
-    .outerRadius(function(d){return r * pvc.transitionRatio})
-    .angle(function(d){return a(d)})
+    .outerRadius(function(d){
+      return myself.chart.animate(0 , r)
+      })
+    .angle(function(d){
+      return a(d)
+      })
     .cursor("pointer")
     .event("click",function(d){
       pvc.log("You clicked on index " + this.index + ", value " + d + ", angle: " + myself.accumulateAngle(a,this.index));
-    });
+    })
+    .title(function(d){
+      return  d.toFixed(1)
+      })
+    .event("mouseover", pv.Behavior.tipsy({
+      gravity: "s",
+      fade: true
+    }));
+    
 
     // Extend pie
     this.extend(this.pvPie,"pie_");
