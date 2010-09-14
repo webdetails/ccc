@@ -306,7 +306,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     // Now do the full grids
     if(this.fullGrid){
 
-      pvc.log("TODO: Currently the full grids disappear under the main panel. Fix it")
       this.pvRuleGrid = this.pvRule.add(pv.Rule)
       .data(scale.ticks(20))
       .strokeStyle("#f0f0f0")

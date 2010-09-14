@@ -41,19 +41,20 @@ pv.Behavior.tipsy = function(opts) {
        * note that CSS positioning does not support subpixels, and the current
        * rounding implementation can be off by one pixel.
        */
+
+    tip.style.left = Math.floor(this.left() * t.k + t.x) + "px";
+    tip.style.top = Math.floor(this.top() * t.k + t.y) + "px";
+
     if (this.properties.width) {
       tip.style.width = Math.ceil(this.width() * t.k) + 1 + "px";
       tip.style.height = Math.ceil(this.height() * t.k) + 1 + "px";
-      tip.style.left = Math.floor(this.left() * t.k + t.x) + "px";
-      tip.style.top = Math.floor(this.top() * t.k + t.y) + "px";
+
 
     } else if (this.properties.shapeRadius) {
       var r = this.shapeRadius();
       t.x -= r;
       t.y -= r;
       tip.style.height = tip.style.width = Math.ceil(2 * r * t.k) + "px";
-      tip.style.left = Math.floor(this.left() * t.k + t.x) + "px";
-      tip.style.top = Math.floor(this.top() * t.k + t.y) + "px";
 
     } else if( this.properties.outerRadius){
       // Wedge

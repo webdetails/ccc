@@ -100,6 +100,17 @@ pvc.DataEngine = Base.extend({
 
   },
 
+   /*
+   * Returns the transposed values for the dataset
+   */
+
+  getTransposedValues: function(){
+
+
+    return pv.transpose(this.getValues().slice());
+
+  },
+
   /*
    * Returns the values for a given series idx
    *
@@ -134,6 +145,20 @@ pvc.DataEngine = Base.extend({
    */
   getCategoriesSize: function(){
     return this.getCategories().length;
+  },
+
+  /**
+   * For every category in the data, get the maximum of the sum of the series
+   * values.
+   *
+   */
+
+  getCategoriesMaxSum: function(){
+
+    var myself=this;
+    return pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
+      return pv.sum(myself.getValuesForCategoryIdx(idx))
+    }));
   },
 
   /**
@@ -226,7 +251,6 @@ pvc.DataTranslator = Base.extend({
       return a.slice(1);
     });
       
-
   },
 
   getColumns: function(){

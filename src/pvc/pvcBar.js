@@ -109,9 +109,18 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
     var size = this.options.barOrientation=="vertical"?
     this.basePanel.height - this.options.xAxisSize:
     this.basePanel.width;
-    
-    var max = this.dataEngine.getSeriesAbsoluteMax();
-    var min = this.dataEngine.getSeriesAbsoluteMin();
+
+    var max, min;
+
+    if(this.options.stackedBarChart){
+      max = this.dataEngine.getCategoriesMaxSum();
+      min = 0;
+    }
+    else{
+      max = this.dataEngine.getSeriesAbsoluteMax();
+      min = this.dataEngine.getSeriesAbsoluteMin();
+
+    }
     if(min > 0 && this.options.originIsZero){
       min = 0
     }
@@ -211,50 +220,97 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     var lScale = this.chart.getLinearScale();
     var oScale = this.chart.getOrdinalScale();
     
-    var bScale = new pv.Scale.ordinal(pv.range(0,this.chart.dataEngine.getSeriesSize()))
-    .splitBanded(0, oScale.range().band, this.barSizeRatio);
+    
+    var maxBarSize;
 
 
-    // We need to take into account the maxValue if our band is higher than that
-    var maxBarSize = bScale.range().band;
-    var barPositionOffset = 0;
-    if (maxBarSize > this.maxBarSize){
-      barPositionOffset = (maxBarSize - this.maxBarSize)/2 ;
-      maxBarSize = this.maxBarSize;
-    }
+    // Stacked?
+    if (this.stacked){
 
-    this.pvBarPanel = this.pvPanel.add(pv.Panel)
-    .data(pv.range(0,this.chart.dataEngine.getCategoriesSize()))
-    [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-      return oScale(this.index) + barPositionOffset;
-    })
-    [anchor](0)
-    [pvc.BasePanel.paralelLength[anchor]](oScale.range().band)
-    [pvc.BasePanel.orthogonalLength[anchor]](this[pvc.BasePanel.orthogonalLength[anchor]])
 
-    this.pvBar = this.pvBarPanel.add(pv.Bar)
-    .data(function(d){
-      return myself.chart.dataEngine.getValuesForCategoryIdx(d)
+      maxBarSize = oScale.range().band;
+      var bScale = new pv.Scale.ordinal([0])
+      .splitBanded(0, oScale.range().band, this.barSizeRatio);
+
+
+      var barPositionOffset = 0;
+      if (maxBarSize > this.maxBarSize){
+        barPositionOffset = (maxBarSize - this.maxBarSize)/2 ;
+        maxBarSize = this.maxBarSize;
+      }
+      
+     
+      this.pvBarPanel = this.pvPanel.add(pv.Layout.Stack)
+      /*
+      .orient(anchor)
+      .order("inside-out")
+      .offset("wiggle")*/
+      .layers(this.chart.dataEngine.getTransposedValues())
+      [this.barOrientation == "vertical"?"y":"x"](function(d){
+        return myself.chart.animate(0, lScale(d))
       })
-    .fillStyle(pv.Colors.category20().by(pv.index))
-    [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-      return bScale(this.index) + barPositionOffset;
+      [this.barOrientation == "vertical"?"x":"y"](oScale.by(pv.index))
+
+      this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
+      [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+
+    /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
+        return this.parent.left() + barPositionOffset
+      })*/;
+
+    }
+    else{
+
+      var bScale = new pv.Scale.ordinal(pv.range(0,this.chart.dataEngine.getSeriesSize()))
+      .splitBanded(0, oScale.range().band, this.barSizeRatio);
+
+      // We need to take into account the maxValue if our band is higher than that
+      maxBarSize = bScale.range().band;
+      var barPositionOffset = 0;
+      if (maxBarSize > this.maxBarSize){
+        barPositionOffset = (maxBarSize - this.maxBarSize)/2 ;
+        maxBarSize = this.maxBarSize;
+      }
+
+      this.pvBarPanel = this.pvPanel.add(pv.Panel)
+      .data(pv.range(0,this.chart.dataEngine.getCategoriesSize()))
+      [pvc.BasePanel.relativeAnchor[anchor]](function(d){
+        return oScale(this.index) + barPositionOffset;
+      })
+      [anchor](0)
+      [pvc.BasePanel.paralelLength[anchor]](oScale.range().band)
+      [pvc.BasePanel.orthogonalLength[anchor]](this[pvc.BasePanel.orthogonalLength[anchor]])
+
+
+      this.pvBar = this.pvBarPanel.add(pv.Bar)
+      .data(function(d){
+        return myself.chart.dataEngine.getValuesForCategoryIdx(d)
+        })
+      .fillStyle(pv.Colors.category20().by(pv.index))
+      [pvc.BasePanel.relativeAnchor[anchor]](function(d){
+        return bScale(this.index) + barPositionOffset;
+      })
+      [anchor](0)
+      [pvc.BasePanel.orthogonalLength[anchor]](function(d){
+        return myself.chart.animate(0, lScale(d))
+      })
+      [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+
+    }
+    // Labels:
+
+    this.pvBar
+    .title(function(d){
+      return  d.toFixed(1)
     })
-    [anchor](0)
-    [pvc.BasePanel.orthogonalLength[anchor]](function(d){
-      return myself.chart.animate(0, lScale(d))
-    })
-    [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
-    .title(function(d){return  d.toFixed(1)})
     .event("mouseover", pv.Behavior.tipsy({
       gravity: "s",
       fade: true
-    }));
-
-
-
-
-    // Labels:
+    }))
+    .cursor("pointer")
+    .event("click",function(d){
+      pvc.log("You clicked on index " + this.index + ", value " + d);
+    });
 
     if(this.showValues){
       this.pvBarLabel = this.pvBar
@@ -266,6 +322,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       // Extend barLabel
       this.extend(this.pvBarLabel,"barLabel_");
     }
+
 
     // Extend bar and barPanel
     this.extend(this.pvBar,"barPanel_");

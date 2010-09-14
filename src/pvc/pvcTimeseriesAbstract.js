@@ -25,7 +25,6 @@ pvc.TimeseriesAbstract = pvc.Base.extend({
 
   preRender: function(){
 
-    // TODO: Build it
     this.base();
 
     pvc.log("Prerendering in TimeseriesAbstract");

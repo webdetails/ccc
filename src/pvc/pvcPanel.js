@@ -130,10 +130,7 @@ pvc.Base = Base.extend({
       this.preRender();
     }
 
-    pvc.log("TODO: Rendering in pvc, canvas: " + this.options.canvas);
     this.basePanel.getPvPanel().render();
-
-
     
     if(this.options.animate == true ){
       this.isAnimating = true;
