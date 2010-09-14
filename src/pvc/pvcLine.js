@@ -41,7 +41,9 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
       stacked: this.options.stackedLineChart,
       showValues: this.options.showValues,
       showDots: this.options.showDots,
-      lineOrientation: this.options.lineOrientation
+      lineOrientation: this.options.lineOrientation,
+      timeSeries: this.options.timeSeries,
+      timeSeriesFormat: this.options.timeSeriesFormat
     });
 
     this.lineChartPanel.appendTo(this.basePanel); // Add it
@@ -55,7 +57,7 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
   getXScale: function(){
 
     return this.options.lineOrientation == "vertical"?
-    this.getOrdinalScale():
+    (this.options.timeSeries?this.getTimeseriesScale():this.getOrdinalScale()):
     this.getLinearScale();
 
   },
@@ -68,7 +70,7 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
 
     return this.options.lineOrientation == "vertical"?
     this.getLinearScale():
-    this.getOrdinalScale();
+    (this.options.timeSeries?this.getTimeseriesScale():this.getOrdinalScale());
   },
 
   /*
@@ -128,11 +130,45 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
   },
 
   /*
+   * Scale for the timeseries axis. xx if lineOrientation is vertical, yy otherwise
+   *
+   */
+  getTimeseriesScale: function(){
+
+
+
+
+
+    var size = this.options.lineOrientation=="vertical"?
+    this.basePanel.width:
+    this.basePanel.height - this.options.xAxisSize;
+
+    var categories =  this.dataEngine.getCategories();
+    var parser = pv.Format.date(this.options.timeSeriesFormat);
+
+    var scale = new pv.Scale.linear(parser.parse(categories[0]),parser.parse(categories[categories.length -1]));
+
+    if(this.options.lineOrientation=="vertical" && this.options.yAxisPosition == "left"){
+      scale.range( this.options.yAxisSize , size);
+    }
+    else if(this.options.lineOrientation=="vertical" && this.options.yAxisPosition == "right"){
+      scale.range(0, size - this.options.yAxisSize);
+    }
+    else{
+      scale.range(0, size - this.options.xAxisSize);
+    }
+
+    return scale;
+
+
+  },
+
+  /*
    * Indicates if xx is an ordinal scale
    */
 
   isXAxisOrdinal: function(){
-    return this.options.lineOrientation == "vertical";
+    return this.options.lineOrientation == "vertical" && !this.options.timeSeries;
   },
 
 
@@ -141,7 +177,7 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
    */
 
   isYAxisOrdinal: function(){
-    return this.options.lineOrientation == "horizontal";
+    return this.options.lineOrientation == "horizontal" && !this.options.timeSeries;
   },
 
   /*
@@ -224,7 +260,8 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
 
     var lScale = this.chart.getLinearScale();
     var oScale = this.chart.getOrdinalScale();
-    
+    var tScale = this.chart.getTimeseriesScale();
+    var parser = pv.Format.date(this.timeSeriesFormat);
     
     var maxLineSize;
 
@@ -262,7 +299,13 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
       })
       //.strokeStyle(pv.Colors.category20().by(pv.index))
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-        return oScale(this.index) + oScale.range().band/2;
+        if(myself.timeSeries){
+          var date = myself.chart.dataEngine.getCategories()[this.index]
+          return tScale(parser.parse(date));
+        }
+        else{
+          return oScale(this.index) + oScale.range().band/2;
+        }
       })
       [anchor](function(d){
         return myself.chart.animate(0,lScale(d));
