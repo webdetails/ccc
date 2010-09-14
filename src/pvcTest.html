@@ -134,8 +134,11 @@ and open the template in the editor.
       });
 
       line.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      line.preRender();
+      var o = line.dataEngine.getObjectsForSeriesIdx(0);
       line.render();
 
+      
 
 
       var bar = new pvc.BarChart({

@@ -258,14 +258,14 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvLinePanel.add(pv.Line)
       .data(function(d){
-        return pv.blend(myself.chart.dataEngine.getValuesForSeriesIdx(d))
+        return myself.chart.dataEngine.getObjectsForSeriesIdx(d)
       })
       //.strokeStyle(pv.Colors.category20().by(pv.index))
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-        return oScale(this.index) + oScale.range().band/2;
+        return oScale(d.category) + oScale.range().band/2;
       })
       [anchor](function(d){
-        return myself.chart.animate(0,lScale(d));
+        return myself.chart.animate(0,lScale(d.value));
       })
    
 
@@ -279,7 +279,7 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
 
     this.pvLine
     .text(function(d){
-      return d.toFixed(1)
+      return d.value.toFixed(1)
     })
     .event("point", pv.Behavior.tipsy({
       gravity: "s",
@@ -291,7 +291,7 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
     .shapeSize(this.showDots?20:0)
     .cursor("pointer")
     .event("click",function(d){
-      pvc.log("You clicked on index " + this.index + ", value " + d );
+      pvc.log("You clicked on index " + this.index + ", value " + d.value );
     });
 
     if(this.showValues){

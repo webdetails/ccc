@@ -123,6 +123,23 @@ pvc.DataEngine = Base.extend({
   },
 
   /*
+   * Returns the object for a given series idx in the form {category: catName, value: val}
+   *
+   */
+
+  getObjectsForSeriesIdx: function(idx){
+
+    var myself = this;
+    var ar = [];
+    this.getValues().map(function(a,i){
+      if(typeof a[idx] != "undefined"){
+          ar.push({category: myself.getCategories()[i], value: a[idx]}) ;
+      }
+    })
+    return ar;
+  },
+
+  /*
    * Returns the values for a given category idx
    *
    */
@@ -131,6 +148,23 @@ pvc.DataEngine = Base.extend({
     return this.getValues()[idx];
   },
 
+
+  /*
+   * Returns the object for a given category idx in the form {serie: value}
+   *
+   */
+
+  getObjectsForCategoryIdx: function(idx){
+
+    var myself = this;
+    var ar=[];
+    this.getValues()[idx].map(function(a,i){
+      if(typeof a != "undefined"){
+          ar.push({serie: myself.getSeries()[i], value: a}) ;
+      }
+    })
+    return ar;
+  },
 
   /*
    * Returns how many series we have
