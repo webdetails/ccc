@@ -143,8 +143,11 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
     this.basePanel.width:
     this.basePanel.height - this.options.xAxisSize;
 
-    var categories =  this.dataEngine.getCategories();
     var parser = pv.Format.date(this.options.timeSeriesFormat);
+    var categories =  this.dataEngine.getCategories().sort(function(a,b){
+      return parser.parse(a)>parser.parse(b)
+    });
+
 
     var scale = new pv.Scale.linear(parser.parse(categories[0]),parser.parse(categories[categories.length -1]));
 
@@ -269,6 +272,7 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
     // Stacked?
     if (this.stacked){
 
+      // TODO
 
       maxLineSize = oScale.range().band;
       var bScale = new pv.Scale.ordinal([0])
@@ -284,10 +288,9 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvLinePanel.layer.add(pv.Line)
       [pvc.BasePanel.paralelLength[anchor]](maxLineSize)
-
+      
     }
     else{
-
 
       this.pvLinePanel = this.pvPanel.add(pv.Panel)
       .data(pv.range(0,this.chart.dataEngine.getSeriesSize()))
@@ -295,20 +298,23 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvLinePanel.add(pv.Line)
       .data(function(d){
-        return pv.blend(myself.chart.dataEngine.getValuesForSeriesIdx(d))
+        return myself.chart.dataEngine.getObjectsForSeriesIdx(d, function(a,b){
+          return parser.parse(a.category) < parser.parse(b.category);
+        })
       })
       //.strokeStyle(pv.Colors.category20().by(pv.index))
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
+
         if(myself.timeSeries){
-          var date = myself.chart.dataEngine.getCategories()[this.index]
-          return tScale(parser.parse(date));
+          return tScale(parser.parse(d.category));
         }
         else{
-          return oScale(this.index) + oScale.range().band/2;
+          return oScale(d.category) + oScale.range().band/2;
         }
+
       })
       [anchor](function(d){
-        return myself.chart.animate(0,lScale(d));
+        return myself.chart.animate(0,lScale(d.value));
       })
    
 
@@ -322,7 +328,7 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
 
     this.pvLine
     .text(function(d){
-      return d.toFixed(1)
+      return d.value.toFixed(1)
     })
     .event("point", pv.Behavior.tipsy({
       gravity: "s",
@@ -334,7 +340,7 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
     .shapeSize(this.showDots?20:0)
     .cursor("pointer")
     .event("click",function(d){
-      pvc.log("You clicked on index " + this.index + ", value " + d );
+      pvc.log("You clicked on index " + this.index + ", value " + d.value );
     });
 
     if(this.showValues){

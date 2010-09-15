@@ -247,11 +247,12 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       .offset("wiggle")*/
       .layers(this.chart.dataEngine.getTransposedValues())
       [this.barOrientation == "vertical"?"y":"x"](function(d){
-        return myself.chart.animate(0, lScale(d))
+        return myself.chart.animate(0, lScale(d||0))
       })
       [this.barOrientation == "vertical"?"x":"y"](oScale.by(pv.index))
 
       this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
+      .data(function(d){return d||0})
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
 
     /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
@@ -292,7 +293,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       })
       [anchor](0)
       [pvc.BasePanel.orthogonalLength[anchor]](function(d){
-        return myself.chart.animate(0, lScale(d))
+        return myself.chart.animate(0, lScale(d||0))
       })
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
 
@@ -301,7 +302,8 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     this.pvBar
     .title(function(d){
-      return  d.toFixed(1)
+      pvc.log("pvBar title: " + d)
+      return  typeof d == "undefined"?"":d.toFixed(1);
     })
     .event("mouseover", pv.Behavior.tipsy({
       gravity: "s",

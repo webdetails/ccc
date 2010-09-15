@@ -123,6 +123,28 @@ pvc.DataEngine = Base.extend({
   },
 
   /*
+   * Returns the object for a given series idx in the form {category: catName, value: val}
+   *
+   */
+
+  getObjectsForSeriesIdx: function(idx, sortF){
+
+    var myself = this;
+    var ar = [];
+    this.getValues().map(function(a,i){
+      if(typeof a[idx] != "undefined"){
+          ar.push({category: myself.getCategories()[i], value: a[idx]}) ;
+      }
+    })
+
+    if (typeof sortF == "function"){
+      return ar.sort(sortF)
+    }
+    else
+      return ar;
+  },
+
+  /*
    * Returns the values for a given category idx
    *
    */
@@ -131,6 +153,23 @@ pvc.DataEngine = Base.extend({
     return this.getValues()[idx];
   },
 
+
+  /*
+   * Returns the object for a given category idx in the form {serie: value}
+   *
+   */
+
+  getObjectsForCategoryIdx: function(idx){
+
+    var myself = this;
+    var ar=[];
+    this.getValues()[idx].map(function(a,i){
+      if(typeof a != "undefined"){
+          ar.push({serie: myself.getSeries()[i], value: a}) ;
+      }
+    })
+    return ar;
+  },
 
   /*
    * Returns how many series we have
@@ -183,7 +222,7 @@ pvc.DataEngine = Base.extend({
 
     var myself=this;
     return pv.max(pv.range(0,this.getSeriesSize()).map(function(idx){
-      return pv.max(myself.getValuesForSeriesIdx(idx))
+      return pv.max(myself.getValuesForSeriesIdx(idx).filter(pvc.nonEmpty))
     }));
 
   },
@@ -195,7 +234,7 @@ pvc.DataEngine = Base.extend({
 
     var myself=this;
     return pv.min(pv.range(0,this.getSeriesSize()).map(function(idx){
-      return pv.min(myself.getValuesForSeriesIdx(idx))
+      return pv.min(myself.getValuesForSeriesIdx(idx).filter(pvc.nonEmpty))
     }));
 
   },

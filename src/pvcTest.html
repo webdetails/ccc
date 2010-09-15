@@ -134,8 +134,11 @@ and open the template in the editor.
       });
 
       line.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      line.preRender();
+      var o = line.dataEngine.getObjectsForSeriesIdx(0);
       line.render();
 
+      
 
 
       var bar = new pvc.BarChart({
@@ -151,8 +154,8 @@ and open the template in the editor.
         legendPosition: "bottom",
         legendSize: null,
 
-        barOrientation: 'vertical',
-        stackedBarChart: true,
+        barOrientation: 'horizontal',
+        stackedBarChart: false,
         maxBarSize: 100,
 
         panelSizeRatio: 0.5,
