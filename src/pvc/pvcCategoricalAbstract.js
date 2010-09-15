@@ -280,7 +280,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     var scale = this.scale;
 
     this.pvRuleLabel = this.pvRule.add(pv.Rule)
-    .data(this.scale.ticks(20))
+    .data(this.scale.ticks())
     [pvc.BasePanel.paralelLength[this.anchor]](null)
     [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
     [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale)
@@ -307,7 +307,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     if(this.fullGrid){
 
       this.pvRuleGrid = this.pvRule.add(pv.Rule)
-      .data(scale.ticks(20))
+      .data(scale.ticks())
       .strokeStyle("#f0f0f0")
       [pvc.BasePanel.paralelLength[this.anchor]](null)
       [pvc.BasePanel.oppositeAnchor[this.anchor]](- this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] +

@@ -2,12 +2,12 @@
 
 
 /**
- * LineChart is the main class for generating... line charts (another surprise!).
+ * ScatterAbstract is the class that will be extended by dot, line, stackedline and area charts.
  */
 
-pvc.LineChart = pvc.CategoricalAbstract.extend({
+pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
-  lineChartPanel : null,
+  scatterChartPanel : null,
 
   constructor: function(o){
 
@@ -15,10 +15,14 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
 
     var _defaults = {
       showDots: false,
+      showLines: false,
+      showAreas: false,
       showValues: false,
-      stackedLineChart: false,
+      axisOffset: 0.05,
+      valuesAnchor: "right",
+      stacked: false,
       originIsZero: true,
-      lineOrientation: "vertical",
+      orientation: "vertical",
       timeSeries: false,
       timeSeriesFormat: "%Y-%m-%d"
     };
@@ -34,19 +38,22 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
 
     this.base();
 
-    pvc.log("Prerendering in lineChart");
+    pvc.log("Prerendering in ScatterAbstract");
 
 
-    this.lineChartPanel = new pvc.LineChartPanel(this, {
-      stacked: this.options.stackedLineChart,
+    this.scatterChartPanel = new pvc.ScatterChartPanel(this, {
+      stacked: this.options.stacked,
       showValues: this.options.showValues,
+      valuesAnchor: this.options.valuesAnchor,
+      showLines: this.options.showLines,
       showDots: this.options.showDots,
-      lineOrientation: this.options.lineOrientation,
+      showAreas: this.options.showAreas,
+      orientation: this.options.orientation,
       timeSeries: this.options.timeSeries,
       timeSeriesFormat: this.options.timeSeriesFormat
     });
 
-    this.lineChartPanel.appendTo(this.basePanel); // Add it
+    this.scatterChartPanel.appendTo(this.basePanel); // Add it
 
   },
 
@@ -56,7 +63,7 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
 
   getXScale: function(){
 
-    return this.options.lineOrientation == "vertical"?
+    return this.options.orientation == "vertical"?
     (this.options.timeSeries?this.getTimeseriesScale():this.getOrdinalScale()):
     this.getLinearScale();
 
@@ -68,25 +75,25 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
 
   getYScale: function(){
 
-    return this.options.lineOrientation == "vertical"?
+    return this.options.orientation == "vertical"?
     this.getLinearScale():
     (this.options.timeSeries?this.getTimeseriesScale():this.getOrdinalScale());
   },
 
   /*
-   * Scale for the ordinal axis. xx if lineOrientation is vertical, yy otherwise
+   * Scale for the ordinal axis. xx if orientation is vertical, yy otherwise
    *
    */
   getOrdinalScale: function(){
 
     var scale = new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()));
 
-    var size = this.options.lineOrientation=="vertical"?this.basePanel.width:this.basePanel.height;
+    var size = this.options.orientation=="vertical"?this.basePanel.width:this.basePanel.height;
 
-    if(this.options.lineOrientation=="vertical" && this.options.yAxisPosition == "left"){
+    if(this.options.orientation=="vertical" && this.options.yAxisPosition == "left"){
       scale.splitBanded( this.options.yAxisSize , size, 1);
     }
-    else if(this.options.lineOrientation=="vertical" && this.options.yAxisPosition == "right"){
+    else if(this.options.orientation=="vertical" && this.options.yAxisPosition == "right"){
       scale.splitBanded(0, size - this.options.yAxisSize, 1);
     }
     else{
@@ -100,19 +107,18 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
   },
 
   /*
-   * Scale for the linear axis. yy if lineOrientation is vertical, xx otherwise
+   * Scale for the linear axis. yy if orientation is vertical, xx otherwise
    *
    */
   getLinearScale: function(){
 
-
-    var size = this.options.lineOrientation=="vertical"?
+    var size = this.options.orientation=="vertical"?
     this.basePanel.height - this.options.xAxisSize:
     this.basePanel.width;
 
     var max, min;
 
-    if(this.options.stackedLineChart){
+    if(this.options.stacked){
       max = this.dataEngine.getCategoriesMaxSum();
       min = 0;
     }
@@ -124,37 +130,43 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
     if(min > 0 && this.options.originIsZero){
       min = 0
     }
-    return new pv.Scale.linear(min,max).range(0, size );
+
+    // Adding a small offset to the scale:
+    var offset = (max - min) * this.options.axisOffset;
+
+    return new pv.Scale.linear(min - offset,max + offset).range(0, size );
     
 
   },
 
   /*
-   * Scale for the timeseries axis. xx if lineOrientation is vertical, yy otherwise
+   * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise
    *
    */
   getTimeseriesScale: function(){
 
 
-
-
-
-    var size = this.options.lineOrientation=="vertical"?
+    var size = this.options.orientation=="vertical"?
     this.basePanel.width:
     this.basePanel.height - this.options.xAxisSize;
 
     var parser = pv.Format.date(this.options.timeSeriesFormat);
     var categories =  this.dataEngine.getCategories().sort(function(a,b){
-      return parser.parse(a)>parser.parse(b)
+      return parser.parse(a) - parser.parse(b)
     });
 
 
-    var scale = new pv.Scale.linear(parser.parse(categories[0]),parser.parse(categories[categories.length -1]));
+    // Adding a small offset to the scale:
+    var max = parser.parse(categories[categories.length -1]);
+    var min = parser.parse(categories[0]);
+    var offset = (max.getTime() - min.getTime()) * this.options.axisOffset;
 
-    if(this.options.lineOrientation=="vertical" && this.options.yAxisPosition == "left"){
+    var scale = new pv.Scale.linear(new Date(min.getTime() - offset),new Date(max.getTime() + offset));
+
+    if(this.options.orientation=="vertical" && this.options.yAxisPosition == "left"){
       scale.range( this.options.yAxisSize , size);
     }
-    else if(this.options.lineOrientation=="vertical" && this.options.yAxisPosition == "right"){
+    else if(this.options.orientation=="vertical" && this.options.yAxisPosition == "right"){
       scale.range(0, size - this.options.yAxisSize);
     }
     else{
@@ -171,7 +183,7 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
    */
 
   isXAxisOrdinal: function(){
-    return this.options.lineOrientation == "vertical" && !this.options.timeSeries;
+    return this.options.orientation == "vertical" && !this.options.timeSeries;
   },
 
 
@@ -180,7 +192,7 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
    */
 
   isYAxisOrdinal: function(){
-    return this.options.lineOrientation == "horizontal" && !this.options.timeSeries;
+    return this.options.orientation == "horizontal" && !this.options.timeSeries;
   },
 
   /*
@@ -196,13 +208,121 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
 }
 );
 
+/**
+ * Dot Chart
+ *
+ */
+
+pvc.DotChart = pvc.ScatterAbstract.extend({
+
+  constructor: function(o){
+
+    this.base();
+
+    var _defaults = {
+      showDots: true,
+      showLines: false,
+      showAreas: false,
+      showValues: false,
+      stacked: false
+    };
+
+    // Apply options
+    $.extend(this.options,_defaults, o);
+
+  }
+});
+
+
+/**
+ * Line Chart
+ *
+ */
+
+pvc.LineChart = pvc.ScatterAbstract.extend({
+
+  constructor: function(o){
+
+    this.base();
+
+    var _defaults = {
+      showDots: false, // ask
+      showLines: true,
+      showAreas: false,
+      showValues: false,
+      stacked: false
+    };
+
+    // Apply options
+    $.extend(this.options,_defaults, o);
+
+
+  }
+});
+
+
+
+/**
+ * Stacked Line Chart
+ *
+ */
+
+pvc.StackedLineChart = pvc.ScatterAbstract.extend({
+
+  constructor: function(o){
+
+    this.base();
+
+    var _defaults = {
+      showDots: false, // ask
+      showLines: true,
+      showAreas: false,
+      showValues: false,
+      stacked: true
+    };
+
+    // Apply options
+    $.extend(this.options,_defaults, o);
+
+
+  }
+});
+
+
+/**
+ * Stacked Area Chart
+ *
+ */
+
+pvc.StackedAreaChart = pvc.ScatterAbstract.extend({
+
+  constructor: function(o){
+
+    this.base();
+
+    var _defaults = {
+      showDots: false, // ask
+      showLines: false,
+      showAreas: true,
+      showValues: false,
+      stacked: true
+    };
+
+    // Apply options
+    $.extend(this.options,_defaults, o);
+
+
+  }
+});
+
+
 
 /*
- * Line chart panel. Generates a line chart. Specific options are:
- * <i>lineOrientation</i> - horizontal or vertical. Default: vertical
+ * Scatter chart panel. Base class for generating the other xy charts. Specific options are:
+ * <i>orientation</i> - horizontal or vertical. Default: vertical
  * <i>showDots</i> - Show or hide dots. Default: true
  * <i>showValues</i> - Show or hide line value. Default: false
- * <i>stackedLineChart</i> -  Stacked? Default: false
+ * <i>stacked</i> -  Stacked? Default: false
  * <i>panelSizeRatio</i> - Ratio of the band occupied by the pane;. Default: 0.5 (50%)
  * <i>lineSizeRatio</i> - In multiple series, percentage of inner
  * band occupied by lines. Default: 0.5 (50%)
@@ -218,12 +338,13 @@ pvc.LineChart = pvc.CategoricalAbstract.extend({
  */
 
 
-pvc.LineChartPanel = pvc.BasePanel.extend({
+pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
   _parent: null,
   pvLine: null,
-  pvLineDot: null,
-  pvLineLabel: null,
+  pvArea: null,
+  pvDot: null,
+  pvLabel: null,
   pvCategoryPanel: null,
   data: null,
 
@@ -231,12 +352,12 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
   timeSeriesFormat: "%Y-%m-%d",
 
   stacked: false,
-  panelSizeRatio: 1,
-  lineSizeRatio: 0.5,
-  maxLineSize: 200,
-  showValues: true,
+  showAreas: false,
+  showLines: true,
   showDots: true,
-  lineOrientation: "vertical",
+  showValues: true,
+  valuesAnchor: "right",
+  orientation: "vertical",
 
 
   constructor: function(chart, options){
@@ -255,7 +376,7 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
     .width(this.width)
     .height(this.height)
 
-    var anchor = this.lineOrientation == "vertical"?"bottom":"left";
+    var anchor = this.orientation == "vertical"?"bottom":"left";
 
     // Extend body, resetting axisSizes
     this.chart.options.yAxisSize = 0;
@@ -272,36 +393,44 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
     // Stacked?
     if (this.stacked){
 
-      // TODO
-
-      maxLineSize = oScale.range().band;
-      var bScale = new pv.Scale.ordinal([0])
-      .splitBanded(0, oScale.range().band, this.lineSizeRatio);
-
-
-      this.pvLinePanel = this.pvPanel.add(pv.Layout.Stack)
+      
+      this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
       .layers(this.chart.dataEngine.getTransposedValues())
-      [this.lineOrientation == "vertical"?"x":"y"](function(){
-        return oScale(this.index)
+      [this.orientation == "vertical"?"x":"y"](function(){
+        if(myself.timeSeries){
+          return tScale(parser.parse(myself.chart.dataEngine.getCategories()[this.index]));
+        }
+        else{
+          return oScale(parser.parse(myself.chart.dataEngine.getCategories()[this.index])) + oScale.range().band/2;
+        }
       })
-      [this.lineOrientation == "vertical"?"y":"x"](lScale)
+      [this.orientation == "vertical"?"y":"x"](function(d){
+        return myself.chart.animate(0,lScale(d));
+      })
 
-      this.pvLine = this.pvLinePanel.layer.add(pv.Line)
-      [pvc.BasePanel.paralelLength[anchor]](maxLineSize)
+      this.pvArea = this.pvScatterPanel.layer.add(pv.Area)
+      .fillStyle(this.showAreas?pv.Colors.category10().by(pv.parent):null);
+
+      this.pvLine = this.pvArea.anchor("top").add(pv.Line)
+      .lineWidth(this.showLines?1.5:0);
+    //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
       
     }
     else{
 
-      this.pvLinePanel = this.pvPanel.add(pv.Panel)
+      this.pvScatterPanel = this.pvPanel.add(pv.Panel)
       .data(pv.range(0,this.chart.dataEngine.getSeriesSize()))
 
+      this.pvArea = this.pvScatterPanel.add(pv.Area)
+      .fillStyle(this.showAreas?pv.Colors.category10().by(pv.parent):null);
 
-      this.pvLine = this.pvLinePanel.add(pv.Line)
+      this.pvLine = this.pvArea.add(pv.Line)
       .data(function(d){
-        return myself.chart.dataEngine.getObjectsForSeriesIdx(d, function(a,b){
-          return parser.parse(a.category) < parser.parse(b.category);
+        return myself.chart.dataEngine.getObjectsForSeriesIdx(d, this.timeSeries?function(a,b){
+          return parser.parse(a.category) - parser.parse(b.category);
+          }: null)
         })
-      })
+      .lineWidth(this.showLines?1.5:0)
       //.strokeStyle(pv.Colors.category20().by(pv.index))
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
 
@@ -328,7 +457,10 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
 
     this.pvLine
     .text(function(d){
-      return d.value.toFixed(1)
+      if( typeof d == "object"){
+        return d.value.toFixed(1);
+      }
+      else return d.toFixed(1);
     })
     .event("point", pv.Behavior.tipsy({
       gravity: "s",
@@ -336,29 +468,39 @@ pvc.LineChartPanel = pvc.BasePanel.extend({
     }))
 
 
-    this.pvLineDot = this.pvLine.add(pv.Dot)
+    this.pvDot = this.pvLine.add(pv.Dot)
     .shapeSize(this.showDots?20:0)
+    .lineWidth(this.showDots?1.5:0)
+    //.strokeStyle(pv.Colors.category20().by(pv.index))
     .cursor("pointer")
     .event("click",function(d){
       pvc.log("You clicked on index " + this.index + ", value " + d.value );
     });
 
     if(this.showValues){
-      this.pvLineLabel = this.pvLineDot
-      .anchor("bottom")
+      this.pvLabel = this.pvDot
+      .anchor(this.valuesAnchor)
       .add(pv.Label)
       .bottom(0)
-      .text(pv.identity)
+      .text(function(d){
+        if( typeof d == "object"){
+          return d.value.toFixed(1);
+        }
+        else return d.toFixed(1);
+      })
 
       // Extend lineLabel
-      this.extend(this.pvLineLabel,"lineLabel_");
+      this.extend(this.pvLabel,"lineLabel_");
     }
 
 
     // Extend line and linePanel
-    this.extend(this.pvLine,"linePanel_");
+    this.extend(this.pvScatterPanel,"scatterPanel_");
+    this.extend(this.pvArea,"area_");
     this.extend(this.pvLine,"line_");
-    
+    this.extend(this.pvDot,"dot_");
+    this.extend(this.pvLabel,"label_");
+
 
     // Extend body
     this.extend(this.pvPanel,"chart_");

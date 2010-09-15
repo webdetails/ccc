@@ -302,7 +302,6 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     this.pvBar
     .title(function(d){
-      pvc.log("pvBar title: " + d)
       return  typeof d == "undefined"?"":d.toFixed(1);
     })
     .event("mouseover", pv.Behavior.tipsy({
