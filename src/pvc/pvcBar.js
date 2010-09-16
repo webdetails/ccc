@@ -49,128 +49,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
 
     this.barChartPanel.appendTo(this.basePanel); // Add it
 
-  },
-
-  /*
-   * xx scale for bar chart
-   */
-
-  getXScale: function(){
-
-    return this.options.orientation == "vertical"?
-    this.getOrdinalScale():
-    this.getLinearScale();
-
-  },
-
-  /*
-   * yy scale for bar chart
-   */
-
-  getYScale: function(){
-
-    return this.options.orientation == "vertical"?
-    this.getLinearScale():
-    this.getOrdinalScale();
-  },
-
-  /*
-   * Scale for the ordinal axis. xx if orientation is vertical, yy otherwise
-   *
-   */
-  getOrdinalScale: function(){
-
-    var scale = new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()));
-
-    var size = this.options.orientation=="vertical"?this.basePanel.width:this.basePanel.height;
-
-    if(this.options.orientation=="vertical" && this.options.yAxisPosition == "left"){
-      scale.splitBanded( this.options.yAxisSize , size, this.options.panelSizeRatio);
-    }
-    else if(this.options.orientation=="vertical" && this.options.yAxisPosition == "right"){
-      scale.splitBanded(0, size - this.options.yAxisSize, this.options.panelSizeRatio);
-    }
-    else{
-      scale.splitBanded(0, size - this.options.xAxisSize, this.options.panelSizeRatio);
-    }
-
-    return scale;
-
-
-
-  },
-
-
-  /*
-   * Scale for the linear axis. yy if orientation is vertical, xx otherwise
-   *
-   */
-  getLinearScale: function(){
-
-
-    var isVertical = this.options.orientation=="vertical"
-    var size = isVertical?this.basePanel.height:this.basePanel.width;
-
-    var max, min;
-
-    if(this.options.stacked){
-      max = this.dataEngine.getCategoriesMaxSum();
-      min = 0;
-    }
-    else{
-      max = this.dataEngine.getSeriesAbsoluteMax();
-      min = this.dataEngine.getSeriesAbsoluteMin();
-
-    }
-    if(min > 0 && this.options.originIsZero){
-      min = 0
-    }
-
-    // Adding a small offset to the scale:
-    var offset = (max - min) * this.options.axisOffset;
-    var scale = new pv.Scale.linear(min - offset,max + offset)
-
-
-    if( !isVertical && this.options.yAxisPosition == "left"){
-      scale.range( this.options.yAxisSize , size);
-    }
-    else if( !isVertical && this.options.yAxisPosition == "right"){
-      scale.range(0, size - this.options.yAxisSize);
-    }
-    else{
-      scale.range(0, size - this.options.xAxisSize);
-    }
-
-    return scale
-
-  },
-
-  /*
-   * Indicates if xx is an ordinal scale
-   */
-
-  isXAxisOrdinal: function(){
-    return this.options.orientation == "vertical";
-  },
-
-
-  /*
-   * Indicates if yy is an ordinal scale
-   */
-
-  isYAxisOrdinal: function(){
-    return this.options.orientation == "horizontal";
-  },
-
-  /*
-   *  List of elements to use in the axis ordinal
-   *
-   */
-  getAxisOrdinalElements: function(){
-    return this.dataEngine.getCategories();
   }
-
-
 
 }
 );
@@ -268,7 +147,9 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       [this.orientation == "vertical"?"x":"y"](oScale.by(pv.index))
 
       this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
-      .data(function(d){return d||0})
+      .data(function(d){
+        return d||0
+        })
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
 
     /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
@@ -318,10 +199,10 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     this.pvBar
     .title(function(d){
-        var v = d;
-        var s = myself.chart.dataEngine.getSeries()[this.parent.index]
-        var c = myself.chart.dataEngine.getCategories()[this.index]
-        return myself.chart.options.tooltipFormat(s,c,v);
+      var v = d;
+      var s = myself.chart.dataEngine.getSeries()[this.parent.index]
+      var c = myself.chart.dataEngine.getCategories()[this.index]
+      return myself.chart.options.tooltipFormat(s,c,v);
     })
     .event("mouseover", pv.Behavior.tipsy({
       gravity: "s",
