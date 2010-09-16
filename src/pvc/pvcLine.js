@@ -402,7 +402,6 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
     // Stacked?
     if (this.stacked){
-
       
       this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
       .layers(this.chart.dataEngine.getTransposedValues())
@@ -467,10 +466,17 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
     this.pvLine
     .text(function(d){
+      var v, c;
+      var s = myself.chart.dataEngine.getSeries()[this.parent.index]
       if( typeof d == "object"){
-        return d.value.toFixed(1);
+        v = d.value;
+        c = d.category
       }
-      else return d.toFixed(1);
+      else{
+        v = d
+        c = myself.chart.dataEngine.getCategories()[this.index]
+      };
+      return myself.chart.options.tooltipFormat(s,c,v);
     })
     .event("point", pv.Behavior.tipsy({
       gravity: "s",

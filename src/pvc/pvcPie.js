@@ -18,7 +18,10 @@ pvc.PieChart = pvc.Base.extend({
       showValues: true,
       innerGap: 0.9,
       explodedSliceRadius: 0,
-      explodedSliceIndex: null
+      explodedSliceIndex: null,
+      tooltipFormat: function(s,c,v){
+        return c+":  " + v;
+      }
     };
 
 
@@ -51,20 +54,20 @@ pvc.PieChart = pvc.Base.extend({
 
 
 /*
-   * Pie chart panel. Generates a pie chart. Specific options are:
-   * <i>showValues</i> - Show or hide slice value. Default: false
-   * <i>explodedSliceIndex</i> - Index of the slice to explode. Default: null
-   * <i>explodedSliceRadius</i> - If one wants a pie with an exploded effect,
-   *  specify a value in pixels here. If above argument is specified, explodes
-   *  only one slice. Else explodes all. Default: 0
-   * <i>innerGap</i> - The percentage of the inner area used by the pie. Default: 0.9 (90%)
-   *
-   * Has the following protovis extension points:
-   *
-   * <i>chart_</i> - for the main chart Panel
-   * <i>pie_</i> - for the main pie wedge
-   * <i>pieLabel_</i> - for the main pie label
-   */
+ * Pie chart panel. Generates a pie chart. Specific options are:
+ * <i>showValues</i> - Show or hide slice value. Default: false
+ * <i>explodedSliceIndex</i> - Index of the slice to explode. Default: null
+ * <i>explodedSliceRadius</i> - If one wants a pie with an exploded effect,
+ *  specify a value in pixels here. If above argument is specified, explodes
+ *  only one slice. Else explodes all. Default: 0
+ * <i>innerGap</i> - The percentage of the inner area used by the pie. Default: 0.9 (90%)
+ *
+ * Has the following protovis extension points:
+ *
+ * <i>chart_</i> - for the main chart Panel
+ * <i>pie_</i> - for the main pie wedge
+ * <i>pieLabel_</i> - for the main pie label
+ */
 
 
 pvc.PieChartPanel = pvc.BasePanel.extend({
@@ -119,17 +122,19 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     })
     .outerRadius(function(d){
       return myself.chart.animate(0 , r)
-      })
+    })
     .angle(function(d){
       return a(d)
-      })
+    })
     .cursor("pointer")
     .event("click",function(d){
       pvc.log("You clicked on index " + this.index + ", value " + d + ", angle: " + myself.accumulateAngle(a,this.index));
     })
     .title(function(d){
-      return  d.toFixed(1)
-      })
+      var s = myself.chart.dataEngine.getSeries()[this.parent.index]
+      var c = myself.chart.dataEngine.getCategories()[this.index]
+      return myself.chart.options.tooltipFormat(s,c,d);
+    })
     .event("mouseover", pv.Behavior.tipsy({
       gravity: "s",
       fade: true

@@ -38,7 +38,11 @@ pvc.Base = Base.extend({
       titlePosition: "top", // options: bottom || left || right
       titleAlign: "center", // left / right / center
       legend: false,
-      legendPosition: "bottom"
+      legendPosition: "bottom",
+
+      tooltipFormat: function(s,c,v){
+        return s+", "+c+":  " + v ;
+      }
 
     };
     

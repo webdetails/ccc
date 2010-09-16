@@ -270,6 +270,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     .textAlign("center")
     .textBaseline("middle")
     .text(pv.identity)
+    .font("9px sans-serif")
   },
 
 
@@ -290,6 +291,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     .anchor(this.anchor)
     .add(pv.Label)
     .text(scale.tickFormat)
+    .font("9px sans-serif")
     .visible(function(d){
       // mini grids
       if (this.index % 2){

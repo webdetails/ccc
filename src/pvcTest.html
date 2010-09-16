@@ -62,10 +62,14 @@
 
 
     <h1>Bar</h1>
-    <div id="pvcBar"></div>
+    <div id="pvcBar1"></div>
+    <div id="pvcBar2"></div>
+    <div id="pvcBar3"></div>
 
     <h1>Pie</h1>
-    <div id="pvcPie"></div>
+    <div id="pvcPie1"></div>
+    <div id="pvcPie1"></div>
+    <div id="pvcPie1"></div>
 
 
 
@@ -478,12 +482,10 @@
 
 
 
-      var bar = new pvc.BarChart({
-        //      var bar = new pvc.CategoricalAbstract({
-        // legendPosition: "left",
-        canvas: "pvcBar",
-        width: 600,
-        height: 400,
+      var bar1 = new pvc.BarChart({
+        canvas: "pvcBar1",
+        width: 300,
+        height: 200,
         title: "Bar chart",
         titlePosition: "left",
         titleSize: 40,
@@ -491,11 +493,11 @@
         legendPosition: "bottom",
         legendSize: null,
 
-        barOrientation: 'vertical',
-        stackedBarChart: false,
+        orientation: 'vertical',
+        stacked: false,
         maxBarSize: 100,
 
-        panelSizeRatio: 0.5,
+        panelSizeRatio:0.75,
         barSizeRatio: 1,
 
         showValues: true,
@@ -540,8 +542,77 @@
 
       });
 
-      bar.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-      bar.render();
+      bar1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      bar1.render();
+
+
+
+      var bar2 = new pvc.BarChart({
+        canvas: "pvcBar2",
+        width: 300,
+        height: 200,
+        title: "Stacked Bar chart",
+        titlePosition: "bottom",
+        titleSize: 20,
+        legend: true,
+        legendPosition: "left",
+        legendSize: null,
+
+        orientation: 'vertical',
+        stacked: true,
+        //maxBarSize: 100,
+
+        showValues: true,
+        showXScale: true,
+        showYScale: true,
+        yAxisPosition: "right",
+        yAxisSize: 20,
+        xAxisPosition: "bottom",
+        xAxisSize: 20,
+        xAxisFullGrid: false,
+        yAxisFullGrid: false,
+
+        panelSizeRatio: 1,
+        barSizeRatio: 1
+
+      });
+
+      bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      bar2.render();
+
+
+      var bar3 = new pvc.BarChart({
+        canvas: "pvcBar3",
+        width: 300,
+        height: 200,
+        title: "Horizontal Bar chart",
+        titlePosition: "bottom",
+        titleSize: 20,
+        legend: true,
+        legendPosition: "right",
+        legendSize: null,
+
+        orientation: 'horizontal',
+        stacked: false,
+        //maxBarSize: 100,
+
+        showValues: true,
+        showXScale: true,
+        showYScale: true,
+        yAxisPosition: "left",
+        yAxisSize: 20,
+        xAxisPosition: "bottom",
+        xAxisSize: 20,
+        xAxisFullGrid: false,
+        yAxisFullGrid: false,
+
+        panelSizeRatio: 0.75,
+        barSizeRatio: 1
+
+      });
+
+      bar3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      bar3.render();
 
 
       /* Pie chart */
