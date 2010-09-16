@@ -23,7 +23,7 @@ pvc.Base = Base.extend({
   legendSource: "series",
 
   constructor: function(options){
-
+    var myself = this;
     var _defaults = {
       canvas: null,
       width: 400,
@@ -41,7 +41,16 @@ pvc.Base = Base.extend({
       legendPosition: "bottom",
 
       tooltipFormat: function(s,c,v){
-        return s+", "+c+":  " + v ;
+        return s+", "+c+":  " + myself.options.valueFormat(v) ;
+      },
+
+      valueFormat: function(d){
+        return pv.Format.number().fractionDigits(0, 2).format(d)
+
+      },
+      clickable: true,
+      clickAction: function(s, c, v){
+        pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
       }
 
     };
@@ -318,7 +327,7 @@ pvc.BasePanel = Base.extend({
     for (p in this.chart.options.extensionPoints){
       if (p.indexOf(prefix) == 0){
         var m = p.substring(prefix.length);
-        mark[m](pvc.ev(this.chart.options.extensionPoints[p]));
+        mark[m](this.chart.options.extensionPoints[p]);
       }
 
     }

@@ -221,6 +221,10 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
   create: function(){
 
+    this.chart.basePanel.pvPanel
+    .events("all")
+    .event("mousemove", pv.Behavior.point(Infinity));
+
     var myself = this;
     this.width = this._parent.width;
     this.height = this._parent.height;
@@ -300,12 +304,6 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
    
 
     }
-    // Labels:
-
-    //this.pvPanel.event("mousemove", pv.Behavior.point(Infinity).collapse("y"));
-    this.chart.basePanel.pvPanel
-    .events("all")
-    .event("mousemove", pv.Behavior.point(Infinity));
 
     this.pvLine
     .text(function(d){
@@ -324,17 +322,35 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     .event("point", pv.Behavior.tipsy({
       gravity: "s",
       fade: true
-    }))
+    }));
 
 
     this.pvDot = this.pvLine.add(pv.Dot)
-    .shapeSize(this.showDots?20:0)
-    .lineWidth(this.showDots?1.5:0)
-    //.strokeStyle(pv.Colors.category20().by(pv.index))
-    .cursor("pointer")
-    .event("click",function(d){
-      pvc.log("You clicked on index " + this.index + ", value " + d.value );
-    });
+    .shapeSize(20)
+    .lineWidth(1.5)
+    .strokeStyle(this.showDots?pv.Colors.category10().by(pv.parent):null)
+    .fillStyle(this.showDots?"white":null)
+    
+
+    if (this.chart.options.clickable){
+      this.pvDot
+      .cursor("pointer")
+      .event("click",function(d){
+        var v, c;
+        var s = myself.chart.dataEngine.getSeries()[this.parent.index]
+        if( typeof d == "object"){
+          v = d.value;
+          c = d.category
+        }
+        else{
+          v = d
+          c = myself.chart.dataEngine.getCategories()[this.index]
+        }
+        return myself.chart.options.clickAction(s,c, v);
+      });
+    }
+
+
 
     if(this.showValues){
       this.pvLabel = this.pvDot
@@ -342,10 +358,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .add(pv.Label)
       .bottom(0)
       .text(function(d){
-        if( typeof d == "object"){
-          return d.value.toFixed(1);
-        }
-        else return d.toFixed(1);
+        return myself.chart.options.valueFormat(typeof d == "object"?d.value:d)
       })
 
       // Extend lineLabel

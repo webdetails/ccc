@@ -126,20 +126,27 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     .angle(function(d){
       return a(d)
     })
-    .cursor("pointer")
-    .event("click",function(d){
-      pvc.log("You clicked on index " + this.index + ", value " + d + ", angle: " + myself.accumulateAngle(a,this.index));
-    })
     .title(function(d){
+      var v = myself.chart.options.valueFormat(d);
       var s = myself.chart.dataEngine.getSeries()[this.parent.index]
       var c = myself.chart.dataEngine.getCategories()[this.index]
-      return myself.chart.options.tooltipFormat(s,c,d);
+      return myself.chart.options.tooltipFormat(s,c,v);
     })
     .event("mouseover", pv.Behavior.tipsy({
       gravity: "s",
       fade: true
     }));
-    
+
+
+    if (this.chart.options.clickable){
+      this.pvPie
+      .cursor("pointer")
+      .event("click",function(d){
+        var s = myself.chart.dataEngine.getSeries()[this.parent.index]
+        var c = myself.chart.dataEngine.getCategories()[this.index]
+        return myself.chart.options.clickAction(s,c, d);
+      });
+    }
 
     // Extend pie
     this.extend(this.pvPie,"pie_");

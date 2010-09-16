@@ -149,7 +149,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
       .data(function(d){
         return d||0
-        })
+      })
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
 
     /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
@@ -199,19 +199,26 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     this.pvBar
     .title(function(d){
-      var v = d;
-      var s = myself.chart.dataEngine.getSeries()[this.parent.index]
-      var c = myself.chart.dataEngine.getCategories()[this.index]
-      return myself.chart.options.tooltipFormat(s,c,v);
+      var v = myself.chart.options.valueFormat(d);
+      var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index]
+      var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index]
+      return myself.chart.options.tooltipFormat(s,c, v);
+    
     })
     .event("mouseover", pv.Behavior.tipsy({
       gravity: "s",
       fade: true
-    }))
-    .cursor("pointer")
-    .event("click",function(d){
-      pvc.log("You clicked on index " + this.index + ", value " + d);
-    });
+    }));
+
+    if (this.chart.options.clickable){
+      this.pvBar
+      .cursor("pointer")
+      .event("click",function(d){
+        var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index]
+        var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index]
+        return myself.chart.options.clickAction(s,c, d);
+      });
+    }
 
     if(this.showValues){
       this.pvBarLabel = this.pvBar

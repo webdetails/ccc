@@ -287,8 +287,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
   _parent: null,
   pvRule: null,
-  pvRuleLabel: null,
-  pvRuleGrid: null,
+  pvLabel: null,
+  pvGrid: null,
 
   ordinal: false,
   anchor: "bottom",
@@ -331,8 +331,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     // Extend panel
     this.extend(this.pvPanel, this.panelName + "_");
     this.extend(this.pvRule, this.panelName + "Rule_");
-    this.extend(this.pvRuleLabel, this.panelName + "RuleLabel_");
-    this.extend(this.pvRuleGrid, this.panelName + "RuleGrid_");
+    this.extend(this.pvLabel, this.panelName + "Label_");
+    this.extend(this.pvGrid, this.panelName + "Grid_");
 
   },
 
@@ -365,7 +365,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     var myself = this;
     
-    this.pvRuleLabel = this.pvRule.add(pv.Label)
+    this.pvLabel = this.pvRule.add(pv.Label)
     .data(this.elements)
     [pvc.BasePanel.paralelLength[this.anchor]](null)
     [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
@@ -385,7 +385,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     var scale = this.scale;
 
-    this.pvRuleLabel = this.pvRule.add(pv.Rule)
+    this.pvLabel = this.pvRule.add(pv.Rule)
     .data(this.scale.ticks())
     [pvc.BasePanel.paralelLength[this.anchor]](null)
     [pvc.BasePanel.oppositeAnchor[this.anchor]](0)

@@ -14,29 +14,29 @@ var crosstab_01 = {
     "colType":"Numeric",
     "colName":"value2"
   }]
-  };
+};
 
 
 
 
 var relational_01 = {
   "resultset":[
-    ["Green","2010-01-01",74],
-    ["Green","2010-01-02",72],
-    ["Green","2010-01-03",50],
-    ["Green","2010-01-04",20],
-    ["Green","2010-01-05",23],
-    ["Red","2010-01-01",18],
-    ["Red","2010-01-02",12],
-    ["Red","2010-01-03",9],
-    ["Red","2010-01-04",6],
-    ["Red","2010-01-05",13],
-    ["Blue","2010-01-01",5],
-    ["Blue","2010-01-02",2],
-    ["Blue","2010-01-03",1],
-    ["Blue","2010-01-04",0],
-    ["Blue","2010-01-05",10]
-],
+  ["Green","2010-01-01",74],
+  ["Green","2010-01-02",72],
+  ["Green","2010-01-03",50],
+  ["Green","2010-01-04",20],
+  ["Green","2010-01-05",23],
+  ["Red","2010-01-01",18],
+  ["Red","2010-01-02",12],
+  ["Red","2010-01-03",9],
+  ["Red","2010-01-04",6],
+  ["Red","2010-01-05",13],
+  ["Blue","2010-01-01",5],
+  ["Blue","2010-01-02",2],
+  ["Blue","2010-01-03",1],
+  ["Blue","2010-01-04",0],
+  ["Blue","2010-01-05",10]
+  ],
   "metadata":[{
     "colIndex":0,
     "colType":"String",
@@ -50,20 +50,20 @@ var relational_01 = {
     "colType":"Numeric",
     "colName":"Value"
   }]
-  };
+};
 
 
 
 var relational_02 = {
   "resultset":[
-    ["Green",74],
-    ["Red",48],
-    ["Orange",37],
-    ["Cyan",27],
-    ["Black",22],
-    ["White",19],
-    ["Magenta",18],
-    ["Blue",4]],
+  ["Green",74],
+  ["Red",48],
+  ["Orange",37],
+  ["Cyan",27],
+  ["Black",22],
+  ["White",19],
+  ["Magenta",18],
+  ["Blue",4]],
   "metadata":[{
     "colIndex":0,
     "colType":"String",
@@ -73,26 +73,26 @@ var relational_02 = {
     "colType":"Numeric",
     "colName":"Value"
   }]
-  };
+};
 
-  var relational_03 = {
+var relational_03 = {
   "resultset":[
-    ["Green",74],
-    ["Red",48],
-    ["Orange",37],
-    ["Cyan",27],
-    ["Black",22],
-    ["White",19],
-    ["Magenta",18],
-    ["Blue",41],
-    ["John",7],
-    ["Mary",48],
-    ["Alex",27],
-    ["Filipa",76],
-    ["James",21],
-    ["Ikaruga",30],
-    ["Bird",50],
-    ["Bender",41]],
+  ["Green",74],
+  ["Red",48],
+  ["Orange",37],
+  ["Cyan",27],
+  ["Black",22],
+  ["White",19],
+  ["Magenta",18],
+  ["Blue",41],
+  ["John",7],
+  ["Mary",48],
+  ["Alex",27],
+  ["Filipa",76],
+  ["James",21],
+  ["Ikaruga",30],
+  ["Bird",50],
+  ["Bender",41]],
   "metadata":[{
     "colIndex":0,
     "colType":"String",
@@ -102,4 +102,5 @@ var relational_02 = {
     "colType":"Numeric",
     "colName":"Value"
   }]
-  };
+};
+
