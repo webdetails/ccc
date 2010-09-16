@@ -48,7 +48,7 @@ pvc.Base = Base.extend({
         return pv.Format.number().fractionDigits(0, 2).format(d)
 
       },
-      clickable: true,
+      clickable: false,
       clickAction: function(s, c, v){
         pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
       }
