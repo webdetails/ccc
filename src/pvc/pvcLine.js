@@ -112,9 +112,8 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
    */
   getLinearScale: function(){
 
-    var size = this.options.orientation=="vertical"?
-    this.basePanel.height - this.options.xAxisSize:
-    this.basePanel.width;
+    var isVertical = this.options.orientation=="vertical"
+    var size = isVertical?this.basePanel.height:this.basePanel.width;
 
     var max, min;
 
@@ -133,9 +132,20 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
     // Adding a small offset to the scale:
     var offset = (max - min) * this.options.axisOffset;
+    var scale = new pv.Scale.linear(min - offset,max + offset)
 
-    return new pv.Scale.linear(min - offset,max + offset).range(0, size );
-    
+
+    if( !isVertical && this.options.yAxisPosition == "left"){
+      scale.range( this.options.yAxisSize , size);
+    }
+    else if( !isVertical && this.options.yAxisPosition == "right"){
+      scale.range(0, size - this.options.yAxisSize);
+    }
+    else{
+      scale.range(0, size - this.options.xAxisSize);
+    }
+
+    return scale
 
   },
 
@@ -411,7 +421,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       this.pvArea = this.pvScatterPanel.layer.add(pv.Area)
       .fillStyle(this.showAreas?pv.Colors.category10().by(pv.parent):null);
 
-      this.pvLine = this.pvArea.anchor("top").add(pv.Line)
+      this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0);
     //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
       

@@ -2,9 +2,18 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1">
         <file>
+            <url>src/pvc/pvcLine.js</url>
+            <line>259</line>
+            <line>397</line>
+            <line>407</line>
+            <line>481</line>
+        </file>
+        <file>
             <url>src/pvc/pvcBar.js</url>
             <line>80</line>
-            <line>206</line>
+            <line>215</line>
+            <line>251</line>
+            <line>294</line>
         </file>
         <file>
             <url>src/pvc/pvcCategoricalAbstract.js</url>
@@ -14,7 +23,7 @@
         <file>
             <url>src/pvc/pvcPie.js</url>
             <line>63</line>
-            <line>128</line>
+            <line>119</line>
         </file>
         <file>
             <url>src/EcoTableComponent.js</url>
@@ -24,7 +33,9 @@
         </file>
         <file>
             <url>src/pvc/pvcPanel.js</url>
-            <line>78</line>
+            <line>9</line>
+            <line>132</line>
+            <line>194</line>
         </file>
     </editor-bookmarks>
 </project-private>
