@@ -104,3 +104,31 @@ var relational_03 = {
   }]
 };
 
+var test = {
+  "resultset":[["Shipped",2003,3573701.2500000014],
+    ["Resolved",2003,28550.59],
+    ["Cancelled",2003,75132],
+    ["Shipped",2004,4750205],
+    ["Cancelled",2004,187195],
+    ["Resolved",2004,24078],
+    ["On Hold",2004,26260],
+    ["Shipped",2005,1513074],
+    ["Resolved",2005,98089],
+    ["On Hold",2005,152718],
+    ["Disputed",2005 , 72212.86],
+    ["In Process",2005,144729]
+  ],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"STATUS"
+  },{
+    "colIndex":1,
+    "colType":"Numeric",
+    "colName":"YEAR_ID"
+  },{
+    "colIndex":2,
+    "colType":"Numeric",
+    "colName":"PRICE"
+  }]
+  };

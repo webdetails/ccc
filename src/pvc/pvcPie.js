@@ -123,6 +123,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     .outerRadius(function(d){
       return myself.chart.animate(0 , r)
     })
+    .fillStyle(this.chart.colors().by(pv.index))
     .angle(function(d){
       return a(d)
     })

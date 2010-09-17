@@ -151,6 +151,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
         return d||0
       })
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+      .fillStyle(this.chart.colors().by(pv.parent))
 
     /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
         return this.parent.left() + barPositionOffset
@@ -184,7 +185,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       .data(function(d){
         return myself.chart.dataEngine.getValuesForCategoryIdx(d)
         })
-      .fillStyle(pv.Colors.category20().by(pv.index))
+      .fillStyle(this.chart.colors().by(pv.index))
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
         return bScale(this.index) + barPositionOffset;
       })

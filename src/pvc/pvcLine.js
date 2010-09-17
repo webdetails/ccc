@@ -265,7 +265,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       })
 
       this.pvArea = this.pvScatterPanel.layer.add(pv.Area)
-      .fillStyle(this.showAreas?pv.Colors.category10().by(pv.parent):null);
+      .fillStyle(this.showAreas?this.chart.colors().by(pv.parent):null);
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0);
@@ -278,7 +278,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .data(pv.range(0,this.chart.dataEngine.getSeriesSize()))
 
       this.pvArea = this.pvScatterPanel.add(pv.Area)
-      .fillStyle(this.showAreas?pv.Colors.category10().by(pv.parent):null);
+      .fillStyle(this.showAreas?this.chart.colors().by(pv.parent):null);
 
       this.pvLine = this.pvArea.add(pv.Line)
       .data(function(d){
@@ -287,7 +287,6 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           }: null)
         })
       .lineWidth(this.showLines?1.5:0)
-      //.strokeStyle(pv.Colors.category20().by(pv.index))
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
 
         if(myself.timeSeries){
@@ -306,6 +305,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     }
 
     this.pvLine
+    .strokeStyle(this.chart.colors().by(pv.parent))
     .text(function(d){
       var v, c;
       var s = myself.chart.dataEngine.getSeries()[this.parent.index]
@@ -328,7 +328,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     this.pvDot = this.pvLine.add(pv.Dot)
     .shapeSize(20)
     .lineWidth(1.5)
-    .strokeStyle(this.showDots?pv.Colors.category10().by(pv.parent):null)
+    .strokeStyle(this.showDots?this.chart.colors().by(pv.parent):null)
     .fillStyle(this.showDots?"white":null)
     
 

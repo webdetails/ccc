@@ -19,8 +19,9 @@ pvc.Base = Base.extend({
   titlePanel: null,
   legendPanel: null,
 
-  // options
   legendSource: "series",
+  colors: null,
+
 
   constructor: function(options){
     var myself = this;
@@ -39,6 +40,7 @@ pvc.Base = Base.extend({
       titleAlign: "center", // left / right / center
       legend: false,
       legendPosition: "bottom",
+      colors: null,
 
       tooltipFormat: function(s,c,v){
         return s+", "+c+":  " + myself.options.valueFormat(v) ;
@@ -82,6 +84,18 @@ pvc.Base = Base.extend({
     this.dataEngine.createTranslator();
 
     pvc.log(this.dataEngine.getInfo());
+
+    // Create the color info
+    if (typeof this.options.colors == 'undefined' || this.options.colors == null){
+      this.colors = pv.Colors.category10;
+    }
+    else{
+      this.colors = function() {
+        var scale = pv.colors(this.options.colors);
+        scale.domain.apply(scale, arguments);
+        return scale;
+      };
+    }
 
 
     // create the basePanel. Since we don't have a parent panel we need to

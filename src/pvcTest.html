@@ -75,7 +75,6 @@
 
     <script type="text/javascript">
 
-
       var textElement =
         {
         name: "regionSelector",
@@ -105,7 +104,7 @@
         //legendSize: 30,
         yAxisSize: 30,
         xAxisSize: 30,
-        
+
         orientation: 'vertical',
         extensionPoints: {
           xAxisLabel_text: function(d){return d.substr(5)}
@@ -196,6 +195,8 @@
         legendAlign: "right",
         //legendSize: null,
 
+        colors: ["#333","#666","#999","#CCC","#EEE"],
+
         orientation: 'vertical',
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
@@ -243,7 +244,7 @@
 
       });
 
-      line2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      line2.setData({resultset: relational_01.resultset, metadata:[]}, {crosstabMode: false, seriesInRows: false});
       line2.render();
 
       var line3 = new pvc.LineChart({
@@ -300,6 +301,8 @@
         legendPosition: "top",
         legendAlign: "right",
         //legendSize: null,
+
+        colors: ["#333","#666","#999","#CCC","#EEE"],
 
         orientation: 'vertical',
         timeSeries: false,
@@ -469,6 +472,8 @@
         legendAlign: "right",
         //legendSize: null,
 
+        colors: ["#333","#666","#999","#CCC","#EEE"],
+
         orientation: 'vertical',
         timeSeries: true,
         timeSeriesFormat: "%Y-%m-%d",
@@ -565,6 +570,8 @@
         legend: true,
         legendPosition: "left",
         legendSize: null,
+
+        colors: ["#333","#666","#999","#CCC","#EEE"],
 
         orientation: 'vertical',
         stacked: true,

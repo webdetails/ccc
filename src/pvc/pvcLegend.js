@@ -46,7 +46,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
   create: function(){
     var myself = this;
-    var c = pv.Colors.category10();
+    var c = this.chart.colors();
     var x,y;
 
 
