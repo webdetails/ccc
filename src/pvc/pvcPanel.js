@@ -107,7 +107,7 @@ pvc.Base = Base.extend({
     this.basePanel.getPvPanel().canvas(this.options.canvas);
 
     // Title
-    if (this.options.title != null){
+    if (this.options.title != null && this.options.title.lengh != ""){
       this.titlePanel = new pvc.TitlePanel(this, {
         title: this.options.title,
         anchor: this.options.titlePosition,
