@@ -75,6 +75,7 @@
 
     <script type="text/javascript">
 
+
       var textElement =
         {
         name: "regionSelector",
@@ -100,18 +101,18 @@
         titleSize: 20,
         legend: true,
         legendPosition: "left",
-        legendAlign: "top",
+        legendAlign: "right",
         //legendSize: 30,
         yAxisSize: 30,
         xAxisSize: 30,
-
-        orientation: 'vertical',
-        extensionPoints: {
+        
+        orientation: 'vertical'
+        /*extensionPoints: {
           xAxisLabel_text: function(d){return d.substr(5)}
-        }
+        }*/
       });
 
-      dot1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
       dot1.render();
 
       var dot2 = new pvc.DotChart({
@@ -195,8 +196,6 @@
         legendAlign: "right",
         //legendSize: null,
 
-        colors: ["#333","#666","#999","#CCC","#EEE"],
-
         orientation: 'vertical',
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
@@ -244,7 +243,7 @@
 
       });
 
-      line2.setData({resultset: relational_01.resultset, metadata:[]}, {crosstabMode: false, seriesInRows: false});
+      line2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
       line2.render();
 
       var line3 = new pvc.LineChart({
@@ -301,8 +300,6 @@
         legendPosition: "top",
         legendAlign: "right",
         //legendSize: null,
-
-        colors: ["#333","#666","#999","#CCC","#EEE"],
 
         orientation: 'vertical',
         timeSeries: false,
@@ -472,8 +469,6 @@
         legendAlign: "right",
         //legendSize: null,
 
-        colors: ["#333","#666","#999","#CCC","#EEE"],
-
         orientation: 'vertical',
         timeSeries: true,
         timeSeriesFormat: "%Y-%m-%d",
@@ -571,8 +566,6 @@
         legendPosition: "left",
         legendSize: null,
 
-        colors: ["#333","#666","#999","#CCC","#EEE"],
-
         orientation: 'vertical',
         stacked: true,
         //maxBarSize: 100,
@@ -656,8 +649,9 @@
         innerGap: 0.9,
         showValues: true,
         explodedSliceIndex: 4,
-        explodedSliceRadius: 15
-        
+        explodedSliceRadius: 15,
+
+        numberPosition: 0
         /*
         extensionPoints: {
           base_fillStyle: "red",

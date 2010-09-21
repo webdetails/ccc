@@ -45,7 +45,7 @@ pvc.DataEngine = Base.extend({
     this.translator.setData(this.metadata, this.resultset);
     this.translator.prepare();
     if( this.seriesInRows ){
-      pv.transpose(this.translator.getValues())
+      this.translator.transpose()
     }
 
 
@@ -307,6 +307,11 @@ pvc.DataTranslator = Base.extend({
     })
 
 
+  },
+
+  transpose: function(){
+
+     pv.transpose(this.values);
   },
 
 
