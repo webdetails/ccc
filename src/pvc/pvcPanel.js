@@ -86,7 +86,7 @@ pvc.Base = Base.extend({
     pvc.log(this.dataEngine.getInfo());
 
     // Create the color info
-    if (typeof this.options.colors == 'undefined' || this.options.colors == null){
+    if (typeof this.options.colors == 'undefined' || this.options.colors == null || this.options.colors.length == 0){
       this.colors = pv.Colors.category10;
     }
     else{

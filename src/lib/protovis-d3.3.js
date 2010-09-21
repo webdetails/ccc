@@ -8694,13 +8694,13 @@ pv.Panel = function() {
 };
 
 pv.Panel.prototype = pv.extend(pv.Bar)
-    .property("transform")
-    .property("overflow", String)
-    .property("canvas", function(c) {
-        return (typeof c == "string")
-            ? document.getElementById(c)
-            : c; // assume that c is the passed-in element
-      });
+  .property("transform")
+  .property("overflow", String)
+  .property("canvas", function(c) {
+    return (typeof c == "string")
+    ? document.getElementById(c)
+    : c; // assume that c is the passed-in element
+  });
 
 pv.Panel.prototype.type = "panel";
 
@@ -8747,9 +8747,9 @@ pv.Panel.prototype.type = "panel";
  * @type pv.Panel
  */
 pv.Panel.prototype.defaults = new pv.Panel()
-    .extend(pv.Bar.prototype.defaults)
-    .fillStyle(null) // override Bar default
-    .overflow("visible");
+  .extend(pv.Bar.prototype.defaults)
+  .fillStyle(null) // override Bar default
+  .overflow("visible");
 
 /**
  * Returns an anchor with the specified name. This method is overridden such
