@@ -257,7 +257,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           return tScale(parser.parse(myself.chart.dataEngine.getCategories()[this.index]));
         }
         else{
-          return oScale(parser.parse(myself.chart.dataEngine.getCategories()[this.index])) + oScale.range().band/2;
+          return oScale(myself.chart.dataEngine.getCategories()[this.index]) + oScale.range().band/2;
         }
       })
       [this.orientation == "vertical"?"y":"x"](function(d){
