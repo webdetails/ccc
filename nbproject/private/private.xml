@@ -3,27 +3,28 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1">
         <file>
             <url>src/pvc/pvcLine.js</url>
-            <line>259</line>
-            <line>397</line>
-            <line>407</line>
-            <line>481</line>
-        </file>
-        <file>
-            <url>src/pvc/pvcBar.js</url>
-            <line>80</line>
-            <line>215</line>
-            <line>251</line>
-            <line>294</line>
+            <line>326</line>
         </file>
         <file>
             <url>src/pvc/pvcCategoricalAbstract.js</url>
-            <line>263</line>
-            <line>271</line>
+            <line>368</line>
+            <line>376</line>
+        </file>
+        <file>
+            <url>src/pvc/pvcBar.js</url>
+            <line>51</line>
+            <line>110</line>
+            <line>146</line>
+            <line>192</line>
+            <line>219</line>
+        </file>
+        <file>
+            <url>src/pvcTest.html</url>
+            <line>121</line>
         </file>
         <file>
             <url>src/pvc/pvcPie.js</url>
-            <line>63</line>
-            <line>119</line>
+            <line>133</line>
         </file>
         <file>
             <url>src/EcoTableComponent.js</url>
@@ -34,8 +35,8 @@
         <file>
             <url>src/pvc/pvcPanel.js</url>
             <line>9</line>
-            <line>132</line>
-            <line>194</line>
+            <line>158</line>
+            <line>220</line>
         </file>
     </editor-bookmarks>
 </project-private>

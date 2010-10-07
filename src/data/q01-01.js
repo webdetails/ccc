@@ -52,7 +52,38 @@ var relational_01 = {
   }]
 };
 
-
+var relational_test = {
+  "resultset":[
+    ["EMEA","2003",52],
+    ["EMEA","2004",73],
+    ["EMEA","2005",28],
+    ["NA","2003",40],
+    ["NA","2004",57],
+    ["NA","2005",22],
+    ["Japan","2003",7],
+    ["Japan","2004",6],
+    ["Japan","2005",3],
+    ["APAC","2003",12],
+    ["APAC","2004",15],
+    ["APAC","2005",11],
+    ["APAC1","2003",12],
+    ["APAC1","2004",15],
+    ["APAC1","2005",11]
+  ],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"TERRITORY"
+  },{
+    "colIndex":1,
+    "colType":"String",
+    "colName":""
+  },{
+    "colIndex":2,
+    "colType":"Integer",
+    "colName":""
+  }]
+  };
 
 var relational_02 = {
   "resultset":[
@@ -106,17 +137,17 @@ var relational_03 = {
 
 var test = {
   "resultset":[["Shipped",2003,3573701.2500000014],
-    ["Resolved",2003,28550.59],
-    ["Cancelled",2003,75132],
-    ["Shipped",2004,4750205],
-    ["Cancelled",2004,187195],
-    ["Resolved",2004,24078],
-    ["On Hold",2004,26260],
-    ["Shipped",2005,1513074],
-    ["Resolved",2005,98089],
-    ["On Hold",2005,152718],
-    ["Disputed",2005 , 72212.86],
-    ["In Process",2005,144729]
+  ["Resolved",2003,28550.59],
+  ["Cancelled",2003,75132],
+  ["Shipped",2004,4750205],
+  ["Cancelled",2004,187195],
+  ["Resolved",2004,24078],
+  ["On Hold",2004,26260],
+  ["Shipped",2005,1513074],
+  ["Resolved",2005,98089],
+  ["On Hold",2005,152718],
+  ["Disputed",2005 , 72212.86],
+  ["In Process",2005,144729]
   ],
   "metadata":[{
     "colIndex":0,
@@ -131,4 +162,4 @@ var test = {
     "colType":"Numeric",
     "colName":"PRICE"
   }]
-  };
+};

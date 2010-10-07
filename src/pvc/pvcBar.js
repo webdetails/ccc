@@ -16,8 +16,8 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
     var _defaults = {
       showValues: true,
       stacked: false,
-      panelSizeRatio: 1,
-      innerBandWidthRatio: 1,
+      panelSizeRatio: 0.9,
+      barSizeRatio: 0.9,
       maxBarSize: 2000,
       originIsZero: true,
       axisOffset: 0.05,
