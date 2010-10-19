@@ -123,11 +123,11 @@
         animate: false,
         title: "Dot chart - Timeseries ",
         titlePosition: "left",
-        titleSize: 40,
+        titleSize: 30,
         legend: true,
         legendPosition: "left",
         legendAlign: "right",
-        legendSize: 20,
+        //legendSize: 20,
 
         orientation: 'vertical',
         timeSeries: true,
@@ -651,8 +651,8 @@
         explodedSliceIndex: 4,
         explodedSliceRadius: 15,
 
-        numberPosition: 0
-        /*
+        numberPosition: 0,
+        
         extensionPoints: {
           base_fillStyle: "red",
           title_fillStyle: "yellow",
@@ -661,11 +661,15 @@
           // titleLabel_bottom: 0,
           // titleLabel_textAlign: "left",
           legend_fillStyle: "green",
-          chart_fillStyle: "#eee"
+          chart_fillStyle: "#eee",
           //pie_strokeStyle: "white"
-          //pie_innerRadius: 10
+          pie_innerRadius: 200,
+          pie_startAngle: function(){
+            var s = this.sibling();
+            return s ? s.endAngle : Math.PI;
+          }
           //pieLabel_textAngle: "0"
-        }*/
+        }
 
       });
 

@@ -221,10 +221,6 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
   create: function(){
 
-    this.chart.basePanel.pvPanel
-    .events("all")
-    .event("mousemove", pv.Behavior.point(Infinity));
-
     var myself = this;
     this.width = this._parent.width;
     this.height = this._parent.height;
@@ -232,6 +228,8 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     this.pvPanel = this._parent.getPvPanel().add(this.type)
     .width(this.width)
     .height(this.height)
+    .events("all")
+    .event("mousemove", pv.Behavior.point(Infinity));
 
     var anchor = this.orientation == "vertical"?"bottom":"left";
 
