@@ -183,7 +183,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
       this.pvBar = this.pvBarPanel.add(pv.Bar)
       .data(function(d){
-        return myself.chart.dataEngine.getValuesForCategoryIdx(d)
+        return myself.chart.dataEngine.getValuesForCategoryIndex(d)
         })
       .fillStyle(this.chart.colors().by(pv.index))
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){

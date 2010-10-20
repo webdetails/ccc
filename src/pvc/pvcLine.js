@@ -249,13 +249,13 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     if (this.stacked){
       
       this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
-      .layers(this.chart.dataEngine.getTransposedValues())
+      .layers(this.chart.dataEngine.getVisibleTransposedValues())
       [this.orientation == "vertical"?"x":"y"](function(){
         if(myself.timeSeries){
-          return tScale(parser.parse(myself.chart.dataEngine.getCategories()[this.index]));
+          return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));
         }
         else{
-          return oScale(myself.chart.dataEngine.getCategories()[this.index]) + oScale.range().band/2;
+          return oScale(myself.chart.dataEngine.getCategoryByIndex(this.index)) + oScale.range().band/2;
         }
       })
       [this.orientation == "vertical"?"y":"x"](function(d){
@@ -273,14 +273,14 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     else{
 
       this.pvScatterPanel = this.pvPanel.add(pv.Panel)
-      .data(pv.range(0,this.chart.dataEngine.getSeriesSize()))
+      .data(this.chart.dataEngine.getVisibleSeriesIndexes())
 
       this.pvArea = this.pvScatterPanel.add(pv.Area)
       .fillStyle(this.showAreas?this.chart.colors().by(pv.parent):null);
 
       this.pvLine = this.pvArea.add(pv.Line)
       .data(function(d){
-        return myself.chart.dataEngine.getObjectsForSeriesIdx(d, this.timeSeries?function(a,b){
+        return myself.chart.dataEngine.getObjectsForSeriesIndex(d, this.timeSeries?function(a,b){
           return parser.parse(a.category) - parser.parse(b.category);
           }: null)
         })
@@ -303,7 +303,13 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     }
 
     this.pvLine
-    .strokeStyle(this.chart.colors().by(pv.parent))
+
+   //  y.by(function(d) d.foo) is equivalent to function(d) y(d.foo)
+
+    .strokeStyle(function(c){
+      return myself.chart.colors(pv.range(myself.chart.dataEngine.getSeriesSize()))(c.serieIndex)
+      //return myself.chart.colors()(function(c) { return this.parent.index; })
+    })
     .text(function(d){
       var v, c;
       var s = myself.chart.dataEngine.getSeries()[this.parent.index]

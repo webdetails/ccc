@@ -169,7 +169,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
    */
   getOrdinalScale: function(){
 
-    var scale = new pv.Scale.ordinal(pv.range(0,this.dataEngine.getCategoriesSize()));
+    var scale = new pv.Scale.ordinal(this.dataEngine.getVisibleCategoriesIndexes());
 
     var size = this.options.orientation=="vertical"?this.basePanel.width:this.basePanel.height;
 
@@ -205,8 +205,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
       min = 0;
     }
     else{
-      max = this.dataEngine.getSeriesAbsoluteMax();
-      min = this.dataEngine.getSeriesAbsoluteMin();
+      max = this.dataEngine.getVisibleSeriesAbsoluteMax();
+      min = this.dataEngine.getVisibleSeriesAbsoluteMin();
 
     }
     if(min > 0 && this.options.originIsZero){
@@ -244,7 +244,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     this.basePanel.height - this.options.xAxisSize;
 
     var parser = pv.Format.date(this.options.timeSeriesFormat);
-    var categories =  this.dataEngine.getCategories().sort(function(a,b){
+    var categories =  this.dataEngine.getVisibleCategories().sort(function(a,b){
       return parser.parse(a) - parser.parse(b)
     });
 

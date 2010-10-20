@@ -150,7 +150,7 @@ pvc.Base = Base.extend({
    *
    */
 
-  render: function(){
+  render: function(bypassAnimation){
 
     if(!this.isPreRendered){
       this.preRender();
@@ -158,7 +158,7 @@ pvc.Base = Base.extend({
 
     this.basePanel.getPvPanel().render();
     
-    if(this.options.animate == true ){
+    if(this.options.animate == true && !bypassAnimation ){
       this.isAnimating = true;
       this.basePanel.getPvPanel().transition()
       .duration( 2000)

@@ -104,16 +104,16 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
 
     var r = pv.min([this.width, this.height])/2 * this.innerGap;
 
-    var sum = this.chart.dataEngine.getSeriesMaxSum();
+    var sum = this.chart.dataEngine.getVisibleSeriesMaxSum();
     
     pvc.log("Radius: "+ r + "; Maximum sum: " + sum);
 
     var a = pv.Scale.linear(0, sum).range(0, 2 * Math.PI);
-    this.data = this.chart.dataEngine.getValuesForSeriesIdx(0);
+    this.data = this.chart.dataEngine.getValuesForSeriesIndex(0);
 
 
     this.pvPie = this.pvPanel.add(pv.Wedge)
-    .data(this.chart.dataEngine.getValuesForSeriesIdx(0))
+    .data(this.chart.dataEngine.getValuesForSeriesIndex(0))
     .bottom(function(d){
       return myself.explodeSlice("cos", a, this.index);
     })

@@ -145,13 +145,21 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       return this.hidden()=="true"?"rgba(200,200,200,1)":"rgba(200,200,200,0.0001)";
     })
     .event("click",function(e){
-      pvc.log("Worked. Toggling visibility of index " + this.index);
-      myself.chart.dataEngine.toggleVisibility(myself.chart.legendSource,this.index);
 
+      return myself.toggleVisibility(this.index);
 
-      this.hidden(this.hidden()=="true"?"false":"true")
-      return this;
     });
+
+    // defined font function
+    var computeFont = function(idx){
+      if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
+        return "9px sans-serif "
+      }
+      else{
+        return "italic 9px sans-serif "
+      }
+
+    }
 
     if(this.drawLine == true && this.drawMarker == true){
       
@@ -173,7 +181,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
       this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
       .textMargin(myself.textMargin)
-      .font("9px sans-serif")
+      .font(function(){
+        return computeFont(this.index)
+      })
     }
     else if(this.drawLine == true){
       
@@ -187,7 +197,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
       this.pvLabel = this.pvRule.anchor("right").add(pv.Label)
       .textMargin(myself.textMargin)
-      .font("9px sans-serif")
+      .font(function(){
+        return computeFont(this.index)
+      })
     }
     else if(this.drawMarker == true){
 
@@ -203,6 +215,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
       this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
       .textMargin(myself.textMargin)
+      .font(function(){
+        return computeFont(this.parent.index)
+      })
     
     }
 
@@ -215,6 +230,18 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     this.extend(this.pvLabel,"legendLabel_");
 
 
+  },
+
+  toggleVisibility: function(idx){
+    
+    pvc.log("Worked. Toggling visibility of index " + idx);
+    this.chart.dataEngine.toggleVisibility(this.chart.legendSource,idx);
+
+    // Rerender chart
+    this.chart.preRender();
+    this.chart.render(true);
+    
+    return this.pvLabel;
   }
 
 
