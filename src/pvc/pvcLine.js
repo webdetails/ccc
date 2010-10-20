@@ -302,13 +302,11 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
     }
 
+    var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()))
+
     this.pvLine
-
-   //  y.by(function(d) d.foo) is equivalent to function(d) y(d.foo)
-
-    .strokeStyle(function(c){
-      return myself.chart.colors(pv.range(myself.chart.dataEngine.getSeriesSize()))(c.serieIndex)
-      //return myself.chart.colors()(function(c) { return this.parent.index; })
+    .strokeStyle(function(d){
+      return colors(d.serieIndex)
     })
     .text(function(d){
       var v, c;
