@@ -130,6 +130,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     .width(this.width)
     .height(this.height)    
 
+
+
     //********** Markers and Lines ***************************
 
     this.pvLegendPanel = this.pvPanel.add(pv.Panel)
@@ -143,7 +145,10 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       return this.hidden()=="true"?"rgba(200,200,200,1)":"rgba(200,200,200,0.0001)";
     })
     .event("click",function(e){
-      pvc.log("Worked: " + this.index);
+      pvc.log("Worked. Toggling visibility of index " + this.index);
+      myself.chart.dataEngine.toggleVisibility(myself.chart.legendSource,this.index);
+
+
       this.hidden(this.hidden()=="true"?"false":"true")
       return this;
     });

@@ -16,6 +16,10 @@ pvc.DataEngine = Base.extend({
   series: null,
   categories: null,
   values: null,
+  hiddenData:{
+    series:{},
+    categories:{}
+  },
 
   constructor: function(chart,metadata, resultset){
 
@@ -78,6 +82,50 @@ pvc.DataEngine = Base.extend({
   },
 
   /*
+   * Returns a serie on the underlying data by an index
+   *
+   */
+
+  getSerieByIdx: function(idx){
+    return (this.series || this.translator.getColumns())[idx];
+  },
+
+
+  /*
+   * Returns an array with the indexes for the series
+   *
+   */
+  getSeriesIndexes: function(){
+    // we'll just return everything
+    return pv.range(this.getSeries().length)
+  },
+
+  /*
+   * Returns an array with the indexes for the visible series
+   *
+   */
+  getVisibleSeriesIndexes: function(){
+
+    var myself=this;
+    return pv.range(this.getSeries().length).filter(function(v,myself){
+      return !this.hiddenData.series[v];
+    });
+  },
+
+  /*
+   * Togles the serie visibility based on an index. Returns true if serie is now
+   * visible, false otherwise.
+   *
+   */
+
+  toggleSerieVisibility: function(idx){
+
+    return this.toggleVisibility("series",idx);
+
+  },
+
+
+  /*
    * Returns the categories on the underlying data
    *
    */
@@ -85,6 +133,69 @@ pvc.DataEngine = Base.extend({
   getCategories: function(){
     return this.categories || this.translator.getRows();
   },
+
+  /*
+   * Returns the categories on the underlying data
+   *
+   */
+
+  getCategoryByIdx: function(idx){
+    return (this.categories || this.translator.getRows())[idx];
+  },
+
+  /*
+   * Returns an array with the indexes for the categories
+   *
+   */
+  getCategoriesIndexes: function(){
+    // we'll just return everything
+    return pv.range(this.getCategories().length)
+  },
+
+  /*
+   * Returns an array with the indexes for the visible categories
+   *
+   */
+  getVisibleCategoriesIndexes: function(){
+
+    var myself=this;
+    return pv.range(this.getCategories().length).filter(function(v,myself){
+      return !this.hiddenData.categories[v];
+    });
+  },
+
+  /*
+   * Togles the category visibility based on an index. Returns true if category is now
+   * visible, false otherwise.
+   *
+   */
+
+  toggleCategoryVisibility: function(idx){
+
+    return this.toggleVisibility("categories",idx);
+
+  },
+
+  /*
+   * Togles the visibility of category os series based on an index.
+   * Returns true if is now visible, false otherwise.
+   *
+   */
+
+  toggleVisibility: function(axis,idx){
+
+    // Accepted values for axis: series|categories
+    pvc.log("Toggling visibility of " + axis + "["+idx+"]");
+
+    if (typeof this.hiddenData[axis][idx] == "undefined"){
+      this.hiddenData[axis][idx] = true;
+    }
+    else{
+      delete this.hiddenData[axis][idx];
+    }
+
+  },
+
 
   /*
    * Returns the values for the dataset
@@ -100,7 +211,7 @@ pvc.DataEngine = Base.extend({
 
   },
 
-   /*
+  /*
    * Returns the transposed values for the dataset
    */
 
@@ -133,7 +244,10 @@ pvc.DataEngine = Base.extend({
     var ar = [];
     this.getValues().map(function(a,i){
       if(typeof a[idx] != "undefined"){
-          ar.push({category: myself.getCategories()[i], value: a[idx]}) ;
+        ar.push({
+          category: myself.getCategories()[i],
+          value: a[idx]
+        }) ;
       }
     })
 
@@ -165,7 +279,10 @@ pvc.DataEngine = Base.extend({
     var ar=[];
     this.getValues()[idx].map(function(a,i){
       if(typeof a != "undefined"){
-          ar.push({serie: myself.getSeries()[i], value: a}) ;
+        ar.push({
+          serie: myself.getSeries()[i],
+          value: a
+        }) ;
       }
     })
     return ar;
@@ -311,16 +428,16 @@ pvc.DataTranslator = Base.extend({
 
   transpose: function(){
 
-     pv.transpose(this.values);
+    pv.transpose(this.values);
   },
 
 
   prepare: function(){
-  // Specific code goes here - override me
+    // Specific code goes here - override me
   },
 
   sort: function(sortFunc){
-  // Specify the sorting data - override me
+    // Specify the sorting data - override me
   }
 
 
@@ -388,7 +505,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
     this.resultset.map(function(l){
 
       myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]] + 1] =
-      pvc.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
+        pvc.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
     })
 
     // Create an inicial line with the categories
