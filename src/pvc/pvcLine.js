@@ -261,8 +261,9 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           return oScale(myself.chart.dataEngine.getCategoryByIndex(this.index)) + oScale.range().band/2;
         }
       })
+      [anchor](lScale(0))
       [this.orientation == "vertical"?"y":"x"](function(d){
-        return myself.chart.animate(0,lScale(d));
+        return myself.chart.animate(0,lScale(d)-lScale(0));
       })
 
       this.pvArea = this.pvScatterPanel.layer.add(pv.Area)

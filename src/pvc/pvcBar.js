@@ -1,6 +1,3 @@
-
-
-
 /**
  * BarChart is the main class for generating... bar charts (another surprise!).
  */
@@ -146,8 +143,9 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       .offset("wiggle")*/
       .layers(this.chart.dataEngine.getVisibleTransposedValues())
       [this.orientation == "vertical"?"y":"x"](function(d){
-        return myself.chart.animate(0, lScale(d||0))
+        return myself.chart.animate(0, lScale(d||0)-lScale(0))
       })
+      [anchor](lScale(0))
       [this.orientation == "vertical"?"x":"y"](oScale.by(pv.index))
 
       this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
@@ -196,7 +194,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       })
       [anchor](lScale(0))
       [pvc.BasePanel.orthogonalLength[anchor]](function(d){
-        return myself.chart.animate(0, lScale(d||0))
+        return myself.chart.animate(0, lScale(d||0) - lScale(0))
       })
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
 
