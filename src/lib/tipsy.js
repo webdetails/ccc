@@ -59,7 +59,7 @@ pv.Behavior.tipsy = function(opts) {
     } else if( this.properties.outerRadius){
       // Wedge
       var angle = this.endAngle() - this.angle()/2
-      var radius = this.outerRadius() - (this.outerRadius() - this.innerRadius())*0.7;
+      var radius = this.outerRadius() - (this.outerRadius() - this.innerRadius())*0.3;
       tip.style.left = Math.floor(this.left() + Math.cos(angle)*radius + t.x) + "px";
       tip.style.top = Math.floor(this.top() + Math.sin(angle)*radius + t.y) + "px";
     }

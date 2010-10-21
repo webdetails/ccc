@@ -112,7 +112,7 @@
 
       });
       dot2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-      dot2.render();
+      //dot2.render();
 
 
       // Test of pvc in standalone mode
@@ -121,15 +121,15 @@
         canvas: "pvcLine1",
         width: 700,
         height: 500,
-        stacked: false,
+        stacked: true,
 
-        animate: false,
+        animate: true,
 
         title: "line chart - horizontal",
         titlePosition: "top",
         titleSize: 40,
         legend: true,
-        legendPosition: "right",
+        legendPosition: "bottom",
         legendAlign: "right",
         legendDrawLine: false,
         legendDrawMarker: true,
@@ -139,8 +139,8 @@
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
 
-        showValues: false,
-        showDots: false,
+        showValues: true,
+        showDots: true,
         showXScale: true,
         //showYScale: true,
         yAxisPosition: "right",

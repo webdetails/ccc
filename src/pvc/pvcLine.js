@@ -244,6 +244,11 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     
     var maxLineSize;
 
+    var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
+    var colorFunc = function(d){
+      // return colors(d.serieIndex)
+      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.parent.index])
+    };
 
     // Stacked?
     if (this.stacked){
@@ -263,10 +268,10 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       })
 
       this.pvArea = this.pvScatterPanel.layer.add(pv.Area)
-      .fillStyle(this.showAreas?this.chart.colors().by(pv.parent):null);
+      .fillStyle(this.showAreas?colorFunc:null);
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
-      .lineWidth(this.showLines?1.5:0);
+      .lineWidth(this.showLines?1.5:0.001);
     //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
       
     }
@@ -276,7 +281,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .data(this.chart.dataEngine.getVisibleSeriesIndexes())
 
       this.pvArea = this.pvScatterPanel.add(pv.Area)
-      .fillStyle(this.showAreas?this.chart.colors().by(pv.parent):null);
+      .fillStyle(this.showAreas?colorFunc:null);
 
       this.pvLine = this.pvArea.add(pv.Line)
       .data(function(d){
@@ -284,7 +289,8 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           return parser.parse(a.category) - parser.parse(b.category);
           }: null)
         })
-      .lineWidth(this.showLines?1.5:0)
+      .lineWidth(this.showLines?1.5:0.001)
+
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
 
         if(myself.timeSeries){
@@ -302,12 +308,9 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
     }
 
-    var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()))
-
+    
     this.pvLine
-    .strokeStyle(function(d){
-      return colors(d.serieIndex)
-    })
+    .strokeStyle(colorFunc)
     .text(function(d){
       var v, c;
       var s = myself.chart.dataEngine.getSeries()[this.parent.index]
@@ -319,7 +322,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
         v = d
         c = myself.chart.dataEngine.getCategories()[this.index]
       };
-      return myself.chart.options.tooltipFormat(s,c,v);
+      return myself.chart.options.tooltipFormat.call(myself,s,c,v);
     })
     .event("point", pv.Behavior.tipsy({
       gravity: "s",
@@ -330,7 +333,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     this.pvDot = this.pvLine.add(pv.Dot)
     .shapeSize(20)
     .lineWidth(1.5)
-    .strokeStyle(this.showDots?this.chart.colors().by(pv.parent):null)
+    .strokeStyle(this.showDots?colorFunc:null)
     .fillStyle(this.showDots?"white":null)
     
 

@@ -1,4 +1,4 @@
-// b8e18ef93d0118b86e203d6b44603a72bf9574b8
+// 40c6f5ffe4b15a3df4723b1de6a55d8730f44c95
 /**
  * @class The built-in Array class.
  * @name Array
@@ -5119,7 +5119,7 @@ pv.SvgScene.expect = function(e, type, attributes, style) {
         if (pv.renderer() != 'svgweb') // svgweb doesn't support removeproperty TODO SVGWEB
             e.style.removeProperty(name);
     }
-    else e.style[name] = value;
+	else e.style.setProperty(name,value,'');
   }
   return e;
 };
@@ -5819,7 +5819,7 @@ pv.SvgScene.dot = function(scenes) {
     };
     if (path) {
       svg.transform = "translate(" + s.left + "," + s.top + ")";
-      if (s.shapeAngle) svg.transform += " rotate(" + 180 * s.shapeAngle / Math.PI + ")";
+      if (s.angle) svg.transform += " rotate(" + 180 * s.shapeAngle / Math.PI + ")";
       svg.d = path;
       e = this.expect(e, "path", svg);
     } else {
@@ -11195,6 +11195,7 @@ pv.Layout.Network.prototype = pv.extend(pv.Layout)
         return v.map(function(d, i) {
             if (typeof d != "object") d = {nodeValue: d};
             d.index = i;
+            d.linkDegree = 0;
             return d;
           });
       })
@@ -11231,9 +11232,6 @@ pv.Layout.Network.prototype.buildImplied = function(s) {
   pv.Layout.prototype.buildImplied.call(this, s);
   if (s.$id >= this.$id) return true;
   s.$id = this.$id;
-  s.nodes.forEach(function(d) {
-      d.linkDegree = 0;
-    });
   s.links.forEach(function(d) {
       var v = d.linkValue;
       (d.sourceNode || (d.sourceNode = s.nodes[d.source])).linkDegree += v;

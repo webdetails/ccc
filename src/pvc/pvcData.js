@@ -291,6 +291,19 @@ pvc.DataEngine = Base.extend({
     })
   },
 
+     /*
+   * Returns the visible values for a given category idx
+   *
+   */
+
+  getVisibleValuesForSeriesIndex: function(idx){
+
+    var series = this.getValuesForSeriesIndex(idx)
+    return this.getVisibleCategoriesIndexes().map(function(idx){
+      return series[idx]
+    })
+  },
+
   /*
    * Returns the object for a given series idx in the form {category: catName, value: val}
    *
@@ -324,6 +337,19 @@ pvc.DataEngine = Base.extend({
 
   getValuesForCategoryIndex: function(idx){
     return this.getValues()[idx];
+  },
+
+   /*
+   * Returns the visible values for a given category idx
+   *
+   */
+
+  getVisibleValuesForCategoryIndex: function(idx){
+
+    var cats = this.getValuesForCategoryIndex(idx);
+    return this.getVisibleSeriesIndexes().map(function(idx){
+      return cats[idx]
+    })
   },
 
 
@@ -369,11 +395,11 @@ pvc.DataEngine = Base.extend({
    *
    */
 
-  getCategoriesMaxSum: function(){
+  getCategoriesMaxSumOfVisibleSeries: function(){
 
     var myself=this;
     return pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
-      return pv.sum(myself.getValuesForCategoryIndex(idx))
+      return pv.sum(myself.getVisibleValuesForCategoryIndex(idx))
     }));
   },
 

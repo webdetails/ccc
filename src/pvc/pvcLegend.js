@@ -151,14 +151,21 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     });
 
     // defined font function
-    var computeFont = function(idx){
+    var computeDecoration = function(idx){
       if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
-        return "9px sans-serif "
+        return "";
       }
       else{
-        return "italic 9px sans-serif "
+        return "line-through"
       }
-
+    }
+    var computeTextStyle = function(idx){
+      if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
+        return "black"
+      }
+      else{
+        return "#ccc"
+      }
     }
 
     if(this.drawLine == true && this.drawMarker == true){
@@ -181,9 +188,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
       this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
       .textMargin(myself.textMargin)
-      .font(function(){
-        return computeFont(this.index)
-      })
     }
     else if(this.drawLine == true){
       
@@ -197,9 +201,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
       this.pvLabel = this.pvRule.anchor("right").add(pv.Label)
       .textMargin(myself.textMargin)
-      .font(function(){
-        return computeFont(this.index)
-      })
+
     }
     else if(this.drawMarker == true){
 
@@ -215,12 +217,16 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
       this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
       .textMargin(myself.textMargin)
-      .font(function(){
-        return computeFont(this.parent.index)
-      })
     
     }
 
+    this.pvLabel
+    .textDecoration(function(){
+      return computeDecoration(this.parent.index)
+    })
+    .textStyle(function(){
+      return computeTextStyle(this.parent.index)
+    })
 
     // Extend legend
     this.extend(this.pvPanel,"legendArea_");

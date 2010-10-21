@@ -10,6 +10,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
   yScale: null,
   xScale: null,
 
+  prevMax: null,
+  prevMin: null,
+
 
   constructor: function(o){
 
@@ -201,7 +204,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     var max, min;
 
     if(this.options.stacked){
-      max = this.dataEngine.getCategoriesMaxSum();
+      max = this.dataEngine.getCategoriesMaxSumOfVisibleSeries();
       min = 0;
     }
     else{
