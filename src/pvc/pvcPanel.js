@@ -47,7 +47,7 @@ pvc.Base = Base.extend({
       },
 
       valueFormat: function(d){
-        return pv.Format.number().fractionDigits(0, 2).format(pv.Format.number().parse(d));
+        return pv.Format.number().fractionDigits(0, 2).format(pv.Format.number().fractionDigits(0, 10).parse(d));
       },
       clickable: false,
       clickAction: function(s, c, v){
