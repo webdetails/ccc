@@ -234,12 +234,10 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     var anchor = this.orientation == "vertical"?"bottom":"left";
 
     // Extend body, resetting axisSizes
-    this.chart.options.yAxisSize = 0;
-    this.chart.options.xAxisSize = 0;
 
-    var lScale = this.chart.getLinearScale();
-    var oScale = this.chart.getOrdinalScale();
-    var tScale = this.chart.getTimeseriesScale();
+    var lScale = this.chart.getLinearScale(true);
+    var oScale = this.chart.getOrdinalScale(true);
+    var tScale = this.chart.getTimeseriesScale(true);
     var parser = pv.Format.date(this.timeSeriesFormat);
     
     var maxLineSize;

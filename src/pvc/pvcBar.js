@@ -109,11 +109,9 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     var anchor = this.orientation == "vertical"?"bottom":"left";
 
     // Extend body, resetting axisSizes
-    this.chart.options.yAxisSize = 0;
-    this.chart.options.xAxisSize = 0;
 
-    var lScale = this.chart.getLinearScale();
-    var oScale = this.chart.getOrdinalScale();
+    var lScale = this.chart.getLinearScale(true);
+    var oScale = this.chart.getOrdinalScale(true);
 
     var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
     var colorFunc = function(d){
