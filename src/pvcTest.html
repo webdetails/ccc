@@ -68,8 +68,8 @@
 
     <h1>Pie</h1>
     <div id="pvcPie1"></div>
-    <div id="pvcPie1"></div>
-    <div id="pvcPie1"></div>
+    <div id="pvcPie2"></div>
+    <div id="pvcPie3"></div>
 
 
 
@@ -626,7 +626,7 @@
       /* Pie chart */
       var pie = new pvc.PieChart({
         // legendPosition: "left",
-        canvas: "pvcPie",
+        canvas: "pvcPie1",
         width: 600,
         height: 400,
         title: "My title",
@@ -661,13 +661,9 @@
           // titleLabel_bottom: 0,
           // titleLabel_textAlign: "left",
           legend_fillStyle: "green",
-          chart_fillStyle: "#eee",
+          chart_fillStyle: "#eee"
           //pie_strokeStyle: "white"
-          pie_innerRadius: 200,
-          pie_startAngle: function(){
-            var s = this.sibling();
-            return s ? s.endAngle : Math.PI;
-          }
+          //pie_innerRadius: 200
           //pieLabel_textAngle: "0"
         }
 

@@ -291,7 +291,7 @@ pvc.DataEngine = Base.extend({
     })
   },
 
-     /*
+  /*
    * Returns the visible values for a given category idx
    *
    */
@@ -339,7 +339,7 @@ pvc.DataEngine = Base.extend({
     return this.getValues()[idx];
   },
 
-   /*
+  /*
    * Returns the visible values for a given category idx
    *
    */
@@ -564,6 +564,11 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
       // Adding a static serie
       this.resultset.map(function(d){
         d.splice(0,0,"Serie");
+      })
+      this.metadata.splice(0,0,{
+        "colIndex":2,
+        "colType":"String",
+        "colName":"Series"
       })
     }
 

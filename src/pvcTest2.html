@@ -68,8 +68,8 @@
 
     <h1>Pie</h1>
     <div id="pvcPie1"></div>
-    <div id="pvcPie1"></div>
-    <div id="pvcPie1"></div>
+    <div id="pvcPie2"></div>
+    <div id="pvcPie3"></div>
 
 
 
@@ -116,10 +116,10 @@
 
 
       // Test of pvc in standalone mode
-      var line = new pvc.LineChart({
+      var line = new pvc.PieChart({
         // legendPosition: "left",
         canvas: "pvcLine1",
-        width: 700,
+        width: 500,
         height: 500,
         stacked: true,
 
@@ -155,42 +155,60 @@
       });
 
       line.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-      line.render();
+      //line.render();
 
-
-      var line2 = new pvc.LineChart({
+      /* Pie chart */
+      var pie = new pvc.PieChart({
         // legendPosition: "left",
-        canvas: "pvcLine1",
-        width: 700,
-        height: 500,
-        title: "line chart - horizontal",
-        titlePosition: "top",
+        canvas: "pvcPie1",
+        width: 600,
+        height: 400,
+        title: "My title",
+        titlePosition: "left",
         titleSize: 40,
         legend: true,
-        legendPosition: "top",
-        legendAlign: "right",
-        drawMarker: false,
-        //legendSize: null,
+        legendPosition: "right", //top, bottom, left, right
+        legendAlign: "right", //left, center, right || top, middle, bottom
+        // legendSize: null,
+        legendDrawLine: true,
+        legendDrawMarker: false,
+        //legendMinMarginX: 8,
+        //legendMinMarginY: 8,
+        //legendTextMargin: 6,
+        legendPadding: 20,
+        legendTextAdjust: 7,
+        //legendShape: "square",
+        //legendMarkerSize: 15,
 
-        orientation: 'vertical',
-        timeSeries: false,
-        timeSeriesFormat: "%Y-%m-%d",
+        innerGap: 0.9,
+        showValues: true,
+        explodedSliceIndex: 4,
+        explodedSliceRadius: 15,
 
-        showValues: false,
-        showDots: false,
-        showXScale: true,
-        //showYScale: true,
-        yAxisPosition: "right",
-        yAxisSize: 30,
-        //xAxisPosition: "bottom",
-        xAxisSize: 30
-        //xAxisFullGrid: true,
-        //yAxisFullGrid: true,
+        numberPosition: 0,
+
+        extensionPoints: {
+          base_fillStyle: "red",
+          title_fillStyle: "yellow",
+          titleLabel_font: "16px sans-serif",
+          // title_strokeStyle: "black",
+          // titleLabel_bottom: 0,
+          // titleLabel_textAlign: "left",
+          legend_fillStyle: "green",
+          chart_fillStyle: "#eee"
+          //pie_strokeStyle: "white"
+          //pie_innerRadius: 200,
+          //pie_startAngle: function(){
+          //  var s = this.sibling();
+          //  return s ? s.endAngle : Math.PI;
+          //}
+          //pieLabel_textAngle: "0"
+        }
 
       });
 
-      line2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-      //line2.render();
+      pie.setData($.extend(true, {},relational_03), {crosstabMode: false, seriesInRows: false});
+      pie.render();
 
 
 
