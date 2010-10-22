@@ -17,7 +17,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
       barSizeRatio: 0.9,
       maxBarSize: 2000,
       originIsZero: true,
-      axisOffset: 0.05,
+      axisOffset: 0,
       orientation: "vertical"
     };
 

@@ -116,7 +116,7 @@
 
 
       // Test of pvc in standalone mode
-      var line = new pvc.PieChart({
+      var line = new pvc.BarChart({
         // legendPosition: "left",
         canvas: "pvcLine1",
         width: 500,
@@ -150,12 +150,12 @@
         xAxisFullGrid: true,
         yAxisFullGrid: true,
 
-        axisOffset: 0.1
+        axisOffset: 0.05
 
       });
 
       line.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-      //line.render();
+      line.render();
 
       /* Pie chart */
       var pie = new pvc.PieChart({
@@ -240,7 +240,7 @@
       });
 
       stackedArea3.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
-      stackedArea3.render();
+      //stackedArea3.render();
 
 
     </script>

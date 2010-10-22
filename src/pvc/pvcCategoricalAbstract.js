@@ -355,12 +355,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
   renderAxis: function(){
 
+    var scaleRange = this.scale.range();
     this.pvRule = this.pvPanel
     .add(pv.Rule)
     .strokeStyle("#aaa")
     [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
-    [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale.range()[0])
-    [pvc.BasePanel.paralelLength[this.anchor]](this.scale.range()[1])
+    [pvc.BasePanel.relativeAnchor[this.anchor]](scaleRange[0])
+    [pvc.BasePanel.paralelLength[this.anchor]](scaleRange[scaleRange.length - 1] + (this.ordinal?scaleRange.band:0))
 
     if (this.ordinal == true){
       this.renderOrdinalAxis();
