@@ -544,7 +544,7 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
     });
     a1.splice(0,0,"x");
 
-    this.values = this.resultset;
+    this.values = this.resultset.slice();
     this.values.splice(0,0,a1);
 
   }

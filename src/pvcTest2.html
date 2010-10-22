@@ -91,7 +91,7 @@
       var dot2 = new pvc.DotChart({
         // legendPosition: "left",
         canvas: "pvcDot2",
-        width: 300,
+        width: 500,
         height: 200,
         animate: false,
         title: "Dot chart - Timeseries ",
@@ -208,8 +208,39 @@
       });
 
       pie.setData($.extend(true, {},relational_03), {crosstabMode: false, seriesInRows: false});
-      pie.render();
+      //pie.render();
 
+      var stackedArea3 = new pvc.StackedAreaChart({
+        // legendPosition: "left",
+        canvas: "pvcStackedArea3",
+        width: 600,
+        height: 400,
+        animate: false,
+        title: "line chart - huge dataset",
+        titlePosition: "top",
+        titleSize: 40,
+        legend: true,
+        legendPosition: "top",
+        legendAlign: "right",
+        //legendSize: null,
+
+        orientation: 'vertical',
+        timeSeries: true,
+        timeSeriesFormat: "%Y-%m-%d",
+
+        yAxisSize: 30,
+        xAxisSize: 30,
+        xAxisFullGrid: true,
+        yAxisFullGrid: true,
+        extensionPoints: {
+          titleLabel_font: "13px serif"
+          //dot_strokeStyle: "white",
+        }
+
+      });
+
+      stackedArea3.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
+      stackedArea3.render();
 
 
     </script>
