@@ -18,6 +18,7 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
       showLines: false,
       showAreas: false,
       showValues: false,
+      showTooltips: true,
       axisOffset: 0.05,
       valuesAnchor: "right",
       stacked: false,
@@ -49,6 +50,7 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
       showLines: this.options.showLines,
       showDots: this.options.showDots,
       showAreas: this.options.showAreas,
+      showTooltips: this.options.showTooltips,
       orientation: this.options.orientation,
       timeSeries: this.options.timeSeries,
       timeSeriesFormat: this.options.timeSeriesFormat
@@ -209,6 +211,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
   showLines: true,
   showDots: true,
   showValues: true,
+  showTooltips: true,
   valuesAnchor: "right",
   orientation: "vertical",
 
@@ -227,9 +230,13 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
     this.pvPanel = this._parent.getPvPanel().add(this.type)
     .width(this.width)
-    .height(this.height)
-    .events("all")
-    .event("mousemove", pv.Behavior.point(Infinity));
+    .height(this.height);
+
+    if(this.showTooltips || this.chart.options.clickable ){
+      this.pvPanel
+      .events("all")
+      .event("mousemove", pv.Behavior.point(Infinity));
+    }
 
     var anchor = this.orientation == "vertical"?"bottom":"left";
 
@@ -323,11 +330,14 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       };
       return myself.chart.options.tooltipFormat.call(myself,s,c,v);
     })
-    .event("point", pv.Behavior.tipsy({
-      gravity: "s",
-      fade: true
-    }));
 
+    if(this.showTooltips){
+      this.pvLine
+      .event("point", pv.Behavior.tipsy({
+        gravity: "s",
+        fade: true
+      }));
+    }
 
     this.pvDot = this.pvLine.add(pv.Dot)
     .shapeSize(20)

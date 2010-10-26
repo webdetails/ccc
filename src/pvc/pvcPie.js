@@ -19,6 +19,7 @@ pvc.PieChart = pvc.Base.extend({
       innerGap: 0.9,
       explodedSliceRadius: 0,
       explodedSliceIndex: null,
+      showTooltips: true,
       tooltipFormat: function(s,c,v){
         return c+":  " + v + " (" + Math.round(v/this.sum*100,1) + "%)";
       }
@@ -42,7 +43,8 @@ pvc.PieChart = pvc.Base.extend({
       innerGap: this.options.innerGap,
       explodedSliceRadius: this.options.explodedSliceRadius,
       explodedSliceIndex: this.options.explodedSliceIndex,
-      showValues: this.options.showValues
+      showValues: this.options.showValues,
+      showTooltips: this.options.showTooltips
     });
 
     this.pieChartPanel.appendTo(this.basePanel); // Add it
@@ -80,6 +82,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
   innerGap: 0.9,
   explodedSliceRadius: 0,
   explodedSliceIndex: null,
+  showTooltips: true,
   showValues: true,
 
   sum: 0,
@@ -139,10 +142,15 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
       var c = myself.chart.dataEngine.getCategories()[this.index]
       return myself.chart.options.tooltipFormat.call(myself,s,c,v);
     })
-    .event("mouseover", pv.Behavior.tipsy({
-      gravity: "s",
-      fade: true
-    }));
+
+    if(this.showTooltips){
+      this.pvPie
+      .event("mouseover", pv.Behavior.tipsy({
+        gravity: "s",
+        fade: true
+      }));
+
+    }
 
 
     if (this.chart.options.clickable){
