@@ -176,7 +176,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     var xAxisSize = bypassAxis?0:this.options.xAxisSize;
 
 
-    var scale = new pv.Scale.ordinal(this.dataEngine.getVisibleCategoriesIndexes());
+    var scale = new pv.Scale.ordinal(this.dataEngine.getVisibleCategories());
 
     var size = this.options.orientation=="vertical"?this.basePanel.width:this.basePanel.height;
 
@@ -383,7 +383,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     [pvc.BasePanel.paralelLength[this.anchor]](null)
     [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
     [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
-      return myself.scale(this.index) + myself.scale.range().band/2;
+      return myself.scale(d) + myself.scale.range().band/2;
     })
     .textAlign("center")
     .textBaseline("middle")

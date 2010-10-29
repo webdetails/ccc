@@ -28,7 +28,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   minMarginX: 8,
   minMarginY: 20,
   textMargin: 6,
-  padding: 20,
+  padding: 24,
   textAdjust: 7,
   shape: "square",
   markerSize: 15,

@@ -244,7 +244,11 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
     var lScale = this.chart.getLinearScale(true);
     var oScale = this.chart.getOrdinalScale(true);
-    var tScale = this.chart.getTimeseriesScale(true);
+    var tScale;
+    if(this.timeSeries){
+      tScale = chart.getTimeseriesScale(true);
+    }
+    
     var parser = pv.Format.date(this.timeSeriesFormat);
     
     var maxLineSize;
@@ -340,10 +344,10 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     }
 
     this.pvDot = this.pvLine.add(pv.Dot)
-    .shapeSize(20)
+    .shapeSize(12)
     .lineWidth(1.5)
     .strokeStyle(this.showDots?colorFunc:null)
-    .fillStyle(this.showDots?"white":null)
+    .fillStyle(this.showDots?colorFunc:null)
     
 
     if (this.chart.options.clickable){
