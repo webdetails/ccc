@@ -246,7 +246,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     var oScale = this.chart.getOrdinalScale(true);
     var tScale;
     if(this.timeSeries){
-      tScale = chart.getTimeseriesScale(true);
+      tScale = this.chart.getTimeseriesScale(true);
     }
     
     var parser = pv.Format.date(this.timeSeriesFormat);
