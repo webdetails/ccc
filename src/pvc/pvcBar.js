@@ -205,7 +205,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     // Labels:
 
     this.pvBar
-    .title(function(d){
+    .text(function(d){
       var v = myself.chart.options.valueFormat(d);
       var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index]
       var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index]
