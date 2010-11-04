@@ -87,7 +87,7 @@ pvc.DataEngine = Base.extend({
    */
 
   getSerieByIndex: function(idx){
-    return (this.series || this.translator.getColumns())[idx];
+    return this.getSeries()[idx];
   },
 
 
@@ -145,7 +145,23 @@ pvc.DataEngine = Base.extend({
    */
 
   getCategories: function(){
-    return this.categories || this.translator.getRows();
+
+    if( this.categories == null ){
+
+      if(this.chart.options.timeSeries){
+        var parser = pv.Format.date(this.chart.options.timeSeriesFormat);
+        this.categories = this.translator.getRows().sort(function(a,b){
+          return parser.parse(a) - parser.parse(b)
+        });
+
+      }
+      else{
+        this.categories = this.translator.getRows()
+      }
+
+    }
+
+    return this.categories;
   },
 
   /*
@@ -154,7 +170,7 @@ pvc.DataEngine = Base.extend({
    */
 
   getCategoryByIndex: function(idx){
-    return (this.categories || this.translator.getRows())[idx];
+    return this.getCategories()[idx];
   },
 
   /*
@@ -398,9 +414,11 @@ pvc.DataEngine = Base.extend({
   getCategoriesMaxSumOfVisibleSeries: function(){
 
     var myself=this;
-    return pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
-      return pv.sum(myself.getVisibleValuesForCategoryIndex(idx))
+    var max = pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
+      return pv.sum(myself.getVisibleValuesForCategoryIndex(idx).filter(pvc.nonEmpty))
     }));
+    pvc.log("getCategoriesMaxSumOfVisibleSeries: " + max);
+    return max;
   },
 
   /**
@@ -413,9 +431,11 @@ pvc.DataEngine = Base.extend({
   getVisibleSeriesMaxSum: function(){
 
     var myself=this;
-    return pv.max(this.getVisibleSeriesIndexes().map(function(idx){
-      return pv.sum(myself.getValuesForSeriesIndex(idx))
+    var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
+      return pv.sum(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty))
     }));
+    pvc.log("getVisibleSeriesMaxSum: " + max);
+    return max;
   },
 
   /*
@@ -424,10 +444,11 @@ pvc.DataEngine = Base.extend({
   getVisibleSeriesAbsoluteMax: function(){
 
     var myself=this;
-    return pv.max(this.getVisibleSeriesIndexes().map(function(idx){
+    var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
       return pv.max(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty))
     }));
-
+    pvc.log("getVisibleSeriesAbsoluteMax: " + max);
+    return max;
   },
 
   /*
@@ -436,10 +457,11 @@ pvc.DataEngine = Base.extend({
   getVisibleSeriesAbsoluteMin: function(){
 
     var myself=this;
-    return pv.min(this.getVisibleSeriesIndexes().map(function(idx){
+    var min = pv.min(this.getVisibleSeriesIndexes().map(function(idx){
       return pv.min(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty))
     }));
-
+    pvc.log("getVisibleSeriesAbsoluteMin: " + min);
+    return min;
   },
 
 

@@ -88,159 +88,40 @@
 
       Dashboards.init([textElement]);
 
-      var dot2 = new pvc.DotChart({
-        // legendPosition: "left",
-        canvas: "pvcDot2",
-        width: 500,
+
+      var bar2 = new pvc.BarChart({
+        canvas: "pvcBar2",
+        width: 300,
         height: 200,
-        animate: false,
-        title: "Dot chart - Timeseries ",
-        titlePosition: "left",
-        titleSize: 30,
+        title: "Stacked Bar chart",
+        titlePosition: "bottom",
+        titleSize: 20,
         legend: true,
         legendPosition: "left",
-        legendAlign: "right",
-        //legendSize: 20,
+        legendSize: null,
 
         orientation: 'vertical',
-        timeSeries: true,
-        timeSeriesFormat: "%Y-%m-%d",
-
-        showValues: true,
-        valuesAnchor: "left",
-        axisOffset: 0.2
-
-      });
-      dot2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-      //dot2.render();
-
-
-      // Test of pvc in standalone mode
-      var line = new pvc.BarChart({
-        // legendPosition: "left",
-        canvas: "pvcLine1",
-        width: 500,
-        height: 500,
         stacked: true,
-
-        animate: true,
-
-        title: "line chart - horizontal",
-        titlePosition: "top",
-        titleSize: 40,
-        legend: true,
-        legendPosition: "bottom",
-        legendAlign: "right",
-        legendDrawLine: false,
-        legendDrawMarker: true,
-        //legendSize: null,
-
-        orientation: 'vertical',
-        timeSeries: false,
-        timeSeriesFormat: "%Y-%m-%d",
+        showTooltips: false,
+        //maxBarSize: 100,
 
         showValues: true,
-        showDots: true,
         showXScale: true,
-        //showYScale: true,
+        showYScale: true,
         yAxisPosition: "right",
-        yAxisSize: 30,
-        //xAxisPosition: "bottom",
-        xAxisSize: 30,
-        xAxisFullGrid: true,
-        yAxisFullGrid: true,
+        yAxisSize: 20,
+        xAxisPosition: "bottom",
+        xAxisSize: 20,
+        xAxisFullGrid: false,
+        yAxisFullGrid: false,
 
-        axisOffset: 0.05
-
-      });
-
-      line.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-      line.render();
-
-      /* Pie chart */
-      var pie = new pvc.PieChart({
-        // legendPosition: "left",
-        canvas: "pvcPie1",
-        width: 600,
-        height: 400,
-        title: "My title",
-        titlePosition: "left",
-        titleSize: 40,
-        legend: true,
-        legendPosition: "right", //top, bottom, left, right
-        legendAlign: "right", //left, center, right || top, middle, bottom
-        // legendSize: null,
-        legendDrawLine: true,
-        legendDrawMarker: false,
-        //legendMinMarginX: 8,
-        //legendMinMarginY: 8,
-        //legendTextMargin: 6,
-        legendPadding: 20,
-        legendTextAdjust: 7,
-        //legendShape: "square",
-        //legendMarkerSize: 15,
-
-        innerGap: 0.9,
-        showValues: true,
-        explodedSliceIndex: 4,
-        explodedSliceRadius: 15,
-
-        numberPosition: 0,
-
-        extensionPoints: {
-          base_fillStyle: "red",
-          title_fillStyle: "yellow",
-          titleLabel_font: "16px sans-serif",
-          // title_strokeStyle: "black",
-          // titleLabel_bottom: 0,
-          // titleLabel_textAlign: "left",
-          legend_fillStyle: "green",
-          chart_fillStyle: "#eee"
-          //pie_strokeStyle: "white"
-          //pie_innerRadius: 200,
-          //pie_startAngle: function(){
-          //  var s = this.sibling();
-          //  return s ? s.endAngle : Math.PI;
-          //}
-          //pieLabel_textAngle: "0"
-        }
+        panelSizeRatio: 0.9,
+        barSizeRatio: 0.8
 
       });
 
-      pie.setData($.extend(true, {},relational_03), {crosstabMode: false, seriesInRows: false});
-      //pie.render();
-
-      var stackedArea3 = new pvc.StackedAreaChart({
-        // legendPosition: "left",
-        canvas: "pvcStackedArea3",
-        width: 600,
-        height: 400,
-        animate: false,
-        title: "line chart - huge dataset",
-        titlePosition: "top",
-        titleSize: 40,
-        legend: true,
-        legendPosition: "top",
-        legendAlign: "right",
-        //legendSize: null,
-
-        orientation: 'vertical',
-        timeSeries: true,
-        timeSeriesFormat: "%Y-%m-%d",
-
-        yAxisSize: 30,
-        xAxisSize: 30,
-        xAxisFullGrid: true,
-        yAxisFullGrid: true,
-        extensionPoints: {
-          titleLabel_font: "13px serif"
-          //dot_strokeStyle: "white",
-        }
-
-      });
-
-      stackedArea3.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
-      //stackedArea3.render();
+      bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+      bar2.render();
 
 
     </script>

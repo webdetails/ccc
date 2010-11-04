@@ -30,7 +30,13 @@ pvc.sumOrSet = function(v1,v2){
 
 pvc.nonEmpty = function(d){
   return typeof d != "undefined"
-  }
+}
+
+pvc.padMatrixWithZeros = function(d){
+  return d.map(function(v){return v.map(function(a){
+      return typeof a == "undefined"?0:a;
+    })})
+}
 
 
 /**

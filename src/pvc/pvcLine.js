@@ -263,7 +263,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     if (this.stacked){
       
       this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
-      .layers(this.chart.dataEngine.getVisibleTransposedValues())
+      .layers(pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues()))
       [this.orientation == "vertical"?"x":"y"](function(){
         if(myself.timeSeries){
           return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));

@@ -144,7 +144,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       .orient(anchor)
       .order("inside-out")
       .offset("wiggle")*/
-      .layers(this.chart.dataEngine.getVisibleTransposedValues())
+      .layers(pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues()))
       [this.orientation == "vertical"?"y":"x"](function(d){
         return myself.chart.animate(0, lScale(d||0)-lScale(0))
       })
@@ -153,7 +153,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
       this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
       .data(function(d){
-        return d||0
+        return d
       })
       //[anchor](lScale(0))
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
