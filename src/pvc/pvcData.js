@@ -279,9 +279,7 @@ pvc.DataEngine = Base.extend({
   getTransposedValues: function(){
 
 
-    return pv.transpose(this.getValues().map(function(d){
-      return d.slice()
-    }));
+    return pv.transpose(pvc.cloneMatrix(this.getValues()));
 
   },
 
@@ -568,9 +566,7 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
     });
     a1.splice(0,0,"x");
 
-    this.values = this.resultset.map(function(d){
-      return d.slice()
-    });
+    this.values = pvc.cloneMatrix(this.resultset);
     this.values.splice(0,0,a1);
 
   }
