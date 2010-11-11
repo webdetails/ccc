@@ -19,8 +19,9 @@ pvc.PieChart = pvc.Base.extend({
       innerGap: 0.9,
       explodedSliceRadius: 0,
       explodedSliceIndex: null,
+      showTooltips: true,
       tooltipFormat: function(s,c,v){
-        return c+":  " + v;
+        return c+":  " + v + " (" + Math.round(v/this.sum*100,1) + "%)";
       }
     };
 
@@ -42,7 +43,8 @@ pvc.PieChart = pvc.Base.extend({
       innerGap: this.options.innerGap,
       explodedSliceRadius: this.options.explodedSliceRadius,
       explodedSliceIndex: this.options.explodedSliceIndex,
-      showValues: this.options.showValues
+      showValues: this.options.showValues,
+      showTooltips: this.options.showTooltips
     });
 
     this.pieChartPanel.appendTo(this.basePanel); // Add it
@@ -80,8 +82,10 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
   innerGap: 0.9,
   explodedSliceRadius: 0,
   explodedSliceIndex: null,
+  showTooltips: true,
   showValues: true,
 
+  sum: 0,
 
   constructor: function(chart, options){
 
@@ -102,18 +106,23 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
 
     // Add the chart. For a pie chart we have one series only
 
+    var colors = this.chart.colors(pv.range(this.chart.dataEngine.getCategoriesSize()));
+    var colorFunc = function(d){
+      // return colors(d.serieIndex)
+      return colors(myself.chart.dataEngine.getVisibleCategoriesIndexes()[this.index])
+    };
+    
+    this.data = this.chart.dataEngine.getVisibleValuesForSeriesIndex(0);
+
+    this.sum = pv.sum(this.data);
+    var a = pv.Scale.linear(0, this.sum).range(0, 2 * Math.PI);
     var r = pv.min([this.width, this.height])/2 * this.innerGap;
 
-    var sum = this.chart.dataEngine.getSeriesMaxSum();
-    
-    pvc.log("Radius: "+ r + "; Maximum sum: " + sum);
-
-    var a = pv.Scale.linear(0, sum).range(0, 2 * Math.PI);
-    this.data = this.chart.dataEngine.getValuesForSeriesIdx(0);
+    pvc.log("Radius: "+ r + "; Maximum sum: " + this.sum);
 
 
     this.pvPie = this.pvPanel.add(pv.Wedge)
-    .data(this.chart.dataEngine.getValuesForSeriesIdx(0))
+    .data(this.data)
     .bottom(function(d){
       return myself.explodeSlice("cos", a, this.index);
     })
@@ -123,20 +132,25 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     .outerRadius(function(d){
       return myself.chart.animate(0 , r)
     })
-    .fillStyle(this.chart.colors().by(pv.index))
+    .fillStyle(colorFunc)
     .angle(function(d){
       return a(d)
     })
-    .title(function(d){
+    .text(function(d){
       var v = myself.chart.options.valueFormat(d);
       var s = myself.chart.dataEngine.getSeries()[this.parent.index]
       var c = myself.chart.dataEngine.getCategories()[this.index]
-      return myself.chart.options.tooltipFormat(s,c,v);
+      return myself.chart.options.tooltipFormat.call(myself,s,c,v);
     })
-    .event("mouseover", pv.Behavior.tipsy({
-      gravity: "s",
-      fade: true
-    }));
+
+    if(this.showTooltips){
+      this.pvPie
+      .event("mouseover", pv.Behavior.tipsy({
+        gravity: "s",
+        fade: true
+      }));
+
+    }
 
 
     if (this.chart.options.clickable){

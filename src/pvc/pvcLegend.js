@@ -22,13 +22,13 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
   anchor: "bottom",
   align: "left",
-  legendPanel: null,
+  pvLegendPanel: null,
   legend: null,
   legendSize: null,
   minMarginX: 8,
-  minMarginY: 8,
+  minMarginY: 20,
   textMargin: 6,
-  padding: 20,
+  padding: 24,
   textAdjust: 7,
   shape: "square",
   markerSize: 15,
@@ -53,8 +53,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     //pvc.log("Debug PMartins");
 
     var data = this.chart.legendSource=="series"?
-      this.chart.dataEngine.getSeries():
-      this.chart.dataEngine.getCategories();
+    this.chart.dataEngine.getSeries():
+    this.chart.dataEngine.getCategories();
 
 
 
@@ -117,7 +117,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         myself.minMarginY = myself.height - realysize;
       }
       x = myself.minMarginX;
-      y = function(){return myself.height - this.index*myself.padding - myself.minMarginY;}
+      y = function(){
+        return myself.height - this.index*myself.padding - myself.minMarginY;
+      }
     }
 
     if(this.width == null){
@@ -128,67 +130,127 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     .width(this.width)
     .height(this.height)    
 
+
+
     //********** Markers and Lines ***************************
 
+    this.pvLegendPanel = this.pvPanel.add(pv.Panel)
+    .data(data)
+    .def("hidden","false")
+    .left(x)
+    .bottom(y)
+    .height(this.markerSize)
+    .cursor("pointer")
+    .fillStyle(function(){
+      return this.hidden()=="true"?"rgba(200,200,200,1)":"rgba(200,200,200,0.0001)";
+    })
+    .event("click",function(e){
+
+      return myself.toggleVisibility(this.index);
+
+    });
+
+    // defined font function
+    var computeDecoration = function(idx){
+      if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
+        return "";
+      }
+      else{
+        return "line-through"
+      }
+    }
+    var computeTextStyle = function(idx){
+      if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
+        return "black"
+      }
+      else{
+        return "#ccc"
+      }
+    }
 
     if(this.drawLine == true && this.drawMarker == true){
       
-      this.pvRule = this.pvPanel.add(pv.Rule)
-      .data(data)
+      this.pvRule = this.pvLegendPanel.add(pv.Rule)
+      .left(0)
       .width(this.markerSize)
       .lineWidth(1)
-      .strokeStyle(function(){return c(this.index);})
-      .left(x)
-      .bottom(y)
+      .strokeStyle(function(){
+        return c(this.index);
+      })
 
       this.pvDot = this.pvRule.anchor("center").add(pv.Dot)
-      .size(this.markerSize)
-      .shape(this.shape)
-      .lineWidth(0)
-      .fillStyle(function(){return c(this.index);})
-
-      this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
-      .textMargin(myself.textMargin)
-      .font("9px sans-serif")
-    }
-    else if(this.drawLine == true){
-      
-      this.pvRule = this.pvPanel.add(pv.Rule)
-      .data(data)
-      .width(this.markerSize)
-      .lineWidth(1)
-      .strokeStyle(function(){return c(this.index);})
-      .left(x)
-      .bottom(y)
-
-      this.pvLabel = this.pvRule.anchor("right").add(pv.Label)
-      .textMargin(myself.textMargin)
-      .font("9px sans-serif")
-    }
-    else if(this.drawMarker == true){
-      this.pvDot = this.pvPanel.add(pv.Dot)
-      .data(data)
       .shapeSize(this.markerSize)
       .shape(this.shape)
       .lineWidth(0)
-      .fillStyle(function(){return c(this.index);})
-      .left(x)
-      .bottom(y)
+      .fillStyle(function(){
+        return c(this.parent.index);
+      })
 
       this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
-      .data(data)
       .textMargin(myself.textMargin)
-      .font("9px sans-serif")
+    }
+    else if(this.drawLine == true){
+      
+      this.pvRule = this.pvLegendPanel.add(pv.Rule)
+      .left(0)
+      .width(this.markerSize)
+      .lineWidth(1)
+      .strokeStyle(function(){
+        return c(this.parent.index);
+      })
+
+      this.pvLabel = this.pvRule.anchor("right").add(pv.Label)
+      .textMargin(myself.textMargin)
+
+    }
+    else if(this.drawMarker == true){
+
+      this.pvDot = this.pvLegendPanel.add(pv.Dot)
+      .left(this.markerSize/2)
+      .shapeSize(this.markerSize)
+      .shape(this.shape)
+      .lineWidth(0)
+      .fillStyle(function(){
+        return c(this.parent.index);
+      })
+
+
+      this.pvLabel = this.pvDot.anchor("right").add(pv.Label)
+      .textMargin(myself.textMargin)
+    
     }
 
+    this.pvLabel
+    .textDecoration(function(){
+      return computeDecoration(this.parent.index)
+    })
+    .textStyle(function(){
+      return computeTextStyle(this.parent.index)
+    })
 
     // Extend legend
-    this.extend(this.pvPanel,"legend_");
+    this.extend(this.pvPanel,"legendArea_");
+    this.extend(this.pvLegendPanel,"legendPanel_");
     this.extend(this.pvRule,"legendRule_");
     this.extend(this.pvDot,"legendDot_");
     this.extend(this.pvLabel,"legendLabel_");
 
 
+  },
+
+  toggleVisibility: function(idx){
+    
+    pvc.log("Worked. Toggling visibility of index " + idx);
+    this.chart.dataEngine.toggleVisibility(this.chart.legendSource,idx);
+
+    // Forcing removal of tipsy legends
+    $(".tipsy").remove();
+
+    // Rerender chart
+    this.chart.preRender();
+    this.chart.render(true);
+    
+    return this.pvLabel;
   }
 
 

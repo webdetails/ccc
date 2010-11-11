@@ -1,6 +1,3 @@
-
-
-
 /**
  * BarChart is the main class for generating... bar charts (another surprise!).
  */
@@ -16,11 +13,12 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
     var _defaults = {
       showValues: true,
       stacked: false,
-      panelSizeRatio: 1,
-      innerBandWidthRatio: 1,
+      panelSizeRatio: 0.9,
+      barSizeRatio: 0.9,
       maxBarSize: 2000,
       originIsZero: true,
-      axisOffset: 0.05,
+      axisOffset: 0,
+      showTooltips: true,
       orientation: "vertical"
     };
 
@@ -44,6 +42,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
       barSizeRatio: this.options.barSizeRatio,
       maxBarSize: this.options.maxBarSize,
       showValues: this.options.showValues,
+      showTooltips: this.options.showTooltips,
       orientation: this.options.orientation
     });
 
@@ -85,6 +84,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
   stacked: false,
   panelSizeRatio: 1,
   barSizeRatio: 0.5,
+  showTooltips: true,
   maxBarSize: 200,
   showValues: true,
   orientation: "vertical",
@@ -109,13 +109,17 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     var anchor = this.orientation == "vertical"?"bottom":"left";
 
     // Extend body, resetting axisSizes
-    this.chart.options.yAxisSize = 0;
-    this.chart.options.xAxisSize = 0;
 
-    var lScale = this.chart.getLinearScale();
-    var oScale = this.chart.getOrdinalScale();
-    
-    
+    var lScale = this.chart.getLinearScale(true);
+    var oScale = this.chart.getOrdinalScale(true);
+
+    var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
+    var colorFunc = function(d){
+      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.parent.index])
+    };
+    var colorFunc2 = function(d){
+      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index])
+    };
     var maxBarSize;
 
 
@@ -140,18 +144,20 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       .orient(anchor)
       .order("inside-out")
       .offset("wiggle")*/
-      .layers(this.chart.dataEngine.getTransposedValues())
+      .layers(pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues()))
       [this.orientation == "vertical"?"y":"x"](function(d){
-        return myself.chart.animate(0, lScale(d||0))
+        return myself.chart.animate(0, lScale(d||0)-lScale(0))
       })
+      [anchor](lScale(0))
       [this.orientation == "vertical"?"x":"y"](oScale.by(pv.index))
 
       this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
       .data(function(d){
-        return d||0
+        return d
       })
+      //[anchor](lScale(0))
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
-      .fillStyle(this.chart.colors().by(pv.parent))
+      .fillStyle(colorFunc)
 
     /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
         return this.parent.left() + barPositionOffset
@@ -160,7 +166,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     }
     else{
 
-      var bScale = new pv.Scale.ordinal(pv.range(0,this.chart.dataEngine.getSeriesSize()))
+      var bScale = new pv.Scale.ordinal(this.chart.dataEngine.getVisibleSeriesIndexes())
       .splitBanded(0, oScale.range().band, this.barSizeRatio);
 
       // We need to take into account the maxValue if our band is higher than that
@@ -172,7 +178,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       }
 
       this.pvBarPanel = this.pvPanel.add(pv.Panel)
-      .data(pv.range(0,this.chart.dataEngine.getCategoriesSize()))
+      .data(this.chart.dataEngine.getVisibleCategoriesIndexes())
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
         return oScale(this.index) + barPositionOffset;
       })
@@ -183,15 +189,15 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
       this.pvBar = this.pvBarPanel.add(pv.Bar)
       .data(function(d){
-        return myself.chart.dataEngine.getValuesForCategoryIdx(d)
+        return myself.chart.dataEngine.getVisibleValuesForCategoryIndex(d)
         })
-      .fillStyle(this.chart.colors().by(pv.index))
+      .fillStyle(colorFunc2)
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-        return bScale(this.index) + barPositionOffset;
+        return bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + barPositionOffset;
       })
-      [anchor](0)
+      [anchor](lScale(0))
       [pvc.BasePanel.orthogonalLength[anchor]](function(d){
-        return myself.chart.animate(0, lScale(d||0))
+        return myself.chart.animate(0, lScale(d||0) - lScale(0))
       })
       [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
 
@@ -199,17 +205,22 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     // Labels:
 
     this.pvBar
-    .title(function(d){
+    .text(function(d){
       var v = myself.chart.options.valueFormat(d);
       var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index]
       var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index]
-      return myself.chart.options.tooltipFormat(s,c, v);
+      return myself.chart.options.tooltipFormat.call(myself,s,c,v);
     
     })
-    .event("mouseover", pv.Behavior.tipsy({
-      gravity: "s",
-      fade: true
-    }));
+
+    if(this.showTooltips){
+      this.pvBar
+      .event("mouseover", pv.Behavior.tipsy({
+        gravity: "s",
+        fade: true
+      }));
+    }
+
 
     if (this.chart.options.clickable){
       this.pvBar

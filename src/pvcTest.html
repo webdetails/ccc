@@ -68,8 +68,8 @@
 
     <h1>Pie</h1>
     <div id="pvcPie1"></div>
-    <div id="pvcPie1"></div>
-    <div id="pvcPie1"></div>
+    <div id="pvcPie2"></div>
+    <div id="pvcPie3"></div>
 
 
 
@@ -106,13 +106,14 @@
         yAxisSize: 30,
         xAxisSize: 30,
         
-        orientation: 'vertical'
-        /*extensionPoints: {
-          xAxisLabel_text: function(d){return d.substr(5)}
-        }*/
+        orientation: 'vertical',
+        extensionPoints: {
+          noDataMessage_text: "Oops! Data missing"
+          /*xAxisLabel_text: function(d){return d.substr(5)}*/
+        }
       });
 
-      dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
+      //dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
       dot1.render();
 
       var dot2 = new pvc.DotChart({
@@ -123,11 +124,12 @@
         animate: false,
         title: "Dot chart - Timeseries ",
         titlePosition: "left",
-        titleSize: 40,
+        titleSize: 30,
         legend: true,
         legendPosition: "left",
         legendAlign: "right",
-        legendSize: 20,
+        showTooltips: false,
+        //legendSize: 20,
 
         orientation: 'vertical',
         timeSeries: true,
@@ -148,7 +150,7 @@
         width: 300,
         height: 200,
         animate: false,
-        title: "Dot chart - Timeseries with extra options",
+        title: "Dot chart - Extra options",
         titlePosition: "bottom",
         titleSize: 40,
         legend: true,
@@ -204,7 +206,7 @@
         showDots: false,
         showXScale: true,
         //showYScale: true,
-        yAxisPosition: "left",
+        yAxisPosition: "right",
         yAxisSize: 30,
         //xAxisPosition: "bottom",
         xAxisSize: 30
@@ -222,7 +224,7 @@
         width: 300,
         height: 200,
         animate: false,
-        title: "line chart - Timeseries with dots",
+        title: "line chart - standard with dots",
         titlePosition: "top",
         titleSize: 40,
         legend: true,
@@ -568,6 +570,7 @@
 
         orientation: 'vertical',
         stacked: true,
+        showTooltips: false,
         //maxBarSize: 100,
 
         showValues: true,
@@ -626,7 +629,7 @@
       /* Pie chart */
       var pie = new pvc.PieChart({
         // legendPosition: "left",
-        canvas: "pvcPie",
+        canvas: "pvcPie1",
         width: 600,
         height: 400,
         title: "My title",
@@ -638,6 +641,7 @@
         // legendSize: null,
         legendDrawLine: true,
         legendDrawMarker: false,
+        showTooltips: true,
         //legendMinMarginX: 8,
         //legendMinMarginY: 8,
         //legendTextMargin: 6,
@@ -651,8 +655,8 @@
         explodedSliceIndex: 4,
         explodedSliceRadius: 15,
 
-        numberPosition: 0
-        /*
+        numberPosition: 0,
+        
         extensionPoints: {
           base_fillStyle: "red",
           title_fillStyle: "yellow",
@@ -663,9 +667,9 @@
           legend_fillStyle: "green",
           chart_fillStyle: "#eee"
           //pie_strokeStyle: "white"
-          //pie_innerRadius: 10
+          //pie_innerRadius: 200
           //pieLabel_textAngle: "0"
-        }*/
+        }
 
       });
 
