@@ -29,7 +29,7 @@ pvc.sumOrSet = function(v1,v2){
 }
 
 pvc.nonEmpty = function(d){
-  return typeof d != "undefined"
+  return typeof d != "undefined" && d !== null;
 }
 
 pvc.padMatrixWithZeros = function(d){

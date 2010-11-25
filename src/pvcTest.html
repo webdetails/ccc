@@ -106,13 +106,14 @@
         yAxisSize: 30,
         xAxisSize: 30,
         
-        orientation: 'vertical'
-        /*extensionPoints: {
-          xAxisLabel_text: function(d){return d.substr(5)}
-        }*/
+        orientation: 'vertical',
+        extensionPoints: {
+          noDataMessage_text: "Oops! Data missing"
+          /*xAxisLabel_text: function(d){return d.substr(5)}*/
+        }
       });
 
-      dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
+      //dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
       dot1.render();
 
       var dot2 = new pvc.DotChart({
