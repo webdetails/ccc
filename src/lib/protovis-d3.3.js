@@ -952,11 +952,12 @@ pv.Format.number = function() {
   format.parse = function(x) {
     var re = pv.Format.re;
 
-    /* Remove leading and trailing padding. Split on the decimal separator. */
-    var s = String(x)
-        .replace(new RegExp("^(" + re(padi) + ")*"), "")
-        .replace(new RegExp("(" + re(padf) + ")*$"), "")
-        .split(decimal);
+    /* Remove leading and trailing padding. Split on the decimal separator, if exists. */
+    var s = String(x).split(decimal);
+    if(s.length == 1)
+      s[1]="";
+    s[0].replace(new RegExp("^(" + re(padi) + ")*"), "");
+    s[1].replace(new RegExp("(" + re(padf) + ")*$"), "")
 
     /* Remove grouping and truncate the integral part. */
     var i = s[0].replace(new RegExp(re(group), "g"), "");
