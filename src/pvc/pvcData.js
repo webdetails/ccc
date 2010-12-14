@@ -16,18 +16,23 @@ pvc.DataEngine = Base.extend({
     series: null,
     categories: null,
     values: null,
-    hiddenData:{
-        series:{},
-        categories:{}
-    },
+    hiddenData: null,
 
-    constructor: function(chart,metadata, resultset){
+    constructor: function(chart){
 
         this.chart = chart;
+        this.hiddenData = {
+            series:{},
+            categories:{}
+        }
+      
+    },
+
+    setData: function( metadata, resultset){
+
         this.metadata = metadata;
         this.resultset = resultset;
 
-    
     },
 
     /**

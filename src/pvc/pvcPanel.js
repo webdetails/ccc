@@ -61,6 +61,8 @@ pvc.Base = Base.extend({
         // Apply options
         $.extend(this.options, _defaults);
 
+        // Create DataEngine
+        this.dataEngine = new pvc.DataEngine(this);
 
     },
 
@@ -82,8 +84,8 @@ pvc.Base = Base.extend({
             throw new NoDataException();
         }
 
-        // First, we need to create the data engine and initialize the translator
-        this.dataEngine = new pvc.DataEngine(this,this.metadata,this.resultset);
+        // Getting data engine and initialize the translator
+        this.dataEngine.setData(this.metadata,this.resultset);
         this.dataEngine.setCrosstabMode(this.options.crosstabMode);
         this.dataEngine.setSeriesInRows(this.options.seriesInRows);
         this.dataEngine.createTranslator();
