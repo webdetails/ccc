@@ -138,8 +138,8 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     })
     .text(function(d){
       var v = myself.chart.options.valueFormat(d);
-      var s = myself.chart.dataEngine.getSeries()[this.parent.index]
-      var c = myself.chart.dataEngine.getCategories()[this.index]
+      var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
+      var c = myself.chart.dataEngine.getVisibleCategories()[this.index]
       return myself.chart.options.tooltipFormat.call(myself,s,c,v);
     })
 

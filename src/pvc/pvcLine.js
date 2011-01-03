@@ -323,14 +323,14 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     .strokeStyle(colorFunc)
     .text(function(d){
       var v, c;
-      var s = myself.chart.dataEngine.getSeries()[this.parent.index]
+      var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
       if( typeof d == "object"){
         v = d.value;
         c = d.category
       }
       else{
         v = d
-        c = myself.chart.dataEngine.getCategories()[this.index]
+        c = myself.chart.dataEngine.getVisibleCategories()[this.index]
       };
       return myself.chart.options.tooltipFormat.call(myself,s,c,v);
     })
