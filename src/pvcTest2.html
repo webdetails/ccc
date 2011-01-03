@@ -1,134 +1,187 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>CCC playground</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <script type="text/javascript" src="cdf/Base.js"></script>
-    <script type="text/javascript" src="cdf/jquery.js"></script>
-    <script type="text/javascript" src="cdf/jquery.ui.js"></script>
-    <script type="text/javascript" src="cdf/jquery.blockUI.js"></script>
-    <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
-    <script type="text/javascript" src="cdf/jquery.dropshadow.js"></script>
-    <script type="text/javascript" src="data/q01-01.js"></script>
-    <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
-    <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
-    <script type="text/javascript" src="lib/tipsy.js"></script>
-    <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+    <head>
+        <title>CCC playground</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="cdf/Base.js"></script>
+        <script type="text/javascript" src="cdf/jquery.js"></script>
+        <script type="text/javascript" src="cdf/jquery.ui.js"></script>
+        <script type="text/javascript" src="cdf/jquery.blockUI.js"></script>
+        <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+        <script type="text/javascript" src="cdf/jquery.dropshadow.js"></script>
+        <script type="text/javascript" src="data/q01-01.js"></script>
+        <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+        <script type="text/javascript" src="lib/tipsy.js"></script>
+        <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
-    <script type="text/javascript" src="cdf/Dashboards.js"></script>
-    <script type="text/javascript" src="cdf/CoreComponents.js"></script>
-    <script type="text/javascript" src="pvc/pvc.js"></script>
-    <script type="text/javascript" src="pvc/pvcPanel.js"></script>
-    <script type="text/javascript" src="pvc/pvcLegend.js"></script>
-    <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
-    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-    <script type="text/javascript" src="pvc/pvcPie.js"></script>
-    <script type="text/javascript" src="pvc/pvcBar.js"></script>
-    <script type="text/javascript" src="pvc/pvcLine.js"></script>
-    <script type="text/javascript" src="pvc/pvcData.js"></script>
-    <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
-    <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
-    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
-  </head>
-  <body>
+        <script type="text/javascript" src="cdf/Dashboards.js"></script>
+        <script type="text/javascript" src="cdf/CoreComponents.js"></script>
+        <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+        <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcPie.js"></script>
+        <script type="text/javascript" src="pvc/pvcBar.js"></script>
+        <script type="text/javascript" src="pvc/pvcLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcData.js"></script>
+        <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
+        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+        <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+    </head>
+    <body>
 
-    <h1>
-      CCC playground
-    </h1>
-
-
-
-    <h1>Dot</h1>
-    <div id="pvcDot1"></div>
-    <div id="pvcDot2"></div>
-    <div id="pvcDot3"></div>
-
-    <h1>Line</h1>
-    <div id="pvcLine1"></div>
-    <div id="pvcLine2"></div>
-    <div id="pvcLine3"></div>
-
-    <br/>
-
-    <h1>Stacked Line</h1>
-    <div id="pvcStackedLine1"></div>
-    <div id="pvcStackedLine2"></div>
-    <div id="pvcStackedLine3"></div>
-
-    <h1>Stacked Area</h1>
-    <div id="pvcStackedArea1"></div>
-    <div id="pvcStackedArea2"></div>
-    <div id="pvcStackedArea3"></div>
-
-
-    <h1>Bar</h1>
-    <div id="pvcBar1"></div>
-    <div id="pvcBar2"></div>
-    <div id="pvcBar3"></div>
-
-    <h1>Pie</h1>
-    <div id="pvcPie1"></div>
-    <div id="pvcPie2"></div>
-    <div id="pvcPie3"></div>
+        <h1>
+            CCC playground
+        </h1>
 
 
 
-    <script type="text/javascript">
+        <h1>Dot</h1>
+        <div id="pvcDot1"></div>
+        <div id="pvcDot2"></div>
+        <div id="pvcDot3"></div>
+
+        <h1>Line</h1>
+        <div id="pvcLine1"></div>
+        <div id="pvcLine2"></div>
+        <div id="pvcLine3"></div>
+
+        <br/>
+
+        <h1>Stacked Line</h1>
+        <div id="pvcStackedLine1"></div>
+        <div id="pvcStackedLine2"></div>
+        <div id="pvcStackedLine3"></div>
+
+        <h1>Stacked Area</h1>
+        <div id="pvcStackedArea1"></div>
+        <div id="pvcStackedArea2"></div>
+        <div id="pvcStackedArea3"></div>
 
 
-      var textElement =
-        {
-        name: "regionSelector",
-        type: "textComponent",
-        listeners:[],
-        expression: function(){return "My text generated in " + new Date()},
-        htmlObject: "sampleObject",
-        executeAtStart: true
-      };
+        <h1>Bar</h1>
+        <div id="pvcBar1"></div>
+        <div id="pvcBar2"></div>
+        <div id="pvcBar3"></div>
 
-      Dashboards.init([textElement]);
-
-
-      var bar2 = new pvc.BarChart({
-        canvas: "pvcBar2",
-        width: 300,
-        height: 200,
-        title: "Stacked Bar chart",
-        titlePosition: "bottom",
-        titleSize: 20,
-        legend: true,
-        legendPosition: "left",
-        legendSize: null,
-
-        orientation: 'vertical',
-        stacked: true,
-        showTooltips: false,
-        //maxBarSize: 100,
-
-        showValues: true,
-        showXScale: true,
-        showYScale: true,
-        yAxisPosition: "right",
-        yAxisSize: 20,
-        xAxisPosition: "bottom",
-        xAxisSize: 20,
-        xAxisFullGrid: false,
-        yAxisFullGrid: false,
-
-        panelSizeRatio: 0.9,
-        barSizeRatio: 0.8
-
-      });
-
-      bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-      bar2.render();
-
-
-    </script>
+        <h1>Pie</h1>
+        <div id="pvcPie1"></div>
+        <div id="pvcPie2"></div>
+        <div id="pvcPie3"></div>
 
 
 
+        <script type="text/javascript">
 
 
-  </body>
+            var textElement =
+                {
+                name: "regionSelector",
+                type: "textComponent",
+                listeners:[],
+                expression: function(){return "My text generated in " + new Date()},
+                htmlObject: "sampleObject",
+                executeAtStart: true
+            };
+
+            Dashboards.init([textElement]);
+
+
+            var bar1 = new pvc.BarChart({
+                canvas: "pvcBar1",
+                width: 600,
+                height: 300,
+                title: "Stacked Bar chart",
+                titlePosition: "bottom",
+                titleSize: 20,
+                legend: false,
+                legendPosition: "left",
+                legendSize: null,
+
+                orientation: 'vertical',
+                stacked: false,
+                showTooltips: false,
+                maxBarSize: 100,
+
+                showValues: true,
+                showXScale: true,
+                showYScale: true,
+                yAxisPosition: "right",
+                yAxisSize: 20,
+                xAxisPosition: "bottom",
+                xAxisSize: 20,
+                xAxisFullGrid: false,
+                yAxisFullGrid: false,
+
+                panelSizeRatio: 0.9,
+                barSizeRatio: 0.8
+
+            });
+
+            bar1.setData(relational_test, {crosstabMode: false, seriesInRows: false});
+            bar1.render();
+
+            var bar2 = new pvc.BarChart({
+                canvas: "pvcBar2",
+                width: 630,
+                height: 300,
+                dataAccessId: "categoryQuery",
+                path: "/metrics/bugzilla/solr/IT.cda",
+                crosstabMode: false,
+                seriesInRows: false,
+                animate: false,
+                clickable: true,
+                clickAction: function(s,c,v){
+
+                    // s is nothing, c is component
+                    solr.bugLink("IT",{component: c});
+
+                } ,
+                timeSeries: false,
+                timeSeriesFormat: "%Y-%m-%d",
+                stacked: false,
+                maxBarSize: 100,
+                //panelSizeRatio: 0.8,
+                barSizeRatio: 0.9,
+                orientation: "vertical",
+                colors: [],
+                showValues: false,
+                tooltipFormat: function(s,c,v){
+                    return c + ': ' + v;
+                } ,
+                valuesAnchor: "right",
+                titlePosition: "top",
+                titleSize: 25,
+                legend: false,
+                legendPosition: "bottom",
+                legendAlign: "center",
+                showXScale: true,
+                xAxisPosition: "bottom",
+                xAxisSize: 100,
+                showYScale: true,
+                yAxisPosition: "left",
+                yAxisSize: 50,
+                xAxisFullGrid: false,
+                yAxisFullGrid: false,
+                axisOffset: 0,
+                originIsZero: true,
+                extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"]]
+            });
+
+
+
+
+            bar2.setData(relational_test, {crosstabMode: false, seriesInRows: false});
+            bar2.render();
+
+
+        </script>
+
+
+
+
+
+    </body>
 </html>
