@@ -181,7 +181,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
       this.pvBarPanel = this.pvPanel.add(pv.Panel)
       .data(this.chart.dataEngine.getVisibleCategoriesIndexes())
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-        return oScale(this.index) + barPositionOffset;
+        return oScale(this.index);
       })
       [anchor](0)
       [pvc.BasePanel.paralelLength[anchor]](oScale.range().band)
