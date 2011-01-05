@@ -64,7 +64,7 @@ var relational_test =
         "colType":"Integer",
         "colName":"value"
     }]
-    }
+}
 
 var relational_02 = {
     "resultset":[
@@ -142,5 +142,39 @@ var test = {
         "colIndex":2,
         "colType":"Numeric",
         "colName":"PRICE"
+    }]
+};
+
+
+var omniscient = {
+    "resultset":[["Jan",256,1278,321,1540,3],
+    ["Feb",209,2165,null,1019,24],
+    ["Mar",694,2264,44,1205,12],
+    ["Apr",1257,1040,15,1512,18],
+    ["May",995,2490,null,1171,14]],
+    "metadata":[{
+        "colIndex":0,
+        "colType":"String",
+        "colName":"Time"
+    },{
+        "colIndex":1,
+        "colType":"Numeric",
+        "colName":"APAC"
+    },{
+        "colIndex":2,
+        "colType":"Numeric",
+        "colName":"EMEA"
+    },{
+        "colIndex":3,
+        "colType":"Numeric",
+        "colName":"Japan"
+    },{
+        "colIndex":4,
+        "colType":"Numeric",
+        "colName":"NA"
+    },{
+        "colIndex":5,
+        "colType":"Numeric",
+        "colName":"Claims"
     }]
 };

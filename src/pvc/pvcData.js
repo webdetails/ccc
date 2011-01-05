@@ -16,7 +16,10 @@ pvc.DataEngine = Base.extend({
     series: null,
     categories: null,
     values: null,
+    secondYAxisValues: null,
     hiddenData: null,
+    secondYAxis: false, // Do we have double axis?
+    secondYAxisIdx: 0,
 
     constructor: function(chart){
 
@@ -52,11 +55,7 @@ pvc.DataEngine = Base.extend({
         }
 
         this.translator.setData(this.metadata, this.resultset);
-        this.translator.prepare();
-        if( this.seriesInRows ){
-            this.translator.transpose()
-        }
-
+        this.translator.prepare(this);
 
     },
 
@@ -71,6 +70,7 @@ pvc.DataEngine = Base.extend({
 
         out+= "  Series ( "+ this.getSeriesSize() +" ): " + this.getSeries().slice(0,10) +"\n";
         out+= "  Categories ( "+ this.getCategoriesSize() +" ): " + this.getCategories().slice(0,10) +"\n";
+        out+= "  `- secondYAxis: " + this.chart.options.secondYAxis + "; secondYAxisIndex: " + this.chart.options.secondYAxisIdx + "\n";
         out+= "------------------------------------------\n";
 
         return out;
@@ -273,9 +273,25 @@ pvc.DataEngine = Base.extend({
         if (this.values == null){
             this.values = this.translator.getValues();
         }
-        return this.values;
+        return this.values;transpose
 
     },
+
+    /*
+   * Returns the values for the second axis of the dataset
+   */
+
+    getSecondYAxisValues: function(){
+
+
+        if (this.secondYAxisValues == null){
+            this.secondYAxisValues = this.translator.getSecondYAxisvalues();
+        }
+        return this.secondAxisvalues;
+
+    },
+
+
 
     /*
    * Returns the transposed values for the dataset
@@ -499,9 +515,11 @@ pvc.DataEngine = Base.extend({
 
 pvc.DataTranslator = Base.extend({
 
+    dataEngine: null,
     metadata: null,
     resultset: null,
     values: null,
+    secondYAxisValues: null,
 
     constructor: function(){
     },
@@ -546,7 +564,32 @@ pvc.DataTranslator = Base.extend({
     },
 
 
-    prepare: function(){
+    prepare: function(dataEngine){
+        this.dataEngine = dataEngine;
+        this.prepareImpl();
+        this.postPrepare();
+    },
+
+    postPrepare: function(){
+
+        if( this.dataEngine.seriesInRows ){
+            this.transpose()
+        }
+        if(this.dataEngine.chart.options.secondYAxis){
+            var idx = this.dataEngine.chart.options.secondYAxisIdx;
+            if (idx>=0){
+                idx++; // first row is cat name
+            }
+
+            // Transpose, splice, transpose back
+            pv.transpose(this.values);
+            this.secondYAxisValues = this.values.splice(idx , 1);
+            pv.transpose(this.values);
+        }
+
+    },
+
+    prepareImpl: function(){
     // Specific code goes here - override me
     },
 
@@ -561,7 +604,7 @@ pvc.DataTranslator = Base.extend({
 pvc.CrosstabTranslator = pvc.DataTranslator.extend({
 
 
-    prepare: function(){
+    prepareImpl: function(){
     
         // All we need to do is to prepend to the result's matrix the series
         // line
@@ -583,7 +626,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
 
 
-    prepare: function(){
+    prepareImpl: function(){
 
         var myself = this;
 

@@ -89,91 +89,50 @@
             Dashboards.init([textElement]);
 
 
-            var bar1 = new pvc.BarChart({
-                canvas: "pvcBar1",
-                width: 600,
-                height: 300,
-                title: "Stacked Bar chart",
-                titlePosition: "bottom",
-                titleSize: 20,
-                legend: false,
-                legendPosition: "left",
-                legendSize: null,
-
-                orientation: 'vertical',
-                stacked: false,
-                showTooltips: false,
-                maxBarSize: 100,
-
-                showValues: true,
-                showXScale: true,
-                showYScale: true,
-                yAxisPosition: "right",
-                yAxisSize: 20,
-                xAxisPosition: "bottom",
-                xAxisSize: 20,
-                xAxisFullGrid: false,
-                yAxisFullGrid: false,
-
-                panelSizeRatio: 0.9,
-                barSizeRatio: 0.8
-
-            });
-
-            bar1.setData(relational_test, {crosstabMode: false, seriesInRows: false});
-            bar1.render();
-
             var bar2 = new pvc.BarChart({
                 canvas: "pvcBar2",
                 width: 630,
                 height: 300,
-                dataAccessId: "categoryQuery",
-                path: "/metrics/bugzilla/solr/IT.cda",
-                crosstabMode: false,
+                crosstabMode: true,
                 seriesInRows: false,
                 animate: false,
-                clickable: true,
-                clickAction: function(s,c,v){
-
-                    // s is nothing, c is component
-                    solr.bugLink("IT",{component: c});
-
-                } ,
+                clickable: false,
                 timeSeries: false,
                 timeSeriesFormat: "%Y-%m-%d",
-                stacked: false,
-                maxBarSize: 100,
-                //panelSizeRatio: 0.8,
+                stacked: true,
+                maxBarSize: 30,
+                panelSizeRatio: 0.8,
                 barSizeRatio: 0.9,
                 orientation: "vertical",
-                colors: [],
+                colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
                 showValues: false,
-                tooltipFormat: function(s,c,v){
-                    return c + ': ' + v;
-                } ,
                 valuesAnchor: "right",
                 titlePosition: "top",
                 titleSize: 25,
-                legend: false,
-                legendPosition: "bottom",
+                legend: true,
+                legendPosition: "top",
                 legendAlign: "center",
                 showXScale: true,
                 xAxisPosition: "bottom",
-                xAxisSize: 100,
+                xAxisSize: 30,
                 showYScale: true,
                 yAxisPosition: "left",
                 yAxisSize: 50,
                 xAxisFullGrid: false,
-                yAxisFullGrid: false,
+                yAxisFullGrid: true,
                 axisOffset: 0,
                 originIsZero: true,
+                secondYAxis: true,
+                secondYAxisIndependentScale: true,
+
+
                 extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"]]
             });
 
 
 
 
-            bar2.setData(relational_test, {crosstabMode: false, seriesInRows: false});
+            bar2.setData(omniscient, {crosstabMode: true, seriesInRows: false });
             bar2.render();
 
 

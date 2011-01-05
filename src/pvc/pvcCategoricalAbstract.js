@@ -27,7 +27,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             yAxisSize: 50,
             xAxisSize: 50,
             xAxisFullGrid: false,
-            yAxisFullGrid: false
+            yAxisFullGrid: false,
+            secondYAxis: false,
+            secondYAxisIdx: 0,
+            secondYAxisIndependentScale: false,
+            secondYAxisSize: 0 // calculated
         };
 
 
@@ -42,6 +46,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.options.xAxisSize = 0
         }
 
+        if(this.options.secondYAxisIndependentScale){
+            this.options.secondYAxisSize = this.options.yAxisSize;
+        }
 
     },
 
@@ -174,7 +181,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
-
+        var secondYAxisSize = bypassAxis?0:this.options.secondYAxisSize;
 
         var scale = new pv.Scale.ordinal(this.dataEngine.getVisibleCategories());
 
@@ -182,14 +189,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         if(this.options.orientation=="vertical" && this.options.yAxisPosition == "left"){
             scale.min = yAxisSize;
-            scale.max = size;
+            scale.max = size - secondYAxisSize;
         }
         else if(this.options.orientation=="vertical" && this.options.yAxisPosition == "right"){
-            scale.min = 0;
+            scale.min = secondYAxisSize;
             scale.max = size-yAxisSize;
         }
         else{
-            scale.min = 0;
+            scale.min = secondYAxisSize;
             scale.max = size-xAxisSize;
         }
         scale.splitBanded( scale.min, scale.max, this.options.panelSizeRatio);
