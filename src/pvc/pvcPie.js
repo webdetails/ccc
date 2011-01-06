@@ -12,7 +12,7 @@ pvc.PieChart = pvc.Base.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showValues: true,

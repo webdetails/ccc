@@ -16,10 +16,10 @@ pvc.DataEngine = Base.extend({
     series: null,
     categories: null,
     values: null,
-    secondYAxisValues: null,
+    secondAxisValues: null,
     hiddenData: null,
-    secondYAxis: false, // Do we have double axis?
-    secondYAxisIdx: 0,
+    secondAxis: false, // Do we have double axis?
+    secondAxisIdx: 0,
 
     constructor: function(chart){
 
@@ -70,7 +70,7 @@ pvc.DataEngine = Base.extend({
 
         out+= "  Series ( "+ this.getSeriesSize() +" ): " + this.getSeries().slice(0,10) +"\n";
         out+= "  Categories ( "+ this.getCategoriesSize() +" ): " + this.getCategories().slice(0,10) +"\n";
-        out+= "  `- secondYAxis: " + this.chart.options.secondYAxis + "; secondYAxisIndex: " + this.chart.options.secondYAxisIdx + "\n";
+        out+= "  `- secondAxis: " + this.chart.options.secondAxis + "; secondAxisIndex: " + this.chart.options.secondAxisIdx + "\n";
         out+= "------------------------------------------\n";
 
         return out;
@@ -273,7 +273,7 @@ pvc.DataEngine = Base.extend({
         if (this.values == null){
             this.values = this.translator.getValues();
         }
-        return this.values;transpose
+        return this.values;
 
     },
 
@@ -281,14 +281,55 @@ pvc.DataEngine = Base.extend({
    * Returns the values for the second axis of the dataset
    */
 
-    getSecondYAxisValues: function(){
+    getSecondAxisValues: function(){
 
 
-        if (this.secondYAxisValues == null){
-            this.secondYAxisValues = this.translator.getSecondYAxisvalues();
+        if (this.secondAxisValues == null){
+            this.secondAxisValues = this.translator.getSecondAxisValues();
         }
-        return this.secondAxisvalues;
+        return this.secondAxisValues;
 
+    },
+
+
+    /*
+   * Returns the object for the second axis in the form {category: catName, value: val}
+   *
+   */
+
+    getObjectsForSecondAxis: function(sortF){
+
+        var myself = this;
+        var ar = [];
+        this.getSecondAxisValues().map(function(v,i){
+            if(typeof v != "undefined" && v != null){
+                ar.push({
+                    category: myself.getCategories()[i],
+                    value: v
+                }) ;
+            }
+        })
+
+        if (typeof sortF == "function"){
+            return ar.sort(sortF)
+        }
+        else
+            return ar;
+    },
+    /*
+   * Returns the maximum value for the second axis of the dataset
+   */
+    getSecondAxisMax:function(){
+
+        return pv.max(this.getSecondAxisValues().filter(pvc.nonEmpty))
+    },
+    
+    /*
+   * Returns the minimum value for the second axis of the dataset
+   */
+    getSecondAxisMin:function(){
+
+        return pv.min(this.getSecondAxisValues().filter(pvc.nonEmpty))
     },
 
 
@@ -519,7 +560,7 @@ pvc.DataTranslator = Base.extend({
     metadata: null,
     resultset: null,
     values: null,
-    secondYAxisValues: null,
+    secondAxisValues: null,
 
     constructor: function(){
     },
@@ -539,6 +580,14 @@ pvc.DataTranslator = Base.extend({
             return a.slice(1);
         });
       
+    },
+
+    getSecondAxisValues: function(){
+
+
+        // Skips first row
+        return this.secondAxisValues.slice(1);
+
     },
 
     getColumns: function(){
@@ -575,15 +624,15 @@ pvc.DataTranslator = Base.extend({
         if( this.dataEngine.seriesInRows ){
             this.transpose()
         }
-        if(this.dataEngine.chart.options.secondYAxis){
-            var idx = this.dataEngine.chart.options.secondYAxisIdx;
+        if(this.dataEngine.chart.options.secondAxis){
+            var idx = this.dataEngine.chart.options.secondAxisIdx;
             if (idx>=0){
                 idx++; // first row is cat name
             }
 
             // Transpose, splice, transpose back
             pv.transpose(this.values);
-            this.secondYAxisValues = this.values.splice(idx , 1);
+            this.secondAxisValues = this.values.splice(idx , 1)[0];
             pv.transpose(this.values);
         }
 

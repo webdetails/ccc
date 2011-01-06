@@ -11,7 +11,7 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showDots: false,
@@ -300,7 +300,6 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           }: null)
         })
       .lineWidth(this.showLines?1.5:0.001)
-
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
 
         if(myself.timeSeries){

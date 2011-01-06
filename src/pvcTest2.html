@@ -99,11 +99,12 @@
                 clickable: false,
                 timeSeries: false,
                 timeSeriesFormat: "%Y-%m-%d",
-                stacked: true,
+                stacked: false,
                 maxBarSize: 30,
                 panelSizeRatio: 0.8,
                 barSizeRatio: 0.9,
                 orientation: "vertical",
+                // orientation: "horizontal",
                 colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
                 showValues: false,
                 valuesAnchor: "right",
@@ -118,13 +119,17 @@
                 showYScale: true,
                 yAxisPosition: "left",
                 yAxisSize: 50,
-                xAxisFullGrid: false,
+                xAxisFullGrid: true,
                 yAxisFullGrid: true,
                 axisOffset: 0,
                 originIsZero: true,
-                secondYAxis: true,
-                secondYAxisIndependentScale: true,
 
+                secondAxis: true,
+                secondAxisIndependentScale: true,
+                secondAxisIdx: -1, // default
+                secondAxisOriginIsZero: true, // default
+                secondAxisOffset: 0, // default
+                //secondAxisColor: "red",
 
                 extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"]]
             });
@@ -132,7 +137,7 @@
 
 
 
-            bar2.setData(omniscient, {crosstabMode: true, seriesInRows: false });
+            bar2.setData(test2, {crosstabMode: true, seriesInRows: false });
             bar2.render();
 
 
