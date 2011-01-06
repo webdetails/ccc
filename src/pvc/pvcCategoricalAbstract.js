@@ -32,7 +32,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             yAxisFullGrid: false,
 
             secondAxis: false,
-            secondAxisIdx: 1,
+            secondAxisIdx: -1,
             secondAxisIndependentScale: false,
             secondAxisOriginIsZero: true,
             secondAxisOffset: 0,
