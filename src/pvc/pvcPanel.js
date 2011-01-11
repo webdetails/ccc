@@ -84,6 +84,11 @@ pvc.Base = Base.extend({
             throw new NoDataException();
         }
 
+        // Disable animation if browser doesn't support it
+        if(!$.support.svg){
+            this.options.animate = false;
+        }
+
         // Getting data engine and initialize the translator
         this.dataEngine.setData(this.metadata,this.resultset);
         this.dataEngine.setCrosstabMode(this.options.crosstabMode);
@@ -165,7 +170,7 @@ pvc.Base = Base.extend({
 
             this.basePanel.getPvPanel().render();
     
-            if(this.options.animate == true && !bypassAnimation ){
+            if(this.options.animate == true && !bypassAnimation){
                 this.isAnimating = true;
                 this.basePanel.getPvPanel().transition()
                 .duration( 2000)

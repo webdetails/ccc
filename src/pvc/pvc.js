@@ -9,9 +9,9 @@ var pvc = {}
 
 pvc.log = function(m){
 
-  if (typeof console != "undefined"){
-    console.log("[pvChart]: " + m);
-  }
+    if (typeof console != "undefined"){
+        console.log("[pvChart]: " + m);
+    }
 };
 
 /**
@@ -21,29 +21,29 @@ pvc.log = function(m){
  */
 
 pvc.ev = function(x){
-  return typeof x == "function"?x():x;
+    return typeof x == "function"?x():x;
 };
 
 pvc.sumOrSet = function(v1,v2){
-  return typeof v1 == "undefined"?v2:v1+v2;
+    return typeof v1 == "undefined"?v2:v1+v2;
 }
 
 pvc.nonEmpty = function(d){
-  return typeof d != "undefined" && d !== null;
+    return typeof d != "undefined" && d !== null;
 }
 
 pvc.padMatrixWithZeros = function(d){
-  return d.map(function(v){
-    return v.map(function(a){
-      return typeof a == "undefined"?0:a;
+    return d.map(function(v){
+        return v.map(function(a){
+            return typeof a == "undefined"?0:a;
+        })
     })
-  })
 }
 
 pvc.cloneMatrix = function(m){
-  return m.map(function(d){
-    return d.slice()
-  });
+    return m.map(function(d){
+        return d.slice()
+    });
 }
 
 
@@ -54,24 +54,34 @@ pvc.cloneMatrix = function(m){
  */
 if (!Array.prototype.filter)
 {
-  Array.prototype.filter = function(fun, thisp)
-  {
-    var len = this.length >>> 0;
-    if (typeof fun != "function")
-      throw new TypeError();
-
-    var res = [];
-    var thisp = arguments[1];
-    for (var i = 0; i < len; i++)
+    Array.prototype.filter = function(fun, thisp)
     {
-      if (i in this)
-      {
-        var val = this[i]; // in case fun mutates this
-        if (fun.call(thisp, val, i, this))
-          res.push(val);
-      }
-    }
+        var len = this.length >>> 0;
+        if (typeof fun != "function")
+            throw new TypeError();
 
-    return res;
-  };
+        var res = [];
+        var thisp = arguments[1];
+        for (var i = 0; i < len; i++)
+        {
+            if (i in this)
+            {
+                var val = this[i]; // in case fun mutates this
+                if (fun.call(thisp, val, i, this))
+                    res.push(val);
+            }
+        }
+
+        return res;
+    };
 }
+
+
+/**
+ *
+ * Implements support for svg detection
+ *
+ **/
+(function($){
+    $.support.svg = $.support.svg || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.0");    
+})(jQuery);

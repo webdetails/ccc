@@ -2,21 +2,23 @@
 <html>
     <head>
         <title>CCC playground</title>
+
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+</script><![endif]-->
+        <meta name="svg.render.forceflash" content="true">
+
+
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="cdf/Base.js"></script>
         <script type="text/javascript" src="cdf/jquery.js"></script>
-        <script type="text/javascript" src="cdf/jquery.ui.js"></script>
-        <script type="text/javascript" src="cdf/jquery.blockUI.js"></script>
         <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
-        <script type="text/javascript" src="cdf/jquery.dropshadow.js"></script>
         <script type="text/javascript" src="data/q01-01.js"></script>
         <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
         <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
         <script type="text/javascript" src="lib/tipsy.js"></script>
         <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
-        <script type="text/javascript" src="cdf/Dashboards.js"></script>
-        <script type="text/javascript" src="cdf/CoreComponents.js"></script>
         <script type="text/javascript" src="pvc/pvc.js"></script>
         <script type="text/javascript" src="pvc/pvcPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegend.js"></script>
@@ -75,70 +77,63 @@
 
         <script type="text/javascript">
 
-
-            var textElement =
-                {
-                name: "regionSelector",
-                type: "textComponent",
-                listeners:[],
-                expression: function(){return "My text generated in " + new Date()},
-                htmlObject: "sampleObject",
-                executeAtStart: true
-            };
-
-            Dashboards.init([textElement]);
+            pv.listenForPageLoad(function() {
 
 
-            var bar2 = new pvc.BarChart({
-                canvas: "pvcBar2",
-                width: 630,
-                height: 300,
-                crosstabMode: true,
-                seriesInRows: false,
-                animate: false,
-                clickable: false,
-                timeSeries: false,
-                timeSeriesFormat: "%Y-%m-%d",
-                stacked: false,
-                maxBarSize: 30,
-                panelSizeRatio: 0.8,
-                barSizeRatio: 0.9,
-                orientation: "vertical",
-                // orientation: "horizontal",
-                colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
-                showValues: false,
-                valuesAnchor: "right",
-                titlePosition: "top",
-                titleSize: 25,
-                legend: true,
-                legendPosition: "top",
-                legendAlign: "center",
-                showXScale: true,
-                xAxisPosition: "bottom",
-                xAxisSize: 30,
-                showYScale: true,
-                yAxisPosition: "left",
-                yAxisSize: 50,
-                xAxisFullGrid: true,
-                yAxisFullGrid: true,
-                axisOffset: 0,
-                originIsZero: true,
+                var bar2 = new pvc.BarChart({
+                    canvas: "pvcBar2",
+                    width: 630,
+                    height: 300,
+                    crosstabMode: true,
+                    seriesInRows: false,
+                    animate: true,
+                    clickable: false,
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+                    stacked: false,
+                    maxBarSize: 30,
+                    panelSizeRatio: 0.8,
+                    barSizeRatio: 0.9,
+                    orientation: "vertical",
+                    // orientation: "horizontal",
+                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+                    showValues: false,
+                    valuesAnchor: "right",
+                    titlePosition: "top",
+                    titleSize: 25,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "center",
+                    showXScale: true,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 50,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    axisOffset: 0,
+                    originIsZero: true,
 
-                secondAxis: true,
-                secondAxisIndependentScale: true,
-                secondAxisIdx: -1, // default
-                secondAxisOriginIsZero: true, // default
-                secondAxisOffset: 0, // default
-                //secondAxisColor: "red",
+                    secondAxis: false,
+                    secondAxisIndependentScale: true,
+                    secondAxisIdx: -1,
+                    secondAxisOriginIsZero: true,
+                    secondAxisColor: "blue",
 
-                extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"]]
+                    //secondAxisColor: "red",
+
+                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"]]
+                });
+
+
+
+
+                bar2.setData(test2, {crosstabMode: true, seriesInRows: false });
+            
+                bar2.render();
             });
 
-
-
-
-            bar2.setData(test2, {crosstabMode: true, seriesInRows: false });
-            bar2.render();
 
 
         </script>

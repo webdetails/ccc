@@ -76,9 +76,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Generate axis
 
-        this.generateSecondXAxis(); // this goes before the other because of the fullGrid
+        if(this.options.secondAxis)
+            this.generateSecondXAxis(); // this goes before the other because of the fullGrid
         this.generateXAxis();
-        this.generateSecondYAxis(); // this goes before the other because of the fullGrid
+        if(this.options.secondAxis)
+            this.generateSecondYAxis(); // this goes before the other because of the fullGrid
         this.generateYAxis();
 
 
@@ -383,7 +385,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      */
     getSecondScale: function(bypassAxis){
 
-        if(!this.options.secondAxisIndependentScale){
+        if(!this.options.secondAxis || !this.options.secondAxisIndependentScale){
             return this.getLinearScale(bypassAxis);
         }
 
