@@ -210,7 +210,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
         }
 
 
-        if(this.chart.options.secondAxis && this.chart.options.secondAxisIndependentScale){
+        if(this.chart.options.secondAxis){
             // Second axis - support for lines
             this.pvSecondLine = this.pvPanel.add(pv.Line)
             .data(function(d){
