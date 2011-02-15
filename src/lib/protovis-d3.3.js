@@ -1,4 +1,4 @@
-// 52483171a48e99adfd9a7ce6f3b7c215c6722b25
+// 8209f9d8708a60e1977f41e4689c60f956091428
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3308,7 +3308,7 @@ pv.Scale.quantitative = function() {
             break;
           }
           case 2592e6: {
-            step = 3; // seasons
+            step = (n > 24) ? 3 : ((n > 12) ? 2 : 1);
             date.setMonth(Math.floor(date.getMonth() / step) * step);
             break;
           }
@@ -5869,7 +5869,7 @@ pv.SvgScene.image = function(scenes) {
           "width": s.width,
           "height": s.height
         });
-      e.setAttributeNS(this.xlink, "href", s.url);
+      e.setAttributeNS(this.xlink, "xlink:href", s.url);
     }
     e = this.append(e, scenes, i);
 
