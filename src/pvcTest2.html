@@ -80,58 +80,36 @@
             pv.listenForPageLoad(function() {
 
 
-                var bar2 = new pvc.BarChart({
-                    canvas: "pvcBar2",
-                    width: 630,
+
+                var line2 = new pvc.LineChart({
+                    // legendPosition: "left",
+                    canvas: "pvcLine2",
+                    width: 800,
                     height: 300,
-                    crosstabMode: true,
-                    seriesInRows: false,
-                    animate: true,
-                    clickable: false,
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-                    stacked: false,
-                    maxBarSize: 30,
-                    panelSizeRatio: 0.8,
-                    barSizeRatio: 0.9,
-                    orientation: "vertical",
-                    // orientation: "horizontal",
-                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
-                    showValues: false,
-                    valuesAnchor: "right",
+                    animate: false,
+                    title: "line chart - standard with dots",
                     titlePosition: "top",
-                    titleSize: 25,
+                    titleSize: 40,
                     legend: true,
                     legendPosition: "top",
-                    legendAlign: "center",
-                    showXScale: true,
-                    xAxisPosition: "bottom",
+                    legendAlign: "right",
+                    //legendSize: null,
+
+                    //orientation: 'horizontal',
+                    timeSeries: true,
+                    timeSeriesFormat: "%Y-%m-%d",
+
+                    showValues: false,
+                    showDots: true,
+                    yAxisSize: 30,
                     xAxisSize: 30,
-                    showYScale: true,
-                    yAxisPosition: "left",
-                    yAxisSize: 50,
                     xAxisFullGrid: true,
-                    yAxisFullGrid: true,
-                    axisOffset: 0,
-                    originIsZero: true,
+                    yAxisFullGrid: true
 
-                    secondAxis: false,
-                    secondAxisIndependentScale: true,
-                    secondAxisIdx: -1,
-                    secondAxisOriginIsZero: true,
-                    secondAxisColor: "blue",
-
-                    //secondAxisColor: "red",
-
-                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"]]
                 });
 
-
-
-
-                bar2.setData(test2, {crosstabMode: true, seriesInRows: false });
-            
-                bar2.render();
+                line2.setData(test3 , {crosstabMode: false, seriesInRows: false});
+                line2.render();
             });
 
 

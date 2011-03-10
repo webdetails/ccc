@@ -1,4 +1,4 @@
-// 52483171a48e99adfd9a7ce6f3b7c215c6722b25
+// 8209f9d8708a60e1977f41e4689c60f956091428
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3264,27 +3264,27 @@ pv.Scale.quantitative = function() {
         precision = 31536e6;
         format = "%Y";
         /** @ignore */ increment = function(d) { d.setFullYear(d.getFullYear() + step); };
-      } else if (span >= 3 * 2592e6) {
+      } else if (span >= 5 * 2592e6) {
         precision = 2592e6;
         format = "%m/%Y";
         /** @ignore */ increment = function(d) { d.setMonth(d.getMonth() + step); };
-      } else if (span >= 3 * 6048e5) {
+      } else if (span >= 5 * 6048e5) {
         precision = 6048e5;
         format = "%m/%d";
         /** @ignore */ increment = function(d) { d.setDate(d.getDate() + 7 * step); };
-      } else if (span >= 3 * 864e5) {
+      } else if (span >= 5 * 864e5) {
         precision = 864e5;
         format = "%m/%d";
         /** @ignore */ increment = function(d) { d.setDate(d.getDate() + step); };
-      } else if (span >= 3 * 36e5) {
+      } else if (span >= 5 * 36e5) {
         precision = 36e5;
         format = "%I:%M %p";
         /** @ignore */ increment = function(d) { d.setHours(d.getHours() + step); };
-      } else if (span >= 3 * 6e4) {
+      } else if (span >= 5 * 6e4) {
         precision = 6e4;
         format = "%I:%M %p";
         /** @ignore */ increment = function(d) { d.setMinutes(d.getMinutes() + step); };
-      } else if (span >= 3 * 1e3) {
+      } else if (span >= 5 * 1e3) {
         precision = 1e3;
         format = "%I:%M:%S";
         /** @ignore */ increment = function(d) { d.setSeconds(d.getSeconds() + step); };
@@ -3308,7 +3308,7 @@ pv.Scale.quantitative = function() {
             break;
           }
           case 2592e6: {
-            step = 3; // seasons
+            step = (n > 24) ? 3 : ((n > 12) ? 2 : 1);
             date.setMonth(Math.floor(date.getMonth() / step) * step);
             break;
           }
@@ -5869,7 +5869,7 @@ pv.SvgScene.image = function(scenes) {
           "width": s.width,
           "height": s.height
         });
-      e.setAttributeNS(this.xlink, "href", s.url);
+      e.setAttributeNS(this.xlink, "xlink:href", s.url);
     }
     e = this.append(e, scenes, i);
 
