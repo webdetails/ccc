@@ -371,7 +371,12 @@ pvc.BasePanel = Base.extend({
         for (p in this.chart.options.extensionPoints){
             if (p.indexOf(prefix) == 0){
                 var m = p.substring(prefix.length);
-                mark[m](this.chart.options.extensionPoints[p]);
+                // Distinguish between mark methods and properties
+                if (typeof mark[m] === "function") {
+                    mark[m](this.chart.options.extensionPoints[p]);
+                } else {
+                    mark[m] = this.chart.options.extensionPoints[p];
+                }
             }
 
         }
