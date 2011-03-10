@@ -83,7 +83,8 @@ pvc.DataEngine = Base.extend({
    */
 
     getSeries: function(){
-        return this.series || this.translator.getColumns();
+        var res = this.series || this.translator.getColumns();
+	return res;
     },
 
     /*
@@ -112,9 +113,10 @@ pvc.DataEngine = Base.extend({
     getVisibleSeriesIndexes: function(){
 
         var myself=this;
-        return pv.range(this.getSeries().length).filter(function(v){
+        var res =  pv.range(this.getSeries().length).filter(function(v){
             return !myself.hiddenData.series[v];
         });
+        return res;
     },
 
     /*
@@ -194,9 +196,10 @@ pvc.DataEngine = Base.extend({
     getVisibleCategoriesIndexes: function(){
 
         var myself=this;
-        return pv.range(this.getCategories().length).filter(function(v){
+        var res = pv.range(this.getCategories().length).filter(function(v){
             return !myself.hiddenData.categories[v];
         });
+	return res;
     },
 
     /*
@@ -352,10 +355,10 @@ pvc.DataEngine = Base.extend({
 
     getVisibleTransposedValues: function(){
         var myself = this;
-        return this.getVisibleSeriesIndexes().map(function(sIdx){
+        var res = this.getVisibleSeriesIndexes().map(function(sIdx){
             return myself.getValuesForSeriesIndex(sIdx)
         })
-
+        return res;
     },
 
     /*
@@ -425,9 +428,10 @@ pvc.DataEngine = Base.extend({
     getVisibleValuesForCategoryIndex: function(idx){
 
         var cats = this.getValuesForCategoryIndex(idx);
-        return this.getVisibleSeriesIndexes().map(function(idx){
+        var res = this.getVisibleSeriesIndexes().map(function(idx){
             return cats[idx]
-        })
+        });
+	return res;
     },
 
 

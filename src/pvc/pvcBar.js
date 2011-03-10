@@ -108,6 +108,10 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
         .width(this.width)
         .height(this.height)
 
+        if  (   ('fixedMinY' in myself.chart.options)
+             || ('fixedMaxY' in myself.chart.options) )
+          this.pvPanel["overflow"]("hidden");
+
         var anchor = this.orientation == "vertical"?"bottom":"left";
 
         // Extend body, resetting axisSizes
@@ -163,6 +167,20 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
             .fillStyle(colorFunc)
 
+           // CvK: adding markers for datapoints that are off-axis
+	   this.pvPanel.add(pv.Dot)
+             .shape("triangle")
+             .shapeSize(12)
+             .lineWidth(1.5)
+             .strokeStyle("red")
+             .fillStyle(null)
+             .data(function(){
+                var res = [[0, 1000], [1, 1000]];
+                return res;
+                })
+            ["left"](function(d){ return oScale(d[0]) + barPositionOffset;})
+            ["bottom"](function(d){ return lScale(d[1]) }) ;
+
         /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
         return this.parent.left() + barPositionOffset
       })*/;
@@ -181,10 +199,13 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
                 maxBarSize = this.maxBarSize;
             }
 
+
+
             this.pvBarPanel = this.pvPanel.add(pv.Panel)
             .data(this.chart.dataEngine.getVisibleCategoriesIndexes())
             [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-                return oScale(this.index);
+                var res = oScale(this.index);
+                return res;
             })
             [anchor](0)
             [pvc.BasePanel.paralelLength[anchor]](oScale.range().band)
@@ -193,11 +214,14 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
             this.pvBar = this.pvBarPanel.add(pv.Bar)
             .data(function(d){
-                return myself.chart.dataEngine.getVisibleValuesForCategoryIndex(d)
+                var res = myself.chart.dataEngine
+                     .getVisibleValuesForCategoryIndex(d);
+                return res;
                 })
             .fillStyle(colorFunc2)
             [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-                return bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + barPositionOffset;
+                var res = bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + barPositionOffset;
+                return res;
             })
             [anchor](function(d){
                 return lScale(pv.min([0,d]))
@@ -205,7 +229,39 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.orthogonalLength[anchor]](function(d){
                 return myself.chart.animate(0, Math.abs(lScale(d||0) - lScale(0)))
             })
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ;   // ; added
+
+           // CvK: adding markers for datapoints that are off-axis
+
+           if      ('fixedMinY' in myself.chart.options) {
+             var fixedMin = myself.chart.options.fixedMinY;
+             var offGridPositionOffset = maxBarSize/2;  
+
+	   this.underflowMarkers = this.pvBarPanel.add(pv.Dot)
+             .shape("triangle")
+             .shapeSize(12)
+             .lineWidth(1.5)
+             .strokeStyle("red")
+             .fillStyle(null)
+             .data(function(d){
+                var res = myself.chart.dataEngine
+                 .getVisibleValuesForCategoryIndex(d);
+               for(var i=0; i<res.length; i++)
+                 res[i] = (res[i] < fixedMin) ? fixedMin : null; 
+                return res;
+                })
+            [pvc.BasePanel.relativeAnchor[anchor]](function(d){
+                var res = bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + offGridPositionOffset;
+                return res;
+            })//          ["left"](function(d){
+//            var res = oScale(d[0]) + barPositionOffset;
+//            return res; })
+	    ["bottom"](function(d){ 
+              var res = lScale(d);    // lScale(d[1]);
+              return res; }) ;
+
+          }
+
 
         }
 

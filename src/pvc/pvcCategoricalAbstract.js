@@ -308,6 +308,17 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             min = 0
         }
 
+        if (isVertical) {
+          if('fixedMinY' in this.options) {
+            min = this.options.fixedMinY
+          }
+          if('fixedMaxY' in this.options) {
+            max = this.options.fixedMaxY
+          }
+        }
+
+
+
         // Adding a small offset to the scale:
         var offset = (max - min) * this.options.axisOffset;
         var scale = new pv.Scale.linear(min - offset,max + offset)
