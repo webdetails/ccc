@@ -308,14 +308,15 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             min = 0
         }
 
-        if (isVertical) {
+        // CvK:  added to set bounds
+        //if (isVertical) {   // should also work for horizontal
           if('fixedMinY' in this.options) {
             min = this.options.fixedMinY
           }
           if('fixedMaxY' in this.options) {
             max = this.options.fixedMaxY
           }
-        }
+        //}
 
 
 

@@ -232,10 +232,18 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ;   // ; added
 
            // CvK: adding markers for datapoints that are off-axis
-
+           //  UNDERFLOW  =  datavalues < fixedMinY
            if      ('fixedMinY' in myself.chart.options) {
+
+             // made a local function here (should probably be located elsewhere)
+             var calcBotOffset = function(scale, offset) {
+               var res  = scale.min + offset;
+               return res;
+             }
+
              var fixedMin = myself.chart.options.fixedMinY;
-             var offGridPositionOffset = maxBarSize/2;  
+             var offGridBarOffset = maxBarSize/2;
+             var offGridBotOffset = calcBotOffset(lScale, 7);
 
 	   this.underflowMarkers = this.pvBarPanel.add(pv.Dot)
              .shape("triangle")
@@ -246,21 +254,60 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
              .data(function(d){
                 var res = myself.chart.dataEngine
                  .getVisibleValuesForCategoryIndex(d);
+               // check for off-grid values (and replace by null)
                for(var i=0; i<res.length; i++)
                  res[i] = (res[i] < fixedMin) ? fixedMin : null; 
                 return res;
                 })
             [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-                var res = bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + offGridPositionOffset;
+                var res = bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + offGridBarOffset;
                 return res;
-            })//          ["left"](function(d){
-//            var res = oScale(d[0]) + barPositionOffset;
-//            return res; })
-	    ["bottom"](function(d){ 
-              var res = lScale(d);    // lScale(d[1]);
-              return res; }) ;
+            })
+	    [anchor](function(d){ 
+              // draw the markers at a fixed position (null values are
+              // shown off-grid (-1000)
+              return (d != null) ? offGridBotOffset: -10000; }) ;
+
+           }
+
+           // CvK: overflow markers: max > fixedMaxY
+           if      ('fixedMaxY' in myself.chart.options) {
+
+             // made a local function here (should probably be located elsewhere)
+             var calcTopOffset = function(scale, offset) {
+               var res  = scale.max - offset;
+               return res;
+             }
+
+             var fixedMax = myself.chart.options.fixedMaxY;
+             var offGridBarOffset = maxBarSize/2;
+             var offGridTopOffset = calcTopOffset(lScale, 8);
+
+	   this.overflowMarkers = this.pvBarPanel.add(pv.Dot)
+             .shape("diamond")
+             .shapeSize(12)
+             .lineWidth(1.5)
+             .strokeStyle("red")
+             .fillStyle("white")
+             .data(function(d){
+                var res = myself.chart.dataEngine
+                 .getVisibleValuesForCategoryIndex(d);
+               // check for off-grid values (and replace by null)
+               for(var i=0; i<res.length; i++)
+                 res[i] = (res[i] > fixedMax) ? fixedMax : null; 
+                return res;
+                })
+            [pvc.BasePanel.relativeAnchor[anchor]](function(d){
+                var res = bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + offGridBarOffset;
+                return res;
+            })
+	    [anchor](function(d){ 
+              // draw the markers at a fixed position (null values are
+              // shown off-grid (-1000)
+              return (d != null) ? offGridTopOffset: -10000; }) ;
 
           }
+
 
 
         }
