@@ -308,14 +308,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         // function s are normal objects, so you they can carry data (piggy-back)
         scale.pb_categories = categories;
 
-/*  replace by new code below
-        var size = this.options.orientation=="vertical"?
-          this.basePanel.height:
-          this.basePanel.width;
-// CvK: does not work for horizontal charts
-        scale.min = 0;
-        scale.max = size - xAxisSize;
-*/
         if (perpAxis == "y") {
           scale.min = 0;
           scale.max = this.basePanel.height - xAxisSize;
@@ -618,7 +610,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderOrdinalAxis: function(){
 
         var myself = this;
-    
+
+      var align =  (this.anchor == "bottom" || this.anchor == "top") ? 
+        "center" : 
+          (this.anchor == "left")  ?
+                           "right" : 
+                           "left";
+
         this.pvLabel = this.pvRule.add(pv.Label)
         .data(this.elements)
         [pvc.BasePanel.paralelLength[this.anchor]](null)
@@ -626,7 +624,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
             return myself.scale(d) + myself.scale.range().band/2;
         })
-        .textAlign("center")
+        .textAlign(align)
         .textBaseline("middle")
         .text(pv.identity)
         .font("9px sans-serif")

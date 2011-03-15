@@ -20,16 +20,17 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
         var _defaults = {
             showValues: true,
-            stacked: false,
-            panelSizeRatio: 0.9,
-            heatGridSizeRatio: 0.9,
-            maxHeatGridSize: 2000,
             originIsZero: true,
             axisOffset: 0,
             showTooltips: true,
             orientation: "vertical",
              // use a categorical here based on series labels
-            perpAxisOrdinal: true 
+            perpAxisOrdinal: true,
+            normPerCol: true,
+            numSD: 2,
+            loColor: "white",
+            hiColor: "darkgreen",
+          nullColor: "darkorange"
         };
 
 
@@ -124,19 +125,53 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       var xScale = this.chart.xAxisPanel.scale;
       var yScale = this.chart.yAxisPanel.scale;
         
-      var data = this.chart.dataEngine.getValues();
+      cols = xScale.pb_categories;
 
-      cols =xScale.pb_categories;
-      data = data.map(function(d) pv.dict(cols, function() d[this.index]));
+      var origData = this.chart.dataEngine.getTransposedValues();
+      data = origData.map(function(d) pv.dict(cols, function() d[this.index]));
+      data.reverse();  // the colums are build from top to bottom
 
-      /* The color scale ranges 3 standard deviations in each direction. */
-      // compute the mean and standard-deviation for each column
-      var mean = pv.dict(cols, function(f) pv.mean(data, function(d) d[f]));
-      var sd = pv.dict(cols, function(f) pv.deviation(data, function(d) d[f]));
-      //  compute a scale-function for each column (each key)
-      var fill = pv.dict(cols, function(f) pv.Scale.linear()
-        .domain(-2 * sd[f] + mean[f], 2 * sd[f] + mean[f])
-        .range("white", "darkgreen"));
+      /* The color scale ranges numSD standard deviations in each
+      direction. */
+      var fill = null;
+      var opts = this.chart.options;
+      if (this.chart.options.normPerCol) {
+        // compute the mean and standard-deviation for each column
+        var mean = pv.dict(cols, function(f) pv.mean(data, function(d) d[f]));
+        var sd = pv.dict(cols, function(f) pv.deviation(data, function(d) d[f]));
+        //  compute a scale-function for each column (each key)
+        fill = pv.dict(cols, function(f) pv.Scale.linear()
+           .domain(-opts.numSD * sd[f] + mean[f],
+                   opts.numSD * sd[f] + mean[f])
+           .range(opts.loColor, opts.hiColor));
+//        .range("darkred", "darkgreen"));
+      } else {   // normalize over the whole array
+        var mean = 0.0, sd = 0.0, count = 0;
+        for (var i=0; i<origData.length; i++)
+          for(var j=0; j<origData[i].length; j++)
+            if (origData[i][j] != null){
+              mean += origData[i][j]; count++;
+          }
+        mean /= count;
+        for (var i=0; i<origData.length; i++)
+          for(var j=0; j<origData[i].length; j++)
+            if (origData[i][j] != null){
+              var variance = origData[i][j] - mean;
+              sd += variance*variance;
+          }
+        sd /= count;
+        sd = Math.sqrt(sd);
+          
+        var scale = pv.Scale.linear()
+           .domain(-opts.numSD * sd + mean,
+                   opts.numSD * sd + mean)
+           .range(opts.loColor, opts.hiColor);
+        fill = pv.dict(cols, function(f) scale)
+//        fill = Array();
+//        for (var key in cols)
+//            fill[key] = scale;
+      }
+
 
       /* The cell dimensions. */
       var w = (xScale.max - xScale.min)/xScale.pb_categories.length;
@@ -153,24 +188,25 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         .data(data)
         .top(function() this.index * h)
         .height(h)
-        .fillStyle(function(d, f) fill[f](d[f]))
+        .fillStyle(function(d, f) fill[f](d[f]) )
         .strokeStyle("white")
         .lineWidth(1)
         .antialias(false);
         ***/
 
-      this.pvPanel.add(pv.Panel)
+      this.pvHeatGrid = this.pvPanel.add(pv.Panel)
         .data(cols)
-        [pvc.BasePanel.relativeAnchor[anchor]](function() this.index * w)
+      [pvc.BasePanel.relativeAnchor[anchor]](function() this.index * w)
         [pvc.BasePanel.paralelLength[anchor]](w)
         .add(pv.Panel)
         .data(data)
         [pvc.BasePanel.oppositeAnchor[anchor]](function() this.index * h)
         [pvc.BasePanel.orthogonalLength[anchor]](h)
-        .fillStyle(function(d, f) fill[f](d[f]))
+        .fillStyle(function(dat, col) (dat[col] != null) ? fill[col](dat[col]):opts.nullColor)  
         .strokeStyle("white")
         .lineWidth(1)
-        .antialias(false);
+        .antialias(false)
+        .text(function(d,f) d[f]);
 
 
         // NO SUPPORT for overflow and underflow on HeatGrids
@@ -181,7 +217,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
 
 
-/*************   useful other options (clickable etc...)
+
         if(this.showTooltips){
             this.pvHeatGrid
             .event("mouseover", pv.Behavior.tipsy({
@@ -211,7 +247,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             // Extend heatGridLabel
             this.extend(this.pvHeatGridLabel,"heatGridLabel_");
         }
-        ********/
+
 
         // Extend heatGrid and heatGridPanel
         this.extend(this.pvHeatGrid,"heatGridPanel_");
