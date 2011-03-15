@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> fixed bounds</title>
+
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+</script><![endif]-->
+        <meta name="svg.render.forceflash" content="true">
+
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="cdf/Base.js"></script>
+        <script type="text/javascript" src="cdf/jquery.js"></script>
+        <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+        <script type="text/javascript" src="data/q01-01.js"></script>
+        <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+        <script type="text/javascript" src="lib/tipsy.js"></script>
+        <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+
+        <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+        <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcPie.js"></script>
+        <script type="text/javascript" src="pvc/pvcBar.js"></script>
+        <script type="text/javascript" src="pvc/pvcHeatGrid.js"></script>
+        <script type="text/javascript" src="pvc/pvcLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcData.js"></script>
+        <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
+        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+        <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+    </head>
+    <body>
+
+        <h1>
+            CCC playground
+        </h1>
+
+
+
+
+
+
+        <h1>HeatGrid (vertical)</h1>
+        <div id="pvcBar1"></div>
+
+        <h1>HeatGrid (horizontal)</h1>
+        <div id="pvcBar2"></div>
+        <div id="pvcBar3"></div>
+
+
+
+        <script type="text/javascript">
+
+            pv.listenForPageLoad(function() {
+
+                var heatGrid2 = new pvc.HeatGridChart({
+                    canvas: "pvcBar1",
+                    width: 630,
+                    height: 300,
+                    crosstabMode: true,
+                    seriesInRows: false,
+                    animate: false,
+                    clickable: false,
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+                    stacked: false,
+                    maxBarSize: 30,
+                    panelSizeRatio: 0.8,
+                    barSizeRatio: 0.9,
+                    orientation: "vertical",
+                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+                    showValues: false,
+                    valuesAnchor: "right",
+                    titlePosition: "top",
+                    titleSize: 25,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "center",
+                    showXScale: true,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 50,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    axisOffset: 0,
+                    originIsZero: true,
+
+                    secondAxis: false,
+                    secondAxisIndependentScale: true,
+                    secondAxisIdx: -1,
+                    secondAxisOriginIsZero: true,
+                    secondAxisColor: "blue",
+
+                    //secondAxisColor: "red",
+
+                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
+                });
+
+
+                heatGrid2.setData(test2, {crosstabMode: true, seriesInRows: false });
+                heatGrid2.render();
+
+
+
+                var heatGrid3 = new pvc.HeatGridChart({
+                    canvas: "pvcBar2",
+                    width: 630,
+                    height: 300,
+                    crosstabMode: true,
+                    seriesInRows: false,
+                    animate: false,
+                    clickable: false,
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+                    stacked: false,
+                    maxBarSize: 30,
+                    panelSizeRatio: 0.8,
+                    barSizeRatio: 0.9,
+
+                    orientation: "horizontal",
+                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+                    showValues: false,
+                    valuesAnchor: "right",
+                    titlePosition: "top",
+                    titleSize: 25,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "center",
+                    showXScale: true,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 50,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    axisOffset: 0,
+                    originIsZero: true,
+
+                    secondAxis: false,
+                    secondAxisIndependentScale: true,
+                    secondAxisIdx: -1,
+                    secondAxisOriginIsZero: true,
+                    secondAxisColor: "blue",
+
+                    //secondAxisColor: "red",
+
+                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
+                });
+
+
+
+
+                heatGrid3.setData(test2, {crosstabMode: true, seriesInRows: false });
+                heatGrid3.render();
+
+
+
+
+            });
+
+
+
+
+
+        </script>
+
+
+
+
+
+    </body>
+</html>
