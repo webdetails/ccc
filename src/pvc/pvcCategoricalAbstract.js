@@ -302,7 +302,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
 
         if (perpAxis) {   // added by CvK
-            var categories = this.dataEngine.getSeries();
+            var categories = this.dataEngine.getVisibleSeries();
             var scale = new pv.Scale.ordinal(categories);
 
             if (perpAxis == "y") {
