@@ -89,9 +89,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     _parent: null,
     pvHeatGrid: null,
     pvHeatGridLabel: null,
-    pvCategoryPanel: null,
-    pvSecondLie: null,
-    pvSecondDot: null,
     data: null,
 
     stacked: false,
@@ -125,14 +122,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var xScale = this.chart.xAxisPanel.scale;
         var yScale = this.chart.yAxisPanel.scale;
         
-        cols = xScale.pb_categories;
+        cols = xScale.domain();
 
-        var origData = this.chart.dataEngine.getTransposedValues();
+        var origData = this.chart.dataEngine.getVisibleTransposedValues();
         data = origData.map(function(d){
             return pv.dict(cols, function(){
                 return  d[this.index]
-                })
-            });
+            })
+        });
         data.reverse();  // the colums are build from top to bottom
 
         /* The color scale ranges numSD standard deviations in each
@@ -144,20 +141,20 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             var mean = pv.dict(cols, function(f){
                 return pv.mean(data, function(d){
                     return d[f]
-                    })
-                });
+                })
+            });
             var sd = pv.dict(cols, function(f){
                 return pv.deviation(data, function(d){
                     return d[f]
-                    })
-                });
+                })
+            });
             //  compute a scale-function for each column (each key)
             fill = pv.dict(cols, function(f){
                 return pv.Scale.linear()
                 .domain(-opts.numSD * sd[f] + mean[f],
                     opts.numSD * sd[f] + mean[f])
                 .range(opts.loColor, opts.hiColor)
-                });
+            });
         } else {   // normalize over the whole array
             var mean = 0.0, sd = 0.0, count = 0;
             for (var i=0; i<origData.length; i++)
@@ -182,37 +179,19 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             .range(opts.loColor, opts.hiColor);
             fill = pv.dict(cols, function(f){
                 return scale
-                })
-        //        fill = Array();
-        //        for (var key in cols)
-        //            fill[key] = scale;
+            })
         }
 
 
         /* The cell dimensions. */
-        var w = (xScale.max - xScale.min)/xScale.pb_categories.length;
-        var h = (yScale.max - yScale.min)/yScale.pb_categories.length;
+        var w = (xScale.max - xScale.min)/xScale.domain().length;
+        var h = (yScale.max - yScale.min)/yScale.domain().length;
 
         if (anchor != "bottom") {
             var tmp = w;
             w = h;
             h = tmp;
         }
-
-        /** original function   (for "vertical chart only")
-      this.pvPanel.add(pv.Panel)
-        .data(cols)
-        .left(function() this.index * w)
-        .width(w)
-        .add(pv.Panel)
-        .data(data)
-        .top(function() this.index * h)
-        .height(h)
-        .fillStyle(function(d, f) fill[f](d[f]) )
-        .strokeStyle("white")
-        .lineWidth(1)
-        .antialias(false);
-         ***/
 
         this.pvHeatGrid = this.pvPanel.add(pv.Panel)
         .data(cols)
@@ -224,17 +203,17 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         .data(data)
         [pvc.BasePanel.oppositeAnchor[anchor]](function(){
             return this.index * h
-            })
+        })
         [pvc.BasePanel.orthogonalLength[anchor]](h)
         .fillStyle(function(dat, col){
             return  (dat[col] != null) ? fill[col](dat[col]):opts.nullColor
-            })
+        })
         .strokeStyle("white")
         .lineWidth(1)
         .antialias(false)
         .text(function(d,f){
             return d[f]
-            });
+        });
 
 
         // NO SUPPORT for overflow and underflow on HeatGrids
@@ -242,9 +221,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         // NO SUPPORT for SecondAxis on HeatGrids
 
         // Labels:
-
-
-
 
         if(this.showTooltips){
             this.pvHeatGrid
