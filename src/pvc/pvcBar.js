@@ -90,7 +90,10 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     maxBarSize: 200,
     showValues: true,
     orientation: "vertical",
-
+    tipsySettings: {
+        gravity: "s",
+        fade: true
+    },
 
     constructor: function(chart, options){
 
@@ -304,11 +307,10 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
         })
 
         if(this.showTooltips){
+            // Extend default
+            this.extend(this.tipsySettings,"tooltip_");
             this.pvBar
-            .event("mouseover", pv.Behavior.tipsy({
-                gravity: "s",
-                fade: true
-            }));
+            .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
         }
 
 

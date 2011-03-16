@@ -77,7 +77,8 @@ pvc.Base = Base.extend({
     preRender: function(){
 
         pvc.log("Prerendering in pvc");
-
+        // Now's as good a time as any to completely clear out all tipsy tooltips
+        $('.tipsy').remove();
         // If we don't have data, we just need to set a "no data" message
         // and go on with life.
         if (this.resultset.length === 0) {
@@ -371,7 +372,12 @@ pvc.BasePanel = Base.extend({
         for (p in this.chart.options.extensionPoints){
             if (p.indexOf(prefix) == 0){
                 var m = p.substring(prefix.length);
-                mark[m](this.chart.options.extensionPoints[p]);
+                // Distinguish between mark methods and properties
+                if (typeof mark[m] === "function") {
+                    mark[m](this.chart.options.extensionPoints[p]);
+                } else {
+                    mark[m] = this.chart.options.extensionPoints[p];
+                }
             }
 
         }

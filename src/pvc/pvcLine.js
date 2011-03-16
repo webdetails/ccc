@@ -8,6 +8,10 @@
 pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
   scatterChartPanel : null,
+  tipsySettings: {
+    gravity: "s",
+    fade: true
+  },
 
   constructor: function(o){
 
@@ -335,11 +339,9 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     })
 
     if(this.showTooltips){
+      this.extend(this.tipsySettings,"tooltip_");
       this.pvLine
-      .event("point", pv.Behavior.tipsy({
-        gravity: "s",
-        fade: true
-      }));
+      .event("point", pv.Behavior.tipsy(this.tipsySettings));
     }
 
     this.pvDot = this.pvLine.add(pv.Dot)
