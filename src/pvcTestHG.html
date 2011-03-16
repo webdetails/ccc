@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> fixed bounds</title>
+
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+</script><![endif]-->
+        <meta name="svg.render.forceflash" content="true">
+
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="cdf/Base.js"></script>
+        <script type="text/javascript" src="cdf/jquery.js"></script>
+        <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+        <script type="text/javascript" src="data/q01-01.js"></script>
+        <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+        <script type="text/javascript" src="lib/tipsy.js"></script>
+        <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+
+        <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+        <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcPie.js"></script>
+        <script type="text/javascript" src="pvc/pvcBar.js"></script>
+        <script type="text/javascript" src="pvc/pvcHeatGrid.js"></script>
+        <script type="text/javascript" src="pvc/pvcLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcData.js"></script>
+        <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
+        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+        <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+    </head>
+    <body>
+
+        <h1>
+            CCC playground
+        </h1>
+
+The colormapping used in the subsequent charts is
+<ul>
+<li> light green  low revenues for this PMC (=Product Market Combination)</li>
+<li> Dark green:  high revenues for this PMC
+<li> Orange:  null value for this PMC
+</ul>
+The subsequent three charts show the same dataset with different settings.
+
+        <h2>HeatGrid (normalize per column)</h2>
+        In this chart we normalize per product (column of the graph).
+        We observe that Product A and E sell best in
+        Europe (more revenue --> darker color), while the other three products return most revenue in
+        Japan.
+
+        <div id="pvcHG1"></div>
+<p>
+TO DO: If we want to add a legend this needs to be a relative scale as
+        the the actual scaling differs per product column. 
+
+        <h2>HeatGrid (normalize over full matrix)</h2>
+        If the next chart we have normalized over the full matrix.
+        Here we observe that most revenue comes from products C and
+        E. Product C sells best in Japan Product E in Europe (and no
+        data for Japan).
+        <div id="pvcHG2"></div>
+<p>
+TO DO: for this type of graph we can add a legend that maps 5
+        different colors to revenue values as all cells use the same
+        color mapping.
+
+        <h2>HeatGrid (horizontal)</h2>
+        This is the same chart (normalized per product) as the first
+        chart. However, this chart is has a different
+        orientation. Again the data is normalized by product, so
+        here the data is normalized by per Row!
+        <div id="pvcHG3"></div>
+
+
+
+        <script type="text/javascript">
+
+            pv.listenForPageLoad(function() {
+
+                var heatGrid2 = new pvc.HeatGridChart({
+                    canvas: "pvcHG1",
+                    width: 630,
+                    height: 300,
+                    crosstabMode: true,
+                    seriesInRows: false,
+                    animate: false,
+                    clickable: false,
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+                    stacked: false,
+                    maxBarSize: 30,
+                    panelSizeRatio: 0.8,
+                    barSizeRatio: 0.9,
+                    orientation: "vertical",
+                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+                    showValues: false,
+                    valuesAnchor: "right",
+                    titlePosition: "top",
+                    titleSize: 25,
+                    legend: false,
+                    legendPosition: "top",
+                    legendAlign: "center",
+                    showXScale: true,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 50,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    axisOffset: 0,
+                    originIsZero: true,
+
+                    secondAxis: false,
+                    secondAxisIndependentScale: true,
+                    secondAxisIdx: -1,
+                    secondAxisOriginIsZero: true,
+                    secondAxisColor: "blue",
+                    //secondAxisColor: "red",
+
+                    normPerCol: true,
+
+                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
+                });
+
+
+                heatGrid2.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+                heatGrid2.render();
+
+                var heatGrid2nt = new pvc.HeatGridChart({
+                    canvas: "pvcHG2",
+                    width: 630,
+                    height: 300,
+                    crosstabMode: true,
+                    seriesInRows: false,
+                    animate: false,
+                    clickable: false,
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+                    stacked: false,
+                    maxBarSize: 30,
+                    panelSizeRatio: 0.8,
+                    barSizeRatio: 0.9,
+                    orientation: "vertical",
+                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+                    showValues: false,
+                    valuesAnchor: "right",
+                    titlePosition: "top",
+                    titleSize: 25,
+                    legend: false,
+                    legendPosition: "top",
+                    legendAlign: "center",
+                    showXScale: true,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 70,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    axisOffset: 0,
+                    originIsZero: true,
+
+                    secondAxis: false,
+                    secondAxisIndependentScale: true,
+                    secondAxisIdx: -1,
+                    secondAxisOriginIsZero: true,
+                    secondAxisColor: "blue",
+                    //secondAxisColor: "red",
+
+                    normPerCol: false,
+
+                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
+                });
+
+
+                heatGrid2nt.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+                heatGrid2nt.render();
+
+
+
+                var heatGrid3 = new pvc.HeatGridChart({
+                    canvas: "pvcHG3",
+                    width: 630,
+                    height: 300,
+                    crosstabMode: true,
+                    seriesInRows: false,
+                    animate: false,
+                    clickable: false,
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+                    stacked: false,
+                    maxBarSize: 30,
+                    panelSizeRatio: 0.8,
+                    barSizeRatio: 0.9,
+
+                    orientation: "horizontal",
+                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+                    showValues: false,
+                    valuesAnchor: "right",
+                    titlePosition: "top",
+                    titleSize: 25,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "center",
+                    showXScale: true,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 70,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    axisOffset: 0,
+                    originIsZero: true,
+
+                    secondAxis: false,
+                    secondAxisIndependentScale: true,
+                    secondAxisIdx: -1,
+                    secondAxisOriginIsZero: true,
+                    secondAxisColor: "blue",
+
+                    //secondAxisColor: "red",
+
+                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
+                });
+
+
+
+
+                heatGrid3.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+                heatGrid3.render();
+
+
+
+
+            });
+
+
+
+
+
+        </script>
+
+
+
+
+
+    </body>
+</html>

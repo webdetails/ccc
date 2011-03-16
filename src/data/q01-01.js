@@ -194,3 +194,38 @@ var test3 = {
         "colName":"[Measures].[Lost Sales Availability]"
     }]
     }
+
+
+var testHeatGrid = {
+    "resultset":[["Product A",null,1278,321,540,110],
+    ["Product B",209,2165,5000,1019,null],
+    ["Product C",3694,5264,15444,9205,312],
+    ["Product D",1257,1040,7215,1512,18],
+    ["Product E",895,14489,null,5171,14]],
+    "metadata":[{
+        "colIndex":0,
+        "colType":"String",
+        "colName":"Product-line"
+    },{
+        "colIndex":1,
+        "colType":"Numeric",
+        "colName":"APAC"
+    },{
+        "colIndex":2,
+        "colType":"Numeric",
+        "colName":"EMEA"
+    },{
+        "colIndex":3,
+        "colType":"Numeric",
+        "colName":"Japan"
+    },{
+        "colIndex":4,
+        "colType":"Numeric",
+        "colName":"NA"
+    },{
+        "colIndex":5,
+        "colType":"Numeric",
+        "colName":"RoW"
+    }]
+};
+

@@ -98,6 +98,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
     },
 
+
     create: function(){
 
         var myself = this;
@@ -107,6 +108,10 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
         this.pvPanel = this._parent.getPvPanel().add(this.type)
         .width(this.width)
         .height(this.height)
+
+        if  (   ('fixedMinY' in myself.chart.options)
+             || ('fixedMaxY' in myself.chart.options) )
+          this.pvPanel["overflow"]("hidden");
 
         var anchor = this.orientation == "vertical"?"bottom":"left";
 
@@ -163,6 +168,20 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
             .fillStyle(colorFunc)
 
+           // CvK: adding markers for datapoints that are off-axis
+	   this.pvPanel.add(pv.Dot)
+             .shape("triangle")
+             .shapeSize(12)
+             .lineWidth(1.5)
+             .strokeStyle("red")
+             .fillStyle(null)
+             .data(function(){
+                var res = [[0, 1000], [1, 1000]];
+                return res;
+                })
+            ["left"](function(d){ return oScale(d[0]) + barPositionOffset;})
+            ["bottom"](function(d){ return lScale(d[1]) }) ;
+
         /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
         return this.parent.left() + barPositionOffset
       })*/;
@@ -181,10 +200,13 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
                 maxBarSize = this.maxBarSize;
             }
 
+
+
             this.pvBarPanel = this.pvPanel.add(pv.Panel)
             .data(this.chart.dataEngine.getVisibleCategoriesIndexes())
             [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-                return oScale(this.index);
+                var res = oScale(this.index);
+                return res;
             })
             [anchor](0)
             [pvc.BasePanel.paralelLength[anchor]](oScale.range().band)
@@ -193,11 +215,14 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
             this.pvBar = this.pvBarPanel.add(pv.Bar)
             .data(function(d){
-                return myself.chart.dataEngine.getVisibleValuesForCategoryIndex(d)
+                var res = myself.chart.dataEngine
+                     .getVisibleValuesForCategoryIndex(d);
+                return res;
                 })
             .fillStyle(colorFunc2)
             [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-                return bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + barPositionOffset;
+                var res = bScale(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]) + barPositionOffset;
+                return res;
             })
             [anchor](function(d){
                 return lScale(pv.min([0,d]))
@@ -205,10 +230,38 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.orthogonalLength[anchor]](function(d){
                 return myself.chart.animate(0, Math.abs(lScale(d||0) - lScale(0)))
             })
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ;   // ; added
+
+           if      ('fixedMinY' in myself.chart.options)
+               // CvK: adding markers for datapoints that are off-axis
+               //  UNDERFLOW  =  datavalues < fixedMinY
+              this.generateOverflowMarker(anchor, true, maxBarSize, 
+                   0, bScale,
+                   function(d){
+                     var res = myself.chart.dataEngine
+                       .getVisibleValuesForCategoryIndex(d);
+                     // check for off-grid values (and replace by null)
+                     var fixedMin = myself.chart.options.fixedMinY;
+                     for(var i=0; i<res.length; i++)
+                       res[i] = (res[i] < fixedMin) ? fixedMin : null; 
+                     return res;
+                   });
+
+           if ('fixedMaxY' in myself.chart.options)
+              // CvK: overflow markers: max > fixedMaxY
+              this.generateOverflowMarker(anchor, false, maxBarSize, 
+                   Math.PI, bScale,
+                   function(d){
+                     var res = myself.chart.dataEngine
+                       .getVisibleValuesForCategoryIndex(d);
+                     // check for off-grid values (and replace by null)
+                     var fixedMax = myself.chart.options.fixedMaxY;
+                     for(var i=0; i<res.length; i++)
+                       res[i] = (res[i] > fixedMax) ? fixedMax : null; 
+                     return res;
+                   });
 
         }
-
 
         if(this.chart.options.secondAxis){
             // Second axis - support for lines
@@ -236,6 +289,8 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             .lineWidth(1.5)
             .fillStyle(this.chart.options.secondAxisColor)
         }
+
+
 
         // Labels:
 
@@ -287,6 +342,47 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
         // Extend body
         this.extend(this.pvPanel,"chart_");
 
-    }
+    },
+
+
+
+      /*******
+       *  Function used to generate overflow and underflowmarkers.
+       *  This function is only used when fixedMinX and fixedMaxY are set
+       *
+       *******/
+      generateOverflowMarker: function(anchor, underflow, maxBarSize, angle,
+                                     bScale, dataFunction)
+
+      {
+        var myself = this;
+        var offGridBarOffset = maxBarSize/2;
+
+        var offGridBorderOffset = (underflow) ?
+          this.chart.getLinearScale(true).min + 8  :
+          this.chart.getLinearScale(true).max - 8   ;
+
+        if (this.orientation != "vertical")
+          angle += Math.PI/2.0;
+
+	this.overflowMarkers = this.pvBarPanel.add(pv.Dot)
+          .shape("triangle")
+          .shapeSize(10)
+          .shapeAngle(angle)
+          .lineWidth(1.5)
+          .strokeStyle("red")
+          .fillStyle("white")
+          .data(dataFunction)
+        [pvc.BasePanel.relativeAnchor[anchor]](function(d){
+          var res = bScale(myself.chart.dataEngine
+                           .getVisibleSeriesIndexes()[this.index])
+                           + offGridBarOffset;
+          return res;
+        })
+	[anchor](function(d){ 
+          // draw the markers at a fixed position (null values are
+          // shown off-grid (-1000)
+          return (d != null) ? offGridBorderOffset: -10000; }) ;
+     }
 
 });
