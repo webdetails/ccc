@@ -212,7 +212,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      *
      */
     getAxisOrdinalElements: function(){
-        return this.dataEngine.getCategories();
+        return this.dataEngine.getVisibleCategories();
     },
 
 
