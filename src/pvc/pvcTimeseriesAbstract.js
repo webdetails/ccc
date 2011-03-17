@@ -27,8 +27,6 @@ pvc.TimeseriesAbstract = pvc.Base.extend({
 
     this.base();
 
-    pvc.log("Prerendering in TimeseriesAbstract");
-
 
     // Do we have the timeseries panel? add it
 
