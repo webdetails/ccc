@@ -71,8 +71,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         this.base();
 
-        pvc.log("Prerendering in CategoricalAbstract");
-
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         this.secondScale =  this.options.secondAxisIndependentScale?this.getSecondScale(): this.getLinearScale();
