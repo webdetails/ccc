@@ -244,7 +244,11 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     this.chart.dataEngine.toggleVisibility(this.chart.legendSource,idx);
 
     // Forcing removal of tipsy legends
-    $(".tipsy").remove();
+    try{
+      $(".tipsy").remove();
+    }catch(e){
+      // Do nothing
+    }
 
     // Rerender chart
     this.chart.preRender();

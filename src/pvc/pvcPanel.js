@@ -78,7 +78,11 @@ pvc.Base = Base.extend({
 
         pvc.log("Prerendering in pvc");
         // Now's as good a time as any to completely clear out all tipsy tooltips
-        $('.tipsy').remove();
+        try {
+            $('.tipsy').remove();
+        } catch(e) {
+            // Do nothing
+        }
         // If we don't have data, we just need to set a "no data" message
         // and go on with life.
         if (this.resultset.length === 0) {
