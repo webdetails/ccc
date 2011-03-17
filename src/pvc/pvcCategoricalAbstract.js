@@ -335,6 +335,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 scale.min = secondYAxisSize;
                 scale.max = size - xAxisSize - secondXAxisSize;
             }
+
         }  // end else-part -- if (perpAxis)
 
         scale.splitBanded( scale.min, scale.max, this.options.panelSizeRatio);
