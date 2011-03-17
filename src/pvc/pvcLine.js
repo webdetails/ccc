@@ -30,7 +30,9 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
       orientation: "vertical",
       timeSeries: false,
       timeSeriesFormat: "%Y-%m-%d",
-      panelSizeRatio: 1
+      panelSizeRatio: 1,
+      fixedMinY: null,
+      fixedMaxY: null
     };
 
 
@@ -43,6 +45,8 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
   preRender: function(){
 
     this.base();
+
+    pvc.log("Prerendering in ScatterAbstract");
 
 
     this.scatterChartPanel = new pvc.ScatterChartPanel(this, {
@@ -233,6 +237,11 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     this.pvPanel = this._parent.getPvPanel().add(this.type)
     .width(this.width)
     .height(this.height);
+
+    // add clipping for bounds
+    if  (   (myself.chart.options.fixedMinY != null)
+         || (myself.chart.options.fixedMaxY != null) )
+      this.pvPanel["overflow"]("hidden");
 
     if(this.showTooltips || this.chart.options.clickable ){
       this.pvPanel

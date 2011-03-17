@@ -19,7 +19,9 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
             originIsZero: true,
             axisOffset: 0,
             showTooltips: true,
-            orientation: "vertical"
+            orientation: "vertical",
+            fixedMinY: null,
+            fixedMaxY: null
         };
 
 
@@ -112,8 +114,8 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
         .width(this.width)
         .height(this.height)
 
-        if  (   ('fixedMinY' in myself.chart.options)
-             || ('fixedMaxY' in myself.chart.options) )
+        if  (   (myself.chart.options.fixedMinY != null)
+             || (myself.chart.options.fixedMaxY != null) )
           this.pvPanel["overflow"]("hidden");
 
         var anchor = this.orientation == "vertical"?"bottom":"left";
@@ -171,20 +173,6 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
             .fillStyle(colorFunc)
 
-           // CvK: adding markers for datapoints that are off-axis
-	   this.pvPanel.add(pv.Dot)
-             .shape("triangle")
-             .shapeSize(12)
-             .lineWidth(1.5)
-             .strokeStyle("red")
-             .fillStyle(null)
-             .data(function(){
-                var res = [[0, 1000], [1, 1000]];
-                return res;
-                })
-            ["left"](function(d){ return oScale(d[0]) + barPositionOffset;})
-            ["bottom"](function(d){ return lScale(d[1]) }) ;
-
         /*[pvc.BasePanel.relativeAnchor[anchor]](function(d){
         return this.parent.left() + barPositionOffset
       })*/;
@@ -233,9 +221,9 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.orthogonalLength[anchor]](function(d){
                 return myself.chart.animate(0, Math.abs(lScale(d||0) - lScale(0)))
             })
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ;   // ; added
+            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ; 
 
-           if      ('fixedMinY' in myself.chart.options)
+           if      (myself.chart.options.fixedMinY != null)
                // CvK: adding markers for datapoints that are off-axis
                //  UNDERFLOW  =  datavalues < fixedMinY
               this.generateOverflowMarker(anchor, true, maxBarSize, 
@@ -250,7 +238,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
                      return res;
                    });
 
-           if ('fixedMaxY' in myself.chart.options)
+           if (myself.chart.options.fixedMaxY != null)
               // CvK: overflow markers: max > fixedMaxY
               this.generateOverflowMarker(anchor, false, maxBarSize, 
                    Math.PI, bScale,

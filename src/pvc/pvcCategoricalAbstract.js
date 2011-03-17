@@ -71,6 +71,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         this.base();
 
+        pvc.log("Prerendering in CategoricalAbstract");
+
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         this.secondScale =  this.options.secondAxisIndependentScale?this.getSecondScale(): this.getLinearScale();
@@ -223,8 +225,20 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      *  List of elements to use in the axis ordinal
      *
      */
-    getAxisOrdinalElements: function(){
-        return this.dataEngine.getVisibleCategories();
+    getAxisOrdinalElements: function(axis){
+        var onSeries = false;
+
+        // onSeries can only be true if the perpendicular axis is ordinal
+        if (this.options.perpAxisOrdinal) {
+            if (axis == "x")
+                onSeries = ! (this.options.orientation == "vertical");
+            else
+                onSeries = this.options.orientation == "vertical";
+        }
+        
+        return onSeries ?
+        this.dataEngine.getVisibleSeries() :
+        this.dataEngine.getVisibleCategories();
     },
 
 
@@ -303,13 +317,17 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             var categories = this.dataEngine.getVisibleCategories();
             var scale = new pv.Scale.ordinal(categories);
 
-            var size = this.options.orientation=="vertical"?this.basePanel.width:this.basePanel.height;
+            var size = this.options.orientation=="vertical"?
+                         this.basePanel.width:
+                         this.basePanel.height;
 
-            if(this.options.orientation=="vertical" && this.options.yAxisPosition == "left"){
+            if (   this.options.orientation=="vertical"
+                && this.options.yAxisPosition == "left"){
                 scale.min = yAxisSize;
                 scale.max = size - secondYAxisSize;
             }
-            else if(this.options.orientation=="vertical" && this.options.yAxisPosition == "right"){
+            else if (   this.options.orientation=="vertical" 
+                     && this.options.yAxisPosition == "right"){
                 scale.min = secondYAxisSize;
                 scale.max = size-yAxisSize;
             }
@@ -370,15 +388,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
 
         // CvK:  added to set bounds
-        //if (isVertical) {   // should also work for horizontal
-        if('fixedMinY' in this.options) {
-            min = this.options.fixedMinY
-        }
-        if('fixedMaxY' in this.options) {
-            max = this.options.fixedMaxY
-        }
-        //}
-
+        if(   ('fixedMinY' in this.options)
+           && (this.options.fixedMinY != null)
+           && !(isNaN(Number(this.options.fixedMinY))))
+            min = this.options.fixedMinY;
+        if(   ('fixedMaxY' in this.options)
+           && (this.options.fixedMaxY != null)
+           && !(isNaN(Number(this.options.fixedMaxY))))
+            max = this.options.fixedMaxY;
 
 
         // Adding a small offset to the scale:

@@ -254,11 +254,13 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
           .range(opts.loColor, opts.hiColor)
       });
      else {   // normalize over the whole array
-      var theMin = min[0];
-      for (var i=1; i<min.length; i++) if (min[i] < theMin) theMin = min[i];
+      var theMin = min[cols[0]];
+      for (var i=1; i<cols.length; i++)
+        if (min[cols[i]] < theMin) theMin = min[cols[i]];
 
-      var theMax = max[0];
-      for (var i=1; i<max.length; i++) if (max[i] < theMax) theMax = max[i];
+      var theMax = max[cols[0]];
+      for (var i=1; i<cols.length; i++)
+        if (max[cols[i]] < theMax) theMax = max[cols[i]];
 
       var scale = pv.Scale.linear()
         .domain(theMin, theMax)
