@@ -71,8 +71,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         this.base();
 
-        pvc.log("Prerendering in CategoricalAbstract");
-
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         this.secondScale =  this.options.secondAxisIndependentScale?this.getSecondScale(): this.getLinearScale();
@@ -225,20 +223,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      *  List of elements to use in the axis ordinal
      *
      */
-    getAxisOrdinalElements: function(axis){
-        var onSeries = false;
-
-        // onSeries can only be true if the perpendicular axis is ordinal
-        if (this.options.perpAxisOrdinal) {
-            if (axis == "x")
-                onSeries = ! (this.options.orientation == "vertical");
-            else
-                onSeries = this.options.orientation == "vertical";
-        }
-        
-        return onSeries ?
-        this.dataEngine.getVisibleSeries() :
-        this.dataEngine.getVisibleCategories();
+    getAxisOrdinalElements: function(){
+        return this.dataEngine.getVisibleCategories();
     },
 
 

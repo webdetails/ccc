@@ -46,8 +46,6 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
     this.base();
 
-    pvc.log("Prerendering in ScatterAbstract");
-
 
     this.scatterChartPanel = new pvc.ScatterChartPanel(this, {
       stacked: this.options.stacked,
