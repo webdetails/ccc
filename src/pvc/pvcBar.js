@@ -20,8 +20,8 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
             axisOffset: 0,
             showTooltips: true,
             orientation: "vertical",
-            fixedMinY: null,
-            fixedMaxY: null
+            orthoFixedMin: null,
+            orthoFixedMax: null
         };
 
 
@@ -114,8 +114,8 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
         .width(this.width)
         .height(this.height)
 
-        if  (   (myself.chart.options.fixedMinY != null)
-             || (myself.chart.options.fixedMaxY != null) )
+        if  (   (myself.chart.options.orthoFixedMin != null)
+             || (myself.chart.options.orthoFixedMax != null) )
           this.pvPanel["overflow"]("hidden");
 
         var anchor = this.orientation == "vertical"?"bottom":"left";
@@ -223,30 +223,30 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
             })
             [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ; 
 
-           if      (myself.chart.options.fixedMinY != null)
+           if      (myself.chart.options.orthoFixedMin != null)
                // CvK: adding markers for datapoints that are off-axis
-               //  UNDERFLOW  =  datavalues < fixedMinY
+               //  UNDERFLOW  =  datavalues < orthoFixedMin
               this.generateOverflowMarker(anchor, true, maxBarSize, 
                    0, bScale,
                    function(d){
                      var res = myself.chart.dataEngine
                        .getVisibleValuesForCategoryIndex(d);
                      // check for off-grid values (and replace by null)
-                     var fixedMin = myself.chart.options.fixedMinY;
+                     var fixedMin = myself.chart.options.orthoFixedMin;
                      for(var i=0; i<res.length; i++)
                        res[i] = (res[i] < fixedMin) ? fixedMin : null; 
                      return res;
                    });
 
-           if (myself.chart.options.fixedMaxY != null)
-              // CvK: overflow markers: max > fixedMaxY
+           if (myself.chart.options.orthoFixedMax != null)
+              // CvK: overflow markers: max > orthoFixedMax
               this.generateOverflowMarker(anchor, false, maxBarSize, 
                    Math.PI, bScale,
                    function(d){
                      var res = myself.chart.dataEngine
                        .getVisibleValuesForCategoryIndex(d);
                      // check for off-grid values (and replace by null)
-                     var fixedMax = myself.chart.options.fixedMaxY;
+                     var fixedMax = myself.chart.options.orthoFixedMax;
                      for(var i=0; i<res.length; i++)
                        res[i] = (res[i] > fixedMax) ? fixedMax : null; 
                      return res;
@@ -338,7 +338,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
       /*******
        *  Function used to generate overflow and underflowmarkers.
-       *  This function is only used when fixedMinX and fixedMaxY are set
+       *  This function is only used when fixedMinX and orthoFixedMax are set
        *
        *******/
       generateOverflowMarker: function(anchor, underflow, maxBarSize, angle,

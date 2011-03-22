@@ -40,7 +40,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             secondAxisSize: 0, // calculated
 
             // CvK  added extra parameter for implementation of HeatGrid
-            perpAxisOrdinal: false
+            orthoAxisOrdinal: false
         // if orientation==vertical then perpendicular-axis is the y-axis
         //  else perpendicular-axis is the x-axis.
         };
@@ -203,7 +203,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if (this.options.orientation == "vertical") 
             isOrdinal = !(this.options.timeSeries);
         else 
-            isOrdinal =  this.options.perpAxisOrdinal;
+            isOrdinal =  this.options.orthoAxisOrdinal;
         return isOrdinal;
     },
 
@@ -215,7 +215,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     isYAxisOrdinal: function(){
         var isOrdinal = false;
         if (this.options.orientation == "vertical")
-            isOrdinal =  this.options.perpAxisOrdinal;
+            isOrdinal =  this.options.orthoAxisOrdinal;
         else
             isOrdinal = !(this.options.timeSeries);
         return isOrdinal;
@@ -229,7 +229,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var onSeries = false;
 
         // onSeries can only be true if the perpendicular axis is ordinal
-        if (this.options.perpAxisOrdinal) {
+        if (this.options.orthoAxisOrdinal) {
             if (axis == "x")
                 onSeries = ! (this.options.orientation == "vertical");
             else
@@ -255,7 +255,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.getTimeseriesScale()     :
             this.getOrdinalScale();
         } else {
-            scale =  (this.options.perpAxisOrdinal) ?
+            scale =  (this.options.orthoAxisOrdinal) ?
             this.getPerpOrdinalScale("x")    :
             this.getLinearScale();
         } 
@@ -270,7 +270,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     getYScale: function(){
         var scale = null;
         if (this.options.orientation == "vertical") {
-            scale =  (this.options.perpAxisOrdinal) ?
+            scale =  (this.options.orthoAxisOrdinal) ?
             this.getPerpOrdinalScale("y")    :
             scale = this.getLinearScale();
         } else { 
@@ -287,7 +287,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      *     - getPerpOrdScale()
      *   (CvK)
      */
-    getOrdScale: function(bypassAxis, perpAxis){
+    getOrdScale: function(bypassAxis, orthoAxis){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
@@ -301,19 +301,19 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             secondXAxisSize = bypassAxis?0:this.options.secondAxisSize;
         }
 
-        if (perpAxis) {   // added by CvK
+        if (orthoAxis) {   // added by CvK
             var categories = this.dataEngine.getVisibleSeries();
             var scale = new pv.Scale.ordinal(categories);
 
-            if (perpAxis == "y") {
+            if (orthoAxis == "y") {
                 scale.min = 0;
                 scale.max = this.basePanel.height - xAxisSize;
-            } else {   // assume perpAxis == "x"
+            } else {   // assume orthoAxis == "x"
                 scale.min = yAxisSize;
                 scale.max = this.basePanel.width;
             }
 
-        } else {   // perpAxis == false  (so normal ordinal axis)
+        } else {   // orthoAxis == false  (so normal ordinal axis)
             var categories = this.dataEngine.getVisibleCategories();
             var scale = new pv.Scale.ordinal(categories);
 
@@ -336,7 +336,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 scale.max = size - xAxisSize - secondXAxisSize;
             }
 
-        }  // end else-part -- if (perpAxis)
+        }  // end else-part -- if (orthoAxis)
 
         scale.splitBanded( scale.min, scale.max, this.options.panelSizeRatio);
         return scale;
@@ -348,8 +348,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      */
     getOrdinalScale: function(bypassAxis){
         var bpa = (bypassAxis) ? bypassAxis : null;
-        var perpAxis = null;
-        var scale = this.getOrdScale(bpa, perpAxis);
+        var orthoAxis = null;
+        var scale = this.getOrdScale(bpa, orthoAxis);
         return scale;
     },
     /*
@@ -358,9 +358,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      *     xx otherwise
      *   (CvK)
      */
-    getPerpOrdinalScale: function(perpAxis){
+    getPerpOrdinalScale: function(orthoAxis){
         var bypassAxis = null;
-        var scale = this.getOrdScale(bypassAxis, perpAxis);
+        var scale = this.getOrdScale(bypassAxis, orthoAxis);
         return scale;
     },
     /**
@@ -389,14 +389,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
 
         // CvK:  added to set bounds
-        if(   ('fixedMinY' in this.options)
-           && (this.options.fixedMinY != null)
-           && !(isNaN(Number(this.options.fixedMinY))))
-            min = this.options.fixedMinY;
-        if(   ('fixedMaxY' in this.options)
-           && (this.options.fixedMaxY != null)
-           && !(isNaN(Number(this.options.fixedMaxY))))
-            max = this.options.fixedMaxY;
+        if(   ('orthoFixedMin' in this.options)
+           && (this.options.orthoFixedMin != null)
+           && !(isNaN(Number(this.options.orthoFixedMin))))
+            min = this.options.orthoFixedMin;
+        if(   ('orthoFixedMax' in this.options)
+           && (this.options.orthoFixedMax != null)
+           && !(isNaN(Number(this.options.orthoFixedMax))))
+            max = this.options.orthoFixedMax;
 
 
         // Adding a small offset to the scale:

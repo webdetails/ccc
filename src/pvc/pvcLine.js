@@ -31,8 +31,8 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
       timeSeries: false,
       timeSeriesFormat: "%Y-%m-%d",
       panelSizeRatio: 1,
-      fixedMinY: null,
-      fixedMaxY: null
+      orthoFixedMin: null,
+      orthoFixedMax: null
     };
 
 
@@ -239,8 +239,8 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     .height(this.height);
 
     // add clipping for bounds
-    if  (   (myself.chart.options.fixedMinY != null)
-         || (myself.chart.options.fixedMaxY != null) )
+    if  (   (myself.chart.options.orthoFixedMin != null)
+         || (myself.chart.options.orthoFixedMax != null) )
       this.pvPanel["overflow"]("hidden");
 
     if(this.showTooltips || this.chart.options.clickable ){

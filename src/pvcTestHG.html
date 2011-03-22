@@ -36,7 +36,7 @@
     <body>
 
         <h1>
-            CCC playground
+            Using HeatGrids to visualize 2D data
         </h1>
 
 The colormapping used in the subsequent charts is
@@ -50,7 +50,7 @@ The subsequent three charts show the same dataset with different settings.
         <h2>HeatGrid (normalize per column)</h2>
         In this chart we normalize per product (column of the graph).
         We observe that Product A and E sell best in
-        Europe (more revenue --> darker color), while the other three products return most revenue in
+        Europe (more revenue --> red color), while the other three products return most revenue in
         Japan.
 
         <div id="pvcHG1"></div>
@@ -72,7 +72,7 @@ TO DO: for this type of graph we can add a legend that maps 5
         <h2>HeatGrid (horizontal)</h2>
         This is the same chart (normalized per product) as the first
         chart. However, this chart is has a different
-        orientation. Again the data is normalized by product, so
+        orientation and a green color-scheme (white --> green). Again the data is normalized by product, so
         here the data is normalized by per Row!
         <div id="pvcHG3"></div>
 
@@ -102,7 +102,7 @@ TO DO: for this type of graph we can add a legend that maps 5
                     valuesAnchor: "right",
                     titlePosition: "top",
                     titleSize: 25,
-                    legend: true,
+                    legend: false,
                     legendPosition: "top",
                     legendAlign: "center",
                     showXScale: true,
@@ -116,14 +116,16 @@ TO DO: for this type of graph we can add a legend that maps 5
                     axisOffset: 0,
                     originIsZero: false,
 
-                    secondAxis: false,
-                    secondAxisIndependentScale: true,
-                    secondAxisIdx: -1,
-                    secondAxisOriginIsZero: true,
-                    secondAxisColor: "blue",
+                    //secondAxis: false,
+                    //secondAxisIndependentScale: true,
+                    //secondAxisIdx: -1,
+                    //secondAxisOriginIsZero: true,
+                    //secondAxisColor: "blue",
                     //secondAxisColor: "red",
 
-                    normPerCol: true,
+                    normPerBaseCategory: true,
+                    minColor: "#10FF10",
+                    maxColor: "red",
 
                     extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
                 });
@@ -163,14 +165,16 @@ TO DO: for this type of graph we can add a legend that maps 5
                     yAxisFullGrid: true,
                     axisOffset: 0,
 
-                    secondAxis: false,
-                    secondAxisIndependentScale: true,
-                    secondAxisIdx: -1,
-                    secondAxisOriginIsZero: true,
-                    secondAxisColor: "blue",
+                    //secondAxis: false,
+                    //secondAxisIndependentScale: true,
+                    //secondAxisIdx: -1,
+                    //secondAxisOriginIsZero: true,
+                    //secondAxisColor: "blue",
                     //secondAxisColor: "red",
 
-                    normPerCol: false,
+                    normPerBaseCategory: false,
+                    minColor: "#10FF10",
+                    maxColor: "red",
 
                     extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
                 });
@@ -199,7 +203,7 @@ TO DO: for this type of graph we can add a legend that maps 5
                     valuesAnchor: "right",
                     titlePosition: "top",
                     titleSize: 25,
-                    legend: true,
+                    legend: false,
                     legendPosition: "top",
                     legendAlign: "center",
                     showXScale: true,

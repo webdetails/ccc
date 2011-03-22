@@ -7,6 +7,7 @@
  *  A heatGrid contains:
  *     - two categorical axis (both on x and y-axis)
  *     - no legend as series become rows on the perpendicular axis 
+ *  Please contact CvK if there are issues with HeatGrid at cde@vinzi.nl.
  */
 
 pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
@@ -25,13 +26,13 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             showTooltips: true,
             orientation: "vertical",
             // use a categorical here based on series labels
-            perpAxisOrdinal: true,
-            normPerCol: true,
+            orthoAxisOrdinal: true,
             scalingType: "linear",    // "normal" (distribution) or "linear"
+            normPerBaseCategory: true,
             numSD: 2,                 // width (only for normal distribution)
-            loColor: "white",
-            hiColor: "darkgreen",
-            nullColor:  "#efc5ad"  // "#f4b379"
+            minColor: "white",
+            maxColor: "darkgreen",
+            nullColor:  "#efc5ad"  // white with a shade of orange
         };
 
 
@@ -247,11 +248,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       })
     });
 
-    if (opts.normPerCol)  //  compute a scale-function for each column (each key
+    if (opts.normPerBaseCategory)  //  compute a scale-function for each column (each key
       fill = pv.dict(cols, function(f){
         return pv.Scale.linear()
           .domain(min[f], max[f])
-          .range(opts.loColor, opts.hiColor)
+          .range(opts.minColor, opts.maxColor)
       });
      else {   // normalize over the whole array
       var theMin = min[cols[0]];
@@ -264,7 +265,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
       var scale = pv.Scale.linear()
         .domain(theMin, theMax)
-        .range(opts.loColor, opts.hiColor);
+        .range(opts.minColor, opts.maxColor);
       fill = pv.dict(cols, function(f){
         return scale
       })
@@ -276,7 +277,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
   getNormalColorScale: function (data, cols){
     var fill;
     var opts = this.chart.options;
-    if (opts.normPerCol) {
+    if (opts.normPerBaseCategory) {
       // compute the mean and standard-deviation for each column
       var mean = pv.dict(cols, function(f){
         return pv.mean(data, function(d){
@@ -293,7 +294,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         return pv.Scale.linear()
           .domain(-opts.numSD * sd[f] + mean[f],
                   opts.numSD * sd[f] + mean[f])
-          .range(opts.loColor, opts.hiColor)
+          .range(opts.minColor, opts.maxColor)
       });
     } else {   // normalize over the whole array
       var mean = 0.0, sd = 0.0, count = 0;
@@ -316,7 +317,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       var scale = pv.Scale.linear()
         .domain(-opts.numSD * sd + mean,
                 opts.numSD * sd + mean)
-        .range(opts.loColor, opts.hiColor);
+        .range(opts.minColor, opts.maxColor);
       fill = pv.dict(cols, function(f){
         return scale
       })
