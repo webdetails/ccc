@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CCC playground</title>
+
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+</script><![endif]-->
+        <meta name="svg.render.forceflash" content="true">
+
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="cdf/Base.js"></script>
+        <script type="text/javascript" src="cdf/jquery.js"></script>
+        <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+        <script type="text/javascript" src="data/q01-01.js"></script>
+        <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+        <script type="text/javascript" src="lib/tipsy.js"></script>
+        <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+
+        <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+        <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcLinearAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcScatter.js"></script>
+        <script type="text/javascript" src="pvc/pvcLLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcPie.js"></script>
+        <script type="text/javascript" src="pvc/pvcBar.js"></script>
+        <script type="text/javascript" src="pvc/pvcLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcData.js"></script>
+        <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
+        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+        <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+    </head>
+    <body>
+
+        <h1>
+            CCC playground 
+        </h1>
+A comparison of ordinal and linear base axis for
+<ol>
+<li> DotCharts </li>
+<li> LineCharts (to be tested) </li>
+<li> AreaCharts (to be tested) </li>
+<li> StackedAreacharts  (to be implemented) </li>
+</ol>
+
+        <h2>Dot  (small dataset (one series: testDotL)</h2>
+This is the Pvc Dots with a linear base-axis
+<p>
+        <div id="pvcDot1"></div>
+
+<p>
+And this one has an ordinal base-axis.
+There are three essential differences to the previous chart:
+<ul>
+  <li>Values along the base-axis are not in numerical order (the
+    values have the same order as the dataset)</li>
+  <li>Values can appear multiple times (see value 30) along the
+  base-axis </li>
+  <li>The data-points are equidistant, so the distance from 20-30 is
+    the same as the distance 30-100</li>
+</ul>
+A last thing that you need to know (not visible here) is that you can
+not use low cardinality integer numbers as base-axis categories, as
+this might lead to data-points being plotted at the wrong location.
+<p>
+        <div id="pvcDot2"></div>
+
+        <div id="pvcDot3"></div>
+
+
+        <h2>Dot  (larger dataset (TWO series: testDotL2)</h2>
+Now I added a second column definition to the dataset and
+suddenly my full data-set is scattered, look at the series labels.
+And my axis is ruined. 
+
+Clearly I do not fully understand how the data-array works. I have set
+        the "seriesInRows" to falls, but it still seems to use rows as dataset.
+
+This is the Pvc Dots with a linear base-axis
+<p>
+        <div id="pvcDot1L"></div>
+
+<p>
+And this one has an ordinal base-axis
+<p>
+        <div id="pvcDot2L"></div>
+
+        <div id="pvcDot3"></div>
+
+        <h2>Line</h2>
+        <div id="pvcLine1"></div>
+        <div id="pvcLine2"></div>
+        <div id="pvcLine3"></div>
+
+        <br/>
+
+        <h2>Stacked Line</h2>
+        <div id="pvcStackedLine1"></div>
+        <div id="pvcStackedLine2"></div>
+        <div id="pvcStackedLine3"></div>
+
+        <h2>Stacked Area</h2>
+        <div id="pvcStackedArea1"></div>
+        <div id="pvcStackedArea2"></div>
+        <div id="pvcStackedArea3"></div>
+
+
+        <script type="text/javascript">
+
+            pv.listenForPageLoad(function() {
+
+
+
+                var dotL = new pvc.lDotChart({
+                    // legendPosition: "left",
+                    canvas: "pvcDot1",
+                    width: 800,
+                    height: 300,
+                    animate: false,
+                    title: "line chart - standard with dots",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+            originIsZero: true,
+                    //orientation: 'horizontal',
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+
+                    showValues: false,
+                    showDots: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true
+
+                });
+
+                dotL.setData(testLDot , {crosstabMode: false, seriesInRows: false});
+                dotL.render();
+
+                var dotC = new pvc.DotChart({
+                    // legendPosition: "left",
+                    canvas: "pvcDot2",
+                    width: 800,
+                    height: 300,
+                    animate: false,
+                    title: "line chart - standard with dots",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+
+                    //orientation: 'horizontal',
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+
+                    showValues: false,
+                    showDots: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true
+
+                });
+
+                dotC.setData(testLDot , {crosstabMode: false, seriesInRows: false});
+                dotC.render();
+
+
+
+                var dotL2 = new pvc.lDotChart({
+                    // legendPosition: "left",
+                    canvas: "pvcDot1L",
+                    width: 800,
+                    height: 300,
+                    animate: false,
+                    title: "line chart - standard with dots",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+            originIsZero: true,
+                    //orientation: 'horizontal',
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+
+                    showValues: false,
+                    showDots: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true
+
+                });
+
+                dotL2.setData(testLDot2 , {crosstabMode: false, seriesInRows: false});
+                dotL2.render();
+
+                var dotC2 = new pvc.DotChart({
+                    // legendPosition: "left",
+                    canvas: "pvcDot2L",
+                    width: 800,
+                    height: 300,
+                    animate: false,
+                    title: "line chart - standard with dots",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+
+                    //orientation: 'horizontal',
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+
+                    showValues: false,
+                    showDots: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true
+
+                });
+
+                dotC2.setData(testLDot2 , {crosstabMode: false, seriesInRows: false});
+                dotC2.render();
+            });
+
+
+
+        </script>
+
+
+
+
+
+    </body>
+</html>

@@ -145,36 +145,20 @@ var test = {
 };
 
 
-var test2 = {
-    "resultset":[["Jan",256,1278,321,1540,10],
-    ["Feb",209,2165,null,1019,24],
-    ["Mar",694,2264,3444,1205,12],
-    ["Apr",1257,1040,5215,1512,18],
-    ["May",995,2490,null,1171,14]],
+var testLDots = {
+    "resultset":[[10, 15],
+    	[20, 25],
+    	[30, 35],
+    	[15, -4],
+    	[5, -25]] ,
     "metadata":[{
         "colIndex":0,
-        "colType":"String",
-        "colName":"Time"
+        "colType":"Numeric",
+        "colName":"Position"
     },{
         "colIndex":1,
         "colType":"Numeric",
-        "colName":"APAC"
-    },{
-        "colIndex":2,
-        "colType":"Numeric",
-        "colName":"EMEA"
-    },{
-        "colIndex":3,
-        "colType":"Numeric",
-        "colName":"Japan"
-    },{
-        "colIndex":4,
-        "colType":"Numeric",
-        "colName":"NA"
-    },{
-        "colIndex":5,
-        "colType":"Numeric",
-        "colName":"Claims"
+        "colName":"Measurement-1"
     }]
 };
 
@@ -228,3 +212,47 @@ var testHeatGrid = {
     }]
 };
 
+var testLDot = {
+    "resultset":[
+	[10,10,15],
+	[20,20,-10],
+	[30,30,+5],
+	[100,40,30],
+	[15,10,25],
+	[25,-30,10]
+	],
+    "metadata":[{
+        "colIndex":0,
+        "colType":"Numeric",
+        "colName":"Position"
+    },{
+        "colIndex":1,
+        "colType":"Numeric",
+        "colName":"Measure-1"
+    }
+     ]
+};
+
+var testLDot2 = {
+    "resultset":[
+	[10,10,15],
+	[20,20,-10],
+	[30,30,+5],
+	[100,40,30],
+	[15,10,25],
+	[30,-30,10]
+	],
+    "metadata":[{
+        "colIndex":0,
+        "colType":"Numeric",
+        "colName":"Position"
+    },{
+        "colIndex":1,
+        "colType":"Numeric",
+        "colName":"Measure-1"
+    },{
+        "colIndex":2,
+        "colType":"Numeric",
+        "colName":"Measure-2"
+    } ]
+};

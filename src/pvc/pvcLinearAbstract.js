@@ -1,9 +1,14 @@
 /**
- * CategoricalAbstract is the base class for all categorical or timeseries
+ * LinearAbstract is the base class for all chart types that have
+ * a two linear axis.
+ * If the base-axis is a categorical axis you should use categoricalAbstract.
+ * 
+ * If you have issues with this class please contact CvK at cde@vinzi.nl 
  */
 
-pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
+pvc.LinearAbstract = pvc.CategoricalAbstract.extend({
 
+/*
     yAxisPanel : null,
     xAxisPanel : null,
     secondXAxisPanel: null,
@@ -14,13 +19,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     prevMax: null,
     prevMin: null,
-
+    */
 
     constructor: function(o){
 
         this.base(o);
 
         var _defaults = {
+/*
             showAllTimeseries: false, // meaningless here
             showXScale: true,
             showYScale: true,
@@ -43,6 +49,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             orthoAxisOrdinal: false
         // if orientation==vertical then perpendicular-axis is the y-axis
         //  else perpendicular-axis is the x-axis.
+        */
         };
 
 
@@ -50,6 +57,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         $.extend(this.options,_defaults, o);
 
         // Sanitize some options:
+/*
         if (this.options.showYScale == false){
             this.options.yAxisSize = 0
         }
@@ -63,7 +71,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         else{
             this.options.secondAxisSize = 0;
         }
-
+  */
+      return;
     },
 
     preRender: function(){
@@ -71,8 +80,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         this.base();
 
-        pvc.log("Prerendering in CategoricalAbstract");
-
+        pvc.log("Prerendering in LinearAbstract");
+/*
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         this.secondScale =  this.options.secondAxisIndependentScale?this.getSecondScale(): this.getLinearScale();
@@ -87,7 +96,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.generateSecondYAxis(); // this goes before the other because of the fullGrid
         this.generateYAxis();
 
-
+        */
 
 
     },
@@ -96,7 +105,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     /*
      * Generates the X axis. It's in a separate function to allow overriding this value
      */
-
+/*
     generateXAxis: function(){
 
         if (this.options.showXScale){
@@ -110,7 +119,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 elements: this.getAxisOrdinalElements("x")
             });
 
-//            this.xAxisPanel.setScale(this.xScale);
             this.xAxisPanel.setScale(this.xScale);
             this.xAxisPanel.appendTo(this.basePanel); // Add it
 
@@ -118,12 +126,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
 
     },
-
+    */
 
     /*
      * Generates the Y axis. It's in a separate function to allow overriding this value
      */
-
+/*
     generateYAxis: function(){
 
         if (this.options.showYScale){
@@ -143,12 +151,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
 
     },
-
+    */
 
     /*
      * Generates the second axis for X, if exists and only for vertical horizontal charts
      */
-
+/*
     generateSecondXAxis: function(){
 
         if( this.options.secondAxisIndependentScale && this.options.orientation == "horizontal"){
@@ -167,11 +175,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.secondXAxisPanel.appendTo(this.basePanel); // Add it
         }
     },
-
+    */
     /*
      * Generates the second axis for Y, if exists and only for vertical horizontal charts
      */
-
+/*
     generateSecondYAxis: function(){
 
         if( this.options.secondAxisIndependentScale && this.options.orientation == "vertical"){
@@ -192,17 +200,17 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         }
     },
-
+    */
 
 
     /*
-     * Indicates if xx is an ordinal scale
+     * Indicates if x-axis (horizontal axis) is an ordinal scale
      */
 
     isXAxisOrdinal: function(){
         var isOrdinal = false;
         if (this.options.orientation == "vertical") 
-            isOrdinal = !(this.options.timeSeries);
+            isOrdinal = false;
         else 
             isOrdinal =  this.options.orthoAxisOrdinal;
         return isOrdinal;
@@ -212,7 +220,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     /*
      * Indicates if yy is an ordinal scale
      */
-
+/*
     isYAxisOrdinal: function(){
         var isOrdinal = false;
         if (this.options.orientation == "vertical")
@@ -221,11 +229,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             isOrdinal = !(this.options.timeSeries);
         return isOrdinal;
     },
-
+    */
     /*
      *  List of elements to use in the axis ordinal
      *
      */
+/*
     getAxisOrdinalElements: function(axis){
         var onSeries = false;
 
@@ -242,7 +251,40 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         this.dataEngine.getVisibleCategories();
     },
 
+    */
+    getLinearBaseScale: function(bypassAxis){
 
+        var yAxisSize = bypassAxis?0:this.options.yAxisSize;
+        var xAxisSize = bypassAxis?0:this.options.xAxisSize;
+
+        var isVertical = this.options.orientation=="vertical"
+
+        // compute the input-domain of the scale
+        var domainMin = this.dataEngine.getCategoryMin();
+        var domainMax = this.dataEngine.getCategoryMax();
+        // Adding a small relative offset to the scale to prevent that
+        // points are located on top of the axis:
+        var offset = (domainMax - domainMin) * this.options.axisOffset;
+        domainMin -= offset;
+        domainMax += offset;
+
+        // compute the output-range
+        var rangeMin, rangeMax;
+        if (isVertical) {
+          rangeMin = xAxisSize;
+          rangeMax = this.basePanel.width;
+        } else {
+          rangeMin = yAxisSize;
+          rangeMax = this.basePanel.heigth;
+        }
+        
+        // create the (linear) Scale
+        var scale = new pv.Scale.linear()
+              .domain(domainMin, domainMax)
+              .range(rangeMin, rangeMax);
+
+        return scale;
+    },
 
     /*
      * xx scale for categorical charts
@@ -254,11 +296,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if (this.options.orientation == "vertical") {
             scale = this.options.timeSeries  ?
             this.getTimeseriesScale()     :
-            this.getOrdinalScale();
+            this.getLinearBaseScale();   // linear is the default
         } else {
-            scale =  (this.options.orthoAxisOrdinal) ?
-            this.getPerpOrdinalScale("x")    :
-            this.getLinearScale();
+            scale = this.getLinearScale();
         } 
 
         return scale;
@@ -271,16 +311,16 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     getYScale: function(){
         var scale = null;
         if (this.options.orientation == "vertical") {
-            scale =  (this.options.orthoAxisOrdinal) ?
-            this.getPerpOrdinalScale("y")    :
-            this.getLinearScale();
+//            scale =  (this.options.orthoAxisOrdinal) ?
+//            this.getPerpOrdinalScale("y")    :
+            scale = this.getLinearScale();
         } else { 
             scale = this.options.timeSeries  ?
             this.getTimeseriesScale()     :
-            this.getOrdinalScale();
+            this.getLinearBaseScale();
         }
         return scale;
-    },
+    }
 
     /*
      * Helper function to facilitate  (refactoring)
@@ -288,6 +328,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      *     - getPerpOrdScale()
      *   (CvK)
      */
+
+/*
     getOrdScale: function(bypassAxis, orthoAxis){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
@@ -342,30 +384,35 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         scale.splitBanded( scale.min, scale.max, this.options.panelSizeRatio);
         return scale;
     },
-
+    */
     /*
      * Scale for the ordinal axis. xx if orientation is vertical, yy otherwise
      *
      */
+/*
     getOrdinalScale: function(bypassAxis){
         var bpa = (bypassAxis) ? bypassAxis : null;
         var orthoAxis = null;
         var scale = this.getOrdScale(bpa, orthoAxis);
         return scale;
     },
+    */
     /*
      * Scale for the perpendicular ordinal axis.
      *     yy if orientation is vertical,
      *     xx otherwise
      *   (CvK)
      */
+/*
     getPerpOrdinalScale: function(orthoAxis){
         var bypassAxis = null;
         var scale = this.getOrdScale(bypassAxis, orthoAxis);
         return scale;
     },
+    */
     /**
     **/
+/*
     getLinearScale: function(bypassAxis){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
@@ -423,11 +470,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         return scale;
 
     },
-
+    */
     /*
      * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise
      *
      */
+
+/*
     getTimeseriesScale: function(bypassAxis){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
@@ -470,11 +519,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
 
     },
+    */
 
     /*
      * Scale for the linear axis. yy if orientation is vertical, xx otherwise
      *
      */
+/*
     getSecondScale: function(bypassAxis){
 
         if(!this.options.secondAxis || !this.options.secondAxisIndependentScale){
@@ -518,226 +569,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     }
 
+*/
 }
 )
 
 
-/*
- * AxisPanel panel.
- *
- * 
- */
-pvc.AxisPanel = pvc.BasePanel.extend({
-
-    _parent: null,
-    pvRule: null,
-    pvLabel: null,
-    pvRuleGrid: null,
-
-    ordinal: false,
-    anchor: "bottom",
-    axisSize: 30,
-    tickLength: 6,
-    tickColor: "#aaa",
-    oppositeAxisSize: 30,
-    panelName: "axis", // override
-    scale: null,
-    fullGrid: false,
-    elements: [], // To be used in ordinal scales
-
-
-    constructor: function(chart, options){
-
-        this.base(chart,options);
-
-    },
-
-    create: function(){
-
-        // Size will depend only on the existence of the labels
-
-
-        if (this.anchor == "top" || this.anchor == "bottom"){
-            this.width = this._parent.width;
-            this.height = this.axisSize;
-        }
-        else{
-            this.height = this._parent.height;
-            this.width = this.axisSize;
-        }
-
-
-        this.pvPanel = this._parent.getPvPanel().add(this.type)
-        .width(this.width)
-        .height(this.height)
-
-        this.renderAxis();
-
-        // Extend panel
-        this.extend(this.pvPanel, this.panelName + "_");
-        this.extend(this.pvRule, this.panelName + "Rule_");
-        this.extend(this.pvLabel, this.panelName + "Label_");
-        this.extend(this.pvRuleGrid, this.panelName + "Grid_");
-
-    },
-
-
-    setScale: function(scale){
-        this.scale = scale;
-    },
-
-    renderAxis: function(){
-
-        var min, max;
-        if (this.ordinal) {
-          min = this.scale.min;
-          max = this.scale.max;
-        } else {
-          var scaleRange = this.scale.range();
-          min = scaleRange[0];
-          max = scaleRange[1];
-        }
-        this.pvRule = this.pvPanel
-        .add(pv.Rule)
-        .strokeStyle(this.tickColor)
-        [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
-        [pvc.BasePanel.relativeAnchor[this.anchor]](min)
-        [pvc.BasePanel.paralelLength[this.anchor]](max - min)
-
-        if (this.ordinal == true){
-            this.renderOrdinalAxis();
-        }
-        else{
-            this.renderLinearAxis();
-        }
-    
-    },
-  
-
-    renderOrdinalAxis: function(){
-
-        var myself = this;
-
-        var align =  (this.anchor == "bottom" || this.anchor == "top") ?
-        "center" : 
-        (this.anchor == "left")  ?
-        "right" :
-        "left";
-
-        this.pvLabel = this.pvRule.add(pv.Label)
-        .data(this.elements)
-        [pvc.BasePanel.paralelLength[this.anchor]](null)
-        [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
-        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
-            return myself.scale(d) + myself.scale.range().band/2;
-        })
-        .textAlign(align)
-        .textBaseline("middle")
-        .text(pv.identity)
-        .font("9px sans-serif")
-    },
-
-
-    renderLinearAxis: function(){
-
-        var myself = this;
-    
-        var scale = this.scale;
-
-        this.pvLabel = this.pvRule.add(pv.Rule)
-        .data(this.scale.ticks())
-        [pvc.BasePanel.paralelLength[this.anchor]](null)
-        [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
-        [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale)
-        [pvc.BasePanel.orthogonalLength[this.anchor]](function(d){
-            return myself.tickLength/(this.index%2 + 1)
-        })
-        .strokeStyle(this.tickColor)
-        .anchor(this.anchor)
-        .add(pv.Label)
-        .text(scale.tickFormat)
-        .font("9px sans-serif")
-        .visible(function(d){
-            // mini grids
-            if (this.index % 2){
-                return false;
-            }
-            // also, hide the first and last ones
-            if( scale(d) == 0  || scale(d) == scale.range()[1] ){
-                return false;
-            }
-            return true;
-        })
-
-
-        // Now do the full grids
-        if(this.fullGrid){
-
-            this.pvRuleGrid = this.pvRule.add(pv.Rule)
-            .data(scale.ticks())
-            .strokeStyle("#f0f0f0")
-            [pvc.BasePanel.paralelLength[this.anchor]](null)
-            [pvc.BasePanel.oppositeAnchor[this.anchor]](- this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] +
-                this[pvc.BasePanel.orthogonalLength[this.anchor]])
-            [pvc.BasePanel.relativeAnchor[this.anchor]](scale)
-            [pvc.BasePanel.orthogonalLength[this.anchor]](this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] -
-                this[pvc.BasePanel.orthogonalLength[this.anchor]])
-            .visible(function(d){
-                // mini grids
-                if (this.index % 2){
-                    return false;
-                }
-                // also, hide the first and last ones
-                if( scale(d) == 0  || scale(d) == scale.range()[1] ){
-                    return false;
-                }
-                return true;
-            })
-        }
-
-
-    }
-
-
-
-});
-
-/*
- * XAxisPanel panel.
- *
- *
- */
-pvc.XAxisPanel = pvc.AxisPanel.extend({
-
-    anchor: "bottom",
-    panelName: "xAxis",
-
-    constructor: function(chart, options){
-
-        this.base(chart,options);
-
-    }
-
-});
-
-
-/*
- * YAxisPanel panel.
- *
- *
- */
-pvc.YAxisPanel = pvc.AxisPanel.extend({
-
-    anchor: "left",
-    panelName: "yAxis",
-    pvRule: null,
-
-    constructor: function(chart, options){
-
-        this.base(chart,options);
-
-    }
-
-
-
-});
