@@ -195,19 +195,25 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         if (opts.clickable){
             this.pvHeatGrid
             .cursor("pointer")
-            .event("click",function(d){
+            .event("click",function(row, rowCol){
                 var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index]
                 var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index]
-                return myself.chart.options.clickAction(s,c, d);
+                var d = row[rowCol];
+                return myself.chart.options.clickAction(s,c,d);
             });
         }
 
         if(this.showValues){
+            
+            var getValue = function(row, rowAgain, rowCol){
+                return row[rowCol];
+            };
+            
             this.pvHeatGridLabel = this.pvHeatGrid
             .anchor("center")
             .add(pv.Label)
             .bottom(0)
-            .text(pv.identity)
+            .text(getValue);
 
             // Extend heatGridLabel
             this.extend(this.pvHeatGridLabel,"heatGridLabel_");

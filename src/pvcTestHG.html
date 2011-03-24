@@ -75,6 +75,10 @@ TO DO: for this type of graph we can add a legend that maps 5
         orientation and a green color-scheme (white --> green). Again the data is normalized by product, so
         here the data is normalized by per Row!
         <div id="pvcHG3"></div>
+        
+        <h2>HeatGrid (clickable, showValues)</h2>
+        This is the same chart as before, now clickable and showing values.
+        <div id="pvcHG4"></div>
 
 
 
@@ -234,6 +238,60 @@ TO DO: for this type of graph we can add a legend that maps 5
 
                 heatGrid3.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
                 heatGrid3.render();
+                
+                
+                var heatGrid4 = new pvc.HeatGridChart({
+                    canvas: "pvcHG4",
+                    width: 630,
+                    height: 300,
+                    crosstabMode: true,
+                    seriesInRows: false,
+                    animate: false,
+                    clickable: true,
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+                    stacked: false,
+                    clickAction: function(series,category,dataValue){
+                      alert('series "' + series + '", category "' + category + '", value = ' + dataValue);
+                    },
+
+                    orientation: "horizontal",
+                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+                    showValues: true,
+                    valuesAnchor: "right",
+                    titlePosition: "top",
+                    titleSize: 25,
+                    legend: false,
+                    legendPosition: "top",
+                    legendAlign: "center",
+                    showXScale: true,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    showYScale: true,
+                    panelSizeRatio: 0.8,
+                    yAxisPosition: "left",
+                    yAxisSize: 70,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    axisOffset: 0,
+                    originIsZero: false,
+
+                    secondAxis: false,
+                    secondAxisIndependentScale: true,
+                    secondAxisIdx: -1,
+                    secondAxisOriginIsZero: true,
+                    secondAxisColor: "blue",
+
+                    //secondAxisColor: "red",
+
+                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
+                });
+
+
+
+
+                heatGrid4.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+                heatGrid4.render();
 
 
 
