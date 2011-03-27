@@ -219,7 +219,7 @@ var testLDot = {
 	[30,30,+5],
 	[100,40,30],
 	[15,10,25],
-	[25,-30,10]
+	[30,-30,10]
 	],
     "metadata":[{
         "colIndex":0,
@@ -254,5 +254,32 @@ var testLDot2 = {
         "colIndex":2,
         "colType":"Numeric",
         "colName":"Measure-2"
+    } ]};
+// };
+
+var testArea2 = {
+    "resultset":[
+        [0,0,0],
+	[10,10,15],
+	[20,20,10],
+	[30,30,+5],
+	[40,0,10],
+	[15,10,25],
+	[100,40,30],
+        [110,0,0]
+	],
+    "metadata":[{
+        "colIndex":0,
+        "colType":"Numeric",
+        "colName":"Position"
+    },{
+        "colIndex":1,
+        "colType":"Numeric",
+        "colName":"Measure-1"
+    },{
+        "colIndex":2,
+        "colType":"Numeric",
+        "colName":"Measure-2"
     } ]
+
 };

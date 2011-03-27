@@ -32,7 +32,7 @@
  */
 
 
-pvc.LScatterChartPanel = pvc.BasePanel.extend({
+pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
   _parent: null,
   pvLine: null,
@@ -103,7 +103,11 @@ pvc.LScatterChartPanel = pvc.BasePanel.extend({
         return parser.parse(a.category)-parser.parse(b.category);};
     }  
     myself.DF.getDataForSerieId = 
-      function(d){ return myself.chart.dataEngine.getObjectsForSeriesIndex(d, pFunc) };
+      function(d){ var res = myself.chart.dataEngine
+            .getObjectsForSeriesIndex(d, pFunc);
+            res.sort(function(a, b) {return a.category - b.category; })
+            return res;
+          };
 
   },
 

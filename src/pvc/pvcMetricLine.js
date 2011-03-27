@@ -5,7 +5,7 @@
  * ScatterAbstract is the class that will be extended by dot, line, stackedline and area charts.
  */
 
-pvc.LScatterAbstract = pvc.LinearAbstract.extend({
+pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
 
   scatterChartPanel : null,
   tipsySettings: {
@@ -46,10 +46,10 @@ pvc.LScatterAbstract = pvc.LinearAbstract.extend({
 
     this.base();
 
-    pvc.log("Prerendering in LScatterAbstract");
+    pvc.log("Prerendering in MetricScatterAbstract");
 
 
-    this.scatterChartPanel = new pvc.LScatterChartPanel(this, {
+    this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
       stacked: this.options.stacked,
       showValues: this.options.showValues,
       valuesAnchor: this.options.valuesAnchor,
@@ -70,11 +70,11 @@ pvc.LScatterAbstract = pvc.LinearAbstract.extend({
 );
 
 /**
- * Dot Chart
+ * Metric Dot Chart
  *
  */
 
-pvc.lDotChart = pvc.LScatterAbstract.extend({
+pvc.mDotChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
@@ -96,11 +96,11 @@ pvc.lDotChart = pvc.LScatterAbstract.extend({
 
 
 /**
- * Line Chart
+ * Metric Line Chart
  *
  */
 
-pvc.lLineChart = pvc.LScatterAbstract.extend({
+pvc.mLineChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
@@ -124,11 +124,11 @@ pvc.lLineChart = pvc.LScatterAbstract.extend({
 
 
 /**
- * Stacked Line Chart
+ * Metric Stacked Line Chart
  *
  */
 
-pvc.lStackedLineChart = pvc.LScatterAbstract.extend({
+pvc.mStackedLineChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
@@ -151,11 +151,11 @@ pvc.lStackedLineChart = pvc.LScatterAbstract.extend({
 
 
 /**
- * Stacked Area Chart
+ * Metric Stacked Area Chart
  *
  */
 
-pvc.lStackedAreaChart = pvc.LScatterAbstract.extend({
+pvc.mStackedAreaChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
