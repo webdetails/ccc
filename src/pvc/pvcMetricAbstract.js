@@ -79,11 +79,11 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
     // compute the output-range
     var rangeMin, rangeMax;
     if (isVertical) {
-      rangeMin = xAxisSize;
+      rangeMin = yAxisSize;
       rangeMax = this.basePanel.width;
     } else {
-      rangeMin = yAxisSize;
-      rangeMax = this.basePanel.height;
+      rangeMin = 0;
+      rangeMax = this.basePanel.height - xAxisSize;
     }
     
     // create the (linear) Scale
