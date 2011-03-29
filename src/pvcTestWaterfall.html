@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CCC playground</title>
+
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+</script><![endif]-->
+        <meta name="svg.render.forceflash" content="true">
+
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="cdf/Base.js"></script>
+        <script type="text/javascript" src="cdf/jquery.js"></script>
+        <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+        <script type="text/javascript" src="data/q01-01.js"></script>
+        <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+        <script type="text/javascript" src="lib/tipsy.js"></script>
+        <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+
+        <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+        <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcPie.js"></script>
+        <script type="text/javascript" src="pvc/pvcBar.js"></script>
+        <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
+        <script type="text/javascript" src="pvc/pvcLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcData.js"></script>
+        <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
+        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+        <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+    </head>
+    <body>
+
+        <h1>
+            CCC playground (Waterfall charts)
+        </h1>
+
+
+        <h1>Waterfall</h1>
+The waterfall charts are a powerfull chart-type to display
+        distributions. compared to pie-charts the waterfall charts
+        have the advantage that it is easier to visually compare the
+        size of bars as all bars are parallel to one another. For a
+        pie-chart it can be difficult to compare wedges that are at
+        totally different angles to one another. However, the real
+        advantage of the waterfall-chart is visible when comparing
+        distributions where pie's also have a subdimension as shown in
+        the example below. On the left side you see the total. When
+        you move to the right you see the split of this total across
+        the four sales regions. In each sales regions and in the
+        totals column you can also observe a split to two productlines
+        (product A and product B).
+<br/>
+        <div id="pvcWf1"></div>
+
+        <div id="pvcWf2"></div>
+The graph on the right hand side shows a more advanced example, where
+        we first show the main region (USA, Europe and Rest of World),
+        Next we give a break-up of the RoW region to different
+        subregions. <br/>
+TO DO:  
+<ul>
+<li>We need to add horizontal lines that connnect the top (or
+        bottom of a stack to the next stack to strengthen the visual
+        perception of a waterfall.</li>
+<li>We need to fix the legend as it currently does not match the
+  stacked bars.</li>
+<li>Currently I use orthoFixedMin and orthoFixedMax to set the
+  axisbounds as the automatic computation of axisbounds fails due to
+  the hidden/invisible section that is computed (not present in data).
+</ul>
+<br/>
+
+        <h1>Bar</h1>
+        <div id="pvcBar1"></div>
+        <div id="pvcBar2"></div>
+        <div id="pvcBar3"></div>
+
+
+        <script type="text/javascript">
+
+
+            pv.listenForPageLoad(function() {
+
+
+
+
+
+/*
+                wf0.setData(testWaterfall_00, {crosstabMode: true, seriesInRows: false});
+                wf0.render();
+
+                var wf1 = new pvc.WaterfallChart({
+                    canvas: "pvcWf1",
+                    width: 400,
+                    height: 300,
+                    title: "Sales by region and product",
+                    titlePosition: "left",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "bottom",
+                    legendSize: null,
+ animate: false,
+
+                    orientation: 'vertical',
+                    stacked: true,
+               waterfall: false,
+               orthoFixedMin: 0,
+               orthoFixedMax: 2500,
+                    maxBarSize: 100,
+
+                    panelSizeRatio:0.75,
+                    barSizeRatio: 1,
+
+                    showValues: true,
+                    showXScale: true,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 30,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+        
+                    extensionPoints: {
+                         titleLabel_font: "16px sans-serif",
+          
+                        legend_fillStyle: "green",
+                        allTimeseries_fillStyle: "blue",
+          
+                    }
+
+                });
+*/
+
+                var wf1 = new pvc.WaterfallChart({
+                    canvas: "pvcWf1",
+                    width: 450,
+                    height: 350,
+                    title: "Sales by region and product",
+                    titlePosition: "left",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "bottom",
+                    legendSize: null,
+ animate: false,
+
+                    orientation: 'vertical',
+                    stacked: true,
+               waterfall: false,
+               orthoFixedMin: 0,
+               orthoFixedMax: 2500,
+                    maxBarSize: 100,
+
+                    panelSizeRatio:0.75,
+                    barSizeRatio: 1,
+
+                    showValues: true,
+                    showXScale: true,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 30,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+        
+                    extensionPoints: {
+                         titleLabel_font: "16px sans-serif",
+          
+                        legend_fillStyle: "green",
+                        allTimeseries_fillStyle: "blue",
+          
+                    }
+
+                });
+
+                wf1.setData(testWaterfall_01, {crosstabMode: true, seriesInRows: false});
+                wf1.render();
+
+                var wf2 = new pvc.WaterfallChart({
+                    canvas: "pvcWf2",
+                    width: 450,
+                    height: 350,
+                    title: "Sales by region and product",
+                    titlePosition: "left",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "bottom",
+                    legendSize: null,
+ animate: false,
+
+                    orientation: 'vertical',
+                    stacked: true,
+               waterfall: false,
+               orthoFixedMin: 0,
+               orthoFixedMax: 2500,
+                    maxBarSize: 100,
+
+                    panelSizeRatio:0.75,
+                    barSizeRatio: 1,
+
+                    showValues: true,
+                    showXScale: true,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 30,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+        
+                    extensionPoints: {
+                         titleLabel_font: "16px sans-serif",
+          
+                        legend_fillStyle: "green",
+                        allTimeseries_fillStyle: "blue",
+          
+                    }
+
+                });
+
+                wf2.setData(testWaterfall_02, {crosstabMode: true, seriesInRows: false});
+                wf2.render();
+
+                var bar1 = new pvc.BarChart({
+                    canvas: "pvcBar1",
+                    width: 300,
+                    height: 200,
+                    title: "Bar chart",
+                    titlePosition: "left",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "bottom",
+                    legendSize: null,
+ animate: false,
+
+                    orientation: 'vertical',
+                    stacked: false,
+               waterfall: false,
+                    maxBarSize: 100,
+
+                    panelSizeRatio:0.75,
+                    barSizeRatio: 1,
+
+                    showValues: true,
+                    showXScale: true,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 30,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+        
+                    /*
+            showAllTimeseries: true,
+            allTimeseriesPosition: "bottom",
+            allTimeseriesSize: 50,
+                     */
+                    extensionPoints: {
+                        //base_fillStyle: "red",
+                        title_fillStyle: "yellow",
+                        titleLabel_font: "16px sans-serif",
+                        // title_strokeStyle: "black",
+                        // titleLabel_bottom: 0,
+                        // titleLabel_textAlign: "left",
+          
+                        legend_fillStyle: "green",
+                        //chart_fillStyle: "#fff",
+                        allTimeseries_fillStyle: "blue",
+                        xAxis_fillStyle: "#eee",
+                        yAxis_fillStyle: "#bbb",
+
+                        //xAxisRule_strokeStyle:"yellow",
+                        //xAxisRuleGrid_strokeStyle:"#eee",
+                        yAxisRule_strokeStyle:"blue"
+          
+                        //pie_strokeStyle: "white"
+                        //pie_innerRadius: 10
+                        //pieLabel_textAngle: "0"
+
+                        //barLabel_textStyle: "red"
+                    }
+
+                });
+
+                bar1.setData(relational_02, {crosstabMode: false, seriesInRows: false});
+                bar1.render();
+            
+                var bar2 = new pvc.BarChart({
+                    canvas: "pvcBar2",
+                    width: 300,
+                    height: 200,
+                    title: "Stacked Barline chart",
+                    titlePosition: "bottom",
+                    titleSize: 20,
+                    legend: true,
+                    legendPosition: "left",
+ animate: false,
+                    legendSize: null,
+
+                    orientation: 'vertical',
+                    stacked: false,
+               waterfall: false,
+                    showTooltips: false,
+                    //maxBarSize: 100,
+
+                    showValues: true,
+                    showXScale: true,
+                    showYScale: true,
+                    yAxisPosition: "right",
+                    yAxisSize: 20,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 20,
+                    xAxisFullGrid: false,
+                    yAxisFullGrid: false,
+
+                    panelSizeRatio: 0.9,
+                    barSizeRatio: 0.8,
+
+                    secondAxis: true,
+                    secondAxisIndependentScale: true,
+                    secondAxisIdx: -1, // default
+                    secondAxisOriginIsZero: true, // default
+                    secondAxisOffset: 0, // default
+                    secondAxisColor: "red"
+
+                });
+
+                bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+                bar2.render();
+
+
+                var bar3 = new pvc.BarChart({
+                    canvas: "pvcBar3",
+                    width: 300,
+                    height: 200,
+                    title: "Horizontal Bar chart",
+                    titlePosition: "bottom",
+                    titleSize: 20,
+                    legend: true,
+                    legendPosition: "right",
+                    legendSize: null,
+ animate: false,
+
+                    orientation: 'horizontal',
+                    stacked: false,
+               waterfall: false,
+                    //maxBarSize: 100,
+
+                    showValues: true,
+                    showXScale: true,
+                    showYScale: true,
+                    yAxisPosition: "left",
+                    yAxisSize: 20,
+                    xAxisPosition: "bottom",
+                    xAxisSize: 20,
+                    xAxisFullGrid: false,
+                    yAxisFullGrid: false,
+
+                    panelSizeRatio: 1,
+                    barSizeRatio: 0.75
+
+                });
+
+                bar3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+                bar3.render();
+
+
+            });
+
+        </script>
+
+
+
+
+
+    </body>
+</html>

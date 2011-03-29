@@ -64,8 +64,9 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
   prepareDataFunctions:  function() {
     /*
-        This functions implements a number of helper functions via
-        closures. Overriding this function allows you to implement
+        This function implements a number of helper functions via
+        closures. The helper functions are all stored in this.DF
+        Overriding this function allows you to implement
         a different ScatterScart.
      */
     var myself = this;
@@ -109,6 +110,15 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
             return res;
           };
 
+
+    var colors = this.chart.colors(
+         pv.range(this.chart.dataEngine.getSeriesSize()));
+    myself.DF.colorFunc = function(d){
+      // return colors(d.serieIndex)
+      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()
+              [this.parent.index])
+    };
+
   },
 
   create: function(){
@@ -139,16 +149,11 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
     var maxLineSize;
 
-    var colors = this.chart.colors(
-         pv.range(this.chart.dataEngine.getSeriesSize()));
-    var colorFunc = function(d){
-      // return colors(d.serieIndex)
-      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()
-              [this.parent.index])
-    };
-
     // Stacked?
     if (this.stacked){
+
+      pvc.log("WARNING: the stacked option of metric charts still needs to be implemented.");
+
 /*    CvK:  have to rewrite this code  
       this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
       .layers(pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues()))
@@ -183,7 +188,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
       // add the area's
       // CvK: why adding area's if showArea
       this.pvArea = this.pvScatterPanel.add(pv.Area)
-        .fillStyle(this.showAreas?colorFunc:null);
+        .fillStyle(this.showAreas?myself.DF.colorFunc:null);
 
       var lineWidth = this.showLines ? 1.5 : 0.001;
       // add line and make lines invisible if not needed.
@@ -196,7 +201,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
     
     this.pvLine
-      .strokeStyle(colorFunc)
+      .strokeStyle(myself.DF.colorFunc)
       .text(function(d){
         var v, c;
         var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
@@ -220,8 +225,8 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
     this.pvDot = this.pvLine.add(pv.Dot)
     .shapeSize(12)
     .lineWidth(1.5)
-    .strokeStyle(this.showDots?colorFunc:null)
-    .fillStyle(this.showDots?colorFunc:null)
+    .strokeStyle(this.showDots?myself.DF.colorFunc:null)
+    .fillStyle(this.showDots?myself.DF.colorFunc:null)
     
 
     if (this.chart.options.clickable){

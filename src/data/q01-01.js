@@ -18,7 +18,6 @@ var crosstab_01 = {
 
 
 
-
 var relational_01 = {
     "resultset":[
     //["Green","2010-01-01",74],
@@ -281,5 +280,67 @@ var testArea2 = {
         "colType":"Numeric",
         "colName":"Measure-2"
     } ]
-
 };
+
+var testWaterfall_01 = {
+    "resultset":[
+      ["Total",  "U", 800, 1200],
+      ["USA",    "D", 100,  600],
+      ["Europe", "D", 400,  300],
+      ["Asia",   "D", 200,  100],
+      ["RoW",    "D", 100,  200]
+	],
+    "metadata":[{
+        "colIndex":0,
+        "colType":"String",
+        "colName":"Category"
+    },{
+        "colIndex":1,
+        "colType":"String",
+        "colName":"Cumulated"
+    },{
+        "colIndex":2,
+        "colType":"Numeric",
+        "colName":"Product A"
+    },{
+        "colIndex":3,
+        "colType":"Numeric",
+        "colName":"Product B"
+    }
+     ]
+};
+
+var testWaterfall_02 = {
+    "resultset":[
+      ["Total",  "U", 800, 1200],
+      ["USA",    "D", 100,  600],
+      ["Europe", "D", 400,  300],
+      ["RoW",    "0", 300,  300],
+      ["Japan",   "D", 100,  75],
+      ["China",   "D", 100,  25],
+      ["S. America", "D", 50,  80],
+      ["MEA",    "D", 25,  80],
+      ["Mexico",    "D", 25,  40]
+    ],
+    "metadata":[{
+        "colIndex":0,
+        "colType":"String",
+        "colName":"Category"
+    },{
+        "colIndex":1,
+        "colType":"String",
+        "colName":"Cumulated"
+    },{
+        "colIndex":2,
+        "colType":"Numeric",
+        "colName":"Product A"
+    },{
+        "colIndex":3,
+        "colType":"Numeric",
+        "colName":"Product B"
+    }
+     ]
+};
+
+
+
