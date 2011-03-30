@@ -30,8 +30,8 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
 
     var _defaults = {
       showValues: true,
-      stacked: false,    // should be true by default for waterfall
-      waterfall: false,  // should be true for waterfall
+      stacked: true,
+      waterfall: true,
       panelSizeRatio: 0.9,
       barSizeRatio: 0.9,
       maxBarSize: 2000,
@@ -57,8 +57,8 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
 
 
     this.wfChartPanel = new pvc.WaterfallChartPanel(this, {
-      stacked: true, //this.options.stacked,
-      waterfall: true, //this.options.waterfall,
+      stacked: this.options.stacked,
+      waterfall: this.options.waterfall,
       panelSizeRatio: this.options.panelSizeRatio,
       barSizeRatio: this.options.barSizeRatio,
       maxBarSize: this.options.maxBarSize,
@@ -105,7 +105,6 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
   data: null,
   
   stacked: false,
-  waterfall: false,
   panelSizeRatio: 1,
   barSizeRatio: 0.5,
   showTooltips: true,
