@@ -16,15 +16,20 @@ pvc.BulletChart = pvc.Base.extend({
       orientation: "left",
       showTooltips: true,
       legend: false,
-      bulletHeight: 30,
-      bulletSpacing: 50,
+
+      bulletHeight: 30,      // Bullet height
+      bulletSpacing: 50,     // Spacing between bullets
+      bulletMargin: 100,     // Left margin
 
       // Defaults
-      bulletMarkers: [30],
-      bulletMeasures: [45],
-      bulletRanges: [30,60,90],
-      bulletName: "My Test",
-      bulletDescription: "description"
+      bulletMarkers: [],     // Array of markers to appear
+      bulletMeasures: [],    // Array of measures
+      bulletRanges: [],      // Ranges
+      bulletTitle: "Bullet", // Title
+      bulletSubtitle: "",    // Subtitle
+
+      crosstabMode: true,
+      seriesInRows: true
 
     };
 
@@ -65,9 +70,15 @@ pvc.BulletChart = pvc.Base.extend({
  * Has the following protovis extension points:
  *
  * <i>chart_</i> - for the main chart Panel
- * <i>bullet_</i> - for the actual bar
- * <i>bulletPanel_</i> - for the panel where the bars sit
- * <i>bulletLabel_</i> - for the main bar label
+ * <i>bulletsPanel_</i> - for the bullets panel
+ * <i>bulletPanel_</i> - for the bullets pv.Layout.Bullet
+ * <i>bulletRange_</i> - for the bullet range
+ * <i>bulletMeasure_</i> - for the bullet measure
+ * <i>bulletMarker_</i> - for the marker
+ * <i>bulletRule_</i> - for the axis rule
+ * <i>bulletRuleLabel_</i> - for the axis rule label
+ * <i>bulletTitle_</i> - for the bullet title
+ * <i>bulletSubtitle_</i> - for the main bar label
  */
 
 
@@ -94,55 +105,11 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
   create: function(){
 
-
-    var bullets = [
-    {
-      title: "Revenue",
-      subtitle: "US$, in thousands",
-      ranges: [150, 225, 300],
-      measures: [270],
-      markers: [250]
-    },
-    {
-      title: "Profit",
-      subtitle: "%",
-      ranges: [20, 25, 30],
-      measures: [23],
-      markers: [26]
-    },
-    {
-      title: "Order Size",
-      subtitle: "US$, average",
-      ranges: [400,600,800],
-      measures: [320],
-      markers: [550]
-    },
-    {
-      title: "New Customers",
-      subtitle: "count",
-      ranges: [1400, 2000, 2500],
-      measures: [1650],
-      markers: [2100]
-    },
-    {
-      title: "Satisfaction",
-      subtitle: "out of 5",
-      ranges: [3.5, 4.25, 5],
-      measures: [1,3.4],
-      markers: [4.4,3]
-    }
-    ];
-
-
-    var format = pv.Format.number();
-
     var myself = this;
     this.width = this._parent.width;
     this.height = this._parent.height;
 
     var data = this.buildData();
-
-    var n = 4, size=160;
 
     this.pvPanel = this._parent.getPvPanel().add(pv.Panel)
     .width(this.width)
@@ -150,10 +117,10 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     this.pvBullets = this.pvPanel.add(pv.Panel)
     .data(data)
-    .width(this.width)
+    .width(this.width - this.chart.options.bulletMargin - 20)
     .height(this.chart.options.bulletHeight)
     .margin(20)
-    .left(100)
+    .left(this.chart.options.bulletMargin)
     .top(function(){
       //pvc.log("Bullets index: " + this.index);
       return this.index * (myself.chart.options.bulletHeight + myself.chart.options.bulletSpacing);
@@ -191,14 +158,28 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       return d.title
     });
 
-    this.pvBulletSubTitle = this.pvBullet.anchor("left").add(pv.Label)
+    this.pvBulletSubtitle = this.pvBullet.anchor("left").add(pv.Label)
     .textStyle("#666")
     .textAlign("right")
     .textBaseline("top")
     .text(function(d){
       return d.subtitle
     });
-     
+
+    // Extension points
+    this.extend(this.pvBullets,"bulletsPanel_");
+    this.extend(this.pvBullet,"bulletPanel_");
+    this.extend(this.pvBulletRange,"bulletRange_");
+    this.extend(this.pvBulletMeasure,"bulletMeasure_");
+    this.extend(this.pvBulletMarker,"bulletMarker_");
+    this.extend(this.pvBulletRule,"bulletRule_");
+    this.extend(this.pvBulletRuleLabel,"bulletRuleLabel_");
+    this.extend(this.pvBulletTitle,"bulletTitle_");
+    this.extend(this.pvBulletSubtitle,"bulletSubtitle_");
+
+    // Extend body
+    this.extend(this.pvPanel,"chart_");
+
   },
 
   /*
@@ -216,7 +197,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     var defaultData = {
       title: this.chart.options.bulletTitle,
-      subtitle: this.chart.options.bulletSubTitle,
+      subtitle: this.chart.options.bulletSubtitle,
       ranges:this.chart.options.bulletRanges,
       measures: this.chart.options.bulletMeasures,
       markers: this.chart.options.bulletMarkers
@@ -224,20 +205,46 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     
     var data = [];
 
-    if(this.chart.dataEngine.getCategoriesSize() == 0 ){
+    if(this.chart.dataEngine.getSeriesSize() == 0 ){
       // No data
       data.push($.extend({},defaultData));
 
-      return data;
-    };
+    }
+    else{
 
-    // Series size:
-    /*
-    var series = this.chart.dataEngine.getVisibleSeries();
-    var categories = this.chart.dataEngine.getVisibleCategories();
+      // We have data. Iterate through the series.
+      for(var i in this.chart.dataEngine.getVisibleSeriesIndexes()){
+        var s = this.chart.dataEngine.getSerieByIndex(i);
+        var v = this.chart.dataEngine.getVisibleValuesForSeriesIndex(i);
+        var d = $.extend({},defaultData);
 
-    pvc.log("Series: " + series + "; Categories: " + categories);
-    */
+        switch(v.length){
+          case 0:
+            // Value only
+            d.measures = [s];
+            break;
+          case 2:
+            // Name, value and markers
+            d.markers = [v[1]]
+          case 1:
+            // name and value
+            d.title = s;
+            d.measures = [v[0]];
+            break;
+          default:
+            // greater or equal 4
+            d.title = s;
+            d.subtitle = v[0];
+            d.measures = [v[1]];
+            d.markers = [v[2]]
+            d.ranges = v.slice(3);
+        }
+
+
+        data.push(d);
+      }
+
+    }
    
     return data;
   }

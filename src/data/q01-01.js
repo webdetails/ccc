@@ -254,7 +254,7 @@ var testLDot2 = {
     "colType":"Numeric",
     "colName":"Measure-2"
   } ]
-  };
+};
 // };
 
 var testArea2 = {
@@ -345,22 +345,12 @@ var testWaterfall_02 = {
 
 var bullet_valueOnly = {
   "resultset":[
-  ["Europe", 800, 1200, 1300],
-  ["Asia", 100,  600,1000],
-  ["Africa", 400,  500,600]
+  [80],[60]
   ],
   "metadata":[{
     "colIndex":0,
-    "colType":"String",
-    "colName":"Description"
-  },{
-    "colIndex":1,
     "colType":"Numeric",
     "colName":"Value"
-  },{
-    "colIndex":2,
-    "colType":"Numeric",
-    "colName":"Max"
   }
   ]
 }
@@ -368,9 +358,9 @@ var bullet_valueOnly = {
 
 var bullet_NameValue = {
   "resultset":[
-  ["Europe", 800, 1200],
-  ["Asia", 100,  600],
-  ["Africa", 400,  500]
+  ["Europe", 800],
+  ["Asia", 100],
+  ["Africa", 400]
   ],
   "metadata":[{
     "colIndex":0,
@@ -384,11 +374,11 @@ var bullet_NameValue = {
   ]
 }
 
-var bullet_NameValueMax = {
+var bullet_NameValueMarker = {
   "resultset":[
-  ["Europe", 800, 1200, 1300],
-  ["Asia", 100,  600,1000],
-  ["Africa", 400,  500,600]
+  ["Europe", 800, 300],
+  ["Asia", 100,  500],
+  ["Africa", 400,  100]
   ],
   "metadata":[{
     "colIndex":0,
@@ -401,7 +391,46 @@ var bullet_NameValueMax = {
   },{
     "colIndex":2,
     "colType":"Numeric",
-    "colName":"Max"
+    "colName":"Marker"
+  }
+  ]
+}
+
+
+var bullet_NameDescValueMarkerRanges = {
+  "resultset":[
+  ["Europe","Profit", 80, 120, 50,150,200],
+  ["Asia", "Count",100,  600,300,600,900],
+  ["Africa", "Result", 400,  500,100,200,300]
+  ],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"Title"
+  },{
+    "colIndex":1,
+    "colType":"String",
+    "colName":"Subtitle"
+  },{
+    "colIndex":2,
+    "colType":"Numeric",
+    "colName":"Value"
+  },{
+    "colIndex":3,
+    "colType":"Numeric",
+    "colName":"Marker"
+  },{
+    "colIndex":4,
+    "colType":"Numeric",
+    "colName":"Range1"
+  },{
+    "colIndex":5,
+    "colType":"Numeric",
+    "colName":"Range2"
+  },{
+    "colIndex":6,
+    "colType":"Numeric",
+    "colName":"Range3"
   }
   ]
 }
