@@ -58,20 +58,17 @@ The waterfall charts are a powerfull chart-type to display
         <div id="pvcWf1"></div>
 
         <div id="pvcWf2"></div>
+<br/>
 The graph on the right hand side shows a more advanced example, where
         we first show the main region (USA, Europe and Rest of World),
         Next we give a break-up of the RoW region to different
         subregions. <br/>
 TO DO:  
 <ul>
-<li>We need to add horizontal lines that connnect the top (or
-        bottom of a stack to the next stack to strengthen the visual
-        perception of a waterfall.</li>
-<li>We need to fix the legend as it currently does not match the
-  stacked bars.</li>
 <li>Currently I use orthoFixedMin and orthoFixedMax to set the
   axisbounds as the automatic computation of axisbounds fails due to
   the hidden/invisible section that is computed (not present in data).
+<li>Extend the graph such that you can also view non-stacked waterfall charts 
 </ul>
 <br/>
 
@@ -155,7 +152,7 @@ TO DO:
                     maxBarSize: 100,
 
                     panelSizeRatio:0.75,
-                    barSizeRatio: 1,
+                    barSizeRatio: 1.0,
 
                     showValues: true,
                     showXScale: true,

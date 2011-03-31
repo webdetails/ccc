@@ -123,46 +123,111 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     return;
   },
 
+  ruleData: null,
+
+  /****
+   *  Functions that transforms a dataset to waterfall-format.
+   *
+   * The assumption made is that the first category is a tekst column
+   * containing one of the following values:
+   *    - "U":  If this category (row) needs go upwards (height
+   *       increases)
+   *    - "D": If the waterfall goes downward.
+   *    - other values: the waterfall resets to zero (used represent
+   *        intermediate subtotal) Currently subtotals need to be
+   *        provided in the dataset.
+   *  This function computes the offsets of each bar and stores the
+   *  offset in the first category (for stacked charts)
+   ****/
+  
+  constructWaterfall: function(dataset) 
+  {
+    var cumulated = 0.0;
+    var ruleData = [[],[]];
+    
+    var cats = this.chart.dataEngine.getVisibleCategoriesIndexes(); 
+    
+    for(var c=0; c<dataset[0].length; c++) {
+      var mult;
+      
+      // store the category
+      ruleData[0].push(cats[c]);
+
+      // determine next action (direction)
+      if (dataset[0][c] == "U")
+        mult = 1.0;
+      else if (dataset[0][c] == "D")
+        mult = -1.0;
+      else {
+        mult = 1.0; cumulated = 0.0;
+      }
+      if (mult > 0.0)
+        dataset[0][c] = cumulated;
+      
+      // update the other series and determine new cumulated
+      for(var ser=1; ser<dataset.length; ser++) {
+        var val = Math.abs(dataset[ser][c]);
+        dataset[ser][c] = val;  // negative values not allowed
+        // only use negative values for internal usage in waterfall
+        cumulated += mult*val;
+      }
+      if (mult < 0.0)
+        dataset[0][c] = cumulated;
+      ruleData[1].push(cumulated);
+    }
+    return ruleData;
+  },
+
 
   getDataSet:  function() {
     var dataset = null
-    
+    // check whether it does not kill the source-data    
     dataset = this.stacked ?  
       pvc.padMatrixWithZeros(this.chart.dataEngine
                              .getVisibleTransposedValues()) :
       this.chart.dataEngine.getVisibleCategoriesIndexes();
 
-
-    if (this.waterfall) {
-      var cumulated = 0.0;
-      for(var s=0; s<dataset[0].length; s++) {
-        var mult;
-
-        // determine next action (direction)
-        if (dataset[0][s] == "U")
-          mult = 1.0;
-        else if (dataset[0][s] == "D")
-          mult = -1.0;
-        else {
-          mult = 1.0; cumulated = 0.0;
-        }
-        if (mult > 0.0)
-          dataset[0][s] = cumulated;
-
-        // update the other series and determine new cumulated
-        for(var cat=1; cat<dataset.length; cat++) {
-          var val = Math.abs(dataset[cat][s]);
-          dataset[cat][s] = val;  // negative values not allowed
-          // only use negative values for internal usage in waterfall
-          cumulated += mult*val;
-        }
-        if (mult < 0.0)
-          dataset[0][s] = cumulated;
-      }
-    }
+    if (this.waterfall)
+      this.ruleData = this.constructWaterfall(dataset)
 
     return dataset;
   } ,
+
+  /****
+   *  Functions used to draw a set of horizontal rules that connect
+   *  the bars that compose the waterfall
+   ****/
+  drawWaterfalls: function(panel) {
+    var ruleData = this.ruleData;
+
+    if (this.stacked)
+      this.drawRules(panel, ruleData[0], ruleData[1], 2);
+    else
+      pvc.log("Waterfall not implemented for none-stacked");
+  } ,
+
+  drawRules: function(panel, cats, vals, offset) {
+    var data = []; 
+
+    // build the dataset as a hashmap
+    var x1 = this.DF.baseRulePosFunc(cats[0]) +offset;
+    for(var i=0; i<cats.length-1; i++) 
+      // this is the function for stacked data
+    {
+      var x2 = this.DF.baseRulePosFunc(cats[i+1]) + offset;
+      data.push({
+        x: x1, 
+        y:  this.DF.orthoLengthFunc(vals[i]), 
+        w: x2 - x1
+      });
+      x1 = x2;  // go to next element
+    }
+    panel.add(pv.Rule)
+    .data(data)
+    .left(function(d) { return d.x })
+    .bottom(function(d) { return d.y })
+    .width(function(d) { return d.w })
+  },
 
   prepareDataFunctions:  function(stacked) {
     /*
@@ -210,7 +275,14 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
      * fuctions to determine positions along base axis.
      */
     this.DF.basePositionFunc = stacked ?
-      function(d){ return oScale(this.index) + barPositionOffset;} :
+      function(d){ var res = oScale(this.index) + barPositionOffset;
+            // This function used this pointer instead of d !!
+            return res } :
+      null;
+
+    this.DF.baseRulePosFunc = stacked ?
+      function(d){ var res = oScale(d) + barPositionOffset;
+            return res } :
       null;
 
     this.DF.catContainerBasePosFunc = (stacked) ? null :
@@ -242,8 +314,12 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
       function(d){ return lScale(pv.min([0,d])); };
 
     this.DF.orthoLengthFunc = stacked ? 
-      function(d){ return myself.chart.animate(0, lScale(d||0)-lScale(0)) } :
-      function(d){return myself.chart.animate(0, Math.abs(lScale(d||0) - lScale(0)))};
+      function(d){ var res = myself.chart.animate(0, lScale(d||0)-lScale(0));
+            return res; } :
+      function(d){ var res = myself.chart.animate(0, 
+                          Math.abs(lScale(d||0) - lScale(0)));
+            return res;
+          };
 
     this.DF.secOrthoLengthFunc = 
       function(d){ return myself.chart.animate(0,l2Scale(d.value));};
@@ -259,7 +335,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
       if (myself.waterfall) {
         if (ind == 0)
           return pv.Color.names["transparent"];
-        ind--;
+//        ind--;   don't do the ind-- otherwise it doesn't match legend
       }
       return colors (myself.chart.dataEngine
        .getVisibleSeriesIndexes()[ind]);
@@ -295,9 +371,13 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     var maxBarSize = this.DF.maxBarSize;
 
     if (this.stacked){
+      var dataset = this.getDataSet();
+
+      if (this.waterfall)
+        this.drawWaterfalls(this.pvPanel);
 
       this.pvBarPanel = this.pvPanel.add(pv.Layout.Stack)
-        .layers(this.getDataSet() )
+        .layers(dataset)
       [this.orientation == "vertical"?"y":"x"](myself.DF.orthoLengthFunc)
       [anchor](myself.DF.orthoBotPos)
       [this.orientation == "vertical"?"x":"y"](myself.DF.basePositionFunc);
@@ -346,8 +426,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
       // Second axis - support for lines
       this.pvSecondLine = this.pvPanel.add(pv.Line)
         .data(function(d){
-          return myself.chart.dataEngine.getObjectsForSecondAxis(d, this.timeSeries?function(a,b){
-            return parser.parse(a.category) - parser.parse(b.category);
+          return myself.chart.dataEngine.getObjectsForSecondAxis(d, 
+             this.timeSeries ? function(a,b){
+               return parser.parse(a.category) - parser.parse(b.category);
           }: null)
         })
         .strokeStyle(this.chart.options.secondAxisColor)
