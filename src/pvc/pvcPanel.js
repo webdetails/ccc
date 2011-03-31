@@ -85,7 +85,7 @@ pvc.Base = Base.extend({
         }
         // If we don't have data, we just need to set a "no data" message
         // and go on with life.
-        if (this.resultset.length === 0) {
+        if (!this.allowNoData && this.resultset.length === 0) {
             throw new NoDataException();
         }
 
