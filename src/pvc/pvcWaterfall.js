@@ -49,9 +49,25 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
     return;
   },
 
+  callWithHiddenFirstSeries: function(callFunc) {
+    var res;
+    var de = this.dataEngine;
+
+    if (de.isVisible("series", 0)) {
+      de.toggleSerieVisibility(0);
+      res = callFunc.call(this);
+      de.toggleSerieVisibility(0);
+    } else
+      res = callFunc();
+
+    return res;
+  } ,
+
   preRender: function(){
 
-    this.base();
+    // first series are symbolic labels, so hide it such that
+    // the axis-range computation is possible in "AbstractCategoricalAxis.
+    this.callWithHiddenFirstSeries( this.base );
 
     pvc.log("Prerendering in barChart");
 
@@ -115,6 +131,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     gravity: "s",
     fade: true
   },
+  ruleData: null,
+
 
   constructor: function(chart, options){
 
@@ -123,7 +141,33 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     return;
   },
 
-  ruleData: null,
+
+  callWithHiddenFirstSeries: function(env, callFunc) {
+    var res;
+    var de = this.chart.dataEngine;
+
+    if (de.isVisible("series", 0)) {
+      de.toggleSerieVisibility(0);
+      switch (arguments.length) {
+      case 2:
+        res = callFunc.call(env);
+        break;
+      case 3:
+        res = callFunc.call(env, arguments[2]);
+        break;
+      case 4:
+        res = callFunc.call(env, arguments[2], arguments[3]);
+        break;
+      default: pvc.log("ERROR: wrong number of arguments in callWithHiddenFirstSeries!!")
+
+      }
+      de.toggleSerieVisibility(0);
+    } else
+      res = callFunc();
+
+    return res;
+  } ,
+
 
   /****
    *  Functions that transforms a dataset to waterfall-format.
@@ -193,55 +237,42 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     return dataset;
   } ,
 
-  /****
-   *  Functions used to draw a set of horizontal rules that connect
-   *  the bars that compose the waterfall
-   ****/
-  drawWaterfalls: function(panel) {
-    var ruleData = this.ruleData;
 
-    if (this.stacked)
-      this.drawRules(panel, ruleData[0], ruleData[1], 2);
-    else
-      pvc.log("Waterfall not implemented for none-stacked");
-  } ,
 
-  drawRules: function(panel, cats, vals, offset) {
-    var data = []; 
 
-    // build the dataset as a hashmap
-    var x1 = this.DF.baseRulePosFunc(cats[0]) +offset;
-    for(var i=0; i<cats.length-1; i++) 
-      // this is the function for stacked data
-    {
-      var x2 = this.DF.baseRulePosFunc(cats[i+1]) + offset;
-      data.push({
-        x: x1, 
-        y:  this.DF.orthoLengthFunc(vals[i]), 
-        w: x2 - x1
-      });
-      x1 = x2;  // go to next element
-    }
-    panel.add(pv.Rule)
-    .data(data)
-    .left(function(d) { return d.x })
-    .bottom(function(d) { return d.y })
-    .width(function(d) { return d.w })
-  },
-
-  prepareDataFunctions:  function(stacked) {
     /*
-        This function implements a number of helper functions via
-        closures. The helper functions are all stored in this.DF
-        Overriding this function allows you to implement
-        a different ScatterScart.
+     *   This function implements a number of helper functions in order
+     *   to increase the readibily and extendibility of the code by:
+     *    1: providing symbolic names to the numerous anonymous
+     *        functions that need to be passed to CC
+     *    2: by moving large parts of the local variabele (parameters
+     *       and scaling functions out of the 'create' function to this
+     *       prepareDataFunctions blok. 
+     *    3: More sharing of code due to introduction of the 'this.DF'
+     *        for storing all helper functions.
+     *    4: increased code-sharing between stacked and non-stacked
+     *       variant of the bar chart.
+     *    The create function is now much cleaner and easier to understand.
+     *
+     *   These helper functions (closures) are all stored in 'this.DF'
+     *
+     *   Overriding this 'prepareDataFunctions' allows you to implement
+     *   a different ScatterScart.
+     *   however, it is also possible to replace specific functions
+     *   from the 'this.DF' object.
      */
+  prepareDataFunctions:  function(stacked) {
     var myself = this;
 
     // create empty container for the functions and data
     this.DF = {}
 
-    var lScale = this.chart.getLinearScale(true);
+    // first series are symbolic labels, so hide it such that
+    // the axis-range computation is possible.
+    var lScale = this.waterfall ?
+      this.callWithHiddenFirstSeries(this.chart,
+           this.chart.getLinearScale, true):
+      this.chart.getLinearScale(true);
     var l2Scale = this.chart.getSecondScale(true);
     var oScale = this.chart.getOrdinalScale(true);
     var bSCale = null;
@@ -349,6 +380,51 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     return;
   } ,
 
+
+
+  /****
+   *  Functions used to draw a set of horizontal rules that connect
+   *  the bars that compose the waterfall
+   ****/
+  drawWaterfalls: function(panel) {
+    var ruleData = this.ruleData;
+
+    if (this.stacked)
+      this.drawRules(panel, ruleData[0], ruleData[1], 2);
+    else
+      pvc.log("Waterfall not implemented for none-stacked");
+  } ,
+
+  drawRules: function(panel, cats, vals, offset) {
+    var data = []; 
+
+    var anchor = this.orientation == "vertical"?"bottom":"left";
+
+    // build the dataset as a hashmap
+    var x1 = this.DF.baseRulePosFunc(cats[0]) +offset;
+    for(var i=0; i<cats.length-1; i++) 
+      // this is the function for stacked data
+    {
+      var x2 = this.DF.baseRulePosFunc(cats[i+1]) + offset;
+      data.push({
+        x: x1, 
+        y:  this.DF.orthoLengthFunc(vals[i]), 
+        w: x2 - x1
+      });
+      x1 = x2;  // go to next element
+    }
+
+    panel.add(pv.Rule)
+    .data(data)
+    [pvc.BasePanel.relativeAnchor[anchor]](function(d) { return d.x })
+    [anchor](function(d) { return d.y })
+    [pvc.BasePanel.paralelLength[anchor]](function(d) { return d.w })
+
+    return;
+  },
+
+
+
   create: function(){
     var myself = this;
     this.width = this._parent.width;
@@ -372,6 +448,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
     if (this.stacked){
       var dataset = this.getDataSet();
+
+      if (this.orientation == "vertical")
+        pvc.log("WARNING: currently the 'horizontal' orientation is not possible for stacked barcharts and waterfall charts (will be implemented later)");
 
       if (this.waterfall)
         this.drawWaterfalls(this.pvPanel);
@@ -486,8 +565,16 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
 
     // Extend bar and barPanel
-    this.extend(this.pvBar,"barPanel_");
-    this.extend(this.pvBar,"bar_");
+    // Pedro & Tiago: I'm wondering whether I should stick to the
+    // bar labels here, or not??
+    // currently the first branch is always discarded (&& false)
+    if (this.waterfall && false) {
+      this.extend(this.pvBar,"wfPanel_");
+      this.extend(this.pvBar,"wf_");
+    } else {
+      this.extend(this.pvBar,"barPanel_");
+      this.extend(this.pvBar,"bar_");
+    }
     
 
     // Extend body
