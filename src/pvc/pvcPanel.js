@@ -431,6 +431,13 @@ pvc.BasePanel = Base.extend({
         right: "bottom"
     },
 
+    relativeAnchorMirror: {
+        top: "right",
+        bottom: "right",
+        left: "top",
+        right: "top"
+    },
+
     oppositeAnchor:{
         top: "bottom",
         bottom: "top",
