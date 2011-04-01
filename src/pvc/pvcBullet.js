@@ -176,7 +176,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
 
     this.pvBulletMarker = this.pvBullet.marker.add(pv.Dot)
-    .shape("triangle")
+    .shape("square")
     .fillStyle("white")
     .text(function(d){
       return myself.chart.options.valueFormat(d);
