@@ -46,6 +46,9 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
     // Apply options
     $.extend(this.options,_defaults, o);
 
+    //  force stacked to be true (default of base-class is false)
+    this.options.stacked = true;
+
     return;
   },
 
@@ -69,7 +72,7 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
     // the axis-range computation is possible in "AbstractCategoricalAxis.
     this.callWithHiddenFirstSeries( this.base );
 
-    pvc.log("Prerendering in barChart");
+    pvc.log("Prerendering in waterfallChart");
 
 
     this.wfChartPanel = new pvc.WaterfallChartPanel(this, {
