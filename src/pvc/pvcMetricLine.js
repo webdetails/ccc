@@ -74,7 +74,7 @@ pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
  *
  */
 
-pvc.mDotChart = pvc.MetricScatterAbstract.extend({
+pvc.MetricDotChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
@@ -100,7 +100,7 @@ pvc.mDotChart = pvc.MetricScatterAbstract.extend({
  *
  */
 
-pvc.mLineChart = pvc.MetricScatterAbstract.extend({
+pvc.MetricLineChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 

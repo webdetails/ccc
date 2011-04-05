@@ -143,7 +143,7 @@ This is the Pvc Dot chart with a Categorical base-axis
 
 
 
-                var LineL = new pvc.mLineChart({
+                var LineL = new pvc.MetricLineChart({
                     // legendPosition: "left",
                     canvas: "pvcLine1",
                     width: 800,
@@ -205,7 +205,7 @@ This is the Pvc Dot chart with a Categorical base-axis
 
 
 
-                var lineL2 = new pvc.mLineChart({
+                var lineL2 = new pvc.MetricLineChart({
                     // legendPosition: "left",
                     canvas: "pvcLine1L",
                     width: 800,
@@ -265,7 +265,7 @@ This is the Pvc Dot chart with a Categorical base-axis
                 lineC2.setData(testLDot2 , {crosstabMode: true, seriesInRows: false});
                 lineC2.render();
 
-                var lineL2v = new pvc.mLineChart({
+                var lineL2v = new pvc.MetricLineChart({
                     // legendPosition: "left",
                     canvas: "pvcLineLv",
                     width: 800,
@@ -296,7 +296,7 @@ This is the Pvc Dot chart with a Categorical base-axis
                 lineL2v.render();
 
 
-                var dotL2 = new pvc.mDotChart({
+                var dotL2 = new pvc.MetricDotChart({
                     // legendPosition: "left",
                     canvas: "pvcDot1L",
                     width: 800,
@@ -358,7 +358,7 @@ This is the Pvc Dot chart with a Categorical base-axis
 
 
 
-                var areaL2 = new pvc.mLineChart({
+                var areaL2 = new pvc.MetricLineChart({
                     // legendPosition: "left",
                     canvas: "pvcMetArea",
                     width: 800,
@@ -422,7 +422,42 @@ This is the Pvc Dot chart with a Categorical base-axis
                 areaC2.render();
 
 
-            });
+/*****  code for stacked needs to be implemented first
+                var stAreaL2 = new pvc.MetricLineChart({
+                    // legendPosition: "left",
+                    canvas: "pvcStackedArea1",
+                    width: 800,
+                    height: 300,
+                    animate: false,
+                    title: "Linear base-axis (two dot series)",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+            originIsZero: true,
+                    //orientation: 'horizontal',
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+
+            stacked: true,
+                    showValues: false,
+                    showAreas: true,
+                    showDots: false,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true
+
+                });
+
+                stAreaL2.setData(testArea2 , {crosstabMode: true, seriesInRows: false});
+                stAreaL2.render();
+***/
+
+
+            });  // end of script
 
 
 
