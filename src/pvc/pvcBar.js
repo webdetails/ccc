@@ -16,6 +16,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
             panelSizeRatio: 0.9,
             barSizeRatio: 0.9,
             maxBarSize: 2000,
+            valuesAnchor: "center",
             originIsZero: true,
             axisOffset: 0,
             showTooltips: true,
@@ -44,6 +45,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
             barSizeRatio: this.options.barSizeRatio,
             maxBarSize: this.options.maxBarSize,
             showValues: this.options.showValues,
+            valuesAnchor: this.options.valuesAnchor,
             showTooltips: this.options.showTooltips,
             orientation: this.options.orientation
         });
@@ -89,6 +91,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
     panelSizeRatio: 1,
     barSizeRatio: 0.5,
     showTooltips: true,
+    valuesAnchor: "right",
     maxBarSize: 200,
     showValues: true,
     orientation: "vertical",
@@ -314,7 +317,7 @@ pvc.BarChartPanel = pvc.BasePanel.extend({
 
         if(this.showValues){
             this.pvBarLabel = this.pvBar
-            .anchor("center")
+            .anchor(this.valuesAnchor)
             .add(pv.Label)
             .bottom(0)
             .text(pv.identity)
