@@ -95,7 +95,7 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
 
 
 /*
- * Bar chart panel. Generates a bar chart. Specific options are:
+ * Waterfall chart panel (also bar-chart). Generates a bar chart. Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
  * <i>showValues</i> - Show or hide bar value. Default: false
  * <i>stacked</i> -  Stacked? Default: false

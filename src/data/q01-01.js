@@ -434,3 +434,34 @@ var bullet_NameDescValueMarkerRanges = {
   }
   ]
 }
+
+
+var parCoordTest_01 = {
+  "resultset":[
+  ["pat 1",  40, 1,   130, 6],
+  ["pat 2",  50,   2, 140,  5],
+  ["pat 3",  50,   1, 135,  4]
+  ],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"Category"
+  },{
+    "colIndex":1,
+    "colType":"Numeric",
+    "colName":"Leeftijd"
+  },{
+    "colIndex":2,
+    "colType":"String",
+    "colName":"Geslacht"
+  },{
+    "colIndex":3,
+    "colType":"Numeric",
+    "colName":"Bloeddruk"
+  },{
+    "colIndex":4,
+    "colType":"Numeric",
+    "colName":"Chol"
+  }
+  ]
+};
