@@ -240,7 +240,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
     // add clipping for bounds
     if  (   (myself.chart.options.orthoFixedMin != null)
-         || (myself.chart.options.orthoFixedMax != null) )
+      || (myself.chart.options.orthoFixedMax != null) )
       this.pvPanel["overflow"]("hidden");
 
     if(this.showTooltips || this.chart.options.clickable ){
@@ -311,6 +311,10 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           }: null)
         })
       .lineWidth(this.showLines?1.5:0.001)
+      .segmented(true)
+      .visible(function(d) {
+        return d.value==null?false:true;
+      })
       [pvc.BasePanel.relativeAnchor[anchor]](function(d){
 
         if(myself.timeSeries){
@@ -334,7 +338,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     .text(function(d){
       var v, c;
       var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
-      if( typeof d == "object"){
+      if( d != null && typeof d == "object"){
         v = d.value;
         c = d.category
       }
@@ -364,7 +368,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .event("click",function(d){
         var v, c;
         var s = myself.chart.dataEngine.getSeries()[this.parent.index]
-        if( typeof d == "object"){
+        if(  d != null && typeof d == "object"){
           v = d.value;
           c = d.category
         }
@@ -384,7 +388,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .add(pv.Label)
       .bottom(0)
       .text(function(d){
-        return myself.chart.options.valueFormat(typeof d == "object"?d.value:d)
+        return myself.chart.options.valueFormat( (d != null && typeof d == "object")?d.value:d)
       })
 
       // Extend lineLabel

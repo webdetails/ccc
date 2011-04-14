@@ -323,7 +323,7 @@ pvc.DataEngine = Base.extend({
         var myself = this;
         var ar = [];
         this.getSecondAxisValues().map(function(v,i){
-            if(typeof v != "undefined" && v != null){
+            if(typeof v != "undefined" /* && v != null */ ){
                 ar.push({
                     category: myself.getCategories()[i],
                     value: v
@@ -413,7 +413,7 @@ pvc.DataEngine = Base.extend({
         var myself = this;
         var ar = [];
         this.getValues().map(function(a,i){
-            if(typeof a[idx] != "undefined" && a[idx] != null){
+            if(typeof a[idx] != "undefined" /* && a[idx] != null */){
                 ar.push({
                     serieIndex: idx,
                     category: myself.getCategories()[i],
@@ -463,7 +463,7 @@ pvc.DataEngine = Base.extend({
         var myself = this;
         var ar=[];
         this.getValues()[idx].map(function(a,i){
-            if(typeof a != "undefined" && a!= null){
+            if(typeof a != "undefined" /* && a!= null */){
                 ar.push({
                     categoryIndex: idx,
                     serie: myself.getSeries()[i],
