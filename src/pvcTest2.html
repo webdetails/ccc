@@ -77,9 +77,10 @@
 
         <script type="text/javascript">
 
+        // enable debug
+        pvc.debug = true;
+
             pv.listenForPageLoad(function() {
-
-
 
                 var line2 = new pvc.LineChart({
                     // legendPosition: "left",
@@ -93,6 +94,7 @@
                     legend: true,
                     legendPosition: "top",
                     legendAlign: "right",
+
                     //legendSize: null,
 
                     //orientation: 'horizontal',
@@ -101,7 +103,7 @@
 
                     showValues: false,
                     showDots: true,
-                    yAxisSize: 30,
+                    yAxisSize: 50,
                     xAxisSize: 30,
                     xAxisFullGrid: true,
                     yAxisFullGrid: true

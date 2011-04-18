@@ -531,6 +531,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     _parent: null,
     pvRule: null,
+    pvTicks: null,
     pvLabel: null,
     pvRuleGrid: null,
 
@@ -576,6 +577,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Extend panel
         this.extend(this.pvPanel, this.panelName + "_");
         this.extend(this.pvRule, this.panelName + "Rule_");
+        this.extend(this.pvTicks, this.panelName + "Ticks_");
         this.extend(this.pvLabel, this.panelName + "Label_");
         this.extend(this.pvRuleGrid, this.panelName + "Grid_");
 
@@ -644,7 +646,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
         var scale = this.scale;
 
-        this.pvLabel = this.pvRule.add(pv.Rule)
+        this.pvTicks = this.pvRule.add(pv.Rule)
         .data(this.scale.ticks())
         [pvc.BasePanel.paralelLength[this.anchor]](null)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
@@ -652,7 +654,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         [pvc.BasePanel.orthogonalLength[this.anchor]](function(d){
             return myself.tickLength/(this.index%2 + 1)
         })
-        .strokeStyle(this.tickColor)
+        .strokeStyle(this.tickColor);
+
+        this.pvLabel = this.pvTicks
         .anchor(this.anchor)
         .add(pv.Label)
         .text(scale.tickFormat)

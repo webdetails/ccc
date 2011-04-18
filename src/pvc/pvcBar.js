@@ -16,6 +16,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
             panelSizeRatio: 0.9,
             barSizeRatio: 0.9,
             maxBarSize: 2000,
+            valuesAnchor: "center",
             originIsZero: true,
             axisOffset: 0,
             showTooltips: true,
@@ -45,6 +46,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
             barSizeRatio: this.options.barSizeRatio,
             maxBarSize: this.options.maxBarSize,
             showValues: this.options.showValues,
+            valuesAnchor: this.options.valuesAnchor,
             showTooltips: this.options.showTooltips,
             orientation: this.options.orientation
         });
@@ -56,4 +58,15 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
 }
 );
 
+
+/***************
+ *  removed BarChartPanel  (CvK)
+ *
+ * Refactored the CODE:  BarChartPanel is now replaced by the
+ *    WaterfallChartPanel as the Waterfallchart code is easier to extend.
+ *    (in a next refactoringstep we could take the waterfall specific
+ *     code out of the Waterfallchart panel out and make 
+ *     restore inherence to waterfall being a special case of barChart.
+ *
+ ***************/
 

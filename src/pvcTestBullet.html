@@ -63,7 +63,8 @@
 
     <pre>
     {
-      bulletHeight: 30,                   // Bullet height
+      orientation: "horizontal",          // "horizontal" or "vertical"
+      bulletSize: 30,                     // Bullet size
       bulletSpacing: 50,                  // Spacing between bullets
       bulletMargin: 100,                  // Left margin
 
@@ -138,6 +139,9 @@
 
     <script type="text/javascript">
 
+      // enable debug
+      pvc.debug = true;
+
       pv.listenForPageLoad(function() {
 
 
@@ -145,16 +149,17 @@
         var bullet1 = new pvc.BulletChart({
           // legendPosition: "left",
           canvas: "pvcBullet1",
-          width: 500,
-          height: 100,
+          width: 600,
+          height: 350,
           animate: false,
+          orientation: "vertical",
           title: "Bullet charts, no data passed",
           titlePosition: "top",
           titleSize: 40,
 
-          bulletHeight: 25,                   // Bullet height
-          bulletSpacing: 50,                  // Spacing between bullets
-          bulletMargin: 100,                  // Left margin
+          bulletSize: 25,                   // Bullet height
+          bulletSpacing: 150,                  // Spacing between bullets
+          bulletMargin: 30,                  // Left margin
 
           // Specific values
           bulletMarkers: [90],
@@ -184,7 +189,7 @@
           titlePosition: "top",
           titleSize: 40,
 
-          bulletHeight: 25,                   // Bullet height
+          bulletSize: 25,                   // Bullet height
           bulletSpacing: 50,                  // Spacing between bullets
           bulletMargin: 100,                  // Left margin
 
@@ -208,7 +213,7 @@
           titlePosition: "top",
           titleSize: 40,
 
-          bulletHeight: 25,                   // Bullet height
+          bulletSize: 25,                   // Bullet height
           bulletSpacing: 50,                  // Spacing between bullets
           bulletMargin: 100,                  // Left margin
 
@@ -232,7 +237,7 @@
           titlePosition: "top",
           titleSize: 40,
 
-          bulletHeight: 25,                   // Bullet height
+          bulletSize: 25,                   // Bullet height
           bulletSpacing: 50,                  // Spacing between bullets
           bulletMargin: 100,                  // Left margin
 
@@ -255,7 +260,12 @@
           animate: false,
           title: "Bullet charts, full info",
           titlePosition: "top",
-          titleSize: 40
+          titleSize: 40,
+
+          orientation: "vertical",
+          bulletSize: 25,                   // Bullet height
+          bulletSpacing: 80,               // Spacing between bullets
+          bulletMargin: 30                  // Left margin
 
         });
 

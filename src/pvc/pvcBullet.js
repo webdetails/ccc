@@ -13,11 +13,11 @@ pvc.BulletChart = pvc.Base.extend({
 
     var _defaults = {
       showValues: true,
-      orientation: "left",
+      orientation: "horizontal",
       showTooltips: true,
       legend: false,
 
-      bulletHeight: 30,      // Bullet height
+      bulletSize: 30,        // Bullet size
       bulletSpacing: 50,     // Spacing between bullets
       bulletMargin: 100,     // Left margin
 
@@ -29,7 +29,12 @@ pvc.BulletChart = pvc.Base.extend({
       bulletSubtitle: "",    // Subtitle
 
       crosstabMode: true,
-      seriesInRows: true
+      seriesInRows: true,
+
+      tipsySettings: {
+        gravity: "s",
+        fade: true
+      }
 
     };
 
@@ -91,7 +96,6 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
   showTooltips: true,
   showValues: true,
-  orientation: "left",
   tipsySettings: {
     gravity: "s",
     fade: true
@@ -113,21 +117,47 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     this.pvPanel = this._parent.getPvPanel().add(pv.Panel)
     .width(this.width)
-    .height(this.height)
+    .height(this.height);
+
+    var anchor = myself.chart.options.orientation=="horizontal"?"left":"bottom";
+    var size, angle, align, titleOffset, ruleAnchor, leftPos, topPos;
+    
+    if(myself.chart.options.orientation=="horizontal"){
+      size = this.width - this.chart.options.bulletMargin - 20;
+      angle=0;
+      align = "right";
+      titleOffset = 0;
+      ruleAnchor = "bottom";
+      leftPos = this.chart.options.bulletMargin;
+      topPos = function(){
+        return this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing);
+      }
+    }
+    else
+    {
+      size = this.height - this.chart.options.bulletMargin - 20;
+      angle = -Math.PI/2;
+      align = "left";
+      titleOffset = -12;
+      ruleAnchor = "right";
+      leftPos = function(){
+        return myself.chart.options.bulletMargin + this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing);
+      }
+      topPos = undefined;
+
+    }
 
     this.pvBullets = this.pvPanel.add(pv.Panel)
     .data(data)
-    .width(this.width - this.chart.options.bulletMargin - 20)
-    .height(this.chart.options.bulletHeight)
+    [pvc.BasePanel.orthogonalLength[anchor]](size)
+    [pvc.BasePanel.paralelLength[anchor]](this.chart.options.bulletSize)
     .margin(20)
-    .left(this.chart.options.bulletMargin)
-    .top(function(){
-      //pvc.log("Bullets index: " + this.index);
-      return this.index * (myself.chart.options.bulletHeight + myself.chart.options.bulletSpacing);
-    });
+    .left(leftPos) // titles will be on left always
+    .top(topPos);
+    
 
     this.pvBullet = this.pvBullets.add(pv.Layout.Bullet)
-    .orient("left")
+    .orient(anchor)
     .ranges(function(d){
       return d.ranges
     })
@@ -139,29 +169,49 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     });
 
     this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
-    this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar);
+    this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
+    .text(function(d){
+      return myself.chart.options.valueFormat(d);
+    });
+
 
     this.pvBulletMarker = this.pvBullet.marker.add(pv.Dot)
-    .shape("triangle")
-    .fillStyle("white");
+    .shape("square")
+    .fillStyle("white")
+    .text(function(d){
+      return myself.chart.options.valueFormat(d);
+    });
+
+
+    if(this.showTooltips){
+      // Extend default
+      this.extend(this.tipsySettings,"tooltip_");
+      this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+      this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+    }
 
     this.pvBulletRule = this.pvBullet.tick.add(pv.Rule)
 
-    this.pvBulletRuleLabel = this.pvBulletRule.anchor("bottom").add(pv.Label)
+    this.pvBulletRuleLabel = this.pvBulletRule.anchor(ruleAnchor).add(pv.Label)
     .text(this.pvBullet.x.tickFormat);
 
-    this.pvBulletTitle = this.pvBullet.anchor("left").add(pv.Label)
+    this.pvBulletTitle = this.pvBullet.anchor(anchor).add(pv.Label)
     .font("bold 12px sans-serif")
-    .textAlign("right")
+    .textAngle(angle)
+    .left(-10)
+    .textAlign(align)
     .textBaseline("bottom")
+    .left(titleOffset)
     .text(function(d){
       return d.title
     });
 
-    this.pvBulletSubtitle = this.pvBullet.anchor("left").add(pv.Label)
+    this.pvBulletSubtitle = this.pvBullet.anchor(anchor).add(pv.Label)
     .textStyle("#666")
-    .textAlign("right")
+    .textAngle(angle)
+    .textAlign(align)
     .textBaseline("top")
+    .left(titleOffset)
     .text(function(d){
       return d.subtitle
     });

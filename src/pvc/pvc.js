@@ -1,5 +1,9 @@
 
-var pvc = {}
+var pvc = {
+
+  debug: false
+
+}
 
 /**
  *
@@ -9,7 +13,7 @@ var pvc = {}
 
 pvc.log = function(m){
 
-    if (typeof console != "undefined"){
+    if (typeof console != "undefined" && pvc.debug){
         console.log("[pvChart]: " + m);
     }
 };
