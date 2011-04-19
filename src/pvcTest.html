@@ -51,7 +51,10 @@
         <div id="pvcLine3"></div>
 
         <br/>
-
+        <div id="pvcLine4"></div>
+        <div id="pvcLine5"></div>
+        <div id="pvcLine6"></div>
+        <br/>
         <h1>Stacked Line</h1>
         <div id="pvcStackedLine1"></div>
         <div id="pvcStackedLine2"></div>
@@ -99,7 +102,7 @@
         
                     orientation: 'vertical',
                     extensionPoints: {
-                        noDataMessage_text: "Oops! Data missing"
+                        noDataMessage_text: "This is an example of a chart without data"
                         /*xAxisLabel_text: function(d){return d.substr(5)}*/
                     }
                 });
@@ -282,8 +285,122 @@
                 line3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
                 line3.render();
 
+                var line4 = new pvc.LineChart({
+                    // legendPosition: "left",
+                    canvas: "pvcLine4",
+                    width: 300,
+                    height: 200,
+                    animate: true,
+                    title: "line chart with all constant data",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
 
+                    orientation: 'vertical',
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
 
+                    showValues: false,
+                    originIsZero: false,
+                    showDots: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    extensionPoints: {
+                        titleLabel_font: "13px serif",
+                        //dot_strokeStyle: "white",
+                        dot_fillStyle: "white",
+                        dot_shape: "square",
+                        dot_lineWidth: 2,
+                        dot_shapeRadius: 4,
+                        line_lineWidth: 0.5
+                    }
+
+                });
+
+                line4.setData(constant_01, {crosstabMode: false, seriesInRows: false});
+                line4.render();
+
+                var line5 = new pvc.LineChart({
+                    // legendPosition: "left",
+                    canvas: "pvcLine5",
+                    width: 300,
+                    height: 200,
+                    animate: true,
+                    title: "line chart with several series of constant data",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+
+                    orientation: 'vertical',
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+
+                    showValues: false,
+                    showDots: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    extensionPoints: {
+                        titleLabel_font: "13px serif",
+                        //dot_strokeStyle: "white",
+                        dot_fillStyle: "white",
+                        dot_shape: "square",
+                        dot_lineWidth: 2,
+                        dot_shapeRadius: 4,
+                        line_lineWidth: 0.5
+                    }
+
+                });
+
+                line5.setData(constant_02, {crosstabMode: false, seriesInRows: false});
+                line5.render();
+                var line6 = new pvc.LineChart({
+                    // legendPosition: "left",
+                    canvas: "pvcLine6",
+                    width: 300,
+                    height: 200,
+                    animate: true,
+                    title: "line chart with all zero data",
+                    titlePosition: "top",
+                    titleSize: 40,
+                    legend: true,
+                    legendPosition: "top",
+                    legendAlign: "right",
+                    //legendSize: null,
+
+                    orientation: 'vertical',
+                    timeSeries: false,
+                    timeSeriesFormat: "%Y-%m-%d",
+
+                    showValues: false,
+                    showDots: true,
+                    yAxisSize: 30,
+                    xAxisSize: 30,
+                    xAxisFullGrid: true,
+                    yAxisFullGrid: true,
+                    extensionPoints: {
+                        titleLabel_font: "13px serif",
+                        //dot_strokeStyle: "white",
+                        dot_fillStyle: "white",
+                        dot_shape: "square",
+                        dot_lineWidth: 2,
+                        dot_shapeRadius: 4,
+                        line_lineWidth: 0.5
+                    }
+
+                });
+
+                line6.setData(constant_03, {crosstabMode: false, seriesInRows: false});
+                line6.render();
                 // Test of pvc in standalone mode
                 var stackedLine = new pvc.StackedLineChart({
                     // legendPosition: "left",
