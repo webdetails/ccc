@@ -171,6 +171,24 @@ pvc.DataEngine = Base.extend({
         return this.categories;
     },
 
+  getCategoryMin: function() {
+    var cat = this.getCategories();
+    var min = cat[0];
+    for(var i in cat)
+      if (cat[i] < min)
+        min = cat[i];
+    return min;
+  },
+
+  getCategoryMax: function() {
+    var cat = this.getCategories();
+    var max = cat[0];
+    for(var i in cat)
+      if (cat[i] > max)
+        max = cat[i];
+    return max;
+  },
+
     /*
    * Returns the categories on the underlying data
    *
@@ -305,7 +323,7 @@ pvc.DataEngine = Base.extend({
         var myself = this;
         var ar = [];
         this.getSecondAxisValues().map(function(v,i){
-            if(typeof v != "undefined" && v != null){
+            if(typeof v != "undefined" /* && v != null */ ){
                 ar.push({
                     category: myself.getCategories()[i],
                     value: v
@@ -395,7 +413,7 @@ pvc.DataEngine = Base.extend({
         var myself = this;
         var ar = [];
         this.getValues().map(function(a,i){
-            if(typeof a[idx] != "undefined" && a[idx] != null){
+            if(typeof a[idx] != "undefined" /* && a[idx] != null */){
                 ar.push({
                     serieIndex: idx,
                     category: myself.getCategories()[i],
@@ -445,7 +463,7 @@ pvc.DataEngine = Base.extend({
         var myself = this;
         var ar=[];
         this.getValues()[idx].map(function(a,i){
-            if(typeof a != "undefined" && a!= null){
+            if(typeof a != "undefined" /* && a!= null */){
                 ar.push({
                     categoryIndex: idx,
                     serie: myself.getSeries()[i],

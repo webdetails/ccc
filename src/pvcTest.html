@@ -1,289 +1,295 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>CCC playground</title>
+  <head>
+    <title>CCC playground</title>
 
-        <!--[if lt IE 9]>
-        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
 </script><![endif]-->
-        <meta name="svg.render.forceflash" content="true">
+    <meta name="svg.render.forceflash" content="true">
 
 
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script type="text/javascript" src="cdf/Base.js"></script>
-        <script type="text/javascript" src="cdf/jquery.js"></script>
-        <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
-        <script type="text/javascript" src="data/q01-01.js"></script>
-        <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
-        <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
-        <script type="text/javascript" src="lib/tipsy.js"></script>
-        <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="cdf/Base.js"></script>
+    <script type="text/javascript" src="cdf/jquery.js"></script>
+    <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="lib/tipsy.js"></script>
+    <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
-        <script type="text/javascript" src="pvc/pvc.js"></script>
-        <script type="text/javascript" src="pvc/pvcPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcLegend.js"></script>
-        <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcPie.js"></script>
-        <script type="text/javascript" src="pvc/pvcBar.js"></script>
-        <script type="text/javascript" src="pvc/pvcLine.js"></script>
-        <script type="text/javascript" src="pvc/pvcData.js"></script>
-        <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
-        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
-        <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
-    </head>
-    <body>
+    <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+    <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
+    <script type="text/javascript" src="pvc/pvcPie.js"></script>
+    <script type="text/javascript" src="pvc/pvcBar.js"></script>
+    <script type="text/javascript" src="pvc/pvcLine.js"></script>
+    <script type="text/javascript" src="pvc/pvcData.js"></script>
+    <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
+    <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+  </head>
+  <body>
 
-        <h1>
-            CCC playground
-        </h1>
-
-
-
-        <h1>Dot</h1>
-        <div id="pvcDot1"></div>
-        <div id="pvcDot2"></div>
-        <div id="pvcDot3"></div>
-
-        <h1>Line</h1>
-        <div id="pvcLine1"></div>
-        <div id="pvcLine2"></div>
-        <div id="pvcLine3"></div>
-
-        <br/>
-        <div id="pvcLine4"></div>
-        <div id="pvcLine5"></div>
-        <div id="pvcLine6"></div>
-        <br/>
-        <h1>Stacked Line</h1>
-        <div id="pvcStackedLine1"></div>
-        <div id="pvcStackedLine2"></div>
-        <div id="pvcStackedLine3"></div>
-
-        <h1>Stacked Area</h1>
-        <div id="pvcStackedArea1"></div>
-        <div id="pvcStackedArea2"></div>
-        <div id="pvcStackedArea3"></div>
-
-
-        <h1>Bar</h1>
-        <div id="pvcBar1"></div>
-        <div id="pvcBar2"></div>
-        <div id="pvcBar3"></div>
-
-        <h1>Pie</h1>
-        <div id="pvcPie1"></div>
-        <div id="pvcPie2"></div>
-        <div id="pvcPie3"></div>
+    <h1>
+      CCC playground
+    </h1>
 
 
 
-        <script type="text/javascript">
+    <h1>Dot</h1>
+    <div id="pvcDot1"></div>
+    <div id="pvcDot2"></div>
+    <div id="pvcDot3"></div>
+
+    <h1>Line</h1>
+    <div id="pvcLine1"></div>
+    <div id="pvcLine2"></div>
+    <div id="pvcLine3"></div>
+
+    <br/>
+
+    <div id="pvcLine4"></div>
+    <div id="pvcLine5"></div>
+    <div id="pvcLine6"></div>
+
+    <br/>
+
+    <h1>Stacked Line</h1>
+    <div id="pvcStackedLine1"></div>
+    <div id="pvcStackedLine2"></div>
+    <div id="pvcStackedLine3"></div>
+
+    <h1>Stacked Area</h1>
+    <div id="pvcStackedArea1"></div>
+    <div id="pvcStackedArea2"></div>
+    <div id="pvcStackedArea3"></div>
 
 
-            pv.listenForPageLoad(function() {
+    <h1>Bar</h1>
+    <div id="pvcBar1"></div>
+    <div id="pvcBar2"></div>
+    <div id="pvcBar3"></div>
+
+    <h1>Pie</h1>
+    <div id="pvcPie1"></div>
+    <div id="pvcPie2"></div>
+    <div id="pvcPie3"></div>
 
 
-                var dot1 = new pvc.DotChart({
-                    // legendPosition: "left",
-                    canvas: "pvcDot1",
-                    width: 300,
-                    height: 200,
-                    animate: true,
-                    title: "Dot chart",
-                    titlePosition: "bottom",
-                    titleSize: 20,
-                    legend: true,
-                    legendPosition: "left",
-                    legendAlign: "right",
-                    //legendSize: 30,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
+
+    <script type="text/javascript">
+
+      // enable debug
+      pvc.debug = true;
+
+      pv.listenForPageLoad(function() {
+
+
+        var dot1 = new pvc.DotChart({
+          // legendPosition: "left",
+          canvas: "pvcDot1",
+          width: 300,
+          height: 200,
+          animate: true,
+          title: "Dot chart",
+          titlePosition: "bottom",
+          titleSize: 20,
+          legend: true,
+          legendPosition: "left",
+          legendAlign: "right",
+          //legendSize: 30,
+          yAxisSize: 30,
+          xAxisSize: 30,
         
-                    orientation: 'vertical',
-                    extensionPoints: {
-                        noDataMessage_text: "This is an example of a chart without data"
-                        /*xAxisLabel_text: function(d){return d.substr(5)}*/
-                    }
-                });
+          orientation: 'vertical',
+          extensionPoints: {
+            noDataMessage_text: "Example of a chart with missing data"
+            /*xAxisLabel_text: function(d){return d.substr(5)}*/
+          }
+        });
 
             
-                //dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
-                dot1.render();
+        //dot1.setData(relational_01, {crosstabMode: false, seriesInRows: true});
+        dot1.render();
            
 
 
 
-                var dot2 = new pvc.DotChart({
-                    // legendPosition: "left",
-                    canvas: "pvcDot2",
-                    width: 300,
-                    height: 200,
-                    animate: true,
-                    title: "Dot chart - Timeseries ",
-                    titlePosition: "left",
-                    titleSize: 30,
-                    legend: true,
-                    legendPosition: "left",
-                    legendAlign: "right",
-                    showTooltips: false,
-                    //legendSize: 20,
+        var dot2 = new pvc.DotChart({
+          // legendPosition: "left",
+          canvas: "pvcDot2",
+          width: 300,
+          height: 200,
+          animate: true,
+          title: "Dot chart - Timeseries ",
+          titlePosition: "left",
+          titleSize: 30,
+          legend: true,
+          legendPosition: "left",
+          legendAlign: "right",
+          showTooltips: false,
+          //legendSize: 20,
 
-                    orientation: 'vertical',
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d",
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
 
-                    showValues: true,
-                    valuesAnchor: "left",
-                    axisOffset: 0.2
+          showValues: true,
+          valuesAnchor: "left",
+          axisOffset: 0.2
 
-                });
-                dot2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                dot2.render();
-
-
-                var dot3 = new pvc.DotChart({
-                    // legendPosition: "left",
-                    canvas: "pvcDot3",
-                    width: 300,
-                    height: 200,
-                    animate: true,
-                    title: "Dot chart - Extra options",
-                    titlePosition: "bottom",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "right",
-                    legendAlign: "right",
-                    legendSize: 100,
-
-                    orientation: 'vertical',
-
-                    showValues: false,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
-                    extensionPoints: {
-                        titleLabel_font: "13px serif",
-                        xAxisLabel_textAngle: 0.3,
-                        xAxisLabel_textAlign: "center",
-                        xAxisLabel_textBaseline: "top",
-                        xAxisLabel_textStyle: "black",
-                        xAxisLabel_text: function(d){return d.substr(5)},
-                        //dot_strokeStyle: "white",
-                        dot_fillStyle: "white",
-                        dot_shape: "square",
-                        dot_shapeRadius: 4
-                    }
-
-                });
-
-                dot3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                dot3.render();
+        });
+        dot2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        dot2.render();
 
 
-                // Test of pvc in standalone mode
-                var line = new pvc.LineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcLine1",
-                    width: 300,
-                    height: 200,
-                    title: "line chart - horizontal",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
+        var dot3 = new pvc.DotChart({
+          // legendPosition: "left",
+          canvas: "pvcDot3",
+          width: 300,
+          height: 200,
+          animate: true,
+          title: "Dot chart - Extra options",
+          titlePosition: "bottom",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "right",
+          legendAlign: "right",
+          legendSize: 100,
 
-                    orientation: 'vertical',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
+          orientation: 'vertical',
 
-                    showValues: false,
-                    showDots: false,
-                    showXScale: true,
-                    //showYScale: true,
-                    yAxisPosition: "right",
-                    yAxisSize: 30,
-                    //xAxisPosition: "bottom",
-                    xAxisSize: 30
-                    //xAxisFullGrid: true,
-                    //yAxisFullGrid: true,
+          showValues: false,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif",
+            xAxisLabel_textAngle: 0.3,
+            xAxisLabel_textAlign: "center",
+            xAxisLabel_textBaseline: "top",
+            xAxisLabel_textStyle: "black",
+            xAxisLabel_text: function(d){return d.substr(5)},
+            //dot_strokeStyle: "white",
+            dot_fillStyle: "white",
+            dot_shape: "square",
+            dot_shapeRadius: 4
+          }
 
-                });
+        });
 
-                line.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                line.render();
+        dot3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        dot3.render();
 
-                var line2 = new pvc.LineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcLine2",
-                    width: 300,
-                    height: 200,
-                    animate: true,
-                    title: "line chart - standard with dots",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
 
-                    orientation: 'horizontal',
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d",
+        // Test of pvc in standalone mode
+        var line = new pvc.LineChart({
+          // legendPosition: "left",
+          canvas: "pvcLine1",
+          width: 300,
+          height: 200,
+          title: "line chart - horizontal",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
 
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
+          orientation: 'vertical',
+          timeSeries: false,
+          timeSeriesFormat: "%Y-%m-%d",
 
-                });
+          showValues: false,
+          showDots: false,
+          showXScale: true,
+          //showYScale: true,
+          yAxisPosition: "right",
+          yAxisSize: 30,
+          //xAxisPosition: "bottom",
+          xAxisSize: 30
+          //xAxisFullGrid: true,
+          //yAxisFullGrid: true,
 
-                line2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                line2.render();
+        });
 
-                var line3 = new pvc.LineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcLine3",
-                    width: 300,
-                    height: 200,
-                    animate: true,
-                    title: "line chart - Timeseries with extra options",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
+        line.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        line.render();
 
-                    orientation: 'vertical',
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d",
+        var line2 = new pvc.LineChart({
+          // legendPosition: "left",
+          canvas: "pvcLine2",
+          width: 300,
+          height: 200,
+          animate: true,
+          title: "line chart - standard with dots",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
 
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
-                    extensionPoints: {
-                        titleLabel_font: "13px serif",
-                        //dot_strokeStyle: "white",
-                        dot_fillStyle: "white",
-                        dot_shape: "square",
-                        dot_lineWidth: 2,
-                        dot_shapeRadius: 4,
-                        line_lineWidth: 0.5
-                    }
+          orientation: 'horizontal',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
 
-                });
+          showValues: false,
+          showDots: true,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true
 
-                line3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                line3.render();
+        });
+
+        line2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        line2.render();
+
+        var line3 = new pvc.LineChart({
+          // legendPosition: "left",
+          canvas: "pvcLine3",
+          width: 300,
+          height: 200,
+          animate: true,
+          title: "line chart - Timeseries with extra options",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          showValues: false,
+          showDots: true,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif",
+            //dot_strokeStyle: "white",
+            dot_fillStyle: "white",
+            dot_shape: "square",
+            dot_lineWidth: 2,
+            dot_shapeRadius: 4,
+            line_lineWidth: 0.5
+          }
+
+        });
+
+        line3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        line3.render();
 
                 var line4 = new pvc.LineChart({
                     // legendPosition: "left",
@@ -401,421 +407,423 @@
 
                 line6.setData(constant_03, {crosstabMode: false, seriesInRows: false});
                 line6.render();
-                // Test of pvc in standalone mode
-                var stackedLine = new pvc.StackedLineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcStackedLine1",
-                    width: 300,
-                    height: 200,
-                    title: "line chart - horizontal",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-
-                    orientation: 'vertical',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showDots: false,
-                    showXScale: true,
-                    //showYScale: true,
-                    yAxisPosition: "left",
-                    yAxisSize: 30,
-                    //xAxisPosition: "bottom",
-                    xAxisSize: 30
-                    //xAxisFullGrid: true,
-                    //yAxisFullGrid: true,
-
-                });
-
-                stackedLine.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                stackedLine.render();
-
-                var stackedLine2 = new pvc.StackedLineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcStackedLine2",
-                    width: 300,
-                    height: 200,
-                    animate: true,
-                    title: "line chart - Timeseries with dots",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: false,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-
-                    orientation: 'vertical',
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d",
-                    //axisOffset: 0.12,
-
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                stackedLine2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                stackedLine2.render();
-
-                var stackedLine3 = new pvc.StackedLineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcStackedLine3",
-                    width: 300,
-                    height: 200,
-                    animate: false,
-                    title: "line chart - Timeseries with extra options",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-
-                    orientation: 'vertical',
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
-                    extensionPoints: {
-                        titleLabel_font: "13px serif",
-                        //dot_strokeStyle: "white",
-                        dot_fillStyle: "white",
-                        dot_shape: "square",
-                        dot_lineWidth: 2,
-                        dot_shapeRadius: 4,
-                        line_lineWidth: 0.5
-                    }
-
-                });
-
-                stackedLine3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                stackedLine3.render();
 
 
+        // Test of pvc in standalone mode
+        var stackedLine = new pvc.StackedLineChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedLine1",
+          width: 300,
+          height: 200,
+          title: "line chart - horizontal",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
 
+          orientation: 'vertical',
+          timeSeries: false,
+          timeSeriesFormat: "%Y-%m-%d",
 
-                // Test of pvc in standalone mode
-                var stackedArea = new pvc.StackedAreaChart({
-                    // legendPosition: "left",
-                    canvas: "pvcStackedArea1",
-                    width: 300,
-                    height: 200,
-                    title: "area chart - horizontal",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
+          showValues: false,
+          showDots: false,
+          showXScale: true,
+          //showYScale: true,
+          yAxisPosition: "left",
+          yAxisSize: 30,
+          //xAxisPosition: "bottom",
+          xAxisSize: 30
+          //xAxisFullGrid: true,
+          //yAxisFullGrid: true,
 
-                    orientation: 'vertical',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
+        });
 
-                    showXScale: true,
-                    //showYScale: true,
-                    yAxisPosition: "left",
-                    yAxisSize: 30,
-                    //xAxisPosition: "bottom",
-                    xAxisSize: 30
-                    //xAxisFullGrid: true,
-                    //yAxisFullGrid: true,
+        stackedLine.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedLine.render();
 
-                });
+        var stackedLine2 = new pvc.StackedLineChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedLine2",
+          width: 300,
+          height: 200,
+          animate: true,
+          title: "line chart - Timeseries with dots",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: false,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
 
-                stackedArea.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                stackedArea.render();
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+          //axisOffset: 0.12,
 
-                var stackedArea2 = new pvc.StackedAreaChart({
-                    // legendPosition: "left",
-                    canvas: "pvcStackedArea2",
-                    width: 300,
-                    height: 200,
-                    animate: true,
-                    title: "line chart - Timeseries with dots",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
+          showValues: false,
+          showDots: true,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true
 
-                    orientation: 'vertical',
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d",
+        });
 
-                    showValues: false,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
+        stackedLine2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedLine2.render();
 
-                });
+        var stackedLine3 = new pvc.StackedLineChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedLine3",
+          width: 300,
+          height: 200,
+          animate: false,
+          title: "line chart - Timeseries with extra options",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
 
-                stackedArea2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                stackedArea2.render();
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
 
-                var stackedArea3 = new pvc.StackedAreaChart({
-                    // legendPosition: "left",
-                    canvas: "pvcStackedArea3",
-                    width: 300,
-                    height: 200,
-                    animate: false,
-                    title: "line chart - huge dataset",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
+          showValues: false,
+          showDots: true,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif",
+            //dot_strokeStyle: "white",
+            dot_fillStyle: "white",
+            dot_shape: "square",
+            dot_lineWidth: 2,
+            dot_shapeRadius: 4,
+            line_lineWidth: 0.5
+          }
 
-                    orientation: 'vertical',
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d",
+        });
 
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
-                    extensionPoints: {
-                        titleLabel_font: "13px serif"
-                        //dot_strokeStyle: "white",
-                    }
-
-                });
-
-                stackedArea3.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
-                stackedArea3.render();
+        stackedLine3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedLine3.render();
 
 
 
 
-                var bar1 = new pvc.BarChart({
-                    canvas: "pvcBar1",
-                    width: 300,
-                    height: 200,
-                    title: "Bar chart",
-                    titlePosition: "left",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "bottom",
-                    legendSize: null,
+        // Test of pvc in standalone mode
+        var stackedArea = new pvc.StackedAreaChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedArea1",
+          width: 300,
+          height: 200,
+          title: "area chart - horizontal",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
 
-                    orientation: 'vertical',
-                    stacked: false,
-                    maxBarSize: 100,
+          orientation: 'vertical',
+          timeSeries: false,
+          timeSeriesFormat: "%Y-%m-%d",
 
-                    panelSizeRatio:0.75,
-                    barSizeRatio: 1,
+          showXScale: true,
+          //showYScale: true,
+          yAxisPosition: "left",
+          yAxisSize: 30,
+          //xAxisPosition: "bottom",
+          xAxisSize: 30
+          //xAxisFullGrid: true,
+          //yAxisFullGrid: true,
 
-                    showValues: true,
-                    showXScale: true,
-                    showYScale: true,
-                    yAxisPosition: "left",
-                    yAxisSize: 30,
-                    xAxisPosition: "bottom",
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
+        });
+
+        stackedArea.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedArea.render();
+
+        var stackedArea2 = new pvc.StackedAreaChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedArea2",
+          width: 300,
+          height: 200,
+          animate: true,
+          title: "line chart - Timeseries with dots",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          showValues: false,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true
+
+        });
+
+        stackedArea2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        stackedArea2.render();
+
+        var stackedArea3 = new pvc.StackedAreaChart({
+          // legendPosition: "left",
+          canvas: "pvcStackedArea3",
+          width: 300,
+          height: 200,
+          animate: false,
+          title: "line chart - huge dataset",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          //legendSize: null,
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif"
+            //dot_strokeStyle: "white",
+          }
+
+        });
+
+        stackedArea3.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
+        stackedArea3.render();
+
+
+
+
+        var bar1 = new pvc.BarChart({
+          canvas: "pvcBar1",
+          width: 300,
+          height: 200,
+          title: "Bar chart",
+          titlePosition: "left",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "bottom",
+          legendSize: null,
+
+          orientation: 'vertical',
+          stacked: false,
+          maxBarSize: 100,
+
+          panelSizeRatio:0.75,
+          barSizeRatio: 1,
+
+          showValues: true,
+          showXScale: true,
+          showYScale: true,
+          yAxisPosition: "left",
+          yAxisSize: 30,
+          xAxisPosition: "bottom",
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
         
-                    /*
-            showAllTimeseries: true,
-            allTimeseriesPosition: "bottom",
-            allTimeseriesSize: 50,
-                     */
-                    extensionPoints: {
-                        //base_fillStyle: "red",
-                        title_fillStyle: "yellow",
-                        titleLabel_font: "16px sans-serif",
-                        // title_strokeStyle: "black",
-                        // titleLabel_bottom: 0,
-                        // titleLabel_textAlign: "left",
+          /*
+        showAllTimeseries: true,
+        allTimeseriesPosition: "bottom",
+        allTimeseriesSize: 50,
+           */
+          extensionPoints: {
+            //base_fillStyle: "red",
+            title_fillStyle: "yellow",
+            titleLabel_font: "16px sans-serif",
+            // title_strokeStyle: "black",
+            // titleLabel_bottom: 0,
+            // titleLabel_textAlign: "left",
           
-                        legend_fillStyle: "green",
-                        //chart_fillStyle: "#fff",
-                        allTimeseries_fillStyle: "blue",
-                        xAxis_fillStyle: "#eee",
-                        yAxis_fillStyle: "#bbb",
+            legend_fillStyle: "green",
+            //chart_fillStyle: "#fff",
+            allTimeseries_fillStyle: "blue",
+            xAxis_fillStyle: "#eee",
+            yAxis_fillStyle: "#bbb",
 
-                        //xAxisRule_strokeStyle:"yellow",
-                        //xAxisRuleGrid_strokeStyle:"#eee",
-                        yAxisRule_strokeStyle:"blue"
+            //xAxisRule_strokeStyle:"yellow",
+            //xAxisRuleGrid_strokeStyle:"#eee",
+            yAxisRule_strokeStyle:"blue"
           
-                        //pie_strokeStyle: "white"
-                        //pie_innerRadius: 10
-                        //pieLabel_textAngle: "0"
+            //pie_strokeStyle: "white"
+            //pie_innerRadius: 10
+            //pieLabel_textAngle: "0"
 
-                        //barLabel_textStyle: "red"
-                    }
+            //barLabel_textStyle: "red"
+          }
 
-                });
+        });
 
-                bar1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                bar1.render();
+        bar1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        bar1.render();
             
-                var bar2 = new pvc.BarChart({
-                    canvas: "pvcBar2",
-                    width: 300,
-                    height: 200,
-                    title: "Stacked Barline chart",
-                    titlePosition: "bottom",
-                    titleSize: 20,
-                    legend: true,
-                    legendPosition: "left",
-                    legendSize: null,
+        var bar2 = new pvc.BarChart({
+          canvas: "pvcBar2",
+          width: 300,
+          height: 200,
+          title: "Stacked Barline chart",
+          titlePosition: "bottom",
+          titleSize: 20,
+          legend: true,
+          legendPosition: "left",
+          legendSize: null,
 
-                    orientation: 'vertical',
-                    stacked: true,
-                    showTooltips: false,
-                    //maxBarSize: 100,
+          orientation: 'vertical',
+          stacked: true,
+          showTooltips: false,
+          //maxBarSize: 100,
 
-                    showValues: true,
-                    showXScale: true,
-                    showYScale: true,
-                    yAxisPosition: "right",
-                    yAxisSize: 20,
-                    xAxisPosition: "bottom",
-                    xAxisSize: 20,
-                    xAxisFullGrid: false,
-                    yAxisFullGrid: false,
+          showValues: true,
+          showXScale: true,
+          showYScale: true,
+          yAxisPosition: "right",
+          yAxisSize: 20,
+          xAxisPosition: "bottom",
+          xAxisSize: 20,
+          xAxisFullGrid: false,
+          yAxisFullGrid: false,
 
-                    panelSizeRatio: 0.9,
-                    barSizeRatio: 0.8,
+          panelSizeRatio: 0.9,
+          barSizeRatio: 0.8,
 
-                    secondAxis: true,
-                    secondAxisIndependentScale: true,
-                    secondAxisIdx: -1, // default
-                    secondAxisOriginIsZero: true, // default
-                    secondAxisOffset: 0, // default
-                    secondAxisColor: "red"
+          secondAxis: true,
+          secondAxisIndependentScale: true,
+          secondAxisIdx: -1, // default
+          secondAxisOriginIsZero: true, // default
+          secondAxisOffset: 0, // default
+          secondAxisColor: "red"
 
-                });
+        });
 
-                bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                bar2.render();
-
-
-                var bar3 = new pvc.BarChart({
-                    canvas: "pvcBar3",
-                    width: 300,
-                    height: 200,
-                    title: "Horizontal Bar chart",
-                    titlePosition: "bottom",
-                    titleSize: 20,
-                    legend: true,
-                    legendPosition: "right",
-                    legendSize: null,
-
-                    orientation: 'horizontal',
-                    stacked: false,
-                    //maxBarSize: 100,
-
-                    showValues: true,
-                    showXScale: true,
-                    showYScale: true,
-                    yAxisPosition: "left",
-                    yAxisSize: 20,
-                    xAxisPosition: "bottom",
-                    xAxisSize: 20,
-                    xAxisFullGrid: false,
-                    yAxisFullGrid: false,
-
-                    panelSizeRatio: 1,
-                    barSizeRatio: 0.75
-
-                });
-
-                bar3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                bar3.render();
+        bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        bar2.render();
 
 
-                /* Pie chart */
-                var pie = new pvc.PieChart({
-                    // legendPosition: "left",
-                    canvas: "pvcPie1",
-                    width: 600,
-                    height: 400,
-                    title: "My title",
-                    titlePosition: "left",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "right", //top, bottom, left, right
-                    legendAlign: "right", //left, center, right || top, middle, bottom
-                    // legendSize: null,
-                    legendDrawLine: true,
-                    legendDrawMarker: false,
-                    showTooltips: true,
-                    //legendMinMarginX: 8,
-                    //legendMinMarginY: 8,
-                    //legendTextMargin: 6,
-                    legendPadding: 20,
-                    legendTextAdjust: 7,
-                    //legendShape: "square",
-                    //legendMarkerSize: 15,
+        var bar3 = new pvc.BarChart({
+          canvas: "pvcBar3",
+          width: 300,
+          height: 200,
+          title: "Horizontal Bar chart",
+          titlePosition: "bottom",
+          titleSize: 20,
+          legend: true,
+          legendPosition: "right",
+          legendSize: null,
 
-                    innerGap: 0.9,
-                    showValues: true,
-                    explodedSliceIndex: 4,
-                    explodedSliceRadius: 15,
+          orientation: 'horizontal',
+          stacked: false,
+          //maxBarSize: 100,
 
-                    numberPosition: 0,
+          showValues: true,
+          showXScale: true,
+          showYScale: true,
+          yAxisPosition: "left",
+          yAxisSize: 20,
+          xAxisPosition: "bottom",
+          xAxisSize: 20,
+          xAxisFullGrid: false,
+          yAxisFullGrid: false,
+
+          panelSizeRatio: 1,
+          barSizeRatio: 0.75
+
+        });
+
+        bar3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        bar3.render();
+
+
+        /* Pie chart */
+        var pie = new pvc.PieChart({
+          // legendPosition: "left",
+          canvas: "pvcPie1",
+          width: 600,
+          height: 400,
+          title: "My title",
+          titlePosition: "left",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "right", //top, bottom, left, right
+          legendAlign: "right", //left, center, right || top, middle, bottom
+          // legendSize: null,
+          legendDrawLine: true,
+          legendDrawMarker: false,
+          showTooltips: true,
+          //legendMinMarginX: 8,
+          //legendMinMarginY: 8,
+          //legendTextMargin: 6,
+          legendPadding: 20,
+          legendTextAdjust: 7,
+          //legendShape: "square",
+          //legendMarkerSize: 15,
+
+          innerGap: 0.9,
+          showValues: true,
+          explodedSliceIndex: 4,
+          explodedSliceRadius: 15,
+
+          numberPosition: 0,
         
-                    extensionPoints: {
-                        base_fillStyle: "red",
-                        title_fillStyle: "yellow",
-                        titleLabel_font: "16px sans-serif",
-                        // title_strokeStyle: "black",
-                        // titleLabel_bottom: 0,
-                        // titleLabel_textAlign: "left",
-                        legend_fillStyle: "green",
-                        chart_fillStyle: "#eee"
-                        //pie_strokeStyle: "white"
-                        //pie_innerRadius: 200
-                        //pieLabel_textAngle: "0"
-                    }
+          extensionPoints: {
+            base_fillStyle: "red",
+            title_fillStyle: "yellow",
+            titleLabel_font: "16px sans-serif",
+            // title_strokeStyle: "black",
+            // titleLabel_bottom: 0,
+            // titleLabel_textAlign: "left",
+            legend_fillStyle: "green",
+            chart_fillStyle: "#eee"
+            //pie_strokeStyle: "white"
+            //pie_innerRadius: 200
+            //pieLabel_textAngle: "0"
+          }
 
-                });
+        });
 
-                pie.setData($.extend(true, {},relational_03), {crosstabMode: false, seriesInRows: false});
-            pie.render();
-
-
-                var crosstab01 = new pvc.TimeseriesAbstract({});
-                crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
-                crosstab01.preRender();
+        pie.setData($.extend(true, {},relational_03), {crosstabMode: false, seriesInRows: false});
+        pie.render();
 
 
-                // Testing some other datasets:
-                var relational = new pvc.TimeseriesAbstract({});
-                relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-                relational.preRender();
+        var crosstab01 = new pvc.TimeseriesAbstract({});
+        crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
+        crosstab01.preRender();
 
 
-                var relational2 = new pvc.TimeseriesAbstract({});
-                relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
-                relational2.preRender();
-
-            });
-
-        </script>
+        // Testing some other datasets:
+        var relational = new pvc.TimeseriesAbstract({});
+        relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
+        relational.preRender();
 
 
+        var relational2 = new pvc.TimeseriesAbstract({});
+        relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
+        relational2.preRender();
+
+      });
+
+    </script>
 
 
 
-    </body>
+
+
+  </body>
 </html>

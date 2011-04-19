@@ -16,29 +16,36 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
     constructor: function(o){
 
-
         this.base(o);
+
+	// enforce some defaults for the HeatGridChart
+        this.options.legend = false;
+        this.options.orthoAxisOrdinal = true;
+        this.options.orginIsZero = true;
 
         var _defaults = {
             showValues: true,
-            originIsZero: true,
+            //originIsZero: true,
             axisOffset: 0,
             showTooltips: true,
             orientation: "vertical",
             // use a categorical here based on series labels
-            orthoAxisOrdinal: true,
             scalingType: "linear",    // "normal" (distribution) or "linear"
             normPerBaseCategory: true,
+            orthoAxisOrdinal: true,
             numSD: 2,                 // width (only for normal distribution)
             minColor: "white",
             maxColor: "darkgreen",
             nullColor:  "#efc5ad"  // white with a shade of orange
         };
 
-
         // Apply options
         $.extend(this.options,_defaults, o);
 
+	// enforce some defaults for the HeatGridChart
+        this.options.orthoAxisOrdinal = true;
+        this.options.legend = false;
+        this.options.orginIsZero = true;
 
     },
 
@@ -188,19 +195,25 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         if (opts.clickable){
             this.pvHeatGrid
             .cursor("pointer")
-            .event("click",function(d){
+            .event("click",function(row, rowCol){
                 var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index]
                 var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index]
-                return myself.chart.options.clickAction(s,c, d);
+                var d = row[rowCol];
+                return myself.chart.options.clickAction(s,c,d);
             });
         }
 
         if(this.showValues){
+            
+            var getValue = function(row, rowAgain, rowCol){
+                return row[rowCol];
+            };
+            
             this.pvHeatGridLabel = this.pvHeatGrid
             .anchor("center")
             .add(pv.Label)
             .bottom(0)
-            .text(pv.identity)
+            .text(getValue);
 
             // Extend heatGridLabel
             this.extend(this.pvHeatGridLabel,"heatGridLabel_");

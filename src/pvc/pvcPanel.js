@@ -85,7 +85,7 @@ pvc.Base = Base.extend({
         }
         // If we don't have data, we just need to set a "no data" message
         // and go on with life.
-        if (this.resultset.length === 0) {
+        if (!this.allowNoData && this.resultset.length === 0) {
             throw new NoDataException();
         }
 
@@ -429,6 +429,13 @@ pvc.BasePanel = Base.extend({
         bottom: "left",
         left: "bottom",
         right: "bottom"
+    },
+
+    relativeAnchorMirror: {
+        top: "right",
+        bottom: "right",
+        left: "top",
+        right: "top"
     },
 
     oppositeAnchor:{

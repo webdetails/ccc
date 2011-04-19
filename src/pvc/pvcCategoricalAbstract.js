@@ -110,6 +110,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 elements: this.getAxisOrdinalElements("x")
             });
 
+//            this.xAxisPanel.setScale(this.xScale);
             this.xAxisPanel.setScale(this.xScale);
             this.xAxisPanel.appendTo(this.basePanel); // Add it
 
@@ -272,7 +273,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if (this.options.orientation == "vertical") {
             scale =  (this.options.orthoAxisOrdinal) ?
             this.getPerpOrdinalScale("y")    :
-            scale = this.getLinearScale();
+            this.getLinearScale();
         } else { 
             scale = this.options.timeSeries  ?
             this.getTimeseriesScale()     :
@@ -538,6 +539,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     _parent: null,
     pvRule: null,
+    pvTicks: null,
     pvLabel: null,
     pvRuleGrid: null,
 
@@ -583,6 +585,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Extend panel
         this.extend(this.pvPanel, this.panelName + "_");
         this.extend(this.pvRule, this.panelName + "Rule_");
+        this.extend(this.pvTicks, this.panelName + "Ticks_");
         this.extend(this.pvLabel, this.panelName + "Label_");
         this.extend(this.pvRuleGrid, this.panelName + "Grid_");
 
@@ -595,20 +598,27 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     renderAxis: function(){
 
-        var scaleRange = this.scale.range();
+        var min, max;
+        if (this.ordinal) {
+          min = this.scale.min;
+          max = this.scale.max;
+        } else {
+          var scaleRange = this.scale.range();
+          min = scaleRange[0];
+          max = scaleRange[1];
+        }
         this.pvRule = this.pvPanel
         .add(pv.Rule)
         .strokeStyle(this.tickColor)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
-        [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale.min)
-        [pvc.BasePanel.paralelLength[this.anchor]](this.scale.max - this.scale.min)
+        [pvc.BasePanel.relativeAnchor[this.anchor]](min)
+        [pvc.BasePanel.paralelLength[this.anchor]](max - min)
 
         if (this.ordinal == true){
             this.renderOrdinalAxis();
         }
         else{
             this.renderLinearAxis();
-      
         }
     
     },
@@ -644,7 +654,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
         var scale = this.scale;
 
-        this.pvLabel = this.pvRule.add(pv.Rule)
+        this.pvTicks = this.pvRule.add(pv.Rule)
         .data(this.scale.ticks())
         [pvc.BasePanel.paralelLength[this.anchor]](null)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
@@ -652,7 +662,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         [pvc.BasePanel.orthogonalLength[this.anchor]](function(d){
             return myself.tickLength/(this.index%2 + 1)
         })
-        .strokeStyle(this.tickColor)
+        .strokeStyle(this.tickColor);
+
+        this.pvLabel = this.pvTicks
         .anchor(this.anchor)
         .add(pv.Label)
         .text(scale.tickFormat)
