@@ -21,13 +21,17 @@ pvc.ParallelCoordinates = pvc.Base.extend({
     this.base(o);
 
     var _defaults = {
+      topRuleOffset: 30,
+      botRuleOffset: 30,
+      leftRuleOffset: 60,
+      rightRuleOffset: 60
     };
 
 
     // Apply options
     $.extend(this.options,_defaults, o);
 
-
+    return;
   },
 
   preRender: function(){
@@ -38,15 +42,15 @@ pvc.ParallelCoordinates = pvc.Base.extend({
 
 
     this.parCoordPanel = new pvc.ParCoordPanel(this, {
-      innerGap: this.options.innerGap,
-      explodedSliceRadius: this.options.explodedSliceRadius,
-      explodedSliceIndex: this.options.explodedSliceIndex,
-      showValues: this.options.showValues,
-      showTooltips: this.options.showTooltips
+      topRuleOffset : this.options.topRuleOffset,
+      botRuleOffset : this.options.botRuleOffset,
+      leftRuleOffset : this.options.leftRuleOffset,
+      rightRuleOffset : this.options.rightRuleOffset
     });
 
     this.parCoordPanel.appendTo(this.basePanel); // Add it
 
+    return;
   }
 
 }
@@ -73,27 +77,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
   _parent: null,
   pvParCoord: null,
-//  pvPieLabel: null,
-//  data: null,
 
-
-//  units : null,
-/*
-{
-      cyl: {name: "cylinders", unit: ""},
-      dsp: {name: "displacement", unit: " sq in"},
-      lbs: {name: "weight", unit: " lbs"},
-      hp: {name: "horsepower", unit: " hp"},
-      acc: {name: "acceleration (0-60 mph)", unit: " sec"},
-      mpg: {name: "mileage", unit: " mpg"},
-      year: {name: "year", unit: ""}
-    },
-    */
-
-  categories: null, 
+  dimensions: null, 
   data: null,
 
-  units: null,
+  dimensionDescr: null,
 
   constructor: function(chart, options){
 
@@ -104,58 +92,133 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
   retrieveData: function () {
     var de = this.chart.dataEngine;
 
-//    this.series = de.getVisibleSeries();
-    this.categories = de.getVisibleCategories();
-    var data = de.getValues();
+    this.dimensions = de.getVisibleCategories();
+    var values = de.getValues();
 
-    var serieIndex = de.getVisibleSeriesIndexes();
-    var catIndex = de.getVisibleCategoriesIndexes();
-//    var catValues = de.getVisibleValuesForCategoryIndex(cat[0]);
-    var keys = de.getCategories();
+    var dataRowIndex = de.getVisibleSeriesIndexes();
+    var pCoordIndex = de.getVisibleCategoriesIndexes();
 
-    //  possibly inline this code
-    var generateHash = function(keys, data, index) {
+    var pCoordKeys = de.getCategories();
+
+    // generate an array with an empty array for each non-numeric
+    // dimension  (tests based on first data-row only!)
+    // and a function to update the mapping
+    var pCoordMapping = pCoordIndex.map(
+      function(d) {return (isNaN(values[d][0])) ? 
+            {len: 0, map: new Array() } : null; });
+    var coordMapping = function(i, val) {
+
+      var cMap = pCoordMapping[i];
+      var k = cMap.map[val];
+      if (k == null) {
+        k = cMap.len;
+        cMap.len++;
+//pCoordMapping[i][val] = k;
+        cMap.map[val] = k;
+      }
+/*
+      for(k=0; k<cMap.length; k++)
+        if (cMap[k] == val)
+          return k;
+      // val is not found in the map, so add it at the end of the array
+      cMap[k] = val;
+      */
+      return k;
+    };
+
+    //   local function to transform a data-row to a hashMap
+    //   (key-value pairs) 
+    //   closure uses pCoordKeys and values
+    var generateHashMap = function(row) {
       var record = new Object();
-      for(var i in catIndex) 
-        record[keys[i]] = data[i][index]
-
+      for(var i in pCoordIndex) {
+         record[pCoordKeys[i]] = (pCoordMapping[i]) ?
+          coordMapping(i, values[i][row]) :
+          values[i][row];
+      }
       return record;
     }
 
-    this.data = serieIndex.map(function(si) { return generateHash (keys, data, si)})
+    // generate array with a hashmap per data-row
+    this.data = dataRowIndex.map(function(row) { return generateHashMap (row)})
 
-    var genKeyVal = function (keys, values) {
-       var record = new Object();
-      for (var i = 0; i<keys.length; i++)
-         record[keys[i]] = values[i];
-      return record;
-    }
     
-    //generate a describtion of the units
-    this.units = genKeyVal(this.categories, this.categories.map(function(cat)
+    //generate a description of the parallel-coordinates
+    var descrVals = this.dimensions.map(function(cat)
            {
              var item = new Object();
-             item["name"] = cat;
-             item["unit"] = "";
+             // the part after "__" is assumed to be the units
+             var elements = cat.split("__");
+             item["name"] = elements[0];
+             item["unit"] = (elements.length >1)? elements[1] : "";
              return item;
-           }));
+           });
+    // extend the record with min, max and step
+    for(var i=0; i<descrVals.length; i++) {
+      var item = descrVals[i];
+      var index = pCoordIndex[i];
+      item["orgRowIndex"] = index;
+
+      // determine min, max and estimate step-size
+      var theMin = theMax = theMin2 = theMax2 = (pCoordMapping[index]) ?
+          pCoordMapping[index].map[ values[index][0] ] :
+          values[index][0];
+
+      var len = values[index].length;
+      for(var k=1; k<len; k++) {
+        var v =  (pCoordMapping[index]) ?
+          pCoordMapping[index].map[ values[index][k] ] :
+          values[index][k];
+        if (v < theMin)
+        {
+          theMin2 = theMin;
+          theMin = v;
+        }
+        if (v > theMax) {
+          theMax2 = theMax;
+          theMax = v;
+        }
+      }
+      var theStep = ((theMax - theMax2) + (theMin2-theMin))/2;
+      item["min"] = theMin;
+      item["max"] = theMax;
+      item["step"] = theStep;
+
+      // include the mapping in the 
+      if (pCoordMapping[index]) {
+        item["map"] = pCoordMapping[index].map;
+        item["mapLength"] = pCoordMapping[index].len;
+      }
+    }
+
+    // generate a object using the given set of keys and values
+    //  (map from keys[i] to vals[i])
+    var genKeyVal = function (keys, vals) {
+       var record = new Object();
+      for (var i = 0; i<keys.length; i++)
+         record[keys[i]] = vals[i];
+      return record;
+    }
+    this.dimensionDescr = genKeyVal(this.dimensions, descrVals);
     
-
-
     return;
   } ,
 
   create: function(){
 
-//    this.data = cars;
-
-    var myself=this;
+    var myself = this;
     this.width = this._parent.width;
     this.height = this._parent.height;
 
     // used in the closures
-    height = this.height;
-    width = this.width; 
+    var height = this.height,
+    width = this.width, 
+    topRuleOffs = this.chart.options.topRuleOffset,
+    botRuleOffs = this.chart.options.botRuleOffset,
+    leftRuleOffs = this.chart.options.leftRuleOffset,
+    rightRulePos = width - this.chart.options.rightRuleOffset,
+    ruleHeight = height - topRuleOffs - botRuleOffs,
+    labelTopOffs = topRuleOffs -12;
 
     this.pvPanel = this._parent.getPvPanel().add(this.type)
     .width(this.width)
@@ -163,44 +226,46 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     this.retrieveData();
 
-//    var dims = pv.keys(this.categories);
-    var dims = this.categories;
+    var dims = this.dimensions;
 
-    var left = this.width/(this.categories.length +1);
-    var right = left * this.categories.length;
-    var fudge = 0.5,     // extra space over top and under bottom
-//    x = pv.Scale.ordinal(dims).splitFlush(0, this.width),
-    x = pv.Scale.ordinal(dims).splitFlush(left, right),
-    y = pv.dict(dims, function(t) pv.Scale.linear(
-      myself.data.filter(function(d) { return !isNaN(d[t]); }),
-      function(d) { var res = Math.floor(d[t]) - fudge;
-              return res;
-           },
-      function(d) { return Math.ceil(d[t]) + fudge;}
-        ).range(0, height)),
-    colors = pv.dict(dims, function(t) pv.Scale.linear(
-      myself.data.filter(function(d) { return !isNaN(d[t]); }),
-      function(d) { return Math.floor(d[t]) - fudge;},
-      function(d) { return Math.ceil(d[t]) +  fudge;}
-        ).range("steelblue", "brown"));
+    // getDimSc is the basis for getDimensionScale and getDimColorScale
+    var getDimSc = function(t) {
+      var theMin = myself.dimensionDescr[t].min;
+      var theMax = myself.dimensionDescr[t].max;
+      var theStep = myself.dimensionDescr[t].step;
+      // add some margin at top and bottom (based on step)
+      theMin -= theStep;
+      theMax += theStep;
+      return pv.Scale.linear(theMin, theMax)
+              .range(botRuleOffs, height-topRuleOffs);
+    }; 
+    var getDimensionScale = function(t) {
+      return getDimSc(t)
+              .range(botRuleOffs, height-topRuleOffs);
+    }; 
+    var getDimColorScale = function(t) {
+      return getDimSc(t)
+              .range("steelblue", "brown");
+    }; 
+
+    var x = pv.Scale.ordinal(dims).splitFlush(leftRuleOffs, rightRulePos);
+    var y = pv.dict(dims, getDimensionScale);
+    var colors = pv.dict(dims, getDimColorScale);
 
     // Interaction state. 
     var filter = pv.dict(dims, function(t) {
       return {min: y[t].domain()[0], max: y[t].domain()[1]};  });
     var active = dims[0];   // choose the active dimension 
 
+    var selectVisible = function(d) { return dims.every(  
+            function(t) {return (d[t] >= filter[t].min) && (d[t] <= filter[t].max) }
+        )};
     // set margins of the base-panel
-    this.pvPanel
-      .left(30)
-      .right(30)
-      .top(30)
-      .bottom(20);
 
     // The parallel coordinates display.
     this.pvPanel.add(pv.Panel)
       .data(myself.data)
-      .visible(function(d) { return dims.every(function(t)
-        (d[t] >= filter[t].min) && (d[t] <= filter[t].max))})
+      .visible(selectVisible)
       .add(pv.Line)
       .data(dims)
       .left(function(t, d) { return x(t)})
@@ -212,21 +277,22 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     // Rule per dimension.
     rule = this.pvPanel.add(pv.Rule)
       .data(dims)
-      .left(x);
+      .left(x)
+      .top(topRuleOffs)
+      .bottom(botRuleOffs);
 
     // Dimension label
     rule.anchor("top").add(pv.Label)
-      .top(-12)
+      .top(labelTopOffs)
       .font("bold 10px sans-serif")
-      .text(function(d) { return myself.units[d].name; });
+      .text(function(d) { return myself.dimensionDescr[d].name; });
 
     // The parallel coordinates display.
     var change = this.pvPanel.add(pv.Panel);
 
     var line = change.add(pv.Panel)
       .data(myself.data)
-      .visible(function(d) { return dims.every(function(t)
-         (d[t] >= filter[t].min) && (d[t] <= filter[t].max))})
+      .visible(selectVisible)
       .add(pv.Line)
       .data(dims)
       .left(function(t, d) { return x(t);})
@@ -246,11 +312,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     // Updater for slider and resizer.
     function selectAll(d) {
-      if (d.dy < 3) {
+      if (d.dy < 3) {  // 
         var t = d.dim;
         filter[t].min = Math.max(y[t].domain()[0], y[t].invert(0));
         filter[t].max = Math.min(y[t].domain()[1], y[t].invert(height));
-        d.y = 0; d.dy = height;
+        d.y = botRuleOffs; d.dy = ruleHeight;
         active = t;
         change.render();
       }
@@ -259,7 +325,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     // Handle select and drag 
     var handle = change.add(pv.Panel)
-      .data(dims.map(function(dim) { return {y:0, dy:height, dim:dim}; }))
+      .data(dims.map(function(dim) { return {y:botRuleOffs, dy:ruleHeight, dim:dim}; }))
       .left(function(t) { return x(t.dim) - 30; })
       .width(60)
       .fillStyle("rgba(0,0,0,.001)")
@@ -283,14 +349,14 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     handle.anchor("bottom").add(pv.Label)
       .textBaseline("top")
-      .text(function(d) { return filter[d.dim].min.toFixed(0) + myself.units[d.dim].unit});
+      .text(function(d) { return filter[d.dim].min.toFixed(0) + myself.dimensionDescr[d.dim].unit});
 
     handle.anchor("top").add(pv.Label)
       .textBaseline("bottom")
-      .text(function(d) {return filter[d.dim].max.toFixed(0) + myself.units[d.dim].unit});
+      .text(function(d) {return filter[d.dim].max.toFixed(0) + myself.dimensionDescr[d.dim].unit});
 
 
-    // Extend pie
+    // Extend ParallelCoordinates
     this.extend(this.pvParCoord,"parCoord_");
 
     // Extend body
