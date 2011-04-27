@@ -385,6 +385,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             min = this.dataEngine.getVisibleSeriesAbsoluteMin();
 
         }
+        
+        /* If the bounds are the same, things break,
+         * so we add a wee bit of variation.
+         */
+        if (min === max) {
+            min = min !== 0 ? min * 0.99 : this.options.originIsZero ? 0 : -0.1;
+            max = max !== 0 ? max * 1.01 : 0.1;
+        }
         if(min > 0 && this.options.originIsZero){
             min = 0
         }
