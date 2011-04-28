@@ -272,10 +272,33 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
     // first series are symbolic labels, so hide it such that
     // the axis-range computation is possible.
+/*
     var lScale = this.waterfall ?
       this.callWithHiddenFirstSeries(this.chart,
            this.chart.getLinearScale, true):
       this.chart.getLinearScale(true);
+*/
+/** start  fix  (need to resolve this nicely  (CvK))**/
+    var lScale;
+    if (this.waterfall) {
+	// compute the dataset
+	var ds = this.getDataSet();
+	// extract the maximum
+	var mx = 0.0 
+	for(var c=0; c<ds[0].length; c++) {
+	   var h = 0.0;
+	   for(var r=0; r<ds.length; r++)
+	     h += ds[r][c];
+	   if (h > mx)  mx = h;
+        }
+	// set maximum as a fixed bound
+	this.chart.options.orthoFixedMax = mx;	
+
+        lScale = this.chart.getLinearScale(true);
+
+    }  else
+      lScale = this.chart.getLinearScale(true);
+/** end fix **/
     var l2Scale = this.chart.getSecondScale(true);
     var oScale = this.chart.getOrdinalScale(true);
     var bSCale = null;
