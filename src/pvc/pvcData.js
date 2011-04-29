@@ -374,7 +374,7 @@ pvc.DataEngine = Base.extend({
     getVisibleTransposedValues: function(){
         var myself = this;
         var res = this.getVisibleSeriesIndexes().map(function(sIdx){
-            return myself.getValuesForSeriesIndex(sIdx)
+            return myself.getVisibleValuesForSeriesIndex(sIdx)
         })
         return res;
     },
