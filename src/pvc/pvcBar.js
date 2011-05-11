@@ -41,7 +41,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
 
         this.barChartPanel = new pvc.WaterfallChartPanel(this, {
             stacked: this.options.stacked,
-          waterfal: false,
+            waterfal: false,
             panelSizeRatio: this.options.panelSizeRatio,
             barSizeRatio: this.options.barSizeRatio,
             maxBarSize: this.options.maxBarSize,

@@ -148,9 +148,9 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     })
 
     if(this.showTooltips){
-      this.extend(this.tipsySettings,"tooltip_");
+      this.extend(this.chart.tipsySettings,"tooltip_");
       this.pvPie
-      .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+      .event("mouseover", pv.Behavior.tipsy(this.chart.tipsySettings));
 
     }
 

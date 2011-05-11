@@ -534,9 +534,9 @@ var bullet_NameDescValueMarkerRanges = {
 
 var parCoordTest_01 = {
   "resultset":[
-  ["pat 1",  40, 1,   130, 6],
-  ["pat 2",  50,   2, 140,  5],
-  ["pat 3",  50,   1, 135,  4]
+  ["pat 1",  40, "M",   130, 6],
+  ["pat 2",  50, "F", 140,  5],
+  ["pat 3",  50, "M", 135,  4]
   ],
   "metadata":[{
     "colIndex":0,
@@ -545,7 +545,7 @@ var parCoordTest_01 = {
   },{
     "colIndex":1,
     "colType":"Numeric",
-    "colName":"Leeftijd"
+    "colName":"Leeftijd__jaar"
   },{
     "colIndex":2,
     "colType":"String",
@@ -553,11 +553,12 @@ var parCoordTest_01 = {
   },{
     "colIndex":3,
     "colType":"Numeric",
-    "colName":"Bloeddruk"
+    "colName":"Bloeddruk__mmHg"
   },{
     "colIndex":4,
     "colType":"Numeric",
-    "colName":"Chol"
+    "colName":"Chol__mmol"
   }
   ]
 };
+
