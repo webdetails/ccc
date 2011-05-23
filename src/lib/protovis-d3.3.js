@@ -1,4 +1,4 @@
-// 8209f9d8708a60e1977f41e4689c60f956091428
+// 3b6f56a0d36816abfae8b7115871692cd5b8ca42
 /**
  * @class The built-in Array class.
  * @name Array
@@ -388,7 +388,8 @@ pv.listenForPageLoad = function(listener) {
  * 'svgweb' is if we identify svgweb is there.
  */
 pv.renderer = function() {
-    return (typeof window.svgweb === "undefined") ? "nativesvg" : "svgweb";
+    return (typeof document.svgImplementation !== "undefined") ? document.svgImplementation:
+     (typeof window.svgweb === "undefined") ? "nativesvg" : "svgweb";
 }
 
 /** @private Returns a locally-unique positive id. */
@@ -403,30 +404,32 @@ pv.functor = function(v) {
 /*
  * Parses the Protovis specifications on load, allowing the use of JavaScript
  * 1.8 function expressions on browsers that only support JavaScript 1.6.
- *
+ * This should only happen for browser environments, so we exclude batik.
  * @see pv.parse
  */
-pv.listen(window, "load", function() {
-   /*
-    * Note: in Firefox any variables declared here are visible to the eval'd
-    * script below. Even worse, any global variables declared by the script
-    * could overwrite local variables here (such as the index, `i`)!  To protect
-    * against this, all variables are explicitly scoped on a pv.$ object.
-    */
-   pv.$ = {i:0, x:document.getElementsByTagName("script")};
-    pv.$.xlen = pv.$.x.length;
-    for (; pv.$.i < pv.$.xlen; pv.$.i++) {
-      pv.$.s = pv.$.x[pv.$.i];
-      if (pv.$.s.type == "text/javascript+protovis") {
-        try {
-          window.eval(pv.parse(pv.$.s.text));
-        } catch (e) {
-          pv.error(e);
+if (pv.renderer() !== "batik") {
+  pv.listen(window, "load", function() {
+     /*
+      * Note: in Firefox any variables declared here are visible to the eval'd
+      * script below. Even worse, any global variables declared by the script
+      * could overwrite local variables here (such as the index, `i`)!  To protect
+      * against this, all variables are explicitly scoped on a pv.$ object.
+      */
+     pv.$ = {i:0, x:document.getElementsByTagName("script")};
+      pv.$.xlen = pv.$.x.length;
+      for (; pv.$.i < pv.$.xlen; pv.$.i++) {
+        pv.$.s = pv.$.x[pv.$.i];
+        if (pv.$.s.type == "text/javascript+protovis") {
+          try {
+            window.eval(pv.parse(pv.$.s.text));
+          } catch (e) {
+            pv.error(e);
+          }
         }
       }
-    }
-    delete pv.$;
-  });
+      delete pv.$;
+    });
+}
 /**
  * Abstract; see an implementing class.
  *
@@ -5117,10 +5120,15 @@ pv.SvgScene.expect = function(e, type, attributes, style) {
     var value = style[name];
     if (value == this.implicit.css[name]) value = null;
     if (value == null) {
-        if (pv.renderer() != 'svgweb') // svgweb doesn't support removeproperty TODO SVGWEB
-            e.style.removeProperty(name);
+      if (pv.renderer() === "batik") {
+        e.removeAttribute(name);
+      } else if (pv.renderer() != 'svgweb') // svgweb doesn't support removeproperty TODO SVGWEB
+        e.style.removeProperty(name);
     }
-    else e.style[name] = value;
+    else if (pv.renderer() == "batik")
+      e.style.setProperty(name,value);
+    else
+      e.style[name] = value;
   }
   return e;
 };
@@ -5136,10 +5144,9 @@ pv.SvgScene.append = function(e, scenes, index) {
 /**
  * Applies a title tooltip to the specified element <tt>e</tt>, using the
  * <tt>title</tt> property of the specified scene node <tt>s</tt>. Note that
- * this implementation does not create an SVG <tt>title</tt> element as a child
- * of <tt>e</tt>; although this is the recommended standard, it is only
- * supported in Opera. Instead, an anchor element is created around the element
- * <tt>e</tt>, and the <tt>xlink:title</tt> attribute is set accordingly.
+ * this implementation creates both the SVG <tt>title</tt> element (which
+ * is the recommended approach, but only works in more modern browsers) and
+ * the <tt>xlink:title</tt> attribute which works on more down-level browsers.
  *
  * @param e an SVG element.
  * @param s a scene node.
@@ -5150,6 +5157,8 @@ pv.SvgScene.title = function(e, s) {
   if (s.title) {
     if (!a) {
       a = this.create("a");
+      // for FF>=4 when showing non-title element tooltips
+      a.setAttributeNS(this.xlink, "xlink:href", "");
       if (e.parentNode) e.parentNode.replaceChild(a, e);
       a.appendChild(e);
     }
@@ -5157,7 +5166,29 @@ pv.SvgScene.title = function(e, s) {
     // Set the title. Using xlink:title ensures the call works in IE
     // but only FireFox seems to show the title.
     // without xlink: in there, it breaks IE.
-    a.setAttributeNS(this.xlink, "xlink:title", s.title);
+    a.setAttributeNS(this.xlink, "xlink:title", s.title); // for FF<4
+
+    // for SVG renderers that follow the recommended approach
+    var t = null;
+    for (var c = e.firstChild; c != null; c = c.nextSibling) {
+      if (c.nodeName == "title") {
+        t = c;
+        break;
+      }
+    }
+    if (!t) {
+      t = this.create("title");
+      e.appendChild(t);
+    } else {
+      t.removeChild(t.firstChild); // empty out the text
+    }
+
+    if (pv.renderer() == "svgweb") { // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
+      t.appendChild(document.createTextNode(s.title, true));
+    } else {
+      t.appendChild(document.createTextNode(s.title));
+    }
+
     return a;
   }
   if (a) a.parentNode.replaceChild(e, a);
@@ -5816,7 +5847,8 @@ pv.SvgScene.dot = function(scenes) {
       "fill-opacity": fill.opacity || null,
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
-      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
+      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
+      "stroke-dasharray": s.strokeDasharray
     };
     if (path) {
       svg.transform = "translate(" + s.left + "," + s.top + ")";
@@ -5980,7 +6012,8 @@ pv.SvgScene.line = function(scenes) {
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-linejoin": s.lineJoin
+      "stroke-linejoin": s.lineJoin,
+      "stroke-dasharray": s.strokeDasharray
     });
   return this.append(e, scenes, 0);
 };
@@ -6112,13 +6145,15 @@ pv.SvgScene.panel = function(scenes) {
 
     /* svg */
     if (!scenes.parent) {
-      s.canvas.style.display = "inline-block";
+      if(pv.renderer() !== "batik") {
+        s.canvas.style.display = "inline-block";
+      }
       if (g && (g.parentNode != s.canvas)) {
         g = s.canvas.firstChild;
         e = g && g.firstChild;
       }
       if (!g) {
-        g = this.create("svg");
+        g = this.create(pv.renderer() !== "batik"? "svg":"g");
         g.setAttribute("font-size", "10px");
         g.setAttribute("font-family", "sans-serif");
         g.setAttribute("fill", "none");
@@ -6163,7 +6198,7 @@ pv.SvgScene.panel = function(scenes) {
                 * Until a better solution comes along, lets use this.
                 */
                 var me = this;
-                var callback = function () {
+                (function () {
                     if (complete) {
                         complete = false;
                         me.appendChild(frag);
@@ -6171,11 +6206,11 @@ pv.SvgScene.panel = function(scenes) {
                           me.addEventListener(pv.Scene.events[j], pv.SvgScene.dispatch, false);
                         }
                         scenes.$g = me;
+                        scenes.$g.__ready = true;
                     } else {
-                        setTimeout(callback, 10);
+                        setTimeout(arguments.callee, 10);
                     }
-                }
-                callback();
+                })();
 
             }, false);
 
@@ -6186,12 +6221,13 @@ pv.SvgScene.panel = function(scenes) {
               g.addEventListener(this.events[j], this.dispatch, false);
             }
             g = s.canvas.appendChild(g);
+            g.__ready = true;
         }
 
         e = g.firstChild;
       }
       scenes.$g = g;
-      if (pv.renderer() != 'svgweb') {
+      if (g.__ready) {
         g.setAttribute("width", s.width + s.left + s.right);
         g.setAttribute("height", s.height + s.top + s.bottom);
       }
@@ -8103,6 +8139,7 @@ pv.Dot.prototype = pv.extend(pv.Mark)
     .property("shapeSize", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.color)
+    .property("strokeDasharray", String)
     .property("fillStyle", pv.color);
 
 pv.Dot.prototype.type = "dot";
@@ -8198,7 +8235,8 @@ pv.Dot.prototype.defaults = new pv.Dot()
     .extend(pv.Mark.prototype.defaults)
     .shape("circle")
     .lineWidth(1.5)
-    .strokeStyle(pv.Colors.category10().by(pv.parent));
+    .strokeStyle(pv.Colors.category10().by(pv.parent))
+    .strokeDasharray("");
 
 /**
  * Constructs a new dot anchor with default properties. Dots support five
@@ -8471,6 +8509,7 @@ pv.Line.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
     .property("lineJoin", String)
     .property("strokeStyle", pv.color)
+    .property("strokeDasharray", String)
     .property("fillStyle", pv.color)
     .property("segmented", Boolean)
     .property("interpolate", String)
@@ -8586,6 +8625,7 @@ pv.Line.prototype.defaults = new pv.Line()
     .lineJoin("miter")
     .lineWidth(1.5)
     .strokeStyle(pv.Colors.category10().by(pv.parent))
+    .strokeDasharray("")
     .interpolate("linear")
     .eccentricity(0)
     .tension(.7);
@@ -9018,7 +9058,16 @@ pv.Panel.prototype.buildInstance = function(s) {
 pv.Panel.prototype.buildImplied = function(s) {
   if (!this.parent) {
     var c = s.canvas;
-    if (c) {
+    if (pv.renderer() === "batik") {
+      if (c) {
+        if (c.$panel != this) {
+          c.$panel = this;
+          while (c.lastChild) c.removeChild(c.lastChild);
+        }
+      } else {
+        c = document.lastChild;
+      }
+    } else if (c) {
       /* Clear the container if it's not associated with this panel. */
       if (c.$panel != this) {
         c.$panel = this;

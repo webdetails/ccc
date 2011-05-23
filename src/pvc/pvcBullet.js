@@ -263,7 +263,8 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     else{
 
       // We have data. Iterate through the series.
-      for(var i in this.chart.dataEngine.getVisibleSeriesIndexes()){
+      var indices = this.chart.dataEngine.getVisibleSeriesIndexes()
+      for(var i in indices) if (indices.hasOwnProperty(i)){
         var s = this.chart.dataEngine.getSerieByIndex(i);
         var v = this.chart.dataEngine.getVisibleValuesForSeriesIndex(i);
         var d = $.extend({},defaultData);

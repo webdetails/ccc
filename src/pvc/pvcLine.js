@@ -350,9 +350,9 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     })
 
     if(this.showTooltips){
-      this.extend(this.tipsySettings,"tooltip_");
+      this.extend(this.chart.tipsySettings,"tooltip_");
       this.pvLine
-      .event("point", pv.Behavior.tipsy(this.tipsySettings));
+      .event("point", pv.Behavior.tipsy(this.chart.tipsySettings));
     }
 
     this.pvDot = this.pvLine.add(pv.Dot)
