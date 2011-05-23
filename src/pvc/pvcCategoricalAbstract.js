@@ -549,6 +549,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     pvTicks: null,
     pvLabel: null,
     pvRuleGrid: null,
+    pvScale: null,
 
     ordinal: false,
     anchor: "bottom",
@@ -587,6 +588,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         .width(this.width)
         .height(this.height)
 
+
+
         this.renderAxis();
 
         // Extend panel
@@ -595,6 +598,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvTicks, this.panelName + "Ticks_");
         this.extend(this.pvLabel, this.panelName + "Label_");
         this.extend(this.pvRuleGrid, this.panelName + "Grid_");
+
 
     },
 
@@ -605,12 +609,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     renderAxis: function(){
 
-        var min, max;
+        var min, max,myself=this;
+        myself.pvScale = this.scale;
+        myself.extend(myself.pvScale, myself.panelName + "Scale_");
+
+
         if (this.ordinal) {
-            min = this.scale.min;
-            max = this.scale.max;
+            min = myself.pvScale.min;
+            max = myself.pvScale.max;
         } else {
-            var scaleRange = this.scale.range();
+            var scaleRange = myself.pvScale.range();
             min = scaleRange[0];
             max = scaleRange[1];
         }
@@ -660,9 +668,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var myself = this;
     
         var scale = this.scale;
-
+        
         this.pvTicks = this.pvRule.add(pv.Rule)
-        .data(this.scale.ticks())
+        .data(scale.ticks())
         [pvc.BasePanel.paralelLength[this.anchor]](null)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
         [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale)

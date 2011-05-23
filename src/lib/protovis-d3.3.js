@@ -1,4 +1,4 @@
-// 3b6f56a0d36816abfae8b7115871692cd5b8ca42
+// 7b1b50b1febb6e1f62db92afd3bb259534f53139
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3068,7 +3068,8 @@ pv.Scale.quantitative = function() {
       n = false, // whether the domain is negative
       f = pv.identity, // default forward transform
       g = pv.identity, // default inverse transform
-      tickFormat = String; // default tick formatting function
+      tickFormat = String, // default tick formatting function
+      dateTickFormat; //custom date tick format
 
   /** @private */
   function newDate(x) {
@@ -3296,6 +3297,9 @@ pv.Scale.quantitative = function() {
         format = "%S.%Qs";
         /** @ignore */ increment = function(d) { d.setTime(d.getTime() + step); };
       }
+
+      format = dateTickFormat?dateTickFormat:format;
+
       tickFormat = pv.Format.date(format);
 
       var date = new Date(min), dates = [];
@@ -3362,6 +3366,20 @@ pv.Scale.quantitative = function() {
     var ticks = pv.range(start, end + step, step);
     return reverse ? ticks.reverse() : ticks;
   };
+
+
+  /**
+   * Formats the specified tick with a well defined string for the date
+   * @function
+   * @name pv.Scale.quantitative.prototype.dateTickFormat
+   * @returns {string} a string with the desired tick format.
+   */
+  scale.dateTickFormat = function () {
+    if (arguments.length) {
+      dateTickFormat = arguments[0];
+      return this;
+    }
+    return dateTickFormat;  };
 
   /**
    * Formats the specified tick value using the appropriate precision, based on

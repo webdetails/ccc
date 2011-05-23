@@ -15,6 +15,7 @@
     <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
     <script type="text/javascript" src="data/q01-01.js"></script>
     <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="QuantitativeScale.js"></script>
     <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
     <script type="text/javascript" src="lib/tipsy.js"></script>
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
@@ -192,7 +193,7 @@
         var line = new pvc.LineChart({
           // legendPosition: "left",
           canvas: "pvcLine1",
-          width: 300,
+          width: 400,
           height: 200,
           title: "line chart - horizontal",
           titlePosition: "top",
@@ -203,7 +204,7 @@
           //legendSize: null,
 
           orientation: 'vertical',
-          timeSeries: false,
+          timeSeries: true,
           timeSeriesFormat: "%Y-%m-%d",
 
           showValues: false,
@@ -213,9 +214,13 @@
           yAxisPosition: "right",
           yAxisSize: 30,
           //xAxisPosition: "bottom",
-          xAxisSize: 30
+          xAxisSize: 30,
           //xAxisFullGrid: true,
           //yAxisFullGrid: true,
+          extensionPoints: {
+            noDataMessage_text: "Example of a chart with missing data",
+            xAxisScale_dateTickFormat: "%Y/%m/%d"
+          }
 
         });
 
