@@ -74,7 +74,7 @@ pvc.ParallelCoordinates = pvc.Base.extend({
  * Has the following protovis extension points:
  *
  * <i>chart_</i> - for the main chart Panel
- * <i>parCoord_</i> - for the main pie wedge
+ * <i>parCoord_</i> - for the parallel coordinates
  *    << to be completed >>
  */
 
@@ -382,7 +382,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
      *******/
     // Draw the data to the parallel dimensions 
     // (the light grey dataset is a fixed background)
-    this.pvPanel.add(pv.Panel)
+    this.pvParCoord = this.pvPanel.add(pv.Panel)
       .data(myself.data)
       .visible(selectVisible)
       .add(pv.Line)
@@ -517,8 +517,14 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
                   "" :
                   filter[d.dim].max.toFixed(numDigits) + dimDescr[d.dim].unit});
 
+
+    /*****
+     *  add the extension points
+     *******/
+
     // Extend ParallelCoordinates
     this.extend(this.pvParCoord,"parCoord_");
+    // the parCoord panel is the base-panel (not the colored dynamic overlay)
 
     // Extend body
     this.extend(this.pvPanel,"chart_");
