@@ -1,4 +1,4 @@
-// 7b1b50b1febb6e1f62db92afd3bb259534f53139
+// 1a4f810f17c630f0b6287dae670ef0090bac8755
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3069,7 +3069,8 @@ pv.Scale.quantitative = function() {
       f = pv.identity, // default forward transform
       g = pv.identity, // default inverse transform
       tickFormat = String, // default tick formatting function
-      dateTickFormat; //custom date tick format
+      dateTickFormat, //custom date tick format
+      dateTickPrecision; //custom date tick precision
 
   /** @private */
   function newDate(x) {
@@ -3263,32 +3264,34 @@ pv.Scale.quantitative = function() {
         }
       }
 
+      var nn = 5;
+
       var precision, format, increment, step = 1;
-      if (span >= 3 * 31536e6) {
+      if (span >= nn * 31536e6) {
         precision = 31536e6;
         format = "%Y";
         /** @ignore */ increment = function(d) { d.setFullYear(d.getFullYear() + step); };
-      } else if (span >= 5 * 2592e6) {
+      } else if (span >= nn * 2592e6) {
         precision = 2592e6;
         format = "%m/%Y";
         /** @ignore */ increment = function(d) { d.setMonth(d.getMonth() + step); };
-      } else if (span >= 5 * 6048e5) {
+      } else if (span >= nn * 6048e5) {
         precision = 6048e5;
         format = "%m/%d";
         /** @ignore */ increment = function(d) { d.setDate(d.getDate() + 7 * step); };
-      } else if (span >= 5 * 864e5) {
+      } else if (span >= nn * 864e5) {
         precision = 864e5;
         format = "%m/%d";
         /** @ignore */ increment = function(d) { d.setDate(d.getDate() + step); };
-      } else if (span >= 5 * 36e5) {
+      } else if (span >= nn * 36e5) {
         precision = 36e5;
         format = "%I:%M %p";
         /** @ignore */ increment = function(d) { d.setHours(d.getHours() + step); };
-      } else if (span >= 5 * 6e4) {
+      } else if (span >= nn * 6e4) {
         precision = 6e4;
         format = "%I:%M %p";
         /** @ignore */ increment = function(d) { d.setMinutes(d.getMinutes() + step); };
-      } else if (span >= 5 * 1e3) {
+      } else if (span >= nn * 1e3) {
         precision = 1e3;
         format = "%I:%M:%S";
         /** @ignore */ increment = function(d) { d.setSeconds(d.getSeconds() + step); };
@@ -3298,6 +3301,7 @@ pv.Scale.quantitative = function() {
         /** @ignore */ increment = function(d) { d.setTime(d.getTime() + step); };
       }
 
+      precision = dateTickPrecision?dateTickPrecision:precision;
       format = dateTickFormat?dateTickFormat:format;
 
       tickFormat = pv.Format.date(format);
@@ -3344,6 +3348,13 @@ pv.Scale.quantitative = function() {
         }
       }
 
+
+      if(dateTickPrecision){
+        step=1;
+        increment = function(d) { d.setSeconds(d.getSeconds() + step*dateTickPrecision/1000);};
+      }
+
+
       while (true) {
         increment(date);
         if (date > max) break;
@@ -3380,6 +3391,23 @@ pv.Scale.quantitative = function() {
       return this;
     }
     return dateTickFormat;  };
+
+
+
+  /**
+   * Formats the specified tick with a defined precision for the date
+   * @function
+   * @name pv.Scale.quantitative.prototype.dateTickPrecision
+   * @returns {string} a string with the desired tick format.
+   */
+  scale.dateTickPrecision = function () {
+    if (arguments.length) {
+      dateTickPrecision = arguments[0];
+      return this;
+    }
+    return dateTickPrecision;  };
+
+
 
   /**
    * Formats the specified tick value using the appropriate precision, based on

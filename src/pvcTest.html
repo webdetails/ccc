@@ -15,7 +15,6 @@
     <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
     <script type="text/javascript" src="data/q01-01.js"></script>
     <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
-    <script type="text/javascript" src="QuantitativeScale.js"></script>
     <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
     <script type="text/javascript" src="lib/tipsy.js"></script>
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
@@ -219,7 +218,8 @@
           //yAxisFullGrid: true,
           extensionPoints: {
             noDataMessage_text: "Example of a chart with missing data",
-            xAxisScale_dateTickFormat: "%Y/%m/%d"
+            xAxisScale_dateTickFormat: "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5 //set in miliseconds
           }
 
         });
