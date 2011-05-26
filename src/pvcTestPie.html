@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC playground</title>
+
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+</script><![endif]-->
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="cdf/Base.js"></script>
+    <script type="text/javascript" src="cdf/jquery.js"></script>
+    <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="lib/tipsy.js"></script>
+    <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+
+    <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+    <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
+    <script type="text/javascript" src="pvc/pvcPie.js"></script>
+    <script type="text/javascript" src="pvc/pvcBar.js"></script>
+    <script type="text/javascript" src="pvc/pvcLine.js"></script>
+    <script type="text/javascript" src="pvc/pvcData.js"></script>
+    <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+        
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
+  <body>
+
+    <h1>
+      Pie Chart
+    </h1>
+Pie charts are useful for performing relative comparisons: how do the parts make up the whole? 
+An alternative to pie is the donut chart.
+
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Legend properties</h4>
+<ul>
+  <li>legend (true|false)</li>
+  <li>legendPosition (right, top, bottom, left, right)</li>
+  <li>legendAlign (right, left, center, right, top, middle,
+bottom)</li>
+  <li>legendSize</li>
+  <li>legendDrawLine (true|false)</li>
+  <li>legendDrawMarker (true|false)</li>
+  <li>showTooltips (true|false)</li>
+</ul>
+<h4>Slice properties</h4>
+<ul>
+  <li>showValues - Show or hide slice value. Default: false</li>
+  <li>innerGap - The percentage of the inner area used by the
+pie. Default: 0.9 (90%)</li>
+  <li>explodedSliceIndex - Index of the slice to explode.
+Default: null</li>
+  <li>explodedSliceRadius - If one wants a pie with an exploded
+effect,&nbsp;specify a value in pixels here. If above argument is
+specified, explodes only one slice.&nbsp;Else explodes all.
+Default: 0<br>
+  </li>
+</ul>
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for&nbsp;Pie extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>
+  <li>tooltip_</li>
+  <li>pie_</li>
+  <li>pieLabel_</li>
+  <li>chart_</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>pieLabel_textAngle</li>
+</ul>
+
+<h2>Examples</h2>
+<h3>A Simple Pie </h2>
+This is the simplest pie ever. Just provide the dimensions, a title and the data to be rendered.
+<textarea cols="55" rows="15" id="pvcPie1Code">
+        var pie = new pvc.PieChart({
+          canvas: "pvcPie1",
+          width: 350,
+          height: 250,
+          title: "Simple Pie",
+          animate: false,
+          showTooltips: true,
+          showValues: false,
+        });
+        pie.setData($.extend(true, {},relational_03),
+           {crosstabMode: false,
+            seriesInRows: false});
+        pie.render();
+
+</textarea>
+
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcPie1"></div>
+
+<h3>A Rich Pie </h3>
+Any simple pie can be enhanced by configuring the legends, setting colors, fonts, and more. 
+<textarea cols="55" rows="22" id="pvcPie2Code">
+        var pie = new pvc.PieChart({
+          canvas: "pvcPie2",
+          width: 400,
+          height: 400,
+          animate: false,
+          title: "Sample Pie",
+          titlePosition: "left",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "right",
+          legendAlign: "right",
+          legendDrawLine: true,
+          legendDrawMarker: false,
+          showTooltips: true,
+          legendPadding: 20,
+          legendTextAdjust: 7,
+          innerGap: 0.8,
+          showValues: true,
+          explodedSliceIndex: 4,
+          explodedSliceRadius: 15,
+          colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+          extensionPoints: {
+            base_fillStyle: "lightgray",
+            title_fillStyle: "lightblue",
+            titleLabel_font: "16px sans-serif",
+            legend_fillStyle: "green",
+            chart_fillStyle: "#eee"
+          }
+        });
+
+        pie.setData($.extend(true, {},relational_03),
+           {crosstabMode: false,
+            seriesInRows: false});
+        pie.render();
+</textarea>
+
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcPie2"></div>
+    
+<h3>A Donut</h3>
+A pie can be converted into a donut by simple adding an extension point:
+<ul>
+  <li>pie_innerRadius</li>
+</ul>
+<textarea cols="55" rows="23" id="pvcPie3Code">
+        var pie = new pvc.PieChart({
+          canvas: "pvcPie3",
+          width: 400,
+          height: 400,
+          title: "Sample Donut",
+          titlePosition: "bottom",
+          legend: false,
+          showTooltips: true,
+          innerGap: 0.8,
+          showValues: true,
+        
+          extensionPoints: {
+            pie_innerRadius:90,
+            titleLabel_font: "18px sans-serif",
+          }
+        });
+
+        pie.setData($.extend(true, {},relational_03),
+            {crosstabMode: false,
+             seriesInRows: false});
+        pie.render();
+
+</textarea>
+
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcPie3"></div>
+
+    </script>
+
+  </body>
+</html>
