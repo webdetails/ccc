@@ -32,6 +32,8 @@
         <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
         <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
         <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+
+        <script type="text/javascript" src="pvcDocUtils.js"></script>
     </head>
     <body>
 
@@ -39,13 +41,13 @@
             Using HeatGrids to visualize 2D data
         </h1>
 
-The colormapping used in the subsequent charts is
-<ul>
-<li>  green  low revenues for this PMC (=Product Market Combination)</li>
-<li>  red:  PMC's with high revenues (hot-spots)
-<li> Orange:  null value for this PMC
-</ul>
-The subsequent three charts show the same dataset with different settings.
+        The colormapping used in the subsequent charts is
+        <ul>
+            <li>  green  low revenues for this PMC (=Product Market Combination)</li>
+            <li>  red:  PMC's with high revenues (hot-spots)
+            <li> Orange:  null value for this PMC
+        </ul>
+        The subsequent three charts show the same dataset with different settings.
 
         <h2>HeatGrid (normalize per column)</h2>
         In this chart we normalize per product (column of the graph).
@@ -53,10 +55,43 @@ The subsequent three charts show the same dataset with different settings.
         Europe (more revenue --> red color), while the other three products return most revenue in
         Japan.
 
+        <br/>
+
+        <textarea  cols="80" rows="23" id="pvcHG1Code">
+var heatGrid2 = new pvc.HeatGridChart({
+    canvas: "pvcHG1",
+    width: 630,
+    height: 300,
+    crosstabMode: true,
+    seriesInRows: false,
+    animate: false,
+    clickable: false,
+    panelSizeRatio: 0.8,
+    orientation: "vertical",
+    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
+    showValues: true,
+    valuesAnchor: "right",
+    titlePosition: "top",
+    titleSize: 25,
+    normPerBaseCategory: true,
+    minColor: "#10FF10",
+    maxColor: "red",
+
+    extensionPoints: []
+ });
+
+heatGrid2.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+heatGrid2.render();
+        </textarea>
+
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+
+        <br/>
+
         <div id="pvcHG1"></div>
-<p>
-TO DO: If we want to add a legend this needs to be a relative scale as
-        the the actual scaling differs per product column. 
+        <p>
+            TO DO: If we want to add a legend this needs to be a relative scale as
+            the the actual scaling differs per product column. 
 
         <h2>HeatGrid (normalize over full matrix)</h2>
         If the next chart we have normalized over the full matrix.
@@ -64,10 +99,10 @@ TO DO: If we want to add a legend this needs to be a relative scale as
         E. Product C sells best in Japan Product E in Europe (and no
         data for Japan).
         <div id="pvcHG2"></div>
-<p>
-TO DO: for this type of graph we can add a legend that maps 5
-        different colors to revenue values as all cells use the same
-        color mapping.
+        <p>
+            TO DO: for this type of graph we can add a legend that maps 5
+            different colors to revenue values as all cells use the same
+            color mapping.
 
         <h2>HeatGrid (horizontal)</h2>
         This is the same chart (normalized per product) as the first
@@ -75,7 +110,7 @@ TO DO: for this type of graph we can add a legend that maps 5
         orientation and a green color-scheme (white --> green). Again the data is normalized by product, so
         here the data is normalized by per Row!
         <div id="pvcHG3"></div>
-        
+
         <h2>HeatGrid (clickable, showValues)</h2>
         This is the same chart as before, now clickable and showing values.
         <div id="pvcHG4"></div>
@@ -84,62 +119,11 @@ TO DO: for this type of graph we can add a legend that maps 5
 
         <script type="text/javascript">
 
-      // enable debug
-      pvc.debug = true;
 
             pv.listenForPageLoad(function() {
 
-                var heatGrid2 = new pvc.HeatGridChart({
-                    canvas: "pvcHG1",
-                    width: 630,
-                    height: 300,
-                    crosstabMode: true,
-                    seriesInRows: false,
-                    animate: false,
-                    clickable: false,
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-                    stacked: false,
-                    maxBarSize: 30,
-                    panelSizeRatio: 0.8,
-                    barSizeRatio: 0.9,
-                    orientation: "vertical",
-                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
-                    showValues: true,
-                    valuesAnchor: "right",
-                    titlePosition: "top",
-                    titleSize: 25,
-                    legend: false,
-                    legendPosition: "top",
-                    legendAlign: "center",
-                    showXScale: true,
-                    xAxisPosition: "bottom",
-                    xAxisSize: 30,
-                    showYScale: true,
-                    yAxisPosition: "left",
-                    yAxisSize: 50,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
-                    axisOffset: 0,
-                    originIsZero: false,
-
-                    //secondAxis: false,
-                    //secondAxisIndependentScale: true,
-                    //secondAxisIdx: -1,
-                    //secondAxisOriginIsZero: true,
-                    //secondAxisColor: "blue",
-                    //secondAxisColor: "red",
-
-                    normPerBaseCategory: true,
-                    minColor: "#10FF10",
-                    maxColor: "red",
-
-                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
-                });
-
-
-                heatGrid2.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
-                heatGrid2.render();
+                // When everything is ready, click all tryMe buttons
+            
 
                 var heatGrid2nt = new pvc.HeatGridChart({
                     canvas: "pvcHG2",
@@ -255,7 +239,7 @@ TO DO: for this type of graph we can add a legend that maps 5
                     timeSeriesFormat: "%Y-%m-%d",
                     stacked: false,
                     clickAction: function(series,category,dataValue){
-                      alert('series "' + series + '", category "' + category + '", value = ' + dataValue);
+                        alert('series "' + series + '", category "' + category + '", value = ' + dataValue);
                     },
 
                     orientation: "horizontal",
@@ -290,13 +274,8 @@ TO DO: for this type of graph we can add a legend that maps 5
                     extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
                 });
 
-
-
-
                 heatGrid4.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
                 heatGrid4.render();
-
-
 
 
             });
