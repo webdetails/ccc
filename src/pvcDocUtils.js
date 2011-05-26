@@ -1,8 +1,12 @@
 
-
+pvc.debug = true;
 var tryMe = function(e){ 
-    console.log("Test " + e);
-    eval($(e).prev().text());
+    try{
+        eval( $(e).prev().val());
+    }
+    catch(e){
+        alert("Error: " + e);
+    }
 }
 
 pv.listenForPageLoad(function() {
