@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Heat grid</title>
+        <title>CCC Samples - Heat grid</title>
 
         <!--[if lt IE 9]>
         <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
@@ -35,260 +35,199 @@
 
         <script type="text/javascript" src="pvcDocUtils.js"></script>
     </head>
-    <body>
+  <body>
 
-        <h1>
-            Using HeatGrids to visualize 2D data
-        </h1>
+    <h1>
+      Heat grid Chart
+    </h1>
+A heatGrid is a coloured matrix that displays a two-dimensional dataset.
+The intensity or the color of each cell depends on the value that it represents.
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
 
-        The colormapping used in the subsequent charts is
-        <ul>
-            <li>  green  low revenues for this PMC (=Product Market Combination)</li>
-            <li>  red:  PMC's with high revenues (hot-spots)
-            <li> Orange:  null value for this PMC
-        </ul>
-        The subsequent three charts show the same dataset with different settings.
+<h4>Heat grid properties</h4>
+<ul>
+  <li>orientation - horizontal or vertical. Default: vertical</li>
+  <li>showValues - Show or hide heatGrid value. Default: false</li>
+  <li>panelSizeRatio - Ratio of the band occupied by the pane;.
+Default: 0.5 (50%)</li>
+  <li>heatGridSizeRatio - In multiple series, percentage of inner
+band occupied by heatGrids. Default: 0.5 (50%)</li>
+  <li>maxHeatGridSize - Maximum size of a heatGrid in pixels.
+Default: 2000</li>
+  <li>normPerBaseCategory - Normalize by column? true or false</li>
+  <li>minColor - Default: "white"</li>
+  <li>maxColor - Default: "darkgreen"</li>
+  <li>nullColor - Default:&nbsp; "#efc5ad" (white with a
+shade of orange)</li>
+</ul>
 
-        <h2>HeatGrid (normalize per column)</h2>
-        In this chart we normalize per product (column of the graph).
-        We observe that Product A and E sell best in
-        Europe (more revenue --> red color), while the other three products return most revenue in
-        Japan.
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for Heat grid extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>
+  <li>xAxis_</li>
+  <li>yAxis_</li>
+  <li>chart_ - for the main chart Panel</li>
+  <li>heatGrid_ - for the actual heatGrid</li>
+  <li>heatGridPanel_ - for the panel where the heatGrids is</li>
+  <li>heatGridLabel_ - for the main heatGrid label</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>xAxisLabel_textAlign</li>
+</ul>
 
-        <br/>
+<h2>Examples</h2>
+The following examples show revenues by product and market. 
+All the examples show the same dataset with different settings.
 
-        <textarea  cols="80" rows="23" id="pvcHG1Code">
-var heatGrid2 = new pvc.HeatGridChart({
+<h3>Heat grid - Normalized by Product (column)</h2>
+This chart is normalized by column (normPerBaseCategory = true).
+This chart uses the default color mapping: light green for low revenues; dark green for high revenues; orange for null values.<br>
+<textarea cols="55" rows="18" id="pvcHG1Code">
+var heatGrid1 = new pvc.HeatGridChart({
     canvas: "pvcHG1",
-    width: 630,
+    width: 400,
     height: 300,
-    crosstabMode: true,
-    seriesInRows: false,
+    title:"Heat grid - Normalized by Product",
     animate: false,
     clickable: false,
     panelSizeRatio: 0.8,
     orientation: "vertical",
-    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
     showValues: true,
     valuesAnchor: "right",
-    titlePosition: "top",
-    titleSize: 25,
     normPerBaseCategory: true,
-    minColor: "#10FF10",
-    maxColor: "red",
+    });
 
-    extensionPoints: []
- });
-
-heatGrid2.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
-heatGrid2.render();
-        </textarea>
-
+heatGrid1.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+heatGrid1.render();
+</textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-
-        <br/>
-
         <div id="pvcHG1"></div>
-        <p>
-            TO DO: If we want to add a legend this needs to be a relative scale as
-            the the actual scaling differs per product column. 
-
-        <h2>HeatGrid (normalize over full matrix)</h2>
-        If the next chart we have normalized over the full matrix.
-        Here we observe that most revenue comes from products C and
-        E. Product C sells best in Japan Product E in Europe (and no
-        data for Japan).
-        <div id="pvcHG2"></div>
-        <p>
-            TO DO: for this type of graph we can add a legend that maps 5
-            different colors to revenue values as all cells use the same
-            color mapping.
-
-        <h2>HeatGrid (horizontal)</h2>
-        This is the same chart (normalized per product) as the first
-        chart. However, this chart is has a different
-        orientation and a green color-scheme (white --> green). Again the data is normalized by product, so
-        here the data is normalized by per Row!
-        <div id="pvcHG3"></div>
-
-        <h2>HeatGrid (clickable, showValues)</h2>
-        This is the same chart as before, now clickable and showing values.
-        <div id="pvcHG4"></div>
-
-
-
-        <script type="text/javascript">
-
-
-            pv.listenForPageLoad(function() {
-
-                // When everything is ready, click all tryMe buttons
-            
-
-                var heatGrid2nt = new pvc.HeatGridChart({
+<br>We observe that Product A sells best in Europe,
+while the other three products return most revenue in Japan.<br>
+<p>
+TO DO: If we want to add a legend this needs to be a relative scale as the actual scaling differs 
+per product column.
+</p> 
+<h3>Heat grid - Normalized over the full matrix</h2>
+In this chart we have normalized over the full matrix (normPerBaseCategory = false).
+<br>
+<textarea cols="55" rows="18" id="pvcHG2Code">
+var heatGrid2 = new pvc.HeatGridChart({
                     canvas: "pvcHG2",
-                    width: 630,
+                    width: 400,
                     height: 300,
-                    crosstabMode: true,
-                    seriesInRows: false,
                     animate: false,
                     clickable: false,
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-                    stacked: false,
                     panelSizeRatio: 0.8,
                     orientation: "vertical",
-                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
-                    showValues: false,
+                    showValues: true,
                     valuesAnchor: "right",
-                    titlePosition: "top",
-                    titleSize: 25,
-                    legend: false,
-                    legendPosition: "top",
-                    legendAlign: "center",
                     showXScale: true,
                     xAxisPosition: "bottom",
-                    xAxisSize: 30,
                     showYScale: true,
                     yAxisPosition: "left",
-                    yAxisSize: 70,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
                     axisOffset: 0,
-
-                    //secondAxis: false,
-                    //secondAxisIndependentScale: true,
-                    //secondAxisIdx: -1,
-                    //secondAxisOriginIsZero: true,
-                    //secondAxisColor: "blue",
-                    //secondAxisColor: "red",
-
                     normPerBaseCategory: false,
-                    minColor: "#10FF10",
-                    maxColor: "red",
 
-                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
+                    extensionPoints: {
+                      xAxisLabel_textAngle:-0.3,
+                      xAxisLabel_textAlign:"right",
+                      }
                 });
+                heatGrid2.setData(testHeatGrid,
+                           {crosstabMode: true,
+                            seriesInRows: false });
+                heatGrid2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcHG2"></div>
+<br>Here we observe that most revenue comes from product C which sells best in Japan.<br>
+<p>
+TO DO: for this type of graph we can add a legend that maps 5
+different colors to revenue values as all cells use the same color mapping.
+</p>
 
-
-                heatGrid2nt.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
-                heatGrid2nt.render();
-
-
-
-                var heatGrid3 = new pvc.HeatGridChart({
+<h3>Heat grid - Normalized by Product (row)</h2>
+This is the same chart with a different orientation, 
+and a different color-scheme (minColor and maxColor properties)<br>
+Again the data is normalized by product (by Row).
+<br>
+<textarea cols="55" rows="18" id="pvcHG3Code">
+var heatGrid3 = new pvc.HeatGridChart({
                     canvas: "pvcHG3",
-                    width: 630,
+                    width: 400,
                     height: 300,
-                    crosstabMode: true,
-                    seriesInRows: false,
                     animate: false,
                     clickable: false,
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-                    stacked: false,
-
                     orientation: "horizontal",
-                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
                     showValues: false,
-                    valuesAnchor: "right",
-                    titlePosition: "top",
-                    titleSize: 25,
-                    legend: false,
-                    legendPosition: "top",
-                    legendAlign: "center",
                     showXScale: true,
                     xAxisPosition: "bottom",
-                    xAxisSize: 30,
                     showYScale: true,
                     panelSizeRatio: 0.8,
                     yAxisPosition: "left",
                     yAxisSize: 70,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
-                    axisOffset: 0,
-                    originIsZero: false,
-
-                    secondAxis: false,
-                    secondAxisIndependentScale: true,
-                    secondAxisIdx: -1,
-                    secondAxisOriginIsZero: true,
-                    secondAxisColor: "blue",
-
-                    //secondAxisColor: "red",
-
-                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
+                    minColor: "#FEDFE1",
+                    maxColor: "#F11929",
                 });
-
-
-
-
-                heatGrid3.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+                heatGrid3.setData(testHeatGrid,
+                                 {crosstabMode: true,
+                                  seriesInRows: false });
                 heatGrid3.render();
-                
-                
-                var heatGrid4 = new pvc.HeatGridChart({
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcHG3"></div>
+
+<h3>Clickable heat grid</h2>
+Same chart as the previous, but clickable.
+<br>
+<textarea cols="55" rows="18" id="pvcHG4Code">
+var heatGrid4 = new pvc.HeatGridChart({
                     canvas: "pvcHG4",
-                    width: 630,
+                    width: 400,
                     height: 300,
-                    crosstabMode: true,
-                    seriesInRows: false,
                     animate: false,
                     clickable: true,
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-                    stacked: false,
+                    
                     clickAction: function(series,category,dataValue){
                         alert('series "' + series + '", category "' + category + '", value = ' + dataValue);
                     },
-
                     orientation: "horizontal",
-                    colors: ["#8ab51e","#0b98d4","#ff9108","#cbcecf","#c51015","#858383"],
-                    showValues: true,
-                    valuesAnchor: "right",
-                    titlePosition: "top",
-                    titleSize: 25,
-                    legend: false,
-                    legendPosition: "top",
-                    legendAlign: "center",
+                    showValues: false,
                     showXScale: true,
                     xAxisPosition: "bottom",
-                    xAxisSize: 30,
                     showYScale: true,
                     panelSizeRatio: 0.8,
                     yAxisPosition: "left",
                     yAxisSize: 70,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
-                    axisOffset: 0,
-                    originIsZero: false,
-
-                    secondAxis: false,
-                    secondAxisIndependentScale: true,
-                    secondAxisIdx: -1,
-                    secondAxisOriginIsZero: true,
-                    secondAxisColor: "blue",
-
-                    //secondAxisColor: "red",
-
-                    extensionPoints: [["xAxisLabel_textAngle","-0.6"],["xAxisLabel_textAlign","right"],["noDataMessage_text","Zarro boogs found"],["pvBar_bottom","200"]]
                 });
-
-                heatGrid4.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
+                heatGrid4.setData(testHeatGrid,
+                                 {crosstabMode: true,
+                                  seriesInRows: false });
                 heatGrid4.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcHG4"></div>
+    </script>
 
-
-            });
-
-
-
-
-
-        </script>
-
-
-
-
-
-    </body>
+  </body>
 </html>
+
