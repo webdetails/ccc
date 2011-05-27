@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC Samples - Stacked Area Chart</title>
+
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+</script><![endif]-->
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="cdf/Base.js"></script>
+    <script type="text/javascript" src="cdf/jquery.js"></script>
+    <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="lib/tipsy.js"></script>
+    <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+
+    <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvcPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+    <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
+    <script type="text/javascript" src="pvc/pvcPie.js"></script>
+    <script type="text/javascript" src="pvc/pvcBar.js"></script>
+    <script type="text/javascript" src="pvc/pvcLine.js"></script>
+    <script type="text/javascript" src="pvc/pvcData.js"></script>
+    <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+        
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
+  <body>
+
+    <h1>
+      Stacked Area Chart
+    </h1>
+Stacked area graphs are useful for displaying the trend of contribution of values of two or more variables to the total over categories or time. 
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Legend properties</h4>
+<ul>
+  <li>legend (true|false)</li>
+  <li>legendPosition (right, top, bottom, left)</li>
+  <li>legendAlign (right, left, center, top, middle, bottom)</li>
+  <li>legendSize</li>
+  <li>legendDrawLine (true|false)</li>
+  <li>legendDrawMarker (true|false)</li>
+  <li>showTooltips (true|false)</li>
+</ul>
+<h4>Data properties</h4>
+<ul>
+  <li>timeSeries (true| false)</li>
+  <li>timeSeriesFormat. For example: "%Y-%m-%d"</li>
+</ul>
+<h4>Stacked Area chart properties</h4>
+<ul>
+  <li>orientation - horizontal or vertical. Default: vertical</li>
+  <li>showValues - Show or hide line value. Default: false</li>
+  <li>panelSizeRatio - Ratio of the band occupied by the pane.
+Default: 0.5 (50%)</li>
+  <li>stacked - Stacked? Default: true</li>
+  <li>lineSizeRatio - In multiple series, percentage of inner band occupied by lines. Default: 0.5 (50%)</li>
+  <li>maxLineSize - Maximum size of a line in pixels. Default:
+2000</li>
+</ul>
+
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for Stacked Area chart extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>  
+  <li>Axis_</li>
+  <li>xAxis_</li>
+  <li>yAxis_</li>
+  <li>xAxisRule_</li>
+  <li>yAxisRule_</li>
+  <li>xAxisRuleGrid_</li>
+  <li>yAxisRuleGrid_</li>
+  <li>tooltip_</li>
+  <li>chart_</li>
+  <li>area_</li>
+  <li>dot_</li>
+  <li>lineDot_</li>
+  <li>lineLabel_</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>area_fillStyle</li>
+</ul>
+
+<h2>Examples</h2>
+<h3>A Simple Area chart</h2>
+You can use the StackedAreaChart to render a simple Area chart like this one:<br>
+<textarea cols="55" rows="15" id="pvcStackedArea1Code">
+        var stackedArea = new pvc.StackedAreaChart({
+          canvas: "pvcStackedArea1",
+          width: 400,
+          height: 220,
+          animate: false,
+          title: "Simple Area chart",
+          legend: false,
+          legendPosition: "top",
+          legendAlign: "right",
+          orientation: 'vertical',
+        });
+        stackedArea.setData(relational_02,
+                           {crosstabMode: false,
+                            seriesInRows: false});
+        stackedArea.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcStackedArea1"></div>
+
+<h3>A Stacked Area for displaying Time series data</h2>
+The following is a stacked area chart displaying three series over time.<br>
+<textarea cols="55" rows="15" id="pvcStackedArea2Code">
+        var stackedArea2 = new pvc.StackedAreaChart({
+          canvas: "pvcStackedArea2",
+          width: 400,
+          height: 220,
+          animate: false,
+          title: "Stacked Area Chart - Timeseries",
+          titlePosition: "top",
+          titleSize: 40,
+          legend: false,
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          showValues: false,
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
+
+          extensionPoints: {
+area_fillStyle:pv.colors("#ff7800","#FFb573","#ff9a40"),
+          }
+
+        });
+        stackedArea2.setData(relational_01,
+                            {crosstabMode: false,
+                             seriesInRows: false});
+        stackedArea2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcStackedArea2"></div>
+
+
+<h3>A Stacked Area displaying a huge dataset</h2>
+This is how a huge dataset looks like rendered with a stacked area chart:<br>
+<textarea cols="55" rows="15" id="pvcStackedArea2Code">
+        var stackedArea3 = new pvc.StackedAreaChart({
+          canvas: "pvcStackedArea3",
+          width: 400,
+          height: 220,
+          animate: false,
+          title: "Stacked Area Chart - huge dataset",
+          legend: true,
+          legendPosition: "bottom",
+          legendAlign: "left",
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          yAxisSize: 30,
+          xAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
+          extensionPoints: {
+            titleLabel_font: "13px serif"
+          }
+        });
+        stackedArea3.setData(crosstab_01,
+                            {crosstabMode: true,
+                             seriesInRows: false});
+        stackedArea3.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcStackedArea3"></div>
+        
+    </script>
+
+  </body>
+</html>
