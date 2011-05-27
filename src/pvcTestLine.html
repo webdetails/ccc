@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CCC Samples - Dot Char</title>
+    <title>CCC Samples - Line Chart</title>
 
     <!--[if lt IE 9]>
     <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
@@ -36,10 +36,9 @@
   <body>
 
     <h1>
-     Dot Char
+      Line Chart
     </h1>
-A Dot chart consists of group of data points plotted on a simple scale.
-The Dot chart can be a very useful alternative to the horizontal bar chart, being the dot chart less cluttered and less redundant than that.
+Line charts are often used to visualize time series data.
 
 <h2>Chart Options</h2>
 <h4>Dimensions</h4>
@@ -69,21 +68,27 @@ bottom)</li>
   <li>timeSeries (true| false)</li>
   <li>timeSeriesFormat. For example: "%Y-%m-%d"</li>
 </ul>
-<h4>Dot chart properties</h4>
+<h4>Line chart properties</h4>
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
   <li>showDots - Show or hide dots. Default: true</li>
   <li>showValues - Show or hide line value. Default: false</li>
-  <li>panelSizeRatio - Ratio of the band occupied by the pane. 
+  <li>panelSizeRatio - Ratio of the band occupied by the pane.
 Default: 0.5 (50%)</li>
+  <li>stacked - Stacked? Default: false</li>
+  <li>lineSizeRatio - In multiple series, percentage of inner
+band occupied by lines. Default: 0.5 (50%)</li>
+  <li>maxLineSize - Maximum size of a line in pixels. Default:
+2000</li>
 </ul>
+
 <h2>Extension Points</h2>
 The following&nbsp;list&nbsp;serves as the basis
-for&nbsp;Dot chart extension points:
+for&nbsp;Line chart extension points:
 <ul>
   <li>base_</li>
   <li>title_</li>
-  <li>titleLabel_</li>
+  <li>titleLabel_</li>  
   <li>Axis_</li>
   <li>xAxis_</li>
   <li>yAxis_</li>
@@ -93,114 +98,95 @@ for&nbsp;Dot chart extension points:
   <li>yAxisRuleGrid_</li>
   <li>tooltip_</li>
   <li>chart_ - for the main chart Panel</li>
-  <li>dot_</li>
+  <li>line_ - for the actual line</li>
+  <li>linePanel_ - for the panel where the lines are</li>
+  <li>lineDot_ - the dots on the line</li>
+
 </ul>
 Sample extension points:<br>
 <ul>
   <li>base_fillStyle</li>
   <li>titleLabel_font</li>
-  <li>dot_shape</li>
+  <li>line_lineWidth</li>
 </ul>
 
 <h2>Examples</h2>
-<h3>A Simple Dot Chart</h2>
-Here you have a very simple dot chart.<br>
-<textarea cols="55" rows="15" id="pvcDot1Code">
-          var dot1 = new pvc.DotChart({
-          canvas: "pvcDot1",
+<h3>A Simple Line chart</h2>
+The following is a line chart displaying three time series.<br>
+<textarea cols="55" rows="15" id="pvcLine1Code">
+        var line1 = new pvc.LineChart({
+          canvas: "pvcLine1",
           width: 400,
-          height: 300,
-          animate: false,
-          title: "Dot chart",
-          titlePosition: "bottom",
-          legend: false,
-          showTooltips: true,
-          showValues: true,
-          orientation: 'horizontal',
-        });
-        dot1.setData(relational_03,
-            {crosstabMode: false,
-             seriesInRows: false});
-        dot1.render();
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcDot1"></div>
-
-<h3>An attractive dot chart</h2>
-The simplest dot chart can become more attractive by setting some properties as for example
-the shape or color for the dots.<br>
-<textarea cols="55" rows="15" id="pvcDot2Code">
-          var dot2 = new pvc.DotChart({
-          canvas: "pvcDot2",
-          width: 400,
-          height: 300,
-          animate: false,
-          title: "A rich Dot chart",
-          titlePosition: "top",
-          legend: false,
-          showTooltips: true,
-          showValues: true,
-          orientation: 'horizontal',
-        extensionPoints: {
-            title_fillStyle: "orange",
-            yAxis_fillStyle: "#bbb",
-            xAxisLabel_textAlign: "center",
-            xAxisLabel_textStyle: "darkBlue",
-            yAxisLabel_textStyle: "darkBlue",
-            dot_fillStyle: "orange",
-            dot_shapeRadius: 3,
-            dot_shape:"triangle",
-                // circle,square,triangle,cross,diamond
-            chart_fillStyle: "#eee",
-          }
-         });
-        dot2.setData(relational_03,
-                    {crosstabMode: false,
-                     seriesInRows: false});
-        dot2.render();
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcDot2"></div>
-
-<h3>A Time series dot chart</h2>
-To use a dot chart to render a time series, just set the timeSeries to true, and set the timeSeriesFormat property.<br>
-<textarea cols="55" rows="15" id="pvcDot3Code">
-  var dot3 = new pvc.DotChart({
-          canvas: "pvcDot3",
-          width: 400,
-          height: 300,
-          animate: false,
-          title: "A time series Dot chart",
-          titlePosition: "left",
+          height: 220,
+          animate:false,
+          title: "Simple Line chart",
           legend: true,
-          showTooltips: true,
-          showValues: true,
+          legendPosition: "top",
+          legendAlign: "right",
+
           orientation: 'vertical',
           timeSeries: true,
           timeSeriesFormat: "%Y-%m-%d",
 
-        extensionPoints: {
-            title_fillStyle: "lightBlue",
-            xAxisLabel_textAngle: -0.6,
-            xAxisLabel_textAlign: "center",
-            xAxisLabel_textBaseline: "top",
-            xAxisLabel_textStyle: "black",
-
-            xAxisLabel_textStyle: "darkBlue",
-            yAxisLabel_textStyle: "darkBlue",
-            dot_shapeRadius: 3,
-            dot_shape:"cross",
-            chart_fillStyle: "#eee",
+          showValues: false,
+          yAxisPosition: "right",
+          yAxisSize: 30,
+          extensionPoints: {
+            noDataMessage_text: "Example of a chart with missing data",
+            xAxisScale_dateTickFormat: "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5
+                      //set in miliseconds
           }
-         });
-        dot3.setData(relational_01,
-                    {crosstabMode: false,
-                     seriesInRows: false});
-        dot3.render();
-
+        });
+        line1.setData(relational_01, 
+             {crosstabMode: false,
+              seriesInRows: false});
+        line1.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcDot3"></div>
+        <div id="pvcLine1"></div>
+
+<h3>A Decorated Line chart</h2>
+A simple line chart can be enhanced as for example adding a background grid, or drawing the dots 
+that connect the lines.<br>
+<textarea cols="55" rows="15" id="pvcLine2Code">
+        var line2 = new pvc.LineChart({
+          canvas: "pvcLine2",
+          width: 400,
+          height: 220,
+          animate:false,
+          title: "A Dot Line chart",
+          legend: true,
+          legendPosition: "bottom",
+          legendAlign: "left",
+
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          showValues: true,
+          showDots:true,
+          yAxisPosition: "left",
+          yAxisSize: 30,
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
+          extensionPoints: {
+            title_fillStyle: "lightYellow",
+            dot_shapeRadius: 2,
+            dot_shape:"diamond",
+            line_lineWidth: 1,
+            xAxisScale_dateTickFormat: "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5
+                      //set in miliseconds
+          }
+        });
+        line2.setData(relational_01, 
+             {crosstabMode: false,
+              seriesInRows: false});
+        line2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine2"></div>
         
     </script>
 
