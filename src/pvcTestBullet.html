@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CCC playground</title>
+    <title>CCC Samples - Bullet Chart</title>
 
     <!--[if lt IE 9]>
     <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
 </script><![endif]-->
     <meta name="svg.render.forceflash" content="true">
-
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script type="text/javascript" src="cdf/Base.js"></script>
@@ -32,255 +31,235 @@
     <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
     <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
     <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
-
-    <style type="text/css">
-      table, td, th{
-        border: 1px solid;
-        border-collapse: collapse;
-        text-align: center;
-      }
-    </style>
+        
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
   </head>
   <body>
 
-
-
     <h1>
-      CCC playground
+      Bullet Chart
     </h1>
+Bullet Charts are a replacement for so-called gauge and -meter charts 
+(think gas gauge and thermometer).<br>
+They compare a given quantitative measure (such as profit or revenue) against 
+qualitative ranges (e.g., poor, satisfactory, good) and related markers 
+(e.g. the same measure a year ago), as typically found in a gauge-type chart 
+into a much smaller space with a much higher data density.<br>
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Bullet chart properties</h4>
+<ul>
+  <li>orientation (horizontal | vertical)</li>
+  <li>showValues (true|false)</li>
+  <li>bulletSize - bullet height</li>
+  <li>bulletSpacing - spacing between bullets</li>
+  <li>bulletMargin - left margin</li>  
+</ul>
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for the Bullet char extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>
+  <li>chart_</li>
+  <li>bulletsPanel_</li>
+  <li>bulletPanel_</li>
+  <li>bulletRange_</li>
+  <li>bulletMeasure_</li>
+  <li>bulletMarker_</li>
+  <li>bulletRule_</li>
+  <li>bulletRuleLabel_</li>
+  <li>bulletTitle_</li>
+  <li>bulletSubtitle_</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>bulletMarker_shape</li>
+</ul>
 
+<h2>Examples</h2>
 
+<h3>Bullet chart with fixed values</h2>
+When no datasource is passed, the bullet chart is rendered based on the fixed values provided for 
+bulletTitle, bulletSubtitle, bulletMeasures, bulletMarkers and bulletRanges.<br> 
+    
+<textarea cols="55" rows="15" id="pvcBullet1Code">
+var bullet1 = new pvc.BulletChart({
+    canvas: "pvcBullet1",
+    width: 400,
+    height: 250,
+    animate: false,
+    orientation: "vertical",
 
-    <h1>Bullet Chart</h1>
+    bulletSize: 25,     // Bullet height
+    bulletSpacing: 150, // Spacing between bullets
+    bulletMargin: 30,   // Left margin
 
-    <p> This is the demo page for bullet charts in CCC. There are several ways to
-      work with it:
-    </p>
+    // Specific values
+    bulletTitle: "My Test",
+    bulletSubtitle: "description",
+    bulletMeasures: [50],
+    bulletMarkers: [90],
+    bulletRanges: [30,80,100],
 
-    <h2>No datasource passed</h2>
+    extensionPoints: {
+      "bulletMarker_shape":"dot",
+      "bulletTitle_textStyle":"green"
+      }    
+    });
+    bullet1.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBullet1"></div>
 
-    <p>When no datasource is passed, all is controlled by the options that affect this component:</p>
-
-    <pre>
-    {
-      orientation: "horizontal",          // "horizontal" or "vertical"
-      bulletSize: 30,                     // Bullet size
-      bulletSpacing: 50,                  // Spacing between bullets
-      bulletMargin: 100,                  // Left margin
-
-      // Defaults
-      bulletMarkers: [90],                // Array of markers to appear
-      bulletMeasures: [50],               // Array of measures
-      bulletRanges: [30,80,100],          // Ranges
-      bulletTitle: "My Test",             // Title
-      bulletSubtitle: "description"       // Subtitle
-    }
-    </pre>
-
-
-    <div id="pvcBullet1"></div>
-
-    <h2>Data is passed</h2>
-
-    <p>
-      When a datasource is passed, the behavior is different according to the structure
-      of the data.
-
-      When a certain data structure has missing information, the options passed to
-      the component will take place
-    </p>
-
-    <h3> Data structure</h3>
-
+<h3>Bullet chart based on a datasource</h2>
+When a datasource is provided, the bullet chart is rendered according to the structure of data. 
+<br>
+The supplied data can have one of the following formats:<br>
     <table>
       <thead>
         <tr>
-          <th>
-            Number of columns
-          </th>
-          <th>
-            Structure
-          </th>
+    <th>
+      Number of columns
+    </th>
+    <th>
+      Structure
+    </th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>1</td><td>Expected value only</td>
+    <td>1</td><td>Value</td>
         </tr>
         <tr>
-          <td>2</td><td>Expected title and value</td>
+    <td>2</td><td>Title | Value</td>
         </tr>
         <tr>
-          <td>3</td><td>Expected title, value and marker</td>
+    <td>3</td><td>Title | Value | Marker</td>
         </tr>
         <tr>
-          <td> &gt;= 4 </td><td>Expected title, description, value marker and ranges</td>
+    <td> &gt;= 4 </td><td>Title | Subtitle | Value | Marker | Ranges</td>
         </tr>
       </tbody>
     </table>
+<br>
+For the datasets with less than four columns, the missing information will 
+be taken form the bullet chart definition.<br>
 
-    <h4>1 column - Value only</h4>
+<h4>Bullet chart based on a datasource with a single column: Value</h4>
+<textarea cols="55" rows="15" id="pvcBullet2Code">
+var bullet2 = new pvc.BulletChart({
+    canvas: "pvcBullet2",
+    width: 400,
+    height: 250,
+    animate: false,
+    title: "Bullet charts, value only",
+    titlePosition: "top",
+    titleSize: 40,
 
-    <div id="pvcBullet2"></div>
+    bulletSize: 25,
+    bulletSpacing: 50,
+    bulletMargin: 100,
 
-    <h4>2 columns - Title and value only</h4>
+    // Specific values
+    bulletRanges: [30,80,100],
+    bulletTitle: "My Test",
+    bulletSubtitle: "value"
+    });
+    bullet2.setData(bullet_valueOnly);
+    bullet2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBullet2"></div>
 
-    <div id="pvcBullet3"></div>
+<h4>Bullet chart based on a datasource with two columns: Title and value</h4>
+<textarea cols="55" rows="15" id="pvcBullet3Code">
+var bullet3 = new pvc.BulletChart({
+    canvas: "pvcBullet3",
+    width: 400,
+    height: 250,
+    animate: false,
+    title: "Bullet charts, title and value",
+    titlePosition: "top",
+    titleSize: 40,
 
-    <h4>3 columns - Title, value and marker</h4>
+    bulletSize: 25,
+    bulletSpacing: 50,
+    bulletMargin: 100,
 
-    <div id="pvcBullet4"></div>
+    // Specific values
+    bulletRanges: [200,500,1000],
+    bulletSubtitle: "description"
+    });
+    bullet3.setData(bullet_NameValue);
+    bullet3.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBullet3"></div>
 
+<h4>Bullet chart based on a datasource with three columns: Title, value and marker</h4>
+<textarea cols="55" rows="15" id="pvcBullet4Code">
+var bullet4 = new pvc.BulletChart({
+    canvas: "pvcBullet4",
+    width: 400,
+    height: 250,
+    animate: false,
+    title: "Bullet charts, title, value and marker",
+    titlePosition: "top",
+    titleSize: 40,
 
-    <h4>>= 4 columns - Title, subtitle, value, marker and ranges</h4>
+    bulletSize: 25,
+    bulletSpacing: 50,
+    bulletMargin: 100,
 
-    <div id="pvcBullet5"></div>
+    // Specific values
+    bulletRanges: [200,500,1000],
+    bulletMarkers: [600],
+    bulletSubtitle: "description"
+    });
+    bullet4.setData(bullet_NameValueMarker);
+    bullet4.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBullet4"></div>
 
+<h4>Bullet chart based on a datasource with four or more columns: Title, subtitle, value, marker and ranges</h4>
+<textarea cols="55" rows="15" id="pvcBullet5Code">
+var bullet5 = new pvc.BulletChart({
+    canvas: "pvcBullet5",
+    width: 400,
+    height: 250,
+    animate: false,
+    title: "Bullet charts, full info",
+    titlePosition: "top",
+    titleSize: 40,
 
-    <script type="text/javascript">
+    orientation: "vertical",
+    bulletSize: 25,
+    bulletSpacing: 80,
+    bulletMargin: 30
+    });
 
-      // enable debug
-      pvc.debug = true;
-
-      pv.listenForPageLoad(function() {
-
-
-
-        var bullet1 = new pvc.BulletChart({
-          // legendPosition: "left",
-          canvas: "pvcBullet1",
-          width: 600,
-          height: 350,
-          animate: false,
-          orientation: "vertical",
-          title: "Bullet charts, no data passed",
-          titlePosition: "top",
-          titleSize: 40,
-
-          bulletSize: 25,                   // Bullet height
-          bulletSpacing: 150,                  // Spacing between bullets
-          bulletMargin: 30,                  // Left margin
-
-          // Specific values
-          bulletMarkers: [90],
-          bulletMeasures: [50],
-          bulletRanges: [30,80,100],
-          bulletTitle: "My Test",
-          bulletSubtitle: "description",
-
-          extensionPoints: {
-            "bulletMarker_shape":"dot",
-            "bulletTitle_textStyle":"green"
-          }
-          
-        });
-
-        //bullet1.setData(bullet_01 , {crosstabMode: true, seriesInRows: false});
-        bullet1.render();
-
-
-        var bullet2 = new pvc.BulletChart({
-          // legendPosition: "left",
-          canvas: "pvcBullet2",
-          width: 500,
-          height: 200,
-          animate: false,
-          title: "Bullet charts, value only",
-          titlePosition: "top",
-          titleSize: 40,
-
-          bulletSize: 25,                   // Bullet height
-          bulletSpacing: 50,                  // Spacing between bullets
-          bulletMargin: 100,                  // Left margin
-
-          // Specific values
-          bulletRanges: [30,80,100],
-          bulletTitle: "My Test",
-          bulletSubtitle: "value"
-
-        });
-
-        bullet2.setData(bullet_valueOnly);
-        bullet2.render();
-
-        var bullet3 = new pvc.BulletChart({
-          // legendPosition: "left",
-          canvas: "pvcBullet3",
-          width: 500,
-          height: 250,
-          animate: false,
-          title: "Bullet charts, title and value",
-          titlePosition: "top",
-          titleSize: 40,
-
-          bulletSize: 25,                   // Bullet height
-          bulletSpacing: 50,                  // Spacing between bullets
-          bulletMargin: 100,                  // Left margin
-
-          // Specific values
-          bulletRanges: [200,500,1000],
-          bulletSubtitle: "description"
-
-        });
-
-        bullet3.setData(bullet_NameValue);
-        bullet3.render();
-
-
-        var bullet4 = new pvc.BulletChart({
-          // legendPosition: "left",
-          canvas: "pvcBullet4",
-          width: 500,
-          height: 300,
-          animate: false,
-          title: "Bullet charts, title, value and marker",
-          titlePosition: "top",
-          titleSize: 40,
-
-          bulletSize: 25,                   // Bullet height
-          bulletSpacing: 50,                  // Spacing between bullets
-          bulletMargin: 100,                  // Left margin
-
-          // Specific values
-          bulletRanges: [200,500,1000],
-          bulletMarkers: [600],
-          bulletSubtitle: "description"
-
-        });
-
-        bullet4.setData(bullet_NameValueMarker);
-        bullet4.render();
-
-
-        var bullet5 = new pvc.BulletChart({
-          // legendPosition: "left",
-          canvas: "pvcBullet5",
-          width: 500,
-          height: 300,
-          animate: false,
-          title: "Bullet charts, full info",
-          titlePosition: "top",
-          titleSize: 40,
-
-          orientation: "vertical",
-          bulletSize: 25,                   // Bullet height
-          bulletSpacing: 80,               // Spacing between bullets
-          bulletMargin: 30                  // Left margin
-
-        });
-
-        bullet5.setData(bullet_NameDescValueMarkerRanges);
-        bullet5.render();
-
-      });
-
-
+    bullet5.setData(bullet_NameDescValueMarkerRanges);
+    bullet5.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBullet5"></div>
 
     </script>
-
-
-
-
 
   </body>
 </html>
