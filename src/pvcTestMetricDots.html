@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>CCC playground</title>
+  <head>
+    <title>CCC Samples - Metric Chart</title>
 
-        <!--[if lt IE 9]>
-        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
 </script><![endif]-->
-        <meta name="svg.render.forceflash" content="true">
-
+    <meta name="svg.render.forceflash" content="true">
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="cdf/Base.js"></script>
@@ -34,442 +33,295 @@
         <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
         <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
         <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
-    </head>
-    <body>
+        
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
+  <body>
 
-        <h1>
-            CCC playground 
-        </h1>
-A comparison of ordinal and linear base axis for
-<ol>
-<li> LineCharts</li>
-<li> DotCharts </li>
-<li> AreaCharts (to be tested) </li>
-<li> StackedLinecharts  (to be implemented) </li>
-<li> StackedAreacharts  (to be implemented) </li>
-</ol>
+    <h1>
+      Metrics Chart
+    </h1>
+Metrics charts are similar to line graphs in that they use horizontal 
+and vertical axes to plot data points. However the axes in a Metric chart are <i>Linear</i> more than 
+<i>Categorical</i>, as they serve for a very specific purpose.
+Metrics charts can show you visually the strength, shape or the direction of the relationship between 
+variables, and whether there are outliers in your data.
+<h2>A comparison between categorical-base and linear-base axes</h2>
+To understand the difference between categorical-base and linear-base charts, look at the following examples:
 
-
-
-
-        <h2>Metric Line  (small dataset (one series: testDotL)</h2>
-This is the Pvc Dots with a linear base-axis (a metric axis-frame)
-<p>
-        <div id="pvcLine1"></div>
-
-<p>
-And this one has an ordinal (categorical) base-axis.
-There are three essential differences to the previous chart:
+<table>
+  <tbody>
+    <tr>
+      <td><div id="pvcLine1"></div>
+      </td>
+      <td><div id="pvcLine2"></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+There are some features in the categorical chart (chart on the left) not suitable for the analysis 
+that a linear chart allows you to do:
 <ul>
-  <li>Values along the base-axis are not in numerical order (the
-    values have the same order as the dataset)</li>
-  <li>Values can appear multiple times (see value 30) along the
-  base-axis </li>
-  <li>The data-points are equidistant, so the distance from 20-30 is
-    the same as the distance 30-100</li>
+  <li>Values along the base-axis are not in numerical order (the values have the same order as the dataset)</li>
+  <li>Values can appear multiple times along the base-axis </li>
+  <li>The data-points are equidistant, so the distance from 20-30 is the same as the distance 30-100</li>
 </ul>
-A last thing that you need to know (not visible here) is that you can
-not use low cardinality integer numbers as base-axis categories, as
-this might lead to data-points being plotted at the wrong location.
-<p>
-        <div id="pvcLine2"></div>
-
-
-
-        <h2>Metric Line Chart  (larger dataset (TWO series: testDotL2)</h2>
-Now I added a second column definition to the dataset and
-suddenly my full data-set is scattered, look at the series labels.
-And my axis is ruined. 
-
-Clearly I do not fully understand how the data-array works. I have set
-        the "seriesInRows" to falls, but it still seems to use rows as dataset.
-
-This is the Pvc Dots with a linear base-axis
-<p>
-        <div id="pvcLine1L"></div>
-
-<p>
-And this one has an ordinal base-axis
-<p>
-        <div id="pvcLine2L"></div>
-
-<br/>
-<br/>
-And this one has an Linear base-axis and vertical orientation.
- <p>
-        <div id="pvcLineLv"></div>
-
-
-
-        <h2>Metric Dot (linear)</h2> 
-This is the Pvc Dot chart with a linear base-axis
-<p>
-       <div id="pvcDot1L"></div>
-
-<p>
-And this one has an categorical base-axis
-<p>
-        <div id="pvcDot2L"></div>
-
-        <br/>
-
-        <h2>Metric Area chart</h2>
-This is the Pvc Dot chart with a linear base-axis
+A last thing (not visible here) is that you can not use low cardinality integer numbers as base-axis 
+categories, as this might lead to data-points being plotted at the wrong location.
 <p>
 
-        <div id="pvcMetArea"></div>
-<br/>
-This is the Pvc Dot chart with a Categorical base-axis
-<p>
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Legend properties</h4>
+<ul>
+  <li>legend (true|false)</li>
+  <li>legendPosition (right, top, bottom, left)</li>
+  <li>legendAlign (right, left, center, top, middle, bottom)</li>
+  <li>legendSize</li>
+  <li>legendDrawLine (true|false)</li>
+  <li>legendDrawMarker (true|false)</li>
+  <li>showTooltips (true|false)</li>
+</ul>
+<h4>Metrics chart properties</h4>
+<ul>
+  <li>orientation - horizontal or vertical. Default: vertical</li>
+  <li>showDots - Show or hide dots. Default: true for
+MetricsDotChart, false for MetricsLineChart</li>
+  <li>showLines - Show or hide lines. Default: false for
+MetricsDotChart, true for MetricsLineChart</li>
+  <li>showValues - Show or hide value. Default: false</li>
+  <li>showAreas - Show or hide the areas. Default: false</li>
+  <li>panelSizeRatio - Ratio of the band occupied by the pane. Default: 0.5 (50%)</li>
+  <li>lineSizeRatio - In multiple series, percentage of inner
+band occupied by lines. Default: 0.5 (50%)</li>
+  <li>maxLineSize - Maximum size of a line in pixels. Default:
+2000</li>
+</ul>
 
-        <div id="pvcCatArea"></div>
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for Metrics chart extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>
+  <li>xAxis_</li>
+  <li>yAxis_</li>
+  <li>xAxisRule_</li>
+  <li>yAxisRule_</li>
+  <li>xAxisRuleGrid_</li>
+  <li>yAxisRuleGrid_</li>
+  <li>tooltip_</li>
+  <li>chart_</li>
+  <li>line_</li>
+  <li>linePanel_</li>
+  <li>lineDot_</li>
+  <li>lineLabel_</li>
 
-        <br/>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>line_lineWidth</li>
+</ul>
 
-        <h2>Metric Stacked Line</h2>
-        <div id="pvcStackedLine1"></div>
-        <div id="pvcStackedLine2"></div>
-        <div id="pvcStackedLine3"></div>
+<h2>Examples</h2>
+<h3>Simple Metrics Chart</h2>
+This is the same metrics chart showed above. It is a MetricLineChart.<br>
+<textarea cols="55" rows="15" id="pvcMetrics1Code">
 
-        <h2>Metric Stacked Area</h2>
-        <div id="pvcStackedArea1"></div>
-        <div id="pvcStackedArea2"></div>
-        <div id="pvcStackedArea3"></div>
+var Metrics1 = new pvc.MetricLineChart({
+    canvas: "pvcMetrics1",
+    width: 400,
+    height: 250,
+    animate: false,
+    title: "Simple Metrics Chart",
+    legend: false,
+    originIsZero: true,
+    showValues: false,
+    showDots: true,
+    yAxisSize: 30,
+    xAxisSize: 30,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true
+});
+Metrics1.setData(testLDot , 
+                {crosstabMode: true,
+                 seriesInRows: false});
+Metrics1.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcMetrics1"></div>
 
+<h3>A two-series Metrics Chart</h2>
+Same as above, with a new series.<br>
+<textarea cols="55" rows="15" id="pvcMetrics2Code">
+var Metrics2 = new pvc.MetricLineChart({
+    canvas: "pvcMetrics2",
+    width: 400,
+    height: 250,
+    animate: false,
+    title: "A two-series Metrics Chart",
+    legend: true,
+    legendPosition: "bottom",
+    legendAlign: "right",
+    originIsZero: true,
+    showValues: false,
+    showDots: true,
+    yAxisSize: 30,
+    xAxisSize: 30,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true
+});
+Metrics2.setData(testLDot2,
+{crosstabMode: true,
+ seriesInRows: false});
+Metrics2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcMetrics2"></div>
+        
+<h3>A two-series Metrics Chart - Horizontal</h2>
+Same as above, with different orientation.<br>
+<textarea cols="55" rows="15" id="pvcMetrics3Code">
+var Metrics3 = new pvc.MetricLineChart({
+    canvas: "pvcMetrics3",
+    width: 400,
+    height: 250,
+    orientation: 'horizontal',
+    animate: false,
+    title: "A two-series Metrics Chart",
+    legend: true,
+    legendPosition: "bottom",
+    legendAlign: "right",
+    originIsZero: true,
+    showValues: false,
+    showDots: true,
+    yAxisSize: 30,
+    xAxisSize: 30,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true
+});
+Metrics3.setData(testLDot2,
+{crosstabMode: true,
+ seriesInRows: false});
+Metrics3.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcMetrics3"></div>
+        
+<h3>A Dot Metrics Chart</h2>
+Same as previous charts, but dot instead of lines. This is a MetricDotChart.<br>
+<textarea cols="55" rows="15" id="pvcMetrics4Code">
+var Metrics4 = new pvc.MetricDotChart({
+    canvas: "pvcMetrics4",
+    width: 400,
+    height: 250,
+    animate: false,
+    title: "A MetricDotChart",
+    legend: true,
+    legendPosition: "bottom",
+    legendAlign: "right",
+    originIsZero: true,
+    showValues: false,
+    showDots: true,
+    yAxisSize: 30,
+    xAxisSize: 30,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true
+});
+Metrics4.setData(testLDot2,
+                {crosstabMode: true,
+                 seriesInRows: false});
+Metrics4.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcMetrics4"></div>        
 
-        <script type="text/javascript">
+<h3>An Area Metrics Chart</h2>
+Same as above, but with a coloured area (showAreas=true).<br>
+<textarea cols="55" rows="15" id="pvcMetrics5Code">
+var Metrics5 = new pvc.MetricLineChart({
+    canvas: "pvcMetrics5",
+    width: 400,
+    height: 250,
+    animate: false,
+    title: "An Area Metrics Chart",
+    legend: true,
+    legendPosition: "bottom",
+    legendAlign: "right",
+    originIsZero: true,
+    showValues: false,
+    showAreas: true,
+    showDots: false,
+    yAxisSize: 30,
+    xAxisSize: 30,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true
 
-      // enable debug
-      pvc.debug = true;
-
-
-            pv.listenForPageLoad(function() {
-
-
-
-                var LineL = new pvc.MetricLineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcLine1",
-                    width: 800,
-                    height: 300,
-                    animate: false,
-                    title: "Linear base-axis (dot-chart)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-            originIsZero: true,
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                LineL.setData(testLDot , {crosstabMode: true, seriesInRows: false});
-                LineL.render();
+});
+Metrics5.setData(testArea2,
+                {crosstabMode: true,
+                 seriesInRows: false});
+Metrics5.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcMetrics5"></div>
+        
+<script type="text/javascript">
+pv.listenForPageLoad(function() {
 
                 var LineC = new pvc.LineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcLine2",
-                    width: 800,
-                    height: 300,
+                    canvas: "pvcLine1",
+                    width: 350,
+                    height: 250,
                     animate: false,
-                    title: "Categorical base-axis (dot-chart)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
+                    title: "Categorical base-axis",
+                    titlePosition: "bottom",
+                    titleSize: 20,
+                    legend: false,
                     showValues: false,
                     showDots: true,
                     yAxisSize: 30,
                     xAxisSize: 30,
                     xAxisFullGrid: true,
                     yAxisFullGrid: true
-
                 });
-
                 LineC.setData(testLDot , {crosstabMode: true, seriesInRows: false});
                 LineC.render();
 
-
-
-                var lineL2 = new pvc.MetricLineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcLine1L",
-                    width: 800,
-                    height: 300,
+                var LineL = new pvc.MetricLineChart({
+                    canvas: "pvcLine2",
+                    width: 350,
+                    height: 250,
                     animate: false,
-                    title: "Linear base-axis (two dot series)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-            originIsZero: true,
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
+                    title: "Linear base-axis",
+                    titlePosition: "bottom",
+                    titleSize: 20,
+                    legend: false,
+                    originIsZero: true,
                     showValues: false,
                     showDots: true,
                     yAxisSize: 30,
                     xAxisSize: 30,
                     xAxisFullGrid: true,
                     yAxisFullGrid: true
+                });                
+                LineL.setData(testLDot , {crosstabMode: true, seriesInRows: false});
+                LineL.render();
+                });  // end of script
+    </script>
 
-                });
-
-                lineL2.setData(testLDot2 , {crosstabMode: true, seriesInRows: false});
-                lineL2.render();
-
-                var lineC2 = new pvc.LineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcLine2L",
-                    width: 800,
-                    height: 300,
-                    animate: false,
-                    title: "Categorical base-axis (two dot series)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                lineC2.setData(testLDot2 , {crosstabMode: true, seriesInRows: false});
-                lineC2.render();
-
-                var lineL2v = new pvc.MetricLineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcLineLv",
-                    width: 800,
-                    height: 300,
-                    animate: false,
-                    title: "Linear base-axis (two dot series)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-            originIsZero: true,
-                    orientation: "horizontal",
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                lineL2v.setData(testLDot2 , {crosstabMode: true, seriesInRows: false});
-                lineL2v.render();
-
-
-                var dotL2 = new pvc.MetricDotChart({
-                    // legendPosition: "left",
-                    canvas: "pvcDot1L",
-                    width: 800,
-                    height: 300,
-                    animate: false,
-                    title: "Linear base-axis (two dot series)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-            originIsZero: true,
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                dotL2.setData(testLDot2 , {crosstabMode: true, seriesInRows: false});
-                dotL2.render();
-
-                var dotC2 = new pvc.DotChart({
-                    // legendPosition: "left",
-                    canvas: "pvcDot2L",
-                    width: 800,
-                    height: 300,
-                    animate: false,
-                    title: "Categorical base-axis (two Line series)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                dotC2.setData(testLDot2 , {crosstabMode: true, seriesInRows: false});
-                dotC2.render();
-
-
-
-                var areaL2 = new pvc.MetricLineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcMetArea",
-                    width: 800,
-                    height: 300,
-                    animate: false,
-                    title: "Linear base-axis (two dot series)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-            originIsZero: true,
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showAreas: true,
-                    showDots: false,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                areaL2.setData(testArea2 , {crosstabMode: true, seriesInRows: false});
-                areaL2.render();
-
-
-                var areaC2 = new pvc.LineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcCatArea",
-                    width: 800,
-                    height: 300,
-                    animate: false,
-                    title: "Categorical base-axis (two dot series)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-            originIsZero: true,
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-                    showValues: false,
-                    showAreas: true,
-                    showDots: false,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                areaC2.setData(testArea2 , {crosstabMode: true, seriesInRows: false});
-                areaC2.render();
-
-
-/*****  code for stacked needs to be implemented first
-                var stAreaL2 = new pvc.MetricLineChart({
-                    // legendPosition: "left",
-                    canvas: "pvcStackedArea1",
-                    width: 800,
-                    height: 300,
-                    animate: false,
-                    title: "Linear base-axis (two dot series)",
-                    titlePosition: "top",
-                    titleSize: 40,
-                    legend: true,
-                    legendPosition: "top",
-                    legendAlign: "right",
-                    //legendSize: null,
-            originIsZero: true,
-                    //orientation: 'horizontal',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
-            stacked: true,
-                    showValues: false,
-                    showAreas: true,
-                    showDots: false,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
-
-                });
-
-                stAreaL2.setData(testArea2 , {crosstabMode: true, seriesInRows: false});
-                stAreaL2.render();
-***/
-
-
-            });  // end of script
-
-
-
-        </script>
-
-
-
-
-
-    </body>
+  </body>
 </html>
