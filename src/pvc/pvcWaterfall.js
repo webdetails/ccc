@@ -608,7 +608,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .anchor("center")
             .add(pv.Label)
             .bottom(0)
-            .text(pv.identity)
+            .text(function(d){
+                return myself.chart.options.valueFormat(d);
+            })
       
             // Extend barLabel
             this.extend(this.pvBarLabel,"barLabel_");
