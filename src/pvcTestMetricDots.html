@@ -119,6 +119,8 @@ for Metrics chart extension points:
   <li>yAxis_</li>
   <li>xAxisRule_</li>
   <li>yAxisRule_</li>
+  <li>xAxisScale_</li>
+  <li>yAxisScale_</li>
   <li>xAxisRuleGrid_</li>
   <li>yAxisRuleGrid_</li>
   <li>tooltip_</li>
@@ -137,7 +139,7 @@ Sample extension points:<br>
 </ul>
 
 <h2>Examples</h2>
-<h3>Simple Metrics Chart</h2>
+<h3>Simple Metrics Chart</h3>
 This is the same metrics chart showed above. It is a MetricLineChart.<br>
 <textarea cols="55" rows="15" id="pvcMetrics1Code">
 
@@ -164,7 +166,7 @@ Metrics1.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcMetrics1"></div>
 
-<h3>A two-series Metrics Chart</h2>
+<h3>A two-series Metrics Chart</h3>
 Same as above, with a new series.<br>
 <textarea cols="55" rows="15" id="pvcMetrics2Code">
 var Metrics2 = new pvc.MetricLineChart({
@@ -192,7 +194,7 @@ Metrics2.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcMetrics2"></div>
         
-<h3>A two-series Metrics Chart - Horizontal</h2>
+<h3>A two-series Metrics Chart - Horizontal</h3>
 Same as above, with different orientation.<br>
 <textarea cols="55" rows="15" id="pvcMetrics3Code">
 var Metrics3 = new pvc.MetricLineChart({
@@ -221,7 +223,7 @@ Metrics3.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcMetrics3"></div>
         
-<h3>A Dot Metrics Chart</h2>
+<h3>A Dot Metrics Chart</h3>
 Same as previous charts, but dot instead of lines. This is a MetricDotChart.<br>
 <textarea cols="55" rows="15" id="pvcMetrics4Code">
 var Metrics4 = new pvc.MetricDotChart({
@@ -249,7 +251,7 @@ Metrics4.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcMetrics4"></div>        
 
-<h3>An Area Metrics Chart</h2>
+<h3>An Area Metrics Chart</h3>
 Same as above, but with a coloured area (showAreas=true).<br>
 <textarea cols="55" rows="15" id="pvcMetrics5Code">
 var Metrics5 = new pvc.MetricLineChart({

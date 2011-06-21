@@ -92,6 +92,8 @@ for&nbsp;Line chart extension points:
   <li>yAxis_</li>
   <li>xAxisRule_</li>
   <li>yAxisRule_</li>
+  <li>xAxisScale_</li>
+  <li>yAxisScale_</li>
   <li>xAxisRuleGrid_</li>
   <li>yAxisRuleGrid_</li>
   <li>tooltip_</li>
@@ -109,7 +111,7 @@ Sample extension points:<br>
 </ul>
 
 <h2>Examples</h2>
-<h3>A Simple Line chart</h2>
+<h3>A Simple Line chart</h3>
 The following is a line chart displaying three time series.<br>
 <textarea cols="55" rows="15" id="pvcLine1Code">
         var line1 = new pvc.LineChart({
@@ -144,7 +146,7 @@ The following is a line chart displaying three time series.<br>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine1"></div>
 
-<h3>A Decorated Line chart</h2>
+<h3>A Decorated Line chart</h3>
 A simple line chart can be enhanced as for example adding a background grid, or drawing the dots 
 that connect the lines.<br>
 <textarea cols="55" rows="15" id="pvcLine2Code">
@@ -186,7 +188,6 @@ that connect the lines.<br>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine2"></div>
         
-    </script>
 
   </body>
 </html>

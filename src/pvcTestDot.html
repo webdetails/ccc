@@ -87,6 +87,8 @@ for&nbsp;Dot chart extension points:
   <li>yAxis_</li>
   <li>xAxisRule_</li>
   <li>yAxisRule_</li>
+  <li>xAxisScale_</li>
+  <li>yAxisScale_</li>
   <li>xAxisRuleGrid_</li>
   <li>yAxisRuleGrid_</li>
   <li>tooltip_</li>
@@ -101,7 +103,7 @@ Sample extension points:<br>
 </ul>
 
 <h2>Examples</h2>
-<h3>A Simple Dot Chart</h2>
+<h3>A Simple Dot Chart</h3>
 Here you have a very simple dot chart.<br>
 <textarea cols="55" rows="15" id="pvcDot1Code">
           var dot1 = new pvc.DotChart({
@@ -124,7 +126,7 @@ Here you have a very simple dot chart.<br>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcDot1"></div>
 
-<h3>An attractive dot chart</h2>
+<h3>An attractive dot chart</h3>
 The simplest dot chart can become more attractive by setting some properties as for example
 the shape or color for the dots.<br>
 <textarea cols="55" rows="15" id="pvcDot2Code">
@@ -160,7 +162,7 @@ the shape or color for the dots.<br>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcDot2"></div>
 
-<h3>A Time series dot chart</h2>
+<h3>A Time series dot chart</h3>
 To use a dot chart to render a time series, just set the timeSeries to true, and set the timeSeriesFormat property.<br>
 <textarea cols="55" rows="15" id="pvcDot3Code">
   var dot3 = new pvc.DotChart({
@@ -200,7 +202,6 @@ To use a dot chart to render a time series, just set the timeSeries to true, and
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcDot3"></div>
         
-    </script>
 
   </body>
 </html>

@@ -89,6 +89,8 @@ for&nbsp;Bar extension points:
   <li>yAxisRule_</li>
   <li>xAxisRuleGrid_</li>
   <li>yAxisRuleGrid_</li>
+  <li>xAxisScale_</li>
+  <li>yAxisScale_</li>
   <li>tooltip_</li>
   <li>barLabel_</li>
   <li>barPanel_</li>
@@ -104,10 +106,11 @@ color&nbsp;and thickness.</li>
   <li>titleLabel_font</li>
   <li>yAxisRule_strokeStyle</li>
   <li>barLabel_textAngle</li>
+  <li>xAxisScale_dateTickPrecision</li>
 </ul>
 
 <h2>Examples</h2>
-<h3>A simple Bar chart</h2>
+<h3>A simple Bar chart</h3>
 For drawing a very simple bar chart, just provide the data and set the orientation of the bars.<br>  
 
 <textarea cols="55" rows="15" id="pvcBar1Code">
@@ -129,7 +132,7 @@ For drawing a very simple bar chart, just provide the data and set the orientati
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar1"></div>
 
-<h3>A Rich Bar chart</h2>
+<h3>A Rich Bar chart</h3>
 A simple bar chart can be enhanced by setting properties to the panel, bars, axis or legends.<br>
 
 <textarea cols="55" rows="15" id="pvcBar2Code">
@@ -178,7 +181,7 @@ A simple bar chart can be enhanced by setting properties to the panel, bars, axi
         <div id="pvcBar2"></div>
 
 
-<h3>A Stacked Bar chart</h2>
+<h3>A Stacked Bar chart</h3>
 You can represent a third dimension of data through a stack bar chart. In this way, a single bar on the chart can show data for more than one category of data.<br>
 To draw a stacked bar just set the stacked property to true. To a better understanding of the chart, consider configuring the Legend.<br>
 <textarea cols="55" rows="15" id="pvcBar3Code">
@@ -209,7 +212,6 @@ To draw a stacked bar just set the stacked property to true. To a better underst
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar3"></div>
         
-    </script>
 
   </body>
 </html>
