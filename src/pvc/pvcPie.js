@@ -113,8 +113,8 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
 
     var colors = this.chart.colors(pv.range(this.chart.dataEngine.getCategoriesSize()));
     var colorFunc = function(d){
-      // return colors(d.serieIndex)
-      return colors(this.index)
+      var cIdx = myself.chart.dataEngine.getVisibleCategoriesIndexes()[this.index];
+      return colors(cIdx);
     };
     
     this.data = this.chart.dataEngine.getVisibleValuesForSeriesIndex(0);
