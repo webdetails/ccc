@@ -25,7 +25,8 @@ pvc.PieChart = pvc.Base.extend({
       explodedSliceIndex: null,
       showTooltips: true,
       tooltipFormat: function(s,c,v){
-        return c+":  " + v + " (" + Math.round(v/this.sum*100,1) + "%)";
+        var val = this.chart.options.valueFormat(v);
+        return c+":  " + val + " (" + Math.round(v/this.sum*100,1) + "%)";
       }
     };
 
@@ -141,10 +142,9 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
       return a(d)
     })
     .text(function(d){
-      var v = myself.chart.options.valueFormat(d);
       var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
       var c = myself.chart.dataEngine.getVisibleCategories()[this.index]
-      return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+      return myself.chart.options.tooltipFormat.call(myself,s,c,d);
     })
 
     if(this.showTooltips){
@@ -159,8 +159,8 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
       this.pvPie
       .cursor("pointer")
       .event("click",function(d){
-        var s = myself.chart.dataEngine.getSeries()[this.parent.index]
-        var c = myself.chart.dataEngine.getCategories()[this.index]
+        var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
+        var c = myself.chart.dataEngine.getVisibleCategories()[this.index]
         return myself.chart.options.clickAction(s,c, d);
       });
     }
