@@ -43,6 +43,8 @@
 <h1> Demonstratie van boomstructuren voor tonen van dataverbanden</h1>
 
 
+  <div id="pvcDataTree2"> </div>
+
   <div id="pvcDataTree"> </div>
 
 
@@ -53,7 +55,6 @@
     // a local of the enclosing function
     globalSelect = 'team A';
 
-//    var parCoord = new pvc.ParallelCoordinates({
     var datTree = new pvc.DataTree({
     // legendPosition: "left",
     canvas: "pvcDataTree",
@@ -71,6 +72,25 @@
     datTree.setStructData(datTreeTestStructure_01);
 
     datTree.render();
+
+    // Now with bottom-height specified
+    var datTree2 = new pvc.DataTree({
+    // legendPosition: "left",
+    canvas: "pvcDataTree2",
+    width: 820,
+    height: 420,
+    title: "Demonstrating DataTree (with bottom and height specified)",
+    selectParam: "globalSelect",
+    structDatasource: "ds3"
+    });
+
+    // load fake data (otherwise function fails)        
+    datTree.setData(datTreeTestData_01, {crosstabMode: true,
+    seriesInRows: true});
+
+    datTree2.setStructData(datTreeTestStructure_02);
+
+    datTree2.render();
            
     });
 

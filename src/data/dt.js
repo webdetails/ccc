@@ -71,4 +71,41 @@ var datTreeTestData_01 = {
   ]
 };
 
+var datTreeTestStructure_02 = {
+  "resultset":[
+	       ["A1",  "Winst",   "winst", "sum", "B1 B2", 100, 70],
+	       [" B1",  "Bijdrage", "bijdrage", "sum", "", 300, 100],
+	       ["B2 ",  "Kosten", "kosten", "sum", "", 20, 200]
+  ],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"box_id"
+  },{
+    "colIndex":1,
+    "colType":"String",
+    "colName":"label"
+  },{
+    "colIndex":2,
+    "colType":"String",
+    "colName":"selector"
+  },{
+    "colIndex":3,
+    "colType":"String",
+    "colName":"aggregation"
+  },{
+    "colIndex":4,
+    "colType":"String",
+    "colName":"children"
+  },{
+    "colIndex":5,
+    "colType":"Integer",
+    "colName":"bottom"
+  },{
+    "colIndex":6,
+    "colType":"Integer",
+    "colName":"height"
+  }
+  ]
+};
 

@@ -245,6 +245,10 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     this.treeElements = de.getVisibleSeries();
     var values = de.getValues();
 
+    // if a fifth column is added, then
+    //  bottom and height are provided in the dataset.
+    var bottomHeightSpecified = (colLabels.length > 4);
+
     // trim al element labels (to allow for matching without spaces)
     for(var e in this.treeElements) 
       this.treeElements[e] = $.trim(this.treeElements[e]);
@@ -317,11 +321,15 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
       box.rowIndex = bnds.numRows - (row - bnds.min) - 1;
 
       box.left = this.leftOffs + box.colIndex * gridWidth;
-      box.bottom = this.botOffs + box.rowIndex * bnds.gridHeight
-        + bnds.relBottom;
       box.width = cellWidth;
-      box.height = bnds.cellHeight;
-
+      if (bottomHeightSpecified) {
+	  box.bottom = values[4][e];
+	  box.height = values[5][e];
+      } else {
+	  box.bottom = this.botOffs + box.rowIndex * bnds.gridHeight
+	      + bnds.relBottom;
+	  box.height = bnds.cellHeight;
+      }
       box.label = values[0][e];
       box.selector = values[1][e];
       box.aggregation = values[2][e];
