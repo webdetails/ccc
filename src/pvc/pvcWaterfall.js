@@ -72,7 +72,7 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
         // the axis-range computation is possible in "AbstractCategoricalAxis.
         this.callWithHiddenFirstSeries( this.base );
 
-        pvc.log("Prerendering in waterfallChart");
+        pvc.log("Prerendering in Bar- or WaterfallChart");
 
 
         this.wfChartPanel = new pvc.WaterfallChartPanel(this, {
@@ -120,7 +120,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     pvBarLabel: null,
     pvWaterfallLine: null,
     pvCategoryPanel: null,
-    pvSecondLie: null,
+    pvSecondLine: null,
     pvSecondDot: null,
     data: null,
   
@@ -332,7 +332,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
 
         /*
-     * fuctions to determine positions along base axis.
+     * functions to determine positions along base axis.
      */
         this.DF.basePositionFunc = stacked ?
         function(d){
@@ -400,8 +400,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         };
 
 
-        /*
-     * fuctions to determine the color palette.
+    /*
+     * functions to determine the color palette.
      */
         var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
         // colorFunc is used for the base dataseries
@@ -521,7 +521,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
         } else {   //  not this.stacked
 
-            // define a panel for each category label.
+            // define a container (panel) for each category label.
             // later the individuals bars of series will be drawn in 
             // these panels.
             this.pvBarPanel = this.pvPanel.add(pv.Panel)
@@ -533,7 +533,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.orthogonalLength[anchor]](
                 this[pvc.BasePanel.orthogonalLength[anchor]])
 
-            // next add the bars to the bar-contains in pvBarPanel
+            // next add the bars to the bar-containers in pvBarPanel
             this.pvBar = this.pvBarPanel.add(pv.Bar)
             .data(function(d){
                 var res = myself.chart.dataEngine
@@ -617,7 +617,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         }
 
         // Extend waterfall line
-        this.extend(this.pvWaterfallLine,"barWaterfallLine_");
+	if (this.waterfall)
+	    this.extend(this.pvWaterfallLine,"barWaterfallLine_");
 
         // Extend bar and barPanel
         this.extend(this.pvBar,"barPanel_");

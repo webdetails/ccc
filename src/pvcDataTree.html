@@ -43,9 +43,10 @@
 <h1> Demonstratie van boomstructuren voor tonen van dataverbanden</h1>
 
 
-  <div id="pvcDataTree2"> </div>
 
   <div id="pvcDataTree"> </div>
+
+  <div id="pvcDataTree2"> </div>
 
 
   <script type="text/javascript">
@@ -60,7 +61,7 @@
     canvas: "pvcDataTree",
     width: 820,
     height: 420,
-    title: "Demonstrating DataTree",
+    title: "Demonstrating DataTree (with auto-generated layout)",
     selectParam: "globalSelect",
     structDatasource: "ds2"
     });
@@ -79,13 +80,13 @@
     canvas: "pvcDataTree2",
     width: 820,
     height: 420,
-    title: "Demonstrating DataTree (with bottom and height specified)",
+    title: "Demonstrating DataTree (with user-defined coordinates)",
     selectParam: "globalSelect",
     structDatasource: "ds3"
     });
 
     // load fake data (otherwise function fails)        
-    datTree.setData(datTreeTestData_01, {crosstabMode: true,
+    datTree2.setData(datTreeTestData_01, {crosstabMode: true,
     seriesInRows: true});
 
     datTree2.setStructData(datTreeTestStructure_02);

@@ -1,9 +1,9 @@
 
 var datTreeTestStructure_01 = {
   "resultset":[
-  ["A1",  "Winst",   "winst", "sum", "B1 B2"],
-  [" B1",  "Bijdrage", "bijdrage", "sum", ""],
-  ["B2 ",  "Kosten", "kosten", "sum", ""]
+  ["A1",  "Profit",   "winst", "sum", "B1 B2"],
+  [" B1",  "Contribution-margin", "bijdrage", "sum", ""],
+  ["B2 ",  "Cost", "kosten", "sum", ""]
   ],
   "metadata":[{
     "colIndex":0,
@@ -31,29 +31,29 @@ var datTreeTestStructure_01 = {
 
 var datTreeTestData_01 = {
   "resultset":[
-  ["winst", "_five", 10],
-  ["winst", "_twentyfive", 30],
-  ["winst", "_fifty", 35],
-  ["winst", "_seventyfive", 40],
-  ["winst", "_ninetyfive", 50],
+  ["winst", "_p5", 10],
+  ["winst", "_p25", 30],
+  ["winst", "_p50", 35],
+  ["winst", "_p75", 40],
+  ["winst", "_p95", 50],
   ["winst", "team A", 45],
-  ["winst", "team B", 12],
+  ["winst", "team B", 17],
 
-  ["bijdrage", "_five", 1],
-  ["bijdrage", "_twentyfive", 2],
-  ["bijdrage", "_fifty", 3],
-  ["bijdrage", "_seventyfive", 4],
-  ["bijdrage", "_ninetyfive", 5],
-  ["bijdrage", "team A", 4],
-  ["bijdrage", "team B", 1],
+  ["bijdrage", "_p5", 10],
+  ["bijdrage", "_p25", 30],
+  ["bijdrage", "_p50", 60],
+  ["bijdrage", "_p75", 80],
+  ["bijdrage", "_p95", 95],
+  ["bijdrage", "team A", 55],
+  ["bijdrage", "team B", 77],
 
-  ["kosten", "_five", 5],
-  ["kosten", "_twentyfive", 25],
-  ["kosten", "_fifty", 50],
-  ["kosten", "_seventyfive", 75],
-  ["kosten", "_ninetyfive", 95],
-  ["kosten", "team A", 45],
-  ["kosten", "team B", 12]
+  ["kosten", "_p5", 3],
+  ["kosten", "_p25", 20],
+  ["kosten", "_p50", 50],
+  ["kosten", "_p75", 60],
+  ["kosten", "_p95", 80],
+  ["kosten", "team A", 10],
+  ["kosten", "team B", 60]
   ],
   "metadata":[{
     "colIndex":0,

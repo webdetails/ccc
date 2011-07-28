@@ -389,14 +389,16 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
       dat.push(this.findDataValue("_p95", elem.values));
 
       var noBox = false;
+
+      // switch order (assume computational artifact)
+      if (dat[4] < dat[0]) {
+        dat = dat.reverse();
+        pvc.log(" dataset "+ elem.box_id +
+		" repaired (_p95 was smaller than _p5)");
+        }
       if (dat[4] > dat[0])
         sp.hScale = pv.Scale.linear( dat[0], dat[4]);
       else {
-        if (dat[4] < dat[0]) {
-          pvc.log(" dataset "+ box_id + " has invalid statistics");
-          sp.hScale = null;
-          continue;
-        }
         noBox = true;
         // generate a fake scale centered around dat[0] (== dat[4])
         sp.hScale = pv.Scale.linear( dat[0] - 1e-10, dat[0] + 1e-10);
