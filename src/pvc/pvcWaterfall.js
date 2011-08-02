@@ -596,9 +596,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .cursor("pointer")
             .event("click",function(d){
                 var s = myself.chart.dataEngine
-                .getSeries()[myself.stacked?this.parent.index:this.index]
+                .getVisibleSeries()[myself.stacked?this.parent.index:this.index]
                 var c = myself.chart.dataEngine
-                .getCategories()[myself.stacked?this.index:this.parent.index]
+                .getVisibleCategories()[myself.stacked?this.index:this.parent.index]
                 return myself.chart.options.clickAction(s,c, d);
             });
         }
