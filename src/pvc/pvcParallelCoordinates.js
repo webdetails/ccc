@@ -1,4 +1,3 @@
-
 /**
  * Parallel coordinates offer a way to visualize data and make (sub-)selections
  * on this dataset.
@@ -95,6 +94,12 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
   },
 
+    /*****
+     * retrieve the data from database and transform it to maps.
+     *    - this.dimensions: all dimensions
+     *    - this.dimensionDescr: description of dimensions
+     *    - this.data: array with hashmap per data-point
+     *****/
   retrieveData: function () {
     var de = this.chart.dataEngine;
     var numDigit = this.chart.options.numDigits;
@@ -116,19 +121,21 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     // categorical or numerical!
     var pCoordMapping = (this.chart.options.mapAllDimensions) ?
       pCoordIndex.map( function(d) {return (isNaN(values[d][0])) ? 
-              {categorical: true, len: 0, map: new Array() } : 
+              {categorical: true, len: 0, map: [] } : 
                              {categorical: false, len: 0,
-                                 map: new Array(), theValue: new Array() }; })
+                                 map: [], theValue: [] }; })
     : pCoordIndex.map( function(d) {return (isNaN(values[d][0])) ? 
-              {categorical: true, len: 0, map: new Array() } : 
+              {categorical: true, len: 0, map: [] } : 
               null; }) ;
-    // ... and a function to update the mapping
-    //  For non-categorical value the original-value is store in theValue
+  
+      // ... and a function to update the mapping
+      //  For non-categorical value the original-value is store in theValue
     var coordMapping = function(i, val) {
       var cMap = pCoordMapping[i];
+      var k = null; // define in outer scope.
       if (cMap.categorical == false) {
         var keyVal = val.toFixed(numDigit);   // force the number to be a string
-        var k = cMap.map[keyVal];
+        k = cMap.map[keyVal];
         if (k == null) {
           k = cMap.len;
           cMap.len++;
@@ -136,7 +143,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
           cMap.theValue[keyVal] = val;
         }
       } else {
-        var k = cMap.map[val];
+        k = cMap.map[val];
         if (k == null) {
           k = cMap.len;
           cMap.len++;
@@ -159,10 +166,10 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
          if (pCoordMapping[i]) {
            // add all data
            for (var col=0; col<values[i].length; col++)
-             coordMapping(i, values[i][col])
+               coordMapping(i, values[i][col]);
            // create a sorted array
            var cMap = pCoordMapping[i].map;
-           var sorted = new Array();
+           var sorted = [];
            for(var item in cMap)
              sorted.push(item);
            sorted.sort();
@@ -181,34 +188,34 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     //   (key-value pairs) 
     //   closure uses pCoordKeys and values
     var generateHashMap = function(col) {
-      var record = new Object();
+      var record = {};
       for(var i in pCoordIndex) {
          record[pCoordKeys[i]] = (pCoordMapping[i]) ?
           coordMapping(i, values[i][col]) :
           values[i][col];
       }
       return record;
-    }
+    };
     // generate array with a hashmap per data-point
-    this.data = dataRowIndex.map(function(col) { return generateHashMap (col)})
+      this.data = dataRowIndex.map(function(col) { return generateHashMap (col)});
 
     
     //generate a description of the parallel-dimensions
     var descrVals = this.dimensions.map(function(cat)
            {
-             var item = new Object();
+             var item = {};
              // the part after "__" is assumed to be the units
              var elements = cat.split("__");
-             item["id"] = cat;
-             item["name"] = elements[0];
-             item["unit"] = (elements.length >1)? elements[1] : "";
+             item.id = cat;
+             item.name = elements[0];
+             item.unit = (elements.length >1)? elements[1] : "";
              return item;
            });
     // extend the record with min, max and step
     for(var i=0; i<descrVals.length; i++) {
       var item = descrVals[i];
       var index = pCoordIndex[i];
-      item["orgRowIndex"] = index;
+      item.orgRowIndex = index;
 
       // determine min, max and estimate step-size
       var len = values[index].length;
@@ -249,22 +256,20 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       }   // end else:  coordinate mapping applied
 
       var theStep = ((theMax - theMax2) + (theMin2-theMin))/2;
-      item["min"] = theMin;
-      item["max"] = theMax;
-      item["step"] = theStep;
+      item.min = theMin;
+      item.max = theMax;
+      item.step = theStep;
 
       // include the mapping in the 
-      item["categorical"] = false; 
-//      item["theValue"] = null;
+      item.categorical = false; 
       if (pCoordMapping[index]) {
-        item["map"] = pCoordMapping[index].map;
-//        item["theValue"] = pCoordMapping[index].theValue;
-        item["mapLength"] = pCoordMapping[index].len;
-        item["categorical"] = pCoordMapping[index].categorical; 
+        item.map = pCoordMapping[index].map;
+        item.mapLength = pCoordMapping[index].len;
+        item.categorical = pCoordMapping[index].categorical; 
 
         // create the reverse-mapping from key to original value
         if (item.categorical == false) {
-          item["orgValue"] = new Array();
+          item.orgValue = [];
           var theMap =  pCoordMapping[index].map;
           for (key in theMap)
             item.orgValue[ theMap[key] ] = 0.0+key;
@@ -275,11 +280,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     // generate a object using the given set of keys and values
     //  (map from keys[i] to vals[i])
     var genKeyVal = function (keys, vals) {
-       var record = new Object();
+       var record = {};
       for (var i = 0; i<keys.length; i++)
          record[keys[i]] = vals[i];
       return record;
-    }
+    };
     this.dimensionDescr = genKeyVal(this.dimensions, descrVals);
     
     return;
@@ -336,8 +341,8 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
         var func = function(x) { var res = scale( dd.orgValue[x]);
                       return res; };
         // wire domain() and invert() to the original scale
-        func["domain"] = function() { return scale.domain(); };
-        func["invert"] = function(d) { return scale.invert(d); };
+        func.domain = function() { return scale.domain(); };
+        func.invert = function(d) { return scale.invert(d); };
         return func;
       }
       else
@@ -369,11 +374,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
               var dd = dimDescr[t];
               var val = (dd.orgValue && (dd.categorical == false)) ?
                 dd.orgValue[d[t]] : d[t];
-              return (val >= filter[t].min) && (val <= filter[t].max) }
+		return (val >= filter[t].min) && (val <= filter[t].max); }
         )}
     : function(d) { return dims.every(  
             function(t) {
-              return (d[t] >= filter[t].min) && (d[t] <= filter[t].max) }
+		return (d[t] >= filter[t].min) && (d[t] <= filter[t].max); }
         )};
  
 
@@ -387,9 +392,9 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       .visible(selectVisible)
       .add(pv.Line)
       .data(dims)
-      .left(function(t, d) { return x(t)})
+	  .left(function(t, d) { return x(t); } )
       .bottom(function(t, d) { var res = y[t] (d[t]);
-                      return res})
+			       return res; })
       .strokeStyle("#ddd")
       .lineWidth(1)
       .antialias(false);
@@ -410,7 +415,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     // add labels on the categorical dimension
     //  compute the array of labels
-    var labels = new Array();
+    var labels = [];
     var labelXoffs = 6,
     labelYoffs = 3;
     for(d in dimDescr) {
@@ -422,7 +427,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
             x:  xVal,
             y:  y[dim.id](dim.map[l]) + labelYoffs,
             label: l
-          }
+          };
       }
     }
     var dimLabels = this.pvPanel.add(pv.Panel)
