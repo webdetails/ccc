@@ -400,8 +400,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             min = min !== 0 ? min * 0.99 : this.options.originIsZero ? 0 : -0.1;
             max = max !== 0 ? max * 1.01 : 0.1;
         }
-        if(min > 0 && this.options.originIsZero){
-            min = 0
+        if(min * max > 0 && this.options.originIsZero){
+            if(min > 0){
+                min = 0;
+            }else{
+                max = 0;
+            }
         }
 
         // CvK:  added to set bounds
@@ -417,7 +421,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Adding a small offset to the scale:
         var offset = (max - min) * this.options.axisOffset;
-        var scale = new pv.Scale.linear(min - offset,max + offset)
+        var scale = new pv.Scale.linear(min - (this.options.originIsZero && min == 0 ? 0 : offset),max + (this.options.originIsZero && max == 0 ? 0 : offset));
 
 
         if( !isVertical && this.options.yAxisPosition == "left"){
@@ -505,13 +509,17 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var max = this.dataEngine.getSecondAxisMax();
         var min = this.dataEngine.getSecondAxisMin();
 
-        if(min > 0 && this.options.secondAxisOriginIsZero){
-            min = 0
+        if(min * max > 0 && this.options.secondAxisOriginIsZero){
+            if(min > 0){
+                min = 0;
+            }else{
+                max = 0;
+            }
         }
 
         // Adding a small offset to the scale:
         var offset = (max - min) * this.options.secondAxisOffset;
-        var scale = new pv.Scale.linear(min - offset,max + offset)
+        var scale = new pv.Scale.linear(min - (this.options.secondAxisOriginIsZero && min == 0 ? 0 : offset),max + (this.options.secondAxisOriginIsZero && max == 0 ? 0 : offset));
 
 
         if( !isVertical && this.options.yAxisPosition == "left"){
