@@ -95,6 +95,7 @@ pvc.Base = Base.extend({
         }
 
         // Getting data engine and initialize the translator
+        this.dataEngine.clearDataCache();
         this.dataEngine.setData(this.metadata,this.resultset);
         this.dataEngine.setCrosstabMode(this.options.crosstabMode);
         this.dataEngine.setSeriesInRows(this.options.seriesInRows);
