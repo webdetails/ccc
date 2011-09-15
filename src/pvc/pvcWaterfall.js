@@ -308,7 +308,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         /** end fix **/
         var l2Scale = this.chart.getSecondScale(true);
         var oScale = this.chart.getOrdinalScale(true);
-        var bSCale = null;
+        var bScale = null;
 
         // determine barPositionOffset and bScale
         this.DF.maxBarSize = null;
@@ -355,7 +355,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
         this.DF.catContainerBasePosFunc = (stacked) ? null :
         function(d){
-            return oScale(this.index);
+            return oScale(myself.chart.dataEngine.getVisibleCategories()[d]);
         };
 
         this.DF.catContainerWidth = (stacked) ? null :
