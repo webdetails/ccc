@@ -390,66 +390,68 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
 
       var noBox = false;
 
-      // switch order (assume computational artifact)
-      if (dat[4] < dat[0]) {
-        dat = dat.reverse();
-        pvc.log(" dataset "+ elem.box_id +
-		" repaired (_p95 was smaller than _p5)");
+	if (typeof(dat[2]) != "undefined") {
+        // switch order (assume computational artifact)
+        if (dat[4] < dat[0]) {
+          dat = dat.reverse();
+          pvc.log(" dataset "+ elem.box_id +
+	  	" repaired (_p95 was smaller than _p5)");
+          }
+        if (dat[4] > dat[0])
+          sp.hScale = pv.Scale.linear( dat[0], dat[4]);
+        else {
+          noBox = true;
+          // generate a fake scale centered around dat[0] (== dat[4])
+          sp.hScale = pv.Scale.linear( dat[0] - 1e-10, dat[0] + 1e-10);
         }
-      if (dat[4] > dat[0])
-        sp.hScale = pv.Scale.linear( dat[0], dat[4]);
-      else {
-        noBox = true;
-        // generate a fake scale centered around dat[0] (== dat[4])
-        sp.hScale = pv.Scale.linear( dat[0] - 1e-10, dat[0] + 1e-10);
-      }
-      sp.hScale.range(elem.left + rlMargin, elem.left + elem.width - rlMargin);
-      var avLabel = "" + dat[2];   // prepare the label
+        sp.hScale.range(elem.left + rlMargin, elem.left + elem.width - rlMargin);
+        var avLabel = "" + dat[2];   // prepare the label
 
-      for(var i=0; i< dat.length; i++) dat[i] = sp.hScale( dat[i]) 
+        for(var i=0; i< dat.length; i++) dat[i] = sp.hScale( dat[i]) 
 
-      sp.bot = elem.bottom + elem.height / 3,
-      sp.top = elem.bottom + 2 * elem.height / 3,
-      sp.mid = (sp.top + sp.bot) / 2;   // 2/3 of height
-      sp.textBottom = elem.bottom + margin;
-      sp.textBottom = sp.bot - opts.valueFontsize - 1;
+        sp.bot = elem.bottom + elem.height / 3,
+        sp.top = elem.bottom + 2 * elem.height / 3,
+        sp.mid = (sp.top + sp.bot) / 2;   // 2/3 of height
+        sp.textBottom = elem.bottom + margin;
+        sp.textBottom = sp.bot - opts.valueFontsize - 1;
 
-      // and add the new set of rules for a box-plot.
-      var lwa = 3;   // constant for "lineWidth Average"
-      if (noBox) {
-          sp.vRules.push({"left": dat[0],
+        // and add the new set of rules for a box-plot.
+        var lwa = 3;   // constant for "lineWidth Average"
+        if (noBox) {
+            sp.vRules.push({"left": dat[0],
                           "bottom": sp.bot,
                           "lWidth": lwa,
                           "height": sp.top - sp.bot});
-      } else {
-        sp.hRules.push({"left": dat[0],
+        } else {
+          sp.hRules.push({"left": dat[0],
                         "width":  dat[1] - dat[0],
                         "lWidth": 1,
                         "bottom": sp.mid});
-        sp.hRules.push({"left": dat[1],
+          sp.hRules.push({"left": dat[1],
                         "width":  dat[3] - dat[1],
                         "lWidth": 1,
                         "bottom": sp.bot});
-        sp.hRules.push({"left": dat[1],
+          sp.hRules.push({"left": dat[1],
                         "width":  dat[3] - dat[1],
                         "lWidth": 1,
                         "bottom": sp.top});
-        sp.hRules.push({"left": dat[3],
+          sp.hRules.push({"left": dat[3],
                         "width":  dat[4] - dat[3],
                         "lWidth": 1,
                         "bottom": sp.mid});
-        for(var i=0; i<dat.length; i++)
-          sp.vRules.push({"left": dat[i],
+          for(var i=0; i<dat.length; i++)
+            sp.vRules.push({"left": dat[i],
                           "bottom": sp.bot,
                           "lWidth": (i == 2) ? lwa : 1,
                           "height": sp.top - sp.bot});
-      }
+        }
 
-      sp.labels.push({left: dat[2],
+        sp.labels.push({left: dat[2],
                       bottom: sp.textBottom,
                       text: this.labelFixedDigits(avLabel),
                       size: opts.smValueFont,
                       color: opts.boxplotColor});
+    }
     }
   } ,
 
