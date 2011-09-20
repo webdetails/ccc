@@ -295,7 +295,7 @@ pvc.DataEngine = Base.extend({
 
     
     /*
-     * Clears the cache that's user for optimization
+     * Clears the cache that's used for optimization
      *
      */
 

@@ -234,6 +234,10 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
 
     getDataSet:  function() {
+        
+        //clear needed to force re-fetch of visible series
+        this.chart.dataEngine.clearDataCache();
+        
         var dataset = null
         // check whether it does not kill the source-data    
         dataset = this.stacked ?  
