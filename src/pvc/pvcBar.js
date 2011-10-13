@@ -9,7 +9,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
     constructor: function(o){
 
         this.base(o);
-
+        var myself = this;
         var _defaults = {
             showValues: true,
             stacked: false,
@@ -22,7 +22,15 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
             showTooltips: true,
             orientation: "vertical",
             orthoFixedMin: null,
-            orthoFixedMax: null
+            orthoFixedMax: null,
+            tooltipFormat: function(s,c,v){
+                var ret = s+", "+c+":  " + myself.options.valueFormat(v);
+                if (myself.options.stacked && myself.options.percentage) {
+                    ret = ret + "%";
+                }
+                return ret;
+            }
+
         };
 
 

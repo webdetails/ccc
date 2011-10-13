@@ -423,6 +423,39 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
+     * Returns the transposed values converted to percentages
+     */
+    getVisibleTransposedPercentages: function() {
+        var data = pvc.padMatrixWithZeros(this.getVisibleTransposedValues());
+        // this is data[series][category] - so first sum up the category data for each series, and get it's total
+        // then return the percentages
+        var categoryTotals = [];
+        for (var i = 0; i < data.length; i++) {
+            var series = data[i];
+            for (var j = 0; j < series.length; j++) {
+                var curTotal = categoryTotals[j];
+                if (typeof curTotal == "undefined" || curTotal == null) {
+                    curTotal = series[j];
+                }
+                else {
+                    curTotal = curTotal + series[j]
+                }
+                categoryTotals[j] = curTotal;
+
+            }
+        }
+
+        data = data.map(function(v) {
+            var cur = 0;
+            return v.map(function(a) {
+                var tot = categoryTotals[cur++];
+                return (tot == undefined || tot == null) ? 0 : (a * 100) / tot;
+            })
+        })
+        return data;
+    },
+
+    /*
      * Returns the values for a given series idx
      *
      */
