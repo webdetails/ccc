@@ -257,13 +257,11 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     var oScale = this.chart.getOrdinalScale(true);
     var tScale;
     if(this.timeSeries){
-      tScale = this.chart.getTimeseriesScale(true);
+      tScale = this.chart.getTimeseriesScale(true,true);
     }
     
     var parser = pv.Format.date(this.timeSeriesFormat);
     
-    var maxLineSize;
-
     var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
     var colorFunc = function(d){
       // return colors(d.serieIndex)

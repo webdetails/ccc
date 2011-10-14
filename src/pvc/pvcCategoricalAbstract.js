@@ -260,12 +260,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         if (this.options.orientation == "vertical") {
             scale = this.options.timeSeries  ?
-            this.getTimeseriesScale()     :
+            this.getTimeseriesScale(false,true)     :
             this.getOrdinalScale();
         } else {
             scale =  (this.options.orthoAxisOrdinal) ?
             this.getPerpOrdinalScale("x")    :
-            this.getLinearScale();
+            this.getLinearScale(false,true);
         } 
 
         return scale;
@@ -373,7 +373,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
     /**
     **/
-    getLinearScale: function(bypassAxis){
+    getLinearScale: function(bypassAxis,bypassOffset){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
@@ -421,6 +421,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Adding a small offset to the scale:
         var offset = (max - min) * this.options.axisOffset;
+        offset = bypassOffset?0:offset;
         var scale = new pv.Scale.linear(min - (this.options.originIsZero && min == 0 ? 0 : offset),max + (this.options.originIsZero && max == 0 ? 0 : offset));
 
 
@@ -447,11 +448,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise
      *
      */
-    getTimeseriesScale: function(bypassAxis){
+    getTimeseriesScale: function(bypassAxis,bypassOffset){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
-        var secondAxisSize = bypassAxis?0:this.options.secondAxisSize;
 
         var size = this.options.orientation=="vertical"?
         this.basePanel.width:
@@ -465,8 +465,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Adding a small offset to the scale:
         var max = parser.parse(categories[categories.length -1]);
-        var min = parser.parse(categories[0]);
+        var min = parser.parse(categories[0]);        
         var offset = (max.getTime() - min.getTime()) * this.options.axisOffset;
+        offset = bypassOffset?0:offset;
 
         var scale = new pv.Scale.linear(new Date(min.getTime() - offset),new Date(max.getTime() + offset));
 
