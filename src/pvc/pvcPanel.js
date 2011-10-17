@@ -177,7 +177,7 @@ pvc.Base = Base.extend({
             }
 
             if( typeof this.options.renderCallback !== "undefined" ){
-                this.options.renderCallback();
+                this.options.renderCallback.call(this);
             }
         
             this.basePanel.getPvPanel().render();
