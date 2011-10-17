@@ -22,6 +22,8 @@ pvc.Base = Base.extend({
     legendSource: "series",
     colors: null,
 
+    // renderCallback
+    renderCallback: undefined,
 
     constructor: function(options){
         var myself = this;
@@ -174,6 +176,10 @@ pvc.Base = Base.extend({
                 this.preRender();
             }
 
+            if( typeof this.options.renderCallback !== "undefined" ){
+                this.options.renderCallback();
+            }
+        
             this.basePanel.getPvPanel().render();
     
             if(this.options.animate == true && !bypassAnimation){
