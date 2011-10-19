@@ -99,8 +99,11 @@ pvc.Base = Base.extend({
         this.dataEngine.setData(this.metadata,this.resultset);
         this.dataEngine.setCrosstabMode(this.options.crosstabMode);
         this.dataEngine.setSeriesInRows(this.options.seriesInRows);
+        //TODO: new
         this.dataEngine.setMultiValued(this.options.isMultiValued);
         this.dataEngine.setValuesIndexes(this.options.measuresIndexes);//columns where measure values are, for relational data
+        this.dataEngine.setDataOptions(this.options.dataOptions);
+        //end
         this.dataEngine.createTranslator();
         
 

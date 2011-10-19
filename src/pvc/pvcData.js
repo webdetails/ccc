@@ -856,6 +856,9 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
         this.crosstabMode = crosstabMode;
         /*this.measuresIdx = measuresIdx; *///measuresIdx : when measures are normalized
         this.dataOptions = dataOptions;
+        
+        if(this.dataOptions == null) this.dataOptions = {};//TODO:
+        
     },
     
     prepareImpl: function()
