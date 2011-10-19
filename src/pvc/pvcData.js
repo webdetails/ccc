@@ -835,7 +835,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
         // Create an initial line with the categories
         var l1 = series;
         l1.splice(0,0,"x");
-        this.values.splice(0,0, l1)
+        this.values.splice(0,0, l1);
  
     },
     
@@ -863,6 +863,9 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
     
     prepareImpl: function()
     {
+        //TODO: hcoded:
+        var separator = '~';
+        
         //categories
         var categoriesIdx = this.dataOptions.categoriesIdx;
         if(categoriesIdx == null) { categoriesIdx = [1];}
@@ -877,13 +880,32 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
             if(this.dataOptions.measuresInColumns || this.dataOptions.measuresIdx == null) //TODO: 
             {//series1/measure1, series1/measure2...
                 // line
-                var a1 = this.metadata.slice(1).map(function(d){
+                var cols = this.metadata.slice(1).map(function(d){
                     return d.colName;
                 });
-                a1.splice(0,0,"x");
-                //TODO: more measures here
-                this.values = pvc.cloneMatrix(this.resultset).map(function(row){ return row.map(function(d){ return [d];}); });
-                this.values.splice(0,0,a1);
+                
+                //a1 now series1~measure1 | .. | series1~measureN | series2~measure1 |..| seriesM~measureN
+                var lastColName = null;
+                var colNames = [];
+                var measures = null;
+                var measuresStart = pv.max(categoriesIdx);
+                for(var i = measuresStart; i< cols.length; i++){
+                    var col = cols[i];
+                    var sepIdx = col.lastIndexOf(separator);
+                    var colName = (sepIdx < 0)? '' : col.slice(0,sepIdx);
+                    if(colName != lastColName) {
+                        colNames.push(colName);
+                        lastColName = colName;
+                    }
+                }
+                var numMeasures = (cols.length - measuresStart) / colNames.length;
+                colNames.splice(0,0,"x");
+                //TODO: merge series
+                
+                //TODO: more measures here, single val as is; multi: will need to iterate and merge values
+                this.values = this.mergeMeasuresInColumns(this.resultset, measuresStart, numMeasures);
+                //this.values = pvc.cloneMatrix(this.resultset).map(function(row){ return row.map(function(d){ return [d];}); });
+                this.values.splice(0,0,colNames);
                 
             }
             else {//TODO: refactor
@@ -967,6 +989,22 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
             this.values = this.allValues;
         }
 
+    },
+    
+    
+    mergeMeasuresInColumns: function(values, startIdx, numMeasures)
+    {
+      return values.map(function(row, rowIdx){
+        var newRow = row.slice(0, startIdx);
+        for(var i=startIdx;i<row.length;i+=numMeasures){
+            var value = [];
+            for(var j =0; j < numMeasures;j++){
+                value.push(row[i+j]);
+            }
+            newRow.push(value);
+        }
+        return newRow;
+      });
     },
     
     addSeriesToMetadata: function(){

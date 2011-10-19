@@ -46,10 +46,12 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             xAxisClickAction: function(d){
                 self.heatGridChartPanel.selectXValue(d);
                 self.heatGridChartPanel.pvPanel.render();
+                self.heatGridChartPanel.triggerSelectionChange();
             },
             yAxisClickAction: function(d){ //TODO: move elsewhere
                 self.heatGridChartPanel.selectYValue(d);
                 self.heatGridChartPanel.pvPanel.render();
+                self.heatGridChartPanel.triggerSelectionChange();
             }
         };
 
@@ -123,11 +125,13 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     showValues: true,
     orientation: "vertical",
 
-
     //TODO:
   //  colorValIdx: 0,
     sizeValIdx: 0,
     defaultValIdx:0,
+    //function to be invoked when a selection occurs
+    // (shape click-select, row/column click and lasso finished)
+    onSelectionChange: null,
     
     selections: {},
     
@@ -159,6 +163,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.height = this._parent.height;
         
         this.colorValIdx = opts.colorValIdx;
+        
+        //event triggering
+        this.onSelectionChange = opts.onSelectionChange;
         
         //TODO:
         //var sizeValIdx = 0;
@@ -290,6 +297,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
                         var d = r[i];
                         myself.toggleSelection(s,c);
+                        myself.triggerSelectionChange();
+                        //TODO: classic clickAction
                         if($.isArray(d)) d= d[0];
                         myself.chart.options.clickAction(s,c,d);
                         myself.pvPanel.render();
@@ -365,6 +374,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     /*
      *selections - testing (start)
+     *TODO: transient, will have to change selection storage
      */
     
     initSelections:function(defaultValue){
@@ -434,6 +444,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       else { this.toggleSeries(x); }
     },
     
+    //pseudo-toggle elements with category c:
+    // deselect all if all selected, otherwise select all
     toggleCategories: function(c){
         var series = this.chart.dataEngine.getSeries();
         var selected = true;
@@ -449,6 +461,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             }
         }
     },
+    
+    //pseudo-toggle elements with series s:
+    // deselect all if all selected, otherwise select all
     toggleSeries: function(s){
         var categories = this.chart.dataEngine.getCategories();
         var selected = true;
@@ -467,6 +482,13 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     getSelectCount: function(){
         return this.getSelections().length;
+    },
+    
+    triggerSelectionChange: function(){
+        if(typeof(this.onSelectionChange) == 'function'){
+            var selections = this.getSelections();
+            this.onSelectionChange(selections);
+        }
     },
     
     /*
@@ -552,7 +574,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       }
       var theMax = max[cols[0]];
       for (var i=1; i<cols.length; i++){
-        if (max[cols[i]] < theMax) theMax = max[cols[i]];
+        if (max[cols[i]] > theMax) theMax = max[cols[i]];
       }
       var scale = pv.Scale.linear()
         .domain(theMin, theMax)
