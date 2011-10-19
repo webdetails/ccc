@@ -23,7 +23,13 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         this.options.orthoAxisOrdinal = true;
         this.options.orginIsZero = true;
 
+        var self = this;
         var _defaults = {
+            colorValIdx: 0,
+            sizeValIdx: 0,
+            defaultValIdx:0,
+            measuresIndexes: [2],
+            
             showValues: true,
             //originIsZero: true,
             axisOffset: 0,
@@ -36,8 +42,18 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             numSD: 2,                 // width (only for normal distribution)
             minColor: "white",
             maxColor: "darkgreen",
-            nullColor:  "#efc5ad"  // white with a shade of orange
+            nullColor:  "#efc5ad",  // white with a shade of orange
+            xAxisClickAction: function(d){
+                self.heatGridChartPanel.selectXValue(d);
+                self.heatGridChartPanel.pvPanel.render();
+            },
+            yAxisClickAction: function(d){ //TODO: move elsewhere
+                self.heatGridChartPanel.selectYValue(d);
+                self.heatGridChartPanel.pvPanel.render();
+            }
         };
+
+        
 
         // Apply options
         $.extend(this.options,_defaults, o);
@@ -54,7 +70,6 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         this.base();
 
         pvc.log("Prerendering in heatGridChart");
-
 
         this.heatGridChartPanel = new pvc.HeatGridChartPanel(this, {
             stacked: this.options.stacked,
@@ -109,10 +124,31 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     orientation: "vertical",
 
 
+    //TODO:
+  //  colorValIdx: 0,
+    sizeValIdx: 0,
+    defaultValIdx:0,
+    
+    selections: {},
+    
+    //measuresIndexes: [2],
+
     constructor: function(chart, options){
 
         this.base(chart,options);
 
+    },
+
+    getValue: function(d, i){
+        if($.isArray(d)) {
+            if(i != null) return d[i];
+            else return d[0];
+        }
+        else return d;
+    },
+    
+    getColorValue: function(d){
+        return this.getValue(d, this.colorValIdx);
     },
 
     create: function(){
@@ -121,10 +157,17 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var opts = this.chart.options;
         this.width = this._parent.width;
         this.height = this._parent.height;
+        
+        this.colorValIdx = opts.colorValIdx;
+        
+        //TODO:
+        //var sizeValIdx = 0;
+        //var colorValIdx = 1;
+        //var defaultValIdx = 0;
 
         this.pvPanel = this._parent.getPvPanel().add(this.type)
-        .width(this.width)
-        .height(this.height)
+            .width(this.width)
+            .height(this.height);
 
         var anchor = this.orientation == "vertical"?"bottom":"left";
 
@@ -138,8 +181,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         // create a mapping of the data that shows the columns (rows)
         data = origData.map(function(d){
             return pv.dict(cols, function(){
-                return  d[this.index]
-            })
+                return  d[this.index];
+            });
         });
         data.reverse();  // the colums are build from top to bottom
 
@@ -155,28 +198,112 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             w = h;
             h = tmp;
         }
+        
+        //reset selections
+        this.initSelections(false);
 
         this.pvHeatGrid = this.pvPanel.add(pv.Panel)
-        .data(cols)
-        [pvc.BasePanel.relativeAnchor[anchor]](function(){
-            return this.index * w
+            .data(cols)
+            [pvc.BasePanel.relativeAnchor[anchor]](function(){ //ex: datum.left(i=1 * w=15)
+                return this.index * w;
+                })
+            [pvc.BasePanel.paralelLength[anchor]](w)
+            .add(pv.Panel)
+            .data(data)
+            //[pvc.BasePanel.oppositeAnchor[anchor]]
+            [anchor]
+            (function(){
+                return this.index * h;
             })
-        [pvc.BasePanel.paralelLength[anchor]](w)
-        .add(pv.Panel)
-        .data(data)
-        [pvc.BasePanel.oppositeAnchor[anchor]](function(){
-            return this.index * h
-        })
-        [pvc.BasePanel.orthogonalLength[anchor]](h)
-        .fillStyle(function(dat, col){
-            return  (dat[col] != null) ? fill[col](dat[col]):opts.nullColor
-        })
-        .strokeStyle("white")
-        .lineWidth(1)
-        .antialias(false)
-        .text(function(d,f){
-          return d[f]});
+            [pvc.BasePanel.orthogonalLength[anchor]](h)
+            .antialias(false)
+            .strokeStyle("white");
+        
+        
+        //tooltip text
+         this.pvHeatGrid.text(function(d,f){
+              return myself.getValue(d[f]);
+         });
+         
+        //set coloring and shape / sizes if enabled
+       if(opts.useShapes){
+            //total max in data
+            var maxVal = pv.max(data, function(datum){// {col:value ..}
+                return pv.max( pv.values(datum).map(function(d){ return myself.getValue(d, this.sizeValIdx);})) ;
+            });
 
+            var maxRadius = Math.min(w,h) / 2 -2;
+            var maxArea = maxRadius * maxRadius ;//not *4, apparently treats as circle area
+            
+            var valueToRadius = function(value){
+                return value != null ? value/maxVal * maxRadius : Math.min(maxRadius,5) ;
+            };
+            
+            var valueToArea =  function(value){//
+                return value != null ? value/maxVal * maxArea : Math.min(maxArea,5);
+            }
+            
+            var valueToColor = function(value, i){
+                return  (value != null) ? fill[i](value) : opts.nullColor;
+            };
+            //this.pvPanel.def("selectCount", myself.getSelections().length);//TODO: remove selectCount
+            
+            this.shapes =
+                this.pvHeatGrid
+                    .add(pv.Dot)
+                    .def("selected", function(){
+                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                        return myself.isSelected(s,c);
+                    })
+                    .shape( function(r, ra ,i){
+                        return myself.getValue(r[i]) != null ? "circle" : "cross";
+                    })
+                    .shapeSize(function(r,ra, i) {
+                        return valueToArea(myself.getValue(r[i], myself.sizeValIdx));
+                    })
+                    .fillStyle(function(r, ra, i){
+                        //return valueToColor(r[i], i);
+                        if(myself.getColorValue(r[i]) == null) return opts.nullColor;
+                        var color=  fill[i](myself.getColorValue(r[i]));
+                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index]; 
+                        if(myself.getSelectCount() > 0 && !this.selected()){// !myself.isSelected(s,c)){ 
+                            //var gScale = color.r + color.g + color.b;
+                            //gScale = Math.floor(gScale / 3);
+                            //return new pv.rgb(gScale, gScale, gScale, 0.5);
+                            return color.alpha(0.5);
+                        }
+                        return color;
+                    })
+                    .lineWidth(function(r, ra, i){
+                        //var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                        //var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                        //return myself.isSelected(s,c)? 3 : 1;
+                        return this.selected()? 3 : 1;
+                    })
+                    .strokeStyle("black")
+                    .event("click", function(r,ra,i) {
+                        //this.selected(!this.selected());
+                        //myself.pvPanel.selectCount( myself.pvPanel.selectCount() + (this.selected() ? 1 : -1) );
+                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                        var d = r[i];
+                        myself.toggleSelection(s,c);
+                        if($.isArray(d)) d= d[0];
+                        myself.chart.options.clickAction(s,c,d);
+                        myself.pvPanel.render();
+                        //if (opts.clickable){
+                        //    return true;
+                        //}
+                    });
+       }
+       else
+       {//no shapes, apply color map to panel
+        this.pvHeatGrid.fillStyle(function(dat, col){
+             return  (dat[col] != null) ? fill[col](dat[col]) : opts.nullColor;
+         });
+       }
 
         // NO SUPPORT for overflow and underflow on HeatGrids
 
@@ -205,18 +332,25 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
         if(this.showValues){
             
+            var myself = this;
             var getValue = function(row, rowAgain, rowCol){
                 return row[rowCol];
             };
-            
             this.pvHeatGridLabel = this.pvHeatGrid
             .anchor("center")
             .add(pv.Label)
             .bottom(0)
             .text(getValue);
-
             // Extend heatGridLabel
             this.extend(this.pvHeatGridLabel,"heatGridLabel_");
+            
+            //TODO:change label color
+                            //var value = myself.getValue(row[rowCol], colorValIdx);
+                //var color = (value != null) ? fill[i](value) : opts.nullColor;
+                //if(color.r){
+                //    
+                //}
+            
         }
 
 
@@ -226,8 +360,151 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
         // Extend body
         this.extend(this.pvPanel,"chart_");
-
     },
+    
+    
+    /*
+     *selections - testing (start)
+     */
+    
+    initSelections:function(defaultValue){
+      this.selections = {};
+      var series = this.chart.dataEngine.getSeries();
+      var cats = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < series.length; i++ ){
+            this.selections[series[i]] = {};
+            for(var j = 0; j < cats.length; j++ ){
+                this.selections[series[i]][cats[j]] = defaultValue;
+            }
+      }
+    },
+    
+    isSelected: function(s,c){
+      return this.selections[s] ?
+        this.selections[s][c] :
+        false;
+    },
+    
+    addSelection: function(s,c){
+      if(!this.selections[s]) this.selections[s] = {};
+      this.selections[s][c] = true;
+    },
+    
+    removeSelection: function(s,c){
+      if(this.selections[s]){
+        this.selections[s][c] = false;
+      }
+    },
+    
+    toggleSelection: function(s,c){
+        if(this.isSelected(s,c)) this.removeSelection(s,c);
+        else this.addSelection(s,c);
+    },
+    
+    getSelections: function(){
+        return pv.flatten(this.selections).key("series").key("category").key("selected")
+            .array().filter(function(d) { return d.selected; });
+    },
+    
+    selectSeries: function(s){
+        var cats = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < cats.length; i++ ){
+            this.selections[s][cats[i]] = true;
+        }
+    },
+    selectCategories: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i = 0; i < series.length; i++ ){
+            //this.selections[series[i]][c] = true;
+            this.addSelection(series[i],c);
+        }
+    },
+    
+    selectXValue: function(y){
+      if(this.orientation == "vertical"){
+        this.toggleCategories(y);
+      }
+      else { this.toggleSeries(y); }
+    },
+    
+    selectYValue: function(x){
+      if(this.orientation == "horizontal"){
+        this.toggleCategories(x);
+      }
+      else { this.toggleSeries(x); }
+    },
+    
+    toggleCategories: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        var selected = true;
+        for(var i = 0; i < series.length; i++ ){
+            var s = series[i];
+            selected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+            //this.selections[series[i]][c] = true;
+        }
+        if(selected){
+            for(var i = 0; i < series.length; i++ ){
+                this.removeSelection(series[i],c);
+            }
+        }
+    },
+    toggleSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        var selected = true;
+        for(var i = 0; i < categories.length; i++ ){
+            var c = categories[i];
+            selected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+            //this.selections[series[i]][c] = true;
+        }
+        if(selected){
+            for(var i = 0; i < categories.length; i++ ){
+                this.removeSelection(s,categories[i]);
+            }
+        }
+    },
+    
+    getSelectCount: function(){
+        return this.getSelections().length;
+    },
+    
+    /*
+     *selections - testing (end)
+     */
+    
+    /**
+     * Get label color that will contrast with given bg color
+     */
+    getLabelColor: function(r, g, b){
+        var brightness = (r*299 + g*587 + b*114) / 1000;
+        if (brightness > 125) {
+            return '#000000';
+        } else {
+            return '#ffffff';
+        }
+    },
+    
+    
+    //mergeMeasureValues: function(rows, measureIndexes){
+    //    var newRows = [];
+    //    for(var i=0; i< rows.length; i++){
+    //        var row = rows[i];
+    //        var newRow = [];
+    //        var measures = [];
+    //        for(var col=0; col < row.length; col++){
+    //            //TODO: improve
+    //            if(measureIndexes.indexOf(col) < 0){
+    //                newRow.push(row[col]);
+    //            }
+    //            else measures.push(row[col]);
+    //        }
+    //        newRow.push(measures);
+    //        newRows.push(newRow);
+    //    }
+    //    return newRows;
+    //},
+    
   
   /***********
    * compute an array of fill-functions. Each column out of "cols" 
@@ -238,50 +515,51 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
    *         (where sd is the standards deviation)
    ********/
   getColorScale: function(data, cols) {
-    switch (this.chart.options.scalingType) {
-    case "normal": return this.getNormalColorScale(data, cols);
-    case "linear": return this.getLinearColorScale(data, cols);
-    default:
-      throw "Invalid option " + this.scaleType + " in HeatGrid"
+      switch (this.chart.options.scalingType) {
+      case "normal": return this.getNormalColorScale(data, cols, this.colorValIdx);//TODO:
+      case "linear": return this.getLinearColorScale(data, cols, this.colorValIdx);
+      default:
+        throw "Invalid option " + this.scaleType + " in HeatGrid";
     }
   },
 
-  getLinearColorScale: function (data, cols){
+  getLinearColorScale: function (data, cols, colorIdx){
     var fill;
     var opts = this.chart.options;
     // compute the mean and standard-deviation for each column
+    var myself = this;
     var min = pv.dict(cols, function(f){
       return pv.min(data, function(d){
-        return d[f]
-      })
+        return myself.getValue(d[f],colorIdx);
+      });
     });
     var max = pv.dict(cols, function(f){
       return pv.max(data, function(d){
-        return d[f]
-      })
+        return myself.getValue(d[f], colorIdx);
+      });
     });
 
     if (opts.normPerBaseCategory)  //  compute a scale-function for each column (each key
       fill = pv.dict(cols, function(f){
         return pv.Scale.linear()
           .domain(min[f], max[f])
-          .range(opts.minColor, opts.maxColor)
+          .range(opts.minColor, opts.maxColor);
       });
-     else {   // normalize over the whole array
+    else {   // normalize over the whole array
       var theMin = min[cols[0]];
-      for (var i=1; i<cols.length; i++)
+      for (var i=1; i<cols.length; i++) {
         if (min[cols[i]] < theMin) theMin = min[cols[i]];
-
+      }
       var theMax = max[cols[0]];
-      for (var i=1; i<cols.length; i++)
+      for (var i=1; i<cols.length; i++){
         if (max[cols[i]] < theMax) theMax = max[cols[i]];
-
+      }
       var scale = pv.Scale.linear()
         .domain(theMin, theMax)
         .range(opts.minColor, opts.maxColor);
       fill = pv.dict(cols, function(f){
-        return scale
-      })
+        return scale;
+      });
     }
 
     return fill;  // run an array of values to compute the colors per column
@@ -292,14 +570,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     var opts = this.chart.options;
     if (opts.normPerBaseCategory) {
       // compute the mean and standard-deviation for each column
+      var myself = this;
       var mean = pv.dict(cols, function(f){
         return pv.mean(data, function(d){
-          return d[f]
+          return myself.getValue(d[f]);
         })
       });
       var sd = pv.dict(cols, function(f){
         return pv.deviation(data, function(d){
-          return d[f]
+          myself.getValue(d[f]);
         })
       });
       //  compute a scale-function for each column (each key)
@@ -307,7 +586,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         return pv.Scale.linear()
           .domain(-opts.numSD * sd[f] + mean[f],
                   opts.numSD * sd[f] + mean[f])
-          .range(opts.minColor, opts.maxColor)
+          .range(opts.minColor, opts.maxColor);
       });
     } else {   // normalize over the whole array
       var mean = 0.0, sd = 0.0, count = 0;
@@ -318,12 +597,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             count++;
           }
       mean /= count;
-      for (var i=0; i<origData.length; i++)
-        for(var j=0; j<origData[i].length; j++)
+      for (var i=0; i<origData.length; i++){
+        for(var j=0; j<origData[i].length; j++){
           if (origData[i][j] != null){
             var variance = origData[i][j] - mean;
             sd += variance*variance;
           }
+        }
+      }
       sd /= count;
       sd = Math.sqrt(sd);
       
@@ -332,8 +613,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 opts.numSD * sd + mean)
         .range(opts.minColor, opts.maxColor);
       fill = pv.dict(cols, function(f){
-        return scale
-      })
+        return scale;
+      });
     }
 
     return fill;  // run an array of values to compute the colors per column

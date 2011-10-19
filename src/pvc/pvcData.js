@@ -25,6 +25,10 @@ pvc.DataEngine = Base.extend({
     visibleCategories: undefined,
     visibleSeriesIndexes: undefined,
     visibleSeries: undefined,
+    
+    //neu
+    isMultiValued: false,
+    valuesIndexes: null,
 
     constructor: function(chart){
 
@@ -32,7 +36,7 @@ pvc.DataEngine = Base.extend({
         this.hiddenData = {
             series:{},
             categories:{}
-        }
+        };
       
     },
 
@@ -48,9 +52,12 @@ pvc.DataEngine = Base.extend({
      */
 
     createTranslator: function(){
-
-        // Create the appropriate translator
-        if(this.crosstabMode){
+        
+        if(this.isMultiValued){
+            pvc.log("Creating MultiValueTranslator");
+            this.translator = new pvc.MultiValueTranslator(this.valuesIndexes, this.crosstabMode, this.dataOptions);  //TODO: 
+        }
+        else if(this.crosstabMode){
             pvc.log("Creating CrosstabTranslator");
             this.translator = new pvc.CrosstabTranslator();
         }
@@ -58,7 +65,7 @@ pvc.DataEngine = Base.extend({
             pvc.log("Creating RelationalTranslator");
             this.translator = new pvc.RelationalTranslator();
         }
-
+        
         this.translator.setData(this.metadata, this.resultset);
         this.translator.prepare(this);
 
@@ -418,9 +425,10 @@ pvc.DataEngine = Base.extend({
         var myself = this;
         var res = this.getVisibleSeriesIndexes().map(function(sIdx){
             return myself.getVisibleValuesForSeriesIndex(sIdx)
-        })
+        });
         return res;
     },
+
 
     /*
      * Returns the values for a given series idx
@@ -598,7 +606,7 @@ pvc.DataEngine = Base.extend({
 
     isCrosstabMode: function(){
         return this.crosstabMode;
-        pv.range(0,this.getSeriesSize())
+        //pv.range(0,this.getSeriesSize());
     },
 
     setSeriesInRows: function(seriesInRows){
@@ -607,11 +615,31 @@ pvc.DataEngine = Base.extend({
 
     isSeriesInRows: function(){
         return this.seriesInRows;
+    },
+    
+    setValuesIndexes: function(valuesIndexes){
+        this.valuesIndexes = valuesIndexes;
+    },
+    
+    setMultiValued: function(multiValue){
+        this.isMultiValued = !! multiValue;
+    },
+    
+    //TODO: in multiValued mode, have all options only related to data mapping in one object?
+    setDataOptions: function(dataOptions){
+        this.dataOptions = dataOptions;
     }
 
 });
 
 
+///*
+// * DataEngine that deals with multiple measures
+// */
+//pvc.MultiValuedDataEngine = pvc.DataEngine.extend({
+//    
+//    
+//});
 
 pvc.DataTranslator = Base.extend({
 
@@ -619,6 +647,7 @@ pvc.DataTranslator = Base.extend({
     metadata: null,
     resultset: null,
     values: null,
+    valuesMulti: null,
     secondAxisValues: null,
 
     constructor: function(){
@@ -633,7 +662,6 @@ pvc.DataTranslator = Base.extend({
 
     getValues: function(){
 
-
         // Skips first row, skips first col.
         return this.values.slice(1).map(function(a){
             return a.slice(1);
@@ -642,7 +670,6 @@ pvc.DataTranslator = Base.extend({
     },
 
     getSecondAxisValues: function(){
-
 
         // Skips first row
         return this.secondAxisValues.slice(1);
@@ -725,6 +752,7 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
         this.values = pvc.cloneMatrix(this.resultset);
         this.values.splice(0,0,a1);
 
+        
     }
   
 });
@@ -741,7 +769,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
         if(this.metadata.length == 2){
             // Adding a static serie
             this.resultset.map(function(d){
-                d.splice(0,0,"Serie");
+                d.splice(0,0,"Series");
             })
             this.metadata.splice(0,0,{
                 "colIndex":2,
@@ -786,7 +814,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
         var numeratedCategories = pv.numerate(categories);
 
 
-        // Finally, itetate through the resultset and build the new values
+        // Finally, iterate through the resultset and build the new values
 
         this.values = [];
         var categoriesLength = categories.length;
@@ -804,14 +832,240 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
             pvc.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
         })
 
-        // Create an inicial line with the categories
+        // Create an initial line with the categories
         var l1 = series;
         l1.splice(0,0,"x");
         this.values.splice(0,0, l1)
  
+    },
+    
+    getValueFromResultSetRow : function(resultSetRow){
+        return resultSetRow[2];
     }
 
 
 });
+
+
+
+pvc.MultiValueTranslator = pvc.DataTranslator.extend({
+    
+    constructor: function(valuesIndexes, crosstabMode, dataOptions)//measuresIdx , categoriesIndexes) //seriesIndexes, numMeasures(1), 
+    {
+        this.valuesIndexes = valuesIndexes;
+        this.crosstabMode = crosstabMode;
+        /*this.measuresIdx = measuresIdx; *///measuresIdx : when measures are normalized
+        this.dataOptions = dataOptions;
+    },
+    
+    prepareImpl: function()
+    {
+        //categories
+        var categoriesIdx = this.dataOptions.categoriesIdx;
+        if(categoriesIdx == null) { categoriesIdx = [1];}
+        else if(!$.isArray(categoriesIdx)) { categoriesIdx = [categoriesIdx]; }
+        
+        if(this.crosstabMode){
+            
+            //2 modes here:
+            // 1) all measures in one column
+            // 2) measures with separator mixed with series (TODO!) -- regular crosstab mode
+            
+            if(this.dataOptions.measuresInColumns || this.dataOptions.measuresIdx == null) //TODO: 
+            {//series1/measure1, series1/measure2...
+                // line
+                var a1 = this.metadata.slice(1).map(function(d){
+                    return d.colName;
+                });
+                a1.splice(0,0,"x");
+                //TODO: more measures here
+                this.values = pvc.cloneMatrix(this.resultset).map(function(row){ return row.map(function(d){ return [d];}); });
+                this.values.splice(0,0,a1);
+                
+            }
+            else {//TODO: refactor
+            
+                //TODO: PASS VARS
+                var measuresIdx = this.dataOptions.measuresIdx;
+                if(measuresIdx == null) { measuresIdx = 1;}
+                var numMeasures = this.dataOptions.numMeasures;
+                if (numMeasures == null) { numMeasures = 1; } 
+                
+                var a1 = this.metadata.slice(measuresIdx + 1).map(function(d){
+                    return d.colName;
+                });
+                a1.splice(0,0,"x");
+        
+                //var values = pvc.cloneMatrix(this.resultset);
+                this.values = [];
+                var newRow = [];
+                var row;
+                for(var i=0; i<this.resultset.length; i++){
+                    var rem = i % numMeasures;
+                    row = this.resultset[i];
+                    if(rem == 0)
+                    {//first in measures batch
+                        newRow = row.slice();//clone
+                        //values = [];
+                        newRow.splice(measuresIdx,1);//remove measures' titles column
+                        for(var j=measuresIdx; j<newRow.length;j++){
+                            newRow[j] = [];    //init measures
+                        }
+                    }
+                    
+                    //add values    
+                    for(var j=measuresIdx; j<newRow.length;j++){
+                       newRow[j].push(row[j+1]);//push measures
+                    }
+                    
+                    if(rem == numMeasures -1){//measures batch complete
+                        this.values.push(newRow);
+                    }   
+                }
+                
+                this.values.splice(0,0,a1);
+            }
+        }
+        else {//TODO: refactor
+        //relational mode
+            var seriesIdx = 0;//TODO:hcoded, needs ref from chart?
+            var categoriesIdx = 1;
+    
+            var tree = pv.tree(this.resultset).keys(function(d){
+                return [d[seriesIdx],d[categoriesIdx]];
+            }).map();
+            
+            // Now, get series and categories:
+    
+            var series = pv.uniq(this.resultset.map(function(d){
+                return d[0];
+            }));
+            
+    
+            var categories = pv.uniq(this.resultset.map(function(d){
+                return d[1];
+            }))
+            
+            // Finally, iterate through the resultset and build the new values
+    
+            this.allValues = [];
+    
+            var l1 = series;//TODO:clone?
+            //add table corner
+            l1.splice(0,0,"x");
+            
+            var values = this.getMultiValuesFromResultSet(this.valuesIndexes, categories, series,categoriesIdx, seriesIdx);
+            // Create an initial line with the categories
+            values.splice(0,0, l1);
+            this.allValues = values;
+    
+            //this.values = this.getValuesFromResultSet(measuresIndexes[0],categories, series,categoriesIdx, seriesIdx);
+            //this.values.splice(0,0,l1);
+            this.values = this.allValues;
+        }
+
+    },
+    
+    addSeriesToMetadata: function(){
+        if(this.metadata.length == 2){
+            // Adding a static serie
+            this.resultset.map(function(d){
+                d.splice(0,0,"Series");
+            })
+            this.metadata.splice(0,0,{
+                "colIndex":2,
+                "colType":"String",
+                "colName":"Series"
+            })
+        }
+    },
+    
+    //overridden
+    getValues: function(idx){
+        if(idx == null){//default to first
+           // return this.values;
+            return this.values.slice(1).map(function(a){
+                return a.slice(1);
+            });
+        }
+        else if(idx > this.allValues.length || idx < 0) { throw new NoDataException(); }
+        else {
+            //return this.allValues.map(function(d){
+            //    return d[idx];
+            //});
+            return this.allValues.slice(1).map(function(a){
+                return a.slice(1);
+            }).map(function(d){
+                return d[idx];
+            });
+            //return this.allValues[idx];
+        }
+    },
+    
+    //TODO: remake
+    sumOrSetVect: function(v1, v2){
+        if (v1 == null || !$.isArray(v1)) {return v2;}
+        //TODO: check
+        var res = [];
+        for(var i=0;i<v1.length;i++){
+            if(v1[i] == null) { res[i] = v2[i];}
+            res[i] = v1[i] + v2[i];
+        }
+        return res;
+    },
+    
+    //series with x
+    getValuesFromResultSet: function(valueIndex, categories, series, categoriesIdx, seriesIdx)
+    {
+        var categoriesLength = categories.length;
+        var seriesLength = series.length;
+        var numeratedSeries = pv.numerate(series);
+        var numeratedCategories = pv.numerate(categories);
+        
+        // Initialize array
+        var values = [];                
+        pv.range(0,categoriesLength).map(function(d){
+            values[d] = new Array(seriesLength);
+            values[d][0] = categories[d];
+        });
+        // Set array values
+        this.resultset.map(function(row){
+            var i = numeratedCategories[row[categoriesIdx]];
+            var j = numeratedSeries[row[seriesIdx]];
+            values[i][j] = pvc.sumOrSet(values[i][j], row[valueIndex]);
+        });
+        return values;
+    },
+    
+    getMultiValuesFromResultSet: function(valueIndexes, categories, series, categoriesIdx, seriesIdx)
+    {
+        var categoriesLength = categories.length;
+        var seriesLength = series.length;
+        var numeratedSeries = pv.numerate(series);
+        var numeratedCategories = pv.numerate(categories);
+        
+        var myself = this;
+        // Initialize array
+        var values = [];                
+        pv.range(0,categoriesLength).map(function(d){
+            values[d] = new Array(seriesLength);
+            values[d][0] = categories[d];
+        });
+        // Set array values
+        this.resultset.map(function(row){
+            var i = numeratedCategories[row[categoriesIdx]];
+            var j = numeratedSeries[row[seriesIdx]];
+            
+            var val = [];
+            for(var k = 0; k < valueIndexes.length; k++){
+                val.push( row[valueIndexes[k]]);
+            }
+            values[i][j] = myself.sumOrSetVect(values[i][j], val);
+        });
+        return values;
+    }
+    
+});
+
 
 NoDataException = function() {};

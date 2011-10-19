@@ -38,6 +38,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             secondAxisOffset: 0,
             secondAxisColor: "blue",
             secondAxisSize: 0, // calculated
+            
+            panelSizeRatio: 1,//TODO:
 
             // CvK  added extra parameter for implementation of HeatGrid
             orthoAxisOrdinal: false
@@ -67,7 +69,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     preRender: function(){
 
-
         this.base();
 
         pvc.log("Prerendering in CategoricalAbstract");
@@ -94,9 +95,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.generateSecondYAxis(); // this goes before the other because of the fullGrid
         this.generateYAxis();
 
-
-
-
     },
 
 
@@ -114,7 +112,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 axisSize: this.options.xAxisSize,
                 oppositeAxisSize: this.options.yAxisSize,
                 fullGrid:  this.options.xAxisFullGrid,
-                elements: this.getAxisOrdinalElements("x")
+                ordinalElements: this.getAxisOrdinalElements("x"),
+                clickAction: this.options.xAxisClickAction
             });
 
             //            this.xAxisPanel.setScale(this.xScale);
@@ -122,7 +121,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.xAxisPanel.appendTo(this.basePanel); // Add it
 
         }
-
 
     },
 
@@ -141,7 +139,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 axisSize: this.options.yAxisSize,
                 oppositeAxisSize: this.options.xAxisSize,
                 fullGrid:  this.options.yAxisFullGrid,
-                elements: this.getAxisOrdinalElements("y")
+                ordinalElements: this.getAxisOrdinalElements("y"),
+                clickAction: this.options.yAxisClickAction
             });
 
             this.yAxisPanel.setScale(this.yScale);
@@ -166,7 +165,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 axisSize: this.options.secondAxisSize,
                 oppositeAxisSize: this.options.yAxisSize,
                 fullGrid:  false, // not supported
-                elements: this.getAxisOrdinalElements("x"),
+                ordinalElements: this.getAxisOrdinalElements("x"),
                 tickColor: this.options.secondAxisColor
             });
 
@@ -190,7 +189,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 axisSize: this.options.secondAxisSize,
                 oppositeAxisSize: this.options.xAxisSize,
                 fullGrid:  false, // not supported
-                elements: this.getAxisOrdinalElements("y"),
+                ordinalElements: this.getAxisOrdinalElements("y"),
                 tickColor: this.options.secondAxisColor
             });
 
@@ -568,8 +567,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     panelName: "axis", // override
     scale: null,
     fullGrid: false,
-    elements: [], // To be used in ordinal scales
-
+    ordinalElements: [], // To be used in ordinal scales
+    clickAction: null,//TODO: new
 
     constructor: function(chart, options){
 
@@ -648,6 +647,52 @@ pvc.AxisPanel = pvc.BasePanel.extend({
   
 
     renderOrdinalAxis: function(){
+        var myself = this;
+
+        var align =  (this.anchor == "bottom" || this.anchor == "top") ?
+        "center" : 
+        (this.anchor == "left")  ?
+        "right" :
+        "left";
+
+        this.pvLabel = this.pvRule.add(pv.Panel)
+        .data(this.ordinalElements)
+        [pvc.BasePanel.paralelLength[this.anchor]](function(d){
+            return myself.scale.range().band;
+        })
+        [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
+        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
+            return myself.scale(d);// - myself.scale.range().band/2;
+        })
+        .event("click", function(d){
+            if(typeof(myself.clickAction) == "function"){
+                myself.clickAction(d);    
+            }
+          //alert(d);  
+        })
+/*        .event("mouseover", function() {this.fillStyle('rgba(127, 127, 127, .5)');}) 
+        .event("mouseout", function() {this.fillStyle('rgba(127, 127, 127, .001)');})   */  
+        .lineWidth(1)
+        .fillStyle('rgba(127, 127, 127, .001)')
+        .cursor( 'pointer')
+        .add(pv.Label)
+        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
+            return myself.scale.range().band/2;
+        })
+        .textAlign("center")//.textAlign(align)
+        //.textAlign(align)
+        .textBaseline("middle")
+        .anchor('center')
+       // .textAngle(-0.7854) //pi/4
+        .text(pv.identity)
+        .font("9px sans-serif");
+        
+        this.pvLabel.event("click", function(d){
+          alert(d);  
+        })
+    },
+
+    renderOrdinalAxisS: function(){
 
         var myself = this;
 
@@ -658,7 +703,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         "left";
 
         this.pvLabel = this.pvRule.add(pv.Label)
-        .data(this.elements)
+        .data(this.ordinalElements)
         [pvc.BasePanel.paralelLength[this.anchor]](null)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
         [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
@@ -667,7 +712,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         .textAlign(align)
         .textBaseline("middle")
         .text(pv.identity)
-        .font("9px sans-serif")
+        .font("9px sans-serif");
+        
     },
 
 

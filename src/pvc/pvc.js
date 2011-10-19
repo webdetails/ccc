@@ -46,7 +46,7 @@ pvc.padMatrixWithZeros = function(d){
 
 pvc.cloneMatrix = function(m){
     return m.map(function(d){
-        return d.slice()
+        return d.slice();
     });
 }
 

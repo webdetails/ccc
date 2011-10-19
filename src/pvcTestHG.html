@@ -110,9 +110,12 @@ var heatGrid1 = new pvc.HeatGridChart({
     clickable: false,
     panelSizeRatio: 0.8,
     orientation: "vertical",
-    showValues: true,
+    showValues: false,
     valuesAnchor: "right",
     normPerBaseCategory: true,
+    useShapes: true,
+    minColor: "#0EDFF1",
+    maxColor: "#0119F9",
     });
 
 heatGrid1.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
@@ -146,7 +149,6 @@ var heatGrid2 = new pvc.HeatGridChart({
                     yAxisPosition: "left",
                     axisOffset: 0,
                     normPerBaseCategory: false,
-
                     extensionPoints: {
                       xAxisLabel_textAngle:-0.3,
                       xAxisLabel_textAlign:"right",
