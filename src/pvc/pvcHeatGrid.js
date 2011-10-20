@@ -236,7 +236,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
        if(opts.useShapes){
             //total max in data
             var maxVal = pv.max(data, function(datum){// {col:value ..}
-                return pv.max( pv.values(datum).map(function(d){ return myself.getValue(d, this.sizeValIdx);})) ;
+                return pv.max( pv.values(datum).map(
+                    function(d){ return myself.getValue(d, myself.sizeValIdx);})) ;
             });
 
             var maxRadius = Math.min(w,h) / 2 -2;
@@ -264,7 +265,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         return myself.isSelected(s,c);
                     })
                     .shape( function(r, ra ,i){
-                        return myself.getValue(r[i]) != null ? "circle" : "cross";
+                        return myself.getValue(r[i]) != null ? "square" : "cross";
                     })
                     .shapeSize(function(r,ra, i) {
                         return valueToArea(myself.getValue(r[i], myself.sizeValIdx));
@@ -283,6 +284,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         }
                         return color;
                     })
+                    .cursor("pointer") //TODO:
                     .lineWidth(function(r, ra, i){
                         //var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                         //var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
@@ -300,7 +302,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         myself.triggerSelectionChange();
                         //TODO: classic clickAction
                         if($.isArray(d)) d= d[0];
-                        myself.chart.options.clickAction(s,c,d);
+                        if(typeof(myself.chart.options.clickAction) == 'function'){
+                            myself.chart.options.clickAction(s,c,d);
+                        }
                         myself.pvPanel.render();
                         //if (opts.clickable){
                         //    return true;
@@ -416,12 +420,20 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             .array().filter(function(d) { return d.selected; });
     },
     
+    setSelections: function(selections){
+        this.selections = {};
+        for(var i=0;i<selections.length;i++){
+            this.addSelection(selections[i].series, selections[i].category);
+        }
+    },
+    
     selectSeries: function(s){
         var cats = this.chart.dataEngine.getCategories();
         for(var i = 0; i < cats.length; i++ ){
             this.selections[s][cats[i]] = true;
         }
     },
+    
     selectCategories: function(c){
         var series = this.chart.dataEngine.getSeries();
         for(var i = 0; i < series.length; i++ ){
