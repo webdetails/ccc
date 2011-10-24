@@ -651,24 +651,29 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderOrdinalAxis: function(){
 
         var myself = this;
-
+        
         var align =  (this.anchor == "bottom" || this.anchor == "top") ?
         "center" : 
         (this.anchor == "left")  ?
         "right" :
         "left";
+       
+       this.pvTicks = this.pvRule.add(pv.Rule)
+                        .data(this.elements)
+                        [pvc.BasePanel.paralelLength[this.anchor]](null)
+                        [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
+                        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
+                            return myself.scale(d) + myself.scale.range().band/2;
+                        })
+                        [pvc.BasePanel.orthogonalLength[this.anchor]](10)
+                        .strokeStyle("rgba(0,0,0,0)");
 
-        this.pvLabel = this.pvRule.add(pv.Label)
-        .data(this.elements)
-        [pvc.BasePanel.paralelLength[this.anchor]](null)
-        [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
-        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
-            return myself.scale(d) + myself.scale.range().band/2;
-        })
-        .textAlign(align)
-        .textBaseline("middle")
-        .text(pv.identity)
-        .font("9px sans-serif")
+
+        this.pvLabel = this.pvTicks.anchor(this.anchor)
+                            .add(pv.Label)
+                            .text(this.scale.tickFormat)
+                            .font("9px sans-serif");
+
     },
 
 
