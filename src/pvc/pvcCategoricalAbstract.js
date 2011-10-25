@@ -665,7 +665,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                         [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
                             return myself.scale(d) + myself.scale.range().band/2;
                         })
-                        [pvc.BasePanel.orthogonalLength[this.anchor]](10)
+                        [pvc.BasePanel.orthogonalLength[this.anchor]](5)
                         .strokeStyle("rgba(0,0,0,0)");
 
 
