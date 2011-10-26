@@ -88,11 +88,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Generate axis
 
-        if(this.options.secondAxis)
+        if(this.options.secondAxis){
             this.generateSecondXAxis(); // this goes before the other because of the fullGrid
+        }
         this.generateXAxis();
-        if(this.options.secondAxis)
+        if(this.options.secondAxis){
             this.generateSecondYAxis(); // this goes before the other because of the fullGrid
+        }
         this.generateYAxis();
 
     },
@@ -113,7 +115,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 oppositeAxisSize: this.options.yAxisSize,
                 fullGrid:  this.options.xAxisFullGrid,
                 ordinalElements: this.getAxisOrdinalElements("x"),
-                clickAction: this.options.xAxisClickAction
+                clickAction: this.options.xAxisClickAction,
+                useCompositeAxis: this.options.useCompositeAxis //TODO:new
             });
 
             //            this.xAxisPanel.setScale(this.xScale);
@@ -140,7 +143,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 oppositeAxisSize: this.options.xAxisSize,
                 fullGrid:  this.options.yAxisFullGrid,
                 ordinalElements: this.getAxisOrdinalElements("y"),
-                clickAction: this.options.yAxisClickAction
+                clickAction: this.options.yAxisClickAction,
+                useCompositeAxis: this.options.useCompositeAxis //TODO:new
             });
 
             this.yAxisPanel.setScale(this.yScale);
@@ -637,30 +641,471 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         [pvc.BasePanel.paralelLength[this.anchor]](max - min)
 
         if (this.ordinal == true){
-            this.renderOrdinalAxis();
+            if(this.useCompositeAxis == true){
+                //TODO:temp, hcoded
+                if(this.panelName == "xAxis"){
+                  this.renderCompositeOrdinalAxisXTest();
+                 //  this.renderCompositeOrdinalAxisXHC();
+                }
+                else {
+                    this.renderCompositeOrdinalAxis();
+                }
+            }
+            else {
+                this.renderOrdinalAxis();
+            }
         }
         else{
             this.renderLinearAxis();
         }
     
     },
-  
+    
+    renderCompositeOrdinalAxisXHC2: function(){
+    //TODO:
+    },
+    
+    renderCompositeOrdinalAxisXHC: function(){
+        var myself = this;
+    
+        var align = (this.anchor == "bottom" || this.anchor == "top") ?
+        "center" : 
+        (this.anchor == "left")  ?
+        "right" :
+        "left";
+        
+        //var bogusData = {
+        //    'Products AB' : {
+        //        'Product B' : 1,
+        //        'Product A' : 1
+        //    },
+        //    'Product C' : 1,
+        //    'Product D' : 1
+        //};
+        var bogusData = {
+            'pre-preD' : {'pred':{'Product D' : 1}},
+            'prec':{'Product C' : 1},
+            'Products AB' : {
+                'Product B' : 1,
+                'Product A' : 1
+            }
+        };
+        
+        //var bogusRoots = [{name :'pre-preD', breadth:1} ,{name:'prec',breadth: 1},{name:'Products AB', breadth:2}];
+        var bogusRoots = [{name:'Products AB', breadth:2},  {name:'prec',breadth: 1}, {name :'pre-preD', breadth:1}];
 
-    renderOrdinalAxis: function(){
+        //var asDom = pv.dom(bogusData);
+        ////remove root
+        //
+        //var nodes = asDom.nodes();
+        //var rootToRemove = nodes[0];
+        //nodes = nodes.slice(1);
+        //for(var i=0;i<nodes.length;i++)
+        //{//create multiple roots (ie remove references to root)
+        //    if(nodes[i].parentNode == rootToRemove ){nodes[i].parentNode = null;}
+        //    else {break;}//breadth-first, done
+        //}
+        var width = 350;
+        var left = 50;
+        var totBreadth = 4.0;
+        var layout = this.pvRule.add(pv.Panel)
+        //new
+        //.data(bogusRoots)
+        //end
+            .data(bogusRoots)
+            .left(function(d){
+                var ret = left;
+                left += width *( d.breadth *1.0 / totBreadth);
+                return ret;
+            })
+            .width(function (d){
+                return width *( d.breadth *1.0 / totBreadth);
+            })
+            .add(pv.Layout.Cluster.Fill)
+            .nodes(function(d){
+                   return pv.dom(bogusData[d.name]).root(d.name).nodes();
+            })
+            //.order("descending")
+            //.size(function(d){
+            //    return d;
+            //    })
+            .orient("bottom")
+        ;
+        var rootHeight = 25;//hcoded vs 100
+        
+        //layout.node.transform(function(d){
+        //    //if(d.depth == 0){
+        //    //    d.dy = 0
+        //    //    return;
+        //    //}
+        //    //else {
+        //        d.minDepth -= 1/3.0;
+        //        d.maxDepth -= 1/3.0;
+        //        d.depth -= 1/3.0;
+        //        d.dy += (d.maxDepth - d.minDepth) * rootHeight;
+        //        d.y -= rootHeight;
+        //    //}
+        //});
+        
+        layout.node.add(pv.Bar)
+            //.size( function(d){
+            //    return d;
+            //    }
+            //)
+          //  .bottom(function(d){
+          ////      d.y -= rootHeight;
+          //      if(d.depth ==0) return d.y;
+          // //     d.y += rootHeight
+          //      return d.y ;// + rootHeight;
+          //  })
+          //  .height(function(d){
+          //     if(d.depth == 0){
+          //      return 1;
+          //     }
+            //    //d.y = 0
+            //  //  rootHeight = d.dy;
+            //    d.dy = 1;
+            //    return d.dy;
+            //   }
+            //   else{
+            //    d.dy += rootHeight;
+              //  d.dy += (d.maxDepth - d.minDepth) * rootHeight;
+         //       return d.dy;//(d.maxDepth - d.minDepth) * (rootHeight );
+            //   }
+          //  })
+            .fillStyle('rgba(127,127,127,.05)')
+            .strokeStyle("rgb(127,127,127)")
+            .lineWidth(0.5)
+            
+            //.top(function(d){
+            //  return d.y + rootHeight;// + rootHeight * 2;
+            //})
+            //.visible(function(d){
+            //    return d.depth != 0
+            //    })
+            
+            
+            ;
+        
+        layout.label.add(pv.Label)
+        .textAngle(function(d){
+            return 0;//Math.PI/2;
+                //var tan = d.dy/d.dx;
+                //return -Math.atan(tan);
+            });
+        
+    },
+    
+    //////
+    
+    getElementsTree: function(elements){
+        var tree = {};
+       for(var i =0; i<elements.length; i++){
+            var baseElem = elements[i][0];
+            if(!tree[baseElem]){
+                tree[baseElem] = elements[i].length == 1 ? 0 : {};
+             //   sectionNames.push(baseElem);
+            }
+            var currObj = tree[baseElem];
+            for(var j=1;j<elements[i].length;j++){
+                var elem = elements[i][j];
+                if(!currObj[elem]){
+                  currObj[elem] = (j == elements[i].length-1) ? 0 : {};
+                }
+                currObj = currObj[elem];
+            }
+        }
+    },
+    
+    getLayout: function(tree, orientation, breadthCounters, numLeaves){
+        
+        var sectionNames = [];
+        for(var section in tree){
+            if(tree.hasOwnProperty(section)){
+                sectionNames.push(section);
+            }
+        }
+        
+        myself = this;
+        
+        var axisWidth = this.width - this.oppositeAxisSize;
+        //var numLeaves = elements.length;
+        var widthPerLeaf = axisWidth / numLeaves;
+        var left = this.oppositeAxisSize;
+        
+        return this.pvRule.add(pv.Panel)
+            .data(sectionNames)
+             .lineWidth(1)
+            .left(function(name){
+                var ret = left;
+                left += widthPerLeaf * breadthCounters[name];
+                return ret;
+            })
+            .height(function(){
+                return myself.axisSize;// -2;
+            })
+            .width(function (name){
+                return widthPerLeaf * breadthCounters[name];
+            })
+            .add(pv.Layout.Cluster.Fill)
+            .nodes(function(name){
+                   return pv.dom(tree[name]).root(name).nodes();
+            })
+            .orient(orientation);
+    },
+    
+    getBreadthCounters: function(elements){
+       var breadthCounters = {};
+       for(var i =0; i<elements.length; i++){
+            var name = elements[i][0];
+            if(!breadthCounters[name]){
+                breadthCounters[name] = 1;
+            }
+            else {
+                breadthCounters[name] = breadthCounters[name] + 1;
+            }
+        }
+        return breadthCounters;
+    },
+    
+    renderCompositeOrdinalAxisXTest: function(){
         var myself = this;
 
-        var align =  (this.anchor == "bottom" || this.anchor == "top") ?
+        var align = (this.anchor == "bottom" || this.anchor == "top") ?
         "center" : 
         (this.anchor == "left")  ?
         "right" :
         "left";
 
+        var elements = this.ordinalElements.slice(0).reverse();
+        
+        //v2
+        var tree = {};
+        var sectionNames = [];
+        var xlen = elements.length;
+        for(var i =0; i<elements.length; i++){
+            var baseElem = elements[i][0];
+            if(!tree[baseElem]){
+                tree[baseElem] = elements[i].length == 1 ? 0 : {};
+                sectionNames.push(baseElem);
+            }
+            var currObj = tree[baseElem];
+            for(var j=1;j<elements[i].length;j++){
+                var elem = elements[i][j];
+                if(!currObj[elem]){
+                  currObj[elem] = (j == elements[i].length-1) ? 0 : {};
+                }
+                currObj = currObj[elem];
+            }
+        }
+        var breadthCounters = this.getBreadthCounters(elements);
+        //{};
+        ////count breadth (leaf nodes #)
+        //for(var i =0; i<elements.length; i++){
+        //    var name = elements[i][0];
+        //    if(!breadthCounters[name]){
+        //        breadthCounters[name] = 1;
+        //    }
+        //    else {
+        //        breadthCounters[name] = breadthCounters[name] + 1;
+        //    }
+        //}
+        
+        //var axisWidth = this.width - this.oppositeAxisSize;
+        //var numLeaves = elements.length;
+        //var widthPerLeaf = axisWidth / numLeaves;
+        //var left = this.oppositeAxisSize;
+        //////////
+        
+        var layout = this.getLayout(tree, "bottom", breadthCounters, elements.length);
+        
+        //this.pvRule.add(pv.Panel)
+        //    .data(sectionNames)
+        //     .lineWidth(0)
+        //    .left(function(name){
+        //        var ret = left;
+        //        left += widthPerLeaf * breadthCounters[name];
+        //        return ret;
+        //    })
+        //    .height(function(){
+        //        return myself.axisSize;
+        //    })
+        //    .width(function (name){
+        //        return widthPerLeaf * breadthCounters[name];
+        //    })
+        //    .add(pv.Layout.Cluster.Fill)
+        //    .nodes(function(name){
+        //           return pv.dom(tree[name]).root(name).nodes();
+        //    })
+        //    .orient("bottom");
+
+            
+        var diagDepthCutoff = 1.1;
+            //see what will fit
+        layout.node
+        //.add(pv.Panel)
+            .def("fitsBox",true)
+            .height(function(d,e,f){//just iterate and get cutoff
+                var fitsBox = myself.doesTextSizeFit(d.dx, 0, d.nodeName, null);
+                if(!fitsBox){
+                    this.fitsBox(fitsBox);
+                    diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                }
+                return d.dy;
+            });
+            
+            
+            //fill space
+            layout.node.add(pv.Bar)
+            .fillStyle('rgba(127,127,127,.01)')
+            .strokeStyle("rgb(127,127,127)")
+            .lineWidth( function(d){
+                if(d.maxDepth == 1) {return 0;}
+                else {return 0.5;}
+               // return 0.5;
+            })
+            .top(function(d){//TODO:remove this!
+                return d.y ;//+ 1;
+            })
+            .text(function(d){
+                return d.nodeName;
+            })
+            .event("mouseover", pv.Behavior.tipsy({//Tooltip
+                gravity: "n",
+                fade: true
+            }));
+            
+            
+            //var properRender = null;
+            //get labels in proper places
+            layout.label.add(pv.Label)
+            .textAngle(function(d){
+                if(d.depth >= diagDepthCutoff){
+                    var tan = d.dy/d.dx;
+                    //if(tan <= 0.15) {tan = 0};//will just screw the text without much gain
+                    var res = -Math.atan(tan);// more vertical (ex -0.3)?..
+                    if(res < 0 && res > -0.15) {return 0;}
+                    else {return res ;}//- 0.3;}
+                }
+                else return 0;
+            })
+            .text(function(d){
+                if(d.depth >= diagDepthCutoff){//trim if needed
+                    var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
+                    return myself.trimToWidth(diagonalLength, d.nodeName, null, '..');
+                }
+                return d.nodeName ;
+            })
+            ;
+        
+    },
+  
+    //TODO: move to subclass?
+    //axis labels with multidimensional support
+    renderCompositeOrdinalAxis: function(){
+        
+        ////TODO:remove!
+        //this.renderCompositeOrdinalAxisM();
+        
+        var myself = this;
+
+        var align = (this.anchor == "bottom" || this.anchor == "top") ?
+        "center" : 
+        (this.anchor == "left")  ?
+        "right" :
+        "left";
+
+        var elements = this.ordinalElements.slice(0);
+        
+        //v2
+        var tree = {};
+        var sectionNames;
+        var xlen = elements.length;
+        for(var i =0; i<xlen; i++){
+            var baseElem = elements[i][0];
+            if(!tree[baseElem]){
+                tree[baseElem] = elements[i].length == 1 ? 0 : {};
+            }
+            var currObj = tree[baseElem];
+            for(var j=1;j<elements[i].length;j++){
+                var elem = elements[i][j];
+                if(!currObj[elem]){
+                  currObj[elem] = (j == elements[i].length-1) ? 0 : {};
+                }
+                currObj = currObj[elem];
+            }
+            //if(elements[i].length == 1){
+            //    tree[baseElem] = 1;
+            //}
+            //else {
+            //    tree[baseElem] = {};
+            //    var currObj = tree[baseElem];
+            //    //var key = baseElem;
+            //    for(var j=1;j<elements[i].length;j++){
+            //        
+            //        var elem = elements[i][j];
+            //        var elemObj = {};
+            //        elemObj[elem] = 1;//
+            //        
+            //        currObj[key] = elemObj;
+            //        
+            //        
+            //    }
+        }
+
+        //arrange ordinal elements into drawing matrix
+        
+        //var ylen = pv.max(elements, function(element){ return $.isArray(element)? element.length : 1; });
+        //var xlen = elements.length;
+        //var fpMx = [];
+        //for(var i=0;i< xlen;i++){
+        //    var row = [];
+        //    var xacc = 1;
+        //    for(var j = 0; j < ylen; j++){
+        //        var v = {
+        //            xdim :1,
+        //            ydim: (j == elements[i].length - 1)? ylen - j : 1,
+        //            lbl: (j >= elements[i].length)?
+        //                elements[i][elements[i].length - 1] :
+        //                elements[i][j]
+        //        }
+        //        row.push(v);
+        //    }
+        //    fpMx.push(row);
+        //}
+        ////...
+        //for(var y=0; y<ylen;y++)
+        //{
+        //    for(var x=xlen-1; x > 0;x--)
+        //    {//accumulate equal labels over x
+        //      if(fpMx[x][y].lbl == fpMx[x-1][y].lbl){//consecutive label
+        //        fpMx[x-1][y].xdim += fpMx[x][y].xdim;
+        //        fpMx[x][y].xdim = 0;
+        //      }
+        //    }
+        //}
+        
+                //var ylen = pv.max(elements, function(element){ return $.isArray(element)? element.length : 1; });
+        //var xlen = elements.length;
+
+        
         this.pvLabel = this.pvRule.add(pv.Panel)
         .data(this.ordinalElements)
+      // //new ini
+      //  .data(fpMx)//1 per column 
+      //  .add(pv.Bar)
+      //  .data(function(){
+      //      return fpMx[this.index];
+      //      })
+      ////new fim
+        .def("dim", function(){
+            return {fixedSize: myself.axisSize,
+                    parSize: myself.scale.range().band};
+        })
         [pvc.BasePanel.paralelLength[this.anchor]](function(d){
             return myself.scale.range().band;
         })
-        [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
+        [pvc.BasePanel.oppositeAnchor[this.anchor]](2) //border size ?
         [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
             return myself.scale(d);// - myself.scale.range().band/2;
         })
@@ -670,29 +1115,79 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }
           //alert(d);  
         })
-/*        .event("mouseover", function() {this.fillStyle('rgba(127, 127, 127, .5)');}) 
-        .event("mouseout", function() {this.fillStyle('rgba(127, 127, 127, .001)');})   */  
+        //.event("mouseover", function() {this.fillStyle('rgba(127, 127, 127, .5)');this.render()}) 
+        //.event("mouseout", function() {this.fillStyle('rgba(127, 127, 127, .001)');this.render();})   
         .lineWidth(1)
         .fillStyle('rgba(127, 127, 127, .001)')
         .cursor( 'pointer')
+     //testing
+        
+     //gnitset
         .add(pv.Label)
         [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
             return myself.scale.range().band/2;
         })
         .textAlign("center")//.textAlign(align)
-        //.textAlign(align)
+     //   .textAlign(align)
+        .textAngle( function(d){
+            var w = this.parent.dim().parSize;
+            var h = this.parent.dim().fixedSize;
+            var tan = (myself.panelName == "xAxis")? h/w : w/h;
+            return -Math.atan(tan);
+            } ) //pi/4 -0.7854
         .textBaseline("middle")
-        .anchor('center')
-       // .textAngle(-0.7854) //pi/4
+        //.anchor('center')
         .text(pv.identity)
-        .font("9px sans-serif");
-        
+      //  .font("8px sans-serif");
+        ;
         this.pvLabel.event("click", function(d){
           alert(d);  
         })
     },
+    
+    //aux functions for renderCompositeOrdinalAxis
+    
+    getTextSizePlaceholder : function(){
+        //TODO:move elsewhere
+        var TEXT_SIZE_PHOLDER_APPEND='_textSizeHtmlObj';
+        if(!this.textSizeTestHolder){
+            var chartHolder = $('#' + this.chart.options.canvas);
+            var textSizeTestHolderId = chartHolder.attr('id') + TEXT_SIZE_PHOLDER_APPEND;
+            this.textSizeTestHolder = $('<div>')
+                .attr('id', textSizeTestHolderId)
+                .css('position', 'absolute')
+                .css('visibility', 'hidden')
+                .css('width', 'auto')
+                .css('height', 'auto');
+            chartHolder.append(this.textSizeTestHolder);
+        }
+        return this.textSizeTestHolder;
+    },
+    
+    doesTextSizeFit: function(w, h, text, font){
+        var MARGIN = 15;
+        var holder = this.getTextSizePlaceholder();
+        holder.text(text);
+        return holder.width() - MARGIN <= w;
+    },
+    
+    trimToWidth: function(w, text, font, trimTerminator){
+        var MARGIN = 15;
+        var holder = this.getTextSizePlaceholder();
+        if(font){
+            holder.css("font", font);
+        }
+        var trimmed = false;
+        for(holder.text(text); holder.width() - MARGIN > w;text = text.slice(0,text.length -1)){
+            holder.text(text );//+ (trimmed? trimTerminator: ''));
+            trimmed = true;
+            holder.hide();
+            holder.show();
+        }
+        return text + (trimmed? trimTerminator: '');
+    },
 
-    renderOrdinalAxisS: function(){
+    renderOrdinalAxis: function(){
 
         var myself = this;
 
