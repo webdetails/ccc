@@ -638,18 +638,18 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         .strokeStyle(this.tickColor)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
         [pvc.BasePanel.relativeAnchor[this.anchor]](min)
-        [pvc.BasePanel.paralelLength[this.anchor]](max - min)
+        [pvc.BasePanel.parallelLength[this.anchor]](max - min)
 
         if (this.ordinal == true){
             if(this.useCompositeAxis == true){
                 //TODO:temp, hcoded
-                if(this.panelName == "xAxis"){
-                  this.renderCompositeOrdinalAxisXTest();
+    //            if(this.panelName == "xAxis"){
+                  this.renderCompositeOrdinalAxis();
                  //  this.renderCompositeOrdinalAxisXHC();
-                }
-                else {
-                    this.renderCompositeOrdinalAxis();
-                }
+  //              }
+                //else {
+                //    this.renderCompositeOrdinalAxis();
+                //}
             }
             else {
                 this.renderOrdinalAxis();
@@ -661,84 +661,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     },
     
-    renderCompositeOrdinalAxisXHC: function(){
-        var myself = this;
-    
-        var align = (this.anchor == "bottom" || this.anchor == "top") ?
-        "center" : 
-        (this.anchor == "left")  ?
-        "right" :
-        "left";
-        
-        var bogusData = {
-            'pre-preD' : {'pred':{'Product D' : 1}},
-            'prec':{'Product C' : 1},
-            'Products AB' : {
-                'Product B' : 1,
-                'Product A' : 1
-            }
-        };
-        
-        //var bogusRoots = [{name :'pre-preD', breadth:1} ,{name:'prec',breadth: 1},{name:'Products AB', breadth:2}];
-        var bogusRoots = [{name:'Products AB', breadth:2},  {name:'prec',breadth: 1}, {name :'pre-preD', breadth:1}];
-
-        //var asDom = pv.dom(bogusData);
-        ////remove root
-        //
-        //var nodes = asDom.nodes();
-        //var rootToRemove = nodes[0];
-        //nodes = nodes.slice(1);
-        //for(var i=0;i<nodes.length;i++)
-        //{//create multiple roots (ie remove references to root)
-        //    if(nodes[i].parentNode == rootToRemove ){nodes[i].parentNode = null;}
-        //    else {break;}//breadth-first, done
-        //}
-        var width = 350;
-        var left = 50;
-        var totBreadth = 4.0;
-        var layout = this.pvRule.add(pv.Panel)
-        //new
-        //.data(bogusRoots)
-        //end
-            .data(bogusRoots)
-            .left(function(d){
-                var ret = left;
-                left += width *( d.breadth *1.0 / totBreadth);
-                return ret;
-            })
-            .width(function (d){
-                return width *( d.breadth *1.0 / totBreadth);
-            })
-            .add(pv.Layout.Cluster.Fill)
-            .nodes(function(d){
-                   return pv.dom(bogusData[d.name]).root(d.name).nodes();
-            })
-            //.order("descending")
-            //.size(function(d){
-            //    return d;
-            //    })
-            .orient("bottom")
-        ;
-        var rootHeight = 25;//hcoded vs 100
-        
-        layout.node.add(pv.Bar)
-            .fillStyle('rgba(127,127,127,.05)')
-            .strokeStyle("rgb(127,127,127)")
-            .lineWidth(0.5)
-            
-            
-            ;
-        
-        layout.label.add(pv.Label)
-        .textAngle(function(d){
-            return 0;//Math.PI/2;
-                //var tan = d.dy/d.dx;
-                //return -Math.atan(tan);
-            });
-        
-    },
-    
-    //////
     
     getElementsTree: function(elements){
         var tree = {};
@@ -746,7 +668,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var baseElem = elements[i][0];
             if(!tree[baseElem]){
                 tree[baseElem] = elements[i].length == 1 ? 0 : {};
-             //   sectionNames.push(baseElem);
             }
             var currObj = tree[baseElem];
             for(var j=1;j<elements[i].length;j++){
@@ -762,67 +683,31 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     getLayoutSingleCluster: function(tree, orientation, maxDepth){
         
         myself = this;
-        
-        //var numLeaves = elements.length;
-        var height = this.axisSize;
-        var baseDisplacement = (1.0/++maxDepth)* height;
+
+        var depthLength = this.axisSize;
+        var baseDisplacement = (1.0/++maxDepth)* depthLength;
         var scaleFactor = maxDepth*1.0/ (maxDepth -1);
-     //  baseDisplacement *= scaleFactor;
+        baseDisplacement /= scaleFactor;
+        var margin = scaleFactor;
+        baseDisplacement -= Math.ceil(margin);
+        var orthogonalLength = pvc.BasePanel.orthogonalLength[orientation];
+        var dlen = (orthogonalLength == 'width')? 'dx' : 'dy';
         
-        var panel = this.pvRule.add(pv.Panel).height(height*scaleFactor);
-     //   panel.transform(pv.Transform.identity.translate(0,baseDisplacement));//.scale(scaleFactor));
-        var layout = panel.add(pv.Layout.Partition.Fill)
-            .nodes(pv.dom(tree).root('').nodes())//create with pseudo-root
-            .orient("bottom")
+        var displacement = (dlen == 'dx')?
+                ((orientation == 'left')? [-baseDisplacement, 0] : [baseDisplacement ,0]) :
+                ((orientation == 'top')? [0,-baseDisplacement ] : [0, baseDisplacement ]);
+           
+        this.pv
+        var panel = this.pvRule
+                        .add(pv.Panel)[orthogonalLength](depthLength).overflow('hidden').strokeStyle(null).lineWidth(0) //viewport
+                        .add(pv.Panel)[orthogonalLength](depthLength * scaleFactor - margin ).strokeStyle(null).lineWidth(0);// panel resized and shifted to make bogus root disappear
+        panel.transform(pv.Transform.identity.translate(displacement[0], displacement[1]));
+        
+        var layout = panel.add(pv.Layout.Cluster.Fill)
+            .nodes(pv.dom(tree).root('').nodes())//create with pseudo-root,otherwise fails with one level
+            .orient(orientation)
             ;
-      //  panel.transform().translate(0,baseDisplacement);
-        layout.node
-        .height(function(d){
-                    //d.y += baseDisplacement;
-                    if(d.depth > 0){
-                        d.dy *= scaleFactor;
-                    }
-                    return d.dy;// * scaleFactor;
-                })
-        ;
         return layout;
-    },
-    
-    getLayout: function(tree, orientation, breadthCounters, numLeaves){
-        
-        var sectionNames = [];
-        for(var section in tree){
-            if(tree.hasOwnProperty(section)){
-                sectionNames.push(section);
-            }
-        }
-        
-        myself = this;
-        
-        var axisWidth = this.width - this.oppositeAxisSize;
-        //var numLeaves = elements.length;
-        var widthPerLeaf = axisWidth / numLeaves;
-        var left = this.oppositeAxisSize;
-        
-        return this.pvRule.add(pv.Panel)
-            .data(sectionNames)
-             .lineWidth(1)
-            .left(function(name){
-                var ret = left;
-                left += widthPerLeaf * breadthCounters[name];
-                return ret;
-            })
-            .height(function(){
-                return myself.axisSize;// -2;
-            })
-            .width(function (name){
-                return widthPerLeaf * breadthCounters[name];
-            })
-            .add(pv.Layout.Cluster.Fill)
-            .nodes(function(name){
-                   return pv.dom(tree[name]).root(name).nodes();
-            })
-            .orient(orientation);
     },
     
     getBreadthCounters: function(elements){
@@ -839,7 +724,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return breadthCounters;
     },
     
-    renderCompositeOrdinalAxisXTest: function(){
+    renderCompositeOrdinalAxis: function(){
         var myself = this;
 
         var align = (this.anchor == "bottom" || this.anchor == "top") ?
@@ -848,7 +733,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         "right" :
         "left";
 
-        var elements = this.ordinalElements.slice(0).reverse();
+        var elements = this.ordinalElements.slice(0);
+        if(this.anchor == 'bottom' || this.anchor == 'right') {elements.reverse();}
         
         //v2
         var tree = {};
@@ -869,19 +755,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 currObj = currObj[elem];
             }
         }
-        var breadthCounters = this.getBreadthCounters(elements);
-        //var layout = this.getLayout(tree, "bottom", breadthCounters, elements.length);
         
         var maxDepth = pv.max(elements, function(col){
             return $.isArray(col) ? col.length : 1;
             });
         
-        var layout = this.getLayoutSingleCluster(tree, "bottom", maxDepth);
-            
-        var diagDepthCutoff = 1.1;
-            //see what will fit
+        var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
+    
+        var diagDepthCutoff = 1.1; //depth in [-1/(n+1), 1]
+        //see what will fit
         layout.node
-        //.add(pv.Panel)
             .def("fitsBox",true)
             .height(function(d,e,f){//just iterate and get cutoff
                 var fitsBox = myself.doesTextSizeFit(d.dx, 0, d.nodeName, null);
@@ -891,18 +774,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 }
                 return d.dy;
             });
-            
-            //fill space
-            layout.node.add(pv.Bar)
+        
+        //fill space
+        layout.node.add(pv.Bar)
             .fillStyle('rgba(127,127,127,.01)')
-            .strokeStyle("rgb(127,127,127)")
-            .lineWidth( function(d){
-                if(d.maxDepth == 1 && d.minDepth > 0) {return 0;}
-                else {return 0.5;}
-               // return 0.5;
+            .strokeStyle( function(d){
+                if(d.maxDepth == 1 || d.maxDepth ==0 ) {return null;}
+                else {return "rgba(127,127,127,0.5)";}
             })
-            .top(function(d){//TODO:remove this!
-                return d.y ;//+ 1;
+            .lineWidth( function(d){
+                if(d.maxDepth == 1 || d.maxDepth ==0 ) {return 0;}
+                else {return 0.5;}
             })
             .text(function(d){
                 return d.nodeName;
@@ -911,18 +793,20 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 gravity: "n",
                 fade: true
             }));
-            
-            
-            //var properRender = null;
-            //get labels in proper places
-            layout.label.add(pv.Label)
+        
+        //cutoffs -> snap to vertical/horizontal
+        var H_CUTOFF_ANG = -0.30;
+        var V_CUTOFF_ANG = -1.27;
+        
+        //get labels in proper alignment
+        layout.label.add(pv.Label)
             .textAngle(function(d){
                 if(d.depth >= diagDepthCutoff){
                     var tan = d.dy/d.dx;
-                    //if(tan <= 0.15) {tan = 0};//will just screw the text without much gain
                     var res = -Math.atan(tan);// more vertical (ex -0.3)?..
-                    if(res < 0 && res > -0.15) {return 0;}
-                    else {return res ;}//- 0.3;}
+                    if(res < 0 && res > H_CUTOFF_ANG) {return 0;}
+                    else if(res > -Math.PI/2 && res < V_CUTOFF_ANG) {return -Math.PI/2;}
+                    else {return res ;}
                 }
                 else return 0;
             })
@@ -936,94 +820,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             ;
         
     },
-  
-    //TODO: move to subclass?
-    //axis labels with multidimensional support
-    renderCompositeOrdinalAxis: function(){
-        
-        ////TODO:remove!
-        //this.renderCompositeOrdinalAxisM();
-        
-        var myself = this;
-
-        var align = (this.anchor == "bottom" || this.anchor == "top") ?
-        "center" : 
-        (this.anchor == "left")  ?
-        "right" :
-        "left";
-
-        var elements = this.ordinalElements.slice(0);
-        
-        //v2
-        var tree = {};
-        var sectionNames;
-        var xlen = elements.length;
-        for(var i =0; i<xlen; i++){
-            var baseElem = elements[i][0];
-            if(!tree[baseElem]){
-                tree[baseElem] = elements[i].length == 1 ? 0 : {};
-            }
-            var currObj = tree[baseElem];
-            for(var j=1;j<elements[i].length;j++){
-                var elem = elements[i][j];
-                if(!currObj[elem]){
-                  currObj[elem] = (j == elements[i].length-1) ? 0 : {};
-                }
-                currObj = currObj[elem];
-            }
-        }
-
-        
-        this.pvLabel = this.pvRule.add(pv.Panel)
-        .data(this.ordinalElements)
-        .def("dim", function(){
-            return {fixedSize: myself.axisSize,
-                    parSize: myself.scale.range().band};
-        })
-        [pvc.BasePanel.paralelLength[this.anchor]](function(d){
-            return myself.scale.range().band;
-        })
-        [pvc.BasePanel.oppositeAnchor[this.anchor]](2) //border size ?
-        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
-            return myself.scale(d);// - myself.scale.range().band/2;
-        })
-        .event("click", function(d){
-            if(typeof(myself.clickAction) == "function"){
-                myself.clickAction(d);    
-            }
-          //alert(d);  
-        })
-        //.event("mouseover", function() {this.fillStyle('rgba(127, 127, 127, .5)');this.render()}) 
-        //.event("mouseout", function() {this.fillStyle('rgba(127, 127, 127, .001)');this.render();})   
-        .lineWidth(1)
-        .fillStyle('rgba(127, 127, 127, .001)')
-        .cursor( 'pointer')
-     //testing
-        
-     //gnitset
-        .add(pv.Label)
-        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
-            return myself.scale.range().band/2;
-        })
-        .textAlign("center")//.textAlign(align)
-     //   .textAlign(align)
-        .textAngle( function(d){
-            var w = this.parent.dim().parSize;
-            var h = this.parent.dim().fixedSize;
-            var tan = (myself.panelName == "xAxis")? h/w : w/h;
-            return -Math.atan(tan);
-            } ) //pi/4 -0.7854
-        .textBaseline("middle")
-        //.anchor('center')
-        .text(pv.identity)
-      //  .font("8px sans-serif");
-        ;
-        this.pvLabel.event("click", function(d){
-          alert(d);  
-        })
-    },
-    
-    //aux functions for renderCompositeOrdinalAxis
     
     getTextSizePlaceholder : function(){
         //TODO:move elsewhere, chartHolder may not have id..
@@ -1077,7 +873,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         this.pvLabel = this.pvRule.add(pv.Label)
         .data(this.ordinalElements)
-        [pvc.BasePanel.paralelLength[this.anchor]](null)
+        [pvc.BasePanel.parallelLength[this.anchor]](null)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
         [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
             return myself.scale(d) + myself.scale.range().band/2;
@@ -1098,7 +894,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         this.pvTicks = this.pvRule.add(pv.Rule)
         .data(scale.ticks())
-        [pvc.BasePanel.paralelLength[this.anchor]](null)
+        [pvc.BasePanel.parallelLength[this.anchor]](null)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
         [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale)
         [pvc.BasePanel.orthogonalLength[this.anchor]](function(d){
@@ -1130,7 +926,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.pvRuleGrid = this.pvRule.add(pv.Rule)
             .data(scale.ticks())
             .strokeStyle("#f0f0f0")
-            [pvc.BasePanel.paralelLength[this.anchor]](null)
+            [pvc.BasePanel.parallelLength[this.anchor]](null)
             [pvc.BasePanel.oppositeAnchor[this.anchor]](- this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] +
                 this[pvc.BasePanel.orthogonalLength[this.anchor]])
             [pvc.BasePanel.relativeAnchor[this.anchor]](scale)

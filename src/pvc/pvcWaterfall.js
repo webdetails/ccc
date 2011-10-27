@@ -474,7 +474,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         [anchor](function(d) {
             return d.y
         })
-        [pvc.BasePanel.paralelLength[anchor]](function(d) {
+        [pvc.BasePanel.parallelLength[anchor]](function(d) {
             return d.w
         })
         .strokeStyle("#c0c0c0");
@@ -524,7 +524,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .data(function(d){
                 return d
             })
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+            [pvc.BasePanel.parallelLength[anchor]](maxBarSize)
             .fillStyle(myself.DF.colorFunc);
 
         } else {   //  not this.stacked
@@ -536,7 +536,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .data(this.getDataSet() )
             [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.catContainerBasePosFunc)
             [anchor](0)
-            [pvc.BasePanel.paralelLength[anchor]](myself.DF.catContainerWidth)
+            [pvc.BasePanel.parallelLength[anchor]](myself.DF.catContainerWidth)
             // pvBarPanel[X]  = this[X]  (copy the function)
             [pvc.BasePanel.orthogonalLength[anchor]](
                 this[pvc.BasePanel.orthogonalLength[anchor]])
@@ -552,7 +552,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.relBasePosFunc)
             [anchor](myself.DF.orthoBotPos)
             [pvc.BasePanel.orthogonalLength[anchor]](myself.DF.orthoLengthFunc)
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ; 
+            [pvc.BasePanel.parallelLength[anchor]](maxBarSize)  ; 
 
         }  // end of if (stacked)
 

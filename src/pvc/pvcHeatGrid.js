@@ -29,7 +29,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             sizeValIdx: 0,
             defaultValIdx:0,
             measuresIndexes: [2],
-            
+            //multi-dimensional clickable label
+            useCompositeAxis:false,
             showValues: true,
             //originIsZero: true,
             axisOffset: 0,
@@ -214,7 +215,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.relativeAnchor[anchor]](function(){ //ex: datum.left(i=1 * w=15)
                 return this.index * w;
                 })
-            [pvc.BasePanel.paralelLength[anchor]](w)
+            [pvc.BasePanel.parallelLength[anchor]](w)
             .add(pv.Panel)
             .data(data)
             //[pvc.BasePanel.oppositeAnchor[anchor]]

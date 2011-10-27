@@ -915,6 +915,10 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
                     this.values = this.mergeMeasuresInColumns(this.resultset, measuresStart, 1);
                 }
                 
+                for(var i=0;i<colNames.length;i++){
+                    colNames[i] = colNames[i].split('~');
+                }
+                
                 this.values = this.mergeColumnNames(this.values, 0, this.dataOptions.categoriesCount);
                 //this.values = pvc.cloneMatrix(this.resultset).map(function(row){ return row.map(function(d){ return [d];}); });
                 colNames.splice(0,0,"x");

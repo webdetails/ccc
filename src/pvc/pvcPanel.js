@@ -452,7 +452,7 @@ pvc.BasePanel = Base.extend({
         right: "left"
     },
 
-    paralelLength:{
+    parallelLength:{
         top: "width",
         bottom: "width",
         right: "height",

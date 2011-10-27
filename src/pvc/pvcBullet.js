@@ -150,7 +150,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     this.pvBullets = this.pvPanel.add(pv.Panel)
     .data(data)
     [pvc.BasePanel.orthogonalLength[anchor]](size)
-    [pvc.BasePanel.paralelLength[anchor]](this.chart.options.bulletSize)
+    [pvc.BasePanel.parallelLength[anchor]](this.chart.options.bulletSize)
     .margin(20)
     .left(leftPos) // titles will be on left always
     .top(topPos);
