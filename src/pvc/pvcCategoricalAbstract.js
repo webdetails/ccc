@@ -661,10 +661,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     },
     
-    renderCompositeOrdinalAxisXHC2: function(){
-    //TODO:
-    },
-    
     renderCompositeOrdinalAxisXHC: function(){
         var myself = this;
     
@@ -674,14 +670,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         "right" :
         "left";
         
-        //var bogusData = {
-        //    'Products AB' : {
-        //        'Product B' : 1,
-        //        'Product A' : 1
-        //    },
-        //    'Product C' : 1,
-        //    'Product D' : 1
-        //};
         var bogusData = {
             'pre-preD' : {'pred':{'Product D' : 1}},
             'prec':{'Product C' : 1},
@@ -733,56 +721,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         ;
         var rootHeight = 25;//hcoded vs 100
         
-        //layout.node.transform(function(d){
-        //    //if(d.depth == 0){
-        //    //    d.dy = 0
-        //    //    return;
-        //    //}
-        //    //else {
-        //        d.minDepth -= 1/3.0;
-        //        d.maxDepth -= 1/3.0;
-        //        d.depth -= 1/3.0;
-        //        d.dy += (d.maxDepth - d.minDepth) * rootHeight;
-        //        d.y -= rootHeight;
-        //    //}
-        //});
-        
         layout.node.add(pv.Bar)
-            //.size( function(d){
-            //    return d;
-            //    }
-            //)
-          //  .bottom(function(d){
-          ////      d.y -= rootHeight;
-          //      if(d.depth ==0) return d.y;
-          // //     d.y += rootHeight
-          //      return d.y ;// + rootHeight;
-          //  })
-          //  .height(function(d){
-          //     if(d.depth == 0){
-          //      return 1;
-          //     }
-            //    //d.y = 0
-            //  //  rootHeight = d.dy;
-            //    d.dy = 1;
-            //    return d.dy;
-            //   }
-            //   else{
-            //    d.dy += rootHeight;
-              //  d.dy += (d.maxDepth - d.minDepth) * rootHeight;
-         //       return d.dy;//(d.maxDepth - d.minDepth) * (rootHeight );
-            //   }
-          //  })
             .fillStyle('rgba(127,127,127,.05)')
             .strokeStyle("rgb(127,127,127)")
             .lineWidth(0.5)
-            
-            //.top(function(d){
-            //  return d.y + rootHeight;// + rootHeight * 2;
-            //})
-            //.visible(function(d){
-            //    return d.depth != 0
-            //    })
             
             
             ;
@@ -815,6 +757,35 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 currObj = currObj[elem];
             }
         }
+    },
+    
+    getLayoutSingleCluster: function(tree, orientation, maxDepth){
+        
+        myself = this;
+        
+        //var numLeaves = elements.length;
+        var height = this.axisSize;
+        var baseDisplacement = (1.0/++maxDepth)* height;
+        var scaleFactor = maxDepth*1.0/ (maxDepth -1);
+     //  baseDisplacement *= scaleFactor;
+        
+        var panel = this.pvRule.add(pv.Panel).height(height*scaleFactor);
+     //   panel.transform(pv.Transform.identity.translate(0,baseDisplacement));//.scale(scaleFactor));
+        var layout = panel.add(pv.Layout.Partition.Fill)
+            .nodes(pv.dom(tree).root('').nodes())//create with pseudo-root
+            .orient("bottom")
+            ;
+      //  panel.transform().translate(0,baseDisplacement);
+        layout.node
+        .height(function(d){
+                    //d.y += baseDisplacement;
+                    if(d.depth > 0){
+                        d.dy *= scaleFactor;
+                    }
+                    return d.dy;// * scaleFactor;
+                })
+        ;
+        return layout;
     },
     
     getLayout: function(tree, orientation, breadthCounters, numLeaves){
@@ -899,46 +870,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }
         }
         var breadthCounters = this.getBreadthCounters(elements);
-        //{};
-        ////count breadth (leaf nodes #)
-        //for(var i =0; i<elements.length; i++){
-        //    var name = elements[i][0];
-        //    if(!breadthCounters[name]){
-        //        breadthCounters[name] = 1;
-        //    }
-        //    else {
-        //        breadthCounters[name] = breadthCounters[name] + 1;
-        //    }
-        //}
+        //var layout = this.getLayout(tree, "bottom", breadthCounters, elements.length);
         
-        //var axisWidth = this.width - this.oppositeAxisSize;
-        //var numLeaves = elements.length;
-        //var widthPerLeaf = axisWidth / numLeaves;
-        //var left = this.oppositeAxisSize;
-        //////////
+        var maxDepth = pv.max(elements, function(col){
+            return $.isArray(col) ? col.length : 1;
+            });
         
-        var layout = this.getLayout(tree, "bottom", breadthCounters, elements.length);
-        
-        //this.pvRule.add(pv.Panel)
-        //    .data(sectionNames)
-        //     .lineWidth(0)
-        //    .left(function(name){
-        //        var ret = left;
-        //        left += widthPerLeaf * breadthCounters[name];
-        //        return ret;
-        //    })
-        //    .height(function(){
-        //        return myself.axisSize;
-        //    })
-        //    .width(function (name){
-        //        return widthPerLeaf * breadthCounters[name];
-        //    })
-        //    .add(pv.Layout.Cluster.Fill)
-        //    .nodes(function(name){
-        //           return pv.dom(tree[name]).root(name).nodes();
-        //    })
-        //    .orient("bottom");
-
+        var layout = this.getLayoutSingleCluster(tree, "bottom", maxDepth);
             
         var diagDepthCutoff = 1.1;
             //see what will fit
@@ -954,13 +892,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return d.dy;
             });
             
-            
             //fill space
             layout.node.add(pv.Bar)
             .fillStyle('rgba(127,127,127,.01)')
             .strokeStyle("rgb(127,127,127)")
             .lineWidth( function(d){
-                if(d.maxDepth == 1) {return 0;}
+                if(d.maxDepth == 1 && d.minDepth > 0) {return 0;}
                 else {return 0.5;}
                // return 0.5;
             })
@@ -1034,70 +971,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 }
                 currObj = currObj[elem];
             }
-            //if(elements[i].length == 1){
-            //    tree[baseElem] = 1;
-            //}
-            //else {
-            //    tree[baseElem] = {};
-            //    var currObj = tree[baseElem];
-            //    //var key = baseElem;
-            //    for(var j=1;j<elements[i].length;j++){
-            //        
-            //        var elem = elements[i][j];
-            //        var elemObj = {};
-            //        elemObj[elem] = 1;//
-            //        
-            //        currObj[key] = elemObj;
-            //        
-            //        
-            //    }
         }
-
-        //arrange ordinal elements into drawing matrix
-        
-        //var ylen = pv.max(elements, function(element){ return $.isArray(element)? element.length : 1; });
-        //var xlen = elements.length;
-        //var fpMx = [];
-        //for(var i=0;i< xlen;i++){
-        //    var row = [];
-        //    var xacc = 1;
-        //    for(var j = 0; j < ylen; j++){
-        //        var v = {
-        //            xdim :1,
-        //            ydim: (j == elements[i].length - 1)? ylen - j : 1,
-        //            lbl: (j >= elements[i].length)?
-        //                elements[i][elements[i].length - 1] :
-        //                elements[i][j]
-        //        }
-        //        row.push(v);
-        //    }
-        //    fpMx.push(row);
-        //}
-        ////...
-        //for(var y=0; y<ylen;y++)
-        //{
-        //    for(var x=xlen-1; x > 0;x--)
-        //    {//accumulate equal labels over x
-        //      if(fpMx[x][y].lbl == fpMx[x-1][y].lbl){//consecutive label
-        //        fpMx[x-1][y].xdim += fpMx[x][y].xdim;
-        //        fpMx[x][y].xdim = 0;
-        //      }
-        //    }
-        //}
-        
-                //var ylen = pv.max(elements, function(element){ return $.isArray(element)? element.length : 1; });
-        //var xlen = elements.length;
 
         
         this.pvLabel = this.pvRule.add(pv.Panel)
         .data(this.ordinalElements)
-      // //new ini
-      //  .data(fpMx)//1 per column 
-      //  .add(pv.Bar)
-      //  .data(function(){
-      //      return fpMx[this.index];
-      //      })
-      ////new fim
         .def("dim", function(){
             return {fixedSize: myself.axisSize,
                     parSize: myself.scale.range().band};
@@ -1148,7 +1026,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     //aux functions for renderCompositeOrdinalAxis
     
     getTextSizePlaceholder : function(){
-        //TODO:move elsewhere
+        //TODO:move elsewhere, chartHolder may not have id..
         var TEXT_SIZE_PHOLDER_APPEND='_textSizeHtmlObj';
         if(!this.textSizeTestHolder){
             var chartHolder = $('#' + this.chart.options.canvas);
