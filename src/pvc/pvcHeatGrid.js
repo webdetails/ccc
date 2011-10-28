@@ -45,19 +45,19 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             maxColor: "darkgreen",
             nullColor:  "#efc5ad",  // white with a shade of orange
             xAxisClickAction: function(d){
-                self.heatGridChartPanel.selectXValue(d);
+                //self.heatGridChartPanel.selectXValue(d);
+                self.heatGridChartPanel.selectAxisValue('x', d);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
             },
             yAxisClickAction: function(d){ //TODO: move elsewhere
-                self.heatGridChartPanel.selectYValue(d);
+                //self.heatGridChartPanel.selectYValue(d);
+                self.heatGridChartPanel.selectAxisValue('y', d);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
             }
         };
-
         
-
         // Apply options
         $.extend(this.options,_defaults, o);
 
@@ -192,7 +192,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 return  d[this.index];
             });
         });
-        data.reverse();  // the colums are build from top to bottom
+        //data.reverse();  // the colums are build from top to bottom --> nope, bottom to top, left to right now
 
         // get an array of scaling functions (one per column)
         var fill = this.getColorScale(data, cols);
@@ -443,35 +443,171 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
     },
     
-    selectXValue: function(y){
-      if(this.orientation == "vertical"){
-        this.toggleCategories(y);
-      }
-      else { this.toggleSeries(y); }
+    //selectXValue: function(xval){
+    //    this.selectAxisValue('x',xval);
+    //  //if(this.orientation == "vertical"){
+    //  //  
+    //  //  if(this.chart.options.useCompositeAxis){
+    //  //      this.toggleCategoriesHierarchy(y);
+    //  //  }
+    //  //  else { this.toggleCategories(y); }
+    //  //}
+    //  //else {//TODO:
+    //  //  this.toggleSeries(y);
+    //  //  }
+    //},
+    //
+    //selectYValue: function(yval){
+    //    
+    //    this.selectAxisValue('y',yval);
+    //  //if(this.orientation == "horizontal"){
+    //  //  if(this.chart.options.useCompositeAxis){
+    //  //      this.toggleCategoriesHierarchy(x);
+    //  //  }
+    //  //  else { this.toggleCategories(x); }
+    //  //}
+    //  //else {//TODO:
+    //  //  
+    //  //  if(this.chart.options.useCompositeAxis){
+    //  //      this.toggleCategoriesHierarchy(x);
+    //  //  }
+    //  //  
+    //  //  this.toggleSeries(x);
+    //  //  }
+    //},
+    
+    selectAxisValue: function(axis, axisValue)
+    {
+        var type = (this.orientation == 'horizontal')?
+            ((axis == 'x')? 's' : 'c') :
+            ((axis == 'x')? 'c' : 's')
+            
+        if(this.chart.options.useCompositeAxis)
+        {
+            if(type =='c'){ this.toggleCategoriesHierarchy(axisValue); }
+            else { this.toggleSeriesHierarchy(axisValue); }
+        }
+        else
+        {
+            if(type =='c'){ this.toggleCategories(axisValue); }
+            else { this.toggleSeries(axisValue); }
+        }
     },
     
-    selectYValue: function(x){
-      if(this.orientation == "horizontal"){
-        this.toggleCategories(x);
-      }
-      else { this.toggleSeries(x); }
+    //ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+    arrayStartsWith: function(array, base)
+    {
+        if(array.length < base.length) { return false; }
+        
+        for(var i=0; i<base.length;i++){
+            if(base[i] != array[i]) {
+                return false;
+            }
+        }
+        return true;
+    },
+    
+    toggleCategoriesHierarchy: function(cbase){
+        if(this.selectCategoriesHierarchy(cbase)){
+            this.deselectCategoriesHierarchy(cbase);
+        }
+    },
+    
+    toggleSeriesHierarchy: function(sbase){
+        if(this.selectSeriesHierarchy(sbase)){
+            this.deselectSeriesHierarchy(sbase);
+        }
+    },
+    
+    //returns bool wereAllSelected
+    selectCategoriesHierarchy: function(cbase){
+        var categories = this.chart.dataEngine.getCategories();
+        var selected = true;
+        for(var i =0; i< categories.length ; i++){
+            var c = categories[i];
+            if( this.arrayStartsWith(c, cbase) ){
+                selected &= this.selectCategory(c);
+            }
+        }
+        return selected;
+    },
+    
+    selectSeriesHierarchy: function(sbase){
+        var series = this.chart.dataEngine.getSeries();
+        var selected = true;
+        for(var i =0; i< series.length ; i++){
+            var s = series[i];
+            if( this.arrayStartsWith(s, sbase) ){
+                selected &= this.selectSeries(s);
+            }
+        }
+        return selected;
+    },
+    
+    deselectCategoriesHierarchy: function(cbase){
+        var categories = this.chart.dataEngine.getCategories();
+        for(var i =0; i< categories.length ; i++){
+            var c = categories[i];
+            if( this.arrayStartsWith(c, cbase) ){
+                this.deselectCategory(c);
+            }
+        }
+    },
+    
+    deselectSeriesHierarchy: function(sbase){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i =0; i< series.length ; i++){
+            var s = series[i];
+            if( this.arrayStartsWith(s, sbase) ){
+                this.deselectSeries(s);
+            }
+        }
+    },
+    
+    //returns bool wereAllSelected
+    selectCategory: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        var wereAllSelected = true;
+        for(var i = 0; i < series.length; i++ ){
+            var s = series[i];
+            wereAllSelected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+        }
+        return wereAllSelected;
+    },
+    
+    selectSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        var wereAllSelected = true;
+        for(var i = 0; i < categories.length; i++ ){
+            var c = categories[i];
+            wereAllSelected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+        }
+        return wereAllSelected;
+    },
+    
+    deselectCategory: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i = 0; i < series.length; i++ ){
+            this.removeSelection(series[i],c);
+        }
+    },
+
+    deselectSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < categories.length; i++ ){
+            this.removeSelection(s, categories[i]);
+        }
     },
     
     //pseudo-toggle elements with category c:
     // deselect all if all selected, otherwise select all
     toggleCategories: function(c){
         var series = this.chart.dataEngine.getSeries();
-        var selected = true;
-        for(var i = 0; i < series.length; i++ ){
-            var s = series[i];
-            selected &= this.isSelected(s,c);
-            this.addSelection(s,c);
-            //this.selections[series[i]][c] = true;
-        }
+        var selected = this.selectCategory(c);
         if(selected){
-            for(var i = 0; i < series.length; i++ ){
-                this.removeSelection(series[i],c);
-            }
+            this.deselectCategory(c);
         }
     },
     
@@ -479,17 +615,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     // deselect all if all selected, otherwise select all
     toggleSeries: function(s){
         var categories = this.chart.dataEngine.getCategories();
-        var selected = true;
-        for(var i = 0; i < categories.length; i++ ){
-            var c = categories[i];
-            selected &= this.isSelected(s,c);
-            this.addSelection(s,c);
-            //this.selections[series[i]][c] = true;
-        }
+        var selected = this.selectSeries(s);
         if(selected){
-            for(var i = 0; i < categories.length; i++ ){
-                this.removeSelection(s,categories[i]);
-            }
+            this.deselectSeries(s);
         }
     },
     

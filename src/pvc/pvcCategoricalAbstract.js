@@ -642,14 +642,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         if (this.ordinal == true){
             if(this.useCompositeAxis == true){
-                //TODO:temp, hcoded
-    //            if(this.panelName == "xAxis"){
                   this.renderCompositeOrdinalAxis();
-                 //  this.renderCompositeOrdinalAxisXHC();
-  //              }
-                //else {
-                //    this.renderCompositeOrdinalAxis();
-                //}
             }
             else {
                 this.renderOrdinalAxis();
@@ -661,6 +654,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     },
     
+    /////////////////////////////////////////////////
+    //begin: composite axis
     
     getElementsTree: function(elements){
         var tree = {};
@@ -685,26 +680,37 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         myself = this;
 
         var depthLength = this.axisSize;
+        //displace to take out bogus-root
         var baseDisplacement = (1.0/++maxDepth)* depthLength;
+        baseDisplacement -= 0.125 * depthLength;//compensation
         var scaleFactor = maxDepth*1.0/ (maxDepth -1);
-        baseDisplacement /= scaleFactor;
-        var margin = scaleFactor;
-        baseDisplacement -= Math.ceil(margin);
         var orthogonalLength = pvc.BasePanel.orthogonalLength[orientation];
-        var dlen = (orthogonalLength == 'width')? 'dx' : 'dy';
+        //var dlen = (orthogonalLength == 'width')? 'dx' : 'dy';
         
-        var displacement = (dlen == 'dx')?
-                ((orientation == 'left')? [-baseDisplacement, 0] : [baseDisplacement ,0]) :
-                ((orientation == 'top')? [0,-baseDisplacement ] : [0, baseDisplacement ]);
+        var displacement = (orthogonalLength == 'width')?
+                ((orientation == 'left')? [-baseDisplacement, 0] : [baseDisplacement, 0]) :
+                ((orientation == 'top')?  [0, -baseDisplacement] : [0, baseDisplacement]);
            
-        this.pv
+        this.pvRule.lineWidth(0).strokeStyle(null);
         var panel = this.pvRule
-                        .add(pv.Panel)[orthogonalLength](depthLength).overflow('hidden').strokeStyle(null).lineWidth(0) //viewport
-                        .add(pv.Panel)[orthogonalLength](depthLength * scaleFactor - margin ).strokeStyle(null).lineWidth(0);// panel resized and shifted to make bogus root disappear
+                        .add(pv.Panel)[orthogonalLength](depthLength).overflow('hidden').strokeStyle(null).lineWidth(0) //cropping panel
+                        .add(pv.Panel)[orthogonalLength](depthLength * scaleFactor ).strokeStyle(null).lineWidth(0);// panel resized and shifted to make bogus root disappear
         panel.transform(pv.Transform.identity.translate(displacement[0], displacement[1]));
         
+        //set full label path
+        var nodes = pv.dom(tree).root('').nodes().map(function(node){
+            var path = [];
+            path.push(node.nodeName);
+            for(var pnode = node.parentNode; pnode != null; pnode = pnode.parentNode){
+              path.push(pnode.nodeName);      
+            }
+            node.nodePath = path.reverse().slice(1);
+            return node;
+        });
+        
+        //create with bogus-root;pv.Hierarchy must always have exactly one root and at least one element besides the root
         var layout = panel.add(pv.Layout.Cluster.Fill)
-            .nodes(pv.dom(tree).root('').nodes())//create with pseudo-root,otherwise fails with one level
+            .nodes(nodes)
             .orient(orientation)
             ;
         return layout;
@@ -734,9 +740,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         "left";
 
         var elements = this.ordinalElements.slice(0);
-        if(this.anchor == 'bottom' || this.anchor == 'right') {elements.reverse();}
+        //TODO: extend this to work with chart.orientation
+        if(this.anchor == 'bottom' || this.anchor == 'left') {elements.reverse();}
         
-        //v2
+        //build tree with elements
         var tree = {};
         var sectionNames = [];
         var xlen = elements.length;
@@ -758,14 +765,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         var maxDepth = pv.max(elements, function(col){
             return $.isArray(col) ? col.length : 1;
-            });
+        });
         
         var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
     
         var diagDepthCutoff = 1.1; //depth in [-1/(n+1), 1]
         //see what will fit
         layout.node
-            .def("fitsBox",true)
+            .def("fitsBox",true) //TODO: change to fitInfo
             .height(function(d,e,f){//just iterate and get cutoff
                 var fitsBox = myself.doesTextSizeFit(d.dx, 0, d.nodeName, null);
                 if(!fitsBox){
@@ -783,11 +790,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 else {return "rgba(127,127,127,0.5)";}
             })
             .lineWidth( function(d){
-                if(d.maxDepth == 1 || d.maxDepth ==0 ) {return 0;}
+                if(d.maxDepth == 1 || d.maxDepth ==0 ) { return 0; }
                 else {return 0.5;}
             })
             .text(function(d){
                 return d.nodeName;
+            })
+            .cursor('pointer')
+            .event('click', function(d){
+                if(myself.clickAction){
+                    myself.clickAction(d.nodePath);
+                }
             })
             .event("mouseover", pv.Behavior.tipsy({//Tooltip
                 gravity: "n",
@@ -799,7 +812,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var V_CUTOFF_ANG = -1.27;
         
         //get labels in proper alignment
-        layout.label.add(pv.Label)
+        this.pvLabel = layout.label.add(pv.Label)
             .textAngle(function(d){
                 if(d.depth >= diagDepthCutoff){
                     var tan = d.dy/d.dx;
@@ -818,9 +831,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return d.nodeName ;
             })
             ;
-        
     },
     
+    //TODO: change uses for svg version 
     getTextSizePlaceholder : function(){
         //TODO:move elsewhere, chartHolder may not have id..
         var TEXT_SIZE_PHOLDER_APPEND='_textSizeHtmlObj';
@@ -860,6 +873,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
         return text + (trimmed? trimTerminator: '');
     },
+    
+    // end: composite axis
+    /////////////////////////////////////////////////
 
     renderOrdinalAxis: function(){
 
@@ -944,12 +960,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return true;
             })
         }
-
-
     }
-
-
-
 });
 
 /*
