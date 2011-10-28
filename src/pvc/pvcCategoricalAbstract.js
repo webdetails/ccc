@@ -671,7 +671,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         this.pvLabel = this.pvTicks.anchor(this.anchor)
                             .add(pv.Label)
-                            .text(this.scale.tickFormat)
+                            .textAlign(align)
+                            .text(pv.identity)
                             .font("9px sans-serif");
 
     },
