@@ -738,6 +738,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         (this.anchor == "left")  ?
         "right" :
         "left";
+        
+        var axisDirection = (this.anchor == 'bottom' || this.anchor == 'top')?
+            'h':
+            'v';
 
         var elements = this.ordinalElements.slice(0);
         //TODO: extend this to work with chart.orientation
@@ -769,18 +773,24 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
     
-        var diagDepthCutoff = 1.1; //depth in [-1/(n+1), 1]
+        var diagDepthCutoff = 2; //depth in [-1/(n+1), 1]
         //see what will fit
         layout.node
-            .def("fitsBox",true) //TODO: change to fitInfo
+            .def("fitInfo", null)
+            //.def("fitsBox",true) //TODO: change to fitInfo
             .height(function(d,e,f){//just iterate and get cutoff
-                var fitsBox = myself.doesTextSizeFit(d.dx, 0, d.nodeName, null);
-                if(!fitsBox){
-                    this.fitsBox(fitsBox);
+                //var fitsBox = myself.doesTextSizeFit(d.dx, d.nodeName, null);
+                //if(!fitsBox){
+                //    this.fitsBox(fitsBox);
+                //    diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                //}
+                var fitInfo = myself.getFitInfo(d.dx, d.dy, d.nodeName, null);//TODO:font
+                if(!fitInfo.h){
                     diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
                 }
+                this.fitInfo( fitInfo );
                 return d.dy;
-            });
+            }) ;
         
         //fill space
         layout.node.add(pv.Bar)
@@ -808,26 +818,75 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }));
         
         //cutoffs -> snap to vertical/horizontal
-        var H_CUTOFF_ANG = -0.30;
-        var V_CUTOFF_ANG = -1.27;
+        var H_CUTOFF_ANG = 0.30;
+        var V_CUTOFF_ANG = 1.27;
+        var V_CUTOFF_RATIO = 0.8;
         
-        //get labels in proper alignment
+        //draw labels and make them fit
         this.pvLabel = layout.label.add(pv.Label)
-            .textAngle(function(d){
-                if(d.depth >= diagDepthCutoff){
+            .def('lblDirection','h')
+            .textAngle(function(d)
+            {
+                var fitInfo = this.fitInfo();
+                if(d.depth >= diagDepthCutoff)
+                {
                     var tan = d.dy/d.dx;
-                    var res = -Math.atan(tan);// more vertical (ex -0.3)?..
-                    if(res < 0 && res > H_CUTOFF_ANG) {return 0;}
-                    else if(res > -Math.PI/2 && res < V_CUTOFF_ANG) {return -Math.PI/2;}
-                    else {return res ;}
+                    var angle = Math.atan(tan);
+                    var hip = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
+                    if( (axisDirection == 'v' && ( fitInfo.v || Math.sin(angle) >=0.8 ))
+                        || angle > V_CUTOFF_ANG)
+                    {//prefer vertical
+                        this.lblDirection('v');
+                        return -Math.PI/2;
+                    }
+                    else if(angle > H_CUTOFF_ANG) {
+                        //this.lblDirection('h');
+                        //return 0;
+                        this.lblDirection('d');
+                        return -angle;
+                    }
+                    //else if(angle < Math.PI/2 && angle > V_CUTOFF_ANG) {
+                    //    this.lblDirection('v');
+                    //    return -Math.PI/2;
+                    //}
+                    //else {return -angle ;}
                 }
-                else return 0;
+                this.lblDirection('h');
+                return 0;//horizontal
+            
+                //if(d.depth >= diagDepthCutoff){
+                //    var tan = d.dy/d.dx;
+                //    var res = -Math.atan(tan);// more vertical (ex -0.3)?..
+                //    if(res < 0 && res > H_CUTOFF_ANG) {return 0;}
+                //    else if(res > -Math.PI/2 && res < V_CUTOFF_ANG) {return -Math.PI/2;}
+                //    else {return res ;}
+                //}
+                //else return 0;
             })
-            .text(function(d){
-                if(d.depth >= diagDepthCutoff){//trim if needed
-                    var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
-                    return myself.trimToWidth(diagonalLength, d.nodeName, null, '..');
+            .text(function(d){//TODO: change
+                var fitInfo = this.fitInfo();
+                switch(this.lblDirection()){
+                    case 'h':
+                        if(!fitInfo.h){
+                            return myself.trimToWidth(d.dx, d.nodeName, null, '..');
+                        }
+                        break;
+                    case 'v':
+                        if(!fitInfo.v){
+                            return myself.trimToWidth(d.dy, d.nodeName, null, '..');
+                        }
+                        break;
+                    case 'd':
+                       if(!fitInfo.d){
+                            var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
+                            return myself.trimToWidth(diagonalLength, d.nodeName, null, '..');
+                        }
+                        break;
                 }
+                //if(d.depth >= diagDepthCutoff){//trim if needed
+                //    var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
+                //    return myself.trimToWidth(diagonalLength, d.nodeName, null, '..');
+                //}
                 return d.nodeName ;
             })
             ;
@@ -851,15 +910,28 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return this.textSizeTestHolder;
     },
     
-    doesTextSizeFit: function(w, h, text, font){
-        var MARGIN = 15;
+    //whether fits horizaontally, vertical and/or in diagonal
+    getFitInfo: function(w, h, text, font)
+    {
+        var fitInfo =
+        {
+            h: this.doesTextSizeFit(w, text, font),
+            v: this.doesTextSizeFit(h, text, font),
+            d: this.doesTextSizeFit(Math.sqrt(w*w + h*h), text, font)
+        };
+        return fitInfo;
+    },
+    
+    //TODO: use svg approach
+    doesTextSizeFit: function(length, text, font){
+        var MARGIN = 15;//TODO: hcoded
         var holder = this.getTextSizePlaceholder();
         holder.text(text);
-        return holder.width() - MARGIN <= w;
+        return holder.width() - MARGIN <= length;
     },
     
     trimToWidth: function(w, text, font, trimTerminator){
-        var MARGIN = 15;
+        var MARGIN = 15;//TODO: hcoded
         var holder = this.getTextSizePlaceholder();
         if(font){
             holder.css("font", font);
