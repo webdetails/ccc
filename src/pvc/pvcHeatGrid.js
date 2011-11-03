@@ -134,7 +134,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     nullShape: "cross",
     defaultBorder: 0,
     nullBorder: 2,
-    selectedBorder: 3,
+    selectedBorder: 2,
     //function to be invoked when a selection occurs
     // (shape click-select, row/column click and lasso finished)
     onSelectionChange: null,
@@ -255,7 +255,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     function(d){ return myself.getValue(d, myself.sizeValIdx);})) ;
             });
 
-            var maxRadius = Math.min(w,h) / 2 -1;//-2
+            var maxRadius = Math.min(w,h) / 2 -2;//-2
             var maxArea = maxRadius * maxRadius ;//not *4, apparently treats as circle area even if square
             
             var valueToRadius = function(value){
@@ -314,7 +314,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         return this.selected()? myself.selectedBorder :
                                                 ( (myself.sizeValIdx == null ||
                                                    myself.getValue(r[i], myself.sizeValIdx) != null )?
-                                                        myself.defaultBorder :
+                                                        myself.defaultBorder : //0 hcoded?
                                                         myself.nullBorder);
                     })
                     .strokeStyle(function(r, ra, i){
@@ -345,7 +345,19 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                             myself.chart.options.clickAction(s,c,d);
                         }
                         myself.pvPanel.render();
+                    })
+                    ;
+                
+                //double click marks
+                if(typeof( opts.doubleClickAction ) == 'function' )
+                {//TODO: needs to prevent click from being called (timer?)
+                    this.shapes.event("dblclick", function(r,ra,i){
+                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                        var d = r[i];
+                        opts.doubleClickAction(s,c,d);
                     });
+                }
        }
        else
        {//no shapes, apply color map to panel iself

@@ -81,6 +81,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.options.xAxisSize = 0
         }
 
+        //TODO: font
+
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         this.secondScale =  this.options.secondAxisIndependentScale?this.getSecondScale(): this.getLinearScale();
@@ -682,14 +684,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var depthLength = this.axisSize;
         //displace to take out bogus-root
         var baseDisplacement = (1.0/++maxDepth)* depthLength;
-        baseDisplacement -= 0.125 * depthLength;//compensation
+        baseDisplacement -= (1.0/12.0) * depthLength;//heuristic compensation
+        
+        var margin = 0;
+        
         var scaleFactor = maxDepth*1.0/ (maxDepth -1);
         var orthogonalLength = pvc.BasePanel.orthogonalLength[orientation];
         //var dlen = (orthogonalLength == 'width')? 'dx' : 'dy';
         
         var displacement = (orthogonalLength == 'width')?
-                ((orientation == 'left')? [-baseDisplacement, 0] : [baseDisplacement, 0]) :
-                ((orientation == 'top')?  [0, -baseDisplacement] : [0, baseDisplacement]);
+                ((orientation == 'left')? [-baseDisplacement - margin, 0] : [baseDisplacement + margin, 0]) :
+                ((orientation == 'top')?  [0, -baseDisplacement - margin] : [0, baseDisplacement + margin]);
            
         this.pvRule.lineWidth(0).strokeStyle(null);
         var panel = this.pvRule
@@ -774,6 +779,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
     
         var diagDepthCutoff = 2; //depth in [-1/(n+1), 1]
+        var vertDepthCutoff = 2;
         //see what will fit
         layout.node
             .def("fitInfo", null)
@@ -784,16 +790,23 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 //    this.fitsBox(fitsBox);
                 //    diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
                 //}
-                var fitInfo = myself.getFitInfo(d.dx, d.dy, d.nodeName, null);//TODO:font
+                //var fitInfo = myself.getFitInfo(d.dx, d.dy, d.nodeName, null);
+                var fitInfo = myself.getFitInfoSVG(d.dx, d.dy, d.nodeName, null);
                 if(!fitInfo.h){
-                    diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                    
+                    if(axisDirection == 'v' && fitInfo.v ){//prefer vertical
+                        vertDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                    }
+                    else {
+                        diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                    }
                 }
                 this.fitInfo( fitInfo );
                 return d.dy;
             }) ;
         
         //fill space
-        layout.node.add(pv.Bar)
+        var lblBar = layout.node.add(pv.Bar)
             .fillStyle('rgba(127,127,127,.01)')
             .strokeStyle( function(d){
                 if(d.maxDepth == 1 || d.maxDepth ==0 ) {return null;}
@@ -828,13 +841,21 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .textAngle(function(d)
             {
                 var fitInfo = this.fitInfo();
+                
+                if(d.depth >= vertDepthCutoff && d.depth < diagDepthCutoff){
+                        this.lblDirection('v');
+                        return -Math.PI/2;
+                }
                 if(d.depth >= diagDepthCutoff)
                 {
+                    
                     var tan = d.dy/d.dx;
                     var angle = Math.atan(tan);
                     var hip = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
-                    if( (axisDirection == 'v' && ( fitInfo.v || Math.sin(angle) >=0.8 ))
-                        || angle > V_CUTOFF_ANG)
+                    
+                    if//( (axisDirection == 'v' && ( fitInfo.v || Math.sin(angle) >=0.8 ))
+                       // ||
+                      (angle > V_CUTOFF_ANG)
                     {//prefer vertical
                         this.lblDirection('v');
                         return -Math.PI/2;
@@ -868,18 +889,22 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 switch(this.lblDirection()){
                     case 'h':
                         if(!fitInfo.h){
-                            return myself.trimToWidth(d.dx, d.nodeName, null, '..');
+                            //return myself.trimToWidth(d.dx, d.nodeName, null, '..');
+                            return myself.trimToWidthSVG(d.dx, d.nodeName, null, '..');
                         }
                         break;
                     case 'v':
                         if(!fitInfo.v){
-                            return myself.trimToWidth(d.dy, d.nodeName, null, '..');
+                            return myself.trimToWidthSVG(d.dy, d.nodeName, null, '..');
                         }
                         break;
                     case 'd':
                        if(!fitInfo.d){
-                            var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
-                            return myself.trimToWidth(diagonalLength, d.nodeName, null, '..');
+                          //  var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
+                          //  return myself.trimToWidthSVG(diagonalLength -5, d.nodeName, null, '..');
+                          var ang = Math.atan(d.dy/d.dx);
+                          var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx) ;//-13;
+                          return myself.trimToWidthSVG(diagonalLength-2,d.nodeName,null,'..');
                         }
                         break;
                 }
@@ -890,6 +915,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return d.nodeName ;
             })
             ;
+            
+            //double click label //TODO: need doubleclick axis action + single click prevention..
+            //if(typeof( this.doubleClickAction ) == 'function' )
+            //{
+                //lblBar.event("dblclick", function(r,ra,i){
+                //    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                //    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                //    var d = r[i];
+                //    myself.doubleClickAction,                //});
+            //}
     },
     
     //TODO: change uses for svg version 
@@ -909,6 +944,109 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
         return this.textSizeTestHolder;
     },
+
+    getTextSizePvLabel: function(text, font){
+        var holder = this.getTextSizePlaceholder();
+        var holderId = holder.attr('id');
+        var panel = new pv.Panel();
+        panel.canvas(holderId);
+        var lbl = panel.add(pv.Label).text(text);
+        if(font){
+            lbl.font(font);
+        }
+        return lbl;
+    },
+    
+    getTextLenSVG: function(text, font){
+        var holder = this.getTextSizePlaceholder();
+        var holderId = holder.attr('id');
+        var panel = new pv.Panel();
+        panel.canvas(holderId);
+        var lbl = panel.add(pv.Label).text(text);//.textBaseline("middle");
+        if(font){
+            lbl.font(font);
+        }
+        panel.render();
+        //get generated label
+        var elem = $('#' + holderId + ' text')[0];
+        var box = elem.getBBox();//bounding box
+        return box.width;
+    },
+    
+    //getTextBBox: function(angle, lbl){
+    //   // var lbl = this.getTextSizePvLabel(text, font);
+    //    lbl.textAngle(angle);
+    //    lbl.root.render();
+    //    var elem = $('#' + holderId + ' text')[0];
+    //    return elem.getBBox();//bounding box
+    //},
+    
+    getFitInfoSVG: function(w, h, text, font)
+    {
+        if(text == '') return {h:true, v:true, d:true};
+        var len = this.getTextLenSVG(text, font);
+        var fitInfo =
+        {
+            h: len <= w,
+            v: len <= h,
+            d: len <= Math.sqrt(w*w + h*h) -2
+        };
+        return fitInfo;
+    },
+    
+    trimToWidthSVGDiag: function(w,h,text,font,angle, trimTerminator){
+        var lbl = this.getTextSizePvLabel(text, font);
+        var holder = this.getTextSizePlaceholder();
+        var holderId = holder.attr('id'); 
+        var trimmed = false;
+        lbl.textAngle(angle);
+        lbl.root.render();
+        var elem = $('#' + holderId + ' text').parent()[0];
+        
+        for(var box =  elem.getBBox();
+            box.width > w ||
+            box.height > h;
+            text = text.slice(0,text.length -1))
+        {
+            trimmed = true;
+            lbl.text(text + trimTerminator);
+            lbl.root.render();
+           // elem = $('#' + holderId + ' text').parent()[0];
+            box = elem.getBBox();
+        }
+        return text + (trimmed? trimTerminator: '');
+    },
+    
+    //getFitInfoSVG: function(w, h, text, font)
+    //{
+    //    var fitInfo = {};
+    //    
+    //    var lbl = this.getTextSizePvLabel(text, font);
+    //    lbl.root.render();
+    //    //fitInfo.h = 
+    //    
+    //    if(text == '') return {h:true, v:true, d:true};
+    //    var len = this.getTextLenSVG(text, font);
+    //    var fitInfo =
+    //    {
+    //        h: len <= w,
+    //        v: len <= h,
+    //        d: len <= Math.sqrt(w*w + h*h) -5 //margin in diagonal
+    //    };
+    //    return fitInfo;
+    //},
+    
+    trimToWidthSVG: function(len, text, font, trimTerminator){
+        if(text == '') return text;
+        var holder = this.getTextSizePlaceholder();
+        var trimmed = false;
+        
+        for(var textLen = this.getTextLenSVG(text, font); textLen > len; text = text.slice(0,text.length -1)){
+            textLen = this.getTextLenSVG(text, font);
+            trimmed = true;
+        }
+        return text + (trimmed? trimTerminator: '');
+    },
     
     //whether fits horizaontally, vertical and/or in diagonal
     getFitInfo: function(w, h, text, font)
@@ -924,14 +1062,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     //TODO: use svg approach
     doesTextSizeFit: function(length, text, font){
-        var MARGIN = 15;//TODO: hcoded
+        var MARGIN = 4;//TODO: hcoded
         var holder = this.getTextSizePlaceholder();
         holder.text(text);
         return holder.width() - MARGIN <= length;
     },
     
     trimToWidth: function(w, text, font, trimTerminator){
-        var MARGIN = 15;//TODO: hcoded
+        var MARGIN = 4;//TODO: hcoded
         var holder = this.getTextSizePlaceholder();
         if(font){
             holder.css("font", font);
