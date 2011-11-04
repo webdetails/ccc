@@ -117,10 +117,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 oppositeAxisSize: this.options.yAxisSize,
                 fullGrid:  this.options.xAxisFullGrid,
                 ordinalElements: this.getAxisOrdinalElements("x"),
-                clickAction: this.options.xAxisClickAction,
                 
-                useCompositeAxis: this.options.useCompositeAxis, //new
-                font: this.options.axisLabelFont
+                clickAction: this.options.xAxisClickAction,
+                useCompositeAxis: this.options.useCompositeAxis, 
+                font: this.options.axisLabelFont,
+                doubleClickAction: this.options.xAxisDoubleClickAction,
+                clickDelay: this.options.axisClickDelay
             });
 
             //            this.xAxisPanel.setScale(this.xScale);
@@ -147,9 +149,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 oppositeAxisSize: this.options.xAxisSize,
                 fullGrid:  this.options.yAxisFullGrid,
                 ordinalElements: this.getAxisOrdinalElements("y"),
+                
                 clickAction: this.options.yAxisClickAction,
-                useCompositeAxis: this.options.useCompositeAxis, //new
-                font: this.options.axisLabelFont
+                useCompositeAxis: this.options.useCompositeAxis, 
+                font: this.options.axisLabelFont,
+                doubleClickAction: this.options.yAxisDoubleClickAction,
+                clickDelay: this.options.axisClickDelay
             });
 
             this.yAxisPanel.setScale(this.yScale);
@@ -801,6 +806,29 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return d.dy;
             }) ;
         
+        //click / double click interaction
+        var ignoreClicks = 0;
+        var DBL_CLICK_MAX_DELAY = (this.clickDelay)? this.clickDelay : 300; //ms
+        var clickAction = (typeof(this.clickAction) == 'function')?
+            function(d){
+                if(ignoreClicks) { ignoreClicks--; }
+                else {
+                    myself.clickAction(d);
+                }
+            } :
+            null;
+            
+        ////TODO:testing
+        //this.doubleClickAction = function(d){
+        //    alert(d).join(', ');
+        //}
+        var doubleClickAction = (typeof(this.doubleClickAction) == 'function')?
+            function(d){
+                ignoreClicks = 2;
+                myself.doubleClickAction(d);
+            } :
+            null;
+        
         //fill space
         var lblBar = layout.node.add(pv.Bar)
             .fillStyle('rgba(127,127,127,.01)')
@@ -817,9 +845,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             .cursor( myself.clickAction? 'pointer' : 'default')
             .event('click', function(d){
-                if(myself.clickAction){
-                    myself.clickAction(d.nodePath);
+                if(clickAction){
+                    if(doubleClickAction){
+                        window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
+                    }
+                    else { clickAction(d.nodePath); }
                 }
+                
+                //if(myself.clickAction){
+                //    myself.clickAction(d.nodePath);
+                //}
             })
             .event("mouseover", pv.Behavior.tipsy({//Tooltip
                 gravity: "n",
@@ -889,15 +924,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             ;
             
-            //double click label //TODO: need doubleclick axis action + single click prevention..
-            //if(typeof( this.doubleClickAction ) == 'function' )
-            //{
-                //lblBar.event("dblclick", function(r,ra,i){
-                //    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                //    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                //    var d = r[i];
-                //    myself.doubleClickAction,                //});
-            //}
+           // double click label //TODO: need doubleclick axis action + single click prevention..
+            if(doubleClickAction)
+            {
+                lblBar.event("dblclick", function(d){
+                    doubleClickAction(d.nodePath);
+                });
+            }
     },
     
     getTextSizePlaceholder : function()
