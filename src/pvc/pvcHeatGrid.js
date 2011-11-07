@@ -50,7 +50,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
             },
-            yAxisClickAction: function(d){ //TODO: move elsewhere
+            yAxisClickAction: function(d){ //TODO: move elsewhere?
                 //self.heatGridChartPanel.selectYValue(d);
                 self.heatGridChartPanel.selectAxisValue('y', d);
                 self.heatGridChartPanel.pvPanel.render();
@@ -241,123 +241,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             .strokeStyle("white")
             .overflow('hidden'); //overflow important if showValues=true
         
-        
         //tooltip text
          this.pvHeatGrid.text(function(d,f){
               return myself.getValue(d[f]);
          });
          
         //set coloring and shape / sizes if enabled
-       if(opts.useShapes){
-            //total max in data
-            var maxVal = pv.max(data, function(datum){// {col:value ..}
-                return pv.max( pv.values(datum).map(
-                    function(d){ return myself.getValue(d, myself.sizeValIdx);})) ;
-            });
-
-            var maxRadius = Math.min(w,h) / 2 -2;//-2
-            var maxArea = maxRadius * maxRadius ;//not *4, apparently treats as circle area even if square
-            
-            var valueToRadius = function(value){
-                return value != null ? value/maxVal * maxRadius : Math.min(maxRadius,5) ;//TODO:hcoded
-            };
-            
-            var valueToArea =  function(value){//
-                return value != null ? value/maxVal * maxArea : Math.max(4,maxArea/16);//TODO:hcoded
-            }
-            
-            var valueToColor = function(value, i){
-                return  (value != null) ? fill[i](value) : opts.nullColor;
-            };
-            //this.pvPanel.def("selectCount", myself.getSelections().length);//TODO: remove selectCount
-            
-            this.shapes =
-                this.pvHeatGrid
-                    .add(pv.Dot)
-                    .def("selected", function(){
-                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                        return myself.isSelected(s,c);
-                    })
-                    .shape( function(r, ra ,i){
-                        if(myself.sizeValIdx == null){
-                            return myself.shape;
-                        }
-                        return myself.getValue(r[i]) != null ? myself.shape : myself.nullShape;
-                    })
-                    .shapeSize(function(r,ra, i) {
-                        if(myself.sizeValIdx == null){
-                            return maxArea;
-                        }
-                        return valueToArea(myself.getValue(r[i], myself.sizeValIdx));
-                    })
-                    .fillStyle(function(r, ra, i){
-                        //return valueToColor(r[i], i);
-                        var color = opts.nullColor;
-                        if(myself.colorValIdx != null ){
-                            if(myself.getColorValue(r[i]) == null) return opts.nullColor;
-                            color =  fill[i](myself.getColorValue(r[i]));
-                            var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                            var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index]; 
-                            if(myself.getSelectCount() > 0 && !this.selected()){// !myself.isSelected(s,c)){ 
-                                //var gScale = color.r + color.g + color.b;
-                                //gScale = Math.floor(gScale / 3);
-                                //return new pv.rgb(gScale, gScale, gScale, 0.5);
-                                return color.alpha(0.5);
-                            }
-                        }
-                        return color;
-                    })
-                    .cursor("pointer") //TODO:
-                    .lineWidth(function(r, ra, i)
-                    {
-                        return this.selected()? myself.selectedBorder :
-                                                ( (myself.sizeValIdx == null ||
-                                                   myself.getValue(r[i], myself.sizeValIdx) != null )?
-                                                        myself.defaultBorder : //0 hcoded?
-                                                        myself.nullBorder);
-                    })
-                    .strokeStyle(function(r, ra, i){
-                        return (this.selected() ||
-                                myself.sizeValIdx == null ||
-                                myself.getValue(r[i], myself.sizeValIdx) != null )?
-                                         "black" :
-                                         (myself.colorValIdx != null)?
-                                            (myself.getColorValue(r[i]))?
-                                                fill[i](myself.getColorValue(r[i])) :
-                                                opts.nullColor :
-                                            opts.nullColor;
-                    })
-                    .text(function(r,ra,i){
-                        return myself.valuesToText(r[i]);
-                    })
-                    .event("click", function(r,ra,i) {
-                        //this.selected(!this.selected());
-                        //myself.pvPanel.selectCount( myself.pvPanel.selectCount() + (this.selected() ? 1 : -1) );
-                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                        var d = r[i];
-                        myself.toggleSelection(s,c);
-                        myself.triggerSelectionChange();
-                        //classic clickAction
-                        if($.isArray(d)) d= d[0];
-                        if(typeof(myself.chart.options.clickAction) == 'function'){
-                            myself.chart.options.clickAction(s,c,d);
-                        }
-                        myself.pvPanel.render();
-                    })
-                    ;
-                
-                //double click marks
-                if(typeof( opts.doubleClickAction ) == 'function' )
-                {//TODO: needs to prevent click from being called (timer?)
-                    this.shapes.event("dblclick", function(r,ra,i){
-                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                        var d = r[i];
-                        opts.doubleClickAction(s,c,d);
-                    });
-                }
+       if(opts.useShapes)
+       {
+            this.createHeatMap(w,h, opts, fill);
        }
        else
        {//no shapes, apply color map to panel iself
@@ -366,12 +258,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
          });
        }
 
-        // NO SUPPORT for overflow and underflow on HeatGrids
-
-        // NO SUPPORT for SecondAxis on HeatGrids (does not make sense)
-
-        // Labels:
-
+        //Tooltip
         if(this.showTooltips){
             this.pvHeatGrid
             .event("mouseover", pv.Behavior.tipsy({
@@ -380,6 +267,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             }));
         }
 
+        //clickAction
         if (opts.clickable){
             this.pvHeatGrid
             .cursor("pointer")
@@ -391,6 +279,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             });
         }
 
+        //showValues
         if(this.showValues)
         {
             var myself = this;
@@ -414,6 +303,250 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.extend(this.pvPanel,"chart_");
     },
     
+    inRubberBandSelection: function(x,y){
+        if(!this.rubberBand) { return false; }
+        
+        var r = this.rubberBand;
+        return  x > r.x && x < r.x + r.dx &&
+                y > r.y && y < r.y + r.dy ;
+        
+    },
+    
+    createSelectOverlay : function(w,h)
+    {
+        //TODO: flip support: parallelLength etc..
+        var opts = this.chart.options;
+        this.rubberBand = {x:0, y:0, dx:4, dy:4};
+        var myself = this;
+        
+        var isSelecting = false;
+        var selectFill = 'rgba(255, 127, 0, 0.15)';
+        var selectStroke = 'rgb(255,127,0)';
+        var invisibleFill = 'rgba(127,127,127,0.01)';
+        
+        //rubber band display
+        this.selectBar = this.pvPanel
+           .add(pv.Bar)
+                .visible(function() isSelecting)
+                .left(function(d) d.x)
+                .top(function(d) d.y)
+                .width(function(d) d.dx)
+                .height(function(d) d.dy)
+                .fillStyle(selectFill)
+                .strokeStyle(selectStroke);
+                
+        //rubber band selection behavior definition
+        this.pvPanel
+            .data([this.rubberBand])
+            .fillStyle(invisibleFill)
+            .event('mousedown', pv.Behavior.selector(false))
+            .event('selectstart', function(d){
+                isSelecting = true;
+                myself.selectBar.render();
+            })
+            .event('select', function(rb){
+                myself.rubberBand = rb;
+                myself.selectBar.render();
+            })
+            .event('selectend', function(rb){
+                isSelecting = false;
+                //translate top to bottom
+                myself.selectBar.render();
+                myself.rubberBand.y = myself.height - rb.y - rb.dy;
+                myself.setRubberbandSelections(myself.rubberBand,w,h);
+                myself.shapes.render();
+            });
+    },
+    
+    setRubberbandSelections: function(rb,w,h)
+    {
+        var series = this.chart.dataEngine.getSeries();
+        var categories = this.chart.dataEngine.getCategories();
+        
+        var sSel = [];
+        var cSel = [];
+        
+        //find included series/categories
+        for(var i=0; i< series.length; i++){
+            var y = i*h + h/2;
+            if(y > rb.y && y < rb.y + rb.dy){
+                sSel.push(series[i]);
+            }
+        }
+        for(var i=0; i< categories.length; i++){
+            var x = i*w + w/2;
+            if(x > rb.x && x < rb.x + rb.dx){
+                cSel.push(categories[i]);
+            }
+        }
+        
+        //select shapes in intersection
+        for(var i=0; i< sSel.length; i++){
+            var s = sSel[i];
+            for(var j=0; j<cSel.length; j++){
+                var c = cSel[j];
+                this.addSelection(s,c);
+            }
+        }
+    },
+    
+    //createSelectOverlay2: function(){
+    //  var opts = this.chart.options;
+    //  
+    //  this.rubberBand = null;
+    //  var myself = this;
+    //  function update(d, t) {
+    //    myself.rubberBand = d;
+    //     //this.render();
+    //     // myself.pvPanel.render();
+    //    //this.render();
+    //    myself.selectionBar.render();
+    //    //myself.shapes.render();
+    //  };
+    //  
+    //  var underSelection = false;
+    //  //this.pvPanel.reverse(true);
+    //  
+    //  this.selectOverlay = this.pvPanel//.add(pv.Panel)
+    //    .data([{x:0, y:0, dx:50, dy:50}]) //dimensions that will be updated by pv.Behavior
+    //    //.cursor('default')
+    //    //.width(this.width)
+    //    //.height(this.height)
+    //    .fillStyle("rgba(127,127,0,.15)")
+    //    .event('mousedown', pv.Behavior.selector(false))
+    //    .event('selectstart', function(d){
+    //       rubberBand = null;
+    //    })
+    //    .event('select', update)
+    //    .event('selectend', function(d){
+    //        myself.rubberBand = null;
+    //        myself.selectionBar.render();
+    //    });
+    //    
+    //   this.selectionBar = this.selectOverlay
+    //    .add(pv.Bar)
+    //        .visible(function(d, k, t) {
+    //          return myself.rubberBand != null;
+    //        })
+    //        .left(function(d) d.x)
+    //        .top(function(d) d.y)
+    //        .width(function(d) d.dx)
+    //        .height(function(d) d.dy)
+    //        .fillStyle("rgba(255,127,0,.15)")
+    //        .strokeStyle("orange")
+    //  ;
+    // // this.selectOverlay.render();
+    //  
+    //},
+    
+    //creates new version
+    createHeatMap: function(w, h, opts, fill)
+    {
+        var myself = this;
+        //total max in data
+        var maxVal = pv.max(data, function(datum){// {col:value ..}
+            return pv.max( pv.values(datum).map(
+                function(d){ return myself.getValue(d, myself.sizeValIdx);})) ;
+        });
+    
+        var maxRadius = Math.min(w,h) / 2 -2;
+        var maxArea = maxRadius * maxRadius ;// apparently treats as square area even if circle, triangle is different
+        
+        var valueToRadius = function(value){
+            return value != null ? value/maxVal * maxRadius : Math.min(maxRadius,5) ;//TODO:hcoded
+        };
+        
+        var valueToArea =  function(value){//
+            return value != null ? value/maxVal * maxArea : Math.max(4,maxArea/16);//TODO:hcoded
+        }
+        
+        var valueToColor = function(value, i){
+            return  (value != null) ? fill[i](value) : opts.nullColor;
+        };
+        
+        
+        this.shapes =
+            this.pvHeatGrid
+                .add(pv.Dot)
+                .def("selected", function(){
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    var isSelected =  myself.isSelected(s,c);
+                    //TODO: revert  this, testing only
+                    //if(!isSelected){//check in rubberBand
+                    //    isSelected = myself.inRubberBandSelection(this.parent.parent.index * w + w/2,
+                    //                                              this.parent.index * h + h/2);
+                    //    if(isSelected) {
+                    //        myself.addSelection(s,c);
+                    //    }
+                    //}
+                    return isSelected;
+                })
+                .shape( function(r, ra ,i){
+                    if(myself.sizeValIdx == null){
+                        return myself.shape;
+                    }
+                    return myself.getValue(r[i]) != null ? myself.shape : myself.nullShape;
+                })
+                .shapeSize(function(r,ra, i) {
+                    if(myself.sizeValIdx == null){
+                        return maxArea;
+                    }
+                    return valueToArea(myself.getValue(r[i], myself.sizeValIdx));
+                })
+                .fillStyle(function(r, ra, i){
+                    //return valueToColor(r[i], i);
+                    var color = opts.nullColor;
+                    if(myself.colorValIdx != null ){
+                        if(myself.getColorValue(r[i]) == null) return opts.nullColor;
+                        color =  fill[i](myself.getColorValue(r[i]));
+                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index]; 
+                        if(myself.getSelectCount() > 0 && !this.selected()){
+                            return color.alpha(0.5);
+                        }
+                    }
+                    return color;
+                })
+                .cursor("pointer") //TODO:
+                .lineWidth(function(r, ra, i)
+                {
+                    return this.selected()? myself.selectedBorder :
+                                            ( (myself.sizeValIdx == null ||
+                                               myself.getValue(r[i], myself.sizeValIdx) != null )?
+                                                    myself.defaultBorder : //0 hcoded?
+                                                    myself.nullBorder);
+                })
+                .strokeStyle(function(r, ra, i){
+                    return (this.selected() ||
+                            myself.sizeValIdx == null ||
+                            myself.getValue(r[i], myself.sizeValIdx) != null )?
+                                     "black" :
+                                     (myself.colorValIdx != null)?
+                                        (myself.getColorValue(r[i]))?
+                                            fill[i](myself.getColorValue(r[i])) :
+                                            opts.nullColor :
+                                        opts.nullColor;
+                })
+                .text(function(r,ra,i){
+                    return myself.valuesToText(r[i]);
+                })
+                .event("click", function(r,ra,i) {
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    var d = r[i];
+                    myself.toggleSelection(s,c);
+                    myself.triggerSelectionChange();
+                    //classic clickAction
+                    if($.isArray(d)) d= d[0];
+                    if(typeof(myself.chart.options.clickAction) == 'function'){
+                        myself.chart.options.clickAction(s,c,d);
+                    }
+                    myself.pvPanel.render();
+                })
+                ;
+                this.createSelectOverlay(w,h);
+    },
     
     /*
      *selections - testing (start)
@@ -789,4 +922,68 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 }
 
 
-});
+});//end: HeatGridChartPanel
+
+
+/**
+ * Equal to pv.Behavior.select but doesn't necessarily
+ * force redraw of component it's in on mousemove.
+ * (default behavior matches pv.Behavior.select())
+ * @param {boolean} autoRefresh refresh parent mark automatically
+ * @param {pv.Mark} mark
+ * @return {function mousedown
+ **/
+pv.Behavior.selector = function(autoRefresh, mark) {
+  var scene, // scene context
+      index, // scene context
+      r, // region being selected
+      m1, // initial mouse position
+      redrawThis = (arguments.length > 0)?
+                    autoRefresh : true; //redraw mark - default: same as pv.Behavior.select
+    
+  /** @private */
+  function mousedown(d) {
+    if(mark == null){
+        index = this.index;
+        scene = this.scene;
+    }
+    else {
+        index = mark.index;
+        scene = mark.scene;
+    }
+    m1 = this.mouse();
+    
+    r = d;
+    r.x = m1.x;
+    r.y = m1.y;
+    r.dx = r.dy = 0;
+    pv.Mark.dispatch("selectstart", scene, index);
+  }
+
+  /** @private */
+  function mousemove() {
+    if (!scene) return;
+    scene.mark.context(scene, index, function() {
+        var m2 = this.mouse();
+        r.x = Math.max(0, Math.min(m1.x, m2.x));
+        r.y = Math.max(0, Math.min(m1.y, m2.y));
+        r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
+        r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
+        if(redrawThis){
+            this.render();
+        }
+      });
+    pv.Mark.dispatch("select", scene, index);
+  }
+
+  /** @private */
+  function mouseup() {
+    if (!scene) return;
+    pv.Mark.dispatch("selectend", scene, index);
+    scene = null;
+  }
+
+  pv.listen(window, "mousemove", mousemove);
+  pv.listen(window, "mouseup", mouseup);
+  return mousedown;
+};
