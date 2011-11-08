@@ -72,8 +72,12 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
         // the axis-range computation is possible in "AbstractCategoricalAxis.
         this.callWithHiddenFirstSeries( this.base );
 
-        pvc.log("Prerendering in Bar- or WaterfallChart");
-
+	var logMessage = "Prerendering a ";
+	if (this.options.waterfall)
+            logMessage += "WaterfallChart";
+	else logMessage +=  ((this.options.stacked) ?
+			     "stacked" : "normal")  +  " BarChart";
+	pvc.log(logMessage);
 
         this.wfChartPanel = new pvc.WaterfallChartPanel(this, {
             stacked: this.options.stacked,
@@ -230,6 +234,10 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
 
     getDataSet:  function() {
+        
+        //clear needed to force re-fetch of visible series
+        this.chart.dataEngine.clearDataCache();
+        
         var dataset = null
         // check whether it does not kill the source-data    
         dataset = this.stacked ?  
@@ -304,7 +312,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         /** end fix **/
         var l2Scale = this.chart.getSecondScale(true);
         var oScale = this.chart.getOrdinalScale(true);
-        var bSCale = null;
+        var bScale = null;
 
         // determine barPositionOffset and bScale
         this.DF.maxBarSize = null;
@@ -351,7 +359,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
         this.DF.catContainerBasePosFunc = (stacked) ? null :
         function(d){
-            return oScale(this.index);
+            return oScale(myself.chart.dataEngine.getVisibleCategories()[d]);
         };
 
         this.DF.catContainerWidth = (stacked) ? null :
@@ -601,6 +609,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
                 .getCategories()[myself.stacked?this.index:this.parent.index];
                 var elem = this.scene.$g.childNodes[this.index];
                 return myself.chart.options.clickAction(s,c, d, elem);
+
             });
         }
 

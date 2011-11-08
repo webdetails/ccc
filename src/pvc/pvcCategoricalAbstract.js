@@ -260,12 +260,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         if (this.options.orientation == "vertical") {
             scale = this.options.timeSeries  ?
-            this.getTimeseriesScale()     :
+            this.getTimeseriesScale(false,true)     :
             this.getOrdinalScale();
         } else {
             scale =  (this.options.orthoAxisOrdinal) ?
             this.getPerpOrdinalScale("x")    :
-            this.getLinearScale();
+            this.getLinearScale(false,true);
         } 
 
         return scale;
@@ -373,7 +373,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
     /**
     **/
-    getLinearScale: function(bypassAxis){
+    getLinearScale: function(bypassAxis,bypassOffset){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
@@ -400,8 +400,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             min = min !== 0 ? min * 0.99 : this.options.originIsZero ? 0 : -0.1;
             max = max !== 0 ? max * 1.01 : 0.1;
         }
-        if(min > 0 && this.options.originIsZero){
-            min = 0
+        if(min * max > 0 && this.options.originIsZero){
+            if(min > 0){
+                min = 0;
+            }else{
+                max = 0;
+            }
         }
 
         // CvK:  added to set bounds
@@ -417,7 +421,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Adding a small offset to the scale:
         var offset = (max - min) * this.options.axisOffset;
-        var scale = new pv.Scale.linear(min - offset,max + offset)
+        offset = bypassOffset?0:offset;
+        var scale = new pv.Scale.linear(min - (this.options.originIsZero && min == 0 ? 0 : offset),max + (this.options.originIsZero && max == 0 ? 0 : offset));
 
 
         if( !isVertical && this.options.yAxisPosition == "left"){
@@ -443,11 +448,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise
      *
      */
-    getTimeseriesScale: function(bypassAxis){
+    getTimeseriesScale: function(bypassAxis,bypassOffset){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
-        var secondAxisSize = bypassAxis?0:this.options.secondAxisSize;
 
         var size = this.options.orientation=="vertical"?
         this.basePanel.width:
@@ -461,8 +465,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Adding a small offset to the scale:
         var max = parser.parse(categories[categories.length -1]);
-        var min = parser.parse(categories[0]);
+        var min = parser.parse(categories[0]);        
         var offset = (max.getTime() - min.getTime()) * this.options.axisOffset;
+        offset = bypassOffset?0:offset;
 
         var scale = new pv.Scale.linear(new Date(min.getTime() - offset),new Date(max.getTime() + offset));
 
@@ -505,13 +510,17 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var max = this.dataEngine.getSecondAxisMax();
         var min = this.dataEngine.getSecondAxisMin();
 
-        if(min > 0 && this.options.secondAxisOriginIsZero){
-            min = 0
+        if(min * max > 0 && this.options.secondAxisOriginIsZero){
+            if(min > 0){
+                min = 0;
+            }else{
+                max = 0;
+            }
         }
 
         // Adding a small offset to the scale:
         var offset = (max - min) * this.options.secondAxisOffset;
-        var scale = new pv.Scale.linear(min - offset,max + offset)
+        var scale = new pv.Scale.linear(min - (this.options.secondAxisOriginIsZero && min == 0 ? 0 : offset),max + (this.options.secondAxisOriginIsZero && max == 0 ? 0 : offset));
 
 
         if( !isVertical && this.options.yAxisPosition == "left"){
@@ -642,24 +651,30 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderOrdinalAxis: function(){
 
         var myself = this;
-
+        
         var align =  (this.anchor == "bottom" || this.anchor == "top") ?
         "center" : 
         (this.anchor == "left")  ?
         "right" :
         "left";
+       
+       this.pvTicks = this.pvRule.add(pv.Rule)
+                        .data(this.elements)
+                        [pvc.BasePanel.paralelLength[this.anchor]](null)
+                        [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
+                        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
+                            return myself.scale(d) + myself.scale.range().band/2;
+                        })
+                        [pvc.BasePanel.orthogonalLength[this.anchor]](5)
+                        .strokeStyle("rgba(0,0,0,0)");
 
-        this.pvLabel = this.pvRule.add(pv.Label)
-        .data(this.elements)
-        [pvc.BasePanel.paralelLength[this.anchor]](null)
-        [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
-        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
-            return myself.scale(d) + myself.scale.range().band/2;
-        })
-        .textAlign(align)
-        .textBaseline("middle")
-        .text(pv.identity)
-        .font("9px sans-serif")
+
+        this.pvLabel = this.pvTicks.anchor(this.anchor)
+                            .add(pv.Label)
+                            .textAlign(align)
+                            .text(pv.identity)
+                            .font("9px sans-serif");
+
     },
 
 

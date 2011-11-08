@@ -1,8 +1,7 @@
-
 /**
  * Parallel coordinates offer a way to visualize data and make (sub-)selections
  * on this dataset.
- * Enhanced version of protovis example 
+ * This code has been based on a protovis example:
  *    http://vis.stanford.edu/protovis/ex/cars.html
  */
 
@@ -25,8 +24,12 @@ pvc.ParallelCoordinates = pvc.Base.extend({
       botRuleOffset: 30,
       leftRuleOffset: 60,
       rightRuleOffset: 60,
+	// sort the categorical (non-numerical dimensions)
       sortCategorical: true,
+	// map numerical dimension too (uniform (possible non-linear)
+	// distribution of the observed values)
       mapAllDimensions: true,
+	// number of digits after decimal point.
       numDigits: 0
     };
 
@@ -42,7 +45,6 @@ pvc.ParallelCoordinates = pvc.Base.extend({
     this.base();
 
     pvc.log("Prerendering in parallelCoordinates");
-
 
     this.parCoordPanel = new pvc.ParCoordPanel(this, {
       topRuleOffset : this.options.topRuleOffset,
@@ -85,9 +87,10 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
   pvParCoord: null,
 
   dimensions: null, 
+  dimensionDescr: null,
+
   data: null,
 
-  dimensionDescr: null,
 
   constructor: function(chart, options){
 
@@ -95,6 +98,12 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
   },
 
+    /*****
+     * retrieve the data from database and transform it to maps.
+     *    - this.dimensions: all dimensions
+     *    - this.dimensionDescr: description of dimensions
+     *    - this.data: array with hashmap per data-point
+     *****/
   retrieveData: function () {
     var de = this.chart.dataEngine;
     var numDigit = this.chart.options.numDigits;
@@ -110,33 +119,36 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     /******
      *  Generate a Coordinate mapping. 
      *  This mapping is required for categorical dimensions and
-     *  optional for the numerical dimensions.
+     *  optional for the numerical dimensions (in 4 steps)
      ********/
-    // Only the first row is used to test whether a dimension is
-    // categorical or numerical!
+    // 1: generate an array of coorMapping-functions
+    // BEWARE: Only the first row (index 0) is used to test whether 
+    // a dimension is categorical or numerical!
     var pCoordMapping = (this.chart.options.mapAllDimensions) ?
       pCoordIndex.map( function(d) {return (isNaN(values[d][0])) ? 
-              {categorical: true, len: 0, map: new Array() } : 
+              {categorical: true, len: 0, map: [] } : 
                              {categorical: false, len: 0,
-                                 map: new Array(), theValue: new Array() }; })
+                                 map: [], displayValue: [] }; })
     : pCoordIndex.map( function(d) {return (isNaN(values[d][0])) ? 
-              {categorical: true, len: 0, map: new Array() } : 
+              {categorical: true, len: 0, map: [] } : 
               null; }) ;
-    // ... and a function to update the mapping
-    //  For non-categorical value the original-value is store in theValue
-    var coordMapping = function(i, val) {
+  
+      // 2: and generate a helper-function to update the mapping
+      //  For non-categorical value the original-value is store in displayValue
+    var coordMapUpdate = function(i, val) {
       var cMap = pCoordMapping[i];
+      var k = null; // define in outer scope.
       if (cMap.categorical == false) {
         var keyVal = val.toFixed(numDigit);   // force the number to be a string
-        var k = cMap.map[keyVal];
+        k = cMap.map[keyVal];
         if (k == null) {
           k = cMap.len;
           cMap.len++;
           cMap.map[keyVal] = k;
-          cMap.theValue[keyVal] = val;
+          cMap.displayValue[keyVal] = val;
         }
       } else {
-        var k = cMap.map[val];
+        k = cMap.map[val];
         if (k == null) {
           k = cMap.len;
           cMap.len++;
@@ -145,12 +157,15 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       }
       return k;
     };
-    // for the categorical dimensions map == theValue
+
+    // 3. determine the value to be displayed
+    //   for the categorical dimensions map == displayValue
     for(var d in pCoordMapping)
       if (   pCoordMapping[d]
           && pCoordMapping[d].categorical)
-        pCoordMapping[d].theValue = pCoordMapping[d].map
+        pCoordMapping[d].displayValue = pCoordMapping[d].map
 
+    // 4. apply the sorting of the dimension
     if (   this.chart.options.sortCategorical
         || this.chart.options.mapAllDimensions) {
       // prefill the coordMapping in order to get it in sorted order.
@@ -159,10 +174,10 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
          if (pCoordMapping[i]) {
            // add all data
            for (var col=0; col<values[i].length; col++)
-             coordMapping(i, values[i][col])
+               coordMapUpdate(i, values[i][col]);
            // create a sorted array
            var cMap = pCoordMapping[i].map;
-           var sorted = new Array();
+           var sorted = [];
            for(var item in cMap)
              sorted.push(item);
            sorted.sort();
@@ -177,38 +192,48 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       }
     }
 
-    //   local function to transform a data-row to a hashMap
-    //   (key-value pairs) 
+    /*************
+    *  Generate the full dataset (using the coordinate mapping).
+    *  (in 2 steps)
+    ******/
+    //   1. generate helper-function to transform a data-row to a hashMap
+    //   (key-value pairs). 
     //   closure uses pCoordKeys and values
     var generateHashMap = function(col) {
-      var record = new Object();
+      var record = {};
       for(var i in pCoordIndex) {
          record[pCoordKeys[i]] = (pCoordMapping[i]) ?
-          coordMapping(i, values[i][col]) :
-          values[i][col];
+              coordMapUpdate(i, values[i][col]) :
+              values[i][col];
       }
       return record;
-    }
-    // generate array with a hashmap per data-point
-    this.data = dataRowIndex.map(function(col) { return generateHashMap (col)})
+    };
+    // 2. generate array with a hashmap per data-point
+    this.data = dataRowIndex.map(function(col) { return generateHashMap (col)});
 
     
-    //generate a description of the parallel-dimensions
+    /*************
+    *  Generate an array of descriptors for the dimensions (in 3 steps).
+    ******/
+    // 1. find the dimensions
     var descrVals = this.dimensions.map(function(cat)
            {
-             var item = new Object();
+             var item = {};
              // the part after "__" is assumed to be the units
              var elements = cat.split("__");
-             item["id"] = cat;
-             item["name"] = elements[0];
-             item["unit"] = (elements.length >1)? elements[1] : "";
+             item.id = cat;
+             item.name = elements[0];
+             item.unit = (elements.length >1)? elements[1] : "";
              return item;
            });
-    // extend the record with min, max and step
+
+    // 2. compute the min, max and step(-size) per dimension)
     for(var i=0; i<descrVals.length; i++) {
       var item = descrVals[i];
       var index = pCoordIndex[i];
-      item["orgRowIndex"] = index;
+	// orgRowIndex is the index in the original dataset
+	// some indices might be (non-existent/invisible)
+      item.orgRowIndex = index;
 
       // determine min, max and estimate step-size
       var len = values[index].length;
@@ -217,10 +242,10 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       // two version of the same code (one with mapping and one without)
       if (pCoordMapping[index]) {
         theMin = theMax = theMin2 = theMax2 =
-               pCoordMapping[index].theValue[ values[index][0] ] ;
+               pCoordMapping[index].displayValue[ values[index][0] ] ;
 
         for(var k=1; k<len; k++) {
-          var v = pCoordMapping[index].theValue[ values[index][k] ] ;
+          var v = pCoordMapping[index].displayValue[ values[index][k] ] ;
           if (v < theMin)
           {
             theMin2 = theMin;
@@ -249,22 +274,20 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       }   // end else:  coordinate mapping applied
 
       var theStep = ((theMax - theMax2) + (theMin2-theMin))/2;
-      item["min"] = theMin;
-      item["max"] = theMax;
-      item["step"] = theStep;
+      item.min = theMin;
+      item.max = theMax;
+      item.step = theStep;
 
-      // include the mapping in the 
-      item["categorical"] = false; 
-//      item["theValue"] = null;
+      // 3. and include the mapping (and reverse mapping) 
+      item.categorical = false; 
       if (pCoordMapping[index]) {
-        item["map"] = pCoordMapping[index].map;
-//        item["theValue"] = pCoordMapping[index].theValue;
-        item["mapLength"] = pCoordMapping[index].len;
-        item["categorical"] = pCoordMapping[index].categorical; 
+        item.map = pCoordMapping[index].map;
+        item.mapLength = pCoordMapping[index].len;
+        item.categorical = pCoordMapping[index].categorical; 
 
         // create the reverse-mapping from key to original value
         if (item.categorical == false) {
-          item["orgValue"] = new Array();
+          item.orgValue = [];
           var theMap =  pCoordMapping[index].map;
           for (key in theMap)
             item.orgValue[ theMap[key] ] = 0.0+key;
@@ -275,15 +298,17 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     // generate a object using the given set of keys and values
     //  (map from keys[i] to vals[i])
     var genKeyVal = function (keys, vals) {
-       var record = new Object();
+       var record = {};
       for (var i = 0; i<keys.length; i++)
          record[keys[i]] = vals[i];
       return record;
-    }
+    };
     this.dimensionDescr = genKeyVal(this.dimensions, descrVals);
     
     return;
   } ,
+
+
 
 
 
@@ -309,6 +334,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     topRulePos = this.height- topRuleOffs;
     ruleHeight = topRulePos - botRuleOffs,
     labelTopOffs = topRuleOffs - 12,
+      // use dims to get the elements of dimDescr in the appropriate order!!
     dims = this.dimensions,
     dimDescr = this.dimensionDescr;
 
@@ -316,18 +342,20 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
      *   Generate the scales x, y and color
      *******/
     // getDimSc is the basis for getDimensionScale and getDimColorScale
-    var getDimSc = function(t) {
+    var getDimSc = function(t, addMargin) {
       var theMin = dimDescr[t].min;
       var theMax = dimDescr[t].max;
       var theStep = dimDescr[t].step;
       // add some margin at top and bottom (based on step)
-      theMin -= theStep;
-      theMax += theStep;
+      if (addMargin) {
+        theMin -= theStep;
+        theMax += theStep;
+      }
       return pv.Scale.linear(theMin, theMax)
               .range(botRuleOffs, topRulePos);
     }; 
     var getDimensionScale = function(t) {
-      var scale = getDimSc(t)
+	var scale = getDimSc(t, true)
               .range(botRuleOffs, topRulePos);
       var dd = dimDescr[t];
       if (   dd.orgValue
@@ -336,15 +364,15 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
         var func = function(x) { var res = scale( dd.orgValue[x]);
                       return res; };
         // wire domain() and invert() to the original scale
-        func["domain"] = function() { return scale.domain(); };
-        func["invert"] = function(d) { return scale.invert(d); };
+        func.domain = function() { return scale.domain(); };
+        func.invert = function(d) { return scale.invert(d); };
         return func;
       }
       else
         return scale;
     }; 
     var getDimColorScale = function(t) {
-      var scale = getDimSc(t)
+	var scale = getDimSc(t, false)
               .range("steelblue", "brown");
         return scale;
     }; 
@@ -365,17 +393,77 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     var selectVisible = (this.chart.options.mapAllDimensions) ?
       function(d) { return dims.every(  
+	    // all dimension are handled via a mapping.
             function(t) {
               var dd = dimDescr[t];
               var val = (dd.orgValue && (dd.categorical == false)) ?
-                dd.orgValue[d[t]] : d[t];
-              return (val >= filter[t].min) && (val <= filter[t].max) }
+                    dd.orgValue[d[t]] : d[t];
+	      return (val >= filter[t].min) && (val <= filter[t].max); }
         )}
     : function(d) { return dims.every(  
             function(t) {
-              return (d[t] >= filter[t].min) && (d[t] <= filter[t].max) }
+		// TO DO: check whether this operates correctly for
+		// categorical dimensions  (when mapAllDimensions == false
+		return (d[t] >= filter[t].min) && (d[t] <= filter[t].max); }
         )};
  
+
+    /*****
+     *   generateLinePattern produces a line pattern based on
+     *          1. the current dataset.
+     *          2. the current filter settings.
+     *          3. the provided colorMethod.
+     *  The result is an array where each element contains at least
+     *            {x1, y1, x2, y2, color}
+     *  Two auxiliary fields are 
+     *  Furthermore auxiliary functions are provided
+     *     - genAuxData: generate the auxiliary dataset (of clean is)
+     *     - drawLinePattern
+     *     - colorFuncBg
+     *     - colorFuncFreq
+     *     - colorFuncActive
+     *******/
+      var auxData = null;
+      var genAuxData = function() {
+	  if (auxData === null) {
+	      // generate a new (reusable) structure.
+	      auxData = [];
+	      var genNewArray = function (k, l) {
+		  // generated an array with null values
+		  var arr = []
+		  for (var a=0; a<k; a++) {
+		      var elem = []
+		      for (var b=0; b<l; b++) 
+			  elem.push(0);
+		      arr.push(0);
+		  }
+		  return arr;
+	      };
+	      for(var i =0; i<dims.length -1; i++) {
+		  var currDimLen = dimDescr[ dims[i] ].mapLength;
+		  var nextDimLen = dimDescr[ dims[i+1] ].mapLength;
+		  auxData.push( genNewArray(currDimLen, nextDimLen) )
+	      }
+	  } else {
+	  // re-use the existing data-structure if it exists already
+	      for (var a in auxData)
+		  for (var b in a)
+		      for (c=0; c<b.length; c++)
+			  b[c] = 0;
+	  }
+
+      };
+      var generateLinePattern = function (colFunc) {
+	  // find a filtered data-set
+	  var filterData = selectVisible(myself.data)
+
+      };
+      var drawLinePattern = function (panel, pattern) {
+      };
+      var colorFuncBg = function() {
+	  return "#ddd";
+      };
+
 
     /*****
      *   Draw the chart and its annotations (except dynamic content)
@@ -387,9 +475,9 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       .visible(selectVisible)
       .add(pv.Line)
       .data(dims)
-      .left(function(t, d) { return x(t)})
+	  .left(function(t, d) { return x(t); } )
       .bottom(function(t, d) { var res = y[t] (d[t]);
-                      return res})
+			       return res; })
       .strokeStyle("#ddd")
       .lineWidth(1)
       .antialias(false);
@@ -410,7 +498,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     // add labels on the categorical dimension
     //  compute the array of labels
-    var labels = new Array();
+    var labels = [];
     var labelXoffs = 6,
     labelYoffs = 3;
     for(d in dimDescr) {
@@ -422,7 +510,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
             x:  xVal,
             y:  y[dim.id](dim.map[l]) + labelYoffs,
             label: l
-          }
+          };
       }
     }
     var dimLabels = this.pvPanel.add(pv.Panel)
@@ -433,6 +521,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       .text(function(d) { return d.label})
       .textAlign("left");
     
+      
+    /*****
+     *   Add an additional panel over the top for the dynamic content
+     *    (and draw the (full) dataset)
+     *******/
     // Draw the selected (changeable) data on a new panel on top
     var change = this.pvPanel.add(pv.Panel);
     var line = change.add(pv.Panel)

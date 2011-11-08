@@ -20,6 +20,11 @@ pvc.DataEngine = Base.extend({
     hiddenData: null,
     secondAxis: false, // Do we have double axis?
     secondAxisIdx: 0,
+    
+    visibleCategoriesIndexes: undefined,
+    visibleCategories: undefined,
+    visibleSeriesIndexes: undefined,
+    visibleSeries: undefined,
 
     constructor: function(chart){
 
@@ -39,8 +44,8 @@ pvc.DataEngine = Base.extend({
     },
 
     /**
-   * Creates the appropriate translator
-   */
+     * Creates the appropriate translator
+     */
 
     createTranslator: function(){
 
@@ -60,8 +65,8 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns some information on the data points
-   */
+     * Returns some information on the data points
+     */
 
     getInfo: function(){
 
@@ -78,9 +83,9 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns the series on the underlying data
-   *
-   */
+     * Returns the series on the underlying data
+     *
+     */
 
     getSeries: function(){
         var res = this.series || this.translator.getColumns();
@@ -88,9 +93,9 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns a serie on the underlying data by an index
-   *
-   */
+     * Returns a serie on the underlying data by an index
+     *
+     */
 
     getSerieByIndex: function(idx){
         return this.getSeries()[idx];
@@ -98,46 +103,59 @@ pvc.DataEngine = Base.extend({
 
 
     /*
-   * Returns an array with the indexes for the series
-   *
-   */
+     * Returns an array with the indexes for the series
+     *
+     */
     getSeriesIndexes: function(){
         // we'll just return everything
         return pv.range(this.getSeries().length)
     },
 
     /*
-   * Returns an array with the indexes for the visible series
-   *
-   */
+     * Returns an array with the indexes for the visible series
+     *
+     */
     getVisibleSeriesIndexes: function(){
 
-        var myself=this;
-        var res =  pv.range(this.getSeries().length).filter(function(v){
-            return !myself.hiddenData.series[v];
-        });
-        return res;
+        if (typeof this.visibleSeriesIndexes === "undefined"){
+            
+            var myself=this;
+            var res =  pv.range(this.getSeries().length).filter(function(v){
+                return !myself.hiddenData.series[v];
+            });
+            this.visibleSeriesIndexes = res;
+        }
+        
+        return this.visibleSeriesIndexes;
+
     },
 
     /*
-   * Returns an array with the visible categories. Use only when index information
-   * is not required
-   *
-   */
+     * Returns an array with the visible categories. Use only when index information
+     * is not required
+     *
+     */
     getVisibleSeries: function(){
 
-        var myself = this;
-        return this.getVisibleSeriesIndexes().map(function(idx){
-            return myself.getSerieByIndex(idx);
-        })
+
+
+        if (typeof this.visibleSeries === "undefined"){
+            var myself = this;
+            var res = this.getVisibleSeriesIndexes().map(function(idx){
+                return myself.getSerieByIndex(idx);
+            });
+            this.visibleSeries = res;
+        }
+        
+        return this.visibleSeries;
     },
 
 
     /*
-   * Togles the serie visibility based on an index. Returns true if serie is now
-   * visible, false otherwise.
-   *
-   */
+     * Togles the serie visibility based on an index. Returns true if serie is now
+     * visible, false otherwise.
+     *
+     */
 
     toggleSerieVisibility: function(idx){
 
@@ -147,9 +165,9 @@ pvc.DataEngine = Base.extend({
 
 
     /*
-   * Returns the categories on the underlying data
-   *
-   */
+     * Returns the categories on the underlying data
+     *
+     */
 
     getCategories: function(){
 
@@ -171,73 +189,83 @@ pvc.DataEngine = Base.extend({
         return this.categories;
     },
 
-  getCategoryMin: function() {
-    var cat = this.getCategories();
-    var min = cat[0];
-    for(var i in cat)
-      if (cat[i] < min)
-        min = cat[i];
-    return min;
-  },
+    getCategoryMin: function() {
+        var cat = this.getCategories();
+        var min = cat[0];
+        for(var i in cat)
+            if (cat[i] < min)
+                min = cat[i];
+        return min;
+    },
 
-  getCategoryMax: function() {
-    var cat = this.getCategories();
-    var max = cat[0];
-    for(var i in cat)
-      if (cat[i] > max)
-        max = cat[i];
-    return max;
-  },
+    getCategoryMax: function() {
+        var cat = this.getCategories();
+        var max = cat[0];
+        for(var i in cat)
+            if (cat[i] > max)
+                max = cat[i];
+        return max;
+    },
 
     /*
-   * Returns the categories on the underlying data
-   *
-   */
+     * Returns the categories on the underlying data
+     *
+     */
 
     getCategoryByIndex: function(idx){
         return this.getCategories()[idx];
     },
 
     /*
-   * Returns an array with the indexes for the categories
-   *
-   */
+     * Returns an array with the indexes for the categories
+     *
+     */
     getCategoriesIndexes: function(){
         // we'll just return everything
         return pv.range(this.getCategories().length)
     },
 
     /*
-   * Returns an array with the indexes for the visible categories
-   *
-   */
+     * Returns an array with the indexes for the visible categories
+     *
+     */
     getVisibleCategoriesIndexes: function(){
-
-        var myself=this;
-        var res = pv.range(this.getCategories().length).filter(function(v){
-            return !myself.hiddenData.categories[v];
-        });
-        return res;
+        
+        if (typeof this.visibleCategoriesIndexes === "undefined"){
+            var myself=this;
+            var res = pv.range(this.getCategories().length).filter(function(v){
+                return !myself.hiddenData.categories[v];
+            });
+            this.visibleCategoriesIndexes = res;
+        }
+        
+        return this.visibleCategoriesIndexes;
     },
 
     /*
-   * Returns an array with the visible categories. Use only when index information
-   * is not required
-   *
-   */
+     * Returns an array with the visible categories. Use only when index information
+     * is not required
+     *
+     */
     getVisibleCategories: function(){
   
-        var myself = this;
-        return this.getVisibleCategoriesIndexes().map(function(idx){
-            return myself.getCategoryByIndex(idx);
-        })
+        if (typeof this.visibleCategories === "undefined"){
+            var myself = this;
+            var res = this.getVisibleCategoriesIndexes().map(function(idx){
+                return myself.getCategoryByIndex(idx);
+            });
+        
+            this.visibleCategories = res;
+        }
+        
+        return this.visibleCategories;
     },
 
     /*
-   * Togles the category visibility based on an index. Returns true if category is now
-   * visible, false otherwise.
-   *
-   */
+     * Togles the category visibility based on an index. Returns true if category is now
+     * visible, false otherwise.
+     *
+     */
 
     toggleCategoryVisibility: function(idx){
 
@@ -246,10 +274,10 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Togles the visibility of category or series based on an index.
-   * Returns true if is now visible, false otherwise.
-   *
-   */
+     * Togles the visibility of category or series based on an index.
+     * Returns true if is now visible, false otherwise.
+     *
+     */
 
     toggleVisibility: function(axis,idx){
 
@@ -265,11 +293,26 @@ pvc.DataEngine = Base.extend({
 
     },
 
+    
     /*
-   * Returns the visibility status of a category or series based on an index.
-   * Returns true if is visible, false otherwise.
-   *
-   */
+     * Clears the cache that's used for optimization
+     *
+     */
+
+    clearDataCache: function(){
+        
+        this.visibleCategoriesIndexes = undefined;
+        this.visibleCategories = undefined;
+        this.visibleSeriesIndexes = undefined;
+        this.visibleSeries = undefined;
+    
+    },
+
+    /*
+     * Returns the visibility status of a category or series based on an index.
+     * Returns true if is visible, false otherwise.
+     *
+     */
     isVisible: function(axis,idx){
 
         // Accepted values for axis: series|categories
@@ -285,8 +328,8 @@ pvc.DataEngine = Base.extend({
 
 
     /*
-   * Returns the values for the dataset
-   */
+     * Returns the values for the dataset
+     */
 
     getValues: function(){
 
@@ -299,8 +342,8 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns the values for the second axis of the dataset
-   */
+     * Returns the values for the second axis of the dataset
+     */
 
     getSecondAxisValues: function(){
 
@@ -314,9 +357,9 @@ pvc.DataEngine = Base.extend({
 
 
     /*
-   * Returns the object for the second axis in the form {category: catName, value: val}
-   *
-   */
+     * Returns the object for the second axis in the form {category: catName, value: val}
+     *
+     */
 
     getObjectsForSecondAxis: function(sortF){
 
@@ -338,16 +381,16 @@ pvc.DataEngine = Base.extend({
             return ar;
     },
     /*
-   * Returns the maximum value for the second axis of the dataset
-   */
+     * Returns the maximum value for the second axis of the dataset
+     */
     getSecondAxisMax:function(){
 
         return pv.max(this.getSecondAxisValues().filter(pvc.nonEmpty))
     },
     
     /*
-   * Returns the minimum value for the second axis of the dataset
-   */
+     * Returns the minimum value for the second axis of the dataset
+     */
     getSecondAxisMin:function(){
 
         return pv.min(this.getSecondAxisValues().filter(pvc.nonEmpty))
@@ -356,8 +399,8 @@ pvc.DataEngine = Base.extend({
 
 
     /*
-   * Returns the transposed values for the dataset
-   */
+     * Returns the transposed values for the dataset
+     */
 
     getTransposedValues: function(){
 
@@ -368,8 +411,8 @@ pvc.DataEngine = Base.extend({
 
 
     /*
-   * Returns the transposed values for the visible dataset
-   */
+     * Returns the transposed values for the visible dataset
+     */
 
     getVisibleTransposedValues: function(){
         var myself = this;
@@ -380,9 +423,9 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns the values for a given series idx
-   *
-   */
+     * Returns the values for a given series idx
+     *
+     */
 
     getValuesForSeriesIndex: function(idx){
         return this.getValues().map(function(a){
@@ -391,9 +434,9 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns the visible values for a given category idx
-   *
-   */
+     * Returns the visible values for a given category idx
+     *
+     */
 
     getVisibleValuesForSeriesIndex: function(idx){
 
@@ -404,9 +447,9 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns the object for a given series idx in the form {category: catName, value: val}
-   *
-   */
+     * Returns the object for a given series idx in the form {category: catName, value: val}
+     *
+     */
 
     getObjectsForSeriesIndex: function(idx, sortF){
 
@@ -430,18 +473,18 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns the values for a given category idx
-   *
-   */
+     * Returns the values for a given category idx
+     *
+     */
 
     getValuesForCategoryIndex: function(idx){
         return this.getValues()[idx];
     },
 
     /*
-   * Returns the visible values for a given category idx
-   *
-   */
+     * Returns the visible values for a given category idx
+     *
+     */
 
     getVisibleValuesForCategoryIndex: function(idx){
 
@@ -454,9 +497,9 @@ pvc.DataEngine = Base.extend({
 
 
     /*
-   * Returns the object for a given category idx in the form {serie: value}
-   *
-   */
+     * Returns the object for a given category idx in the form {serie: value}
+     *
+     */
 
     getObjectsForCategoryIndex: function(idx){
 
@@ -475,42 +518,42 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Returns how many series we have
-   */
+     * Returns how many series we have
+     */
 
     getSeriesSize: function(){
         return this.getSeries().length;
     },
 
     /*
-   * Returns how many categories, or data points, we have
-   */
+     * Returns how many categories, or data points, we have
+     */
     getCategoriesSize: function(){
         return this.getCategories().length;
     },
 
     /**
-   * For every category in the data, get the maximum of the sum of the series
-   * values.
-   *
-   */
+     * For every category in the data, get the maximum of the sum of the series
+     * values.
+     *
+     */
 
     getCategoriesMaxSumOfVisibleSeries: function(){
 
         var myself=this;
         var max = pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
-            return pv.sum(myself.getVisibleValuesForCategoryIndex(idx).filter(pvc.nonEmpty))
+            return pv.sum(myself.getVisibleValuesForCategoryIndex(idx).filter(pvc.nonEmpty).map(function(e){return e < 0 ? 0 : e;}));
         }));
         pvc.log("getCategoriesMaxSumOfVisibleSeries: " + max);
         return max;
     },
 
     /**
-   * For every serie in the data, get the maximum of the sum of the category
-   * values. If only one serie, gets the sum of the value. Useful to build
-   * pieCharts
-   *
-   */
+     * For every serie in the data, get the maximum of the sum of the category
+     * values. If only one serie, gets the sum of the value. Useful to build
+     * pieCharts
+     *
+     */
 
     getVisibleSeriesMaxSum: function(){
 
@@ -523,8 +566,8 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Get the maximum value in all series
-   */
+     * Get the maximum value in all series
+     */
     getVisibleSeriesAbsoluteMax: function(){
 
         var myself=this;
@@ -536,8 +579,8 @@ pvc.DataEngine = Base.extend({
     },
 
     /*
-   * Get the minimum value in all series
-   */
+     * Get the minimum value in all series
+     */
     getVisibleSeriesAbsoluteMin: function(){
 
         var myself=this;
@@ -564,12 +607,6 @@ pvc.DataEngine = Base.extend({
 
     isSeriesInRows: function(){
         return this.seriesInRows;
-    },
-
-    resetDataCache: function(){
-        this.series = null;
-        this.categories = null;
-        this.values = null;
     }
 
 });
