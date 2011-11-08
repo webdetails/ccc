@@ -442,10 +442,11 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
             .cursor("pointer")
             .event("click",function(d){
                 var s = myself.chart.dataEngine
-                .getSeries()[myself.stacked?this.parent.index:this.index]
+                .getSeries()[myself.stacked?this.parent.index:this.index];
                 var c = myself.chart.dataEngine
-                .getCategories()[myself.stacked?this.index:this.parent.index]
-                return myself.chart.options.clickAction(s,c, d);
+                .getCategories()[myself.stacked?this.index:this.parent.index];
+                var elem = this.scene.$g.childNodes[this.index];
+                return myself.chart.options.clickAction(s,c, d, elem);
             });
         }
     /*  heeft geen data !!

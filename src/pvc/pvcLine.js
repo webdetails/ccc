@@ -367,7 +367,8 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .cursor("pointer")
       .event("click",function(d){
         var v, c;
-        var s = myself.chart.dataEngine.getSeries()[this.parent.index]
+        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+        var elem = this.scene.$g.childNodes[this.index];
         if(  d != null && typeof d == "object"){
           v = d.value;
           c = d.category
@@ -376,7 +377,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           v = d
           c = myself.chart.dataEngine.getCategories()[this.index]
         }
-        return myself.chart.options.clickAction(s,c, v);
+        return myself.chart.options.clickAction(s,c, v, elem);
       });
     }
 

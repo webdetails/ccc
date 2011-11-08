@@ -233,8 +233,9 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
       this.pvDot
       .cursor("pointer")
       .event("click",function(d){
-        var v, c;
+        var v, c, elem;
         var s = myself.chart.dataEngine.getSeries()[this.parent.index]
+        elem = this.scene.$g.childNodes[this.index];
         if( typeof d == "object"){
           v = d.value;
           c = d.category
@@ -243,7 +244,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
           v = d
           c = myself.chart.dataEngine.getCategories()[this.index]
         }
-        return myself.chart.options.clickAction(s,c, v);
+        return myself.chart.options.clickAction(s,c, v, elem);
       });
     }
 
