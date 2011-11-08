@@ -594,7 +594,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         // Size will depend only on the existence of the labels
 
-
         if (this.anchor == "top" || this.anchor == "bottom"){
             this.width = this._parent.width;
             this.height = this.axisSize;
@@ -604,12 +603,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.width = this.axisSize;
         }
 
-
         this.pvPanel = this._parent.getPvPanel().add(this.type)
         .width(this.width)
         .height(this.height)
-
-
 
         this.renderAxis();
 
@@ -619,7 +615,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvTicks, this.panelName + "Ticks_");
         this.extend(this.pvLabel, this.panelName + "Label_");
         this.extend(this.pvRuleGrid, this.panelName + "Grid_");
-
 
     },
 
@@ -706,7 +701,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
            
         this.pvRule.lineWidth(0).strokeStyle(null);
         var panel = this.pvRule
-                        .add(pv.Panel)[orthogonalLength](depthLength).overflow('hidden').strokeStyle(null).lineWidth(0) //cropping panel
+                        .add(pv.Panel)[orthogonalLength](depthLength)//.overflow('hidden')
+                            .strokeStyle(null).lineWidth(0) //cropping panel
                         .add(pv.Panel)[orthogonalLength](depthLength * scaleFactor ).strokeStyle(null).lineWidth(0);// panel resized and shifted to make bogus root disappear
         panel.transform(pv.Transform.identity.translate(displacement[0], displacement[1]));
         
@@ -715,7 +711,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var path = [];
             path.push(node.nodeName);
             for(var pnode = node.parentNode; pnode != null; pnode = pnode.parentNode){
-              path.push(pnode.nodeName);      
+              path.push(pnode.nodeName);
             }
             node.nodePath = path.reverse().slice(1);
             return node;
@@ -988,6 +984,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     getFitInfoSVG: function(w, h, text, font)
     {
+        if(!pv.have_SVG){
+            return this.getFitInfo(w,h,text,font);
+        }
         if(text == '') return {h:true, v:true, d:true};
         var len = this.getTextLenSVG(text, font);
         var fitInfo =
@@ -1000,6 +999,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     trimToWidthSVGDiag: function(w,h,text,font,angle, trimTerminator){//TODO:discard?
+        
+        if(!pv.have_SVG){
+            return this.trimToWidth(len,text,font);
+        }
+        
         var lbl = this.getTextSizePvLabel(text, font);
         var holder = this.getTextSizePlaceholder();
         var holderId = holder.attr('id'); 
@@ -1023,6 +1027,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     trimToWidthSVG: function(len, text, font, trimTerminator){//TODO:perf?
+        if(!pv.have_SVG){
+            return this.trimToWidth(len,text,font);
+        }
+        
         if(text == '') return text;
         var holder = this.getTextSizePlaceholder();
         var trimmed = false;
@@ -1037,11 +1045,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     //whether fits horizaontally, vertical and/or in diagonal
     getFitInfo: function(w, h, text, font)
     {
+        var fitsH = this.doesTextSizeFit(w, text, font);
+        var fitsV =  this.doesTextSizeFit(h, text, font);
+        var fitsD = this.doesTextSizeFit(Math.sqrt(w*w + h*h)- 5, text, font);//TODO:hcoded
+        
         var fitInfo =
         {
-            h: this.doesTextSizeFit(w, text, font),
-            v: this.doesTextSizeFit(h, text, font),
-            d: this.doesTextSizeFit(Math.sqrt(w*w + h*h)-diagMargin, text, font)
+            h: fitsH,
+            v: fitsV,
+            d: fitsD 
         };
         return fitInfo;
     },

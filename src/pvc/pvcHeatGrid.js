@@ -168,7 +168,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
         else return vals;
     },
-//TODO: support no sizeValIdx, no color, and neither
 
     create: function(){
 
@@ -214,7 +213,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var w = (xScale.max - xScale.min)/xScale.domain().length;
         var h = (yScale.max - yScale.min)/yScale.domain().length;
 
-        if (anchor != "bottom") {
+        if (anchor != "bottom") {//TODO: remove and change composite axis labels!
             var tmp = w;
             w = h;
             h = tmp;
@@ -238,7 +237,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             })
             [pvc.BasePanel.orthogonalLength[anchor]](h)
             .antialias(false)
-            .strokeStyle("white")
+            
+            .strokeStyle(null)//TODO: issue with categorical axis default label
+            .lineWidth(0)
             .overflow('hidden'); //overflow important if showValues=true
         
         //tooltip text
@@ -327,11 +328,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         //rubber band display
         this.selectBar = this.pvPanel
            .add(pv.Bar)
-                .visible(function() isSelecting)
-                .left(function(d) d.x)
-                .top(function(d) d.y)
-                .width(function(d) d.dx)
-                .height(function(d) d.dy)
+                .visible(function() {return isSelecting;} )
+                .left(function(d) { return d.x; })
+                .top(function(d) { return d.y;})
+                .width(function(d) { return d.dx;})
+                .height(function(d) { return d.dy;})
                 .fillStyle(selectFill)
                 .strokeStyle(selectStroke);
                 
@@ -345,6 +346,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 myself.selectBar.render();
             })
             .event('select', function(rb){
+                
                 myself.rubberBand = rb;
                 myself.selectBar.render();
             })
@@ -471,19 +473,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 .def("selected", function(){
                     var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                     var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                    var isSelected =  myself.isSelected(s,c);
-                    //TODO: revert  this, testing only
-                    //if(!isSelected){//check in rubberBand
-                    //    isSelected = myself.inRubberBandSelection(this.parent.parent.index * w + w/2,
-                    //                                              this.parent.index * h + h/2);
-                    //    if(isSelected) {
-                    //        myself.addSelection(s,c);
-                    //    }
-                    //}
-                    return isSelected;
+                    return  myself.isSelected(s,c);
                 })
                 .shape( function(r, ra ,i){
-                    if(myself.sizeValIdx == null){
+                    if(opts.sizeValIdx == null){
                         return myself.shape;
                     }
                     return myself.getValue(r[i]) != null ? myself.shape : myself.nullShape;
@@ -786,25 +779,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
     },
     
-    
-    //mergeMeasureValues: function(rows, measureIndexes){
-    //    var newRows = [];
-    //    for(var i=0; i< rows.length; i++){
-    //        var row = rows[i];
-    //        var newRow = [];
-    //        var measures = [];
-    //        for(var col=0; col < row.length; col++){
-    //            //TODO: improve
-    //            if(measureIndexes.indexOf(col) < 0){
-    //                newRow.push(row[col]);
-    //            }
-    //            else measures.push(row[col]);
-    //        }
-    //        newRow.push(measures);
-    //        newRows.push(newRow);
-    //    }
-    //    return newRows;
-    //},
     
   
   /***********
