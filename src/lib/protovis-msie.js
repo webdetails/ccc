@@ -93,7 +93,8 @@ var vml = {
     o.translate_x = 0;
     o.translate_y = 0;
     if ( attr.transform ) {
-      var t = /translate\((\d+(?:\.\d+)?)(?:,(\d+(?:\.\d+)?))?\)/.exec( attr.transform );
+      var t = /translate\((-?\d+(?:\.\d+)?)(?:,(-?\d+(?:\.\d+)?))?\)/.exec( attr.transform );//support negative translations
+      //var t = /translate\((\d+(?:\.\d+)?)(?:,(\d+(?:\.\d+)?))?\)/.exec( attr.transform );
       if ( t && t[1] ) { o.translate_x = parseFloat( t[1] ); }
       if ( t && t[2] ) { o.translate_y = parseFloat( t[2] ); }
       var r = /rotate\((\d+\.\d+|\d+)\)/.exec( attr.transform );
@@ -213,7 +214,7 @@ var vml = {
         es.height = ( r * 2 ) + "px";
         vml.fill( elm, attr );
         vml.stroke( elm, attr );
-      },
+      }
     },
 
     "text": {
@@ -545,6 +546,7 @@ pv.VmlScene = {
 // copy helper methods from SvgScene onto our new Scene
 pv.VmlScene.copy_functions( pv.SvgScene );
 pv.Scene = pv.VmlScene;
+pv.renderer = function() { return 'vml' };//changed renderer
 
 
 pv.VmlScene.expect = function (e, type, attr, style) {
@@ -897,7 +899,12 @@ pv.VmlScene.label = function(scenes) {
     var dx = 0, dy = 0;
 
     if ( s.textBaseline === 'middle' ) {
-      dy -= label.fontsize / 2;
+      if(s.textAngle < 0){
+        dy = Math.sin(s.textAngle) * label.width /2;// +label.fontsize / 2;
+      }
+      else {
+        dy -= label.fontsize / 2;
+        }
     }
     else if ( s.textBaseline === 'top' ) {
       dy += s.textMargin;
@@ -907,7 +914,12 @@ pv.VmlScene.label = function(scenes) {
     }
 
     if ( s.textAlign === 'center' ) {
+     if(s.textAngle < 0){
+        dx = -Math.cos(s.textAngle) * label.width / 2 ;
+      }
+     else {
       dx -= label.width / 2; 
+     }
     }
     else if ( s.textAlign === 'right' ) {
       dx -= label.width + s.textMargin; 
