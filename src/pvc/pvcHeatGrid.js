@@ -72,6 +72,11 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
         this.base();
 
+        //TODO: temporary until protovis-msie is integrated
+        if(!pv.have_VML){
+            pv.have_SVG =true;
+        }
+
         pvc.log("Prerendering in heatGridChart");
 
         this.heatGridChartPanel = new pvc.HeatGridChartPanel(this, {
@@ -343,7 +348,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             .event('mousedown', pv.Behavior.selector(false))
             .event('selectstart', function(d){
                 isSelecting = true;
-                myself.selectBar.render();
+               // myself.selectBar.render();
             })
             .event('select', function(rb){
                 

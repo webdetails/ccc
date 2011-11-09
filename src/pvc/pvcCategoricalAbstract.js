@@ -1028,7 +1028,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     trimToWidthSVG: function(len, text, font, trimTerminator){//TODO:perf?
         if(!pv.have_SVG){
-            return this.trimToWidth(len,text,font);
+            return this.trimToWidth(len,text,font, trimTerminator);
         }
         
         if(text == '') return text;
