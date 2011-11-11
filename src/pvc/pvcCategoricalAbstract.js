@@ -948,12 +948,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }))
             ;
             
-            layout.height(function(d){
-                //var datum = this.data();
-                var x =0;
-                return d.dy;
-                });
-            
            // double click label //TODO: need doubleclick axis action + single click prevention..
             if(doubleClickAction)
             {
