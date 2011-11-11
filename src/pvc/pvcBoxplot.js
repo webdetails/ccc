@@ -69,6 +69,8 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 	    boxplotColor: this.options.boxplotColor
         });
 
+        this.categoricalPanel = this.bpChartPanel;
+
         this.bpChartPanel.appendTo(this.basePanel); // Add it
 
         return;

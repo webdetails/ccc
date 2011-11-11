@@ -61,6 +61,8 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
       timeSeries: this.options.timeSeries,
       timeSeriesFormat: this.options.timeSeriesFormat
     });
+    
+    this.categoricalPanel = this.scatterChartPanel;
 
     this.scatterChartPanel.appendTo(this.basePanel); // Add it
 
@@ -333,6 +335,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     
     this.pvLine
     .strokeStyle(colorFunc)
+    .lineJoin(null)
     .text(function(d){
       var v, c;
       var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]

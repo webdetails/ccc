@@ -8,6 +8,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     xAxisPanel : null,
     secondXAxisPanel: null,
     secondYAxisPanel: null,
+    
+    categoricalPanel: null, // This will act as a holder for the specific panel
 
     yScale: null,
     xScale: null,
@@ -41,8 +43,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
             // CvK  added extra parameter for implementation of HeatGrid
             orthoAxisOrdinal: false
-        // if orientation==vertical then perpendicular-axis is the y-axis
-        //  else perpendicular-axis is the x-axis.
+            // if orientation==vertical then perpendicular-axis is the y-axis
+            //  else perpendicular-axis is the x-axis.
         };
 
 
@@ -245,8 +247,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
         
         return onSeries ?
-        this.dataEngine.getVisibleSeries() :
-        this.dataEngine.getVisibleCategories();
+            this.dataEngine.getVisibleSeries() :
+            this.dataEngine.getVisibleCategories();
     },
 
 
@@ -260,12 +262,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         if (this.options.orientation == "vertical") {
             scale = this.options.timeSeries  ?
-            this.getTimeseriesScale(false,true)     :
-            this.getOrdinalScale();
+                this.getTimeseriesScale(false,true)     :
+                this.getOrdinalScale();
         } else {
             scale =  (this.options.orthoAxisOrdinal) ?
-            this.getPerpOrdinalScale("x")    :
-            this.getLinearScale(false,true);
+                this.getPerpOrdinalScale("x")    :
+                this.getLinearScale(false,true);
         } 
 
         return scale;
@@ -279,12 +281,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var scale = null;
         if (this.options.orientation == "vertical") {
             scale =  (this.options.orthoAxisOrdinal) ?
-            this.getPerpOrdinalScale("y")    :
-            this.getLinearScale();
+                this.getPerpOrdinalScale("y")    :
+                this.getLinearScale();
         } else { 
             scale = this.options.timeSeries  ?
-            this.getTimeseriesScale()     :
-            this.getOrdinalScale();
+                this.getTimeseriesScale()     :
+                this.getOrdinalScale();
         }
         return scale;
     },
@@ -326,8 +328,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             var scale = new pv.Scale.ordinal(categories);
 
             var size = this.options.orientation=="vertical"?
-            this.basePanel.width:
-            this.basePanel.height;
+                this.basePanel.width:
+                this.basePanel.height;
 
             if (   this.options.orientation=="vertical"
                 && this.options.yAxisPosition == "left"){
@@ -372,7 +374,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         return scale;
     },
     /**
-    **/
+     **/
     getLinearScale: function(bypassAxis,bypassOffset){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
@@ -454,8 +456,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
 
         var size = this.options.orientation=="vertical"?
-        this.basePanel.width:
-        this.basePanel.height;
+            this.basePanel.width:
+            this.basePanel.height;
 
         var parser = pv.Format.date(this.options.timeSeriesFormat);
         var categories =  this.dataEngine.getVisibleCategories().sort(function(a,b){
@@ -540,7 +542,85 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         scale.range(scale.min, scale.max);
         return scale;
 
-    }
+    },
+    
+    markEventDefaults: {
+        strokeStyle: "#5BCBF5",  /* Line Color */
+        lineWidth: "0.5",  /* Line Width */
+        textStyle: "#5BCBF5", /* Text Color */
+        verticalOffset: 10, /* Distance between vertical anchor and label */
+        verticalAnchor: "bottom", /* Vertical anchor: top or bottom */
+        horizontalAnchor: "right", /* Horizontal anchor: left or right */
+        forceHorizontalAnchor: false, /* Horizontal anchor position will be respected if true */
+        horizontalAnchorSwapLimit: 80 /* Horizontal anchor will switch if less than this space available */
+    },
+    
+    
+    markEvent: function(dateString, label, options){
+
+
+        if( this.options.timeSeries !== true){
+            
+            pvc.log("Attempting to mark an event on a non timeSeries chart");
+            return;
+        }
+
+        var o = $.extend({},this.markEventDefaults,options);
+        var scale = this.getTimeseriesScale(true,true);
+
+        // Are we outside the allowed scale? 
+        var d = pv.Format.date(this.options.timeSeriesFormat).parse(dateString);
+        var dpos = scale( d );
+        
+        if( dpos < scale.range()[0] || dpos > scale.range()[1]){
+            pvc.log("Event outside the allowed range, returning");
+            return;
+        }
+
+        // Add the line
+
+        var panel = this.categoricalPanel.pvPanel;
+        var h = this.yScale.range()[1];
+
+        // Detect where to place the horizontalAnchor
+        var anchor = o.horizontalAnchor;
+        if( !o.forceHorizontalAnchor ){
+
+            var availableSize = o.horizontalAnchor == "right"?scale.range()[1]-dpos:dpos;
+            
+            // TODO: Replace this availableSize condition with a check for the text size
+            if (availableSize < o.horizontalAnchorSwapLimit ){
+                o.horizontalAnchor = o.horizontalAnchor == "right"?"left":"right";
+            }
+            
+        }
+
+        var line = panel.add(pv.Line)
+        .data([0,h])
+        .strokeStyle(o.strokeStyle)
+        .lineWidth(o.lineWidth)
+        .bottom(function(d){
+            return d
+        })
+        .left(dpos)
+        
+        var label = line
+        .anchor(o.horizontalAnchor)
+        .top( o.verticalAnchor == "top"?o.verticalOffset:(h-o.verticalOffset))
+        .add(pv.Label)
+        .text(label)
+        .textStyle(o.textStyle)
+        .visible(function(d){
+            return this.index==0
+        });
+
+        /*
+        this.extend(this.pvPanel, this.panelName + "_");
+        this.extend(this.pvRule, this.panelName + "Rule_");
+        */
+       
+    }    
+
 
 }
 )
@@ -653,27 +733,27 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var myself = this;
         
         var align =  (this.anchor == "bottom" || this.anchor == "top") ?
-        "center" : 
-        (this.anchor == "left")  ?
-        "right" :
-        "left";
+            "center" : 
+            (this.anchor == "left")  ?
+            "right" :
+            "left";
        
-       this.pvTicks = this.pvRule.add(pv.Rule)
-                        .data(this.elements)
-                        [pvc.BasePanel.paralelLength[this.anchor]](null)
-                        [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
-                        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
-                            return myself.scale(d) + myself.scale.range().band/2;
-                        })
-                        [pvc.BasePanel.orthogonalLength[this.anchor]](5)
-                        .strokeStyle("rgba(0,0,0,0)");
+        this.pvTicks = this.pvRule.add(pv.Rule)
+        .data(this.elements)
+        [pvc.BasePanel.paralelLength[this.anchor]](null)
+        [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
+        [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
+            return myself.scale(d) + myself.scale.range().band/2;
+        })
+        [pvc.BasePanel.orthogonalLength[this.anchor]](5)
+        .strokeStyle("rgba(0,0,0,0)");
 
 
         this.pvLabel = this.pvTicks.anchor(this.anchor)
-                            .add(pv.Label)
-                            .textAlign(align)
-                            .text(pv.identity)
-                            .font("9px sans-serif");
+        .add(pv.Label)
+        .textAlign(align)
+        .text(pv.identity)
+        .font("9px sans-serif");
 
     },
 

@@ -72,12 +72,12 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
         // the axis-range computation is possible in "AbstractCategoricalAxis.
         this.callWithHiddenFirstSeries( this.base );
 
-	var logMessage = "Prerendering a ";
-	if (this.options.waterfall)
+        var logMessage = "Prerendering a ";
+        if (this.options.waterfall)
             logMessage += "WaterfallChart";
-	else logMessage +=  ((this.options.stacked) ?
-			     "stacked" : "normal")  +  " BarChart";
-	pvc.log(logMessage);
+        else logMessage +=  ((this.options.stacked) ?
+            "stacked" : "normal")  +  " BarChart";
+        pvc.log(logMessage);
 
         this.wfChartPanel = new pvc.WaterfallChartPanel(this, {
             stacked: this.options.stacked,
@@ -89,6 +89,8 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
             showTooltips: this.options.showTooltips,
             orientation: this.options.orientation
         });
+
+        this.categoricalPanel = this.wfChartPanel;
 
         this.wfChartPanel.appendTo(this.basePanel); // Add it
 
@@ -408,7 +410,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         };
 
 
-    /*
+        /*
      * functions to determine the color palette.
      */
         var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
@@ -627,8 +629,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         }
 
         // Extend waterfall line
-	if (this.waterfall)
-	    this.extend(this.pvWaterfallLine,"barWaterfallLine_");
+        if (this.waterfall)
+            this.extend(this.pvWaterfallLine,"barWaterfallLine_");
 
         // Extend bar and barPanel
         this.extend(this.pvBar,"barPanel_");

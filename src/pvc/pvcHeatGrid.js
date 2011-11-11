@@ -18,7 +18,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
         this.base(o);
 
-	// enforce some defaults for the HeatGridChart
+        // enforce some defaults for the HeatGridChart
         this.options.legend = false;
         this.options.orthoAxisOrdinal = true;
         this.options.orginIsZero = true;
@@ -42,7 +42,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         // Apply options
         $.extend(this.options,_defaults, o);
 
-	// enforce some defaults for the HeatGridChart
+        // enforce some defaults for the HeatGridChart
         this.options.orthoAxisOrdinal = true;
         this.options.legend = false;
         this.options.orginIsZero = true;
@@ -65,6 +65,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             showTooltips: this.options.showTooltips,
             orientation: this.options.orientation
         });
+
+        this.categoricalPanel = this.heatGridChartPanel;
 
         this.heatGridChartPanel.appendTo(this.basePanel); // Add it
 
@@ -175,7 +177,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         .lineWidth(1)
         .antialias(false)
         .text(function(d,f){
-          return d[f]});
+            return d[f]
+            });
 
 
         // NO SUPPORT for overflow and underflow on HeatGrids
@@ -230,7 +233,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
     },
   
-  /***********
+    /***********
    * compute an array of fill-functions. Each column out of "cols" 
    * gets it's own scale function assigned to compute the color
    * for a value. Currently supported scales are:
@@ -238,107 +241,109 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
    *    -  normal distributed from   -numSD*sd to  numSD*sd 
    *         (where sd is the standards deviation)
    ********/
-  getColorScale: function(data, cols) {
-    switch (this.chart.options.scalingType) {
-    case "normal": return this.getNormalColorScale(data, cols);
-    case "linear": return this.getLinearColorScale(data, cols);
-    default:
-      throw "Invalid option " + this.scaleType + " in HeatGrid"
-    }
-  },
+    getColorScale: function(data, cols) {
+        switch (this.chart.options.scalingType) {
+            case "normal":
+                return this.getNormalColorScale(data, cols);
+            case "linear":
+                return this.getLinearColorScale(data, cols);
+            default:
+                throw "Invalid option " + this.scaleType + " in HeatGrid"
+        }
+    },
 
-  getLinearColorScale: function (data, cols){
-    var fill;
-    var opts = this.chart.options;
-    // compute the mean and standard-deviation for each column
-    var min = pv.dict(cols, function(f){
-      return pv.min(data, function(d){
-        return d[f]
-      })
-    });
-    var max = pv.dict(cols, function(f){
-      return pv.max(data, function(d){
-        return d[f]
-      })
-    });
+    getLinearColorScale: function (data, cols){
+        var fill;
+        var opts = this.chart.options;
+        // compute the mean and standard-deviation for each column
+        var min = pv.dict(cols, function(f){
+            return pv.min(data, function(d){
+                return d[f]
+            })
+        });
+        var max = pv.dict(cols, function(f){
+            return pv.max(data, function(d){
+                return d[f]
+            })
+        });
 
-    if (opts.normPerBaseCategory)  //  compute a scale-function for each column (each key
-      fill = pv.dict(cols, function(f){
-        return pv.Scale.linear()
-          .domain(min[f], max[f])
-          .range(opts.minColor, opts.maxColor)
-      });
-     else {   // normalize over the whole array
-      var theMin = min[cols[0]];
-      for (var i=1; i<cols.length; i++)
-        if (min[cols[i]] < theMin) theMin = min[cols[i]];
+        if (opts.normPerBaseCategory)  //  compute a scale-function for each column (each key
+            fill = pv.dict(cols, function(f){
+                return pv.Scale.linear()
+                .domain(min[f], max[f])
+                .range(opts.minColor, opts.maxColor)
+            });
+        else {   // normalize over the whole array
+            var theMin = min[cols[0]];
+            for (var i=1; i<cols.length; i++)
+                if (min[cols[i]] < theMin) theMin = min[cols[i]];
 
-      var theMax = max[cols[0]];
-      for (var i=1; i<cols.length; i++)
-        if (max[cols[i]] < theMax) theMax = max[cols[i]];
+            var theMax = max[cols[0]];
+            for (var i=1; i<cols.length; i++)
+                if (max[cols[i]] < theMax) theMax = max[cols[i]];
 
-      var scale = pv.Scale.linear()
-        .domain(theMin, theMax)
-        .range(opts.minColor, opts.maxColor);
-      fill = pv.dict(cols, function(f){
-        return scale
-      })
-    }
+            var scale = pv.Scale.linear()
+            .domain(theMin, theMax)
+            .range(opts.minColor, opts.maxColor);
+            fill = pv.dict(cols, function(f){
+                return scale
+            })
+        }
 
-    return fill;  // run an array of values to compute the colors per column
-  },
+        return fill;  // run an array of values to compute the colors per column
+    },
 
-  getNormalColorScale: function (data, cols){
-    var fill;
-    var opts = this.chart.options;
-    if (opts.normPerBaseCategory) {
-      // compute the mean and standard-deviation for each column
-      var mean = pv.dict(cols, function(f){
-        return pv.mean(data, function(d){
-          return d[f]
-        })
-      });
-      var sd = pv.dict(cols, function(f){
-        return pv.deviation(data, function(d){
-          return d[f]
-        })
-      });
-      //  compute a scale-function for each column (each key)
-      fill = pv.dict(cols, function(f){
-        return pv.Scale.linear()
-          .domain(-opts.numSD * sd[f] + mean[f],
-                  opts.numSD * sd[f] + mean[f])
-          .range(opts.minColor, opts.maxColor)
-      });
-    } else {   // normalize over the whole array
-      var mean = 0.0, sd = 0.0, count = 0;
-      for (var i=0; i<origData.length; i++)
-        for(var j=0; j<origData[i].length; j++)
-          if (origData[i][j] != null){
-            mean += origData[i][j];
-            count++;
-          }
-      mean /= count;
-      for (var i=0; i<origData.length; i++)
-        for(var j=0; j<origData[i].length; j++)
-          if (origData[i][j] != null){
-            var variance = origData[i][j] - mean;
-            sd += variance*variance;
-          }
-      sd /= count;
-      sd = Math.sqrt(sd);
+    getNormalColorScale: function (data, cols){
+        var fill;
+        var opts = this.chart.options;
+        if (opts.normPerBaseCategory) {
+            // compute the mean and standard-deviation for each column
+            var mean = pv.dict(cols, function(f){
+                return pv.mean(data, function(d){
+                    return d[f]
+                })
+            });
+            var sd = pv.dict(cols, function(f){
+                return pv.deviation(data, function(d){
+                    return d[f]
+                })
+            });
+            //  compute a scale-function for each column (each key)
+            fill = pv.dict(cols, function(f){
+                return pv.Scale.linear()
+                .domain(-opts.numSD * sd[f] + mean[f],
+                    opts.numSD * sd[f] + mean[f])
+                .range(opts.minColor, opts.maxColor)
+            });
+        } else {   // normalize over the whole array
+            var mean = 0.0, sd = 0.0, count = 0;
+            for (var i=0; i<origData.length; i++)
+                for(var j=0; j<origData[i].length; j++)
+                    if (origData[i][j] != null){
+                        mean += origData[i][j];
+                        count++;
+                    }
+            mean /= count;
+            for (var i=0; i<origData.length; i++)
+                for(var j=0; j<origData[i].length; j++)
+                    if (origData[i][j] != null){
+                        var variance = origData[i][j] - mean;
+                        sd += variance*variance;
+                    }
+            sd /= count;
+            sd = Math.sqrt(sd);
       
-      var scale = pv.Scale.linear()
-        .domain(-opts.numSD * sd + mean,
+            var scale = pv.Scale.linear()
+            .domain(-opts.numSD * sd + mean,
                 opts.numSD * sd + mean)
-        .range(opts.minColor, opts.maxColor);
-      fill = pv.dict(cols, function(f){
-        return scale
-      })
-    }
+            .range(opts.minColor, opts.maxColor);
+            fill = pv.dict(cols, function(f){
+                return scale
+            })
+        }
 
-    return fill;  // run an array of values to compute the colors per column
-}
+        return fill;  // run an array of values to compute the colors per column
+    }
 
 
 });
