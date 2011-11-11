@@ -798,18 +798,18 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
          */
 
         var tree = pv.tree(this.resultset).keys(function(d){
-            return [d[0],d[1]]
+            return (d != null)? [d[0],d[1]] : [null, null];
         }).map();
         
         // Now, get series and categories:
 
         var series = pv.uniq(this.resultset.map(function(d){
-            return d[0];
+            return (d != null)? d[0] : null;
         }));
         var numeratedSeries = pv.numerate(series);
 
         var categories = pv.uniq(this.resultset.map(function(d){
-            return d[1];
+            return (d != null)? d[1] : null;
         }))
         var numeratedCategories = pv.numerate(categories);
 
