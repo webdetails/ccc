@@ -72,12 +72,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
         this.base();
 
-        //TODO: temporary until protovis-msie is integrated
-        if(!pv.have_VML){
-            pv.have_SVG =true;
-        }
-
         pvc.log("Prerendering in heatGridChart");
+        
 
         this.heatGridChartPanel = new pvc.HeatGridChartPanel(this, {
             stacked: this.options.stacked,
@@ -90,6 +86,9 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         });
 
         this.heatGridChartPanel.appendTo(this.basePanel); // Add it
+
+        //make selectable
+        
 
     }
 
@@ -325,13 +324,38 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.rubberBand = {x:0, y:0, dx:4, dy:4};
         var myself = this;
         
+        var dMin= Math.min(w,h) /2;
+        
         var isSelecting = false;
+        var checkSelections = false;
         var selectFill = 'rgba(255, 127, 0, 0.15)';
         var selectStroke = 'rgb(255,127,0)';
         var invisibleFill = 'rgba(127,127,127,0.01)';
         
+        
+        var dispatchRubberBandSelection = function(rb)
+        {
+            var xAxis = myself.chart.xAxisPanel;
+            var yAxis = myself.chart.yAxisPanel;
+            
+            //1) Chart: translate coordinates
+            myself.rubberBand.y = myself.height - rb.y  - rb.dy;
+            if(myself.chart.options.xAxisPosition == 'top'){
+                myself.rubberBand.y += xAxis[pvc.BasePanel.orthogonalLength[xAxis.anchor]];
+            }
+            if(myself.chart.options.yAxisPosition == 'left'){
+                myself.rubberBand.x -= yAxis[pvc.BasePanel.orthogonalLength[yAxis.anchor]];
+            }
+            myself.setRubberbandSelections(myself.rubberBand,w,h);
+            
+            //axis
+            
+            
+            myself.shapes.render();
+        };
+        
         //rubber band display
-        this.selectBar = this.pvPanel
+        this.selectBar = this.pvPanel.root//TODO
            .add(pv.Bar)
                 .visible(function() {return isSelecting;} )
                 .left(function(d) { return d.x; })
@@ -342,7 +366,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 .strokeStyle(selectStroke);
                 
         //rubber band selection behavior definition
-        this.pvPanel
+        this.pvPanel.root//TODO
             .data([this.rubberBand])
             .fillStyle(invisibleFill)
             .event('mousedown', pv.Behavior.selector(false))
@@ -353,15 +377,24 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             .event('select', function(rb){
                 
                 myself.rubberBand = rb;
-                myself.selectBar.render();
+                if(rb.dx > dMin || rb.dy > dMin){
+                    checkSelections  =true;
+                    myself.selectBar.render();
+                }
             })
             .event('selectend', function(rb){
                 isSelecting = false;
                 //translate top to bottom
-                myself.selectBar.render();
-                myself.rubberBand.y = myself.height - rb.y - rb.dy;
-                myself.setRubberbandSelections(myself.rubberBand,w,h);
-                myself.shapes.render();
+                if(checkSelections){
+                    checkSelections = false;
+                    myself.selectBar.render();//TODO: update coordinates
+                    
+                    dispatchRubberBandSelection(rb);
+                    
+                    //myself.rubberBand.y = myself.height - rb.y - rb.dy;
+                    //myself.setRubberbandSelections(myself.rubberBand,w,h);
+                    //myself.shapes.render();
+                }
             });
     },
     
@@ -536,11 +569,12 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     myself.toggleSelection(s,c);
                     myself.triggerSelectionChange();
                     //classic clickAction
-                    if($.isArray(d)) d= d[0];
                     if(typeof(myself.chart.options.clickAction) == 'function'){
+                        if($.isArray(d)) d= d[0];
                         myself.chart.options.clickAction(s,c,d);
                     }
                     myself.pvPanel.render();
+                   // myself.shapes.render();
                 })
                 ;
                 this.createSelectOverlay(w,h);
@@ -572,12 +606,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     addSelection: function(s,c){
       if(!this.selections[s]) this.selections[s] = {};
       this.selections[s][c] = true;
+      //TODO:
+      this.selectCount = null;
     },
     
     removeSelection: function(s,c){
       if(this.selections[s]){
         this.selections[s][c] = false;
       }
+      this.selectCount = null;
     },
     
     toggleSelection: function(s,c){
@@ -758,7 +795,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
     
     getSelectCount: function(){
-        return this.getSelections().length;
+        if(this.selectCount == null){
+          this.selectCount = this.getSelections().length;
+        }
+        return this.selectCount;
     },
     
     triggerSelectionChange: function(){

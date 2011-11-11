@@ -69,6 +69,9 @@ var vml = {
   text_shim: null,
   _textcache: {},
   text_dims: function ( text, font ) {
+    
+    if ( !vml.text_shim ) { vml.init();}
+    
     if ( !(font in vml._textcache) ) {
       vml._textcache[ font ] = {};
     }
@@ -511,6 +514,9 @@ var vml = {
 
 };
 
+//ext access to vml functions
+pv.Vml = vml;
+
 pv.VmlScene = {
   
   // The pre-multipled scale, based on any enclosing transforms.
@@ -899,12 +905,12 @@ pv.VmlScene.label = function(scenes) {
     var dx = 0, dy = 0;
 
     if ( s.textBaseline === 'middle' ) {
-      if(s.textAngle < 0){
-        dy = Math.sin(s.textAngle) * label.width /2;// +label.fontsize / 2;
+      if(s.textAngle != 0){
+        dy += Math.sin(s.textAngle) * label.width /2;
       }
       else {
         dy -= label.fontsize / 2;
-        }
+      }
     }
     else if ( s.textBaseline === 'top' ) {
       dy += s.textMargin;
@@ -914,8 +920,8 @@ pv.VmlScene.label = function(scenes) {
     }
 
     if ( s.textAlign === 'center' ) {
-     if(s.textAngle < 0){
-        dx = -Math.cos(s.textAngle) * label.width / 2 ;
+     if(s.textAngle != 0){
+        dx -= Math.cos(s.textAngle) * label.width / 2 ;
       }
      else {
       dx -= label.width / 2; 
