@@ -388,15 +388,51 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 myself.clearSelections();
             }
             
-            //TODO: intersection instead of join
-            for(var i=0; i<xSelections.length; i++){
-                myself.chart.heatGridChartPanel.selectAxisValue('x', xSelections[i]);
+            if( ySelections.length > 0 && xSelections.length > 0 )
+            {//intersection
+                var series = myself.chart.dataEngine.getSeries();
+                var categories = myself.chart.dataEngine.getCategories();
+                var selectedSeries = [], selectedCategories = [],
+                    sSelections, cSelections;
+                if(this.orientation == 'horizontal'){
+                    sSelections = xSelections;
+                    cSelections = ySelections;
+                }
+                else {
+                    sSelections = ySelections;
+                    cSelections = xSelections;                    
+                }
+                //expand selections
+                for(var i=0;i<sSelections.length;i++)
+                {
+                    var s = sSelections[i];
+                    for(var j=0;j<series.length; j++){
+                        if( myself.arrayStartsWith(series[j], s)){
+                            selectedSeries.push(series[j]);
+                        }
+                    }
+                }
+                for(var i=0;i<cSelections.length;i++)
+                {
+                    var c = cSelections[i];
+                    for(var j=0;j<categories.length; j++){
+                        if( myself.arrayStartsWith(categories[j], c)){
+                            selectedCategories.push(categories[j]);
+                        }
+                    }
+                }
+                //intersection
+                for(var i=0;i<selectedSeries.length;i++)
+                {
+                    var s = selectedSeries[i];
+                    for(var j=0; j<selectedCategories.length; j++)
+                    {
+                        var c = selectedCategories[j];
+                        myself.addSelection(s,c);
+                    }
+                }
             }
-            for(var i=0; i<ySelections.length; i++){
-                myself.chart.heatGridChartPanel.selectAxisValue('y', ySelections[i]);
-            }
-            
-            if(ySelections.length == 0 || xSelections.length == 0)
+            else if(ySelections.length == 0 && xSelections.length == 0)
             {//if there are label selections, they already include any chart selections
                 //3) Chart: translate coordinates (drawn bottom-up)
                 //first get offsets
@@ -408,6 +444,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 myself.rubberBand.y = y;
 
                 myself.setRubberbandSelections(myself.rubberBand,w,h);            
+            }
+            else
+            {
+                for(var i=0; i<xSelections.length; i++){
+                    myself.chart.heatGridChartPanel.selectAxisValue('x', xSelections[i]);
+                }
+                for(var i=0; i<ySelections.length; i++){
+                    myself.chart.heatGridChartPanel.selectAxisValue('y', ySelections[i]);
+                }
             }
 
             myself.shapes.render();
@@ -764,6 +809,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
     
     //ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+    //     arrayStartsWith(a, a) -> true
     arrayStartsWith: function(array, base)
     {
         if(array.length < base.length) { return false; }
