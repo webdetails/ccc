@@ -44,7 +44,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             minColor: "white",
             maxColor: "darkgreen",
             nullColor:  "#efc5ad",  // white with a shade of orange
-            xAxisClickAction: function(d){
+            xAxisClickAction: function(d){//TODO: selectMode
                 //self.heatGridChartPanel.selectXValue(d);
                 self.heatGridChartPanel.selectAxisValue('x', d);
                 self.heatGridChartPanel.pvPanel.render();
@@ -183,7 +183,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.colorValIdx = opts.colorValIdx;
         this.sizeValIdx = opts.sizeValIdx;
         
-        //TODO:
         if(opts.shape != null) {this.shape = opts.shape;}
         
         //event triggering
@@ -273,10 +272,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
 
         //clickAction
-        if (opts.clickable){
+        if (opts.clickable) {//custom clickAction
             this.pvHeatGrid
             .cursor("pointer")
-            .event("click",function(row, rowCol){
+            .event("click",function(row, rowCol){//TODO: mouse event?
                 var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index]
                 var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index]
                 var d = row[rowCol];
@@ -317,6 +316,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         
     },
     
+    /**
+     * Add rubberband functionality to main panel (includes axis)
+     **/
     createSelectOverlay : function(w,h)
     {
         //TODO: flip support: parallelLength etc..
@@ -333,25 +335,84 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var invisibleFill = 'rgba(127,127,127,0.01)';
         
         
-        var dispatchRubberBandSelection = function(rb)
-        {
+        var dispatchRubberBandSelection = function(rb, ev)
+        {//do the rubber band
             var xAxis = myself.chart.xAxisPanel;
             var yAxis = myself.chart.yAxisPanel;
             
-            //1) Chart: translate coordinates
-            myself.rubberBand.y = myself.height - rb.y  - rb.dy;
-            if(myself.chart.options.xAxisPosition == 'top'){
-                myself.rubberBand.y += xAxis[pvc.BasePanel.orthogonalLength[xAxis.anchor]];
+            var opts = myself.chart.options;
+            
+            var positions = ['top','left', 'bottom', 'right'];
+            var setPositions = function(position, len){
+              var obj ={};
+              for(var i=0; i< positions.length;i++){
+                if(positions[i] == position){
+                    obj[positions[i]] = len;
+                }
+                else {
+                    obj[positions[i]] = 0;
+                }
+              }
+              return obj;
+            };
+            
+            //get offsets
+            var titleOffset;
+            if(opts.title){
+                titleOffset = setPositions(opts.titlePosition, myself.chart.titlePanel.titleSize);
             }
-            if(myself.chart.options.yAxisPosition == 'left'){
-                myself.rubberBand.x -= yAxis[pvc.BasePanel.orthogonalLength[yAxis.anchor]];
+            else {
+                titleOffset = setPositions();
             }
-            myself.setRubberbandSelections(myself.rubberBand,w,h);
+            var xAxisOffset = setPositions(opts.xAxisPosition, myself.chart.xAxisPanel.height);
+            var yAxisOffset = setPositions(opts.yAxisPosition, myself.chart.yAxisPanel.width);
             
-            //axis
+            var y = 0, x=0;   
+            //1) x axis
+            y = rb.y - titleOffset['top'] ;
+            if(opts.xAxisPosition == 'bottom'){//chart
+                y -= myself.height;
+            }
+            x = rb.x - titleOffset['left'] - yAxisOffset['left'];
+            var xSelections = myself.chart.xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+                        
+            //2) y axis
+            y = rb.y - titleOffset['top'] - xAxisOffset['top'];//- xAxisOffset['top'];
+            x = rb.x - titleOffset['left'];
+            if(opts.yAxisPosition == 'right'){//chart
+                x -= myself.width;
+            }
+            var ySelections = myself.chart.yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
             
+            if(!ev.ctrlKey){
+                myself.clearSelections();
+            }
             
+            //TODO: intersection instead of join
+            for(var i=0; i<xSelections.length; i++){
+                myself.chart.heatGridChartPanel.selectAxisValue('x', xSelections[i]);
+            }
+            for(var i=0; i<ySelections.length; i++){
+                myself.chart.heatGridChartPanel.selectAxisValue('y', ySelections[i]);
+            }
+            
+            if(ySelections.length == 0 || xSelections.length == 0)
+            {//if there are label selections, they already include any chart selections
+                //3) Chart: translate coordinates (drawn bottom-up)
+                //first get offsets
+                y = rb.y -titleOffset['top'] - xAxisOffset['top'];
+                x = rb.x - titleOffset['left'] - yAxisOffset['left'];
+                //top->bottom
+                y = myself.height -y -rb.dy;
+                myself.rubberBand.x = x;
+                myself.rubberBand.y = y;
+
+                myself.setRubberbandSelections(myself.rubberBand,w,h);            
+            }
+
             myself.shapes.render();
+            myself.chart.heatGridChartPanel.triggerSelectionChange();
+            
         };
         
         //rubber band display
@@ -369,6 +430,12 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.pvPanel.root//TODO
             .data([this.rubberBand])
             .fillStyle(invisibleFill)
+            .event("click", function(d, e) {
+                if(!e.ctrlKey){
+                    myself.clearSelections();
+                    myself.shapes.render();
+                }
+            })
             .event('mousedown', pv.Behavior.selector(false))
             .event('selectstart', function(d){
                 isSelecting = true;
@@ -377,23 +444,20 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             .event('select', function(rb){
                 
                 myself.rubberBand = rb;
-                if(rb.dx > dMin || rb.dy > dMin){
+                if(isSelecting && (rb.dx > dMin || rb.dy > dMin)){
                     checkSelections  =true;
                     myself.selectBar.render();
                 }
             })
-            .event('selectend', function(rb){
-                isSelecting = false;
-                //translate top to bottom
-                if(checkSelections){
-                    checkSelections = false;
-                    myself.selectBar.render();//TODO: update coordinates
-                    
-                    dispatchRubberBandSelection(rb);
-                    
-                    //myself.rubberBand.y = myself.height - rb.y - rb.dy;
-                    //myself.setRubberbandSelections(myself.rubberBand,w,h);
-                    //myself.shapes.render();
+            .event('selectend', function(rb, mouseEvent){
+                if(isSelecting){
+                    isSelecting = false;
+                    //translate top to bottom
+                    if(checkSelections){
+                        checkSelections = false;
+                        myself.selectBar.render();//TODO: update coordinates
+                        dispatchRubberBandSelection(rb, mouseEvent);
+                    }
                 }
             });
     },
@@ -504,7 +568,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             return  (value != null) ? fill[i](value) : opts.nullColor;
         };
         
-        
         this.shapes =
             this.pvHeatGrid
                 .add(pv.Dot)
@@ -562,11 +625,16 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 .text(function(r,ra,i){
                     return myself.valuesToText(r[i]);
                 })
-                .event("click", function(r,ra,i) {
+                .event("click", function(r,ra,i,n1,n2,e) {
                     var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                     var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
                     var d = r[i];
-                    myself.toggleSelection(s,c);
+                    if(e.ctrlKey){
+                        myself.toggleSelection(s,c);
+                    } else {//hard select
+                        myself.clearSelections();
+                        myself.addSelection(s,c);
+                    }
                     myself.triggerSelectionChange();
                     //classic clickAction
                     if(typeof(myself.chart.options.clickAction) == 'function'){
@@ -597,6 +665,12 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       }
     },
     
+    //makes none selected
+    clearSelections: function(){
+        this.selections = {};
+        this.selectCount = null;
+    },
+    
     isSelected: function(s,c){
       return this.selections[s] ?
         this.selections[s][c] :
@@ -617,10 +691,32 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       this.selectCount = null;
     },
     
-    toggleSelection: function(s,c){
-        if(this.isSelected(s,c)) this.removeSelection(s,c);
-        else this.addSelection(s,c);
+    toggleSelection: function(s,c,keepOthers){
+        if(this.isSelected(s,c)) {
+            this.removeSelection(s,c);
+        }
+        else {
+            this.addSelection(s,c);
+        }
     },
+    //toggleSelection: function(s,c,keepOthers){
+    //    var isSelected = this.isSelected(s,c);
+    //    
+    //    if(keepOthers){
+    //        if(isSelected) {
+    //            this.removeSelection(s,c);
+    //        }
+    //        else {
+    //            this.addSelection(s,c);
+    //        }
+    //    }
+    //    else {
+    //        this.clearSelections();
+    //        if(!isSelected){
+    //            this.addSelection(s,c);
+    //        }
+    //    }
+    //},
     
     getSelections: function(){
         return pv.flatten(this.selections).key("series").key("category").key("selected")
@@ -946,7 +1042,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
 /**
  * Equal to pv.Behavior.select but doesn't necessarily
- * force redraw of component it's in on mousemove.
+ * force redraw of component it's in on mousemove, and sends event info
  * (default behavior matches pv.Behavior.select())
  * @param {boolean} autoRefresh refresh parent mark automatically
  * @param {pv.Mark} mark
@@ -961,7 +1057,7 @@ pv.Behavior.selector = function(autoRefresh, mark) {
                     autoRefresh : true; //redraw mark - default: same as pv.Behavior.select
     
   /** @private */
-  function mousedown(d) {
+  function mousedown(d, e) {
     if(mark == null){
         index = this.index;
         scene = this.scene;
@@ -976,11 +1072,11 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     r.x = m1.x;
     r.y = m1.y;
     r.dx = r.dy = 0;
-    pv.Mark.dispatch("selectstart", scene, index);
+    pv.Mark.dispatch("selectstart", scene, index, e);
   }
 
   /** @private */
-  function mousemove() {
+  function mousemove(e) {
     if (!scene) return;
     scene.mark.context(scene, index, function() {
         var m2 = this.mouse();
@@ -992,13 +1088,13 @@ pv.Behavior.selector = function(autoRefresh, mark) {
             this.render();
         }
       });
-    pv.Mark.dispatch("select", scene, index);
+    pv.Mark.dispatch("select", scene, index, e);
   }
 
   /** @private */
-  function mouseup() {
+  function mouseup(e) {
     if (!scene) return;
-    pv.Mark.dispatch("selectend", scene, index);
+    pv.Mark.dispatch("selectend", scene, index, e);
     scene = null;
   }
 

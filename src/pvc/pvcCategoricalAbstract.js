@@ -687,18 +687,25 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var depthLength = this.axisSize;
         //displace to take out bogus-root
         var baseDisplacement = (1.0/++maxDepth)* depthLength;
-        baseDisplacement -= (1.0/12.0) * depthLength;//heuristic compensation
-        
-        var margin = 0;
+        var margin = (1.0/12.0) * depthLength;//heuristic compensation
+        baseDisplacement -= margin;
         
         var scaleFactor = maxDepth*1.0/ (maxDepth -1);
         var orthogonalLength = pvc.BasePanel.orthogonalLength[orientation];
         //var dlen = (orthogonalLength == 'width')? 'dx' : 'dy';
         
         var displacement = (orthogonalLength == 'width')?
-                ((orientation == 'left')? [-baseDisplacement - margin, 0] : [baseDisplacement + margin, 0]) :
-                ((orientation == 'top')?  [0, -baseDisplacement - margin] : [0, baseDisplacement + margin]);
-           
+                ((orientation == 'left')? [-baseDisplacement, 0] : [baseDisplacement, 0]) :
+                ((orientation == 'top')?  [0, -baseDisplacement] : [0, baseDisplacement]);
+
+        //store without compensation for lasso handling   
+        this.axisDisplacement = displacement.slice(0);
+        for(var i=0;i<this.axisDisplacement.length;i++){
+            if(this.axisDisplacement[i] < 0 ){ this.axisDisplacement[i] -= margin ;}
+            else if(this.axisDisplacement[i] > 0 ){ this.axisDisplacement[i] = 0 ;}
+            this.axisDisplacement[i] *= scaleFactor;
+        }
+        
         this.pvRule.lineWidth(0).strokeStyle(null);
         var panel = this.pvRule
                         .add(pv.Panel)[orthogonalLength](depthLength)//.overflow('hidden')
@@ -722,6 +729,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .nodes(nodes)
             .orient(orientation)
             ;
+            
+        //keep node references for lasso selection
+        this.storedNodes = nodes;
+        
         return layout;
     },
     
@@ -739,8 +750,47 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return breadthCounters;
     },
     
-    triggerAreaSelections: function(x,y,dx,dy,mode){
+    getAreaSelections: function(x,y,dx,dy,mode){
         
+        var selections = [];
+        x-= this.axisDisplacement[0];
+        y-= this.axisDisplacement[1];
+        
+        this.storedNodes[0].visitBefore(function(node, i){
+           if(i==0) {return;}
+           var nodeX = node.x + node.dx /2;
+           var nodeY = node.y + node.dy /2;
+            
+            if(nodeX > x && nodeX < x + dx &&
+               nodeY > y && nodeY < y + dy){
+                selections.push(node.nodePath);
+            }
+        });
+        
+        var lastSelection = null;
+        var compressedSelections = [];
+        for(var i=0; i<selections.length;i++){
+            var selection = selections[i];
+            if(lastSelection==null ||
+               !this.arrayStartsWith(selection, lastSelection)){
+                lastSelection = selection;
+                compressedSelections.push(selection);
+            }
+        }
+        return compressedSelections;
+    },
+    
+    
+    arrayStartsWith: function(array, base)
+    {
+        if(array.length < base.length) { return false; }
+        
+        for(var i=0; i<base.length;i++){
+            if(base[i] != array[i]) {
+                return false;
+            }
+        }
+        return true;
     },
     
     renderCompositeOrdinalAxis: function(){
@@ -757,7 +807,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             'v';
 
         var elements = this.ordinalElements.slice(0);
-        //TODO: extend this to work with chart.orientation
+        //TODO: extend this to work with chart.orientation?
         if(this.anchor == 'bottom' || this.anchor == 'left') {elements.reverse();}
         
         //build tree with elements
@@ -818,10 +868,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             } :
             null;
             
-        ////TODO:testing
-        //this.doubleClickAction = function(d){
-        //    alert(d).join(', ');
-        //}
         var doubleClickAction = (typeof(this.doubleClickAction) == 'function')?
             function(d){
                 ignoreClicks = 2;
@@ -863,6 +909,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var V_CUTOFF_ANG = 1.27;
         var V_CUTOFF_RATIO = 0.8;
         var diagMargin = this.getFontSize(this.font) / 2;
+        
         
         //draw labels and make them fit
         this.pvLabel = layout.label.add(pv.Label)
@@ -930,16 +977,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .event('click', function(d){
                 if(clickAction){
                     if(doubleClickAction){
-                        //has to be closure in order to work with ie
+                        //arg has to be passed in closure in order to work with ie
                         window.setTimeout(function(){clickAction(d.nodePath)}, DBL_CLICK_MAX_DELAY);
                        // window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
                     }
                     else { clickAction(d.nodePath); }
                 }
-                
-                //if(myself.clickAction){
-                //    myself.clickAction(d.nodePath);
-                //}
             })
             .event("mouseover", pv.Behavior.tipsy({//Tooltip
                 gravity: "n",
@@ -955,6 +998,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     doubleClickAction(d.nodePath);
                 });
             }
+            
     },
     
     getTextSizePlaceholder : function()
