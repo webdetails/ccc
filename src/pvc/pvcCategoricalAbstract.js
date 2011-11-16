@@ -860,18 +860,18 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var ignoreClicks = 0;
         var DBL_CLICK_MAX_DELAY = (this.clickDelay)? this.clickDelay : 300; //ms
         var clickAction = (typeof(this.clickAction) == 'function')?
-            function(d){
+            function(d, e){
                 if(ignoreClicks) { ignoreClicks--; }
                 else {
-                    myself.clickAction(d);
+                    myself.clickAction(d, e);
                 }
             } :
             null;
             
         var doubleClickAction = (typeof(this.doubleClickAction) == 'function')?
-            function(d){
+            function(d, e){
                 ignoreClicks = 2;
-                myself.doubleClickAction(d);
+                myself.doubleClickAction(d, e);
             } :
             null;
         
@@ -974,14 +974,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             .cursor( myself.clickAction? 'pointer' : 'default')
             .events('all')//labels don't have events by default
-            .event('click', function(d){
+            .event('click', function(d,n0,n1,n2,n3,n4, e){
                 if(clickAction){
                     if(doubleClickAction){
                         //arg has to be passed in closure in order to work with ie
-                        window.setTimeout(function(){clickAction(d.nodePath)}, DBL_CLICK_MAX_DELAY);
+                        window.setTimeout(function(){clickAction(d.nodePath, e)}, DBL_CLICK_MAX_DELAY);
                        // window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
                     }
-                    else { clickAction(d.nodePath); }
+                    else { clickAction(d.nodePath, e); }
                 }
             })
             .event("mouseover", pv.Behavior.tipsy({//Tooltip
@@ -994,8 +994,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
            // double click label //TODO: need doubleclick axis action + single click prevention..
             if(doubleClickAction)
             {
-                this.pvLabel.event("dblclick", function(d){
-                    doubleClickAction(d.nodePath);
+                this.pvLabel.event("dblclick", function(d, e){
+                    doubleClickAction(d.nodePath, e);
                 });
             }
             
@@ -1037,7 +1037,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     getTextLength: function(text, font){
-      return (pv.renderer() != 'vml')?
+      return (pv.renderer() != 'vml')?//TODO: support svgweb? defaulting to svg
         this.getTextLenSVG(text, font) :
         this.getTextLenVML(text, font) ;
     },
@@ -1118,7 +1118,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
         return text + (trimmed? trimTerminator: '');
     },
-    
     
     //TODO: use for IE if non-svg option kept
     doesTextSizeFit: function(length, text, font){

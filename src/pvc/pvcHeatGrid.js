@@ -44,15 +44,15 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             minColor: "white",
             maxColor: "darkgreen",
             nullColor:  "#efc5ad",  // white with a shade of orange
-            xAxisClickAction: function(d){//TODO: selectMode
+            xAxisClickAction: function(item, event){//TODO: selectMode
                 //self.heatGridChartPanel.selectXValue(d);
-                self.heatGridChartPanel.selectAxisValue('x', d);
+                self.heatGridChartPanel.selectAxisValue('x', item, event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
             },
-            yAxisClickAction: function(d){ //TODO: move elsewhere?
+            yAxisClickAction: function(item, event){ //TODO: move elsewhere?
                 //self.heatGridChartPanel.selectYValue(d);
-                self.heatGridChartPanel.selectAxisValue('y', d);
+                self.heatGridChartPanel.selectAxisValue('y', item, event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
             }
@@ -135,7 +135,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     sizeValIdx: 0,
     defaultValIdx:0,
     shape: "square",
-    nullShape: "cross",
+    nullShape: 'cross',
     defaultBorder: 0,
     nullBorder: 2,
     selectedBorder: 2,
@@ -183,6 +183,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.colorValIdx = opts.colorValIdx;
         this.sizeValIdx = opts.sizeValIdx;
         
+        //TODO:
         if(opts.shape != null) {this.shape = opts.shape;}
         
         //event triggering
@@ -606,7 +607,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         };
         
         var valueToArea =  function(value){//
-            return value != null ? value/maxVal * maxArea : Math.max(4,maxArea/16);//TODO:hcoded
+            return value != null ? value/maxVal * maxArea :  Math.max(4,maxArea/16);//TODO:hcoded
         }
         
         var valueToColor = function(value, i){
@@ -625,13 +626,16 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     if(opts.sizeValIdx == null){
                         return myself.shape;
                     }
-                    return myself.getValue(r[i]) != null ? myself.shape : myself.nullShape;
+                    return myself.getValue(r[i]) != null ? myself.shape : opts.nullShape;
                 })
-                .shapeSize(function(r,ra, i) {
+                .shapeSize(function(r,ra, i) {                    
                     if(myself.sizeValIdx == null){
                         return maxArea;
                     }
-                    return valueToArea(myself.getValue(r[i], myself.sizeValIdx));
+                    var val = myself.getValue(r[i], myself.sizeValIdx);
+                    return (val == null && opts.nullShape == null)?
+                        0 :
+                        valueToArea(myself.getValue(r[i], myself.sizeValIdx));
                 })
                 .fillStyle(function(r, ra, i){
                     //return valueToColor(r[i], i);
@@ -736,7 +740,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       this.selectCount = null;
     },
     
-    toggleSelection: function(s,c,keepOthers){
+    toggleSelection: function(s,c){
         if(this.isSelected(s,c)) {
             this.removeSelection(s,c);
         }
@@ -790,7 +794,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
     },
     
-    selectAxisValue: function(axis, axisValue)
+    selectAxisValue: function(axis, axisValue, toggle)
     {
         var type = (this.orientation == 'horizontal')?
             ((axis == 'x')? 's' : 'c') :
@@ -798,11 +802,28 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
         if(this.chart.options.useCompositeAxis)
         {
-            if(type =='c'){ this.toggleCategoriesHierarchy(axisValue); }
-            else { this.toggleSeriesHierarchy(axisValue); }
+            if(!toggle){
+                this.clearSelections();
+            }
+            if(type =='c'){
+                if(!toggle){
+                    this.selectCategoriesHierarchy(axisValue);
+                }
+                else {
+                    this.toggleCategoriesHierarchy(axisValue);
+                }
+            }
+            else {
+                if(!toggle){
+                    this.selectSeriesHierarchy(axisValue);
+                }
+                else{
+                    this.toggleSeriesHierarchy(axisValue);
+                }
+            }
         }
         else
-        {
+        {//??
             if(type =='c'){ this.toggleCategories(axisValue); }
             else { this.toggleSeries(axisValue); }
         }

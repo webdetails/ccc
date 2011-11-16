@@ -842,7 +842,7 @@ pv.listen = function(target, type, listener) {
 
 pv.VmlScene.dispatch = pv.listener(function(e) {
   var t = e.target.$scene;
-  if ( t && pv.Mark.dispatch(e.type, t.scenes, t.index) ) {
+  if ( t && pv.Mark.dispatch(e.type, t.scenes, t.index, e) ) {
     e.preventDefault();
   }
 });
