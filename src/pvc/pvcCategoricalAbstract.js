@@ -753,6 +753,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     getAreaSelections: function(x,y,dx,dy,mode){
         
         var selections = [];
+        
+        if(!this.useCompositeAxis){
+            return selections;
+        }
+        
         x-= this.axisDisplacement[0];
         y-= this.axisDisplacement[1];
         

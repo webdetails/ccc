@@ -370,20 +370,26 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
             var y = 0, x=0;   
             //1) x axis
-            y = rb.y - titleOffset['top'] ;
-            if(opts.xAxisPosition == 'bottom'){//chart
-                y -= myself.height;
+            var xSelections = []
+            if(opts.useCompositeAxis){
+                y = rb.y - titleOffset['top'] ;
+                if(opts.xAxisPosition == 'bottom'){//chart
+                    y -= myself.height;
+                }
+                x = rb.x - titleOffset['left'] - yAxisOffset['left'];
+                xSelections =  myself.chart.xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
             }
-            x = rb.x - titleOffset['left'] - yAxisOffset['left'];
-            var xSelections = myself.chart.xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
                         
             //2) y axis
-            y = rb.y - titleOffset['top'] - xAxisOffset['top'];//- xAxisOffset['top'];
-            x = rb.x - titleOffset['left'];
-            if(opts.yAxisPosition == 'right'){//chart
-                x -= myself.width;
+            var ySelections = [];
+            if(opts.useCompositeAxis){
+                y = rb.y - titleOffset['top'] - xAxisOffset['top'];//- xAxisOffset['top'];
+                x = rb.x - titleOffset['left'];
+                if(opts.yAxisPosition == 'right'){//chart
+                    x -= myself.width;
+                }
+                ySelections = myself.chart.yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
             }
-            var ySelections = myself.chart.yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
             
             if(!ev.ctrlKey){
                 myself.clearSelections();
