@@ -44,14 +44,14 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             minColor: "white",
             maxColor: "darkgreen",
             nullColor:  "#efc5ad",  // white with a shade of orange
-            xAxisClickAction: function(item, event){//TODO: selectMode
-                //self.heatGridChartPanel.selectXValue(d);
+            rubberBandFill: 'rgba(255, 127, 0, 0.15)',
+            rubberBandLine: 'rgb(255,127,0)',
+            xAxisClickAction: function(item, event){
                 self.heatGridChartPanel.selectAxisValue('x', item, event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
             },
             yAxisClickAction: function(item, event){ //TODO: move elsewhere?
-                //self.heatGridChartPanel.selectYValue(d);
                 self.heatGridChartPanel.selectAxisValue('y', item, event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
@@ -85,10 +85,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             orientation: this.options.orientation
         });
 
-        this.heatGridChartPanel.appendTo(this.basePanel); // Add it
-
-        //make selectable
-        
+        this.heatGridChartPanel.appendTo(this.basePanel); // Add it       
 
     }
 
@@ -145,8 +142,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     selectNullValues: false,
     
     selections: {},
-    
-    //measuresIndexes: [2],
 
     constructor: function(chart, options){
 
@@ -210,7 +205,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 return  d[this.index];
             });
         });
-        //data.reverse();  // the colums are build from top to bottom --> nope, bottom to top, left to right now
 
         // get an array of scaling functions (one per column)
         var fill = this.getColorScale(data, cols);
@@ -333,8 +327,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         
         var isSelecting = false;
         var checkSelections = false;
-        var selectFill = 'rgba(255, 127, 0, 0.15)';
-        var selectStroke = 'rgb(255,127,0)';
+        var selectFill = opts.rubberBandFill; // 'rgba(255, 127, 0, 0.15)';
+        var selectStroke =  opts.rubberBandLine;//'rgb(255,127,0)';
         var invisibleFill = 'rgba(127,127,127,0.01)';
         
         
@@ -487,9 +481,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             this.pvPanel.root.fillStyle(invisibleFill);
         }
         
-        this.pvPanel.root//TODO
+        this.pvPanel.root
             .data([this.rubberBand])
-           //.fillStyle(invisibleFill)
             .event("click", function(d, e) {
                 if(!e.ctrlKey){
                     myself.clearSelections();
@@ -499,13 +492,12 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             .event('mousedown', pv.Behavior.selector(false))
             .event('selectstart', function(d){
                 isSelecting = true;
-               // myself.selectBar.render();
             })
             .event('select', function(rb){
                 
                 myself.rubberBand = rb;
                 if(isSelecting && (rb.dx > dMin || rb.dy > dMin)){
-                    checkSelections  =true;
+                    checkSelections = true;
                     myself.selectBar.render();
                 }
             })
@@ -555,55 +547,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             }
         }
     },
-    
-    //createSelectOverlay2: function(){
-    //  var opts = this.chart.options;
-    //  
-    //  this.rubberBand = null;
-    //  var myself = this;
-    //  function update(d, t) {
-    //    myself.rubberBand = d;
-    //     //this.render();
-    //     // myself.pvPanel.render();
-    //    //this.render();
-    //    myself.selectionBar.render();
-    //    //myself.shapes.render();
-    //  };
-    //  
-    //  var underSelection = false;
-    //  //this.pvPanel.reverse(true);
-    //  
-    //  this.selectOverlay = this.pvPanel//.add(pv.Panel)
-    //    .data([{x:0, y:0, dx:50, dy:50}]) //dimensions that will be updated by pv.Behavior
-    //    //.cursor('default')
-    //    //.width(this.width)
-    //    //.height(this.height)
-    //    .fillStyle("rgba(127,127,0,.15)")
-    //    .event('mousedown', pv.Behavior.selector(false))
-    //    .event('selectstart', function(d){
-    //       rubberBand = null;
-    //    })
-    //    .event('select', update)
-    //    .event('selectend', function(d){
-    //        myself.rubberBand = null;
-    //        myself.selectionBar.render();
-    //    });
-    //    
-    //   this.selectionBar = this.selectOverlay
-    //    .add(pv.Bar)
-    //        .visible(function(d, k, t) {
-    //          return myself.rubberBand != null;
-    //        })
-    //        .left(function(d) d.x)
-    //        .top(function(d) d.y)
-    //        .width(function(d) d.dx)
-    //        .height(function(d) d.dy)
-    //        .fillStyle("rgba(255,127,0,.15)")
-    //        .strokeStyle("orange")
-    //  ;
-    // // this.selectOverlay.render();
-    //  
-    //},
     
     //creates new version
     createHeatMap: function(w, h, opts, fill)
@@ -747,12 +690,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       var cIdx = this.chart.dataEngine.getCategories().indexOf(c);
       var val = this.chart.dataEngine.getValues()[cIdx][sIdx];
       return val == null || val[0] == null;
-      //if(this.chart.options.sizeValIdx != null){
-      //  
-      //}
-      //else if (this.chart.options.colorValIdx != null){
-      //  
-      //}
     },
     
     addSelection: function(s,c){
