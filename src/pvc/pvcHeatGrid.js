@@ -135,13 +135,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     sizeValIdx: 0,
     defaultValIdx:0,
     shape: "square",
-    nullShape: 'cross',
+    nullShape: "cross",
     defaultBorder: 0,
     nullBorder: 2,
     selectedBorder: 2,
     //function to be invoked when a selection occurs
     // (shape click-select, row/column click and lasso finished)
     onSelectionChange: null,
+    selectNullValues: false,
     
     selections: {},
     
@@ -182,6 +183,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         
         this.colorValIdx = opts.colorValIdx;
         this.sizeValIdx = opts.sizeValIdx;
+        this.selectNullValues = opts.nullShape != null;
         
         //TODO:
         if(opts.shape != null) {this.shape = opts.shape;}
@@ -479,9 +481,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 .strokeStyle(selectStroke);
                 
         //rubber band selection behavior definition
+        if(!opts.extensionPoints ||
+           !opts.extensionPoints.base_fillStyle)
+        {
+            this.pvPanel.root.fillStyle(invisibleFill);
+        }
+        
         this.pvPanel.root//TODO
             .data([this.rubberBand])
-            .fillStyle(invisibleFill)
+           //.fillStyle(invisibleFill)
             .event("click", function(d, e) {
                 if(!e.ctrlKey){
                     myself.clearSelections();
@@ -541,6 +549,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             var s = sSel[i];
             for(var j=0; j<cSel.length; j++){
                 var c = cSel[j];
+                //if(this.chart.options.nullShape != null || //TODO: select or not null values
+                //   )
                 this.addSelection(s,c);
             }
         }
@@ -634,7 +644,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     }
                     return myself.getValue(r[i]) != null ? myself.shape : opts.nullShape;
                 })
-                .shapeSize(function(r,ra, i) {                    
+                .shapeSize(function(r,ra, i) {
                     if(myself.sizeValIdx == null){
                         return maxArea;
                     }
@@ -732,10 +742,27 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         false;
     },
     
+    isValueNull: function(s,c){
+      var sIdx = this.chart.dataEngine.getSeries().indexOf(s);
+      var cIdx = this.chart.dataEngine.getCategories().indexOf(c);
+      var val = this.chart.dataEngine.getValues()[cIdx][sIdx];
+      return val == null || val[0] == null;
+      //if(this.chart.options.sizeValIdx != null){
+      //  
+      //}
+      //else if (this.chart.options.colorValIdx != null){
+      //  
+      //}
+    },
+    
     addSelection: function(s,c){
+      if(!this.selectNullValues)
+      {//check if null
+        if(this.isValueNull(s,c)){ return; }
+      }
+    
       if(!this.selections[s]) this.selections[s] = {};
       this.selections[s][c] = true;
-      //TODO:
       this.selectCount = null;
     },
     
