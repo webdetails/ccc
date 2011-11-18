@@ -880,12 +880,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             } :
             null;
         
-        //fill space
+        //label space (left transparent)
         var lblBar = layout.node.add(pv.Bar)
             .fillStyle('rgba(127,127,127,.01)')
             .strokeStyle( function(d){
                 if(d.maxDepth == 1 || d.maxDepth ==0 ) {return null;}
-                else {return "rgba(127,127,127,0.5)";} //non-terminal items, so grouping is visible
+                else {return "rgba(127,127,127,0.1)";} //non-terminal items, so grouping is visible
             })
             .lineWidth( function(d){
                 if(d.maxDepth == 1 || d.maxDepth ==0 ) { return 0; }
@@ -893,21 +893,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             .text(function(d){
                 return d.nodeName;
-            })
-//            .cursor( myself.clickAction? 'pointer' : 'default')
-            //.event('click', function(d){
-            //    if(clickAction){
-            //        if(doubleClickAction){
-            //            window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
-            //        }
-            //        else { clickAction(d.nodePath); }
-            //    }
-            //    
-            //    //if(myself.clickAction){
-            //    //    myself.clickAction(d.nodePath);
-            //    //}
-            //})
-;
+            });
         
         //cutoffs -> snap to vertical/horizontal
         var H_CUTOFF_ANG = 0.30;
@@ -919,7 +905,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //draw labels and make them fit
         this.pvLabel = layout.label.add(pv.Label)
             .def('lblDirection','h')
-            //.def('ang',0)
             .textAngle(function(d)
             {
                 var fitInfo = this.fitInfo();
@@ -949,12 +934,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return 0;//horizontal
             })
             .font(myself.font)
-            //.def('title', function(){ return this.parent.text() ;})
             .title(function(d){
                 return d.nodeName;
                 })
-            .text(function(d){//TODO: change
-                //this.title(d.nodeName);
+            .text(function(d){
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){
                     case 'h':
@@ -979,7 +962,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             .cursor( myself.clickAction? 'pointer' : 'default')
             .events('all')//labels don't have events by default
-            .event('click', function(d,n0,n1,n2,n3,n4, e){
+            .event('click', function(d){
+                var e = pv.event;
                 if(clickAction){
                     if(doubleClickAction){
                         //arg has to be passed in closure in order to work with ie

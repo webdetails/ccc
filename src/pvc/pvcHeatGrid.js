@@ -482,9 +482,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
         
         this.pvPanel.root
-            .data([this.rubberBand])
-            .event("click", function(d, e) {
-                if(!e.ctrlKey){
+           // .data([this.rubberBand])
+            .data([myself.rubberBand])
+            .event("click", function(d) {
+                if(!pv.event.ctrlKey){
                     myself.clearSelections();
                     myself.shapes.render();
                 }
@@ -501,14 +502,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     myself.selectBar.render();
                 }
             })
-            .event('selectend', function(rb, mouseEvent){
+            .event('selectend', function(rb){
                 if(isSelecting){
                     isSelecting = false;
                     //translate top to bottom
                     if(checkSelections){
                         checkSelections = false;
                         myself.selectBar.render();//TODO: update coordinates
-                        dispatchRubberBandSelection(rb, mouseEvent);
+                        dispatchRubberBandSelection(rb, pv.event);
                     }
                 }
             });
@@ -633,11 +634,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 .text(function(r,ra,i){
                     return myself.valuesToText(r[i]);
                 })
-                .event("click", function(r,ra,i,n1,n2,e) {
+                .event("click", function(r,ra,i) {
                     var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                     var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
                     var d = r[i];
-                    if(e.ctrlKey){
+                    if(pv.event.ctrlKey){
                         myself.toggleSelection(s,c);
                     } else {//hard select
                         myself.clearSelections();
@@ -650,10 +651,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         myself.chart.options.clickAction(s,c,d);
                     }
                     myself.pvPanel.render();
-                   // myself.shapes.render();
-                })
-                ;
-                this.createSelectOverlay(w,h);
+                });
+        this.createSelectOverlay(w,h);
     },
     
     /*
@@ -718,24 +717,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             this.addSelection(s,c);
         }
     },
-    //toggleSelection: function(s,c,keepOthers){
-    //    var isSelected = this.isSelected(s,c);
-    //    
-    //    if(keepOthers){
-    //        if(isSelected) {
-    //            this.removeSelection(s,c);
-    //        }
-    //        else {
-    //            this.addSelection(s,c);
-    //        }
-    //    }
-    //    else {
-    //        this.clearSelections();
-    //        if(!isSelected){
-    //            this.addSelection(s,c);
-    //        }
-    //    }
-    //},
     
     getSelections: function(){
         return pv.flatten(this.selections).key("series").key("category").key("selected")
@@ -1109,7 +1090,7 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     r.x = m1.x;
     r.y = m1.y;
     r.dx = r.dy = 0;
-    pv.Mark.dispatch("selectstart", scene, index, e);
+    pv.Mark.dispatch("selectstart", scene, index);
   }
 
   /** @private */
@@ -1125,13 +1106,13 @@ pv.Behavior.selector = function(autoRefresh, mark) {
             this.render();
         }
       });
-    pv.Mark.dispatch("select", scene, index, e);
+    pv.Mark.dispatch("select", scene, index);
   }
 
   /** @private */
   function mouseup(e) {
     if (!scene) return;
-    pv.Mark.dispatch("selectend", scene, index, e);
+    pv.Mark.dispatch("selectend", scene, index);
     scene = null;
   }
 
