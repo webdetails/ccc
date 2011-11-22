@@ -355,7 +355,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
             //get offsets
             var titleOffset;
-            if(opts.title){
+            if(opts.title != null){
                 titleOffset = setPositions(opts.titlePosition, myself.chart.titlePanel.titleSize);
             }
             else {
