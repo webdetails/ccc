@@ -44,8 +44,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             minColor: "white",
             maxColor: "darkgreen",
             nullColor:  "#efc5ad",  // white with a shade of orange
-            rubberBandFill: 'rgba(255, 127, 0, 0.15)',
-            rubberBandLine: 'rgb(255,127,0)',
+            rubberBandFill: 'rgba(203, 239, 163, 0.6)',
+            rubberBandLine: '#86fe00',
             xAxisClickAction: function(item, event){
                 self.heatGridChartPanel.selectAxisValue('x', item, event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
@@ -451,10 +451,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             else
             {
                 for(var i=0; i<xSelections.length; i++){
-                    myself.chart.heatGridChartPanel.selectAxisValue('x', xSelections[i]);
+                    myself.selectAxisValue('x', xSelections[i], true);
                 }
                 for(var i=0; i<ySelections.length; i++){
-                    myself.chart.heatGridChartPanel.selectAxisValue('y', ySelections[i]);
+                    myself.selectAxisValue('y', ySelections[i], true);
                 }
             }
 
@@ -574,6 +574,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             return  (value != null) ? fill[i](value) : opts.nullColor;
         };
         
+        var toGreyScale = function(color){
+            //convert to greyscale using YCbCr luminance conv
+           // var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+            
+            var avg = Math.round( (color.r + color.g + color.b)/3);
+            
+            return pv.rgb(avg,avg,avg);
+        };
+        
         this.shapes =
             this.pvHeatGrid
                 .add(pv.Dot)
@@ -606,7 +615,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                         var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index]; 
                         if(myself.getSelectCount() > 0 && !this.selected()){
-                            return color.alpha(0.5);
+                            //return color.alpha(0.5);
+                            return toGreyScale(color);
                         }
                     }
                     return color;
@@ -624,7 +634,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     return (this.selected() ||
                             myself.sizeValIdx == null ||
                             myself.getValue(r[i], myself.sizeValIdx) != null )?
-                                     "black" :
+                                     null ://"black" :
                                      (myself.colorValIdx != null)?
                                         (myself.getColorValue(r[i]))?
                                             fill[i](myself.getColorValue(r[i])) :
@@ -652,7 +662,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     }
                     myself.pvPanel.render();
                 });
-        this.createSelectOverlay(w,h);
+        if(opts.isMultiValued)
+        {
+            this.createSelectOverlay(w,h);
+        }
     },
     
     /*
