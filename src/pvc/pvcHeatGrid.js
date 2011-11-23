@@ -753,6 +753,13 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.rubberBand = {x:0, y:0, dx:4, dy:4};
         var myself = this;
         
+        if(opts.orientation == 'horizontal')
+        {//switch back w,h
+            var tmp = w;
+            w=h;
+            h=tmp;
+        }
+        
         var dMin= Math.min(w,h) /2;
         
         var isSelecting = false;
@@ -796,7 +803,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
             var y = 0, x=0;   
             //1) x axis
-            var xSelections = []
+            var xSelections = [];
             if(opts.useCompositeAxis){
                 y = rb.y - titleOffset['top'] ;
                 if(opts.xAxisPosition == 'bottom'){//chart
@@ -827,7 +834,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 var categories = myself.chart.dataEngine.getCategories();
                 var selectedSeries = [], selectedCategories = [],
                     sSelections, cSelections;
-                if(this.orientation == 'horizontal'){
+                if(opts.orientation == 'horizontal'){
                     sSelections = xSelections;
                     cSelections = ySelections;
                 }
