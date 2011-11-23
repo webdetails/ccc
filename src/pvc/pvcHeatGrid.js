@@ -41,8 +41,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             normPerBaseCategory: true,
             orthoAxisOrdinal: true,
             numSD: 2,                 // width (only for normal distribution)
-            minColor: "white",
-            maxColor: "darkgreen",
+            //minColor: "white",
+            //maxColor: "darkgreen",
             nullColor:  "#efc5ad",  // white with a shade of orange
             rubberBandFill: 'rgba(203, 239, 163, 0.6)',
             rubberBandLine: '#86fe00',
@@ -55,7 +55,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
                 self.heatGridChartPanel.selectAxisValue('y', item, event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
-            }
+            },
+            colorRange: ['red', 'yellow','green']
         };
         
         // Apply options
@@ -182,8 +183,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         
         //colors
         opts.nullColor = pv.color(opts.nullColor);
-        opts.minColor = pv.color(opts.minColor);
-        opts.maxColor = pv.color(opts.maxColor);
+        if(opts.minColor != null) opts.minColor = pv.color(opts.minColor);
+        if(opts.maxColor != null) opts.maxColor = pv.color(opts.maxColor);
         
         if(opts.shape != null) {this.shape = opts.shape;}
         
@@ -1018,53 +1019,89 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
    ********/
   getColorScale: function(data, cols) {
       switch (this.chart.options.scalingType) {
-      case "normal": return this.getNormalColorScale(data, cols, this.colorValIdx);//TODO:
-      case "linear": return this.getLinearColorScale(data, cols, this.colorValIdx);
-      default:
-        throw "Invalid option " + this.scaleType + " in HeatGrid";
+        case "normal":
+          return this.getNormalColorScale(data, cols, this.colorValIdx);//TODO:
+        case "linear":
+          return this.getLinearColorScale(data, cols, this.colorValIdx);
+        //TODO: case "external":
+        default:
+          throw "Invalid option " + this.scaleType + " in HeatGrid";
     }
   },
+  
+  
+  getLinearColorScale: function(data, cols, colorIdx){
 
-  getLinearColorScale: function (data, cols, colorIdx){
-    var fill;
     var opts = this.chart.options;
-    // compute the mean and standard-deviation for each column
     var myself = this;
-    var min = pv.dict(cols, function(f){
-      return pv.min(data, function(d){
-        return myself.getValue(d[f],colorIdx);
-      });
-    });
-    var max = pv.dict(cols, function(f){
-      return pv.max(data, function(d){
-        return myself.getValue(d[f], colorIdx);
-      });
-    });
 
-    if (opts.normPerBaseCategory)  //  compute a scale-function for each column (each key
-      fill = pv.dict(cols, function(f){
-        return pv.Scale.linear()
-          .domain(min[f], max[f])
-          .range(opts.minColor, opts.maxColor);
-      });
-    else {   // normalize over the whole array
-      var theMin = min[cols[0]];
-      for (var i=1; i<cols.length; i++) {
-        if (min[cols[i]] < theMin) theMin = min[cols[i]];
-      }
-      var theMax = max[cols[0]];
-      for (var i=1; i<cols.length; i++){
-        if (max[cols[i]] > theMax) theMax = max[cols[i]];
-      }
-      var scale = pv.Scale.linear()
-        .domain(theMin, theMax)
-        .range(opts.minColor, opts.maxColor);
-      fill = pv.dict(cols, function(f){
-        return scale;
-      });
+    var rangeArgs = opts.colorRange;
+    if(opts.minColor != null && opts.maxColor != null){
+        rangeArgs = [opts.minColor,opts.maxColor];
     }
-
-    return fill;  // run an array of values to compute the colors per column
+    
+    var domainArgs = opts.colorRangeInterval;
+    if(domainArgs.length > rangeArgs.length){
+        domainArgs = domainArgs.slice(0, rangeArgs.length);
+    }
+    
+    if(domainArgs == null || domainArgs.length < rangeArgs.length || opts.normPerBaseCategory){
+        
+        var min = pv.dict(cols, function(f){
+          return pv.min(data, function(d){
+            return myself.getValue(d[f],colorIdx);
+          });
+        });
+        var max = pv.dict(cols, function(f){
+          return pv.max(data, function(d){
+            return myself.getValue(d[f], colorIdx);
+          });
+        });
+        
+        if (opts.normPerBaseCategory){  //  compute a scale-function for each column (each key
+          //overrides colorRangeIntervals
+            return pv.dict(cols, function(f){
+                var fMin = min[f],
+                    fMax = max[f];
+              var step = (fMax - fMin)/( rangeArgs.length -1);
+              var scale = pv.Scale.linear();
+              scale.domain.apply(scale, pv.range(fMin,fMax + step, step));
+              scale.range.apply(scale,rangeArgs);
+              return scale;
+            });
+        }
+        else {   // normalize over the whole array
+          var theMin = min[cols[0]];
+          for (var i=1; i<cols.length; i++) {
+            if (min[cols[i]] < theMin) theMin = min[cols[i]];
+          }
+          var theMax = max[cols[0]];
+          for (var i=1; i<cols.length; i++){
+            if (max[cols[i]] > theMax) theMax = max[cols[i]];
+          }
+          //use supplied numbers
+          var toPad =
+                domainArgs == null ?
+                rangeArgs.length :
+                rangeArgs.length - domainArgs.length;
+          switch(toPad){
+            case 1:
+                //TODO: should adapt to represent middle?
+                domainArgs.push(theMax);
+                break;
+            case 2:
+                domainArgs = [theMin].concat(domainArgs).concat(theMax);
+                break;
+            default:
+                var step = (theMax - theMin)/(rangeArgs.length -1);
+                domainArgs = pv.range(theMin, theMax + step, step);
+          }
+        }
+    }
+    var scale = pv.Scale.linear();
+    scale.domain.apply(scale,domainArgs)
+    scale.range.apply(scale,rangeArgs);
+    return pv.dict(cols,function(f){ return scale;});
   },
 
   getNormalColorScale: function (data, cols){
