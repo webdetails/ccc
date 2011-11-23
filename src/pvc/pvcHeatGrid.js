@@ -1039,9 +1039,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     if(opts.minColor != null && opts.maxColor != null){
         rangeArgs = [opts.minColor,opts.maxColor];
     }
+    else if (opts.minColor != null){
+        rangeArgs.splice(0,1,opts.minColor);
+    }
+    else if (opts.maxColor != null){
+        rangeArgs.splice(rangeArgs.length-1,1,opts.maxColor);
+    }
     
     var domainArgs = opts.colorRangeInterval;
-    if(domainArgs.length > rangeArgs.length){
+    if(domainArgs != null && domainArgs.length > rangeArgs.length){
         domainArgs = domainArgs.slice(0, rangeArgs.length);
     }
     
