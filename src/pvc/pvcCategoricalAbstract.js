@@ -882,10 +882,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         //label space (left transparent)
         var lblBar = layout.node.add(pv.Bar)
-            .fillStyle('rgba(127,127,127,.01)')
+            .fillStyle('rgba(127,127,127,.001)')
             .strokeStyle( function(d){
                 if(d.maxDepth == 1 || d.maxDepth ==0 ) {return null;}
-                else {return "rgba(127,127,127,0.1)";} //non-terminal items, so grouping is visible
+                else {return "rgba(127,127,127,0.3)";} //non-terminal items, so grouping is visible
             })
             .lineWidth( function(d){
                 if(d.maxDepth == 1 || d.maxDepth ==0 ) { return 0; }

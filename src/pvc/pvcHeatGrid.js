@@ -66,6 +66,10 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         this.options.orthoAxisOrdinal = true;
         this.options.legend = false;
         this.options.orginIsZero = true;
+        
+        if(this.options.useCompositeAxis){//force array support
+            this.options.isMultiValued = true;
+        }
 
     },
 
@@ -359,8 +363,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         
         var toGreyScale = function(color){
             //convert to greyscale using YCbCr luminance conv
-           // var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
-            var avg = Math.round( (color.r + color.g + color.b)/3);
+            var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+          //  var avg = Math.round( (color.r + color.g + color.b)/3);
             
             return pv.rgb(avg,avg,avg);
         };
