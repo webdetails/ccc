@@ -1061,8 +1061,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     if(domainArgs != null && domainArgs.length > rangeArgs.length){
         domainArgs = domainArgs.slice(0, rangeArgs.length);
     }
+    if(domainArgs == null){
+        domainArgs = [];
+    }
     
-    if(domainArgs == null || domainArgs.length < rangeArgs.length || opts.normPerBaseCategory){
+    if(domainArgs.length < rangeArgs.length || opts.normPerBaseCategory){
         
         var min = pv.dict(cols, function(f){
           return pv.min(data, function(d){

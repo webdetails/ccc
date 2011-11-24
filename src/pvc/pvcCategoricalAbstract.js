@@ -1014,15 +1014,24 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     getTextSizePvLabel: function(text, font)
     {
-        var holder = this.getTextSizePlaceholder();
-        var holderId = holder.attr('id');
-        var panel = new pv.Panel();
-        panel.canvas(holderId);
-        var lbl = panel.add(pv.Label).text(text);
-        if(font){
-            lbl.font(font);
+        if(!this.textSizePvLabel || this.textSizeLabelFont != font){
+            var holder = this.getTextSizePlaceholder();
+            var holderId = holder.attr('id');
+            var panel = new pv.Panel();
+            panel.canvas(holderId);
+            var lbl = panel.add(pv.Label).text(text);
+            if(font){
+                lbl.font(font);
+            }
+            panel.render();
+            this.textSizePvLabel = $('#' + holderId + ' text');
+            this.textSizeLabelFont = font;
         }
-        return lbl;
+        else {
+            this.textSizePvLabel.text(text);
+        }
+        
+        return this.textSizePvLabel[0];
     },
     
     getTextLength: function(text, font){
@@ -1032,13 +1041,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     getTextLenSVG: function(text, font){
-        var holder = this.getTextSizePlaceholder();
-        var holderId = holder.attr('id');
-        var lbl = this.getTextSizePvLabel(text, font);// panel.add(pv.Label).text(text);//.textBaseline("middle");
-        lbl.root.render();
-        //get generated label
-        var elem = $('#' + holderId + ' text')[0];
-        var box = elem.getBBox();//bounding box
+        var lbl = this.getTextSizePvLabel(text, font);
+        var box = lbl.getBBox();
         return box.width;
     },
     
@@ -1068,44 +1072,52 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return fitInfo;
     },
     
-    trimToWidthSVGDiag: function(w,h,text,font,angle, trimTerminator){//TODO:discard?
-        
-        if(!pv.have_SVG){
-            return this.trimToWidth(Math.sqrt(w*w + h*h -2),text,font);
-        }
-        
-        var lbl = this.getTextSizePvLabel(text, font);
-        var holder = this.getTextSizePlaceholder();
-        var holderId = holder.attr('id'); 
-        var trimmed = false;
-        lbl.textAngle(angle);
-        lbl.root.render();
-        var elem = $('#' + holderId + ' text').parent()[0];
-        
-        for(var box =  elem.getBBox();
-            box.width > w ||
-            box.height > h;
-            text = text.slice(0,text.length -1))
-        {
-            trimmed = true;
-            lbl.text(text + trimTerminator);
-            lbl.root.render();
-           // elem = $('#' + holderId + ' text').parent()[0];
-            box = elem.getBBox();
-        }
-        return text + (trimmed? trimTerminator: '');
+    trimToWidth: function(len,text,font,trimTerminator){
+      if(text == '') return text;
+      var textLen = this.getTextLength(text, font);
+      
+      if(textLen <= len){
+        return text;
+      }
+      
+      if(textLen > len * 1.5){//cutoff for using other algorithm
+        return this.trimToWidthBin(len,text,font,trimTerminator);
+      }
+      
+      while(textLen > len){
+        text = text.slice(0,text.length -1);
+        textLen = this.getTextLength(text, font);
+      }
+      return text + trimTerminator;
     },
     
-    trimToWidth: function(len, text, font, trimTerminator){//TODO:perf?
+    trimToWidthBin :function(len,text,font,trimTerminator){
         
-        if(text == '') return text;
-        var trimmed = false;
+        var high = text.length-2;
+        var low = 0;
+        var mid;
+        var fits=false;
+        var textLen;
         
-        for(var textLen = this.getTextLength(text, font); textLen > len; text = text.slice(0,text.length -1)){
-            textLen = this.getTextLength(text, font);
-            trimmed = true;
+        while(low <= high && high > 0){
+            
+            mid = Math.ceil((low + high)/2);
+            //text = text.slice(0,mid);
+            textLen = this.getTextLength(text.slice(0,mid), font);
+            
+            if(textLen > len){
+                high = mid-1;
+            }
+            else {
+                if( this.getTextLength(text.slice(0,mid+1), font) < len ){
+                    low = mid+1;
+                }
+                else return text.slice(0,mid) + trimTerminator;
+            }
+            
         }
-        return text + (trimmed? trimTerminator: '');
+        
+        return text.slice(0,high) + trimTerminator; 
     },
     
     //TODO: use for IE if non-svg option kept
