@@ -155,8 +155,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
 
     getValue: function(d, i){
-        if($.isArray(d)) {
-            if(i != null) return d[i];
+        if(d!=null && d[0] !== undefined){
+            if(i != null && d[i] !== undefined) return d[i];//TODO:
             else return d[0];
         }
         else return d;
@@ -168,7 +168,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
 
     valuesToText: function(vals){
-        if($.isArray(vals)){
+        if(vals != null && vals[0] !== undefined){// $.isArray(vals)){
             return vals.join(', ');
         }
         else return vals;
@@ -441,12 +441,12 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     myself.triggerSelectionChange();
                     //classic clickAction
                     if(typeof(myself.chart.options.clickAction) == 'function'){
-                        if($.isArray(d)) d= d[0];
+                        if(d!= null && d[0] !== undefined){ d= d[0]; }
                         myself.chart.options.clickAction(s,c,d);
                     }
                     myself.pvPanel.render();
                 });
-        if(opts.isMultiValued)
+        if(opts.isMultiValued && pv.renderer() != 'batik')
         {
             this.createSelectOverlay(w,h);
         }

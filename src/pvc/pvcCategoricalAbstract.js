@@ -836,7 +836,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
         
         var maxDepth = pv.max(elements, function(col){
-            return $.isArray(col) ? col.length : 1;
+            //return $.isArray(col) ? col.length : 1;
+            return (col != null && col[0] !== undefined) ? col.length : 1;
         });
         
         var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
@@ -1035,9 +1036,20 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     getTextLength: function(text, font){
-      return (pv.renderer() != 'vml')?//TODO: support svgweb? defaulting to svg
-        this.getTextLenSVG(text, font) :
-        this.getTextLenVML(text, font) ;
+        
+        switch(pv.renderer()){
+            case 'vml':
+                return this.getTextLenVML(text, font);
+            case 'batik':
+                return getTextLenCGG(text, font);
+            case 'svg':
+            default:
+                return this.getTextLenSVG(text, font);
+        }
+      //  
+      //return (pv.renderer() != 'vml')?//TODO: support svgweb? defaulting to svg
+      //  this.getTextLenSVG(text, font) :
+      //  this.getTextLenVML(text, font) ;
     },
     
     getTextLenSVG: function(text, font){
@@ -1052,11 +1064,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     //TODO: if not in px?..
     getFontSize: function(font){
+        //TODO:batik
+        if(pv.renderer() == 'batik'){
+            return 15;//TODO:!
+        }
         var holder = this.getTextSizePlaceholder();
         holder.css('font', font);
         return parseInt(holder.css('font-size'));//.slice(0,-2);
     },
-
     
     getFitInfo: function(w, h, text, font, diagMargin)
     {    

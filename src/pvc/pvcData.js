@@ -1070,9 +1070,8 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
         }
     },
     
-    //TODO: remake
     sumOrSetVect: function(v1, v2){
-        if (v1 == null || !$.isArray(v1)) {return v2;}
+         if (v1 == null || v1[0] === undefined) { return v2; }
         //TODO: check
         var res = [];
         for(var i=0;i<v1.length;i++){
