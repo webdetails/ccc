@@ -138,9 +138,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     defaultValIdx:0,
     shape: "square",
     nullShape: "cross",
-    defaultBorder: 0,
+    defaultBorder: 1,
     nullBorder: 2,
-    selectedBorder: null,
+    selectedBorder: 2,
     //function to be invoked when a selection occurs
     // (shape click-select, row/column click and lasso finished)
     onSelectionChange: null,
@@ -209,7 +209,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
         var origData = this.chart.dataEngine.getVisibleTransposedValues();
         // create a mapping of the data that shows the columns (rows)
-        data = origData.map(function(d){
+        var data = origData.map(function(d){
             return pv.dict(cols, function(){
                 return  d[this.index];
             });
@@ -257,7 +257,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         //set coloring and shape / sizes if enabled
        if(opts.useShapes)
        {
-            this.createHeatMap(w,h, opts, fill);
+            this.createHeatMap(data, w,h, opts, fill);
        }
        else
        {//no shapes, apply color map to panel iself
@@ -312,7 +312,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
     
     //creates new version
-    createHeatMap: function(w, h, opts, fill)
+    createHeatMap: function(data, w, h, opts, fill)
     {
         var myself = this;
         //total max in data
@@ -359,7 +359,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         myself.nullBorder;
                 }
             }
-        }
+        };
+        
+        var getBorderColor = function(value,i,selected){
+            return getFillColor(value,i,selected).darker();
+        };
         
         var toGreyScale = function(color){
             //convert to greyscale using YCbCr luminance conv
@@ -422,7 +426,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     }
                     //has width
                     return (myself.getValue(r[i], myself.sizeValIdx) != null )?
-                                     "black" :
+                                    getBorderColor(r[i],i,this.selected()) :
                                      getFillColor(r[i],i,this.selected());
                 })
                 .text(function(r,ra,i){
@@ -501,15 +505,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       }
     
       if(!this.selections[s]) this.selections[s] = {};
-      this.selections[s][c] = true;
+      this.selections[s][c] = {'series': s, 'category' : c};
       this.selectCount = null;
     },
     
     removeSelection: function(s,c){
       if(this.selections[s]){
-        this.selections[s][c] = false;
+        this.selections[s][c] = true;//TODO: delete?
       }
-      this.selectCount = null;
+      this.selectCount = false;
     },
     
     toggleSelection: function(s,c){
@@ -522,9 +526,27 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
     
     getSelections: function(){
-        return pv.flatten(this.selections).key("series").key("category").key("selected")
-            .array().filter(function(d) { return d.selected; });
+        var selections = [];
+        for(var s in this.selections){
+          if(this.selections.hasOwnProperty(s) )
+          {
+              for(var c in this.selections[s]){
+               if(this.selections[s].hasOwnProperty(c))
+               {
+                    if(this.selections[s][c]){
+                        selections.push(this.selections[s][c]);
+                    }
+               }
+              }
+          }
+        }
+        return selections;
     },
+    
+    //getSelections: function(){
+    //    return pv.flatten(this.selections).key("series").key("category").key("selected")
+    //        .array().filter(function(d) { return d.selected != null; });
+    //},
     
     setSelections: function(selections){
         this.selections = {};
@@ -924,6 +946,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 if(!pv.event.ctrlKey){
                     myself.clearSelections();
                     myself.shapes.render();
+                    myself.triggerSelectionChange();
                 }
             })
             .event('mousedown', pv.Behavior.selector(false))
@@ -1083,11 +1106,19 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             return pv.dict(cols, function(f){
                 var fMin = min[f],
                     fMax = max[f];
-              var step = (fMax - fMin)/( rangeArgs.length -1);
-              var scale = pv.Scale.linear();
-              scale.domain.apply(scale, pv.range(fMin,fMax + step, step));
-              scale.range.apply(scale,rangeArgs);
-              return scale;
+                if(fMax == fMin)
+                {
+                    if(fMax >=1){
+                        fMin = fMax -1;
+                    } else {
+                        fMax = fMin +1;    
+                    }
+                }
+                var step = (fMax - fMin)/( rangeArgs.length -1);
+                var scale = pv.Scale.linear();
+                scale.domain.apply(scale, pv.range(fMin,fMax + step, step));
+                scale.range.apply(scale,rangeArgs);
+                return scale;
             });
         }
         else {   // normalize over the whole array

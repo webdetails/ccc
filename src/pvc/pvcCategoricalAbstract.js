@@ -1064,13 +1064,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     //TODO: if not in px?..
     getFontSize: function(font){
-        //TODO:batik
         if(pv.renderer() == 'batik'){
-            return 15;//TODO:!
+            var sty = document.createElementNS('http://www.w3.org/2000/svg','text').style;
+            sty.setProperty('font',font);
+            return parseInt(sty.getProperty('font-size'));
         }
-        var holder = this.getTextSizePlaceholder();
-        holder.css('font', font);
-        return parseInt(holder.css('font-size'));//.slice(0,-2);
+        else {
+            var holder = this.getTextSizePlaceholder();
+            holder.css('font', font);
+            return parseInt(holder.css('font-size'));//.slice(0,-2);
+        }
     },
     
     getFitInfo: function(w, h, text, font, diagMargin)

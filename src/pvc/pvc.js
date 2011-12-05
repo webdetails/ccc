@@ -30,11 +30,11 @@ pvc.ev = function(x){
 
 pvc.sumOrSet = function(v1,v2){
     return typeof v1 == "undefined"?v2:v1+v2;
-}
+};
 
 pvc.nonEmpty = function(d){
     return typeof d != "undefined" && d !== null;
-}
+};
 
 pvc.padMatrixWithZeros = function(d){
     return d.map(function(v){
@@ -42,14 +42,53 @@ pvc.padMatrixWithZeros = function(d){
             return typeof a == "undefined"?0:a;
         })
     })
-}
+};
 
 pvc.cloneMatrix = function(m){
     return m.map(function(d){
         return d.slice();
     });
-}
+};
 
+    /**
+     *ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+     *     arrayStartsWith(a, a) -> true
+     **/
+pvc.arrayStartsWith = function(array, base)
+{
+    if(array.length < base.length) { return false; }
+    
+    for(var i=0; i<base.length;i++){
+        if(base[i] != array[i]) {
+            return false;
+        }
+    }
+    return true;
+};
+
+/**
+ * Equals for two arrays
+ * func - needed if not flat array of comparables
+ **/
+pvc.arrayEquals = function(array1, array2, func)
+{
+  if(array1 == null){return array2 == null;}
+  
+  var useFunc = typeof(func) == 'function';
+  
+  for(var i=0;i<array1.length;i++)
+  {
+    if(useFunc){
+        if(!func(array1[i],array2[i])){
+            return false;
+        }
+    }
+    else if(array1[i]!=array2[i]){
+        return false;   
+    }
+  }
+  return true;
+};
 
 /**
  *
