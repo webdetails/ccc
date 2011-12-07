@@ -387,6 +387,37 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
            return color;
         };
         
+        //double click + click
+        var ignoreClicks = 0;
+        var DBL_CLICK_MAX_DELAY = (this.clickDelay)? this.clickDelay : 300; //ms
+        //click
+        var clickAction = function(s,c,d,e){
+            if(ignoreClicks) { ignoreClicks--;}
+            else {
+                if(e.ctrlKey){
+                    myself.toggleSelection(s,c);
+                } else {//hard select
+                    myself.clearSelections();
+                    myself.addSelection(s,c);
+                }
+                myself.triggerSelectionChange();
+                //classic clickAction
+                if(typeof(myself.chart.options.clickAction) == 'function'){
+                    if(d!= null && d[0] !== undefined){ d= d[0]; }
+                    myself.chart.options.clickAction(s,c,d,e);
+                }
+                myself.pvPanel.render();
+            }
+        };
+        //dblClick
+        var doubleClickAction = (typeof(opts.doubleClickAction) == 'function')?
+            function(s,c,d, e){
+                ignoreClicks = 2;
+                opts.doubleClickAction(s,c,d, e);
+            } :
+            null;
+        
+        //chart generation
         this.shapes =
             this.pvHeatGrid
                 .add(pv.Dot)
@@ -437,20 +468,41 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                     var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
                     var d = r[i];
-                    if(pv.event.ctrlKey){
-                        myself.toggleSelection(s,c);
-                    } else {//hard select
-                        myself.clearSelections();
-                        myself.addSelection(s,c);
+                    var e = pv.event;
+                    
+                    if(doubleClickAction){
+                        //arg has to be passed in closure in order to work with ie
+                        window.setTimeout(function(){clickAction(s,c,d, e)}, DBL_CLICK_MAX_DELAY);
+                       // window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
                     }
-                    myself.triggerSelectionChange();
-                    //classic clickAction
-                    if(typeof(myself.chart.options.clickAction) == 'function'){
-                        if(d!= null && d[0] !== undefined){ d= d[0]; }
-                        myself.chart.options.clickAction(s,c,d);
-                    }
-                    myself.pvPanel.render();
+                    else { clickAction(s,c,d,e); }
+                    
+                    //if(pv.event.ctrlKey){
+                    //    myself.toggleSelection(s,c);
+                    //} else {//hard select
+                    //    myself.clearSelections();
+                    //    myself.addSelection(s,c);
+                    //}
+                    //myself.triggerSelectionChange();
+                    ////classic clickAction
+                    //if(typeof(myself.chart.options.clickAction) == 'function'){
+                    //    if(d!= null && d[0] !== undefined){ d= d[0]; }
+                    //    myself.chart.options.clickAction(s,c,d);
+                    //}
+                    //myself.pvPanel.render();
                 });
+                
+        if(doubleClickAction)
+        {
+            this.shapes.event("dblclick", function(r,ra,i){
+                var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                var d = r[i];
+                var e = pv.event;
+                doubleClickAction(s,c,d,e);
+            });
+        }
+                
         if(opts.isMultiValued && pv.renderer() != 'batik')
         {
             this.createSelectOverlay(w,h);
@@ -542,11 +594,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
         return selections;
     },
-    
-    //getSelections: function(){
-    //    return pv.flatten(this.selections).key("series").key("category").key("selected")
-    //        .array().filter(function(d) { return d.selected != null; });
-    //},
     
     setSelections: function(selections){
         this.selections = {};
