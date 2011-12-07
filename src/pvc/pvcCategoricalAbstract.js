@@ -984,8 +984,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
            // double click label //TODO: need doubleclick axis action + single click prevention..
             if(doubleClickAction)
             {
-                this.pvLabel.event("dblclick", function(d, e){
-                    doubleClickAction(d.nodePath, e);
+                this.pvLabel.event("dblclick", function(d){
+                    doubleClickAction(d.nodePath, pv.event);
                 });
             }
             

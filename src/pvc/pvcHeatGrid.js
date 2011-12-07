@@ -229,7 +229,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
         
         //reset selections
-        this.initSelections(false);
+        this.initSelections(null);
 
         this.pvHeatGrid = this.pvPanel.add(pv.Panel)
             .data(cols)
@@ -348,9 +348,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             else 
             {//is null and needs border to show up
                 if(isSelected){
-                 return (myself.selectedBorder == null || myself.selectedBorder == 0 )?
-                    myself.nullBorder:
-                    myself.selectedBorder;
+                    return (myself.selectedBorder == null || myself.selectedBorder == 0 )?
+                       myself.nullBorder:
+                       myself.selectedBorder;
                 }
                 else
                 {
@@ -382,10 +382,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
            if(myself.getSelectCount() > 0 && !isSelected)
            {//non-selected items
                //return color.alpha(0.5);
-               return toGreyScale(color);
+               return toGreyScale(color);//.lighter();?
            }
            return color;
-        }
+        };
         
         this.shapes =
             this.pvHeatGrid
@@ -403,7 +403,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 })
                 .shapeSize(function(r,ra, i) {
                     if(myself.sizeValIdx == null){
-                        return maxArea;
+                        if(opts.nullShape == null && myself.getValue(r[i], myself.colorValIdx) == null) return 0;
+                        else return maxArea;
                     }
                     var val = myself.getValue(r[i], myself.sizeValIdx);
                     return (val == null && opts.nullShape == null)?
@@ -487,7 +488,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     isSelected: function(s,c){
       return this.selections[s] ?
-        this.selections[s][c] :
+        this.selections[s][c]!=null :
         false;
     },
     
@@ -503,7 +504,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       {//check if null
         if(this.isValueNull(s,c)){ return; }
       }
-    
       if(!this.selections[s]) this.selections[s] = {};
       this.selections[s][c] = {'series': s, 'category' : c};
       this.selectCount = null;
@@ -511,9 +511,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     removeSelection: function(s,c){
       if(this.selections[s]){
-        this.selections[s][c] = true;//TODO: delete?
+        this.selections[s][c] = null;//TODO: delete?
       }
-      this.selectCount = false;
+      this.selectCount = null;
     },
     
     toggleSelection: function(s,c){
@@ -558,7 +558,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     selectSeries: function(s){
         var cats = this.chart.dataEngine.getCategories();
         for(var i = 0; i < cats.length; i++ ){
-            this.selections[s][cats[i]] = true;
+            this.addSelection(s,cats[i]);
+            //this.selections[s][cats[i]] = true;
         }
     },
     
@@ -687,6 +688,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var wereAllSelected = true;
         for(var i = 0; i < series.length; i++ ){
             var s = series[i];
+            if(!this.selectNullValues && this.isValueNull(s,c)){
+                continue;
+            }
             wereAllSelected &= this.isSelected(s,c);
             this.addSelection(s,c);
         }
@@ -698,6 +702,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var wereAllSelected = true;
         for(var i = 0; i < categories.length; i++ ){
             var c = categories[i];
+            if(!this.selectNullValues && this.isValueNull(s,c)){
+                continue;
+            }
             wereAllSelected &= this.isSelected(s,c);
             this.addSelection(s,c);
         }
@@ -814,7 +821,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
             //get offsets
             var titleOffset;
-            if(opts.title != null){
+            if(myself.chart.titlePanel != null){
                 titleOffset = setPositions(opts.titlePosition, myself.chart.titlePanel.titleSize);
             }
             else {
@@ -1122,14 +1129,22 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             });
         }
         else {   // normalize over the whole array
-          var theMin = min[cols[0]];
-          for (var i=1; i<cols.length; i++) {
-            if (min[cols[i]] < theMin) theMin = min[cols[i]];
-          }
-          var theMax = max[cols[0]];
-          for (var i=1; i<cols.length; i++){
-            if (max[cols[i]] > theMax) theMax = max[cols[i]];
-          }
+            var theMin = min[cols[0]];
+            for (var i=1; i<cols.length; i++) {
+              if (min[cols[i]] < theMin) theMin = min[cols[i]];
+            }
+            var theMax = max[cols[0]];
+            for (var i=1; i<cols.length; i++){
+              if (max[cols[i]] > theMax) theMax = max[cols[i]];
+            }
+            if(theMax == theMin)
+            {
+                if(theMax >=1){
+                    theMin = theMax -1;
+                } else {
+                    theMax = theMin +1;
+                }
+            } 
           //use supplied numbers
           var toPad =
                 domainArgs == null ?
