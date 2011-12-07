@@ -989,7 +989,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 }
             })
             .event("mouseover", pv.Behavior.tipsy({//Tooltip
-                gravity: "n",
+                gravity: "s",
                 fade: true,
                 offset: diagMargin * 2
             }))

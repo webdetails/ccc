@@ -264,9 +264,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.pvHeatGrid.fillStyle(function(dat, col){
              return  (dat[col] != null) ? fill[col](dat[col]) : opts.nullColor;
          });
-       }
-
-        //Tooltip
+                //Tooltip
         if(this.showTooltips){
             this.pvHeatGrid
             .event("mouseover", pv.Behavior.tipsy({
@@ -274,6 +272,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 fade: true
             }));
         }
+       }
 
         //clickAction
         if (opts.clickable) {//custom clickAction
@@ -491,7 +490,24 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     //}
                     //myself.pvPanel.render();
                 });
-                
+        if(opts.showTooltips){
+            this.shapes.title(function(r,ra,i){
+                if(opts.customTooltip){
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    var d = r[i];
+                    return opts.customTooltip(s,c,d);
+                }
+                else {
+                    return myself.valuesToText(r[i]);
+                }
+            })
+            .event("mouseover", pv.Behavior.tipsy({
+                html: true,
+                gravity: "w",
+                fade: true
+            }));
+        }
         if(doubleClickAction)
         {
             this.shapes.event("dblclick", function(r,ra,i){
