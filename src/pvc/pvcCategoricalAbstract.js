@@ -121,8 +121,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 clickAction: this.options.xAxisClickAction,
                 useCompositeAxis: this.options.useCompositeAxis, 
                 font: this.options.axisLabelFont,
+                
                 doubleClickAction: this.options.xAxisDoubleClickAction,
-                clickDelay: this.options.axisClickDelay
+                clickDelay: this.options.axisClickDelay,
+                getLabel: this.options.xAxisGetLabel
             });
 
             //            this.xAxisPanel.setScale(this.xScale);
@@ -149,12 +151,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 oppositeAxisSize: this.options.xAxisSize,
                 fullGrid:  this.options.yAxisFullGrid,
                 ordinalElements: this.getAxisOrdinalElements("y"),
-                
                 clickAction: this.options.yAxisClickAction,
                 useCompositeAxis: this.options.useCompositeAxis, 
                 font: this.options.axisLabelFont,
                 doubleClickAction: this.options.yAxisDoubleClickAction,
-                clickDelay: this.options.axisClickDelay
+                clickDelay: this.options.axisClickDelay,
+                getLabel: this.options.yAxisGetLabel
             });
 
             this.yAxisPanel.setScale(this.yScale);
@@ -713,14 +715,26 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                         .add(pv.Panel)[orthogonalLength](depthLength * scaleFactor ).strokeStyle(null).lineWidth(0);// panel resized and shifted to make bogus root disappear
         panel.transform(pv.Transform.identity.translate(displacement[0], displacement[1]));
         
-        //set full label path
+        //set full path and label
         var nodes = pv.dom(tree).root('').nodes().map(function(node){
+            //path
             var path = [];
             path.push(node.nodeName);
             for(var pnode = node.parentNode; pnode != null; pnode = pnode.parentNode){
               path.push(pnode.nodeName);
             }
             node.nodePath = path.reverse().slice(1);
+            //label
+            if(typeof(myself.getLabel) == 'function' ){
+                node.nodeLabel = myself.getLabel(node.nodeName);
+            }
+            else {
+                node.nodeLabel = node.nodeName;
+            }
+            if(node.nodeLabel == undefined){
+                node.nodeLabel = '';
+            }
+            
             return node;
         });
         
@@ -848,7 +862,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         layout.node
             .def("fitInfo", null)
             .height(function(d,e,f){//just iterate and get cutoff
-                var fitInfo = myself.getFitInfo(d.dx, d.dy, d.nodeName, myself.font, diagMargin);
+                var fitInfo = myself.getFitInfo(d.dx, d.dy, d.nodeLabel, myself.font, diagMargin);
                 if(!fitInfo.h){
                     
                     if(axisDirection == 'v' && fitInfo.v ){//prefer vertical
@@ -893,7 +907,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 else {return 0.5;} //non-terminal items, so grouping is visible
             })
             .text(function(d){
-                return d.nodeName;
+                return d.nodeLabel;
             });
         
         //cutoffs -> snap to vertical/horizontal
@@ -936,30 +950,30 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             .font(myself.font)
             .title(function(d){
-                return d.nodeName;
+                return d.nodeLabel;
                 })
             .text(function(d){
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){
                     case 'h':
                         if(!fitInfo.h){//TODO: fallback option for no svg
-                            return myself.trimToWidth(d.dx, d.nodeName, myself.font, '..');
+                            return myself.trimToWidth(d.dx, d.nodeLabel, myself.font, '..');
                         }
                         break;
                     case 'v':
                         if(!fitInfo.v){
-                            return myself.trimToWidth(d.dy, d.nodeName, myself.font, '..');
+                            return myself.trimToWidth(d.dy, d.nodeLabel, myself.font, '..');
                         }
                         break;
                     case 'd':
                        if(!fitInfo.d){
                           var ang = Math.atan(d.dy/d.dx);
                           var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx) ;
-                          return myself.trimToWidth(diagonalLength-diagMargin,d.nodeName, myself.font,'..');
+                          return myself.trimToWidth(diagonalLength-diagMargin,d.nodeLabel, myself.font,'..');
                         }
                         break;
                 }
-                return d.nodeName ;
+                return d.nodeLabel ;
             })
             .cursor( myself.clickAction? 'pointer' : 'default')
             .events('all')//labels don't have events by default
