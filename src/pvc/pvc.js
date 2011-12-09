@@ -40,8 +40,8 @@ pvc.padMatrixWithZeros = function(d){
     return d.map(function(v){
         return v.map(function(a){
             return typeof a == "undefined"?0:a;
-        })
-    })
+        });
+    });
 };
 
 pvc.cloneMatrix = function(m){
