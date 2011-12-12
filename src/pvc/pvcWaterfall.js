@@ -617,7 +617,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
         if(this.showValues){
             this.pvBarLabel = this.pvBar
-            .anchor("center")
+            .anchor(this.valuesAnchor ? this.valuesAnchor : 'center')
             .add(pv.Label)
             .bottom(0)
             .text(function(d){
