@@ -951,7 +951,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .font(myself.font)
             .title(function(d){
                 return d.nodeLabel;
-                })
+            })
             .text(function(d){
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){

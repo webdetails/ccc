@@ -293,7 +293,6 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0.001);
-    //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
       
     }
     else{
