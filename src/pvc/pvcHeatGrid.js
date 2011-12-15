@@ -41,11 +41,11 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             normPerBaseCategory: true,
             orthoAxisOrdinal: true,
             numSD: 2,                 // width (only for normal distribution)
-            minColor: "white",
-            maxColor: "darkgreen",
+            //minColor: "white",
+            //maxColor: "darkgreen",
             nullColor:  "#efc5ad",  // white with a shade of orange
-            rubberBandFill: 'rgba(255, 127, 0, 0.15)',
-            rubberBandLine: 'rgb(255,127,0)',
+            rubberBandFill: 'rgba(203, 239, 163, 0.6)',
+            rubberBandLine: '#86fe00',
             xAxisClickAction: function(item, event){
                 self.heatGridChartPanel.selectAxisValue('x', item, event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
@@ -55,7 +55,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
                 self.heatGridChartPanel.selectAxisValue('y', item, event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
-            }
+            },
+            colorRange: ['red', 'yellow','green']
         };
         
         // Apply options
@@ -65,6 +66,10 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         this.options.orthoAxisOrdinal = true;
         this.options.legend = false;
         this.options.orginIsZero = true;
+        
+        if(this.options.useCompositeAxis){//force array support
+            this.options.isMultiValued = true;
+        }
 
     },
 
@@ -133,7 +138,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     defaultValIdx:0,
     shape: "square",
     nullShape: "cross",
-    defaultBorder: 0,
+    defaultBorder: 1,
     nullBorder: 2,
     selectedBorder: 2,
     //function to be invoked when a selection occurs
@@ -150,8 +155,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
 
     getValue: function(d, i){
-        if($.isArray(d)) {
-            if(i != null) return d[i];
+        if(d!=null && d[0] !== undefined){
+            if(i != null && d[i] !== undefined) return d[i];//TODO:
             else return d[0];
         }
         else return d;
@@ -163,7 +168,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
 
     valuesToText: function(vals){
-        if($.isArray(vals)){
+        if(vals != null && vals[0] !== undefined){// $.isArray(vals)){
             return vals.join(', ');
         }
         else return vals;
@@ -180,7 +185,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.sizeValIdx = opts.sizeValIdx;
         this.selectNullValues = opts.nullShape != null;
         
-        //TODO:
+        //colors
+        opts.nullColor = pv.color(opts.nullColor);
+        if(opts.minColor != null) opts.minColor = pv.color(opts.minColor);
+        if(opts.maxColor != null) opts.maxColor = pv.color(opts.maxColor);
+        
         if(opts.shape != null) {this.shape = opts.shape;}
         
         //event triggering
@@ -200,7 +209,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
         var origData = this.chart.dataEngine.getVisibleTransposedValues();
         // create a mapping of the data that shows the columns (rows)
-        data = origData.map(function(d){
+        var data = origData.map(function(d){
             return pv.dict(cols, function(){
                 return  d[this.index];
             });
@@ -213,14 +222,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var w = (xScale.max - xScale.min)/xScale.domain().length;
         var h = (yScale.max - yScale.min)/yScale.domain().length;
 
-        if (anchor != "bottom") {//TODO: remove and change composite axis labels!
+        if (anchor != "bottom") {
             var tmp = w;
             w = h;
             h = tmp;
         }
         
         //reset selections
-        this.initSelections(false);
+        this.initSelections(null);
 
         this.pvHeatGrid = this.pvPanel.add(pv.Panel)
             .data(cols)
@@ -230,15 +239,13 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.parallelLength[anchor]](w)
             .add(pv.Panel)
             .data(data)
-            //[pvc.BasePanel.oppositeAnchor[anchor]]
             [anchor]
             (function(){
                 return this.index * h;
             })
             [pvc.BasePanel.orthogonalLength[anchor]](h)
             .antialias(false)
-            
-            .strokeStyle(null)//TODO: issue with categorical axis default label
+            .strokeStyle(null)
             .lineWidth(0)
             .overflow('hidden'); //overflow important if showValues=true
         
@@ -250,16 +257,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         //set coloring and shape / sizes if enabled
        if(opts.useShapes)
        {
-            this.createHeatMap(w,h, opts, fill);
+            this.createHeatMap(data, w,h, opts, fill);
        }
        else
        {//no shapes, apply color map to panel iself
         this.pvHeatGrid.fillStyle(function(dat, col){
              return  (dat[col] != null) ? fill[col](dat[col]) : opts.nullColor;
          });
-       }
-
-        //Tooltip
+                //Tooltip
         if(this.showTooltips){
             this.pvHeatGrid
             .event("mouseover", pv.Behavior.tipsy({
@@ -267,12 +272,13 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 fade: true
             }));
         }
+       }
 
         //clickAction
         if (opts.clickable) {//custom clickAction
             this.pvHeatGrid
             .cursor("pointer")
-            .event("click",function(row, rowCol){//TODO: mouse event?
+            .event("click",function(row, rowCol){
                 var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index]
                 var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index]
                 var d = row[rowCol];
@@ -304,7 +310,523 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.extend(this.pvPanel,"chart_");
     },
     
-    inRubberBandSelection: function(x,y){
+    //creates new version
+    createHeatMap: function(data, w, h, opts, fill)
+    {
+        var myself = this;
+        //total max in data
+        var maxVal = pv.max(data, function(datum){// {col:value ..}
+            return pv.max( pv.values(datum).map(
+                function(d){ return myself.getValue(d, myself.sizeValIdx);})) ;
+        });
+    
+        var maxRadius = Math.min(w,h) / 2 -2;
+        var maxArea = maxRadius * maxRadius ;// apparently treats as square area even if circle, triangle is different
+        
+        var valueToRadius = function(value){
+            return value != null ? value/maxVal * maxRadius : Math.min(maxRadius,5) ;//TODO:hcoded
+        };
+        
+        var valueToArea =  function(value){//
+            return value != null ? value/maxVal * maxArea :  Math.max(4,maxArea/16);//TODO:hcoded
+        }
+        
+        var valueToColor = function(value, i){
+            return  (value != null) ? fill[i](value) : opts.nullColor;
+        };
+        
+        var getLineWidth = function(value, isSelected){
+            if(myself.sizeValIdx == null ||
+               !myself.isNullShapeLineOnly() ||
+               myself.getValue(value, myself.sizeValIdx) != null)
+            {
+                return isSelected?
+                    myself.selectedBorder:
+                    myself.defaultBorder;
+            }
+            else 
+            {//is null and needs border to show up
+                if(isSelected){
+                    return (myself.selectedBorder == null || myself.selectedBorder == 0 )?
+                       myself.nullBorder:
+                       myself.selectedBorder;
+                }
+                else
+                {
+                    return (myself.defaultBorder > 0)?
+                        myself.defaultBorder:
+                        myself.nullBorder;
+                }
+            }
+        };
+        
+        var getBorderColor = function(value,i,selected){
+            return getFillColor(value,i,selected).darker();
+        };
+        
+        var toGreyScale = function(color){
+            //convert to greyscale using YCbCr luminance conv
+            var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+          //  var avg = Math.round( (color.r + color.g + color.b)/3);
+            
+            return pv.rgb(avg,avg,avg,0.6).brighter();
+        };
+        
+        var getFillColor = function(value,i, isSelected){
+           var color = opts.nullColor;
+           if(myself.colorValIdx != null && myself.getColorValue(value) != null)
+           {
+               color =  fill[i](myself.getColorValue(value));
+           }
+           if(myself.getSelectCount() > 0 && !isSelected)
+           {//non-selected items
+               //return color.alpha(0.5);
+               return toGreyScale(color);//.lighter();?
+           }
+           return color;
+        };
+        
+        //double click + click
+        var ignoreClicks = 0;
+        var DBL_CLICK_MAX_DELAY = (this.clickDelay)? this.clickDelay : 300; //ms
+        //click
+        var clickAction = function(s,c,d,e){
+            if(ignoreClicks) { ignoreClicks--;}
+            else {
+                if(e.ctrlKey){
+                    myself.toggleSelection(s,c);
+                } else {//hard select
+                    myself.clearSelections();
+                    myself.addSelection(s,c);
+                }
+                myself.triggerSelectionChange();
+                //classic clickAction
+                if(typeof(myself.chart.options.clickAction) == 'function'){
+                    if(d!= null && d[0] !== undefined){ d= d[0]; }
+                    myself.chart.options.clickAction(s,c,d,e);
+                }
+                myself.pvPanel.render();
+            }
+        };
+        //dblClick
+        var doubleClickAction = (typeof(opts.doubleClickAction) == 'function')?
+            function(s,c,d, e){
+                ignoreClicks = 2;
+                opts.doubleClickAction(s,c,d, e);
+            } :
+            null;
+        
+        //chart generation
+        this.shapes =
+            this.pvHeatGrid
+                .add(pv.Dot)
+                .def("selected", function(){
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    return  myself.isSelected(s,c);
+                })
+                .shape( function(r, ra ,i){
+                    if(opts.sizeValIdx == null){
+                        return myself.shape;
+                    }
+                    return myself.getValue(r[i]) != null ? myself.shape : opts.nullShape;
+                })
+                .shapeSize(function(r,ra, i) {
+                    if(myself.sizeValIdx == null){
+                        if(opts.nullShape == null && myself.getValue(r[i], myself.colorValIdx) == null) return 0;
+                        else return maxArea;
+                    }
+                    var val = myself.getValue(r[i], myself.sizeValIdx);
+                    return (val == null && opts.nullShape == null)?
+                        0 :
+                        valueToArea(myself.getValue(r[i], myself.sizeValIdx));
+                })
+                .fillStyle(function(r, ra, i)
+                {
+                    return getFillColor(r[i],i,this.selected());
+                })
+                .cursor("pointer")
+                .lineWidth(function(r, ra, i)
+                {
+                    return getLineWidth(r[i], this.selected());
+                })
+                .strokeStyle(function(r, ra, i){
+                    
+                    if( !(getLineWidth(r[i], this.selected()) > 0) ){//null|<0
+                        return null;//no style
+                    }
+                    //has width
+                    return (myself.getValue(r[i], myself.sizeValIdx) != null )?
+                                    getBorderColor(r[i],i,this.selected()) :
+                                     getFillColor(r[i],i,this.selected());
+                })
+                .text(function(r,ra,i){
+                    return myself.valuesToText(r[i]);
+                })
+                .event("click", function(r,ra,i) {
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    var d = r[i];
+                    var e = pv.event;
+                    
+                    if(doubleClickAction){
+                        //arg has to be passed in closure in order to work with ie
+                        window.setTimeout(function(){clickAction(s,c,d, e)}, DBL_CLICK_MAX_DELAY);
+                       // window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
+                    }
+                    else { clickAction(s,c,d,e); }
+                    
+                    //if(pv.event.ctrlKey){
+                    //    myself.toggleSelection(s,c);
+                    //} else {//hard select
+                    //    myself.clearSelections();
+                    //    myself.addSelection(s,c);
+                    //}
+                    //myself.triggerSelectionChange();
+                    ////classic clickAction
+                    //if(typeof(myself.chart.options.clickAction) == 'function'){
+                    //    if(d!= null && d[0] !== undefined){ d= d[0]; }
+                    //    myself.chart.options.clickAction(s,c,d);
+                    //}
+                    //myself.pvPanel.render();
+                });
+        if(opts.showTooltips){
+            this.shapes.title(function(r,ra,i){
+                if(opts.customTooltip){
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    var d = r[i];
+                    return opts.customTooltip(s,c,d);
+                }
+                else {
+                    return myself.valuesToText(r[i]);
+                }
+            })
+            .event("mouseover", pv.Behavior.tipsy({
+                html: true,
+                gravity: "e",
+                fade: false
+            }));
+        }
+        if(doubleClickAction)
+        {
+            this.shapes.event("dblclick", function(r,ra,i){
+                var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                var d = r[i];
+                var e = pv.event;
+                doubleClickAction(s,c,d,e);
+            });
+        }
+                
+        if(opts.isMultiValued && pv.renderer() != 'batik')
+        {
+            this.createSelectOverlay(w,h);
+        }
+    },
+    
+    isNullShapeLineOnly: function(){
+      return this.nullShape == 'cross';  
+    },
+    
+    /***********************
+     * SELECTIONS (start)
+     */
+    
+    /**
+     * init with default (bool)
+     **/
+    initSelections:function(defaultValue){
+      this.selections = {};
+      var series = this.chart.dataEngine.getSeries();
+      var cats = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < series.length; i++ ){
+            this.selections[series[i]] = {};
+            for(var j = 0; j < cats.length; j++ ){
+                this.selections[series[i]][cats[j]] = defaultValue;
+            }
+      }
+    },
+    
+    //makes none selected
+    clearSelections: function(){
+        this.selections = {};
+        this.selectCount = null;
+    },
+    
+    isSelected: function(s,c){
+      return this.selections[s] ?
+        this.selections[s][c]!=null :
+        false;
+    },
+    
+    isValueNull: function(s,c){
+      var sIdx = this.chart.dataEngine.getSeries().indexOf(s);
+      var cIdx = this.chart.dataEngine.getCategories().indexOf(c);
+      var val = this.chart.dataEngine.getValues()[cIdx][sIdx];
+      return val == null || val[0] == null;
+    },
+    
+    addSelection: function(s,c){
+      if(!this.selectNullValues)
+      {//check if null
+        if(this.isValueNull(s,c)){ return; }
+      }
+      if(!this.selections[s]) this.selections[s] = {};
+      this.selections[s][c] = {'series': s, 'category' : c};
+      this.selectCount = null;
+    },
+    
+    removeSelection: function(s,c){
+      if(this.selections[s]){
+        this.selections[s][c] = null;//TODO: delete?
+      }
+      this.selectCount = null;
+    },
+    
+    toggleSelection: function(s,c){
+        if(this.isSelected(s,c)) {
+            this.removeSelection(s,c);
+        }
+        else {
+            this.addSelection(s,c);
+        }
+    },
+    
+    getSelections: function(){
+        var selections = [];
+        for(var s in this.selections){
+          if(this.selections.hasOwnProperty(s) )
+          {
+              for(var c in this.selections[s]){
+               if(this.selections[s].hasOwnProperty(c))
+               {
+                    if(this.selections[s][c]){
+                        selections.push(this.selections[s][c]);
+                    }
+               }
+              }
+          }
+        }
+        return selections;
+    },
+    
+    setSelections: function(selections){
+        this.selections = {};
+        for(var i=0;i<selections.length;i++){
+            this.addSelection(selections[i].series, selections[i].category);
+        }
+    },
+    
+    selectSeries: function(s){
+        var cats = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < cats.length; i++ ){
+            this.addSelection(s,cats[i]);
+            //this.selections[s][cats[i]] = true;
+        }
+    },
+    
+    selectCategories: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i = 0; i < series.length; i++ ){
+            this.addSelection(series[i],c);
+        }
+    },
+    
+    selectAxisValue: function(axis, axisValue, toggle)
+    {
+        var type = (this.orientation == 'horizontal')?
+            ((axis == 'x')? 's' : 'c') :
+            ((axis == 'x')? 'c' : 's')
+            
+        if(this.chart.options.useCompositeAxis)
+        {
+            if(!toggle){
+                this.clearSelections();
+            }
+            if(type =='c'){
+                if(!toggle){
+                    this.selectCategoriesHierarchy(axisValue);
+                }
+                else {
+                    this.toggleCategoriesHierarchy(axisValue);
+                }
+            }
+            else {
+                if(!toggle){
+                    this.selectSeriesHierarchy(axisValue);
+                }
+                else{
+                    this.toggleSeriesHierarchy(axisValue);
+                }
+            }
+        }
+        else
+        {//??
+            if(type =='c'){ this.toggleCategories(axisValue); }
+            else { this.toggleSeries(axisValue); }
+        }
+    },
+    
+    /**
+     *ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+     *     arrayStartsWith(a, a) -> true
+     **/
+    arrayStartsWith: function(array, base)
+    {
+        if(array.length < base.length) { return false; }
+        
+        for(var i=0; i<base.length;i++){
+            if(base[i] != array[i]) {
+                return false;
+            }
+        }
+        return true;
+    },
+    
+    toggleCategoriesHierarchy: function(cbase){
+        if(this.selectCategoriesHierarchy(cbase)){
+            this.deselectCategoriesHierarchy(cbase);
+        }
+    },
+    
+    toggleSeriesHierarchy: function(sbase){
+        if(this.selectSeriesHierarchy(sbase)){
+            this.deselectSeriesHierarchy(sbase);
+        }
+    },
+    
+    /**
+     *returns bool wereAllSelected
+     **/
+    selectCategoriesHierarchy: function(cbase){
+        var categories = this.chart.dataEngine.getCategories();
+        var selected = true;
+        for(var i =0; i< categories.length ; i++){
+            var c = categories[i];
+            if( this.arrayStartsWith(c, cbase) ){
+                selected &= this.selectCategory(c);
+            }
+        }
+        return selected;
+    },
+    
+    selectSeriesHierarchy: function(sbase){
+        var series = this.chart.dataEngine.getSeries();
+        var selected = true;
+        for(var i =0; i< series.length ; i++){
+            var s = series[i];
+            if( this.arrayStartsWith(s, sbase) ){
+                selected &= this.selectSeries(s);
+            }
+        }
+        return selected;
+    },
+    
+    deselectCategoriesHierarchy: function(cbase){
+        var categories = this.chart.dataEngine.getCategories();
+        for(var i =0; i< categories.length ; i++){
+            var c = categories[i];
+            if( this.arrayStartsWith(c, cbase) ){
+                this.deselectCategory(c);
+            }
+        }
+    },
+
+    deselectSeriesHierarchy: function(sbase){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i =0; i< series.length ; i++){
+            var s = series[i];
+            if( this.arrayStartsWith(s, sbase) ){
+                this.deselectSeries(s);
+            }
+        }
+    },
+    
+    /**
+     *returns bool wereAllSelected
+     **/
+    selectCategory: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        var wereAllSelected = true;
+        for(var i = 0; i < series.length; i++ ){
+            var s = series[i];
+            if(!this.selectNullValues && this.isValueNull(s,c)){
+                continue;
+            }
+            wereAllSelected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+        }
+        return wereAllSelected;
+    },
+    
+    selectSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        var wereAllSelected = true;
+        for(var i = 0; i < categories.length; i++ ){
+            var c = categories[i];
+            if(!this.selectNullValues && this.isValueNull(s,c)){
+                continue;
+            }
+            wereAllSelected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+        }
+        return wereAllSelected;
+    },
+    
+    deselectCategory: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i = 0; i < series.length; i++ ){
+            this.removeSelection(series[i],c);
+        }
+    },
+
+    deselectSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < categories.length; i++ ){
+            this.removeSelection(s, categories[i]);
+        }
+    },
+    
+    /**
+     *pseudo-toggle elements with category c:
+     *deselect all if all selected, otherwise select all
+     **/
+    toggleCategories: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        var selected = this.selectCategory(c);
+        if(selected){
+            this.deselectCategory(c);
+        }
+    },
+    
+    /**
+     *pseudo-toggle elements with series s:
+     *deselect all if all selected, otherwise select all
+     **/
+    toggleSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        var selected = this.selectSeries(s);
+        if(selected){
+            this.deselectSeries(s);
+        }
+    },
+    
+    getSelectCount: function(){
+        if(this.selectCount == null){
+          this.selectCount = this.getSelections().length;
+        }
+        return this.selectCount;
+    },
+    
+    triggerSelectionChange: function(){
+        if(typeof(this.onSelectionChange) == 'function'){
+            var selections = this.getSelections();
+            this.onSelectionChange(selections);
+        }
+    },
+    
+        inRubberBandSelection: function(x,y){
         if(!this.rubberBand) { return false; }
         
         var r = this.rubberBand;
@@ -323,6 +845,13 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.rubberBand = {x:0, y:0, dx:4, dy:4};
         var myself = this;
         
+        if(opts.orientation == 'horizontal')
+        {//switch back w,h
+            var tmp = w;
+            w=h;
+            h=tmp;
+        }
+        
         var dMin= Math.min(w,h) /2;
         
         var isSelecting = false;
@@ -331,7 +860,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var selectStroke =  opts.rubberBandLine;//'rgb(255,127,0)';
         var invisibleFill = 'rgba(127,127,127,0.01)';
         
-        
+        //callback to handle end of rubber band selection
         var dispatchRubberBandSelection = function(rb, ev)
         {//do the rubber band
             var xAxis = myself.chart.xAxisPanel;
@@ -355,7 +884,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
             //get offsets
             var titleOffset;
-            if(opts.title){
+            if(myself.chart.titlePanel != null){
                 titleOffset = setPositions(opts.titlePosition, myself.chart.titlePanel.titleSize);
             }
             else {
@@ -366,7 +895,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
             var y = 0, x=0;   
             //1) x axis
-            var xSelections = []
+            var xSelections = [];
             if(opts.useCompositeAxis){
                 y = rb.y - titleOffset['top'] ;
                 if(opts.xAxisPosition == 'bottom'){//chart
@@ -397,7 +926,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 var categories = myself.chart.dataEngine.getCategories();
                 var selectedSeries = [], selectedCategories = [],
                     sSelections, cSelections;
-                if(this.orientation == 'horizontal'){
+                if(opts.orientation == 'horizontal'){
                     sSelections = xSelections;
                     cSelections = ySelections;
                 }
@@ -451,10 +980,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             else
             {
                 for(var i=0; i<xSelections.length; i++){
-                    myself.chart.heatGridChartPanel.selectAxisValue('x', xSelections[i]);
+                    myself.selectAxisValue('x', xSelections[i], true);
                 }
                 for(var i=0; i<ySelections.length; i++){
-                    myself.chart.heatGridChartPanel.selectAxisValue('y', ySelections[i]);
+                    myself.selectAxisValue('y', ySelections[i], true);
                 }
             }
 
@@ -482,12 +1011,12 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
         
         this.pvPanel.root
-           // .data([this.rubberBand])
             .data([myself.rubberBand])
             .event("click", function(d) {
                 if(!pv.event.ctrlKey){
                     myself.clearSelections();
                     myself.shapes.render();
+                    myself.triggerSelectionChange();
                 }
             })
             .event('mousedown', pv.Behavior.selector(false))
@@ -508,7 +1037,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     //translate top to bottom
                     if(checkSelections){
                         checkSelections = false;
-                        myself.selectBar.render();//TODO: update coordinates
+                        myself.selectBar.render();
                         dispatchRubberBandSelection(rb, pv.event);
                     }
                 }
@@ -517,417 +1046,61 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     setRubberbandSelections: function(rb,w,h)
     {
-        var series = this.chart.dataEngine.getSeries();
-        var categories = this.chart.dataEngine.getCategories();
+        var orient = (this.orientation == 'horizontal')? 'h' : 'v';
         
-        var sSel = [];
-        var cSel = [];
+        var yValues = (orient == 'h')?
+            this.chart.dataEngine.getCategories() :
+            this.chart.dataEngine.getSeries();
+        var xValues = (orient == 'h')?
+            this.chart.dataEngine.getSeries() :    
+            this.chart.dataEngine.getCategories();
+        
+        var ySel = [];
+        var xSel = [];
         
         //find included series/categories
-        for(var i=0; i< series.length; i++){
+        for(var i=0; i< yValues.length; i++){
             var y = i*h + h/2;
             if(y > rb.y && y < rb.y + rb.dy){
-                sSel.push(series[i]);
+                ySel.push(yValues[i]);
             }
         }
-        for(var i=0; i< categories.length; i++){
+        for(var i=0; i< xValues.length; i++){
             var x = i*w + w/2;
             if(x > rb.x && x < rb.x + rb.dx){
-                cSel.push(categories[i]);
+                xSel.push(xValues[i]);
             }
+        }
+        
+        var sSel, cSel;
+        if(orient == 'h'){
+            sSel = xSel;
+            cSel = ySel;
+        }
+        else {
+            sSel = ySel;
+            cSel = xSel;            
         }
         
         //select shapes in intersection
-        for(var i=0; i< sSel.length; i++){
+        for(var i=0; i< sSel.length; i++)
+        {
             var s = sSel[i];
-            for(var j=0; j<cSel.length; j++){
+            for(var j=0; j<cSel.length; j++)
+            {
                 var c = cSel[j];
-                //if(this.chart.options.nullShape != null || //TODO: select or not null values
-                //   )
                 this.addSelection(s,c);
             }
         }
     },
     
-    //creates new version
-    createHeatMap: function(w, h, opts, fill)
-    {
-        var myself = this;
-        //total max in data
-        var maxVal = pv.max(data, function(datum){// {col:value ..}
-            return pv.max( pv.values(datum).map(
-                function(d){ return myself.getValue(d, myself.sizeValIdx);})) ;
-        });
-    
-        var maxRadius = Math.min(w,h) / 2 -2;
-        var maxArea = maxRadius * maxRadius ;// apparently treats as square area even if circle, triangle is different
-        
-        var valueToRadius = function(value){
-            return value != null ? value/maxVal * maxRadius : Math.min(maxRadius,5) ;//TODO:hcoded
-        };
-        
-        var valueToArea =  function(value){//
-            return value != null ? value/maxVal * maxArea :  Math.max(4,maxArea/16);//TODO:hcoded
-        }
-        
-        var valueToColor = function(value, i){
-            return  (value != null) ? fill[i](value) : opts.nullColor;
-        };
-        
-        this.shapes =
-            this.pvHeatGrid
-                .add(pv.Dot)
-                .def("selected", function(){
-                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                    return  myself.isSelected(s,c);
-                })
-                .shape( function(r, ra ,i){
-                    if(opts.sizeValIdx == null){
-                        return myself.shape;
-                    }
-                    return myself.getValue(r[i]) != null ? myself.shape : opts.nullShape;
-                })
-                .shapeSize(function(r,ra, i) {
-                    if(myself.sizeValIdx == null){
-                        return maxArea;
-                    }
-                    var val = myself.getValue(r[i], myself.sizeValIdx);
-                    return (val == null && opts.nullShape == null)?
-                        0 :
-                        valueToArea(myself.getValue(r[i], myself.sizeValIdx));
-                })
-                .fillStyle(function(r, ra, i){
-                    //return valueToColor(r[i], i);
-                    var color = opts.nullColor;
-                    if(myself.colorValIdx != null ){
-                        if(myself.getColorValue(r[i]) == null) return opts.nullColor;
-                        color =  fill[i](myself.getColorValue(r[i]));
-                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index]; 
-                        if(myself.getSelectCount() > 0 && !this.selected()){
-                            return color.alpha(0.5);
-                        }
-                    }
-                    return color;
-                })
-                .cursor("pointer") //TODO:
-                .lineWidth(function(r, ra, i)
-                {
-                    return this.selected()? myself.selectedBorder :
-                                            ( (myself.sizeValIdx == null ||
-                                               myself.getValue(r[i], myself.sizeValIdx) != null )?
-                                                    myself.defaultBorder : //0 hcoded?
-                                                    myself.nullBorder);
-                })
-                .strokeStyle(function(r, ra, i){
-                    return (this.selected() ||
-                            myself.sizeValIdx == null ||
-                            myself.getValue(r[i], myself.sizeValIdx) != null )?
-                                     "black" :
-                                     (myself.colorValIdx != null)?
-                                        (myself.getColorValue(r[i]))?
-                                            fill[i](myself.getColorValue(r[i])) :
-                                            opts.nullColor :
-                                        opts.nullColor;
-                })
-                .text(function(r,ra,i){
-                    return myself.valuesToText(r[i]);
-                })
-                .event("click", function(r,ra,i) {
-                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                    var d = r[i];
-                    if(pv.event.ctrlKey){
-                        myself.toggleSelection(s,c);
-                    } else {//hard select
-                        myself.clearSelections();
-                        myself.addSelection(s,c);
-                    }
-                    myself.triggerSelectionChange();
-                    //classic clickAction
-                    if(typeof(myself.chart.options.clickAction) == 'function'){
-                        if($.isArray(d)) d= d[0];
-                        myself.chart.options.clickAction(s,c,d);
-                    }
-                    myself.pvPanel.render();
-                });
-        this.createSelectOverlay(w,h);
-    },
     
     /*
-     *selections - testing (start)
-     *TODO: transient, will have to change selection storage
-     */
-    
-    initSelections:function(defaultValue){
-      this.selections = {};
-      var series = this.chart.dataEngine.getSeries();
-      var cats = this.chart.dataEngine.getCategories();
-        for(var i = 0; i < series.length; i++ ){
-            this.selections[series[i]] = {};
-            for(var j = 0; j < cats.length; j++ ){
-                this.selections[series[i]][cats[j]] = defaultValue;
-            }
-      }
-    },
-    
-    //makes none selected
-    clearSelections: function(){
-        this.selections = {};
-        this.selectCount = null;
-    },
-    
-    isSelected: function(s,c){
-      return this.selections[s] ?
-        this.selections[s][c] :
-        false;
-    },
-    
-    isValueNull: function(s,c){
-      var sIdx = this.chart.dataEngine.getSeries().indexOf(s);
-      var cIdx = this.chart.dataEngine.getCategories().indexOf(c);
-      var val = this.chart.dataEngine.getValues()[cIdx][sIdx];
-      return val == null || val[0] == null;
-    },
-    
-    addSelection: function(s,c){
-      if(!this.selectNullValues)
-      {//check if null
-        if(this.isValueNull(s,c)){ return; }
-      }
-    
-      if(!this.selections[s]) this.selections[s] = {};
-      this.selections[s][c] = true;
-      this.selectCount = null;
-    },
-    
-    removeSelection: function(s,c){
-      if(this.selections[s]){
-        this.selections[s][c] = false;
-      }
-      this.selectCount = null;
-    },
-    
-    toggleSelection: function(s,c){
-        if(this.isSelected(s,c)) {
-            this.removeSelection(s,c);
-        }
-        else {
-            this.addSelection(s,c);
-        }
-    },
-    
-    getSelections: function(){
-        return pv.flatten(this.selections).key("series").key("category").key("selected")
-            .array().filter(function(d) { return d.selected; });
-    },
-    
-    setSelections: function(selections){
-        this.selections = {};
-        for(var i=0;i<selections.length;i++){
-            this.addSelection(selections[i].series, selections[i].category);
-        }
-    },
-    
-    selectSeries: function(s){
-        var cats = this.chart.dataEngine.getCategories();
-        for(var i = 0; i < cats.length; i++ ){
-            this.selections[s][cats[i]] = true;
-        }
-    },
-    
-    selectCategories: function(c){
-        var series = this.chart.dataEngine.getSeries();
-        for(var i = 0; i < series.length; i++ ){
-            //this.selections[series[i]][c] = true;
-            this.addSelection(series[i],c);
-        }
-    },
-    
-    selectAxisValue: function(axis, axisValue, toggle)
-    {
-        var type = (this.orientation == 'horizontal')?
-            ((axis == 'x')? 's' : 'c') :
-            ((axis == 'x')? 'c' : 's')
-            
-        if(this.chart.options.useCompositeAxis)
-        {
-            if(!toggle){
-                this.clearSelections();
-            }
-            if(type =='c'){
-                if(!toggle){
-                    this.selectCategoriesHierarchy(axisValue);
-                }
-                else {
-                    this.toggleCategoriesHierarchy(axisValue);
-                }
-            }
-            else {
-                if(!toggle){
-                    this.selectSeriesHierarchy(axisValue);
-                }
-                else{
-                    this.toggleSeriesHierarchy(axisValue);
-                }
-            }
-        }
-        else
-        {//??
-            if(type =='c'){ this.toggleCategories(axisValue); }
-            else { this.toggleSeries(axisValue); }
-        }
-    },
-    
-    //ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
-    //     arrayStartsWith(a, a) -> true
-    arrayStartsWith: function(array, base)
-    {
-        if(array.length < base.length) { return false; }
-        
-        for(var i=0; i<base.length;i++){
-            if(base[i] != array[i]) {
-                return false;
-            }
-        }
-        return true;
-    },
-    
-    toggleCategoriesHierarchy: function(cbase){
-        if(this.selectCategoriesHierarchy(cbase)){
-            this.deselectCategoriesHierarchy(cbase);
-        }
-    },
-    
-    toggleSeriesHierarchy: function(sbase){
-        if(this.selectSeriesHierarchy(sbase)){
-            this.deselectSeriesHierarchy(sbase);
-        }
-    },
-    
-    //returns bool wereAllSelected
-    selectCategoriesHierarchy: function(cbase){
-        var categories = this.chart.dataEngine.getCategories();
-        var selected = true;
-        for(var i =0; i< categories.length ; i++){
-            var c = categories[i];
-            if( this.arrayStartsWith(c, cbase) ){
-                selected &= this.selectCategory(c);
-            }
-        }
-        return selected;
-    },
-    
-    selectSeriesHierarchy: function(sbase){
-        var series = this.chart.dataEngine.getSeries();
-        var selected = true;
-        for(var i =0; i< series.length ; i++){
-            var s = series[i];
-            if( this.arrayStartsWith(s, sbase) ){
-                selected &= this.selectSeries(s);
-            }
-        }
-        return selected;
-    },
-    
-    deselectCategoriesHierarchy: function(cbase){
-        var categories = this.chart.dataEngine.getCategories();
-        for(var i =0; i< categories.length ; i++){
-            var c = categories[i];
-            if( this.arrayStartsWith(c, cbase) ){
-                this.deselectCategory(c);
-            }
-        }
-    },
-    
-    deselectSeriesHierarchy: function(sbase){
-        var series = this.chart.dataEngine.getSeries();
-        for(var i =0; i< series.length ; i++){
-            var s = series[i];
-            if( this.arrayStartsWith(s, sbase) ){
-                this.deselectSeries(s);
-            }
-        }
-    },
-    
-    //returns bool wereAllSelected
-    selectCategory: function(c){
-        var series = this.chart.dataEngine.getSeries();
-        var wereAllSelected = true;
-        for(var i = 0; i < series.length; i++ ){
-            var s = series[i];
-            wereAllSelected &= this.isSelected(s,c);
-            this.addSelection(s,c);
-        }
-        return wereAllSelected;
-    },
-    
-    selectSeries: function(s){
-        var categories = this.chart.dataEngine.getCategories();
-        var wereAllSelected = true;
-        for(var i = 0; i < categories.length; i++ ){
-            var c = categories[i];
-            wereAllSelected &= this.isSelected(s,c);
-            this.addSelection(s,c);
-        }
-        return wereAllSelected;
-    },
-    
-    deselectCategory: function(c){
-        var series = this.chart.dataEngine.getSeries();
-        for(var i = 0; i < series.length; i++ ){
-            this.removeSelection(series[i],c);
-        }
-    },
-
-    deselectSeries: function(s){
-        var categories = this.chart.dataEngine.getCategories();
-        for(var i = 0; i < categories.length; i++ ){
-            this.removeSelection(s, categories[i]);
-        }
-    },
-    
-    //pseudo-toggle elements with category c:
-    // deselect all if all selected, otherwise select all
-    toggleCategories: function(c){
-        var series = this.chart.dataEngine.getSeries();
-        var selected = this.selectCategory(c);
-        if(selected){
-            this.deselectCategory(c);
-        }
-    },
-    
-    //pseudo-toggle elements with series s:
-    // deselect all if all selected, otherwise select all
-    toggleSeries: function(s){
-        var categories = this.chart.dataEngine.getCategories();
-        var selected = this.selectSeries(s);
-        if(selected){
-            this.deselectSeries(s);
-        }
-    },
-    
-    getSelectCount: function(){
-        if(this.selectCount == null){
-          this.selectCount = this.getSelections().length;
-        }
-        return this.selectCount;
-    },
-    
-    triggerSelectionChange: function(){
-        if(typeof(this.onSelectionChange) == 'function'){
-            var selections = this.getSelections();
-            this.onSelectionChange(selections);
-        }
-    },
-    
-    /*
-     *selections - testing (end)
-     */
+     *selections (end)
+     **********************/
     
     /**
-     * Get label color that will contrast with given bg color
+     * TODO: Get label color that will contrast with given bg color
      */
     getLabelColor: function(r, g, b){
         var brightness = (r*299 + g*587 + b*114) / 1000;
@@ -950,53 +1123,114 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
    ********/
   getColorScale: function(data, cols) {
       switch (this.chart.options.scalingType) {
-      case "normal": return this.getNormalColorScale(data, cols, this.colorValIdx);//TODO:
-      case "linear": return this.getLinearColorScale(data, cols, this.colorValIdx);
-      default:
-        throw "Invalid option " + this.scaleType + " in HeatGrid";
+        case "normal":
+          return this.getNormalColorScale(data, cols, this.colorValIdx);//TODO:
+        case "linear":
+          return this.getLinearColorScale(data, cols, this.colorValIdx);
+        //TODO: case "external":
+        default:
+          throw "Invalid option " + this.scaleType + " in HeatGrid";
     }
   },
+  
+  
+  getLinearColorScale: function(data, cols, colorIdx){
 
-  getLinearColorScale: function (data, cols, colorIdx){
-    var fill;
     var opts = this.chart.options;
-    // compute the mean and standard-deviation for each column
     var myself = this;
-    var min = pv.dict(cols, function(f){
-      return pv.min(data, function(d){
-        return myself.getValue(d[f],colorIdx);
-      });
-    });
-    var max = pv.dict(cols, function(f){
-      return pv.max(data, function(d){
-        return myself.getValue(d[f], colorIdx);
-      });
-    });
 
-    if (opts.normPerBaseCategory)  //  compute a scale-function for each column (each key
-      fill = pv.dict(cols, function(f){
-        return pv.Scale.linear()
-          .domain(min[f], max[f])
-          .range(opts.minColor, opts.maxColor);
-      });
-    else {   // normalize over the whole array
-      var theMin = min[cols[0]];
-      for (var i=1; i<cols.length; i++) {
-        if (min[cols[i]] < theMin) theMin = min[cols[i]];
-      }
-      var theMax = max[cols[0]];
-      for (var i=1; i<cols.length; i++){
-        if (max[cols[i]] > theMax) theMax = max[cols[i]];
-      }
-      var scale = pv.Scale.linear()
-        .domain(theMin, theMax)
-        .range(opts.minColor, opts.maxColor);
-      fill = pv.dict(cols, function(f){
-        return scale;
-      });
+    var rangeArgs = opts.colorRange;
+    if(opts.minColor != null && opts.maxColor != null){
+        rangeArgs = [opts.minColor,opts.maxColor];
     }
-
-    return fill;  // run an array of values to compute the colors per column
+    else if (opts.minColor != null){
+        rangeArgs.splice(0,1,opts.minColor);
+    }
+    else if (opts.maxColor != null){
+        rangeArgs.splice(rangeArgs.length-1,1,opts.maxColor);
+    }
+    
+    var domainArgs = opts.colorRangeInterval;
+    if(domainArgs != null && domainArgs.length > rangeArgs.length){
+        domainArgs = domainArgs.slice(0, rangeArgs.length);
+    }
+    if(domainArgs == null){
+        domainArgs = [];
+    }
+    
+    if(domainArgs.length < rangeArgs.length || opts.normPerBaseCategory){
+        
+        var min = pv.dict(cols, function(f){
+          return pv.min(data, function(d){
+            return myself.getValue(d[f],colorIdx);
+          });
+        });
+        var max = pv.dict(cols, function(f){
+          return pv.max(data, function(d){
+            return myself.getValue(d[f], colorIdx);
+          });
+        });
+        
+        if (opts.normPerBaseCategory){  //  compute a scale-function for each column (each key
+          //overrides colorRangeIntervals
+            return pv.dict(cols, function(f){
+                var fMin = min[f],
+                    fMax = max[f];
+                if(fMax == fMin)
+                {
+                    if(fMax >=1){
+                        fMin = fMax -1;
+                    } else {
+                        fMax = fMin +1;    
+                    }
+                }
+                var step = (fMax - fMin)/( rangeArgs.length -1);
+                var scale = pv.Scale.linear();
+                scale.domain.apply(scale, pv.range(fMin,fMax + step, step));
+                scale.range.apply(scale,rangeArgs);
+                return scale;
+            });
+        }
+        else {   // normalize over the whole array
+            var theMin = min[cols[0]];
+            for (var i=1; i<cols.length; i++) {
+              if (min[cols[i]] < theMin) theMin = min[cols[i]];
+            }
+            var theMax = max[cols[0]];
+            for (var i=1; i<cols.length; i++){
+              if (max[cols[i]] > theMax) theMax = max[cols[i]];
+            }
+            if(theMax == theMin)
+            {
+                if(theMax >=1){
+                    theMin = theMax -1;
+                } else {
+                    theMax = theMin +1;
+                }
+            } 
+          //use supplied numbers
+          var toPad =
+                domainArgs == null ?
+                rangeArgs.length :
+                rangeArgs.length - domainArgs.length;
+          switch(toPad){
+            case 1:
+                //TODO: should adapt to represent middle?
+                domainArgs.push(theMax);
+                break;
+            case 2:
+                domainArgs = [theMin].concat(domainArgs).concat(theMax);
+                break;
+            default:
+                var step = (theMax - theMin)/(rangeArgs.length -1);
+                domainArgs = pv.range(theMin, theMax + step, step);
+          }
+        }
+    }
+    var scale = pv.Scale.linear();
+    scale.domain.apply(scale,domainArgs)
+    scale.range.apply(scale,rangeArgs);
+    return pv.dict(cols,function(f){ return scale;});
   },
 
   getNormalColorScale: function (data, cols){

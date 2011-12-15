@@ -5894,7 +5894,7 @@ pv.SvgScene.dot = function(scenes) {
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-dasharray": s.strokeDasharray
+      "stroke-dasharray": (s.strokeDasharray)? s.strokeDasharray : 'none'
     };
     if (path) {
       svg.transform = "translate(" + s.left + "," + s.top + ")";
@@ -6059,7 +6059,7 @@ pv.SvgScene.line = function(scenes) {
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
       "stroke-linejoin": s.lineJoin,
-      "stroke-dasharray": s.strokeDasharray
+      "stroke-dasharray": (s.strokeDasharray)? s.strokeDasharray : 'none'
     });
   return this.append(e, scenes, 0);
 };
@@ -6180,10 +6180,13 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
        + " " + c.x + "," + c.y
        + " " + d.x + "," + d.y;
 };
-pv.SvgScene.panel = function(scenes) {
+pv.SvgScene.panel = function(scenes)
+{
   var g = scenes.$g, e = g && g.firstChild;
   var complete = false;
+  
   for (var i = 0; i < scenes.length; i++) {
+
     var s = scenes[i];
 
     /* visible */
@@ -6262,6 +6265,7 @@ pv.SvgScene.panel = function(scenes) {
 
             svgweb.appendChild (g, s.canvas);
             g = frag;
+
         } else {
             for (var j = 0; j < this.events.length; j++) {
               g.addEventListener(this.events[j], this.dispatch, false);
@@ -6283,8 +6287,10 @@ pv.SvgScene.panel = function(scenes) {
     if (s.overflow == "hidden") {
       var id = pv.id().toString(36),
           c = this.expect(e, "g", {"clip-path": "url(#" + id + ")"});
+          
       if (!c.parentNode) g.appendChild(c);
       scenes.$g = g = c;
+
       e = c.firstChild;
 
       e = this.expect(e, "clipPath", {"id": id});
@@ -6336,6 +6342,7 @@ pv.SvgScene.panel = function(scenes) {
 
 pv.SvgScene.fill = function(e, scenes, i) {
   var s = scenes[i], fill = s.fillStyle;
+
   if (fill.opacity || s.events == "all") {
     e = this.expect(e, "rect", {
         "shape-rendering": s.antialias ? null : "crispEdges",
@@ -6351,6 +6358,7 @@ pv.SvgScene.fill = function(e, scenes, i) {
       });
     e = this.append(e, scenes, i);
   }
+
   return e;
 };
 

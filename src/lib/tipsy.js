@@ -9,7 +9,7 @@ pv.Behavior.tipsy = function(opts) {
   function trigger() {
     if (tip) {
       $(tip).tipsy("hide");
-      tip.parentNode.removeChild(tip);
+      if(tip.parentNode) tip.parentNode.removeChild(tip);
       tip = null;
     }
   }
