@@ -83,7 +83,7 @@ pvc.Base = Base.extend({
         try {
             $('.tipsy').remove();
         } catch(e) {
-            // Do nothing
+        // Do nothing
         }
         // If we don't have data, we just need to set a "no data" message
         // and go on with life.
@@ -380,18 +380,20 @@ pvc.BasePanel = Base.extend({
 
     extend: function(mark, prefix){
 
-        for (p in this.chart.options.extensionPoints){
-            if (p.indexOf(prefix) == 0){
-                var m = p.substring(prefix.length);
-                // Distinguish between mark methods and properties
-                if (typeof mark[m] === "function") {
-                    mark[m](this.chart.options.extensionPoints[p]);
-                } else {
-                    mark[m] = this.chart.options.extensionPoints[p];
+        // if mark is null or undefined, skip
+        if ( !!mark )
+            for (p in this.chart.options.extensionPoints){
+                if (p.indexOf(prefix) == 0){
+                    var m = p.substring(prefix.length);
+                    // Distinguish between mark methods and properties
+                    if (typeof mark[m] === "function") {
+                        mark[m](this.chart.options.extensionPoints[p]);
+                    } else {
+                        mark[m] = this.chart.options.extensionPoints[p];
+                    }
                 }
-            }
 
-        }
+            }
 
     },
 

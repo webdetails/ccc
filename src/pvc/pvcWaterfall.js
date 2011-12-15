@@ -636,6 +636,12 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         this.extend(this.pvBarPanel,"barPanel_");
         this.extend(this.pvBar,"bar_");
     
+        // Extend secondAxis
+        if(this.pvSecondLine)
+            this.extend(this.pvSecondLine,"barSecondLine_");
+
+        if(this.pvSecondDot)
+            this.extend(this.pvSecondDot,"barSecondDot_");
 
         // Extend body
         this.extend(this.pvPanel,"chart_");
