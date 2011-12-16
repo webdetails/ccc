@@ -7,69 +7,67 @@
 
 pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
 
-    scatterChartPanel : null,
-    tipsySettings: {
-        gravity: "s",
-        fade: true
-    },
+  scatterChartPanel : null,
+  tipsySettings: {
+    gravity: "s",
+    fade: true
+  },
 
-    constructor: function(o){
+  constructor: function(o){
 
-        this.base(o);
+    this.base(o);
 
-        var _defaults = {
-            showDots: false,
-            showLines: false,
-            showAreas: false,
-            showValues: false,
-            showTooltips: true,
-            axisOffset: 0.05,
-            valuesAnchor: "right",
-            stacked: false,
-            originIsZero: true,
-            orientation: "vertical",
-            timeSeries: false,
-            timeSeriesFormat: "%Y-%m-%d",
-            panelSizeRatio: 1,
-            orthoFixedMin: null,
-            orthoFixedMax: null
-        };
-
-
-        // Apply options
-        $.extend(this.options,_defaults, o);
+    var _defaults = {
+      showDots: false,
+      showLines: false,
+      showAreas: false,
+      showValues: false,
+      showTooltips: true,
+      axisOffset: 0.05,
+      valuesAnchor: "right",
+      stacked: false,
+      originIsZero: true,
+      orientation: "vertical",
+      timeSeries: false,
+      timeSeriesFormat: "%Y-%m-%d",
+      panelSizeRatio: 1,
+      orthoFixedMin: null,
+      orthoFixedMax: null
+    };
 
 
-    },
-
-    preRender: function(){
-
-        this.base();
-
-        pvc.log("Prerendering in MetricScatterAbstract");
+    // Apply options
+    $.extend(this.options,_defaults, o);
 
 
-        this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
-            stacked: this.options.stacked,
-            showValues: this.options.showValues,
-            valuesAnchor: this.options.valuesAnchor,
-            showLines: this.options.showLines,
-            showDots: this.options.showDots,
-            showAreas: this.options.showAreas,
-            showTooltips: this.options.showTooltips,
-            orientation: this.options.orientation,
-            timeSeries: this.options.timeSeries,
-            timeSeriesFormat: this.options.timeSeriesFormat
-        });
+  },
 
-        this.categoricalPanel = this.scatterChartPanel;
+  preRender: function(){
 
-        this.scatterChartPanel.appendTo(this.basePanel); // Add it
+    this.base();
 
-    }
+    pvc.log("Prerendering in MetricScatterAbstract");
 
-}
-);
+    this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
+      stacked: this.options.stacked,
+      showValues: this.options.showValues,
+      valuesAnchor: this.options.valuesAnchor,
+      showLines: this.options.showLines,
+      showDots: this.options.showDots,
+      showAreas: this.options.showAreas,
+      showTooltips: this.options.showTooltips,
+      orientation: this.options.orientation,
+      timeSeries: this.options.timeSeries,
+      timeSeriesFormat: this.options.timeSeriesFormat
+    });
+
+    this.categoricalPanel = this.scatterChartPanel;
+
+    this.scatterChartPanel.appendTo(this.basePanel); // Add it
+
+  }
+
+});
 
 /**
  * Metric Dot Chart
@@ -78,22 +76,22 @@ pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
 
 pvc.MetricDotChart = pvc.MetricScatterAbstract.extend({
 
-    constructor: function(o){
+  constructor: function(o){
 
-        this.base();
+    this.base();
 
-        var _defaults = {
-            showDots: true,
-            showLines: false,
-            showAreas: false,
-            showValues: false,
-            stacked: false
-        };
+    var _defaults = {
+      showDots: true,
+      showLines: false,
+      showAreas: false,
+      showValues: false,
+      stacked: false
+    };
 
-        // Apply options
-        $.extend(this.options,_defaults, o);
+    // Apply options
+    $.extend(this.options,_defaults, o);
 
-    }
+  }
 });
 
 
@@ -104,23 +102,23 @@ pvc.MetricDotChart = pvc.MetricScatterAbstract.extend({
 
 pvc.MetricLineChart = pvc.MetricScatterAbstract.extend({
 
-    constructor: function(o){
+  constructor: function(o){
 
-        this.base();
+    this.base();
 
-        var _defaults = {
-            showDots: false, // ask
-            showLines: true,
-            showAreas: false,
-            showValues: false,
-            stacked: false
-        };
+    var _defaults = {
+      showDots: false, // ask
+      showLines: true,
+      showAreas: false,
+      showValues: false,
+      stacked: false
+    };
 
-        // Apply options
-        $.extend(this.options,_defaults, o);
+    // Apply options
+    $.extend(this.options,_defaults, o);
 
 
-    }
+  }
 });
 
 
@@ -132,23 +130,23 @@ pvc.MetricLineChart = pvc.MetricScatterAbstract.extend({
 
 pvc.mStackedLineChart = pvc.MetricScatterAbstract.extend({
 
-    constructor: function(o){
+  constructor: function(o){
 
-        this.base();
+    this.base();
 
-        var _defaults = {
-            showDots: false, // ask
-            showLines: true,
-            showAreas: false,
-            showValues: false,
-            stacked: true
-        };
+    var _defaults = {
+      showDots: false, // ask
+      showLines: true,
+      showAreas: false,
+      showValues: false,
+      stacked: true
+    };
 
-        // Apply options
-        $.extend(this.options,_defaults, o);
+    // Apply options
+    $.extend(this.options,_defaults, o);
 
 
-    }
+  }
 });
 
 
@@ -159,22 +157,22 @@ pvc.mStackedLineChart = pvc.MetricScatterAbstract.extend({
 
 pvc.mStackedAreaChart = pvc.MetricScatterAbstract.extend({
 
-    constructor: function(o){
+  constructor: function(o){
 
-        this.base();
+    this.base();
 
-        var _defaults = {
-            showDots: false, // ask
-            showLines: false,
-            showAreas: true,
-            showValues: false,
-            stacked: true
-        };
+    var _defaults = {
+      showDots: false, // ask
+      showLines: false,
+      showAreas: true,
+      showValues: false,
+      stacked: true
+    };
 
-        // Apply options
-        $.extend(this.options,_defaults, o);
+    // Apply options
+    $.extend(this.options,_defaults, o);
 
 
-    }
+  }
 });
 

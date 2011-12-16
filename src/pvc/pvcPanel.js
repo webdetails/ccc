@@ -83,7 +83,7 @@ pvc.Base = Base.extend({
         try {
             $('.tipsy').remove();
         } catch(e) {
-        // Do nothing
+            // Do nothing
         }
         // If we don't have data, we just need to set a "no data" message
         // and go on with life.
@@ -101,6 +101,11 @@ pvc.Base = Base.extend({
         this.dataEngine.setData(this.metadata,this.resultset);
         this.dataEngine.setCrosstabMode(this.options.crosstabMode);
         this.dataEngine.setSeriesInRows(this.options.seriesInRows);
+        //TODO: new
+        this.dataEngine.setMultiValued(this.options.isMultiValued);
+        this.dataEngine.setValuesIndexes(this.options.measuresIndexes);//columns where measure values are, for relational data
+        this.dataEngine.setDataOptions(this.options.dataOptions);
+        //end
         this.dataEngine.createTranslator();
 
         pvc.log(this.dataEngine.getInfo());
@@ -126,7 +131,7 @@ pvc.Base = Base.extend({
         this.basePanel.getPvPanel().canvas(this.options.canvas);
 
         // Title
-        if (this.options.title != null && this.options.title.lengh != ""){
+        if (this.options.title != null && this.options.title != ""){
             this.titlePanel = new pvc.TitlePanel(this, {
                 title: this.options.title,
                 anchor: this.options.titlePosition,
@@ -454,7 +459,7 @@ pvc.BasePanel = Base.extend({
         right: "left"
     },
 
-    paralelLength:{
+    parallelLength:{
         top: "width",
         bottom: "width",
         right: "height",

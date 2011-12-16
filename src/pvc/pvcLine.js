@@ -293,7 +293,6 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0.001);
-    //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
       
     }
     else{
@@ -368,8 +367,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .cursor("pointer")
       .event("click",function(d){
         var v, c;
-        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-        var elem = this.scene.$g.childNodes[this.index];
+        var s = myself.chart.dataEngine.getSeries()[this.parent.index]
         if(  d != null && typeof d == "object"){
           v = d.value;
           c = d.category
@@ -378,11 +376,10 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           v = d
           c = myself.chart.dataEngine.getCategories()[this.index]
         }
-        return myself.chart.options.clickAction(s,c, v, elem);
+        var e = arguments[arguments.length-1];
+        return myself.chart.options.clickAction(s, c, v, e);
       });
     }
-
-
 
     if(this.showValues){
       this.pvLabel = this.pvDot
@@ -397,14 +394,12 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       this.extend(this.pvLabel,"lineLabel_");
     }
 
-
     // Extend line and linePanel
     this.extend(this.pvScatterPanel,"scatterPanel_");
     this.extend(this.pvArea,"area_");
     this.extend(this.pvLine,"line_");
     this.extend(this.pvDot,"dot_");
     this.extend(this.pvLabel,"label_");
-
 
     // Extend body
     this.extend(this.pvPanel,"chart_");

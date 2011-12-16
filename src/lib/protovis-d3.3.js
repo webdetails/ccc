@@ -5260,7 +5260,7 @@ pv.SvgScene.dispatch = pv.listener(function(e) {
       }
     }
 
-    if (pv.Mark.dispatch(type, t.scenes, t.index)) e.preventDefault();
+    if (pv.Mark.dispatch(type, t.scenes, t.index, e)) e.preventDefault();
   }
 });
 
@@ -5894,7 +5894,7 @@ pv.SvgScene.dot = function(scenes) {
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-dasharray": s.strokeDasharray
+      "stroke-dasharray": (s.strokeDasharray)? s.strokeDasharray : 'none'
     };
     if (path) {
       svg.transform = "translate(" + s.left + "," + s.top + ")";
@@ -6059,7 +6059,7 @@ pv.SvgScene.line = function(scenes) {
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
       "stroke-linejoin": s.lineJoin,
-      "stroke-dasharray": s.strokeDasharray
+      "stroke-dasharray": (s.strokeDasharray)? s.strokeDasharray : 'none'
     });
   return this.append(e, scenes, 0);
 };
@@ -6180,10 +6180,13 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
        + " " + c.x + "," + c.y
        + " " + d.x + "," + d.y;
 };
-pv.SvgScene.panel = function(scenes) {
+pv.SvgScene.panel = function(scenes)
+{
   var g = scenes.$g, e = g && g.firstChild;
   var complete = false;
+  
   for (var i = 0; i < scenes.length; i++) {
+
     var s = scenes[i];
 
     /* visible */
@@ -6262,6 +6265,7 @@ pv.SvgScene.panel = function(scenes) {
 
             svgweb.appendChild (g, s.canvas);
             g = frag;
+
         } else {
             for (var j = 0; j < this.events.length; j++) {
               g.addEventListener(this.events[j], this.dispatch, false);
@@ -6283,8 +6287,10 @@ pv.SvgScene.panel = function(scenes) {
     if (s.overflow == "hidden") {
       var id = pv.id().toString(36),
           c = this.expect(e, "g", {"clip-path": "url(#" + id + ")"});
+          
       if (!c.parentNode) g.appendChild(c);
       scenes.$g = g = c;
+
       e = c.firstChild;
 
       e = this.expect(e, "clipPath", {"id": id});
@@ -6336,6 +6342,7 @@ pv.SvgScene.panel = function(scenes) {
 
 pv.SvgScene.fill = function(e, scenes, i) {
   var s = scenes[i], fill = s.fillStyle;
+
   if (fill.opacity || s.events == "all") {
     e = this.expect(e, "rect", {
         "shape-rendering": s.antialias ? null : "crispEdges",
@@ -6351,6 +6358,7 @@ pv.SvgScene.fill = function(e, scenes, i) {
       });
     e = this.append(e, scenes, i);
   }
+
   return e;
 };
 
@@ -7699,11 +7707,11 @@ pv.Mark.prototype.context = function(scene, index, f) {
 };
 
 /** @private Execute the event listener, then re-render. */
-pv.Mark.dispatch = function(type, scene, index) {
+pv.Mark.dispatch = function(type, scene, index, event) {
   var m = scene.mark, p = scene.parent, l = m.$handlers[type];
-  if (!l) return p && pv.Mark.dispatch(type, p, scene.parentIndex);
+  if (!l) return p && pv.Mark.dispatch(type, p, scene.parentIndex, event);
   m.context(scene, index, function() {
-      m = l.apply(m, pv.Mark.stack);
+      m = l.apply(m, pv.Mark.stack.concat(event));
       if (m && m.render) m.render();
     });
   return true;
@@ -14875,7 +14883,7 @@ pv.Behavior.drag = function() {
       max;
 
   /** @private */
-  function mousedown(d) {
+  function mousedown(d, e) {
     index = this.index;
     scene = this.scene;
     var m = this.mouse();
@@ -14885,11 +14893,11 @@ pv.Behavior.drag = function() {
       y: this.parent.height() - (d.dy || 0)
     };
     scene.mark.context(scene, index, function() { this.render(); });
-    pv.Mark.dispatch("dragstart", scene, index);
+    pv.Mark.dispatch("dragstart", scene, index, e);
   }
 
   /** @private */
-  function mousemove() {
+  function mousemove(e) {
     if (!scene) return;
     scene.mark.context(scene, index, function() {
         var m = this.mouse();
@@ -14897,15 +14905,15 @@ pv.Behavior.drag = function() {
         p.y = p.fix.y = Math.max(0, Math.min(v1.y + m.y, max.y));
         this.render();
       });
-    pv.Mark.dispatch("drag", scene, index);
+    pv.Mark.dispatch("drag", scene, index, e);
   }
 
   /** @private */
-  function mouseup() {
+  function mouseup(e) {
     if (!scene) return;
     p.fix = null;
     scene.mark.context(scene, index, function() { this.render(); });
-    pv.Mark.dispatch("dragend", scene, index);
+    pv.Mark.dispatch("dragend", scene, index, e);
     scene = null;
   }
 
@@ -15011,7 +15019,7 @@ pv.Behavior.point = function(r) {
   }
 
   /** @private */
-  function mousemove() {
+  function mousemove(e) {
     /* If the closest mark is far away, clear the current target. */
     var point = search(this.scene, this.index);
     if ((point.cost == Infinity) || (point.distance > r2)) point = null;
@@ -15021,12 +15029,12 @@ pv.Behavior.point = function(r) {
       if (point
           && (unpoint.scene == point.scene)
           && (unpoint.index == point.index)) return;
-      pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index);
+      pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
     }
 
     /* Point the new target, if there is one. */
     if (unpoint = point) {
-      pv.Mark.dispatch("point", point.scene, point.index);
+      pv.Mark.dispatch("point", point.scene, point.index, e);
 
       /* Unpoint when the mouse leaves the root panel. */
       pv.listen(this.root.canvas(), "mouseout", mouseout);
@@ -15036,7 +15044,7 @@ pv.Behavior.point = function(r) {
   /** @private */
   function mouseout(e) {
     if (unpoint && !pv.ancestor(this, e.relatedTarget)) {
-      pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index);
+      pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
       unpoint = null;
     }
   }
@@ -15134,7 +15142,7 @@ pv.Behavior.select = function() {
       m1; // initial mouse position
 
   /** @private */
-  function mousedown(d) {
+  function mousedown(d, e) {
     index = this.index;
     scene = this.scene;
     m1 = this.mouse();
@@ -15142,11 +15150,11 @@ pv.Behavior.select = function() {
     r.x = m1.x;
     r.y = m1.y;
     r.dx = r.dy = 0;
-    pv.Mark.dispatch("selectstart", scene, index);
+    pv.Mark.dispatch("selectstart", scene, index, e);
   }
 
   /** @private */
-  function mousemove() {
+  function mousemove(e) {
     if (!scene) return;
     scene.mark.context(scene, index, function() {
         var m2 = this.mouse();
@@ -15156,13 +15164,13 @@ pv.Behavior.select = function() {
         r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
         this.render();
       });
-    pv.Mark.dispatch("select", scene, index);
+    pv.Mark.dispatch("select", scene, index, e);
   }
 
   /** @private */
-  function mouseup() {
+  function mouseup(e) {
     if (!scene) return;
-    pv.Mark.dispatch("selectend", scene, index);
+    pv.Mark.dispatch("selectend", scene, index, e);
     scene = null;
   }
 
@@ -15235,7 +15243,7 @@ pv.Behavior.resize = function(side) {
       m1; // initial mouse position
 
   /** @private */
-  function mousedown(d) {
+  function mousedown(d, e) {
     index = this.index;
     scene = this.scene;
     m1 = this.mouse();
@@ -15246,11 +15254,11 @@ pv.Behavior.resize = function(side) {
       case "top": m1.y = r.y + r.dy; break;
       case "bottom": m1.y = r.y; break;
     }
-    pv.Mark.dispatch("resizestart", scene, index);
+    pv.Mark.dispatch("resizestart", scene, index, e);
   }
 
   /** @private */
-  function mousemove() {
+  function mousemove(e) {
     if (!scene) return;
     scene.mark.context(scene, index, function() {
         var m2 = this.mouse();
@@ -15260,13 +15268,13 @@ pv.Behavior.resize = function(side) {
         r.dy = Math.min(this.parent.height(), Math.max(m2.y, m1.y)) - r.y;
         this.render();
       });
-    pv.Mark.dispatch("resize", scene, index);
+    pv.Mark.dispatch("resize", scene, index, e);
   }
 
   /** @private */
-  function mouseup() {
+  function mouseup(e) {
     if (!scene) return;
-    pv.Mark.dispatch("resizeend", scene, index);
+    pv.Mark.dispatch("resizeend", scene, index, e);
     scene = null;
   }
 
@@ -15337,7 +15345,7 @@ pv.Behavior.pan = function() {
   }
 
   /** @private */
-  function mousemove() {
+  function mousemove(e) {
     if (!scene) return;
     scene.mark.context(scene, index, function() {
         var x = (pv.event.pageX - v1.x) * k,
@@ -15349,7 +15357,7 @@ pv.Behavior.pan = function() {
         }
         this.transform(m).render();
       });
-    pv.Mark.dispatch("pan", scene, index);
+    pv.Mark.dispatch("pan", scene, index, e);
   }
 
   /** @private */
@@ -15429,7 +15437,7 @@ pv.Behavior.zoom = function(speed) {
   if (!arguments.length) speed = 1 / 48;
 
   /** @private */
-  function mousewheel() {
+  function mousewheel(e) {
     var v = this.mouse(),
         k = pv.event.wheel * speed,
         m = this.transform().translate(v.x, v.y)
@@ -15441,7 +15449,7 @@ pv.Behavior.zoom = function(speed) {
       m.y = Math.max((1 - m.k) * this.height(), Math.min(0, m.y));
     }
     this.transform(m).render();
-    pv.Mark.dispatch("zoom", this.scene, this.index);
+    pv.Mark.dispatch("zoom", this.scene, this.index, e);
   }
 
   /**

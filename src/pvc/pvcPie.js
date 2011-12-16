@@ -161,8 +161,8 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
       .event("click",function(d){
         var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index];
         var c = myself.chart.dataEngine.getVisibleCategories()[this.index];
-        var elem = this.scene.$g.childNodes[this.index];
-        return myself.chart.options.clickAction(s,c, d,elem);
+        var e = arguments[arguments.length-1];
+        return myself.chart.options.clickAction(s, c, d, e);
       });
     }
 

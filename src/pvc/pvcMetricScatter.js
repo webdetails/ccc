@@ -175,7 +175,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0.001);
-    //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
+    //[pvc.BasePanel.parallelLength[anchor]](maxLineSize)
     */    
     }
     else {
@@ -233,9 +233,8 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
       this.pvDot
       .cursor("pointer")
       .event("click",function(d){
-        var v, c, elem;
+        var v, c, e;
         var s = myself.chart.dataEngine.getSeries()[this.parent.index]
-        elem = this.scene.$g.childNodes[this.index];
         if( typeof d == "object"){
           v = d.value;
           c = d.category
@@ -244,7 +243,8 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
           v = d
           c = myself.chart.dataEngine.getCategories()[this.index]
         }
-        return myself.chart.options.clickAction(s,c, v, elem);
+        e = arguments[arguments.length-1];
+        return myself.chart.options.clickAction(s, c, v, e);
       });
     }
 

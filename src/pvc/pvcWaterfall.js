@@ -410,7 +410,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         };
 
 
-        /*
+    /*
      * functions to determine the color palette.
      */
         var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
@@ -476,7 +476,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         [anchor](function(d) {
             return d.y
         })
-        [pvc.BasePanel.paralelLength[anchor]](function(d) {
+        [pvc.BasePanel.parallelLength[anchor]](function(d) {
             return d.w
         })
         .strokeStyle("#c0c0c0");
@@ -526,7 +526,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .data(function(d){
                 return d
             })
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+            [pvc.BasePanel.parallelLength[anchor]](maxBarSize)
             .fillStyle(myself.DF.colorFunc);
 
         } else {   //  not this.stacked
@@ -538,7 +538,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .data(this.getDataSet() )
             [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.catContainerBasePosFunc)
             [anchor](0)
-            [pvc.BasePanel.paralelLength[anchor]](myself.DF.catContainerWidth)
+            [pvc.BasePanel.parallelLength[anchor]](myself.DF.catContainerWidth)
             // pvBarPanel[X]  = this[X]  (copy the function)
             [pvc.BasePanel.orthogonalLength[anchor]](
                 this[pvc.BasePanel.orthogonalLength[anchor]])
@@ -554,7 +554,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.relBasePosFunc)
             [anchor](myself.DF.orthoBotPos)
             [pvc.BasePanel.orthogonalLength[anchor]](myself.DF.orthoLengthFunc)
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ; 
+            [pvc.BasePanel.parallelLength[anchor]](maxBarSize)  ; 
 
         }  // end of if (stacked)
 
@@ -603,16 +603,15 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
         if (this.chart.options.clickable){
             this.pvBar
-            .cursor("pointer")
-            .event("click",function(d){
-                var s = myself.chart.dataEngine
-                .getSeries()[myself.stacked?this.parent.index:this.index];
-                var c = myself.chart.dataEngine
-                .getCategories()[myself.stacked?this.index:this.parent.index];
-                var elem = this.scene.$g.childNodes[this.index];
-                return myself.chart.options.clickAction(s,c, d, elem);
-
-            });
+                .cursor("pointer")
+                .event("click",function(d){
+                    var s = myself.chart.dataEngine
+                        .getSeries()[myself.stacked?this.parent.index:this.index];
+                    var c = myself.chart.dataEngine
+                        .getCategories()[myself.stacked?this.index:this.parent.index];
+                    var e = arguments[arguments.length-1];
+                    return myself.chart.options.clickAction(s, c, d, e);
+                });
         }
 
         if(this.showValues){
@@ -629,19 +628,22 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         }
 
         // Extend waterfall line
-        if (this.waterfall)
+        if (this.waterfall){
             this.extend(this.pvWaterfallLine,"barWaterfallLine_");
+        }
 
         // Extend bar and barPanel
         this.extend(this.pvBarPanel,"barPanel_");
         this.extend(this.pvBar,"bar_");
     
         // Extend secondAxis
-        if(this.pvSecondLine)
+        if(this.pvSecondLine){
             this.extend(this.pvSecondLine,"barSecondLine_");
+        }
 
-        if(this.pvSecondDot)
+        if(this.pvSecondDot){
             this.extend(this.pvSecondDot,"barSecondDot_");
+        }
 
         // Extend body
         this.extend(this.pvPanel,"chart_");
