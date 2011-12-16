@@ -326,7 +326,34 @@ var testHeatGrid = {
   }]
 };
 
-var testHeatGridComp = {"metadata":[{"colIndex":0,"colName":"Territory","colLabel":"Territory","colType":"STRING"},{"colIndex":1,"colName":"Region","colLabel":"Region","colType":"STRING"},{"colIndex":2,"colName":"Country","colLabel":"Country","colType":"STRING"},{"colIndex":3,"colName":"Products~Land~Classic Cars~Quantity","colLabel":"Products~Land~Classic Cars~Quantity","colType":"NUMERIC"},{"colIndex":4,"colName":"Products~Land~Classic Cars~Sales","colLabel":"Products~Land~Classic Cars~Sales","colType":"NUMERIC"},{"colIndex":5,"colName":"Products~Land~Motorcycles~Quantity","colLabel":"Products~Land~Motorcycles~Quantity","colType":"NUMERIC"},{"colIndex":6,"colName":"Products~Land~Motorcycles~Sales","colLabel":"Products~Land~Motorcycles~Sales","colType":"NUMERIC"},{"colIndex":7,"colName":"Products~Planes~Quantity","colLabel":"Products~Planes~Quantity","colType":"NUMERIC"},{"colIndex":8,"colName":"Products~Planes~Sales","colLabel":"Products~Planes~Sales","colType":"NUMERIC"}],"resultset":[["APAC","Somewhere","Australia",1818,193085.5400000001,876,89968.76,813,74853.87000000001],["APAC","Somewhere","Hong Kong",null,472710.49,35,3845.8,462,39649.31],["APAC","Somewhere","Japan",314,472710.49,309,26536.41,547,49176.96000000001],["APAC","Somewhere","New Zealand",1526,167198.22999999995,976,99849.46999999999,517,46572.33000000001],["APAC","Somewhere","Philippines",478,53112.090000000004,241,18061.68,215,20906.87],["APAC","Somewhere","Singapore",1043,132890.44,44,4175.6,null,null],["EMEA","PIIGS","Spain",937,101459.47,197,26047.66,200,17860.44],["EMEA","PIIGS","Ireland",202,31688.82,58,4953.200000000001,115,11784.36],["EMEA","PIIGS","Italy",982,133182.62999999998,111,11609.380000000001,1276,113717.56],["EMEA","Real Europe","Belgium",147,20136.960000000003,null,null,41,5624.79],["EMEA","Real Europe","Denmark",1244,157182.48000000004,null,null,70,7586.45],["EMEA","Real Europe","Finland",1284,153552.24000000002,447,47866.72,421,34375.130000000005],["EMEA","Real Europe","France",3540,388951.2000000002,2404,226390.30999999997,1136,108155.51000000002],["EMEA","Real Europe","Germany",1281,148314.99999999997,121,7497.500000000001,245,23001.26],["EMEA","Real Europe","Norway",1158,134787.36999999997,484,51768.63,325,29500.7],["EMEA","Real Europe","Austria",4380,476165.1499999998,780,74634.82000000002,1101,89985.51],["EMEA","Real Europe","Sweden",552,69088.06000000001,133,15567.25,104,8899.6],["EMEA","Real Europe","Switzerland",1078,117713.55999999998,null,null,null,null],["EMEA","Real Europe","UK",1507,159377.69999999998,371,40802.810000000005,479,41163.51],["EMEA","Bogus Europe","Bogus One",1078,117713.55999999998,null,null,null,null],["EMEA","Bogus Europe","Bogus Two",1507,159377.69999999998,371,40802.810000000005,479,41163.51]]}
+var testHeatGridComp =
+    {"metadata":[{"colIndex":0,"colName":"Territory","colLabel":"Territory","colType":"STRING"},
+                 {"colIndex":2,"colName":"Country","colLabel":"Country","colType":"STRING"},
+                 {"colIndex":3,"colName":"Products~Land~Classic Cars~Quantity","colLabel":"Products~Land~Classic Cars~Quantity","colType":"NUMERIC"},
+                 {"colIndex":4,"colName":"Products~Land~Classic Cars~Sales","colLabel":"Products~Land~Classic Cars~Sales","colType":"NUMERIC"},
+                 {"colIndex":5,"colName":"Products~Land~Motorcycles~Quantity","colLabel":"Products~Land~Motorcycles~Quantity","colType":"NUMERIC"},
+                 {"colIndex":6,"colName":"Products~Land~Motorcycles~Sales","colLabel":"Products~Land~Motorcycles~Sales","colType":"NUMERIC"},
+                 {"colIndex":7,"colName":"Products~Planes~Quantity","colLabel":"Products~Planes~Quantity","colType":"NUMERIC"},
+                 {"colIndex":8,"colName":"Products~Planes~Sales","colLabel":"Products~Planes~Sales","colType":"NUMERIC"}],
+    "resultset":[["APAC","Australia",1818,193085.5400000001,876,89968.76,813,74853.87000000001],
+                 ["APAC","Hong Kong",null,472710.49,35,3845.8,462,39649.31],
+                 ["APAC","Japan",314,472710.49,309,26536.41,547,49176.96000000001],
+                 ["APAC","New Zealand",1526,167198.22999999995,976,99849.46999999999,517,46572.33000000001],
+                 ["APAC","Philippines",478,53112.090000000004,241,18061.68,215,20906.87],
+                 ["APAC","Singapore",1043,132890.44,44,4175.6,null,null],
+                 ["EMEA","Spain",937,101459.47,197,26047.66,200,17860.44],
+                 ["EMEA","Ireland",202,31688.82,58,4953.200000000001,115,11784.36],
+                 ["EMEA","Italy",982,133182.62999999998,111,11609.380000000001,1276,113717.56],
+                 ["EMEA","Belgium",147,20136.960000000003,null,null,41,5624.79],
+                 ["EMEA","Denmark",1244,157182.48000000004,null,null,70,7586.45],
+                 ["EMEA","Finland",1284,153552.24000000002,447,47866.72,421,34375.130000000005],
+                 ["EMEA","France",3540,388951.2000000002,2404,226390.30999999997,1136,108155.51000000002],
+                 ["EMEA","Germany",1281,148314.99999999997,121,7497.500000000001,245,23001.26],
+                 ["EMEA","Norway",1158,134787.36999999997,484,51768.63,325,29500.7],
+                 ["EMEA","Austria",4380,476165.1499999998,780,74634.82000000002,1101,89985.51],
+                 ["EMEA","Sweden",552,69088.06000000001,133,15567.25,104,8899.6],
+                 ["EMEA","Switzerland",1078,117713.55999999998,null,null,null,null],
+                 ["EMEA","UK",1507,159377.69999999998,371,40802.810000000005,479,41163.51]]};
 
 var testLDot = {
   "resultset":[

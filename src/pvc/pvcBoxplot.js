@@ -69,6 +69,8 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 	    boxplotColor: this.options.boxplotColor
         });
 
+        this.categoricalPanel = this.bpChartPanel;
+
         this.bpChartPanel.appendTo(this.basePanel); // Add it
 
         return;
@@ -441,11 +443,10 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
             this.pvBoxPanel
             .cursor("pointer")
             .event("click",function(d){
-                var s = myself.chart.dataEngine
-                .getSeries()[myself.stacked?this.parent.index:this.index]
-                var c = myself.chart.dataEngine
-                .getCategories()[myself.stacked?this.index:this.parent.index]
-                return myself.chart.options.clickAction(s,c, d);
+                var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index];
+                var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index];
+                var ev = pv.event;
+                return myself.chart.options.clickAction(s,c, d, ev);
             });
         }
     /*  heeft geen data !!

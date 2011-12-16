@@ -8,6 +8,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     xAxisPanel : null,
     secondXAxisPanel: null,
     secondYAxisPanel: null,
+    
+    categoricalPanel: null, // This will act as a holder for the specific panel
 
     yScale: null,
     xScale: null,
@@ -80,8 +82,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if (this.options.showXScale == false){
             this.options.xAxisSize = 0
         }
-
-        //TODO: font
 
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
@@ -174,7 +174,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     generateSecondXAxis: function(){
 
         if( this.options.secondAxisIndependentScale && this.options.orientation == "horizontal"){
-            this.secondXAxisPanel = new pvc.XAxisPanel(this, {
+            this.secondXAxisPanel = new pvc.SecondXAxisPanel(this, {
                 ordinal: this.isXAxisOrdinal(),
                 showAllTimeseries: false,
                 anchor: pvc.BasePanel.oppositeAnchor[this.options.xAxisPosition],
@@ -198,7 +198,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         if( this.options.secondAxisIndependentScale && this.options.orientation == "vertical"){
 
-            this.secondYAxisPanel = new pvc.YAxisPanel(this, {
+            this.secondYAxisPanel = new pvc.SecondYAxisPanel(this, {
                 ordinal: this.isYAxisOrdinal(),
                 showAllTimeseries: false,
                 anchor: pvc.BasePanel.oppositeAnchor[this.options.yAxisPosition],
@@ -275,12 +275,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         if (this.options.orientation == "vertical") {
             scale = this.options.timeSeries  ?
-            this.getTimeseriesScale()     :
+            this.getTimeseriesScale(false,true)     :
             this.getOrdinalScale();
         } else {
             scale =  (this.options.orthoAxisOrdinal) ?
             this.getPerpOrdinalScale("x")    :
-            this.getLinearScale();
+            this.getLinearScale(false,true);
         } 
 
         return scale;
@@ -387,8 +387,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         return scale;
     },
     /**
-    **/
-    getLinearScale: function(bypassAxis){
+     **/
+    getLinearScale: function(bypassAxis,bypassOffset){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
@@ -436,6 +436,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Adding a small offset to the scale:
         var offset = (max - min) * this.options.axisOffset;
+        offset = bypassOffset?0:offset;
         var scale = new pv.Scale.linear(min - (this.options.originIsZero && min == 0 ? 0 : offset),max + (this.options.originIsZero && max == 0 ? 0 : offset));
 
 
@@ -462,11 +463,19 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise
      *
      */
-    getTimeseriesScale: function(bypassAxis){
+    getTimeseriesScale: function(bypassAxis,bypassOffset){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
-        var secondAxisSize = bypassAxis?0:this.options.secondAxisSize;
+
+        var secondXAxisSize = 0, secondYAxisSize = 0;
+        
+        if( this.options.orientation == "vertical"){
+            secondYAxisSize = bypassAxis?0:this.options.secondAxisSize;
+        }
+        else{
+            secondXAxisSize = bypassAxis?0:this.options.secondAxisSize;
+        }
 
         var size = this.options.orientation=="vertical"?
         this.basePanel.width:
@@ -482,21 +491,22 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var max = parser.parse(categories[categories.length -1]);
         var min = parser.parse(categories[0]);
         var offset = (max.getTime() - min.getTime()) * this.options.axisOffset;
+        offset = bypassOffset?0:offset;
 
         var scale = new pv.Scale.linear(new Date(min.getTime() - offset),new Date(max.getTime() + offset));
 
         if(this.options.orientation=="vertical" && this.options.yAxisPosition == "left"){
             scale.min = yAxisSize;
-            scale.max = size;
+            scale.max = size - secondYAxisSize;
             
         }
         else if(this.options.orientation=="vertical" && this.options.yAxisPosition == "right"){
-            scale.min = 0;
+            scale.min = secondYAxisSize;
             scale.max = size - yAxisSize;
         }
         else{
             scale.min = 0;
-            scale.max = size - xAxisSize;
+            scale.max = size - xAxisSize - secondXAxisSize;
         }
 
         scale.range( scale.min , scale.max);
@@ -554,10 +564,79 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         scale.range(scale.min, scale.max);
         return scale;
 
+    },
+    
+    markEventDefaults: {
+        strokeStyle: "#5BCBF5",  /* Line Color */
+        lineWidth: "0.5",  /* Line Width */
+        textStyle: "#5BCBF5", /* Text Color */
+        verticalOffset: 10, /* Distance between vertical anchor and label */
+        verticalAnchor: "bottom", /* Vertical anchor: top or bottom */
+        horizontalAnchor: "right", /* Horizontal anchor: left or right */
+        forceHorizontalAnchor: false, /* Horizontal anchor position will be respected if true */
+        horizontalAnchorSwapLimit: 80 /* Horizontal anchor will switch if less than this space available */
+    },
+    
+    
+    markEvent: function(dateString, label, options){
+
+        if( this.options.timeSeries !== true){
+            
+            pvc.log("Attempting to mark an event on a non timeSeries chart");
+            return;
+        }
+
+        var o = $.extend({},this.markEventDefaults,options);
+        var scale = this.getTimeseriesScale(true,true);
+
+        // Are we outside the allowed scale? 
+        var d = pv.Format.date(this.options.timeSeriesFormat).parse(dateString);
+        var dpos = scale( d );
+        
+        if( dpos < scale.range()[0] || dpos > scale.range()[1]){
+            pvc.log("Event outside the allowed range, returning");
+            return;
+        }
+
+        // Add the line
+
+        var panel = this.categoricalPanel.pvPanel;
+        var h = this.yScale.range()[1];
+
+        // Detect where to place the horizontalAnchor
+        var anchor = o.horizontalAnchor;
+        if( !o.forceHorizontalAnchor )
+        {
+            var availableSize = o.horizontalAnchor == "right"?scale.range()[1]-dpos:dpos;
+            
+            // TODO: Replace this availableSize condition with a check for the text size
+            if (availableSize < o.horizontalAnchorSwapLimit ){
+                o.horizontalAnchor = o.horizontalAnchor == "right"?"left":"right";
+            }
+            
+        }
+
+        var line = panel.add(pv.Line)
+            .data([0,h])
+            .strokeStyle(o.strokeStyle)
+            .lineWidth(o.lineWidth)
+            .bottom(function(d){
+                return d;
+            })
+            .left(dpos)
+
+        var pvLabel = line
+            .anchor(o.horizontalAnchor)
+            .top( o.verticalAnchor == "top" ? o.verticalOffset : (h - o.verticalOffset))
+            .add(pv.Label)
+            .text(label)
+            .textStyle(o.textStyle)
+            .visible(function(d){
+                return this.index==0;
+            });
     }
 
-}
-)
+});
 
 
 /*
@@ -849,6 +928,22 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }
         }
         
+        var tipsyGravity = 's';
+        switch(this.anchor){
+            case 'bottom':
+                tipsyGravity = 's';
+                break;
+            case 'top':
+                tipsyGravity = 'n';
+                break;
+            case 'left':
+                tipsyGravity = 'w';
+                break;
+            case 'right':
+                tipsyGravity = 'e';
+                break;
+        }
+        
         var maxDepth = pv.max(elements, function(col){
             //return $.isArray(col) ? col.length : 1;
             return (col != null && col[0] !== undefined) ? col.length : 1;
@@ -978,7 +1073,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .cursor( myself.clickAction? 'pointer' : 'default')
             .events('all')//labels don't have events by default
             .event('click', function(d){
-                var e = pv.event;
+                var e = arguments[arguments.length-1];
                 if(clickAction){
                     if(doubleClickAction){
                         //arg has to be passed in closure in order to work with ie
@@ -989,7 +1084,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 }
             })
             .event("mouseover", pv.Behavior.tipsy({//Tooltip
-                gravity: "s",
+                gravity: tipsyGravity,
                 fade: true,
                 offset: diagMargin * 2
             }))
@@ -999,7 +1094,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             if(doubleClickAction)
             {
                 this.pvLabel.event("dblclick", function(d){
-                    doubleClickAction(d.nodePath, pv.event);
+                    doubleClickAction(d.nodePath, arguments[arguments.length-1]);
                 });
             }
             
@@ -1170,23 +1265,28 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var myself = this;
 
         var align =  (this.anchor == "bottom" || this.anchor == "top") ?
-        "center" : 
-        (this.anchor == "left")  ?
-        "right" :
-        "left";
-
-        this.pvLabel = this.pvRule.add(pv.Label)
+                    "center" : 
+                    (this.anchor == "left")  ?
+                        "right" :
+                        "left";
+       
+        this.pvTicks = this.pvRule.add(pv.Rule)
         .data(this.ordinalElements)
         [pvc.BasePanel.parallelLength[this.anchor]](null)
-        [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
+        [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
         [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
             return myself.scale(d) + myself.scale.range().band/2;
         })
+        [pvc.BasePanel.orthogonalLength[this.anchor]](5)
+        .strokeStyle("rgba(0,0,0,0)");//TODO:ok?
+
+        this.pvLabel = this.pvTicks.anchor(this.anchor)
+        .add(pv.Label)
         .textAlign(align)
-        .textBaseline("middle")
-        .text(pv.identity)
+        //.textBaseline("middle")
+        //.text(pv.identity)
         .font("9px sans-serif");
-        
+
     },
 
 
@@ -1269,6 +1369,20 @@ pvc.XAxisPanel = pvc.AxisPanel.extend({
 
 });
 
+/*
+ * SecondXAxisPanel panel.
+ *
+ *
+ */
+pvc.SecondXAxisPanel = pvc.XAxisPanel.extend({
+
+    panelName: "secondXAxis",
+
+    constructor: function(chart, options){
+        this.base(chart,options);
+    }
+});
+
 
 /*
  * YAxisPanel panel.
@@ -1287,6 +1401,21 @@ pvc.YAxisPanel = pvc.AxisPanel.extend({
 
     }
 
+});
 
+/*
+ * SecondYAxisPanel panel.
+ *
+ *
+ */
+pvc.SecondYAxisPanel = pvc.YAxisPanel.extend({
+
+    panelName: "secondYAxis",
+
+    constructor: function(chart, options){
+
+        this.base(chart,options);
+
+    }
 
 });

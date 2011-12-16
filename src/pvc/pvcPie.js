@@ -159,9 +159,10 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
       this.pvPie
       .cursor("pointer")
       .event("click",function(d){
-        var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
-        var c = myself.chart.dataEngine.getVisibleCategories()[this.index]
-        return myself.chart.options.clickAction(s,c, d);
+        var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index];
+        var c = myself.chart.dataEngine.getVisibleCategories()[this.index];
+        var e = arguments[arguments.length-1];
+        return myself.chart.options.clickAction(s, c, d, e);
       });
     }
 

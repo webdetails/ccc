@@ -3,7 +3,6 @@
     <head>
         <title>CCC Samples - B</title>
 
-        <!--meta name="svg.render.forceflash" content="true"-->
 
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -40,39 +39,55 @@
 
 
 <h3>Test</h3>
-<textarea cols="55" rows="18" id="pvcHG1Code">
-var heatGrid1 = new pvc.HeatGridChart({
-    canvas: "pvcHG1",
+<textarea cols="55" rows="18" id="pvcHG5Code">
+var heatGrid5 = new pvc.HeatGridChart({
+    canvas: "pvcHG5",
     width: 600,
-    height: 300,
-    title:"Heat grid - Normalized by Product",
+    height: 250,
+    title:"Selectable heat grid with composite axis",
     animate: false,
     clickable: false,
     orientation: "vertical",
     showValues: false,
     valuesAnchor: "right",
-    normPerBaseCategory: true,
+    normPerBaseCategory: false,
+    colorValIdx: 1,
+    sizeValIdx: 0,
     useShapes: true,
-
-   dataOptions: {
-            categoriesCount : 3,
+    nullColor:'blue',
+    nullShape:null,
+    colorRange:['red','yellow', 'lightgreen','darkgreen'],
+    dataOptions: {
+            categoriesCount : 2,
             measuresInColumns: true
         },
-
-shape: 'square',
+axisLabelFont:'14px helvetica',
+shape: 'circle',
+onSelectionChange: function(selections){
+ var selTxt = '';
+ for(var i=0;i&lt;selections.length;i++){
+  var item = selections[i];
+  selTxt += 'category:[' + item.category.join(', ') + '] ';
+  selTxt += ', series:[' + item.series.join(', ') +']&ltbr&gt' ;
+ }
+  $('#selected').html(selTxt);
+},
+yAxisSize:60,
 xAxisSize:100,
-yAxisSize:100,
 isMultiValued: true,
 useCompositeAxis:true
     });
 
-heatGrid1.setData(testHeatGridComp, {crosstabMode: true, seriesInRows: false });
-heatGrid1.render();
+heatGrid5.setData(testHeatGridComp, {crosstabMode: true, seriesInRows: false });
+heatGrid5.render();
+
 
 </textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcHG1"></div>
- 
+<button class="tryMe" onclick='tryMe(this)'>Try me</button>
+<div id="pvcHG5"></div>
+<br>
+<span>Selections:</span>
+<div id="selected"/>
         
   </body>
 </html>

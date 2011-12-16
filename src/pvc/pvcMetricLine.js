@@ -48,7 +48,6 @@ pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
 
     pvc.log("Prerendering in MetricScatterAbstract");
 
-
     this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
       stacked: this.options.stacked,
       showValues: this.options.showValues,
@@ -62,12 +61,13 @@ pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
       timeSeriesFormat: this.options.timeSeriesFormat
     });
 
+    this.categoricalPanel = this.scatterChartPanel;
+
     this.scatterChartPanel.appendTo(this.basePanel); // Add it
 
   }
 
-}
-);
+});
 
 /**
  * Metric Dot Chart

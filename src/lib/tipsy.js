@@ -14,10 +14,12 @@ pv.Behavior.tipsy = function(opts) {
     }
   }
   
-  function mouseMove(ev){
-    if(tip){
-      if(ev == null) ev = pv.event;
-      $(tip).tipsy("tip").css({left:ev.clientX+8+"px",top:ev.clientY+8+"px"});
+  function mouseMoveAbs(ev){//assumes absolute positioning
+    if(tip!=null)
+    {
+      var tipLbl = $(tip).tipsy("tip");
+      tipLbl.css('left',ev.pageX+8+"px");
+      tipLbl.css('top',ev.pageY+8+"px");
     }
   }
 
@@ -56,11 +58,12 @@ pv.Behavior.tipsy = function(opts) {
       tip.style.width = Math.ceil(this.width() * t.k) + 1 + "px";
       tip.style.height = Math.ceil(this.height() * t.k) + 1 + "px";
 
-    } else if (this.properties.shapeRadius) {
-      var r = this.shapeRadius();
-      t.x -= r;
-      t.y -= r;
-      tip.style.height = tip.style.width = Math.ceil(2 * r * t.k) + "px";
+
+    //} else if (this.properties.shapeRadius && !opts.followMouse) {
+    //  var r = this.shapeRadius();
+    //  t.x -= r;
+    //  t.y -= r;
+    //  tip.style.height = tip.style.width = Math.ceil(2 * r * t.k) + "px";
 
     } else if( this.properties.outerRadius){
       // Wedge
@@ -70,7 +73,7 @@ pv.Behavior.tipsy = function(opts) {
       tip.style.top = Math.floor(this.top() + Math.sin(angle)*radius + t.y) + "px";
     }
      if(opts.followMouse){
-      $(pv.event.target).mousemove(mouseMove);
+      $(pv.event.target).mousemove(mouseMoveAbs);
      }
     /*
        * Cleanup the tooltip span on mouseout. Immediately trigger the tooltip;

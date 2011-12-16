@@ -72,12 +72,12 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
         // the axis-range computation is possible in "AbstractCategoricalAxis.
         this.callWithHiddenFirstSeries( this.base );
 
-	var logMessage = "Prerendering a ";
-	if (this.options.waterfall)
+        var logMessage = "Prerendering a ";
+        if (this.options.waterfall)
             logMessage += "WaterfallChart";
-	else logMessage +=  ((this.options.stacked) ?
-			     "stacked" : "normal")  +  " BarChart";
-	pvc.log(logMessage);
+        else logMessage +=  ((this.options.stacked) ?
+            "stacked" : "normal")  +  " BarChart";
+        pvc.log(logMessage);
 
         this.wfChartPanel = new pvc.WaterfallChartPanel(this, {
             stacked: this.options.stacked,
@@ -89,6 +89,8 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
             showTooltips: this.options.showTooltips,
             orientation: this.options.orientation
         });
+
+        this.categoricalPanel = this.wfChartPanel;
 
         this.wfChartPanel.appendTo(this.basePanel); // Add it
 
@@ -584,9 +586,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         .text(function(d){
             var v = myself.chart.options.valueFormat(d);
             var s = myself.chart.dataEngine
-            .getVisibleSeries()[myself.stacked?this.parent.index:this.index]
+            .getVisibleSeries()[myself.stacked?this.parent.index:this.index];
             var c = myself.chart.dataEngine
-            .getVisibleCategories()[myself.stacked?this.index:this.parent.index]
+            .getVisibleCategories()[myself.stacked?this.index:this.parent.index];
             return myself.chart.options.tooltipFormat.call(myself,s,c,v);
     
         })
@@ -601,19 +603,20 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
         if (this.chart.options.clickable){
             this.pvBar
-            .cursor("pointer")
-            .event("click",function(d){
-                var s = myself.chart.dataEngine
-                .getVisibleSeries()[myself.stacked?this.parent.index:this.index]
-                var c = myself.chart.dataEngine
-                .getVisibleCategories()[myself.stacked?this.index:this.parent.index]
-                return myself.chart.options.clickAction(s,c, d);
-            });
+                .cursor("pointer")
+                .event("click",function(d){
+                    var s = myself.chart.dataEngine
+                        .getSeries()[myself.stacked?this.parent.index:this.index];
+                    var c = myself.chart.dataEngine
+                        .getCategories()[myself.stacked?this.index:this.parent.index];
+                    var e = arguments[arguments.length-1];
+                    return myself.chart.options.clickAction(s, c, d, e);
+                });
         }
 
         if(this.showValues){
             this.pvBarLabel = this.pvBar
-            .anchor(this.valuesAnchor?this.valuesAnchor : 'center')
+            .anchor(this.valuesAnchor ? this.valuesAnchor : 'center')
             .add(pv.Label)
             .bottom(0)
             .text(function(d){
@@ -625,13 +628,22 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         }
 
         // Extend waterfall line
-	if (this.waterfall)
-	    this.extend(this.pvWaterfallLine,"barWaterfallLine_");
+        if (this.waterfall){
+            this.extend(this.pvWaterfallLine,"barWaterfallLine_");
+        }
 
         // Extend bar and barPanel
         this.extend(this.pvBarPanel,"barPanel_");
         this.extend(this.pvBar,"bar_");
     
+        // Extend secondAxis
+        if(this.pvSecondLine){
+            this.extend(this.pvSecondLine,"barSecondLine_");
+        }
+
+        if(this.pvSecondDot){
+            this.extend(this.pvSecondDot,"barSecondDot_");
+        }
 
         // Extend body
         this.extend(this.pvPanel,"chart_");

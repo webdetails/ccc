@@ -61,6 +61,8 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
       timeSeries: this.options.timeSeries,
       timeSeriesFormat: this.options.timeSeriesFormat
     });
+    
+    this.categoricalPanel = this.scatterChartPanel;
 
     this.scatterChartPanel.appendTo(this.basePanel); // Add it
 
@@ -257,13 +259,11 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     var oScale = this.chart.getOrdinalScale(true);
     var tScale;
     if(this.timeSeries){
-      tScale = this.chart.getTimeseriesScale(true);
+      tScale = this.chart.getTimeseriesScale(true,true);
     }
     
     var parser = pv.Format.date(this.timeSeriesFormat);
     
-    var maxLineSize;
-
     var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
     var colorFunc = function(d){
       // return colors(d.serieIndex)
@@ -334,6 +334,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     
     this.pvLine
     .strokeStyle(colorFunc)
+    .lineJoin(null)
     .text(function(d){
       var v, c;
       var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
@@ -375,11 +376,10 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           v = d
           c = myself.chart.dataEngine.getCategories()[this.index]
         }
-        return myself.chart.options.clickAction(s,c, v);
+        var e = arguments[arguments.length-1];
+        return myself.chart.options.clickAction(s, c, v, e);
       });
     }
-
-
 
     if(this.showValues){
       this.pvLabel = this.pvDot
@@ -394,14 +394,12 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       this.extend(this.pvLabel,"lineLabel_");
     }
 
-
     // Extend line and linePanel
     this.extend(this.pvScatterPanel,"scatterPanel_");
     this.extend(this.pvArea,"area_");
     this.extend(this.pvLine,"line_");
     this.extend(this.pvDot,"dot_");
     this.extend(this.pvLabel,"label_");
-
 
     // Extend body
     this.extend(this.pvPanel,"chart_");

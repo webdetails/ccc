@@ -22,6 +22,8 @@ pvc.Base = Base.extend({
     legendSource: "series",
     colors: null,
 
+    // renderCallback
+    renderCallback: undefined,
 
     constructor: function(options){
         var myself = this;
@@ -105,7 +107,6 @@ pvc.Base = Base.extend({
         this.dataEngine.setDataOptions(this.options.dataOptions);
         //end
         this.dataEngine.createTranslator();
-        
 
         pvc.log(this.dataEngine.getInfo());
         // Create the color info
@@ -180,6 +181,10 @@ pvc.Base = Base.extend({
                 this.preRender();
             }
 
+            if( typeof this.options.renderCallback !== "undefined" ){
+                this.options.renderCallback.call(this);
+            }
+        
             this.basePanel.getPvPanel().render();
     
             if(this.options.animate == true && !bypassAnimation){
@@ -380,18 +385,20 @@ pvc.BasePanel = Base.extend({
 
     extend: function(mark, prefix){
 
-        for (p in this.chart.options.extensionPoints){
-            if (p.indexOf(prefix) == 0){
-                var m = p.substring(prefix.length);
-                // Distinguish between mark methods and properties
-                if (typeof mark[m] === "function") {
-                    mark[m](this.chart.options.extensionPoints[p]);
-                } else {
-                    mark[m] = this.chart.options.extensionPoints[p];
+        // if mark is null or undefined, skip
+        if ( !!mark )
+            for (p in this.chart.options.extensionPoints){
+                if (p.indexOf(prefix) == 0){
+                    var m = p.substring(prefix.length);
+                    // Distinguish between mark methods and properties
+                    if (typeof mark[m] === "function") {
+                        mark[m](this.chart.options.extensionPoints[p]);
+                    } else {
+                        mark[m] = this.chart.options.extensionPoints[p];
+                    }
                 }
-            }
 
-        }
+            }
 
     },
 

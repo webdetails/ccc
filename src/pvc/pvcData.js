@@ -65,7 +65,7 @@ pvc.DataEngine = Base.extend({
             pvc.log("Creating RelationalTranslator");
             this.translator = new pvc.RelationalTranslator();
         }
-        
+
         this.translator.setData(this.metadata, this.resultset);
         this.translator.prepare(this);
 
@@ -429,7 +429,6 @@ pvc.DataEngine = Base.extend({
         return res;
     },
 
-
     /*
      * Returns the values for a given series idx
      *
@@ -550,7 +549,7 @@ pvc.DataEngine = Base.extend({
 
         var myself=this;
         var max = pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
-            return pv.sum(myself.getVisibleValuesForCategoryIndex(idx).filter(pvc.nonEmpty))
+            return pv.sum(myself.getVisibleValuesForCategoryIndex(idx).filter(pvc.nonEmpty).map(function(e){return e < 0 ? 0 : e;}));
         }));
         pvc.log("getCategoriesMaxSumOfVisibleSeries: " + max);
         return max;
@@ -633,13 +632,6 @@ pvc.DataEngine = Base.extend({
 });
 
 
-///*
-// * DataEngine that deals with multiple measures
-// */
-//pvc.MultiValuedDataEngine = pvc.DataEngine.extend({
-//    
-//    
-//});
 
 pvc.DataTranslator = Base.extend({
 
@@ -647,7 +639,6 @@ pvc.DataTranslator = Base.extend({
     metadata: null,
     resultset: null,
     values: null,
-    valuesMulti: null,
     secondAxisValues: null,
 
     constructor: function(){
@@ -670,10 +661,8 @@ pvc.DataTranslator = Base.extend({
     },
 
     getSecondAxisValues: function(){
-
         // Skips first row
         return this.secondAxisValues.slice(1);
-
     },
 
     getColumns: function(){
@@ -752,7 +741,6 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
         this.values = pvc.cloneMatrix(this.resultset);
         this.values.splice(0,0,a1);
 
-        
     }
   
 });
@@ -770,12 +758,12 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
             // Adding a static serie
             this.resultset.map(function(d){
                 d.splice(0,0,"Series");
-            })
+            });
             this.metadata.splice(0,0,{
                 "colIndex":2,
                 "colType":"String",
                 "colName":"Series"
-            })
+            });
         }
 
         /*
@@ -837,10 +825,6 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
         l1.splice(0,0,"x");
         this.values.splice(0,0, l1);
  
-    },
-    
-    getValueFromResultSetRow : function(resultSetRow){
-        return resultSetRow[2];
     }
 
 
@@ -863,19 +847,13 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
     
     prepareImpl: function()
     {
-        //TODO: hcoded:
-        var separator = '~';
-        
-        //categories
-        //var categoriesIdx = this.dataOptions.categoriesIdx;
-        //if(categoriesIdx == null) { categoriesIdx = [0];}
-       // else if(!$.isArray(categoriesIdx)) { categoriesIdx = [categoriesIdx]; }
+        var separator = (this.dataOptions.separator != null)? this.dataOptions.separator : '~';
         
         if(this.crosstabMode){
             
             //2 modes here:
-            // 1) all measures in one column
-            // 2) measures with separator mixed with series (TODO!) -- regular crosstab mode
+            // 1) all measures in one column right after categories
+            // 2) measures with separator mixed with series
             
             if(!this.dataOptions.categoriesCount){//default
                 this.dataOptions.categoriesCount = 1;
@@ -925,9 +903,8 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
                 this.values.splice(0,0,colNames);
                 
             }
-            else {//if(this.dataOptions.denormalizedMeasures) {//TODO: refactor
-            
-                //TODO: PASS VARS
+            else {//TODO:refactor?
+                
                 var measuresIdx = this.dataOptions.measuresIdx;
                 if(measuresIdx == null) { measuresIdx = 1;}
                 var numMeasures = this.dataOptions.numMeasures;
@@ -968,7 +945,7 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
                 this.values.splice(0,0,a1);
             }
         }
-        else {//TODO: refactor
+        else {//TODO: refactor?
         //relational mode
             var seriesIdx = 0;//TODO:hcoded, needs ref from chart?
             var categoriesIdx = 1;
@@ -1001,8 +978,6 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
             values.splice(0,0, l1);
             this.allValues = values;
     
-            //this.values = this.getValuesFromResultSet(measuresIndexes[0],categories, series,categoriesIdx, seriesIdx);
-            //this.values.splice(0,0,l1);
             this.values = this.allValues;
         }
 
