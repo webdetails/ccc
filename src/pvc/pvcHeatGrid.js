@@ -47,12 +47,12 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             rubberBandFill: 'rgba(203, 239, 163, 0.6)',
             rubberBandLine: '#86fe00',
             xAxisClickAction: function(item, event){
-                self.heatGridChartPanel.selectAxisValue('x', item, event.ctrlKey);
+                self.heatGridChartPanel.selectAxisValue('x', item, !self.options.ctrlSelectMode || event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
             },
             yAxisClickAction: function(item, event){ //TODO: move elsewhere?
-                self.heatGridChartPanel.selectAxisValue('y', item, event.ctrlKey);
+                self.heatGridChartPanel.selectAxisValue('y', item, !self.options.ctrlSelectMode || event.ctrlKey);
                 self.heatGridChartPanel.pvPanel.render();
                 self.heatGridChartPanel.triggerSelectionChange();
             },
@@ -364,7 +364,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         };
         
         var getBorderColor = function(value,i,selected){
-            return getFillColor(value,i,selected).darker();
+            //return getFillColor(value,i,selected).darker();
+            var bcolor = getFillColor(value,i,true);
+            return (myself.getSelectCount() == 0 || selected)? bcolor.darker() : bcolor;
         };
         
         var toGreyScale = function(color){
@@ -395,7 +397,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var clickAction = function(s,c,d,e){
             if(ignoreClicks) { ignoreClicks--;}
             else {
-                if(e.ctrlKey){
+                if(!opts.ctrlSelectMode || e.ctrlKey){
                     myself.toggleSelection(s,c);
                 } else {//hard select
                     myself.clearSelections();
@@ -500,7 +502,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 html: true,
                 gravity: "c",
                 fade: false,
-                followMouse:true
+                followMouse:true,
+                opacity: 1
             }));
         }
         if(doubleClickAction)
@@ -544,9 +547,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
     
     //makes none selected
-    clearSelections: function(){
+    clearSelections: function(refresh){
         this.selections = {};
         this.selectCount = null;
+        if(refresh) this.shapes.render();
     },
     
     isSelected: function(s,c){
@@ -911,7 +915,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 ySelections = myself.chart.yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
             }
             
-            if(!ev.ctrlKey){
+            if(opts.ctrlSelectMode && !ev.ctrlKey){
                 myself.clearSelections();
             }
             
@@ -975,7 +979,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             else
             {
                 for(var i=0; i<xSelections.length; i++){
-                    myself.selectAxisValue('x', xSelections[i], true);
+                    myself.selectAxisValue('x', xSelections[i],  true);
                 }
                 for(var i=0; i<ySelections.length; i++){
                     myself.selectAxisValue('y', ySelections[i], true);
@@ -1010,7 +1014,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             .event("click", function(d) {
                 var e = arguments[arguments.length-1];
                 //if(!pv.event.ctrlKey){
-                if(!e.ctrlKey){
+                if(opts.ctrlSelectMode && !e.ctrlKey){
                     myself.clearSelections();
                     myself.shapes.render();
                     myself.triggerSelectionChange();

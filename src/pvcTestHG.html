@@ -250,21 +250,22 @@ var heatGrid5 = new pvc.HeatGridChart({
             categoriesCount : 2,
             measuresInColumns: true
         },
-axisLabelFont:'14px helvetica',
-shape: 'circle',
-onSelectionChange: function(selections){
- var selTxt = '';
- for(var i=0;i&lt;selections.length;i++){
-  var item = selections[i];
-  selTxt += 'category:[' + item.category.join(', ') + '] ';
-  selTxt += ', series:[' + item.series.join(', ') +']&ltbr&gt' ;
- }
-  $('#selected').html(selTxt);
-},
-yAxisSize:60,
-xAxisSize:100,
-isMultiValued: true,
-useCompositeAxis:true
+    ctrlSelectMode: true,
+    axisLabelFont:'14px helvetica',
+    shape: 'circle',
+    onSelectionChange: function(selections){
+     var selTxt = '';
+     for(var i=0;i&lt;selections.length;i++){
+      var item = selections[i];
+      selTxt += 'category:[' + item.category.join(', ') + '] ';
+      selTxt += ', series:[' + item.series.join(', ') +']&ltbr&gt' ;
+     }
+      $('#selected').html(selTxt);
+    },
+    yAxisSize:60,
+    xAxisSize:100,
+    isMultiValued: true,
+    useCompositeAxis:true
     });
 
 heatGrid5.setData(testHeatGridComp, {crosstabMode: true, seriesInRows: false });
