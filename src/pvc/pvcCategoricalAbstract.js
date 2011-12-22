@@ -1044,9 +1044,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return 0;//horizontal
             })
             .font(myself.font)
-            .title(function(d){
-                return d.nodeLabel;
-            })
+            //.title(function(d){
+            //    return d.nodeLabel;
+            //})
             .text(function(d){
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){
@@ -1082,14 +1082,22 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     }
                     else { clickAction(d.nodePath, e); }
                 }
-            })
-            .event("mouseover", pv.Behavior.tipsy({//Tooltip
-                gravity: tipsyGravity,
-                fade: true,
-                offset: diagMargin * 2
-            }))
-            ;
-            
+            });
+
+            //tooltip
+            this.pvLabel
+                //.def('tooltip', '')
+                .title(function(d){
+                    this.instance()['tooltip'] = d.nodeLabel;
+                    return '';
+                })
+                .event("mouseover", pv.Behavior.tipsy({//Tooltip
+                    gravity: tipsyGravity,
+                    fade: true,
+                    offset: diagMargin * 2,
+                    opacity:1
+                }));
+
            // double click label //TODO: need doubleclick axis action + single click prevention..
             if(doubleClickAction)
             {
@@ -1097,7 +1105,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     doubleClickAction(d.nodePath, arguments[arguments.length-1]);
                 });
             }
-            
+
     },
     
     getTextSizePlaceholder : function()
