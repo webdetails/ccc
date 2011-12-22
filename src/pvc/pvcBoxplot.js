@@ -445,7 +445,7 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
             .event("click",function(d){
                 var s = myself.chart.dataEngine.getSeries()[myself.stacked?this.parent.index:this.index];
                 var c = myself.chart.dataEngine.getCategories()[myself.stacked?this.index:this.parent.index];
-                var ev = pv.event;
+                var ev = arguments[arguments.length-1];
                 return myself.chart.options.clickAction(s,c, d, ev);
             });
         }
