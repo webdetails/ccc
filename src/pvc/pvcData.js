@@ -855,7 +855,7 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
             // 1) all measures in one column right after categories
             // 2) measures with separator mixed with series
             
-            if(!this.dataOptions.categoriesCount){//default
+            if(this.dataOptions.categoriesCount == null){//default
                 this.dataOptions.categoriesCount = 1;
             }
             
