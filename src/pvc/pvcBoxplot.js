@@ -422,12 +422,11 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
         // add Labels:
         this.pvBoxPanel
         .text(function(d){
-            var v = myself.chart.options.valueFormat(d);
             var s = myself.chart.dataEngine
             .getVisibleSeries()[myself.stacked?this.parent.index:this.index]
             var c = myself.chart.dataEngine
             .getVisibleCategories()[myself.stacked?this.index:this.parent.index]
-            return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+            return myself.chart.options.tooltipFormat.call(myself,s,c,d);
     
         })
 
