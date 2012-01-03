@@ -82,7 +82,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       realxsize = maxperline*(cellsize + this.padding) + myself.minMarginX - this.padding;
       realysize = myself.padding*(Math.ceil(data.length/maxperline));
 
-      if(this.heigth == null){
+      if(this.height == null){
         this.height = realysize;
       }
 
