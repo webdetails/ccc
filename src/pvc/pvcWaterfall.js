@@ -500,7 +500,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             this.pvPanel["overflow"]("hidden");
         }
 
-        var anchor = this.orientation == "vertical"?"bottom":"left";
+        var isVertical = this.orientation == "vertical";
+        var anchor = isVertical ? "bottom" : "left";
 
         // prepare data and functions when creating (rendering) the chart.
         this.prepareDataFunctions(this.stacked);
@@ -511,19 +512,16 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         if (this.stacked){
             var dataset = this.getDataSet();
 
-            if (this.orientation == "vertical"){
-                pvc.log("WARNING: currently the 'horizontal' orientation is not possible for stacked barcharts and waterfall charts (will be implemented later)");
-            }
-
             if (this.waterfall){
                 this.drawWaterfalls(this.pvPanel);
             }
 
             this.pvBarPanel = this.pvPanel.add(pv.Layout.Stack)
-                .layers(dataset)
-                [this.orientation == "vertical"?"y":"x"](myself.DF.orthoLengthFunc)
-                [anchor](myself.DF.orthoBotPos)
-                [this.orientation == "vertical"?"x":"y"](myself.DF.basePositionFunc);
+				.layers(dataset)
+				.orient(isVertical ? "bottom-left" : "left-bottom")
+				.x(this.DF.basePositionFunc)
+				.y(this.DF.orthoLengthFunc)
+				[anchor](this.DF.orthoBotPos);
 
             this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
                 .data(function(d){

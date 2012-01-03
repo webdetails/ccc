@@ -30,7 +30,7 @@
         <script type="text/javascript" src="pvc/pvcLine.js"></script>
         <script type="text/javascript" src="pvc/pvcData.js"></script>
         <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
-        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+        <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
         <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
         
         <script type="text/javascript" src="pvcDocUtils.js"></script>
@@ -113,7 +113,7 @@ Sample extension points:<br>
 </ul>
 
 <h2>Examples</h2>
-<h3>Sample Waterfall</h2>
+<h3>Sample Waterfall</h3>
 On the left side you see the total. 
 When you move to the right you see the split of this total across the four sales regions.
 In each sales region as well as in the totals column you can also observe a split into two product lines.<br>
@@ -160,55 +160,146 @@ var wf1 = new pvc.WaterfallChart({
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcWf1"></div>
 
-
-<h3>An Advanced Waterfall</h2>
-This chart shows a more advanced example, where we first show the main regions:
- USA, Europe and Rest of World.
-Then, the RoW region is in turn split into its different sub-regions.<br>
-<textarea cols="55" rows="20" id="pvcWf1Code">
+<h3>Sample horizontal Waterfall</h3>
+The example 'Sample Waterfall' with an 'horizontal' orientation.<br>
+<textarea cols="55" rows="20" id="pvcWf2Code">
 var wf2 = new pvc.WaterfallChart({
-         canvas: "pvcWf2",
-         width: 450,
-         height: 400,
-         title: "Sales by region and product - Detailed",
-         titlePosition: "bottom",
-         titleSize: 40,
-         legend: true,
-         legendPosition: "top",
-         legendAlign: "right",
-         animate: false,
+    canvas: "pvcWf2",
+    width:  400,
+    height: 300,
+    title:  "Sales by region and product - Horizontal",
+    titlePosition: "bottom",
+    titleSize: 40,
+    legend: true,
+    legendPosition: "top",
+    legendAlign:    "right",
+    animate: false,
 
-         orientation: 'vertical',
-         stacked: true,
-         maxBarSize: 100,
+    orientation: 'horizontal',
+    stacked: true,
+    maxBarSize: 100,
 
-         panelSizeRatio:0.75,
-         barSizeRatio: 1,
+    panelSizeRatio:0.75,
+    barSizeRatio: 1.0,
 
-         showValues: true,
-         showXScale: true,
-         showYScale: true,
-         yAxisPosition: "left",
-         yAxisSize: 30,
-         xAxisPosition: "bottom",
-         xAxisSize: 30,
-         xAxisFullGrid: true,
-         yAxisFullGrid: true,
-        
-         extensionPoints: {
-          titleLabel_font: "16px sans-serif",          
-          barWaterfallLine_strokeStyle:"red"
-          }
-         });
-         wf2.setData(testWaterfall_02,
-                    {crosstabMode: true,
-                     seriesInRows: false});
-         wf2.render();
+    showValues: true,
+    showXScale: true,
+    showYScale: true,
+    yAxisPosition: "left",
+    yAxisSize: 40,
+    xAxisPosition: "bottom",
+    xAxisSize: 30,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true,
+
+    extensionPoints: {
+        titleLabel_font: "16px sans-serif",         
+    }});
+
+wf2.setData(testWaterfall_01, {
+    crosstabMode: true,
+    seriesInRows: false
+});
+
+wf2.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcWf2"></div>
 
-    </script>
+<h3>An Advanced Waterfall</h3>
+This chart shows a more advanced example, where we first show the main regions:
+ USA, Europe and Rest of World.
+Then, the RoW region is in turn split into its different sub-regions.<br>
+<textarea cols="55" rows="25" id="pvcWf3Code">
+var wf3 = new pvc.WaterfallChart({
+    canvas: "pvcWf3",
+    width: 450,
+    height: 400,
+    title: "Sales by region and product - Detailed",
+    titlePosition: "bottom",
+    titleSize: 40,
+    legend: true,
+    legendPosition: "top",
+    legendAlign: "right",
+    animate: false,
 
+    orientation: 'vertical',
+    stacked: true,
+    maxBarSize: 100,
+
+    panelSizeRatio:0.75,
+    barSizeRatio: 1,
+
+    showValues: true,
+    showXScale: true,
+    showYScale: true,
+    yAxisPosition: "left",
+    yAxisSize: 30,
+    xAxisPosition: "bottom",
+    xAxisSize: 30,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true,
+
+    extensionPoints: {
+        titleLabel_font: "16px sans-serif",          
+        barWaterfallLine_strokeStyle:"red"
+    }});
+
+wf3.setData(testWaterfall_02,{
+    crosstabMode: true,
+    seriesInRows: false
+});
+
+wf3.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcWf3"></div>
+
+<h3>An horizontal Advanced Waterfall</h3>
+The example 'An Advanced Waterfall' with an 'horizontal' orientation.<br>
+<textarea cols="55" rows="25" id="pvcWf4Code">
+var wf4 = new pvc.WaterfallChart({
+    canvas: "pvcWf4",
+    width: 450,
+    height: 400,
+    title: "Sales by region and product - Detailed - Horizontal",
+    titlePosition: "bottom",
+    titleSize: 40,
+    legend: true,
+    legendPosition: "top",
+    legendAlign: "right",
+    animate: false,
+
+    orientation: 'horizontal',
+    stacked: true,
+    maxBarSize: 100,
+
+    panelSizeRatio:0.75,
+    barSizeRatio: 1,
+
+    showValues: true,
+    showXScale: true,
+    showYScale: true,
+    yAxisPosition: "left",
+    yAxisSize: 45,
+    xAxisPosition: "bottom",
+    xAxisSize: 30,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true,
+
+    extensionPoints: {
+        titleLabel_font: "16px sans-serif",          
+        barWaterfallLine_strokeStyle:"red"
+    }});
+
+wf4.setData(testWaterfall_02,{
+    crosstabMode: true,
+    seriesInRows: false
+});
+
+wf4.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcWf4"></div>
   </body>
 </html>
