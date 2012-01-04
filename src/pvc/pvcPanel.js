@@ -49,7 +49,7 @@ pvc.Base = Base.extend({
             },
 
             valueFormat: function(d){
-                return pv.Format.number().fractionDigits(0, 2).format(pv.Format.number().fractionDigits(0, 10).parse(d));
+                return pv.Format.number().fractionDigits(0, 2).format(d);//pv.Format.number().fractionDigits(0, 10).parse(d));
             },
             clickable: false,
             clickAction: function(s, c, v){
@@ -101,6 +101,11 @@ pvc.Base = Base.extend({
         this.dataEngine.setData(this.metadata,this.resultset);
         this.dataEngine.setCrosstabMode(this.options.crosstabMode);
         this.dataEngine.setSeriesInRows(this.options.seriesInRows);
+        //TODO: new
+        this.dataEngine.setMultiValued(this.options.isMultiValued);
+        this.dataEngine.setValuesIndexes(this.options.measuresIndexes);//columns where measure values are, for relational data
+        this.dataEngine.setDataOptions(this.options.dataOptions);
+        //end
         this.dataEngine.createTranslator();
 
         pvc.log(this.dataEngine.getInfo());
@@ -126,7 +131,7 @@ pvc.Base = Base.extend({
         this.basePanel.getPvPanel().canvas(this.options.canvas);
 
         // Title
-        if (this.options.title != null && this.options.title.lengh != ""){
+        if (this.options.title != null && this.options.title != ""){
             this.titlePanel = new pvc.TitlePanel(this, {
                 title: this.options.title,
                 anchor: this.options.titlePosition,
@@ -380,18 +385,20 @@ pvc.BasePanel = Base.extend({
 
     extend: function(mark, prefix){
 
-        for (p in this.chart.options.extensionPoints){
-            if (p.indexOf(prefix) == 0){
-                var m = p.substring(prefix.length);
-                // Distinguish between mark methods and properties
-                if (typeof mark[m] === "function") {
-                    mark[m](this.chart.options.extensionPoints[p]);
-                } else {
-                    mark[m] = this.chart.options.extensionPoints[p];
+        // if mark is null or undefined, skip
+        if ( !!mark )
+            for (p in this.chart.options.extensionPoints){
+                if (p.indexOf(prefix) == 0){
+                    var m = p.substring(prefix.length);
+                    // Distinguish between mark methods and properties
+                    if (typeof mark[m] === "function") {
+                        mark[m](this.chart.options.extensionPoints[p]);
+                    } else {
+                        mark[m] = this.chart.options.extensionPoints[p];
+                    }
                 }
-            }
 
-        }
+            }
 
     },
 
@@ -452,7 +459,7 @@ pvc.BasePanel = Base.extend({
         right: "left"
     },
 
-    paralelLength:{
+    parallelLength:{
         top: "width",
         bottom: "width",
         right: "height",

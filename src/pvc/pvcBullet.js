@@ -93,7 +93,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
   pvBullets: null,
   pvBullet: null,
   data: null,
-
+  onSelectionChange: null,
   showTooltips: true,
   showValues: true,
   tipsySettings: {
@@ -130,7 +130,8 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       ruleAnchor = "bottom";
       leftPos = this.chart.options.bulletMargin;
       topPos = function(){
-        return this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing);
+        //TODO: 10
+        return 10 + (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing));
       }
     }
     else
@@ -150,7 +151,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     this.pvBullets = this.pvPanel.add(pv.Panel)
     .data(data)
     [pvc.BasePanel.orthogonalLength[anchor]](size)
-    [pvc.BasePanel.paralelLength[anchor]](this.chart.options.bulletSize)
+    [pvc.BasePanel.parallelLength[anchor]](this.chart.options.bulletSize)
     .margin(20)
     .left(leftPos) // titles will be on left always
     .top(topPos);
@@ -167,6 +168,20 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .markers(function(d){
       return d.markers
     });
+    
+    
+    if (myself.chart.options.clickable){
+      this.pvBullet
+      .cursor("pointer")
+      .event("click",function(d){
+        var s = d.title;
+        var c = d.subtitle;
+        var ev = pv.event;
+        return myself.chart.options.clickAction(s,c, d.measures, ev);
+      });
+    }
+    
+    
 
     this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
     this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
@@ -216,6 +231,28 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       return d.subtitle
     });
 
+	var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ? 
+	function(d, e) {
+		ignoreClicks = 2;
+		myself.chart.options.axisDoubleClickAction(d, e);
+		
+	}: null;
+    
+    if (doubleClickAction) {
+    	this.pvBulletTitle.events('all')  //labels don't have events by default
+            .event("dblclick", function(d){
+                    doubleClickAction(d, arguments[arguments.length-1]);
+                });
+
+    	this.pvBulletSubtitle.events('all')  //labels don't have events by default
+            .event("dblclick", function(d){
+                    doubleClickAction(d, arguments[arguments.length-1]);
+                });
+
+    }
+
+
+
     // Extension points
     this.extend(this.pvBullets,"bulletsPanel_");
     this.extend(this.pvBullet,"bulletPanel_");
@@ -255,16 +292,15 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     
     var data = [];
 
-    if(this.chart.dataEngine.getSeriesSize() == 0 ){
+    if(this.chart.dataEngine.getSeriesSize() == 0 ) {
       // No data
       data.push($.extend({},defaultData));
-
     }
-    else{
-
+    else {
       // We have data. Iterate through the series.
-      var indices = this.chart.dataEngine.getVisibleSeriesIndexes()
-      for(var i in indices) if (indices.hasOwnProperty(i)){
+      var indices = this.chart.dataEngine.getVisibleSeriesIndexes();
+      for(var i in indices) if (indices.hasOwnProperty(i))
+      {
         var s = this.chart.dataEngine.getSerieByIndex(i);
         var v = this.chart.dataEngine.getVisibleValuesForSeriesIndex(i);
         var d = $.extend({},defaultData);
@@ -287,14 +323,13 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             d.title = s;
             d.subtitle = v[0];
             d.measures = [v[1]];
-            d.markers = [v[2]]
-            d.ranges = v.slice(3);
+            d.markers = [v[2]];
+            if (v.length >= 3){
+              d.ranges = v.slice(3);
+            }
         }
-
-
         data.push(d);
       }
-
     }
    
     return data;

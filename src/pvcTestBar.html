@@ -28,7 +28,7 @@
     <script type="text/javascript" src="pvc/pvcBar.js"></script>
     <script type="text/javascript" src="pvc/pvcLine.js"></script>
     <script type="text/javascript" src="pvc/pvcData.js"></script>
-    <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+    <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
     <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
         
     <script type="text/javascript" src="pvcDocUtils.js"></script>
@@ -216,6 +216,35 @@ To draw a stacked bar just set the stacked property to true. To a better underst
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar3"></div>
         
+<h3>An horizontal Stacked Bar chart</h3>
+The stacked bar chart of the previous example, but with an 'horizontal' orientation.<br>
+<textarea cols="55" rows="24" id="pvcBar4Code">
+var bar4 = new pvc.BarChart({
+    canvas: "pvcBar4",
+    width:  400,
+    height: 400,
+    title:  "Stacked Bar Chart - Horizontal",
+    orientation: 'horizontal',
+    stacked: true,
+    animate: false,
+    legend:  true,
+    legendPosition: "right",
+    yAxisSize: 70,
+    
+    extensionPoints: {
+        xAxisLabel_textAngle: -1,
+        xAxisLabel_textAlign: "center",
+        xAxisLabel_textBaseline: "top"
+    }});
 
+bar4.setData(relational_01,{
+    crosstabMode: false,
+    seriesInRows: false
+});
+		
+bar4.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBar4"></div>
   </body>
 </html>
