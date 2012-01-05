@@ -409,14 +409,22 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
                     return parser.parse(a.category) - parser.parse(b.category);
                     }: null)
                 })
-            .strokeStyle(this.chart.options.secondAxisColor)
+            .strokeStyle(function(){
+              var cols = this.chart.options.secondAxisColor;
+              cols = cols instanceof Array ? cols : [cols];
+              return cols[this.parent.index % cols.length];
+            })
             [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.secBasePosFunc)
             [anchor](myself.DF.secOrthoLengthFunc);
 
             this.pvSecondDot = this.pvSecondLine.add(pv.Dot)
             .shapeSize(8)
             .lineWidth(1.5)
-            .fillStyle(this.chart.options.secondAxisColor)
+            .fillStyle(function(){
+              var cols = this.chart.options.secondAxisColor;
+              cols = cols instanceof Array ? cols : [cols];
+              return cols[this.parent.index % cols.length];
+            });
         }
 
         // add Labels:

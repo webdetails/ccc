@@ -45,9 +45,11 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   },
 
   create: function(){
-    var myself = this;
-    var c = this.chart.colors();
-    var x,y;
+    var myself = this,
+      c, cLen,
+      c1 = this.chart.colors(),
+      c2 = this.chart.secondAxisColor(),
+      x,y;
 
 
     //pvc.log("Debug PMartins");
@@ -55,9 +57,18 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     var data = this.chart.legendSource=="series"?
     this.chart.dataEngine.getSeries():
     this.chart.dataEngine.getCategories();
+    cLen = data.length;
 
-
-
+    if (this.chart.options.secondAxis) {
+        var args = this.chart.dataEngine.getSecondAxisSeries();
+        args.unshift(0);
+        args.unshift(data.length);
+        data.splice.apply(data, args);
+    }
+    c = function(arg) {return arg < cLen ?
+      c1.apply(this,arguments) :
+      c2.apply(this,[arg - cLen]);
+    };
     //determine the size of the biggest cell
     //Size will depend on positioning and font size mainly
     var maxtext = 0;
@@ -180,7 +191,11 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
       this.pvDot = this.pvRule.anchor("center").add(pv.Dot)
       .shapeSize(this.markerSize)
-      .shape(this.shape)
+      .shape(function(){
+        return myself.shape ? myself.shape :
+          this.parent.index < cLen  ? 'square':
+           'bar';
+      })
       .lineWidth(0)
       .fillStyle(function(){
         return c(this.parent.index);
@@ -208,8 +223,16 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       this.pvDot = this.pvLegendPanel.add(pv.Dot)
       .left(this.markerSize/2)
       .shapeSize(this.markerSize)
-      .shape(this.shape)
-      .lineWidth(0)
+      .shape(function(){
+        return myself.shape ? myself.shape :
+          this.parent.index < cLen  ? 'square':
+           'bar';
+      })
+      .angle(1.57)
+      .lineWidth(2)
+      .strokeStyle(function(){
+        return c(this.parent.index);
+      })
       .fillStyle(function(){
         return c(this.parent.index);
       })

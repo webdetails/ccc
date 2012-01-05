@@ -721,7 +721,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
         this.pvRule = this.pvPanel
         .add(pv.Rule)
-        .strokeStyle(this.tickColor)
+        .strokeStyle('black')
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
         [pvc.BasePanel.relativeAnchor[this.anchor]](min)
         [pvc.BasePanel.parallelLength[this.anchor]](max - min)
@@ -1312,7 +1312,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         [pvc.BasePanel.orthogonalLength[this.anchor]](function(d){
             return myself.tickLength/(this.index%2 + 1)
         })
-        .strokeStyle(this.tickColor);
+        .strokeStyle('black');
 
         this.pvLabel = this.pvTicks
         .anchor(this.anchor)

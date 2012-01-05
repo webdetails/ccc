@@ -564,22 +564,33 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
 
         if(this.chart.options.secondAxis){
-            // Second axis - support for lines
-            this.pvSecondLine = this.pvPanel.add(pv.Line)
-                .data(function(d){
-                    return myself.chart.dataEngine.getObjectsForSecondAxis(d, 
-                        this.timeSeries ? function(a,b){
-                        return parser.parse(a.category) - parser.parse(b.category);
-                        }: null);
-                    })
-                .strokeStyle(this.chart.options.secondAxisColor)
-                [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.secBasePosFunc)
-                [anchor](myself.DF.secOrthoLengthFunc);
-    
-                this.pvSecondDot = this.pvSecondLine.add(pv.Dot)
-                .shapeSize(8)
-                .lineWidth(1.5)
-                .fillStyle(this.chart.options.secondAxisColor);
+            // Second axis - support for line
+            this.pvSecondScatterPanel = this.pvPanel.add(pv.Panel)
+              .data(this.chart.dataEngine.getSecondAxisIndices());
+            this.pvArea = this.pvSecondScatterPanel.add(pv.Area)
+             .fillStyle(null);
+            this.pvSecondLine = this.pvArea.add(pv.Line)
+            .segmented(true)
+            .data(function(d){
+                return myself.chart.dataEngine.getObjectsForSecondAxis(d,
+                    this.timeSeries ? function(a,b){
+                    return parser.parse(a.category) - parser.parse(b.category);
+                    }: null)
+                })
+            .strokeStyle(function(){
+              var colors = myself.chart.options.secondAxisColor;
+              colors = colors instanceof Array ? colors : [colors];
+              return colors[this.parent.index % colors.length];})
+            [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.secBasePosFunc)
+            [anchor](myself.DF.secOrthoLengthFunc);
+
+            this.pvSecondDot = this.pvSecondLine.add(pv.Dot)
+            .shapeSize(8)
+            .lineWidth(1.5)
+            .fillStyle(function(){
+              var colors = myself.chart.options.secondAxisColor;
+              colors = colors instanceof Array ? colors : [colors];
+              return colors[this.parent.index % colors.length];});
         }
 
         // add Labels:

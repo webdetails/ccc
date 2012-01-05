@@ -362,24 +362,31 @@ pvc.DataEngine = Base.extend({
 
     },
 
+    getSecondAxisSeries: function() {
+       return this.translator.getSecondAxisSeries();
+    },
 
+    getSecondAxisIndices: function() {
+        return Object.keys(this.secondAxisValues);
+    },
     /*
      * Returns the object for the second axis in the form {category: catName, value: val}
      *
      */
 
-    getObjectsForSecondAxis: function(sortF){
-
+    getObjectsForSecondAxis: function(idx,sortF){
+        var idx = idx || 0;
         var myself = this;
         var ar = [];
-        this.getSecondAxisValues().map(function(v,i){
-            if(typeof v != "undefined" /* && v != null */ ){
-                ar.push({
-                    category: myself.getCategories()[i],
-                    value: v
-                }) ;
-            }
-        })
+        this.getSecondAxisValues()[idx].map(function(v,j){
+          if(typeof v != "undefined" /* && v != null */ ){
+              ar.push({
+                  serieIndex: idx,
+                  category: myself.getCategories()[j],
+                  value: v
+              }) ;
+          }
+        });
 
         if (typeof sortF == "function"){
             return ar.sort(sortF)
@@ -392,7 +399,12 @@ pvc.DataEngine = Base.extend({
      */
     getSecondAxisMax:function(){
 
-        return pv.max(this.getSecondAxisValues().filter(pvc.nonEmpty))
+        return pv.max(this.getSecondAxisValues()
+          .reduce(function(a, b) {  
+            return a.concat(b);
+          })
+          .filter(pvc.nonEmpty)
+        );
     },
     
     /*
@@ -400,7 +412,12 @@ pvc.DataEngine = Base.extend({
      */
     getSecondAxisMin:function(){
 
-        return pv.min(this.getSecondAxisValues().filter(pvc.nonEmpty))
+        return pv.min(this.getSecondAxisValues()
+          .reduce(function(a, b) {  
+            return a.concat(b);
+          })
+          .filter(pvc.nonEmpty)
+        );
     },
 
 
@@ -661,8 +678,23 @@ pvc.DataTranslator = Base.extend({
     },
 
     getSecondAxisValues: function(){
+
+
         // Skips first row
-        return this.secondAxisValues.slice(1);
+        return this.secondAxisValues.map(function(a){
+            return a.slice(1);
+        });
+
+    },
+
+    getSecondAxisSeries: function(){
+
+
+        // Skips first row
+        return this.secondAxisValues.map(function(a){
+            return a[0];
+        });
+
     },
 
     getColumns: function(){
@@ -701,13 +733,18 @@ pvc.DataTranslator = Base.extend({
         }
         if(this.dataEngine.chart.options.secondAxis){
             var idx = this.dataEngine.chart.options.secondAxisIdx;
-            if (idx>=0){
-                idx++; // first row is cat name
+            if (!(idx instanceof  Array)) {
+              idx = [idx];
             }
+            idx.sort();
 
             // Transpose, splice, transpose back
             pv.transpose(this.values);
-            this.secondAxisValues = this.values.splice(idx , 1)[0];
+            this.secondAxisValues = [];
+            for (var i = idx.length - 1; i >=0 ;i --) {
+              var index = Number(idx[i]); index = index < 0 ? index : index + 1;
+              this.secondAxisValues.unshift(this.values.splice(index , 1)[0]);
+            }
             pv.transpose(this.values);
         }
 

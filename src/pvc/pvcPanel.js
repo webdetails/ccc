@@ -112,10 +112,19 @@ pvc.Base = Base.extend({
         // Create the color info
         if (typeof this.options.colors == 'undefined' || this.options.colors == null || this.options.colors.length == 0){
             this.colors = pv.Colors.category10;
-        }
-        else{
+        } else{
             this.colors = function() {
                 var scale = pv.colors(this.options.colors);
+                scale.domain.apply(scale, arguments);
+                return scale;
+            }
+        };
+        if (typeof this.options.secondAxisColor == 'undefined' || this.options.secondAxisColor == null || this.options.secondAxisColor.length == 0){
+            this.secondAxisColor = pv.Colors.category10;
+        } else {
+            this.secondAxisColor = function() {
+                var sec = this.options.secondAxisColor;
+                var scale = pv.colors(sec instanceof Array ? sec : [sec]);
                 scale.domain.apply(scale, arguments);
                 return scale;
             };
