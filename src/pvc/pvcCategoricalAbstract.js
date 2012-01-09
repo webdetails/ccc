@@ -427,11 +427,15 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if(   ('orthoFixedMin' in this.options)
             && (this.options.orthoFixedMin != null)
             && !(isNaN(Number(this.options.orthoFixedMin))))
+        {
             min = this.options.orthoFixedMin;
+        }
         if(   ('orthoFixedMax' in this.options)
             && (this.options.orthoFixedMax != null)
             && !(isNaN(Number(this.options.orthoFixedMax))))
+        {
             max = this.options.orthoFixedMax;
+        }
 
 
         // Adding a small offset to the scale:
@@ -908,11 +912,19 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //TODO: extend this to work with chart.orientation?
         if(this.anchor == 'bottom' || this.anchor == 'left') {elements.reverse();}
         
+        var isHierarchy = true;
+        
         //build tree with elements
         var tree = {};
         var sectionNames = [];
         var xlen = elements.length;
         for(var i =0; i<elements.length; i++){
+            if(typeof(elements[i]) == 'string'){
+                isHierarchy = false;
+                tree[elements[i]] = 0;
+                sectionNames.push(elements[i]);
+                continue;
+            }
             var baseElem = elements[i][0];
             if(!tree[baseElem]){
                 tree[baseElem] = elements[i].length == 1 ? 0 : {};
@@ -944,10 +956,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 break;
         }
         
-        var maxDepth = pv.max(elements, function(col){
+        var maxDepth =isHierarchy? pv.max(elements, function(col){
             //return $.isArray(col) ? col.length : 1;
             return (col != null && col[0] !== undefined) ? col.length : 1;
-        });
+        }) : 1;
         
         var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
     
