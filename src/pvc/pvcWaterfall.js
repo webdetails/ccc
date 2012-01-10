@@ -45,7 +45,7 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
 
         // Apply options
         $.extend(this.options,_defaults, o);
-
+		
         //  force stacked to be true (default of base-class is false)
         this.options.stacked = true;
 
@@ -142,7 +142,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         fade: true
     },
     ruleData: null,
-
+	selections: {},
 
     constructor: function(chart, options){
 
@@ -417,23 +417,43 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         // colorFunc is used for the base dataseries
         this.DF.colorFunc = function(d){
             var ind = this.parent.index;
+            
+			var s = myself.chart.dataEngine.getSeries()[this.index];
+			var c = myself.chart.dataEngine.getCategories()[this.parent.index];
+            var isSelected =   myself.isSelected(s,c);            
+            
+            var shouldChangeColor = myself.getSelections().length > 0;
             if (myself.waterfall) {
                 if (ind == 0)
                     return pv.Color.names["transparent"];
             //        ind--;   don't do the ind-- otherwise it doesn't match legend
             }
-            return colors (myself.chart.dataEngine
-                .getVisibleSeriesIndexes()[ind]);
+            
+            var clr = colors (myself.chart.dataEngine.getVisibleSeriesIndexes()[ind]);
+            return (!shouldChangeColor || (shouldChangeColor && isSelected)) ? clr : myself.toGreyScale(clr);
         };
         // colorFunc2 is used for ....
         this.DF.colorFunc2 = function(d){
-            return colors(myself.chart.dataEngine
-                .getVisibleSeriesIndexes()[this.index])
+			var s = myself.chart.dataEngine.getSeries()[this.index];
+			var c = myself.chart.dataEngine.getCategories()[this.parent.index];
+            var isSelected =   myself.isSelected(s,c);            
+            var shouldChangeColor = myself.getSelections().length > 0;
+            
+        	var clr = colors(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.index]);
+            return (!shouldChangeColor || (shouldChangeColor && isSelected)) ? clr : myself.toGreyScale(clr);
         };
 
         return;
     } ,
 
+
+
+ toGreyScale: function(color){
+            //convert to greyscale using YCbCr luminance conv
+            var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+            //  var avg = Math.round( (color.r + color.g + color.b)/3);
+            return pv.rgb(avg,avg,avg,0.6).brighter();
+        },
 
 
     /****
@@ -490,6 +510,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         var myself = this;
         this.width = this._parent.width;
         this.height = this._parent.height;
+
+
+        this.onSelectionChange = myself.chart.options.onSelectionChange;
 
         this.pvPanel = this._parent.getPvPanel().add(this.type)
         .width(this.width)
@@ -581,6 +604,53 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .fillStyle(this.chart.options.secondAxisColor)
         }
 
+
+        //double click + click
+        var ignoreClicks = 0;
+        var DBL_CLICK_MAX_DELAY = (this.clickDelay)? this.clickDelay : 300; //ms
+        //click
+        var clickAction = function(s,c,d,e){
+            if(ignoreClicks) { ignoreClicks--;}
+            else {
+                if(e.ctrlKey){
+                    myself.toggleSelection(s,c);
+                } else {//hard select
+                    myself.clearSelections();
+                    myself.addSelection(s,c);
+                }
+                myself.triggerSelectionChange();
+                //classic clickAction
+                if(typeof(myself.chart.options.clickAction) == 'function'){
+                    if(d!= null && d[0] !== undefined){ d= d[0]; }
+                    myself.chart.options.clickAction(s,c,d,e);
+                }
+                myself.pvPanel.render();
+            }
+        };
+
+
+        var doubleClickAction = (typeof(myself.chart.options.doubleClickAction) == 'function')?
+            function(s,c,d,e){
+                ignoreClicks = 2;
+                myself.chart.options.doubleClickAction(s,c,d, e);
+            } :
+            null;
+
+
+
+
+        if(doubleClickAction)
+        {
+            this.pvBar.cursor("pointer").event("dblclick", function(r,ra,i){
+                var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                var c = myself.chart.dataEngine.getCategories()[this.parent.index];
+                var d = r[i];
+                var e = arguments[arguments.length-1];//pv.event;
+                doubleClickAction(s,c,d,e);
+            });
+        }
+
+
         // add Labels:
         this.pvBar
         .text(function(d){
@@ -597,7 +667,29 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             // Extend default
             this.extend(this.tipsySettings,"tooltip_");
             this.pvBar
-            .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+            .def("tooltip",'')
+            .title(function(r,ra,i){
+                var tooltip = '';
+                if(myself.chart.options.customTooltip){
+                    var s = myself.chart.dataEngine.getSeries()[this.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.index];
+                    var d = r;
+                    tooltip = myself.chart.options.customTooltip(s,c,d);
+                }
+                else {
+                    tooltip = r[i];
+                }
+                this.tooltip(tooltip);
+                return '';//prevent browser tooltip
+            })
+            .event("mouseover", pv.Behavior.tipsy({
+                html: true,
+                gravity: "c",
+                fade: false,
+                followMouse:true
+            }));
+            
+//            .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
         }
 
 
@@ -610,7 +702,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
                     var c = myself.chart.dataEngine
                         .getCategories()[myself.stacked?this.index:this.parent.index];
                     var e = arguments[arguments.length-1];
-                    return myself.chart.options.clickAction(s, c, d, e);
+                    return clickAction(s, c, d, e);
                 });
         }
 
@@ -643,6 +735,12 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
         if(this.pvSecondDot){
             this.extend(this.pvSecondDot,"barSecondDot_");
+        }
+
+
+		if (pv.renderer() != 'batik')
+        {
+            this.createSelectOverlay(this.width,this.height);
         }
 
         // Extend body
@@ -731,6 +829,601 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             // shown off-grid (-1000)
             return (d != null) ? offGridBorderOffset: -10000;
         }) ;
+    },
+    
+    
+    /***********************
+     * SELECTIONS (start)
+     */
+    
+    /**
+     * init with default (bool)
+     **/
+    initSelections:function(defaultValue){
+      this.selections = {};
+      var series = this.chart.dataEngine.getSeries();
+      var cats = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < series.length; i++ ){
+            this.selections[series[i]] = {};
+            for(var j = 0; j < cats.length; j++ ){
+                this.selections[series[i]][cats[j]] = defaultValue;
+            }
+      }
+    },
+    
+    //makes none selected
+    clearSelections: function(){
+        this.selections = {};
+        this.selectCount = null;
+    },
+    
+    isSelected: function(s,c){
+      return this.selections[s] ?
+        this.selections[s][c]!=null :
+        false;
+    },
+    
+    isValueNull: function(s,c){
+      var sIdx = this.chart.dataEngine.getSeries().indexOf(s);
+      var cIdx = this.chart.dataEngine.getCategories().indexOf(c);
+      var val = this.chart.dataEngine.getValues()[cIdx][sIdx];
+      return val == null ;
+    },
+    
+    addSelection: function(s,c){
+      if(!this.selectNullValues)
+      {//check if null
+        if(this.isValueNull(s,c)){ return; }
+      }
+      if(!this.selections[s]) this.selections[s] = {};
+      this.selections[s][c] = {'series': s, 'category' : c};
+      this.selectCount = null;
+    },
+    
+    removeSelection: function(s,c){
+      if(this.selections[s]){
+        this.selections[s][c] = null;//TODO: delete?
+      }
+      this.selectCount = null;
+    },
+    
+    toggleSelection: function(s,c){
+        if(this.isSelected(s,c)) {
+            this.removeSelection(s,c);
+        }
+        else {
+            this.addSelection(s,c);
+        }
+    },
+    
+    getSelections: function(){
+        var selections = [];
+        for(var s in this.selections){
+          if(this.selections.hasOwnProperty(s) )
+          {
+              for(var c in this.selections[s]){
+               if(this.selections[s].hasOwnProperty(c))
+               {
+                    if(this.selections[s][c]){
+                        selections.push(this.selections[s][c]);
+                    }
+               }
+              }
+          }
+        }
+        return selections;
+    },
+    
+    setSelections: function(selections){
+        this.selections = {};
+        for(var i=0;i<selections.length;i++){
+            this.addSelection(selections[i].series, selections[i].category);
+        }
+    },
+    
+    selectSeries: function(s){
+        var cats = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < cats.length; i++ ){
+            this.addSelection(s,cats[i]);
+            //this.selections[s][cats[i]] = true;
+        }
+    },
+    
+    selectCategories: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i = 0; i < series.length; i++ ){
+            this.addSelection(series[i],c);
+        }
+    },
+    
+    selectAxisValue: function(axis, axisValue, toggle)
+    {
+        var type = (this.orientation == 'horizontal')?
+            ((axis == 'x')? 's' : 'c') :
+            ((axis == 'x')? 'c' : 's')
+            
+        if(this.chart.options.useCompositeAxis)
+        {
+            if(!toggle){
+                this.clearSelections();
+            }
+            if(type =='c'){
+                if(!toggle){
+                    this.selectCategoriesHierarchy(axisValue);
+                }
+                else {
+                    this.toggleCategoriesHierarchy(axisValue);
+                }
+            }
+            else {
+                if(!toggle){
+                    this.selectSeriesHierarchy(axisValue);
+                }
+                else{
+                    this.toggleSeriesHierarchy(axisValue);
+                }
+            }
+        }
+        else
+        {//??
+            if(type =='c'){ this.toggleCategories(axisValue); }
+            else { this.toggleSeries(axisValue); }
+        }
+    },
+    
+    /**
+     *ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+     *     arrayStartsWith(a, a) -> true
+     **/
+    arrayStartsWith: function(array, base)
+    {
+        if(array.length < base.length) { return false; }
+        
+        for(var i=0; i<base.length;i++){
+            if(base[i] != array[i]) {
+                return false;
+            }
+        }
+        return true;
+    },
+    
+    toggleCategoriesHierarchy: function(cbase){
+        if(this.selectCategoriesHierarchy(cbase)){
+            this.deselectCategoriesHierarchy(cbase);
+        }
+    },
+    
+    toggleSeriesHierarchy: function(sbase){
+        if(this.selectSeriesHierarchy(sbase)){
+            this.deselectSeriesHierarchy(sbase);
+        }
+    },
+    
+    /**
+     *returns bool wereAllSelected
+     **/
+    selectCategoriesHierarchy: function(cbase){
+        var categories = this.chart.dataEngine.getCategories();
+        var selected = true;
+        for(var i =0; i< categories.length ; i++){
+            var c = categories[i];
+            if( this.arrayStartsWith(c, cbase) ){
+                selected &= this.selectCategory(c);
+            }
+        }
+        return selected;
+    },
+    
+    selectSeriesHierarchy: function(sbase){
+        var series = this.chart.dataEngine.getSeries();
+        var selected = true;
+        for(var i =0; i< series.length ; i++){
+            var s = series[i];
+            if( this.arrayStartsWith(s, sbase) ){
+                selected &= this.selectSeries(s);
+            }
+        }
+        return selected;
+    },
+    
+    deselectCategoriesHierarchy: function(cbase){
+        var categories = this.chart.dataEngine.getCategories();
+        for(var i =0; i< categories.length ; i++){
+            var c = categories[i];
+            if( this.arrayStartsWith(c, cbase) ){
+                this.deselectCategory(c);
+            }
+        }
+    },
+
+    deselectSeriesHierarchy: function(sbase){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i =0; i< series.length ; i++){
+            var s = series[i];
+            if( this.arrayStartsWith(s, sbase) ){
+                this.deselectSeries(s);
+            }
+        }
+    },
+    
+    /**
+     *returns bool wereAllSelected
+     **/
+    selectCategory: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        var wereAllSelected = true;
+        for(var i = 0; i < series.length; i++ ){
+            var s = series[i];
+            if(!this.selectNullValues && this.isValueNull(s,c)){
+                continue;
+            }
+            wereAllSelected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+        }
+        return wereAllSelected;
+    },
+    
+    selectSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        var wereAllSelected = true;
+        for(var i = 0; i < categories.length; i++ ){
+            var c = categories[i];
+            if(!this.selectNullValues && this.isValueNull(s,c)){
+                continue;
+            }
+            wereAllSelected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+        }
+        return wereAllSelected;
+    },
+    
+    deselectCategory: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i = 0; i < series.length; i++ ){
+            this.removeSelection(series[i],c);
+        }
+    },
+
+    deselectSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < categories.length; i++ ){
+            this.removeSelection(s, categories[i]);
+        }
+    },
+    
+    /**
+     *pseudo-toggle elements with category c:
+     *deselect all if all selected, otherwise select all
+     **/
+    toggleCategories: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        var selected = this.selectCategory(c);
+        if(selected){
+            this.deselectCategory(c);
+        }
+    },
+    
+    /**
+     *pseudo-toggle elements with series s:
+     *deselect all if all selected, otherwise select all
+     **/
+    toggleSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        var selected = this.selectSeries(s);
+        if(selected){
+            this.deselectSeries(s);
+        }
+    },
+    
+    getSelectCount: function(){
+        if(this.selectCount == null){
+          this.selectCount = this.getSelections().length;
+        }
+        return this.selectCount;
+    },
+    
+    triggerSelectionChange: function(){
+        if(typeof(this.onSelectionChange) == 'function'){
+            var selections = this.getSelections();
+            this.onSelectionChange(selections);
+        }
+    },
+    
+        inRubberBandSelection: function(x,y){
+        if(!this.rubberBand) { return false; }
+        
+        var r = this.rubberBand;
+        return  x > r.x && x < r.x + r.dx &&
+                y > r.y && y < r.y + r.dy ;
+        
+    },
+    
+    /**
+     * Add rubberband functionality to main panel (includes axis)
+     **/
+    createSelectOverlay : function(w,h)
+    {
+        //TODO: flip support: parallelLength etc..
+        var opts = this.chart.options;
+        this.rubberBand = {x:0, y:0, dx:4, dy:4};
+        var myself = this;
+        
+        if(opts.orientation == 'horizontal')
+        {//switch back w,h
+            var tmp = w;
+            w=h;
+            h=tmp;
+        }
+        
+        var dMin= Math.min(w,h) /2;
+        
+        var isSelecting = false;
+        var checkSelections = false;
+        var selectFill = 'rgba(255, 127, 0, 0.15)'; // opts.rubberBandFill;
+        var selectStroke =  'rgb(255,127,0)';// opts.rubberBandLine;
+        var invisibleFill = 'rgba(127,127,127,0.01)';
+        
+        //callback to handle end of rubber band selection
+        var dispatchRubberBandSelection = function(rb, ev)
+        {//do the rubber band
+            var xAxis = myself.chart.xAxisPanel;
+            var yAxis = myself.chart.yAxisPanel;
+            
+            var opts = myself.chart.options;
+            
+            var positions = ['top','left', 'bottom', 'right'];
+            var setPositions = function(position, len){
+              var obj ={};
+              for(var i=0; i< positions.length;i++){
+                if(positions[i] == position){
+                    obj[positions[i]] = len;
+                }
+                else {
+                    obj[positions[i]] = 0;
+                }
+              }
+              return obj;
+            };
+            
+            //get offsets
+            var titleOffset;
+            if(myself.chart.titlePanel != null){
+                titleOffset = setPositions(opts.titlePosition, myself.chart.titlePanel.titleSize);
+            }
+            else {
+                titleOffset = setPositions();
+            }
+            var xAxisOffset = setPositions(opts.xAxisPosition, myself.chart.xAxisPanel.height);
+            var yAxisOffset = setPositions(opts.yAxisPosition, myself.chart.yAxisPanel.width);
+            
+            var y = 0, x=0;   
+            //1) x axis
+            var xSelections = [];
+            if(opts.useCompositeAxis){
+                y = rb.y - titleOffset['top'] ;
+                if(opts.xAxisPosition == 'bottom'){//chart
+                    y -= myself.height;
+                }
+                x = rb.x - titleOffset['left'] - yAxisOffset['left'];
+                xSelections =  myself.chart.xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+            }
+                        
+            //2) y axis
+            var ySelections = [];
+            if(opts.useCompositeAxis){
+                y = rb.y - titleOffset['top'] - xAxisOffset['top'];//- xAxisOffset['top'];
+                x = rb.x - titleOffset['left'];
+                if(opts.yAxisPosition == 'right'){//chart
+                    x -= myself.width;
+                }
+                ySelections = myself.chart.yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+            }
+            
+            if(!ev.ctrlKey){
+                myself.clearSelections();
+            }
+            
+            if( ySelections.length > 0 && xSelections.length > 0 )
+            {//intersection
+                var series = myself.chart.dataEngine.getSeries();
+                var categories = myself.chart.dataEngine.getCategories();
+                var selectedSeries = [], selectedCategories = [],
+                    sSelections, cSelections;
+                if(opts.orientation == 'horizontal'){
+                    sSelections = xSelections;
+                    cSelections = ySelections;
+                }
+                else {
+                    sSelections = ySelections;
+                    cSelections = xSelections;                    
+                }
+                //expand selections
+                for(var i=0;i<sSelections.length;i++)
+                {
+                    var s = sSelections[i];
+                    for(var j=0;j<series.length; j++){
+                        if( myself.arrayStartsWith(series[j], s)){
+                            selectedSeries.push(series[j]);
+                        }
+                    }
+                }
+                for(var i=0;i<cSelections.length;i++)
+                {
+                    var c = cSelections[i];
+                    for(var j=0;j<categories.length; j++){
+                        if( myself.arrayStartsWith(categories[j], c)){
+                            selectedCategories.push(categories[j]);
+                        }
+                    }
+                }
+                //intersection
+                for(var i=0;i<selectedSeries.length;i++)
+                {
+                    var s = selectedSeries[i];
+                    for(var j=0; j<selectedCategories.length; j++)
+                    {
+                        var c = selectedCategories[j];
+                        myself.addSelection(s,c);
+                    }
+                }
+            }
+            else if(ySelections.length == 0 && xSelections.length == 0)
+            {//if there are label selections, they already include any chart selections
+                //3) Chart: translate coordinates (drawn bottom-up)
+                //first get offsets
+                y = rb.y -titleOffset['top'] - xAxisOffset['top'];
+                x = rb.x - titleOffset['left'] - yAxisOffset['left'];
+                //top->bottom
+                y = myself.height -y -rb.dy;
+                myself.rubberBand.x = x;
+                myself.rubberBand.y = y;
+
+                myself.setRubberbandSelections(myself.rubberBand,w,h);            
+            }
+            else
+            {
+                for(var i=0; i<xSelections.length; i++){
+                    myself.selectAxisValue('x', xSelections[i], true);
+                }
+                for(var i=0; i<ySelections.length; i++){
+                    myself.selectAxisValue('y', ySelections[i], true);
+                }
+            }
+
+            myself.pvBar.render();
+            myself.triggerSelectionChange();
+            
+        };
+        
+        //rubber band display
+        this.selectBar = this.pvPanel.root//TODO
+           .add(pv.Bar)
+                .visible(function() {return isSelecting;} )
+                .left(function(d) { return d.x; })
+                .top(function(d) { return d.y;})
+                .width(function(d) { return d.dx;})
+                .height(function(d) { return d.dy;})
+                .fillStyle(selectFill)
+                .strokeStyle(selectStroke);
+                
+        //rubber band selection behavior definition
+        if(!opts.extensionPoints ||
+           !opts.extensionPoints.base_fillStyle)
+        {
+            this.pvPanel.root.fillStyle(invisibleFill);
+        }
+        
+        this.pvPanel.root
+            .data([myself.rubberBand])
+            .event("click", function(d) {
+                var e = arguments[arguments.length-1];
+                //if(!pv.event.ctrlKey){
+                if(!e.ctrlKey){
+                    myself.clearSelections();
+                    myself.pvBar.render();
+                    myself.triggerSelectionChange();
+                }
+            })
+            .event('mousedown', pv.Behavior.selector(false))
+            .event('selectstart', function(d){
+                isSelecting = true;
+            })
+            .event('select', function(rb){
+                
+                myself.rubberBand = rb;
+                if(isSelecting && (rb.dx > dMin || rb.dy > dMin)){
+                    checkSelections = true;
+                    myself.selectBar.render();
+                }
+            })
+            .event('selectend', function(rb,event){
+                if(isSelecting){
+                    isSelecting = false;
+                    //translate top to bottom
+                    if(checkSelections){
+                        checkSelections = false;
+                        myself.selectBar.render();
+                        dispatchRubberBandSelection(rb, event);
+                    }
+                }
+            });
+    },
+    
+    setRubberbandSelections: function(rb,w,h)
+    {
+        var orient = (this.orientation == 'horizontal')? 'h' : 'v';
+        
+        var categories = this.chart.dataEngine.getCategories();
+
+        var series =             this.chart.dataEngine.getSeries();
+
+        var ySel = [];
+        var xSel = [];
+        
+        //find included series/categories
+        for(var i=0; i< categories.length; i++){
+			if (orient == 'v') {
+				var start= this.pvPanel.scene[0].children[0][i].left;
+				var length= this.pvPanel.scene[0].children[0][i].width;
+                
+            	for (var j=0; j < series.length;j++) {
+					var startY= this.pvPanel.scene[0].children[0][i].children[0][j].bottom;
+					var endY= this.pvPanel.scene[0].children[0][i].children[0][j].height + startY;
+					var startX= this.pvPanel.scene[0].children[0][i].children[0][j].left + start;
+					var endX= this.pvPanel.scene[0].children[0][i].children[0][j].width + startX;
+            			
+            		if (((startY >= rb.y && startY < rb.y + rb.dy) && ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx))) ||
+            			((endY >= rb.y && endY < rb.y + rb.dy) && ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx)))) {
+						xSel.push(categories[i]);            			
+						ySel.push(series[j]);            		
+					}
+            	}
+            } else {
+
+				var start= this.pvPanel.scene[0].children[0][i].bottom;
+				var length= this.pvPanel.scene[0].children[0][i].height;
+                           
+            	for (var j=0; j < series.length;j++) {
+					var startX= this.pvPanel.scene[0].children[0][i].children[0][j].left;
+					var endX= this.pvPanel.scene[0].children[0][i].children[0][j].width + startX;
+					var startY= this.pvPanel.scene[0].children[0][i].children[0][j].bottom + start;
+					var endY= this.pvPanel.scene[0].children[0][i].children[0][j].height + startY;
+
+            			   			
+            		if (((startY >= rb.y && startY < rb.y + rb.dy) && ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx))) ||
+            			((endY >= rb.y && endY < rb.y + rb.dy) && ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx)))) {
+						ySel.push(categories[i]);            			
+						xSel.push(series[j]);            		
+					}
+            	}                                            
+            }
+        }
+
+        
+        var sSel, cSel;
+        if(orient == 'h'){
+            sSel = xSel;
+            cSel = ySel;
+        }
+        else {
+            sSel = ySel;
+            cSel = xSel;            
+        }
+        
+        //select shapes in intersection
+        for(var i=0; i< sSel.length; i++)
+        {
+            var s = sSel[i];
+            this.addSelection(s, cSel[i]);
+        }
     }
+    
+    
+    /*
+     *selections (end)
+     **********************/
+    
+    
+    
 
 });
