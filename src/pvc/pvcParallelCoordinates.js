@@ -160,11 +160,14 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     // 3. determine the value to be displayed
     //   for the categorical dimensions map == displayValue
-    for(var d in pCoordMapping)
-      if (   pCoordMapping[d]
-          && pCoordMapping[d].categorical)
-        pCoordMapping[d].displayValue = pCoordMapping[d].map
-
+    for(var d in pCoordMapping){
+        if (pCoordMapping.hasOwnProperty(d) && 
+            pCoordMapping[d] && 
+            pCoordMapping[d].categorical) {
+            pCoordMapping[d].displayValue = pCoordMapping[d].map
+        }
+    }
+    
     // 4. apply the sorting of the dimension
     if (   this.chart.options.sortCategorical
         || this.chart.options.mapAllDimensions) {
@@ -178,8 +181,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
            // create a sorted array
            var cMap = pCoordMapping[i].map;
            var sorted = [];
-           for(var item in cMap)
-             sorted.push(item);
+           for(var item in cMap){
+                if(cMap.hasOwnProperty(item)){
+                    sorted.push(item);
+                }
+           }
            sorted.sort();
            // and assign a new index to all items
            if (pCoordMapping[i].categorical)
@@ -202,9 +208,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     var generateHashMap = function(col) {
       var record = {};
       for(var i in pCoordIndex) {
-         record[pCoordKeys[i]] = (pCoordMapping[i]) ?
-              coordMapUpdate(i, values[i][col]) :
-              values[i][col];
+          if(pCoordIndex.hasOwnProperty(i)){
+                record[pCoordKeys[i]] = (pCoordMapping[i]) ?
+                    coordMapUpdate(i, values[i][col]) :
+                    values[i][col];
+          }
       }
       return record;
     };
@@ -289,8 +297,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
         if (item.categorical == false) {
           item.orgValue = [];
           var theMap =  pCoordMapping[index].map;
-          for (key in theMap)
-            item.orgValue[ theMap[key] ] = 0.0+key;
+          for (key in theMap){
+              if(theMap.hasOwnProperty(key)){
+                item.orgValue[ theMap[key] ] = 0.0+key;
+              }
+          }
         }
       }
     }
@@ -446,10 +457,16 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 	      }
 	  } else {
 	  // re-use the existing data-structure if it exists already
-	      for (var a in auxData)
-		  for (var b in a)
-		      for (c=0; c<b.length; c++)
-			  b[c] = 0;
+	      for (var a in auxData){
+                  if(auxData.hasOwnProperty(a)){
+                      for (var b in a){
+                          if(a.hasOwnProperty(b)){
+                              for (c=0; c<b.length; c++)
+                                  b[c] = 0;
+                          }
+                      }
+                  }
+              }
 	  }
 
       };
@@ -502,15 +519,20 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     var labelXoffs = 6,
     labelYoffs = 3;
     for(d in dimDescr) {
-      var dim = dimDescr[d];
-      if (dim.categorical) {
-        var  xVal = x(dim.id) + labelXoffs;
-        for (l in dim.map)
-          labels[labels.length] = {
-            x:  xVal,
-            y:  y[dim.id](dim.map[l]) + labelYoffs,
-            label: l
-          };
+     if(dimDescr.hasOwnProperty(d)){
+          var dim = dimDescr[d];
+          if (dim.categorical) {
+            var  xVal = x(dim.id) + labelXoffs;
+            for (var l in dim.map){
+                 if(dim.map.hasOwnProperty(l)){
+                      labels[labels.length] = {
+                        x:  xVal,
+                        y:  y[dim.id](dim.map[l]) + labelYoffs,
+                        label: l
+                      };
+                 }
+            }
+          }
       }
     }
     var dimLabels = this.pvPanel.add(pv.Panel)

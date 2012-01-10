@@ -439,7 +439,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             secondXAxisSize = bypassAxis ? 0 : this.options.secondAxisSize;
         }
         
-        // TODO - DCLEAO - DataEngine#getCategories já faz isto não??
+        // TODO - DCLEAO - DataEngine#getCategories already does this...??
         var parser = pv.Format.date(this.options.timeSeriesFormat),
             categories = this.dataEngine.getVisibleCategories().sort(function(a, b){
                 return parser.parse(a) - parser.parse(b)
@@ -844,11 +844,19 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //TODO: extend this to work with chart.orientation?
         if(this.anchor == 'bottom' || this.anchor == 'left') {elements.reverse();}
         
+        var isHierarchy = true;
+        
         //build tree with elements
         var tree = {};
         var sectionNames = [];
         var xlen = elements.length;
         for(var i =0; i<elements.length; i++){
+            if(typeof(elements[i]) == 'string'){
+                isHierarchy = false;
+                tree[elements[i]] = 0;
+                sectionNames.push(elements[i]);
+                continue;
+            }
             var baseElem = elements[i][0];
             if(!tree[baseElem]){
                 tree[baseElem] = elements[i].length == 1 ? 0 : {};
@@ -880,10 +888,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 break;
         }
         
-        var maxDepth = pv.max(elements, function(col){
+        var maxDepth =isHierarchy? pv.max(elements, function(col){
             //return $.isArray(col) ? col.length : 1;
             return (col != null && col[0] !== undefined) ? col.length : 1;
-        });
+        }) : 1;
         
         var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
     
