@@ -19,7 +19,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   pvDot: null,
   pvLabel: null,
 
-
   anchor: "bottom",
   align: "left",
   pvLegendPanel: null,
@@ -35,13 +34,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   drawLine: false,
   drawMarker: true,
 
-
-
-
   constructor: function(chart, options){
-
     this.base(chart,options);
-
   },
 
   create: function(){
@@ -51,12 +45,12 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       c2 = this.chart.secondAxisColor(),
       x,y;
 
-
     //pvc.log("Debug PMartins");
-
-    var data = this.chart.legendSource=="series"?
-    this.chart.dataEngine.getSeries():
-    this.chart.dataEngine.getCategories();
+    
+    var data = this.chart.legendSource == "series"
+               ? this.chart.dataEngine.getSeries()
+               : this.chart.dataEngine.getCategories();
+    
     cLen = data.length;
 
     if (this.chart.options.secondAxis) {
@@ -65,21 +59,25 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         args.unshift(data.length);
         data.splice.apply(data, args);
     }
-    c = function(arg) {return arg < cLen ?
-      c1.apply(this,arguments) :
-      c2.apply(this,[arg - cLen]);
+    
+    c = function(arg){
+        return arg < cLen
+               ? c1.apply(this, arguments)
+               : c2.call(this, arg - cLen);
     };
-    //determine the size of the biggest cell
-    //Size will depend on positioning and font size mainly
-    var maxtext = 0;
-    for (i in data){
-      maxtext = maxtext < data[i].length?data[i].length:maxtext;
+    
+    // Determine the size of the biggest cell
+    // Size will depend on positioning and font size mainly
+    var maxTextLen = 0;
+    for (var i in data){
+        if(maxTextLen < data[i].length){
+            maxTextLen = data[i].length;
+        }
     }
-    var cellsize = this.markerSize + maxtext*this.textAdjust;
+    
+    var cellsize = this.markerSize + maxTextLen * this.textAdjust;
 
     var realxsize, realysize;
-
-
     if (this.anchor == "top" || this.anchor == "bottom"){
       this.width = this._parent.width;
       this.height = this.legendSize;
@@ -106,17 +104,18 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       }
 
       x = function(){
-        var n = Math.ceil(this.index/maxperline);
-        return (this.index%maxperline)*(cellsize + myself.padding) + myself.minMarginX;
-      }
-      myself.minMarginY = (myself.height - realysize)/2;
+        return (this.index % maxperline) * (cellsize + myself.padding) + 
+                myself.minMarginX;
+      };
+      
+      myself.minMarginY = (myself.height - realysize) / 2;
+      
       y = function(){
         var n = Math.floor(this.index/maxperline); 
-        return myself.height  - n*myself.padding - myself.minMarginY - myself.padding/2;
-      }
-
-    }
-    else{
+        return myself.height  - n * myself.padding - myself.minMarginY - myself.padding/2;
+      };
+      
+    } else {
       this.height = this._parent.height;
       this.width = this.legendSize;
       realxsize = cellsize + this.minMarginX;
@@ -130,7 +129,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       x = myself.minMarginX;
       y = function(){
         return myself.height - this.index*myself.padding - myself.minMarginY;
-      }
+      };
     }
 
     if(this.width == null){
@@ -138,28 +137,26 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     }
 
     this.pvPanel = this._parent.getPvPanel().add(this.type)
-    .width(this.width)
-    .height(this.height)    
-
-
+        .width(this.width)
+        .height(this.height)    
 
     //********** Markers and Lines ***************************
 
     this.pvLegendPanel = this.pvPanel.add(pv.Panel)
-    .data(data)
-    .def("hidden","false")
-    .left(x)
-    .bottom(y)
-    .height(this.markerSize)
-    .cursor("pointer")
-    .fillStyle(function(){
-      return this.hidden()=="true"?"rgba(200,200,200,1)":"rgba(200,200,200,0.0001)";
-    })
-    .event("click",function(e){
-
-      return myself.toggleVisibility(this.index);
-
-    });
+        .data(data)
+        .def("hidden","false")
+        .left(x)
+        .bottom(y)
+        .height(this.markerSize)
+        .cursor("pointer")
+        .fillStyle(function(){
+          return this.hidden()=="true"
+                 ? "rgba(200,200,200,1)"
+                 : "rgba(200,200,200,0.0001)";
+        })
+        .event("click",function(e){
+          return myself.toggleVisibility(this.index);
+        });
 
     // defined font function
     var computeDecoration = function(idx){
@@ -169,7 +166,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       else{
         return "line-through"
       }
-    }
+    };
+    
     var computeTextStyle = function(idx){
       if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
         return "black"
@@ -177,7 +175,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       else{
         return "#ccc"
       }
-    }
+    };
 
     if(this.drawLine == true && this.drawMarker == true){
       
@@ -257,29 +255,19 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     this.extend(this.pvRule,"legendRule_");
     this.extend(this.pvDot,"legendDot_");
     this.extend(this.pvLabel,"legendLabel_");
-
-
   },
 
   toggleVisibility: function(idx){
     
     pvc.log("Worked. Toggling visibility of index " + idx);
-    this.chart.dataEngine.toggleVisibility(this.chart.legendSource,idx);
+    this.chart.dataEngine.toggleVisibility(this.chart.legendSource, idx);
 
     // Forcing removal of tipsy legends
-    try{
-      $(".tipsy").remove();
-    }catch(e){
-      // Do nothing
-    }
+    pvc.removeTipsyLegends();
 
     // Rerender chart
-    this.chart.preRender();
-    this.chart.render(true);
+    this.chart.render(true, true);
     
     return this.pvLabel;
   }
-
-
 });
-

@@ -667,22 +667,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
     },
     
-    /**
-     *ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
-     *     arrayStartsWith(a, a) -> true
-     **/
-    arrayStartsWith: function(array, base)
-    {
-        if(array.length < base.length) { return false; }
-        
-        for(var i=0; i<base.length;i++){
-            if(base[i] != array[i]) {
-                return false;
-            }
-        }
-        return true;
-    },
-    
     toggleCategoriesHierarchy: function(cbase){
         if(this.selectCategoriesHierarchy(cbase)){
             this.deselectCategoriesHierarchy(cbase);
@@ -703,7 +687,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var selected = true;
         for(var i =0; i< categories.length ; i++){
             var c = categories[i];
-            if( this.arrayStartsWith(c, cbase) ){
+            if( pvc.arrayStartsWith(c, cbase) ){
                 selected &= this.selectCategory(c);
             }
         }
@@ -715,7 +699,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var selected = true;
         for(var i =0; i< series.length ; i++){
             var s = series[i];
-            if( this.arrayStartsWith(s, sbase) ){
+            if( pvc.arrayStartsWith(s, sbase) ){
                 selected &= this.selectSeries(s);
             }
         }
@@ -726,7 +710,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var categories = this.chart.dataEngine.getCategories();
         for(var i =0; i< categories.length ; i++){
             var c = categories[i];
-            if( this.arrayStartsWith(c, cbase) ){
+            if( pvc.arrayStartsWith(c, cbase) ){
                 this.deselectCategory(c);
             }
         }
@@ -736,7 +720,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var series = this.chart.dataEngine.getSeries();
         for(var i =0; i< series.length ; i++){
             var s = series[i];
-            if( this.arrayStartsWith(s, sbase) ){
+            if( pvc.arrayStartsWith(s, sbase) ){
                 this.deselectSeries(s);
             }
         }
@@ -938,7 +922,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 {
                     var s = sSelections[i];
                     for(var j=0;j<series.length; j++){
-                        if( myself.arrayStartsWith(series[j], s)){
+                        if( pvc.arrayStartsWith(series[j], s)){
                             selectedSeries.push(series[j]);
                         }
                     }
@@ -947,7 +931,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 {
                     var c = cSelections[i];
                     for(var j=0;j<categories.length; j++){
-                        if( myself.arrayStartsWith(categories[j], c)){
+                        if( pvc.arrayStartsWith(categories[j], c)){
                             selectedCategories.push(categories[j]);
                         }
                     }

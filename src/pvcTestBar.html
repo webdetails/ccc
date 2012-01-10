@@ -19,6 +19,7 @@
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
     <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvcData.js"></script>
     <script type="text/javascript" src="pvc/pvcPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcLegend.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
@@ -27,7 +28,7 @@
     <script type="text/javascript" src="pvc/pvcPie.js"></script>
     <script type="text/javascript" src="pvc/pvcBar.js"></script>
     <script type="text/javascript" src="pvc/pvcLine.js"></script>
-    <script type="text/javascript" src="pvc/pvcData.js"></script>
+    
     <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
     <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
         
@@ -133,7 +134,7 @@ For drawing a very simple bar chart, just provide the data and set the orientati
              seriesInRows: false});
         bar1.render();
 </textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <button id="pvcBar1TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar1"></div>
 
 <h3>A Rich Bar chart</h3>
@@ -144,13 +145,14 @@ A simple bar chart can be enhanced by setting properties to the panel, bars, axi
         var bar2 = new pvc.BarChart({
           canvas: "pvcBar2",
           width: 400,
-          height: 250,
+          height: 500,
           title: "Sample Bar chart",
           titlePosition:"left",
           orientation: 'horizontal',
           stacked: false,
           animate:false,
-
+legend: true,
+legendPosition: "right",
           showValues: false,
           showXScale: true,
           showYScale: true,
@@ -161,7 +163,7 @@ A simple bar chart can be enhanced by setting properties to the panel, bars, axi
           xAxisFullGrid: true,
           
           extensionPoints: {
-            bar_fillStyle:pv.colors("#BF4630","#FF5D40","#FF8973"),
+            //bar_fillStyle:pv.colors("#BF4630","#FF5D40","#FF8973"),
             bar_lineWidth:1,
             bar_strokeStyle:"#000",
             title_fillStyle: "lightBlue",

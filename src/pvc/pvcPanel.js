@@ -25,7 +25,7 @@ pvc.Base = Base.extend({
     // renderCallback
     renderCallback: undefined,
 
-    constructor: function(options){
+    constructor: function(/*options*/){
         var myself = this;
         var _defaults = {
             canvas: null,
@@ -63,28 +63,37 @@ pvc.Base = Base.extend({
         // Apply options
         $.extend(this.options, _defaults);
 
-        // Create DataEngine
-        this.dataEngine = new pvc.DataEngine(this);
-
+        this.dataEngine = this.createDataEngine();
     },
-
-
+    
+    /**
+     * Creates an appropriate DataEngine
+     */
+    createDataEngine: function(){
+        return new pvc.DataEngine(this);
+    },
+    
+    initBasePanel: function(){
+        // Since we don't have a parent panel we need to manually create the points
+        this.basePanel = new pvc.BasePanel(this); // Base panel, no parent
+        this.basePanel.setSize(this.options.width, this.options.height);
+        this.basePanel.create();
+        this.basePanel.getPvPanel().canvas(this.options.canvas);
+    },
+	
     /**
      *
-     * Building the visualization has 2 stages: First the preRender prepares and
-     * build every object that will be used; Later
+     * Building the visualization has 2 stages: 
+	 * First the preRender method prepares and builds every object that will be used; 
+	 * Later the render method effectively renders.
      *
      */
-
     preRender: function(){
-
         pvc.log("Prerendering in pvc");
+        
         // Now's as good a time as any to completely clear out all tipsy tooltips
-        try {
-            $('.tipsy').remove();
-        } catch(e) {
-            // Do nothing
-        }
+        pvc.removeTipsyLegends();
+		
         // If we don't have data, we just need to set a "no data" message
         // and go on with life.
         if (!this.allowNoData && this.resultset.length === 0) {
@@ -97,48 +106,27 @@ pvc.Base = Base.extend({
         }
 
         // Getting data engine and initialize the translator
-        this.dataEngine.clearDataCache();
-        this.dataEngine.setData(this.metadata,this.resultset);
-        this.dataEngine.setCrosstabMode(this.options.crosstabMode);
-        this.dataEngine.setSeriesInRows(this.options.seriesInRows);
+        var de = this.dataEngine;
+        de.clearDataCache();
+        de.setData(this.metadata,this.resultset);
+        de.setCrosstabMode(this.options.crosstabMode);
+        de.setSeriesInRows(this.options.seriesInRows);
         //TODO: new
-        this.dataEngine.setMultiValued(this.options.isMultiValued);
-        this.dataEngine.setValuesIndexes(this.options.measuresIndexes);//columns where measure values are, for relational data
-        this.dataEngine.setDataOptions(this.options.dataOptions);
+        de.setMultiValued(this.options.isMultiValued);
+        de.setValuesIndexes(this.options.measuresIndexes);//columns where measure values are, for relational data
+        de.setDataOptions(this.options.dataOptions);
         //end
-        this.dataEngine.createTranslator();
+        de.createTranslator();
 
         pvc.log(this.dataEngine.getInfo());
-        // Create the color info
-        if (typeof this.options.colors == 'undefined' || this.options.colors == null || this.options.colors.length == 0){
-            this.colors = pv.Colors.category10;
-        } else{
-            this.colors = function() {
-                var scale = pv.colors(this.options.colors);
-                scale.domain.apply(scale, arguments);
-                return scale;
-            }
-        };
-        if (typeof this.options.secondAxisColor == 'undefined' || this.options.secondAxisColor == null || this.options.secondAxisColor.length == 0){
-            this.secondAxisColor = pv.Colors.category10;
-        } else {
-            this.secondAxisColor = function() {
-                var sec = this.options.secondAxisColor;
-                var scale = pv.colors(sec instanceof Array ? sec : [sec]);
-                scale.domain.apply(scale, arguments);
-                return scale;
-            };
-        }
-
-
-        // create the basePanel. Since we don't have a parent panel we need to
-        // manually create the points
-
-        this.basePanel = new pvc.BasePanel(this); // Base panel, no parent
-        this.basePanel.setSize(this.options.width, this.options.height);
-        this.basePanel.create();
-        this.basePanel.getPvPanel().canvas(this.options.canvas);
-
+        
+        // Create color schemes
+        this.colors = pvc.createColorScheme(this.options.colors);
+        this.secondAxisColor = pvc.createColorScheme(this.options.secondAxisColor);
+		
+        // Create the basePanel.
+        this.initBasePanel();
+		
         // Title
         if (this.options.title != null && this.options.title != ""){
             this.titlePanel = new pvc.TitlePanel(this, {
@@ -149,9 +137,7 @@ pvc.Base = Base.extend({
             });
 
             this.titlePanel.appendTo(this.basePanel); // Add it
-
         }
-
 
         // Legend
         if (this.options.legend){
@@ -171,11 +157,9 @@ pvc.Base = Base.extend({
             });
 
             this.legendPanel.appendTo(this.basePanel); // Add it
-
         }
 
         this.isPreRendered = true;
-
     },
 
     /**
@@ -183,109 +167,94 @@ pvc.Base = Base.extend({
      * Render the visualization. If not prerendered, do it now
      *
      */
-
-    render: function(bypassAnimation){
+    render: function(bypassAnimation, rebuild){
         try {
-            if(!this.isPreRendered){
+            if(!this.isPreRendered || rebuild){
                 this.preRender();
             }
 
-            if( typeof this.options.renderCallback !== "undefined" ){
+            if(this.options.renderCallback){
                 this.options.renderCallback.call(this);
             }
         
             this.basePanel.getPvPanel().render();
     
-            if(this.options.animate == true && !bypassAnimation){
+            if(this.options.animate && !bypassAnimation){
                 this.isAnimating = true;
                 this.basePanel.getPvPanel().transition()
-                .duration( 2000)
-                .ease("cubic-in-out")
-                .start();
+                    .duration( 2000)
+                    .ease("cubic-in-out")
+                    .start();
             }
         } catch (e) {
             if(e instanceof NoDataException) {
 
                 if (!this.basePanel) {
                     pvc.log("No panel");
-                    this.basePanel = new pvc.BasePanel(this); // Base panel, no parent
-                    this.basePanel.setSize(this.options.width, this.options.height);
-                    this.basePanel.create();
-                    this.basePanel.getPvPanel().canvas(this.options.canvas);
+                    this.initBasePanel();
                 }
+				
                 pvc.log("creating message");
-                var message = this.basePanel.getPvPanel().anchor("center").add(pv.Label);
+                var pvPanel = this.basePanel.getPvPanel(),
+                    message = pvPanel.anchor("center").add(pv.Label);
                 message.text("No data found");
-                this.basePanel.extend(message,"noDataMessage_");
-                this.basePanel.getPvPanel().render();
+                this.basePanel.extend(message, "noDataMessage_");
+                pvPanel.render();
             } else {
                 // We don't know how to handle this
                 throw e;
             }
         }
-
-
     },
-
 
     /**
      * Method to set the data to the chart. Expected object is the same as what
      * comes from the CDA: {metadata: [], resultset: []}
      */
-
     setData: function(data, options){
         this.setResultset(data.resultset);
         this.setMetadata(data.metadata);
 
-        $.extend(this.options,options);
+        $.extend(this.options, options);
     },
-
 
     /**
      * Sets the resultset that will be used to build the chart
      */
-
     setResultset: function(resultset){
-
         this.resultset = resultset;
         if (resultset.length == 0){
             pvc.log("Warning: Resultset is empty")
         }
-
     },
-
 
     /**
      * Sets the metadata that, optionally, will give more information for building
      * the chart
      */
-
     setMetadata: function(metadata){
-
         this.metadata = metadata;
         if (metadata.length == 0){
             pvc.log("Warning: Metadata is empty")
         }
-
     },
 
     /*
      * Animation
      */
-
     animate: function(start, end){
-
-        if (this.options.animate == false || this.isAnimating == true){
-            return end;
-        }
-        else{
-            return start
-        }
-
+        return (!this.options.animate || this.isAnimating) 
+                ? end 
+                : start;
+    },
+    
+    isOrientationVertical: function(orientation){
+        return (orientation || this.options.orientation) === "vertical";
+    },
+    
+    isOrientationHorizontal: function(orientation){
+        return (orientation || this.options.orientation) == "horizontal";
     }
-
-
-
 });
 
 
@@ -307,38 +276,33 @@ pvc.BasePanel = Base.extend({
     fillColor: "red",
     margins: null,
 
-    constructor: function(chart,options){
+    constructor: function(chart, options){
 
         this.chart = chart;
-        $.extend(this,options);
+        $.extend(this, options);
 
         this.margins = {
-            top:0,
-            right: 0,
+            top:    0,
+            right:  0,
             bottom: 0,
-            left: 0
-        }
-
+            left:   0
+        };
     },
-
 
     create: function(){
 
-        if(this._parent == null){
+        if(!this._parent){
             // Should be created for the vis panel only
             this.pvPanel = new pv.Panel();
-            this.extend(this.pvPanel,"base_");
-        }
-        else{
+            this.extend(this.pvPanel, "base_");
+        } else {
             this.pvPanel = this._parent.pvPanel.add(this.type);
         }
 
         this.pvPanel
-        .width(this.width)
-        .height(this.height);
-
+            .width(this.width)
+            .height(this.height);
     },
-
 
     /*
      *  Create the panel, appending it to the previous one using a specified anchor.
@@ -349,35 +313,33 @@ pvc.BasePanel = Base.extend({
      *  3) append it to the previous one in the correct position
      *
      */
+    appendTo: function(parent){
 
-    appendTo: function(_parent){
-
-        this._parent = _parent;
+        this._parent = parent;
         this.create();
 
         // Reduce size and update margins
-        var a = this.anchor;
-        if(a == "top" || a == "bottom"){
+        var a  = this.anchor,
+            ao = this.anchorOrtho(),
+            isTopOrBottom = this.isAnchorTopOrBottom(),
+            margins = this._parent.margins;
+		
+        if(isTopOrBottom){
             this._parent.height -= this.height;
-        }
-        else{
+        } else {
             this._parent.width -= this.width;
         }
-
-
     
         // See where to attach it.
-        this.pvPanel[a](this._parent.margins[a]);
-        this.pvPanel[pvc.BasePanel.relativeAnchor[a]](this._parent.margins[pvc.BasePanel.relativeAnchor[a]]);
+        this.pvPanel[a ](margins[a ]);
+        this.pvPanel[ao](margins[ao]);
 
         // update margins
-        if(a == "top" || a == "bottom"){
-            this._parent.margins[this.anchor] += this.height;
+        if(isTopOrBottom){
+            margins[a] += this.height;
+        } else {
+            margins[a] += this.width;
         }
-        else{
-            this._parent.margins[a] += this.width;
-        }
-
     },
 
 
@@ -391,62 +353,97 @@ pvc.BasePanel = Base.extend({
      * unexisting method won't blow this
      *
      */
-
     extend: function(mark, prefix){
-
         // if mark is null or undefined, skip
-        if ( !!mark )
-            for (p in this.chart.options.extensionPoints){
-                if (p.indexOf(prefix) == 0){
-                    var m = p.substring(prefix.length);
+        if (mark){
+            var pL = prefix.length,
+                points = this.chart.options.extensionPoints;
+            for (var p in points){
+                if (p.indexOf(prefix) === 0){
+                    var m = p.substring(pL);
                     // Distinguish between mark methods and properties
                     if (typeof mark[m] === "function") {
-                        mark[m](this.chart.options.extensionPoints[p]);
+                        mark[m](points[p]);
                     } else {
-                        mark[m] = this.chart.options.extensionPoints[p];
+                        mark[m] = points[p];
                     }
                 }
-
             }
-
+        }
     },
 
     /*
-     * Sets the size for the panel, when he parent panel is undefined
+     * Sets the size for the panel, for when the parent panel is undefined
      */
-
-    setSize: function(w,h){
-        this.width = w;
+    setSize: function(w, h){
+        this.width  = w;
         this.height = h;
-
     },
 
     /*
-     * returns the width of the Panel
+     * Returns the width of the Panel
      */
     getWidth: function(){
-        return this.width
+        return this.width;
     },
 
     /*
-     * returns the height of the Panel
+     * Returns the height of the Panel
      */
     getHeight: function(){
-        return this.height
+        return this.height;
     },
 
     /*
      * Returns the underlying protovis Panel
      */
     getPvPanel: function(){
-        return this.pvPanel
+        return this.pvPanel;
+    },
+    
+    /**
+     * Returns true if the anchor is one of the values 'top' or 'bottom'.
+     */
+    isAnchorTopOrBottom: function(anchor){
+        if(!anchor) { anchor = this.anchor; }
+        return anchor === "top" || anchor === "bottom";
+    },
+    
+    anchorOrtho: function(anchor){
+        if(!anchor) { anchor = this.anchor; }
+        return pvc.BasePanel.relativeAnchor[anchor];
+    },
+    
+    anchorOrthoMirror: function(anchor){
+        if(!anchor) { anchor = this.anchor; }
+        return pvc.BasePanel.relativeAnchorMirror[anchor];
+    },
+    
+    anchorOpposite: function(anchor){
+        if(!anchor) { anchor = this.anchor; }
+        return pvc.BasePanel.oppositeAnchor[anchor];
+    },
+    
+    anchorLength: function(anchor){
+        if(!anchor) { anchor = this.anchor; }
+        return pvc.BasePanel.parallelLength[anchor];
+    },
+    
+    anchorOrthoLength: function(anchor){
+        if(!anchor) { anchor = this.anchor; }
+        return pvc.BasePanel.orthogonalLength[anchor];
+    },
+    
+    isOrientationVertical: function(orientation){
+        return this.chart.isOrientationVertical(orientation);
+    },
+    
+    isOrientationHorizontal: function(orientation){
+        return this.chart.isOrientationHorizontal(orientation);
     }
-
-
 },{
-    // determine what is the associated method to call to position the labels
-    // correctly
-
+    // Determine what is the associated method to 
+	//  call to position the labels correctly
     relativeAnchor: {
         top: "left",
         bottom: "left",
@@ -481,12 +478,12 @@ pvc.BasePanel = Base.extend({
         right: "width",
         left: "width"
     }
-
 })
 
 
 /*
- * Title panel. Generates the title. Specific options are:
+ * Title panel. Generates the title.
+ * Specific options are:
  * <i>title</i> - text. Default: null
  * <i>titlePosition</i> - top / bottom / left / right. Default: top
  * <i>titleSize</i> - The size of the title in pixels. Default: 25
@@ -507,82 +504,77 @@ pvc.TitlePanel = pvc.BasePanel.extend({
     titleAlign: "center",
     font: "14px sans-serif",
 
-
-
     constructor: function(chart, options){
-
         this.base(chart,options);
-
     },
 
     create: function(){
-
         // Size will depend on positioning and font size mainly
-    
-        if (this.anchor == "top" || this.anchor == "bottom"){
-            this.width = this._parent.width;
+        var isTopOrBottom = this.isAnchorTopOrBottom();
+        if (isTopOrBottom){
+            this.width  = this._parent.width;
             this.height = this.titleSize;
-        }
-        else{
+        } else{
             this.height = this._parent.height;
-            this.width = this.titleSize;
+            this.width  = this.titleSize;
         }
-
 
         this.pvPanel = this._parent.getPvPanel().add(this.type)
-        .width(this.width)
-        .height(this.height)
+			.width(this.width)
+			.height(this.height);
 
         // Extend title
-        this.extend(this.pvPanel,"title_");
+        this.extend(this.pvPanel, "title_");
 
-        var rotation = {
-            top: 0,
-            right: Math.PI/2,
+        // Label
+        var rotationByAnchor = {
+            top:    0,
+            right:  Math.PI/2,
             bottom: 0,
-            left: -Math.PI/2
+            left:   -Math.PI/2
         };
-
-        // label
+		
         this.pvLabel = this.pvPanel.add(pv.Label)
-        .text(this.title)
-        .font(this.font)
-        .textAlign("center")
-        .textBaseline("middle")
-        .bottom(this.height/2)
-        .left(this.width/2)
-        .textAngle(rotation[this.anchor]);
+			.text(this.title)
+			.font(this.font)
+			.textAlign("center")
+			.textBaseline("middle")
+			.bottom(this.height/2)
+			.left(this.width/2)
+			.textAngle(rotationByAnchor[this.anchor]);
 
         // Cases:
         if(this.titleAlign == "center"){
             this.pvLabel
-            .bottom(this.height/2)
-            .left(this.width/2)
-        }
-        else{
+                .bottom(this.height/2)
+                .left(this.width/2);
+        } else {
 
             this.pvLabel.textAlign(this.titleAlign);
 
-            if ( this.anchor == "top" || this.anchor == "bottom"){
-
-                this.pvLabel.bottom(null).left(null); // reset
-                this.pvLabel[this.titleAlign](0)
-                .bottom(this.height/2)
-
-            }
-            else if (this.anchor == "right"){
-                this.titleAlign=="left"?this.pvLabel.bottom(null).top(0):this.pvLabel.bottom(0);
-            }
-            else if (this.anchor == "left"){
-                this.titleAlign=="right"?this.pvLabel.bottom(null).top(0):this.pvLabel.bottom(0);
+            if (isTopOrBottom){
+                this.pvLabel
+                    .bottom(null)
+                    .left(null) // reset
+                    [this.titleAlign](0)
+                    .bottom(this.height/2);
+					
+            } else if (this.anchor == "right") {
+                if(this.titleAlign == "left"){
+                    this.pvLabel.bottom(null).top(0);
+                } else {
+                    this.pvLabel.bottom(0);
+                }
+            } else if (this.anchor == "left"){
+                if(this.titleAlign == "right"){
+                    this.pvLabel.bottom(null).top(0);
+                } else {
+                    this.pvLabel.bottom(0);
+                }
             }
         }
 
-
         // Extend title label
-        this.extend(this.pvLabel,"titleLabel_");
-
+        this.extend(this.pvLabel, "titleLabel_");
     }
-
-
 });

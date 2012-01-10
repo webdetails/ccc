@@ -40,7 +40,7 @@ pvc.sumOrSet = function(v1,v2){
 };
 
 pvc.nonEmpty = function(d){
-    return typeof d != "undefined" && d !== null;
+    return d != null;
 };
 
 pvc.padMatrixWithZeros = function(d){
@@ -57,20 +57,22 @@ pvc.cloneMatrix = function(m){
     });
 };
 
-    /**
-     *ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
-     *     arrayStartsWith(a, a) -> true
-     **/
-pvc.arrayStartsWith = function(array, base)
-{
-    if(array.length < base.length) { return false; }
+/**
+ *ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+ *     arrayStartsWith(a, a) -> true
+ **/
+pvc.arrayStartsWith = function(array, base){
+    if(array.length < base.length) { 
+		return false; 
+	}
     
     for(var i=0; i<base.length;i++){
         if(base[i] != array[i]) {
             return false;
         }
     }
-    return true;
+    
+	return true;
 };
 
 /**
@@ -98,12 +100,46 @@ pvc.arrayEquals = function(array1, array2, func)
 };
 
 /**
+ * Converts something to an array if it is not one already
+ *  an if it is not equal (==) to null.
+*/
+pvc.toArray = function(thing){
+	return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+};
+
+/**
+ * Creates a color scheme based on the specified colors.
+ * The default color scheme is "pv.Colors.category10", 
+ * and is returned when null or an empty array is specified.
+ */
+pvc.createColorScheme = function(colors){
+	if (colors == null || colors.length == 0){
+		return pv.Colors.category10;
+	}
+	
+	colors = pvc.toArray(colors);
+	
+	return function() {
+		var scale = pv.colors(colors);
+		scale.domain.apply(scale, arguments);
+		return scale;
+	};
+};
+
+pvc.removeTipsyLegends = function(){
+    try {
+        $('.tipsy').remove();
+    } catch(e) {
+        // Do nothing
+    }
+};
+
+/**
  *
  * Implements filter property if not implemented yet
  *
  */
-if (!Array.prototype.filter)
-{
+if (!Array.prototype.filter){
     Array.prototype.filter = function(fun, thisp)
     {
         var len = this.length >>> 0;

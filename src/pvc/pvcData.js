@@ -66,11 +66,17 @@ pvc.DataEngine = Base.extend({
             this.translator = new pvc.RelationalTranslator();
         }
 
+        this.prepareTranslator();
+    },
+    
+    /**
+     * Prepares a just created translator
+     */
+    prepareTranslator: function(){
         this.translator.setData(this.metadata, this.resultset);
         this.translator.prepare(this);
-
     },
-
+    
     /*
      * Returns some information on the data points
      */
@@ -178,19 +184,16 @@ pvc.DataEngine = Base.extend({
 
     getCategories: function(){
 
-        if( this.categories == null ){
+        if(this.categories == null){
 
             if(this.chart.options.timeSeries){
                 var parser = pv.Format.date(this.chart.options.timeSeriesFormat);
                 this.categories = this.translator.getRows().sort(function(a,b){
                     return parser.parse(a) - parser.parse(b)
                 });
-
-            }
-            else{
+            } else {
                 this.categories = this.translator.getRows()
             }
-
         }
 
         return this.categories;
@@ -822,9 +825,10 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
          */
 
-        var tree = pv.tree(this.resultset).keys(function(d){
-            return (d != null)? [d[0],d[1]] : [null, null];
-        }).map();
+//  WHAT's this for... DCLEAO?
+//        var tree = pv.tree(this.resultset).keys(function(d){
+//            return (d != null)? [d[0],d[1]] : [null, null];
+//        }).map();
         
         // Now, get series and categories:
 
@@ -846,25 +850,27 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
         var seriesLength = series.length;
 
         // Initialize array
-        pv.range(0,categoriesLength).map(function(d){
-            myself.values[d] = new Array(seriesLength + 1);
-            myself.values[d][0] = categories[d]
+        pv.range(0,categoriesLength).map(function(catIndex){
+            var row = new Array(seriesLength + 1);
+            row[0] = categories[catIndex];
+            
+            myself.values[catIndex] = row;
         })
 
-        this.resultset.map(function(l){
-
-            myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]] + 1] =
-            pvc.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
+        this.resultset.map(function(r){
+            var catIndex = numeratedCategories[r[1]],
+                row = myself.values[catIndex],
+                serIndex = numeratedSeries[r[0]] + 1,
+                value = r[2];
+            
+            row[serIndex] = pvc.sumOrSet(row[serIndex], value);
         })
 
         // Create an initial line with the categories
         var l1 = series;
         l1.splice(0,0,"x");
         this.values.splice(0,0, l1);
- 
     }
-
-
 });
 
 
