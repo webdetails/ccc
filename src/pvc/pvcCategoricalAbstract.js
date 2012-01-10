@@ -399,7 +399,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var max, min;
 
         if(this.options.stacked){
-            max = this.dataEngine.getCategoriesMaxSumOfVisibleSeries();
+            max = this.options.percentage ? 100 : this.dataEngine.getCategoriesMaxSumOfVisibleSeries();
             min = 0;
         }
         else{

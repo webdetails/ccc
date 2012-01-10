@@ -239,13 +239,17 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         
         //clear needed to force re-fetch of visible series
         this.chart.dataEngine.clearDataCache();
-        
+
         var dataset = null
-        // check whether it does not kill the source-data    
-        dataset = this.stacked ?  
-        pvc.padMatrixWithZeros(this.chart.dataEngine
-            .getVisibleTransposedValues()) :
-        this.chart.dataEngine.getVisibleCategoriesIndexes();
+        // check whether it does not kill the source-data
+        if (this.stacked) {
+            // could by myself.chart.options.percentage, can't remember
+            dataset = this.chart.options.percentage ? this.chart.dataEngine.getVisibleTransposedPercentages() :
+                    pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues())
+        }
+        else {
+            dataset = this.chart.dataEngine.getVisibleCategoriesIndexes();
+        }
 
         if (this.waterfall)
             this.ruleData = this.constructWaterfall(dataset)
