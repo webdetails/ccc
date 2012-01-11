@@ -150,7 +150,8 @@ pvc.WaterfallTranslator = pvc.DataTranslator.extend({
          */
         
         this.sourceTranslator.setData(this.metadata, this.resultset);
-        this.sourceTranslator.prepare(this.dataEngine);
+        this.sourceTranslator.dataEngine = this.dataEngine;
+        this.sourceTranslator.prepareImpl();
         
         // The MultiValueTranslator doesn't support this kind of treatment...
         this.values = this.sourceTranslator.values;
