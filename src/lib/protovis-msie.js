@@ -43,6 +43,9 @@ if ( typeof Date.now !== 'function' ) {
   Date.now = function () { return new Date() * 1; };
 }
 
+// TODO - may be removed this if sparkline compatibility issue is solved
+// Create namespace before sparkline has a chance
+if ( !document.namespaces.v ) { document.namespaces.add( 'v', 'urn:schemas-microsoft-com:vml' ); }
 
 var vml = {
 
