@@ -43,7 +43,12 @@ pvc.Base = Base.extend({
             legend: false,
             legendPosition: "bottom",
             colors: null,
-
+            
+            /**
+             * s : series
+             * c : category
+             * v : numeric value
+             */
             tooltipFormat: function(s,c,v){
                 return s+", "+c+":  " + myself.options.valueFormat(v) ;
             },

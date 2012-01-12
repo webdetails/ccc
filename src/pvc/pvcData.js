@@ -121,7 +121,7 @@ pvc.DataEngine = Base.extend({
      */
     getSeriesIndexes: function(){
         // we'll just return everything
-        return pv.range(this.getSeries().length)
+        return pv.range(this.getSeries().length);
     },
 
     /*
@@ -189,10 +189,10 @@ pvc.DataEngine = Base.extend({
             if(this.chart.options.timeSeries){
                 var parser = pv.Format.date(this.chart.options.timeSeriesFormat);
                 this.categories = this.translator.getRows().sort(function(a,b){
-                    return parser.parse(a) - parser.parse(b)
+                    return parser.parse(a) - parser.parse(b);
                 });
             } else {
-                this.categories = this.translator.getRows()
+                this.categories = this.translator.getRows();
             }
         }
 
@@ -232,7 +232,7 @@ pvc.DataEngine = Base.extend({
      */
     getCategoriesIndexes: function(){
         // we'll just return everything
-        return pv.range(this.getCategories().length)
+        return pv.range(this.getCategories().length);
     },
 
     /*
@@ -378,7 +378,7 @@ pvc.DataEngine = Base.extend({
      */
 
     getObjectsForSecondAxis: function(idx,sortF){
-        var idx = idx || 0;
+        idx = idx || 0;
         var myself = this;
         var ar = [];
         this.getSecondAxisValues()[idx].map(function(v,j){
@@ -392,12 +392,13 @@ pvc.DataEngine = Base.extend({
         });
 
         if (typeof sortF == "function"){
-            return ar.sort(sortF)
+            return ar.sort(sortF);
         }
-        else
-            return ar;
+        
+        return ar;
     },
-    /*
+    
+    /**
      * Returns the maximum value for the second axis of the dataset
      */
     getSecondAxisMax:function(){
@@ -406,12 +407,11 @@ pvc.DataEngine = Base.extend({
           .reduce(function(a, b) {  
             return a.concat(b);
           })
-          .filter(pvc.nonEmpty)
-        );
+          .filter(pvc.nonEmpty));
     },
     
-    /*
-     * Returns the minimum value for the second axis of the dataset
+    /**
+     * Returns the minimum value for the second axis of the dataset.
      */
     getSecondAxisMin:function(){
 
@@ -419,65 +419,54 @@ pvc.DataEngine = Base.extend({
           .reduce(function(a, b) {  
             return a.concat(b);
           })
-          .filter(pvc.nonEmpty)
-        );
+          .filter(pvc.nonEmpty));
     },
 
-
-
-    /*
-     * Returns the transposed values for the dataset
+    /**
+     * Returns the transposed values for the dataset.
      */
-
     getTransposedValues: function(){
-
-
+    	
         return pv.transpose(pvc.cloneMatrix(this.getValues()));
-
     },
 
-
-    /*
-     * Returns the transposed values for the visible dataset
+    /**
+     * Returns the transposed values for the visible dataset.
      */
-
     getVisibleTransposedValues: function(){
         var myself = this;
         var res = this.getVisibleSeriesIndexes().map(function(sIdx){
-            return myself.getVisibleValuesForSeriesIndex(sIdx)
+            return myself.getVisibleValuesForSeriesIndex(sIdx);
         });
         return res;
     },
 
-    /*
+    /**
      * Returns the values for a given series idx
      *
      */
-
     getValuesForSeriesIndex: function(idx){
         return this.getValues().map(function(a){
             return a[idx];
-        })
+        });
     },
 
-    /*
+    /**
      * Returns the visible values for a given category idx
      *
      */
-
     getVisibleValuesForSeriesIndex: function(idx){
 
-        var series = this.getValuesForSeriesIndex(idx)
+        var series = this.getValuesForSeriesIndex(idx);
         return this.getVisibleCategoriesIndexes().map(function(idx){
-            return series[idx]
-        })
+            return series[idx];
+        });
     },
 
-    /*
+    /**
      * Returns the object for a given series idx in the form {category: catName, value: val}
      *
      */
-
     getObjectsForSeriesIndex: function(idx, sortF){
 
         var myself = this;
@@ -490,44 +479,41 @@ pvc.DataEngine = Base.extend({
                     value: a[idx]
                 }) ;
             }
-        })
+        });
 
         if (typeof sortF == "function"){
-            return ar.sort(sortF)
+            return ar.sort(sortF);
         }
-        else
-            return ar;
+        
+        return ar;
     },
 
-    /*
+    /**
      * Returns the values for a given category idx
      *
      */
-
     getValuesForCategoryIndex: function(idx){
         return this.getValues()[idx];
     },
 
-    /*
+    /**
      * Returns the visible values for a given category idx
      *
      */
-
     getVisibleValuesForCategoryIndex: function(idx){
 
         var cats = this.getValuesForCategoryIndex(idx);
         var res = this.getVisibleSeriesIndexes().map(function(idx){
-            return cats[idx]
+            return cats[idx];
         });
         return res;
     },
 
 
-    /*
+    /**
      * Returns the object for a given category idx in the form {serie: value}
      *
      */
-
     getObjectsForCategoryIndex: function(idx){
 
         var myself = this;
@@ -540,11 +526,11 @@ pvc.DataEngine = Base.extend({
                     value: a
                 }) ;
             }
-        })
+        });
         return ar;
     },
 
-    /*
+    /**
      * Returns how many series we have
      */
 
@@ -552,7 +538,7 @@ pvc.DataEngine = Base.extend({
         return this.getSeries().length;
     },
 
-    /*
+    /**
      * Returns how many categories, or data points, we have
      */
     getCategoriesSize: function(){
@@ -564,7 +550,6 @@ pvc.DataEngine = Base.extend({
      * values.
      *
      */
-
     getCategoriesMaxSumOfVisibleSeries: function(){
 
         var myself=this;
@@ -581,43 +566,41 @@ pvc.DataEngine = Base.extend({
      * pieCharts
      *
      */
-
     getVisibleSeriesMaxSum: function(){
 
         var myself=this;
         var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.sum(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty))
+            return pv.sum(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
         }));
         pvc.log("getVisibleSeriesMaxSum: " + max);
         return max;
     },
 
-    /*
+    /**
      * Get the maximum value in all series
      */
     getVisibleSeriesAbsoluteMax: function(){
 
         var myself=this;
         var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.max(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty))
+            return pv.max(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
         }));
         pvc.log("getVisibleSeriesAbsoluteMax: " + max);
         return max;
     },
 
-    /*
+    /**
      * Get the minimum value in all series
      */
     getVisibleSeriesAbsoluteMin: function(){
 
         var myself=this;
         var min = pv.min(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.min(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty))
+            return pv.min(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
         }));
         pvc.log("getVisibleSeriesAbsoluteMin: " + min);
         return min;
     },
-
 
     setCrosstabMode: function(crosstabMode){
         this.crosstabMode = crosstabMode;
@@ -661,8 +644,8 @@ pvc.DataTranslator = Base.extend({
     values: null,
     secondAxisValues: null,
 
-    constructor: function(){
-    },
+    //constructor: function(){
+    //},
 
 
     setData: function(metadata, resultset){
@@ -672,49 +655,36 @@ pvc.DataTranslator = Base.extend({
 
 
     getValues: function(){
-
         // Skips first row, skips first col.
         return this.values.slice(1).map(function(a){
             return a.slice(1);
-        });
-      
+        });      
     },
 
     getSecondAxisValues: function(){
-
-
         // Skips first row
         return this.secondAxisValues.map(function(a){
             return a.slice(1);
         });
-
     },
 
     getSecondAxisSeries: function(){
-
-
         // Skips first row
         return this.secondAxisValues.map(function(a){
             return a[0];
         });
-
     },
 
     getColumns: function(){
-
         // First column of every row, skipping 1st entry
         return this.values[0].slice(1);
     },
 
     getRows: function(){
-
-
         // first element of every row, skipping 1st one
         return this.values.slice(1).map(function(d){
             return d[0];
-        })
-
-
+        });
     },
 
     transpose: function(){
@@ -732,8 +702,9 @@ pvc.DataTranslator = Base.extend({
     postPrepare: function(){
 
         if( this.dataEngine.seriesInRows ){
-            this.transpose()
+            this.transpose();
         }
+        
         if(this.dataEngine.chart.options.secondAxis){
             var idx = this.dataEngine.chart.options.secondAxisIdx;
             if (!(idx instanceof  Array)) {
@@ -750,7 +721,6 @@ pvc.DataTranslator = Base.extend({
             }
             pv.transpose(this.values);
         }
-
     },
 
     prepareImpl: function(){
@@ -762,7 +732,7 @@ pvc.DataTranslator = Base.extend({
     }
 
 
-})
+});
 
 
 pvc.CrosstabTranslator = pvc.DataTranslator.extend({
@@ -825,7 +795,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
          */
 
-//  WHAT's this for... DCLEAO?
+//  TODO: WHAT's this for... DCLEAO?
 //        var tree = pv.tree(this.resultset).keys(function(d){
 //            return (d != null)? [d[0],d[1]] : [null, null];
 //        }).map();
@@ -839,7 +809,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
 
         var categories = pv.uniq(this.resultset.map(function(d){
             return (d != null)? d[1] : null;
-        }))
+        }));
         var numeratedCategories = pv.numerate(categories);
 
 
@@ -855,7 +825,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
             row[0] = categories[catIndex];
             
             myself.values[catIndex] = row;
-        })
+        });
 
         this.resultset.map(function(r){
             var catIndex = numeratedCategories[r[1]],
@@ -864,7 +834,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
                 value = r[2];
             
             row[serIndex] = pvc.sumOrSet(row[serIndex], value);
-        })
+        });
 
         // Create an initial line with the categories
         var l1 = series;
@@ -907,7 +877,7 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
                 // line
                 var lastColName = null;
                 var colNames = [];
-                var measures = null;
+                //var measures = null;
                 var measuresStart = this.dataOptions.categoriesCount;
                 
                 var cols = this.metadata.slice(measuresStart).map(function(d){
@@ -1006,7 +976,7 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
     
             var categories = pv.uniq(this.resultset.map(function(d){
                 return d[1];
-            }))
+            }));
             
             // Finally, iterate through the resultset and build the new values
     
@@ -1043,7 +1013,7 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
         var newRow = row.slice(0, startIdx);
         for(var i=startIdx;i<row.length;i+=numMeasures){
             var value = [];
-            for(var j =0; j < numMeasures;j++){
+            for(var j = 0; j < numMeasures;j++){
                 value.push(row[i+j]);
             }
             newRow.push(value);
@@ -1057,12 +1027,12 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
             // Adding a static serie
             this.resultset.map(function(d){
                 d.splice(0,0,"Series");
-            })
+            });
             this.metadata.splice(0,0,{
                 "colIndex":2,
                 "colType":"String",
                 "colName":"Series"
-            })
+            });
         }
     },
     

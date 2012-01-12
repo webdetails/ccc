@@ -125,6 +125,7 @@ For drawing a very simple bar chart, just provide the data and set the orientati
           title: "Sample Bar chart",
           orientation: 'horizontal',
           animate:false,
+          orthoFixedMax: 60
         });
 
         bar1.setData(relational_03,
@@ -200,7 +201,7 @@ To draw a stacked bar just set the stacked property to true. To a better underst
           animate:false,
           legend:true,
           legendPosition:"right",
-
+          orthoFixedMax: 130,
         extensionPoints: {
             xAxisLabel_textAngle: -1,
             xAxisLabel_textAlign: "center",

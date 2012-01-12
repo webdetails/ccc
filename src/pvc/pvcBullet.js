@@ -132,7 +132,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       topPos = function(){
         //TODO: 10
         return 10 + (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing));
-      }
+      };
     }
     else
     {
@@ -143,7 +143,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       ruleAnchor = "right";
       leftPos = function(){
         return myself.chart.options.bulletMargin + this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing);
-      }
+      };
       topPos = undefined;
 
     }
@@ -160,13 +160,13 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     this.pvBullet = this.pvBullets.add(pv.Layout.Bullet)
     .orient(anchor)
     .ranges(function(d){
-      return d.ranges
+      return d.ranges;
     })
     .measures(function(d){
-      return d.measures
+      return d.measures;
     })
     .markers(function(d){
-      return d.markers
+      return d.markers;
     });
     
     
@@ -205,7 +205,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
     }
 
-    this.pvBulletRule = this.pvBullet.tick.add(pv.Rule)
+    this.pvBulletRule = this.pvBullet.tick.add(pv.Rule);
 
     this.pvBulletRuleLabel = this.pvBulletRule.anchor(ruleAnchor).add(pv.Label)
     .text(this.pvBullet.x.tickFormat);
@@ -218,7 +218,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .textBaseline("bottom")
     .left(titleOffset)
     .text(function(d){
-      return d.title
+      return d.title;
     });
 
     this.pvBulletSubtitle = this.pvBullet.anchor(anchor).add(pv.Label)
@@ -228,7 +228,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .textBaseline("top")
     .left(titleOffset)
     .text(function(d){
-      return d.subtitle
+      return d.subtitle;
     });
 
 	var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ? 
@@ -312,7 +312,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             break;
           case 2:
             // Name, value and markers
-            d.markers = [v[1]]
+            d.markers = [v[1]];
           case 1:
             // name and value
             d.title = s;

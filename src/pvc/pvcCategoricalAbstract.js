@@ -52,10 +52,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         
         // Sanitize some options:
         if (!this.options.showYScale){
-            this.options.yAxisSize = 0
+            this.options.yAxisSize = 0;
         }
         if (!this.options.showXScale){
-            this.options.xAxisSize = 0
+            this.options.xAxisSize = 0;
         }
 
         if(this.options.secondAxis && this.options.secondAxisIndependentScale){
@@ -442,7 +442,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         // TODO - DCLEAO - DataEngine#getCategories already does this...??
         var parser = pv.Format.date(this.options.timeSeriesFormat),
             categories = this.dataEngine.getVisibleCategories().sort(function(a, b){
-                return parser.parse(a) - parser.parse(b)
+                return parser.parse(a) - parser.parse(b);
             });
         
         // Adding a small offset to the scale:
@@ -579,10 +579,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             .bottom(function(d){
                 return d;
             })
-            .left(dpos)
+            .left(dpos);
 
-        var pvLabel = line
-            .anchor(o.horizontalAnchor)
+        //var pvLabel = 
+        line.anchor(o.horizontalAnchor)
             .top( o.verticalAnchor == "top" ? o.verticalOffset : (h - o.verticalOffset))
             .add(pv.Label)
             .text(label)
@@ -641,7 +641,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         this.pvPanel = this._parent.getPvPanel().add(this.type)
             .width(this.width)
-            .height(this.height)
+            .height(this.height);
 
         this.renderAxis();
 
@@ -659,7 +659,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     renderAxis: function(){
 
-        var min, max, myself = this;
+        var min, max;
         
         this.pvScale = this.scale;
         this.extend(this.pvScale, this.panelName + "Scale_");
@@ -830,12 +830,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderCompositeOrdinalAxis: function(){
         var myself = this;
 
-        var align = (this.anchor == "bottom" || this.anchor == "top") ?
-        "center" : 
-        (this.anchor == "left")  ?
-        "right" :
-        "left";
-        
         var axisDirection = (this.anchor == 'bottom' || this.anchor == 'top')?
             'h':
             'v';
@@ -849,7 +843,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //build tree with elements
         var tree = {};
         var sectionNames = [];
-        var xlen = elements.length;
         for(var i =0; i<elements.length; i++){
             if(typeof(elements[i]) == 'string'){
                 isHierarchy = false;
@@ -935,7 +928,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             null;
         
         //label space (left transparent)
-        var lblBar = layout.node.add(pv.Bar)
+        //var lblBar = 
+        layout.node.add(pv.Bar)
             .fillStyle('rgba(127,127,127,.001)')
             .strokeStyle( function(d){
                 if(d.maxDepth == 1 || d.maxDepth ==0 ) {return null;}
@@ -952,7 +946,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //cutoffs -> snap to vertical/horizontal
         var H_CUTOFF_ANG = 0.30;
         var V_CUTOFF_ANG = 1.27;
-        var V_CUTOFF_RATIO = 0.8;
+        //var V_CUTOFF_RATIO = 0.8;
         var diagMargin = this.getFontSize(this.font) / 2;
         
         
@@ -972,7 +966,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     
                     var tan = d.dy/d.dx;
                     var angle = Math.atan(tan);
-                    var hip = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
+                    //var hip = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
                     
                     if(angle > V_CUTOFF_ANG)
                     {
@@ -1006,7 +1000,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                         break;
                     case 'd':
                        if(!fitInfo.d){
-                          var ang = Math.atan(d.dy/d.dx);
+                          //var ang = Math.atan(d.dy/d.dx);
                           var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx) ;
                           return myself.trimToWidth(diagonalLength-diagMargin,d.nodeLabel, myself.font,'..');
                         }
@@ -1021,7 +1015,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 if(clickAction){
                     if(doubleClickAction){
                         //arg has to be passed in closure in order to work with ie
-                        window.setTimeout(function(){clickAction(d.nodePath, e)}, DBL_CLICK_MAX_DELAY);
+                        window.setTimeout(function(){ clickAction(d.nodePath, e); }, DBL_CLICK_MAX_DELAY);
                        // window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
                     }
                     else { clickAction(d.nodePath, e); }
@@ -1175,7 +1169,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var high = text.length-2;
         var low = 0;
         var mid;
-        var fits=false;
         var textLen;
         
         while(low <= high && high > 0){
@@ -1247,7 +1240,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             [this.anchorOrtho()       ](this.scale)
             [this.anchorOrthoLength() ](function(d){
                 // TL, TL/2, TL, TL/2 ....
-                return myself.tickLength / (this.index % 2 + 1)
+                return myself.tickLength / (this.index % 2 + 1);
             })
             .strokeStyle('black');
 

@@ -7,12 +7,9 @@ var tryMe = function(e){
     catch(e){
         alert("Error: " + e);
     }
-}
+};
 
 pv.listenForPageLoad(function() {
-
     // When everything is ready, click all tryMe buttons
     $("button.tryMe").click();
-    
-    
 });
