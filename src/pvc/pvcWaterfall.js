@@ -185,8 +185,8 @@ pvc.WaterfallTranslator = pvc.DataTranslator.extend({
  * <i>stacked</i> -  Stacked? Default: false
  * <i>panelSizeRatio</i> - Ratio of the band occupied by the pane;. Default: 0.5 (50%)
  * <i>barSizeRatio</i> - In multiple series, percentage of inner
- * band occupied by bars. Default: 0.5 (50%)
- * <i>maxBarSize</i> - Maximum size of a bar in pixels. Default: 2000
+ * band occupied by bars. Default: 0.9 (90%)
+ * <i>maxBarSize</i> - Maximum size (width) of a bar in pixels. Default: 2000
  *
  * Has the following protovis extension points:
  *
@@ -341,12 +341,12 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
     /*
      *   This function implements a number of helper functions in order
-     *   to increase the readibily and extendibility of the code by:
+     *   to increase the readability and extensibility of the code by:
      *    1: providing symbolic names to the numerous anonymous
      *        functions that need to be passed to CC
-     *    2: by moving large parts of the local variabele (parameters
+     *    2: by moving large parts of the local variable (parameters
      *       and scaling functions out of the 'create' function to this
-     *       prepareDataFunctions blok. 
+     *       prepareDataFunctions block. 
      *    3: More sharing of code due to introduction of the 'this.DF'
      *        for storing all helper functions.
      *    4: increased code-sharing between stacked and non-stacked
@@ -361,7 +361,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
      *   from the 'this.DF' object.
      */
     prepareDataFunctions:  function(dataset, stacked, isVertical) {
-        var myself = this;
+        var myself = this,
+        	chart  = this.chart,
+        	dataEngine = chart.dataEngine;
 
         // create empty container for the functions and data
         this.DF = {};
@@ -369,67 +371,69 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         // first series are symbolic labels, so hide it such that
         // the axis-range computation is possible.
         /*
-    var lScale = this.waterfall ?
-      this.callWithHiddenFirstSeries(this.chart,
-           this.chart.getLinearScale, true):
-      this.chart.getLinearScale(true);
-*/
+		    var lScale = this.waterfall
+		  		 ? this.callWithHiddenFirstSeries(
+		  			this.chart,
+		           	this.chart.getLinearScale, 
+		           	true)
+		         : this.chart.getLinearScale(true);
+		*/
         /** start  fix  (need to resolve this nicely  (CvK))**/
         if (this.waterfall) {
             // extract the maximum
-            var mx = 0.0 
-            for(var c=0; c < dataset[0].length; c++) {
-                var h = 0.0;
-                for(var r=0; r < dataset.length; r++)
-                    h += dataset[r][c];
-                if (h > mx)  mx = h;
+            var mx = 0, 
+                catCount = dataset[0].length;
+            for(var c = 0 ; c < catCount ; c++) {
+                var h = 0;
+                for(var s = 0 ; s < dataset.length ; s++){
+                    h += dataset[s][c];
+                }
+                if (h > mx) {
+                	mx = h;
+                }
             }
             
             // set maximum as a fixed bound
-            this.chart.options.orthoFixedMax = mx;	
+            chart.options.orthoFixedMax = mx;	
         }
         
-        var lScale = this.chart.getLinearScale(true);
+        var lScale = chart.getLinearScale(true);
         /** end fix **/
         
-        var l2Scale = this.chart.getSecondScale(true);
-        var oScale = this.chart.getOrdinalScale(true);
+        var l2Scale = chart.getSecondScale(true);
+        var oScale  = chart.getOrdinalScale(true);
         
-        // determine barPositionOffset and bScale
-        this.DF.maxBarSize = null;
-        var barPositionOffset = 0;
+        // determine barPositionOffset and barScale
+        var barPositionOffset = 0,
+        	barScale, // for !stacked and overflow markers
+        	ordBand = oScale.range().band,
+        	maxBarSize = ordBand;
         
-        var bScale;
-        if (stacked) {
-            this.DF.maxBarSize = oScale.range().band;
-
-            //CvK: check whether bScale is ever used for stacked graphs!)
-            bScale = new pv.Scale.ordinal([0])
-                        .splitBanded(0, oScale.range().band, this.barSizeRatio);
-        } else {
-            var seriesIndexes = this.chart.dataEngine.getVisibleSeriesIndexes();
+        if(!stacked){
+        	var ordDomain = dataEngine.getVisibleSeriesIndexes();
             if(!isVertical){
                 // Non-stacked Horizontal bar charts show series from
                 //  top to bottom (according to the legend)
-                seriesIndexes = seriesIndexes.slice(0);
-                seriesIndexes.reverse();
+            	ordDomain = ordDomain.slice(0);
+            	ordDomain.reverse();
             }
             
-            bScale = new pv.Scale.ordinal(seriesIndexes)
-                        .splitBanded(0, oScale.range().band, this.barSizeRatio);
-
-            // We need to take into account the maxValue if our band is higher than that
-            this.DF.maxBarSize = bScale.range().band;
+            barScale = new pv.Scale.ordinal(ordDomain)
+            				.splitBanded(0, ordBand, this.barSizeRatio);
+            
+            // Export needed for generated overflow markers.
+            this.DF.barScale = barScale;
+            
+            maxBarSize = barScale.range().band;
         }
         
-        if (this.DF.maxBarSize > this.maxBarSize) {
-            barPositionOffset = (this.DF.maxBarSize - this.maxBarSize)/2 ;
-            this.DF.maxBarSize = this.maxBarSize;
+        if (maxBarSize > this.maxBarSize) {
+            barPositionOffset = (maxBarSize - this.maxBarSize) / 2;
+            maxBarSize = this.maxBarSize;
         }
         
-        // export needed for generated overflow markers.
-        this.DF.bScale = bScale;
-
+        this.DF.maxBarSize = maxBarSize;
+        
         /*
          * functions to determine positions along BASE axis.
          */
@@ -446,23 +450,21 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             }
         } else {
             this.DF.catContainerBasePosFunc = function(d){
-                return oScale(myself.chart.dataEngine.getVisibleCategories()[d]);
+                return oScale(dataEngine.getVisibleCategories()[d]);
             };
             
-            this.DF.catContainerWidth = oScale.range().band;
+            this.DF.catContainerWidth = ordBand;
             
             this.DF.relBasePosFunc = function(d){
-                var res = bScale(myself.chart.dataEngine
-                    .getVisibleSeriesIndexes()[this.index]) + barPositionOffset;
-                return res;
+                return barScale(dataEngine.getVisibleSeriesIndexes()[this.index]) + 
+                		barPositionOffset;
             };
         }
 
         this.DF.secBasePosFunc = function(d){
-            if(myself.timeSeries){
-                return tScale(parser.parse(d.category));
-            }
-            return oScale(d.category) + oScale.range().band / 2;
+            return myself.timeSeries 
+            	   ? tScale(parser.parse(d.category))
+            	   : (oScale(d.category) + ordBand / 2);
         };
 
         /*
@@ -470,29 +472,27 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         */
         this.DF.orthoBotPos = stacked ?
             lScale(0) :
-            function(d){
-                return lScale(pv.min([0,d]));
-            };
+            function(d){ return lScale(pv.min([0,d])); };
 
         this.DF.orthoLengthFunc = stacked ? 
         function(d){
-            return myself.chart.animate(0, lScale(d||0)-lScale(0) );
+            return chart.animate(0, lScale(d||0)-lScale(0) );
         } :
         function(d){
-            var res = myself.chart.animate(0, 
+            var res = chart.animate(0, 
                 Math.abs(lScale(d||0) - lScale(0)));
             return res;
         };
 
         this.DF.secOrthoLengthFunc = function(d){
-            return myself.chart.animate(0, l2Scale(d.value));
+            return chart.animate(0, l2Scale(d.value));
         };
 
         /*
          * functions to determine the color palette.
          */
-        var seriesCount = this.chart.dataEngine.getSeriesSize(),
-            colors = this.chart.colors(pv.range(seriesCount));
+        var seriesCount = dataEngine.getSeriesSize(),
+            colors = chart.colors(pv.range(seriesCount));
         if (this.stacked){
             var totalsSeriesIndex = this.isOrientationHorizontal()
                                     ? 0 
@@ -504,16 +504,14 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
                     return pv.Color.names["transparent"];
                 }
 
-                var seriesIndex2 = myself.chart.dataEngine.
-                                      getVisibleSeriesIndexes()[seriesIndex];
+                var seriesIndex2 = dataEngine.getVisibleSeriesIndexes()[seriesIndex];
                 return colors(seriesIndex2);
             };
             
         } else {
             this.DF.colorFunc2 = function(d){
-                return colors(myself.chart.dataEngine
-                    .getVisibleSeriesIndexes()[this.index])
-            };  
+                return colors(dataEngine.getVisibleSeriesIndexes()[this.index]);
+            };
         }
     },
 
@@ -596,9 +594,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
             this.pvBarPanel = this.pvPanel.add(pv.Layout.Stack)
 				.layers(dataset)
-                                // Stacked Vertical bar charts show series from
-                                //  top to bottom (according to the legend)
-                                .order(isVertical  ? "reverse"     : null)
+                // Stacked Vertical bar charts show series from
+                //  top to bottom (according to the legend)
+                .order(isVertical  ? "reverse"     : null)
 				.orient(isVertical ? "bottom-left" : "left-bottom")
 				.x(this.DF.basePositionFunc)
 				.y(this.DF.orthoLengthFunc)
@@ -675,19 +673,19 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         // Labels:
         this.pvBar
             .text(function(d){
-                var s = myself.chart.dataEngine
-                        .getVisibleSeries()[myself.stacked ? this.parent.index : this.index];
-                var c = myself.chart.dataEngine
-                        .getVisibleCategories()[myself.stacked ? this.index : this.parent.index];
+                var dataEngine = myself.chart.dataEngine, 
+                    s  = dataEngine.getVisibleSeries()
+                		 [myself.stacked ? this.parent.index : this.index],
+                	c  = dataEngine.getVisibleCategories()
+                		 [myself.stacked ? this.index : this.parent.index];
                 
                 return myself.chart.options.tooltipFormat.call(myself,s,c,d);
             });
 
         if(this.showTooltips){
             // Extend default
-            this.extend(this.tipsySettings,"tooltip_");
-            this.pvBar
-                .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+            this.extend(this.tipsySettings, "tooltip_");
+            this.pvBar.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
         }
 
 
@@ -745,51 +743,51 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
    *  This function is only used when fixedMinX and orthoFixedMax are set
    *
    *******/
-    generateOverflowMarkers: function(anchor, stacked)
-    {
-        var myself = this;
-
+    generateOverflowMarkers: function(anchor, stacked){
         if (stacked) {
-            if (   (myself.chart.options.orthoFixedMin != null)
-                || (myself.chart.options.orthoFixedMin != null) )  
+            if ((this.chart.options.orthoFixedMin != null) || 
+                (this.chart.options.orthoFixedMax != null)){  
                 pvc.log("WARNING: overflow markers not implemented for Stacked graph yet");
-        } else {
-            if  (myself.chart.options.orthoFixedMin != null){
-                // CvK: adding markers for datapoints that are off-axis
-                //  UNDERFLOW  =  datavalues < orthoFixedMin
-                this.doGenOverflMarks(anchor, true, this.DF.maxBarSize, 
-                    0, this.DF.bScale,
-                    function(d){
-                        var res = myself.chart.dataEngine
-                        .getVisibleValuesForCategoryIndex(d);
-                        // check for off-grid values (and replace by null)
-                        var fixedMin = myself.chart.options.orthoFixedMin;
-                        for(var i=0; i<res.length; i++)
-                            res[i] = (res[i] < fixedMin) ? fixedMin : null; 
-                        return res;
-                    });
             }
-      
-            if (myself.chart.options.orthoFixedMax != null){
-                // CvK: overflow markers: max > orthoFixedMax
-                this.doGenOverflMarks(anchor, false, this.DF.maxBarSize, 
-                    Math.PI, this.DF.bScale,
-                    function(d){
-                        var res = myself.chart.dataEngine
-                        .getVisibleValuesForCategoryIndex(d);
-                        // check for off-grid values (and replace by null)
-                        var fixedMax = myself.chart.options.orthoFixedMax;
-                        for(var i=0; i<res.length; i++)
-                            res[i] = (res[i] > fixedMax) ? fixedMax : null; 
-                        return res;
-                    });
-            }
+            return;
+        }
+        
+        var myself = this;
+        if  (this.chart.options.orthoFixedMin != null){
+            // CvK: adding markers for datapoints that are off-axis
+            //  UNDERFLOW  =  datavalues < orthoFixedMin
+            this.doGenOverflMarks(anchor, true, this.DF.maxBarSize, 
+                0, this.DF.barScale,
+                function(d){
+                    var res = myself.chart.dataEngine
+                    .getVisibleValuesForCategoryIndex(d);
+                    // check for off-grid values (and replace by null)
+                    var fixedMin = myself.chart.options.orthoFixedMin;
+                    for(var i=0; i<res.length; i++)
+                        res[i] = (res[i] < fixedMin) ? fixedMin : null; 
+                    return res;
+                });
+        }
+  
+        if (this.chart.options.orthoFixedMax != null){
+            // CvK: overflow markers: max > orthoFixedMax
+            this.doGenOverflMarks(anchor, false, this.DF.maxBarSize, 
+                Math.PI, this.DF.barScale,
+                function(d){
+                    var res = myself.chart.dataEngine
+                    .getVisibleValuesForCategoryIndex(d);
+                    // check for off-grid values (and replace by null)
+                    var fixedMax = myself.chart.options.orthoFixedMax;
+                    for(var i=0; i<res.length; i++)
+                        res[i] = (res[i] > fixedMax) ? fixedMax : null; 
+                    return res;
+                });
         }
     },
 
     // helper routine used for both underflow and overflow marks
     doGenOverflMarks: function(anchor, underflow, maxBarSize, angle,
-        bScale, dataFunction)
+        barScale, dataFunction)
     {
         var myself = this;
         var offGridBarOffset = maxBarSize/2,
@@ -812,7 +810,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .fillStyle("white")
             .data(dataFunction)
             [this.anchorOrtho(anchor)](function(d){
-                var res = bScale(myself.chart.dataEngine
+                var res = barScale(myself.chart.dataEngine
                     .getVisibleSeriesIndexes()[this.index])
                     + offGridBarOffset;
                 return res;
