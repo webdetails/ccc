@@ -554,7 +554,11 @@ pvc.DataEngine = Base.extend({
 
         var myself=this;
         var max = pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
-            return pv.sum(myself.getVisibleValuesForCategoryIndex(idx).filter(pvc.nonEmpty).map(function(e){return e < 0 ? 0 : e;}));
+            return pv.sum(
+                        myself.getVisibleValuesForCategoryIndex(idx)
+                              .map(function(e){
+                                  return Math.max(0, pvc.number(e));
+                               }));
         }));
         pvc.log("getCategoriesMaxSumOfVisibleSeries: " + max);
         return max;

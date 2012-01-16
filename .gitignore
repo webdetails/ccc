@@ -3,3 +3,6 @@ dist/
 nbproject/private/
 .DS_Store
 pvc-*.js
+
+.project
+.settings
