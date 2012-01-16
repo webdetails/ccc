@@ -34,9 +34,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
 
         if(this.options.secondAxis && this.options.secondAxisIndependentScale){
-            this.options.secondAxisSize = this.isOrientationVertical()
-                                          ? this.options.yAxisSize
-                                          : this.options.xAxisSize;
+            this.options.secondAxisSize = this.isOrientationVertical()? 
+                this.options.yAxisSize : 
+                this.options.xAxisSize;
         } else {
             this.options.secondAxisSize = 0;
         }
@@ -60,9 +60,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
-        this.secondScale = this.options.secondAxisIndependentScale
-                           ? this.getSecondScale()
-                           : this.getLinearScale();
+        this.secondScale = this.options.secondAxisIndependentScale? 
+            this.getSecondScale(): 
+            this.getLinearScale();
 
         // Generate X axis
         if(this.options.secondAxis){
@@ -188,18 +188,18 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      * Indicates if xx is an ordinal scale
      */
     isXAxisOrdinal: function(){
-        return this.isOrientationVertical()
-               ? !this.options.timeSeries 
-               : this.options.orthoAxisOrdinal;
+        return this.isOrientationVertical()? 
+            !this.options.timeSeries : 
+            this.options.orthoAxisOrdinal;
     },
 
     /*
      * Indicates if yy is an ordinal scale
      */
     isYAxisOrdinal: function(){
-        return this.isOrientationVertical() 
-               ? this.options.orthoAxisOrdinal
-               : !this.options.timeSeries;
+        return this.isOrientationVertical()? 
+            this.options.orthoAxisOrdinal :
+            !this.options.timeSeries;
     },
 
     /*
@@ -214,10 +214,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             var isVertical = this.isOrientationVertical();
             onSeries = (axis == "x") ? !isVertical : isVertical;
         }
-        
-        return onSeries
-               ? this.dataEngine.getVisibleSeries() 
-               : this.dataEngine.getVisibleCategories();
+
+        return onSeries? 
+          this.dataEngine.getVisibleSeries() : 
+          this.dataEngine.getVisibleCategories();
     },
 
     /*
@@ -225,14 +225,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      */
     getXScale: function(){
         if (this.isOrientationVertical()) {
-            return this.options.timeSeries
-                   ? this.getTimeseriesScale(false, true)
-                   : this.getOrdinalScale();
+            return this.options.timeSeries? 
+                this.getTimeseriesScale(false, true): 
+                this.getOrdinalScale();
         }
-        
-        return this.options.orthoAxisOrdinal
-               ? this.getPerpOrdinalScale("x")    
-               : this.getLinearScale(false, true);
+
+        return this.options.orthoAxisOrdinal ? 
+            this.getPerpOrdinalScale("x") :
+            this.getLinearScale(false, true);
     },
 
     /*
@@ -240,14 +240,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      */
     getYScale: function(){
         if (this.isOrientationVertical()) {
-            return this.options.orthoAxisOrdinal 
-                   ? this.getPerpOrdinalScale("y")
-                   : this.getLinearScale();
+            return this.options.orthoAxisOrdinal ? 
+                this.getPerpOrdinalScale("y") : 
+                this.getLinearScale();
         }
         
-        return this.options.timeSeries  
-               ? this.getTimeseriesScale()
-               : this.getOrdinalScale();
+        return this.options.timeSeries ? 
+            this.getTimeseriesScale(): 
+            this.getOrdinalScale();
     },
 
     /*
@@ -261,12 +261,15 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var yAxisSize = bypassAxis ? 0 : this.options.yAxisSize,
             xAxisSize = bypassAxis ? 0 : this.options.xAxisSize,
             secondXAxisSize = 0,
-            secondYAxisSize = 0,
-            isVertical = this.isOrientationVertical(),
-            data = orthoAxis 
-                   ? this.dataEngine.getVisibleSeries()
-                   : this.dataEngine.getVisibleCategories(),
-            scale = new pv.Scale.ordinal(data);
+            secondYAxisSize = 0;
+            
+        var isVertical = this.isOrientationVertical();
+        
+        var data = orthoAxis ? 
+                this.dataEngine.getVisibleSeries(): 
+                this.dataEngine.getVisibleCategories();
+                
+        var scale = new pv.Scale.ordinal(data);
         
         if(!bypassAxis){
             if(isVertical){
@@ -1104,6 +1107,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //var V_CUTOFF_RATIO = 0.8;
         var diagMargin = this.getFontSize(this.font) / 2;
         
+        var align = this.isAnchorTopOrBottom()? 
+            "center"
+            : (this.anchor == "left") ? "right" : "left";
         
         //draw labels and make them fit
         this.pvLabel = layout.label.add(pv.Label)
@@ -1136,10 +1142,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this.lblDirection('h');
                 return 0;//horizontal
             })
+            //override central alignment for horizontal text in vertical axis
+            .textAlign(function(d){
+                return (axisDirection != 'v' || d.depth >= vertDepthCutoff || d.depth >= diagDepthCutoff)? 'center' : align;
+            })
+            .left(function(d) {
+                return (axisDirection != 'v' || d.depth >= vertDepthCutoff || d.depth >= diagDepthCutoff)?
+                     d.x + d.dx/2 :
+                     ((align == 'right')? d.x + d.dx : d.x);
+            })
             .font(myself.font)
-            //.title(function(d){
-            //    return d.nodeLabel;
-            //})
             .text(function(d){
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){
@@ -1246,12 +1258,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     getTextLength: function(text, font){
-        switch(pv.renderer()){
-            case 'vml':   return this.getTextLenVML(text, font);
-            case 'batik': return getTextLenCGG(text, font);
-            
+        
+        switch(pv.renderer()){            
+            case 'vml':
+                return this.getTextLenVML(text, font);
+            case 'batik':
+                return getTextLenCGG(text, font);
             case 'svg':
-            default:	  return this.getTextLenSVG(text, font);
+            default:
+                return this.getTextLenSVG(text, font);
         }
       //  
       //return (pv.renderer() != 'vml')?//TODO: support svgweb? defaulting to svg
