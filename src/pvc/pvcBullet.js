@@ -131,7 +131,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       leftPos = this.chart.options.bulletMargin;
       topPos = function(){
         //TODO: 10
-        return 10 + (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing));
+        return (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing));
       };
     }
     else
