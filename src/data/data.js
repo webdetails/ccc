@@ -155,7 +155,7 @@ var mondriandata = {
             "colName": "Blue"
         }
     ]
-}
+};
 
 var mysqldata = {
     "resultset": [
@@ -477,4 +477,4 @@ var mysqldata = {
             "colName": "value"
         }
     ]
-}
+};

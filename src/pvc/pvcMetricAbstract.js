@@ -65,7 +65,7 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
     var yAxisSize = bypassAxis?0:this.options.yAxisSize;
     var xAxisSize = bypassAxis?0:this.options.xAxisSize;
     
-    var isVertical = this.options.orientation=="vertical"
+    var isVertical = this.options.orientation=="vertical";
     
     // compute the input-domain of the scale
     var domainMin = this.dataEngine.getCategoryMin();

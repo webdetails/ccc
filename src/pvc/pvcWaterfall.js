@@ -400,8 +400,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         var lScale = chart.getLinearScale(true);
         /** end fix **/
         
-        var l2Scale = chart.getSecondScale(true);
-        var oScale  = chart.getOrdinalScale(true);
+        var l2Scale = chart.getSecondScale(true),
+            oScale  = chart.getOrdinalScale(true);
         
         // determine barPositionOffset and barScale
         var barPositionOffset = 0,
@@ -418,14 +418,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             	ordDomain.reverse();
             }
             
-            // Leave some margin when the case of multiple series.
-            // Before the first, and after the last series.
-            // This space accomplishes bars not touching ordinal grids.
-            // Note that 'barSizeRatio' affects the space between bars.
-            // TODO: This margin does not fill totally right.
-            //   .splitBanded should add padding to the 
-            //   between bands but also before and after the last band.
-            //   As it looks, it is actually
+            // NOTE: 'barSizeRatio' affects the space between bars.
+            // Space between categories is controlled by panelSizeRatio.
             barScale = new pv.Scale.ordinal(ordDomain)
             				.splitBanded(0, ordBand, this.barSizeRatio);
             
@@ -458,8 +452,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             }
         } else {
             this.DF.catContainerBasePosFunc = function(d){
-                return (oScale.range().margin / 2) +
-                       oScale(dataEngine.getVisibleCategories()[d]);
+                return oScale(dataEngine.getVisibleCategories()[d]);
             };
             
             this.DF.catContainerWidth = ordBand;

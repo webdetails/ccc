@@ -111,6 +111,9 @@ pvc.Base = Base.extend({
 	initBasePanel: function() {
 		// Since we don't have a parent panel 
 		// we need to manually create the points.
+	    this.originalWidth  = this.options.width;
+        this.originalHeight = this.options.height;
+        
 		this.basePanel = new pvc.BasePanel(this);
 		this.basePanel.setSize(this.options.width, this.options.height);
 		this.basePanel.create();
@@ -176,8 +179,11 @@ pvc.Base = Base.extend({
 
 			if (this.options.animate && !bypassAnimation) {
 				this.isAnimating = true;
-				this.basePanel.getPvPanel().transition().duration(2000).ease(
-						"cubic-in-out").start();
+				this.basePanel.getPvPanel()
+				        .transition()
+				        .duration(2000)
+				        .ease("cubic-in-out")
+				        .start();
 			}
 		} catch (e) {
 			if (e instanceof NoDataException) {
@@ -193,6 +199,7 @@ pvc.Base = Base.extend({
 				message.text("No data found");
 				this.basePanel.extend(message, "noDataMessage_");
 				pvPanel.render();
+				
 			} else {
 				// We don't know how to handle this
 				throw e;
@@ -359,9 +366,9 @@ pvc.BasePanel = Base.extend({
 		    margins = this._parent.margins;
 
 		if (isTopOrBottom) {
-			this._parent.height -= this.height;
+            this._parent.height -= this.height;
 		} else {
-			this._parent.width -= this.width;
+            this._parent.width -= this.width;
 		}
 
 		// See where to attach it.
@@ -370,9 +377,9 @@ pvc.BasePanel = Base.extend({
 
 		// update margins
 		if (isTopOrBottom) {
-			margins[a] += this.height;
+            margins[a] += this.height;
 		} else {
-			margins[a] += this.width;
+            margins[a] += this.width;
 		}
 	},
     
@@ -382,8 +389,8 @@ pvc.BasePanel = Base.extend({
 	 * for the specific contents of the chart. already ge a pie
 	 * chart! Goes through the list of options and, if it
 	 * matches the prefix, execute that method on the mark.
-	 * WARNING: It's user's responsability to make sure some
-	 * unexisting method won't blow this
+	 * WARNING: It's the user's responsibility to make sure that 
+	 * unexisting methods don't blow this.
 	 * 
 	 */
 	extend: function(mark, prefix) {
