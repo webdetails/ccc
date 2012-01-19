@@ -865,7 +865,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     return scale(d) - scale.range().margin / 2;
                 })
                 [anchorOrthoLength]( ruleLength)
-                .visible(function(d){ return (this.index > 0); });
+                .visible(function(){ return (this.index > 0); });
         }
     },
 
@@ -883,26 +883,28 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             tickStep = Math.abs(ticks[1] - ticks[0]); // ticks.length >= 2
                 
         // (MAJOR) ticks
-        this.pvTicks = this.pvRule.add(pv.Rule)
+        var pvTicks = this.pvTicks = this.pvRule.add(pv.Rule)
         	.zOrder(20)
             .data(ticks)
             //[anchorOpposite ](0) // Inherited from pvRule
             [anchorLength     ](null)
             [anchorOrtho      ](scale)
             [anchorOrthoLength](this.tickLength)
-            .strokeStyle('black');
+            .strokeStyle('black'); // control visibility through color or through .visible
         
         // MINOR ticks are between major scale ticks
         if(this.minorTicks){
-            this.pvMinorTicks = this.pvRule.add(pv.Rule)
-                .zOrder(20)
-                .data(ticks)
-                //[anchorOpposite   ](0) // Inherited from pvRule
-                [anchorLength     ](null)
+            this.pvMinorTicks = this.pvTicks.add(pv.Rule)
+                .zOrder(20) // not inherited
+                //.data(ticks)  // ~ inherited
+                //[anchorOpposite   ](0)   // Inherited from pvRule
+                //[anchorLength     ](null)  // Inherited from pvTicks
                 [anchorOrtho      ](function(d){ return scale(d + tickStep / 2); })
                 [anchorOrthoLength](this.tickLength / 2)
-                .visible(function(/*d*/){ return (this.index < ticks.length - 1); })
-                .strokeStyle('black');
+                .visible(function(){
+                    return (!pvTicks.scene || pvTicks.scene[this.index].visible) &&
+                           (this.index < ticks.length - 1); 
+                });
         }
         
         this.renderLinearAxisLabel(ticks);
