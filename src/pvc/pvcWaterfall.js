@@ -11,7 +11,7 @@
  * Waterfall charts are basically Bar-charts with some added
  * functionality. Given the complexity of the added features this
  * class has it's own code-base. However, it would be easy to
- * derive a BarChart class from this class by swithing of a few 
+ * derive a BarChart class from this class by switching off a few 
  * features.
  * 
  * If you have an issue or suggestions regarding the Waterfall-charts
@@ -207,8 +207,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     data: null,
   
     stacked: false,
-    panelSizeRatio: 1,
-    barSizeRatio: 0.5,
+    panelSizeRatio: 0.9,
+    barSizeRatio: 0.9,
     showTooltips: true,
     maxBarSize: 200,
     showValues: true,
@@ -362,8 +362,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
      */
     prepareDataFunctions:  function(dataset, stacked, isVertical) {
         var myself = this,
-        	chart  = this.chart,
-        	dataEngine = chart.dataEngine;
+            chart  = this.chart,
+            dataEngine = chart.dataEngine;
 
         // create empty container for the functions and data
         this.DF = {};
@@ -400,8 +400,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         var lScale = chart.getLinearScale(true);
         /** end fix **/
         
-        var l2Scale = chart.getSecondScale(true);
-        var oScale  = chart.getOrdinalScale(true);
+        var l2Scale = chart.getSecondScale(true),
+            oScale  = chart.getOrdinalScale(true);
         
         // determine barPositionOffset and barScale
         var barPositionOffset = 0,
@@ -410,7 +410,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         	maxBarSize = ordBand;
         
         if(!stacked){
-        	var ordDomain = dataEngine.getVisibleSeriesIndexes();
+            var ordDomain = dataEngine.getVisibleSeriesIndexes();
             if(!isVertical){
                 // Non-stacked Horizontal bar charts show series from
                 //  top to bottom (according to the legend)
@@ -418,6 +418,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             	ordDomain.reverse();
             }
             
+            // NOTE: 'barSizeRatio' affects the space between bars.
+            // Space between categories is controlled by panelSizeRatio.
             barScale = new pv.Scale.ordinal(ordDomain)
             				.splitBanded(0, ordBand, this.barSizeRatio);
             
@@ -567,8 +569,11 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         this.width  = this._parent.width;
         this.height = this._parent.height;
         
-        // Creates the pvc panel
+        // Creates the pv panel
         this.base();
+        
+        // Send the panel behind the axis, title and legend, panels
+        this.pvPanel.zOrder(-10);
 
         if  ((this.chart.options.orthoFixedMin != null) || 
              (this.chart.options.orthoFixedMax != null)){
@@ -622,8 +627,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             // next add the bars to the bar-containers in pvBarPanel
             this.pvBar = this.pvBarPanel.add(pv.Bar)
                 .data(function(d){
-                        return myself.chart.dataEngine.
-                                    getVisibleValuesForCategoryIndex(d);
+                        return pvc.padArrayWithZeros(
+                                    myself.chart.dataEngine.
+                                        getVisibleValuesForCategoryIndex(d));
                     })
                 .fillStyle(this.DF.colorFunc2)
                 [anchorOrtho      ](this.DF.relBasePosFunc)
@@ -647,10 +653,14 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             this.pvSecondLine = this.pvArea.add(pv.Line)
                 .segmented(true)
                 .data(function(d){
-                    return myself.chart.dataEngine.getObjectsForSecondAxis(d,
-                        this.timeSeries ? function(a,b){
-                        return parser.parse(a.category) - parser.parse(b.category);
-                        }: null)
+                    return myself.chart.dataEngine.getObjectsForSecondAxis(
+                            d,
+                            this.timeSeries 
+                                ? function(a,b){
+                                    return parser.parse(a.category) - 
+                                           parser.parse(b.category); 
+                                  }
+                                : null);
                     })
                 .strokeStyle(function(){
                     var colors = myself.chart.options.secondAxisColor;
@@ -707,6 +717,10 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
                 .anchor(this.valuesAnchor || 'center')
                 .add(pv.Label)
                 .bottom(0)
+                .visible(function(d) { //no space for text otherwise                    
+                    var v = parseFloat(d);
+                    return !isNaN(v) && Math.abs(v) >= 1; 
+                 })
                 .text(function(d){
                     return myself.chart.options.valueFormat(d);
                 });

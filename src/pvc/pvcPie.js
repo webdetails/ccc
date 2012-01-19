@@ -18,23 +18,8 @@ pvc.PieChart = pvc.Base.extend({
 
     this.base(o);
 
-    var _defaults = {
-      showValues: true,
-      innerGap: 0.9,
-      explodedSliceRadius: 0,
-      explodedSliceIndex: null,
-      showTooltips: true,
-      tooltipFormat: function(s,c,v){
-        var val = this.chart.options.valueFormat(v);
-        return c+":  " + val + " (" + Math.round(v/this.sum*100,1) + "%)";
-      }
-    };
-
-
     // Apply options
-    $.extend(this.options,_defaults, o);
-
-
+    $.extend(this.options, pvc.PieChart.defaultOptions, o);
   },
 
   preRender: function(){
@@ -56,8 +41,19 @@ pvc.PieChart = pvc.Base.extend({
 
   }
 
-}
-);
+}, {
+	defaultOptions: {
+		showValues: true,
+		innerGap: 0.9,
+		explodedSliceRadius: 0,
+		explodedSliceIndex: null,
+		showTooltips: true,
+		tooltipFormat: function(s, c, v){
+			var val = this.chart.options.valueFormat(v);
+			return c + ":  " + val + " (" + Math.round(v / this.sum * 100, 1) + "%)";
+		}
+    }
+});
 
 
 /*

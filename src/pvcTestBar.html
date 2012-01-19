@@ -74,8 +74,26 @@ proportional to the values that they represent.
   <li>panelSizeRatio - Ratio of the band occupied by the pane.
 Default: 0.5 (50%)</li>
   <li>barSizeRatio - In multiple series, percentage of inner band
-occupied by bars. Default: 0.5 (50%)</li>
+occupied by bars. Default: 0.9 (90%)</li>
   <li>maxBarSize - Maximum size of a bar in pixels.</li>
+</ul>
+
+<h4>Axis properties</h4>
+<ul>
+  <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
+  <li>secondAxis (true | false) - whether to show the second axis. Default: false</li>
+  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
+  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
+  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
+  <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
+  <li>{x,y,second}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y,second}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y,second}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
+  <li>secondAxisIdx - Array of indexes of the series that are shown on the second axis</li>
+  <li>secondAxisIndependentScale (true | false) - if the second axis has an independent scale</li>
+  <li>secondAxisOriginIsZero (true | false) - if the second axis should show the 0 value at the origin. Default: 0</li>
+  <li>secondAxisColor - line and scale color. Default: blue</li>
 </ul>
 
 
@@ -90,10 +108,18 @@ for&nbsp;Bar extension points:
   <li>yAxis_</li>
   <li>xAxisRule_</li>
   <li>yAxisRule_</li>
-  <li>xAxisRuleGrid_</li>
-  <li>yAxisRuleGrid_</li>
+  <li>xAxisGrid_</li>
+  <li>yAxisGrid_</li>
   <li>xAxisScale_</li>
   <li>yAxisScale_</li>
+  <li>xAxisTicks_</li>
+  <li>yAxisTicks_</li>
+  <li>secondAxisTicks_</li>
+  <li>xAxisMinorTicks_</li>
+  <li>yAxisMinorTicks_</li>
+  <li>secondAxisMinorTicks_</li>
+  <li>xAxisEndLine_</li>
+  <li>yAxisEndLine_</li>
   <li>tooltip_</li>
   <li>barLabel_</li>
   <li>barPanel_</li>
@@ -117,21 +143,25 @@ color&nbsp;and thickness.</li>
 For drawing a very simple bar chart, just provide the data and set the orientation of the bars.<br>  
 
 <textarea cols="55" rows="15" id="pvcBar1Code">
+var bar1 = new pvc.BarChart({
+    canvas: "pvcBar1",
+    width: 400,
+    height: 250,
+    title: "Sample Bar chart",
+    orientation: 'horizontal',
+    animate:false,
+    orthoFixedMax: 60,
+    //yAxisFullGrid: true,
+    extensionPoints: {
+    //    yAxisTicks_strokeStyle: "black"
+    }
+});
 
-        var bar1 = new pvc.BarChart({
-          canvas: "pvcBar1",
-          width: 400,
-          height: 250,
-          title: "Sample Bar chart",
-          orientation: 'horizontal',
-          animate:false,
-          orthoFixedMax: 60
-        });
-
-        bar1.setData(relational_03,
-            {crosstabMode: false,
-             seriesInRows: false});
-        bar1.render();
+bar1.setData(relational_03,{
+    crosstabMode: false,
+    seriesInRows: false
+});
+bar1.render();
 </textarea>
         <button id="pvcBar1TryMe" class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar1"></div>
@@ -140,47 +170,49 @@ For drawing a very simple bar chart, just provide the data and set the orientati
 A simple bar chart can be enhanced by setting properties to the panel, bars, axis or legends.<br>
 
 <textarea cols="55" rows="15" id="pvcBar2Code">
+var bar2 = new pvc.BarChart({
+    canvas: "pvcBar2",
+    width: 400,
+    height: 250,
+    title: "Sample Bar chart",
+    titlePosition:"left",
+    orientation: 'horizontal',
+    stacked: false,
+    animate:false,
+    legend: true,
+    legendPosition: "right",
+    showValues: false,
+    showXScale: true,
+    showYScale: true,
+    yAxisPosition: "left",
+    yAxisSize: 70,
+    xAxisPosition: "bottom",
+    xAxisSize: 20,
+    xAxisFullGrid: true,
+    yAxisFullGrid: true,
+    xAxisEndLine:  true,
+    yAxisEndLine:  true,
+    extensionPoints: {
+        //bar_fillStyle:pv.colors("#BF4630","#FF5D40","#FF8973"),
+        bar_lineWidth:1,
+        //bar_strokeStyle:"#000",
+        title_fillStyle: "lightBlue",
+        titleLabel_font: "16px sans-serif",
+        title_strokeStyle: "black",
+        
+        legend_fillStyle: "green",
+        allTimeseries_fillStyle: "blue",
+        xAxis_fillStyle: "#eee",
+        yAxis_fillStyle: "#bbb",
+        yAxisRule_strokeStyle:"blue"
+    }
+});
 
-        var bar2 = new pvc.BarChart({
-          canvas: "pvcBar2",
-          width: 400,
-          height: 500,
-          title: "Sample Bar chart",
-          titlePosition:"left",
-          orientation: 'horizontal',
-          stacked: false,
-          animate:false,
-legend: true,
-legendPosition: "right",
-          showValues: false,
-          showXScale: true,
-          showYScale: true,
-          yAxisPosition: "left",
-          yAxisSize: 70,
-          xAxisPosition: "bottom",
-          xAxisSize: 20,
-          xAxisFullGrid: true,
-          
-          extensionPoints: {
-            //bar_fillStyle:pv.colors("#BF4630","#FF5D40","#FF8973"),
-            bar_lineWidth:1,
-            bar_strokeStyle:"#000",
-            title_fillStyle: "lightBlue",
-            titleLabel_font: "16px sans-serif",
-            title_strokeStyle: "black",
-          
-            legend_fillStyle: "green",
-            allTimeseries_fillStyle: "blue",
-            xAxis_fillStyle: "#eee",
-            yAxis_fillStyle: "#bbb",
-            yAxisRule_strokeStyle:"blue",
-          }
-        });
-
-        bar2.setData(relational_01,
-            {crosstabMode: false,
-             seriesInRows: false});
-        bar2.render();
+bar2.setData(relational_01, {
+    crosstabMode: false,
+    seriesInRows: false
+});
+bar2.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar2"></div>
@@ -190,29 +222,28 @@ legendPosition: "right",
 You can represent a third dimension of data through a stack bar chart. In this way, a single bar on the chart can show data for more than one category of data.<br>
 To draw a stacked bar just set the stacked property to true. To a better understanding of the chart, consider configuring the Legend.<br>
 <textarea cols="55" rows="15" id="pvcBar3Code">
+var bar3 = new pvc.BarChart({
+    canvas: "pvcBar3",
+    width: 400,
+    height: 250,
+    title: "Stacked Bar Chart",
+    orientation: 'vertical',
+    stacked: true,
+    animate:false,
+    legend:true,
+    legendPosition:"right",
+    orthoFixedMax: 130,
+    extensionPoints: {
+    	xAxisLabel_textAngle: -1,
+    	xAxisLabel_textAlign: "center",
+    	xAxisLabel_textBaseline: "top"
+    }
+});
 
-        var bar3 = new pvc.BarChart({
-          canvas: "pvcBar3",
-          width: 400,
-          height: 250,
-          title: "Stacked Bar Chart",
-          orientation: 'vertical',
-          stacked: true,
-          animate:false,
-          legend:true,
-          legendPosition:"right",
-          orthoFixedMax: 130,
-        extensionPoints: {
-            xAxisLabel_textAngle: -1,
-            xAxisLabel_textAlign: "center",
-            xAxisLabel_textBaseline: "top",
-          }
-        });
-
-        bar3.setData(relational_01,
-            {crosstabMode: false,
-             seriesInRows: false});
-        bar3.render();
+bar3.setData(relational_01,
+    {crosstabMode: false,
+     seriesInRows: false});
+bar3.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar3"></div>
@@ -230,13 +261,8 @@ var bar4 = new pvc.BarChart({
     animate: false,
     legend:  true,
     legendPosition: "right",
-    yAxisSize: 70,
-    
-    extensionPoints: {
-        xAxisLabel_textAngle: -1,
-        xAxisLabel_textAlign: "center",
-        xAxisLabel_textBaseline: "top"
-    }});
+    yAxisSize: 70
+});
 
 bar4.setData(relational_01,{
     crosstabMode: false,
