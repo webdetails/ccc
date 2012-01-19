@@ -288,7 +288,7 @@ var vml = {
     else {
       fill.on = 'true';
       fill.color = vml.color( attr.fill );
-      fill.opacity = parseFloat( attr['fill-opacity'] || '1' ) || '1';
+      fill.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
     }
   },
 
@@ -306,7 +306,7 @@ var vml = {
       stroke.on = 'true';
       stroke.weight = parseFloat( attr['stroke-width'] || '1' ) / 1.25;
       stroke.color = vml.color( attr.stroke ) || 'black';
-      stroke.opacity = parseFloat( attr['stroke-opacity'] || '1' ) || '1';
+      stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
       stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
     }
   },
