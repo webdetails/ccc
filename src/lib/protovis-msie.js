@@ -288,7 +288,7 @@ var vml = {
     else {
       fill.on = 'true';
       fill.color = vml.color( attr.fill );
-      fill.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
+      fill.opacity = Math.min(parseFloat( attr['fill-opacity'] || '1' ),1) || '1';
     }
   },
 
