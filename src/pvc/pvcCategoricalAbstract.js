@@ -915,10 +915,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 [anchorOpposite   ](-ruleLength)
                 [anchorLength     ](null)
                 [anchorOrtho      ](scale)
-                [anchorOrthoLength]( ruleLength)
-                .visible(function(d){
-                    return (this.index > 0);
-                });
+                [anchorOrthoLength]( ruleLength);
         }
     },
     
