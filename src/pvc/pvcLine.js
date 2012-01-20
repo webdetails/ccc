@@ -325,7 +325,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           .data(function(d){
                 return myself.chart.dataEngine.getObjectsForSeriesIndex(
                         d, 
-                        this.timeSeries ?
+                        myself.timeSeries ?
                             function(a,b){
                                 return parser.parse(a.category) - 
                                        parser.parse(b.category);
@@ -334,7 +334,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
                 })
           .lineWidth(this.showLines?1.5:0.001)
           .segmented(true)
-          .visible(pvc.nonEmpty)
+          .visible(function(d) { return d.value != null; })
           [pvc.BasePanel.relativeAnchor[anchor]](
                 myself.timeSeries ?
                   function(d){ return tScale(parser.parse(d.category)); } :

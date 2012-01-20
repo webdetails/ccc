@@ -393,7 +393,7 @@ pv.Mark.prototype.getStaticPropertyValue = function(name) {
  * */
 pv.Mark.prototype.addMargin = function(name, margin) {
     if(margin != 0){
-        var staticValue = pvc.nullTo(this.getStaticPropertyValue(name), 0); 
+        var staticValue = pvc.nullTo(this.getStaticPropertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
         this[name](function(){
