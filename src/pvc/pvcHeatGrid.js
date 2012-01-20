@@ -1112,18 +1112,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
           return this.getNormalColorScale(data, cols, this.colorValIdx);//TODO:
         case "linear":
           return this.getLinearColorScale(data, cols, this.colorValIdx);
-        //TODO: case "external":
+        case "discrete":
+            return this.getDiscreteColorScale(data, cols, this.chart.options, this.colorValIdx);
         default:
           throw "Invalid option " + this.scaleType + " in HeatGrid";
     }
   },
   
-  
-  getLinearColorScale: function(data, cols, colorIdx){
-
-    var opts = this.chart.options;
-    var myself = this;
-
+  getColorRangeArgs: function(opts){
     var rangeArgs = opts.colorRange;
     if(opts.minColor != null && opts.maxColor != null){
         rangeArgs = [opts.minColor,opts.maxColor];
@@ -1134,6 +1130,125 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     else if (opts.maxColor != null){
         rangeArgs.splice(rangeArgs.length-1,1,opts.maxColor);
     }
+    return rangeArgs;
+  },
+  
+  getColorDomainArgs: function(data, cols, opts, rangeArgs, colorIdx){
+    var domainArgs = opts.colorRangeInterval;
+    if(domainArgs != null && domainArgs.length > rangeArgs.length){
+        domainArgs = domainArgs.slice(0, rangeArgs.length);
+    }
+    if(domainArgs == null){
+        domainArgs = [];
+    }
+    
+    if(domainArgs.length < rangeArgs.length){
+        var myself = this;
+        var min = pv.dict(cols, function(f){
+          return pv.min(data, function(d){
+            return myself.getValue(d[f],colorIdx);
+          });
+        });
+        var max = pv.dict(cols, function(f){
+          return pv.max(data, function(d){
+            return myself.getValue(d[f], colorIdx);
+          });
+        });
+        
+        if(opts.normPerBaseCategory){
+            return pv.dict(cols, function(category){
+              return myself.padColorDomainArgs(rangeArgs, [], min[category], max[category]);  
+            });
+        }
+        else {
+            var theMin = min[cols[0]];
+            for (var i=1; i<cols.length; i++) {
+              if (min[cols[i]] < theMin) theMin = min[cols[i]];
+            }
+            var theMax = max[cols[0]];
+            for (var i=1; i<cols.length; i++){
+              if (max[cols[i]] > theMax) theMax = max[cols[i]];
+            }
+            if(theMax == theMin)
+            {
+                if(theMax >=1){
+                    theMin = theMax -1;
+                } else {
+                    theMax = theMin +1;
+                }
+            }
+            return this.padColorDomainArgs(rangeArgs, domainArgs, theMin, theMax);
+        }
+        
+    }
+    
+    return domainArgs;
+  },
+  
+  padColorDomainArgs: function(rangeArgs, domainArgs, min, max){
+    //use supplied numbers
+    var toPad =
+          domainArgs == null ?
+          rangeArgs.length +1 :
+          rangeArgs.length +1 - domainArgs.length;
+    switch(toPad){
+      case 1:
+          //TODO: should adapt to represent middle?
+          domainArgs.push(max);
+          break;
+      case 2:
+          domainArgs = [min].concat(domainArgs).concat(max);
+          break;
+      default://build domain from range
+          var step = (max - min)/(rangeArgs.length -1);
+          domainArgs = pv.range(min, max +step , step);
+    }
+    return domainArgs;
+  },
+  
+  getDiscreteColorScale: function(data, cols, opts, colorIdx)
+  {
+    var colorRange = this.getColorRangeArgs(opts);
+    var domain = this.getColorDomainArgs(data, cols, opts, colorRange, colorIdx);
+
+    //d0--cR0--d1--cR1--d2
+    
+    var getColorVal = function(val, domain, colorRange){
+        if(val <= domain[0]) return pv.color(colorRange[0]);
+        for(var i=0; i<domain.length-1;i++){
+             if(val > domain[i] && val < domain[i+1]){
+                return pv.color(colorRange[i]);
+             }
+        }
+        return pv.color(colorRange[colorRange.length-1]);
+    };
+    
+    if(opts.normPerBaseCategory){
+        return pv.dict(cols, function (category){
+            var dom = domain[category];
+            return function(val){
+                return getColorVal(val, dom, colorRange);
+            }
+        });
+        
+    }
+    else {
+        return pv.dict(cols, function(col){
+            return function(val){
+                return getColorVal(val, domain, colorRange);
+            };
+           
+        });
+    }
+    
+  },
+  
+  getLinearColorScale: function(data, cols, colorIdx){
+
+    var opts = this.chart.options;
+    var myself = this;
+
+    var rangeArgs = this.getColorRangeArgs(opts);
     
     var domainArgs = opts.colorRangeInterval;
     if(domainArgs != null && domainArgs.length > rangeArgs.length){
@@ -1192,7 +1307,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 } else {
                     theMax = theMin +1;
                 }
-            } 
+            }
           //use supplied numbers
           var toPad =
                 domainArgs == null ?
