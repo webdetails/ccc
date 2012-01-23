@@ -433,7 +433,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     if(opts.sizeValIdx == null){
                         return myself.shape;
                     }
-                    return myself.getValue(r[i]) != null ? myself.shape : opts.nullShape;
+                    return myself.getValue(r[i], opts.sizeValIdx) != null ? myself.shape : opts.nullShape;
                 })
                 .shapeSize(function(r,ra, i) {
                     if(myself.sizeValIdx == null){
@@ -1144,14 +1144,18 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     if(domainArgs.length < rangeArgs.length){
         var myself = this;
-        var min = pv.dict(cols, function(f){
+        var min = pv.dict(cols, function(cat){
           return pv.min(data, function(d){
-            return myself.getValue(d[f],colorIdx);
+            var val = myself.getValue(d[cat], colorIdx);
+            if(val!= null) return val;
+            else return Number.POSITIVE_INFINITY;//ignore nulls
           });
         });
-        var max = pv.dict(cols, function(f){
+        var max = pv.dict(cols, function(cat){
           return pv.max(data, function(d){
-            return myself.getValue(d[f], colorIdx);
+            var val = myself.getValue(d[cat], colorIdx);
+            if(val!= null) return val;
+            else return Number.NEGATIVE_INFINITY;//ignore nulls
           });
         });
         
@@ -1212,8 +1216,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     var domain = this.getColorDomainArgs(data, cols, opts, colorRange, colorIdx);
 
     //d0--cR0--d1--cR1--d2
-    
     var getColorVal = function(val, domain, colorRange){
+        if(val == null) return opts.nullColor;
         if(val <= domain[0]) return pv.color(colorRange[0]);
         for(var i=0; i<domain.length-1;i++){
              if(val > domain[i] && val < domain[i+1]){
@@ -1260,14 +1264,18 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     if(domainArgs.length < rangeArgs.length || opts.normPerBaseCategory){
         
-        var min = pv.dict(cols, function(f){
+        var min = pv.dict(cols, function(cat){
           return pv.min(data, function(d){
-            return myself.getValue(d[f],colorIdx);
+            var val = myself.getValue(d[cat], colorIdx);
+            if(val!= null) return val;
+            else return Number.POSITIVE_INFINITY;//ignore nulls
           });
         });
-        var max = pv.dict(cols, function(f){
+        var max = pv.dict(cols, function(cat){
           return pv.max(data, function(d){
-            return myself.getValue(d[f], colorIdx);
+            var val = myself.getValue(d[cat], colorIdx);
+            if(val!= null) return val;
+            else return Number.NEGATIVE_INFINITY;//ignore nulls
           });
         });
         
