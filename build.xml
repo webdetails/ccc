@@ -10,6 +10,58 @@
 <project name="CCC" default="default" basedir=".">
     <description>Builds, tests, and runs the project CCC.</description>
     <import file="nbproject/build-impl.xml"/>
+    
+    
+  <property name="project.stage"
+            value="TRUNK"
+            description="Name of the plugin"/>
+    
+  <property name="project.version"
+            value="SNAPSHOT"
+            description="Project Version"/>
+    
+    
+    <tstamp>
+      <format property="build.time" pattern="yyyy/MM/dd hh:mm aa"/>
+    </tstamp>
+    
+    
+    
+  <!-- Build the project.revision property -->
+  <condition property="distribution.version" value="${project.stage}-${DSTAMP}" else="${project.stage}-${project.version}">
+    <equals arg1="${project.version}" arg2="SNAPSHOT"/>
+  </condition>
+    
+    
+    
+ <!-- Define the Sonar task if this hasn't been done in a common script -->
+  <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+    <classpath path="sonar-ant-task-1.3.jar" />
+  </taskdef>
+  
+  
+   <!-- Add the target -->
+ 
+ <target name="check-sonar-props">
+      <available file="/home/tomcat/sonar.properties" property="sonar.props"/>    
+      <echo>${sonar.props}</echo>
+ </target>
+
+
+<target name="read-sonar-props" depends="check-sonar-props" if="sonar.props">
+<echo>Prop file exists</echo>
+<loadproperties srcFile="/home/tomcat/sonar.properties"/>
+</target>
+ 
+  <target name="sonar" depends='read-sonar-props'>
+    <!-- list of mandatories Sonar properties -->
+    <property name="sonar.sources" value="src/pvc/" />
+ 
+    
+    <sonar:sonar key="pt.webdetails:CCC" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>
+  </target>
+  
+    
     <!--
 
     There exist several targets which are by default empty and which can be 
