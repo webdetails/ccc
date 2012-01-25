@@ -7,7 +7,7 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="CCC" default="default" basedir=".">
+<project name="CCC Release" default="default" basedir=".">
     <description>Builds, tests, and runs the project CCC.</description>
     <import file="nbproject/build-impl.xml"/>
     
@@ -27,11 +27,11 @@
     
     
     
-  <!-- Build the project.revision property -->
+  <!-- Build the project.revision property 
   <condition property="distribution.version" value="${project.stage}-${DSTAMP}" else="${project.stage}-${project.version}">
     <equals arg1="${project.version}" arg2="SNAPSHOT"/>
   </condition>
-    
+    -->
     
     
  <!-- Define the Sonar task if this hasn't been done in a common script -->
@@ -58,7 +58,7 @@
     <property name="sonar.sources" value="src/pvc/" />
  
     
-    <sonar:sonar key="pt.webdetails:CCC" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>
+    <sonar:sonar key="pt.webdetails:CCC-Release" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>
   </target>
   
     
