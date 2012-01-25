@@ -3,24 +3,24 @@
     <head>
         <title>Vinzi Demo</title>
 
-        <!--[if lt IE 9]>
-        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
-</script><![endif]-->
         <meta name="svg.render.forceflash" content="true">
-
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="cdf/Base.js"></script>
         <script type="text/javascript" src="cdf/jquery.js"></script>
         <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
         <script type="text/javascript" src="data/q01-01.js"></script>
+        <!-- ?? Missing?
         <script type="text/javascript" src="data/cars.js"></script>
+        -->
         <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="lib/protovis-msie.js"></script>
         <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
         <script type="text/javascript" src="lib/tipsy.js"></script>
         <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
         <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcData.js"></script>
         <script type="text/javascript" src="pvc/pvcPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegend.js"></script>
         <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
@@ -29,55 +29,49 @@
         <script type="text/javascript" src="pvc/pvcBar.js"></script>
         <script type="text/javascript" src="pvc/pvcParallelCoordinates.js"></script>
         <script type="text/javascript" src="pvc/pvcLine.js"></script>
-        <script type="text/javascript" src="pvc/pvcData.js"></script>
+        
         <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
-        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+        <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
         <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
     </head>
     <body>
+        <h1>Demonstratie van de Patientgroep selectie</h1>
+        
+        Vinzi is er van overtuigd dat de meerwaarde van haar Dashboards
+        optimaal is als de zorgverlener zelfstandig analyses kan uitvoeren om
+        zijn/haar praktische kennis aan te vullen met concrete informatie uit
+        het dashboard. Daarom zijn Vinzi dashboards gericht:
+        
+        <ul>
+          <li> effectief gebruik van kleur en vorm om te zorgen dat de
+          zorgverlener in een oogopslag de relevante informatie herkent.</li>
+          <li> eenvoudige &amp; krachtige gebruikershulpmiddelen die intuitief
+          werken en zonder training kunnen worden gebruikt.</li> 
+        </ul>
+        <p>
+            Onderstaand voorbeeld geeft aan hoe de patientgroep selectie gedaan
+        wordt bij Vinzi Dashboards.
+        </p>
+        <div id="pvcParCoord"> </div>
 
-<h1> Demonstratie van de Patientgroep selectie</h1>
-Vinzi is er van overtuigd dat de meerwaarde van haar Dashboards
-optimaal is als de zorgverlener zelfstandig analyses kan uitvoeren om
-zijn/haar praktische kennis aan te vullen met concrete informatie uit
-het dashboard. Daarom zijn Vinzi dashboards gericht:
-<ul>
-  <li> effectief gebruik van kleur en vorm om te zorgen dat de
-  zorgverlener in een oogopslag de relevante informatie herkent.</li>
-  <li> eenvoudige & krachtige gebruikershulpmiddelen die intuitief
-  werken en zonder training kunnen worden gebruikt.</li> 
-</ul>
-<p>
-Onderstaand voorbeeld geeft aan hoe de patientgroep selectie gedaan
-wordt bij Vinzi Dashboards.
+        <script type="text/javascript">
+            pv.listenForPageLoad(function() {
 
-  <div id="pvcParCoord"> </div>
+                var parCoord = new pvc.ParallelCoordinates({
+                    canvas: "pvcParCoord",
+                    width: 820,
+                    height: 420,
+                    title: "Demonstrating parallel Dimensions"
+                });
 
+                // load fake data (otherwise function fails)
+                parCoord.setData(parCoordTest_01, {crosstabMode: true, seriesInRows: true});
+                parCoord.render();
+            });
+        </script>
 
-  <script type="text/javascript">
-    pv.listenForPageLoad(function() {
-
-    var parCoord = new pvc.ParallelCoordinates({
-    // legendPosition: "left",
-    canvas: "pvcParCoord",
-    width: 820,
-    height: 420,
-    title: "Demonstrating parallel Dimensions",
-    });
-
-    // load fake data (otherwise function fails)        
-    parCoord.setData(parCoordTest_01, {crosstabMode: true, seriesInRows: true});
-    parCoord.render();
-           
-    });
-
-  </script>
-
-<p>
-Dit is een concept-tool die gevuld is met proefdata (waardes en
-verdeling zijn niet realistisch). 
-
-
-
+        <p>
+        Dit is een concept-tool die gevuld is met proefdata (waardes en
+        verdeling zijn niet realistisch).
     </body>
 </html>

@@ -1,50 +1,38 @@
 /**
  * TimeseriesAbstract is the base class for all categorical or timeseries
  */
-
 pvc.TimeseriesAbstract = pvc.Base.extend({
 
-  allTimeseriesPanel : null,
+    allTimeseriesPanel : null,
+    
+    defaultOptions: {
+        showAllTimeseries: true,
+        allTimeseriesPosition: "bottom",
+        allTimeseriesSize: 50
+    },
+    
+    constructor: function(options){
+        this.base();
 
-  constructor: function(o){
+        // Apply options
+        $.extend(this.options, this.defaultOptions, options);
+    },
 
-    this.base();
+    preRender: function(){
 
-    var _defaults = {
-      showAllTimeseries: true,
-      allTimeseriesPosition: "bottom",
-      allTimeseriesSize: 50
-    };
+        this.base();
 
+        // Do we have the timeseries panel? add it
+        if (this.options.showAllTimeseries){
+            this.allTimeseriesPanel = new pvc.AllTimeseriesPanel(this, {
+                anchor: this.options.allTimeseriesPosition,
+                allTimeseriesSize: this.options.allTimeseriesSize
+            });
 
-    // Apply options
-    $.extend(this.options,_defaults, o);
-
-
-  },
-
-  preRender: function(){
-
-    this.base();
-
-
-    // Do we have the timeseries panel? add it
-
-    if (this.options.showAllTimeseries){
-      this.allTimeseriesPanel = new pvc.AllTimeseriesPanel(this, {
-        anchor: this.options.allTimeseriesPosition,
-        allTimeseriesSize: this.options.allTimeseriesSize
-
-      });
-
-      this.allTimeseriesPanel.appendTo(this.basePanel); // Add it
-
+            this.allTimeseriesPanel.appendTo(this.basePanel); // Add it
+        }
     }
-
-  }
-
-}
-)
+});
 
 
 /*
@@ -60,45 +48,30 @@ pvc.TimeseriesAbstract = pvc.Base.extend({
  */
 pvc.AllTimeseriesPanel = pvc.BasePanel.extend({
 
-  _parent: null,
-  pvAllTimeseriesPanel: null,
-  anchor: "bottom",
-  allTimeseriesSize: 50,
+    _parent: null,
+    pvAllTimeseriesPanel: null,
+    anchor: "bottom",
+    allTimeseriesSize: 50,
 
+    constructor: function(chart, options){
+        this.base(chart,options);
+    },
 
+    create: function(){
+        // Size will depend on positioning and font size mainly
+        if (this.isAnchorTopOrBottom()){
+            this.width  = this._parent.width;
+            this.height = this.allTimeseriesSize;
+        } else {
+            this.height = this._parent.height;
+            this.width  = this.allTimeseriesSize;
+        }
 
-  constructor: function(chart, options){
+        this.pvPanel = this._parent.getPvPanel().add(this.type)
+            .width(this.width)
+            .height(this.height);
 
-    this.base(chart,options);
-
-  },
-
-  create: function(){
-
-    // Size will depend on positioning and font size mainly
-
-    if (this.anchor == "top" || this.anchor == "bottom"){
-      this.width = this._parent.width;
-      this.height = this.allTimeseriesSize;
+        // Extend panel
+        this.extend(this.pvPanel,"allTimeseries_");
     }
-    else{
-      this.height = this._parent.height;
-      this.width = this.allTimeseriesSize;
-    }
-
-
-    this.pvPanel = this._parent.getPvPanel().add(this.type)
-    .width(this.width)
-    .height(this.height)
-
-    // Extend panel
-    this.extend(this.pvPanel,"allTimeseries_");
-
-
-  }
-
-
 });
-
-
-

@@ -229,6 +229,48 @@ var relational_03 = {
   }]
 };
 
+var relational_04 = {
+        "resultset":[
+       
+        ["Green","Ford",72],
+        ["Green","Renault",50],
+        ["Green","BMW",20],
+        ["Green","Mercedes",23],
+        ["Green","Mitsubishi",72],
+        ["Green","Peugeut",50],
+        ["Green","Honda",20],
+        ["Green","Audi",23],
+        //
+        ["Red","Ford",27],
+        ["Red","Renault",5],
+        ["Red","BMW",2],
+        ["Red","Mercedes",32],
+        ["Red","Fiat",24],
+        ["Red","Peugeut",4],
+        ["Red","Honda",90],
+        ["Red","Audi",53],
+        //
+        ["Blue","Fiat",60],
+        ["Blue","Peugeut",40],
+        ["Blue","Honda",15],
+        ["Blue","Audi",3],
+        ],
+        "metadata":[{
+          "colIndex":0,
+          "colType":"String",
+          "colName":"Series"
+        },{
+          "colIndex":1,
+          "colType":"String",
+          "colName":"Categories"
+        },{
+          "colIndex":2,
+          "colType":"Numeric",
+          "colName":"Value"
+        }]
+      };
+
+
 var test = {
   "resultset":[["Shipped",2003,3573701.2500000014],
   ["Resolved",2003,28550.59],

@@ -41,7 +41,7 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
 
   },
-
+      
   preRender: function(){
 
     this.base();
@@ -229,138 +229,151 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     this.base(chart,options);
 
   },
-
+  
+  /* @Override */
+  isOrientationVertical: function(){
+    return this.orientation == "vertical";
+  },
+    
+  /* @Override */
+  isOrientationHorizontal: function(){
+    return this.orientation == "horizontal";
+  },
+  
   create: function(){
 
     var myself = this;
+    
     this.width = this._parent.width;
     this.height = this._parent.height;
-
-    this.pvPanel = this._parent.getPvPanel().add(this.type)
-    .width(this.width)
-    .height(this.height);
-
+    
+    // Creates the pvPanel
+    this.base();
+    
     // add clipping for bounds
-    if  (   (myself.chart.options.orthoFixedMin != null)
-      || (myself.chart.options.orthoFixedMax != null) )
+    if((myself.chart.options.orthoFixedMin != null) || 
+       (myself.chart.options.orthoFixedMax != null)){
       this.pvPanel["overflow"]("hidden");
-
+    }
+    
     if(this.showTooltips || this.chart.options.clickable ){
       this.pvPanel
-      .events("all")
-      .event("mousemove", pv.Behavior.point(Infinity));
+          .events("all")
+          .event("mousemove", pv.Behavior.point(Infinity));
     }
 
-    var anchor = this.orientation == "vertical"?"bottom":"left";
+    var isVertical = this.isOrientationVertical(),
+        anchor = isVertical ? "bottom" : "left";
 
     // Extend body, resetting axisSizes
 
-    var lScale = this.chart.getLinearScale(true);
-    var oScale = this.chart.getOrdinalScale(true);
-    var tScale;
-    if(this.timeSeries){
-      tScale = this.chart.getTimeseriesScale(true,true);
-    }
+    var lScale = this.chart.getLinearScale(true),
+        oScale = null, // ~ eclipse warning
+        tScale = null, // ~ eclipse warning 
+        parser = null; // ~ eclipse warning
     
-    var parser = pv.Format.date(this.timeSeriesFormat);
+    if(this.timeSeries){
+        tScale = this.chart.getTimeseriesScale(true, true);
+        parser = pv.Format.date(this.timeSeriesFormat);
+    } else {
+        oScale = this.chart.getOrdinalScale(true);
+    }
     
     var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
     var colorFunc = function(d){
       // return colors(d.serieIndex)
-      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.parent.index])
+      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.parent.index]);
     };
 
     // Stacked?
     if (this.stacked){
-      
+      var dataSet = pvc.padMatrixWithZeros(
+                        this.chart.dataEngine.getVisibleTransposedValues());
       this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
-      .layers(pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues()))
-      [this.orientation == "vertical"?"x":"y"](function(){
-        if(myself.timeSeries){
-          return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));
-        }
-        else{
-          return oScale(myself.chart.dataEngine.getCategoryByIndex(this.index)) + oScale.range().band/2;
-        }
-      })
-      [anchor](lScale(0))
-      [this.orientation == "vertical"?"y":"x"](function(d){
-        return myself.chart.animate(0,lScale(d)-lScale(0));
-      })
+              .layers(dataSet)
+              // Stacked Vertical charts show series from
+              //  top to bottom (according to the legend)
+              .order(isVertical  ? "reverse"  : null)
+              [isVertical ? "x" : "y"](
+                    myself.timeSeries ?
+                    function(){
+                        return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));
+                    } :
+                    function(){
+                        return oScale(myself.chart.dataEngine.getCategoryByIndex(this.index)) + 
+                               oScale.range().band/2;
+                    })
+              [anchor](lScale(0))
+              [isVertical ? "y" : "x"](function(d){
+                return myself.chart.animate(0, lScale(d) - lScale(0));
+              });
 
       this.pvArea = this.pvScatterPanel.layer.add(pv.Area)
-      .fillStyle(this.showAreas?colorFunc:null);
+                            .fillStyle(this.showAreas?colorFunc:null);
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
-      .lineWidth(this.showLines?1.5:0.001);
-      
-    }
-    else{
+                            .lineWidth(this.showLines?1.5:0.001);
+    } else{
 
       this.pvScatterPanel = this.pvPanel.add(pv.Panel)
-      .data(this.chart.dataEngine.getVisibleSeriesIndexes())
+                .data(this.chart.dataEngine.getVisibleSeriesIndexes());
 
       this.pvArea = this.pvScatterPanel.add(pv.Area)
-      .fillStyle(this.showAreas?colorFunc:null);
+                .fillStyle(this.showAreas ? colorFunc : null);
 
       this.pvLine = this.pvArea.add(pv.Line)
-      .data(function(d){
-        return myself.chart.dataEngine.getObjectsForSeriesIndex(d, this.timeSeries?function(a,b){
-          return parser.parse(a.category) - parser.parse(b.category);
-          }: null)
-        })
-      .lineWidth(this.showLines?1.5:0.001)
-      .segmented(true)
-      .visible(function(d) {
-        return d.value==null?false:true;
-      })
-      [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-
-        if(myself.timeSeries){
-          return tScale(parser.parse(d.category));
-        }
-        else{
-          return oScale(d.category) + oScale.range().band/2;
-        }
-
-      })
-      [anchor](function(d){
-        return myself.chart.animate(0,lScale(d.value));
-      })
-   
-
+          .data(function(d){
+                return myself.chart.dataEngine.getObjectsForSeriesIndex(
+                        d, 
+                        myself.timeSeries ?
+                            function(a,b){
+                                return parser.parse(a.category) - 
+                                       parser.parse(b.category);
+                            } : 
+                            null);
+                })
+          .lineWidth(this.showLines?1.5:0.001)
+          .segmented(true)
+          .visible(function(d) { return d.value != null; })
+          [pvc.BasePanel.relativeAnchor[anchor]](
+                myself.timeSeries ?
+                  function(d){ return tScale(parser.parse(d.category)); } :
+                  function(d){ return oScale(d.category) + oScale.range().band/2; })
+          [anchor](function(d){ 
+              return myself.chart.animate(0,lScale(d.value)); 
+          });
     }
 
-    
     this.pvLine
-    .strokeStyle(colorFunc)
-    .lineJoin(null)
-    .text(function(d){
-      var v, c;
-      var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
-      if( d != null && typeof d == "object"){
-        v = d.value;
-        c = d.category
-      }
-      else{
-        v = d
-        c = myself.chart.dataEngine.getVisibleCategories()[this.index]
-      };
-      return myself.chart.options.tooltipFormat.call(myself,s,c,v);
-    })
+        .strokeStyle(colorFunc)
+        .lineJoin(null)
+        .text(function(d){
+            var v, 
+                c,
+                s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index];
+          
+            if( d != null && typeof d == "object"){
+                v = d.value;
+                c = d.category;
+            } else {
+                v = d;
+                c = myself.chart.dataEngine.getVisibleCategories()[this.index];
+            }
+            
+            return myself.chart.options.tooltipFormat.call(myself, s, c, v);
+        });
 
     if(this.showTooltips){
       this.extend(this.chart.tipsySettings,"tooltip_");
       this.pvLine
-      .event("point", pv.Behavior.tipsy(this.chart.tipsySettings));
+        .event("point", pv.Behavior.tipsy(this.chart.tipsySettings));
     }
 
     this.pvDot = this.pvLine.add(pv.Dot)
-    .shapeSize(12)
-    .lineWidth(1.5)
-    .strokeStyle(this.showDots?colorFunc:null)
-    .fillStyle(this.showDots?colorFunc:null)
-    
+        .shapeSize(12)
+        .lineWidth(1.5)
+        .strokeStyle(this.showDots?colorFunc:null)
+        .fillStyle(this.showDots?colorFunc:null);
 
     if (this.chart.options.clickable){
       this.pvDot
@@ -387,8 +400,8 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .add(pv.Label)
       .bottom(0)
       .text(function(d){
-        return myself.chart.options.valueFormat( (d != null && typeof d == "object")?d.value:d)
-      })
+        return myself.chart.options.valueFormat( (d != null && typeof d == "object")?d.value:d);
+      });
 
       // Extend lineLabel
       this.extend(this.pvLabel,"lineLabel_");

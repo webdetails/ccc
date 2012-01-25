@@ -73,7 +73,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
     var baseScale = this.chart.getLinearBaseScale(true);
     var orthoScale = this.chart.getLinearScale(true); 
-
+	var tScale;
     if(this.timeSeries){
       tScale = this.chart.getTimeseriesScale(true);
     }

@@ -3,8 +3,6 @@
     <head>
         <title>CCC Samples - Heat grid</title>
 
-
-
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="cdf/Base.js"></script>
         <script type="text/javascript" src="cdf/jquery.js"></script>
@@ -16,6 +14,7 @@
         <script type="text/javascript" src="lib/tipsy.js"></script>
         <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
         <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcData.js"></script>
         <script type="text/javascript" src="pvc/pvcPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegend.js"></script>
         <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
@@ -24,9 +23,8 @@
         <script type="text/javascript" src="pvc/pvcBar.js"></script>
         <script type="text/javascript" src="pvc/pvcHeatGrid.js"></script>
         <script type="text/javascript" src="pvc/pvcLine.js"></script>
-        <script type="text/javascript" src="pvc/pvcData.js"></script>
         <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
-        <link type="text/css" rel="stylesheet" href="jquery.tooltip.css"/>
+        <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
         <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
 
         <script type="text/javascript" src="pvcDocUtils.js"></script>
@@ -52,7 +50,7 @@ The intensity or the color of each cell depends on the value that it represents.
 </ul>
 <h4>Lifecycle</h4>
 <ul>
-  <li>renderCallback - executed immediatly before render is called</li>
+  <li>renderCallback - executed immediately before render is called</li>
 </ul>
 
 <h4>Heat grid properties</h4>
@@ -258,7 +256,9 @@ var heatGrid5 = new pvc.HeatGridChart({
      for(var i=0;i&lt;selections.length;i++){
       var item = selections[i];
       selTxt += 'category:[' + item.category.join(', ') + '] ';
-      selTxt += ', series:[' + item.series.join(', ') +']&ltbr&gt' ;
+
+      selTxt += ', series:[' + item.series.join(', ') + ']&lt;br&gt;';
+
      }
       $('#selected').html(selTxt);
     },
@@ -277,7 +277,8 @@ heatGrid5.render();
 <div id="pvcHG5"></div>
 <br>
 <span>Selections:</span>
-<div id="selected"/>
+
+<div id="selected"></div>
 
         
   </body>

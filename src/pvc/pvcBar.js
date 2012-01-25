@@ -25,11 +25,16 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
             orthoFixedMax: null
         };
 
-
         // Apply options
         $.extend(this.options,_defaults, o);
-
-
+    },
+    
+    /**
+     * Creates a custom WaterfallDataEngine.
+     * [override]
+     */
+    createDataEngine: function(){
+        return new pvc.WaterfallDataEngine(this);
     },
 
     preRender: function(){
@@ -37,7 +42,6 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
         this.base();
 
         pvc.log("Prerendering in barChart");
-
 
         this.barChartPanel = new pvc.WaterfallChartPanel(this, {
             stacked: this.options.stacked,

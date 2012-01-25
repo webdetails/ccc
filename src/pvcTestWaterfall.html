@@ -3,11 +3,7 @@
     <head>
         <title>CCC Samples - Waterfall chart</title>
 
-        <!--[if lt IE 9]>
-        <script type="text/javascript" src="svgweb/svg.js" data-path="svgweb/">
-</script><![endif]-->
         <meta name="svg.render.forceflash" content="true">
-
 
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="cdf/Base.js"></script>
@@ -15,20 +11,22 @@
         <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
         <script type="text/javascript" src="data/q01-01.js"></script>
         <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="lib/protovis-msie.js"></script>
         <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
         <script type="text/javascript" src="lib/tipsy.js"></script>
         <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
         <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcData.js"></script>
         <script type="text/javascript" src="pvc/pvcPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegend.js"></script>
         <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
         <script type="text/javascript" src="pvc/pvcPie.js"></script>
         <script type="text/javascript" src="pvc/pvcBar.js"></script>
-        <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
         <script type="text/javascript" src="pvc/pvcLine.js"></script>
-        <script type="text/javascript" src="pvc/pvcData.js"></script>
+        
         <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
         <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
         <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
@@ -73,6 +71,7 @@ in a waterfall chart you just compare the size of bars as all bars are parallel 
   <li>legendDrawMarker (true|false)</li>
   <li>showTooltips (true|false)</li>
 </ul>
+
 <h4>Waterfall properties</h4>
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
@@ -83,6 +82,24 @@ Default: 0.5 (50%)</li>
   <li>barSizeRatio - In multiple series, percentage of inner band
 occupied by bars. Default: 0.5 (50%)</li>
   <li>maxBarSize - Maximum size of a bar in pixels. Default: 2000</li>
+</ul>
+
+<h4>Axis properties</h4>
+<ul>
+  <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
+  <li>secondAxis (true | false) - whether to show the second axis. Default: false</li>
+  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
+  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
+  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
+  <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
+  <li>{x,y,second}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y,second}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y,second}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
+  <li>secondAxisIdx - Array of indexes of the series that are shown on the second axis</li>
+  <li>secondAxisIndependentScale (true | false) - if the second axis has an independent scale</li>
+  <li>secondAxisOriginIsZero (true | false) - if the second axis should show the 0 value at the origin. Default: 0</li>
+  <li>secondAxisColor - line and scale color. Default: blue</li>
 </ul>
 
 <h2>Extension Points</h2>
@@ -96,8 +113,18 @@ for Waterfall extension points:
   <li>yAxis_</li>
   <li>xAxisRule_</li>
   <li>yAxisRule_</li>
-  <li>xAxisRuleGrid_</li>
-  <li>yAxisRuleGrid_</li>
+  <li>xAxisGrid_</li>
+  <li>yAxisGrid_</li>
+  <li>xAxisScale_</li>
+  <li>yAxisScale_</li>
+  <li>xAxisTicks_</li>
+  <li>yAxisTicks_</li>
+  <li>secondAxisTicks_</li>
+  <li>xAxisMinorTicks_</li>
+  <li>yAxisMinorTicks_</li>
+  <li>secondAxisMinorTicks_</li>
+  <li>xAxisEndLine_</li>
+  <li>yAxisEndLine_</li>
   <li>tooltip_</li>
   <li>barLabel_</li>
   <li>barPanel_</li>
@@ -144,8 +171,6 @@ var wf1 = new pvc.WaterfallChart({
          yAxisSize: 30,
          xAxisPosition: "bottom",
          xAxisSize: 30,
-         xAxisFullGrid: true,
-         yAxisFullGrid: true,
         
          extensionPoints: {
           titleLabel_font: "16px sans-serif",         
@@ -189,8 +214,6 @@ var wf2 = new pvc.WaterfallChart({
     yAxisSize: 40,
     xAxisPosition: "bottom",
     xAxisSize: 30,
-    xAxisFullGrid: true,
-    yAxisFullGrid: true,
 
     extensionPoints: {
         titleLabel_font: "16px sans-serif",         
@@ -200,6 +223,7 @@ wf2.setData(testWaterfall_01, {
     crosstabMode: true,
     seriesInRows: false
 });
+
 
 wf2.render();
 </textarea>
@@ -237,8 +261,6 @@ var wf3 = new pvc.WaterfallChart({
     yAxisSize: 30,
     xAxisPosition: "bottom",
     xAxisSize: 30,
-    xAxisFullGrid: true,
-    yAxisFullGrid: true,
 
     extensionPoints: {
         titleLabel_font: "16px sans-serif",          
@@ -277,6 +299,7 @@ var wf4 = new pvc.WaterfallChart({
     panelSizeRatio:0.75,
     barSizeRatio: 1,
 
+
     showValues: true,
     showXScale: true,
     showYScale: true,
@@ -286,6 +309,9 @@ var wf4 = new pvc.WaterfallChart({
     xAxisSize: 30,
     xAxisFullGrid: true,
     yAxisFullGrid: true,
+    xAxisEndLine: true,
+    yAxisEndLine: true,
+
 
     extensionPoints: {
         titleLabel_font: "16px sans-serif",          

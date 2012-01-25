@@ -158,32 +158,28 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
         var myself = this;
 
         // create empty container for the functions and data
-        this.DF = {}
+        this.DF = {};
 
         var lScale = this.chart.getLinearScale(true);
 
         var l2Scale = this.chart.getSecondScale(true);
         var oScale = this.chart.getOrdinalScale(true);
-        var bSCale = null;
-
-        // determine barPositionOffset and bScale
+        
+        // determine barPositionOffset and barScale
         this.DF.maxBarSize = null;
         var barPositionOffset = 0;
-	bScale = new pv.Scale.ordinal(
-	   this.chart.dataEngine.getVisibleSeriesIndexes())
-            .splitBanded(0, oScale.range().band, this.boxSizeRatio);
-	// We need to take into account the maxValue if our band 
+        var barScale = new pv.Scale.ordinal(
+        			this.chart.dataEngine.getVisibleSeriesIndexes())
+            		.splitBanded(0, oScale.range().band, this.boxSizeRatio);
+        // We need to take into account the maxValue if our band 
         // exceeds this value
 
-	this.DF.maxBarSize = bScale.range().band;
+        this.DF.maxBarSize = barScale.range().band;
 
         if (this.DF.maxBarSize > this.maxBarSize) {
             barPositionOffset = (this.DF.maxBarSize - this.maxBarSize)/2 ;
             this.DF.maxBarSize = this.maxBarSize;
         }
-        // export needed for generated overflow markers.
-	//        this.DF.bScale = bScale;
-
 
      /*
      * fuctions to determine positions along base axis.
@@ -217,7 +213,7 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
 	// find the relative position within this container
 
         this.DF.relBasePosFunc  = function(d){
-            var res = bScale(myself.chart.dataEngine
+            var res = barScale(myself.chart.dataEngine
                 .getVisibleSeriesIndexes()[this.index]) + barPositionOffset;
             return res;
         };
@@ -269,17 +265,14 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
         // colorFunc2 is used for ....
         this.DF.colorFunc2 = function(d){
             return colors(myself.chart.dataEngine
-                .getVisibleSeriesIndexes()[this.index])
+                .getVisibleSeriesIndexes()[this.index]);
         };
-
-        return;
     } ,
 
   generateBoxPlots: function() {
     var de = this.chart.dataEngine;
-    var opts = this.chart.options;
     var colLabels = de.getVisibleCategories();
-    var visibleSeries = de.getVisibleSeries();
+    //var visibleSeries = de.getVisibleSeries();
     var values = de.getValues();
 
     var lwa = 2;   // lineWidth of average.
@@ -353,7 +346,7 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
     
     this.pvPanel = this._parent.getPvPanel().add(this.type)
       .width(this.width)
-      .height(this.height)
+      .height(this.height);
 
     this.hRules = [];
     this.vRules = [];
@@ -367,8 +360,6 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
 
     this.generateBoxPlots();
 
-    var maxBarSize = this.DF.maxBarSize;
-
     // define a panel for each category label.
     // later the individuals bars of series will be drawn in 
     // these panels.
@@ -377,25 +368,25 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
     // add the box-plots to the chart
       this.pvBoxPanel.add(pv.Bar)
         .data(myself.bars)
-        .left(function(d) { return d.left})
-        .width( function(d) { return d.width})
-        .height( function(d) { return d.height})
-        .bottom( function(d) { return d.bottom})
+        .left(function(d) { return d.left; })
+        .width( function(d) { return d.width; })
+        .height( function(d) { return d.height; })
+        .bottom( function(d) { return d.bottom; })
         .fillStyle( function(d) { return d.fillStyle; });
 
       this.pvBoxPanel.add(pv.Rule)
         .data(myself.hRules)
-        .left(function(d) { return d.left})
-        .width( function(d) { return d.width})
-        .bottom( function(d) { return d.bottom})
+        .left(function(d) { return d.left; })
+        .width( function(d) { return d.width; })
+        .bottom( function(d) { return d.bottom; })
         .lineWidth( function(d) { return d.lWidth; })
         .strokeStyle(myself.chart.options.boxplotColor);
 
       this.pvBoxPanel.add(pv.Rule)
         .data(myself.vRules)
-        .left(function(d) { return d.left})
-        .height( function(d) { return d.height})
-        .bottom( function(d) { return d.bottom})
+        .left(function(d) { return d.left; })
+        .height( function(d) { return d.height; })
+        .bottom( function(d) { return d.bottom; })
         .lineWidth( function(d) { return d.lWidth; })
         .strokeStyle(myself.chart.options.boxplotColor);
 
@@ -407,28 +398,36 @@ pvc.BoxplotChartPanel = pvc.BasePanel.extend({
                 return myself.chart.dataEngine.getObjectsForSecondAxis(d, 
                     this.timeSeries ? function(a,b){
                     return parser.parse(a.category) - parser.parse(b.category);
-                    }: null)
+                    }: null);
                 })
-            .strokeStyle(this.chart.options.secondAxisColor)
+            .strokeStyle(function(){
+              var cols = this.chart.options.secondAxisColor;
+              cols = cols instanceof Array ? cols : [cols];
+              return cols[this.parent.index % cols.length];
+            })
             [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.secBasePosFunc)
             [anchor](myself.DF.secOrthoLengthFunc);
 
             this.pvSecondDot = this.pvSecondLine.add(pv.Dot)
             .shapeSize(8)
             .lineWidth(1.5)
-            .fillStyle(this.chart.options.secondAxisColor)
+            .fillStyle(function(){
+              var cols = this.chart.options.secondAxisColor;
+              cols = cols instanceof Array ? cols : [cols];
+              return cols[this.parent.index % cols.length];
+            });
         }
 
         // add Labels:
         this.pvBoxPanel
         .text(function(d){
             var s = myself.chart.dataEngine
-            .getVisibleSeries()[myself.stacked?this.parent.index:this.index]
+            .getVisibleSeries()[myself.stacked?this.parent.index:this.index];
+            
             var c = myself.chart.dataEngine
-            .getVisibleCategories()[myself.stacked?this.index:this.parent.index]
+                    .getVisibleCategories()[myself.stacked?this.index:this.parent.index];
             return myself.chart.options.tooltipFormat.call(myself,s,c,d);
-    
-        })
+        });
 
         if(this.showTooltips){
             // Extend default
