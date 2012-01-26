@@ -256,9 +256,7 @@ var heatGrid5 = new pvc.HeatGridChart({
      for(var i=0;i&lt;selections.length;i++){
       var item = selections[i];
       selTxt += 'category:[' + item.category.join(', ') + '] ';
-
       selTxt += ', series:[' + item.series.join(', ') + ']&lt;br&gt;';
-
      }
       $('#selected').html(selTxt);
     },
@@ -277,9 +275,7 @@ heatGrid5.render();
 <div id="pvcHG5"></div>
 <br>
 <span>Selections:</span>
-
 <div id="selected"></div>
-
         
   </body>
 </html>

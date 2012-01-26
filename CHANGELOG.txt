@@ -1,0 +1,34 @@
+12.01.25 
+
+Implemented Redmine Feature #107 - Control number of labels on the linear Axis for categorical charts (show "MinorTicks" option, including 2nd axis) 
+Implemented Redmine Feature #108 - Control number of ticks on the linear Axis for categorical charts ("DesiredTickCount", including 2nd axis with independent scale) 
+Implemented Redmine Feature #109 - Rounded maximum for linear axis in categorical charts ("DomainRoundMode" option, including 2nd axis with independent scale) 
+Solved Redmine Issue #120 - Axis labels get cut off 
+Solved Redmine Issue #78 - Fix the vertical order in which series are drawn, so that when applicable, they show from top to bottom.
+Solved Redmine Issue #121 - Tooltips in barcharts do not appear if bars overflow.
+Solved Redmine Issue #103 - Ordinal axis grids not being drawn
+MultiValueTranslator: issue when no categories
+Solved valueFormat receives numeric value, doesn't parse
+Fixed typo of property name in LegendPanel 
+Add multi-series barline support
+useCompositeAxis compatible with flat arrays
+vml namespace conflict: revert sparkline, declaration in protovis-msie no longer lazy
+align horizontal text in composite vertical axis towards the chart; revert convention breaks in multiline conditional expressions
+workaround issue in 16th decimal position in IE9 64bit
+Fixed regression with bulletcharts being translated in 10px down
+Added new (and some of the missing) documentation to the testZZZ.html files
+Fixed the drawing of bars and grid lines on the ordinal scale: they were not centered with the tick and label 
+In linear axis, made minorTicks "extend" (major)ticks, so that visibility (through .visible or .strokeStyle) of the later affects the former. 
+testZZZ.html files documentation mencioned '{x,y}AxisFullGrid_' instead of the correct value'{x,y}AxisGrid_'.
+Fixed linear axis grid to show a line on the last tick (as opposed to the ordinal axis, that does not show the last line). When EndLine is active, it is drawn above the last grid line.
+Fixed bug in the positioning of linear scale labels that revealed it self (don't know why) only on time series charts * Fixed bug in time series scale range calculation when with a second axis * Fixed bug in the drawing of minor ticks on time series scales (date arithmetic issues)
+Fixed regression bug in ScatterCharts (DotChart, LineChart, StackedLineChart and StackedAreaChart) that caused null values to break line drawing. 
+Fixed the visibility of the first grid line of a time series axis - it did not show because, in this case, the first tick is not on the origin.
+Fixed compatibility issue between jQuery.sparkline and protovis-msie when in IE8.
+heatgrid: +scalingType:'discrete' (interval-based, no color interpolation)
+tipsy w/ followMouse: don't fall out of window
+Heatgrid: ignore null values in min/max calculations; nullShape not taking correct index into account;
+solved dangling variable reference
+
+
+
