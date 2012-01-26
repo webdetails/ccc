@@ -20,7 +20,7 @@ pv.have_SVG = !!(
 // detect VML support
 pv.have_VML = (function (d,a,b) {
   a = d.createElement('div');
-  a.innerHTML = '<v:shape adj="1" />';
+  a.innerHTML = '<pvml:shape adj="1" />';
   b = a.firstChild;
   b.style.behavior = 'url(#default#VML)';
   return b ? typeof b.adj === 'object' : true;
@@ -43,17 +43,13 @@ if ( typeof Date.now !== 'function' ) {
   Date.now = function () { return new Date() * 1; };
 }
 
-// TODO - may be removed this if sparkline compatibility issue is solved
-// Create namespace before sparkline has a chance
-if ( !document.namespaces.v ) { document.namespaces.add( 'v', 'urn:schemas-microsoft-com:vml' ); }
-
 var vml = {
 
   round: function(n){ return Math.round( n * 21.6 ); },
 
   styles: null,
 
-  pre: '<v:',
+  pre: '<pvml:',
   post: ' class="msvml">',
 
   block: { 'group':1, 'shape':1, 'shapetype':1, 'line':1,
@@ -337,7 +333,7 @@ var vml = {
       vml.styles.styleSheet.addRule( '.msvml', 'behavior:url(#default#VML);' );
       vml.styles.styleSheet.addRule( '.msvml_block', 'position:absolute;top:0;left:0;' );
       try {
-        if ( !document.namespaces.v ) { document.namespaces.add( 'v', 'urn:schemas-microsoft-com:vml' ); }
+        if ( !document.namespaces.pvml ) { document.namespaces.add( 'pvml', 'urn:schemas-microsoft-com:vml'); }
       }
       catch (e) {
         vml.pre  = '<';
