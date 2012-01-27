@@ -15,13 +15,26 @@ pv.Behavior.tipsy = function(opts) {
             tip = null;
         }
     }
-  
-    function mouseMoveAbs(ev){//assumes absolute positioning
+    
+    function mouseMoveAbs(ev){
         if(tip) {
-            var tipLbl = $(tip).tipsy("tip");
-            tipLbl.css('left', (ev.pageX + 8) + "px");
-            tipLbl.css('top',  (ev.pageY + 8) + "px");
-        }
+          var tipLbl = $(tip).tipsy("tip");
+          var extra = 8;//px
+          var x= ev.pageX + extra;
+              y= ev.pageY + extra;
+            
+          //prevent being cropped by window
+          if(ev.clientX + extra + tipLbl.width() > document.body.clientWidth){
+            x = ev.pageX - extra - tipLbl.width();
+          }
+          if(ev.clientY + extra + tipLbl.height() > document.body.clientHeight){
+            y = ev.pageY - extra - tipLbl.height();
+          }
+          
+          tipLbl.css('left', x + "px");
+          tipLbl.css('top',  y + "px");
+      }
+      
     }
   
     function toParentTransform(parentPanel){

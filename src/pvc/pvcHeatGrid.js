@@ -1,3 +1,4 @@
+
 /**
  * HeatGridChart is the main class for generating... heatGrid charts.
  *  A heatGrid visualizes a matrix of values by a grid (matrix) of *

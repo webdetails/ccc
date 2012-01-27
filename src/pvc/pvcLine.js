@@ -1,3 +1,4 @@
+
 /**
  * ScatterAbstract is the class that will be extended by dot, line, stackedline and area charts.
  */

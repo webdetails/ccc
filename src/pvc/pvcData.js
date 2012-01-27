@@ -1,3 +1,4 @@
+
 /**
  * Class of exception thrown when a chart has no data.
  * @class

@@ -1,7 +1,7 @@
+
 /**
  * BarChart is the main class for generating... bar charts (another surprise!).
  */
-
 pvc.BarChart = pvc.CategoricalAbstract.extend({
 
     barChartPanel : null,

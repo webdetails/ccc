@@ -1,3 +1,4 @@
+
 /*
  * Legend panel. Generates the legend. Specific options are:
  * <i>legend</i> - text. Default: false

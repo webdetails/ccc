@@ -1,3 +1,4 @@
+
 /*********
  *  Panel use to draw line and dotCharts
  *     LScatter is for graphs with a linear base-axis

@@ -1,3 +1,4 @@
+
 /**
  * MetricAbstract is the base class for all chart types that have
  * a two linear axis.
