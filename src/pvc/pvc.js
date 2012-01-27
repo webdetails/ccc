@@ -1,30 +1,62 @@
+// ECMAScript 5 shim
 if(!Object.keys) {
-	Object.keys = function(o){
-		if (o !== Object(o)){
-			throw new TypeError('Object.keys called on non-object');
-		}
-		
-		var ret=[];
-		for(var p in o) 
-			if(Object.prototype.hasOwnProperty.call(o,p)) 
-				ret.push(p);
-		return ret;
-	};
+    Object.keys = function(o){
+        if (o !== Object(o)){
+            throw new TypeError('Object.keys called on non-object');
+        }
+
+        var ret = [];
+        for(var p in o){
+            if(Object.prototype.hasOwnProperty.call(o,p)){
+                ret.push(p);
+            }
+        }
+        
+        return ret;
+    };
 }
 
+/**
+ * Implements filter property if not implemented yet
+ */
+if (!Array.prototype.filter){
+    Array.prototype.filter = function(fun, ctx)
+    {
+        var len = this.length >>> 0;
+        if (typeof fun != "function"){
+            throw new TypeError();
+        }
+        
+        var res = [];
+        for (var i = 0; i < len; i++){
+            if (i in this){
+                var val = this[i]; // in case fun mutates this
+                if (fun.call(ctx, val, i, this))
+                    res.push(val);
+            }
+        }
+
+        return res;
+    };
+}
+
+// ----------------------------
+
 var pvc = {
-  debug: false
+    debug: false
 };
 
 // Begin private scope
 (function(){
-    
+
+var arraySlice = pvc.arraySlice = Array.prototype.slice;
+
 /**
  *  Utility function for logging messages to the console
  */
 pvc.log = function(m){
 
-    if (typeof console != "undefined" && pvc.debug){
+    if (pvc.debug && typeof console != "undefined"){
         console.log("[pvChart]: " + m);
     }
 };
@@ -33,7 +65,7 @@ pvc.log = function(m){
  * Evaluates x if it's a function or returns the value otherwise
  */
 pvc.ev = function(x){
-    return typeof x == "function"?x():x;
+    return typeof x == "function" ? x(): x;
 };
 
 pvc.sumOrSet = function(v1,v2){
@@ -54,6 +86,7 @@ pvc.number = function(d, dv){
     return isNaN(d) ? (dv || 0) : v;
 };
 
+// null or undefined to 'dv''
 pvc.nullTo = function(v, dv){
     return v != null ? v : dv;
 };
@@ -79,29 +112,105 @@ pvc.cloneMatrix = function(m){
 };
 
 /**
- *ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
- *     arrayStartsWith(a, a) -> true
+ * ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+ *      arrayStartsWith(a, a) -> true
  **/
 pvc.arrayStartsWith = function(array, base){
     if(array.length < base.length) { 
-		return false; 
-	}
-    
-    for(var i=0; i<base.length;i++){
+        return false;
+    }
+
+    for(var i = 0; i < base.length ; i++){
         if(base[i] != array[i]) {
             return false;
         }
     }
+
+    return true;
+};
+
+/**
+ * Calls function <i>fun</i> with context <i>ctx</i>
+ * for every own property of <i>o</i>.
+ * Function <i>fun</i> is called with arguments:
+ * value, property, object.
+ */
+pvc.forEachOwn = function(o, fun, ctx){
+    if(o){
+        for(var p in o){
+            if(o.hasOwnProperty(p)){
+                fun.call(ctx, o[p], p, o);
+            }
+        }
+    }
+};
+
+pvc.mergeOwn = function(to, from){
+    pvc.forEachOwn(from, function(v ,p){
+        to[p] = v;
+    });
+    return to;
+};
+
+pvc.forEachRange = function(min, count, fun, ctx){
+    for(var i = min ; i < max ; i++){
+        fun.call(ctx, i);
+    }
+};
+
+/*
+pvc.arrayInsertMany = function(target, index, source){
+    // TODO: is there a better way: without copying source?
+    target.splice.apply(target, [index, 0].concat(other));
+    return target;
+};
+*/
+
+pvc.arrayAppend = function(target, source){
+    for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
+        target[T + i] = source[i];
+    }
+    return target;
+};
+
+// Adapted from pv.range
+pvc.Range = function(start, stop, step){
+    if (arguments.length == 1) {
+        stop  = start;
+        start = 0;
+    }
+  
+    if (step == null) {
+        step = 1;
+    }
     
-	return true;
+    if ((stop - start) / step == Infinity) {
+        throw new Error("range must be finite");
+    }
+  
+    this.stop  = stop;//-= (stop - start) * 1e-10; // floating point precision!
+    this.start = start;
+    this.step  = step;
+};
+
+pvc.Range.prototype.forEach = function(fun, ctx){
+    var i = 0, j;
+    if (this.step < 0) {
+        while((j = this.start + this.step * i++) > this.stop) {
+            fun.call(ctx, j);
+        }
+    } else {
+        while((j = this.start + this.step * i++) < this.stop) {
+            fun.call(ctx, j);
+        }
+    }
 };
 
 /**
  * Equals for two arrays
  * func - needed if not flat array of comparables
  **/
-pvc.arrayEquals = function(array1, array2, func)
-{
+pvc.arrayEquals = function(array1, array2, func){
   if(array1 == null){return array2 == null;}
   
   var useFunc = typeof(func) == 'function';
@@ -125,10 +234,8 @@ pvc.arrayEquals = function(array1, array2, func)
  *  an if it is not equal (==) to null.
 */
 pvc.toArray = function(thing){
-	return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+    return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
 };
-
-var arraySlice = pvc.arraySlice = Array.prototype.slice;
 
 /**
  * Creates a color scheme based on the specified colors.
@@ -136,17 +243,24 @@ var arraySlice = pvc.arraySlice = Array.prototype.slice;
  * and is returned when null or an empty array is specified.
  */
 pvc.createColorScheme = function(colors){
-	if (colors == null || colors.length == 0){
-		return pv.Colors.category10;
-	}
+    if (colors == null || colors.length == 0){
+        return pv.Colors.category10;
+    }
 	
-	colors = pvc.toArray(colors);
+    colors = pvc.toArray(colors);
 	
-	return function() {
-		var scale = pv.colors(colors);
-		scale.domain.apply(scale, arguments);
-		return scale;
-	};
+    return function() {
+        var scale = pv.colors(colors); // creates a color scale with a defined range
+	scale.domain.apply(scale, arguments); // defines the domain of the color scale
+	return scale;
+    };
+};
+
+//convert to greyscale using YCbCr luminance conv
+pvc.toGrayScale = function(color){
+    var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+    //var avg = Math.round( (color.r + color.g + color.b)/3);
+    return pv.rgb(avg,avg,avg,0.6).brighter();
 };
 
 pvc.removeTipsyLegends = function(){
@@ -158,9 +272,18 @@ pvc.removeTipsyLegends = function(){
 };
 
 pvc.compareNatural = function(a, b){
-	return (a < b) ? -1 : ((a > b) ? 1 : 0);
+    return (a < b) ? -1 : ((a > b) ? 1 : 0);
 };
 
+pvc.createDateComparer = function(parser, key){
+    if(!key){
+        key = pv.identity;
+    }
+    
+    return function(a, b){
+        return parser.parse(key(a)) - parser.parse(key(b));
+    };
+};
 
 /* Protovis Z-Order support */
 
@@ -187,16 +310,18 @@ pv.Mark.prototype.zOrder = function(zOrder) {
     return this;
 };
 
-// Copy normal methods' version
+// Copy original methods
 var markRender = pv.Mark.prototype.render,
     panelAdd   = pv.Panel.prototype.add;
 
+// @replace
 pv.Panel.prototype.add = function(){
     this._needChildSort = this._needChildSort || this._hasZOrderChild;
     
     return panelAdd.apply(this, arraySlice.call(arguments));
 };
 
+// @replace
 pv.Mark.prototype.render = function(){
     // ensure zOrder is up to date
     sortChildren.call(this);
@@ -274,7 +399,7 @@ pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
     }
     
     // Call PROTOVIS implementation
-    var ticks = scale.ticks(desiredTickCount);
+    ticks = scale.ticks(desiredTickCount);
     
     if(syncScale != null && !syncScale){
         return ticks;
@@ -387,9 +512,8 @@ pv.Mark.prototype.getStaticPropertyValue = function(name) {
 };
   
 /* ANCHORS */
-/*
+/**
  * name = left | right | top | bottom
- * 
  * */
 pv.Mark.prototype.addMargin = function(name, margin) {
     if(margin != 0){
@@ -404,7 +528,7 @@ pv.Mark.prototype.addMargin = function(name, margin) {
     return this;
 };
 
-/*
+/**
  * margins = {
  *      all:
  *      left:
@@ -412,7 +536,7 @@ pv.Mark.prototype.addMargin = function(name, margin) {
  *      top:
  *      bottom:
  * }
- * */
+ */
 pv.Mark.prototype.addMargins = function(margins) {
     var all = pvc.get(margins, 'all', 0);
     
@@ -454,33 +578,69 @@ pv.Transform.prototype.transformLength = function(length){
 
 })(); // End private scope
 
+
 /**
- *
- * Implements filter property if not implemented yet
- *
- */
-if (!Array.prototype.filter){
-    Array.prototype.filter = function(fun, thisp)
-    {
-        var len = this.length >>> 0;
-        if (typeof fun != "function")
-            throw new TypeError();
+ * Equal to pv.Behavior.select but doesn't necessarily
+ * force redraw of component it's in on mousemove, and sends event info
+ * (default behavior matches pv.Behavior.select())
+ * @param {boolean} autoRefresh refresh parent mark automatically
+ * @param {pv.Mark} mark
+ * @return {function mousedown
+ **/
+pv.Behavior.selector = function(autoRefresh, mark) {
+  var scene, // scene context
+      index, // scene context
+      r, // region being selected
+      m1, // initial mouse position
+      redrawThis = (arguments.length > 0)?
+                    autoRefresh : true; //redraw mark - default: same as pv.Behavior.select
+    
+  /** @private */
+  function mousedown(d, e) {
+    if(mark == null){
+        index = this.index;
+        scene = this.scene;
+    }
+    else {
+        index = mark.index;
+        scene = mark.scene;
+    }
+    m1 = this.mouse();
+    
+    r = d;
+    r.x = m1.x;
+    r.y = m1.y;
+    r.dx = r.dy = 0;
+    pv.Mark.dispatch("selectstart", scene, index, e);
+  }
 
-        var res = [];
-        var thisp = arguments[1];
-        for (var i = 0; i < len; i++)
-        {
-            if (i in this)
-            {
-                var val = this[i]; // in case fun mutates this
-                if (fun.call(thisp, val, i, this))
-                    res.push(val);
-            }
+  /** @private */
+  function mousemove(e) {
+    if (!scene) return;
+    scene.mark.context(scene, index, function() {
+        var m2 = this.mouse();
+        r.x = Math.max(0, Math.min(m1.x, m2.x));
+        r.y = Math.max(0, Math.min(m1.y, m2.y));
+        r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
+        r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
+        if(redrawThis){
+            this.render();
         }
+      });
+    pv.Mark.dispatch("select", scene, index, e);
+  }
 
-        return res;
-    };
-}
+  /** @private */
+  function mouseup(e) {
+    if (!scene) return;
+    pv.Mark.dispatch("selectend", scene, index, e);
+    scene = null;
+  }
+
+  pv.listen(window, "mousemove", mousemove);
+  pv.listen(window, "mouseup", mouseup);
+  return mousedown;
+};
 
 
 /**
@@ -489,5 +649,6 @@ if (!Array.prototype.filter){
  *
  **/
 (function($){
-    $.support.svg = $.support.svg || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
+    $.support.svg = $.support.svg || 
+        document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
 })(jQuery);

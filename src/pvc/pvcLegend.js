@@ -160,7 +160,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     // defined font function
     var computeDecoration = function(idx){
-      if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
+      if(myself.chart.dataEngine.isDimensionVisible(myself.chart.legendSource, idx)){
         return "";
       }
       else{
@@ -169,7 +169,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     };
     
     var computeTextStyle = function(idx){
-      if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
+      if(myself.chart.dataEngine.isDimensionVisible(myself.chart.legendSource, idx)){
         return "black"
       }
       else{
@@ -260,7 +260,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   toggleVisibility: function(idx){
     
     pvc.log("Worked. Toggling visibility of index " + idx);
-    this.chart.dataEngine.toggleVisibility(this.chart.legendSource, idx);
+    this.chart.dataEngine.toggleDimensionVisible(this.chart.legendSource, idx);
 
     // Forcing removal of tipsy legends
     pvc.removeTipsyLegends();

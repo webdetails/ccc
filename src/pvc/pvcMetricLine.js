@@ -1,72 +1,45 @@
-
-
-
 /**
  * ScatterAbstract is the class that will be extended by dot, line, stackedline and area charts.
  */
-
 pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
 
-  scatterChartPanel : null,
-  tipsySettings: {
-    gravity: "s",
-    fade: true
-  },
+    scatterChartPanel : null,
+  
+    constructor: function(o){
 
-  constructor: function(o){
+        this.base(o);
 
-    this.base(o);
+        var _defaults = {
+            showDots: false,
+            showLines: false,
+            showAreas: false,
+            showValues: false,
+            axisOffset: 0.05,
+            valuesAnchor: "right",
+            stacked: false,
+            panelSizeRatio: 1
+        };
 
-    var _defaults = {
-      showDots: false,
-      showLines: false,
-      showAreas: false,
-      showValues: false,
-      showTooltips: true,
-      axisOffset: 0.05,
-      valuesAnchor: "right",
-      stacked: false,
-      originIsZero: true,
-      orientation: "vertical",
-      timeSeries: false,
-      timeSeriesFormat: "%Y-%m-%d",
-      panelSizeRatio: 1,
-      orthoFixedMin: null,
-      orthoFixedMax: null
-    };
+        // Apply options
+        $.extend(this.options, _defaults, o);
+    },
 
+     /* @override */
+    createCategoricalPanel: function(){
+        pvc.log("Prerendering in MetricScatterAbstract");
 
-    // Apply options
-    $.extend(this.options,_defaults, o);
+        this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
+            stacked: this.options.stacked,
+            showValues: this.options.showValues,
+            valuesAnchor: this.options.valuesAnchor,
+            showLines: this.options.showLines,
+            showDots: this.options.showDots,
+            showAreas: this.options.showAreas,
+            orientation: this.options.orientation
+        });
 
-
-  },
-
-  preRender: function(){
-
-    this.base();
-
-    pvc.log("Prerendering in MetricScatterAbstract");
-
-    this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
-      stacked: this.options.stacked,
-      showValues: this.options.showValues,
-      valuesAnchor: this.options.valuesAnchor,
-      showLines: this.options.showLines,
-      showDots: this.options.showDots,
-      showAreas: this.options.showAreas,
-      showTooltips: this.options.showTooltips,
-      orientation: this.options.orientation,
-      timeSeries: this.options.timeSeries,
-      timeSeriesFormat: this.options.timeSeriesFormat
-    });
-
-    this.categoricalPanel = this.scatterChartPanel;
-
-    this.scatterChartPanel.appendTo(this.basePanel); // Add it
-
-  }
-
+        return this.scatterChartPanel;
+    }
 });
 
 /**
@@ -81,11 +54,7 @@ pvc.MetricDotChart = pvc.MetricScatterAbstract.extend({
     this.base();
 
     var _defaults = {
-      showDots: true,
-      showLines: false,
-      showAreas: false,
-      showValues: false,
-      stacked: false
+      showDots: true
     };
 
     // Apply options
@@ -107,17 +76,11 @@ pvc.MetricLineChart = pvc.MetricScatterAbstract.extend({
     this.base();
 
     var _defaults = {
-      showDots: false, // ask
-      showLines: true,
-      showAreas: false,
-      showValues: false,
-      stacked: false
+      showLines: true
     };
 
     // Apply options
     $.extend(this.options,_defaults, o);
-
-
   }
 });
 
@@ -127,7 +90,6 @@ pvc.MetricLineChart = pvc.MetricScatterAbstract.extend({
  * Metric Stacked Line Chart
  *
  */
-
 pvc.mStackedLineChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
@@ -135,10 +97,7 @@ pvc.mStackedLineChart = pvc.MetricScatterAbstract.extend({
     this.base();
 
     var _defaults = {
-      showDots: false, // ask
       showLines: true,
-      showAreas: false,
-      showValues: false,
       stacked: true
     };
 
@@ -162,17 +121,11 @@ pvc.mStackedAreaChart = pvc.MetricScatterAbstract.extend({
     this.base();
 
     var _defaults = {
-      showDots: false, // ask
-      showLines: false,
       showAreas: true,
-      showValues: false,
       stacked: true
     };
 
     // Apply options
     $.extend(this.options,_defaults, o);
-
-
   }
 });
-

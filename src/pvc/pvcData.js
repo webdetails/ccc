@@ -1,9 +1,13 @@
+/**
+ * Class of exception thrown when a chart has no data.
+ * @class
+ */
+var NoDataException = function(){};
 
 /**
- *
- * Base panel. A lot of them will exist here, with some common properties.
- * Each class that extends pvc.base will be responsible to know how to use it
- *
+ * The DataEngine controls access to data.
+ * Adapts data from its original format to the internal format.
+ * Maintains view-state relating visibility and selection.
  */
 pvc.DataEngine = Base.extend({
 
@@ -13,56 +17,170 @@ pvc.DataEngine = Base.extend({
     seriesInRows: false,
     crosstabMode: true,
     translator: null,
-    series: null,
-    categories: null,
     values: null,
-    secondAxisValues: null,
-    hiddenData: null,
+    
     secondAxis: false, // Do we have double axis?
+    secondAxisValues: null,
     secondAxisIdx: 0,
     
-    visibleCategoriesIndexes: undefined,
-    visibleCategories: undefined,
-    visibleSeriesIndexes: undefined,
-    visibleSeries: undefined,
-    
-    //neu
+    // neu
     isMultiValued: false,
     valuesIndexes: null,
-
+    
+    _dimensions: null,
+    _dimensionList: null,
+    
+    // Selection control
+    _selections: null,
+    _selectedCount: 0,
+    
+    // Data list
+    _data: null,
+    
+    // Data indexed by each dimension in turn
+    _dataTree: null,
+    
     constructor: function(chart){
-
+        
         this.chart = chart;
-        this.hiddenData = {
-            series:{},
-            categories:{}
-        };
-      
+        
+        this._initDimensions();
+        
+        // HashTable of selected datums
+        // datum.index -> datum
+        this._selections = {};
+        this._selectedCount = 0;
+    },
+    
+    setCrosstabMode: function(crosstabMode){
+        this.crosstabMode = crosstabMode;
     },
 
-    setData: function( metadata, resultset){
+    isCrosstabMode: function(){
+        return this.crosstabMode;
+    },
 
-        this.metadata = metadata;
+    setSeriesInRows: function(seriesInRows){
+        this.seriesInRows = seriesInRows;
+    },
+
+    isSeriesInRows: function(){
+        return this.seriesInRows;
+    },
+    
+    setValuesIndexes: function(valuesIndexes){
+        this.valuesIndexes = valuesIndexes;
+    },
+    
+    setMultiValued: function(multiValue){
+        this.isMultiValued = !!multiValue;
+    },
+    
+    setData: function(metadata, resultset){
+        this.metadata  = metadata;
         this.resultset = resultset;
-
     },
-
-    /**
-     * Creates the appropriate translator
+    
+    // TODO: in multiValued mode, have all options only related to data mapping in one object?
+    setDataOptions: function(dataOptions){
+        this.dataOptions = dataOptions;
+    },
+    
+    /** 
+     * Initializes the currently supported dimensions:
+     * 'series' and 'categories'.
      */
-
+    _initDimensions: function(){
+        // dimensionName -> state
+        this._dimensions = {};
+        this._dimensionList = [];
+        
+        var me = this;
+        
+        // Must be first, to match the order in the values matrix (lines)
+        this._defDimension('categories', {
+            fetchValues: function(){ return me._fetchCategories(); }
+        });
+        
+        this._defDimension('series', {
+            fetchValues: function(){ return me._fetchSeries(); }
+        });
+    },
+    
+    _defDimension: function(name, definition){
+        var index = this._dimensionList.length,
+            dimension = new pvc.DataDimension(name, index, definition);
+        
+        this._dimensionList[index] = dimension;
+        
+        // TODO: can the name of a dimension be a number?
+        // name or index lookup
+        this._dimensions[name]  = dimension;
+        this._dimensions[index] = dimension;
+    },
+    
+    _fetchSeries: function(){
+        return this.translator.getColumns();
+    },
+    
+    _fetchCategories: function(){
+        var categories = this.translator.getRows();
+            
+        if(this.chart.options.timeSeries){
+            var parser = pv.Format.date(this.chart.options.timeSeriesFormat);
+            categories.sort(pvc.createDateComparer(parser));
+        }
+        
+        return categories;
+    },
+    
+    /**
+     * Obtains a data dimension given its name.
+     * @returns {DataDimension} The desired data dimension.
+     * @throws {Error} If the specified name is not defined.
+     */
+    getDimension: function(name){
+        var dimension = this._dimensions[name];
+        if(!dimension){
+             throw new Error("Undefined dimension with name '" + name + "'");
+        }
+        
+        return dimension;
+    },
+    
+    /**
+     * Obtains a data dimension given its index.
+     * @returns {DataDimension} The desired data dimension.
+     * @throws {Error} If the specified index is not defined.
+     */
+    getDimensionByIndex: function(index){
+        var dimension = this._dimensionList[index];
+        if(!dimension){
+             throw new Error("Undefined dimension with index '" + index + "'");
+        }
+        
+        return dimension;
+    },
+    
+    /**
+     * Creates and prepares the appropriate translator
+     */
     createTranslator: function(){
         
         if(this.isMultiValued){
             pvc.log("Creating MultiValueTranslator");
-            this.translator = new pvc.MultiValueTranslator(this.valuesIndexes, this.crosstabMode, this.dataOptions);  //TODO: 
-        }
-        else if(this.crosstabMode){
+            
+            this.translator = new pvc.MultiValueTranslator(
+                            this.valuesIndexes, 
+                            this.crosstabMode, 
+                            this.dataOptions);  //TODO:
+        } else if(this.crosstabMode){
             pvc.log("Creating CrosstabTranslator");
+            
             this.translator = new pvc.CrosstabTranslator();
-        }
-        else{
+        } else {
             pvc.log("Creating RelationalTranslator");
+            
             this.translator = new pvc.RelationalTranslator();
         }
 
@@ -77,325 +195,250 @@ pvc.DataEngine = Base.extend({
         this.translator.prepare(this);
     },
     
-    /*
+    /**
      * Returns some information on the data points
      */
-
     getInfo: function(){
 
         var out = "------------------------------------------\n";
         out+= "Dataset Information\n";
-
         out+= "  Series ( "+ this.getSeriesSize() +" ): " + this.getSeries().slice(0,10) +"\n";
         out+= "  Categories ( "+ this.getCategoriesSize() +" ): " + this.getCategories().slice(0,10) +"\n";
         out+= "  `- secondAxis: " + this.chart.options.secondAxis + "; secondAxisIndex: " + this.chart.options.secondAxisIdx + "\n";
         out+= "------------------------------------------\n";
 
         return out;
-
     },
 
-    /*
-     * Returns the series on the underlying data
-     *
+    /**
+     * Returns the unique values of a given dimension.
      */
-
+    getDimensionValues: function(name){
+        return this.getDimension(name).getValues();
+    },
+    
+    /**
+     * Returns the nth unique value of a given dimension.
+     */
+    getDimensionValue: function(name, index){
+        return this.getDimension(name).getValue(index);
+    },
+    
+    /**
+     * Returns the number of unique values of a given dimension.
+     */
+    getDimensionSize: function(name){
+        return this.getDimension(name).getSize();
+    },
+    
+    /**
+     * Returns an array with the indexes of visible series values
+     */
+    getDimensionVisibleIndexes: function(name){
+        return this.getDimension(name).getVisibleIndexes();
+    },
+    
+    /**
+     * Returns an array with the visible series values
+     */
+    getDimensionVisibleValues: function(name){
+        return this.getDimension(name).getVisibleValues();
+    },
+        
+    /**
+     * Toggles the visibility of the nth value of the given dimension.
+     * Returns 'undefined' only if 'index' does not exist, and true otherwise.
+     */
+    toggleDimensionVisible: function(name, index){
+        return this.getDimension(name).toggleVisibleByIndex(index);
+    },
+    
+    /**
+     * Returns true if the nth value of the 
+     * given dimension is visible and false otherwise.
+     */
+    isDimensionVisible: function(name, index){
+        return this.getDimension(name).isVisibleByIndex(index);
+    },
+    
+    /** 
+     * Returns the index of a value of the gioven dimension, 
+     * given its visible index.
+     */
+    translateDimensionVisibleIndex: function(name, visibleIndex){
+        return this.getDimension(name).translateVisibleIndex(visibleIndex);
+    },
+    
+    // -----------------
+    
+    /**
+     * Returns the unique series values.
+     */
     getSeries: function(){
-        var res = this.series || this.translator.getColumns();
-        return res;
+        return this.getDimensionValues('series');
     },
 
-    /*
-     * Returns a serie on the underlying data by an index
-     *
+    /**
+     * Returns a series on the underlying data given its index.
+     * @deprecated use dataEngine.getDimensionValue('series', idx)
      */
-
     getSerieByIndex: function(idx){
         return this.getSeries()[idx];
     },
 
-
-    /*
-     * Returns an array with the indexes for the series
-     *
+    /**
+     * Returns an array with the indexes for the series.
+     * @deprecated use pv.Range(dataEngine.getDimensionSize('series'))
      */
     getSeriesIndexes: function(){
         // we'll just return everything
         return pv.range(this.getSeries().length);
     },
 
-    /*
-     * Returns an array with the indexes for the visible series
-     *
+    /**
+     * Returns an array with the indexes of the visible series values.
      */
     getVisibleSeriesIndexes: function(){
-
-        if (typeof this.visibleSeriesIndexes === "undefined"){
-            
-            var myself=this;
-            var res =  pv.range(this.getSeries().length).filter(function(v){
-                return !myself.hiddenData.series[v];
-            });
-            this.visibleSeriesIndexes = res;
-        }
-        
-        return this.visibleSeriesIndexes;
-
+        return this.getDimensionVisibleIndexes('series');
     },
 
-    /*
-     * Returns an array with the visible categories. Use only when index information
-     * is not required
-     *
+    /**
+     * Returns an array with the visible categories.
      */
     getVisibleSeries: function(){
-
-
-
-        if (typeof this.visibleSeries === "undefined"){
-            var myself = this;
-            var res = this.getVisibleSeriesIndexes().map(function(idx){
-                return myself.getSerieByIndex(idx);
-            });
-            this.visibleSeries = res;
-        }
-        
-        return this.visibleSeries;
+        return this.getDimensionVisibleValues('series');
     },
 
-
-    /*
-     * Togles the serie visibility based on an index. Returns true if serie is now
-     * visible, false otherwise.
-     *
+    /**
+     * Togles the series visibility based on an index. 
+     * Returns true if series is now visible, false otherwise.
      */
-
-    toggleSerieVisibility: function(idx){
-
-        return this.toggleVisibility("series",idx);
-
+    toggleSerieVisibility: function(index){
+        return this.toggleDimensionVisible("series", index);
     },
-
-
-    /*
+    
+    /**
      * Returns the categories on the underlying data
-     *
      */
-
     getCategories: function(){
-
-        if(this.categories == null){
-
-            if(this.chart.options.timeSeries){
-                var parser = pv.Format.date(this.chart.options.timeSeriesFormat);
-                this.categories = this.translator.getRows().sort(function(a,b){
-                    return parser.parse(a) - parser.parse(b);
-                });
-            } else {
-                this.categories = this.translator.getRows();
-            }
-        }
-
-        return this.categories;
+        return this.getDimensionValues('categories');
     },
 
     getCategoryMin: function() {
-        var cat = this.getCategories();
-        var min = cat[0];
-        for(var i in cat)
-            if (cat[i] < min)
-                min = cat[i];
-        return min;
+        return this.getDimension('categories').getMinValue();
     },
 
     getCategoryMax: function() {
-        var cat = this.getCategories();
-        var max = cat[0];
-        for(var i in cat)
-            if (cat[i] > max)
-                max = cat[i];
-        return max;
+        return this.getDimension('categories').getMaxValue();
     },
 
-    /*
+    /**
      * Returns the categories on the underlying data
-     *
+     * @deprecated use dataEngine.getDimensionValue('categories', idx) instead
      */
-
     getCategoryByIndex: function(idx){
         return this.getCategories()[idx];
     },
 
-    /*
+    /**
      * Returns an array with the indexes for the categories
-     *
+     * @deprecated use pv.Range(dataEngine.getDimensionSize('categories'))
      */
     getCategoriesIndexes: function(){
         // we'll just return everything
         return pv.range(this.getCategories().length);
     },
 
-    /*
+    /**
      * Returns an array with the indexes for the visible categories
-     *
      */
     getVisibleCategoriesIndexes: function(){
-        
-        if (typeof this.visibleCategoriesIndexes === "undefined"){
-            var myself=this;
-            var res = pv.range(this.getCategories().length).filter(function(v){
-                return !myself.hiddenData.categories[v];
-            });
-            this.visibleCategoriesIndexes = res;
-        }
-        
-        return this.visibleCategoriesIndexes;
+        return this.getDimensionVisibleIndexes('categories');
     },
 
-    /*
-     * Returns an array with the visible categories. Use only when index information
-     * is not required
-     *
+    /**
+     * Returns an array with the visible categories.
      */
     getVisibleCategories: function(){
-  
-        if (typeof this.visibleCategories === "undefined"){
-            var myself = this;
-            var res = this.getVisibleCategoriesIndexes().map(function(idx){
-                return myself.getCategoryByIndex(idx);
-            });
-        
-            this.visibleCategories = res;
-        }
-        
-        return this.visibleCategories;
+        return this.getDimensionVisibleValues('categories');
     },
 
-    /*
-     * Togles the category visibility based on an index. Returns true if category is now
-     * visible, false otherwise.
-     *
+    /**
+     * Togles the category visibility based on an index. 
+     * Returns true if category is now visible, false otherwise.
      */
-
-    toggleCategoryVisibility: function(idx){
-
-        return this.toggleVisibility("categories",idx);
-
+    toggleCategoryVisibility: function(index){
+        return this.toggleDimensionVisible('categories', index);
     },
-
-    /*
-     * Togles the visibility of category or series based on an index.
-     * Returns true if is now visible, false otherwise.
-     *
-     */
-
-    toggleVisibility: function(axis,idx){
-
-        // Accepted values for axis: series|categories
-        pvc.log("Toggling visibility of " + axis + "["+idx+"]");
-
-        if (typeof this.hiddenData[axis][idx] == "undefined"){
-            this.hiddenData[axis][idx] = true;
-        }
-        else{
-            delete this.hiddenData[axis][idx];
-        }
-
-    },
-
     
-    /*
-     * Clears the cache that's used for optimization
-     *
-     */
-
-    clearDataCache: function(){
-        
-        this.visibleCategoriesIndexes = undefined;
-        this.visibleCategories = undefined;
-        this.visibleSeriesIndexes = undefined;
-        this.visibleSeries = undefined;
+    // ---------------------
     
-    },
-
-    /*
-     * Returns the visibility status of a category or series based on an index.
-     * Returns true if is visible, false otherwise.
-     *
-     */
-    isVisible: function(axis,idx){
-
-        // Accepted values for axis: series|categories
-
-        if (typeof this.hiddenData[axis][idx] != "undefined"){
-            return !this.hiddenData[axis][idx];
-        }
-        else{
-            return true;
-        }
-
-    },
-
-
-    /*
+    /**
      * Returns the values for the dataset
      */
-
     getValues: function(){
-
 
         if (this.values == null){
             this.values = this.translator.getValues();
         }
+        
         return this.values;
-
     },
 
-    /*
+    /**
      * Returns the values for the second axis of the dataset
+     * NOTE: this.getSecondAxisValues() values are transposed
      */
-
     getSecondAxisValues: function(){
-
 
         if (this.secondAxisValues == null){
             this.secondAxisValues = this.translator.getSecondAxisValues();
         }
         return this.secondAxisValues;
-
     },
-
+    
+    // DO NOT confuse with setData,
+    // which is quite different
+    getData: function(){
+        if(!this._data){
+            this._data = this.translator.getData();
+        }
+    
+        return this._data;
+    },
+    
     getSecondAxisSeries: function() {
        return this.translator.getSecondAxisSeries();
     },
 
     getSecondAxisIndices: function() {
-        return Object.keys(this.secondAxisValues);
+        return Object.keys(this.getSecondAxisValues());
     },
-    /*
-     * Returns the object for the second axis in the form {category: catName, value: val}
-     *
+    
+    /**
+     * Returns the object for the second axis 
+     * in the form {category: catName, value: val}
      */
-
-    getObjectsForSecondAxis: function(idx,sortF){
-        idx = idx || 0;
-        var myself = this;
-        var ar = [];
-        this.getSecondAxisValues()[idx].map(function(v,j){
-          if(typeof v != "undefined" /* && v != null */ ){
-              ar.push({
-                  serieIndex: idx,
-                  category: myself.getCategories()[j],
-                  value: v
-              }) ;
-          }
-        });
+    getObjectsForSecondAxis: function(seriesIndex, sortF){
+        seriesIndex = seriesIndex || 0;
+        var result = [];
+        
+        // NOTE: this.getSecondAxisValues() values are transposed
+        this.getSecondAxisValues()[seriesIndex].forEach(function(v, j){
+            if(typeof v != "undefined" /* && v != null */ ){
+                result.push({
+                    serieIndex: seriesIndex,
+                    category:   this.getCategories()[j],
+                    value:      v
+                });
+            }
+        }, this);
 
         if (typeof sortF == "function"){
-            return ar.sort(sortF);
+            return result.sort(sortF);
         }
         
-        return ar;
+        return result;
     },
     
     /**
@@ -434,16 +477,13 @@ pvc.DataEngine = Base.extend({
      * Returns the transposed values for the visible dataset.
      */
     getVisibleTransposedValues: function(){
-        var myself = this;
-        var res = this.getVisibleSeriesIndexes().map(function(sIdx){
-            return myself.getVisibleValuesForSeriesIndex(sIdx);
-        });
-        return res;
+        return this.getVisibleSeriesIndexes().map(function(seriesIndex){
+            return this.getVisibleValuesForSeriesIndex(seriesIndex);
+        }, this);
     },
 
     /**
      * Returns the values for a given series idx
-     *
      */
     getValuesForSeriesIndex: function(idx){
         return this.getValues().map(function(a){
@@ -453,7 +493,6 @@ pvc.DataEngine = Base.extend({
 
     /**
      * Returns the visible values for a given category idx
-     *
      */
     getVisibleValuesForSeriesIndex: function(idx){
 
@@ -465,32 +504,30 @@ pvc.DataEngine = Base.extend({
 
     /**
      * Returns the object for a given series idx in the form {category: catName, value: val}
-     *
      */
-    getObjectsForSeriesIndex: function(idx, sortF){
+    getObjectsForSeriesIndex: function(seriesIndex, sortF){
 
-        var myself = this;
-        var ar = [];
-        this.getValues().map(function(a,i){
-            if(typeof a[idx] != "undefined" /* && a[idx] != null */){
-                ar.push({
-                    serieIndex: idx,
-                    category: myself.getCategories()[i],
-                    value: a[idx]
-                }) ;
+        var result = [];
+        
+        this.getValues().forEach(function(a, i){
+            if(typeof a[seriesIndex] != "undefined" /* && a[seriesIndex] != null */){
+                result.push({
+                    serieIndex: seriesIndex,
+                    category:   this.getCategories()[i],
+                    value:      a[seriesIndex]
+                });
             }
-        });
+        }, this);
 
         if (typeof sortF == "function"){
-            return ar.sort(sortF);
+            return result.sort(sortF);
         }
         
-        return ar;
+        return result;
     },
 
     /**
      * Returns the values for a given category idx
-     *
      */
     getValuesForCategoryIndex: function(idx){
         return this.getValues()[idx];
@@ -498,85 +535,82 @@ pvc.DataEngine = Base.extend({
 
     /**
      * Returns the visible values for a given category idx
-     *
      */
     getVisibleValuesForCategoryIndex: function(idx){
 
         var cats = this.getValuesForCategoryIndex(idx);
-        var res = this.getVisibleSeriesIndexes().map(function(idx){
+        return this.getVisibleSeriesIndexes().map(function(idx){
             return cats[idx];
         });
-        return res;
     },
-
 
     /**
      * Returns the object for a given category idx in the form {serie: value}
-     *
      */
     getObjectsForCategoryIndex: function(idx){
 
-        var myself = this;
-        var ar=[];
+        var ar = [];
         this.getValues()[idx].map(function(a,i){
             if(typeof a != "undefined" /* && a!= null */){
                 ar.push({
                     categoryIndex: idx,
-                    serie: myself.getSeries()[i],
+                    serie: this.getSeries()[i],
                     value: a
-                }) ;
+                });
             }
-        });
+        }, this);
+        
         return ar;
     },
 
     /**
      * Returns how many series we have
      */
-
     getSeriesSize: function(){
-        return this.getSeries().length;
+        return this.getDimensionSize('series');
     },
 
     /**
      * Returns how many categories, or data points, we have
      */
     getCategoriesSize: function(){
-        return this.getCategories().length;
+        return this.getDimensionSize('categories');
     },
 
     /**
-     * For every category in the data, get the maximum of the sum of the series
-     * values.
-     *
+     * For every category in the data, 
+     * get the maximum of the sum of the series values.
      */
     getCategoriesMaxSumOfVisibleSeries: function(){
 
-        var myself=this;
-        var max = pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
-            return pv.sum(
-                        myself.getVisibleValuesForCategoryIndex(idx)
-                              .map(function(e){
-                                  return Math.max(0, pvc.number(e));
-                               }));
-        }));
+        var max = pv.max(
+            pv.range(0, this.getCategoriesSize())
+            .map(function(idx){
+                return pv.sum(
+                        this.getVisibleValuesForCategoryIndex(idx)
+                            .map(function(e){ return Math.max(0, pvc.number(e)); }));
+            }, this));
+        
         pvc.log("getCategoriesMaxSumOfVisibleSeries: " + max);
+        
         return max;
     },
 
     /**
-     * For every serie in the data, get the maximum of the sum of the category
-     * values. If only one serie, gets the sum of the value. Useful to build
-     * pieCharts
-     *
+     * For every series in the data, 
+     * get the maximum of the sum of the category values. 
+     * If only one series, 
+     * gets the sum of the value. 
+     * Useful to build pieCharts.
      */
     getVisibleSeriesMaxSum: function(){
 
-        var myself=this;
         var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.sum(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
-        }));
+            return pv.sum(this.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
+        }, this));
+        
         pvc.log("getVisibleSeriesMaxSum: " + max);
+        
         return max;
     },
 
@@ -585,11 +619,12 @@ pvc.DataEngine = Base.extend({
      */
     getVisibleSeriesAbsoluteMax: function(){
 
-        var myself=this;
         var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.max(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
-        }));
+            return pv.max(this.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
+        }, this));
+        
         pvc.log("getVisibleSeriesAbsoluteMax: " + max);
+        
         return max;
     },
 
@@ -598,533 +633,333 @@ pvc.DataEngine = Base.extend({
      */
     getVisibleSeriesAbsoluteMin: function(){
 
-        var myself=this;
         var min = pv.min(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.min(myself.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
-        }));
+            return pv.min(this.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
+        }, this));
+        
         pvc.log("getVisibleSeriesAbsoluteMin: " + min);
+        
         return min;
     },
-
-    setCrosstabMode: function(crosstabMode){
-        this.crosstabMode = crosstabMode;
-    },
-
-    isCrosstabMode: function(){
-        return this.crosstabMode;
-        //pv.range(0,this.getSeriesSize());
-    },
-
-    setSeriesInRows: function(seriesInRows){
-        this.seriesInRows = seriesInRows;
-    },
-
-    isSeriesInRows: function(){
-        return this.seriesInRows;
+    
+    // --------------------------
+    // For searching
+    _getDataTree: function(){
+        if(!this._dataTree){
+            this._dataTree = this._createDataTree();
+        }
+    
+        return this._dataTree;
     },
     
-    setValuesIndexes: function(valuesIndexes){
-        this.valuesIndexes = valuesIndexes;
-    },
-    
-    setMultiValued: function(multiValue){
-        this.isMultiValued = !! multiValue;
-    },
-    
-    //TODO: in multiValued mode, have all options only related to data mapping in one object?
-    setDataOptions: function(dataOptions){
-        this.dataOptions = dataOptions;
-    }
+    // Indexes data on a hierarchical index
+    _createDataTree: function(){
+        
+        function recursive(parentDimNode, datum, dimIndex /* level*/){
+            // parentDimNode has one child per != keyIndex 
+            // that data have on this dimension, on this path.
+            var dimName  = this._dimensionList[dimIndex].name,
+                keyIndex = datum.keyIndexes[dimName],
+                dimNode = parentDimNode[keyIndex];
 
-});
-
-
-
-pvc.DataTranslator = Base.extend({
-
-    dataEngine: null,
-    metadata: null,
-    resultset: null,
-    values: null,
-    secondAxisValues: null,
-
-    //constructor: function(){
-    //},
-
-
-    setData: function(metadata, resultset){
-        this.metadata = metadata;
-        this.resultset = resultset;
-    },
-
-
-    getValues: function(){
-        // Skips first row, skips first col.
-        return this.values.slice(1).map(function(a){
-            return a.slice(1);
-        });      
-    },
-
-    getSecondAxisValues: function(){
-        // Skips first row
-        return this.secondAxisValues.map(function(a){
-            return a.slice(1);
-        });
-    },
-
-    getSecondAxisSeries: function(){
-        // Skips first row
-        return this.secondAxisValues.map(function(a){
-            return a[0];
-        });
-    },
-
-    getColumns: function(){
-        // First column of every row, skipping 1st entry
-        return this.values[0].slice(1);
-    },
-
-    getRows: function(){
-        // first element of every row, skipping 1st one
-        return this.values.slice(1).map(function(d){
-            return d[0];
-        });
-    },
-
-    transpose: function(){
-
-        pv.transpose(this.values);
-    },
-
-
-    prepare: function(dataEngine){
-        this.dataEngine = dataEngine;
-        this.prepareImpl();
-        this.postPrepare();
-    },
-
-    postPrepare: function(){
-
-        if( this.dataEngine.seriesInRows ){
-            this.transpose();
+            if(dimIndex === lastD){
+                // Must be unique...
+                if(parentDimNode[keyIndex]){
+                    throw new Error("Non-unique dimension list.");
+                }
+                
+                // Index datum!
+                parentDimNode[keyIndex] = datum;
+                
+            } else {
+                if(!dimNode){
+                    dimNode = parentDimNode[keyIndex] = [];
+                }
+                
+                recursive.call(this, dimNode, datum, dimIndex + 1);
+            }
         }
         
-        if(this.dataEngine.chart.options.secondAxis){
-            var idx = this.dataEngine.chart.options.secondAxisIdx;
-            if (!(idx instanceof  Array)) {
-              idx = [idx];
-            }
-            idx.sort();
-
-            // Transpose, splice, transpose back
-            pv.transpose(this.values);
-            this.secondAxisValues = [];
-            for (var i = idx.length - 1; i >=0 ;i --) {
-              var index = Number(idx[i]); index = index < 0 ? index : index + 1;
-              this.secondAxisValues.unshift(this.values.splice(index , 1)[0]);
-            }
-            pv.transpose(this.values);
-        }
+        var tree = [],
+            lastD = this._dimensionList.length - 1;
+        
+        this.getData().forEach(function(datum){
+            recursive.call(this, tree, datum, 0);
+        }, this);
+        
+        return tree;
     },
-
-    prepareImpl: function(){
-    // Specific code goes here - override me
-    },
-
-    sort: function(sortFunc){
-    // Specify the sorting data - override me
-    }
-
-
-});
-
-
-pvc.CrosstabTranslator = pvc.DataTranslator.extend({
-
-
-    prepareImpl: function(){
     
-        // All we need to do is to prepend to the result's matrix the series
-        // line
-
-        var a1 = this.metadata.slice(1).map(function(d){
-            return d.colName;
+    /**
+     * Finds a datum given a datum key.
+     * If a matching datum cannot be found then,
+     * if the argument 'createNull' is true,
+     * a «null datum» is returned, 
+     * otherwise, 
+     * null is returned.
+     * 
+     * If an underspecified datum key is given, 
+     * undefined is returned.
+     * 
+     * A datum key is an object 
+     * with one property per data dimension.
+     * 
+     * The property name is the data dimension name,
+     * and the property value is the index 
+     * of the value in that dimension.
+     * @example
+     * <pre>
+     * var datumKey = {
+     *     series: 1,
+     *     category: 23
+     * };
+     * </pre>
+     */
+    findDatum: function(datumKey, createNull){
+        var parentDimNode = this._getDataTree();
+        
+        for(var d = 0, D = this._dimensionList.length ; d < D ; d++){
+            
+            var dimName  = this._dimensionList[d].name,
+                keyIndex = datumKey[dimName];
+            
+            if(keyIndex == null){
+                // Underspecified reference
+                return; // undefined (or, could return more than one...)
+            }
+            
+            var dimNode = parentDimNode[keyIndex];
+            if(dimNode == null){
+                return createNull ? 
+                        this._createNullDatum(datumKey) : 
+                        null; // not found
+            }
+            
+            parentDimNode = dimNode;
+        }
+        
+        // will be a datum
+        return parentDimNode;
+    },
+    
+    // TODO: are null datums really necessary?
+    _createNullDatum: function(datumRef){
+        // TODO: hardcoded for 2 dimensions
+        return new pvc.Datum(
+                    this, 
+                    -1, 
+                    datumRef.series, 
+                    this._dimensions['series'].getValue(datumRef.series),
+                    datumRef.categories, 
+                    this._dimensions['categories'].getValue(datumRef.categories),
+                    null);
+    },
+    
+    // ---------------------
+    // Selections - Many datums
+    
+    /**
+     * Deselects any selected data.
+     */
+    clearSelections: function(){
+         pvc.forEachOwn(this._selections, function(datum){
+            datum._deselect();
         });
-        a1.splice(0,0,"x");
-
-        this.values = pvc.cloneMatrix(this.resultset);
-        this.values.splice(0,0,a1);
-
-    }
-  
-});
-
-
-pvc.RelationalTranslator = pvc.DataTranslator.extend({
-
-
-
-    prepareImpl: function(){
-
-        var myself = this;
-
-        if(this.metadata.length == 2){
-            // Adding a static serie
-            this.resultset.map(function(d){
-                d.splice(0,0,"Series");
-            });
-            this.metadata.splice(0,0,{
-                "colIndex":2,
-                "colType":"String",
-                "colName":"Series"
+        
+        this._selections = {};
+        this._selectedCount = 0;
+    },
+    
+    /**
+     * Returned the number of selected datums.
+     */
+    getSelectedCount: function(){
+        return this._selectedCount;
+    },
+    
+    /**
+     * Returns an array with the selected datums.
+     * @return {Datum[]} The selected datums.
+     */
+    getSelections: function(){
+        var selectionList = [];
+        
+        if(this._selections){
+            pvc.forEachOwn(this._selections, function(datum){
+                selectionList.push(datum);
             });
         }
-
-        /*
-        var seenSeries = [],
-        seenCategories = [],
-        crossTab = [];
-
-        for (r = 0; r < this.resultset.length;r ++) {
-            var row = this.resultset[r],
-            sIdx = ( idx = seenSeries.indexOf(row[0])) > -1 ? idx + 1: seenSeries.push(row[0]),
-            cIdx = ( idx = seenCategories.indexOf(row[1])) > -1 ? idx : seenCategories.push(row[1]) - 1;
-            //console.log(row);
-            if(!crossTab[cIdx]) crossTab[cIdx] = [];
-            crossTab[cIdx][sIdx] = (crossTab[cIdx][sIdx] || 0 ) + row[2];
-            crossTab[cIdx][0] = row[1];
-        }
-
-        this.values = crossTab;
-
-         */
-
-//  TODO: WHAT's this for... DCLEAO?
-//        var tree = pv.tree(this.resultset).keys(function(d){
-//            return (d != null)? [d[0],d[1]] : [null, null];
-//        }).map();
         
-        // Now, get series and categories:
-
-        var series = pv.uniq(this.resultset.map(function(d){
-            return (d != null)? d[0] : null;
-        }));
-        var numeratedSeries = pv.numerate(series);
-
-        var categories = pv.uniq(this.resultset.map(function(d){
-            return (d != null)? d[1] : null;
-        }));
-        var numeratedCategories = pv.numerate(categories);
-
-
-        // Finally, iterate through the resultset and build the new values
-
-        this.values = [];
-        var categoriesLength = categories.length;
-        var seriesLength = series.length;
-
-        // Initialize array
-        pv.range(0,categoriesLength).map(function(catIndex){
-            var row = new Array(seriesLength + 1);
-            row[0] = categories[catIndex];
-            
-            myself.values[catIndex] = row;
-        });
-
-        this.resultset.map(function(r){
-            var catIndex = numeratedCategories[r[1]],
-                row = myself.values[catIndex],
-                serIndex = numeratedSeries[r[0]] + 1,
-                value = r[2];
-            
-            row[serIndex] = pvc.sumOrSet(row[serIndex], value);
-        });
-
-        // Create an initial line with the categories
-        var l1 = series;
-        l1.splice(0,0,"x");
-        this.values.splice(0,0, l1);
-    }
-});
-
-
-
-pvc.MultiValueTranslator = pvc.DataTranslator.extend({
-    
-    constructor: function(valuesIndexes, crosstabMode, dataOptions)//measuresIdx , categoriesIndexes) //seriesIndexes, numMeasures(1), 
-    {
-        this.valuesIndexes = valuesIndexes;
-        this.crosstabMode = crosstabMode;
-        /*this.measuresIdx = measuresIdx; *///measuresIdx : when measures are normalized
-        this.dataOptions = dataOptions;
-        
-        if(this.dataOptions == null) this.dataOptions = {};//TODO:
-        
+        return selectionList;
     },
     
-    prepareImpl: function()
-    {
-        var separator = (this.dataOptions.separator != null)? this.dataOptions.separator : '~';
+    /**
+     * Changes the selected state of the given datums 
+     * to the state 'select'.
+     * @return {boolean} true if any datums changed their state.
+     */
+    setSelections: function(data, select){
+        var anyChanged = false;
         
-        if(this.crosstabMode){
-            
-            //2 modes here:
-            // 1) all measures in one column right after categories
-            // 2) measures with separator mixed with series
-            
-            if(this.dataOptions.categoriesCount == null){//default
-                this.dataOptions.categoriesCount = 1;
-            }
-            
-            if(this.dataOptions.measuresInColumns || this.dataOptions.measuresIdx == null) //TODO: 
-            {//series1/measure1, series1/measure2...
-                // line
-                var lastColName = null;
-                var colNames = [];
-                //var measures = null;
-                var measuresStart = this.dataOptions.categoriesCount;
-                
-                var cols = this.metadata.slice(measuresStart).map(function(d){
-                    return d.colName;
-                });
-                
-                if(this.dataOptions.measuresInColumns){
-                    //a1 now series1~measure1 | .. | series1~measureN | series2~measure1 |..| seriesM~measureN
-                    for(var i = 0; i< cols.length; i++){
-                        var col = cols[i];
-                        var sepIdx = col.lastIndexOf(separator);
-                        var colName = (sepIdx < 0)? '' : col.slice(0,sepIdx);
-                        if(colName != lastColName) {
-                            colNames.push(colName);
-                            lastColName = colName;
+        if(data){
+            data.forEach(function(datum){
+                if(datum.setSelected(select)){
+                    // already called _onDatumSelectedChanged, below
+                    anyChanged = true;
+                }
+            });
+        }
+        
+        return anyChanged;
+    },
+        
+    /**
+     * Pseudo-toggles the selected state of the given datums.
+     * Deselects all if all were selected,
+     * selects all otherwise.
+     */
+    toggleSelections: function(data){
+        if(!this.setSelections(data, true)){
+            this.setSelections(data, false);
+        }
+    },
+    
+    // Called by a Datum when its selected state changed
+    _onDatumSelectedChanged: function(datum, selected){
+        if(selected){
+            this._selections[datum.index] = datum;
+            this._selectedCount++;
+        } else {
+            delete this._selections[datum.index];
+            this._selectedCount--;
+        }
+    },
+    
+    // ---------------------
+    // Querying
+    
+    /**
+     * Returns all the datums that 
+     * satisfy the given 'where' specification.
+     */
+    getWhere: function(where){
+        var data = [];
+        
+        this.forEachWhere(where, function(datum){
+            data.push(datum);
+        });
+        
+        return data;
+    },
+    
+    /**
+     * Calls the specified function for each datum that 
+     * satisfies the given 'where' specification.
+     * 
+     * The format of the where specification is:
+     * where := [orWhere1, orWhere2, ...]
+     * 
+     * orWhere:= {
+     *      // All of the dimension filters must match:
+     *      andDimName1: [orBaseValue1, orBaseValue2, ...],
+     *      andDimName2: [orBaseValue1, orBaseValue2, ...],
+     *      ...
+     * }
+     * 
+     * @example:
+     * All the datums of the 'Green' series 
+     * unioned with
+     * all the datums of the 'Blue' series that have
+     * the 'Bread' or the 'Butter' category.
+     * <pre>
+     * [
+     *      {series: ['Green']}, // OR
+     *      {series: ['Blue'], categories: ['Bread', 'Butter']}
+     * ]
+     * </pre>
+     */
+    forEachWhere: function(where, fun, ctx){
+        // DimA X DimB X DimC X ...
+
+        var D = this._dimensionList.length,
+            firstDimNode = this._getDataTree(),
+            seen = {};
+        
+        // CROSS JOIN
+        function recursive(dimNode, orWhere, d /* level */){
+            if(d === D){ // one more
+                // dimNode is a datum!
+                var id = dimNode.index;
+                if(!seen.hasOwnProperty(id)){
+                    seen[id] = true;
+                    fun.call(ctx, dimNode);
+                }
+            } else {
+                var orIndexes = orWhere[d];
+                if(orIndexes){
+                    // Dimension is constrained by 'where'
+                    orIndexes.forEach(function(orIndex){
+                        // Index, along this path has any datums?
+                        var childDimNode = dimNode[orIndex];
+                        if(childDimNode){
+                            recursive.call(this, childDimNode, orWhere, d + 1);
                         }
-                    }
-                    var numMeasures = (cols.length) / colNames.length;
-                    //TODO: merge series
-                    
-                    //TODO: more measures here, single val as is; multi: will need to iterate and merge values
-                    this.values = this.mergeMeasuresInColumns(this.resultset, measuresStart, numMeasures);
+                    }, this);
+                } else {
+                    // Dimension is not constrained by 'where'
+                    // Traverse only values' indexes that have datums, along this path
+                    pvc.forEachOwn(dimNode, function(childDimNode /*, orIndexText*/){
+                        
+                        recursive.call(this, childDimNode, orWhere, d + 1);
+                    });
                 }
-                else {
-                    colNames = cols;
-                    this.values = this.mergeMeasuresInColumns(this.resultset, measuresStart, 1);
-                }
-                
-                for(var i=0;i<colNames.length;i++){
-                    colNames[i] = colNames[i].split('~');
-                }
-                
-                this.values = this.mergeColumnNames(this.values, 0, this.dataOptions.categoriesCount);
-                //this.values = pvc.cloneMatrix(this.resultset).map(function(row){ return row.map(function(d){ return [d];}); });
-                colNames.splice(0,0,"x");
-                this.values.splice(0,0,colNames);
-                
             }
-            else {//TODO:refactor?
+        }
+        
+        // For each OR where clause
+        where.forEach(function(orWhere){
+            recursive.call(this, firstDimNode, this._expandOrWhereClause(orWhere), 0);
+        }, this);
+    },
+    
+    /*
+     * orWhere: {
+     *      // All of the dimension filters must match:
+     *      andDimName1: [orBaseValue1, orBaseValue2, ...],
+     *      andDimName2: [orBaseValue1, orBaseValue2, ...],
+     *      ...
+     * }
+     * 
+     * returns:
+     * expandedOrWhere: [
+     *      // All of the dimension filters must match:
+     *      andDimIndex1: [orValueIndex1, orValueIndex2, orValueIndex3, ...],
+     *      
+     *      andDimIndex2: [orValueIndex1, orValueIndex2, ...],
+     *      
+     *      ...
+     * ]
+     */
+    _expandOrWhereClause: function(orWhere){
+        var expandedOrWhere = [];
+        
+        // Expand values
+        pvc.forEachOwn(orWhere, function(orBaseValueList, andDimName){
+            var dimension = this.getDimension(andDimName),
+                orValueIndexList = expandedOrWhere[dimension.index] = [];
                 
-                var measuresIdx = this.dataOptions.measuresIdx;
-                if(measuresIdx == null) { measuresIdx = 1;}
-                var numMeasures = this.dataOptions.numMeasures;
-                if (numMeasures == null) { numMeasures = 1; } 
-                
-                var a1 = this.metadata.slice(measuresIdx + 1).map(function(d){
-                    return d.colName;
+                // For each possible base value
+                orBaseValueList.forEach(function(orBaseValue){
+                    
+                    // All descendant values of
+                    dimension.forEachDescendantOrSelf(
+                        orBaseValue, 
+                        function(/* @ignore */orValue, orValueIndex){
+                            orValueIndexList.push(orValueIndex);
+                        });
                 });
-                a1.splice(0,0,"x");
+        }, this);
         
-                //var values = pvc.cloneMatrix(this.resultset);
-                this.values = [];
-                var newRow = [];
-                var row;
-                for(var i=0; i<this.resultset.length; i++){
-                    var rem = i % numMeasures;
-                    row = this.resultset[i];
-                    if(rem == 0)
-                    {//first in measures batch
-                        newRow = row.slice();//clone
-                        //values = [];
-                        newRow.splice(measuresIdx,1);//remove measures' titles column
-                        for(var j=measuresIdx; j<newRow.length;j++){
-                            newRow[j] = [];    //init measures
-                        }
-                    }
-                    
-                    //add values    
-                    for(var j=measuresIdx; j<newRow.length;j++){
-                       newRow[j].push(row[j+1]);//push measures
-                    }
-                    
-                    if(rem == numMeasures -1){//measures batch complete
-                        this.values.push(newRow);
-                    }   
-                }
-                
-                this.values.splice(0,0,a1);
-            }
-        }
-        else {//TODO: refactor?
-        //relational mode
-            var seriesIdx = 0;//TODO:hcoded, needs ref from chart?
-            var categoriesIdx = 1;
-    
-            var tree = pv.tree(this.resultset).keys(function(d){
-                return [d[seriesIdx],d[categoriesIdx]];
-            }).map();
-            
-            // Now, get series and categories:
-    
-            var series = pv.uniq(this.resultset.map(function(d){
-                return d[0];
-            }));
-            
-    
-            var categories = pv.uniq(this.resultset.map(function(d){
-                return d[1];
-            }));
-            
-            // Finally, iterate through the resultset and build the new values
-    
-            this.allValues = [];
-    
-            var l1 = series;//TODO:clone?
-            //add table corner
-            l1.splice(0,0,"x");
-            
-            var values = this.getMultiValuesFromResultSet(this.valuesIndexes, categories, series,categoriesIdx, seriesIdx);
-            // Create an initial line with the categories
-            values.splice(0,0, l1);
-            this.allValues = values;
-    
-            this.values = this.allValues;
-        }
-
-    },
-    
-    
-    mergeColumnNames: function(values,start, count)
-    {
-        return values.map(function(row, rowIdx){
-            var colNames = row.slice(start,start + count);
-            var newRow = row.slice(start + count);
-            newRow.splice(0,0,colNames);
-            return newRow;
-        });
-    },
-    
-    mergeMeasuresInColumns: function(values, startIdx, numMeasures)
-    {
-      return values.map(function(row, rowIdx){
-        var newRow = row.slice(0, startIdx);
-        for(var i=startIdx;i<row.length;i+=numMeasures){
-            var value = [];
-            for(var j = 0; j < numMeasures;j++){
-                value.push(row[i+j]);
-            }
-            newRow.push(value);
-        }
-        return newRow;
-      });
-    },
-    
-    addSeriesToMetadata: function(){
-        if(this.metadata.length == 2){
-            // Adding a static serie
-            this.resultset.map(function(d){
-                d.splice(0,0,"Series");
-            });
-            this.metadata.splice(0,0,{
-                "colIndex":2,
-                "colType":"String",
-                "colName":"Series"
-            });
-        }
-    },
-    
-    //overridden
-    getValues: function(idx){
-        if(idx == null){//default to first
-           // return this.values;
-            return this.values.slice(1).map(function(a){
-                return a.slice(1);
-            });
-        }
-        else if(idx > this.allValues.length || idx < 0) { throw new NoDataException(); }
-        else {
-            //return this.allValues.map(function(d){
-            //    return d[idx];
-            //});
-            return this.allValues.slice(1).map(function(a){
-                return a.slice(1);
-            }).map(function(d){
-                return d[idx];
-            });
-            //return this.allValues[idx];
-        }
-    },
-    
-    sumOrSetVect: function(v1, v2){
-         if (v1 == null || v1[0] === undefined) { return v2; }
-        //TODO: check
-        var res = [];
-        for(var i=0;i<v1.length;i++){
-            if(v1[i] == null) { res[i] = v2[i];}
-            res[i] = v1[i] + v2[i];
-        }
-        return res;
-    },
-    
-    //series with x
-    getValuesFromResultSet: function(valueIndex, categories, series, categoriesIdx, seriesIdx)
-    {
-        var categoriesLength = categories.length;
-        var seriesLength = series.length;
-        var numeratedSeries = pv.numerate(series);
-        var numeratedCategories = pv.numerate(categories);
-        
-        // Initialize array
-        var values = [];                
-        pv.range(0,categoriesLength).map(function(d){
-            values[d] = new Array(seriesLength);
-            values[d][0] = categories[d];
-        });
-        // Set array values
-        this.resultset.map(function(row){
-            var i = numeratedCategories[row[categoriesIdx]];
-            var j = numeratedSeries[row[seriesIdx]];
-            values[i][j] = pvc.sumOrSet(values[i][j], row[valueIndex]);
-        });
-        return values;
-    },
-    
-    getMultiValuesFromResultSet: function(valueIndexes, categories, series, categoriesIdx, seriesIdx)
-    {
-        var categoriesLength = categories.length;
-        var seriesLength = series.length;
-        var numeratedSeries = pv.numerate(series);
-        var numeratedCategories = pv.numerate(categories);
-        
-        var myself = this;
-        // Initialize array
-        var values = [];                
-        pv.range(0,categoriesLength).map(function(d){
-            values[d] = new Array(seriesLength);
-            values[d][0] = categories[d];
-        });
-        // Set array values
-        this.resultset.map(function(row){
-            var i = numeratedCategories[row[categoriesIdx]];
-            var j = numeratedSeries[row[seriesIdx]];
-            
-            var val = [];
-            for(var k = 0; k < valueIndexes.length; k++){
-                val.push( row[valueIndexes[k]]);
-            }
-            values[i][j] = myself.sumOrSetVect(values[i][j], val);
-        });
-        return values;
+        return expandedOrWhere;
     }
-    
 });
-
-
-NoDataException = function() {};

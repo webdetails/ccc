@@ -17,7 +17,12 @@
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
     <script type="text/javascript" src="pvc/pvc.js"></script>
+    
+    <script type="text/javascript" src="pvc/pvcDatum.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataTranslator.js"></script>
     <script type="text/javascript" src="pvc/pvcData.js"></script>
+    
     <script type="text/javascript" src="pvc/pvcPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcLegend.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
@@ -150,6 +155,7 @@ var bar1 = new pvc.BarChart({
     title: "Sample Bar chart",
     orientation: 'horizontal',
     animate:false,
+    clickable: true,
     orthoFixedMax: 60,
     //yAxisFullGrid: true,
     extensionPoints: {
@@ -179,6 +185,7 @@ var bar2 = new pvc.BarChart({
     orientation: 'horizontal',
     stacked: false,
     animate:false,
+    clickable: true,
     legend: true,
     legendPosition: "right",
     showValues: false,
@@ -230,6 +237,7 @@ var bar3 = new pvc.BarChart({
     orientation: 'vertical',
     stacked: true,
     animate:false,
+    clickable: true,
     legend:true,
     legendPosition:"right",
     orthoFixedMax: 130,

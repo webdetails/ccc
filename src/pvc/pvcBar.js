@@ -6,61 +6,47 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
 
     barChartPanel : null,
 
-    constructor: function(o){
+    constructor: function(options){
 
-        this.base(o);
-
-        var _defaults = {
-            showValues: true,
-            stacked: false,
-            panelSizeRatio: 0.9,
-            barSizeRatio: 0.9,
-            maxBarSize: 2000,
-            valuesAnchor: "center",
-            originIsZero: true,
-            axisOffset: 0,
-            showTooltips: true,
-            orientation: "vertical",
-            orthoFixedMin: null,
-            orthoFixedMax: null
-        };
+        this.base(options);
 
         // Apply options
-        $.extend(this.options,_defaults, o);
+        $.extend(this.options, pvc.BarChart.defaultOptions, options);
     },
     
     /**
      * Creates a custom WaterfallDataEngine.
-     * [override]
+     * @override
      */
     createDataEngine: function(){
         return new pvc.WaterfallDataEngine(this);
     },
 
-    preRender: function(){
-
-        this.base();
-
+    /* @override */
+    createCategoricalPanel: function(){
         pvc.log("Prerendering in barChart");
 
         this.barChartPanel = new pvc.WaterfallChartPanel(this, {
-            stacked: this.options.stacked,
-            waterfal: false,
-            panelSizeRatio: this.options.panelSizeRatio,
-            barSizeRatio: this.options.barSizeRatio,
-            maxBarSize: this.options.maxBarSize,
-            showValues: this.options.showValues,
-            valuesAnchor: this.options.valuesAnchor,
-            showTooltips: this.options.showTooltips,
-            orientation: this.options.orientation
+            stacked:        this.options.stacked,
+            waterfall:      false,
+            barSizeRatio:   this.options.barSizeRatio,
+            maxBarSize:     this.options.maxBarSize,
+            showValues:     this.options.showValues,
+            valuesAnchor:   this.options.valuesAnchor,
+            orientation:    this.options.orientation
         });
-
-        this.barChartPanel.appendTo(this.basePanel); // Add it
-
+        
+        return this.barChartPanel;
     }
-
-}
-);
+}, {
+    defaultOptions: {
+        showValues:   true,
+        stacked:      false,
+        barSizeRatio: 0.9,
+        maxBarSize:   2000,
+        valuesAnchor: "center"
+    }
+});
 
 
 /***************

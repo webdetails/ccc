@@ -32,35 +32,25 @@
  */
 
 
-pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
+pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
-  _parent: null,
   pvLine: null,
   pvArea: null,
   pvDot: null,
   pvLabel: null,
   pvCategoryPanel: null,
-  data: null,
-
-  timeSeries: false,
-  timeSeriesFormat: "%Y-%m-%d",
-
+  
   stacked: false,
+
   showAreas: false,
   showLines: true,
   showDots: true,
   showValues: true,
-  showTooltips: true,
   valuesAnchor: "right",
-  orientation: "vertical",
-
-
-  constructor: function(chart, options){
-
-    this.base(chart,options);
-
-  },
-
+  
+//  constructor: function(chart, options){
+//    this.base(chart,options);
+//  },
 
   prepareDataFunctions:  function() {
     /*
@@ -69,85 +59,89 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
         Overriding this function allows you to implement
         a different ScatterScart.
      */
-    var myself = this;
+    var myself = this,
+        chart = this.chart,
+        dataEngine = chart.dataEngine,
+        options = chart.options;
 
-    var baseScale = this.chart.getLinearBaseScale(true);
-    var orthoScale = this.chart.getLinearScale(true); 
+    var baseScale = chart.getLinearBaseScale(true);
+    var orthoScale = chart.getLinearScale(true),
+        tScale,
+        parser;
 
     if(this.timeSeries){
-      tScale = this.chart.getTimeseriesScale(true);
+        parser = pv.Format.date(options.timeSeriesFormat);
+        tScale = chart.getTimeseriesScale(true);
     }
     
     // create empty container for the functions and data
     myself.DF = {}
 
-    myself.DF.baseValues = this.chart.dataEngine.getVisibleCategories();
-    myself.DF.visibleSerieIds = this.chart.dataEngine.getVisibleSeriesIndexes()
-//    myself.DF.data = this.chart.dataEngine.getVisibleTransposedValues();
+    myself.DF.baseValues = dataEngine.getVisibleCategories();
+    myself.DF.visibleSerieIds = dataEngine.getVisibleSeriesIndexes()
+//    myself.DF.data = dataEngine.getVisibleTransposedValues();
 
     // calculate a position along the base-axis
-    myself.DF.baseCalculation = (myself.timeSeries) ?
-      function(d){ return tScale(parser.parse(d.category)); }   :
-      function(d) { return baseScale(d.category);  };
+    myself.DF.baseCalculation = options.timeSeries ?
+          function(d) { return tScale(parser.parse(d.category)); } :
+          function(d) { return baseScale(d.category); };
       
 
     // calculate a position along the orthogonal axis
     myself.DF.orthoCalculation = function(d){
-      return myself.chart.animate(0, orthoScale(d.value));
+      return chart.animate(0, orthoScale(d.value));
     };
 
     // get a data-series for the ID
-    var pFunc = null;
+    var pFunc;
     if (this.timeSeries) {
-      var parser = pv.Format.date(this.timeSeriesFormat);
-      pFunc = function(a,b){ 
-        return parser.parse(a.category)-parser.parse(b.category);};
-    }  
+        pFunc = function(a,b){
+            return parser.parse(a.category) - parser.parse(b.category);
+        };
+    }
+
     myself.DF.getDataForSerieId = 
-      function(d){ var res = myself.chart.dataEngine
-            .getObjectsForSeriesIndex(d, pFunc);
+        function(d){
+            var res = dataEngine.getObjectsForSeriesIndex(d, pFunc);
             res.sort(function(a, b) {return a.category - b.category; })
             return res;
-          };
+        };
 
 
     var colors = this.chart.colors(
-         pv.range(this.chart.dataEngine.getSeriesSize()));
-    myself.DF.colorFunc = function(d){
-      // return colors(d.serieIndex)
-      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()
-              [this.parent.index])
-    };
+         pv.range(dataEngine.getSeriesSize()));
 
+    myself.DF.colorFunc = function(d){
+        // return colors(d.serieIndex)
+        return colors(dataEngine.getVisibleSeriesIndexes()[this.parent.index])
+    };
   },
 
-  create: function(){
+    /**
+     * @override
+     */
+    createCore: function(){
+        // Send the panel behind the axis, title and legend, panels
+        this.pvPanel.zOrder(0);
 
-    var myself = this;
-    this.width = this._parent.width;
-    this.height = this._parent.height;
+        var myself = this,
+            options = this.chart.options,
+            dataEngine = this.chart.dataEngine;
 
-    this.pvPanel = this._parent.getPvPanel().add(this.type)
-    .width(this.width)
-    .height(this.height);
 
-    // add clipping for bounds
-    if  (   (myself.chart.options.orthoFixedMin != null)
-         || (myself.chart.options.orthoFixedMax != null) )
-      this.pvPanel["overflow"]("hidden");
+        // TODO: what's this?
+        if(options.showTooltips || options.clickable ){
+            this.pvPanel
+                .events("all")
+                .event("mousemove", pv.Behavior.point(Infinity));
+        }
 
-    if(this.showTooltips || this.chart.options.clickable ){
-      this.pvPanel
-      .events("all")
-      .event("mousemove", pv.Behavior.point(Infinity));
-    }
+        var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
-    var anchor = this.orientation == "vertical"?"bottom":"left";
+        // prepare data and functions when creating (rendering) the chart.
+        this.prepareDataFunctions();
 
-    // prepare data and functions when creating (rendering) the chart.
-    this.prepareDataFunctions();
-
-    var maxLineSize;
+        //var maxLineSize;
 
     // Stacked?
     if (this.stacked){
@@ -180,7 +174,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
     }
     else {
 
-      // Add the serie identifiers to the scatterPanel
+      // Add the series identifiers to the scatterPanel
       // CvK: Why do we need a new pvPanel and can't we use existing pvPanel?
       this.pvScatterPanel = this.pvPanel.add(pv.Panel)
            .data(myself.DF.visibleSerieIds);
@@ -204,22 +198,20 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
       .strokeStyle(myself.DF.colorFunc)
       .text(function(d){
         var v, c;
-        var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
+        var s = dataEngine.getVisibleSeries()[this.parent.index]
         if( typeof d == "object"){
           v = d.value;
           c = d.category
         }
         else{
           v = d
-          c = myself.chart.dataEngine.getVisibleCategories()[this.index]
+          c = dataEngine.getVisibleCategories()[this.index]
         };
-        return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+        return options.tooltipFormat.call(myself,s,c,v);
       })
 
-    if(this.showTooltips){
-      this.extend(this.chart.tipsySettings,"tooltip_");
-      this.pvLine
-        .event("point", pv.Behavior.tipsy(this.chart.tipsySettings));
+    if(options.showTooltips){
+      this.pvLine.event("point", pv.Behavior.tipsy(this.tipsySettings));
     }
 
     this.pvDot = this.pvLine.add(pv.Dot)
@@ -228,23 +220,22 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
     .strokeStyle(this.showDots?myself.DF.colorFunc:null)
     .fillStyle(this.showDots?myself.DF.colorFunc:null)
     
-
     if (this.chart.options.clickable){
       this.pvDot
       .cursor("pointer")
       .event("click",function(d){
         var v, c, e;
-        var s = myself.chart.dataEngine.getSeries()[this.parent.index]
+        var s = dataEngine.getSeries()[this.parent.index]
         if( typeof d == "object"){
           v = d.value;
           c = d.category
         }
         else{
           v = d
-          c = myself.chart.dataEngine.getCategories()[this.index]
+          c = dataEngine.getCategories()[this.index]
         }
         e = arguments[arguments.length-1];
-        return myself.chart.options.clickAction(s, c, v, e);
+        return options.clickAction(s, c, v, e);
       });
     }
 
@@ -256,28 +247,27 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
       .add(pv.Label)
       .bottom(0)
       .text(function(d){
-        return myself.chart.options.valueFormat(typeof d == "object"?d.value:d)
+        return options.valueFormat(typeof d == "object"?d.value:d)
       })
-
-      // Extend lineLabel
-      this.extend(this.pvLabel,"lineLabel_");
     }
+  },
+   /**
+     * @override
+     */
+    applyExtensions: function(){
 
+        this.base();
 
-    // Extend line and linePanel
-    this.extend(this.pvScatterPanel,"scatterPanel_");
-    this.extend(this.pvArea,"area_");
-    this.extend(this.pvLine,"line_");
-    this.extend(this.pvDot,"dot_");
-    this.extend(this.pvLabel,"label_");
+        // Extend lineLabel
+        if(this.pvLabel){
+            this.extend(this.pvLabel, "lineLabel_");
+        }
 
-
-    // Extend body
-    this.extend(this.pvPanel,"chart_");
-
-  }
-
+        // Extend line and linePanel
+        this.extend(this.pvScatterPanel, "scatterPanel_");
+        this.extend(this.pvArea, "area_");
+        this.extend(this.pvLine, "line_");
+        this.extend(this.pvDot, "dot_");
+        this.extend(this.pvLabel, "label_");
+    }
 });
-
-
-
