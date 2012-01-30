@@ -461,7 +461,7 @@ pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
             if(doma.length !== 2){
                 pvc.log("Ticks forced extending a linear scale's domain, " +
                         "but it is not possible to update the domain because " + 
-                        "it has '" +  doma.length + "' elements.");
+                        "it has '" +  doma.length + "' element(s).");
             } else {
                 pvc.log("Ticks forced extending a linear scale's domain from [" +
                         [domaMin, domaMax] + "] to [" +
@@ -482,7 +482,7 @@ pvc.roundScaleDomain = function(scale, roundMode, desiredTickCount){
     // Domain rounding
     if(roundMode){
         switch(roundMode){
-            case 'none': 
+            case 'none':
                 break;
                 
             case 'nice':
@@ -549,11 +549,64 @@ pv.Mark.prototype.addMargins = function(margins) {
     return this;
 };
 
+/* SCENE */
+/**
+ * Iterates through all instances that
+ * this mark has rendered.
+ */
+pv.Mark.prototype.forEachInstances = function(fun, ctx){
+    var mark = this,
+        indexes = [],
+        instances = [];
+
+    /* Go up to the root and register our way back.
+     * The root mark never "looses" its scene.
+     */
+    while(mark.parent){
+        indexes.unshift(mark.childIndex);
+        mark = mark.parent;
+    }
+
+    // mark != null
+
+    // root scene exists if rendered at least once
+    var scene = mark.scene;
+    if(scene){
+        var L = indexes.length;
+
+        function collectRecursive(scene, level, t){
+            if(level === L){
+                for(var i = 0, I = scene.length ; i < I ; i++){
+                    fun.call(ctx, scene[i], t);
+                }
+            } else {
+                var childIndex = indexes[level];
+                for(var index = 0, D = scene.length ; index < D ; index++){
+                    var instance = scene[index],
+                        childScene = instance.children[childIndex];
+
+                    // Some nodes might have not been rendered?
+                    if(childScene){
+                        var toChild = t.times(instance.transform)
+                                       .translate(instance.left, instance.top);
+
+                        collectRecursive(childScene, level + 1, toChild);
+                    }
+                }
+            }
+        }
+
+        collectRecursive(scene, 0, pv.Transform.identity);
+    }
+
+    return instances;
+};
+
 /* BOUNDS */
 pv.Mark.prototype.toScreenTransform = function(){
     var t = pv.Transform.identity;
     
-    var parent = this.parent;
+    var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
     if(parent){
         do {
             t = t.translate(parent.left(), parent.top())
@@ -601,11 +654,11 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     if(mark == null){
         index = this.index;
         scene = this.scene;
-    }
-    else {
+    } else {
         index = mark.index;
         scene = mark.scene;
     }
+    
     m1 = this.mouse();
     
     r = d;
@@ -619,15 +672,20 @@ pv.Behavior.selector = function(autoRefresh, mark) {
   function mousemove(e) {
     if (!scene) return;
     scene.mark.context(scene, index, function() {
+        // this === scene.mark
         var m2 = this.mouse();
+
         r.x = Math.max(0, Math.min(m1.x, m2.x));
         r.y = Math.max(0, Math.min(m1.y, m2.y));
-        r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
+
+        r.dx = Math.min(this.width(),  Math.max(m2.x, m1.x)) - r.x;
         r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
+
         if(redrawThis){
             this.render();
         }
       });
+
     pv.Mark.dispatch("select", scene, index, e);
   }
 

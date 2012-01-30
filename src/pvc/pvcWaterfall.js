@@ -866,90 +866,41 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
      * @override
      */
     _collectRubberBandSelections: function(){
-        var isVertical = this.isOrientationVertical(),
-            dataEngine = this.chart.dataEngine,
+        var dataEngine = this.chart.dataEngine,
             categories = dataEngine.getVisibleCategories(),
             series = dataEngine.getVisibleSeries(),
             C = categories.length,
             S = series.length;
 
-        var where = [],
-            mark,
-            start, startX, startY, endX, endY, j, i;
+        var rb = this.rubberBand;
+        //pvc.log("rubber=[" + [rb.x0, rb.x0 + rb.dx, rb.y0, rb.y0 + rb.dy] +  "]");
 
-        // Find included series/categories
-        if(!this.stacked){
-            for(i = 0 ; i < C; i++){
-                var foo = this.pvPanel.scene[0].children[0][i],
-                    seriesParent = foo.children[0];
+        var index = 0,
+            where = [];
+        
+        this._forEachInstanceInRubberBand(this.pvBar, function(instance, index){
+            var i, j;
 
-                if (isVertical) {
-                    start  = foo.left;
-
-                    for (j = 0 ; j < S ; j++){
-                        mark = seriesParent[j];
-
-                        startX = mark.left  + start;
-                        endX   = startX + mark.width;
-
-                        startY = mark.bottom;
-                        endY   = mark.height + startY;
-
-                        if (this._intersectsRubberBandSelection(startX, startY, endX, endY)){
-                            where.push({
-                                categories: [categories[i]],
-                                series:     [series[j]]
-                            });
-                        }
-                    }
-
-                } else {
-                    start = foo.bottom;
-
-                    for (j = 0 ; j < S ; j++) {
-                        mark = seriesParent[j];
-
-                        startX = mark.left;
-                        endX   = mark.width  + startX;
-                        startY = mark.bottom + start;
-                        endY   = mark.height + startY;
-
-                        if (this._intersectsRubberBandSelection(startX, startY, endX, endY)){
-                            where.push({
-                                categories: [categories[i]],
-                                series:     [series[j]]
-                            });
-                        }
-                    }
-                }
+            if(this.stacked){
+				// index = j*C + i
+                j = Math.floor(index / C);
+                i = index % C;
+            } else {
+				// index = i*S + j
+                i = Math.floor(index / S);
+                j = index % S;
             }
-        } else {
-            // Stacked
-            // TODO: WIP
-            for (j = 0 ; j < S ; j++){
-                var foo = this.pvPanel.scene[0].children[0][0],
-                    categsParent = foo.children[0][j].children[0];
-                
-                start = foo.left;
-                
-                for(i = 0 ; i < C; i++){
-                    mark = categsParent[j];
-                    
-                    startX = mark.left  + start;
-                    endX   = startX + mark.width;
 
-                    startY = mark.bottom;
-                    endY   = mark.height + startY;
+//            pvc.log("instance data: " + instance.data +
+//                    " index: " + index +
+//                    " [" + [i,j] + "]=[" + [categories[i],series[j]]  + "]");
 
-                    if (this._intersectsRubberBandSelection(startX, startY, endX, endY)){
-                        where.push({
-                                categories: [categories[i]],
-                                series:     [series[j]]
-                            });
-                    }
-                }
-            }
-        }
+            where.push({
+                categories: [categories[i]],
+                series:     [series[j]]
+            });
+        }, this);
+
         return dataEngine.getWhere(where);
     }
     /*

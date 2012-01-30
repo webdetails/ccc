@@ -622,6 +622,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             .visible(function(d){
                 return this.index==0;
             });
+    },
+
+    clearSelections: function(){
+        this.dataEngine.clearSelections();
+        this.categoricalPanel._handleSelectionChanged();
     }
 
 }, {
@@ -876,7 +881,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             action.call(null, selections);
         }
     },
-
+    
     /**
      * The default implementation renders this.pvPanel,
      * which is generally in excess of what actually requires
@@ -1008,6 +1013,10 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
                 //top->bottom
                 y = myself.height - y - rb.dy;
+				
+				// Keep rubber band screen coordinates
+                rb.x0 = rb.x;
+                rb.y0 = rb.y;
 
                 rb.x = x;
                 rb.y = y;
@@ -1103,10 +1112,42 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
     _intersectsRubberBandSelection: function(startX, startY, endX, endY){
         var rb = this.rubberBand;
         return rb &&
-               ((startY >= rb.y && startY < rb.y + rb.dy) && ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx))) ||
-               ((endY   >= rb.y && endY   < rb.y + rb.dy) && ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx)));
-    }
+            ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx))
+            &&
+            ((startY >= rb.y && startY < rb.y + rb.dy) || (endY >= rb.y && endY < rb.y + rb.dy));
+    },
+	
+	// Uses screen coordinates
+    _intersectsRubberBandSelection0: function(begX, endX, begY, endY){
+        var rb = this.rubberBand;
+        return rb &&
+                // Some intersection on X
+               (rb.x0 + rb.dx > begX) &&
+               (rb.x0         < endX) &&
+               // Some intersection on Y
+               (rb.y0 + rb.dy > begY) &&
+               (rb.y0         < endY);
+    },
+	
+    _forEachInstanceInRubberBand: function(mark, fun, ctx){
+        var index = 0;
+        mark.forEachInstances(function(instance, t){
+            var begX = t.transformHPosition(instance.left),
+                endX = begX + t.transformLength(instance.width  || 0),
+                begY = t.transformVPosition(instance.top),
+                endY = begY + t.transformLength(instance.height || 0);
 
+//            pvc.log("data=" + instance.data +
+//                    " position=[" + [begX, endX, begY, endY] +  "]" +
+//                    " index=" + index);
+
+            if (this._intersectsRubberBandSelection0(begX, endX, begY, endY)){
+                fun.call(ctx, instance, index);
+            }
+
+            index++;
+        }, this);
+    }
 });
 
 
