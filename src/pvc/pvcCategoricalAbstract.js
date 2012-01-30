@@ -1293,7 +1293,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderOrdinalAxis: function(){
 
         var scale = this.pvScale,
-            anchorOpposite    = this.anchorOpposite(),    
+            anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
@@ -1501,7 +1501,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var depthLength = this.axisSize;
         //displace to take out bogus-root
         var baseDisplacement = (1.0/++maxDepth)* depthLength;
-        var margin = (1.0/12.0) * depthLength;//heuristic compensation
+        var margin = maxDepth > 2 ? ((1.0/12.0) * depthLength) : 0;//heuristic compensation
         baseDisplacement -= margin;
         
         var scaleFactor = maxDepth*1.0/ (maxDepth -1);
@@ -1773,6 +1773,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this.lblDirection('h');
                 return 0;//horizontal
             })
+            .textMargin(1)
             //override central alignment for horizontal text in vertical axis
             .textAlign(function(d){
                 return (axisDirection != 'v' || d.depth >= vertDepthCutoff || d.depth >= diagDepthCutoff)? 'center' : align;
