@@ -6,3 +6,4 @@ pvc-*.js
 
 .project
 .settings
+/.externalToolBuilders

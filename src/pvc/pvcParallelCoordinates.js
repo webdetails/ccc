@@ -1,11 +1,10 @@
+
 /**
  * Parallel coordinates offer a way to visualize data and make (sub-)selections
  * on this dataset.
  * This code has been based on a protovis example:
  *    http://vis.stanford.edu/protovis/ex/cars.html
  */
-
-
 pvc.ParallelCoordinates = pvc.Base.extend({
 
   parCoordPanel : null,

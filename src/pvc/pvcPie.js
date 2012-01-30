@@ -1,10 +1,7 @@
 
-
-
 /**
  * PieChart is the main class for generating... pie charts (surprise!).
  */
-
 pvc.PieChart = pvc.Base.extend({
 
   pieChartPanel : null,

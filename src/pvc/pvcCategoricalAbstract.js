@@ -1,3 +1,4 @@
+
 /**
  * CategoricalAbstract is the base class for all categorical or timeseries
  */
@@ -13,10 +14,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     yScale: null,
     xScale: null,
 
-    // TODO: DCL - ??
-    //prevMax: null,
-    //prevMin: null,
-      
     constructor: function(options){
 
         this.base(options);
@@ -64,8 +61,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         //  because getZZZZScale calls assume this (bypassAxis = false)
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
-        this.secondScale = this.getSecondScale();
-
+        
+        if(this.options.secondAxis){
+            this.secondScale = this.getSecondScale();
+        }
+        
         // Generate X axis
         if(this.options.secondAxis){
             // this goes before the other because of the fullGrid
@@ -81,6 +81,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
         
         this.generateYAxis();
+
+        this.categoricalPanel = this.createCategoricalPanel();
+        this.categoricalPanel.appendTo(this.basePanel); // Add it
+    },
+
+    /* @abstract */
+    createCategoricalPanel: function(){
+        throw new Error("Not implemented.");
     },
 
     /**
@@ -281,6 +289,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 this.dataEngine.getVisibleSeries(): 
                 this.dataEngine.getVisibleCategories();
         
+        // NOTE: presumes data elements convert well to string
         var scale = new pv.Scale.ordinal(dData);
         
         // RANGE
@@ -441,15 +450,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             isX = this.isOrientationVertical();
         
         // DOMAIN
-        
-        // TODO - DCLEAO - DataEngine#getCategories already does this...??
-        var parser = pv.Format.date(o.timeSeriesFormat),
-            categories = this.dataEngine.getVisibleCategories().sort(function(a, b){
-                return parser.parse(a) - parser.parse(b);
-            });
+        var categories = this.dataEngine.getVisibleCategories();
         
         // Adding a small offset to the scale's domain:
-        var dMin = parser.parse(categories[0]),
+        var parser = pv.Format.date(this.options.timeSeriesFormat),
+            dMin = parser.parse(categories[0]),
             dMax = parser.parse(categories[categories.length - 1]),
             dOffset = 0;
         
@@ -617,14 +622,35 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             .visible(function(d){
                 return this.index==0;
             });
+    },
+
+    clearSelections: function(){
+        this.dataEngine.clearSelections();
+        this.categoricalPanel._handleSelectionChanged();
     }
 
 }, {
-	defaultOptions: {
+    defaultOptions: {
         showAllTimeseries: false, // meaningless here
         showXScale: true,
         showYScale: true,
+
+        originIsZero: true,
+
+        axisOffset: 0,
+        axisLabelFont: '10px sans-serif',
         
+        orthoFixedMin: null,
+        orthoFixedMax: null,
+
+        timeSeries: false,
+        timeSeriesFormat: "%Y-%m-%d",
+
+        // CvK  added extra parameter for implementation of HeatGrid
+        orthoAxisOrdinal: false,
+        // if orientation==vertical then perpendicular-axis is the y-axis
+        //  else perpendicular-axis is the x-axis.
+
         xAxisPosition: "bottom",
         xAxisSize: 50,
         xAxisFullGrid: false,
@@ -652,13 +678,475 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         secondAxisDesiredTickCount: null,   // idem
         secondAxisMinorTicks: true,
         
-        panelSizeRatio: 1,
-        axisLabelFont: '10px sans-serif',
+        panelSizeRatio: 0.9,
         
-        // CvK  added extra parameter for implementation of HeatGrid
-        orthoAxisOrdinal: false
-        // if orientation==vertical then perpendicular-axis is the y-axis
-        //  else perpendicular-axis is the x-axis.
+        // Clicking
+        clickAction: null,
+        doubleClickAction: null,
+        doubleClickMaxDelay: 300, //ms
+
+        // Selection
+        // Use CTRL key to make fine-grained selections
+        ctrlSelectMode: true,
+
+        // function to be invoked when a selection occurs
+        // (shape click-select, row/column click and lasso finished)
+        selectionChangedAction: null,
+
+        // Selection - Rubber band
+        rubberBandFill: 'rgba(203, 239, 163, 0.6)', // 'rgba(255, 127, 0, 0.15)',
+        rubberBandLine: '#86fe00', //'rgb(255,127,0)',
+
+        // Tooltips
+        showTooltips: true,
+        orientation: "vertical"
+    }
+});
+
+
+pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
+
+    orientation: "vertical",
+
+    tipsySettings: {
+        gravity: "s",
+        fade: true
+    },
+
+    constructor: function(chart, options){
+
+        // Shared state between _handleClick and _handleDoubleClick
+        this._ignoreClicks = 0;
+
+        this.base(chart, options);
+    },
+
+    /*
+     * @override
+     */
+    create: function(){
+        // Occupy all space available in the parent panel
+        this.setSize(this._parent.width, this._parent.height);
+
+        // Create the this.pvPanel
+        this.base();
+
+        // Send the panel behind the axis, title and legend, panels
+        this.pvPanel.zOrder(-10);
+
+        // Overflow
+        var options = this.chart.options;
+        if ((options.orthoFixedMin != null) || (options.orthoFixedMax != null)){
+            this.pvPanel["overflow"]("hidden");
+        }
+
+        // Must be extended before because
+        //  it is used to build tipsy behaviour during createCore
+        if(options.showTooltips){
+            this.extend(this.tipsySettings, "tooltip_");
+        }
+        
+        // Create something usefull...
+        this.createCore();
+        
+        if (pv.renderer() !== 'batik'){
+            this._createSelectionOverlay(this.width, this.height);
+        }
+    },
+
+    /**
+     * Override to create marks specific to a given chart.
+     * @virtual 
+     */
+    createCore: function(){
+        // NOOP
+    },
+    
+    /**
+     * @override
+     */
+    applyExtensions: function(){
+        this.base();
+
+        // Extend body
+        this.extend(this.pvPanel, "chart_");
+    },
+    
+    /* @override */
+    isOrientationVertical: function(){
+        return this.orientation == "vertical";
+    },
+
+    /* @override */
+    isOrientationHorizontal: function(){
+        return this.orientation == "horizontal";
+    },
+
+    /**
+     * Override to detect the datum that is being rendered.
+     * Called during PV rendering, from within property functions.
+     * This should only be called on places where it is possible,
+     * through the indexes of current PV mark to 'guess' an
+     * associated datum.
+     * @virtual
+     */
+    _getRenderingDatum: function(mark){
+        return null;
+    },
+
+    // ----------------------------
+    // Click / Double-click
+
+    _handleDoubleClick: function(mark, d, ev){
+        var action = this.chart.options.doubleClickAction;
+        if(action){
+            var datum = this._getRenderingDatum(mark);
+            if(datum){
+                var s = datum.keyValues.series,
+                    c = datum.keyValues.categories;
+
+                this._ignoreClicks = 2;
+
+                action.call(mark, s, c, d, ev, datum);
+            }
+        }
+    },
+
+    _handleClick: function(mark, d, ev){
+        var options = this.chart.options;
+        if(!options.clickable){
+            return;
+        }
+
+        // Selection
+        var datum = this._getRenderingDatum(mark);
+        if(datum){
+            if(!options.doubleClickAction){
+                this._handleClickCore(mark, datum, d, ev);
+            } else {
+                // Delay click evaluation so that
+                // it may be canceled if double click meanwhile
+                // fires.
+                var myself = this;
+                window.setTimeout(
+                    function(){
+                        myself._handleClickCore.call(myself, mark, datum, d, ev);
+                    },
+                    options.doubleClickMaxDelay || 300);
+
+            }
+        }
+    },
+
+    _handleClickCore: function(mark, datum, d, ev){
+        if(this._ignoreClicks) {
+            this._ignoreClicks--;
+            return;
+        }
+
+        // Classic clickAction
+        var action = this.chart.options.clickAction;
+        if(action){
+            // TODO: first value of a multi-valued datum?????
+            if(d != null && d[0] !== undefined){
+                d = d[0];
+            }
+
+            var s = datum.keyValues.series,
+                c = datum.keyValues.categories;
+
+            action.call(mark, s, c, d, ev, datum);
+        }
+
+        // Selection
+        if(this.chart.options.ctrlSelectMode && !ev.ctrlKey){
+            // hard select
+            datum.engine.clearSelections();
+            datum.setSelected(true);
+        } else {
+            datum.toggleSelected();
+        }
+
+        this._handleSelectionChanged();
+    },
+
+    _handleSelectionChanged: function(){
+        this._renderSelectableMarks();
+
+        // Fire action
+        var action = this.chart.options.selectionChangedAction;
+        if(action){
+            var selections = this.chart.dataEngine.getSelections();
+
+            action.call(null, selections);
+        }
+    },
+    
+    /**
+     * The default implementation renders this.pvPanel,
+     * which is generally in excess of what actually requires
+     * to be re-rendered.
+     *
+     * Override to render a more specific set of marks.
+     * @virtual
+     */
+    _renderSelectableMarks: function(){
+        this.pvPanel.render();
+    },
+
+    /**
+     * Add rubberband functionality to main panel (includes axis).
+     * Override to prevent rubber band selection.
+     * @virtual
+     **/
+    _createSelectionOverlay: function(w, h){
+        //TODO: flip support: parallelLength etc..
+
+        var myself = this,
+            isHorizontal = this.isOrientationHorizontal(),
+            chart = this.chart,
+            opts  = chart.options,
+            dataEngine = chart.dataEngine,
+            titlePanel = chart.titlePanel,
+            xAxisPanel = chart.xAxisPanel,
+            yAxisPanel = chart.yAxisPanel;
+
+        this.rubberBand = {x: 0, y: 0, dx: 4, dy: 4};
+
+        if(isHorizontal){
+            // switch back w, h
+            var tmp = w;
+            w = h;
+            h = tmp;
+        }
+
+        var dMin = Math.min(w, h) / 2;
+
+        var isSelecting = false;
+        var checkSelections = false;
+
+        // Helper
+        // Sets all positions to 0 except the specified one
+        var positions = ['top', 'left', 'bottom', 'right'];
+        function setPositions(position, value){
+            var obj = {};
+            for(var i = 0; i < positions.length ; i++){
+                obj[positions[i]] = (positions[i] == position) ? value : 0;
+            }
+            return obj;
+        }
+
+        // Callback to handle end of rubber band selection
+        function dispatchRubberBandSelection(rb, ev){
+            // Get offsets
+            var titleOffset;
+            if(titlePanel != null){
+                titleOffset = setPositions(opts.titlePosition, titlePanel.titleSize);
+            } else {
+                titleOffset = setPositions();
+            }
+
+            var xAxisOffset = setPositions(opts.xAxisPosition, xAxisPanel.height),
+                yAxisOffset = setPositions(opts.yAxisPosition, yAxisPanel.width);
+
+            var y = 0,
+                x = 0;
+
+            // Rubber band selects over any of the axes?
+            var xSelections = [],
+                ySelections = [];
+
+            if(opts.useCompositeAxis){
+                //1) x axis
+                x = rb.x - titleOffset['left'] - yAxisOffset['left'];
+                y = rb.y - titleOffset['top'];
+
+                if(opts.xAxisPosition === 'bottom'){//chart
+                    y -= myself.height;
+                }
+
+                xSelections = xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+
+                //2) y axis
+                x = rb.x - titleOffset['left'];
+                y = rb.y - titleOffset['top'] - xAxisOffset['top'];
+
+                if(opts.yAxisPosition === 'right'){//chart
+                    x -= myself.width;
+                }
+
+                ySelections = yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+            }
+
+            var cSelections = isHorizontal ? ySelections : xSelections,
+                sSelections = isHorizontal ? xSelections : ySelections;
+
+            if(opts.ctrlSelectMode && !ev.ctrlKey){
+                dataEngine.clearSelections();
+            }
+
+            var selectedData,
+                toggle = false;
+
+            // Rubber band selects on both axes?
+            if(ySelections.length > 0 && xSelections.length > 0){
+                // Select the INTERSECTION
+                selectedData = dataEngine.getWhere([
+                    {series: sSelections, /* AND */ categories: cSelections}
+                ]);
+                
+            } else if (ySelections.length > 0 || xSelections.length > 0){
+                // Select the UNION
+                toggle = true;
+
+                selectedData = dataEngine.getWhere([
+                    {series: sSelections}, // OR
+                    {categories: cSelections}
+                ]);
+
+            } else {
+                //if there are label selections, they already include any chart selections
+                //3) Chart: translate coordinates (drawn bottom-up)
+                //first get offsets
+                y = rb.y - titleOffset['top' ] - xAxisOffset['top' ];
+                x = rb.x - titleOffset['left'] - yAxisOffset['left'];
+
+                //top->bottom
+                y = myself.height - y - rb.dy;
+				
+				// Keep rubber band screen coordinates
+                rb.x0 = rb.x;
+                rb.y0 = rb.y;
+
+                rb.x = x;
+                rb.y = y;
+
+                selectedData = myself._collectRubberBandSelections();
+            }
+
+            if(selectedData){
+                if(toggle){
+                    dataEngine.toggleSelections(selectedData);
+                } else {
+                    dataEngine.setSelections(selectedData, true);
+                }
+
+                myself._handleSelectionChanged();
+            }
+        }
+
+        // Rubber band
+        var selectBar = this.selectBar = this.pvPanel.root//TODO
+           .add(pv.Bar)
+                .visible(function() { return isSelecting; } )
+                .left(function(d) { return d.x; })
+                .top(function(d) { return d.y;})
+                .width(function(d) { return d.dx;})
+                .height(function(d) { return d.dy;})
+                .fillStyle(opts.rubberBandFill)
+                .strokeStyle(opts.rubberBandLine);
+
+        // Rubber band selection behavior definition
+        if(!opts.extensionPoints ||
+           !opts.extensionPoints.base_fillStyle){
+
+            var invisibleFill = 'rgba(127,127,127,0.01)';
+            this.pvPanel.root.fillStyle(invisibleFill);
+        }
+
+        this.pvPanel.root
+            .data([myself.rubberBand])
+            .event("click", function() {
+                var ev = arguments[arguments.length-1];
+                 if(opts.ctrlSelectMode && !ev.ctrlKey){
+                    dataEngine.clearSelections();
+
+                    myself._handleSelectionChanged();
+                }
+            })
+            .event('mousedown', pv.Behavior.selector(false))
+            .event('selectstart', function(){
+                isSelecting = true;
+            })
+            .event('select', function(rb){
+
+                myself.rubberBand = rb;
+
+                if(isSelecting && (rb.dx > dMin || rb.dy > dMin)){
+                    checkSelections = true;
+                    selectBar.render();
+                }
+            })
+            .event('selectend', function(rb, ev){
+                if(isSelecting){
+                    isSelecting = false;
+
+                    if(checkSelections){
+                        checkSelections = false;
+                        selectBar.render();
+
+                        dispatchRubberBandSelection(rb, ev);
+                    }
+                }
+            });
+    },
+
+    /**
+     * Should override to provide selection detection
+     * for a specific chart type.
+     *
+     * Use _intersectsRubberBandSelection to check if a shape
+     * is covered by the rubber band.
+     *
+     * Return a 'where' specification suitable for
+     * dataEngine#getWhere.
+     * @virtual
+     */
+    _collectRubberBandSelections: function(){
+        return null;
+    },
+
+    /**
+     * @protected
+     */
+    _intersectsRubberBandSelection: function(startX, startY, endX, endY){
+        var rb = this.rubberBand;
+        return rb &&
+            ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx))
+            &&
+            ((startY >= rb.y && startY < rb.y + rb.dy) || (endY >= rb.y && endY < rb.y + rb.dy));
+    },
+	
+	// Uses screen coordinates
+    _intersectsRubberBandSelection0: function(begX, endX, begY, endY){
+        var rb = this.rubberBand;
+        return rb &&
+                // Some intersection on X
+               (rb.x0 + rb.dx > begX) &&
+               (rb.x0         < endX) &&
+               // Some intersection on Y
+               (rb.y0 + rb.dy > begY) &&
+               (rb.y0         < endY);
+    },
+	
+    _forEachInstanceInRubberBand: function(mark, fun, ctx){
+        var index = 0;
+        mark.forEachInstances(function(instance, t){
+            var begX = t.transformHPosition(instance.left),
+                endX = begX + t.transformLength(instance.width  || 0),
+                begY = t.transformVPosition(instance.top),
+                endY = begY + t.transformLength(instance.height || 0);
+
+//            pvc.log("data=" + instance.data +
+//                    " position=[" + [begX, endX, begY, endY] +  "]" +
+//                    " index=" + index);
+
+            if (this._intersectsRubberBandSelection0(begX, endX, begY, endY)){
+                fun.call(ctx, instance, index);
+            }
+
+            index++;
+        }, this);
     }
 });
 
@@ -873,7 +1361,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 
         // (MAJOR) ticks
         var pvTicks = this.pvTicks = this.pvRule.add(pv.Rule)
-        	.zOrder(20)
+            .zOrder(20)
             .data(ticks)
             // [anchorOpposite ](0) // Inherited from pvRule
             [anchorLength     ](null)
@@ -915,7 +1403,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 [anchorOpposite   ](-ruleLength)
                 [anchorLength     ](null)
                 [anchorOrtho      ](scale)
-                [anchorOrthoLength]( ruleLength);
+                [anchorOrthoLength]( ruleLength)
+//                .visible(function(d){
+//                    return (this.index > 0);
+//                })
+                ;
         }
     },
     
@@ -942,13 +1434,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var rootPanel = this.pvPanel.root;
         if(this.isAnchorTopOrBottom()){
             label.textAlign(function(){
+                var absLeft;
                 if(this.index === 0){
-                    var absLeft = label.toScreenTransform().transformHPosition(label.left());
+                    absLeft = label.toScreenTransform().transformHPosition(label.left());
                     if(absLeft <= 0){
                         return 'left'; // the "left" of the text is anchored to the tick's anchor
                     }
                 } else if(this.index === ticks.length - 1) { 
-                    var absLeft = label.toScreenTransform().transformHPosition(label.left());
+                    absLeft = label.toScreenTransform().transformHPosition(label.left());
                     if(absLeft >= rootPanel.width()){
                         return 'right'; // the "right" of the text is anchored to the tick's anchor
                     }
@@ -957,13 +1450,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             });
         } else {
             label.textBaseline(function(){
+                var absTop;
                 if(this.index === 0){
-                    var absTop = label.toScreenTransform().transformVPosition(label.top());
+                    absTop = label.toScreenTransform().transformVPosition(label.top());
                     if(absTop >= rootPanel.height()){
                         return 'bottom'; // the "bottom" of the text is anchored to the tick's anchor
                     }
                 } else if(this.index === ticks.length - 1) { 
-                    var absTop = label.toScreenTransform().transformVPosition(label.top());
+                    absTop = label.toScreenTransform().transformVPosition(label.top());
                     if(absTop <= 0){
                         return 'top'; // the "top" of the text is anchored to the tick's anchor
                     }
@@ -1077,7 +1571,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return breadthCounters;
     },
     
-    getAreaSelections: function(x,y,dx,dy,mode){
+    getAreaSelections: function(x, y, dx, dy){
         
         var selections = [];
         
@@ -1088,26 +1582,32 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         x-= this.axisDisplacement[0];
         y-= this.axisDisplacement[1];
         
-        this.storedNodes[0].visitBefore(function(node, i){
-           if(i==0) {return;}
-           var nodeX = node.x + node.dx /2;
-           var nodeY = node.y + node.dy /2;
+        var xf = x + dx,
+            yf = y + dy;
             
-            if(nodeX > x && nodeX < x + dx &&
-               nodeY > y && nodeY < y + dy){
-                selections.push(node.nodePath);
-            }
+        this.storedNodes[0].visitBefore(function(node, i){
+            if(i > 0){
+                var centerX = node.x + node.dx /2,
+                    centerY = node.y + node.dy /2;
+            
+                if(x < centerX && centerX < xf && 
+                   y < centerY && centerY < yf){
+                    selections.push(node.nodePath);
+                }
+           }
         });
         
+        // Remove selections following an ascendant selection
         var lastSelection = null;
         var compressedSelections = [];
-        for(var i=0; i<selections.length;i++){
+        for(var i = 0 ; i < selections.length ; i++){
             var selection = selections[i];
-            if(lastSelection==null || !pvc.arrayStartsWith(selection, lastSelection)){
+            if(lastSelection == null || !pvc.arrayStartsWith(selection, lastSelection)){
                 lastSelection = selection;
                 compressedSelections.push(selection);
             }
         }
+        
         return compressedSelections;
     },
     
@@ -1330,8 +1830,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 }));
 
            // double click label //TODO: need doubleclick axis action + single click prevention..
-            if(doubleClickAction)
-            {
+            if(doubleClickAction){
                 this.pvLabel.event("dblclick", function(d){
                     doubleClickAction(d.nodePath, arguments[arguments.length-1]);
                 });
