@@ -153,19 +153,19 @@ pvc.mergeOwn = function(to, from){
     return to;
 };
 
-pvc.forEachRange = function(min, count, fun, ctx){
+/*
+pvc.forEachRange = function(min, max, fun, ctx){
     for(var i = min ; i < max ; i++){
         fun.call(ctx, i);
     }
 };
 
-/*
+
 pvc.arrayInsertMany = function(target, index, source){
     // TODO: is there a better way: without copying source?
     target.splice.apply(target, [index, 0].concat(other));
     return target;
 };
-*/
 
 pvc.arrayAppend = function(target, source){
     for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
@@ -173,6 +173,7 @@ pvc.arrayAppend = function(target, source){
     }
     return target;
 };
+*/
 
 // Adapted from pv.range
 pvc.Range = function(start, stop, step){

@@ -246,6 +246,36 @@ pvc.Base = Base.extend({
         }
     },
 
+    /**
+     * This is the method to be used for the extension points
+     * for the specific contents of the chart. already ge a pie
+     * chart! Goes through the list of options and, if it
+     * matches the prefix, execute that method on the mark.
+     * WARNING: It's the user's responsibility to make sure that
+     * unexisting methods don't blow this.
+     */
+    extend: function(mark, prefix) {
+        // if mark is null or undefined, skip
+        if (mark) {
+            var points = this.options.extensionPoints;
+            if(points){
+                var pL = prefix.length;
+                for (var p in points) {
+                    // Starts with
+                    if (p.indexOf(prefix) === 0) {
+                        var m = p.substring(pL);
+                        // Distinguish between mark methods and properties
+                        if (typeof mark[m] === "function") {
+                            mark[m](points[p]);
+                        } else {
+                            mark[m] = points[p];
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     /*
      * Animation
      */
@@ -404,22 +434,7 @@ pvc.BasePanel = Base.extend({
      * unexisting methods don't blow this.
      */
     extend: function(mark, prefix) {
-        // if mark is null or undefined, skip
-        if (mark) {
-            var pL = prefix.length, points = this.chart.options.extensionPoints;
-            for ( var p in points) {
-                if (p.indexOf(prefix) === 0) {
-                    var m = p.substring(pL);
-                    // Distinguish between mark methods and
-                    // properties
-                    if (typeof mark[m] === "function") {
-                        mark[m](points[p]);
-                    } else {
-                        mark[m] = points[p];
-                    }
-                }
-            }
-        }
+        this.chart.extend(mark, prefix);
     },
 
     /**

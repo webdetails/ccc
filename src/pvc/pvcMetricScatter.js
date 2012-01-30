@@ -212,7 +212,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
       })
 
     if(options.showTooltips){
-      this.pvLine.event("point", pv.Behavior.tipsy(this.tipsySettings));
+      this.pvLine.event("point", pv.Behavior.tipsy(options.tipsySettings));
     }
 
     this.pvDot = this.pvLine.add(pv.Dot)

@@ -20,7 +20,17 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Apply options
         $.extend(this.options, pvc.CategoricalAbstract.defaultOptions, options);
-        
+
+        if(options.showTooltips){
+            var tipsySettings = this.options.tipsySettings;
+            if(tipsySettings){
+                // Clone top-level structure. Should be deep clone, perhaps.
+                tipsySettings = this.options.tipsySettings = pvc.mergeOwn({}, tipsySettings);
+
+                this.extend(tipsySettings, "tooltip_");
+            }
+        }
+
         // Sanitize some options
         if (!this.options.showYScale){
             this.options.yAxisSize = 0;
@@ -592,7 +602,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var h = this.yScale.range()[1];
 
         // Detect where to place the horizontalAnchor
-        var anchor = o.horizontalAnchor;
+        //var anchor = o.horizontalAnchor;
         if( !o.forceHorizontalAnchor )
         {
             var availableSize = o.horizontalAnchor == "right"?scale.range()[1]-dpos:dpos;
@@ -699,7 +709,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Tooltips
         showTooltips: true,
-        orientation: "vertical"
+
+        orientation: "vertical",
+        
+        tipsySettings: {
+            gravity: "s",
+            fade: true
+        }
     }
 });
 
@@ -707,11 +723,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
     orientation: "vertical",
-
-    tipsySettings: {
-        gravity: "s",
-        fade: true
-    },
 
     constructor: function(chart, options){
 
@@ -738,12 +749,6 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         var options = this.chart.options;
         if ((options.orthoFixedMin != null) || (options.orthoFixedMax != null)){
             this.pvPanel["overflow"]("hidden");
-        }
-
-        // Must be extended before because
-        //  it is used to build tipsy behaviour during createCore
-        if(options.showTooltips){
-            this.extend(this.tipsySettings, "tooltip_");
         }
         
         // Create something usefull...

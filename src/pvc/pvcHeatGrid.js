@@ -74,7 +74,6 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             heatGridSizeRatio:  options.heatGridSizeRatio,
             maxHeatGridSize:    options.maxHeatGridSize,
             showValues:         options.showValues,
-            showTooltips:       options.showTooltips,
             orientation:        options.orientation
         });
 
@@ -104,7 +103,6 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     data: null,
 
     heatGridSizeRatio: 0.5,
-    showTooltips: true,
     maxHeatGridSize: 200,
 
     showValues: true,
@@ -235,9 +233,9 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             });
 
             // Tooltip
-            if(this.showTooltips){
+            if(opts.showTooltips){
                 this.pvHeatGrid
-                    .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+                    .event("mouseover", pv.Behavior.tipsy(opts.tipsySettings));
             }
         }
 
@@ -453,7 +451,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                     this.tooltip(tooltip);
                     return '';//prevent browser tooltip
                 })
-                .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+                .event("mouseover", pv.Behavior.tipsy(opts.tipsySettings));
         }
 
         if(opts.doubleClickAction){

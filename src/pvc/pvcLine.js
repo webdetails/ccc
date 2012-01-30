@@ -37,7 +37,6 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
             showLines: this.options.showLines,
             showDots: this.options.showDots,
             showAreas: this.options.showAreas,
-            showTooltips: this.options.showTooltips,
             orientation: this.options.orientation,
             timeSeries: this.options.timeSeries,
             timeSeriesFormat: this.options.timeSeriesFormat
@@ -174,7 +173,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             o  = chart.options,
             de = chart.dataEngine;
 
-        if(this.showTooltips || o.clickable){
+        if(o.showTooltips || o.clickable){
             this.pvPanel
               .events("all")
               .event("mousemove", pv.Behavior.point(Infinity));
@@ -277,8 +276,8 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 return o.tooltipFormat.call(myself, s, c, v);
             });
 
-        if(this.showTooltips){
-            this.pvLine.event("point", pv.Behavior.tipsy(this.tipsySettings));
+        if(o.showTooltips){
+            this.pvLine.event("point", pv.Behavior.tipsy(o.tipsySettings));
         }
 
         this.pvDot = this.pvLine.add(pv.Dot)
