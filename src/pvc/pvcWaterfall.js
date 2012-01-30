@@ -702,7 +702,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                     
                     return ''; // prevent browser tooltip
                 })
-                .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+                .event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
         }
 
 

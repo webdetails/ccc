@@ -165,7 +165,7 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         if(this.showTooltips){
             this.pvBar.
-                event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+                event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
         }
 
 
