@@ -52,7 +52,7 @@ pvc.MetricDotChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showDots: true
@@ -74,7 +74,7 @@ pvc.MetricLineChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showLines: true
@@ -95,7 +95,7 @@ pvc.mStackedLineChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showLines: true,
@@ -119,7 +119,7 @@ pvc.mStackedAreaChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showAreas: true,
