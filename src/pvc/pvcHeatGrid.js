@@ -830,7 +830,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
     }
     var scale = pv.Scale.linear();
-    scale.domain.apply(scale,domainArgs)
+    scale.domain.apply(scale,domainArgs);
     scale.range.apply(scale,rangeArgs);
     return pv.dict(cols,function(f){ return scale;});
   },
