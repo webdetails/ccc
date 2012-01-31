@@ -200,14 +200,18 @@ pvc.Base = Base.extend({
                 }
 
                 pvc.log("creating message");
-                var pvPanel = this.basePanel.getPvPanel(), message = pvPanel
-                        .anchor("center").add(pv.Label);
+                var pvPanel = this.basePanel.getPvPanel(), 
+                    message = pvPanel.anchor("center").add(pv.Label);
+                
                 message.text("No data found");
+
                 this.basePanel.extend(message, "noDataMessage_");
+                
                 pvPanel.render();
 
             } else {
                 // We don't know how to handle this
+                pvc.logError(e.message);
                 throw e;
             }
         }

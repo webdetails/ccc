@@ -62,6 +62,14 @@ pvc.log = function(m){
     }
 };
 
+pvc.logError = function(m){
+    if (typeof console != "undefined"){
+        console.log("[pvChart ERROR]: " + m);
+    } else {
+        throw new Error("[pvChart ERROR]: " + m);
+    }
+};
+
 /**
  * Evaluates x if it's a function or returns the value otherwise
  */

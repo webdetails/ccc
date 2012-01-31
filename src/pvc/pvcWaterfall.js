@@ -449,7 +449,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         if(options.secondAxis){
             var parser = pv.Format.date(options.timeSeriesFormat);
             this.DF.secBasePosFunc = function(d){
-                return myself.timeSeries
+                return options.timeSeries
                        ? tScale(parser.parse(d.category))
                        : (oScale(d.category) + ordBand / 2);
             };
@@ -464,7 +464,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         this.DF.orthoLengthFunc = this.stacked ?
             function(d){
-                return chart.animate(0, lScale(d||0)-lScale(0) );
+                return chart.animate(0, lScale(d||0) - lScale(0));
             } :
             function(d){
                 var res = chart.animate(0,
@@ -634,7 +634,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             this.pvArea = this.pvSecondScatterPanel.add(pv.Area)
                 .fillStyle(null);
             
-            var valueComparer = this.timeSeries ?
+            var valueComparer = options.timeSeries ?
                                 pvc.createDateComparer(
                                     pv.Format.date(options.timeSeriesFormat), 
                                     function(item){ return item.category; }) :

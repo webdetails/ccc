@@ -463,7 +463,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var categories = this.dataEngine.getVisibleCategories();
         
         // Adding a small offset to the scale's domain:
-        var parser = pv.Format.date(this.options.timeSeriesFormat),
+        var parser = pv.Format.date(o.timeSeriesFormat),
             dMin = parser.parse(categories[0]),
             dMax = parser.parse(categories[categories.length - 1]),
             dOffset = 0;
@@ -578,7 +578,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     
     markEvent: function(dateString, label, options){
 
-        if( this.options.timeSeries !== true){
+        if(!this.options.timeSeries){
             pvc.log("Attempting to mark an event on a non timeSeries chart");
             return;
         }

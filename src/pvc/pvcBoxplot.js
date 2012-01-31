@@ -123,7 +123,7 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
         if(options.secondAxis){
             var timeSeries = options.timeSeries,
                 parser = timeSeries ? 
-                            pv.Format.date(this.options.timeSeriesFormat) :
+                            pv.Format.date(options.timeSeriesFormat) :
                             null;
 
             // Second axis - support for lines

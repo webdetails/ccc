@@ -32,9 +32,8 @@
  * <i>lineLabel_</i> - for the main line label
  */
 
-
 pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
-
+    
   pvLine: null,
   pvArea: null,
   pvDot: null,
@@ -53,7 +52,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 //    this.base(chart,options);
 //  },
 
-  prepareDataFunctions:  function() {
+  prepareDataFunctions: function(){
     /*
         This function implements a number of helper functions via
         closures. The helper functions are all stored in this.DF
@@ -63,14 +62,13 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     var myself = this,
         chart = this.chart,
         dataEngine = chart.dataEngine,
-        options = chart.options;
-
-    var baseScale = chart.getLinearBaseScale(true);
-    var orthoScale = chart.getLinearScale(true),
+        options = chart.options,
+        baseScale = chart.getLinearBaseScale(true),
+        orthoScale = chart.getLinearScale(true),
         tScale,
         parser;
 
-    if(this.timeSeries){
+    if(options.timeSeries){
         parser = pv.Format.date(options.timeSeriesFormat);
         tScale = chart.getTimeseriesScale(true);
     }
@@ -79,7 +77,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     myself.DF = {}
 
     myself.DF.baseValues = dataEngine.getVisibleCategories();
-    myself.DF.visibleSerieIds = dataEngine.getVisibleSeriesIndexes()
+    myself.DF.visibleSerieIds = dataEngine.getVisibleSeriesIndexes();
 //    myself.DF.data = dataEngine.getVisibleTransposedValues();
 
     // calculate a position along the base-axis
@@ -95,7 +93,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
     // get a data-series for the ID
     var pFunc;
-    if (this.timeSeries) {
+    if (options.timeSeries) {
         pFunc = function(a,b){
             return parser.parse(a.category) - parser.parse(b.category);
         };
@@ -109,8 +107,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         };
 
 
-    var colors = this.chart.colors(
-         pv.range(dataEngine.getSeriesSize()));
+    var colors = this.chart.colors(pv.range(dataEngine.getSeriesSize()));
 
     myself.DF.colorFunc = function(d){
         // return colors(d.serieIndex)
@@ -153,7 +150,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
       this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
       .layers(pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues()))
       [this.orientation == "vertical"?"x":"y"](function(){
-        if(myself.timeSeries){
+        if(options.timeSeries){
           return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));
         }
         else{
@@ -202,12 +199,12 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         var s = dataEngine.getVisibleSeries()[this.parent.index]
         if( typeof d == "object"){
           v = d.value;
-          c = d.category
+          c = d.category;
         }
         else{
-          v = d
-          c = dataEngine.getVisibleCategories()[this.index]
-        };
+          v = d;
+          c = dataEngine.getVisibleCategories()[this.index];
+        }
         return options.tooltipFormat.call(myself,s,c,v);
       })
 

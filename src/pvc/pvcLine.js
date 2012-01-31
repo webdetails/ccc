@@ -37,9 +37,7 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
             showLines: this.options.showLines,
             showDots: this.options.showDots,
             showAreas: this.options.showAreas,
-            orientation: this.options.orientation,
-            timeSeries: this.options.timeSeries,
-            timeSeriesFormat: this.options.timeSeriesFormat
+            orientation: this.options.orientation
         });
 
         return this.scatterChartPanel;
@@ -146,9 +144,6 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     pvLabel: null,
     pvCategoryPanel: null,
 
-    timeSeries: false,
-    timeSeriesFormat: "%Y-%m-%d",
-
     stacked: false,
     showAreas: false,
     showLines: true,
@@ -190,9 +185,9 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             parser = null, // - warning
             categoryComparer = null; // ~ warning
 
-        if(this.timeSeries){
+        if(o.timeSeries){
             tScale = chart.getTimeseriesScale(true, true);
-            parser = pv.Format.date(this.timeSeriesFormat);
+            parser = pv.Format.date(o.timeSeriesFormat);
             categoryComparer = pvc.createDateComparer(parser, function(d){
                 return d.category;
             });
@@ -215,7 +210,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 //  top to bottom (according to the legend)
                 .order(isVertical  ? "reverse"  : null)
                 [isVertical ? "x" : "y"](
-                    this.timeSeries ?
+                    o.timeSeries ?
                         function(){
                             return tScale(parser.parse(de.getCategoryByIndex(this.index)));
                         } :
@@ -249,7 +244,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 .segmented(true)
                 .visible(function(d) { return d.value != null; })
                 [pvc.BasePanel.relativeAnchor[anchor]](
-                    this.timeSeries ?
+                    o.timeSeries ?
                         function(dataItem){ return tScale(parser.parse(dataItem.category)); } :
                         function(dataItem){ return oScale(dataItem.category) + oScale.range().band/2; })
                 [anchor](function(dataItem){
