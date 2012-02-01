@@ -925,7 +925,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             h = tmp;
         }
 
-        var dMin = Math.min(w, h) / 2;
+        var dMin = 10;// Math.min(w, h) / 2;
 
         var isSelecting = false;
         var checkSelections = false;
