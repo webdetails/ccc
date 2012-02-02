@@ -439,16 +439,19 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             this.shapes
                 .def("tooltip",'')
                 .title(function(r, ra, i){
-                    var tooltip = '';
-                    if(opts.customTooltip){
-                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                        var d = r[i];
-                        tooltip = opts.customTooltip(s,c,d);
-                    } else {
-                        tooltip = myself.valuesToText(r[i]);
+                    if(!this.tooltip()){
+                        var tooltip = '';
+                        if(opts.customTooltip){
+                            var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                            var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                            var d = r[i];
+                            tooltip = opts.customTooltip(s,c,d);
+                        } else {
+                            tooltip = myself.valuesToText(r[i]);
+                        }
+                        this.tooltip(tooltip);
+                     
                     }
-                    this.tooltip(tooltip);
                     return '';//prevent browser tooltip
                 })
                 .event("mouseover", pv.Behavior.tipsy(opts.tipsySettings));
