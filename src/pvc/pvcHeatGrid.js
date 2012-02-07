@@ -14,16 +14,14 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
     heatGridChartPanel : null,
 
-    constructor: function(o){
+    constructor: function(options){
 
-        this.base(o);
+        this.base(options);
 
-        var self = this;
-        
-        var _defaults = {
+        var defaultOptions = {
             colorValIdx: 0,
             sizeValIdx: 0,
-            defaultValIdx:0,
+            defaultValIdx: 0,
             measuresIndexes: [2],
 
             //multi-dimensional clickable label
@@ -36,25 +34,18 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             scalingType: "linear",    // "normal" (distribution) or "linear"
             normPerBaseCategory: true,
             numSD: 2,                 // width (only for normal distribution)
-            //minColor: "white",
-            //maxColor: "darkgreen",
-            nullColor:  "#efc5ad",  // white with a shade of orange
-            
-            xAxisClickAction: function(item, event){
-                self.heatGridChartPanel.selectAxisValue('x', item, !self.options.ctrlSelectMode || event.ctrlKey);
-                self.heatGridChartPanel._handleSelectionChanged();
-            },
-            
-            yAxisClickAction: function(item, event){ //TODO: move elsewhere?
-                self.heatGridChartPanel.selectAxisValue('y', item, !self.options.ctrlSelectMode || event.ctrlKey);
-                self.heatGridChartPanel._handleSelectionChanged();
-            },
-            
-            colorRange: ['red', 'yellow','green']
+            nullShape: undefined,
+            shape: undefined,
+            useShapes: false,
+            colorRange: ['red', 'yellow','green'],
+            colorRangeInterval:  undefined,
+            minColor: undefined, //"white",
+            maxColor: undefined, //"darkgreen",
+            nullColor:  "#efc5ad"  // white with a shade of orange
         };
 
         // Apply options
-        $.extend(this.options, _defaults, o);
+        pvc.mergeDefaults(this.options, defaultOptions, options);
 
         // enforce some options  for the HeatGridChart
         this.options.orthoAxisOrdinal = true;
@@ -153,18 +144,18 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     createCore: function(){
 
         var myself = this,
-            opts = this.chart.options;
+            options = this.chart.options;
         
-        this.colorValIdx = opts.colorValIdx;
-        this.sizeValIdx = opts.sizeValIdx;
-        this.selectNullValues = opts.nullShape != null;
+        this.colorValIdx = options.colorValIdx;
+        this.sizeValIdx = options.sizeValIdx;
+        this.selectNullValues = options.nullShape != null;
         
         // colors
-        opts.nullColor = pv.color(opts.nullColor);
-        if(opts.minColor != null) opts.minColor = pv.color(opts.minColor);
-        if(opts.maxColor != null) opts.maxColor = pv.color(opts.maxColor);
+        options.nullColor = pv.color(options.nullColor);
+        if(options.minColor != null) options.minColor = pv.color(options.minColor);
+        if(options.maxColor != null) options.maxColor = pv.color(options.maxColor);
         
-        if(opts.shape != null) {this.shape = opts.shape;}
+        if(options.shape != null) {this.shape = options.shape;}
         
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
@@ -224,23 +215,23 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         });
          
         // set coloring and shape / sizes if enabled
-        if(opts.useShapes){
-            this.createHeatMap(data, w, h, opts, fill);
+        if(options.useShapes){
+            this.createHeatMap(data, w, h, options, fill);
         } else {
             // no shapes, apply color map to panel itself
             this.pvHeatGrid.fillStyle(function(dat, col){
-                return (dat[col] != null) ? fill[col](dat[col]) : opts.nullColor;
+                return (dat[col] != null) ? fill[col](dat[col]) : options.nullColor;
             });
 
             // Tooltip
-            if(opts.showTooltips){
+            if(options.showTooltips){
                 this.pvHeatGrid
-                    .event("mouseover", pv.Behavior.tipsy(opts.tipsySettings));
+                    .event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
             }
         }
 
         // clickAction
-        if (opts.clickable){
+        if (options.clickable){
             this.pvHeatGrid
                 .cursor("pointer")
                 .event("click", function(row, rowCol){
@@ -304,7 +295,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     },
     
     // heatgrid with resizable shapes instead of panels
-    createHeatMap: function(data, w, h, opts, fill){
+    createHeatMap: function(data, w, h, options, fill){
         var myself = this,
             dataEngine = this.chart.dataEngine;
         
@@ -326,7 +317,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
         
 //        var valueToColor = function(value, i){
-//            return  (value != null) ? fill[i](value) : opts.nullColor;
+//            return  (value != null) ? fill[i](value) : options.nullColor;
 //        };
         
         var getLineWidth = function(value, isSelected){
@@ -354,7 +345,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         };
         
         var getFillColor = function(value, i, isSelected){
-           var color = opts.nullColor;
+           var color = options.nullColor;
            if(myself.colorValIdx != null && myself.getColorValue(value) != null){
                color =  fill[i](myself.getColorValue(value));
            }
@@ -371,19 +362,26 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         // chart generation
         this.shapes = this.pvHeatGrid
             .add(pv.Dot)
+            // NOTE: because 'def' properties
+            // are evaluated before all normal properties and
+            // only once for each build (and not once per local datum),
+            // this works only due to special conditions:
+            // * _getRenderingDatum depends only on this.pvHeatGrid.index
+            //   being set (the parent mark)
+            // * selection status does not depend on the data of this.shapes
             .def("selected", function(){
                 var datum = myself._getRenderingDatum(this);
                 return datum != null && datum.isSelected();
             })
             .shape( function(r, ra ,i){
-                if(opts.sizeValIdx == null){
+                if(options.sizeValIdx == null){
                     return myself.shape;
                 }
-                return myself.getValue(r[i], opts.sizeValIdx) != null ? myself.shape : opts.nullShape;
+                return myself.getValue(r[i], options.sizeValIdx) != null ? myself.shape : options.nullShape;
             })
             .shapeSize(function(r,ra, i) {
                 if(myself.sizeValIdx == null){
-                    if(opts.nullShape == null &&
+                    if(options.nullShape == null &&
                        myself.getValue(r[i], myself.colorValIdx) == null){
                         return 0;
                     }
@@ -392,7 +390,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 }
                 
                 var val = myself.getValue(r[i], myself.sizeValIdx);
-                return (val == null && opts.nullShape == null) ?
+                return (val == null && options.nullShape == null) ?
                         0 : valueToArea(myself.getValue(r[i], myself.sizeValIdx));
             })
             .fillStyle(function(r, ra, i){
@@ -415,7 +413,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 return myself.valuesToText(r[i]);
             });
 
-        if(opts.clickable){
+        if(options.clickable){
             this.shapes
                 .cursor("pointer")
                 .event("click", function(r, ra,i) {
@@ -426,7 +424,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 });
         }
 
-        if(opts.showTooltips){
+        if(options.showTooltips){
             /*   TODO:
                 {
                     html: true,
@@ -437,24 +435,27 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 }
              */
             this.shapes
-                .def("tooltip",'')
-                .title(function(r, ra, i){
-                    var tooltip = '';
-                    if(opts.customTooltip){
+                .localProperty("tooltip", String) // see pvc.js
+                .tooltip(function(r, ra, i){  // NOTE: row, rowAgain, index?
+                    var tooltip;
+                    if(options.customTooltip){
                         var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                         var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
                         var d = r[i];
-                        tooltip = opts.customTooltip(s,c,d);
+                        tooltip = options.customTooltip(s,c,d);
                     } else {
                         tooltip = myself.valuesToText(r[i]);
                     }
-                    this.tooltip(tooltip);
+                    
+                    return tooltip;
+                })
+                .title(function(){
                     return '';//prevent browser tooltip
                 })
-                .event("mouseover", pv.Behavior.tipsy(opts.tipsySettings));
+                .event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
         }
 
-        if(opts.doubleClickAction){
+        if(options.doubleClickAction){
             this.shapes
                 .cursor("pointer")
                 .event("dblclick", function(r, ra, i){
@@ -469,10 +470,10 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
      * Prevent creation of selection overlay if not 'isMultiValued'.
      * @override
      */
-    _createSelectionOverlay: function(w, h){
-        var opts = this.chart.options;
-        if(opts.useShapes && opts.isMultiValued){
-            this.base(w, h);
+    _createSelectionOverlay: function(){
+        var options = this.chart.options;
+        if(options.useShapes && options.isMultiValued){
+            this.base();
         }
     },
     
@@ -491,29 +492,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
 //
 //      return val == null || val[0] == null;
 //    },
-        
-    selectAxisValue: function(axis, axisValue, toggle){
-        // H  X  = T
-        // 1  1  = S
-        // 1  0  = C
-        // 0  1  = C
-        // 0  0  = S
-        var dataEngine = this.chart.dataEngine,
-            dimension = (this.isOrientationHorizontal() === (axis === 'x')) ?
-                          'series' : 'categories';
-        
-        var dimClause = {};
-        dimClause[dimension] = [axisValue];
-        var selectedData = dataEngine.getWhere([dimClause]);
-        
-        if(!toggle){
-            dataEngine.clearSelections();
-            dataEngine.setSelections(selectedData, true);
-        } else {
-            dataEngine.toggleSelections(selectedData);
-        }
-    },
-    
+      
     /**
      * @override
      */
@@ -614,22 +593,22 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     }
   },
   
-  getColorRangeArgs: function(opts){
-    var rangeArgs = opts.colorRange;
-    if(opts.minColor != null && opts.maxColor != null){
-        rangeArgs = [opts.minColor,opts.maxColor];
+  getColorRangeArgs: function(options){
+    var rangeArgs = options.colorRange;
+    if(options.minColor != null && options.maxColor != null){
+        rangeArgs = [options.minColor,options.maxColor];
     }
-    else if (opts.minColor != null){
-        rangeArgs.splice(0,1,opts.minColor);
+    else if (options.minColor != null){
+        rangeArgs.splice(0,1,options.minColor);
     }
-    else if (opts.maxColor != null){
-        rangeArgs.splice(rangeArgs.length-1,1,opts.maxColor);
+    else if (options.maxColor != null){
+        rangeArgs.splice(rangeArgs.length-1,1,options.maxColor);
     }
     return rangeArgs;
   },
   
-  getColorDomainArgs: function(data, cols, opts, rangeArgs, colorIdx){
-    var domainArgs = opts.colorRangeInterval;
+  getColorDomainArgs: function(data, cols, options, rangeArgs, colorIdx){
+    var domainArgs = options.colorRangeInterval;
     if(domainArgs != null && domainArgs.length > rangeArgs.length){
         domainArgs = domainArgs.slice(0, rangeArgs.length);
     }
@@ -654,7 +633,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
           });
         });
         
-        if(opts.normPerBaseCategory){
+        if(options.normPerBaseCategory){
             return pv.dict(cols, function(category){
               return myself.padColorDomainArgs(rangeArgs, [], min[category], max[category]);  
             });
@@ -705,13 +684,13 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     return domainArgs;
   },
   
-  getDiscreteColorScale: function(data, cols, opts, colorIdx){
-    var colorRange = this.getColorRangeArgs(opts);
-    var domain = this.getColorDomainArgs(data, cols, opts, colorRange, colorIdx);
+  getDiscreteColorScale: function(data, cols, options, colorIdx){
+    var colorRange = this.getColorRangeArgs(options);
+    var domain = this.getColorDomainArgs(data, cols, options, colorRange, colorIdx);
 
     //d0--cR0--d1--cR1--d2
     var getColorVal = function(val, domain, colorRange){
-        if(val == null) return opts.nullColor;
+        if(val == null) return options.nullColor;
         if(val <= domain[0]) return pv.color(colorRange[0]);
         for(var i=0; i<domain.length-1;i++){
              if(val > domain[i] && val < domain[i+1]){
@@ -721,7 +700,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         return pv.color(colorRange[colorRange.length-1]);
     };
     
-    if(opts.normPerBaseCategory){
+    if(options.normPerBaseCategory){
         return pv.dict(cols, function (category){
             var dom = domain[category];
             return function(val){
@@ -743,12 +722,12 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
 
   getLinearColorScale: function(data, cols, colorIdx){
 
-    var opts = this.chart.options;
+    var options = this.chart.options;
     var myself = this;
 
-    var rangeArgs = this.getColorRangeArgs(opts);
+    var rangeArgs = this.getColorRangeArgs(options);
     
-    var domainArgs = opts.colorRangeInterval;
+    var domainArgs = options.colorRangeInterval;
     if(domainArgs != null && domainArgs.length > rangeArgs.length){
         domainArgs = domainArgs.slice(0, rangeArgs.length);
     }
@@ -756,7 +735,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         domainArgs = [];
     }
     
-    if(domainArgs.length < rangeArgs.length || opts.normPerBaseCategory){
+    if(domainArgs.length < rangeArgs.length || options.normPerBaseCategory){
         
         var min = pv.dict(cols, function(cat){
           return pv.min(data, function(d){
@@ -773,7 +752,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
           });
         });
         
-        if (opts.normPerBaseCategory){  //  compute a scale-function for each column (each key
+        if (options.normPerBaseCategory){  //  compute a scale-function for each column (each key
           //overrides colorRangeIntervals
             return pv.dict(cols, function(f){
                 var fMin = min[f],
@@ -837,8 +816,8 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
 
   getNormalColorScale: function (data, cols, origData){
     var fill;
-    var opts = this.chart.options;
-    if (opts.normPerBaseCategory) {
+    var options = this.chart.options;
+    if (options.normPerBaseCategory) {
       // compute the mean and standard-deviation for each column
       var myself = this;
       var mean = pv.dict(cols, function(f){
@@ -854,9 +833,9 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
       //  compute a scale-function for each column (each key)
       fill = pv.dict(cols, function(f){
         return pv.Scale.linear()
-          .domain(-opts.numSD * sd[f] + mean[f],
-                  opts.numSD * sd[f] + mean[f])
-          .range(opts.minColor, opts.maxColor);
+          .domain(-options.numSD * sd[f] + mean[f],
+                  options.numSD * sd[f] + mean[f])
+          .range(options.minColor, options.maxColor);
       });
     } else {   // normalize over the whole array
       var mean = 0.0, sd = 0.0, count = 0;
@@ -879,9 +858,9 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
       sd = Math.sqrt(sd);
       
       var scale = pv.Scale.linear()
-        .domain(-opts.numSD * sd + mean,
-                opts.numSD * sd + mean)
-        .range(opts.minColor, opts.maxColor);
+        .domain(-options.numSD * sd + mean,
+                options.numSD * sd + mean)
+        .range(options.minColor, options.maxColor);
       fill = pv.dict(cols, function(f){
         return scale;
       });

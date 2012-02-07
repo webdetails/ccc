@@ -23,11 +23,9 @@ pvc.Base = Base.extend({
     // renderCallback
     renderCallback: undefined,
 
-    constructor: function(/* options */) {
-        this.options = {};
+    constructor: function(options) {
 
-        // Apply options
-        $.extend(this.options, pvc.Base.defaultOptions);
+        this.options = pvc.mergeDefaults({}, pvc.Base.defaultOptions, options);
 
         this.dataEngine = this.createDataEngine();
     },
@@ -132,7 +130,7 @@ pvc.Base = Base.extend({
     initTitlePanel: function(){
         if (this.options.title != null && this.options.title != "") {
             this.titlePanel = new pvc.TitlePanel(this, {
-                title:         this.options.title,
+                title:      this.options.title,
                 anchor:     this.options.titlePosition,
                 titleSize:  this.options.titleSize,
                 titleAlign: this.options.titleAlign
@@ -295,26 +293,55 @@ pvc.Base = Base.extend({
         return (orientation || this.options.orientation) == "horizontal";
     }
 }, {
+    // NOTE: undefined values are not considered by $.extend
+    // and thus BasePanel does not receive null properties...
     defaultOptions: {
         canvas: null,
 
         width:  400,
         height: 300,
-        originalWidth:  400,
-        originalHeight: 300,
 
-        crosstabMode: true,
-        seriesInRows: false,
-        animate:      true,
+        orientation: 'vertical',
 
-        title: null,
+        extensionPoints:  undefined,
+        
+        crosstabMode:     true,
+        isMultiValued:    false,
+        seriesInRows:     false,
+        measuresIndexes:  undefined,
+        dataOptions:      undefined,
+        getCategoryLabel: undefined,
+        getSeriesLabel:   undefined,
+
+        timeSeries:       undefined,
+        timeSeriesFormat: undefined,
+
+        animate: true,
+
+        title:         null,
         titlePosition: "top", // options: bottom || left || right
-        titleAlign: "center", // left / right / center
+        titleAlign:    "center", // left / right / center
+        titleSize:     undefined,
 
-        legend: false,
-        legendPosition: "bottom",
-
+        legend:           false,
+        legendPosition:   "bottom",
+        legendSize:       undefined,
+        legendAlign:      undefined,
+        legendMinMarginX: undefined,
+        legendMinMarginY: undefined,
+        legendTextMargin: undefined,
+        legendPadding:    undefined,
+        legendTextAdjust: undefined,
+        legendShape:      undefined,
+        legendDrawLine:   undefined,
+        legendDrawMarker: undefined,
+        legendMarkerSize: undefined,
+        
         colors: null,
+
+        secondAxis: false,
+        secondAxisIdx: -1,
+        secondAxisColor: undefined,
 
         tooltipFormat: function(s, c, v) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v);
@@ -329,7 +356,9 @@ pvc.Base = Base.extend({
 
         clickAction: function(s, c, v) {
             pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
-        }
+        },
+
+        renderCallback: undefined
     }
 });
 

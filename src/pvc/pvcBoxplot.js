@@ -15,17 +15,12 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
     bpChartPanel : null,
 
-    constructor: function(o){
+    constructor: function(options){
 
-        this.base(o);
-
-        var _defaults = {
-            showValues: true,
-	    boxplotColor: "darkgreen"  // "gray"
-        };
+        this.base(options);
 
         // Apply options
-        $.extend(this.options, _defaults, o);
+        pvc.mergeDefaults(this.options, pvc.BoxplotChart.defaultOptions, options);
     },
     
     /* @override */
@@ -33,8 +28,6 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         pvc.log("Prerendering in boxplotChart");
 
        this.bpChartPanel = new pvc.BoxplotChartPanel(this, {
-		//stacked: this.options.stacked,
-	    //            waterfall: this.options.waterfall,
             panelSizeRatio: this.options.panelSizeRatio,
             boxSizeRatio: this.options.boxSizeRatio,
             showValues: this.options.showValues,
@@ -46,8 +39,12 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
         return this.bpChartPanel;
     }
+}, {
+    defaultOptions: {
+        showValues:   true,
+        boxplotColor: "darkgreen"  // "gray"
+    }
 });
-
 
 /*
  * Boxplot chart panel generates the actual box-plot with a categorical base-axis.

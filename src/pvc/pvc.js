@@ -77,8 +77,17 @@ pvc.ev = function(x){
     return typeof x == "function" ? x(): x;
 };
 
-pvc.sumOrSet = function(v1,v2){
-    return typeof v1 == "undefined"?v2:v1+v2;
+/**
+ * Sums two numbers.
+ * 
+ * If v1 is null or undefined, v2 is returned.
+ * If v2 is null or undefined, v1 is returned.
+ * Else the sum of the two is returned.
+ */
+pvc.sum = function(v1, v2){
+    return v1 == null ? 
+            v2 :
+            (v1 == null ? v1 : (v1 + v2));
 };
 
 pvc.nonEmpty = function(d){
@@ -139,6 +148,23 @@ pvc.arrayStartsWith = function(array, base){
 };
 
 /**
+ * Joins arguments other than null, undefined and ""
+ * using the specified separator and their string representation.
+ */
+pvc.join = function(sep){
+    var args = [],
+        a = arguments;
+    for(var i = 1, L = a.length ; i < L ; i++){
+        var v = a[i];
+        if(v != null && v !== ""){
+            args.push("" + v);
+        }
+    }
+
+    return args.join(sep);
+};
+
+/**
  * Calls function <i>fun</i> with context <i>ctx</i>
  * for every own property of <i>o</i>.
  * Function <i>fun</i> is called with arguments:
@@ -155,11 +181,19 @@ pvc.forEachOwn = function(o, fun, ctx){
 };
 
 pvc.mergeOwn = function(to, from){
-    pvc.forEachOwn(from, function(v ,p){
+    pvc.forEachOwn(from, function(v, p){
         to[p] = v;
     });
     return to;
 };
+
+pvc.mergeDefaults = function(to, defaults, from){
+    pvc.forEachOwn(defaults, function(dv, p){
+        to[p] = (from && from.hasOwnProperty(p)) ? from[p] : dv;
+    });
+    return to;
+};
+
 
 /*
 pvc.forEachRange = function(min, max, fun, ctx){
@@ -364,6 +398,26 @@ function sortChildren(){
         }
     }
 }
+
+/* Local Properties */
+/**
+ * Adapted from pv.Layout#property.
+ * Defines a local property with the specified name and cast.
+ * Note that although the property method is only defined locally,
+ * the cast function is global,
+ * which is necessary since properties are inherited!
+ *
+ * @param {string} name the property name.
+ * @param {function} [cast] the cast function for this property.
+ */
+pv.Mark.prototype.localProperty = function(name, cast) {
+  if (!this.hasOwnProperty("properties")) {
+    this.properties = pv.extend(this.properties);
+  }
+  this.properties[name] = true;
+  this.propertyMethod(name, false, pv.Mark.cast[name] = cast);
+  return this;
+};
 
 /* TICKS */
 /**

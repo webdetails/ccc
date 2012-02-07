@@ -5,108 +5,97 @@
  * Each node of the tree can have it's own datasource to visualize the
  * node. 
  */
-
-
 pvc.DataTree = pvc.Base.extend({
 
-  // the structure of the dataTree is provided by a separate datasource
-  structEngine: null,
-  structMetadata: null,
-  structDataset: null,
+    // the structure of the dataTree is provided by a separate datasource
+    structEngine:   null,
+    structMetadata: null,
+    structDataset:  null,
 
-  DataTreePanel : null,
-  legendSource: "categories",
-  tipsySettings: {
-    gravity: "s",
-    fade: true
-  },
+    DataTreePanel : null,
+    legendSource: "categories",
 
+    constructor: function(options){
 
-  setStructData: function(data){
-    this.structDataset = data.resultset;
-    if (this.structDataset.length == 0){
-      pvc.log("Warning: Structure-dataset is empty")
-    }
-    this.structMetadata = data.metadata;
-    if (this.structMetadata.length == 0){
-      pvc.log("Warning: Structure-Metadata is empty")
-    }
-  },
+        this.base(options);
 
+        // Apply options
+        pvc.mergeDefaults(this.options, pvc.DataTree.defaultOptions, options);
 
-  constructor: function(o){
+        // Create DataEngine
+        this.structEngine = new pvc.DataEngine(this);
+    },
 
-    this.base(o);
+    setStructData: function(data){
+        this.structDataset = data.resultset;
+        if (this.structDataset.length == 0){
+            pvc.log("Warning: Structure-dataset is empty")
+        }
 
-    var _defaults = {
-        // margins around the full tree
-      topRuleOffset: 30,  
-      botRuleOffset: 30,
-      leftRuleOffset: 60,
-      rightRuleOffset: 60,
-        // box related parameters
-      boxplotColor: "grey",
-      headerFontsize: 16,
-      valueFontsize: 20,
-      border:  2,     // bordersize in pixels
-      // use perpendicular connector lines  between boxes.
-      perpConnector: false, 
-      // number of digits (after dot for labels)
-      numDigits: 0,
-      // the space for the connectors is 15% of the width of a grid cell
-      connectorSpace: 0.15,   
-      // the vertical space between gridcells is at least 5%
-      minVerticalSpace: 0.05,   
-      // aspect ratio = width/height  (used to limit AR of the boxes)
-      minAspectRatio: 2.0    
-    };
+        this.structMetadata = data.metadata;
+        if (this.structMetadata.length == 0){
+            pvc.log("Warning: Structure-Metadata is empty")
+        }
+    },
+  
+    preRender: function(){
 
-    // Apply options
-    $.extend(this.options,_defaults, o);
+        this.base();
 
-    // Create DataEngine
-    this.structEngine = new pvc.DataEngine(this);
+        pvc.log("Prerendering a data-tree");
 
-    return;
-  },
-
-  preRender: function(){
-
-    this.base();
-
-    pvc.log("Prerendering a data-tree");
-
-    // Getting structure-data engine and initialize the translator
-    this.structEngine.setData(this.structMetadata,this.structDataset);
-    this.structEngine.setCrosstabMode(true);
-    this.structEngine.setSeriesInRows(true);
-    this.structEngine.createTranslator();
+        // Getting structure-data engine and initialize the translator
+        this.structEngine.setData(this.structMetadata,this.structDataset);
+        this.structEngine.setCrosstabMode(true);
+        this.structEngine.setSeriesInRows(true);
+        this.structEngine.createTranslator();
     
-    pvc.log(this.structEngine.getInfo());
+        pvc.log(this.structEngine.getInfo());
 
-    this.dataTreePanel = new pvc.DataTreePanel(this, {
-      topRuleOffset : this.options.topRuleOffset,
-      botRuleOffset : this.options.botRuleOffset,
-      leftRuleOffset : this.options.leftRuleOffset,
-      rightRuleOffset : this.options.rightRuleOffset,
-      boxplotColor:  this.options.boxplotColor,
-      valueFontsize: this.options.valueFontsize,
-      headerFontsize: this.options.headerFontsize,
-      border: this.options.border,
-      perpConnector: this.options.perpConnector,
-      numDigits: this.options.numDigits,
-      minVerticalSpace: this.options.minVerticalSpace,
-      connectorSpace: this.options.connectorSpace,
-      minAspectRatio: this.options.minAspectRatio
-    });
+        this.dataTreePanel = new pvc.DataTreePanel(this, {
+            topRuleOffset : this.options.topRuleOffset,
+            botRuleOffset : this.options.botRuleOffset,
+            leftRuleOffset : this.options.leftRuleOffset,
+            rightRuleOffset : this.options.rightRuleOffset,
+            boxplotColor:  this.options.boxplotColor,
+            valueFontsize: this.options.valueFontsize,
+            headerFontsize: this.options.headerFontsize,
+            border: this.options.border,
+            perpConnector: this.options.perpConnector,
+            numDigits: this.options.numDigits,
+            minVerticalSpace: this.options.minVerticalSpace,
+            connectorSpace: this.options.connectorSpace,
+            minAspectRatio: this.options.minAspectRatio
+        });
 
-    this.dataTreePanel.appendTo(this.basePanel); // Add it
+        this.dataTreePanel.appendTo(this.basePanel); // Add it
+    }
+}, {
+    defaultOptions: {
+        // margins around the full tree
+        topRuleOffset: 30,
+        botRuleOffset: 30,
+        leftRuleOffset: 60,
+        rightRuleOffset: 60,
+        // box related parameters
+        boxplotColor: "grey",
+        headerFontsize: 16,
+        valueFontsize: 20,
+        border:  2,     // bordersize in pixels
+        // use perpendicular connector lines  between boxes.
+        perpConnector: false,
+        // number of digits (after dot for labels)
+        numDigits: 0,
+        // the space for the connectors is 15% of the width of a grid cell
+        connectorSpace: 0.15,
+        // the vertical space between gridcells is at least 5%
+        minVerticalSpace: 0.05,
+        // aspect ratio = width/height  (used to limit AR of the boxes)
+        minAspectRatio: 2.0,
 
-    return;
-  }
-
-}
-);
+        selectParam: undefined
+    }
+});
 
 
 /*
@@ -118,27 +107,22 @@ pvc.DataTree = pvc.Base.extend({
  * <i>chart_</i> - for the main chart Panel
  *    << to be filled out >>
  */
-
-
 pvc.DataTreePanel = pvc.BasePanel.extend({
 
-  _parent: null,
   pvDataTree: null,
 
   treeElements: null, 
+
   structMap: null,
   structArr: null,
-  data_: null,
 
   hRules: null,
   vRules: null,
   rules: null,
 
-  constructor: function(chart, options){
-
-    this.base(chart,options);
-
-  },
+//  constructor: function(chart, options){
+//    this.base(chart,options);
+//  },
 
   // generating Perpendicular connectors 
   // (only using horizontal and vertical rules)
@@ -148,7 +132,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
 
     this.hRules = [];
     this.vRules = [];
-    this.rules = [];  // also initialize this rule-set
+    this.rules  = [];  // also initialize this rule-set
 
     for(var e in this.structMap) {
       var elem = this.structMap[e];
@@ -176,7 +160,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
                       "height": max - min})
       }
     }
-  } ,
+  },
 
   // generate a line segment and add it to rules
   generateLineSegment: function(x1, y1, x2, y2) {
@@ -186,7 +170,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     line.push({"x":  x2,
                "y":  y2});
     this.rules.push(line);
-  } ,
+  },
 
   // leftLength gives the distance from the left box to the
   // splitting point of the connector
@@ -234,12 +218,11 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
         }
       }
     }
-    return;
-  } ,
+  },
 
   retrieveStructure: function () {
     var de = this.chart.structEngine;
-    var opts = this.chart.options;
+    var options = this.chart.options;
 
     var colLabels = de.getVisibleCategories();
     this.treeElements = de.getVisibleSeries();
@@ -282,9 +265,9 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     // determine parameters to find column-bounds    
     var bnds = bounds.getElement("__cols");
     var gridWidth  = this.innerWidth/(bnds.max - bnds.min + 1); // integer
-    var connectorWidth = opts.connectorSpace * gridWidth;
+    var connectorWidth = options.connectorSpace * gridWidth;
     var cellWidth = gridWidth - connectorWidth;
-    var maxCellHeight = cellWidth/opts.minAspectRatio;
+    var maxCellHeight = cellWidth/options.minAspectRatio;
     var colBase = bnds.min;
     delete bounds["__cols"];
 
@@ -296,7 +279,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
       var numRows = bnds.max - bnds.min + 1;
 
       bnds.gridHeight = this.innerHeight/numRows;
-      bnds.cellHeight = bnds.gridHeight*(1.0 - opts.minVerticalSpace);
+      bnds.cellHeight = bnds.gridHeight*(1.0 - options.minVerticalSpace);
       if (bnds.cellHeight > maxCellHeight)
         bnds.cellHeight = maxCellHeight;
       bnds.relBottom = (bnds.gridHeight - bnds.cellHeight)/2;
@@ -347,9 +330,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
       var elem = this.structMap[e];
       this.structArr.push(elem);
     }
-
-    return;
-  } ,
+  },
 
   findDataValue: function(key, data) {
     for(var i=0; i < data[0].length; i++)
@@ -357,10 +338,10 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
         return data[1][ i ];
 
     pvc.log("Error: value with key : "+key+" not found.")
-  } ,
+  },
 
   generateBoxPlots: function() {
-    var opts = this.chart.options;
+    var options = this.chart.options;
 
     for(var e in this.structArr) {
       var elem = this.structArr[e];
@@ -413,7 +394,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
         sp.top = elem.bottom + 2 * elem.height / 3,
         sp.mid = (sp.top + sp.bot) / 2;   // 2/3 of height
         sp.textBottom = elem.bottom + margin;
-        sp.textBottom = sp.bot - opts.valueFontsize - 1;
+        sp.textBottom = sp.bot - options.valueFontsize - 1;
 
         // and add the new set of rules for a box-plot.
         var lwa = 3;   // constant for "lineWidth Average"
@@ -449,8 +430,8 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
         sp.labels.push({left: dat[2],
                       bottom: sp.textBottom,
                       text: this.labelFixedDigits(avLabel),
-                      size: opts.smValueFont,
-                      color: opts.boxplotColor});
+                      size: options.smValueFont,
+                      color: options.boxplotColor});
     }
     }
   } ,
@@ -470,7 +451,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
   } ,
 
   addDataPoint: function(key) {
-    var opts = this.chart.options;
+    var options = this.chart.options;
 
     for(var e in this.structArr) {
       var elem = this.structArr[e];
@@ -493,16 +474,14 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
       sp.labels.push({left: theLeft,
                       bottom: sp.textBottom,
                       text: this.labelFixedDigits(value),
-                      size: opts.valueFont,
+                      size: options.valueFont,
                       color: theColor});
     }
-    return;
-  } , 
-
+  }, 
 
   retrieveData: function () {
     var de = this.chart.dataEngine;
-    var opts = this.chart.options;
+    var options = this.chart.options;
 
     var colLabels = de.getVisibleCategories();
     var selectors = de.getVisibleSeries();
@@ -533,44 +512,40 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
 
     this.generateBoxPlots();
 
-    var whitespaceQuote = new RegExp ('[\\s\"\']+',"g"); 
-    var selPar = opts.selectParam.replace(whitespaceQuote, '');
-    if (   (selPar != "undefined") 
-        && (selPar.length > 0)
-        && (typeof window[selPar] != "undefined")) {
-      selPar = window[selPar]
-      this.addDataPoint(selPar);
+    var whitespaceQuote = new RegExp ('[\\s\"\']+',"g");
+    if(options.selectParam){
+        var selPar = options.selectParam.replace(whitespaceQuote, '');
+        if (   (selPar != "undefined")
+            && (selPar.length > 0)
+            && (typeof window[selPar] != "undefined")) {
+            selPar = window[selPar]
+            this.addDataPoint(selPar);
+        }
     }
-
-    return;
   } ,
 
 
   create: function(){
 
-    var myself = this;
-    var opts = this.chart.options;
-
-    this.width = this._parent.width;
+    this.width  = this._parent.width;
     this.height = this._parent.height;
 
-    this.pvPanel = this._parent.getPvPanel().add(this.type)
-    .width(this.width)
-    .height(this.height)
+    this.base();
 
+    var myself  = this;
 
-    opts.smValueFontsize = Math.round(0.6 * opts.valueFontsize);
-    opts.smValueFont = "" + opts.smValueFontsize + "px sans-serif"
-    opts.valueFont = "" + opts.valueFontsize + "px sans-serif";
+    var options = this.chart.options;
+    options.smValueFontsize = Math.round(0.6 * options.valueFontsize);
+    options.smValueFont = "" + options.smValueFontsize + "px sans-serif"
+    options.valueFont = "" + options.valueFontsize + "px sans-serif";
 
     // used in the different closures
-    var height = this.height,
-    topRuleOffs = opts.topRuleOffset,
-    botRuleOffs = opts.botRuleOffset,
-    leftRuleOffs = opts.leftRuleOffset;
+    var topRuleOffs = options.topRuleOffset,
+        botRuleOffs = options.botRuleOffset,
+        leftRuleOffs = options.leftRuleOffset;
 
     // set a few parameters which will be used during data-retrieval
-    this.innerWidth = this.width - leftRuleOffs - opts.rightRuleOffset;
+    this.innerWidth = this.width - leftRuleOffs - options.rightRuleOffset;
     this.innerHeight = this.height - topRuleOffs - botRuleOffs;
     this.botOffs = botRuleOffs;
     this.leftOffs = leftRuleOffs;
@@ -579,8 +554,6 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     this.retrieveStructure();
 
     this.retrieveData();
-
-
 
     /*****
      *   Generate the scales x, y and color
@@ -592,7 +565,7 @@ pv.Mark.prototype.property("testAdd");
 return pv.Label(x);
                       }
 */
-    var topMargin = opts.headerFontsize + 3;
+    var topMargin = options.headerFontsize + 3;
 
     // draw the connectors first (rest has to drawn over the top)
     var rules = this.rules;
@@ -615,19 +588,19 @@ return pv.Label(x);
 //;  this.pvDataTree
     .add(pv.Bar)
 //      .data(function(d) {return d; })
-      .left(function(d) { return d.left + opts.border})
-      .bottom(function(d) { return d.bottom + opts.border})
-      .height(function(d) { return d.height - opts.border - topMargin})
-      .width(function(d) { return d.width - 2 * opts.border})
+      .left(function(d) { return d.left + options.border})
+      .bottom(function(d) { return d.bottom + options.border})
+      .height(function(d) { return d.height - options.border - topMargin})
+      .width(function(d) { return d.width - 2 * options.border})
       .fillStyle("white")
     .add(pv.Label)
       .text(function(d) { return d.label})
       .textAlign("center")
       .left(function (d) {return  d.left + d.width/2})
       .bottom(function(d) {return d.bottom + d.height 
-                - opts.headerFontsize - 5 + opts.headerFontsize/5
+                - options.headerFontsize - 5 + options.headerFontsize/5
 })
-      .font("" + opts.headerFontsize + "px sans-serif")
+      .font("" + options.headerFontsize + "px sans-serif")
       .textStyle("white")
       .fillStyle("blue");
 
@@ -669,7 +642,7 @@ return pv.Label(x);
     }
 
     // add the connecting rules (perpendicular rules)
-    if (opts.perpConnector) {
+    if (options.perpConnector) {
       this.pvPanel.add(pv.Rule)
         .data(myself.vRules)
         .left(function(d) { return d.left})
@@ -697,10 +670,5 @@ return pv.Label(x);
 
     // Extend body
     this.extend(this.pvPanel,"chart_");
-
-    return;
   }
-
-
 });
-

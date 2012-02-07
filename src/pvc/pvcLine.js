@@ -1,29 +1,18 @@
 
 /**
- * ScatterAbstract is the class that will be extended by dot, line, stackedline and area charts.
+ * ScatterAbstract is the class that will be extended by
+ * dot, line, stackedline and area charts.
  */
 pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
     scatterChartPanel : null,
     
-    constructor: function(o){
+    constructor: function(options){
 
-        this.base(o);
-
-        var _defaults = {
-            showDots: false,
-            showLines: false,
-            showAreas: false,
-            showValues: false,
-            axisOffset: 0.05,
-            valuesAnchor: "right",
-            stacked: false,
-            panelSizeRatio: 1
-        };
-
+        this.base(options);
 
         // Apply options
-        $.extend(this.options, _defaults, o);
+        pvc.mergeDefaults(this.options, pvc.ScatterAbstract.defaultOptions, options);
     },
 
     /* @override */
@@ -31,35 +20,40 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
         pvc.log("Prerendering in ScatterAbstract");
 
         this.scatterChartPanel = new pvc.ScatterChartPanel(this, {
-            stacked: this.options.stacked,
-            showValues: this.options.showValues,
-            valuesAnchor: this.options.valuesAnchor,
-            showLines: this.options.showLines,
-            showDots: this.options.showDots,
-            showAreas: this.options.showAreas,
-            orientation: this.options.orientation
+            stacked:        this.options.stacked,
+            showValues:     this.options.showValues,
+            valuesAnchor:   this.options.valuesAnchor,
+            showLines:      this.options.showLines,
+            showDots:       this.options.showDots,
+            showAreas:      this.options.showAreas,
+            orientation:    this.options.orientation
         });
 
         return this.scatterChartPanel;
+    }
+}, {
+    defaultOptions: {
+        showDots: false,
+        showLines: false,
+        showAreas: false,
+        showValues: false,
+        axisOffset: 0.05,
+        valuesAnchor: "right",
+        stacked: false,
+        panelSizeRatio: 1
     }
 });
 
 /**
  * Dot Chart
- *
  */
 pvc.DotChart = pvc.ScatterAbstract.extend({
 
-    constructor: function(o){
+    constructor: function(options){
 
-        this.base();
+        this.base(options);
 
-        var _defaults = {
-            showDots: true
-        };
-
-        // Apply options
-        $.extend(this.options, _defaults, o);
+        this.options.showDots = true;
     }
 });
 
@@ -68,16 +62,11 @@ pvc.DotChart = pvc.ScatterAbstract.extend({
  */
 pvc.LineChart = pvc.ScatterAbstract.extend({
 
-    constructor: function(o){
+    constructor: function(options){
 
-        this.base();
+        this.base(options);
 
-        var _defaults = {
-            showLines: true
-        };
-
-        // Apply options
-        $.extend(this.options, _defaults, o);
+        this.options.showLines = true;
     }
 });
 
@@ -86,37 +75,26 @@ pvc.LineChart = pvc.ScatterAbstract.extend({
  */
 pvc.StackedLineChart = pvc.ScatterAbstract.extend({
 
-    constructor: function(o){
+    constructor: function(options){
 
-        this.base();
+        this.base(options);
 
-        var _defaults = {
-            showLines: true,
-            stacked: true
-        };
-
-        // Apply options
-        $.extend(this.options, _defaults, o);
+        this.options.showLines = true;
+        this.options.stacked = true;
     }
 });
-
 
 /**
  * Stacked Area Chart
  */
 pvc.StackedAreaChart = pvc.ScatterAbstract.extend({
 
-    constructor: function(o){
+    constructor: function(options){
 
-        this.base();
+        this.base(options);
 
-        var _defaults = {
-            showAreas: true,
-            stacked: true
-        };
-
-        // Apply options
-        $.extend(this.options, _defaults, o);
+        this.options.showAreas = true;
+        this.options.stacked = true;
     }
 });
 
@@ -165,10 +143,10 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         
         var myself = this,
             chart = this.chart,
-            o  = chart.options,
+            options  = chart.options,
             de = chart.dataEngine;
 
-        if(o.showTooltips || o.clickable){
+        if(options.showTooltips || options.clickable){
             this.pvPanel
               .events("all")
               .event("mousemove", pv.Behavior.point(Infinity));
@@ -185,9 +163,9 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             parser = null, // - warning
             categoryComparer = null; // ~ warning
 
-        if(o.timeSeries){
+        if(options.timeSeries){
             tScale = chart.getTimeseriesScale(true, true);
-            parser = pv.Format.date(o.timeSeriesFormat);
+            parser = pv.Format.date(options.timeSeriesFormat);
             categoryComparer = pvc.createDateComparer(parser, function(d){
                 return d.category;
             });
@@ -210,7 +188,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 //  top to bottom (according to the legend)
                 .order(isVertical  ? "reverse"  : null)
                 [isVertical ? "x" : "y"](
-                    o.timeSeries ?
+                    options.timeSeries ?
                         function(){
                             return tScale(parser.parse(de.getCategoryByIndex(this.index)));
                         } :
@@ -244,7 +222,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 .segmented(true)
                 .visible(function(d) { return d.value != null; })
                 [pvc.BasePanel.relativeAnchor[anchor]](
-                    o.timeSeries ?
+                    options.timeSeries ?
                         function(dataItem){ return tScale(parser.parse(dataItem.category)); } :
                         function(dataItem){ return oScale(dataItem.category) + oScale.range().band/2; })
                 [anchor](function(dataItem){
@@ -268,11 +246,11 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                     c = de.getVisibleCategories()[this.index];
                 }
 
-                return o.tooltipFormat.call(myself, s, c, v);
+                return options.tooltipFormat.call(myself, s, c, v);
             });
 
-        if(o.showTooltips){
-            this.pvLine.event("point", pv.Behavior.tipsy(o.tipsySettings));
+        if(options.showTooltips){
+            this.pvLine.event("point", pv.Behavior.tipsy(options.tipsySettings));
         }
 
         this.pvDot = this.pvLine.add(pv.Dot)
@@ -281,7 +259,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             .strokeStyle(this.showDots?colorFunc:null)
             .fillStyle(this.showDots?colorFunc:null);
 
-        if (o.clickable){
+        if (options.clickable){
             this.pvDot
                 .cursor("pointer")
                 .event("click", function(d){
@@ -296,7 +274,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                       c = de.getVisibleCategories()[this.index];
                     }
                     var e = arguments[arguments.length-1];
-                    return o.clickAction(s, c, v, e);
+                    return options.clickAction(s, c, v, e);
                 });
         }
 
@@ -306,7 +284,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 .add(pv.Label)
                 .bottom(0)
                 .text(function(d){
-                    return o.valueFormat( (d != null && typeof d == "object")? d.value : d);
+                    return options.valueFormat( (d != null && typeof d == "object")? d.value : d);
                 });
         }
     },

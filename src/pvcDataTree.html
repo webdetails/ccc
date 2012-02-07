@@ -39,36 +39,31 @@
         <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
     </head>
     <body>
-
-<h1> Demonstratie van boomstructuren voor tonen van dataverbanden</h1>
-
-
-
+    <h1> Demonstratie van boomstructuren voor tonen van dataverbanden</h1>
   <div id="pvcDataTree"> </div>
-
   <div id="pvcDataTree2"> </div>
 
-
   <script type="text/javascript">
-    pv.listenForPageLoad(function() {
-
+pv.listenForPageLoad(function() {
     // no var in front, otherwise it it becomes 
     // a local of the enclosing function
     globalSelect = 'team A';
 
     var datTree = new pvc.DataTree({
-    // legendPosition: "left",
-    canvas: "pvcDataTree",
-    width: 820,
-    height: 420,
-    title: "Demonstrating DataTree (with auto-generated layout)",
-    selectParam: "globalSelect",
-    structDatasource: "ds2"
+        // legendPosition: "left",
+        canvas: "pvcDataTree",
+        width:  820,
+        height: 420,
+        title:  "Demonstrating DataTree (with auto-generated layout)",
+        selectParam: "globalSelect",
+        structDatasource: "ds2"
     });
 
     // load fake data (otherwise function fails)        
-    datTree.setData(datTreeTestData_01, {crosstabMode: true,
-    seriesInRows: true});
+    datTree.setData(datTreeTestData_01, {
+        crosstabMode: true,
+        seriesInRows: true
+    });
 
     datTree.setStructData(datTreeTestStructure_01);
 
@@ -76,25 +71,25 @@
 
     // Now with bottom-height specified
     var datTree2 = new pvc.DataTree({
-    // legendPosition: "left",
-    canvas: "pvcDataTree2",
-    width: 820,
-    height: 420,
-    title: "Demonstrating DataTree (with user-defined coordinates)",
-    selectParam: "globalSelect",
-    structDatasource: "ds3"
+        // legendPosition: "left",
+        canvas: "pvcDataTree2",
+        width:  820,
+        height: 420,
+        title:  "Demonstrating DataTree (with user-defined coordinates)",
+        selectParam: "globalSelect",
+        structDatasource: "ds3"
     });
 
     // load fake data (otherwise function fails)        
-    datTree2.setData(datTreeTestData_01, {crosstabMode: true,
-    seriesInRows: true});
+    datTree2.setData(datTreeTestData_01, {
+        crosstabMode: true,
+        seriesInRows: true
+    });
 
     datTree2.setStructData(datTreeTestStructure_02);
 
     datTree2.render();
-           
-    });
-
+});
   </script>
 
 <p>

@@ -7,42 +7,12 @@ pvc.BulletChart = pvc.Base.extend({
   bulletChartPanel : null,
   allowNoData: true,
 
-  constructor: function(o){
+  constructor: function(options){
 
-    this.base(o);
-
-    var _defaults = {
-      showValues: true,
-      orientation: "horizontal",
-      showTooltips: true,
-      legend: false,
-
-      bulletSize: 30,        // Bullet size
-      bulletSpacing: 50,     // Spacing between bullets
-      bulletMargin: 100,     // Left margin
-
-      // Defaults
-      bulletMarkers: [],     // Array of markers to appear
-      bulletMeasures: [],    // Array of measures
-      bulletRanges: [],      // Ranges
-      bulletTitle: "Bullet", // Title
-      bulletSubtitle: "",    // Subtitle
-
-      crosstabMode: true,
-      seriesInRows: true,
-
-      tipsySettings: {
-        gravity: "s",
-        fade: true
-      }
-
-    };
-
+    this.base(options);
 
     // Apply options
-    $.extend(this.options,_defaults, o);
-
-
+    pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
   },
 
   preRender: function(){
@@ -59,11 +29,36 @@ pvc.BulletChart = pvc.Base.extend({
     });
 
     this.bulletChartPanel.appendTo(this.basePanel); // Add it
-
   }
+}, {
+  defaultOptions: {
+      showValues: true,
+      orientation: "horizontal",
+      showTooltips: true,
+      legend: false,
 
-}
-);
+      bulletSize:     30,  // Bullet size
+      bulletSpacing:  50,  // Spacing between bullets
+      bulletMargin:  100,  // Left margin
+
+      // Defaults
+      bulletMarkers:  null,     // Array of markers to appear
+      bulletMeasures: null,     // Array of measures
+      bulletRanges:   null,     // Ranges
+      bulletTitle:    "Bullet", // Title
+      bulletSubtitle: "",       // Subtitle
+
+      axisDoubleClickAction: null,
+      
+      crosstabMode: true,
+      seriesInRows: true,
+
+      tipsySettings: {
+        gravity: "s",
+        fade: true
+      }
+    }
+});
 
 
 
@@ -101,16 +96,14 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     fade: true
   },
 
-  constructor: function(chart, options){
-
-    this.base(chart,options);
-
-  },
+//  constructor: function(chart, options){
+//    this.base(chart,options);
+//  },
 
   create: function(){
 
-    var myself = this;
-    this.width = this._parent.width;
+    var myself  = this;
+    this.width  = this._parent.width;
     this.height = this._parent.height;
 
     var data = this.buildData();
@@ -251,8 +244,6 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     }
 
-
-
     // Extension points
     this.extend(this.pvBullets,"bulletsPanel_");
     this.extend(this.pvBullet,"bulletPanel_");
@@ -266,7 +257,6 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     // Extend body
     this.extend(this.pvPanel,"chart_");
-
   },
 
   /*
@@ -281,20 +271,19 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
 
-
     var defaultData = {
-      title: this.chart.options.bulletTitle,
-      subtitle: this.chart.options.bulletSubtitle,
-      ranges:this.chart.options.bulletRanges,
-      measures: this.chart.options.bulletMeasures,
-      markers: this.chart.options.bulletMarkers
+      title:     this.chart.options.bulletTitle,
+      subtitle:  this.chart.options.bulletSubtitle,
+      ranges:    this.chart.options.bulletRanges   || [],
+      measures:  this.chart.options.bulletMeasures || [],
+      markers:   this.chart.options.bulletMarkers  || []
     };
     
     var data = [];
 
     if(this.chart.dataEngine.getSeriesSize() == 0 ) {
       // No data
-      data.push($.extend({},defaultData));
+      data.push($.extend({}, defaultData));
     }
     else {
       // We have data. Iterate through the series.
@@ -334,5 +323,4 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
    
     return data;
   }
-
 });

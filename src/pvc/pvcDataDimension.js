@@ -4,23 +4,28 @@ pvc.DataDimension = Base.extend(
  * @lends DataDimension# 
  */
 {
-    name:  null,
-    index: null,
-    
     // lazy loading of dimension values
     // function() -> [unique dimension values]
     _getValues: null,
-    
+
+    // function(value, index) -> label
+    _calcLabel: null,
+
     _values: null,
+    _labels: null, // cache, immutable
+    _elements: null, // cache, immutable
+    _rootElement: null, // cache, immutable
+    _maxDepth: 0, // cache, immutable
     
     _invisibleIndexes: null,
-    _selectedIndexes: null,
+    _selectedIndexes:  null,
     
     _valueKeyToIndex: null, // cache, immutable
     _visibleIndexes: null,  // cache
     _visibleValues:  null,  // cache
+    _visibleElements: null, // cache
     _selectedValues:  null, // cache
-    
+
     /**
      * A dimension of data.
      * @constructs
@@ -28,13 +33,14 @@ pvc.DataDimension = Base.extend(
     constructor: function(name, index, definition){
         this.name = name;
         this.index = index;
-        this._values = null;
-        this._invisibleIndexes = {},
+
+        this._invisibleIndexes = {};
 
         // translator -> [values]
         this._fetchValues = pvc.get(definition, 'fetchValues');
+        this._calcLabel   = pvc.get(definition, 'calcLabel');
     },
-    
+
     /**
      * Returns the unique values.
      */
@@ -45,7 +51,135 @@ pvc.DataDimension = Base.extend(
         
         return this._values;
     },
-    
+
+    /**
+     * Returns the leaf elements.
+     */
+    getElements: function(){
+        if(!this._elements){
+            this.getElementTree();
+        }
+
+        return this._elements;
+    },
+
+    /**
+     * Returns the root node of the elements tree.
+     */
+    getElementTree: function(){
+        if(!this._rootElement){
+            var treeInfo = this.createElementsTree();
+            
+            this._elements = treeInfo.elements;
+            this._rootElement = treeInfo.root;
+            this._maxDepth = treeInfo.maxDepth;
+        }
+
+        return this._rootElement;
+    },
+
+    /**
+     * Returns the maximum depth.
+     */
+    getMaxDepth: function(){
+        if(!this._elements){
+            this.getElementTree();
+        }
+
+        return this._maxDepth;
+    },
+
+    /**
+     * Creates a custom element tree.
+     */
+    createElementsTree: function(onlyVisible, reversed){
+        var elements = [];
+        var maxDepth = 0;
+
+        // NOTE: The hierarchy need not be uniform.
+        // Some leaf nodes may have depth 1, while others, depth 2.
+        
+        var root   = this._addElement(),
+            values = onlyVisible ? this.getVisibleValues() : this.getValues();
+
+        if(reversed){
+            values = values.slice();
+            values.reverse();
+        }
+
+        for (var i = 0, L = values.length ; i < L ; i++) {
+            var keys = pvc.toArray(values[i]),
+                node = root;
+            
+            for (var k = 0, K = keys.length ; k < K ; k++){
+                if(K > maxDepth){
+                    maxDepth = K;
+                }
+
+                var key = keys[k];
+
+                var child = node.childNodesByKey[key];
+                if(!child){
+                    child = this._addElement(key, node);
+                }
+
+                // Some data contains duplicates.
+                // Such as in the category dimension of metric charts.
+                // Try pvcMetricScatter.js
+//                else if(k === K - 1)
+//                {
+//                    //throw new Error("Not-unique key data.");
+//                }
+
+                node = child;
+            }
+
+            // Add the leaf node
+            if(elements){
+                elements.push(node);
+            }
+        }
+
+        return {
+            root:     root,
+            maxDepth: maxDepth,
+            elements: elements
+        };
+    },
+
+    _addElement: function(key, parent){
+        if(!parent){
+            // Parent is a dummy root
+            key = null;
+        }
+        
+        var child = new pv.Dom.Node(key); // TODO: create subclass
+        //child.nodeValue = key; // constructor does this
+        child.value    = key;
+        child.nodeName = key || "";
+        child.childNodesByKey = {};
+        child.toString = function(){ // TODO: share this function
+            return this.value;
+        };
+
+        if(!parent){
+            child.path     = [];
+            child.absValue = null;
+            child.label    = "";
+            child.absLabel = "";
+        } else {
+            child.path     = parent.path.concat(key);
+            child.absValue = pvc.join("~", parent.absValue, key);
+            child.label    = "" + (this._calcLabel ? this._calcLabel(key) : key);
+            child.absLabel = pvc.join(" ~ ", parent.absLabel, child.label);
+
+            parent.appendChild(child);
+            parent.childNodesByKey[key] = child;
+        }
+
+        return child;
+    },
+
     /**
      * Returns the nth unique value.
      */
@@ -83,15 +217,27 @@ pvc.DataDimension = Base.extend(
      */
     getVisibleValues: function(){
         if(!this._visibleValues){
-            this._visibleValues = this.getValues()
-                    .filter(function(/* @ignore */ value, index){
-                        return !(index in this._invisibleIndexes);
-                    }, this);
+            this._visibleValues = pv.permute(
+                            this.getValues(),
+                            this.getVisibleIndexes());
         }
         
         return this._visibleValues;
     },
-       
+
+    /**
+     * Returns the unique elements.
+     */
+    getVisibleElements: function(){
+        if(!this._visibleElements){
+            this._visibleElements = pv.permute(
+                            this.getElements(),
+                            this.getVisibleIndexes());
+        }
+
+        return this._visibleElements;
+    },
+
      /**
      * Returns true if the value of the 
      * specified index is visible.
@@ -128,6 +274,7 @@ pvc.DataDimension = Base.extend(
         // Clear visible cache
         this._visibleValues  = null;
         this._visibleIndexes = null;
+        this._visibleElements = null;
         
         return true;
     },

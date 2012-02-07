@@ -57,7 +57,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         This function implements a number of helper functions via
         closures. The helper functions are all stored in this.DF
         Overriding this function allows you to implement
-        a different ScatterScart.
+        a different ScatterChart.
      */
     var myself = this,
         chart = this.chart,
@@ -76,10 +76,6 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     // create empty container for the functions and data
     myself.DF = {}
 
-    myself.DF.baseValues = dataEngine.getVisibleCategories();
-    myself.DF.visibleSerieIds = dataEngine.getVisibleSeriesIndexes();
-//    myself.DF.data = dataEngine.getVisibleTransposedValues();
-
     // calculate a position along the base-axis
     myself.DF.baseCalculation = options.timeSeries ?
           function(d) { return tScale(parser.parse(d.category)); } :
@@ -92,18 +88,17 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     };
 
     // get a data-series for the ID
-    var pFunc;
-    if (options.timeSeries) {
-        pFunc = function(a,b){
-            return parser.parse(a.category) - parser.parse(b.category);
-        };
-    }
+//    var pFunc;
+//    if (options.timeSeries) {
+//        pFunc = function(a,b){
+//            return parser.parse(a.category) - parser.parse(b.category);
+//        };
+//    }
 
-    myself.DF.getDataForSerieId = 
+    var sortFun = function(a, b) {return a.category - b.category; };
+    myself.DF.getSeriesData =
         function(d){
-            var res = dataEngine.getObjectsForSeriesIndex(d, pFunc);
-            res.sort(function(a, b) {return a.category - b.category; })
-            return res;
+            return dataEngine.getObjectsForSeriesIndex(d, sortFun);
         };
 
 
@@ -119,16 +114,15 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
      * @override
      */
     createCore: function(){
-        // Send the panel behind the axis, title and legend, panels
+        // Mantain the panel at its default normal z-order
         this.pvPanel.zOrder(0);
 
         var myself = this,
             options = this.chart.options,
             dataEngine = this.chart.dataEngine;
 
-
         // TODO: what's this?
-        if(options.showTooltips || options.clickable ){
+        if(options.showTooltips || options.clickable){
             this.pvPanel
                 .events("all")
                 .event("mousemove", pv.Behavior.point(Infinity));
@@ -141,115 +135,90 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         //var maxLineSize;
 
-    // Stacked?
-    if (this.stacked){
+        // Stacked?
+        if (this.stacked){
 
-      pvc.log("WARNING: the stacked option of metric charts still needs to be implemented.");
+            pvc.log("WARNING: the stacked option of metric charts still needs to be implemented.");
 
-/*    CvK:  have to rewrite this code  
-      this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
-      .layers(pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues()))
-      [this.orientation == "vertical"?"x":"y"](function(){
-        if(options.timeSeries){
-          return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));
+        } else {
+
+            // Add the series identifiers to the scatterPanel
+            // One instance of pvScatterPanel per series
+            this.pvScatterPanel = this.pvPanel.add(pv.Panel)
+                .data(dataEngine.getVisibleSeriesIndexes());
+
+            // Add the area
+            // CvK: why adding area's if showArea
+            this.pvArea = this.pvScatterPanel.add(pv.Area)
+                .fillStyle(this.showAreas ? myself.DF.colorFunc : null);
+
+            var lineWidth = this.showLines ? 1.5 : 0.001;
+
+            // Add line and make lines invisible if not needed.
+            this.pvLine = this.pvArea.add(pv.Line)
+                .data(myself.DF.getSeriesData)
+                .lineWidth(lineWidth)
+                [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.baseCalculation)
+                [anchor](myself.DF.orthoCalculation);
         }
-        else{
-          return oScale(myself.chart.dataEngine.getCategoryByIndex(this.index)) + oScale.range().band/2;
+
+        this.pvLine
+            .strokeStyle(myself.DF.colorFunc)
+            .text(function(d){
+                var v, c;
+                var s = dataEngine.getVisibleSeries()[this.parent.index];
+                if(typeof d == "object"){
+                    v = d.value;
+                    c = d.category;
+                } else {
+                    v = d;
+                    c = dataEngine.getVisibleCategories()[this.index];
+                }
+                
+                return options.tooltipFormat.call(myself,s,c,v);
+            });
+
+        if(options.showTooltips){
+            this.pvLine.event("point", pv.Behavior.tipsy(options.tipsySettings));
         }
-      })
-      [anchor](lScale(0))
-      [this.orientation == "vertical"?"y":"x"](function(d){
-        return myself.chart.animate(0,lScale(d)-lScale(0));
-      })
 
-      this.pvArea = this.pvScatterPanel.layer.add(pv.Area)
-      .fillStyle(this.showAreas?colorFunc:null);
-
-      this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
-      .lineWidth(this.showLines?1.5:0.001);
-    //[pvc.BasePanel.parallelLength[anchor]](maxLineSize)
-    */    
-    }
-    else {
-
-      // Add the series identifiers to the scatterPanel
-      // CvK: Why do we need a new pvPanel and can't we use existing pvPanel?
-      this.pvScatterPanel = this.pvPanel.add(pv.Panel)
-           .data(myself.DF.visibleSerieIds);
-
-      // add the area's
-      // CvK: why adding area's if showArea
-      this.pvArea = this.pvScatterPanel.add(pv.Area)
-        .fillStyle(this.showAreas?myself.DF.colorFunc:null);
-
-      var lineWidth = this.showLines ? 1.5 : 0.001;
-      // add line and make lines invisible if not needed.
-      this.pvLine = this.pvArea.add(pv.Line)
-      .data(myself.DF.getDataForSerieId)
-      .lineWidth(lineWidth)
-      [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.baseCalculation)
-      [anchor](myself.DF.orthoCalculation)
-    }
-
+        this.pvDot = this.pvLine.add(pv.Dot)
+            .shapeSize(12)
+            .lineWidth(1.5)
+            .strokeStyle(this.showDots ? myself.DF.colorFunc : null)
+            .fillStyle(this.showDots ? myself.DF.colorFunc : null);
     
-    this.pvLine
-      .strokeStyle(myself.DF.colorFunc)
-      .text(function(d){
-        var v, c;
-        var s = dataEngine.getVisibleSeries()[this.parent.index]
-        if( typeof d == "object"){
-          v = d.value;
-          c = d.category;
+        if (this.chart.options.clickable){
+            this.pvDot
+                .cursor("pointer")
+                .event("click", function(d){
+                    var v, c, e;
+                    var s = dataEngine.getSeries()[this.parent.index];
+                    if( typeof d == "object"){
+                        v = d.value;
+                        c = d.category
+                    } else {
+                        v = d
+                        c = dataEngine.getCategories()[this.index];
+                    }
+
+                    e = arguments[arguments.length-1];
+
+                    return options.clickAction(s, c, v, e);
+                });
         }
-        else{
-          v = d;
-          c = dataEngine.getVisibleCategories()[this.index];
+
+        if(this.showValues){
+            this.pvLabel = this.pvDot
+                .anchor(this.valuesAnchor)
+                .add(pv.Label)
+                .bottom(0)
+                .text(function(d){
+                    return options.valueFormat(typeof d == "object"?d.value:d);
+                });
         }
-        return options.tooltipFormat.call(myself,s,c,v);
-      })
-
-    if(options.showTooltips){
-      this.pvLine.event("point", pv.Behavior.tipsy(options.tipsySettings));
-    }
-
-    this.pvDot = this.pvLine.add(pv.Dot)
-    .shapeSize(12)
-    .lineWidth(1.5)
-    .strokeStyle(this.showDots?myself.DF.colorFunc:null)
-    .fillStyle(this.showDots?myself.DF.colorFunc:null)
-    
-    if (this.chart.options.clickable){
-      this.pvDot
-      .cursor("pointer")
-      .event("click",function(d){
-        var v, c, e;
-        var s = dataEngine.getSeries()[this.parent.index]
-        if( typeof d == "object"){
-          v = d.value;
-          c = d.category
-        }
-        else{
-          v = d
-          c = dataEngine.getCategories()[this.index]
-        }
-        e = arguments[arguments.length-1];
-        return options.clickAction(s, c, v, e);
-      });
-    }
-
-
-
-    if(this.showValues){
-      this.pvLabel = this.pvDot
-      .anchor(this.valuesAnchor)
-      .add(pv.Label)
-      .bottom(0)
-      .text(function(d){
-        return options.valueFormat(typeof d == "object"?d.value:d)
-      })
-    }
-  },
-   /**
+    },
+    /**
      * @override
      */
     applyExtensions: function(){

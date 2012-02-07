@@ -8,17 +8,14 @@
  */
 pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
 
-    constructor: function(o){
-    
-        this.base(o);
-
-        // Apply options
-        $.extend(this.options, o);
+    constructor: function(options){
+        this.base(options);
     },
 
     /* @override */
     preRender: function(){
         this.base();
+        
         pvc.log("Prerendering in MetricAbstract");
     },
 
@@ -41,7 +38,6 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
     isYAxisOrdinal: function(){
         return this.options.orthoAxisOrdinal && this.isOrientationVertical();
     },
-
 
     getLinearBaseScale: function(bypassAxis){
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
@@ -70,8 +66,11 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
 
         // create the (linear) Scale
         var scale = new pv.Scale.linear()
-          .domain(domainMin, domainMax)
-          .range(rangeMin, rangeMax);
+                      .domain(domainMin, domainMax)
+                      .range(rangeMin, rangeMax);
+
+        scale.min = rangeMin;
+        scale.max = rangeMax;
 
         return scale;
     },

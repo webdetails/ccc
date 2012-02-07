@@ -27,7 +27,7 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
         this.base(options);
 
         // Apply options
-        $.extend(this.options, pvc.WaterfallChart.defaultOptions, options);
+        pvc.mergeDefaults(this.options, pvc.WaterfallChart.defaultOptions, options);
 
         // Water-falls are always stacked
         this.options.stacked = true;
@@ -684,8 +684,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             };
             */
             this.pvBar
-                .def("tooltip", '')
-                .title(function(r, ra, i){ // NOTE: row, rowAgain, index?
+                .localProperty("tooltip", String) // see pvc.js
+                .tooltip(function(r, ra, i){  // NOTE: row, rowAgain, index?
                     var tooltip;
                     if(options.customTooltip){
                         var datum = myself._getRenderingDatum(this),
@@ -698,8 +698,9 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                         tooltip = r[i];
                     }
 
-                    this.tooltip(tooltip);
-                    
+                    return tooltip;
+                })
+                .title(function(){
                     return ''; // prevent browser tooltip
                 })
                 .event("mouseover", pv.Behavior.tipsy(options.tipsySettings));

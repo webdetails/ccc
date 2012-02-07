@@ -172,7 +172,7 @@
             xAxisLabel_textAlign: "center",
             xAxisLabel_textBaseline: "top",
             xAxisLabel_textStyle: "black",
-            xAxisLabel_text: function(d){return d.substr(5)},
+            xAxisLabel_text: function(e){return e.label.substr(5)},
             //dot_strokeStyle: "white",
             dot_fillStyle: "white",
             dot_shape: "square",
@@ -707,7 +707,7 @@
           barSizeRatio: 0.8,
 
           secondAxis: true,
-          //secondAxisIndependentScale: true,
+          secondAxisIndependentScale: true,
           secondAxisIdx: -1, // default
           secondAxisOriginIsZero: true, // default
           secondAxisOffset: 0, // default

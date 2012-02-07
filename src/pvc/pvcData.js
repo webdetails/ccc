@@ -19,10 +19,7 @@ pvc.DataEngine = Base.extend({
     crosstabMode: true,
     translator: null,
     values: null,
-    
-    secondAxis: false, // Do we have double axis?
     secondAxisValues: null,
-    secondAxisIdx: 0,
     
     // neu
     isMultiValued: false,
@@ -100,11 +97,13 @@ pvc.DataEngine = Base.extend({
         
         // Must be first, to match the order in the values matrix (lines)
         this._defDimension('categories', {
-            fetchValues: function(){ return me._fetchCategories(); }
+            fetchValues: function(){ return me._fetchCategories(); },
+            calcLabel:   this.chart.options.getCategoryLabel
         });
         
         this._defDimension('series', {
-            fetchValues: function(){ return me._fetchSeries(); }
+            fetchValues: function(){ return me._fetchSeries(); },
+            calcLabel:   this.chart.options.getSeriesLabel
         });
     },
     
@@ -223,6 +222,14 @@ pvc.DataEngine = Base.extend({
      */
     getDimensionValue: function(name, index){
         return this.getDimension(name).getValue(index);
+    },
+
+    /**
+     * Returns the index of the specified value in the specified dimension.
+     * Returns -1 if the value is not found.
+     */
+    getDimensionValueIndex: function(name, value){
+        return this.getDimension(name).getIndex(value);
     },
     
     /**
@@ -504,18 +511,23 @@ pvc.DataEngine = Base.extend({
     },
 
     /**
-     * Returns the object for a given series idx in the form {category: catName, value: val}
+     * Returns the object for a given series idx in the form:
+     * <pre>
+     * {serieIndex: index, category: categoryValue, value: value}
+     * </pre>
      */
     getObjectsForSeriesIndex: function(seriesIndex, sortF){
 
         var result = [];
-        
+        var categories = this.getCategories();
+
         this.getValues().forEach(function(a, i){
-            if(typeof a[seriesIndex] != "undefined" /* && a[seriesIndex] != null */){
+            var value = a[seriesIndex];
+            if(typeof value != "undefined" /* && a[seriesIndex] != null */){
                 result.push({
                     serieIndex: seriesIndex,
-                    category:   this.getCategories()[i],
-                    value:      a[seriesIndex]
+                    category:   categories[i],
+                    value:      value
                 });
             }
         }, this);
