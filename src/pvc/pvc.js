@@ -189,7 +189,8 @@ pvc.mergeOwn = function(to, from){
 
 pvc.mergeDefaults = function(to, defaults, from){
     pvc.forEachOwn(defaults, function(dv, p){
-        to[p] = (from && from.hasOwnProperty(p)) ? from[p] : dv;
+        var v;
+        to[p] = (from && from.hasOwnProperty(p) && (v = from[p]) !== undefined) ? v : dv;
     });
     return to;
 };

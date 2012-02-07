@@ -231,7 +231,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         // clickAction
-        if (options.clickable){
+        if (this._shouldHandleClick()){
             this.pvHeatGrid
                 .cursor("pointer")
                 .event("click", function(row, rowCol){
@@ -413,7 +413,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 return myself.valuesToText(r[i]);
             });
 
-        if(options.clickable){
+        if(this._shouldHandleClick()){
             this.shapes
                 .cursor("pointer")
                 .event("click", function(r, ra,i) {

@@ -746,7 +746,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         // Create something usefull...
         this.createCore();
         
-        if (pv.renderer() !== 'batik'){
+        if (options.selectable && pv.renderer() !== 'batik'){
             this._createSelectionOverlay();
         }
     },
@@ -809,15 +809,21 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         }
     },
 
-    _handleClick: function(mark, d, ev){
+    _shouldHandleClick: function(){
         var options = this.chart.options;
-        if(!options.clickable){
+        return options.selectable || (options.clickable && options.clickAction);
+    },
+    
+    _handleClick: function(mark, d, ev){
+        if(!this._shouldHandleClick()){
             return;
         }
 
         // Selection
         var datum = this._getRenderingDatum(mark);
         if(datum){
+            var options = this.chart.options;
+            
             if(!options.doubleClickAction){
                 this._handleClickCore(mark, datum, d, ev);
             } else {
@@ -856,15 +862,18 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         }
 
         // Selection
-        if(this.chart.options.ctrlSelectMode && !ev.ctrlKey){
-            // hard select
-            datum.engine.clearSelections();
-            datum.setSelected(true);
-        } else {
-            datum.toggleSelected();
-        }
+        var options = this.chart.options;
+        if(options.selectable){
+            if(options.ctrlSelectMode && !ev.ctrlKey){
+                // hard select
+                datum.engine.clearSelections();
+                datum.setSelected(true);
+            } else {
+                datum.toggleSelected();
+            }
 
-        this._handleSelectionChanged();
+            this._handleSelectionChanged();
+        }
     },
 
     _handleSelectionChanged: function(){
@@ -935,8 +944,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                 titleOffset = setPositions();
             }
 
-            var xAxisOffset = setPositions(options.xAxisPosition, xAxisPanel.height),
-                yAxisOffset = setPositions(options.yAxisPosition, yAxisPanel.width);
+            var xAxisOffset = setPositions(options.xAxisPosition, xAxisPanel ? xAxisPanel.height : 0),
+                yAxisOffset = setPositions(options.yAxisPosition, yAxisPanel ? yAxisPanel.width  : 0);
 
             var y = 0,
                 x = 0;
@@ -954,8 +963,10 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                     y -= myself.height;
                 }
 
-                xSelections = xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
-
+                if(xAxisPanel){
+                    xSelections = xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+                }
+                
                 //2) y axis
                 x = rb.x - titleOffset['left'];
                 y = rb.y - titleOffset['top'] - xAxisOffset['top'];
@@ -964,7 +975,9 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                     x -= myself.width;
                 }
 
-                ySelections = yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+                if(yAxisPanel){
+                    ySelections = yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+                }
             }
 
             var cSelections = isHorizontal ? ySelections : xSelections,
@@ -1027,11 +1040,11 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         // Rubber band
         var selectBar = this.selectBar = this.pvPanel.root//TODO
            .add(pv.Bar)
-                .visible(function() { return isSelecting; } )
-                .left(function(d) { return d.x; })
-                .top(function(d) { return d.y;})
-                .width(function(d) { return d.dx;})
-                .height(function(d) { return d.dy;})
+                .visible(function() {return isSelecting;} )
+                .left(function(d) {return d.x;})
+                .top(function(d) {return d.y;})
+                .width(function(d) {return d.dx;})
+                .height(function(d) {return d.dy;})
                 .fillStyle(options.rubberBandFill)
                 .strokeStyle(options.rubberBandLine);
 
@@ -1284,7 +1297,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Ordinal ticks are drawn at the center of each band,
         //  and not at the beginning, as in a linear axis.
         this.pvTicks = this.pvRule.add(pv.Rule)
-        	.zOrder(20) // see pvc.js
+            .zOrder(20) // see pvc.js
             .data(ticks)
             //[anchorOpposite   ](0)
             [anchorLength     ](null)
@@ -1303,7 +1316,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .zOrder(40) // see pvc.js
             .textAlign(align)
             //.textBaseline("middle")
-            .text(function(e){ return e.label; })
+            .text(function(e){return e.label;})
             .font("9px sans-serif");
         
         if(this.fullGrid){
@@ -1326,7 +1339,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     return scale(e.value) - scale.range().margin / 2;
                 })
                 [anchorOrthoLength]( ruleLength)
-                .visible(function(){ return (this.index > 0); });
+                .visible(function(){return (this.index > 0);});
         }
     },
 
@@ -1469,9 +1482,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
     },
 
-    _handleClick: function(d, ev){
+    _shouldHandleClick: function(){
         var options = this.chart.options;
-        if(!options.clickable || !d){
+        return options.selectable || (options.clickable && this.clickAction);
+    },
+
+    _handleClick: function(d, ev){
+        if(!d || !this._shouldHandleClick()){
             return;
         }
 
@@ -1483,7 +1500,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // Delay click evaluation so that
             // it may be canceled if double click meanwhile
             // fires.
-            var myself = this;
+            var myself  = this,
+                options = this.chart.options;
             window.setTimeout(
                 function(){
                     myself._handleClickCore.call(myself, d, ev);
@@ -1505,8 +1523,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
 
         // TODO: should this be cancellable by the click action?
-        if(this.ordinal){
-            var toggle = this.chart.options.ctrlSelectMode && !ev.ctrlKey;
+        var options = this.chart.options;
+        if(options.selectable && this.ordinal){
+            var toggle = options.ctrlSelectMode && !ev.ctrlKey;
             this._selectOrdinalElement(d, toggle);
         }
     },
@@ -1797,9 +1816,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .cursor('default')
             .events('all'); //labels don't have events by default
 
-        if(options.clickable){
+        if(this._shouldHandleClick()){
             this.pvLabel
-                .cursor('pointer')
+                .cursor("pointer")
                 .event('click', function(d){
                     var ev = arguments[arguments.length - 1];
                     return myself._handleClick(d, ev);

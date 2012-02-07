@@ -122,7 +122,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             dataEngine = this.chart.dataEngine;
 
         // TODO: what's this?
-        if(options.showTooltips || options.clickable){
+        if(options.showTooltips || this._shouldHandleClick()){
             this.pvPanel
                 .events("all")
                 .event("mousemove", pv.Behavior.point(Infinity));
@@ -188,7 +188,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             .strokeStyle(this.showDots ? myself.DF.colorFunc : null)
             .fillStyle(this.showDots ? myself.DF.colorFunc : null);
     
-        if (this.chart.options.clickable){
+        if (this._shouldHandleClick()){
             this.pvDot
                 .cursor("pointer")
                 .event("click", function(d){

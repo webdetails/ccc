@@ -233,6 +233,8 @@ var Metrics3 = new pvc.MetricLineChart({
     originIsZero: true,
     showValues: false,
     showDots: true,
+    clickable: true,
+    clickAction: function(s,c,v){alert(s + " " + c + " " + v);},
     yAxisSize: 30,
     xAxisSize: 30,
     xAxisFullGrid: true,

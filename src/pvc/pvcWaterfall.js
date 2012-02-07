@@ -707,7 +707,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
 
-        if (options.clickable){
+        if(this._shouldHandleClick()){
             this.pvBar
                 .cursor("pointer")
                 .event("click", function(d){

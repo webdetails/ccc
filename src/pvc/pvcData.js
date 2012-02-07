@@ -77,6 +77,27 @@ pvc.DataEngine = Base.extend({
     setData: function(metadata, resultset){
         this.metadata  = metadata;
         this.resultset = resultset;
+
+        if(pvc.debug){
+            pvc.log("ROWS");
+            if(this.resultset){
+                this.resultset.forEach(function(row, index){
+                    pvc.log("row " + index + ": [" + row + "]");
+                });
+            }
+
+            pvc.log("COLS");
+            if(this.metadata){
+                this.metadata.forEach(function(col){
+                    pvc.log("column {" +
+                        "index: " + col.colIndex +
+                        ", name: "  + col.colName +
+                        ", label: "  + col.colLabel +
+                        ", type: "  + col.colType + "}"
+                    );
+                });
+            }
+        }
     },
     
     // TODO: in multiValued mode, have all options only related to data mapping in one object?

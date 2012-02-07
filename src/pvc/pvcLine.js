@@ -13,6 +13,9 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.ScatterAbstract.defaultOptions, options);
+
+        // This categorical chart does not support selection, yet
+        this.options.selectable = false;
     },
 
     /* @override */
@@ -146,7 +149,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             options  = chart.options,
             de = chart.dataEngine;
 
-        if(options.showTooltips || options.clickable){
+        if(options.showTooltips || this._shouldHandleClick()){
             this.pvPanel
               .events("all")
               .event("mousemove", pv.Behavior.point(Infinity));
@@ -259,7 +262,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             .strokeStyle(this.showDots?colorFunc:null)
             .fillStyle(this.showDots?colorFunc:null);
 
-        if (options.clickable){
+        if (this._shouldHandleClick()){
             this.pvDot
                 .cursor("pointer")
                 .event("click", function(d){

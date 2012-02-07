@@ -10,6 +10,9 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
 
     constructor: function(options){
         this.base(options);
+
+        // This categorical chart does not support selection, yet
+        this.options.selectable = false;
     },
 
     /* @override */

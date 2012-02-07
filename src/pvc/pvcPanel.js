@@ -47,6 +47,11 @@ pvc.Base = Base.extend({
     preRender: function() {
         pvc.log("Prerendering in pvc");
 
+        /* DEBUG current options */
+        if(pvc.debug && this.options && typeof(JSON.stringify) !== 'undefined'){
+            pvc.log("OPTIONS:\n" + JSON.stringify(this.options));
+        }
+
         // Now's as good a time as any to completely clear out all
         //  tipsy tooltips
         pvc.removeTipsyLegends();
@@ -352,7 +357,8 @@ pvc.Base = Base.extend({
             // pv.Format.number().fractionDigits(0, 10).parse(d));
         },
 
-        clickable: false,
+        clickable:  false,
+        selectable: false,
 
         clickAction: function(s, c, v) {
             pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);

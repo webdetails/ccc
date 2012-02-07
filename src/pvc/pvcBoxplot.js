@@ -21,6 +21,9 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.BoxplotChart.defaultOptions, options);
+
+        // This categorical chart does not support selection, yet
+        this.options.selectable = false;
     },
     
     /* @override */
@@ -166,10 +169,10 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
 
-        if (this.chart.options.clickable){
+        if (this._shouldHandleClick()){
             this.pvBar
                 .cursor("pointer")
-                .event("click",function(d){
+                .event("click", function(d){
                     var s = dataEngine.getVisibleSeries()[this.parent.index];
                     var c = dataEngine.getVisibleCategories()[this.index];
 
