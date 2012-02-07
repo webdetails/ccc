@@ -1879,7 +1879,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             case 'vml':
                 return this.getTextLenVML(text, font);
             case 'batik':
-                return getTextLenCGG(text, font);
+                font = this.splitFontCGG(font);
+                return getTextLenCGG(text, font.fontFamily, font.fontSize);
             case 'svg':
             default:
                 return this.getTextLenSVG(text, font);
@@ -1888,6 +1889,20 @@ pvc.AxisPanel = pvc.BasePanel.extend({
       //return (pv.renderer() != 'vml')?//TODO: support svgweb? defaulting to svg
       //  this.getTextLenSVG(text, font) :
       //  this.getTextLenVML(text, font) ;
+    },
+    
+    splitFontCGG: function(font){
+        var el = document.createElementNS('http://www.w3.org/2000/svg','text');
+        var sty = el.style;
+        sty.setProperty('font',font);
+        var result = {};
+        result.fontFamily = sty.getProperty('font-family');
+        if(!result.fontFamily){
+            result.fontFamily = 'sans-serif';
+        }
+        result.fontSize = sty.getProperty('font-size');
+        result.fontStyle = sty.getProperty('font-style');
+        return result;
     },
     
     getTextLenSVG: function(text, font){

@@ -425,32 +425,25 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         if(options.showTooltips){
-            /*   TODO:
-                {
-                    html: true,
-                    gravity: "c",
-                    fade: false,
-                    followMouse:true,
-                    opacity: 1
-                }
-             */
             this.shapes
-                .localProperty("tooltip", String) // see pvc.js
-                .tooltip(function(r, ra, i){  // NOTE: row, rowAgain, index?
-                    var tooltip;
-                    if(options.customTooltip){
-                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                        var d = r[i];
-                        tooltip = options.customTooltip(s,c,d);
-                    } else {
-                        tooltip = myself.valuesToText(r[i]);
+                .localProperty("tooltip", String) // localProperty: see pvc.js
+                .tooltip(function(r, ra, i){ // NOTE: row, rowAgain, index
+                    var tooltip = this.tooltip();
+                    if(!tooltip){
+                        if(options.customTooltip){
+                            var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                            var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                            var d = r[i];
+                            tooltip = options.customTooltip(s,c,d);
+                        } else {
+                            tooltip = myself.valuesToText(r[i]);
+                        }
                     }
                     
                     return tooltip;
                 })
                 .title(function(){
-                    return '';//prevent browser tooltip
+                    return ''; //prevent browser tooltip
                 })
                 .event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
         }
