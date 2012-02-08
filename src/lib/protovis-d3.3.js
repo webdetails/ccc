@@ -3313,31 +3313,65 @@ pv.Scale.quantitative = function() {
       var n = span / precision;
       if (n > 10) {
         switch (precision) {
+          // 1 hour
           case 36e5: {
             step = (n > 20) ? 6 : 3;
             date.setHours(Math.floor(date.getHours() / step) * step);
             break;
           }
+
+          // 30 days
           case 2592e6: {
             step = (n > 24) ? 3 : ((n > 12) ? 2 : 1);
             date.setMonth(Math.floor(date.getMonth() / step) * step);
             break;
           }
+
+          // 7 day
+          // (nn = 5:
+          //     span >= 35 days (n >= 5)
+          //     span < 150 days (n <  ~21.43)
+          case 6048e5: {
+            // span (days) | n (ticks/weeks) | step     | new n | description
+            // -----------------------------------------------------------------
+            // 106 - 149   | 15 - 22         | 3*7 = 21 | 5 - 7 | 15 weeks, ~3 months
+            //  71 - 105   | 11 - 15         | 2*7 = 14 | 5 - 7 | 11 weeks, ~2.2 months
+            //  35 -  70   |  5 - 10         | 1*7 =  7 |    -  |  5 weeks, ~1 month
+            step = (n > 15) ? 3 : (n > 10 ? 2 : 1);
+            date.setDate(Math.floor(date.getDate() / (7 * step)) * (7 * step));
+            break;
+          }
+
+          // 1 day (nn = 5: span >= 5 hours and span < 35 days)
+          // span > 10 days: more than 10 ticks
+          case 864e5: {
+            step = (n >= 30) ? 5 : ((n >= 15) ? 3 : 2);
+            date.setDate(Math.floor(date.getDate() / step) * step);
+            break;
+          }
+
+          // 1 minute
           case 6e4: {
             step = (n > 30) ? 15 : ((n > 15) ? 10 : 5);
             date.setMinutes(Math.floor(date.getMinutes() / step) * step);
             break;
           }
+
+          // 1 second
           case 1e3: {
             step = (n > 90) ? 15 : ((n > 60) ? 10 : 5);
             date.setSeconds(Math.floor(date.getSeconds() / step) * step);
             break;
           }
+
+          // 1 millisecond
           case 1: {
             step = (n > 1000) ? 250 : ((n > 200) ? 100 : ((n > 100) ? 50 : ((n > 50) ? 25 : 5)));
             date.setMilliseconds(Math.floor(date.getMilliseconds() / step) * step);
             break;
           }
+
+          // 31536e6 - 1 ano
           default: {
             step = pv.logCeil(n / 15, 10);
             if (n / step < 2) step /= 5;

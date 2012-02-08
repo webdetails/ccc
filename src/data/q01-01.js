@@ -165,6 +165,65 @@ var relational_01 = {
   }]
 };
 
+var relational_012 = {
+  "resultset":[
+  ["Green","2011-07-03",72],
+  ["Green","2011-07-10",50],
+  ["Green","2011-07-17",20],
+  ["Green","2011-07-24",23],
+  ["Green","2011-07-31",72],
+  ["Green","2011-08-02",50],
+
+  ["Blue","2011-07-03",60],
+  ["Blue","2011-07-10",40],
+  ["Blue","2011-07-17",15],
+  ["Blue","2011-07-24",3],
+  ],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"Series"
+  },{
+    "colIndex":1,
+    "colType":"String",
+    "colName":"Categories"
+  },{
+    "colIndex":2,
+    "colType":"Numeric",
+    "colName":"Value"
+  }]
+};
+
+var relational_013 = {
+  "resultset":[
+  ["Green","2011-07-03",72],
+  ["Green","2011-07-10",50],
+  ["Green","2011-07-17",20],
+  ["Green","2011-07-24",23],
+  ["Green","2011-07-31",72],
+  ["Green","2011-08-02",50],
+
+  ["Blue","2011-07-03",60],
+  ["Blue","2011-07-10",40],
+  ["Blue","2011-07-17",15],
+  ["Blue","2011-07-24",3],
+  ["Blue","2011-09-30",30],
+  ],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"Series"
+  },{
+    "colIndex":1,
+    "colType":"String",
+    "colName":"Categories"
+  },{
+    "colIndex":2,
+    "colType":"Numeric",
+    "colName":"Value"
+  }]
+};
+
 var relational_test = 
 {
   "resultset":[["Infrastructure Security",3]],
