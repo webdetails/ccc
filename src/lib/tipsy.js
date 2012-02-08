@@ -179,9 +179,9 @@ pv.Behavior.tipsy = function(opts) {
          * events, such as "click"); thus the mouseleave event handler is
          * registered on the event target rather than the tip overlay.
          */
-        if (tip.style.height){
+//        if (tip.style.height){
             $(pv.event.target).mouseleave(trigger);
-        }
+  //      }
 
         $(tip).tipsy("show");
     };
