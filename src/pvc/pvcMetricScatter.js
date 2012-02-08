@@ -121,9 +121,9 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             options = this.chart.options,
             dataEngine = this.chart.dataEngine;
 
-        // TODO: what's this?
         if(options.showTooltips || this._shouldHandleClick()){
             this.pvPanel
+                // Receive events even if in a transparent panel (default is "painted")
                 .events("all")
                 .event("mousemove", pv.Behavior.point(Infinity));
         }

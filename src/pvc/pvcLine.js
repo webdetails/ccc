@@ -151,6 +151,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         if(options.showTooltips || this._shouldHandleClick()){
             this.pvPanel
+              // Receive events even if in a transparent panel (default is "painted")
               .events("all")
               .event("mousemove", pv.Behavior.point(Infinity));
         }
