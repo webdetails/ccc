@@ -361,9 +361,14 @@ var markRender = pv.Mark.prototype.render,
 
 // @replace
 pv.Panel.prototype.add = function(){
-    this._needChildSort = this._needChildSort || this._hasZOrderChild;
-    
-    return panelAdd.apply(this, arraySlice.call(arguments));
+    var mark = panelAdd.apply(this, arraySlice.call(arguments));
+
+    // Detect new child with non-zero ZOrder
+    if(!this._hasZOrderChild && mark._zOrder !== 0){
+        this._hasZOrderChild = this._needChildSort  = true;
+    }
+
+    return mark;
 };
 
 // @replace

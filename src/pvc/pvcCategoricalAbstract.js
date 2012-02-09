@@ -1249,7 +1249,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             rSize = rMax - rMin;
         
         this.pvRule = this.pvPanel.add(pv.Rule)
-        		.zOrder(30) // see pvc.js
+                .zOrder(30) // see pvc.js
                 .strokeStyle('black')
                 // ex: anchor = bottom
                 [this.anchorOpposite()](0)     // top    (of the axis panel)
