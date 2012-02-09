@@ -1,12 +1,20 @@
 pv.Behavior.tipsy = function(opts) {
+    /**
+     * One tip is reused per behavior instance.
+     * Tipically there is one behavior instance per mark,
+     * and this is reused across all its mark instances.
+     */
     var tip;
-
+    
     /**
      * @private When the mouse leaves the root panel, trigger a mouseleave event
      * on the tooltip span. This is necessary for dimensionless marks (e.g.,
      * lines) when the mouse isn't actually over the span.
      */
-    function trigger() {
+    function removeTipsy(ev) {
+        // Do not leak memory
+        $(ev.target).unbind('mouseleave', removeTipsy);
+        
         if (tip) {
             $(tip).tipsy("hide");
             if(tip.parentNode) {
@@ -19,23 +27,27 @@ pv.Behavior.tipsy = function(opts) {
     function followMouseMoveAbs(ev){
         // TODO: with Dots, only works well if gravity is set to "c"...
         if(tip) {
-          var tipLbl = $(tip).tipsy("tip");
-          var extra = 8;//px
-          var x= ev.pageX + extra;
-              y= ev.pageY + extra;
+            var tipLbl = $(tip).tipsy("tip"),
+                extra = 8,//px
+                x,
+                y;
 
-          // Prevent being cropped by window
-          if(ev.clientX + extra + tipLbl.width() > document.body.clientWidth){
-            x = ev.pageX - extra - tipLbl.width();
-          }
-          if(ev.clientY + extra + tipLbl.height() > document.body.clientHeight){
-            y = ev.pageY - extra - tipLbl.height();
-          }
+            // Prevent being cropped by window
+            if(ev.clientX + extra + tipLbl.width() > document.body.clientWidth){
+                x = ev.pageX - extra - tipLbl.width();
+            } else {
+                x = ev.pageX + extra;
+            }
 
-          tipLbl.css('left', x + "px");
-          tipLbl.css('top',  y + "px");
-      }
+            if(ev.clientY + extra + tipLbl.height() > document.body.clientHeight){
+                y = ev.pageY - extra - tipLbl.height();
+            } else {
+                y = ev.pageY + extra;
+            }
 
+            tipLbl.css('left', x + "px");
+            tipLbl.css('top',  y + "px");
+        }
     }
 
     function toParentTransform(parentPanel){
@@ -107,12 +119,12 @@ pv.Behavior.tipsy = function(opts) {
         };
     }
 
-    return function(d) {
+    function startTooltip(d) {
         /* Create and cache the tooltip span to be used by tipsy. */
         if (!tip) {
             var c = this.root.canvas();
             c.style.position = "relative";
-            $(c).mouseleave(trigger);
+            $(c).mouseleave(removeTipsy);
 
             tip = c.appendChild(document.createElement("div"));
             tip.style.position = "absolute";
@@ -173,16 +185,28 @@ pv.Behavior.tipsy = function(opts) {
         }
         
         /*
-         * Cleanup the tooltip span on mouseout. Immediately trigger the tooltip;
-         * this is necessary for dimensionless marks. Note that the tip has
-         * pointer-events disabled (so as to not interfere with other mouse
-         * events, such as "click"); thus the mouseleave event handler is
-         * registered on the event target rather than the tip overlay.
+         * Cleanup the tooltip span on mouseout.
+         * This is necessary for dimensionless marks.
+         *
+         * Note that the tip has pointer-events disabled
+         * (so as to not interfere with other mouse events, such as "click");
+         * thus the mouseleave event handler is registered on
+         * the event target rather than the tip overlay.
+         *
+         * HACK: Accessing protovis private field.
          */
-        if (tip.style.height){
-            $(pv.event.target).mouseleave(trigger);
+        if(this.$handlers['point'] === startTooltip){
+            // Being used as a point handler
+            // Should remove the tipsy only in the unpoint event
+            if(!this.$handlers['unpoint']){
+                this.event('unpoint', removeTipsy);
+            }
+        } else {
+            $(pv.event.target).mouseleave(removeTipsy);
         }
 
         $(tip).tipsy("show");
-    };
+    }
+
+    return startTooltip;
 };

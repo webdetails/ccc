@@ -125,7 +125,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             this.pvPanel
                 // Receive events even if in a transparent panel (default is "painted")
                 .events("all")
-                .event("mousemove", pv.Behavior.point(Infinity));
+                .event("mousemove", pv.Behavior.point(40));
         }
 
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
