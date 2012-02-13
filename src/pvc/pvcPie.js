@@ -5,7 +5,7 @@
 pvc.PieChart = pvc.Base.extend({
 
   pieChartPanel : null,
-  legendSource: "categories",
+  legendSource: 'category',
   tipsySettings: {
     gravity: "s",
     fade: true

@@ -284,7 +284,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         var serIndex = this.pvHeatGrid.index;
         if(serIndex >= 0){
             var datumRef = {
-                categories: this.pvHeatGrid.parent.index,
+                category: this.pvHeatGrid.parent.index,
                 series:     serIndex
             };
 
@@ -540,7 +540,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 var c = cSel[j];
 
                 where.push({
-                    categories: [c],
+                    category: [c],
                     series:     [s]
                 });
             }

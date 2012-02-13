@@ -13,7 +13,7 @@ pvc.DataTree = pvc.Base.extend({
     structDataset:  null,
 
     DataTreePanel : null,
-    legendSource: "categories",
+    legendSource: 'category',
 
     constructor: function(options){
 

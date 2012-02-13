@@ -570,6 +570,10 @@ pvc.roundScaleDomain = function(scale, roundMode, desiredTickCount){
 };
 
 /* PROPERTIES */
+/**
+ * Returns the value of a property as specified upon definition,
+ * and, thus, without evaluation.
+ */
 pv.Mark.prototype.getStaticPropertyValue = function(name) {
     var properties = this.$properties;
     for (var i = 0, L = properties.length; i < L; i++) {
@@ -580,7 +584,17 @@ pv.Mark.prototype.getStaticPropertyValue = function(name) {
     }
     //return undefined;
 };
-  
+
+/**
+ * Function used to propagate a datum received, as a singleton list.
+ * Use this to prevent re-evaluation of inherited data property functions!
+ */
+pv.dataIdentity = function(datum){
+    //pvc.log("dataIdentity " + this.type + " datum: " + 
+    //        (typeof datum.describe == 'function' ? datum.describe() : datum));
+    return [datum];
+};
+
 /* ANCHORS */
 /**
  * name = left | right | top | bottom

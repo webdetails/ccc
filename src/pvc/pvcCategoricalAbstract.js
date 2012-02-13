@@ -237,7 +237,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             onSeries = (axis == "x") ? !isVertical : isVertical;
         }
 
-        return onSeries ? 'series' : 'categories';
+        return onSeries ? 'series' : 'category';
     },
 
     /**
@@ -799,8 +799,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         if(action){
             var datum = this._getRenderingDatum(mark);
             if(datum){
-                var s = datum.keyValues.series,
-                    c = datum.keyValues.categories;
+                var s = datum.elem.series.value,
+                    c = datum.elem.category.value;
 
                 this._ignoreClicks = 2;
 
@@ -855,8 +855,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                 d = d[0];
             }
 
-            var s = datum.keyValues.series,
-                c = datum.keyValues.categories;
+            var s = datum.elem.series.value,
+                c = datum.elem.category.value;
 
             action.call(mark, s, c, d, ev, datum);
         }
@@ -994,7 +994,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             if(ySelections.length > 0 && xSelections.length > 0){
                 // Select the INTERSECTION
                 selectedData = dataEngine.getWhere([
-                    {series: sSelections, /* AND */ categories: cSelections}
+                    {series: sSelections, /* AND */ category: cSelections}
                 ]);
                 
             } else if (ySelections.length > 0 || xSelections.length > 0){
@@ -1003,7 +1003,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
                 selectedData = dataEngine.getWhere([
                     {series: sSelections}, // OR
-                    {categories: cSelections}
+                    {category: cSelections}
                 ]);
 
             } else {
@@ -1056,9 +1056,20 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             this.pvPanel.root.fillStyle(invisibleFill);
         }
 
+        var selectionEndedDate;
         this.pvPanel.root
             .data([myself.rubberBand])
             .event("click", function() {
+                // It happens sometimes that the click is fired 
+                //  after mouse up, ending up clearing a just made selection.
+                if(selectionEndedDate){
+                    var timeSpan = new Date() - selectionEndedDate;
+                    if(timeSpan < 300){
+                        selectionEndedDate = null;
+                        return;
+                    }
+                }
+                
                 var ev = arguments[arguments.length - 1];
                 //if(options.ctrlSelectMode && !ev.ctrlKey)
                 dataEngine.clearSelections();
@@ -1084,6 +1095,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
                     // Process selection
                     dispatchRubberBandSelection(rb, ev);
+
+                    selectionEndedDate = new Date();
                 }
             });
     },
@@ -1411,10 +1424,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     renderLinearAxisLabel: function(ticks){
-     // Labels are visible (only) on MAJOR ticks,
+        // Labels are visible (only) on MAJOR ticks,
         // On first and last tick care is taken
         //  with their H/V alignment so that
-        //  the label is not drawn of the chart.
+        //  the label is not drawn off the chart.
 
         // Use this margin instead of textMargin, 
         // which affects all margins (left, right, top and bottom).

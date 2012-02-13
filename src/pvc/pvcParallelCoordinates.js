@@ -8,7 +8,7 @@
 pvc.ParallelCoordinates = pvc.Base.extend({
 
   parCoordPanel : null,
-  legendSource: "categories",
+  legendSource: 'category',
 
   tipsySettings: {
     gravity: "s",

@@ -99,7 +99,7 @@ pvc.DataDimension = Base.extend(
         // NOTE: The hierarchy need not be uniform.
         // Some leaf nodes may have depth 1, while others, depth 2.
         
-        var root   = this._addElement(),
+        var root   = new pvc.DataElement(),
             values = onlyVisible ? this.getVisibleValues() : this.getValues();
 
         if(reversed){
@@ -120,16 +120,17 @@ pvc.DataDimension = Base.extend(
 
                 var child = node.childNodesByKey[key];
                 if(!child){
-                    child = this._addElement(key, node);
+                    // Only leaf nodes receive indexes
+                    var index = k === K - 1 ? elements.length : -1;
+                    child = new pvc.DataElement(key, node, index);
                 }
-
-                // Some data contains duplicates.
-                // Such as in the category dimension of metric charts.
-                // Try pvcMetricScatter.js
-//                else if(k === K - 1)
-//                {
-//                    //throw new Error("Not-unique key data.");
-//                }
+                // Duplicate values are ignored
+                // This happend because not all translators return distinct
+                // per dimension values.
+                // The crosstab translator does not check whether the provided
+                // categories are unique when getCategories is called.
+                // Duplicates happen, for example in Metric charts
+                // (for example, see dataset 'testLDot2' in the pvMetricDots.html sample)
 
                 node = child;
             }
@@ -147,44 +148,18 @@ pvc.DataDimension = Base.extend(
         };
     },
 
-    _addElement: function(key, parent){
-        if(!parent){
-            // Parent is a dummy root
-            key = null;
-        }
-        
-        var child = new pv.Dom.Node(key); // TODO: create subclass
-        //child.nodeValue = key; // constructor does this
-        child.value    = key;
-        child.nodeName = key || "";
-        child.childNodesByKey = {};
-        child.toString = function(){ // TODO: share this function
-            return this.value;
-        };
-
-        if(!parent){
-            child.path     = [];
-            child.absValue = null;
-            child.label    = "";
-            child.absLabel = "";
-        } else {
-            child.path     = parent.path.concat(key);
-            child.absValue = pvc.join("~", parent.absValue, key);
-            child.label    = "" + (this._calcLabel ? this._calcLabel(key) : key);
-            child.absLabel = pvc.join(" ~ ", parent.absLabel, child.label);
-
-            parent.appendChild(child);
-            parent.childNodesByKey[key] = child;
-        }
-
-        return child;
-    },
-
     /**
      * Returns the nth unique value.
      */
     getValue: function(index){
         return this.getValues()[index];
+    },
+
+    /**
+     * Returns the nth unique element.
+     */
+    getElement: function(index){
+        return this.getElements()[index];
     },
     
     /**
@@ -272,8 +247,8 @@ pvc.DataDimension = Base.extend(
         }
         
         // Clear visible cache
-        this._visibleValues  = null;
-        this._visibleIndexes = null;
+        this._visibleValues   = null;
+        this._visibleIndexes  = null;
         this._visibleElements = null;
         
         return true;
@@ -327,11 +302,12 @@ pvc.DataDimension = Base.extend(
      * Most suitable for "linear" dimensions -
      * works with number, string and date value types.
      */
-    getMinValue: function() {
+    getMinValue: function(key) {
         var min;
         this.getValues().forEach(function(value, index){
-            if(index === 0 || value < min){
-                min = value;
+            var k = key ? key(value, index) : value;
+            if(index === 0 || k < min){
+                min = k;
             }
         });
         
@@ -343,11 +319,12 @@ pvc.DataDimension = Base.extend(
      * Most suitable for "linear" dimensions -
      * works with number, string and date value types.
      */
-    getMaxValue: function() {
+    getMaxValue: function(key) {
         var max;
         this.getValues().forEach(function(value, index){
-            if(index === 0 || value > max){
-                max = value;
+            var k = key ? key(value, index) : value;
+            if(index === 0 || k > max){
+                max = k;
             }
         });
         
@@ -381,3 +358,39 @@ pvc.DataDimension = Base.extend(
         }
     }
 });
+
+pvc.DataElement = function(key, parent, leafIndex){
+    if(!parent){
+        // Parent is a dummy root
+        key = null;
+    }
+
+    pv.Dom.Node.call(this, key);
+    //this.nodeValue = key; // base constructor does this
+    this.value    = key;
+    this.nodeName = key || "";
+    this.childNodesByKey = {};
+    this.leafIndex = leafIndex; // Unfortunately 'index' already is utilized by the base class according to PRE-ORDER DFS order
+    
+    if(!parent){
+        this.path     = [];
+        this.absValue = null;
+        this.label    = "";
+        this.absLabel = "";
+    } else {
+        this.path     = parent.path.concat(key);
+        this.absValue = pvc.join("~", parent.absValue, key);
+        this.label    = "" + (this._calcLabel ? this._calcLabel(key) : key);
+        this.absLabel = pvc.join(" ~ ", parent.absLabel, this.label);
+
+        parent.appendChild(this);
+        parent.childNodesByKey[key] = this;
+    }
+};
+
+pvc.DataElement.prototype = new pv.Dom.Node();
+pvc.DataElement.prototype.constructor = pvc.DataElement;
+
+pvc.DataElement.prototype.toString = function(){
+    return this.value;
+};

@@ -1,40 +1,30 @@
 
-pvc.Datum = Base.extend(
-/** 
- * @lends Datum# 
+/**
+ * A datum is the atomic data entity of the data model.
+ * A datum contains key properties, of specific data dimensions.
+ * A datum contains a value property.
+ * A datum belongs to a given data engine.
+ *
+ *  datum.elem["series"].value;
+ *  datum.elem.category.value;
+ *
+ * @constructs
+ */
+pvc.Datum = function(dataEngine, datumIndex, elemsByDim, value){
+    // TODO: hardcoded for 2 dimensions
+
+    this.engine = dataEngine;
+    this.index = datumIndex; // -1 => null datum
+    this.elem = elemsByDim;
+    this.value = value;
+    this._selected = false;
+};
+
+$.extend(pvc.Datum.prototype,
+/**
+ * @lends Datum#
  */
 {
-    /**
-     * A datum is the atomic data entity of the data model.
-     * A datum contains key properties, of specific data dimensions.
-     * A datum contains a value property.
-     * A datum belongs to a given data engine.
-     * @constructs
-     */
-    constructor: function(dataEngine, datumIndex, serIndex, serValue, catIndex, catValue, value){
-        // TODO: hardcoded for 2 dimensions
-        
-        this.engine = dataEngine;
-        this.index = datumIndex; // -1 => null datum
-        
-        this.keyValues = {
-            series:     serValue,
-            categories: catValue
-        };
-        
-        this.keyIndexes = {
-            series:     serIndex,
-            categories: catIndex
-        };
-        
-        this.value = value;
-        
-        this._selected = false;
-    },
-    
-    // -------------------
-    // Selected state
-    
     // Called by engine on clear
     _deselect: function(){
         this._selected = false;
@@ -72,5 +62,23 @@ pvc.Datum = Base.extend(
      */
     toggleSelected: function(){
         this.setSelected(!this._selected);
+    },
+
+    describe: function(){
+        var s = ["DATUM #" + this.index];
+
+        this.engine._dimensionList.forEach(function(dimension){
+            var name = dimension.name,
+                elem = this.elem[name];
+            s.push(
+                "\t" + name + ": " +
+                     JSON.stringify(elem.value) + "|" + elem.index);
+        }, this);
+        
+        return s.join(" ");
+    },
+
+    toString: function(){
+        return '' + this.value;
     }
 });

@@ -107,7 +107,7 @@ pvc.DataEngine = Base.extend({
     
     /** 
      * Initializes the currently supported dimensions:
-     * 'series' and 'categories'.
+     * 'series' and 'category'.
      */
     _initDimensions: function(){
         // dimensionName -> state
@@ -117,7 +117,7 @@ pvc.DataEngine = Base.extend({
         var me = this;
         
         // Must be first, to match the order in the values matrix (lines)
-        this._defDimension('categories', {
+        this._defDimension('category', {
             fetchValues: function(){ return me._fetchCategories(); },
             calcLabel:   this.chart.options.getCategoryLabel
         });
@@ -350,20 +350,20 @@ pvc.DataEngine = Base.extend({
      * Returns the categories on the underlying data
      */
     getCategories: function(){
-        return this.getDimensionValues('categories');
+        return this.getDimensionValues('category');
     },
 
     getCategoryMin: function() {
-        return this.getDimension('categories').getMinValue();
+        return this.getDimension('category').getMinValue();
     },
 
     getCategoryMax: function() {
-        return this.getDimension('categories').getMaxValue();
+        return this.getDimension('category').getMaxValue();
     },
 
     /**
      * Returns the categories on the underlying data
-     * @deprecated use dataEngine.getDimensionValue('categories', idx) instead
+     * @deprecated use dataEngine.getDimensionValue('category', idx) instead
      */
     getCategoryByIndex: function(idx){
         return this.getCategories()[idx];
@@ -371,7 +371,7 @@ pvc.DataEngine = Base.extend({
 
     /**
      * Returns an array with the indexes for the categories
-     * @deprecated use pv.Range(dataEngine.getDimensionSize('categories'))
+     * @deprecated use pv.Range(dataEngine.getDimensionSize('category'))
      */
     getCategoriesIndexes: function(){
         // we'll just return everything
@@ -382,14 +382,14 @@ pvc.DataEngine = Base.extend({
      * Returns an array with the indexes for the visible categories
      */
     getVisibleCategoriesIndexes: function(){
-        return this.getDimensionVisibleIndexes('categories');
+        return this.getDimensionVisibleIndexes('category');
     },
 
     /**
      * Returns an array with the visible categories.
      */
     getVisibleCategories: function(){
-        return this.getDimensionVisibleValues('categories');
+        return this.getDimensionVisibleValues('category');
     },
 
     /**
@@ -397,7 +397,7 @@ pvc.DataEngine = Base.extend({
      * Returns true if category is now visible, false otherwise.
      */
     toggleCategoryVisibility: function(index){
-        return this.toggleDimensionVisible('categories', index);
+        return this.toggleDimensionVisible('category', index);
     },
     
     // ---------------------
@@ -608,7 +608,7 @@ pvc.DataEngine = Base.extend({
      * Returns how many categories, or data points, we have
      */
     getCategoriesSize: function(){
-        return this.getDimensionSize('categories');
+        return this.getDimensionSize('category');
     },
 
     /**
@@ -686,14 +686,17 @@ pvc.DataEngine = Base.extend({
         return this._dataTree;
     },
     
-    // Indexes data on a hierarchical index
+    // Indexes data on a hierarchical index,
+    //  in the order of _dimensionList.
+    // The values of key dimensions of datums
+    //  must identify amongst all.
     _createDataTree: function(){
         
         function recursive(parentDimNode, datum, dimIndex /* level*/){
             // parentDimNode has one child per != keyIndex 
             // that data have on this dimension, on this path.
             var dimName  = this._dimensionList[dimIndex].name,
-                keyIndex = datum.keyIndexes[dimName],
+                keyIndex = datum.elem[dimName].leafIndex,
                 dimNode = parentDimNode[keyIndex];
 
             if(dimIndex === lastD){
@@ -782,10 +785,10 @@ pvc.DataEngine = Base.extend({
         return new pvc.Datum(
                     this, 
                     -1, 
-                    datumRef.series, 
-                    this._dimensions['series'].getValue(datumRef.series),
-                    datumRef.categories, 
-                    this._dimensions['categories'].getValue(datumRef.categories),
+                    {
+                        series:   this._dimensions['series'].getElement(datumRef.series),
+                        category: this._dimensions['category'].getElement(datumRef.category)
+                    },
                     null);
     },
     
@@ -875,14 +878,21 @@ pvc.DataEngine = Base.extend({
     /**
      * Returns all the datums that 
      * satisfy the given 'where' specification.
+     * @see #forEachWhere
      */
-    getWhere: function(where){
+    getWhere: function(where, keyArgs){
         var data = [];
         
         this.forEachWhere(where, function(datum){
             data.push(datum);
         });
         
+        var sorter = pvc.get(keyArgs, 'sorter');
+        if(sorter){
+            // Sorts in-place
+            data.sort(sorter);
+        }
+
         return data;
     },
     
@@ -908,7 +918,7 @@ pvc.DataEngine = Base.extend({
      * <pre>
      * [
      *      {series: ['Green']}, // OR
-     *      {series: ['Blue'], categories: ['Bread', 'Butter']}
+     *      {series: ['Blue'], category: ['Bread', 'Butter']}
      * ]
      * </pre>
      */

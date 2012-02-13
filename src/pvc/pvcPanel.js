@@ -1,8 +1,13 @@
 
+pvc.Abstract = Base.extend({
+    invisibleLineWidth: 0.001,
+    defaultLineWidth:   1.5
+});
+
 /**
  * The main component
  */
-pvc.Base = Base.extend({
+pvc.Base = pvc.Abstract.extend({
 
     isPreRendered: false,
     isAnimating:   false,
@@ -261,21 +266,31 @@ pvc.Base = Base.extend({
      * WARNING: It's the user's responsibility to make sure that
      * unexisting methods don't blow this.
      */
-    extend: function(mark, prefix) {
+    extend: function(mark, prefix, keyArgs) {
         // if mark is null or undefined, skip
         if (mark) {
             var points = this.options.extensionPoints;
             if(points){
-                var pL = prefix.length;
+                var pL = prefix.length,
+                    wrapper = pvc.get(keyArgs, 'wrapper'),
+                    context = pvc.get(keyArgs, 'context');
+
                 for (var p in points) {
                     // Starts with
                     if (p.indexOf(prefix) === 0) {
-                        var m = p.substring(pL);
+                        var m = p.substring(pL),
+                            v = points[p];
+
                         // Distinguish between mark methods and properties
                         if (typeof mark[m] === "function") {
-                            mark[m](points[p]);
+                            // Now check if function wrapping is needed
+                            if(wrapper && typeof v === 'function'){
+                                v = wrapper.call(context, v);
+                            }
+                            
+                            mark[m](v);
                         } else {
-                            mark[m] = points[p];
+                            mark[m] = v;
                         }
                     }
                 }
@@ -374,7 +389,7 @@ pvc.Base = Base.extend({
  * Each class that extends pvc.base will be 
  * responsible to know how to use it.
  */
-pvc.BasePanel = Base.extend({
+pvc.BasePanel = pvc.Abstract.extend({
 
     chart: null,
     _parent: null,

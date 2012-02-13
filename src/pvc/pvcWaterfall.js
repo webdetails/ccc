@@ -309,8 +309,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 de = this.chart.dataEngine;
 
             var datumRef = {
-                categories: de.translateDimensionVisibleIndex('categories', visibleCatIndex),
-                series:     de.translateDimensionVisibleIndex('series',     visibleSerIndex)
+                category: de.translateDimensionVisibleIndex('category', visibleCatIndex),
+                series:   de.translateDimensionVisibleIndex('series',   visibleSerIndex)
             };
 
             return de.findDatum(datumRef, true);
@@ -491,7 +491,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         this.DF.colorFunc = function(){
             var datum = myself._getRenderingDatum(this),
-                seriesIndex = datum.keyIndexes.series;
+                seriesIndex = datum.elem.series.leafIndex;
 
             // Change the color of the totals series
             if (myself.waterfall && seriesIndex == totalsSeriesIndex) {
@@ -667,8 +667,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 // TODO: for the no series case... 's' assumes the value "Series"
                 // added by the translator
                 var datum = myself._getRenderingDatum(this),
-                    s = datum.keyValues.series,
-                    c = datum.keyValues.categories;
+                    s = datum.elem.series.value,
+                    c = datum.elem.category.value;
                     // d = datum.values
 
                 return options.tooltipFormat.call(myself, s, c, d, datum);
@@ -689,8 +689,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                     var tooltip;
                     if(options.customTooltip){
                         var datum = myself._getRenderingDatum(this),
-                            s = datum.keyValues.series,
-                            c = datum.keyValues.categories,
+                            s = datum.elem.series.value,
+                            c = datum.elem.category.value,
                             d = r;
 
                         tooltip = options.customTooltip.call(null, s, c, d, datum);
@@ -897,8 +897,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 //                    " [" + [i,j] + "]=[" + [categories[i],series[j]]  + "]");
 
             where.push({
-                categories: [categories[i]],
-                series:     [series[j]]
+                category: [categories[i]],
+                series:   [series[j]]
             });
         }, this);
 

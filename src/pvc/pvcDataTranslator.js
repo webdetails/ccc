@@ -38,15 +38,13 @@ pvc.DataTranslator = Base.extend({
     },
 
     getColumns: function(){
-        // First column of every row, skipping 1st entry
+        // First row, skipping 1st (dummy) element
         return this.values[0].slice(1);
     },
 
     getRows: function(){
-        // first element of every row, skipping 1st one
-        return this.values.slice(1).map(function(d){
-            return d[0];
-        });
+        // First element of every row, skipping 1st row
+        return this.values.slice(1).map(function(row){ return row[0]; });
     },
 
     getData: function(){
@@ -86,7 +84,7 @@ pvc.DataTranslator = Base.extend({
             for (var i = columnIndexes.length - 1 ; i >= 0 ; i--) {
                 var columnIndex = Number(columnIndexes[i]);
                 
-                // TODO: Can a column index be < 0 ? In what cases?
+                // TODO: Can a column index not be >= 0? NaN? In what cases?
                 if(columnIndex >= 0){
                     columnIndex += 1;
                 }
@@ -109,35 +107,34 @@ pvc.DataTranslator = Base.extend({
     },
 
     _createData: function(){
-        // Create data table
+        // Create data
         var data = [],
-            serRow;
+            //serRow,
+            dimSeries = this.dataEngine.getDimension('series'),
+            dimCategs = this.dataEngine.getDimension('category');
         
         // Crosstab to object/relational
         this.values.forEach(function(row, rowIndex){
             if(rowIndex === 0){
                 // 1st row contains series
-                serRow = row;
+                //serRow = row;
             } else {
                 // Remaining rows are 1 per category
-                var catValue,
-                    catIndex = rowIndex - 1;
+                var catIndex = rowIndex - 1,
+                    catElem  = dimCategs.getElement(catIndex);
 
                 row.forEach(function(value, colIndex){
                     if(colIndex === 0){
                         // 1st column contains the category
-                        catValue = value;
+                        // catValue = value;
                     } else if(value != null){
                         // Remaining columns the series values
-                        var serValue = serRow[colIndex],
-                            serIndex = colIndex - 1,
+                        var serIndex = colIndex - 1,
+                            serElem  = dimSeries.getElement(serIndex),
                             datum = new pvc.Datum(
                                         this.dataEngine, 
                                         data.length,
-                                        serIndex, 
-                                        serValue, 
-                                        catIndex, 
-                                        catValue,
+                                        {series: serElem, category: catElem},
                                         value);
                        data.push(datum);
                     }

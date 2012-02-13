@@ -261,8 +261,8 @@ var heatGrid5 = new pvc.HeatGridChart({
         var selTxt = '';
         for(var i=0;i&lt;selections.length;i++){
             var datum = selections[i];
-            selTxt += 'category:[' + datum.keyValues.categories.join(', ') + '] ';
-            selTxt += ', series:[' + datum.keyValues.series.join(', ') + ']&lt;br&gt;';
+            selTxt += 'category:[' + datum.elem.category.path.join(', ') + '] ';
+            selTxt += ', series:[' + datum.elem.series.path.join(', ') + ']&lt;br&gt;';
         }
         $('#selected').html(selTxt);
     },
