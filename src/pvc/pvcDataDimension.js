@@ -99,7 +99,7 @@ pvc.DataDimension = Base.extend(
         // NOTE: The hierarchy need not be uniform.
         // Some leaf nodes may have depth 1, while others, depth 2.
         
-        var root   = new pvc.DataElement(),
+        var root   = new pvc.DataElement(this),
             values = onlyVisible ? this.getVisibleValues() : this.getValues();
 
         if(reversed){
@@ -122,7 +122,7 @@ pvc.DataDimension = Base.extend(
                 if(!child){
                     // Only leaf nodes receive indexes
                     var index = k === K - 1 ? elements.length : -1;
-                    child = new pvc.DataElement(key, node, index);
+                    child = new pvc.DataElement(this, key, node, index);
                 }
                 // Duplicate values are ignored
                 // This happend because not all translators return distinct
@@ -359,7 +359,7 @@ pvc.DataDimension = Base.extend(
     }
 });
 
-pvc.DataElement = function(key, parent, leafIndex){
+pvc.DataElement = function(dimension, key, parent, leafIndex){
     if(!parent){
         // Parent is a dummy root
         key = null;
@@ -380,7 +380,7 @@ pvc.DataElement = function(key, parent, leafIndex){
     } else {
         this.path     = parent.path.concat(key);
         this.absValue = pvc.join("~", parent.absValue, key);
-        this.label    = "" + (this._calcLabel ? this._calcLabel(key) : key);
+        this.label    = "" + (dimension._calcLabel ? dimension._calcLabel(key) : key);
         this.absLabel = pvc.join(" ~ ", parent.absLabel, this.label);
 
         parent.appendChild(this);

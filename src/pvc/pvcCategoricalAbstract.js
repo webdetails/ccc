@@ -1751,7 +1751,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return 0.5; //non-terminal items, so grouping is visible
             })
             .text(function(d){
-                return d.nodeLabel;
+                return d.label;
             });
 
         //cutoffs -> snap to vertical/horizontal
