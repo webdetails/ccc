@@ -211,7 +211,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .textBaseline("bottom")
     .left(titleOffset)
     .text(function(d){
-      return d.title;
+      return d.formattedTitle;
     });
 
     this.pvBulletSubtitle = this.pvBullet.anchor(anchor).add(pv.Label)
@@ -221,15 +221,15 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .textBaseline("top")
     .left(titleOffset)
     .text(function(d){
-      return d.subtitle;
+      return d.formattedSubtitle;
     });
 
-	var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ? 
-	function(d, e) {
-		ignoreClicks = 2;
-		myself.chart.options.axisDoubleClickAction(d, e);
-		
-	}: null;
+    var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ?
+    function(d, e) {
+            //ignoreClicks = 2;
+            myself.chart.options.axisDoubleClickAction(d, e);
+
+    }: null;
     
     if (doubleClickAction) {
     	this.pvBulletTitle.events('all')  //labels don't have events by default
@@ -279,7 +279,10 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       markers:   this.chart.options.bulletMarkers  || []
     };
     
-    var data = [];
+    var data = [],
+        options = this.chart.options,
+        getSeriesLabel   = options.getSeriesLabel || pv.identity,
+        getCategoryLabel = options.getCategoryLabel || pv.identity;
 
     if(this.chart.dataEngine.getSeriesSize() == 0 ) {
       // No data
@@ -299,18 +302,24 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             // Value only
             d.measures = [s];
             break;
+
           case 2:
             // Name, value and markers
             d.markers = [v[1]];
+            // NO break!
           case 1:
             // name and value
             d.title = s;
+            d.formattedTitle = getCategoryLabel(s);
             d.measures = [v[0]];
             break;
+
           default:
             // greater or equal 4
             d.title = s;
             d.subtitle = v[0];
+            d.formattedTitle = getCategoryLabel(s);
+            d.formattedSubtitle = getSeriesLabel(v[0])
             d.measures = [v[1]];
             d.markers = [v[2]];
             if (v.length >= 3){
