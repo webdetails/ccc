@@ -134,21 +134,18 @@ pvc.WaterfallTranslator = pvc.DataTranslator.extend({
         this.resultset = this.sourceTranslator.resultset;
 
         if(this.isWaterfall && this.isVertical){
-            // Place Total as last position
-            // So that when drawing (reversed) it remains at the bottom
+            // Put the Total column in the last position
+            //  so that when drawing, reversed,
+            //  it remains at the bottom
             // ... ["Cat1",  800, 1200, "U"],
             // row[1] -> row[L-1]
-
-            function switchWaterFallSpec(row){
+            this.values = this.values.map(function(row){
                 row = row.slice(0);
                 row.push(row[1]);
                 row.splice(1, 1);
 
                 return row;
-            }
-
-            this.values = this.values.map(switchWaterFallSpec);
-            //this.metadata = reverseRowExceptFirstCol(this.metadata);
+            });
         }
     }
 });

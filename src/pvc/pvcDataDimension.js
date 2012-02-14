@@ -358,39 +358,3 @@ pvc.DataDimension = Base.extend(
         }
     }
 });
-
-pvc.DataElement = function(dimension, key, parent, leafIndex){
-    if(!parent){
-        // Parent is a dummy root
-        key = null;
-    }
-
-    pv.Dom.Node.call(this, key);
-    //this.nodeValue = key; // base constructor does this
-    this.value    = key;
-    this.nodeName = key || "";
-    this.childNodesByKey = {};
-    this.leafIndex = leafIndex; // Unfortunately 'index' already is utilized by the base class according to PRE-ORDER DFS order
-    
-    if(!parent){
-        this.path     = [];
-        this.absValue = null;
-        this.label    = "";
-        this.absLabel = "";
-    } else {
-        this.path     = parent.path.concat(key);
-        this.absValue = pvc.join("~", parent.absValue, key);
-        this.label    = "" + (dimension._calcLabel ? dimension._calcLabel(key) : key);
-        this.absLabel = pvc.join(" ~ ", parent.absLabel, this.label);
-
-        parent.appendChild(this);
-        parent.childNodesByKey[key] = this;
-    }
-};
-
-pvc.DataElement.prototype = new pv.Dom.Node();
-pvc.DataElement.prototype.constructor = pvc.DataElement;
-
-pvc.DataElement.prototype.toString = function(){
-    return this.value;
-};
