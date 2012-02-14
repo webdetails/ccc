@@ -2,7 +2,7 @@
 /**
  * Bullet chart generation
  */
-pvc.BulletChart = pvc.Base.extend({
+pvc.BulletChart = pvc.BaseChart.extend({
 
   bulletChartPanel : null,
   allowNoData: true,

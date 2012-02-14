@@ -2,7 +2,7 @@
 /**
  * TimeseriesAbstract is the base class for all categorical or timeseries
  */
-pvc.TimeseriesAbstract = pvc.Base.extend({
+pvc.TimeseriesAbstract = pvc.BaseChart.extend({
 
     allTimeseriesPanel : null,
 

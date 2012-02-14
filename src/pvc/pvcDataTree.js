@@ -5,7 +5,7 @@
  * Each node of the tree can have it's own datasource to visualize the
  * node. 
  */
-pvc.DataTree = pvc.Base.extend({
+pvc.DataTree = pvc.BaseChart.extend({
 
     // the structure of the dataTree is provided by a separate datasource
     structEngine:   null,

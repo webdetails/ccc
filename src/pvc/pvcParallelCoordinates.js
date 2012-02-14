@@ -5,7 +5,7 @@
  * This code has been based on a protovis example:
  *    http://vis.stanford.edu/protovis/ex/cars.html
  */
-pvc.ParallelCoordinates = pvc.Base.extend({
+pvc.ParallelCoordinates = pvc.BaseChart.extend({
 
   parCoordPanel : null,
   legendSource: 'category',

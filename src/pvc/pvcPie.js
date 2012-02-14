@@ -2,7 +2,7 @@
 /**
  * PieChart is the main class for generating... pie charts (surprise!).
  */
-pvc.PieChart = pvc.Base.extend({
+pvc.PieChart = pvc.BaseChart.extend({
 
   pieChartPanel : null,
   legendSource: 'category',
