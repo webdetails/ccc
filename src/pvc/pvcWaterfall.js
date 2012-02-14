@@ -353,7 +353,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                                 this.chart,
                                 this.chart.getLinearScale,
                                 true)
-                     : this.chart.getLinearScale(true);
+                     : this.chart.getLinearScale({bypassAxisSize: true});
         */
         /** start  fix  (need to resolve this nicely  (CvK))**/
         if (this.waterfall) {
@@ -374,11 +374,11 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             options.orthoFixedMax = mx;
         }
 
-        var lScale = chart.getLinearScale(true);
+        var lScale = chart.getLinearScale({bypassAxisSize: true});
         /** end fix **/
 
-        var l2Scale = chart.getSecondScale(true),
-            oScale  = chart.getOrdinalScale(true);
+        var l2Scale = chart.getSecondScale({bypassAxisSize: true}),
+            oScale  = chart.getOrdinalScale({bypassAxisSize: true});
 
         // determine barPositionOffset and barScale
         var barPositionOffset = 0,
@@ -816,7 +816,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
     doGenOverflMarks: function(anchor, underflow, maxBarSize, angle, barScale, dataFunction){
         var myself = this;
         var offGridBarOffset = maxBarSize/2,
-            lScale = this.chart.getLinearScale(true);
+            lScale = this.chart.getLinearScale({bypassAxisSize: true});
 
         var offGridBorderOffset = underflow
                                     ? lScale.min + 8

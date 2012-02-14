@@ -68,7 +68,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
         
         // NOTE: must be evaluated before axis panels' creation
-        //  because getZZZZScale calls assume this (bypassAxis = false)
+        //  because getZZZZScale calls assume this (bypassAxisSize = false)
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         
@@ -242,28 +242,28 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     /**
      * xx scale for categorical charts.
-     * Must be called before axis panels are created (bypassAxis = false).
+     * Must be called before axis panels are created (bypassAxisSize = false).
      */
     getXScale: function(){
         if (this.isOrientationVertical()) {
             return this.options.timeSeries? 
-                this.getTimeseriesScale(false, true) : 
+                this.getTimeseriesScale({bypassAxisOffset: true}) :
                 this.getOrdinalScale();
         }
 
         return this.options.orthoAxisOrdinal ? 
-            this.getPerpOrdinalScale("x") :
-            this.getLinearScale(false, true);
+            this.getOrdinalScale({orthoAxis: "x"}) :
+            this.getLinearScale({bypassAxisOffset: true});
     },
 
     /**
      * yy scale for categorical charts.
-     * Must be called before axis panels are created (bypassAxis = false).
+     * Must be called before axis panels are created (bypassAxisSize = false).
      */
     getYScale: function(){
         if (this.isOrientationVertical()) {
             return this.options.orthoAxisOrdinal ? 
-                this.getPerpOrdinalScale("y") : 
+                this.getOrdinalScale({orthoAxis: "y"}) : 
                 this.getLinearScale();
         }
         
@@ -273,24 +273,32 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
 
     /**
-     * Helper function to facilitate  (refactoring)
-     *     - getOrdinalScale()
-     *     - getPerpOrdScale()
-     *   (CvK)
+     * Scale for an ordinal axis.
+     * If orthoAxis is null:
+     *   xx if orientation is vertical, yy otherwise.
+     * Else 
+     *   yy if if orthoAxis is "y"
+     *   xx if if orthoAxis is "x"
+     *
+     * Keyword arguments:
+     *   bypassAxisSize: boolean,     default is false
+     *   orthoAxis: "y", "x" or null, default is null
      */
-    getOrdScale: function(bypassAxis, orthoAxis){
+    getOrdinalScale: function(keyArgs){
 
-        var options = this.options,
-            yAxisSize = bypassAxis ? 0 : options.yAxisSize,
-            xAxisSize = bypassAxis ? 0 : options.xAxisSize;
+        var bypassAxisSize = pvc.get(keyArgs, 'bypassAxisSize', false),
+            orthoAxis = pvc.get(keyArgs, 'orthoAxis', null),
+            options   = this.options,
+            yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
+            xAxisSize = bypassAxisSize ? 0 : options.xAxisSize;
         
         // DOMAIN
-        var dData = orthoAxis ? 
-                this.dataEngine.getVisibleSeries(): 
+        var data = orthoAxis ?
+                this.dataEngine.getVisibleSeries() :
                 this.dataEngine.getVisibleCategories();
         
         // NOTE: presumes data elements convert well to string
-        var scale = new pv.Scale.ordinal(dData);
+        var scale = new pv.Scale.ordinal(data);
         
         // RANGE
         if (orthoAxis) {   // added by CvK
@@ -306,7 +314,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 rSize = isX ? this.basePanel.width : this.basePanel.height;
 
             if (isX){
-                var secondYAxisSize = bypassAxis ? 0 : options.secondAxisSize;
+                var secondYAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
                 if(options.yAxisPosition == "left"){
                     scale.min = yAxisSize;
                     scale.max = rSize - secondYAxisSize;
@@ -315,7 +323,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                     scale.max = rSize - yAxisSize;
                 }
             } else {
-                var secondXAxisSize = bypassAxis ? 0 : options.secondAxisSize;
+                var secondXAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
                 scale.min = 0;
                 scale.max = rSize - xAxisSize - secondXAxisSize;
             }
@@ -334,27 +342,18 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
 
     /**
-     * Scale for the ordinal axis. xx if orientation is vertical, yy otherwise.
-     */
-    getOrdinalScale: function(bypassAxis){
-        return this.getOrdScale(bypassAxis, null);
-    },
-    
-    /**
-     * Scale for the perpendicular ordinal axis.
-     *     yy if orientation is vertical,
-     *     xx otherwise
-     *   (CvK)
+     * Scale for a linear axis.
+     * xx if orientation is horizontal, yy otherwise.
      * 
-     *   orthoAxis : "y", "x" or null
+     * Keyword arguments:
+     *   bypassAxisSize:   boolean, default is false
+     *   bypassAxisOffset: boolean, default is false
      */
-    getPerpOrdinalScale: function(orthoAxis){
-        return this.getOrdScale(false, orthoAxis);
-    },
-    
-    getLinearScale: function(bypassAxis, bypassOffset){
+    getLinearScale: function(keyArgs){
 
-        var options   = this.options,
+        var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
+            bypassAxisOffset = pvc.get(keyArgs, 'bypassAxisOffset', false),
+            options   = this.options,
             isX = this.isOrientationHorizontal(),
             dMin, // Domain
             dMax;
@@ -400,7 +399,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         //  as long as they are not 0 and originIsZero=true.
         // DCL: 'axisOffset' is a percentage??
         var dOffset = (dMax - dMin) * options.axisOffset;
-        dOffset = bypassOffset ? 0 : dOffset;
+        dOffset = bypassAxisOffset ? 0 : dOffset;
         
         var scale = new pv.Scale.linear(
                         dMin - (options.originIsZero && dMin == 0 ? 0 : dOffset),
@@ -419,8 +418,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         // but titles and legends already have been...
         var rSize = isX ? this.basePanel.width : this.basePanel.height;
         if(isX){
-            var yAxisSize = bypassAxis ? 0 : options.yAxisSize,
-                secondYAxisSize = bypassAxis ? 0 : options.secondAxisSize;
+            var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
+                secondYAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
             if(options.yAxisPosition == "left"){
                 scale.min = yAxisSize;
                 scale.max = rSize - secondYAxisSize;
@@ -430,8 +429,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             }
 
         } else {
-            var xAxisSize = bypassAxis ? 0 : options.xAxisSize,
-                secondXAxisSize = bypassAxis ? 0 : options.secondAxisSize;
+            var xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
+                secondXAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
             scale.min = 0;
             scale.max = rSize - xAxisSize - secondXAxisSize;
         }
@@ -443,10 +442,16 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     /**
      * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise.
+     *
+     * Keyword arguments:
+     *   bypassAxisSize:   boolean, default is false
+     *   bypassAxisOffset: boolean, default is false
      */
-    getTimeseriesScale: function(bypassAxis, bypassOffset){
+    getTimeseriesScale: function(keyArgs){
 
-        var options = this.options,
+        var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
+            bypassAxisOffset = pvc.get(keyArgs, 'bypassAxisOffset', false),
+            options = this.options,
             isX = this.isOrientationVertical();
         
         // DOMAIN
@@ -458,7 +463,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             dMax = parser.parse(categories[categories.length - 1]),
             dOffset = 0;
         
-        if(!bypassOffset){
+        if(!bypassAxisOffset){
             dOffset = (dMax.getTime() - dMin.getTime()) * options.axisOffset;
         }
 
@@ -477,8 +482,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var rSize = isX ? this.basePanel.width : this.basePanel.height;
         
         if(isX){
-            var yAxisSize = bypassAxis ? 0 : options.yAxisSize,
-                secondYAxisSize = bypassAxis ? 0 : options.secondAxisSize;
+            var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
+                secondYAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
             if(options.yAxisPosition == "left"){
                 scale.min = yAxisSize;
                 scale.max = rSize - secondYAxisSize;
@@ -487,8 +492,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 scale.max = rSize - yAxisSize;
             }
         } else {
-            var xAxisSize = bypassAxis ? 0 : options.xAxisSize,
-                secondXAxisSize = bypassAxis ? 0 : options.secondAxisSize;
+            var xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
+                secondXAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
             scale.min = 0;
             scale.max = rSize - xAxisSize - secondXAxisSize;
         }
@@ -500,18 +505,22 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     /**
      * Scale for the second linear axis. yy if orientation is vertical, xx otherwise.
+     *
+     * Keyword arguments:
+     *   bypassAxisSize:   boolean, default is false
+     *   bypassAxisOffset: boolean, default is false (only implemented for not independent scale)
      */
-    // NOTE: bypassOffset is not implemented
-    getSecondScale: function(bypassAxis, bypassOffset){
+    getSecondScale: function(keyArgs){
 
         var options = this.options;
         
         if(!options.secondAxis || !options.secondAxisIndependentScale){
-            return this.getLinearScale(bypassAxis, bypassOffset);
+            return this.getLinearScale(keyArgs);
         }
         
         // DOMAIN
-        var dMax = this.dataEngine.getSecondAxisMax(),
+        var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
+            dMax = this.dataEngine.getSecondAxisMax(),
             dMin = this.dataEngine.getSecondAxisMin();
 
         if(dMin * dMax > 0 && options.secondAxisOriginIsZero){
@@ -532,8 +541,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         pvc.roundScaleDomain(scale, options.secondAxisRoundDomain, options.secondAxisDesiredTickCount);
                 
         // RANGE
-        var yAxisSize = bypassAxis ? 0 : options.yAxisSize,
-            xAxisSize = bypassAxis ? 0 : options.xAxisSize,
+        var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
+            xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
             isX = this.isOrientationHorizontal(),
             rSize = isX ? this.basePanel.width : this.basePanel.height;
                 
@@ -575,7 +584,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         var o = $.extend({}, this.markEventDefaults, options);
         
-        var scale = this.getTimeseriesScale(true,true);
+        var scale = this.getTimeseriesScale({
+                        bypassAxisSize:   true,
+                        bypassAxisOffset: true
+                    });
 
         // Are we outside the allowed scale? 
         var d = pv.Format.date(this.options.timeSeriesFormat).parse(dateString);

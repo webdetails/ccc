@@ -99,6 +99,22 @@ pvc.get = function(o, p, dv){
     return o && (v = o[p]) != null ? v : dv; 
 };
 
+// Creates an object whose prototype is the specified object.
+pvc.create = (function(){
+    function dummyKlass(){}
+    var dummyProto = dummyKlass.prototype;
+
+    return function(baseProto){
+        dummyKlass.prototype = baseProto || {};
+        
+        var instance = new dummyKlass();
+        
+        dummyKlass.prototype = dummyProto;
+
+        return instance;
+    };
+}());
+
 pvc.number = function(d, dv){
     var v = parseFloat(d);
     return isNaN(d) ? (dv || 0) : v;

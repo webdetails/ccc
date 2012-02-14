@@ -63,14 +63,14 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         chart = this.chart,
         dataEngine = chart.dataEngine,
         options = chart.options,
-        baseScale = chart.getLinearBaseScale(true),
-        orthoScale = chart.getLinearScale(true),
+        baseScale = chart.getLinearBaseScale({bypassAxisSize: true}),
+        orthoScale = chart.getLinearScale({bypassAxisSize: true}),
         tScale,
         parser;
 
     if(options.timeSeries){
         parser = pv.Format.date(options.timeSeriesFormat);
-        tScale = chart.getTimeseriesScale(true);
+        tScale = chart.getTimeseriesScale({bypassAxisSize: true});
     }
     
     // create empty container for the functions and data

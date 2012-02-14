@@ -42,9 +42,17 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
         return this.options.orthoAxisOrdinal && this.isOrientationVertical();
     },
 
-    getLinearBaseScale: function(bypassAxis){
-        var yAxisSize = bypassAxis?0:this.options.yAxisSize;
-        var xAxisSize = bypassAxis?0:this.options.xAxisSize;
+    /**
+     * Scale for a linear base axis.
+     * xx if orientation is horizontal, yy otherwise.
+     *
+     * Keyword arguments:
+     *   bypassAxisSize:   boolean, default is false
+     */
+    getLinearBaseScale: function(keyArgs){
+        var bypassAxisSize = pvc.get(keyArgs, 'bypassAxisSize', false),
+            yAxisSize = bypassAxisSize ? 0 : this.options.yAxisSize,
+            xAxisSize = bypassAxisSize ? 0 : this.options.xAxisSize;
 
         var isVertical = this.options.orientation=="vertical";
 
@@ -81,7 +89,6 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
     /*
      * get the scale for the axis with horizontal orientation
      */
-
     getXScale: function(){
         var scale = null;
 

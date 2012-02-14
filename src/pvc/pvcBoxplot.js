@@ -220,10 +220,10 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
         // create empty container for the functions and data
         this.DF = {};
 
-        var lScale = chart.getLinearScale(true);
+        var lScale = chart.getLinearScale({bypassAxisSize: true});
 
-        var l2Scale = chart.getSecondScale(true);
-        var oScale = chart.getOrdinalScale(true);
+        var l2Scale = chart.getSecondScale({bypassAxisSize: true});
+        var oScale = chart.getOrdinalScale({bypassAxisSize: true});
 
         /*
          * fuctions to determine positions along base axis.

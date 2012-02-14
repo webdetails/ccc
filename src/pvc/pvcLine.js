@@ -161,20 +161,23 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         // Extend body, resetting axisSizes
 
-        var lScale = chart.getLinearScale(true),
+        var lScale = chart.getLinearScale({bypassAxisSize: true}),
             oScale = null, // ~ warning
             tScale = null, // ~ warning 
             parser = null, // - warning
             categoryComparer = null; // ~ warning
 
         if(options.timeSeries){
-            tScale = chart.getTimeseriesScale(true, true);
+            tScale = chart.getTimeseriesScale({
+                            bypassAxisSize:   true,
+                            bypassAxisOffset: true
+                        });
             parser = pv.Format.date(options.timeSeriesFormat);
             categoryComparer = pvc.createDateComparer(parser, function(d){
                 return d.category;
             });
         } else {
-            oScale = chart.getOrdinalScale(true);
+            oScale = chart.getOrdinalScale({bypassAxisSize: true});
         }
 
         var colors = chart.colors(pv.range(de.getSeriesSize()));
