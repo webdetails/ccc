@@ -1,4 +1,4 @@
-// 1a4f810f17c630f0b6287dae670ef0090bac8755
+// b9f03b4bbbdaf113bc0083189b1119582b196aed
 /**
  * @class The built-in Array class.
  * @name Array
@@ -5928,7 +5928,7 @@ pv.SvgScene.dot = function(scenes) {
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-dasharray": (s.strokeDasharray)? s.strokeDasharray : 'none'
+      "stroke-dasharray": s.strokeDasharray || 'none'
     };
     if (path) {
       svg.transform = "translate(" + s.left + "," + s.top + ")";
@@ -6093,7 +6093,7 @@ pv.SvgScene.line = function(scenes) {
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
       "stroke-linejoin": s.lineJoin,
-      "stroke-dasharray": (s.strokeDasharray)? s.strokeDasharray : 'none'
+      "stroke-dasharray": s.strokeDasharray || 'none'
     });
   return this.append(e, scenes, 0);
 };
@@ -6214,13 +6214,10 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
        + " " + c.x + "," + c.y
        + " " + d.x + "," + d.y;
 };
-pv.SvgScene.panel = function(scenes)
-{
+pv.SvgScene.panel = function(scenes) {
   var g = scenes.$g, e = g && g.firstChild;
   var complete = false;
-  
   for (var i = 0; i < scenes.length; i++) {
-
     var s = scenes[i];
 
     /* visible */
@@ -6299,7 +6296,6 @@ pv.SvgScene.panel = function(scenes)
 
             svgweb.appendChild (g, s.canvas);
             g = frag;
-
         } else {
             for (var j = 0; j < this.events.length; j++) {
               g.addEventListener(this.events[j], this.dispatch, false);
@@ -6321,10 +6317,8 @@ pv.SvgScene.panel = function(scenes)
     if (s.overflow == "hidden") {
       var id = pv.id().toString(36),
           c = this.expect(e, "g", {"clip-path": "url(#" + id + ")"});
-          
       if (!c.parentNode) g.appendChild(c);
       scenes.$g = g = c;
-
       e = c.firstChild;
 
       e = this.expect(e, "clipPath", {"id": id});
@@ -6376,7 +6370,6 @@ pv.SvgScene.panel = function(scenes)
 
 pv.SvgScene.fill = function(e, scenes, i) {
   var s = scenes[i], fill = s.fillStyle;
-
   if (fill.opacity || s.events == "all") {
     e = this.expect(e, "rect", {
         "shape-rendering": s.antialias ? null : "crispEdges",
@@ -6392,7 +6385,6 @@ pv.SvgScene.fill = function(e, scenes, i) {
       });
     e = this.append(e, scenes, i);
   }
-
   return e;
 };
 
@@ -6716,6 +6708,12 @@ pv.Mark.prototype.propertyValue = function(name, v) {
 pv.Mark.prototype
     .property("data")
     .property("visible", Boolean)
+    // DATUM - an object counterpart for each value of data.
+    // Must be added here,
+    // to ensure that it is evaluated before VISIBLE
+    // Properties are evaluated backwards in defining order...
+    // Amongst required properties the order will be: id, datum, visible
+    .property("datum", Object)
     .property("left", Number)
     .property("right", Number)
     .property("top", Number)
@@ -6950,6 +6948,10 @@ pv.Mark.prototype.scale = 1;
  */
 pv.Mark.prototype.defaults = new pv.Mark()
     .data(function(d) { return [d]; })
+    // DATUM - an object counterpart for each value of data.
+    .datum(function() {
+        return this.parent ?
+                this.parent.scene[this.parent.index].datum : null; })
     .visible(true)
     .antialias(true)
     .events("painted");
@@ -7038,6 +7040,10 @@ pv.Mark.prototype.anchor = function(name) {
     .name(name)
     .data(function() {
         return this.scene.target.map(function(s) { return s.data; });
+      })
+    // DATUM - an object counterpart for each value of data.
+    .datum(function() {
+        return this.scene.target[this.index].datum;
       })
     .visible(function() {
         return this.scene.target[this.index].visible;
@@ -7334,7 +7340,9 @@ pv.Mark.stack = [];
  * do not need to be queried during build.
  */
 pv.Mark.prototype.bind = function() {
-  var seen = {}, types = [[], [], [], []], data, required = [];
+  var seen = {}, types = [[], [], [], []], data, required = [],
+      // DATUM - an object counterpart for each value of data.
+      requiredPositions = {};
 
   /** Scans the proto chain for the specified mark. */
   function bind(mark) {
@@ -7346,7 +7354,15 @@ pv.Mark.prototype.bind = function() {
           seen[p.name] = p;
           switch (p.name) {
             case "data": data = p; break;
-            case "visible": case "id": required.push(p); break;
+
+            // DATUM - an object counterpart for each value of data.
+            case "datum":
+            case "visible":
+            case "id":
+                required.push(p);
+                requiredPositions[p.name] = i;
+                break;
+
             default: types[p.type].push(p); break;
           }
         }
@@ -7357,6 +7373,17 @@ pv.Mark.prototype.bind = function() {
   /* Scan the proto chain for all defined properties. */
   bind(this);
   bind(this.defaults);
+
+  /*
+   * DATUM - an object counterpart for each value of data.
+   * Sort required properties to respect (inverse) definition order
+   * These may be out of order when one o the properties
+   * comes form this and the other fom this.defaults
+   */
+  required.sort(function(pa, pb){
+      return requiredPositions[pb.name] - requiredPositions[pa.name];
+  });
+
   types[1].reverse();
   types[3].reverse();
 
