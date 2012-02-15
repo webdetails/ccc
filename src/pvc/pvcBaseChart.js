@@ -20,14 +20,14 @@ pvc.BaseChart = pvc.Abstract.extend({
     legendSource: "series",
     colors: null,
 
+    _renderVersion: 0,
+
     // renderCallback
     renderCallback: undefined,
 
     constructor: function(options) {
 
         this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
-
-        this.dataEngine = this.createDataEngine();
     },
 
     /**
@@ -39,22 +39,53 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
 
     /**
+     * Processes options after user options and defaults have been merged.
+     * Applies restrictions,
+     * performs validations and
+     * options values implications.
+     */
+    _processOptions: function(){
+
+        var options = this.options;
+
+        this._processOptionsCore(options);
+        
+        /* DEBUG options */
+        if(pvc.debug && options && typeof(JSON.stringify) !== 'undefined'){
+            pvc.log("OPTIONS:\n" + JSON.stringify(options));
+        }
+
+        return options;
+    },
+
+    /**
+     * Processes options after user options and default options have been merged.
+     * Override to apply restrictions, perform validation or
+     * options values implications.
+     * When overriden, the base implementation should be called.
+     * The implementation must be idempotent -
+     * its successive application should yield the same results.
+     * @virtual
+     */
+    _processOptionsCore: function(options){
+        // Disable animation if environment doesn't support it
+        if (!$.support.svg || pv.renderer() === 'batik') {
+            options.animate = false;
+        }
+    },
+    
+    /**
      * Building the visualization has 2 stages:
      * First the preRender method prepares and builds 
      * every object that will be used.
      * Later the render method effectively renders.
      */
     preRender: function() {
+        /* Increment render version to allow for cache invalidation  */
+        this._renderVersion++;
+        this.isPreRendered = false;
+        
         pvc.log("Prerendering in pvc");
-
-        /* DEBUG current options */
-        if(pvc.debug && this.options && typeof(JSON.stringify) !== 'undefined'){
-            pvc.log("OPTIONS:\n" + JSON.stringify(this.options));
-        }
-
-        // Now's as good a time as any to completely clear out all
-        //  tipsy tooltips
-        pvc.removeTipsyLegends();
 
         // If we don't have data, we just need to set a "no data" message
         // and go on with life.
@@ -62,23 +93,28 @@ pvc.BaseChart = pvc.Abstract.extend({
             throw new NoDataException();
         }
 
-        // Disable animation if browser doesn't support it
-        if (!$.support.svg) {
-            this.options.animate = false;
-        }
+        // Now's as good a time as any to completely clear out all
+        //  tipsy tooltips
+        pvc.removeTipsyLegends();
+        
+        /* Options may be changed between renders */
+        this._processOptions();
 
-        // Getting data engine and initialize the translator
+        // Initialize the data engine and its translator
         this.initDataEngine();
 
         // Create color schemes
         this.colors = pvc.createColorScheme(this.options.colors);
         this.secondAxisColor = pvc.createColorScheme(this.options.secondAxisColor);
 
+        // Initialize chart panels
         this.initBasePanel();
 
         this.initTitlePanel();
 
         this.initLegendPanel();
+
+        // ------------
 
         this.isPreRendered = true;
     },
@@ -88,9 +124,13 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     initDataEngine: function() {
         var de = this.dataEngine;
+        if(!de){
+            de = this.dataEngine = this.createDataEngine();
+        }
+//        else {
+//            //de.clearDataCache();
+//        }
 
-        //de.clearDataCache();
-        
         de.setData(this.metadata, this.resultset);
         de.setCrosstabMode(this.options.crosstabMode);
         de.setSeriesInRows(this.options.seriesInRows);
@@ -176,6 +216,8 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     render: function(bypassAnimation, rebuild) {
         try{
+            //this.isAnimating = false;
+            
             if (!this.isPreRendered || rebuild) {
                 this.preRender();
             }
@@ -186,7 +228,8 @@ pvc.BaseChart = pvc.Abstract.extend({
 
             this.basePanel.getPvPanel().render();
 
-            if (this.options.animate && !bypassAnimation) {
+            // Perform animation
+            if (!bypassAnimation && this.options.animate) {
                 this.isAnimating = true;
                 this.basePanel.getPvPanel()
                         .transition()
@@ -194,6 +237,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                         .ease("cubic-in-out")
                         .start();
             }
+
         } catch (e) {
             if (e instanceof NoDataException) {
 
@@ -293,7 +337,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
 
-    /*
+    /**
      * Animation
      */
     animate: function(start, end) {
@@ -358,13 +402,22 @@ pvc.BaseChart = pvc.Abstract.extend({
         secondAxisIdx: -1,
         secondAxisColor: undefined,
 
-        tooltipFormat: function(s, c, v) {
-            return s + ", " + c + ":  " + this.chart.options.valueFormat(v);
+        tooltipFormat: function(s, c, v, datum) {
+            return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
+                   (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");
         },
 
         valueFormat: function(d) {
             return pv.Format.number().fractionDigits(0, 2).format(d);
             // pv.Format.number().fractionDigits(0, 10).parse(d));
+        },
+
+        stacked: false,
+        
+        percentageNormalized: false,
+
+        percentValueFormat: function(d){
+            return pv.Format.number().fractionDigits(0, 2).format(d) + "%";
         },
 
         clickable:  false,

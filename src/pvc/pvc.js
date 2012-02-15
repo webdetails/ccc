@@ -267,6 +267,16 @@ pvc.Range.prototype.forEach = function(fun, ctx){
     }
 };
 
+pvc.Range.prototype.map = function(fun, ctx){
+    var result = [];
+    
+    this.forEach(function(j){
+        result.push(fun.call(ctx, j));
+    });
+    
+    return result;
+};
+
 /**
  * Equals for two arrays
  * func - needed if not flat array of comparables

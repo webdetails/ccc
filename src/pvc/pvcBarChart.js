@@ -11,15 +11,19 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
         this.base(options);
 
         // Apply options
-        pvc.mergeDefaults(this.options, pvc.BarChart.defaultOptions, options);
+        options = pvc.mergeDefaults(this.options, pvc.BarChart.defaultOptions, options);
     },
-    
+
     /**
-     * Creates a custom WaterfallDataEngine.
+     * Processes options after user options and default options have been merged.
      * @override
      */
-    createDataEngine: function(){
-        return new pvc.WaterfallDataEngine(this);
+    _processOptionsCore: function(options){
+
+        options.waterfall = false;
+        options.percentageNormalized = false;
+        
+        this.base(options);
     },
 
     /* @override */
@@ -27,13 +31,12 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
         pvc.log("Prerendering in barChart");
 
         this.barChartPanel = new pvc.WaterfallChartPanel(this, {
-            stacked:        this.options.stacked,
-            waterfall:      false,
-            barSizeRatio:   this.options.barSizeRatio,
-            maxBarSize:     this.options.maxBarSize,
-            showValues:     this.options.showValues,
-            valuesAnchor:   this.options.valuesAnchor,
-            orientation:    this.options.orientation
+            waterfall:          false,
+            barSizeRatio:       this.options.barSizeRatio,
+            maxBarSize:         this.options.maxBarSize,
+            showValues:         this.options.showValues,
+            valuesAnchor:       this.options.valuesAnchor,
+            orientation:        this.options.orientation
         });
         
         return this.barChartPanel;
@@ -41,7 +44,6 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
 }, {
     defaultOptions: {
         showValues:   true,
-        stacked:      false,
         barSizeRatio: 0.9,
         maxBarSize:   2000,
         valuesAnchor: "center"

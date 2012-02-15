@@ -46,7 +46,8 @@ pvc.PieChart = pvc.BaseChart.extend({
         showTooltips:  true,
         tooltipFormat: function(s, c, v){
             var val = this.chart.options.valueFormat(v);
-            return c + ":  " + val + " (" + Math.round(v / this.sum * 100, 1) + "%)";
+            var pct = this.chart.options.percentValueFormat(v / this.sum * 100);
+            return c + ":  " + val + " (" + pct + ")";
         }
     }
 });
@@ -93,14 +94,12 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
   create: function(){
 
     var myself=this;
+
     this.width = this._parent.width;
     this.height = this._parent.height;
 
-    this.pvPanel = this._parent.getPvPanel().add(this.type)
-    .width(this.width)
-    .height(this.height)
-
-
+    this.base();
+    
     // Add the chart. For a pie chart we have one series only
 
     var colors = this.chart.colors(pv.range(this.chart.dataEngine.getCategoriesSize()));
@@ -145,7 +144,6 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
       .event("mouseover", pv.Behavior.tipsy(this.chart.tipsySettings));
 
     }
-
 
     if (this.chart.options.clickable){
       this.pvPie

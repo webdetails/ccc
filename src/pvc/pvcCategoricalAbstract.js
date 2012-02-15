@@ -18,66 +18,79 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         this.base(options);
 
-        // Apply options
         pvc.mergeDefaults(this.options, pvc.CategoricalAbstract.defaultOptions, options);
+    },
 
-        if(this.options.showTooltips){
-            var tipsySettings = this.options.tipsySettings;
+    /**
+     * Processes options after user options and default options have been merged.
+     * @override
+     */
+    _processOptionsCore: function(options){
+
+        this.base(options);
+
+        // Sanitize some options
+        if(options.showTooltips){
+            var tipsySettings = options.tipsySettings;
             if(tipsySettings){
                 // Clone top-level structure. Should be deep clone, perhaps.
-                tipsySettings = this.options.tipsySettings = pvc.mergeOwn({}, tipsySettings);
+                tipsySettings = options.tipsySettings = pvc.mergeOwn({}, tipsySettings);
 
                 this.extend(tipsySettings, "tooltip_");
             }
         }
 
-        // Sanitize some options
-        if (!this.options.showYScale){
-            this.options.yAxisSize = 0;
-        }
-        
-        if (!this.options.showXScale){
-            this.options.xAxisSize = 0;
+        if (!options.showYScale){
+            options.yAxisSize = 0;
         }
 
-        if(this.options.secondAxis && this.options.secondAxisIndependentScale){
-            this.options.secondAxisSize = this.isOrientationVertical() ?
-                this.options.yAxisSize : 
-                this.options.xAxisSize;
+        if (!options.showXScale){
+            options.xAxisSize = 0;
+        }
+
+        if(options.secondAxis && options.secondAxisIndependentScale){
+            options.secondAxisSize = this._isSecondAxisVertical() ?
+                                        options.yAxisSize :
+                                        options.xAxisSize;
         } else {
-            this.options.secondAxisSize = 0;
+            options.secondAxisSize = 0;
+        }
+
+        if(options.stacked){
+            options.orthoFixedMin = 0;
+
+            if(options.percentageNormalized){
+                options.orthoFixedMax = 100;
+            }
+        } else {
+            options.percentageNormalized = false;
         }
     },
 
-    preRender: function(){
+    _isSecondAxisVertical: function(){
+        return this.isOrientationVertical();
+    },
 
+    preRender: function(){
+        var options = this.options;
+        
         // NOTE: creates root BasePanel, 
         //  and its Title and Legend child panels.
         this.base();
 
         pvc.log("Prerendering in CategoricalAbstract");
         
-        // TODO: DCL - Again??
-        // Sanitize some options:
-        if (!this.options.showYScale){
-            this.options.yAxisSize = 0;
-        }
-        
-        if (!this.options.showXScale){
-            this.options.xAxisSize = 0;
-        }
-        
         // NOTE: must be evaluated before axis panels' creation
         //  because getZZZZScale calls assume this (bypassAxisSize = false)
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         
-        if(this.options.secondAxis){
+        if(options.secondAxis){
             this.secondScale = this.getSecondScale();
         }
         
         // Generate X axis
-        if(this.options.secondAxis){
+        if(options.secondAxis){
             // this goes before the other because of the fullGrid
             this.generateSecondXAxis();
         }
@@ -85,7 +98,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         this.generateXAxis();
         
         // Generate Y axis
-        if(this.options.secondAxis){
+        if(options.secondAxis){
             // this goes before the other because of the fullGrid
             this.generateSecondYAxis();
         }
@@ -314,7 +327,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 rSize = isX ? this.basePanel.width : this.basePanel.height;
 
             if (isX){
-                var secondYAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
+                var secondYAxisSize = bypassAxisSize || !this._isSecondAxisVertical() ? 
+                                        0 :
+                                        options.secondAxisSize;
                 if(options.yAxisPosition == "left"){
                     scale.min = yAxisSize;
                     scale.max = rSize - secondYAxisSize;
@@ -323,7 +338,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                     scale.max = rSize - yAxisSize;
                 }
             } else {
-                var secondXAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
+                var secondXAxisSize = bypassAxisSize || this._isSecondAxisVertical() ?
+                                        0 :
+                                        options.secondAxisSize;
                 scale.min = 0;
                 scale.max = rSize - xAxisSize - secondXAxisSize;
             }
@@ -346,8 +363,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      * xx if orientation is horizontal, yy otherwise.
      * 
      * Keyword arguments:
-     *   bypassAxisSize:   boolean, default is false
-     *   bypassAxisOffset: boolean, default is false
+     *   bypassAxisSize:    boolean, default is false
+     *   bypassAxisOffset:  boolean, default is false
      */
     getLinearScale: function(keyArgs){
 
@@ -356,54 +373,90 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             options   = this.options,
             isX = this.isOrientationHorizontal(),
             dMin, // Domain
-            dMax;
+            dMax,
+            bound,
+            lockedMin = true,
+            lockedMax = true;
         
-        // DOMAIN
-        if(options.stacked){
-            dMax = this.dataEngine.getCategoriesMaxSumOfVisibleSeries();
-            dMin = 0;
+        /* 
+         * Note that in the following dMin and dMax calculations,
+         * orthFixedMin and orthoFixedMax already take into account if
+         * stacked or percentageNormalized are set.
+         * @see _processOptionsCore
+         */
+
+        // Min
+        bound = parseFloat(options.orthoFixedMin);
+        if(!isNaN(bound)){
+            dMin = bound;
         } else {
-            dMax = this.dataEngine.getVisibleSeriesAbsoluteMax();
-            dMin = this.dataEngine.getVisibleSeriesAbsoluteMin();
+            dMin = this.dataEngine.getVisibleSeriesAbsoluteMin(); // may be < 0 !
+            lockedMin = false;
+        }
+
+        // Max
+        bound = parseFloat(options.orthoFixedMax);
+        if(!isNaN(bound)){
+            dMax = bound;
+        } else if(options.stacked) {
+            dMax = this.dataEngine.getCategoriesMaxSumOfVisibleSeries(); // may be < 0 !
+            lockedMax = false;
+        } else {
+            dMax = this.dataEngine.getVisibleSeriesAbsoluteMax(); // may be < 0 !
+            lockedMax = false;
         }
         
-        /* If the bounds are the same, things break,
+        /*
+         * If both negative or both positive
+         * the scale does not contain the number 0.
+         *
+         * Currently this option ignores locks. Is this all right?
+         */
+        if(options.originIsZero && (dMin * dMax > 0)){
+            if(dMin > 0){
+                dMin = 0;
+                lockedMin = true;
+            } else {
+                dMax = 0;
+                lockedMax = true;
+            }
+        }
+
+        /*
+         * If the bounds (still) are the same, things break,
          * so we add a wee bit of variation.
+         *
+         * This one must ignore locks.
          */
         if (dMin === dMax) {
             dMin = dMin !== 0 ? dMin * 0.99 : options.originIsZero ? 0 : -0.1;
             dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
-        }
-        
-        /* Both negative or both positive */
-        if(dMin * dMax > 0 && options.originIsZero){
-            if(dMin > 0){
-                dMin = 0;
-            }else{
-                dMax = 0;
-            }
-        }
-
-        // CvK:  added to set bounds
-        var bound = parseFloat(options.orthoFixedMin);
-        if(!isNaN(bound)){
-            dMin = bound;
-        }
-        
-        bound = parseFloat(options.orthoFixedMax);
-        if(!isNaN(bound)){
+        } else if(dMin > dMax){
+            // What the heck...
+            // Is this ok or should throw?
+            bound = dMin;
+            dMin = dMax;
             dMax = bound;
         }
 
-        // Adding a small offset to the scale's dMin. and dMax.,
+        // Adding a small offset to the scale's dMin and dMax,
         //  as long as they are not 0 and originIsZero=true.
         // DCL: 'axisOffset' is a percentage??
-        var dOffset = (dMax - dMin) * options.axisOffset;
-        dOffset = bypassAxisOffset ? 0 : dOffset;
+        if(!bypassAxisOffset &&
+           options.axisOffset > 0 &&
+           (!lockedMin || !lockedMax)){
+
+            var dOffset = (dMax - dMin) * options.axisOffset;
+            if(!lockedMin){
+                dMin -= dOffset;
+            }
+
+            if(!lockedMax){
+                dMax += dOffset;
+            }
+        }
         
-        var scale = new pv.Scale.linear(
-                        dMin - (options.originIsZero && dMin == 0 ? 0 : dOffset),
-                        dMax + (options.originIsZero && dMax == 0 ? 0 : dOffset));
+        var scale = new pv.Scale.linear(dMin, dMax);
         
         // Domain rounding
         pvc.roundScaleDomain(
@@ -411,15 +464,20 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 isX ? options.xAxisDomainRoundMode  : options.yAxisDomainRoundMode,
                 isX ? options.xAxisDesiredTickCount : options.yAxisDesiredTickCount);
         
+        // ----------------------------
+
         // RANGE
         
-        // NOTE: By the time this is evaluated,
+        // NOTE: By the time this is evaluated by getZZZScale() methods,
         // axis panels have not yet been created,
-        // but titles and legends already have been...
+        // but titles and legends already have been.
+        // In those situations it is specified: bypassAxisSize = false
         var rSize = isX ? this.basePanel.width : this.basePanel.height;
         if(isX){
             var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
-                secondYAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
+                secondYAxisSize = bypassAxisSize || !this._isSecondAxisVertical() ?
+                                    0 :
+                                    options.secondAxisSize;
             if(options.yAxisPosition == "left"){
                 scale.min = yAxisSize;
                 scale.max = rSize - secondYAxisSize;
@@ -430,7 +488,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         } else {
             var xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
-                secondXAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
+                secondXAxisSize = bypassAxisSize || this._isSecondAxisVertical() ?
+                                    0 :
+                                    options.secondAxisSize;
             scale.min = 0;
             scale.max = rSize - xAxisSize - secondXAxisSize;
         }
@@ -441,7 +501,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
 
     /**
-     * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise.
+     * Scale for the timeseries axis.
+     * xx if orientation is vertical, yy otherwise.
      *
      * Keyword arguments:
      *   bypassAxisSize:   boolean, default is false
@@ -483,7 +544,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         
         if(isX){
             var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
-                secondYAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
+                secondYAxisSize = bypassAxisSize || !this._isSecondAxisVertical() ?
+                                    0 :
+                                    options.secondAxisSize;
             if(options.yAxisPosition == "left"){
                 scale.min = yAxisSize;
                 scale.max = rSize - secondYAxisSize;
@@ -493,7 +556,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             }
         } else {
             var xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
-                secondXAxisSize = bypassAxisSize ? 0 : options.secondAxisSize;
+                secondXAxisSize = bypassAxisSize || this._isSecondAxisVertical() ?
+                                    0 :
+                                    options.secondAxisSize;
             scale.min = 0;
             scale.max = rSize - xAxisSize - secondXAxisSize;
         }
@@ -543,7 +608,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         // RANGE
         var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
             xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
-            isX = this.isOrientationHorizontal(),
+            isX = !this._isSecondAxisVertical(),
             rSize = isX ? this.basePanel.width : this.basePanel.height;
                 
         if(isX){
@@ -652,8 +717,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         axisOffset: 0,
         axisLabelFont: '10px sans-serif',
         
-        orthoFixedMin: null,
-        orthoFixedMax: null,
+        orthoFixedMin: null, // when percentageNormalized => 0
+        orthoFixedMax: null, // when percentageNormalized => 100
 
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",

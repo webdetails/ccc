@@ -28,9 +28,20 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.WaterfallChart.defaultOptions, options);
+    },
 
-        // Water-falls are always stacked
-        this.options.stacked = true;
+    /**
+     * Processes options after user options and default options have been merged.
+     * @override
+     */
+    _processOptionsCore: function(options){
+
+        // Waterfall charts are always stacked and not percentageNormalized
+        options.waterfall = true;
+        options.stacked = true;
+        options.percentageNormalized = false;
+
+        this.base(options);
     },
 
     /**
@@ -52,7 +63,6 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
         pvc.log(logMessage);
         
         this.wfChartPanel = new pvc.WaterfallChartPanel(this, {
-            stacked:        this.options.stacked,
             waterfall:      this.options.waterfall,
             barSizeRatio:   this.options.barSizeRatio,
             maxBarSize:     this.options.maxBarSize,
@@ -65,8 +75,6 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
 }, {
     defaultOptions: {
         showValues:   true,
-        stacked:      true,
-        waterfall:    true,
         barSizeRatio: 0.9,
         maxBarSize:   2000
     }
@@ -154,7 +162,6 @@ pvc.WaterfallTranslator = pvc.DataTranslator.extend({
  * Waterfall chart panel (also bar-chart). Generates a bar chart. Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
  * <i>showValues</i> - Show or hide bar value. Default: false
- * <i>stacked</i> -  Stacked? Default: false
  * <i>barSizeRatio</i> - In multiple series, percentage of inner
  * band occupied by bars. Default: 0.9 (90%)
  * <i>maxBarSize</i> - Maximum size (width) of a bar in pixels. Default: 2000
@@ -178,7 +185,6 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
     data: null,
 
     waterfall: false,
-    stacked: false,
 
     barSizeRatio: 0.9,
     maxBarSize: 200,
@@ -186,12 +192,17 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
     ruleData: null,
 
-//    constructor: function(chart, options){
-//        this.base(chart, options);
-//    },
+    constructor: function(chart, options){
+          this.base(chart, options);
+
+          // Cache
+          options = this.chart.options;
+          this.stacked = options.stacked;
+          this.percentageNormalized = this.stacked && options.percentageNormalized;
+    },
 
     /***
-    *  Functions that transforms a dataSet to waterfall-format.
+    * Functions that transforms a dataSet to waterfall-format.
     *
     * The assumption made is that the first category is a tekst column
     * containing one of the following values:
@@ -285,6 +296,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             if (this.waterfall){
                 // NOTE: changes dataSet
                 this.ruleData = this.constructWaterfall(dataSet);
+            } else if(this.percentageNormalized){
+                this._hundredPercentData = this._createHundredPercentData(dataSet);
             }
         } else {
             dataSet = this.chart.dataEngine.getVisibleCategoriesIndexes();
@@ -292,27 +305,92 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         return dataSet;
     },
+
+    _createHundredPercentData: function(dataSet){
+        /*
+         * The dataSet is transposed, because this is a stacked chart:
+         * dataSet:
+         *  [[     800,   100,     400,     200,     100],   // visible series 1
+         *   [    1200,   600,     300,     100,     200]]   // visible series 2
+         * ----------------------------------------------
+         *        2000,   700,     700,     300,     300     // category totals
+         *          20,     7,       7,       3,       3     // category totals /100
+         *
+         * hundredPercentData:
+         *   [[ 800/20, 100/7,   400/7,   200/3,   100/3]
+         *    [1200/20, 600/7,   300/7,   100/3,   200/3]]
+         *
+         * Actually, each cell in hundredPercentData has the format:
+         *   {value: 10.2345, label: "10.23%"}
+         */
+
+        var categsCount  = this.chart.dataEngine.getVisibleCategoriesIndexes().length,
+            // seriesCount  = dataSet.length,
+            categsTotals = new pvc.Range(categsCount).map(function(){ return 0; }),
+            percentFormatter = this.chart.options.percentValueFormat;
+
+        // Sum each category across series
+        dataSet.forEach(function(seriesRow/*, seriesIndex*/){
+            seriesRow.forEach(function(value, categIndex){
+                categsTotals[categIndex] += pvc.number(value);
+            });
+        });
+
+        // Build the 100 percent dataSet
+        return dataSet.map(function(seriesRow/*, seriesIndex*/){
+            return seriesRow.map(function(value, categIndex){
+                value = ((100 * value) / categsTotals[categIndex])
+                return {
+                    value: value,
+                    label: percentFormatter(value)
+                };
+            });
+        });
+    },
     
     /**
      * Returns the datum associated with the 
      * current rendering indexes of this.pvBar.
+     *
+     * In the case of one hundred percent charts,
+     * the returned datum is augmented with a percent field,
+     * which contains an object with the properties 'value' and 'label'.
      * @override 
      */
     _getRenderingDatum: function(mark){
-        var index = this.pvBar.index;
-        if(index >= 0){
-            var visibleSerIndex = this.stacked ? this.pvBar.parent.index : index,
-                visibleCatIndex = this.stacked ? index : this.pvBar.parent.index,
-                de = this.chart.dataEngine;
+        if(!mark){
+            mark = this.pvBar;
+        }
+        var index = mark.index;
+        if(index < 0){
+            return null;
+        }
+        
+        var visibleSerIndex = this.stacked ? mark.parent.index : index,
+            visibleCatIndex = this.stacked ? index : mark.parent.index;
 
-            var datumRef = {
+        return this._getRenderingDatumByIndexes(visibleSerIndex, visibleCatIndex);
+    },
+
+    _getRenderingDatumByIndexes: function(visibleSerIndex, visibleCatIndex){
+        var de = this.chart.dataEngine,
+            datumRef = {
                 category: de.translateDimensionVisibleIndex('category', visibleCatIndex),
                 series:   de.translateDimensionVisibleIndex('series',   visibleSerIndex)
-            };
+            },
+            datum = de.findDatum(datumRef, true);
 
-            return de.findDatum(datumRef, true);
+        // Augment the datum's values with 100 percent data
+        if(datum && this._hundredPercentData){
+            var renderVersion = this.chart._renderVersion;
+            if(!datum.percent || datum._pctRV !== renderVersion){
+                datum._pctRV = renderVersion;
+                
+                datum.percent = this._hundredPercentData[visibleSerIndex][visibleCatIndex];
+            }
         }
-        return null;
+
+        return datum;
     },
 
     /*
@@ -455,19 +533,33 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         /*
         * functions to determine positions along ORTHOGONAL axis
         */
-        this.DF.orthoBotPos = this.stacked ?
-            lScale(0) :
+       var rZero = lScale(0);
+       this.DF.orthoBotPos = this.stacked ?
+            rZero :
             function(d){ return lScale(pv.min([0,d])); };
 
-        this.DF.orthoLengthFunc = this.stacked ?
-            function(d){
-                return chart.animate(0, lScale(d||0) - lScale(0));
-            } :
-            function(d){
-                var res = chart.animate(0,
-                    Math.abs(lScale(d||0) - lScale(0)));
-                return res;
+        this.DF.orthoLengthFunc = (function(){
+            if(this.percentageNormalized){
+                return function(){
+                    // Due to the Stack layout, this is evaluated in a strange way
+                    // for which the datum property does not work:
+                    var datum = myself._getRenderingDatum(this);
+                    var d = datum.percent.value;
+                    return chart.animate(0, lScale(d) - rZero);
+                }
+            }
+
+            if(this.stacked){
+                return function(d){
+                    return chart.animate(0, lScale(d||0) - rZero);
+                };
+            }
+
+            return function(d){
+                return chart.animate(0, Math.abs(lScale(d||0) - rZero));
             };
+
+        }.call(this));
 
         if(options.secondAxis){
             this.DF.secOrthoLengthFunc = function(d){
@@ -487,7 +579,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                                 0 : (seriesCount - 1);
 
         this.DF.colorFunc = function(){
-            var datum = myself._getRenderingDatum(this),
+            var datum = this.datum(),
                 seriesIndex = datum.elem.series.leafIndex;
 
             // Change the color of the totals series
@@ -541,9 +633,9 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         this.pvWaterfallLine = panel.add(pv.Rule)
             .data(data)
-            [this.anchorOrtho(anchor) ](function(d) { return d.x; })
-            [anchor                   ](function(d) { return d.y; })
-            [this.anchorLength(anchor)](function(d) { return d.w; })
+            [this.anchorOrtho(anchor) ](function(d) {return d.x;})
+            [anchor                   ](function(d) {return d.y;})
+            [this.anchorLength(anchor)](function(d) {return d.w;})
             .strokeStyle("#c0c0c0");
     },
 
@@ -588,9 +680,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 [anchor](this.DF.orthoBotPos);
 
             this.pvBar = this.pvBarPanel.layer.add(pv.Bar)
-                .data(function(d){
-                    return d;
-                }) // TODO: is this needed?
+                .data(function(seriesRow){ return seriesRow; })
                 [anchorLength](maxBarSize)
                 .fillStyle(this.DF.colorFunc);
 
@@ -617,9 +707,13 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 [anchor           ](this.DF.orthoBotPos)
                 [anchorOrthoLength](this.DF.orthoLengthFunc)
                 [anchorLength     ](maxBarSize);
-
         }  // end of if (stacked)
 
+        this.pvBar
+            .datum(function(){ 
+                return myself._getRenderingDatum();
+            });
+        
         // generate red markers if some data falls outside the panel bounds
         this.generateOverflowMarkers(anchor, this.stacked);
 
@@ -634,7 +728,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             var valueComparer = options.timeSeries ?
                                 pvc.createDateComparer(
                                     pv.Format.date(options.timeSeriesFormat), 
-                                    function(item){ return item.category; }) :
+                                    function(item){return item.category;}) :
                                 null;
 
             // TODO: this.chart.secondAxisColor();
@@ -663,7 +757,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             .text(function(d){
                 // TODO: for the no series case... 's' assumes the value "Series"
                 // added by the translator
-                var datum = myself._getRenderingDatum(this),
+                var datum = this.datum(),
                     s = datum.elem.series.value,
                     c = datum.elem.category.value;
                     // d = datum.values
@@ -685,7 +779,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 .tooltip(function(r, ra, i){  // NOTE: row, rowAgain, index?
                     var tooltip;
                     if(options.customTooltip){
-                        var datum = myself._getRenderingDatum(this),
+                        var datum = this.datum(),
                             s = datum.elem.series.value,
                             c = datum.elem.category.value,
                             d = r;
@@ -728,10 +822,19 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 .add(pv.Label)
                 .bottom(0)
                 .visible(function(d) { //no space for text otherwise
-                    var v = parseFloat(d);
+                    var v;
+                    if(myself.percentageNormalized){
+                        v = this.datum().percent.value;
+                    } else {
+                        v = parseFloat(d);
+                    }
+                    
                     return !isNaN(v) && Math.abs(v) >= 1;
                  })
                 .text(function(d){
+                    if(myself.percentageNormalized){
+                        return options.valueFormat(Math.round(this.datum().percent.value));
+                    }
                     return options.valueFormat(d);
                 });
         }

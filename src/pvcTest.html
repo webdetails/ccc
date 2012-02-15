@@ -30,9 +30,11 @@
     <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
-    <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
-    <script type="text/javascript" src="pvc/pvcPie.js"></script>
-    <script type="text/javascript" src="pvc/pvcBar.js"></script>
+    <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
+    <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
+    <script type="text/javascript" src="pvc/pvcNormalizedBarChart.js"></script>
+    <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
+    <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
     <script type="text/javascript" src="pvc/pvcLine.js"></script>
     <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
     <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
@@ -77,6 +79,7 @@
     <div id="pvcBar1"></div>
     <div id="pvcBar2"></div>
     <div id="pvcBar3"></div>
+    <div id="pvcBar5"></div>
 
     <h1>Pie</h1>
     <div id="pvcPie1"></div>
@@ -622,8 +625,8 @@
 
         var bar1 = new pvc.BarChart({
           canvas: "pvcBar1",
-          width: 300,
-          height: 200,
+          width: 400,
+          height: 300,
           title: "Bar chart",
           titlePosition: "left",
           titleSize: 40,
@@ -654,28 +657,18 @@
         allTimeseriesSize: 50,
            */
           extensionPoints: {
-            //base_fillStyle: "red",
             title_fillStyle: "yellow",
             titleLabel_font: "16px sans-serif",
-            // title_strokeStyle: "black",
-            // titleLabel_bottom: 0,
-            // titleLabel_textAlign: "left",
-          
             legend_fillStyle: "green",
-            //chart_fillStyle: "#fff",
             allTimeseries_fillStyle: "blue",
             xAxis_fillStyle: "#eee",
             yAxis_fillStyle: "#bbb",
 
-            //xAxisRule_strokeStyle:"yellow",
-            //xAxisGrid_strokeStyle:"#eee",
-            yAxisRule_strokeStyle:"blue"
-          
-            //pie_strokeStyle: "white"
-            //pie_innerRadius: 10
-            //pieLabel_textAngle: "0"
+            yAxisRule_strokeStyle:"blue",
 
-            //barLabel_textStyle: "red"
+            xAxisLabel_textAngle: -1,
+            xAxisLabel_textAlign: "center",
+            xAxisLabel_textBaseline: "top"
           }
 
         });
@@ -685,10 +678,10 @@
             
         var bar2 = new pvc.BarChart({
           canvas: "pvcBar2",
-          width: 300,
-          height: 200,
+          width: 400,
+          height: 300,
           title: "Stacked Barline chart",
-          titlePosition: "bottom",
+          titlePosition: "top",
           titleSize: 20,
           legend: true,
           legendPosition: "left",
@@ -702,12 +695,13 @@
           showValues: true,
           showXScale: true,
           showYScale: true,
-          yAxisPosition: "right",
+          yAxisPosition: "left",
           yAxisSize: 20,
           xAxisPosition: "bottom",
-          xAxisSize: 20,
+          xAxisSize: 40,
           xAxisFullGrid: false,
-          yAxisFullGrid: false,
+          yAxisFullGrid: true,
+          yAxisDomainRoundMode: 'tick',
 
           panelSizeRatio: 0.9,
           barSizeRatio: 0.8,
@@ -716,9 +710,14 @@
           secondAxisIndependentScale: true,
           secondAxisIdx: -1, // default
           secondAxisOriginIsZero: true, // default
-          secondAxisOffset: 0, // default
-          secondAxisColor: "red"
-
+          secondAxisOffset: 0.1, // default
+          secondAxisColor: "red",
+          secondAxisDomainRoundMode: 'tick',
+          extensionPoints: {
+             xAxisLabel_textAngle: -1,
+             xAxisLabel_textAlign: "center",
+             xAxisLabel_textBaseline: "top"
+          }
         });
 
         bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
@@ -727,8 +726,8 @@
 
         var bar3 = new pvc.BarChart({
           canvas: "pvcBar3",
-          width: 300,
-          height: 200,
+          width: 400,
+          height: 300,
           title: "Horizontal Bar chart",
           titlePosition: "bottom",
           titleSize: 20,
@@ -744,7 +743,7 @@
           showXScale: true,
           showYScale: true,
           yAxisPosition: "left",
-          yAxisSize: 20,
+          yAxisSize: 80,
           xAxisPosition: "bottom",
           xAxisSize: 20,
           xAxisFullGrid: false,
@@ -758,6 +757,29 @@
         bar3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         bar3.render();
 
+
+        var bar5 = new pvc.NormalizedBarChart({
+            canvas: "pvcBar5",
+            width: 400,
+            height: 300,
+            title: "100% Stacked Bar Chart",
+            orientation: 'vertical',
+            animate:false,
+            clickable: true,
+            selectable: true,
+            legend:true,
+            legendPosition:"right",
+            extensionPoints: {
+                xAxisLabel_textAngle: -1,
+                xAxisLabel_textAlign: "center",
+                xAxisLabel_textBaseline: "top"
+            }
+        });
+
+        bar5.setData(relational_01,
+            {crosstabMode: false,
+            seriesInRows: false});
+        bar5.render();
 
         /* Pie chart */
         var pie = new pvc.PieChart({

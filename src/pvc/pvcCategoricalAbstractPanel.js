@@ -2,6 +2,7 @@
 pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
     orientation: "vertical",
+    stacked: false,
 
     constructor: function(chart, options){
 

@@ -19,7 +19,6 @@ pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
         pvc.log("Prerendering in MetricScatterAbstract");
 
         this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
-            stacked: this.options.stacked,
             showValues: this.options.showValues,
             valuesAnchor: this.options.valuesAnchor,
             showLines: this.options.showLines,
@@ -38,7 +37,6 @@ pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
         showValues: false,
         axisOffset: 0.05,
         valuesAnchor: "right",
-        stacked: false,
         panelSizeRatio: 1
     }
 });

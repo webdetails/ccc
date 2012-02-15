@@ -23,7 +23,6 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
         pvc.log("Prerendering in ScatterAbstract");
 
         this.scatterChartPanel = new pvc.ScatterChartPanel(this, {
-            stacked:        this.options.stacked,
             showValues:     this.options.showValues,
             valuesAnchor:   this.options.valuesAnchor,
             showLines:      this.options.showLines,
@@ -42,7 +41,6 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
         showValues: false,
         axisOffset: 0.05,
         valuesAnchor: "right",
-        stacked: false,
         panelSizeRatio: 1
     }
 });
@@ -107,7 +105,6 @@ pvc.StackedAreaChart = pvc.ScatterAbstract.extend({
  * <i>showAreas</i> - Show or hide dots. Default: false
  * <i>showLines</i> - Show or hide dots. Default: true
  * <i>showValues</i> - Show or hide line value. Default: false
- * <i>stacked</i> -  Stacked? Default: false
  *
  * Has the following protovis extension points:
  *
@@ -125,7 +122,6 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     pvLabel: null,
     pvCategoryPanel: null,
 
-    stacked: false,
     showAreas: false,
     showLines: true,
     showDots: true,
@@ -187,7 +183,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         };
 
         // Stacked?
-        if (this.stacked){
+        if (options.stacked){
             var dataSet = pvc.padMatrixWithZeros(de.getVisibleTransposedValues());
             this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
                 .layers(dataSet)
