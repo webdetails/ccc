@@ -1,3 +1,46 @@
+12.02.16
+
+New chart type "NormalizedBarChart" (100% stacked/normalized/segmenred bar chart)
+Added new "selectable" chart option that is false by default. Currently, selection is supported by BarChart/WaterfallChart and HeatGridChart.
+Fixed Redmine Bug #193: BoxplotChart does not show box tooltips correctly
+Fixed Redmine Bug #208: BarLine charts break when Independent Line Scale is set to false
+Fixed Redmine Bug #298: Wrong extension point in ccc documentation
+Fixed Redmine Bug #316 - Tooltips of Dots in line charts do not always appear
+Fixed Redmine Bug #317 - Timeseries axes ticks, in some cases, get drawn far to the left, off the chart
+Functions 'getZZZScale' now have a 'keyArgs'-like interface. This interface makes it easy to add new arguments to the functions.
+Refactoring  pvcPanel.js into separate files.
+Put classes in pvcCategoricalAbstract.js and pvcDataDimension.js into separate files
+Fixed bug in value/label code of Categorical charts
+Added support for value and label distinction, for title and subtitle, on the bullet chart.
+Fixed ZOrder bug - did not detect correctly a new child with ZOrder already applied
+Fixed tipsy tooltip issue with dots and lines hiding the tooltip imediately on mouseleave, which is incompatible with the point/unpoint pseudo-events, tipically used in these cases to attach the tipsy behavior.
+Fixed pvc.mergeDefaults function that did copy specified options with an === undefined value	
+Added logging of received Metadata and resultset to DataEngine.
+Added logging of received options, in pvc.Base#preRender.    
+DataDimension inherited code from Composite Ordinal Axes related to onversion of data to tree form and obtaining labels for its elements. New chart options 'getCategoryLabel' and 'getSeriesLabel'.
+Click and Double-click in AxisPanel has been refactored to allow usage by other axis types, besides the composite axis (like linear and normal-ordinal).
+Axis value selection is now integrated in the click event (and thus, xAxisClickAction and yAxisClickAction of HeatGrid have been removed).
+Axis 'clickAction' and 'doubleClickAction' now receive an object argument that contains the properties: 'value', 'label', 'absValue', 'path', 'absLabel'. This breaks the previous interface of these handlers (its .toString method returns the 'value' property, to ensure some backward compatibility).
+Ordinal axes have changed the type of "datum" that is passed to property functions. This can affect functions given tothe following extensions points: 'Ticks_', 'Label_', 'Grid_'. The "datum" received is equal to that described for the clickAction event handler.
+Fixed bug in MetricAbstract that affected drawing of base linear axes.
+Changed options handling by chart classes. They now all declare options in a static property called 'defaultOptions', which is handled in the instance constructor by the new function: pvc.mergeDefaults. This allowed that options would reach the root base class (which by difficulties in option handling in some cases were not passed to base classes), which was required so that the new "getLabel" options could reach the base class, by the time the DataEngine is created. This involved collecting all options of every chart class and placing a default for them in the defaultOptions object. Only options declared here are read from the user options.
+Some refactoring of MultiValueTranslator.
+Improved lasso selection, to behave better near min. width or height of selection rectangle (method _createSelectionOverlay lost the w and h arguments).
+Fixed bug in the HeatGrid and Waterfall tooltip calculation code, that caused tooltips to be shown delayed one mark instance. To this end, a new method has been added to pv.Mark that allows defining a local mark property: 'localProperty'. This is in most situations a better choice that of using 'def', which isn't evaluated per instance of a Mark, but per build of a Mark.
+Performance improvement on heatgrid: don't reevaluate tooltip when shapes are re-rendered
+Solved lasso show delay
+Fixed some bugs related to the timeSeries option being wrongly read on the panel or on the chart.
+compositeAxis: issue with labels overlapping with map when aligned to the right
+Fixed bug related to the last showTooltips change.
+Normalized showTooltips option and tipsySettings options on Categorical charts.
+Generalized categorical charts rubber band detection of selected data.
+Added pvc.CategoricalAbstract#clearSelections method to support Pentaho Analyzer.
+Solved missing ;
+
+
+
+
+
 12.01.25 
 
 Implemented Redmine Feature #107 - Control number of labels on the linear Axis for categorical charts (show "MinorTicks" option, including 2nd axis) 
