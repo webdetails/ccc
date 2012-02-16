@@ -1,48 +1,18 @@
+
 /**
  * Bullet chart generation
  */
-
-pvc.BulletChart = pvc.Base.extend({
+pvc.BulletChart = pvc.BaseChart.extend({
 
   bulletChartPanel : null,
   allowNoData: true,
 
-  constructor: function(o){
+  constructor: function(options){
 
-    this.base(o);
-
-    var _defaults = {
-      showValues: true,
-      orientation: "horizontal",
-      showTooltips: true,
-      legend: false,
-
-      bulletSize: 30,        // Bullet size
-      bulletSpacing: 50,     // Spacing between bullets
-      bulletMargin: 100,     // Left margin
-
-      // Defaults
-      bulletMarkers: [],     // Array of markers to appear
-      bulletMeasures: [],    // Array of measures
-      bulletRanges: [],      // Ranges
-      bulletTitle: "Bullet", // Title
-      bulletSubtitle: "",    // Subtitle
-
-      crosstabMode: true,
-      seriesInRows: true,
-
-      tipsySettings: {
-        gravity: "s",
-        fade: true
-      }
-
-    };
-
+    this.base(options);
 
     // Apply options
-    $.extend(this.options,_defaults, o);
-
-
+    pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
   },
 
   preRender: function(){
@@ -59,11 +29,36 @@ pvc.BulletChart = pvc.Base.extend({
     });
 
     this.bulletChartPanel.appendTo(this.basePanel); // Add it
-
   }
+}, {
+  defaultOptions: {
+      showValues: true,
+      orientation: "horizontal",
+      showTooltips: true,
+      legend: false,
 
-}
-);
+      bulletSize:     30,  // Bullet size
+      bulletSpacing:  50,  // Spacing between bullets
+      bulletMargin:  100,  // Left margin
+
+      // Defaults
+      bulletMarkers:  null,     // Array of markers to appear
+      bulletMeasures: null,     // Array of measures
+      bulletRanges:   null,     // Ranges
+      bulletTitle:    "Bullet", // Title
+      bulletSubtitle: "",       // Subtitle
+
+      axisDoubleClickAction: null,
+      
+      crosstabMode: true,
+      seriesInRows: true,
+
+      tipsySettings: {
+        gravity: "s",
+        fade: true
+      }
+    }
+});
 
 
 
@@ -101,16 +96,14 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     fade: true
   },
 
-  constructor: function(chart, options){
-
-    this.base(chart,options);
-
-  },
+//  constructor: function(chart, options){
+//    this.base(chart,options);
+//  },
 
   create: function(){
 
-    var myself = this;
-    this.width = this._parent.width;
+    var myself  = this;
+    this.width  = this._parent.width;
     this.height = this._parent.height;
 
     var data = this.buildData();
@@ -218,7 +211,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .textBaseline("bottom")
     .left(titleOffset)
     .text(function(d){
-      return d.title;
+      return d.formattedTitle;
     });
 
     this.pvBulletSubtitle = this.pvBullet.anchor(anchor).add(pv.Label)
@@ -228,15 +221,15 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .textBaseline("top")
     .left(titleOffset)
     .text(function(d){
-      return d.subtitle;
+      return d.formattedSubtitle;
     });
 
-	var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ? 
-	function(d, e) {
-		ignoreClicks = 2;
-		myself.chart.options.axisDoubleClickAction(d, e);
-		
-	}: null;
+    var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ?
+    function(d, e) {
+            //ignoreClicks = 2;
+            myself.chart.options.axisDoubleClickAction(d, e);
+
+    }: null;
     
     if (doubleClickAction) {
     	this.pvBulletTitle.events('all')  //labels don't have events by default
@@ -251,8 +244,6 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     }
 
-
-
     // Extension points
     this.extend(this.pvBullets,"bulletsPanel_");
     this.extend(this.pvBullet,"bulletPanel_");
@@ -266,7 +257,6 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     // Extend body
     this.extend(this.pvPanel,"chart_");
-
   },
 
   /*
@@ -281,20 +271,22 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
 
-
     var defaultData = {
-      title: this.chart.options.bulletTitle,
-      subtitle: this.chart.options.bulletSubtitle,
-      ranges:this.chart.options.bulletRanges,
-      measures: this.chart.options.bulletMeasures,
-      markers: this.chart.options.bulletMarkers
+      title:     this.chart.options.bulletTitle,
+      subtitle:  this.chart.options.bulletSubtitle,
+      ranges:    this.chart.options.bulletRanges   || [],
+      measures:  this.chart.options.bulletMeasures || [],
+      markers:   this.chart.options.bulletMarkers  || []
     };
     
-    var data = [];
+    var data = [],
+        options = this.chart.options,
+        getSeriesLabel   = options.getSeriesLabel || pv.identity,
+        getCategoryLabel = options.getCategoryLabel || pv.identity;
 
     if(this.chart.dataEngine.getSeriesSize() == 0 ) {
       // No data
-      data.push($.extend({},defaultData));
+      data.push($.extend({}, defaultData));
     }
     else {
       // We have data. Iterate through the series.
@@ -310,18 +302,24 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             // Value only
             d.measures = [s];
             break;
+
           case 2:
             // Name, value and markers
             d.markers = [v[1]];
+            // NO break!
           case 1:
             // name and value
             d.title = s;
+            d.formattedTitle = getCategoryLabel(s);
             d.measures = [v[0]];
             break;
+
           default:
             // greater or equal 4
             d.title = s;
             d.subtitle = v[0];
+            d.formattedTitle = getCategoryLabel(s);
+            d.formattedSubtitle = getSeriesLabel(v[0])
             d.measures = [v[1]];
             d.markers = [v[2]];
             if (v.length >= 3){
@@ -334,5 +332,4 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
    
     return data;
   }
-
 });

@@ -17,14 +17,20 @@
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
     <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvcDatum.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataTranslator.js"></script>
     <script type="text/javascript" src="pvc/pvcData.js"></script>
-    <script type="text/javascript" src="pvc/pvcPanel.js"></script>
-    <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+    <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
+    <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-    <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
-    <script type="text/javascript" src="pvc/pvcPie.js"></script>
-    <script type="text/javascript" src="pvc/pvcBar.js"></script>
+    <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcLine.js"></script>
     
     <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
@@ -140,7 +146,7 @@ You can use the StackedAreaChart to render a simple Area chart like this one:<br
           legend: false,
           legendPosition: "top",
           legendAlign: "right",
-          orientation: 'vertical',
+          orientation: 'vertical'
         });
         stackedArea.setData(relational_02,
                            {crosstabMode: false,
@@ -173,7 +179,7 @@ The following is a stacked area chart displaying three series over time.<br>
           yAxisFullGrid: true,
 
           extensionPoints: {
-area_fillStyle:pv.colors("#ff7800","#FFb573","#ff9a40"),
+area_fillStyle:pv.colors("#ff7800","#FFb573","#ff9a40")
           }
 
         });
@@ -218,6 +224,5 @@ This is how a huge dataset looks like rendered with a stacked area chart:<br>
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcStackedArea3"></div>
-
   </body>
 </html>

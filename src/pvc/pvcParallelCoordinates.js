@@ -1,43 +1,26 @@
+
 /**
  * Parallel coordinates offer a way to visualize data and make (sub-)selections
  * on this dataset.
  * This code has been based on a protovis example:
  *    http://vis.stanford.edu/protovis/ex/cars.html
  */
-
-
-pvc.ParallelCoordinates = pvc.Base.extend({
+pvc.ParallelCoordinates = pvc.BaseChart.extend({
 
   parCoordPanel : null,
-  legendSource: "categories",
+  legendSource: 'category',
+
   tipsySettings: {
     gravity: "s",
     fade: true
   },
 
-  constructor: function(o){
+  constructor: function(options){
 
-    this.base(o);
-
-    var _defaults = {
-      topRuleOffset: 30,
-      botRuleOffset: 30,
-      leftRuleOffset: 60,
-      rightRuleOffset: 60,
-	// sort the categorical (non-numerical dimensions)
-      sortCategorical: true,
-	// map numerical dimension too (uniform (possible non-linear)
-	// distribution of the observed values)
-      mapAllDimensions: true,
-	// number of digits after decimal point.
-      numDigits: 0
-    };
-
+    this.base(options);
 
     // Apply options
-    $.extend(this.options,_defaults, o);
-
-    return;
+    pvc.mergeDefaults(this.options, pvc.ParallelCoordinates.defaultOptions, options);
   },
 
   preRender: function(){
@@ -57,12 +40,22 @@ pvc.ParallelCoordinates = pvc.Base.extend({
     });
 
     this.parCoordPanel.appendTo(this.basePanel); // Add it
-
-    return;
   }
-
-}
-);
+}, {
+    defaultOptions: {
+      topRuleOffset: 30,
+      botRuleOffset: 30,
+      leftRuleOffset: 60,
+      rightRuleOffset: 60,
+	// sort the categorical (non-numerical dimensions)
+      sortCategorical: true,
+	// map numerical dimension too (uniform (possible non-linear)
+	// distribution of the observed values)
+      mapAllDimensions: true,
+	// number of digits after decimal point.
+      numDigits: 0
+    }
+});
 
 
 /*
@@ -83,14 +76,12 @@ pvc.ParallelCoordinates = pvc.Base.extend({
 
 pvc.ParCoordPanel = pvc.BasePanel.extend({
 
-  _parent: null,
   pvParCoord: null,
 
   dimensions: null, 
   dimensionDescr: null,
 
   data: null,
-
 
   constructor: function(chart, options){
 
@@ -315,13 +306,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       return record;
     };
     this.dimensionDescr = genKeyVal(this.dimensions, descrVals);
-    
-    return;
-  } ,
-
-
-
-
+  },
 
   create: function(){
 
@@ -643,10 +628,5 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     // Extend body
     this.extend(this.pvPanel,"chart_");
-
-    return;
   }
-
-
 });
-

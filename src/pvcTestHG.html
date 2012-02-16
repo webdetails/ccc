@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html  xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:ev="http://www.w3.org/2001/xml-events">
     <head>
         <title>CCC Samples - Heat grid</title>
 
@@ -14,15 +16,24 @@
         <script type="text/javascript" src="lib/tipsy.js"></script>
         <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
         <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvcDatum.js"></script>
+        <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
+        <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
+        <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
+        <script type="text/javascript" src="pvc/pvcDataTranslator.js"></script>
         <script type="text/javascript" src="pvc/pvcData.js"></script>
-        <script type="text/javascript" src="pvc/pvcPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcLegend.js"></script>
+        <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcPie.js"></script>
-        <script type="text/javascript" src="pvc/pvcBar.js"></script>
-        <script type="text/javascript" src="pvc/pvcHeatGrid.js"></script>
-        <script type="text/javascript" src="pvc/pvcLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+        
+        <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
+        
         <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
         <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
         <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
@@ -233,7 +244,8 @@ var heatGrid5 = new pvc.HeatGridChart({
     height: 250,
     title:"Selectable heat grid with composite axis",
     animate: false,
-    clickable: false,
+    clickable: true,
+    selectable: true,
     orientation: "vertical",
     showValues: false,
     valuesAnchor: "right",
@@ -245,26 +257,26 @@ var heatGrid5 = new pvc.HeatGridChart({
     nullShape:null,
     colorRange:['red','yellow', 'lightgreen','darkgreen'],
     dataOptions: {
-            categoriesCount : 2,
-            measuresInColumns: true
-        },
+        categoriesCount : 2,
+        measuresInColumns: true
+    },
     ctrlSelectMode: true,
     axisLabelFont:'14px helvetica',
     shape: 'circle',
-    onSelectionChange: function(selections){
-     var selTxt = '';
-     for(var i=0;i&lt;selections.length;i++){
-      var item = selections[i];
-      selTxt += 'category:[' + item.category.join(', ') + '] ';
-      selTxt += ', series:[' + item.series.join(', ') + ']&lt;br&gt;';
-     }
-      $('#selected').html(selTxt);
+    selectionChangedAction: function(selections){
+        var selTxt = '';
+        for(var i=0;i&lt;selections.length;i++){
+            var datum = selections[i];
+            selTxt += 'category:[' + datum.elem.category.path.join(', ') + '] ';
+            selTxt += ', series:[' + datum.elem.series.path.join(', ') + ']&lt;br&gt;';
+        }
+        $('#selected').html(selTxt);
     },
     yAxisSize:60,
     xAxisSize:100,
     isMultiValued: true,
     useCompositeAxis:true
-    });
+});
 
 heatGrid5.setData(testHeatGridComp, {crosstabMode: true, seriesInRows: false });
 heatGrid5.render();

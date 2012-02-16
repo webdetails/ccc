@@ -1,21 +1,17 @@
+
 /**
  * TimeseriesAbstract is the base class for all categorical or timeseries
  */
-pvc.TimeseriesAbstract = pvc.Base.extend({
+pvc.TimeseriesAbstract = pvc.BaseChart.extend({
 
     allTimeseriesPanel : null,
-    
-    defaultOptions: {
-        showAllTimeseries: true,
-        allTimeseriesPosition: "bottom",
-        allTimeseriesSize: 50
-    },
-    
+
     constructor: function(options){
-        this.base();
+
+        this.base(options);
 
         // Apply options
-        $.extend(this.options, this.defaultOptions, options);
+        pvc.mergeDefaults(this.options, pvc.TimeseriesAbstract.defaultOptions, options);
     },
 
     preRender: function(){
@@ -31,6 +27,12 @@ pvc.TimeseriesAbstract = pvc.Base.extend({
 
             this.allTimeseriesPanel.appendTo(this.basePanel); // Add it
         }
+    }
+}, {
+    defaultOptions: {
+        showAllTimeseries: true,
+        allTimeseriesPosition: "bottom",
+        allTimeseriesSize: 50
     }
 });
 

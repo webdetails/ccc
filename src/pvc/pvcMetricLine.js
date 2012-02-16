@@ -1,178 +1,97 @@
 
-
-
 /**
  * ScatterAbstract is the class that will be extended by dot, line, stackedline and area charts.
  */
-
 pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
 
-  scatterChartPanel : null,
-  tipsySettings: {
-    gravity: "s",
-    fade: true
-  },
+    scatterChartPanel : null,
+  
+    constructor: function(options){
 
-  constructor: function(o){
+        this.base(options);
 
-    this.base(o);
+        // Apply options
+        pvc.mergeDefaults(this.options, pvc.MetricScatterAbstract.defaultOptions, options);
+    },
 
-    var _defaults = {
-      showDots: false,
-      showLines: false,
-      showAreas: false,
-      showValues: false,
-      showTooltips: true,
-      axisOffset: 0.05,
-      valuesAnchor: "right",
-      stacked: false,
-      originIsZero: true,
-      orientation: "vertical",
-      timeSeries: false,
-      timeSeriesFormat: "%Y-%m-%d",
-      panelSizeRatio: 1,
-      orthoFixedMin: null,
-      orthoFixedMax: null
-    };
+     /* @override */
+    createCategoricalPanel: function(){
+        pvc.log("Prerendering in MetricScatterAbstract");
 
+        this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
+            showValues: this.options.showValues,
+            valuesAnchor: this.options.valuesAnchor,
+            showLines: this.options.showLines,
+            showDots: this.options.showDots,
+            showAreas: this.options.showAreas,
+            orientation: this.options.orientation
+        });
 
-    // Apply options
-    $.extend(this.options,_defaults, o);
-
-
-  },
-
-  preRender: function(){
-
-    this.base();
-
-    pvc.log("Prerendering in MetricScatterAbstract");
-
-    this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
-      stacked: this.options.stacked,
-      showValues: this.options.showValues,
-      valuesAnchor: this.options.valuesAnchor,
-      showLines: this.options.showLines,
-      showDots: this.options.showDots,
-      showAreas: this.options.showAreas,
-      showTooltips: this.options.showTooltips,
-      orientation: this.options.orientation,
-      timeSeries: this.options.timeSeries,
-      timeSeriesFormat: this.options.timeSeriesFormat
-    });
-
-    this.categoricalPanel = this.scatterChartPanel;
-
-    this.scatterChartPanel.appendTo(this.basePanel); // Add it
-
-  }
-
+        return this.scatterChartPanel;
+    }
+}, {
+    defaultOptions: {
+        showDots: false,
+        showLines: false,
+        showAreas: false,
+        showValues: false,
+        axisOffset: 0.05,
+        valuesAnchor: "right",
+        panelSizeRatio: 1
+    }
 });
 
 /**
  * Metric Dot Chart
- *
  */
-
 pvc.MetricDotChart = pvc.MetricScatterAbstract.extend({
 
-  constructor: function(o){
+  constructor: function(options){
 
-    this.base();
+    this.base(options);
 
-    var _defaults = {
-      showDots: true,
-      showLines: false,
-      showAreas: false,
-      showValues: false,
-      stacked: false
-    };
-
-    // Apply options
-    $.extend(this.options,_defaults, o);
-
+    this.options.showDots = true;
   }
 });
 
 
 /**
  * Metric Line Chart
- *
  */
-
 pvc.MetricLineChart = pvc.MetricScatterAbstract.extend({
 
-  constructor: function(o){
+  constructor: function(options){
 
-    this.base();
+    this.base(options);
 
-    var _defaults = {
-      showDots: false, // ask
-      showLines: true,
-      showAreas: false,
-      showValues: false,
-      stacked: false
-    };
-
-    // Apply options
-    $.extend(this.options,_defaults, o);
-
-
+    this.options.showLines = true;
   }
 });
-
-
 
 /**
  * Metric Stacked Line Chart
- *
  */
-
 pvc.mStackedLineChart = pvc.MetricScatterAbstract.extend({
 
-  constructor: function(o){
+  constructor: function(options){
 
-    this.base();
+    this.base(options);
 
-    var _defaults = {
-      showDots: false, // ask
-      showLines: true,
-      showAreas: false,
-      showValues: false,
-      stacked: true
-    };
-
-    // Apply options
-    $.extend(this.options,_defaults, o);
-
-
+    this.options.showLines = true;
+    this.options.stacked = true;
   }
 });
-
 
 /**
  * Metric Stacked Area Chart
- *
  */
-
 pvc.mStackedAreaChart = pvc.MetricScatterAbstract.extend({
 
-  constructor: function(o){
+  constructor: function(options){
 
-    this.base();
+    this.base(options);
 
-    var _defaults = {
-      showDots: false, // ask
-      showLines: false,
-      showAreas: true,
-      showValues: false,
-      stacked: true
-    };
-
-    // Apply options
-    $.extend(this.options,_defaults, o);
-
-
+    this.options.showAreas = true;
+    this.options.stacked = true;
   }
 });
-

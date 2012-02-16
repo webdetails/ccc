@@ -17,15 +17,18 @@
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
     <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvcDatum.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataTranslator.js"></script>
     <script type="text/javascript" src="pvc/pvcData.js"></script>
-    <script type="text/javascript" src="pvc/pvcPanel.js"></script>
-    <script type="text/javascript" src="pvc/pvcLegend.js"></script>
-    <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
-    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-    <script type="text/javascript" src="pvc/pvcWaterfall.js"></script>
-    <script type="text/javascript" src="pvc/pvcPie.js"></script>
-    <script type="text/javascript" src="pvc/pvcBar.js"></script>
-    <script type="text/javascript" src="pvc/pvcLine.js"></script>
+    <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
+    <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
+    <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
+
     <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
     <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
         
@@ -99,29 +102,29 @@ Sample extension points:<br>
 
 <h2>Examples</h2>
 <h3>A Simple Pie </h3>
-This is the simplest pie ever. Just provide the dimensions, a title and the data to be rendered.
+This is the simplest pie ever. Just provide the dimensions,
+a title and the data to be rendered.<br/>
 <textarea cols="55" rows="15" id="pvcPie1Code">
-        var pie = new pvc.PieChart({
-          canvas: "pvcPie1",
-          width: 350,
-          height: 250,
-          title: "Simple Pie",
-          animate: false,
-          showTooltips: true,
-          showValues: false,
-        });
-        pie.setData($.extend(true, {},relational_03),
-           {crosstabMode: false,
-            seriesInRows: false});
-        pie.render();
+var pie = new pvc.PieChart({
+    canvas: "pvcPie1",
+    width: 350,
+    height: 250,
+    title: "Simple Pie",
+    animate: false,
+    showTooltips: true,
+    showValues: false,
+});
+pie.setData($.extend(true, {},relational_03),
+    {crosstabMode: false,
+    seriesInRows: false});
+pie.render();
 
 </textarea>
-
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcPie1"></div>
-
 <h3>A Rich Pie </h3>
-Any simple pie can be enhanced by configuring the legends, setting colors, fonts, and more. 
+Any simple pie can be enhanced by configuring the legends,
+setting colors, fonts, and more.<br/>
 <textarea cols="55" rows="22" id="pvcPie2Code">
         var pie = new pvc.PieChart({
           canvas: "pvcPie2",
