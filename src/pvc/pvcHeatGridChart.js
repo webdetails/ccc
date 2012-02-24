@@ -199,6 +199,9 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             [pvc.BasePanel.parallelLength[anchor]](w)
             .add(pv.Panel)
             .data(data)
+            .datum(function(){
+                return myself._getRenderingDatum();
+            })
             [anchor]
             (function(){
                 return this.index * h;
@@ -232,13 +235,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         // clickAction
         if (this._shouldHandleClick()){
-            this.pvHeatGrid
-                .cursor("pointer")
-                .event("click", function(row, rowCol){
-                    var d = row[rowCol],
-                        ev = arguments[arguments.length - 1]; 
-                    return myself._handleClick(this, d, ev);
-                });
+            this._addPropClick(this.pvHeatGrid);
         }
         
         //showValues
@@ -274,24 +271,23 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     /**
      * Returns the datum associated with the
      * current rendering indexes of this.pvHeatGrid.
+     *
      * @override
      */
     _getRenderingDatum: function(mark){
-        // On a property function of this.pvHeatGrid:
-        // var s = myself.chart.dataEngine.getSeries()[this.index];
-        // var c = myself.chart.dataEngine.getCategories()[this.parent.index];
-
-        var serIndex = this.pvHeatGrid.index;
-        if(serIndex >= 0){
-            var datumRef = {
-                category: this.pvHeatGrid.parent.index,
-                series:     serIndex
-            };
-
-            return this.chart.dataEngine.findDatum(datumRef, true);
+        if(!mark){
+            mark = this.pvHeatGrid;
         }
-        
-        return null;
+
+        var index = mark.index;
+        if(index < 0){
+            return null;
+        }
+
+        var visibleSerIndex = index,
+            visibleCatIndex = mark.parent.index;
+
+        return this._getRenderingDatumByIndexes(visibleSerIndex, visibleCatIndex);
     },
     
     // heatgrid with resizable shapes instead of panels
@@ -362,17 +358,8 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         // chart generation
         this.shapes = this.pvHeatGrid
             .add(pv.Dot)
-            // NOTE: because 'def' properties
-            // are evaluated before all normal properties and
-            // only once for each build (and not once per local datum),
-            // this works only due to special conditions:
-            // * _getRenderingDatum depends only on this.pvHeatGrid.index
-            //   being set (the parent mark)
-            // * selection status does not depend on the data of this.shapes
-            .def("selected", function(){
-                var datum = myself._getRenderingDatum(this);
-                return datum != null && datum.isSelected();
-            })
+            .localProperty("selected", Boolean) // localProperty: see pvc.js
+            .selected(function(){ return this.datum().isSelected(); })
             .shape( function(r, ra ,i){
                 if(options.sizeValIdx == null){
                     return myself.shape;
@@ -414,29 +401,28 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             });
 
         if(this._shouldHandleClick()){
-            this.shapes
-                .cursor("pointer")
-                .event("click", function(r, ra,i) {
-                    var d = r[i],
-                        ev = arguments[arguments.length - 1];
-                 
-                    return myself._handleClick(this, d, ev);
-                });
+            this._addPropClick(this.shapes);
         }
 
+        if(options.doubleClickAction){
+            this._addPropDoubleClick(this.shapes);
+        }
+        
         if(options.showTooltips){
             this.shapes
                 .localProperty("tooltip", String) // localProperty: see pvc.js
-                .tooltip(function(r, ra, i){ // NOTE: row, rowAgain, index
+                .tooltip(function(){
                     var tooltip = this.tooltip();
                     if(!tooltip){
+                        var datum = this.datum(),
+                            v = datum.value;
+
                         if(options.customTooltip){
-                            var s = myself.chart.dataEngine.getSeries()[this.parent.index];
-                            var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
-                            var d = r[i];
-                            tooltip = options.customTooltip(s,c,d);
+                            var s = datum.elem.series.rawValue,
+                                c = datum.elem.category.rawValue;
+                            tooltip = options.customTooltip(s, c, v, datum);
                         } else {
-                            tooltip = myself.valuesToText(r[i]);
+                            tooltip = myself.valuesToText(v);
                         }
                     }
                     
@@ -446,16 +432,6 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                     return ''; //prevent browser tooltip
                 })
                 .event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
-        }
-
-        if(options.doubleClickAction){
-            this.shapes
-                .cursor("pointer")
-                .event("dblclick", function(r, ra, i){
-                     var d = r[i],
-                         ev = arguments[arguments.length - 1];
-                     return myself._handleDoubleClick(this, d, ev);
-                });
         }
     },
 
@@ -473,11 +449,8 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     isNullShapeLineOnly: function(){
       return this.nullShape == 'cross';  
     },
-    
-    /***********************
-     * SELECTIONS (start)
-     */
-    // TODO:
+
+// TODO:
 //    isValueNull: function(s,c){
 //      var sIdx = this.chart.dataEngine.getSeries().indexOf(s);
 //      var cIdx = this.chart.dataEngine.getCategories().indexOf(c);
@@ -485,70 +458,23 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
 //
 //      return val == null || val[0] == null;
 //    },
-      
+
     /**
+     * Returns an array of marks whose instances are associated to a datum, or null.
      * @override
      */
-    _collectRubberBandSelections: function(){
-        var isVertical = this.isOrientationVertical(),
-            dataEngine = this.chart.dataEngine,
-            rb = this.rubberBand,
-            w = this._cellWidth,
-            h = this._cellHeight;
-        
-        var yValues = isVertical ? dataEngine.getSeries()     : dataEngine.getCategories(),
-            xValues = isVertical ? dataEngine.getCategories() : dataEngine.getSeries();
-        
-        var ySel = [],
-            xSel = [],
-            i;
-        
-        // find included series/categories
-        for(i = 0; i < yValues.length; i++){
-            var y = i*h + h/2;
-            if(y > rb.y && y < rb.y + rb.dy){
-                ySel.push(yValues[i]);
-            }
-        }
-        
-        if(ySel.length === 0){
-            return null;
-        }
-        
-        for(i = 0; i < xValues.length; i++){
-            var x = i*w + w/2;
-            if(x > rb.x && x < rb.x + rb.dx){
-                xSel.push(xValues[i]);
-            }
-        }
-        
-        if(xSel.length === 0){
-            return null;
-        }
-        
-        // -------------
-        // Select shapes in intersection
-        
-        var where = [];
-
-        var sSel = isVertical ? ySel : xSel,
-            cSel = isVertical ? xSel : ySel;
-
-        for(i = 0 ; i < sSel.length; i++){
-            var s = sSel[i];
-            for(var j = 0; j < cSel.length; j++){
-                var c = cSel[j];
-
-                where.push({
-                    category: [c],
-                    series:     [s]
-                });
-            }
-        }
-
-        return dataEngine.getWhere(where);
+    _getSelectableMarks: function(){
+        return [this.shapes];
     },
     
+    /**
+     * Renders the heat grid panel
+     * @override
+     */
+    _renderSelectableMarks: function(){
+        this.pvPanel.render();
+    },
+
     /*
      *selections (end)
      **********************/

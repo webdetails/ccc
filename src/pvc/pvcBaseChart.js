@@ -5,7 +5,12 @@
 pvc.BaseChart = pvc.Abstract.extend({
 
     isPreRendered: false,
+
+    /**
+     * Indicates if the chart is rendering with animation.
+     */
     isAnimating:   false,
+    _renderAnimationStart: false,
 
     // data
     dataEngine: null,
@@ -21,7 +26,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     colors: null,
 
     _renderVersion: 0,
-
+    
     // renderCallback
     renderCallback: undefined,
 
@@ -84,7 +89,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         /* Increment render version to allow for cache invalidation  */
         this._renderVersion++;
         this.isPreRendered = false;
-        
+
         pvc.log("Prerendering in pvc");
 
         // If we don't have data, we just need to set a "no data" message
@@ -216,7 +221,8 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     render: function(bypassAnimation, rebuild) {
         try{
-            //this.isAnimating = false;
+            this._renderAnimationStart = 
+            this.isAnimating = this.options.animate && !bypassAnimation;
             
             if (!this.isPreRendered || rebuild) {
                 this.preRender();
@@ -226,18 +232,26 @@ pvc.BaseChart = pvc.Abstract.extend({
                 this.options.renderCallback.call(this);
             }
 
+            // When animating, renders the animation's 'start' point
             this.basePanel.getPvPanel().render();
 
-            // Perform animation
-            if (!bypassAnimation && this.options.animate) {
-                this.isAnimating = true;
+            // Transition to the animation's 'end' point
+            if (this.isAnimating) {
+                this._renderAnimationStart = false;
+                
+                var me = this;
                 this.basePanel.getPvPanel()
                         .transition()
                         .duration(2000)
                         .ease("cubic-in-out")
-                        .start();
+                        .start(function(){
+                            me.isAnimating = false;
+                            me._onRenderEnd(true);
+                        });
+            } else {
+                this._onRenderEnd(false);
             }
-
+            
         } catch (e) {
             if (e instanceof NoDataException) {
 
@@ -262,6 +276,26 @@ pvc.BaseChart = pvc.Abstract.extend({
                 throw e;
             }
         }
+    },
+
+    /**
+     * Animation
+     */
+    animate: function(start, end) {
+        return this._renderAnimationStart ? start : end;
+    },
+    
+    /**
+     * Called when a render has ended.
+     * When the render performed an animation
+     * and the 'animated' argument will have the value 'true'.
+     *
+     * The default implementation calls the base panel's
+     * #_onRenderEnd method.
+     * @virtual
+     */
+    _onRenderEnd: function(animated){
+        this.basePanel._onRenderEnd(animated);
     },
 
     /**
@@ -307,29 +341,40 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     extend: function(mark, prefix, keyArgs) {
         // if mark is null or undefined, skip
+        if(pvc.debug){
+            pvc.log("Applying Extension Points for: '" + prefix +
+                    "'" + (mark ? "" : "(target mark does not exist)"));
+        }
+
         if (mark) {
             var points = this.options.extensionPoints;
             if(points){
-                var pL = prefix.length,
-                    wrapper = pvc.get(keyArgs, 'wrapper'),
-                    context = pvc.get(keyArgs, 'context');
-
                 for (var p in points) {
                     // Starts with
-                    if (p.indexOf(prefix) === 0) {
-                        var m = p.substring(pL),
-                            v = points[p];
+                    if(p.indexOf(prefix) === 0){
+                        var m = p.substring(prefix.length);
 
-                        // Distinguish between mark methods and properties
-                        if (typeof mark[m] === "function") {
-                            // Now check if function wrapping is needed
-                            if(wrapper && typeof v === 'function'){
-                                v = wrapper.call(context, v);
-                            }
-                            
-                            mark[m](v);
+                        // Not everything that is passed to 'mark' argument
+                        //  is actually a mark...(ex: scales)
+                        // Not locked and
+                        // Not intercepted and
+                        if(mark.isLocked && mark.isLocked(m)){
+                            pvc.log("* " + m + ": locked extension point!");
+                        } else if(mark.isIntercepted && mark.isIntercepted(m)) {
+                            pvc.log("* " + m + ":" + JSON.stringify(v) + " (controlled)");
                         } else {
-                            mark[m] = v;
+                            var v = points[p];
+
+                            if(pvc.debug){
+                                pvc.log("* " + m + ": " + JSON.stringify(v));
+                            }
+
+                            // Distinguish between mark methods and properties
+                            if (typeof mark[m] === "function") {
+                                mark[m](v);
+                            } else {
+                                mark[m] = v;
+                            }
                         }
                     }
                 }
@@ -338,10 +383,17 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
 
     /**
-     * Animation
+     * Obtains the specified extension point.
+     * Arguments are concatenated with '_'.
      */
-    animate: function(start, end) {
-        return (!this.options.animate || this.isAnimating) ? end : start;
+    _getExtension: function(extPoint) {
+        var points = this.options.extensionPoints;
+        if(!points){
+            return undefined; // ~warning
+        }
+
+        extPoint = pvc.arraySlice.call(arguments).join('_');
+        return points[extPoint];
     },
 
     isOrientationVertical: function(orientation) {

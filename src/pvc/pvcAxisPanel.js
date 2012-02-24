@@ -100,12 +100,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             rSize = rMax - rMin;
         
         this.pvRule = this.pvPanel.add(pv.Rule)
-                .zOrder(30) // see pvc.js
-                .strokeStyle('black')
-                // ex: anchor = bottom
-                [this.anchorOpposite()](0)     // top    (of the axis panel)
-                [this.anchorLength()  ](rSize) // width  
-                [this.anchorOrtho()   ](rMin); // left
+            .zOrder(30) // see pvc.js
+            .strokeStyle('black')
+            // ex: anchor = bottom
+            [this.anchorOpposite()](0)     // top    (of the axis panel)
+            [this.anchorLength()  ](rSize) // width  
+            [this.anchorOrtho()   ](rMin); // left
                 
         
         if(this.endLine){
@@ -115,7 +115,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             
         	this.pvEndLine = this.pvRule.add(pv.Rule)
                     .zOrder(10)
-                    .visible(true) // break inheritance pvRule's visible property
+                    .visible(true) // break inheritance of pvRule's visible property
                     .strokeStyle("#f0f0f0")
                     [this.anchorOpposite()](-ruleLength)
                     [this.anchorLength()  ](null)
@@ -216,8 +216,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // [anchorOpposite ](0) // Inherited from pvRule
             [anchorLength     ](null)
             [anchorOrtho      ](scale)
-            [anchorOrthoLength](this.tickLength)
-            .strokeStyle('black'); // control visibility through color or through .visible
+            [anchorOrthoLength](this.tickLength);
+            // Inherit axis color
+            //.strokeStyle('black'); // control visibility through color or through .visible
         
         // MINOR ticks are between major scale ticks
         if(this.minorTicks){
@@ -240,8 +241,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         // Now do the full grids
         if(this.fullGrid){
-            // Grid rules are visible (only) on MAJOR ticks,
-            // except on the first tick.
+            // Grid rules are visible (only) on MAJOR ticks.
             // When EndLine is active it is drawn above the last grid line.
             var ruleLength = this._parent[anchorOrthoLength] - 
                              this[anchorOrthoLength];
@@ -253,11 +253,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 [anchorOpposite   ](-ruleLength)
                 [anchorLength     ](null)
                 [anchorOrtho      ](scale)
-                [anchorOrthoLength]( ruleLength)
-//                .visible(function(d){
-//                    return (this.index > 0);
-//                })
-                ;
+                [anchorOrthoLength]( ruleLength);
         }
     },
     

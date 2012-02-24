@@ -1,10 +1,11 @@
-pv.Behavior.tipsy = function(opts) {
+pv.Behavior.tipsy = function(opts, usesPoint) {
     /**
      * One tip is reused per behavior instance.
      * Tipically there is one behavior instance per mark,
      * and this is reused across all its mark instances.
      */
-    var tip;
+    var tip,
+        tipMark;
     
     /**
      * @private When the mouse leaves the root panel, trigger a mouseleave event
@@ -21,6 +22,8 @@ pv.Behavior.tipsy = function(opts) {
                 tip.parentNode.removeChild(tip);
             }
             tip = null;
+            tipMark = null;
+            startTooltip.tipMark = null;
         }
     }
 
@@ -132,13 +135,16 @@ pv.Behavior.tipsy = function(opts) {
             $(tip).tipsy(opts);
         }
 
-        /* Propagate the tooltip text. */
-        //tip.title =  this.tooltip != null ? this.tooltip() : this.title() || this.text();
-        tip.title = (this.instance()? this.instance().tooltip : null) ||
-                    (typeof this.tooltip == 'function' ? this.tooltip() : null) ||
+        tipMark = this;
+        startTooltip.tipMark = this;
+
+        /* Find the tooltip text. */
+        var instance = this.instance();
+        tip.title = (instance && instance.tooltip) ||
+                    (typeof this.tooltip == 'function' && this.tooltip()) ||
                      this.title() ||
                      this.text();
-
+         
         /*
          * Compute bounding box. TODO support area, lines, wedges, stroke. Also
          * note that CSS positioning does not support subpixels, and the current
@@ -195,7 +201,10 @@ pv.Behavior.tipsy = function(opts) {
          *
          * HACK: Accessing protovis private field.
          */
-        if(this.$handlers['point'] === startTooltip){
+        var unpoint = usesPoint != null ? 
+                        usesPoint :
+                        (this.$handlers['point'] === startTooltip);
+        if(unpoint){
             // Being used as a point handler
             // Should remove the tipsy only in the unpoint event
             if(!this.$handlers['unpoint']){

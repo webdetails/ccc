@@ -372,13 +372,12 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         return this._getRenderingDatumByIndexes(visibleSerIndex, visibleCatIndex);
     },
 
+    /**
+     * Augments the datum with 100% normalized value information.
+     * @override
+     */
     _getRenderingDatumByIndexes: function(visibleSerIndex, visibleCatIndex){
-        var de = this.chart.dataEngine,
-            datumRef = {
-                category: de.translateDimensionVisibleIndex('category', visibleCatIndex),
-                series:   de.translateDimensionVisibleIndex('series',   visibleSerIndex)
-            },
-            datum = de.findDatum(datumRef, true);
+        var datum = this.base(visibleSerIndex, visibleCatIndex);
 
         // Augment the datum's values with 100 percent data
         if(datum && this._hundredPercentData){
@@ -584,7 +583,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
             // Change the color of the totals series
             if (myself.waterfall && seriesIndex == totalsSeriesIndex) {
-                return pv.Color.names["transparent"];
+                return pv.Color.transparent;
             }
 
             var color = colors(seriesIndex),
@@ -754,16 +753,9 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         // For labels, tooltips
         this.pvBar
-            .text(function(d){
-                // TODO: for the no series case... 's' assumes the value "Series"
-                // added by the translator
-                var datum = this.datum(),
-                    s = datum.elem.series.value,
-                    c = datum.elem.category.value;
-                    // d = datum.values
-
-                return options.tooltipFormat.call(myself, s, c, d, datum);
-            });
+            // Ends up being the default tooltip
+            //  when the property ".tooltip" below evals to falsy.
+            .text(this._createPropDatumTooltip());
 
         if(options.showTooltips){
             /*
@@ -776,19 +768,18 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             */
             this.pvBar
                 .localProperty("tooltip", String) // see pvc.js
-                .tooltip(function(r, ra, i){  // NOTE: row, rowAgain, index?
+                .tooltip(function(){
                     var tooltip;
+
                     if(options.customTooltip){
                         var datum = this.datum(),
-                            s = datum.elem.series.value,
-                            c = datum.elem.category.value,
-                            d = r;
+                            v = datum.value,
+                            s = datum.elem.series.rawValue,
+                            c = datum.elem.category.rawValue;
 
-                        tooltip = options.customTooltip.call(null, s, c, d, datum);
-                    } else {
-                        tooltip = r[i];
+                        tooltip = options.customTooltip.call(null, s, c, v, datum);
                     }
-
+                    
                     return tooltip;
                 })
                 .title(function(){
@@ -799,21 +790,11 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
 
         if(this._shouldHandleClick()){
-            this.pvBar
-                .cursor("pointer")
-                .event("click", function(d){
-                    var ev = arguments[arguments.length - 1];
-                    return myself._handleClick(this, d, ev);
-                });
+            this._addPropClick(this.pvBar);
         }
         
         if(options.doubleClickAction) {
-            this.pvBar
-                .cursor("pointer")
-                .event("dblclick", function(r, ra, i){
-                     var ev = arguments[arguments.length - 1];
-                     return myself._handleDoubleClick(this, r[i], ev);
-                });
+            this._addPropDoubleClick(this.pvBar);
         }
 
         if(this.showValues){
@@ -950,13 +931,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             }) ;
     },
 
-
-    /**********************
-     * selections (begin)
-     */
-    
     /**
-     * Renders this.pvBar - the mark that is affected by selection changes.
+     * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
     _renderSelectableMarks: function(){
@@ -964,48 +940,18 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
     },
 
     /**
+     * Returns an array of marks whose instances are associated to a datum, or null.
      * @override
      */
-    _collectRubberBandSelections: function(){
-        var dataEngine = this.chart.dataEngine,
-            categories = dataEngine.getVisibleCategories(),
-            series = dataEngine.getVisibleSeries(),
-            C = categories.length,
-            S = series.length;
-
-        var rb = this.rubberBand;
-        //pvc.log("rubber=[" + [rb.x0, rb.x0 + rb.dx, rb.y0, rb.y0 + rb.dy] +  "]");
-
-        var index = 0,
-            where = [];
-        
-        this._forEachInstanceInRubberBand(this.pvBar, function(instance, index){
-            var i, j;
-
-            if(this.stacked){
-				// index = j*C + i
-                j = Math.floor(index / C);
-                i = index % C;
-            } else {
-				// index = i*S + j
-                i = Math.floor(index / S);
-                j = index % S;
-            }
-
-//            pvc.log("instance data: " + instance.data +
-//                    " index: " + index +
-//                    " [" + [i,j] + "]=[" + [categories[i],series[j]]  + "]");
-
-            where.push({
-                category: [categories[i]],
-                series:   [series[j]]
-            });
-        }, this);
-
-        return dataEngine.getWhere(where);
+    _getSelectableMarks: function(){
+        return [this.pvBar];
     }
+<<<<<<< HEAD
     /*
      * selections (end)
      **********************/
 });
 
+=======
+});
+>>>>>>> cc35372... * [FEAT][BREAK] Line/Area/Dot charts (stacked or not) - selection support.

@@ -780,7 +780,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Tooltips
         showTooltips:  true,
-        customTooltip: null, // function(s,c,d) -> tooltip text
+        customTooltip: null, // function(s, c, v, datum) -> tooltip text
         tipsySettings: {
             gravity: "s",
             fade: true

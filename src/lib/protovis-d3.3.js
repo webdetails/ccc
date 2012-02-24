@@ -1,4 +1,4 @@
-// b9f03b4bbbdaf113bc0083189b1119582b196aed
+// bb677cde2fae25b1bec496d53b551e7f66d41944
 /**
  * @class The built-in Array class.
  * @name Array
@@ -6709,10 +6709,6 @@ pv.Mark.prototype
     .property("data")
     .property("visible", Boolean)
     // DATUM - an object counterpart for each value of data.
-    // Must be added here,
-    // to ensure that it is evaluated before VISIBLE
-    // Properties are evaluated backwards in defining order...
-    // Amongst required properties the order will be: id, datum, visible
     .property("datum", Object)
     .property("left", Number)
     .property("right", Number)
@@ -7342,7 +7338,9 @@ pv.Mark.stack = [];
 pv.Mark.prototype.bind = function() {
   var seen = {}, types = [[], [], [], []], data, required = [],
       // DATUM - an object counterpart for each value of data.
-      requiredPositions = {};
+      // Ensure that required properties are evaluated in
+      // the order: id, datum, visible
+      requiredPositions = {id: 0, datum: 1, visible: 3};
 
   /** Scans the proto chain for the specified mark. */
   function bind(mark) {
@@ -7360,7 +7358,6 @@ pv.Mark.prototype.bind = function() {
             case "visible":
             case "id":
                 required.push(p);
-                requiredPositions[p.name] = i;
                 break;
 
             default: types[p.type].push(p); break;
@@ -7376,12 +7373,12 @@ pv.Mark.prototype.bind = function() {
 
   /*
    * DATUM - an object counterpart for each value of data.
-   * Sort required properties to respect (inverse) definition order
-   * These may be out of order when one o the properties
-   * comes form this and the other fom this.defaults
+   * Sort required properties.
+   * These may be out of order when one of the properties
+   * comes from 'this' and the other from 'this.defaults'.
    */
   required.sort(function(pa, pb){
-      return requiredPositions[pb.name] - requiredPositions[pa.name];
+      return requiredPositions[pa.name] - requiredPositions[pb.name];
   });
 
   types[1].reverse();
@@ -9770,7 +9767,8 @@ pv.Transition = function(mark) {
   var that = this,
       ease = pv.ease("cubic-in-out"),
       duration = 250,
-      timer;
+      timer,
+      onEndCallback;
 
   var interpolated = {
     top: 1,
@@ -9813,9 +9811,9 @@ pv.Transition = function(mark) {
   function interpolateProperty(list, name, before, after) {
     if (name in interpolated) {
       var i = pv.Scale.interpolator(before[name], after[name]);
-      var f = function(t) { before[name] = i(t); }
+      var f = function(t) {before[name] = i(t);}
     } else {
-      var f = function(t) { if (t > .5) before[name] = after[name]; }
+      var f = function(t) {if (t > .5) before[name] = after[name];}
     }
     f.next = list.head;
     list.head = f;
@@ -9887,7 +9885,7 @@ pv.Transition = function(mark) {
     var seen = {};
     for (var i = 0; i < p.length; i++) seen[p[i].name] = 1;
     p = m.binds.optional
-        .filter(function(p) { return !(p.name in seen); })
+        .filter(function(p) {return !(p.name in seen);})
         .concat(p);
 
     /* Evaluate the properties and update any implied ones. */
@@ -9926,9 +9924,22 @@ pv.Transition = function(mark) {
         : duration;
   };
 
-  that.start = function() {
+  function doEnd(){
+      if(onEndCallback){
+          var cb = onEndCallback;
+          onEndCallback = null;
+          cb();
+      }
+  }
+
+  that.start = function(onEnd) {
+    onEndCallback = onEnd;
+
     // TODO allow partial rendering
-    if (mark.parent) fail();
+    if (mark.parent) {
+        doEnd();
+        fail();
+    }
 
     // TODO allow parallel and sequenced transitions
     if (mark.$transition) mark.$transition.stop();
@@ -9959,6 +9970,7 @@ pv.Transition = function(mark) {
 
   that.stop = function() {
     clearInterval(timer);
+    doEnd();
   };
 };
 pv.Transient = function(mark) {

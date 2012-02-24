@@ -56,9 +56,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     if (this.chart.options.secondAxis) {
         var args = this.chart.dataEngine.getSecondAxisSeries();
-        args.unshift(0);
-        args.unshift(data.length);
-        data.splice.apply(data, args);
+        data = data.concat(args);
     }
     
     c = function(arg){

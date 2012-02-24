@@ -82,7 +82,7 @@ pvc.DataEngine = Base.extend({
             pvc.log("ROWS");
             if(this.resultset){
                 this.resultset.forEach(function(row, index){
-                    pvc.log("row " + index + ": [" + row + "]");
+                    pvc.log("row " + index + ": " + JSON.stringify(row));
                 });
             }
 
@@ -114,17 +114,22 @@ pvc.DataEngine = Base.extend({
         this._dimensions = {};
         this._dimensionList = [];
         
-        var me = this;
+        var me = this,
+            options = this.chart.options;
         
         // Must be first, to match the order in the values matrix (lines)
         this._defDimension('category', {
             fetchValues: function(){ return me._fetchCategories(); },
-            calcLabel:   this.chart.options.getCategoryLabel
+            calcLabel: options.getCategoryLabel,
+            
+            // When timeSeries=true, it is the category dimension that is the timeseries...
+            timeSeries: options.timeSeries,
+            timeSeriesFormat: options.timeSeriesFormat
         });
         
         this._defDimension('series', {
             fetchValues: function(){ return me._fetchSeries(); },
-            calcLabel:   this.chart.options.getSeriesLabel
+            calcLabel: options.getSeriesLabel
         });
     },
     
@@ -145,14 +150,7 @@ pvc.DataEngine = Base.extend({
     },
     
     _fetchCategories: function(){
-        var categories = this.translator.getRows();
-            
-        if(this.chart.options.timeSeries){
-            var parser = pv.Format.date(this.chart.options.timeSeriesFormat);
-            categories.sort(pvc.createDateComparer(parser));
-        }
-        
-        return categories;
+        return this.translator.getRows();
     },
     
     /**
@@ -689,7 +687,7 @@ pvc.DataEngine = Base.extend({
     // Indexes data on a hierarchical index,
     //  in the order of _dimensionList.
     // The values of key dimensions of datums
-    //  must identify amongst all.
+    //  must identify them.
     _createDataTree: function(){
         
         function recursive(parentDimNode, datum, dimIndex /* level*/){
