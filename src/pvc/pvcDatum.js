@@ -72,9 +72,11 @@ $.extend(pvc.Datum.prototype,
                 elem = this.elem[name];
             s.push(
                 "\t" + name + ": " +
-                     JSON.stringify(elem.value) + "|" + elem.index);
+                     JSON.stringify(elem.value) + "|" + elem.leafIndex);
         }, this);
         
+        s.push("\tvalue: " +  this.value);
+
         return s.join(" ");
     },
 

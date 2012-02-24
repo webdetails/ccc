@@ -142,6 +142,7 @@ You can use the StackedAreaChart to render a simple Area chart like this one:<br
           width: 400,
           height: 220,
           animate: false,
+          selectable: true,
           title: "Simple Area chart",
           legend: false,
           legendPosition: "top",
@@ -159,34 +160,51 @@ You can use the StackedAreaChart to render a simple Area chart like this one:<br
 <h3>A Stacked Area for displaying Time series data</h3>
 The following is a stacked area chart displaying three series over time.<br>
 <textarea cols="55" rows="15" id="pvcStackedArea2Code">
-        var stackedArea2 = new pvc.StackedAreaChart({
-          canvas: "pvcStackedArea2",
-          width: 400,
-          height: 220,
-          animate: false,
-          title: "Stacked Area Chart - Timeseries",
-          titlePosition: "top",
-          titleSize: 40,
-          legend: false,
-          orientation: 'vertical',
-          timeSeries: true,
-          timeSeriesFormat: "%Y-%m-%d",
+var colorFun2 = pv.colors("#ff7800","#FFb573","#ff9a40")
+                  .domain(pv.range(3));
 
-          showValues: false,
-          yAxisSize: 30,
-          xAxisSize: 30,
-          xAxisFullGrid: true,
-          yAxisFullGrid: true,
+var stackedArea2 = new pvc.StackedAreaChart({
+        canvas: "pvcStackedArea2",
+        width: 400,
+        height: 220,
+        animate: false,
+        title: "Stacked Area Chart - Timeseries",
+        titlePosition: "top",
+        titleSize: 40,
+        legend: true,
+        legendPosition: 'right',
+        orientation: 'vertical',
+        timeSeries: true,
+        timeSeriesFormat: "%Y-%m-%d",
 
-          extensionPoints: {
-area_fillStyle:pv.colors("#ff7800","#FFb573","#ff9a40")
-          }
+        showValues: false,
+        showLines: true,
+        showDots: true,
+        
+        selectable: true,
+        yAxisSize: 30,
+        xAxisSize: 30,
+        xAxisFullGrid: true,
+        yAxisFullGrid: true,
+        xAxisEndLine: true,
+        yAxisEndLine: true,
+        yAxisDomainRoundMode: 'tick',
+        extensionPoints: {
+            //area_fillStyle: function(){
+            //    var seriesIndex = this.datum().elem.series.leafIndex;
+            //    return colorFun2(seriesIndex);
+            //},
+            dot_fillStyle: "white"
+        }
 
-        });
-        stackedArea2.setData(relational_01,
-                            {crosstabMode: false,
-                             seriesInRows: false});
-        stackedArea2.render();
+    });
+
+    stackedArea2.setData(relational_01,{
+            crosstabMode: false,
+            seriesInRows: false
+    });
+
+    stackedArea2.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcStackedArea2"></div>

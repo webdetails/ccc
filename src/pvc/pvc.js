@@ -41,6 +41,16 @@ if (!Array.prototype.filter){
     };
 }
 
+// Basic JSON shim
+if(!this.JSON){
+    this.JSON = {};
+}
+if(!this.JSON.stringify){
+    this.JSON.stringify = function(t){
+        return '' + t;
+    };
+}
+
 // ----------------------------
 
 var pvc = {
@@ -114,6 +124,30 @@ pvc.create = (function(){
         return instance;
     };
 }());
+
+pvc.define = (function(){
+
+    function setBase(base){
+        var proto = this.prototype = pvc.create(base.prototype);
+        proto.constructor = this;
+        return this;
+    }
+
+    function extend(values){
+        pvc.mergeOwn(this.prototype, values);
+        return this;
+    }
+    
+    return function(klass){
+        klass.base   = setBase;
+        klass.extend = extend;
+        return klass;
+    };
+}());
+
+pvc.scope = function(scopeFun, ctx){
+    return scopeFun.call(ctx);
+};
 
 pvc.number = function(d, dv){
     var v = parseFloat(d);
@@ -203,6 +237,13 @@ pvc.mergeOwn = function(to, from){
     return to;
 };
 
+// For treating an object as dictionary
+// without danger of hasOwnProperty having been overriden.
+var objectHasOwn = Object.prototype.hasOwnProperty;
+pvc.hasOwn = function(o, p){
+    return !!o && objectHasOwn.call(o, p);
+};
+
 pvc.mergeDefaults = function(to, defaults, from){
     pvc.forEachOwn(defaults, function(dv, p){
         var v;
@@ -218,7 +259,6 @@ pvc.forEachRange = function(min, max, fun, ctx){
         fun.call(ctx, i);
     }
 };
-
 
 pvc.arrayInsertMany = function(target, index, source){
     // TODO: is there a better way: without copying source?
@@ -308,6 +348,21 @@ pvc.toArray = function(thing){
     return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
 };
 
+
+/**
+ * Creates an array of the specified length,
+ * and, optionally, initializes it with the specified default value.
+*/
+pvc.newArray = function(len, dv){
+    var a = new Array(len);
+    if(dv !== undefined){
+        for(var i = 0 ; i < len ; i++){
+            a[i] = dv;
+        }
+    }
+    return a;
+};
+
 /**
  * Creates a color scheme based on the specified colors.
  * The default color scheme is "pv.Colors.category10", 
@@ -328,10 +383,10 @@ pvc.createColorScheme = function(colors){
 };
 
 //convert to greyscale using YCbCr luminance conv
-pvc.toGrayScale = function(color){
+pvc.toGrayScale = function(color, alpha){
     var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
     //var avg = Math.round( (color.r + color.g + color.b)/3);
-    return pv.rgb(avg,avg,avg,0.6).brighter();
+    return pv.rgb(avg, avg, avg, alpha != null ? alpha : 0.6).brighter();
 };
 
 pvc.removeTipsyLegends = function(){
@@ -530,7 +585,7 @@ pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
             var domaSize  = domaMax - domaMin,
                 // 1, 10, 100, 1000, ...
                 tickStep  = pv.logFloor(domaSize / desiredTickCount, 10),
-                tickCount = (domaSize / tickStep);
+                tickCount = (domaSize / tickStep),
                 err = desiredTickCount / tickCount;
             
             if      (err <= .15) tickStep *= 10;
@@ -603,7 +658,7 @@ pvc.roundScaleDomain = function(scale, roundMode, desiredTickCount){
 pv.Mark.prototype.getStaticPropertyValue = function(name) {
     var properties = this.$properties;
     for (var i = 0, L = properties.length; i < L; i++) {
-        var property = properties[i]; 
+        var property = properties[i];
         if (property.name == name) {
             return property.value;
         }
@@ -611,13 +666,55 @@ pv.Mark.prototype.getStaticPropertyValue = function(name) {
     //return undefined;
 };
 
+pv.Mark.prototype.intercept = function(prop, interceptor, extValue){
+    if(extValue !== undefined){
+        this[prop](extValue);
+    }
+
+    extValue = this.getStaticPropertyValue(prop);
+        
+    // Let undefined pass through as a sign of not-intercepted
+    // A 'null' value is considered as an existing property value.
+    if(extValue !== undefined){
+        extValue = pv.functor(extValue);
+    }
+    
+    function interceptProp(){
+        var args  = pvc.arraySlice.call(arguments);
+        return interceptor.call(this, extValue, args);
+    }
+
+    this[prop](interceptProp);
+
+    (this._intercepted || (this._intercepted = {}))[prop] = true;
+
+    return this;
+};
+
+pv.Mark.prototype.lock = function(prop, value){
+    if(value !== undefined){
+        this[prop](value);
+    }
+
+    (this._locked || (this._locked = {}))[prop] = true;
+    
+    return this;
+};
+
+
+pv.Mark.prototype.isIntercepted = function(prop){
+    return this._intercepted && this._intercepted[prop];
+};
+
+pv.Mark.prototype.isLocked = function(prop){
+    return this._locked && this._locked[prop];
+};
+
 /**
  * Function used to propagate a datum received, as a singleton list.
  * Use this to prevent re-evaluation of inherited data property functions!
  */
 pv.dataIdentity = function(datum){
-    //pvc.log("dataIdentity " + this.type + " datum: " + 
-    //        (typeof datum.describe == 'function' ? datum.describe() : datum));
     return [datum];
 };
 
@@ -663,7 +760,7 @@ pv.Mark.prototype.addMargins = function(margins) {
  * Iterates through all instances that
  * this mark has rendered.
  */
-pv.Mark.prototype.forEachInstances = function(fun, ctx){
+pv.Mark.prototype.forEachInstance = function(fun, ctx){
     var mark = this,
         indexes = [],
         instances = [];
@@ -739,6 +836,253 @@ pv.Transform.prototype.transformLength = function(length){
     return this.k * length;
 };
 
+// -----------
+
+pv.Mark.prototype.getInstanceShape = function(instance){
+    return new pvc.Rect(
+            instance.left,
+            instance.top,
+            instance.width,
+            instance.height);
+};
+
+pv.Dot.prototype.getInstanceShape = function(instance){
+    return new pvc.Circle(instance.left, instance.top, instance.shapeRadius);
+};
+
+pv.Area.prototype.getInstanceShape =
+pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
+    return new pvc.Line(instance.left, instance.top, nextInstance.left, nextInstance.top);
+};
+
+
+// --------------------
+pvc.Shape = function(){};
+pvc
+.define(pvc.Shape)
+.extend({
+    transform: function(t){
+        return this.clone().apply(t);
+    }
+
+    // clone
+    // intersectsRect
+});
+
+// --------------------
+
+pvc.Rect = function(x, y, dx, dy){
+    this.set(x, y, dx, dy);
+};
+
+pvc
+.define(pvc.Rect)
+.base(pvc.Shape)
+.extend({
+    set: function(x, y, dx, dy){
+        this.x  = x  || 0;
+        this.y  = y  || 0;
+        this.dx = dx || 0;
+        this.dy = dy || 0;
+        this.calc();
+    },
+
+    calc: function(){
+        this.x2  = this.x + this.dx;
+        this.y2  = this.y + this.dy;
+    },
+
+    clone: function(){
+        return new pvc.Rect(this.x, this.y, this.dx, this.dy);
+    },
+
+    apply: function(t){
+        this.x  = t.transformHPosition(this.x);
+        this.y  = t.transformVPosition(this.y);
+        this.dx = t.transformLength(this.dx);
+        this.dy = t.transformLength(this.dy);
+        this.calc();
+        return this;
+    },
+
+    intersectsRect: function(rect){
+//        pvc.log("[" + [this.x, this.x2, this.y, this.y2] + "]~" +
+//                "[" + [rect.x, rect.x2, rect.y, rect.y2] + "]");
+
+        // rect is not trusted to be normalized...(line...)
+        var minX = Math.min(rect.x, rect.x2),
+            maxX = Math.max(rect.x, rect.x2),
+            minY = Math.min(rect.y, rect.y2),
+            maxY = Math.max(rect.y, rect.y2);
+
+        return rect &&
+                // Some intersection on X
+                (this.x2 > minX) &&
+                (this.x  < maxX) &&
+                // Some intersection on Y
+                (this.y2 > minY ) &&
+                (this.y  < maxY);
+    },
+
+    getSides: function(){
+        var x  = Math.min(this.x, this.x2),
+            y  = Math.min(this.y, this.y2),
+            x2 = Math.max(this.x, this.x2),
+            y2 = Math.max(this.y, this.y2);
+
+        /*
+         *    x,y    A
+         *     * ------- *
+         *  D  |         |  B
+         *     |         |
+         *     * --------*
+         *              x2,y2
+         *          C
+         */
+        if(!this._sides){
+            this._sides = [
+                //x, y, x2, y2
+                new pvc.Line(x,  y,  x2, y),
+                new pvc.Line(x2, y,  x2, y2),
+                new pvc.Line(x,  y2, x2, y2),
+                new pvc.Line(x,  y,  x,  y2)
+            ];
+        }
+
+        return this._sides;
+    }
+});
+
+// ------
+
+pvc.Circle = function(x, y, radius){
+    this.x = x || 0;
+    this.y = y || 0;
+    this.radius = radius || 0;
+};
+
+pvc
+.define(pvc.Circle)
+.base(pvc.Shape)
+.extend({
+    clone: function(){
+        return new pvc.Circle(this.x, this.y, this.radius);
+    },
+
+    apply: function(t){
+        this.x = t.transformHPosition(this.x);
+        this.y = t.transformVPosition(this.y);
+        this.radius = t.transformLength(this.radius);
+        return this;
+    },
+
+    intersectsRect: function(rect){
+        // Taken from http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
+        var dx2 = rect.dx / 2,
+            dy2 = rect.dy / 2;
+
+        var circleDistX = Math.abs(this.x - rect.x - dx2),
+            circleDistY = Math.abs(this.y - rect.y - dy2);
+
+        if ((circleDistX > dx2 + this.radius) ||
+            (circleDistY > dy2 + this.radius)) {
+            return false;
+        }
+
+        if (circleDistX <= dx2 || circleDistY <= dy2) {
+            return true;
+        }
+
+        var sqCornerDistance = Math.pow(circleDistX - dx2, 2) +
+                            Math.pow(circleDistY - dy2, 2);
+
+        return sqCornerDistance <= (this.radius * this.radius);
+    }
+});
+
+// -----
+
+pvc.Line = function(x, y, x2, y2){
+    this.x  = x  || 0;
+    this.y  = y  || 0;
+    this.x2 = x2 || 0;
+    this.y2 = y2 || 0;
+};
+
+pvc
+.define(pvc.Line)
+.base(pvc.Shape)
+.extend({
+    clone: function(){
+        return new pvc.Line(this.x, this.y, this.x2, this,x2);
+    },
+
+    apply: function(t){
+        this.x  = t.transformHPosition(this.x );
+        this.y  = t.transformVPosition(this.y );
+        this.x2 = t.transformHPosition(this.x2);
+        this.y2 = t.transformVPosition(this.y2);
+        return this;
+    },
+
+    intersectsRect: function(rect){
+        if(!rect) {
+            return false;
+        }
+        var sides = rect.getSides();
+        for(var i = 0 ; i < 4 ; i++){
+            if(this.intersectsLine(sides[i])){
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+    intersectsLine: function(b){
+        // See: http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
+        var a = this,
+
+            x21 = a.x2 - a.x,
+            y21 = a.y2 - a.y,
+
+            x43 = b.x2 - b.x,
+            y43 = b.y2 - b.y,
+
+            denom = y43 * x21 - x43 * y21;
+
+        if(denom === 0){
+            // Parallel lines: no intersection
+            return false;
+        }
+
+        var y13 = a.y - b.y,
+            x13 = a.x - b.x,
+            numa = (x43 * y13 - y43 * x13),
+            numb = (x21 * y13 - y21 * x13);
+
+        if(denom === 0){
+            // Both 0  => coincident
+            // Only denom 0 => parallel, but not coincident
+            return (numa === 0) && (numb === 0);
+        }
+
+        var ua = numa / denom;
+        if(ua < 0 || ua > 1){
+            // Intersection not within segment a
+            return false;
+        }
+
+        var ub = numb / denom;
+        if(ub < 0 || ub > 1){
+            // Intersection not within segment b
+            return false;
+        }
+
+        return true;
+    }
+});
+
 })(); // End private scope
 
 
@@ -769,11 +1113,9 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     }
     
     m1 = this.mouse();
+
+    scene.mark.selectionRect = new pvc.Rect(m1.x, m1.y);
     
-    r = d;
-    r.x = m1.x;
-    r.y = m1.y;
-    r.dx = r.dy = 0;
     pv.Mark.dispatch("selectstart", scene, index, e);
   }
 
@@ -782,13 +1124,15 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     if (!scene) return;
     scene.mark.context(scene, index, function() {
         // this === scene.mark
-        var m2 = this.mouse();
-
-        r.x = Math.max(0, Math.min(m1.x, m2.x));
-        r.y = Math.max(0, Math.min(m1.y, m2.y));
-
-        r.dx = Math.min(this.width(),  Math.max(m2.x, m1.x)) - r.x;
-        r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
+        var m2 = this.mouse(),
+            x = Math.max(0, Math.min(m1.x, m2.x)),
+            y = Math.max(0, Math.min(m1.y, m2.y));
+            
+        scene.mark.selectionRect.set(
+            x,
+            y,
+            Math.min(this.width(),  Math.max(m2.x, m1.x)) - x,
+            Math.min(this.height(), Math.max(m2.y, m1.y)) - y);
 
         if(redrawThis){
             this.render();
@@ -802,11 +1146,13 @@ pv.Behavior.selector = function(autoRefresh, mark) {
   function mouseup(e) {
     if (!scene) return;
     pv.Mark.dispatch("selectend", scene, index, e);
+    scene.mark.selectionRect = null;
     scene = null;
   }
 
   pv.listen(window, "mousemove", mousemove);
   pv.listen(window, "mouseup", mouseup);
+
   return mousedown;
 };
 

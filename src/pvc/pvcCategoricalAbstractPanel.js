@@ -27,7 +27,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
         // Overflow
         var options = this.chart.options;
-        if ((options.orthoFixedMin != null) || (options.orthoFixedMax != null)){
+        if (parseFloat(options.orthoFixedMin) > 0 ||
+            parseFloat(options.orthoFixedMax) > 0){
             this.pvPanel["overflow"]("hidden");
         }
         
@@ -79,20 +80,35 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         return null;
     },
 
+    /**
+     * Returns a datum given its visible series and category indexes.
+     * @virtual
+     */
+    _getRenderingDatumByIndexes: function(visibleSerIndex, visibleCatIndex){
+        var de = this.chart.dataEngine,
+            datumRef = {
+                category: de.translateDimensionVisibleIndex('category', visibleCatIndex),
+                series:   de.translateDimensionVisibleIndex('series',   visibleSerIndex)
+            };
+
+        return de.findDatum(datumRef, true);
+    },
+
     // ----------------------------
     // Click / Double-click
 
-    _handleDoubleClick: function(mark, d, ev){
+    _handleDoubleClick: function(mark, ev){
         var action = this.chart.options.doubleClickAction;
         if(action){
-            var datum = this._getRenderingDatum(mark);
+            var datum = mark.datum();
             if(datum){
-                var s = datum.elem.series.value,
-                    c = datum.elem.category.value;
+                var s = datum.elem.series.rawValue,
+                    c = datum.elem.category.rawValue,
+                    v = datum.value;
 
                 this._ignoreClicks = 2;
 
-                action.call(mark, s, c, d, ev, datum);
+                action.call(mark, s, c, v, ev, datum);
             }
         }
     },
@@ -102,18 +118,18 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         return options.selectable || (options.clickable && options.clickAction);
     },
     
-    _handleClick: function(mark, d, ev){
+    _handleClick: function(mark, ev){
         if(!this._shouldHandleClick()){
             return;
         }
 
         // Selection
-        var datum = this._getRenderingDatum(mark);
+        var datum = mark.datum();
         if(datum){
             var options = this.chart.options;
             
             if(!options.doubleClickAction){
-                this._handleClickCore(mark, datum, d, ev);
+                this._handleClickCore(mark, datum, ev);
             } else {
                 // Delay click evaluation so that
                 // it may be canceled if double click meanwhile
@@ -121,7 +137,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                 var myself = this;
                 window.setTimeout(
                     function(){
-                        myself._handleClickCore.call(myself, mark, datum, d, ev);
+                        myself._handleClickCore.call(myself, mark, datum, ev);
                     },
                     options.doubleClickMaxDelay || 300);
 
@@ -129,7 +145,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         }
     },
 
-    _handleClickCore: function(mark, datum, d, ev){
+    _handleClickCore: function(mark, datum, ev){
         if(this._ignoreClicks) {
             this._ignoreClicks--;
             return;
@@ -138,15 +154,12 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         // Classic clickAction
         var action = this.chart.options.clickAction;
         if(action){
-            // TODO: first value of a multi-valued datum?????
-            if(d != null && d[0] !== undefined){
-                d = d[0];
-            }
+            var dims = datum.elem,
+                s = dims.series.rawValue,
+                c = dims.category.rawValue,
+                v = datum.value;
 
-            var s = datum.elem.series.value,
-                c = datum.elem.category.value;
-
-            action.call(mark, s, c, d, ev, datum);
+            action.call(mark, s, c, v, ev, datum);
         }
 
         // Selection
@@ -175,9 +188,29 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             action.call(null, selections);
         }
     },
+
+    _addPropClick: function(mark){
+        var myself = this;
+        mark.cursor("pointer")
+            .event("click", function(){
+                var ev = arguments[arguments.length - 1];
+                return myself._handleClick(this, ev);
+            });
+    },
+
+    _addPropDoubleClick: function(mark){
+        var myself = this;
+        mark.cursor("pointer")
+            .event("dblclick", function(){
+                var ev = arguments[arguments.length - 1];
+                return myself._handleDoubleClick(this, ev);
+            });
+    },
     
     /**
-     * The default implementation renders this.pvPanel,
+     * The default implementation renders
+     * the marks returned by #_getSelectableMarks, 
+     * or this.pvPanel if none is returned.
      * which is generally in excess of what actually requires
      * to be re-rendered.
      *
@@ -185,9 +218,52 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
      * @virtual
      */
     _renderSelectableMarks: function(){
-        this.pvPanel.render();
+        var marks = this._getSelectableMarks();
+        if(!marks || !marks.length){
+            this.pvPanel.render();
+        } else {
+            marks.forEach(function(mark){ mark.render(); });
+        }
     },
 
+    /**
+     * Returns an array of marks whose instances are associated to a datum, or null.
+     * @virtual
+     */
+    _getSelectableMarks: function(){
+        return null;
+    },
+
+    /**
+     * The default implementation returns
+     * the datums associated with
+     * the instances of the marks returned by #_getSelectableMarks.
+     * 
+     * Override to provide a specific
+     * selection detection implementation.
+     *
+     * When overriding, 
+     * use #_intersectsRubberBandSelection
+     * to check if a mark is covered by the rubber band.
+     *
+     * Returns an array of being selected datum.
+     * @virtual
+     */
+    _detectSelectingData: function(){
+        var data = [];
+
+        var selectableMarks = this._getSelectableMarks();
+        if(selectableMarks){
+            selectableMarks.forEach(function(mark){
+                this._forEachSelectingMarkInstance(mark, function(datum){
+                    data.push(datum);
+                }, this);
+            }, this);
+        }
+        
+        return data;
+    },
+    
     /**
      * Add rubberband functionality to main panel (includes axis).
      * Override to prevent rubber band selection.
@@ -205,8 +281,6 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             xAxisPanel = chart.xAxisPanel,
             yAxisPanel = chart.yAxisPanel;
 
-        this.rubberBand = {x: 0, y: 0, dx: 4, dy: 4};
-
         var dMin = 10; // Minimum dx or dy for a rubber band selection to be relevant
 
         var isSelecting = false;
@@ -223,7 +297,9 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         }
 
         // Callback to handle end of rubber band selection
-        function dispatchRubberBandSelection(rb, ev){
+        function dispatchRubberBandSelection(ev){
+            var rb = myself.rubberBand;
+
             // Get offsets
             var titleOffset;
             if(titlePanel != null){
@@ -295,23 +371,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                 ]);
 
             } else {
-                //if there are label selections, they already include any chart selections
-                //3) Chart: translate coordinates (drawn bottom-up)
-                //first get offsets
-                y = rb.y - titleOffset['top' ] - xAxisOffset['top' ];
-                x = rb.x - titleOffset['left'] - yAxisOffset['left'];
-
-                //top->bottom
-                y = myself.height - y - rb.dy;
-				
-				// Keep rubber band screen coordinates
-                rb.x0 = rb.x;
-                rb.y0 = rb.y;
-
-                rb.x = x;
-                rb.y = y;
-
-                selectedData = myself._collectRubberBandSelections();
+                selectedData = myself._detectSelectingData();
             }
 
             if(selectedData){
@@ -326,13 +386,13 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         }
 
         // Rubber band
-        var selectBar = this.selectBar = this.pvPanel.root//TODO
-           .add(pv.Bar)
+        var selectBar = this.selectBar = this.pvPanel.root
+            .add(pv.Bar)
                 .visible(function() {return isSelecting;} )
-                .left(function(d) {return d.x;})
-                .top(function(d) {return d.y;})
-                .width(function(d) {return d.dx;})
-                .height(function(d) {return d.dy;})
+                .left(function() {return this.parent.selectionRect.x; })
+                .top(function() {return this.parent.selectionRect.y; })
+                .width(function() {return this.parent.selectionRect.dx; })
+                .height(function() {return this.parent.selectionRect.dy; })
                 .fillStyle(options.rubberBandFill)
                 .strokeStyle(options.rubberBandLine);
 
@@ -346,7 +406,6 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
         var selectionEndedDate;
         this.pvPanel.root
-            .data([myself.rubberBand])
             .event("click", function() {
                 // It happens sometimes that the click is fired 
                 //  after mouse up, ending up clearing a just made selection.
@@ -358,14 +417,13 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                     }
                 }
                 
-                var ev = arguments[arguments.length - 1];
-                //if(options.ctrlSelectMode && !ev.ctrlKey)
                 dataEngine.clearSelections();
                 myself._handleSelectionChanged();
             })
             .event('mousedown', pv.Behavior.selector(false))
-            .event('select', function(rb){
-                if(!isSelecting){
+            .event('select', function(){
+                if(!isSelecting && !chart.isAnimating){
+                    var rb = this.selectionRect;
                     if(Math.sqrt(rb.dx * rb.dx + rb.dy * rb.dy) <= dMin){
                         return;
                     }
@@ -376,74 +434,54 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
                 selectBar.render();
             })
-            .event('selectend', function(rb, ev){
+            .event('selectend', function(dummy, ev){
                 if(isSelecting){
                     isSelecting = false;
                     selectBar.render(); // hide rubber band
 
                     // Process selection
-                    dispatchRubberBandSelection(rb, ev);
+                    dispatchRubberBandSelection(ev);
 
                     selectionEndedDate = new Date();
                 }
             });
     },
 
-    /**
-     * Should override to provide selection detection
-     * for a specific chart type.
-     *
-     * Use _intersectsRubberBandSelection to check if a shape
-     * is covered by the rubber band.
-     *
-     * Return a 'where' specification suitable for
-     * dataEngine#getWhere.
-     * @virtual
-     */
-    _collectRubberBandSelections: function(){
-        return null;
+    _forEachSelectingMarkInstance: function(mark, fun, ctx){
+        if(mark.type === 'area' || mark.type === 'line'){
+            var instancePrev = null,
+                seriesPrev;
+                
+            this._forEachSignumInstance(mark, function(instance, t){
+                // Skip first instance
+                if(instancePrev){
+                    var series = instance.datum.elem.series.absValue;
+                    if(series === seriesPrev){
+                        var shape = mark.getInstanceShape(instancePrev, instance).apply(t);
+                        if (shape.intersectsRect(this.rubberBand)){
+                            fun.call(ctx, instancePrev.datum);
+                        }
+                    }
+                }
+
+                instancePrev = instance;
+                seriesPrev   = instance.datum.elem.series.absValue;
+            }, this);
+        } else {
+            mark.forEachInstance(function(instance, t){
+                var shape = mark.getInstanceShape(instance).apply(t);
+                if (shape.intersectsRect(this.rubberBand)){
+                    fun.call(ctx, instance.datum);
+                }
+            }, this);
+        }
     },
 
-    /**
-     * @protected
-     */
-    _intersectsRubberBandSelection: function(startX, startY, endX, endY){
-        var rb = this.rubberBand;
-        return rb &&
-            ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx))
-            &&
-            ((startY >= rb.y && startY < rb.y + rb.dy) || (endY >= rb.y && endY < rb.y + rb.dy));
-    },
-	
-	// Uses screen coordinates
-    _intersectsRubberBandSelection0: function(begX, endX, begY, endY){
-        var rb = this.rubberBand;
-        return rb &&
-                // Some intersection on X
-               (rb.x0 + rb.dx > begX) &&
-               (rb.x0         < endX) &&
-               // Some intersection on Y
-               (rb.y0 + rb.dy > begY) &&
-               (rb.y0         < endY);
-    },
-	
-    _forEachInstanceInRubberBand: function(mark, fun, ctx){
-        var index = 0;
-        mark.forEachInstances(function(instance, t){
-            var begX = t.transformHPosition(instance.left),
-                endX = begX + t.transformLength(instance.width  || 0),
-                begY = t.transformVPosition(instance.top),
-                endY = begY + t.transformLength(instance.height || 0);
-
-//            pvc.log("data=" + instance.data +
-//                    " position=[" + [begX, endX, begY, endY] +  "]" +
-//                    " index=" + index);
-
-            if (this._intersectsRubberBandSelection0(begX, endX, begY, endY)){
-                fun.call(ctx, instance, index);
+    _forEachSignumInstance: function(mark, fun, ctx){
+        mark.forEachInstance(function(instance, t){
+            if(instance.datum){
+                fun.call(ctx, instance, t);
             }
-
-            index++;
-        }, this);
+        });
     }
 });

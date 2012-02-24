@@ -19,6 +19,7 @@
     <script type="text/javascript" src="pvc/pvc.js"></script>
     <script type="text/javascript" src="pvc/pvcDatum.js"></script>
     <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
+    <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
     <script type="text/javascript" src="pvc/pvcDataTranslator.js"></script>
     <script type="text/javascript" src="pvc/pvcData.js"></script>
     <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
@@ -148,7 +149,8 @@ The following is a line chart displaying three time series.<br>
           legend: true,
           legendPosition: "top",
           legendAlign: "right",
-
+          showAreas: true,
+          selectable: true,
           orientation: 'vertical',
           timeSeries: true,
           timeSeriesFormat: "%Y-%m-%d",
@@ -180,6 +182,7 @@ that connect the lines.<br>
           width: 400,
           height: 220,
           animate:false,
+          selectable: true,
           title: "A Dot Line chart",
           legend: true,
           legendPosition: "bottom",

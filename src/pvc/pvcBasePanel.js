@@ -9,6 +9,7 @@ pvc.BasePanel = pvc.Abstract.extend({
 
     chart: null,
     _parent: null,
+    _children: null,
     type: pv.Panel, // default one
     height: null,
     width: null,
@@ -20,7 +21,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     constructor: function(chart, options) {
 
         this.chart = chart;
-        
+
         $.extend(this, options);
 
         this.margins = {
@@ -47,6 +48,18 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
 
     /**
+     * Adds a panel to children array.
+     */
+    _addChild: function(child){
+        if(child._parent){
+            throw new Error("Child already has a parent.");
+        }
+        
+        child._parent = this;
+        (this._children || (this._children = [])).push(child);
+    },
+
+    /**
      * Create the panel, appending it to the previous one using
      * a specified anchor.
      *
@@ -56,11 +69,15 @@ pvc.BasePanel = pvc.Abstract.extend({
      * 3) append it to the previous one in the correct position.
      */
     appendTo: function(parent) {
-
-        this._parent = parent;
+        if(parent){
+            parent._addChild(this);
+        }
+        
         this.create();
         this.applyExtensions();
 
+        // Layout child
+        
         // Reduce size and update margins
         var a = this.anchor,
             ao = this.anchorOrtho(),
@@ -107,6 +124,31 @@ pvc.BasePanel = pvc.Abstract.extend({
         this.chart.extend(mark, prefix);
     },
 
+    /**
+     * Obtains the specified extension point.
+     * Arguments are concatenated with '_'.
+     */
+    _getExtension: function(extPoint) {
+        return this.chart._getExtension.apply(this.chart, arguments);
+    },
+
+    /**
+     * Called when a render has ended.
+     * When the render performed an animation
+     * and the 'animated' argument will have the value 'true'.
+     *
+     * The default implementation calls each child panel's
+     * #_onRenderEnd method.
+     * @virtual
+     */
+    _onRenderEnd: function(animated){
+        if(this._children){
+            this._children.forEach(function(child){
+                child._onRenderEnd(animated);
+            });
+        }
+    },
+    
     /**
      * Sets the size for the panel, 
      * for when the parent panel is undefined
@@ -173,6 +215,29 @@ pvc.BasePanel = pvc.Abstract.extend({
      * @virtual
      */
     initLayerPanel: function(pvPanel, layer){
+    },
+
+    _createPropDatumTooltip: function(){
+        var myself = this,
+            tooltipFormat = this.chart.options.tooltipFormat;
+
+        return function(){
+            // TODO: for the no series case... 's' assumes the value "Series"
+            // added by the translator
+            var tooltip = '',
+                datum = this.datum();
+            if(datum){
+                tooltip = datum.value;
+                if(tooltipFormat){
+                    var s = datum.elem.series.rawValue,
+                        c = datum.elem.category.rawValue;
+
+                    tooltip = tooltipFormat.call(myself, s, c, tooltip, datum);
+                }
+            }
+
+            return tooltip;
+        };
     },
 
     /**

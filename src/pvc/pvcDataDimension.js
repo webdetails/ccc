@@ -21,11 +21,16 @@ pvc.DataDimension = Base.extend(
     _selectedIndexes:  null,
     
     _valueKeyToIndex: null, // cache, immutable
+    _parsedValuesMap: null, // cache, immutable
     _visibleIndexes: null,  // cache
     _visibleValues:  null,  // cache
     _visibleElements: null, // cache
     _selectedValues:  null, // cache
 
+    _timeSeries: false,
+    _parser: null,
+    _sorter: null,
+    
     /**
      * A dimension of data.
      * @constructs
@@ -39,19 +44,53 @@ pvc.DataDimension = Base.extend(
         // translator -> [values]
         this._fetchValues = pvc.get(definition, 'fetchValues');
         this._calcLabel   = pvc.get(definition, 'calcLabel');
+        this._timeSeries  = pvc.get(definition, 'timeSeries', false);
+        if(this._timeSeries){
+            var timeSeriesFormat = pvc.get(definition, 'timeSeriesFormat');
+            if(timeSeriesFormat){
+                this._parser = pv.Format.date(timeSeriesFormat);
+                
+                var me = this;
+                this._sorter = function(a, b){ 
+                    return me._parseRawValue(a) - me._parseRawValue(b);
+                }; // works for numbers and dates
+            }
+        }
     },
-
+    
     /**
      * Returns the unique values.
      */
     getValues: function(){
         if(!this._values){
             this._values = this._fetchValues.call(null);
+
+            var parser = this._parser;
+            if(parser){
+                // each raw value's #toString is used as the map key
+                this._parsedValuesMap = pv.dict(this._values, function(rawValue){
+                    return parser.parse(rawValue);
+                });
+            }
+
+            // TODO - does not support depth > 1
+            var sorter = this._sorter;
+            if(sorter){
+                this._values.sort(sorter);
+            }
         }
         
         return this._values;
     },
 
+    /**
+     * Parses a raw value with the
+     * dimension's associated parser, if any.
+     */
+    _parseRawValue: function(value){
+        return this._parsedValuesMap ? this._parsedValuesMap[value] : value;
+    },
+    
     /**
      * Returns the leaf elements.
      */
@@ -103,6 +142,8 @@ pvc.DataDimension = Base.extend(
             values = onlyVisible ? this.getVisibleValues() : this.getValues();
 
         if(reversed){
+            // Do not to modify values
+            // TODO: could avoid this - do the 'for' backwards
             values = values.slice();
             values.reverse();
         }
