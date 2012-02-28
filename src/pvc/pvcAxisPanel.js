@@ -38,11 +38,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     create: function(){
         if (this.isAnchorTopOrBottom()){
-            this.width  = this._parent.width;
-            this.height = this.axisSize;
+            this.setSize(this._parent.width, this.axisSize);
         } else {
-            this.height = this._parent.height;
-            this.width  = this.axisSize;
+            this.setSize(this.axisSize, this._parent.height);
         }
 
         // Creates this.pvPanel

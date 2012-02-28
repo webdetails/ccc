@@ -311,12 +311,10 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
   create: function(){
 
     var myself = this;
-    this.width = this._parent.width;
-    this.height = this._parent.height;
+    
+    this.consumeFreeClientSize();
 
-    this.pvPanel = this._parent.getPvPanel().add(this.type)
-    .width(this.width)
-    .height(this.height)
+    this.base();
 
     this.retrieveData();
 
@@ -327,7 +325,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     botRuleOffs = this.chart.options.botRuleOffset,
     leftRuleOffs = this.chart.options.leftRuleOffset,
     rightRulePos = this.width - this.chart.options.rightRuleOffset,
-    topRulePos = this.height- topRuleOffs;
+    topRulePos = this.height- topRuleOffs,
     ruleHeight = topRulePos - botRuleOffs,
     labelTopOffs = topRuleOffs - 12,
       // use dims to get the elements of dimDescr in the appropriate order!!

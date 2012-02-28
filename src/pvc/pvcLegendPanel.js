@@ -78,8 +78,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     var realxsize, realysize;
     if (this.anchor == "top" || this.anchor == "bottom"){
-      this.width = this._parent.width;
-      this.height = this.legendSize;
+      this.setSize(this._parent.width, this.legendSize);
+      
       var maxperline = data.length;
 
       //if the legend is bigger than the available size, multi-line and left align
@@ -91,7 +91,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       realysize = myself.padding*(Math.ceil(data.length/maxperline));
 
       if(this.height == null){
-        this.height = realysize;
+          this.setHeight(realysize);
       }
 
       //changing margins if the alignment is not "left"
@@ -115,8 +115,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       };
       
     } else {
-      this.height = this._parent.height;
-      this.width = this.legendSize;
+      this.setSize(this.legendSize, this._parent.height);
+      
       realxsize = cellsize + this.minMarginX;
       realysize = myself.padding*data.length;
       if(this.align == "middle"){
@@ -132,12 +132,10 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     }
 
     if(this.width == null){
-      this.width = realxsize;
+      this.setWidth(realxsize);
     }
 
-    this.pvPanel = this._parent.getPvPanel().add(this.type)
-        .width(this.width)
-        .height(this.height)    
+    this.base();
 
     //********** Markers and Lines ***************************
 

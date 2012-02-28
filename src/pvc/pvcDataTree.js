@@ -527,8 +527,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
 
   create: function(){
 
-    this.width  = this._parent.width;
-    this.height = this._parent.height;
+    this.consumeFreeClientSize();
 
     this.base();
 

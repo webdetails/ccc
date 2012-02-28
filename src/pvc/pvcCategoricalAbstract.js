@@ -308,7 +308,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 this.dataEngine.getVisibleSeries() :
                 this.dataEngine.getVisibleCategories();
         
-        // NOTE: presumes data elements convert well to string
+        // NOTE: assumes data elements convert well to string
         var scale = new pv.Scale.ordinal(data);
         
         // RANGE

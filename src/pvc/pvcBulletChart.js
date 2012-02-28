@@ -103,15 +103,13 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
   create: function(){
 
     var myself  = this;
-    this.width  = this._parent.width;
-    this.height = this._parent.height;
 
+    this.consumeFreeClientSize();
+    
     var data = this.buildData();
 
-    this.pvPanel = this._parent.getPvPanel().add(pv.Panel)
-    .width(this.width)
-    .height(this.height);
-
+    this.base();
+    
     var anchor = myself.chart.options.orientation=="horizontal"?"left":"bottom";
     var size, angle, align, titleOffset, ruleAnchor, leftPos, topPos;
     
