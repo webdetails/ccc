@@ -21,8 +21,7 @@ if(!Object.keys) {
  * Implements filter property if not implemented yet
  */
 if (!Array.prototype.filter){
-    Array.prototype.filter = function(fun, ctx)
-    {
+    Array.prototype.filter = function(fun, ctx){
         var len = this.length >>> 0;
         if (typeof fun != "function"){
             throw new TypeError();
@@ -39,6 +38,23 @@ if (!Array.prototype.filter){
 
         return res;
     };
+}
+
+if(!Object.create){
+    Object.create = (function(){
+
+        function dummyKlass(){}
+        var dummyProto = dummyKlass.prototype;
+
+        function create(baseProto){
+            dummyKlass.prototype = baseProto || {};
+            var instance = new dummyKlass();
+            dummyKlass.prototype = dummyProto;
+            return instance;
+        }
+
+        return create;
+    }());
 }
 
 // Basic JSON shim
@@ -109,45 +125,119 @@ pvc.get = function(o, p, dv){
     return o && (v = o[p]) != null ? v : dv; 
 };
 
-// Creates an object whose prototype is the specified object.
-pvc.create = (function(){
-    function dummyKlass(){}
-    var dummyProto = dummyKlass.prototype;
+pvc.scope = function(scopeFun, ctx){
+    return scopeFun.call(ctx);
+};
 
-    return function(baseProto){
-        dummyKlass.prototype = baseProto || {};
-        
-        var instance = new dummyKlass();
-        
-        dummyKlass.prototype = dummyProto;
+function asNativeObject(v){
+        return v && typeof(v) === 'object' && v.constructor === Object ?
+                v :
+                undefined;
+}
+
+function asObject(v){
+    return v && typeof(v) === 'object' ? v : undefined;
+}
+
+pvc.mixin = pvc.scope(function(){
+
+    function pvcMixinRecursive(instance, mixin){
+        for(var p in mixin){
+            var vMixin = mixin[p];
+            if(vMixin !== undefined){
+                var oMixin,
+                    oTo = asNativeObject(instance[p]);
+                
+                if(oTo){
+                    oMixin = asObject(vMixin);
+                    if(oMixin){
+                        pvcMixinRecursive(oTo, oMixin);
+                    }
+                } else {
+                    oMixin = asNativeObject(vMixin);
+                    if(oMixin){
+                        vMixin = Object.create(oMixin);
+                    }
+                    
+                    instance[p] = vMixin;
+                }
+            }
+        }
+    }
+
+    function pvcMixin(instance/*mixin1, mixin2, ...*/){
+        for(var i = 1, L = arguments.length ; i < L ; i++){
+            var mixin = asObject(arguments[i]);
+            if(mixin){
+                pvcMixinRecursive(instance, mixin);
+            }
+        }
 
         return instance;
-    };
-}());
+    }
 
-pvc.define = (function(){
+    return pvcMixin;
+});
+
+// Creates an object whose prototype is the specified object.
+pvc.create = pvc.scope(function(){
+
+    function pvcCreateRecursive(instance){
+        for(var p in instance){
+            var vObj = asNativeObject(instance[p]);
+            if(vObj){
+                pvcCreateRecursive( (instance[p] = Object.create(vObj)) );
+            }
+        }
+    }
+    
+    function pvcCreate(/* [deep, ] baseProto, mixin1, mixin2, ...*/){
+        var mixins = arraySlice.call(arguments),
+            deep = true,
+            baseProto = mixins.shift();
+        
+        if(typeof(baseProto) === 'boolean'){
+            deep = baseProto;
+            baseProto = mixins.shift();
+        }
+        
+        var instance = Object.create(baseProto);
+        if(deep){
+            pvcCreateRecursive(instance);
+        }
+
+        // NOTE: 
+        if(mixins.length > 0){
+            mixins.unshift(instance);
+            pvc.mixin.apply(pvc, mixins);
+        }
+
+        return instance;
+    }
+
+    return pvcCreate;
+});
+
+pvc.define = pvc.scope(function(){
 
     function setBase(base){
-        var proto = this.prototype = pvc.create(base.prototype);
+        var proto = this.prototype = Object.create(base.prototype);
         proto.constructor = this;
         return this;
     }
 
-    function extend(values){
-        pvc.mergeOwn(this.prototype, values);
+    function mixin(/*mixin1, mixin2, ...*/){
+        pvc.mixin.apply(pvc, pvc.arrayAppend([this.prototype], arguments));
         return this;
     }
     
     return function(klass){
         klass.base   = setBase;
-        klass.extend = extend;
+        klass.extend = mixin;
+        klass.mixin  = mixin;
         return klass;
     };
-}());
-
-pvc.scope = function(scopeFun, ctx){
-    return scopeFun.call(ctx);
-};
+});
 
 pvc.number = function(d, dv){
     var v = parseFloat(d);
@@ -236,7 +326,35 @@ pvc.mergeOwn = function(to, from){
     });
     return to;
 };
+/*
+function merge(to, from){
+    if(!to) {
+        to = {};
+    }
 
+    if(from){
+        for(var p in from){
+            var vFrom = from[p];
+            if(vFrom !== undefined){
+                var oFrom = asObject(vFrom),
+                    vTo   = to[p];
+
+                if(oFrom){
+                    vTo = merge(asObject(vTo), oFrom);
+                } else if(vFrom !== undefined) {
+                    vTo = vFrom;
+                }
+
+                to[p] = vTo;
+            }
+        }
+    }
+
+    return to;
+}
+
+pvc.merge = merge;
+*/
 // For treating an object as dictionary
 // without danger of hasOwnProperty having been overriden.
 var objectHasOwn = Object.prototype.hasOwnProperty;
@@ -247,8 +365,9 @@ pvc.hasOwn = function(o, p){
 pvc.mergeDefaults = function(to, defaults, from){
     pvc.forEachOwn(defaults, function(dv, p){
         var v;
-        to[p] = (from && from.hasOwnProperty(p) && (v = from[p]) !== undefined) ? v : dv;
+        to[p] = (from && (v = from[p]) !== undefined) ? v : dv;
     });
+    
     return to;
 };
 
@@ -265,14 +384,19 @@ pvc.arrayInsertMany = function(target, index, source){
     target.splice.apply(target, [index, 0].concat(other));
     return target;
 };
+*/
 
-pvc.arrayAppend = function(target, source){
+pvc.arrayAppend = function(target, source, start){
+    if(start == null){
+        start = 0;
+    }
+
     for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
-        target[T + i] = source[i];
+        target[T + i] = source[start + i];
     }
     return target;
 };
-*/
+
 
 // Adapted from pv.range
 pvc.Range = function(start, stop, step){

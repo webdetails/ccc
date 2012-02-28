@@ -38,7 +38,7 @@ pvc.DataElement = function(dimension, value, parent, leafIndex){
     } else {
         this.path     = parent.path.concat(value);
         this.absValue = pvc.join("~",   parent.absValue, localKey);
-        this.label    = "" + (dimension._calcLabel ? dimension._calcLabel(value) : value);
+        this.label    = "" + pvc.nullTo(dimension._calcLabel ? dimension._calcLabel(value) : value, "");
         this.absLabel = pvc.join(" ~ ", parent.absLabel, this.label);
 
         parent.appendChild(this);

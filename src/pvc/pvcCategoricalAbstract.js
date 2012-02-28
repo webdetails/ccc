@@ -33,9 +33,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if(options.showTooltips){
             var tipsySettings = options.tipsySettings;
             if(tipsySettings){
-                // Clone top-level structure. Should be deep clone, perhaps.
-                tipsySettings = options.tipsySettings = pvc.mergeOwn({}, tipsySettings);
-
+                tipsySettings = options.tipsySettings = pvc.create(tipsySettings);
                 this.extend(tipsySettings, "tooltip_");
             }
         }

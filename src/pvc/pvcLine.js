@@ -260,7 +260,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         // -- DOT --
         function dotColorInterceptor(getDatumColor, args){
             if(!myself.showDots){
-                return null;
+                return invisibleFill;
             }
 
             var darker = !getDatumColor && myself.showAreas ? 0.6 : null;
@@ -293,7 +293,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         function fillColorInterceptor(getDatumColor, args){
             if(!myself.showAreas){
-                return null;
+                return invisibleFill;
             }
 
             var hasSelections = de.getSelectedCount() > 0,
@@ -487,19 +487,31 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 //                                return tipsyBehavior.tipMark.type === 'area' ? "c" : "s";
 //                            }
 //                        });
-            // TODO - assumes always dots
             this.pvDot
+                .localProperty("tooltip", String) // see pvc.js
+                .tooltip(function(){
+                    var tooltip;
+
+                    if(options.customTooltip){
+                        var datum = this.datum(),
+                            v = datum.value,
+                            s = datum.elem.series.rawValue,
+                            c = datum.elem.category.rawValue;
+
+                        tooltip = options.customTooltip.call(null, s, c, v, datum);
+                    }
+
+                    return tooltip;
+                })
+                .title(function(){
+                    return ''; // prevent browser tooltip
+                })
                 .event("point", pv.Behavior.tipsy(options.tipsySettings))
                 ;
         }
         
         if (this._shouldHandleClick()){
-            if(this.showDots){
-                // TODO: The click on dots could be enhanced
-                // by "mixing" it with the point/unpoint events;
-                // it would make it easier to click on small dots.
-                this._addPropClick(this.pvDot);
-            }
+            this._addPropClick(this.pvDot);
 
             if(this.showAreas){
                 this._addPropClick(this.pvSelArea);
@@ -507,8 +519,10 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         if(options.doubleClickAction) {
-            if(this.showDots){
-                this._addPropDoubleClick(this.pvDot);
+            this._addPropDoubleClick(this.pvDot);
+
+            if(this.showAreas){
+                this._addPropDoubleClick(this.pvSelArea);
             }
         }
     },
