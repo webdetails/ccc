@@ -56,7 +56,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._processOptionsCore(options);
         
         /* DEBUG options */
-        if(pvc.debug && options && typeof(JSON.stringify) !== 'undefined'){
+        if(pvc.debug && options){
             pvc.log("OPTIONS:\n" + JSON.stringify(options));
         }
 
@@ -76,6 +76,11 @@ pvc.BaseChart = pvc.Abstract.extend({
         // Disable animation if environment doesn't support it
         if (!$.support.svg || pv.renderer() === 'batik') {
             options.animate = false;
+        }
+
+        var margins = options.margins;
+        if(margins){
+            options.margins = this._parseMargins(margins);
         }
     },
     
@@ -167,6 +172,12 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         this.basePanel = new pvc.BasePanel(this);
         this.basePanel.setSize(this.options.width, this.options.height);
+        
+        var margins = this.options.margins;
+        if(margins){
+            this.basePanel.setMargins(margins);
+        }
+        
         this.basePanel.create();
         this.basePanel.applyExtensions();
 
@@ -402,6 +413,51 @@ pvc.BaseChart = pvc.Abstract.extend({
 
     isOrientationHorizontal: function(orientation) {
         return (orientation || this.options.orientation) == "horizontal";
+    },
+
+    /**
+     * Converts a css-like shorthand margin string
+     * to a margins object.
+     *
+     * <ol>
+     *   <li> "1" - {all: 1}</li>
+     *   <li> "1 2" - {top: 1, left: 2, right: 2, bottom: 1}</li>
+     *   <li> "1 2 3" - {top: 1, left: 2, right: 2, bottom: 3}</li>
+     *   <li> "1 2 3 4" - {top: 1, right: 2, bottom: 3, left: 4}</li>
+     * </ol>
+     */
+    _parseMargins: function(margins){
+        if(margins != null){
+            if(typeof margins === 'string'){
+
+                var comps = margins.split(/\s+/);
+                switch(comps.length){
+                    case 1:
+                        margins = {all: comps[0]};
+                        break;
+                    case 2:
+                        margins = {top: comps[0], left: comps[1], right: comps[1], bottom: comps[0]};
+                        break;
+                    case 3:
+                        margins = {top: comps[0], left: comps[1], right: comps[1], bottom: comps[2]};
+                        break;
+                    case 4:
+                        margins = {top: comps[0], right: comps[2], bottom: comps[3], left: comps[4]};
+                        break;
+
+                    default:
+                        pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
+                        margins = null;
+                }
+            } else if (typeof margins === 'number') {
+                margins = {all: margins};
+            } else if (typeof margins !== 'object') {
+                pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
+                margins = null;
+            }
+        }
+
+        return margins;
     }
 }, {
     // NOTE: undefined values are not considered by $.extend
@@ -479,6 +535,8 @@ pvc.BaseChart = pvc.Abstract.extend({
             pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
         },
 
-        renderCallback: undefined
+        renderCallback: undefined,
+
+        margins: undefined
     }
 });

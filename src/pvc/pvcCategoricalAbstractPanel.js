@@ -17,7 +17,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
      */
     create: function(){
         // Occupy all space available in the parent panel
-        this.setSize(this._parent.width, this._parent.height);
+        this.consumeFreeClientSize();
 
         // Create the this.pvPanel
         this.base();

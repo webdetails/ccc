@@ -25,10 +25,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         $.extend(this, options);
 
         this.margins = {
-            top: 0,
-            right: 0,
+            top:    0,
+            right:  0,
             bottom: 0,
-            left: 0
+            left:   0
         };
     },
 
@@ -41,10 +41,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         } else {
             this.pvPanel = this._parent.pvPanel.add(this.type);
         }
-
+        
         this.pvPanel
-            .width(this.width)
-            .height(this.height);
+            .width(this._originalSize.width)
+            .height(this._originalSize.height);
     },
 
     /**
@@ -77,29 +77,18 @@ pvc.BasePanel = pvc.Abstract.extend({
         this.applyExtensions();
 
         // Layout child
-        
-        // Reduce size and update margins
         var a = this.anchor,
             ao = this.anchorOrtho(),
-            isTopOrBottom = this.isAnchorTopOrBottom(),
+            aol = this.anchorOrthoLength(),
             margins = this._parent.margins;
 
-        if (isTopOrBottom) {
-            this._parent.height -= this.height;
-        } else {
-            this._parent.width -= this.width;
-        }
+        this._parent[aol] -= this[aol];
 
-        // See where to attach it.
+        // Place the child
         this.pvPanel[a ](margins[a ]);
         this.pvPanel[ao](margins[ao]);
 
-        // update margins
-        if (isTopOrBottom) {
-            margins[a] += this.height;
-        } else {
-            margins[a] += this.width;
-        }
+        margins[a] += this[aol];
     },
     
     /**
@@ -154,8 +143,13 @@ pvc.BasePanel = pvc.Abstract.extend({
      * for when the parent panel is undefined
      */
     setSize: function(w, h) {
-        this.width = w;
+        this.width  = w;
         this.height = h;
+
+        this._originalSize = {
+            width:  w,
+            height: h
+        };
     },
 
     /**
@@ -170,6 +164,46 @@ pvc.BasePanel = pvc.Abstract.extend({
      */
     getHeight: function() {
         return this.height;
+    },
+    
+    setWidth: function(w) {
+        this.width = w;
+
+        (this._originalSize || (this._originalSize = {})).width = w;
+    },
+    
+    setHeight: function(h) {
+        this.height = h;
+
+        (this._originalSize || (this._originalSize = {})).height = h;
+    },
+
+    consumeFreeClientSize: function(){
+        if(this._parent){
+            this.setSize(this._parent.width, this._parent.height);
+        }
+    },
+
+    /**
+     * Sets the margins of the panel.
+     * Must be called after #setSize and before any child panels are added.
+     */
+    setMargins: function(margins){
+        var m = margins.all;
+        if(m != null){
+            var allEqualMargins = pv.dict(Object.keys(this.margins), function(){ return m; });
+            this.setMargins(allEqualMargins);
+        } else {
+            for(var anchor in margins){
+                if(this.margins.hasOwnProperty(anchor)){
+                    m = +margins[anchor]; // -> to number
+                    if(m >= 0){
+                        this.margins[anchor] = m;
+                        this[this.anchorOrthoLength(anchor)] -= m;
+                    }
+                }
+            }
+        }
     },
 
     /**

@@ -62,16 +62,12 @@ pvc.AllTimeseriesPanel = pvc.BasePanel.extend({
     create: function(){
         // Size will depend on positioning and font size mainly
         if (this.isAnchorTopOrBottom()){
-            this.width  = this._parent.width;
-            this.height = this.allTimeseriesSize;
+            this.setSize(this._parent.width, this.allTimeseriesSize);
         } else {
-            this.height = this._parent.height;
-            this.width  = this.allTimeseriesSize;
+            this.setSize(this.allTimeseriesSize, this._parent.height);
         }
-
-        this.pvPanel = this._parent.getPvPanel().add(this.type)
-            .width(this.width)
-            .height(this.height);
+        
+        this.base();
 
         // Extend panel
         this.extend(this.pvPanel,"allTimeseries_");

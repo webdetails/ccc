@@ -27,15 +27,12 @@ pvc.TitlePanel = pvc.BasePanel.extend({
         // Size will depend on positioning and font size mainly
         var isTopOrBottom = this.isAnchorTopOrBottom();
         if (isTopOrBottom) {
-            this.width = this._parent.width;
-            this.height = this.titleSize;
+            this.setSize(this._parent.width, this.titleSize);
         } else {
-            this.height = this._parent.height;
-            this.width = this.titleSize;
+            this.setSize(this.titleSize, this._parent.height);
         }
 
-        this.pvPanel = this._parent.getPvPanel().add(this.type).width(
-                this.width).height(this.height);
+        this.base();
 
         // Extend title
         this.extend(this.pvPanel, "title_");

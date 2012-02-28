@@ -95,9 +95,8 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
 
     var myself=this;
 
-    this.width = this._parent.width;
-    this.height = this._parent.height;
-
+    this.consumeFreeClientSize();
+    
     this.base();
     
     // Add the chart. For a pie chart we have one series only
