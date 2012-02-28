@@ -11,7 +11,7 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
         this.base(options);
 
         // Apply options
-        options = pvc.mergeDefaults(this.options, pvc.BarChart.defaultOptions, options);
+        pvc.mergeDefaults(this.options, pvc.BarChart.defaultOptions, options);
     },
 
     /**
