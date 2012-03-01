@@ -975,7 +975,26 @@ pv.Mark.prototype.getInstanceShape = function(instance){
 };
 
 pv.Dot.prototype.getInstanceShape = function(instance){
-    return new pvc.Circle(instance.left, instance.top, instance.shapeRadius);
+    var radius = instance.shapeRadius,
+        cx = instance.left,
+        cy = instance.top;
+
+    // TODO: square and diamond break when angle is used
+    switch(instance.shape){
+        case 'diamond':
+            radius *= Math.SQRT2;
+            // NOTE fall through
+        case 'square':
+        case 'cross':
+            return new pvc.Rect(
+                cx - radius,
+                cy - radius,
+                2*radius,
+                2*radius);
+    }
+
+    // 'circle' included
+    return new pvc.Circle(cx, cy, radius);
 };
 
 pv.Area.prototype.getInstanceShape =
