@@ -301,8 +301,20 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 function(d){ return myself.getValue(d, myself.sizeValIdx); })) ;
         });
     
-        var maxRadius = Math.min(w,h) / 2 -2;
-        var maxArea = maxRadius * maxRadius ;// apparently treats as square area even if circle, triangle is different
+        var maxRadius = Math.min(w,h) / 2;
+        if(this.shape === 'diamond'){
+            // Protovis draws diamonds inscribed on
+            // a square with half-side radius*Math.SQRT2
+            // (so that diamonds just look like a rotated square)
+            // For the height of the dimanod not to exceed the cell size
+            // we compensate that factor here.
+            maxRadius /= Math.SQRT2;
+        }
+
+        // Small margin
+        maxRadius -= 2;
+
+        var maxArea = maxRadius * maxRadius;// apparently treats as square area even if circle, triangle is different
      
 //        var valueToRadius = function(value){
 //            return value != null ? value/maxVal * maxRadius : Math.min(maxRadius,5) ;//TODO:hcoded
@@ -380,6 +392,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 return (val == null && options.nullShape == null) ?
                         0 : valueToArea(myself.getValue(r[i], myself.sizeValIdx));
             })
+            .lock('shapeAngle') // rotation of shapes may cause them to not fit the calculated cell. Would have to improve the radius calculation code.
             .fillStyle(function(r, ra, i){
                 return getFillColor(r[i], i, this.selected());
             })
