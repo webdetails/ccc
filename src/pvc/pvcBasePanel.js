@@ -152,6 +152,14 @@ pvc.BasePanel = pvc.Abstract.extend({
         };
     },
 
+    setAnchoredSize: function(size){
+        if (this.isAnchorTopOrBottom()) {
+            this.setSize(this._parent.width, size);
+        } else {
+            this.setSize(size, this._parent.height);
+        }
+    },
+
     /**
      * Returns the width of the Panel
      */

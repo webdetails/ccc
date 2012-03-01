@@ -463,15 +463,15 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
      * Returns an array of marks whose instances are associated to a datum, or null.
      * @override
      */
-    _getSelectableMarks: function(){
+    _getSignums: function(){
         return [this.shapes];
     },
     
     /**
-     * Renders the heat grid panel
+     * Renders the heat grid panel.
      * @override
      */
-    _renderSelectableMarks: function(){
+    _renderSignums: function(){
         this.pvPanel.render();
     },
 

@@ -17,6 +17,7 @@
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
     <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvc.text.js"></script>
     <script type="text/javascript" src="pvc/pvcDatum.js"></script>
     <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
     <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
@@ -57,6 +58,10 @@ For more information on boxplots you can visit
 <ul>
   <li>width</li>
   <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
 </ul>
 <h4>Title properties</h4>
 <ul>
@@ -98,13 +103,15 @@ occupied by bars. Default: 0.5 (50%)</li>
   <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
   <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
   <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
-  <li>{x,y,second}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
-  <li>{x,y,second}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
-  <li>{x,y,second}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
-  <li>secondAxisIdx - Array of indexes of the series that are shown on the second axis</li>
-  <li>secondAxisIndependentScale (true | false) - if the second axis has an independent scale</li>
-  <li>secondAxisOriginIsZero (true | false) - if the second axis should show the 0 value at the origin. Default: 0</li>
-  <li>secondAxisColor - line and scale color. Default: blue</li>
+  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
+  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
 </ul>
 
 <h2>Extension Points</h2>
@@ -114,22 +121,15 @@ for&nbsp;Boxplot extension points:
   <li>base_</li>
   <li>title_</li>
   <li>titleLabel_</li>
-  <li>xAxis_</li>
-  <li>yAxis_</li>
-  <li>xAxisRule_</li>
-  <li>yAxisRule_</li>
-  <li>xAxisGrid_</li>
-  <li>yAxisGrid_</li>
-  <li>xAxisScale_</li>
-  <li>yAxisScale_</li>
-  <li>xAxisTicks_</li>
-  <li>yAxisTicks_</li>
-  <li>secondAxisTicks_</li>
-  <li>xAxisMinorTicks_</li>
-  <li>yAxisMinorTicks_</li>
-  <li>secondAxisMinorTicks_</li>
-  <li>xAxisEndLine_</li>
-  <li>yAxisEndLine_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisRule_</li>
+  <li>{x,y}AxisGrid_</li>
+  <li>{x,y}AxisScale_</li>
+  <li>{x,y}AxisTicks_</li>
+  <li>{x,y}AxisMinorTicks_</li>
+  <li>{x,y}AxisEndLine_</li>
+  <li>{x,y}AxisLabel_</li>
+  <li>{x,y}AxisTitleLabel_</li>
   <li>tooltip_</li>
   <li>boxPanel_</li>
   <li>box_</li>
@@ -157,7 +157,6 @@ For drawing a boxplot chart, just provide the data and set the orientation of th
           width: 400,
           height: 250,
           title: "Sample Boxplot chart",
-          orientation: 'vertical',
           animate:false,
         });
 

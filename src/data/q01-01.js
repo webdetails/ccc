@@ -112,7 +112,63 @@ var crosstab_01 = {
   }]
 };
 
-
+var crosstab_02 = {
+    "resultset":[
+        ["2011-01",null,367,24,null,11,null,11305],
+        ["2011-02",null,131,62,null,81,null,13815],
+        ["2011-03",null,421,165,6,200,null,15864],
+        ["2011-04",null,114,512,null,504,4,14870],
+        ["2011-05",null,79,441,null,832,null,15289],
+        ["2011-06",null,32,516,28,1494,null,20592],
+        ["2011-07",null,null,568,1,1346,null,15753],
+        ["2011-08",null,1,591,2,1136,null,12215],
+        ["2011-09",null,1,525,112,2606,null,22836],
+        ["2011-10",null,30,365,16,1323,1,18231],
+        ["2011-11",7,2,330,93,1351,2,22820],
+        ["2011-12",220,1,425,142,5942,1,15844]
+    ],
+    "metadata":[
+        {
+            "colIndex":0,
+            "colType":"String",
+            "colName":"Year_Month"
+        },
+        {
+            "colIndex":1,
+            "colType":"String",
+            "colName":"Qty/AUS"
+        },
+        {
+            "colIndex":2,
+            "colType":"Numeric",
+            "colName":"Qty/CAM"
+        },
+        {
+            "colIndex":3,
+            "colType":"Numeric",
+            "colName":"Qty/RCM"
+        },
+        {
+            "colIndex":4,
+            "colType":"String",
+            "colName":"Qty/RCN"
+        },
+        {
+            "colIndex":5,
+            "colType":"Numeric",
+            "colName":"Qty/RNA"
+        },
+        {
+            "colIndex":6,
+            "colType":"String",
+            "colName":"Qty/SGP"
+        },
+        {
+            "colIndex":7,
+            "colType":"Numeric",
+            "colName":"Qty/VNO"
+        }
+    ]};
 
 var relational_01 = {
   "resultset":[

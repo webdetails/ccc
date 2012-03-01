@@ -60,12 +60,7 @@ pvc.AllTimeseriesPanel = pvc.BasePanel.extend({
     },
 
     create: function(){
-        // Size will depend on positioning and font size mainly
-        if (this.isAnchorTopOrBottom()){
-            this.setSize(this._parent.width, this.allTimeseriesSize);
-        } else {
-            this.setSize(this.allTimeseriesSize, this._parent.height);
-        }
+        this.setAnchoredSize(this.allTimeseriesSize);
         
         this.base();
 

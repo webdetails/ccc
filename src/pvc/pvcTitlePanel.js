@@ -25,13 +25,8 @@ pvc.TitlePanel = pvc.BasePanel.extend({
 
     create: function() {
         // Size will depend on positioning and font size mainly
-        var isTopOrBottom = this.isAnchorTopOrBottom();
-        if (isTopOrBottom) {
-            this.setSize(this._parent.width, this.titleSize);
-        } else {
-            this.setSize(this.titleSize, this._parent.height);
-        }
-
+        this.setAnchoredSize(this.titleSize);
+        
         this.base();
 
         // Extend title
@@ -45,33 +40,45 @@ pvc.TitlePanel = pvc.BasePanel.extend({
             left: -Math.PI / 2
         };
 
-        this.pvLabel = this.pvPanel.add(pv.Label).text(this.title).font(
-                this.font).textAlign("center").textBaseline("middle").bottom(
-                this.height / 2).left(this.width / 2).textAngle(
-                rotationByAnchor[this.anchor]);
+        this.pvLabel = this.pvPanel.add(pv.Label)
+            .text(this.title)
+            .font(this.font)
+            .textAlign("center")
+            .textBaseline("middle")
+            .bottom(this.height / 2)
+            .left(this.width / 2)
+            .textAngle(rotationByAnchor[this.anchor]);
 
         // Cases:
         if (this.titleAlign == "center") {
             this.pvLabel.bottom(this.height / 2).left(this.width / 2);
         } else {
-
             this.pvLabel.textAlign(this.titleAlign);
 
-            if (isTopOrBottom) {
-                this.pvLabel.bottom(null).left(null) // reset
-                [this.titleAlign](0).bottom(this.height / 2);
+            if (this.isAnchorTopOrBottom()) {
+                this.pvLabel
+                    .bottom(null)
+                    .left(null) // reset
+                    [this.titleAlign](0)
+                    .bottom(this.height / 2);
 
             } else if (this.anchor == "right") {
                 if (this.titleAlign == "left") {
-                    this.pvLabel.bottom(null).top(0);
+                    this.pvLabel
+                        .bottom(null)
+                        .top(0);
                 } else {
-                    this.pvLabel.bottom(0);
+                    this.pvLabel
+                        .bottom(0);
                 }
             } else if (this.anchor == "left") {
                 if (this.titleAlign == "right") {
-                    this.pvLabel.bottom(null).top(0);
+                    this.pvLabel
+                        .bottom(null)
+                        .top(0);
                 } else {
-                    this.pvLabel.bottom(0);
+                    this.pvLabel
+                        .bottom(0);
                 }
             }
         }

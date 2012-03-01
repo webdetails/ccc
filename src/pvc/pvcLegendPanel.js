@@ -76,10 +76,10 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     
     var cellsize = this.markerSize + maxTextLen * this.textAdjust;
 
+    this.setAnchoredSize(this.legendSize);
+
     var realxsize, realysize;
     if (this.anchor == "top" || this.anchor == "bottom"){
-      this.setSize(this._parent.width, this.legendSize);
-      
       var maxperline = data.length;
 
       //if the legend is bigger than the available size, multi-line and left align
@@ -115,14 +115,11 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       };
       
     } else {
-      this.setSize(this.legendSize, this._parent.height);
-      
       realxsize = cellsize + this.minMarginX;
       realysize = myself.padding*data.length;
       if(this.align == "middle"){
         myself.minMarginY = (myself.height - realysize + myself.padding)/2  ;
-      }
-      else if (this.align == "bottom"){
+      } else if (this.align == "bottom"){
         myself.minMarginY = myself.height - realysize;
       }
       x = myself.minMarginX;

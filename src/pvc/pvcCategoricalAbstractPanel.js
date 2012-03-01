@@ -178,7 +178,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
     },
 
     _handleSelectionChanged: function(){
-        this._renderSelectableMarks();
+        this._renderSignums();
 
         // Fire action
         var action = this.chart.options.selectionChangedAction;
@@ -209,7 +209,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
     
     /**
      * The default implementation renders
-     * the marks returned by #_getSelectableMarks, 
+     * the marks returned by #_getSignums, 
      * or this.pvPanel if none is returned.
      * which is generally in excess of what actually requires
      * to be re-rendered.
@@ -217,8 +217,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
      * Override to render a more specific set of marks.
      * @virtual
      */
-    _renderSelectableMarks: function(){
-        var marks = this._getSelectableMarks();
+    _renderSignums: function(){
+        var marks = this._getSignums();
         if(!marks || !marks.length){
             this.pvPanel.render();
         } else {
@@ -230,14 +230,14 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
      * Returns an array of marks whose instances are associated to a datum, or null.
      * @virtual
      */
-    _getSelectableMarks: function(){
+    _getSignums: function(){
         return null;
     },
 
     /**
      * The default implementation returns
      * the datums associated with
-     * the instances of the marks returned by #_getSelectableMarks.
+     * the instances of the marks returned by #_getSignums.
      * 
      * Override to provide a specific
      * selection detection implementation.
@@ -252,7 +252,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
     _detectSelectingData: function(){
         var data = [];
 
-        var selectableMarks = this._getSelectableMarks();
+        var selectableMarks = this._getSignums();
         if(selectableMarks){
             selectableMarks.forEach(function(mark){
                 this._forEachSelectingMarkInstance(mark, function(datum){

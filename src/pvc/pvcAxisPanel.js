@@ -16,14 +16,18 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     ordinal: false,
     ordinalDimensionName: null, // To be used in ordinal scales
     anchor: "bottom",
-    axisSize: 30,
+    axisSize: undefined,
     tickLength: 6,
     tickColor: "#aaa",
     panelName: "axis", // override
     scale: null,
     fullGrid: false,
     endLine:  false,
-    
+    font: '10px sans-serif', // label font
+    titleFont: '12px sans-serif',
+    title: undefined,
+    titleSize: 0,
+
     // To be used in linear scales
     domainRoundMode: 'none',
     desiredTickCount: null,
@@ -32,39 +36,72 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     clickAction: null,
     doubleClickAction: null,
 
-    //constructor: function(chart, options){
-    //    this.base(chart,options);
-    //},
-    
-    create: function(){
-        if (this.isAnchorTopOrBottom()){
-            this.setSize(this._parent.width, this.axisSize);
-        } else {
-            this.setSize(this.axisSize, this._parent.height);
+    constructor: function(chart, options){
+        
+        this.base(chart,options);
+
+        this._calcLayout();
+    },
+
+    _calcLayout: function(){
+
+        var titleSize = 0;
+
+        if(this.title){
+            titleSize = Math.ceil(
+                            pvc.text.getTextHeight(this.title, this.titleFont)
+                            *
+                            pvc.goldenRatio);
+
+            if(this.titleSize > titleSize){
+                titleSize = this.titleSize;
+            }
+
+            if(this.axisSize  != null &&
+               this.titleSize != null &&
+               titleSize > this.axisSize){
+                pvc.log("WARNING: Inconsistent options '" +
+                            this.panelName + "TitleSize: " +  JSON.stringify(this.titleSize) +
+                            this.panelName + "Size: " +  JSON.stringify(this.axisSize));
+
+               titleSize = this.axisSize;
+            }
         }
 
-        // Creates this.pvPanel
+        this.titleSize = titleSize;
+
+        if(this.axisSize == null){
+            this.axisSize = this.titleSize + 50;
+        }
+    },
+
+    create: function(){
+
+        this.setAnchoredSize(this.axisSize);
+        
         this.base();
         
         // ??
         this.extend(this.pvScale, this.panelName + "Scale_");
         
         this.renderAxis();
+    },
 
-        // Apply extension points
-        this.extend(this.pvPanel,    this.panelName + "_"     );
-        this.extend(this.pvRule,     this.panelName + "Rule_" );
-        this.extend(this.pvTicks,    this.panelName + "Ticks_");
-        this.extend(this.pvLabel,    this.panelName + "Label_");
-        this.extend(this.pvRuleGrid, this.panelName + "Grid_" );
+    /**
+     * @override
+     */
+    applyExtensions: function(){
         
-        if(this.pvEndLine){
-            this.extend(this.pvEndLine, this.panelName + "EndLine_");
-        }
-        
-        if(this.pvMinorTicks){
-            this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
-        }
+        this.base();
+
+        this.extend(this.pvPanel,      this.panelName + "_"     );
+        this.extend(this.pvRule,       this.panelName + "Rule_" );
+        this.extend(this.pvTicks,      this.panelName + "Ticks_");
+        this.extend(this.pvLabel,      this.panelName + "Label_");
+        this.extend(this.pvRuleGrid,   this.panelName + "Grid_" );
+        this.extend(this.pvTitle,      this.panelName + "TitleLabel_");
+        this.extend(this.pvEndLine,    this.panelName + "EndLine_");
+        this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
     },
 
     setScale: function(scale){
@@ -95,17 +132,46 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Range
         var rMin  = this.pvScale.min,
             rMax  = this.pvScale.max,
-            rSize = rMax - rMin;
-        
-        this.pvRule = this.pvPanel.add(pv.Rule)
+            rSize = rMax - rMin,
+            ruleParentPanel = this.pvPanel;
+
+        if(this.title){
+           this.pvTitlePanel = this.pvPanel.add(pv.Panel)
+                [this.anchor             ](0)     // bottom (of the axis panel)
+                [this.anchorOrthoLength()](this.titleSize) // height
+                [this.anchorOrtho()      ](rMin)  // left
+                [this.anchorLength()     ](rSize) // width
+                ;
+
+            this.pvTitle = this.pvTitlePanel.anchor('center').add(pv.Label)
+                .lock('text', this.title)
+                .lock('font', this.titleFont)
+
+                // Rotate text over center point
+                .lock('textAngle',
+                    this.anchor === 'left'  ? -Math.PI/2 :
+                    this.anchor === 'right' ?  Math.PI/2 :
+                    null)
+                ;
+
+            // Create a container panel to draw the remaining axis components
+            ruleParentPanel = this.pvPanel.add(pv.Panel)
+                [this.anchorOpposite()   ](0) // top (of the axis panel)
+                [this.anchorOrthoLength()](this.axisSize - this.titleSize) // height
+                [this.anchorOrtho()      ](0)     // left
+                [this.anchorLength()     ](rSize) // width
+                ;
+        }
+
+        this.pvRule = ruleParentPanel.add(pv.Rule)
             .zOrder(30) // see pvc.js
             .strokeStyle('black')
             // ex: anchor = bottom
             [this.anchorOpposite()](0)     // top    (of the axis panel)
             [this.anchorLength()  ](rSize) // width  
             [this.anchorOrtho()   ](rMin); // left
-                
-        
+
+
         if(this.endLine){
             var anchorOrthoLength = this.anchorOrthoLength(),
                 ruleLength = this._parent[anchorOrthoLength] - 
@@ -396,15 +462,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     getLayoutSingleCluster: function(elements, orientation, maxDepth){
         
-        var depthLength = this.axisSize;
+        var depthLength = this.axisSize - this.titleSize;
 
         // displace to take out bogus-root
         maxDepth++;
-        var baseDisplacement = (1.0 / maxDepth)* depthLength;
-        var margin = maxDepth > 2 ? ((1.0/12.0) * depthLength) : 0;//heuristic compensation
+        var baseDisplacement = depthLength / maxDepth;
+        var margin = maxDepth > 2 ? ((1/12) * depthLength) : 0;//heuristic compensation
         baseDisplacement -= margin;
         
-        var scaleFactor = maxDepth*1.0 / (maxDepth -1);
+        var scaleFactor = maxDepth / (maxDepth - 1);
         var orthogonalLength = pvc.BasePanel.orthogonalLength[orientation];
         //var dlen = (orthogonalLength == 'width')? 'dx' : 'dy';
         
@@ -431,10 +497,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .lineWidth(0);
 
         var panel = this.pvRule
-                        .add(pv.Panel)[orthogonalLength](depthLength)//.overflow('hidden')
+                        .add(pv.Panel)
+                            [orthogonalLength](depthLength)//.overflow('hidden')
                             .strokeStyle(null)
                             .lineWidth(0) //cropping panel
-                        .add(pv.Panel)[orthogonalLength](depthLength * scaleFactor )
+                        .add(pv.Panel)
+                            [orthogonalLength](depthLength * scaleFactor)
                             .strokeStyle(null)
                             .lineWidth(0);// panel resized and shifted to make bogus root disappear
 
@@ -510,13 +578,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     renderCompositeOrdinalAxis: function(){
         var myself = this,
-            chart = this.chart,
-            options = chart.options;
+            chart = this.chart;
 
-        var axisDirection = (this.anchor == 'bottom' || this.anchor == 'top')?
-            'h':
-            'v';
-
+        var isTopOrBottom = this.isAnchorTopOrBottom(),
+            axisDirection = isTopOrBottom ? 'h' : 'v';
+        
         var ordinalDimension = chart.dataEngine.getDimension(this.ordinalDimensionName),
             // TODO: extend this to work with chart.orientation?
             reverse  = this.anchor == 'bottom' || this.anchor == 'left',
@@ -550,10 +616,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .def("fitInfo", null)
             .height(function(d, e, f){
                 // Just iterate and get cutoff
-                var fitInfo = myself.getFitInfo(d.dx, d.dy, d.label, myself.font, diagMargin);
+                var fitInfo = pvc.text.getFitInfo(d.dx, d.dy, d.label, myself.font, diagMargin);
                 if(!fitInfo.h){
-
-                    if(axisDirection == 'v' && fitInfo.v ){//prefer vertical
+                    if(axisDirection == 'v' && fitInfo.v){ // prefer vertical
                         vertDepthCutoff = Math.min(diagDepthCutoff, d.depth);
                     } else {
                         diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
@@ -590,11 +655,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var H_CUTOFF_ANG = 0.30;
         var V_CUTOFF_ANG = 1.27;
         //var V_CUTOFF_RATIO = 0.8;
-        var diagMargin = this.getFontSize(this.font) / 2;
+        var diagMargin = pvc.text.getFontSize(this.font) / 2;
 
-        var align = this.isAnchorTopOrBottom()?
-            "center"
-            : (this.anchor == "left") ? "right" : "left";
+        var align = isTopOrBottom ?
+                    "center" :
+                    (this.anchor == "left") ? "right" : "left";
 
         //draw labels and make them fit
         this.pvLabel = layout.label.add(pv.Label)
@@ -640,19 +705,19 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 switch(this.lblDirection()){
                     case 'h':
                         if(!fitInfo.h){//TODO: fallback option for no svg
-                            return myself.trimToWidth(d.dx, d.label, myself.font, '..');
+                            return pvc.text.trimToWidth(d.dx, d.label, myself.font, '..');
                         }
                         break;
                     case 'v':
                         if(!fitInfo.v){
-                            return myself.trimToWidth(d.dy, d.label, myself.font, '..');
+                            return pvc.text.trimToWidth(d.dy, d.label, myself.font, '..');
                         }
                         break;
                     case 'd':
                        if(!fitInfo.d){
                           //var ang = Math.atan(d.dy/d.dx);
                           var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx) ;
-                          return myself.trimToWidth(diagonalLength - diagMargin, d.label, myself.font,'..');
+                          return pvc.text.trimToWidth(diagonalLength - diagMargin, d.label, myself.font,'..');
                         }
                         break;
                 }
@@ -693,179 +758,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 offset: diagMargin * 2,
                 opacity:1
             }));
-    },
-    
-    getTextSizePlaceholder : function(){
-        var TEXT_SIZE_PHOLDER_APPEND='_textSizeHtmlObj';
-        if(!this.textSizeTestHolder || this.textSizeTestHolder.parent().length == 0)
-        {
-            var chartHolder = $('#' + this.chart.options.canvas);
-            var textSizeTestHolderId = chartHolder.attr('id') + TEXT_SIZE_PHOLDER_APPEND;
-            this.textSizeTestHolder = $('#' + this.chart.options.canvas + ' #' + textSizeTestHolderId);
-            if(this.textSizeTestHolder.length == 0)
-            {
-                this.textSizeTestHolder = $('<div>')
-                    .attr('id', textSizeTestHolderId)
-                    .css('position', 'absolute')
-                    .css('visibility', 'hidden')
-                    .css('width', 'auto')
-                    .css('height', 'auto');
-                chartHolder.append(this.textSizeTestHolder);
-            }
-        }
-        return this.textSizeTestHolder;
-    },
-
-    getTextSizePvLabel: function(text, font){
-        if(!this.textSizePvLabel || this.textSizeLabelFont != font){
-            var holder = this.getTextSizePlaceholder();
-            var holderId = holder.attr('id');
-            var panel = new pv.Panel();
-            panel.canvas(holderId);
-            var lbl = panel.add(pv.Label).text(text);
-            if(font){
-                lbl.font(font);
-            }
-            panel.render();
-            this.textSizePvLabel = $('#' + holderId + ' text');
-            this.textSizeLabelFont = font;
-        }
-        else {
-            this.textSizePvLabel.text(text);
-        }
-        
-        return this.textSizePvLabel[0];
-    },
-    
-    getTextLength: function(text, font){
-        
-        switch(pv.renderer()){            
-            case 'vml':
-                return this.getTextLenVML(text, font);
-            case 'batik':
-                font = this.splitFontCGG(font);
-                return getTextLenCGG(text, font.fontFamily, font.fontSize);
-            case 'svg':
-            default:
-                return this.getTextLenSVG(text, font);
-        }
-      //  
-      //return (pv.renderer() != 'vml')?//TODO: support svgweb? defaulting to svg
-      //  this.getTextLenSVG(text, font) :
-      //  this.getTextLenVML(text, font) ;
-    },
-    
-    splitFontCGG: function(font){
-        var el = document.createElementNS('http://www.w3.org/2000/svg','text');
-        var sty = el.style;
-        sty.setProperty('font',font);
-        var result = {};
-        result.fontFamily = sty.getProperty('font-family');
-        if(!result.fontFamily){
-            result.fontFamily = 'sans-serif';
-        }
-        result.fontSize = sty.getProperty('font-size');
-        result.fontStyle = sty.getProperty('font-style');
-        return result;
-    },
-    
-    getTextLenSVG: function(text, font){
-        // TODO 
-        var lbl = this.getTextSizePvLabel(text, font);
-        if(!lbl){
-            return 100;
-        }
-        
-        var box = lbl.getBBox();
-        return box.width;
-    },
-    
-    getTextLenVML: function(text, font){
-        return pv.Vml.text_dims(text, font).width;
-    },
-    
-    //TODO: if not in px?..
-    getFontSize: function(font){
-        if(pv.renderer() == 'batik'){
-            var sty = document.createElementNS('http://www.w3.org/2000/svg','text').style;
-            sty.setProperty('font',font);
-            return parseInt(sty.getProperty('font-size'));
-        }
-        else {
-            var holder = this.getTextSizePlaceholder();
-            holder.css('font', font);
-            return parseInt(holder.css('font-size'));//.slice(0,-2);
-        }
-    },
-    
-    getFitInfo: function(w, h, text, font, diagMargin){    
-        if(text == '') return {h:true, v:true, d:true};
-        var len = this.getTextLength(text, font);
-        
-        var fitInfo = {
-            h: len <= w,
-            v: len <= h,
-            d: len <= Math.sqrt(w*w + h*h) - diagMargin
-        };
-        
-        return fitInfo;
-    },
-    
-    trimToWidth: function(len,text,font,trimTerminator){
-      if(text == '') return text;
-      var textLen = this.getTextLength(text, font);
-      
-      if(textLen <= len){
-        return text;
-      }
-      
-      if(textLen > len * 1.5){//cutoff for using other algorithm
-        return this.trimToWidthBin(len,text,font,trimTerminator);
-      }
-      
-      while(textLen > len){
-        text = text.slice(0,text.length -1);
-        textLen = this.getTextLength(text, font);
-      }
-      return text + trimTerminator;
-    },
-    
-    trimToWidthBin :function(len,text,font,trimTerminator){
-        
-        var high = text.length-2;
-        var low = 0;
-        var mid;
-        var textLen;
-        
-        while(low <= high && high > 0){
-            
-            mid = Math.ceil((low + high)/2);
-            //text = text.slice(0,mid);
-            textLen = this.getTextLength(text.slice(0,mid), font);
-            
-            if(textLen > len){
-                high = mid-1;
-            }
-            else {
-                if( this.getTextLength(text.slice(0,mid+1), font) < len ){
-                    low = mid+1;
-                }
-                else return text.slice(0,mid) + trimTerminator;
-            }
-            
-        }
-        
-        return text.slice(0,high) + trimTerminator; 
-    },
-    
-    //TODO: use for IE if non-svg option kept
-    doesTextSizeFit: function(length, text, font){
-        var MARGIN = 4;//TODO: hcoded
-        var holder = this.getTextSizePlaceholder();
-        holder.text(text);
-        return holder.width() - MARGIN <= length;
     }
-    
     // end: composite axis
     /////////////////////////////////////////////////
 });

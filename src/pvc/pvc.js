@@ -76,6 +76,10 @@ var pvc = {
 // Begin private scope
 (function(){
 
+// goldenRatio proportion
+// ~61.8% ~ 38.2%
+pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
+
 var arraySlice = pvc.arraySlice = Array.prototype.slice;
 
 /**
@@ -241,7 +245,7 @@ pvc.define = pvc.scope(function(){
 
 pvc.number = function(d, dv){
     var v = parseFloat(d);
-    return isNaN(d) ? (dv || 0) : v;
+    return isNaN(v) ? (dv || 0) : v;
 };
 
 // null or undefined to 'dv''

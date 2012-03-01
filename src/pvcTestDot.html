@@ -17,6 +17,7 @@
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
     <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvc.text.js"></script>
     <script type="text/javascript" src="pvc/pvcDatum.js"></script>
     <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
     <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
@@ -50,6 +51,10 @@ The Dot chart can be a very useful alternative to the horizontal bar chart, bein
 <ul>
   <li>width</li>
   <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
 </ul>
 <h4>Title properties</h4>
 <ul>
@@ -105,20 +110,20 @@ for&nbsp;Dot chart extension points:
   <li>base_</li>
   <li>title_</li>
   <li>titleLabel_</li>
-  <li>xAxis_</li>
-  <li>yAxis_</li>
-  <li>xAxisRule_</li>
-  <li>yAxisRule_</li>
-  <li>xAxisScale_</li>
-  <li>yAxisScale_</li>
-  <li>xAxisGrid_</li>
-  <li>yAxisGrid_</li>
-  <li>xAxisTicks_</li>
-  <li>yAxisTicks_</li>
-  <li>xAxisMinorTicks_</li>
-  <li>yAxisMinorTicks_</li>
-  <li>xAxisEndLine_</li>
-  <li>yAxisEndLine_</li>
+  <li>legendArea_</li>
+  <li>legendPanel_</li>
+  <li>legendRule_</li>
+  <li>legendDot_</li>
+  <li>legendLabel_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisRule_</li>
+  <li>{x,y}AxisGrid_</li>
+  <li>{x,y}AxisScale_</li>
+  <li>{x,y}AxisTicks_</li>
+  <li>{x,y}AxisMinorTicks_</li>
+  <li>{x,y}AxisEndLine_</li>
+  <li>{x,y}AxisLabel_</li>
+  <li>{x,y}AxisTitleLabel_</li>
   <li>tooltip_</li>
   <li>chart_ - for the main chart Panel</li>
   <li>dot_</li>
