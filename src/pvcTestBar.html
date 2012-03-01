@@ -15,9 +15,10 @@
     <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
     <script type="text/javascript" src="lib/tipsy.js"></script>
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
-
+    <script type="text/javascript" src="pvc-d1.0.js"></script>
+    <!--
     <script type="text/javascript" src="pvc/pvc.js"></script>
-    
+    <script type="text/javascript" src="pvc/pvc.text.js"></script>
     <script type="text/javascript" src="pvc/pvcDatum.js"></script>
     <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
     <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
@@ -34,6 +35,7 @@
     <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
     <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
+    -->
     
     <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
     <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
@@ -53,6 +55,10 @@ proportional to the values that they represent.
 <ul>
   <li>width</li>
   <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
 </ul>
 <h4>Title properties</h4>
 <ul>
@@ -92,9 +98,15 @@ occupied by bars. Default: 0.9 (90%)</li>
   <li>secondAxis (true | false) - whether to show the second axis. Default: false</li>
   <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
   <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
-  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
+  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 50</li>
   <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
   <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
+  <li>{x,y,second}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y,second}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y,second}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y|second}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
   <li>{x,y,second}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
   <li>{x,y,second}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
   <li>{x,y,second}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
@@ -112,22 +124,20 @@ for&nbsp;Bar extension points:
   <li>base_</li>
   <li>title_</li>
   <li>titleLabel_</li>
-  <li>xAxis_</li>
-  <li>yAxis_</li>
-  <li>xAxisRule_</li>
-  <li>yAxisRule_</li>
-  <li>xAxisGrid_</li>
-  <li>yAxisGrid_</li>
-  <li>xAxisScale_</li>
-  <li>yAxisScale_</li>
-  <li>xAxisTicks_</li>
-  <li>yAxisTicks_</li>
-  <li>secondAxisTicks_</li>
-  <li>xAxisMinorTicks_</li>
-  <li>yAxisMinorTicks_</li>
-  <li>secondAxisMinorTicks_</li>
-  <li>xAxisEndLine_</li>
-  <li>yAxisEndLine_</li>
+  <li>legendArea_</li>
+  <li>legendPanel_</li>
+  <li>legendRule_</li>
+  <li>legendDot_</li>
+  <li>legendLabel_</li>
+  <li>{x,y,second}Axis_</li>
+  <li>{x,y,second}AxisRule_</li>
+  <li>{x,y,second}AxisGrid_</li>
+  <li>{x,y,second}AxisScale_</li>
+  <li>{x,y,second}AxisTicks_</li>
+  <li>{x,y,second}AxisMinorTicks_</li>
+  <li>{x,y,second}AxisEndLine_</li>
+  <li>{x,y,second}AxisLabel_</li>
+  <li>{x,y,second}AxisTitleLabel_</li>
   <li>tooltip_</li>
   <li>barLabel_</li>
   <li>barPanel_</li>
@@ -285,5 +295,37 @@ bar4.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar4"></div>
+
+<h3>Yet Another Stacked Bar chart</h3>
+Consumes crosstab data and contains null values<br>
+<textarea cols="55" rows="24" id="pvcBar5Code">
+var bar5 = new pvc.BarChart({
+    canvas: "pvcBar5",
+    width:  700,
+    height: 400,
+    orientation:"vertical",
+    animate: false,
+    legend:true,
+    legendPosition: "bottom",
+    legendAlign:"center",
+    stacked:true,
+    selectable:true,
+    yAxisSize:50,
+    yAxisDomainRoundMode:"tick",
+    panelSizeRatio:0.8,
+    barSizeRatio:0.9,
+    maxBarSize:100,
+    showValues: false
+});
+
+bar5.setData(crosstab_02,{
+    crosstabMode: true,
+    seriesInRows: false
+});
+
+bar5.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBar5"></div>
   </body>
 </html>

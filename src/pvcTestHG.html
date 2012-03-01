@@ -16,6 +16,7 @@
         <script type="text/javascript" src="lib/tipsy.js"></script>
         <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
         <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvc.text.js"></script>
         <script type="text/javascript" src="pvc/pvcDatum.js"></script>
         <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
         <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
@@ -51,6 +52,10 @@ The intensity or the color of each cell depends on the value that it represents.
 <ul>
   <li>width</li>
   <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
 </ul>
 <h4>Title properties</h4>
 <ul>
@@ -80,6 +85,18 @@ Default: 2000</li>
 shade of orange)</li>
 </ul>
 
+<h4>Axis properties</h4>
+<ul>
+  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
+  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
+  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
+</ul>
+
 <h2>Extension Points</h2>
 The following&nbsp;list&nbsp;serves as the basis
 for Heat grid extension points:
@@ -87,8 +104,8 @@ for Heat grid extension points:
   <li>base_</li>
   <li>title_</li>
   <li>titleLabel_</li>
-  <li>xAxis_</li>
-  <li>yAxis_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisTitleLabel_</li>
   <li>chart_ - for the main chart Panel</li>
   <li>heatGrid_ - for the actual heatGrid</li>
   <li>heatGridPanel_ - for the panel where the heatGrids is</li>

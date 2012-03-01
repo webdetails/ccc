@@ -935,7 +935,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
      * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
-    _renderSelectableMarks: function(){
+    _renderSignums: function(){
         this.pvBarPanel.render();
     },
 
@@ -943,7 +943,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
      * Returns an array of marks whose instances are associated to a datum, or null.
      * @override
      */
-    _getSelectableMarks: function(){
+    _getSignums: function(){
         return [this.pvBar];
     }
 <<<<<<< HEAD

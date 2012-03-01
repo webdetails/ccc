@@ -17,6 +17,7 @@
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
     <script type="text/javascript" src="pvc/pvc.js"></script>
+    <script type="text/javascript" src="pvc/pvc.text.js"></script>
     <script type="text/javascript" src="pvc/pvcDatum.js"></script>
     <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
     <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
@@ -47,6 +48,10 @@ An alternative to pie is the donut chart.
 <ul>
   <li>width</li>
   <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
 </ul>
 <h4>Title properties</h4>
 <ul>
@@ -88,6 +93,11 @@ for&nbsp;Pie extension points:
   <li>base_</li>
   <li>title_</li>
   <li>titleLabel_</li>
+  <li>legendArea_</li>
+  <li>legendPanel_</li>
+  <li>legendRule_</li>
+  <li>legendDot_</li>
+  <li>legendLabel_</li>
   <li>tooltip_</li>
   <li>pie_</li>
   <li>pieLabel_</li>

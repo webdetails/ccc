@@ -51,8 +51,8 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
      */
     getLinearBaseScale: function(keyArgs){
         var bypassAxisSize = pvc.get(keyArgs, 'bypassAxisSize', false),
-            yAxisSize = bypassAxisSize ? 0 : this.options.yAxisSize,
-            xAxisSize = bypassAxisSize ? 0 : this.options.xAxisSize;
+            yAxisSize = this._getAxisSize(bypassAxisSize, 'y'),
+            xAxisSize = this._getAxisSize(bypassAxisSize, 'x');
 
         var isVertical = this.options.orientation=="vertical";
 

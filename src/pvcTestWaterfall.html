@@ -17,6 +17,7 @@
         <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
 
         <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvc.text.js"></script>
         <script type="text/javascript" src="pvc/pvcDatum.js"></script>
         <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
         <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
@@ -56,6 +57,10 @@ in a waterfall chart you just compare the size of bars as all bars are parallel 
 <ul>
   <li>width</li>
   <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
 </ul>
 <h4>Title properties</h4>
 <ul>
@@ -99,6 +104,12 @@ occupied by bars. Default: 0.5 (50%)</li>
   <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
   <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
   <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
+  <li>{x,y,second}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y,second}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y,second}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y|second}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
   <li>{x,y,second}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
   <li>{x,y,second}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
   <li>{x,y,second}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
@@ -115,22 +126,20 @@ for Waterfall extension points:
   <li>base_</li>
   <li>title_</li>
   <li>titleLabel_</li>
-  <li>xAxis_</li>
-  <li>yAxis_</li>
-  <li>xAxisRule_</li>
-  <li>yAxisRule_</li>
-  <li>xAxisGrid_</li>
-  <li>yAxisGrid_</li>
-  <li>xAxisScale_</li>
-  <li>yAxisScale_</li>
-  <li>xAxisTicks_</li>
-  <li>yAxisTicks_</li>
-  <li>secondAxisTicks_</li>
-  <li>xAxisMinorTicks_</li>
-  <li>yAxisMinorTicks_</li>
-  <li>secondAxisMinorTicks_</li>
-  <li>xAxisEndLine_</li>
-  <li>yAxisEndLine_</li>
+  <li>legendArea_</li>
+  <li>legendPanel_</li>
+  <li>legendRule_</li>
+  <li>legendDot_</li>
+  <li>legendLabel_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisRule_</li>
+  <li>{x,y}AxisGrid_</li>
+  <li>{x,y}AxisScale_</li>
+  <li>{x,y}AxisTicks_</li>
+  <li>{x,y}AxisMinorTicks_</li>
+  <li>{x,y}AxisEndLine_</li>
+  <li>{x,y}AxisLabel_</li>
+  <li>{x,y}AxisTitleLabel_</li>
   <li>tooltip_</li>
   <li>barLabel_</li>
   <li>barPanel_</li>

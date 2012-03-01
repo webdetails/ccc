@@ -77,32 +77,44 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         this.base();
 
         pvc.log("Prerendering in CategoricalAbstract");
+
+        this.initSecondXAxis();
+        this.initXAxis();
+        this.initSecondYAxis();
+        this.initYAxis();
         
         // NOTE: must be evaluated before axis panels' creation
         //  because getZZZZScale calls assume this (bypassAxisSize = false)
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
-        
         if(options.secondAxis){
             this.secondScale = this.getSecondScale();
         }
-        
-        // Generate X axis
-        if(options.secondAxis){
-            // this goes before the other because of the fullGrid
-            this.generateSecondXAxis();
-        }
-        
-        this.generateXAxis();
-        
-        // Generate Y axis
-        if(options.secondAxis){
-            // this goes before the other because of the fullGrid
-            this.generateSecondYAxis();
-        }
-        
-        this.generateYAxis();
 
+        // --------------
+
+        if(this.secondXAxisPanel){
+            this.secondXAxisPanel.setScale(this.secondScale);
+            this.secondXAxisPanel.appendTo(this.basePanel); // Add it
+        }
+        
+        if(this.xAxisPanel){
+            this.xAxisPanel.setScale(this.xScale);
+            this.xAxisPanel.appendTo(this.basePanel); // Add it
+        }
+        
+        if(this.secondYAxisPanel){
+            this.secondYAxisPanel.setScale(this.secondScale);
+            this.secondYAxisPanel.appendTo(this.basePanel); // Add it
+        }
+        
+        if(this.yAxisPanel){
+            this.yAxisPanel.setScale(this.yScale);
+            this.yAxisPanel.appendTo(this.basePanel); // Add it
+        }
+
+        // ---------------
+        
         this.categoricalPanel = this.createCategoricalPanel();
         this.categoricalPanel.appendTo(this.basePanel); // Add it
     },
@@ -113,9 +125,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
 
     /**
-     * Generates the X axis. It's in a separate function to allow overriding this value.
+     * Initializes the X axis. It's in a separate function to allow overriding this value.
      */
-    generateXAxis: function(){
+    initXAxis: function(){
     	var options = this.options;
         if (options.showXScale){
             this.xAxisPanel = new pvc.XAxisPanel(this, {
@@ -131,20 +143,19 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 ordinalDimensionName: this.getAxisOrdinalDimension('x'),
                 useCompositeAxis: options.useCompositeAxis,
                 font: options.axisLabelFont,
+                title: options.xAxisTitle,
+                titleFont: options.axisTitleFont,
+                titleSize: options.xAxisTitleSize,
                 clickAction: options.xAxisClickAction,
                 doubleClickAction: options.xAxisDoubleClickAction
             });
-
-            //            this.xAxisPanel.setScale(this.xScale);
-            this.xAxisPanel.setScale(this.xScale);
-            this.xAxisPanel.appendTo(this.basePanel); // Add it
         }
     },
 
     /**
-     * Generates the Y axis. It's in a separate function to allow overriding this value.
+     * Initializes the Y axis. It's in a separate function to allow overriding this value.
      */
-    generateYAxis: function(){
+    initYAxis: function(){
     	var options = this.options;
         if (options.showYScale){
             this.yAxisPanel = new pvc.YAxisPanel(this, {
@@ -160,21 +171,23 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 ordinalDimensionName: this.getAxisOrdinalDimension('y'),
                 useCompositeAxis: options.useCompositeAxis,
                 font: options.axisLabelFont,
+                title: options.yAxisTitle,
+                titleSize: options.yAxisTitleSize,
+                titleFont:  options.axisTitleFont,
                 clickAction:       options.yAxisClickAction,
                 doubleClickAction: options.yAxisDoubleClickAction
             });
-
-            this.yAxisPanel.setScale(this.yScale);
-            this.yAxisPanel.appendTo(this.basePanel); // Add it
         }
     },
 
     /**
-     * Generates the second axis for X, if exists and only for horizontal charts.
+     * Initializes the second axis for X, if exists and only for horizontal charts.
      */
-    generateSecondXAxis: function(){
+    initSecondXAxis: function(){
     	var options = this.options;
-        if(options.secondAxisIndependentScale && this.isOrientationHorizontal()){
+        if(options.secondAxis && 
+           options.secondAxisIndependentScale &&
+           this.isOrientationHorizontal()){
            
             this.secondXAxisPanel = new pvc.SecondXAxisPanel(this, {
                 ordinal: this.isXAxisOrdinal(),
@@ -185,20 +198,22 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 desiredTickCount: options.secondAxisDesiredTickCount,
                 minorTicks:       options.secondAxisMinorTicks,
                 ordinalDimensionName: this.getAxisOrdinalDimension('x'),
-                tickColor: options.secondAxisColor
+                tickColor: options.secondAxisColor,
+                title: options.secondAxisTitle,
+                titleFont: options.axisTitleFont,
+                titleSize: options.secondAxisTitleSize
             });
-
-            this.secondXAxisPanel.setScale(this.secondScale);
-            this.secondXAxisPanel.appendTo(this.basePanel); // Add it
         }
     },
 
     /**
-     * Generates the second axis for Y, if exists and only for vertical charts.
+     * Initializes the second axis for Y, if exists and only for vertical charts.
      */
-    generateSecondYAxis: function(){
+    initSecondYAxis: function(){
     	var options = this.options;
-        if(options.secondAxisIndependentScale && this.isOrientationVertical()){
+        if(options.secondAxis && 
+           options.secondAxisIndependentScale &&
+           this.isOrientationVertical()){
 
             this.secondYAxisPanel = new pvc.SecondYAxisPanel(this, {
                 ordinal: this.isYAxisOrdinal(),
@@ -209,11 +224,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 desiredTickCount: options.secondAxisDesiredTickCount,
                 minorTicks:       options.secondAxisMinorTicks,
                 ordinalDimensionName: this.getAxisOrdinalDimension('y'),
-                tickColor: options.secondAxisColor
+                tickColor: options.secondAxisColor,
+                title: options.secondAxisTitle,
+                titleFont: options.axisTitleFont,
+                titleSize: options.secondAxisTitleSize
             });
-
-            this.secondYAxisPanel.setScale(this.secondScale);
-            this.secondYAxisPanel.appendTo(this.basePanel); // Add it
         }
     },
 
@@ -283,6 +298,15 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.getOrdinalScale();
     },
 
+    _getAxisSize: function(bypass, axisName){
+        if(bypass){
+            return 0;
+        }
+
+        var axis = this[axisName + "AxisPanel"];
+        return axis ? axis.axisSize : 0;
+    },
+
     /**
      * Scale for an ordinal axis.
      * If orthoAxis is null:
@@ -300,8 +324,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var bypassAxisSize = pvc.get(keyArgs, 'bypassAxisSize', false),
             orthoAxis = pvc.get(keyArgs, 'orthoAxis', null),
             options   = this.options,
-            yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
-            xAxisSize = bypassAxisSize ? 0 : options.xAxisSize;
+            yAxisSize = this._getAxisSize(bypassAxisSize, 'y'),
+            xAxisSize = this._getAxisSize(bypassAxisSize, 'x');
         
         // DOMAIN
         var data = orthoAxis ?
@@ -317,8 +341,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 scale.min = 0;
                 scale.max = this.basePanel.height - xAxisSize;
             } else {   // assume orthoAxis == "x"
-                scale.min = yAxisSize;
-                scale.max = this.basePanel.width;
+                if(options.yAxisPosition == "left"){
+                    scale.min = yAxisSize;
+                    scale.max = this.basePanel.width;
+                } else {
+                    scale.min = 0;
+                    scale.max = this.basePanel.width - yAxisSize;
+                }
             }
         } else {   // !orthoAxis (so normal ordinal axis)
             var isX = this.isOrientationVertical(),
@@ -336,9 +365,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                     scale.max = rSize - yAxisSize;
                 }
             } else {
-                var secondXAxisSize = bypassAxisSize || this._isSecondAxisVertical() ?
-                                        0 :
-                                        options.secondAxisSize;
+                var secondXAxisSize = this._getAxisSize(
+                                bypassAxisSize || this._isSecondAxisVertical(),
+                                'second');
                 scale.min = 0;
                 scale.max = rSize - xAxisSize - secondXAxisSize;
             }
@@ -472,10 +501,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         // In those situations it is specified: bypassAxisSize = false
         var rSize = isX ? this.basePanel.width : this.basePanel.height;
         if(isX){
-            var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
-                secondYAxisSize = bypassAxisSize || !this._isSecondAxisVertical() ?
-                                    0 :
-                                    options.secondAxisSize;
+            var yAxisSize = this._getAxisSize(bypassAxisSize, 'y'),
+                secondYAxisSize = this._getAxisSize(bypassAxisSize || !this._isSecondAxisVertical(), 'second');
+
             if(options.yAxisPosition == "left"){
                 scale.min = yAxisSize;
                 scale.max = rSize - secondYAxisSize;
@@ -485,10 +513,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             }
 
         } else {
-            var xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
-                secondXAxisSize = bypassAxisSize || this._isSecondAxisVertical() ?
-                                    0 :
-                                    options.secondAxisSize;
+            var xAxisSize = this._getAxisSize(bypassAxisSize, 'x'),
+                secondXAxisSize = this._getAxisSize(bypassAxisSize || this._isSecondAxisVertical(), 'second');
+            
             scale.min = 0;
             scale.max = rSize - xAxisSize - secondXAxisSize;
         }
@@ -541,10 +568,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var rSize = isX ? this.basePanel.width : this.basePanel.height;
         
         if(isX){
-            var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
-                secondYAxisSize = bypassAxisSize || !this._isSecondAxisVertical() ?
-                                    0 :
-                                    options.secondAxisSize;
+            var yAxisSize = this._getAxisSize(bypassAxisSize, 'y'),
+                secondYAxisSize = this._getAxisSize(bypassAxisSize || !this._isSecondAxisVertical(), 'second');
+
             if(options.yAxisPosition == "left"){
                 scale.min = yAxisSize;
                 scale.max = rSize - secondYAxisSize;
@@ -553,10 +579,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 scale.max = rSize - yAxisSize;
             }
         } else {
-            var xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
-                secondXAxisSize = bypassAxisSize || this._isSecondAxisVertical() ?
-                                    0 :
-                                    options.secondAxisSize;
+            var xAxisSize = this._getAxisSize(bypassAxisSize, 'x'),
+                secondXAxisSize = this._getAxisSize(bypassAxisSize || this._isSecondAxisVertical(), 'second');
+            
             scale.min = 0;
             scale.max = rSize - xAxisSize - secondXAxisSize;
         }
@@ -604,8 +629,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         pvc.roundScaleDomain(scale, options.secondAxisRoundDomain, options.secondAxisDesiredTickCount);
                 
         // RANGE
-        var yAxisSize = bypassAxisSize ? 0 : options.yAxisSize,
-            xAxisSize = bypassAxisSize ? 0 : options.xAxisSize,
+        var xAxisSize = this._getAxisSize(bypassAxisSize, 'x'),
+            yAxisSize = this._getAxisSize(bypassAxisSize, 'y'),
             isX = !this._isSecondAxisVertical(),
             rSize = isX ? this.basePanel.width : this.basePanel.height;
                 
@@ -714,6 +739,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         axisOffset: 0,
         axisLabelFont: '10px sans-serif',
+        axisTitleFont: '12px sans-serif', // 'bold '
         
         orthoFixedMin: null, // when percentageNormalized => 0
         orthoFixedMax: null, // when percentageNormalized => 100
@@ -729,7 +755,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         useCompositeAxis: false,
 
         xAxisPosition: "bottom",
-        xAxisSize: 50,
+        xAxisSize: undefined,
         xAxisFullGrid: false,
         xAxisEndLine:  false,
         xAxisDomainRoundMode: 'none',  // for linear scales
@@ -737,9 +763,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         xAxisMinorTicks:  true,   // idem
         xAxisClickAction: null,
         xAxisDoubleClickAction: null,
-        
+        xAxisTitle: undefined,
+        xAxisTitleSize: undefined,
+
         yAxisPosition: "left",
-        yAxisSize: 50,
+        yAxisSize: undefined,
         yAxisFullGrid: false,
         yAxisEndLine:  false,
         yAxisDomainRoundMode: 'none',
@@ -747,7 +775,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         yAxisMinorTicks:  true,
         yAxisClickAction: null,
         yAxisDoubleClickAction: null,
-
+        yAxisTitle: undefined,
+        yAxisTitleSize: undefined,
+        
         secondAxisIndependentScale: false,
         secondAxisOriginIsZero: true,
         secondAxisOffset: 0,
@@ -756,7 +786,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         secondAxisDomainRoundMode: 'none',  // only with independent second scale
         secondAxisDesiredTickCount: null,   // idem
         secondAxisMinorTicks: true,
-        
+        secondAxisTitle: undefined,
+        secondAxisTitleSize: undefined,
+
         panelSizeRatio: 0.9,
         
         // Content/Plot area clicking
