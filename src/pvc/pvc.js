@@ -235,10 +235,14 @@ pvc.define = pvc.scope(function(){
         return this;
     }
     
-    return function(klass){
-        klass.base   = setBase;
+    return function(klass, base){
         klass.extend = mixin;
         klass.mixin  = mixin;
+        klass.base   = base || null;
+        if(base){
+            setBase.call(klass, base);
+        }
+        
         return klass;
     };
 });
@@ -1005,9 +1009,7 @@ pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
 
 // --------------------
 pvc.Shape = function(){};
-pvc
-.define(pvc.Shape)
-.extend({
+pvc.define(pvc.Shape).mixin({
     transform: function(t){
         return this.clone().apply(t);
     }
@@ -1022,10 +1024,7 @@ pvc.Rect = function(x, y, dx, dy){
     this.set(x, y, dx, dy);
 };
 
-pvc
-.define(pvc.Rect)
-.base(pvc.Shape)
-.extend({
+pvc.define(pvc.Rect, pvc.Shape).mixin({
     set: function(x, y, dx, dy){
         this.x  = x  || 0;
         this.y  = y  || 0;
@@ -1108,10 +1107,7 @@ pvc.Circle = function(x, y, radius){
     this.radius = radius || 0;
 };
 
-pvc
-.define(pvc.Circle)
-.base(pvc.Shape)
-.extend({
+pvc.define(pvc.Circle, pvc.Shape).mixin({
     clone: function(){
         return new pvc.Circle(this.x, this.y, this.radius);
     },
@@ -1156,10 +1152,7 @@ pvc.Line = function(x, y, x2, y2){
     this.y2 = y2 || 0;
 };
 
-pvc
-.define(pvc.Line)
-.base(pvc.Shape)
-.extend({
+pvc.define(pvc.Line, pvc.Shape).mixin({
     clone: function(){
         return new pvc.Line(this.x, this.y, this.x2, this,x2);
     },

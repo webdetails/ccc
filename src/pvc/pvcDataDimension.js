@@ -267,9 +267,6 @@ pvc.DataDimension = Base.extend(
      * Returns true if visibility changed.
      */
     setVisibleByIndex: function(index, visible){
-        // NOTE: in some cases we call setVisibleByIndex
-        // during a phase where the translator hasn't been initialized...
-        // That's why we allo setting the visibility without forcing to get values...
         if(index < 0 || index > this.getValues().length - 1){
             throw new Error("Invalid index");
         }
