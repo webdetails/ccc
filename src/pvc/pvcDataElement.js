@@ -46,10 +46,7 @@ pvc.DataElement = function(dimension, value, parent, leafIndex){
     }
 };
 
-pvc
-.define(pvc.DataElement)
-.base(pv.Dom.Node)
-.extend({
+pvc.define(pvc.DataElement, pv.Dom.Node).mixin({
     toString: function(){
         return this.nodeName; // holds the localKey
     }
