@@ -13,7 +13,7 @@ pvc.scope(function(){
                 font = splitFontCGG(font);
 
                 // NOTE: the global function 'getTextLenCGG' must be
-                // defined by the 'batik' loading environment
+                // defined by the CGG loading environment
                 return getTextLenCGG(text, font.fontFamily, font.fontSize);
 
             //case 'svg':
@@ -28,7 +28,11 @@ pvc.scope(function(){
                 return getTextHeightVML(text, font);
 
             case 'batik':
-                return Math.ceil(getFontSize(font) * 1.2) // TODO
+                font = splitFontCGG(font);
+
+                // NOTE: the global function 'getTextHeightCGG' must be
+                // defined by the CGG loading environment
+                return getTextHeightCGG(text, font.fontFamily, font.fontSize);
 
             //case 'svg':
         }
