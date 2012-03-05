@@ -1,5 +1,6 @@
+pvc.scope(function(){
 
-pvc.DataElement = function(dimension, value, parent, leafIndex){
+function DataElement(dimension, value, parent, leafIndex){
     var localKey,
         rawValue = value;
     
@@ -44,10 +45,12 @@ pvc.DataElement = function(dimension, value, parent, leafIndex){
         parent.appendChild(this);
         parent.childNodesByKey[value] = this;
     }
-};
+}
 
-pvc.define(pvc.DataElement, pv.Dom.Node).mixin({
+pvc.define('pvc.DataElement', DataElement, pv.Dom.Node).mixin({
     toString: function(){
         return this.nodeName; // holds the localKey
     }
+});
+
 });

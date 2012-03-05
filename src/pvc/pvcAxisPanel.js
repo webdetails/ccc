@@ -735,7 +735,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 });
         }
 
-        // TODO: need doubleclick axis action + single click prevention..
         if(this.doubleClickAction){
             this.pvLabel
                 .cursor("pointer")
