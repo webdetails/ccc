@@ -100,6 +100,10 @@ pvc.logError = function(m){
     }
 };
 
+pvc.fail = function(failedMessage){
+    throw new Error(failedMessage);
+};
+
 /**
  * Evaluates x if it's a function or returns the value otherwise
  */
@@ -171,9 +175,12 @@ pvc.mixin = pvc.scope(function(){
 
     function pvcMixin(instance/*mixin1, mixin2, ...*/){
         for(var i = 1, L = arguments.length ; i < L ; i++){
-            var mixin = asObject(arguments[i]);
+            var mixin = arguments[i];
             if(mixin){
-                pvcMixinRecursive(instance, mixin);
+                mixin = asObject(mixin.prototype || mixin);
+                if(mixin){
+                    pvcMixinRecursive(instance, mixin);
+                }
             }
         }
 
@@ -234,18 +241,67 @@ pvc.define = pvc.scope(function(){
         pvc.mixin.apply(pvc, pvc.arrayAppend([this.prototype], arguments));
         return this;
     }
-    
-    return function(klass, base){
+
+    function defineIn(name, what){
+        var namespace,
+            parts = name.split('.');
+        
+        if(parts.length > 1){
+            name = parts.pop();
+            namespace = parts.join('.');
+        }
+
+        getNamespace(namespace)[name] = what;
+    }
+
+    return function(name, klass, base){
         klass.extend = mixin;
         klass.mixin  = mixin;
-        klass.base   = base || null;
+
         if(base){
             setBase.call(klass, base);
         }
-        
+        klass.base = base || null;
+
+        if(name){
+            defineIn(name, klass);
+            klass.name = name;
+        }
+
         return klass;
     };
 });
+
+var global = this,
+    namespaceStack = [],
+    currentNamespace = global;
+
+function getNamespace(name, base){
+    var current = base || currentNamespace;
+    if(name){
+        var parts = name.split('.');
+        for(var i = 0; i < parts.length ; i++){
+            var part = parts[i];
+            current = current[part] || (current[part] = {});
+        }
+    }
+
+    return current;
+}
+
+pvc.namespace = function(name, definition){
+    var namespace = getNamespace(name);
+    if(definition){
+        namespaceStack.push(currentNamespace);
+        try{
+            definition(namespace);
+        } finally {
+            currentNamespace = namespaceStack.pop();
+        }
+    }
+    
+    return namespace;
+};
 
 pvc.number = function(d, dv){
     var v = parseFloat(d);
@@ -971,7 +1027,7 @@ pv.Transform.prototype.transformLength = function(length){
 // -----------
 
 pv.Mark.prototype.getInstanceShape = function(instance){
-    return new pvc.Rect(
+    return new Rect(
             instance.left,
             instance.top,
             instance.width,
@@ -990,7 +1046,7 @@ pv.Dot.prototype.getInstanceShape = function(instance){
             // NOTE fall through
         case 'square':
         case 'cross':
-            return new pvc.Rect(
+            return new Rect(
                 cx - radius,
                 cy - radius,
                 2*radius,
@@ -998,18 +1054,19 @@ pv.Dot.prototype.getInstanceShape = function(instance){
     }
 
     // 'circle' included
-    return new pvc.Circle(cx, cy, radius);
+    return new Circle(cx, cy, radius);
 };
 
 pv.Area.prototype.getInstanceShape =
 pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
-    return new pvc.Line(instance.left, instance.top, nextInstance.left, nextInstance.top);
+    return new Line(instance.left, instance.top, nextInstance.left, nextInstance.top);
 };
 
 
 // --------------------
-pvc.Shape = function(){};
-pvc.define(pvc.Shape).mixin({
+function Shape(){}
+
+pvc.define('pvc.Shape', Shape).mixin({
     transform: function(t){
         return this.clone().apply(t);
     }
@@ -1020,11 +1077,11 @@ pvc.define(pvc.Shape).mixin({
 
 // --------------------
 
-pvc.Rect = function(x, y, dx, dy){
+function Rect(x, y, dx, dy){
     this.set(x, y, dx, dy);
-};
+}
 
-pvc.define(pvc.Rect, pvc.Shape).mixin({
+pvc.define('pvc.Rect', Rect, Shape).mixin({
     set: function(x, y, dx, dy){
         this.x  = x  || 0;
         this.y  = y  || 0;
@@ -1039,7 +1096,7 @@ pvc.define(pvc.Rect, pvc.Shape).mixin({
     },
 
     clone: function(){
-        return new pvc.Rect(this.x, this.y, this.dx, this.dy);
+        return new Rect(this.x, this.y, this.dx, this.dy);
     },
 
     apply: function(t){
@@ -1088,10 +1145,10 @@ pvc.define(pvc.Rect, pvc.Shape).mixin({
         if(!this._sides){
             this._sides = [
                 //x, y, x2, y2
-                new pvc.Line(x,  y,  x2, y),
-                new pvc.Line(x2, y,  x2, y2),
-                new pvc.Line(x,  y2, x2, y2),
-                new pvc.Line(x,  y,  x,  y2)
+                new Line(x,  y,  x2, y),
+                new Line(x2, y,  x2, y2),
+                new Line(x,  y2, x2, y2),
+                new Line(x,  y,  x,  y2)
             ];
         }
 
@@ -1101,15 +1158,15 @@ pvc.define(pvc.Rect, pvc.Shape).mixin({
 
 // ------
 
-pvc.Circle = function(x, y, radius){
+function Circle(x, y, radius){
     this.x = x || 0;
     this.y = y || 0;
     this.radius = radius || 0;
-};
+}
 
-pvc.define(pvc.Circle, pvc.Shape).mixin({
+pvc.define('pvc.Circle', Circle, Shape).mixin({
     clone: function(){
-        return new pvc.Circle(this.x, this.y, this.radius);
+        return new Circle(this.x, this.y, this.radius);
     },
 
     apply: function(t){
@@ -1145,14 +1202,14 @@ pvc.define(pvc.Circle, pvc.Shape).mixin({
 
 // -----
 
-pvc.Line = function(x, y, x2, y2){
+function Line(x, y, x2, y2){
     this.x  = x  || 0;
     this.y  = y  || 0;
     this.x2 = x2 || 0;
     this.y2 = y2 || 0;
-};
+}
 
-pvc.define(pvc.Line, pvc.Shape).mixin({
+pvc.define('pvc.Line', Line, Shape).mixin({
     clone: function(){
         return new pvc.Line(this.x, this.y, this.x2, this,x2);
     },
