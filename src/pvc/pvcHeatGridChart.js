@@ -296,11 +296,18 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             dataEngine = this.chart.dataEngine;
         
         //total max in data
-        var maxVal = pv.max(data, function(datum){// {col:value ..}
+        var maxSizeVal = pv.max(data, function(datum){// {col:value ..}
             return pv.max( pv.values(datum).map(
                 function(d){ return myself.getValue(d, myself.sizeValIdx); })) ;
         });
-    
+
+        var minSizeVal = pv.min(data, function(datum){// {col:value ..}
+            return pv.min( pv.values(datum).map(
+                function(d){ return myself.getValue(d, myself.sizeValIdx); })) ;
+        });
+
+        var maxSizeSpan = Math.abs(maxSizeVal - minSizeVal);
+
         var maxRadius = Math.min(w,h) / 2;
         if(this.shape === 'diamond'){
             // Protovis draws diamonds inscribed on
@@ -316,17 +323,10 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         var maxArea = maxRadius * maxRadius;// apparently treats as square area even if circle, triangle is different
      
-//        var valueToRadius = function(value){
-//            return value != null ? value/maxVal * maxRadius : Math.min(maxRadius,5) ;//TODO:hcoded
-//        };
-        
-        var valueToArea =  function(value){//
-            return value != null ? value/maxVal * maxArea :  Math.max(4,maxArea/16);//TODO:hcoded
-        }
-        
-//        var valueToColor = function(value, i){
-//            return  (value != null) ? fill[i](value) : options.nullColor;
-//        };
+        var sizeValueToArea = function(value){
+            return 1 + (maxArea - 1) *
+                       (value == null ? 0 : (Math.abs(value - minSizeVal) / maxSizeSpan));
+        };
         
         var getLineWidth = function(value, isSelected){
             if(myself.sizeValIdx == null ||
@@ -390,7 +390,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 
                 var val = myself.getValue(r[i], myself.sizeValIdx);
                 return (val == null && options.nullShape == null) ?
-                        0 : valueToArea(myself.getValue(r[i], myself.sizeValIdx));
+                        0 : sizeValueToArea(myself.getValue(r[i], myself.sizeValIdx));
             })
             .lock('shapeAngle') // rotation of shapes may cause them to not fit the calculated cell. Would have to improve the radius calculation code.
             .fillStyle(function(r, ra, i){
