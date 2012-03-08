@@ -1,3 +1,28 @@
+12.03.08
+
+[FEAT][BREAK] Line/Area/Dot charts (stacked or not) - selection support.
+[FIX][BREAK] Linear axis ticks of categorical charts now inherit the color from pvRule (instead of a fixed black).
+[BREAK] Normalized the interface of *extension point* property functions (doesn't affect action handlers, tooltipFormat, ...)
+[BREAK] "scatterPanel_" extension points now receive the series pvc.Element, as first argument (used to receive the series index)
+[BREAK] all other extension points now receive pvc.Datum, as first argument (used to receive: [stacked] the datum value or [non-stacked] an object with category and value properties)
+[FIX]  When multiple series were drawn but one had less points than another, the one with less points wrongly drew zero points, which along with interpolating lines gave a false picture of the facts
+[FEAT][REFA][BREAK] For categories, pvc.Element#value now contains a JS Date object when the chart has options timeSeries
+	The new pvc.Element#rawValue property contains the raw value, as it comes from the data source.
+	Note that pvc.Datum#elem.series or pvc.Datum#elem.category both return a pvc.Element.
+	Only direct accesses to the #value property will be affected; action handlers, tooltip formats and the like still receive the raw value.
+[FIX] Timeseries dimensions no longer parse the string date values multiple times (an operation which is quite slow).
+[FIX] Fixed dangling 'err' variable in pvc.scaleTicks.
+[FIX] Very basic JSON.stringify shim for "poor" enviroments (like server-side printing) (does a #toString...)
+[FIX] Fixed regression bug, dots in stacked line charts where being clipped when placed off the content panel, but still inside the chart area (orthoFixedMin set detection).
+[FIX] Rubber band (selection rectangle) is now disabled during animation
+[FIX] Rubber band (selection rectangle) is now disabled during animation
+[FEAT] Improved extension point handling; it is now possible to intercept (use the user extension plus internal logic) or lock an extension point (prevent its extension).
+[FEAT] The Tipsy behavior now exposes the #tipMark property, which contains the mark currently being "hovered"; this allows to dynamically calculate 'gravity', for example, through a gravity function, supplied in the tipsySettings.
+[FEAT] New Selection detection constructs (pvc.Shape, pvc.Line, pvc.Rect and pvc.Circle)
+[FEAT] HeatGridChart now fills the mark#datum property
+[REFA] HeatGridChart now uses the same selection detection function as do the other categorical charts
+
+
 12.02.16
 
 New chart type "NormalizedBarChart" (100% stacked/normalized/segmenred bar chart)
