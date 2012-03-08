@@ -946,12 +946,5 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
     _getSignums: function(){
         return [this.pvBar];
     }
-<<<<<<< HEAD
-    /*
-     * selections (end)
-     **********************/
 });
 
-=======
-});
->>>>>>> cc35372... * [FEAT][BREAK] Line/Area/Dot charts (stacked or not) - selection support.

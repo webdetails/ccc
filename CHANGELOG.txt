@@ -1,5 +1,29 @@
 12.03.08
-
+ 
+Added the getTextHeightCGG function reference in pvc.text.getTextHeight, for server-side printing
+[FIX] Heat-grid "sizeBy" dimension did not handle negative values correctly.
+namespace support in pvc.define
+Changed generatePvcBundle.sh script to read a scripts file list from the new pvcBundleFiles.txt file.
+Slightly changed the pvc.define method to allow specifying the base class.
+[FIX] Heat grid shape selection for 'square' and 'diamond' shapes 
+[FIX] Heat grid drawing of diamond shape, did not fit the available cell
+[FEAT] Axis titles
+[FIX]  Fixed regression bug in pvc.number (failed to parse a null value as 0)
+[FIX]  Fixed bug in the calculation of discrete orthogonal scales when the y axis is placed on the right
+[BREAK] Any outside access to options.xAxisSize and options.yAxisSize will no longer work as these will no longer, in general, contain the default or final axes sizes         
+	(the final axis size is now at: pvc.AxisPanel#axisSize and includes space for the axis title pvc.AxisPanel#titleSize)
+[FEAT] Added documentation about the new options and extension points to testZZZ.html files
+[FEAT] Added new example/test case to testBar.html to test the situation: nulls/crosstab format/stacked
+[REFA] New file pvc.text.js
+[REFA] Refactored text measuring code from pvc.AxisPanel and placed it in a new file pvc.text.js
+[REFA] pvc.AxisPanel render code was split in layout code and render code. The reason is to support that default axis sizes may be assumed by the axes themselves and before 
+creating the scales. On the other hand, render must be done after creating the scales. This implied refactoring the code in the two described phases
+[FEAT] Added the ability to measure the height of text
+[FEAT] Added the Golden Ratio constant: pvc.goldenRatio
+Improvements to click and double-click handling on Dot/Line/Area charts 
+New utility functions: pvc.arrayAppend, Object.create ECMA5 shim, pvc.mixin * Utility fucntion pvc.mergeDefaults now reads prototype inherited properties also
+[FEAT] New chart 'margins' options with JSON {all: 20, /* top: left: right, bottom: */ } or CSS-like shorthand syntax (without measures) 
+[FIX] Fixed dangling vars in ParallelCoordinates
 [FEAT][BREAK] Line/Area/Dot charts (stacked or not) - selection support.
 [FIX][BREAK] Linear axis ticks of categorical charts now inherit the color from pvRule (instead of a fixed black).
 [BREAK] Normalized the interface of *extension point* property functions (doesn't affect action handlers, tooltipFormat, ...)
