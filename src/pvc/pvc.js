@@ -584,7 +584,7 @@ pvc.createColorScheme = function(colors){
  * use orginial default-colors.
  *    (Added by CvK  febr. 2012)
  ****/
-pvc.setDefaultColorScheme = function(colors)
+pvc.setDefaultColorScheme = function(colors) {
    pvc.defaultColorScheme = (colors == null) ?
          null : pvc.createColorScheme(colors);
    return;
