@@ -33,7 +33,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if(options.showTooltips){
             var tipsySettings = options.tipsySettings;
             if(tipsySettings){
-                tipsySettings = options.tipsySettings = pvc.create(tipsySettings);
+                tipsySettings = options.tipsySettings = def.create(tipsySettings);
                 this.extend(tipsySettings, "tooltip_");
             }
         }
@@ -321,8 +321,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      */
     getOrdinalScale: function(keyArgs){
 
-        var bypassAxisSize = pvc.get(keyArgs, 'bypassAxisSize', false),
-            orthoAxis = pvc.get(keyArgs, 'orthoAxis', null),
+        var bypassAxisSize = def.get(keyArgs, 'bypassAxisSize', false),
+            orthoAxis = def.get(keyArgs, 'orthoAxis', null),
             options   = this.options,
             yAxisSize = this._getAxisSize(bypassAxisSize, 'y'),
             xAxisSize = this._getAxisSize(bypassAxisSize, 'x');
@@ -395,8 +395,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      */
     getLinearScale: function(keyArgs){
 
-        var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
-            bypassAxisOffset = pvc.get(keyArgs, 'bypassAxisOffset', false),
+        var bypassAxisSize   = def.get(keyArgs, 'bypassAxisSize',   false),
+            bypassAxisOffset = def.get(keyArgs, 'bypassAxisOffset', false),
             options   = this.options,
             isX = this.isOrientationHorizontal(),
             dMin, // Domain
@@ -535,8 +535,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      */
     getTimeseriesScale: function(keyArgs){
 
-        var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
-            bypassAxisOffset = pvc.get(keyArgs, 'bypassAxisOffset', false),
+        var bypassAxisSize   = def.get(keyArgs, 'bypassAxisSize',   false),
+            bypassAxisOffset = def.get(keyArgs, 'bypassAxisOffset', false),
             options = this.options,
             isX = this.isOrientationVertical();
         
@@ -607,7 +607,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
         
         // DOMAIN
-        var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
+        var bypassAxisSize   = def.get(keyArgs, 'bypassAxisSize',   false),
             dMax = this.dataEngine.getSecondAxisMax(),
             dMin = this.dataEngine.getSecondAxisMin();
 

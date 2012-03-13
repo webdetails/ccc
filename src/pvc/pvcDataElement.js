@@ -1,9 +1,9 @@
-pvc.scope(function(){
 
-function DataElement(dimension, value, parent, leafIndex){
+def.type('pvc.DataElement')
+.init(function(dimension, value, parent, leafIndex){
     var localKey,
         rawValue = value;
-    
+
     if(!parent){
         // Parent is a dummy root
         localKey = '';
@@ -19,6 +19,7 @@ function DataElement(dimension, value, parent, leafIndex){
     }
 
     pv.Dom.Node.call(this, value);
+    
     //this.nodeValue = value; // base constructor does this
     this.nodeName = localKey;
 
@@ -30,7 +31,7 @@ function DataElement(dimension, value, parent, leafIndex){
     // NOTE: Unfortunately 'index' is already taken by the base class
     // and, when filled, its value is the PRE-ORDER DFS order!
     this.leafIndex = leafIndex;
-    
+
     if(!parent){
         this.path     = [];
         this.absValue = null;
@@ -38,19 +39,17 @@ function DataElement(dimension, value, parent, leafIndex){
         this.absLabel = "";
     } else {
         this.path     = parent.path.concat(value);
-        this.absValue = pvc.join("~",   parent.absValue, localKey);
-        this.label    = "" + pvc.nullTo(dimension._calcLabel ? dimension._calcLabel(value) : value, "");
-        this.absLabel = pvc.join(" ~ ", parent.absLabel, this.label);
+        this.absValue = def.join("~",   parent.absValue, localKey);
+        this.label    = "" + def.nullTo(dimension._calcLabel ? dimension._calcLabel(value) : value, "");
+        this.absLabel = def.join(" ~ ", parent.absLabel, this.label);
 
         parent.appendChild(this);
         parent.childNodesByKey[value] = this;
     }
-}
-
-pvc.define('pvc.DataElement', DataElement, pv.Dom.Node).mixin({
+})
+.add(pv.Dom.Node)
+.add({
     toString: function(){
         return this.nodeName; // holds the localKey
     }
-});
-
 });

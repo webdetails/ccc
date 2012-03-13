@@ -480,8 +480,8 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         // -- INTERACTION --
         if(options.showTooltips){
             // TODO - tooltips centered on areas?
-//            var settings = pvc.mergeOwn(
-//                        pvc.create(options.tipsySettings),
+//            var settings = def.copyOwn(
+//                        def.create(options.tipsySettings),
 //                        {
 //                            gravity: function(){
 //                                return tipsyBehavior.tipMark.type === 'area' ? "c" : "s";
@@ -609,7 +609,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     _calcSelDataBySeries: function(dataBySeries){
         var selDataBySeries = {};
 
-        pvc.forEachOwn(dataBySeries, function(data, absSeriesValue){
+        def.forEachOwn(dataBySeries, function(data, absSeriesValue){
             selDataBySeries[absSeriesValue] = this._calcSeriesSelData(data);
         }, this);
 
@@ -677,7 +677,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                     step  = reverse ? -1 : 1;
 
                 // reverse ? seriesCount - 1 : 0
-                stackedOffsets[start - step] = pvc.newArray(categCount, 0);
+                stackedOffsets[start - step] = def.array.create(categCount, 0);
 
                 for(var c = 0 ; c < categCount ; c++){
                     var categOffset = 0;

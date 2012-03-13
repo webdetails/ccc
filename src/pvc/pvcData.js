@@ -477,7 +477,7 @@ pvc.DataEngine = Base.extend({
           .reduce(function(a, b) {  
             return a.concat(b);
           })
-          .filter(pvc.nonEmpty));
+          .filter(def.notNully));
     },
     
     /**
@@ -489,7 +489,7 @@ pvc.DataEngine = Base.extend({
           .reduce(function(a, b) {  
             return a.concat(b);
           })
-          .filter(pvc.nonEmpty));
+          .filter(def.notNully));
     },
 
     /**
@@ -620,7 +620,7 @@ pvc.DataEngine = Base.extend({
             .map(function(idx){
                 return pv.sum(
                         this.getVisibleValuesForCategoryIndex(idx)
-                            .map(function(e){ return Math.max(0, pvc.number(e)); }));
+                            .map(function(e){ return Math.max(0, def.number(e)); }));
             }, this));
         
         pvc.log("getCategoriesMaxSumOfVisibleSeries: " + max);
@@ -638,7 +638,7 @@ pvc.DataEngine = Base.extend({
     getVisibleSeriesMaxSum: function(){
 
         var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.sum(this.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
+            return pv.sum(this.getValuesForSeriesIndex(idx).filter(def.notNully));
         }, this));
         
         pvc.log("getVisibleSeriesMaxSum: " + max);
@@ -652,7 +652,7 @@ pvc.DataEngine = Base.extend({
     getVisibleSeriesAbsoluteMax: function(){
 
         var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.max(this.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
+            return pv.max(this.getValuesForSeriesIndex(idx).filter(def.notNully));
         }, this));
         
         pvc.log("getVisibleSeriesAbsoluteMax: " + max);
@@ -666,7 +666,7 @@ pvc.DataEngine = Base.extend({
     getVisibleSeriesAbsoluteMin: function(){
 
         var min = pv.min(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.min(this.getValuesForSeriesIndex(idx).filter(pvc.nonEmpty));
+            return pv.min(this.getValuesForSeriesIndex(idx).filter(def.notNully));
         }, this));
         
         pvc.log("getVisibleSeriesAbsoluteMin: " + min);
@@ -797,7 +797,7 @@ pvc.DataEngine = Base.extend({
      * Deselects any selected data.
      */
     clearSelections: function(){
-         pvc.forEachOwn(this._selections, function(datum){
+         def.forEachOwn(this._selections, function(datum){
             datum._deselect();
         });
         
@@ -820,7 +820,7 @@ pvc.DataEngine = Base.extend({
         var selectionList = [];
         
         if(this._selections){
-            pvc.forEachOwn(this._selections, function(datum){
+            def.forEachOwn(this._selections, function(datum){
                 selectionList.push(datum);
             });
         }
@@ -885,7 +885,7 @@ pvc.DataEngine = Base.extend({
             data.push(datum);
         });
         
-        var sorter = pvc.get(keyArgs, 'sorter');
+        var sorter = def.get(keyArgs, 'sorter');
         if(sorter){
             // Sorts in-place
             data.sort(sorter);
@@ -950,7 +950,7 @@ pvc.DataEngine = Base.extend({
                 } else {
                     // Dimension is not constrained by 'where'
                     // Traverse only values' indexes that have datums, along this path
-                    pvc.forEachOwn(dimNode, function(childDimNode /*, orIndexText*/){
+                    def.forEachOwn(dimNode, function(childDimNode /*, orIndexText*/){
                         
                         recursive.call(this, childDimNode, orWhere, d + 1);
                     });
@@ -986,7 +986,7 @@ pvc.DataEngine = Base.extend({
         var expandedOrWhere = [];
         
         // Expand values
-        pvc.forEachOwn(orWhere, function(orBaseValueList, andDimName){
+        def.forEachOwn(orWhere, function(orBaseValueList, andDimName){
             var dimension = this.getDimension(andDimName),
                 orValueIndexList = expandedOrWhere[dimension.index] = [];
                 

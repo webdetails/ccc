@@ -1,74 +1,4 @@
 
-// ECMAScript 5 shim
-if(!Object.keys) {
-    Object.keys = function(o){
-        if (o !== Object(o)){
-            throw new TypeError('Object.keys called on non-object');
-        }
-
-        var ret = [];
-        for(var p in o){
-            if(Object.prototype.hasOwnProperty.call(o,p)){
-                ret.push(p);
-            }
-        }
-        
-        return ret;
-    };
-}
-
-/**
- * Implements filter property if not implemented yet
- */
-if (!Array.prototype.filter){
-    Array.prototype.filter = function(fun, ctx){
-        var len = this.length >>> 0;
-        if (typeof fun != "function"){
-            throw new TypeError();
-        }
-        
-        var res = [];
-        for (var i = 0; i < len; i++){
-            if (i in this){
-                var val = this[i]; // in case fun mutates this
-                if (fun.call(ctx, val, i, this))
-                    res.push(val);
-            }
-        }
-
-        return res;
-    };
-}
-
-if(!Object.create){
-    Object.create = (function(){
-
-        function dummyKlass(){}
-        var dummyProto = dummyKlass.prototype;
-
-        function create(baseProto){
-            dummyKlass.prototype = baseProto || {};
-            var instance = new dummyKlass();
-            dummyKlass.prototype = dummyProto;
-            return instance;
-        }
-
-        return create;
-    }());
-}
-
-// Basic JSON shim
-if(!this.JSON){
-    this.JSON = {};
-}
-if(!this.JSON.stringify){
-    this.JSON.stringify = function(t){
-        return '' + t;
-    };
-}
-
-// ----------------------------
-
 var pvc = {
     debug: false
 };
@@ -100,10 +30,6 @@ pvc.logError = function(m){
     }
 };
 
-pvc.fail = function(failedMessage){
-    throw new Error(failedMessage);
-};
-
 /**
  * Evaluates x if it's a function or returns the value otherwise
  */
@@ -122,195 +48,6 @@ pvc.sum = function(v1, v2){
     return v1 == null ? 
             v2 :
             (v1 == null ? v1 : (v1 + v2));
-};
-
-pvc.nonEmpty = function(d){
-    return d != null;
-};
-
-pvc.get = function(o, p, dv){
-    var v;
-    return o && (v = o[p]) != null ? v : dv; 
-};
-
-pvc.scope = function(scopeFun, ctx){
-    return scopeFun.call(ctx);
-};
-
-function asNativeObject(v){
-        return v && typeof(v) === 'object' && v.constructor === Object ?
-                v :
-                undefined;
-}
-
-function asObject(v){
-    return v && typeof(v) === 'object' ? v : undefined;
-}
-
-pvc.mixin = pvc.scope(function(){
-
-    function pvcMixinRecursive(instance, mixin){
-        for(var p in mixin){
-            var vMixin = mixin[p];
-            if(vMixin !== undefined){
-                var oMixin,
-                    oTo = asNativeObject(instance[p]);
-                
-                if(oTo){
-                    oMixin = asObject(vMixin);
-                    if(oMixin){
-                        pvcMixinRecursive(oTo, oMixin);
-                    }
-                } else {
-                    oMixin = asNativeObject(vMixin);
-                    if(oMixin){
-                        vMixin = Object.create(oMixin);
-                    }
-                    
-                    instance[p] = vMixin;
-                }
-            }
-        }
-    }
-
-    function pvcMixin(instance/*mixin1, mixin2, ...*/){
-        for(var i = 1, L = arguments.length ; i < L ; i++){
-            var mixin = arguments[i];
-            if(mixin){
-                mixin = asObject(mixin.prototype || mixin);
-                if(mixin){
-                    pvcMixinRecursive(instance, mixin);
-                }
-            }
-        }
-
-        return instance;
-    }
-
-    return pvcMixin;
-});
-
-// Creates an object whose prototype is the specified object.
-pvc.create = pvc.scope(function(){
-
-    function pvcCreateRecursive(instance){
-        for(var p in instance){
-            var vObj = asNativeObject(instance[p]);
-            if(vObj){
-                pvcCreateRecursive( (instance[p] = Object.create(vObj)) );
-            }
-        }
-    }
-    
-    function pvcCreate(/* [deep, ] baseProto, mixin1, mixin2, ...*/){
-        var mixins = arraySlice.call(arguments),
-            deep = true,
-            baseProto = mixins.shift();
-        
-        if(typeof(baseProto) === 'boolean'){
-            deep = baseProto;
-            baseProto = mixins.shift();
-        }
-        
-        var instance = Object.create(baseProto);
-        if(deep){
-            pvcCreateRecursive(instance);
-        }
-
-        // NOTE: 
-        if(mixins.length > 0){
-            mixins.unshift(instance);
-            pvc.mixin.apply(pvc, mixins);
-        }
-
-        return instance;
-    }
-
-    return pvcCreate;
-});
-
-pvc.define = pvc.scope(function(){
-
-    function setBase(base){
-        var proto = this.prototype = Object.create(base.prototype);
-        proto.constructor = this;
-        return this;
-    }
-
-    function mixin(/*mixin1, mixin2, ...*/){
-        pvc.mixin.apply(pvc, pvc.arrayAppend([this.prototype], arguments));
-        return this;
-    }
-
-    function defineIn(name, what){
-        var namespace,
-            parts = name.split('.');
-        
-        if(parts.length > 1){
-            name = parts.pop();
-            namespace = parts.join('.');
-        }
-
-        getNamespace(namespace)[name] = what;
-    }
-
-    return function(name, klass, base){
-        klass.extend = mixin;
-        klass.mixin  = mixin;
-
-        if(base){
-            setBase.call(klass, base);
-        }
-        klass.base = base || null;
-
-        if(name){
-            defineIn(name, klass);
-            klass.name = name;
-        }
-
-        return klass;
-    };
-});
-
-var global = this,
-    namespaceStack = [],
-    currentNamespace = global;
-
-function getNamespace(name, base){
-    var current = base || currentNamespace;
-    if(name){
-        var parts = name.split('.');
-        for(var i = 0; i < parts.length ; i++){
-            var part = parts[i];
-            current = current[part] || (current[part] = {});
-        }
-    }
-
-    return current;
-}
-
-pvc.namespace = function(name, definition){
-    var namespace = getNamespace(name);
-    if(definition){
-        namespaceStack.push(currentNamespace);
-        try{
-            definition(namespace);
-        } finally {
-            currentNamespace = namespaceStack.pop();
-        }
-    }
-    
-    return namespace;
-};
-
-pvc.number = function(d, dv){
-    var v = parseFloat(d);
-    return isNaN(v) ? (dv || 0) : v;
-};
-
-// null or undefined to 'dv''
-pvc.nullTo = function(v, dv){
-    return v != null ? v : dv;
 };
 
 pvc.padMatrixWithZeros = function(d){
@@ -351,116 +88,14 @@ pvc.arrayStartsWith = function(array, base){
     return true;
 };
 
-/**
- * Joins arguments other than null, undefined and ""
- * using the specified separator and their string representation.
- */
-pvc.join = function(sep){
-    var args = [],
-        a = arguments;
-    for(var i = 1, L = a.length ; i < L ; i++){
-        var v = a[i];
-        if(v != null && v !== ""){
-            args.push("" + v);
-        }
-    }
-
-    return args.join(sep);
-};
-
-/**
- * Calls function <i>fun</i> with context <i>ctx</i>
- * for every own property of <i>o</i>.
- * Function <i>fun</i> is called with arguments:
- * value, property, object.
- */
-pvc.forEachOwn = function(o, fun, ctx){
-    if(o){
-        for(var p in o){
-            if(o.hasOwnProperty(p)){
-                fun.call(ctx, o[p], p, o);
-            }
-        }
-    }
-};
-
-pvc.mergeOwn = function(to, from){
-    pvc.forEachOwn(from, function(v, p){
-        to[p] = v;
-    });
-    return to;
-};
-/*
-function merge(to, from){
-    if(!to) {
-        to = {};
-    }
-
-    if(from){
-        for(var p in from){
-            var vFrom = from[p];
-            if(vFrom !== undefined){
-                var oFrom = asObject(vFrom),
-                    vTo   = to[p];
-
-                if(oFrom){
-                    vTo = merge(asObject(vTo), oFrom);
-                } else if(vFrom !== undefined) {
-                    vTo = vFrom;
-                }
-
-                to[p] = vTo;
-            }
-        }
-    }
-
-    return to;
-}
-
-pvc.merge = merge;
-*/
-// For treating an object as dictionary
-// without danger of hasOwnProperty having been overriden.
-var objectHasOwn = Object.prototype.hasOwnProperty;
-pvc.hasOwn = function(o, p){
-    return !!o && objectHasOwn.call(o, p);
-};
-
 pvc.mergeDefaults = function(to, defaults, from){
-    pvc.forEachOwn(defaults, function(dv, p){
+    def.forEachOwn(defaults, function(dv, p){
         var v;
         to[p] = (from && (v = from[p]) !== undefined) ? v : dv;
     });
     
     return to;
 };
-
-
-/*
-pvc.forEachRange = function(min, max, fun, ctx){
-    for(var i = min ; i < max ; i++){
-        fun.call(ctx, i);
-    }
-};
-
-pvc.arrayInsertMany = function(target, index, source){
-    // TODO: is there a better way: without copying source?
-    target.splice.apply(target, [index, 0].concat(other));
-    return target;
-};
-*/
-
-pvc.arrayAppend = function(target, source, start){
-    if(start == null){
-        start = 0;
-    }
-
-    for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
-        target[T + i] = source[start + i];
-    }
-    return target;
-};
-
 
 // Adapted from pv.range
 pvc.Range = function(start, stop, step){
@@ -529,29 +164,6 @@ pvc.arrayEquals = function(array1, array2, func){
 };
 
 /**
- * Converts something to an array if it is not one already
- *  an if it is not equal (==) to null.
-*/
-pvc.toArray = function(thing){
-    return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
-};
-
-
-/**
- * Creates an array of the specified length,
- * and, optionally, initializes it with the specified default value.
-*/
-pvc.newArray = function(len, dv){
-    var a = new Array(len);
-    if(dv !== undefined){
-        for(var i = 0 ; i < len ; i++){
-            a[i] = dv;
-        }
-    }
-    return a;
-};
-
-/**
  * Creates a color scheme based on the specified colors.
  * The default color scheme is "pv.Colors.category10", 
  * and is returned when null or an empty array is specified.
@@ -561,7 +173,7 @@ pvc.createColorScheme = function(colors){
         return pv.Colors.category10;
     }
 	
-    colors = pvc.toArray(colors);
+    colors = def.array(colors);
 	
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
@@ -583,10 +195,6 @@ pvc.removeTipsyLegends = function(){
     } catch(e) {
         // Do nothing
     }
-};
-
-pvc.compareNatural = function(a, b){
-    return (a < b) ? -1 : ((a > b) ? 1 : 0);
 };
 
 pvc.createDateComparer = function(parser, key){
@@ -654,7 +262,7 @@ function sortChildren(){
         var needChildSort = this._needChildSort;
         if(needChildSort){
             children.sort(function(m1, m2){
-                return pvc.compareNatural(m1._zOrder, m2._zOrder);
+                return def.compare(m1._zOrder, m2._zOrder);
             });
             
             this._needChildSort = false;
@@ -868,7 +476,7 @@ pv.Mark.prototype.intercept = function(prop, interceptor, extValue){
     }
     
     function interceptProp(){
-        var args  = pvc.arraySlice.call(arguments);
+        var args  = arraySlice.call(arguments);
         return interceptor.call(this, extValue, args);
     }
 
@@ -912,7 +520,7 @@ pv.dataIdentity = function(datum){
  * */
 pv.Mark.prototype.addMargin = function(name, margin) {
     if(margin != 0){
-        var staticValue = pvc.nullTo(this.getStaticPropertyValue(name), 0),
+        var staticValue = def.nullTo(this.getStaticPropertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
         this[name](function(){
@@ -933,12 +541,12 @@ pv.Mark.prototype.addMargin = function(name, margin) {
  * }
  */
 pv.Mark.prototype.addMargins = function(margins) {
-    var all = pvc.get(margins, 'all', 0);
+    var all = def.get(margins, 'all', 0);
     
-    this.addMargin('left',   pvc.get(margins, 'left',   all));
-    this.addMargin('right',  pvc.get(margins, 'right',  all));
-    this.addMargin('top',    pvc.get(margins, 'top',    all));
-    this.addMargin('bottom', pvc.get(margins, 'bottom', all));
+    this.addMargin('left',   def.get(margins, 'left',   all));
+    this.addMargin('right',  def.get(margins, 'right',  all));
+    this.addMargin('top',    def.get(margins, 'top',    all));
+    this.addMargin('bottom', def.get(margins, 'bottom', all));
     
     return this;
 };
@@ -1064,9 +672,8 @@ pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
 
 
 // --------------------
-function Shape(){}
-
-pvc.define('pvc.Shape', Shape).mixin({
+var Shape = def.type('pvc.Shape')
+.add({
     transform: function(t){
         return this.clone().apply(t);
     }
@@ -1077,11 +684,12 @@ pvc.define('pvc.Shape', Shape).mixin({
 
 // --------------------
 
-function Rect(x, y, dx, dy){
+var Rect = def.type('pvc.Rect')
+.base(Shape)
+.init(function(x, y, dx, dy){
     this.set(x, y, dx, dy);
-}
-
-pvc.define('pvc.Rect', Rect, Shape).mixin({
+})
+.add({
     set: function(x, y, dx, dy){
         this.x  = x  || 0;
         this.y  = y  || 0;
@@ -1158,13 +766,14 @@ pvc.define('pvc.Rect', Rect, Shape).mixin({
 
 // ------
 
-function Circle(x, y, radius){
+var Circle = def.type('pvc.Circle')
+.base(Shape)
+.init(function(x, y, radius){
     this.x = x || 0;
     this.y = y || 0;
     this.radius = radius || 0;
-}
-
-pvc.define('pvc.Circle', Circle, Shape).mixin({
+})
+.add({
     clone: function(){
         return new Circle(this.x, this.y, this.radius);
     },
@@ -1202,14 +811,15 @@ pvc.define('pvc.Circle', Circle, Shape).mixin({
 
 // -----
 
-function Line(x, y, x2, y2){
+var Line = def.type('pvc.Line')
+.base(Shape)
+.init(function(x, y, x2, y2){
     this.x  = x  || 0;
     this.y  = y  || 0;
     this.x2 = x2 || 0;
     this.y2 = y2 || 0;
-}
-
-pvc.define('pvc.Line', Line, Shape).mixin({
+})
+.add({
     clone: function(){
         return new pvc.Line(this.x, this.y, this.x2, this,x2);
     },
@@ -1355,10 +965,8 @@ pv.Behavior.selector = function(autoRefresh, mark) {
 
 
 /**
- *
  * Implements support for svg detection
- *
- **/
+ */
 (function($){
     $.support.svg = $.support.svg || 
         document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");

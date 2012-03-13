@@ -332,7 +332,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         // Sum each category across series
         dataSet.forEach(function(seriesRow/*, seriesIndex*/){
             seriesRow.forEach(function(value, categIndex){
-                categsTotals[categIndex] += pvc.number(value);
+                categsTotals[categIndex] += def.number(value);
             });
         });
 
@@ -731,7 +731,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                                 null;
 
             // TODO: this.chart.secondAxisColor();
-            var secondAxisColors = pvc.toArray(options.secondAxisColor);
+            var secondAxisColors = def.array(options.secondAxisColor);
             function secondAxisColorScale(){
                 return secondAxisColors[this.parent.index % secondAxisColors.length];
             }

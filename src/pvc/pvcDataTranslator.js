@@ -74,8 +74,8 @@ pvc.DataTranslator = Base.extend({
 
         var options = this.dataEngine.chart.options;
         if(options.secondAxis){
-            var columnIndexes = pvc.toArray(options.secondAxisIdx)
-                                    .sort();
+            var columnIndexes = def.array(options.secondAxisIdx)
+                                   .sort();
 
             // Transpose, splice, transpose back
             this.transpose();
@@ -84,7 +84,8 @@ pvc.DataTranslator = Base.extend({
             for (var i = columnIndexes.length - 1 ; i >= 0 ; i--) {
                 var columnIndex = Number(columnIndexes[i]);
                 
-                // TODO: Can a column index not be >= 0? NaN? In what cases?
+                // When < 0 it means to position from end
+                // When >= 0, the category column must be taken into account
                 if(columnIndex >= 0){
                     columnIndex += 1;
                 }
@@ -192,6 +193,7 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
  *     ^
  *     |
  *  (Categories)
+ *
  *  
  */
 pvc.RelationalTranslator = pvc.DataTranslator.extend({

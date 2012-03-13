@@ -50,7 +50,7 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
      *   bypassAxisSize:   boolean, default is false
      */
     getLinearBaseScale: function(keyArgs){
-        var bypassAxisSize = pvc.get(keyArgs, 'bypassAxisSize', false),
+        var bypassAxisSize = def.get(keyArgs, 'bypassAxisSize', false),
             yAxisSize = this._getAxisSize(bypassAxisSize, 'y'),
             xAxisSize = this._getAxisSize(bypassAxisSize, 'x');
 

@@ -42,11 +42,11 @@ pvc.DataDimension = Base.extend(
         this._invisibleIndexes = {};
 
         // translator -> [values]
-        this._fetchValues = pvc.get(definition, 'fetchValues');
-        this._calcLabel   = pvc.get(definition, 'calcLabel');
-        this._timeSeries  = pvc.get(definition, 'timeSeries', false);
+        this._fetchValues = def.get(definition, 'fetchValues');
+        this._calcLabel   = def.get(definition, 'calcLabel');
+        this._timeSeries  = def.get(definition, 'timeSeries', false);
         if(this._timeSeries){
-            var timeSeriesFormat = pvc.get(definition, 'timeSeriesFormat');
+            var timeSeriesFormat = def.get(definition, 'timeSeriesFormat');
             if(timeSeriesFormat){
                 this._parser = pv.Format.date(timeSeriesFormat);
                 
@@ -149,7 +149,7 @@ pvc.DataDimension = Base.extend(
         }
 
         for (var i = 0, L = values.length ; i < L ; i++) {
-            var keys = pvc.toArray(values[i]),
+            var keys = def.array(values[i]),
                 node = root;
             
             for (var k = 0, K = keys.length ; k < K ; k++){

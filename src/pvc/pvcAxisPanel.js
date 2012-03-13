@@ -118,7 +118,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             pvPanel.zOrder(-10);
         }
     },
-    
+
     renderAxis: function(){
         // Z-Order
         // ==============
