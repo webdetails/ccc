@@ -18,7 +18,8 @@ var arraySlice = pvc.arraySlice = Array.prototype.slice;
 pvc.log = function(m){
 
     if (pvc.debug && typeof console != "undefined"){
-        console.log("[pvChart]: " + m);
+        console.log("[pvChart]: " + 
+          (typeof m === 'string' ? m : JSON.stringify(m)));
     }
 };
 
@@ -520,7 +521,7 @@ pv.dataIdentity = function(datum){
  * */
 pv.Mark.prototype.addMargin = function(name, margin) {
     if(margin != 0){
-        var staticValue = def.nullTo(this.getStaticPropertyValue(name), 0),
+        var staticValue = def.nullyTo(this.getStaticPropertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
         this[name](function(){
@@ -608,6 +609,11 @@ pv.Mark.prototype.forEachInstance = function(fun, ctx){
 pv.Mark.prototype.toScreenTransform = function(){
     var t = pv.Transform.identity;
     
+    if(this instanceof pv.Panel) {
+        t = t.translate(this.left(), this.top())
+            .times(this.transform());
+    }
+    
     var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
     if(parent){
         do {
@@ -640,6 +646,15 @@ pv.Mark.prototype.getInstanceShape = function(instance){
             instance.top,
             instance.width,
             instance.height);
+};
+
+pv.Label.prototype.getInstanceShape = function(instance){
+    // TODO
+    return new Rect(
+            instance.left,
+            instance.top,
+            10,
+            10);
 };
 
 pv.Dot.prototype.getInstanceShape = function(instance){
@@ -684,8 +699,7 @@ var Shape = def.type('pvc.Shape')
 
 // --------------------
 
-var Rect = def.type('pvc.Rect')
-.base(Shape)
+var Rect = def.type('pvc.Rect', Shape)
 .init(function(x, y, dx, dy){
     this.set(x, y, dx, dy);
 })
@@ -715,7 +729,12 @@ var Rect = def.type('pvc.Rect')
         this.calc();
         return this;
     },
-
+    
+    containsPoint: function(x, y){
+        return this.x < x && x < this.x2 && 
+               this.y < y && y < this.y2;
+    },
+    
     intersectsRect: function(rect){
 //        pvc.log("[" + [this.x, this.x2, this.y, this.y2] + "]~" +
 //                "[" + [rect.x, rect.x2, rect.y, rect.y2] + "]");
@@ -766,8 +785,7 @@ var Rect = def.type('pvc.Rect')
 
 // ------
 
-var Circle = def.type('pvc.Circle')
-.base(Shape)
+var Circle = def.type('pvc.Circle', Shape)
 .init(function(x, y, radius){
     this.x = x || 0;
     this.y = y || 0;
@@ -811,8 +829,7 @@ var Circle = def.type('pvc.Circle')
 
 // -----
 
-var Line = def.type('pvc.Line')
-.base(Shape)
+var Line = def.type('pvc.Line', Shape)
 .init(function(x, y, x2, y2){
     this.x  = x  || 0;
     this.y  = y  || 0;
@@ -899,12 +916,11 @@ var Line = def.type('pvc.Line')
  * (default behavior matches pv.Behavior.select())
  * @param {boolean} autoRefresh refresh parent mark automatically
  * @param {pv.Mark} mark
- * @return {function mousedown
+ * @return {function} mousedown
  **/
 pv.Behavior.selector = function(autoRefresh, mark) {
   var scene, // scene context
       index, // scene context
-      r, // region being selected
       m1, // initial mouse position
       redrawThis = (arguments.length > 0)?
                     autoRefresh : true; //redraw mark - default: same as pv.Behavior.select

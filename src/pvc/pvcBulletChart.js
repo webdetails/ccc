@@ -8,19 +8,34 @@ pvc.BulletChart = pvc.BaseChart.extend({
   allowNoData: true,
 
   constructor: function(options){
-
+      options = options || {};
+      
+     options.readers = [
+        {names: 'value', indexes: [0,1,2,3,4,5,6,7,8]} 
+     ];
+     
+      // Force values not to be numbers
+     options.dimensions = {
+         'value':  {},
+         'value2': {},
+         'value3': {},
+         'value4': {},
+         'value5': {},
+         'value6': {},
+         'value7': {},
+         'value8': {},
+         'value9': {}
+     };
+             
     this.base(options);
 
     // Apply options
     pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
   },
 
-  preRender: function(){
-
-    this.base();
+  _preRenderCore: function(){
 
     pvc.log("Prerendering in bulletChart");
-
 
     this.bulletChartPanel = new pvc.BulletChartPanel(this, {
       showValues: this.options.showValues,
@@ -50,9 +65,11 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
       axisDoubleClickAction: null,
       
-      crosstabMode: true,
-      seriesInRows: true,
-
+//      crosstabMode: true,
+//      seriesInRows: true,
+      crosstabMode:    false,
+      seriesInRows:    false,
+      
       tipsySettings: {
         gravity: "s",
         fade: true
@@ -84,7 +101,6 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
 pvc.BulletChartPanel = pvc.BasePanel.extend({
 
-  _parent: null,
   pvBullets: null,
   pvBullet: null,
   data: null,
@@ -106,9 +122,9 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     this.consumeFreeClientSize();
     
-    var data = this.buildData();
-
     this.base();
+    
+    var data = this.buildData();
     
     var anchor = myself.chart.options.orientation=="horizontal"?"left":"bottom";
     var size, angle, align, titleOffset, ruleAnchor, leftPos, topPos;
@@ -265,67 +281,90 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
    *
    */
 
-  buildData: function(){
+    buildData: function(){
 
-    pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
+        pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
 
-    var defaultData = {
-      title:     this.chart.options.bulletTitle,
-      subtitle:  this.chart.options.bulletSubtitle,
-      ranges:    this.chart.options.bulletRanges   || [],
-      measures:  this.chart.options.bulletMeasures || [],
-      markers:   this.chart.options.bulletMarkers  || []
-    };
+        var data,
+            options = this.chart.options,
+            getSeriesLabel   = options.getSeriesLabel   || pv.identity,
+            getCategoryLabel = options.getCategoryLabel || pv.identity;
+        
+        var defaultData = {
+            title:      this.chart.options.bulletTitle,
+            subtitle:  this.chart.options.bulletSubtitle,
+            ranges:    this.chart.options.bulletRanges   || [],
+            measures:  this.chart.options.bulletMeasures || [],
+            markers:   this.chart.options.bulletMarkers  || []
+        };
     
-    var data = [],
-        options = this.chart.options,
-        getSeriesLabel   = options.getSeriesLabel || pv.identity,
-        getCategoryLabel = options.getCategoryLabel || pv.identity;
-
-    if(this.chart.dataEngine.getSeriesSize() == 0 ) {
-      // No data
-      data.push($.extend({}, defaultData));
-    }
-    else {
-      // We have data. Iterate through the series.
-      var indices = this.chart.dataEngine.getVisibleSeriesIndexes();
-      for(var i in indices) if (indices.hasOwnProperty(i))
-      {
-        var s = this.chart.dataEngine.getSerieByIndex(i);
-        var v = this.chart.dataEngine.getVisibleValuesForSeriesIndex(i);
-        var d = $.extend({},defaultData);
-
-        switch(v.length){
-          case 0:
-            // Value only
-            d.measures = [s];
-            break;
-
-          case 2:
-            // Name, value and markers
-            d.markers = [v[1]];
-            // NO break!
-          case 1:
-            // name and value
-            d.title = s;
-            d.formattedTitle = getCategoryLabel(s);
-            d.measures = [v[0]];
-            break;
-
-          default:
-            // greater or equal 4
-            d.title = s;
-            d.subtitle = v[0];
-            d.formattedTitle = getCategoryLabel(s);
-            d.formattedSubtitle = getSeriesLabel(v[0])
-            d.measures = [v[1]];
-            d.markers = [v[2]];
-            if (v.length >= 3){
-              d.ranges = v.slice(3);
+        defaultData.formattedTitle = getCategoryLabel(defaultData.title);
+        defaultData.formattedSubtitle = getSeriesLabel(defaultData.subtitle);
+        
+        // Check how many dimensions are effectively supplied
+        var de = this.chart.dataEngine,
+            dimsByName = de.dimensions(),
+            dimNames   = de.type.groupDimensionsNames('value'),
+            rangeDimNames,
+            dimCount = 0;
+    
+        for(var i = 0, L = dimNames.length ; i < L ; i++) {
+            if(dimsByName[dimNames[i]].count() === 0) {
+                break;
             }
+            dimCount++;
         }
-        data.push(d);
-      }
+    
+        if(dimCount === 0 ) {
+            // No data
+            data = [def.copy(defaultData)];
+        } else {
+            if(dimCount > 4) {
+                rangeDimNames = dimNames.slice(4, dimCount);
+            }
+            
+            data = de.datums()
+                .select(function(datum){
+                    var d = def.copy(defaultData),
+                        atoms = datum.atoms;
+                    
+                    switch(dimCount) {
+                        case 1:
+                            // Value only
+                            d.measures = [atoms.value.value];
+                            break;
+                            
+                        case 3:
+                            // Name, value and markers
+                            d.markers = [atoms.value3.value];
+                            // NO break!
+                        case 2:
+                            // name and value
+                            d.title = atoms.value.value;
+                            d.formattedTitle = getCategoryLabel(d.title);
+                            d.measures = [atoms.value2.value];
+                            break;
+                            
+                        default:
+                            // greater or equal 4
+                            d.title = atoms.value.value;
+                            d.subtitle = atoms.value2.value;
+                            d.formattedTitle = getCategoryLabel(d.title);
+                            d.formattedSubtitle = getSeriesLabel( d.subtitle)
+                            
+                            d.measures = [atoms.value3.value];
+                            d.markers  = [atoms.value4.value];
+                            
+                            if (rangeDimNames){
+                                d.ranges = rangeDimNames.map(function(dimName){
+                                    return atoms[dimName].value;
+                                });
+                            }
+                    }
+                    
+                    return d;
+                }, this)
+                .array();
     }
    
     return data;

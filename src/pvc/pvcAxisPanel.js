@@ -4,8 +4,6 @@
  */
 pvc.AxisPanel = pvc.BasePanel.extend({
 
-    _parent: null,
-    
     pvRule:     null,
     pvTicks:    null,
     pvLabel:    null,
@@ -14,7 +12,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     pvScale:    null,
     
     ordinal: false,
-    ordinalDimensionName: null, // To be used in ordinal scales
+    ordinalDimensionsNames: null,
     anchor: "bottom",
     axisSize: undefined,
     tickLength: 6,
@@ -23,7 +21,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     scale: null,
     fullGrid: false,
     endLine:  false,
-    font: '10px sans-serif', // label font
+    font: '9px sans-serif', // label font
     titleFont: '12px sans-serif',
     title: undefined,
     titleSize: 0,
@@ -174,17 +172,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         if(this.endLine){
             var anchorOrthoLength = this.anchorOrthoLength(),
-                ruleLength = this._parent[anchorOrthoLength] - 
+                ruleLength = this.parent[anchorOrthoLength] - 
                              this[anchorOrthoLength];
             
         	this.pvEndLine = this.pvRule.add(pv.Rule)
-                    .zOrder(10)
-                    .visible(true) // break inheritance of pvRule's visible property
-                    .strokeStyle("#f0f0f0")
-                    [this.anchorOpposite()](-ruleLength)
-                    [this.anchorLength()  ](null)
-                    [this.anchorOrtho()   ](rMax)
-                    [anchorOrthoLength    ]( ruleLength);
+                .zOrder(10)
+                .visible(true) // break inheritance of pvRule's visible property
+                .strokeStyle("#f0f0f0")
+                [this.anchorOpposite()](-ruleLength)
+                [this.anchorLength()  ](null)
+                [this.anchorOrtho()   ](rMax)
+                [anchorOrthoLength    ]( ruleLength);
         }
          
         if (this.ordinal){
@@ -200,24 +198,30 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     renderOrdinalAxis: function(){
 
-        var scale = this.pvScale,
+        var myself = this,
+            scale = this.pvScale,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
-            ordinalDimension  = this.chart.dataEngine.getDimension(this.ordinalDimensionName),
-            ticks =  ordinalDimension.getVisibleElements();
+            data              = this.chart.dataEngine.groupBy(
+                                        this.ordinalDimensionsNames.join('|'), // 1 multi-dimension level
+                                        {visible: true});
         
         // Ordinal ticks correspond to ordinal datums.
         // Ordinal ticks are drawn at the center of each band,
         //  and not at the beginning, as in a linear axis.
         this.pvTicks = this.pvRule.add(pv.Rule)
             .zOrder(20) // see pvc.js
-            .data(ticks)
+            .data(data.leafs)
+            .localProperty('group')
+            .group(function(leafData){
+                return leafData;
+            })
             //[anchorOpposite   ](0)
             [anchorLength     ](null)
-            [anchorOrtho      ](function(e){
-                return scale(e.value) + (scale.range().band / 2);
+            [anchorOrtho      ](function(leaf){
+                return scale(leaf.absKey) + (scale.range().band / 2);
             })
             [anchorOrthoLength](this.tickLength)
             .strokeStyle('rgba(0,0,0,0)'); // Transparent by default, but extensible
@@ -231,8 +235,33 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .zOrder(40) // see pvc.js
             .textAlign(align)
             //.textBaseline("middle")
-            .text(function(e){return e.label;})
-            .font("9px sans-serif");
+            .text(function(leafData){return leafData.absLabel;})
+            .font(this.font)
+            .localProperty('group')
+            .group(function(leafData){
+                return leafData;
+            })
+            ;
+        
+        if(this._shouldHandleClick()){
+            this.pvLabel
+                .cursor("pointer")
+                .events('all') //labels don't have events by default
+                .event('click', function(data){
+                    var ev = arguments[arguments.length - 1];
+                    return myself._handleClick(data, ev);
+                });
+        }
+
+        if(this.doubleClickAction){
+            this.pvLabel
+                .cursor("pointer")
+                .events('all') //labels don't have events by default
+                .event("dblclick", function(data){
+                    var ev = arguments[arguments.length - 1];
+                    myself._handleDoubleClick(data, ev);
+                });
+        }
         
         if(this.fullGrid){
             // Grid rules are visible on all ticks,
@@ -241,17 +270,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // The 2nd tick separates categ 1 from categ 2.
             // The Nth tick separates categ. N-1 from categ. N
             // No grid line is drawn at the end.
-            var ruleLength = this._parent[anchorOrthoLength] - 
+            var ruleLength = this.parent[anchorOrthoLength] - 
                              this[anchorOrthoLength];
             
             this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
                 .extend(this.pvRule)
-                .data(ticks)
+                .data(data.leafs)
                 .strokeStyle("#f0f0f0")
                 [anchorOpposite   ](-ruleLength)
                 [anchorLength     ](null)
-                [anchorOrtho      ](function(e){
-                    return scale(e.value) - scale.range().margin / 2;
+                [anchorOrtho      ](function(leaf){
+                    return scale(leaf.absKey) - scale.range().margin / 2;
                 })
                 [anchorOrthoLength]( ruleLength)
                 .visible(function(){return (this.index > 0);});
@@ -307,7 +336,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         if(this.fullGrid){
             // Grid rules are visible (only) on MAJOR ticks.
             // When EndLine is active it is drawn above the last grid line.
-            var ruleLength = this._parent[anchorOrthoLength] - 
+            var ruleLength = this.parent[anchorOrthoLength] - 
                              this[anchorOrthoLength];
             
             this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
@@ -398,15 +427,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return options.selectable || (options.clickable && this.clickAction);
     },
 
-    _handleClick: function(d, ev){
-        if(!d || !this._shouldHandleClick()){
+    _handleClick: function(data, ev){
+        if(!data || !this._shouldHandleClick()){
             return;
         }
 
         // Selection
         
         if(!this.doubleClickAction){
-            this._handleClickCore(d, ev);
+            this._handleClickCore(data, ev);
         } else {
             // Delay click evaluation so that
             // it may be canceled if double click meanwhile
@@ -415,13 +444,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 options = this.chart.options;
             window.setTimeout(
                 function(){
-                    myself._handleClickCore.call(myself, d, ev);
+                    myself._handleClickCore.call(myself, data, ev);
                 },
                 options.doubleClickMaxDelay || 300);
         }
     },
 
-    _handleClickCore: function(d, ev){
+    _handleClickCore: function(data, ev){
         if(this._ignoreClicks) {
             this._ignoreClicks--;
             return;
@@ -430,186 +459,81 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Classic clickAction
         var action = this.clickAction;
         if(action){
-            action.call(null, d, ev);
+            action.call(null, data, ev);
         }
 
         // TODO: should this be cancellable by the click action?
         var options = this.chart.options;
         if(options.selectable && this.ordinal){
             var toggle = options.ctrlSelectMode && !ev.ctrlKey;
-            this._selectOrdinalElement(d, toggle);
+            this._selectOrdinalElement(data, toggle);
         }
     },
 
-    _selectOrdinalElement: function(element, toggle){
-        var dataEngine = this.chart.dataEngine;
-
-        var dimClause = {};
-        dimClause[this.ordinalDimensionName] = [element.path];
-        var selectedData = dataEngine.getWhere([dimClause]);
-
+    _selectOrdinalElement: function(data, toggle){
         if(toggle){
-            dataEngine.clearSelections();
+            this.chart.dataEngine.owner.clearSelected();
         }
-        
-        dataEngine.toggleSelections(selectedData);
+
+        pvc.data.Data.toggleSelected(data.datums().array());
 
         this.chart.categoricalPanel._handleSelectionChanged();
     },
-
-    /////////////////////////////////////////////////
-    //begin: composite axis
     
-    getLayoutSingleCluster: function(elements, orientation, maxDepth){
-        
-        var depthLength = this.axisSize - this.titleSize;
-
-        // displace to take out bogus-root
-        maxDepth++;
-        var baseDisplacement = depthLength / maxDepth;
-        var margin = maxDepth > 2 ? ((1/12) * depthLength) : 0;//heuristic compensation
-        baseDisplacement -= margin;
-        
-        var scaleFactor = maxDepth / (maxDepth - 1);
-        var orthogonalLength = pvc.BasePanel.orthogonalLength[orientation];
-        //var dlen = (orthogonalLength == 'width')? 'dx' : 'dy';
-        
-        var displacement = (orthogonalLength == 'width')?
-                ((orientation == 'left')? [-baseDisplacement, 0] : [baseDisplacement, 0]) :
-                ((orientation == 'top')?  [0, -baseDisplacement] : [0, baseDisplacement]);
-
-        // Store without compensation for lasso handling
-        this.axisDisplacement = displacement.slice(0);
-
-        for(var i=0;i<this.axisDisplacement.length;i++){
-            var ad = this.axisDisplacement[i];
-            if(ad < 0){
-                ad -= margin;
-            } else if(ad > 0){
-                ad = 0 ;
-            }
-
-            this.axisDisplacement[i] = ad * scaleFactor;
+    _detectSelectingDatums: function(datumsByKey, rb){
+        if(!this.ordinal) {
+            return false;
         }
         
-        this.pvRule
-            .strokeStyle(null)
-            .lineWidth(0);
-
-        var panel = this.pvRule
-                        .add(pv.Panel)
-                            [orthogonalLength](depthLength)//.overflow('hidden')
-                            .strokeStyle(null)
-                            .lineWidth(0) //cropping panel
-                        .add(pv.Panel)
-                            [orthogonalLength](depthLength * scaleFactor)
-                            .strokeStyle(null)
-                            .lineWidth(0);// panel resized and shifted to make bogus root disappear
-
-        panel.transform(pv.Transform.identity.translate(displacement[0], displacement[1]));
+        var any = false;
         
-        // Create with bogus-root
-        // pv.Hierarchy must always have exactly one root and
-        //  at least one element besides the root
-        var layout = panel.add(pv.Layout.Cluster.Fill)
-            .nodes(elements)
-            .orient(orientation);
-            
-        // keep node references for lasso selection
-        this.storedElements = elements;
-        
-        return layout;
-    },
-    
-    getBreadthCounters: function(elements){
-       var breadthCounters = {};
-       for(var i =0; i<elements.length; i++){
-            var name = elements[i][0];
-            if(!breadthCounters[name]){
-                breadthCounters[name] = 1;
-            }
-            else {
-                breadthCounters[name] = breadthCounters[name] + 1;
-            }
+        function addData(data) {
+            data.datums().each(function(datum){
+                datumsByKey[datum.key] = datum;
+                any = true;
+            });
         }
-        return breadthCounters;
-    },
-    
-    getAreaSelections: function(x, y, dx, dy){
-        
-        var selections = [];
         
         if(!this.useCompositeAxis){
-            return selections;
-        }
-        
-        x-= this.axisDisplacement[0];
-        y-= this.axisDisplacement[1];
-        
-        var xf = x + dx,
-            yf = y + dy;
+            var mark = this.pvLabel;
             
-        this.storedElements[0].visitBefore(function(node, i){
-            if(i > 0){
-                var centerX = node.x + node.dx /2,
-                    centerY = node.y + node.dy /2;
-            
-                if(x < centerX && centerX < xf && 
-                   y < centerY && centerY < yf){
-                    selections.push(node.path);
+            mark.forEachInstance(function(instance, t){
+                var shape = mark.getInstanceShape(instance).apply(t);
+                if (shape.intersectsRect(rb)){
+                    var data = instance.group;
+                    if(data) {
+                        addData(data);
+                    }
                 }
-           }
-        });
-        
-        // Remove selections following an ascendant selection
-        var lastSelection = null;
-        var compressedSelections = [];
-        for(var i = 0 ; i < selections.length ; i++){
-            var selection = selections[i];
-            if(lastSelection == null || !pvc.arrayStartsWith(selection, lastSelection)){
-                lastSelection = selection;
-                compressedSelections.push(selection);
-            }
+            }, this);
+            
+        } else {
+            var t = this._pvLayout.toScreenTransform();
+            this._elements[0].visitBefore(function(data, i){
+                if(i > 0){
+                    var centerX = t.transformHPosition(data.x + data.dx /2),
+                        centerY = t.transformVPosition(data.y + data.dy /2);
+                    if(rb.containsPoint(centerX, centerY)){
+                       addData(data);
+                    }
+                }
+            });
         }
         
-        return compressedSelections;
+        return any;
     },
-
-
+    
+    /////////////////////////////////////////////////
+    //begin: composite axis
     renderCompositeOrdinalAxis: function(){
         var myself = this,
-            chart = this.chart;
-
-        var isTopOrBottom = this.isAnchorTopOrBottom(),
-            axisDirection = isTopOrBottom ? 'h' : 'v';
+            isTopOrBottom = this.isAnchorTopOrBottom(),
+            axisDirection = isTopOrBottom ? 'h' : 'v',
+            tipsyGravity  = this._calcTipsyGravity(),
+            diagDepthCutoff = 2, // depth in [-1/(n+1), 1]
+            vertDepthCutoff = 2;
         
-        var ordinalDimension = chart.dataEngine.getDimension(this.ordinalDimensionName),
-            // TODO: extend this to work with chart.orientation?
-            reverse  = this.anchor == 'bottom' || this.anchor == 'left',
-            treeInfo = ordinalDimension.createElementsTree(true, reverse),
-            maxDepth = treeInfo.maxDepth,
-            elements = treeInfo.root.nodes(); // descendantOrSelf, pre-order traversal, copy
-
-        var tipsyGravity = 's';
-        switch(this.anchor){
-            case 'bottom':
-                tipsyGravity = 's';
-                break;
-            case 'top':
-                tipsyGravity = 'n';
-                break;
-            case 'left':
-                tipsyGravity = 'w';
-                break;
-            case 'right':
-                tipsyGravity = 'e';
-                break;
-        }
-
-        var layout = this.getLayoutSingleCluster(elements, this.anchor, maxDepth);
-
-        var diagDepthCutoff = 2; //depth in [-1/(n+1), 1]
-        var vertDepthCutoff = 2;
+        var layout = this._pvLayout = this.getLayoutSingleCluster();
 
         // See what will fit so we get consistent rotation
         layout.node
@@ -652,9 +576,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             });
 
         //cutoffs -> snap to vertical/horizontal
-        var H_CUTOFF_ANG = 0.30;
-        var V_CUTOFF_ANG = 1.27;
-        //var V_CUTOFF_RATIO = 0.8;
+        var H_CUTOFF_ANG = 0.30,
+            V_CUTOFF_ANG = 1.27;
+        
         var diagMargin = pvc.text.getFontSize(this.font) / 2;
 
         var align = isTopOrBottom ?
@@ -729,90 +653,117 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         if(this._shouldHandleClick()){
             this.pvLabel
                 .cursor("pointer")
-                .event('click', function(d){
+                .event('click', function(data){
                     var ev = arguments[arguments.length - 1];
-                    return myself._handleClick(d, ev);
+                    return myself._handleClick(data, ev);
                 });
         }
 
         if(this.doubleClickAction){
             this.pvLabel
                 .cursor("pointer")
-                .event("dblclick", function(d){
+                .event("dblclick", function(data){
                     var ev = arguments[arguments.length - 1];
-                    myself._handleDoubleClick(d, ev);
+                    myself._handleDoubleClick(data, ev);
                 });
         }
 
         // tooltip
         this.pvLabel
-            //.def('tooltip', '')
             .title(function(d){
                 this.instance()['tooltip'] = d.label;
                 return '';
             })
-            .event("mouseover", pv.Behavior.tipsy({//Tooltip
+            .event("mouseover", pv.Behavior.tipsy({
                 gravity: tipsyGravity,
                 fade: true,
                 offset: diagMargin * 2,
                 opacity:1
             }));
+    },
+    
+    getLayoutSingleCluster: function(){
+        // TODO: extend this to work with chart.orientation?
+        var dataEngine  = this.chart.dataEngine,
+            orientation = this.anchor,
+            reverse  = orientation == 'bottom' || orientation == 'left',
+            ascDesc  = reverse ? ' desc' : ' asc',
+            groupingSpecText = this.ordinalDimensionsNames.join(ascDesc  + ", ") + ascDesc,
+            
+            data     = dataEngine.groupBy(groupingSpecText, {visible: true}),
+            maxDepth = data.treeHeight,
+            elements = data.nodes(),
+            
+            depthLength = this.axisSize - this.titleSize;
+        
+        this._elements = elements; // lasso 
+            
+        // displace to take out bogus-root
+        maxDepth++;
+        
+        var baseDisplacement = depthLength / maxDepth,
+            margin = maxDepth > 2 ? ((1/12) * depthLength) : 0;//heuristic compensation
+        
+        baseDisplacement -= margin;
+        
+        var scaleFactor = maxDepth / (maxDepth - 1),
+            orthoLength = pvc.BasePanel.orthogonalLength[orientation];
+        
+        var displacement = (orthoLength == 'width') ?
+                (orientation === 'left' ? [-baseDisplacement, 0] : [baseDisplacement, 0]) :
+                (orientation === 'top'  ? [0, -baseDisplacement] : [0, baseDisplacement]);
+
+        this.pvRule
+            .strokeStyle(null)
+            .lineWidth(0);
+
+        var panel = this.pvRule
+            .add(pv.Panel)
+                [orthoLength](depthLength)//.overflow('hidden')
+                .strokeStyle(null)
+                .lineWidth(0) //cropping panel
+            .add(pv.Panel)
+                [orthoLength](depthLength * scaleFactor)
+                .strokeStyle(null)
+                .lineWidth(0);// panel resized and shifted to make bogus root disappear
+        
+        panel.transform(pv.Transform.identity.translate(displacement[0], displacement[1]));
+        
+        // Create with bogus-root
+        // pv.Hierarchy must always have exactly one root and
+        //  at least one element besides the root
+        return panel.add(pv.Layout.Cluster.Fill)
+                    .nodes(elements)
+                    .orient(orientation);
+    },
+    
+    _calcTipsyGravity: function(){
+        switch(this.anchor){
+            case 'bottom': return 's';
+            case 'top':    return 'n';
+            case 'left':   return 'w';
+            case 'right':  return 'e';
+        }
+        return 's';
     }
     // end: composite axis
     /////////////////////////////////////////////////
 });
 
-/*
- * XAxisPanel panel.
- *
- */
 pvc.XAxisPanel = pvc.AxisPanel.extend({
-
     anchor: "bottom",
     panelName: "xAxis"
-
-    //constructor: function(chart, options){
-    //    this.base(chart,options);
-    //}
 });
 
-/*
- * SecondXAxisPanel panel.
- *
- */
 pvc.SecondXAxisPanel = pvc.XAxisPanel.extend({
-
     panelName: "secondXAxis"
-
-    //constructor: function(chart, options){
-    //    this.base(chart,options);
-    //}
 });
 
-
-/*
- * YAxisPanel panel.
- *
- */
 pvc.YAxisPanel = pvc.AxisPanel.extend({
-
     anchor: "left",
     panelName: "yAxis"
-
-    //constructor: function(chart, options){
-    //    this.base(chart,options);
-    //}
 });
 
-/*
- * SecondYAxisPanel panel.
- *
- */
 pvc.SecondYAxisPanel = pvc.YAxisPanel.extend({
-
     panelName: "secondYAxis"
-
-    //constructor: function(chart, options){
-    //    this.base(chart,options);
-    //}
 });

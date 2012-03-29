@@ -19,9 +19,7 @@ pvc.PieChart = pvc.BaseChart.extend({
     pvc.mergeDefaults(this.options, pvc.PieChart.defaultOptions, options);
   },
 
-  preRender: function(){
-
-    this.base();
+  _preRenderCore: function(){
 
     pvc.log("Prerendering in pieChart");
 
@@ -72,7 +70,6 @@ pvc.PieChart = pvc.BaseChart.extend({
 
 pvc.PieChartPanel = pvc.BasePanel.extend({
 
-  _parent: null,
   pvPie: null,
   pvPieLabel: null,
   data: null,

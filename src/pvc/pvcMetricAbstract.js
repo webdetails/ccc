@@ -9,6 +9,20 @@
 pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
 
     constructor: function(options){
+        options = options || {};
+        
+        var dimensions = options.dimensions   || (options.dimensions  = {});
+        var category   = dimensions.category  || (dimensions.category = {});
+        var value      = dimensions.value     || (dimensions.value    = {});
+        
+        category.valueType = Number;
+        category.isDiscrete = true;
+        category.compare = null;
+        
+        value.valueType  = Number;
+        value.isDiscrete = false;
+        //value.compare    = null;
+        
         this.base(options);
 
         // This categorical chart does not support selection, yet
@@ -16,7 +30,7 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
     },
 
     /* @override */
-    preRender: function(){
+    _preRenderCore: function(){
         this.base();
         
         pvc.log("Prerendering in MetricAbstract");
@@ -57,8 +71,10 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
         var isVertical = this.options.orientation=="vertical";
 
         // compute the input-domain of the scale
-        var domainMin = this.dataEngine.getCategoryMin();
-        var domainMax = this.dataEngine.getCategoryMax();
+        var domain    = this.dataEngine.dimensions('category').range(),
+            domainMin = domain.min.value;
+            domainMax = domain.max.value;
+        
         // Adding a small relative offset to the scale to prevent that
         // points are located on top of the axis:
         var offset = (domainMax - domainMin) * this.options.axisOffset;

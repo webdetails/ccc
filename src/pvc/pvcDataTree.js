@@ -16,14 +16,17 @@ pvc.DataTree = pvc.BaseChart.extend({
     legendSource: 'category',
 
     constructor: function(options){
-
+        // Force the value dimension not to be a number
+        options = options || {};
+        options.dimensions = options.dimensions || {};
+        if(!options.dimensions.value) {
+            options.dimensions.value = {};
+        }
+        
         this.base(options);
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.DataTree.defaultOptions, options);
-
-        // Create DataEngine
-        this.structEngine = new pvc.DataEngine(this);
     },
 
     setStructData: function(data){
@@ -38,20 +41,33 @@ pvc.DataTree = pvc.BaseChart.extend({
         }
     },
   
-    preRender: function(){
+    _preRenderCore: function(){
 
-        this.base();
-
-        pvc.log("Prerendering a data-tree");
-
-        // Getting structure-data engine and initialize the translator
-        this.structEngine.setData(this.structMetadata,this.structDataset);
-        this.structEngine.setCrosstabMode(true);
-        this.structEngine.setSeriesInRows(true);
-        this.structEngine.createTranslator();
-    
+        pvc.log("Prerendering in data-tree");
+        
+        // Create DataEngine
+        var structEngine  = this.structEngine;
+        var structType    = structEngine ? structEngine.type : new pvc.data.ComplexType();
+        // Force the value dimension not to be a number
+        structType.addDimension('value', {});
+        
+        var translOptions = {
+            seriesInRows: true,
+            crosstabMode: true
+        };
+        
+        var translation = new pvc.data.CrosstabTranslationOper(structType, this.structDataset, this.structMetadata, translOptions);
+        translation.configureType();
+        if(!structEngine) {
+            structEngine = this.structEngine = new pvc.data.Data({type: structType});
+        }
+        
+        structEngine.load(translation.execute(structEngine));
+        
         pvc.log(this.structEngine.getInfo());
-
+        
+        // ------------------
+        
         this.dataTreePanel = new pvc.DataTreePanel(this, {
             topRuleOffset : this.options.topRuleOffset,
             botRuleOffset : this.options.botRuleOffset,
@@ -316,7 +332,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
       box.label = values[0][e];
       box.selector = values[1][e];
       box.aggregation = values[2][e];
-      var children = values[3][e].replace(whitespaceQuote, " ");
+      var children = (values[3][e] || '').replace(whitespaceQuote, " ");
       
       box.children = (children == " " || children ==  "") ?
          null : children.split(" ");

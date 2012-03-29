@@ -17,15 +17,20 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
 
   constructor: function(options){
 
-    this.base(options);
-
-    // Apply options
-    pvc.mergeDefaults(this.options, pvc.ParallelCoordinates.defaultOptions, options);
+   // Force the value dimension not to be a number
+      options = options || {};
+      options.dimensions = options.dimensions || {};
+      if(!options.dimensions.value) {
+          options.dimensions.value = {};
+      }
+      
+      this.base(options);
+    
+      // Apply options
+      pvc.mergeDefaults(this.options, pvc.ParallelCoordinates.defaultOptions, options);
   },
 
-  preRender: function(){
-
-    this.base();
+  _preRenderCore: function(){
 
     pvc.log("Prerendering in parallelCoordinates");
 
@@ -85,8 +90,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
   constructor: function(chart, options){
 
-    this.base(chart,options);
-
+      this.base(chart,options);
   },
 
     /*****

@@ -1,22 +1,6 @@
 // ECMAScript 5 shim
-if(!Object.create){
-    Object.create = (function(){
-
-        function dummyKlass(){}
-        var dummyProto = dummyKlass.prototype;
-
-        function create(baseProto){
-            dummyKlass.prototype = baseProto || {};
-            var instance = new dummyKlass();
-            dummyKlass.prototype = dummyProto;
-            return instance;
-        }
-
-        return create;
-    }());
-}
-
 if(!Object.keys) {
+    /** @ignore */
     Object.keys = function(o){
         if (o !== Object(o)){
             throw new TypeError('Object.keys called on non-object');
@@ -33,13 +17,11 @@ if(!Object.keys) {
     };
 }
 
-/**
- * Implements filter property if not implemented yet
- */
 if (!Array.prototype.filter){
+    /** @ignore */
     Array.prototype.filter = function(fun, ctx){
         var len = this.length >>> 0;
-        if (typeof fun != "function"){
+        if (typeof fun !== 'function'){
             throw new TypeError();
         }
 
@@ -57,11 +39,13 @@ if (!Array.prototype.filter){
 }
 
 if(!Object.create){
+    /** @ignore */
     Object.create = (function(){
 
         var klass = function(){},
             proto = klass.prototype;
         
+        /** @private */
         function create(baseProto){
             klass.prototype = baseProto || {};
             var instance = new klass();
@@ -76,9 +60,11 @@ if(!Object.create){
 
 // Basic JSON shim
 if(!this.JSON){
+    /** @ignore */
     this.JSON = {};
 }
 if(!this.JSON.stringify){
+    /** @ignore */
     this.JSON.stringify = function(t){
         return '' + t;
     };
@@ -86,565 +72,1328 @@ if(!this.JSON.stringify){
 
 // ------------------------
 
-this.def = (function(){
+// TODO: document all this
 
-// All or nothing.
-// Mount in local object.
-var def = {};
-
-def.get = function(o, p, dv){
-    var v;
-    return o && (v = o[p]) != null ? v : dv;
-};
-
-def.scope = function(scopeFun, ctx){
-    return scopeFun.call(ctx);
-};
-
-def.compare = function(a, b){
-    return (a < b) ? -1 : ((a > b) ? 1 : 0);
-};
-
-def.identity = function(x){
-    return x;
-};
-
-// !== null && !== undefined
-def.notNully = function(v){
-    return v != null;
-};
-
-var arraySlice = Array.prototype.slice;
-
-// Adapted from
-// http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
-def.shared = function(){
-    var _channel;
-
-    function create(value){
-
-        function safe(){
-            _channel = value;
-        }
-
-        return safe;
-    }
-
-    function opener(safe){
-        if(_channel != null){ throw new Error("Access denied."); }
-
-        safe();
-
-        var value;
-        return value = _channel, _channel = null, value;
-    }
-
-    opener.safe = create;
-
-    return opener;
-};
-
-/**
- * Calls function <i>fun</i> with context <i>ctx</i>
- * for every own property of <i>o</i>.
- * Function <i>fun</i> is called with arguments:
- * value, property, object.
- */
-def.forEachOwn = function(o, fun, ctx){
-    if(o){
-        for(var p in o){
-            if(o.hasOwnProperty(p)){
-                fun.call(ctx, o[p], p, o);
-            }
-        }
-    }
-};
-
-var objectHasOwn = Object.prototype.hasOwnProperty;
-def.hasOwn = function(o, p){
-    return !!o && objectHasOwn.call(o, p);
-};
-
-
-def.copyOwn = function(to, from){
-    def.forEachOwn(from, function(v, p){
-        to[p] = v;
-    });
+this['def'] = (function(){
     
-    return to;
-};
+    // All or nothing.
+    // Mount in local object.
 
-def.join = function(sep){
-    var args = [],
-        a = arguments;
-    for(var i = 1, L = a.length ; i < L ; i++){
-        var v = a[i];
-        if(v != null && v !== ""){
-            args.push("" + v);
-        }
-    }
-
-    return args.join(sep);
-};
-
-def.error = function(error){
-    return (error instanceof Error) ? error : new Error(error);
-};
-
-def.copyOwn(def.error, {
-    operationInvalid: function(msg){
-        return def.error(def.join(". ", "Invalid operation", msg));
-    },
-
-    notImplemented: function(){
-        return def.error("Not implemented");
-    },
-
-    argumentRequired: function(name){
-        return def.error("Required argument '" + name + "'.");
-    },
-
-    argumentInvalid: function(name, msg){
-        return def.error(def.join(". ", "Invalid argument '" + name + "'.", msg));
-    },
-
-    assertionFailed: function(msg){
-        return def.error(def.join(". ", "Assertion failed", msg));
-    }
-});
-
-def.fail = function(error){
-    throw def.error(error);
-};
-
-def.assert = function(msg){
-    throw def.error.assertionFailed(msg);
-};
-
-// -----------------------
-
-def.global = this;
-
-var namespaceStack = [],
-    currentNamespace = def.global;
-
-function getNamespace(name, base){
-    var current = base || currentNamespace;
-    if(name){
-        var parts = name.split('.');
-        for(var i = 0; i < parts.length ; i++){
-            var part = parts[i];
-            current = current[part] || (current[part] = {});
-        }
-    }
-
-    return current;
-}
-
-function createSpace(name, definition){
-    var namespace = getNamespace(name);
-    if(definition){
-        namespaceStack.push(currentNamespace);
-        try{
-            definition(namespace);
-        } finally {
-            currentNamespace = namespaceStack.pop();
-        }
-    }
-
-    return namespace;
-}
-
-function defineName(namespace, name, value){
-    !def.hasOwn(namespace, name) ||
-        def.fail(def.error.operationInvalid("Name '" + name + "' is already defined in namespace."));
-
-    return namespace[name] = value;
-}
-
-/**
- * Defines a relative namespace with name {@link name}
- * on the current namespace.
- * 
- * <p>
- * Namespace declarations may be nested.
- * </p>
- * <p>
- * The current namespace can be obtained by calling {@link def.space}
- * with no {@link name} argument.
- * The current namespace affects other nested declarations, such as {@link def.type}.
- * </p>
- * <p>
- * A composite namespace name is a name that contains dots ".".
- * </p>
- * @example
- * <pre>
- * def.space('foo.bar', function(space){
- *     space.hello = 1;
- * });
- * </pre>
- *
- * @function
- *
- * @param {String} name The name of the namespace to obtain.
- * If nully, the current namespace is implied.
- * 
- * @param {Function} definition
- * A function that is called whith the desired namespace
- * as first argument and while it is current.
- * 
- * @returns {object} The namespace.
- */
-def.space = createSpace;
-
-// -----------------------
-
-function asNativeObject(v){
-    return v && typeof(v) === 'object' && v.constructor === Object ?
-            v :
-            undefined;
-}
-
-function asObject(v){
-    return v && typeof(v) === 'object' ? v : undefined;
-}
-
-function mixinRecursive(instance, mixin){
-    for(var p in mixin){
-        var vMixin = mixin[p];
-        if(vMixin !== undefined){
-            var oMixin,
-                oTo = asNativeObject(instance[p]);
-
-            if(oTo){
-                oMixin = asObject(vMixin);
-                if(oMixin){
-                    mixinRecursive(oTo, oMixin);
-                }
-            } else {
-                oMixin = asNativeObject(vMixin);
-                if(oMixin){
-                    vMixin = Object.create(oMixin);
-                }
-
-                instance[p] = vMixin;
-            }
-        }
-    }
-}
-
-def.mixin = function(instance/*mixin1, mixin2, ...*/){
-    for(var i = 1, L = arguments.length ; i < L ; i++){
-        var mixin = arguments[i];
-        if(mixin){
-            mixin = asObject(mixin.prototype || mixin);
-            if(mixin){
-                mixinRecursive(instance, mixin);
-            }
-        }
-    }
-
-    return instance;
-};
-
-// -----------------------
-
-function createRecursive(instance){
-    for(var p in instance){
-        var vObj = asNativeObject(instance[p]);
-        if(vObj){
-            createRecursive( (instance[p] = Object.create(vObj)) );
-        }
-    }
-}
+    /** @private */
+    var objectHasOwn = Object.prototype.hasOwnProperty;
     
-// Creates an object whose prototype is the specified object.
-def.create = function(/* [deep, ] baseProto, mixin1, mixin2, ...*/){
-    var mixins = arraySlice.call(arguments),
-        deep = true,
-        baseProto = mixins.shift();
-
-    if(typeof(baseProto) === 'boolean'){
-        deep = baseProto;
-        baseProto = mixins.shift();
-    }
-
-    var instance = Object.create(baseProto);
-    if(deep){
-        createRecursive(instance);
-    }
-
-    // NOTE:
-    if(mixins.length > 0){
-        mixins.unshift(instance);
-        def.mixin.apply(def, mixins);
-    }
-
-    return instance;
-};
-
-// -----------------------
-
-def.type = def.scope(function(){
-    var shared = def.shared();
-
-    function typeLocked(){
-        return def.error.operationInvalid("Type is locked.");
-    }
-
-    var typeProto = {
-        base: function(base){
-            base || def.fail(def.error.argumentRequired('base'));
-            
-            var state = shared(this.safe);
-            
-            !state.locked     || def.fail(typeLocked());
-            !state.base       || def.fail(def.error.operationInvalid("base type already set"));
-            !state.baseLocked || def.fail(def.error.operationInvalid("base is locked"));
-            
-            state.base = base;
-
-            var proto = this.prototype = Object.create(base.prototype);
-            proto.constructor = this;
-            
-            // Get base's init and postInit
-            var baseState = shared(base.safe);
-            
-            baseState.locked = true;
-            
-            state.baseInit = baseState.init || baseState.baseInit;
-            state.basePost = baseState.post || baseState.basePost;
-            
-            return this;
-        },
-
-        init: function(init){
-            var state = shared(this.safe);
-            !state.locked || def.fail(typeLocked());
-
-            state.init = init;
-            return this;
-        },
-
-        postInit: function(postInit){
-            var state = shared(this.safe);
-            !state.locked || def.fail(typeLocked());
-
-            state.post = postInit;
-            return this;
+    /** @private */
+    var arraySlice = Array.prototype.slice;
+    
+    /**
+     * @name def
+     * @namespace The 'definition' library root namespace.
+     */
+    var def = /** @lends def */{
+        /**
+         * The JavaScript global object.
+         * @type {object}
+         */
+        global: this,
+        
+        /**
+         * Gets the value of an existing, own or inherited, and not "nully", property of an object,
+         * or if unsatisfied, a specified default value.
+         * 
+         * @param {object} [o] The object whose property value is desired.
+         * @param {string} p The desired property name.
+         * If the value is not a string, 
+         * it is converted to one, as if String(p) were used.
+         * @param [dv=undefined] The default value.
+         * 
+         * @returns {any} The satisfying property value or the specified default value.
+         * 
+         * @see def.getOwn
+         * @see def.nully
+         */
+        get: function(o, p, dv){
+            var v;
+            return o && (v = o[p]) != null ? v : dv;
         },
         
-        add: function(mixin){
-            var state = shared(this.safe);
-            !state.locked || def.fail(typeLocked());
-
-            state.baseLocked = true;
-
-            var proto = this.prototype,
-                baseProto = state.base && state.base.prototype;
-
-            def.forEachOwn(mixin.prototype || mixin, function(value, p){
-                if(value !== undefined){
-                    if(baseProto && typeof value === 'function'){
-                        var baseValue = baseProto[p];
-                        if(typeof baseValue === 'function'){
-                            value = override(value, baseValue);
-                        }
+        /** 
+         * Creates a property getter function,
+         * for a specified property name.
+         * 
+         * @param {string} name The name of the property.
+         * @param [dv=undefined] 
+         * The default value to return 
+         * if the property would be accessed on null or undefined.
+         * @type function
+         */
+        propGet: function(p, dv){
+            p = '' + p;
+            
+            /**
+             * Gets the value of a prespecified property 
+             * of a given thing.
+             * 
+             * @param [o] The <i>thing</i> whose prespecified property is to be read.
+             * <p>
+             * If {@link o} is not "nully", 
+             * but is not of type 'object', 
+             * the function behaves equivalently to:
+             * </p>
+             * <pre>
+             * return Object(o)[propName];
+             * </pre>
+             * 
+             * @returns {any}
+             * If the specified {@link o} is not "nully", 
+             * returns the value of the prespecified property on it; 
+             * otherwise, returns the prespecified default value.
+             * 
+             * @private
+             */
+            return function(o){ 
+                return o != null ? o[p] : dv;
+            };
+        },
+        
+        // TODO: propSet ?
+        
+        /**
+         * Gets the value of an existing, own, and not "nully", property of an object,
+         * or if unsatisfied, a specified default value.
+         * 
+         * @param {object} [o] The object whose property value is desired.
+         * @param {string} p The desired property name.
+         * If the value is not a string, 
+         * it is converted to one, as if String(p) were used.
+         * @param dv The default value.
+         * 
+         * @returns {any} The satisfying property value or the specified default value.
+         * 
+         * @see def.get
+         * @see def.hasOwn
+         * @see def.nully
+         */
+        getOwn: function(o, p, dv){
+            var v;
+            return o && objectHasOwn.call(o, p) && (v = o[p]) != null ? v : dv;
+        },
+        
+        hasOwn: function(o, p){
+            return !!o && objectHasOwn.call(o, p);
+        },
+        
+        /**
+         * Calls a function 
+         * for every own property of a specified object.
+         * 
+         * @param {object} [o] The object whose own properties are traversed.
+         * @param {function} [fun] The function to be called once per own property of <i>o</i>. 
+         * The signature of the function is:
+         * <pre>
+         * function(value, property : string, o : object) : any
+         * </pre>
+         * 
+         * @param {object} [ctx=null] The context object on which to call <i>fun</i>.
+         * 
+         * @type undefined
+         */
+        forEachOwn: function(o, fun, ctx){
+            if(o){
+                for(var p in o){
+                    if(objectHasOwn.call(o, p)){
+                        fun.call(ctx, o[p], p, o);
                     }
-                    
-                    proto[p] = value;
                 }
+            }
+        },
+        
+        copyOwn: function(to, from){
+            def.forEachOwn(from, function(v, p){
+                to[p] = v;
             });
-
-            return this;
+            
+            return to;
+        },
+        
+        copy: function(a,b){
+            var to, from;
+            if(arguments.length >= 2) {
+                to = a || {};
+                from = b;
+            } else {
+                to   = {};
+                from = a;
+            }
+            
+            if(from) {
+                for(var p in from) { 
+                    to[p] = from[p];
+                }
+            }
+            
+            return to;
+        },
+        
+        ownKeys: Object.keys,
+        
+        keys: function(o){
+            var keys = [];
+            for(var p in o) {
+                keys.push(p);
+            }
+            
+            return keys;
+        },
+        
+        own: function(o){
+            return Object.keys(o)
+                         .map(function(key){ return o[key]; });
+        },
+        
+        scope: function(scopeFun, ctx){
+            return scopeFun.call(ctx);
+        },
+        
+        // Utility/Factory functions ----------------
+        
+        /**
+         * The natural order comparator function.
+         * @field
+         * @type function
+         */
+        compare: function(a, b){
+            return (a < b) ? -1 : ((a > b) ? 1 : 0);
+        },
+        
+        constant: function(v){
+            return function(){ return v; };
+        },
+        
+        /**
+         * The identity function.
+         * @field
+         * @type function
+         */
+        identity: function(x){ return x; },
+        
+        /**
+         * The truthy function.
+         * @field
+         * @type function
+         */
+        truthy: function(x){ return !!x; },
+        
+        /**
+         * The falsy function.
+         * @field
+         * @type function
+         */
+        falsy: function(x){ return !x; },
+        
+        /**
+         * The NO OPeration function.
+         * @field
+         * @type function
+         */
+        noop: (function noop(){ /* NOOP */ }),
+        
+        // negate?
+        
+        // Type coercion ----------------
+        
+        fun: function(v){
+            return def.isFun(v) ? v : def.constant(v);
+        },
+        
+        number: function(d, dv){
+            var v = parseFloat(d);
+            return isNaN(v) ? (dv || 0) : v;
+        },
+        
+        /**
+         * Converts something to an array if it is not one already,
+         * and if it is not nully.
+         * 
+         * @param thing A thing to convert to an array.
+         * @returns {Array} 
+         */
+        array: function(thing){
+            return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+        },
+        
+        // nully to 'dv'
+        nullyTo: function(v, dv){
+            return v != null ? v : dv;
+        },
+        
+        // Predicates ----------------
+        
+        // === null || === undefined
+        nully: function(v){
+            return v == null;
+        },
+        
+        empty: function(v){
+            return v == null || v === '';
+        },
+        
+        notEmpty: function(v){
+            return v != null && v !== '';
+        },
+        
+        // !== null && !== undefined
+        notNully: function(v){
+            return v != null;
+        },
+        
+        isArrayLike: function(v){
+            return v && (v.length != null) && (typeof v !== 'string');
+        },
+        
+        isArray: function(v){
+            return v && (v instanceof Array);
+        },
+        
+        isString: function(v){
+            return typeof v === 'string';
+        },
+        
+        isFun: function(v){
+            return typeof v === 'function';
+        },
+        
+        join: function(sep){
+            var args = [],
+                a = arguments;
+            for(var i = 1, L = a.length ; i < L ; i++){
+                var v = a[i];
+                if(v != null && v !== ""){
+                    args.push("" + v);
+                }
+            }
+        
+            return args.join(sep);
+        },
+        
+        /**
+         * Formats a string by replacing 
+         * place-holder markers, of the form "{foo}",
+         * with the value of corresponding properties
+         * of the specified scope argument.
+         * 
+         * @param {string} mask The string to format.
+         * @param {object} [scope] The scope object.
+         * 
+         * @example
+         * <pre>
+         * def.format("The name '{0}' is undefined.", ['foo']);
+         * // == "The name 'foo' is undefined."
+         * 
+         * def.format("The name '{foo}' is undefined, and so is '{what}'.", {foo: 'bar'});
+         * // == "The name 'bar' is undefined, and so is ''."
+         * 
+         * def.format("The name '{{foo}}' is undefined.", {foo: 'bar'});
+         * // == "The name '{{foo}}' is undefined."
+         * </pre>
+         * 
+         * @returns {string} The formatted string.
+         */
+        format: function(mask, scope){
+            if(mask == null || mask === '') {
+                return "";
+            }
+            return mask.replace(/(^|[^{])\{([^{}]+)\}/g, function($0, before, prop){
+                var value = scope ? scope[prop] : null;
+                return before + (value == null ? "" : value); 
+            });
+        },
+        
+        error: function(error){
+            return (error instanceof Error) ? error : new Error(error);
+        },
+        
+        fail: function(error){
+            throw def.error(error);
+        },
+        
+        assert: function(msg){
+            throw def.error.assertionFailed(msg);
+        },
+        
+        /**
+         * The not implemented function.
+         * @field
+         * @type function
+         */
+        notImplemented: function(){
+            throw def.error.notImplemented();
         }
     };
 
-    // TODO: improve this code
-    function TypeName(full){
-        var parts;
-        if(full instanceof Array){
-            parts = full;
-            full  = parts.join('.');
-        } else {
-            parts = full.split('.');
+    // Adapted from
+    // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
+    def.shared = function(){
+        var _channel = null;
+    
+        /** @private */
+        function create(value){
+    
+            /** @private */
+            function safe(){
+                _channel = value;
+            }
+    
+            return safe;
+        }
+    
+        /** @private */
+        function opener(safe){
+            if(_channel != null){ throw new Error("Access denied."); }
+    
+            safe();
+    
+            var value;
+            return value = _channel, _channel = null, value;
         }
         
-        if(parts.length > 1){
-            this.name           = parts.pop();
-            this.namespace      = parts.join('.');
-            this.namespaceParts = parts;
-        } else {
-            this.name = full;
-            this.namespace = null;
-            this.namespaceParts = [];
+        opener.safe = create;
+    
+        return opener;
+    };
+    
+    var errors = {
+        operationInvalid: function(msg, scope){
+            return def.error(def.join(". ", "Invalid operation.", def.format(msg, scope)));
+        },
+    
+        notImplemented: function(){
+            return def.error("Not implemented");
+        },
+    
+        argumentRequired: function(name){
+            return def.error(def.format("Required argument '{0}'.", [name]));
+        },
+    
+        argumentInvalid: function(name, msg, scope){
+            return def.error(
+                       def.join(" ",
+                           def.format("Invalid argument '{0}'.", [name]), 
+                           def.format(msg, scope)));
+        },
+    
+        assertionFailed: function(msg, scope){
+            return def.error(
+                       def.join(" ", 
+                           "Assertion failed.", 
+                           def.format(msg, scope)));
         }
-    }
-
-    function withBase(base, method, ctx, args){
-        var prevBase = def.base;
-            def.base = base !== method ? base : null;
-        try{
-            return method.apply(ctx, args);
-        } finally {
-            def.base = prevBase;
-        }
-    }
-
-    function override(method, base){
-        return function(){
-            return withBase(base, method, this, arguments);
+    };
+    
+    def.copyOwn(def.error, errors);
+    
+    /* Create direct fail versions of errors */
+    def.forEachOwn(errors, function(errorFun, name){
+        def.fail[name] = function(){
+            throw errorFun.apply(null, arguments);
         };
+    });
+    
+    // -----------------------
+    
+    /** @private */
+    var currentNamespace = def, // at the end of the file it is set to def.global
+        namespaceStack = [];
+    
+    /** @private */
+    function getNamespace(name, base){
+        var current = base || currentNamespace;
+        if(name){
+            var parts = name.split('.');
+            for(var i = 0; i < parts.length ; i++){
+                var part = parts[i];
+                current = current[part] || (current[part] = {});
+            }
+        }
+    
+        return current;
     }
     
-    function createType(name){
-        var state = {},
-            safe = shared.safe(state),
-            typeName  = new TypeName(name);
-        
-        function createInstance(){
-            var method = state.init || state.baseInit;
-            if(method){
-                withBase(state.baseInit, method, this, arguments);
-            }
-
-            method = state.post || state.basePost;
-            if(method){
-                withBase(state.basePost, method, this, arguments);
-            }
+    /** @private */
+    function createSpace(name, base, definition){
+        if(def.isFun(base)){
+            definition = base;
+            base = null;
         }
         
-        createInstance.typeName = typeName;
-        createInstance.safe = safe;
-        def.copyOwn(createInstance, typeProto);
+        var namespace = getNamespace(name, base);
         
-        defineName(def.space(typeName.namespace), typeName.name, createInstance);
-        
-        return createInstance;
+        if(definition){
+            namespaceStack.push(currentNamespace);
+            try{
+                definition(namespace);
+            } finally {
+                currentNamespace = namespaceStack.pop();
+            }
+        }
+    
+        return namespace;
     }
-
-    return createType;
-});
-
-// ----------------------
-
-def.number = function(d, dv){
-    var v = parseFloat(d);
-    return isNaN(v) ? (dv || 0) : v;
-};
-
-// null or undefined to 'dv'
-def.nullTo = function(v, dv){
-    return v != null ? v : dv;
-};
-
-/**
- * Converts something to an array if it is not one already
- * an if it is not nully.
- */
-def.array = function(thing){
-    return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
-};
-
-def.copyOwn(def.array, {
+    
+    /** @private */
+    function defineName(namespace, name, value){
+        !def.hasOwn(namespace, name) ||
+            def.fail.operationInvalid("Name '{0}' is already defined in namespace.", [name]);
+    
+        return namespace[name] = value;
+    }
+    
     /**
-     * Creates an array of the specified length,
-     * and, optionally, initializes it with the specified default value.
+     * Defines a relative namespace with 
+     * name <i>name</i> on the current namespace.
+     * 
+     * <p>
+     * Namespace declarations may be nested.
+     * </p>
+     * <p>
+     * The current namespace can be obtained by 
+     * calling {@link def.space} with no arguments.
+     * The current namespace affects other nested declarations, such as {@link def.type}.
+     * </p>
+     * <p>
+     * A composite namespace name contains dots, ".", separating its elements.
+     * </p>
+     * @example
+     * <pre>
+     * def.space('foo.bar', function(space){
+     *     space.hello = 1;
+     * });
+     * </pre>
+     *
+     * @function
+     *
+     * @param {String} name The name of the namespace to obtain.
+     * If nully, the current namespace is implied.
+     * 
+     * @param {Function} definition
+     * A function that is called whith the desired namespace
+     * as first argument and while it is current.
+     * 
+     * @returns {object} The namespace.
      */
-    create: function(len, dv){
-        var a = new Array(len);
-        if(dv !== undefined){
-            for(var i = 0 ; i < len ; i++){
-                a[i] = dv;
+    def.space = createSpace;
+    
+    // -----------------------
+    
+    /** @private */
+    function asNativeObject(v){
+        return v && typeof(v) === 'object' && v.constructor === Object ?
+                v :
+                undefined;
+    }
+    
+    /** @private */
+    function asObject(v){
+        return v && typeof(v) === 'object' ? v : undefined;
+    }
+    
+    /** @private */
+    function mixinRecursive(instance, mixin){
+        for(var p in mixin){
+            var vMixin = mixin[p];
+            if(vMixin !== undefined){
+                var oMixin,
+                    oTo = asNativeObject(instance[p]);
+    
+                if(oTo){
+                    oMixin = asObject(vMixin);
+                    if(oMixin){
+                        mixinRecursive(oTo, oMixin);
+                    }
+                } else {
+                    oMixin = asNativeObject(vMixin);
+                    if(oMixin){
+                        vMixin = Object.create(oMixin);
+                    }
+    
+                    instance[p] = vMixin;
+                }
+            }
+        }
+    }
+    
+    def.mixin = function(instance/*mixin1, mixin2, ...*/){
+        for(var i = 1, L = arguments.length ; i < L ; i++){
+            var mixin = arguments[i];
+            if(mixin){
+                mixin = asObject(mixin.prototype || mixin);
+                if(mixin){
+                    mixinRecursive(instance, mixin);
+                }
+            }
+        }
+    
+        return instance;
+    };
+    
+    // -----------------------
+    
+    /** @private */
+    function createRecursive(instance){
+        for(var p in instance){
+            var vObj = asNativeObject(instance[p]);
+            if(vObj){
+                createRecursive( (instance[p] = Object.create(vObj)) );
+            }
+        }
+    }
+        
+    // Creates an object whose prototype is the specified object.
+    def.create = function(/* [deep, ] baseProto, mixin1, mixin2, ...*/){
+        var mixins = arraySlice.call(arguments),
+            deep = true,
+            baseProto = mixins.shift();
+    
+        if(typeof(baseProto) === 'boolean'){
+            deep = baseProto;
+            baseProto = mixins.shift();
+        }
+    
+        var instance = Object.create(baseProto);
+        if(deep){
+            createRecursive(instance);
+        }
+    
+        // NOTE:
+        if(mixins.length > 0){
+            mixins.unshift(instance);
+            def.mixin.apply(def, mixins);
+        }
+    
+        return instance;
+    };
+    
+    // -----------------------
+    
+    def.scope(function(){
+        var shared = def.shared(),
+            rootProto = Object.prototype;
+    
+        /** @private */
+        function typeLocked(){
+            return def.error.operationInvalid("Type is locked.");
+        }
+    
+        /** @ignore */
+        var typeProto = /** lends def.type# */{
+            init: function(init){
+                var state = shared(this.safe);
+                !state.locked || def.fail(typeLocked());
+    
+                state.init = init;
+                state.initOrPost = !!(state.init || state.post);
+                return this;
+            },
+    
+            postInit: function(postInit){
+                var state = shared(this.safe);
+                !state.locked || def.fail(typeLocked());
+    
+                state.post = postInit;
+                state.initOrPost = !!(state.init || state.post);
+                return this;
+            },
+            
+            add: function(mixin){
+                var state = shared(this.safe);
+                !state.locked || def.fail(typeLocked());
+    
+                var proto = this.prototype,
+                    baseState = state.base;
+    
+                def.forEachOwn(mixin.prototype || mixin, function(value, p){
+                    if(value !== undefined){
+                        var method = asMethod(value), 
+                            baseMethod;
+                        if(method) {
+                            state.methods[p] = method;
+                            
+                            if(baseState && 
+                               (baseMethod = baseState.methods[p]) &&
+                               // Exclude inherited stuff from Object.prototype
+                               (baseMethod instanceof Method)){
+                                value = baseMethod.override(method);
+                            }
+                        }
+                        
+                        proto[p] = value;
+                    }
+                });
+    
+                return this;
+            }
+        };
+    
+        // TODO: improve this code with indexOf
+        function TypeName(full){
+            var parts;
+            if(full instanceof Array){
+                parts = full;
+                full  = parts.join('.');
+            } else {
+                parts = full.split('.');
+            }
+            
+            if(parts.length > 1){
+                this.name           = parts.pop();
+                this.namespace      = parts.join('.');
+                this.namespaceParts = parts;
+            } else {
+                this.name = full;
+                this.namespace = null;
+                this.namespaceParts = [];
             }
         }
         
-        return a;
-    },
-
-    append: function(target, source, start){
-        if(start == null){
-            start = 0;
-        }
-
-        for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
-            target[T + i] = source[start + i];
-        }
-
-        return target;
-    },
-
-    insert: function(array, index, elem){
-        array.splice(index, 0, elem);
-        return array;
-    },
-
-    binarySearch: function(array, value, comparer){
-        var low  = 0,
-            high = array.length - 1,
-            midpoint = 0,
-            dif;
-
-        while ((dif = high - low) >= 0){
-            if(dif <= 1){
-                midpoint = low;
-            } else {
-                midpoint = low + Math.floor(dif / 2);
+        TypeName.prototype.toString = function(){
+            return this.namespace + '.' + this.name; 
+        };
+        
+        function Method(spec) {
+            this.fun = spec.as;
+            if(spec) {
+                if(spec.isAbstract) {
+                    this.isAbstract = true;
+                }
             }
-
-            var compared = comparer(value, array[midpoint]);
-            // Check to see if value is equal to item in array
-            if (!compared){
-                return midpoint;
-            }
-
-            // Not an exact match, but nothing else to compare with
-            if(dif === 0){
-                return ~(midpoint + 1);
-            }
-
-            if (compared < 0)
-                high = midpoint - 1;
-            else
-                low = midpoint + 1;
         }
-
-        // No items, insert at 0
-        return ~0;
-    },
-
-
-    /**
-     * Inserts an item in an array, 
-     * previously sorted with the specified comparer,
-     * if the item is not already contained in it.
-     *
-     * @param {Array} array A sorted array.
-     * @param item An item to insert in the array.
-     * @param {Function} comparer A comparer function.
-     * 
-     * @returns {Number}
-     * If the item is already contained in the array returns its index.
-     * If the item was not contained in the array returns the two's complement
-     * of the index where the item was inserted.
-     */
-    insertSorted: function(array, item, comparer){
-        var index;
-        if(!comparer){
-            index = ~array.length; // TODO: confirm this works
-            array.push(item);
-        } else {
-            index = def.array.binarySearch(array, item, comparer);
+        
+        def.copyOwn(Method.prototype, {
+            isAbstract: false,
+            override: function(method){
+                if(this.isAbstract) {
+                    return method.fun;
+                }
+                
+                var fun2 = override(method.fun, this.fun);
+                method.fun = fun2;
+                return fun2;
+            }
+        });
+        
+        /** @private */
+        function override(method, base){
+            
+            return function(){
+                var prevBase = def.base;
+                def.base = base;
+                try{
+                    return method.apply(this, arguments);
+                } finally {
+                    def.base = prevBase;
+                }
+            };
+        }
+        
+        /** @private */
+        function asMethod(fun) {
+            if(fun) {
+                if(def.isFun(fun)) {
+                    return new Method({as: fun});
+                }
+                
+                if(fun instanceof Method) {
+                    return fun;
+                }
+                
+                if(def.isFun(fun.as)) {
+                    return new Method(spec);
+                }
+                
+                if(fun.isAbstract) {
+                    return new Method({isAbstract: true, as: def.notImplemented });
+                }
+            }
+            
+            return null;
+        }
+        
+        /** @private */
+        function method(fun) {
+            return asMethod(fun) || def.fail.argumentInvalid('fun');
+        }
+        
+        /** @private */
+        function createConstructor(state) {
+            
+            function constructor(){
+                if(!state.initOrPost){
+                    return;
+                }
+                
+                var prevBase = def.base;
+                try{
+                    var method = state.init;
+                    if(method) {
+                        def.base = state.base.init;
+                        method.apply(this, arguments);
+                    }
+                    
+                    method = state.post;
+                    if(method) {
+                        def.base = state.base.post;
+                        method.apply(this, arguments);
+                    }
+                } finally {
+                    def.base = prevBase;
+                }
+            }
+            
+            return constructor;
+        }
+        
+        var rootState = {
+            methods: {}
+        };
+        
+        /**
+         * Constructs a type with the specified name in the current namespace.
+         * 
+         * @param {string} name The new type name, relative to the base argument.
+         * @param {object} [baseType] The base type.
+         * @param {object} [baseSpace] The base namespace.
+         * The default namespace is the current namespace.
+         */
+        function type(name, baseType, baseSpace){
+            
+            var baseState = baseType && baseType.safe ? shared(baseType.safe) : rootState;
+                state = Object.create(baseState),
+                constructor = createConstructor(state),
+                typeName  = new TypeName(name);
+            
+            // ----
+            
+            state.locked      = false;
+            state.constructor = constructor;
+            state.base        = baseState;
+            state.methods     = Object.create(baseState.methods);
+            
+            // ----
+            
+            baseState.locked = true;
+            
+            // ----
+            constructor.name     = typeName.name;
+            constructor.typeName = typeName;
+            constructor.safe     = shared.safe(state);
+            def.copyOwn(constructor, typeProto);
+            
+            // ----
+            
+            if(baseType) {
+                var proto = constructor.prototype = Object.create(baseType.prototype);
+                proto.constructor = constructor;
+            }
+            
+            constructor.prototype.toString = function(){
+                return "[" + typeName + "]";
+            };
+            
+            // ----
+            
+            defineName(def.space(typeName.namespace, baseSpace), 
+                       typeName.name, 
+                       constructor);
+            
+            return constructor;
+        }
+        
+        def.type   = type;
+        def.method = method; 
+    });
+    
+    // ----------------------
+    
+    def.copyOwn(def.array, /** @lends def.array */{
+        /**
+         * Creates an array of the specified length,
+         * and, optionally, initializes it with the specified default value.
+         */
+        create: function(len, dv){
+            var a = new Array(len);
+            if(dv !== undefined){
+                for(var i = 0 ; i < len ; i++){
+                    a[i] = dv;
+                }
+            }
+            
+            return a;
+        },
+    
+        append: function(target, source, start){
+            if(start == null){
+                start = 0;
+            }
+    
+            for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
+                target[T + i] = source[start + i];
+            }
+    
+            return target;
+        },
+        
+        removeAt: function(array, index){
+            return array.splice(index, 1)[0];
+        },
+        
+        insertAt: function(array, index, elem){
+            array.splice(index, 0, elem);
+            return array;
+        },
+        
+        // TODO: review this...
+        binarySearch: function(array, item, comparer, reverse){
+            if(!comparer) {
+                var index = array.indexOf(item);
+                return index < 0 ? 
+                        // Insert at the end;
+                        (reverse ? 0 : (~array.length)) : // TODO: confirm this works
+                        index;
+            }
+            
+            var low  = 0,
+                high = array.length - 1,
+                midpoint = 0,
+                dif;
+    
+            while ((dif = high - low) >= 0){
+                if(dif <= 1){
+                    midpoint = low;
+                } else {
+                    midpoint = low + Math.floor(dif / 2);
+                }
+    
+                var compared = comparer(item, array[midpoint]);
+                // Check to see if value is equal to item in array
+                if (!compared){
+                    return midpoint;
+                }
+    
+                // Not an exact match, but nothing else to compare with
+                if(dif === 0){
+                    if (compared > 0) {
+                        midpoint++;
+                    }
+                    
+                    return ~midpoint;
+                }
+                
+                if(dif === 1) {
+                    if (compared > 0) {
+                        low = midpoint + 1;
+                    } else {
+                        return ~midpoint;
+                    }
+                }
+    
+                if (compared < 0)
+                    high = midpoint - 1;
+                else
+                    low = midpoint + 1;
+            }
+    
+            // No items, insert at 0
+            return ~0;
+        },
+    
+        /**
+         * Inserts an item in an array, 
+         * previously sorted with a specified comparer,
+         * if the item is not already contained in it.
+         *
+         * @param {Array} array A sorted array.
+         * @param item An item to insert in the array.
+         * @param {Function} [comparer] A comparer function.
+         * @param {boolean} [reverse=false] When true and a comparer function is not specified, 
+         * indicates that the item should be inserted at the first position, 
+         * instead of at the last one.
+         * 
+         * @returns {Number}
+         * If the item is already contained in the array returns its index.
+         * If the item was not contained in the array returns the two's complement
+         * of the index where the item was inserted.
+         */
+        insert: function(array, item, comparer, reverse){
+            
+            var index = def.array.binarySearch(array, item, comparer);
             if(index < 0){
                 // Insert at the two's complement of index
-                def.array.insert(array, ~index, item);
+                array.splice(~index, 0, item);
+            }
+            
+            return index;
+        },
+        
+        remove: function(array, item, comparer){
+            var index = def.array.binarySearch(array, item, comparer);
+            if(index >= 0) {
+                return array.splice(index, 1)[0];
+            }
+            // return undefined;
+        }
+    });
+    
+    // -----------------
+    
+    var nextGlobalId  = 1,
+        nextIdByScope = {};
+    def.nextId = function(scope){
+        if(scope) {
+            var nextId = def.getOwn(nextIdByScope, scope) || 1;
+            nextIdByScope[scope] = nextId + 1;
+            return nextId;
+        }
+        
+        return nextGlobalId++;
+    };
+    
+    // --------------------
+    
+    def.type('Query')
+    .init(function(){
+        this.index = -1;
+        this.item  = undefined;
+    })
+    .add({
+        next: function(){
+            // already was finished
+            if(this.index === -2){
+                return false;
+            }
+            
+            var nextIndex = this.index + 1;
+            if(!this._next(nextIndex)){
+                this.index = -2;
+                this.item  = undefined;
+                return false;
+            }
+            
+            this.index = nextIndex;
+            return true;
+        },
+    
+        /**
+         * @name _next
+         * @function
+         * @param {number} nextIndex The index of the next item, if one exists.
+         * @member def.Query#
+         * @returns {boolean} true if there is a next item, false otherwise.
+         */
+        _next: def.method({isAbstract: true}),
+        
+        // ------------
+        
+        each: function(fun, ctx){
+            while(this.next()){
+                fun.call(ctx, this.item, this.index);
+            }
+        },
+        
+        array: function(){
+            var array = [];
+            while(this.next()){
+                array.push(this.item);
+            }
+            return array;
+        },
+        
+        /**
+         * Facilitates the construction of dictionaries.
+         */
+        object: function(fun, ctx, keyArgs){
+            var target = def.get(keyArgs, 'target') || {},
+                keyFun = def.get(keyArgs, 'key');
+            
+            while(this.next()){
+                var key = '' + (keyFun ? keyFun.call(ctx, this.item, this.index) : this.item);
+                target[key] = fun.call(ctx, this.item, this.index);
+            }
+            
+            return target;
+        },
+        
+        reduce: function(accumulator/*, [initialValue]*/){
+            var i = 0, 
+                result;
+          
+            if(arguments.length < 2) {
+                if(!this.next()) {
+                    throw new TypeError("Length is 0 and no second argument");
+                }
+                
+                result = this.item;
+            } else {  
+                result = arguments[1];
+            }
+            
+            while(this.next()) {
+                result = accumulator(result, this.item, this.index);
+              
+                ++i;
+            }
+          
+            return result;
+        },
+        
+        /**
+         * Obtains the number of items of a query.
+         * @type number
+         */
+        count: function(){
+            var count = 0;
+            
+            while(this.next()){ count++; }
+            
+            return count;
+        },
+        
+        /**
+         * Obtains the first item of a query.
+         * 
+         * <p>
+         * If there are no items, then the specified <i>dv</i> is returned.
+         * </p>
+         * 
+         * @param {any} dv The value returned when there are no items.
+         * When unspecified, the returned value is <i>undefined</i>.
+         * 
+         * @type any
+         */
+        first: function(dv){
+            while(this.next()){ 
+                return this.item; 
+            }
+            
+            return dv;
+        },
+        
+        // TODO: change this to a Query, instead of being an aggregate?
+        // Need object iteration first?
+        // Should be renamed to 'group'
+        index: function(keyFun, ctx){
+            var keyIndex = {};
+            
+            this.each(function(item){
+                var key = keyFun ? keyFun.call(ctx, item) : item;
+                if(key != null) {
+                    var sameKeyItems = def.getOwn(keyIndex, key) || (keyIndex[key] = []);
+                
+                    sameKeyItems.push(item);
+                }
+            });
+            
+            return keyIndex;
+        },
+        
+        // TODO: change this to a Query, instead of being an aggregate?
+        uniqueIndex: function(keyFun, ctx){
+            var keyIndex = {};
+            
+            this.each(function(item){
+                var key = keyFun ? keyFun.call(ctx, item) : item;
+                if(key != null && !def.hasOwn(keyIndex, key)) {
+                    keyIndex[key] = item;
+                }
+            });
+            
+            return keyIndex;
+        },
+        
+        // deferred map
+        select: function(fun, ctx){
+            return new def.SelectQuery(this, fun, ctx);
+        },
+    
+        selectMany: function(fun, ctx){
+            return new def.SelectManyQuery(this, fun, ctx);
+        },
+    
+        // deferred filter
+        where: function(fun, ctx){
+            return new def.WhereQuery(this, fun, ctx);
+        },
+    
+        distinct: function(fun, ctx){
+            return new def.DistinctQuery(this, fun, ctx);
+        },
+    
+        skip: function(n){
+            return new def.SkipQuery(this, n);
+        }
+    });
+    
+    def.type('ArrayLikeQuery', def.Query)
+    .init(function(list){
+        def.base.call(this);
+        this._list  = def.isArrayLike(list) ? list : [list];
+        this._count = this._list.length;
+    })
+    .add({
+        _next: function(nextIndex){
+            if(nextIndex < this._count){
+                this.item = this._list[nextIndex];
+                return 1;
             }
         }
-
-        return index;
+    });
+    
+    def.type('WhereQuery', def.Query)
+    .init(function(source, where, ctx){
+        def.base.call(this);
+        this._where  = where;
+        this._ctx    = ctx;
+        this._source = source;
+    })
+    .add({
+        _next: function(nextIndex){
+            while(this._source.next()){
+                var nextItem = this._source.item;
+                if(this._where.call(this._ctx, nextItem, this._source.index)){
+                    this.item = nextItem;
+                    return 1;
+                }
+            }
+        }
+    });
+    
+    def.type('SelectQuery', def.Query)
+    .init(function(source, select, ctx){
+        def.base.call(this);
+        this._select = select;
+        this._ctx    = ctx;
+        this._source = source;
+    })
+    .add({
+        _next: function(nextIndex){
+            if(this._source.next()){
+                this.item = this._select.call(this._ctx, this._source.item, this._source.index);
+                return 1;
+            }
+        }
+    });
+    
+    
+    def.type('SelectManyQuery', def.Query)
+    .init(function(source, selectMany, ctx){
+        def.base.call(this);
+        this._selectMany = selectMany;
+        this._ctx    = ctx;
+        this._source = source;
+        this._manySource = null;
+    })
+    .add({
+        _next: function(nextIndex){
+            while(true){
+                // Consume all of existing manySource
+                if(this._manySource){
+                    if(this._manySource.next()){
+                        this.item = this._manySource.item;
+                        return 1;
+                    }
+                    
+                    this._manySource = null;
+                }
+    
+                if(!query_nextMany.call(this)){
+                    break;
+                }
+            }
+        }
+    });
+    
+    function query_nextMany(){
+        while(this._source.next()){
+            var manySource = this._selectMany.call(this._ctx, this._source.item, this._source.index);
+            if(manySource != null){
+                this._manySource = def.query(manySource);
+                return 1;
+            }
+        }
     }
-});
-
-return def;
-
+    
+    def.type('DistinctQuery', def.Query)
+    .init(function(source, key, ctx){
+        def.base.call(this);
+        this._key    = key;
+        this._ctx    = ctx;
+        this._source = source;
+        this._keys   = {};
+    })
+    .add({
+        _next: function(nextIndex){
+            while(this._source.next()){
+                var nextItem = this._source.item,
+                    keyValue = this._key ?
+                               this._key.call(this._ctx, nextItem, this._source.index) :
+                               nextItem;
+    
+                // items with null keys are ignored!
+                if(keyValue != null && !def.hasOwn(this._keys, keyValue)){
+                    this._keys[keyValue] = true;
+                    this.item = nextItem;
+                    return 1;
+                }
+            }
+        }
+    });
+    
+    def.type('SkipQuery', def.Query)
+    .init(function(source, skip){
+        def.base.call(this);
+        this._source = source;
+        this._skip = skip;
+    })
+    .add({
+        _next: function(nextIndex){
+            while(this._source.next()){
+                if(this._skip > 0){
+                    this._skip--;
+                } else {
+                    this.item = this._source.item;
+                    return 1;
+                }
+            }
+        }
+    });
+    
+    def.type('NullQuery', def.Query)
+    .add({
+        _next: function(nextIndex){}
+    });
+    
+    def.type('AdhocQuery', def.Query)
+    .init(function(next){
+        def.base.call(this);
+        this._next = next;
+    });
+    
+    def.query = function(q){
+        if(q === undefined) {
+            return new def.NullQuery();
+        }
+        
+        if(q instanceof def.Query){
+            return q;
+        }
+        
+        if(def.isFun(q)){
+            return new def.AdhocQuery(q);
+        }
+    
+        return new def.ArrayLikeQuery(q);
+    };
+    
+    // Reset namespace to global, instead of 'def'
+    currentNamespace = def.global;
+    
+    return def;
 }());

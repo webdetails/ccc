@@ -18,11 +18,28 @@
         <script type="text/javascript" src="def/def.js"></script>
         <script type="text/javascript" src="pvc/pvc.js"></script>
         <script type="text/javascript" src="pvc/pvc.text.js"></script>
-        <script type="text/javascript" src="pvc/pvcDatum.js"></script>
-        <script type="text/javascript" src="pvc/pvcDataDimension.js"></script>
-        <script type="text/javascript" src="pvc/pvcDataElement.js"></script>
-        <script type="text/javascript" src="pvc/pvcDataTranslator.js"></script>
-        <script type="text/javascript" src="pvc/pvcData.js"></script>
+        
+        <script type="text/javascript" src="pvc/data/_data.js"></script>
+        <script type="text/javascript" src="pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.load.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
+        
+        <script type="text/javascript" src="pvc/visual/Role.js"></script>
+        
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
@@ -43,10 +60,12 @@
 
   <script type="text/javascript">
 pv.listenForPageLoad(function() {
+    pvc.debug=true;
+    
     // no var in front, otherwise it it becomes 
     // a local of the enclosing function
     globalSelect = 'team A';
-
+    
     var datTree = new pvc.DataTree({
         // legendPosition: "left",
         canvas: "pvcDataTree",

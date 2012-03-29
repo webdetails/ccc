@@ -8,7 +8,7 @@
 pvc.BasePanel = pvc.Abstract.extend({
 
     chart: null,
-    _parent: null,
+    parent: null,
     _children: null,
     type: pv.Panel, // default one
     height: null,
@@ -16,14 +16,21 @@ pvc.BasePanel = pvc.Abstract.extend({
     anchor: "top",
     pvPanel: null,
     fillColor: "red",
-    margins: null,
-
+    margins:   null,
+    isRoot:    true,
+    isTopRoot: true,
+    root:      null, 
+    topRoot:   null,
+    
     constructor: function(chart, options) {
-
+        
         this.chart = chart;
 
         $.extend(this, options);
-
+        
+        this.root    = this;
+        this.topRoot = this;
+        
         this.margins = {
             top:    0,
             right:  0,
@@ -33,13 +40,16 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
 
     create: function() {
-
-        if (!this._parent) {
-            // Should be created for the vis panel only
-            this.pvPanel = new pv.Panel();
-            //this.extend(this.pvPanel, "base_");
+        if (this.isTopRoot) {
+           this.pvPanel = new pv.Panel();
         } else {
-            this.pvPanel = this._parent.pvPanel.add(this.type);
+            this.pvPanel = this.parent.pvPanel.add(this.type);
+            
+            if(this.isRoot) {
+                this.pvPanel
+                    .left(this.chart.left)
+                    .top(this.chart.top);
+            }
         }
         
         this.pvPanel
@@ -48,14 +58,22 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
 
     /**
-     * Adds a panel to children array.
+     * Adds a panel as child.
      */
     _addChild: function(child){
-        if(child._parent){
+        if(child.parent){
             throw new Error("Child already has a parent.");
         }
         
-        child._parent = this;
+        child.parent    = this;
+        child.topRoot   = this.topRoot;
+        
+        child.isTopRoot = false;
+        child.isRoot    = (child.chart.basePanel === child);
+        if(!child.isRoot) {
+            child.root = this.root;
+        }
+        
         (this._children || (this._children = [])).push(child);
     },
 
@@ -69,26 +87,26 @@ pvc.BasePanel = pvc.Abstract.extend({
      * 3) append it to the previous one in the correct position.
      */
     appendTo: function(parent) {
-        if(parent){
-            parent._addChild(this);
-        }
+        parent._addChild(this);
         
         this.create();
         this.applyExtensions();
-
-        // Layout child
-        var a = this.anchor,
-            ao = this.anchorOrtho(),
-            aol = this.anchorOrthoLength(),
-            margins = this._parent.margins;
-
-        this._parent[aol] -= this[aol];
-
-        // Place the child
-        this.pvPanel[a ](margins[a ]);
-        this.pvPanel[ao](margins[ao]);
-
-        margins[a] += this[aol];
+        
+        if(!this.isRoot) {
+            // Layout child
+            var a = this.anchor,
+                ao = this.anchorOrtho(),
+                aol = this.anchorOrthoLength(),
+                margins = this.parent.margins;
+    
+            this.parent[aol] -= this[aol];
+    
+            // Place the child
+            this.pvPanel[a ](margins[a ]);
+            this.pvPanel[ao](margins[ao]);
+    
+            margins[a] += this[aol];
+        }
     },
     
     /**
@@ -96,7 +114,7 @@ pvc.BasePanel = pvc.Abstract.extend({
      * @virtual
      */
     applyExtensions: function(){
-        if (!this._parent) {
+        if (this.isRoot) {
             this.extend(this.pvPanel, "base_");
         }
     },
@@ -139,6 +157,39 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     /**
+     * The default implementation renders
+     * the marks returned by #_getSignums, 
+     * or this.pvPanel if none is returned (and it has no children)
+     * which is generally in excess of what actually requires
+     * to be re-rendered.
+     * The call is then propagated to any child panels.
+     * 
+     * @virtual
+     */
+    _renderSignums: function(){
+        var marks = this._getSignums();
+        if(marks && marks.length){
+            marks.forEach(function(mark){ mark.render(); });
+        } else if(!this._children) {
+            this.pvPanel.render();
+        }
+        
+        if(this._children){
+            this._children.forEach(function(child){
+                child._renderSignums();
+            });
+        }
+    },
+
+    /**
+     * Returns an array of marks whose instances are associated to a datum, or null.
+     * @virtual
+     */
+    _getSignums: function(){
+        return null;
+    },
+    
+    /**
      * Sets the size for the panel, 
      * for when the parent panel is undefined
      */
@@ -154,9 +205,9 @@ pvc.BasePanel = pvc.Abstract.extend({
 
     setAnchoredSize: function(size){
         if (this.isAnchorTopOrBottom()) {
-            this.setSize(this._parent.width, size);
+            this.setSize(this.parent.width, size);
         } else {
-            this.setSize(size, this._parent.height);
+            this.setSize(size, this.parent.height);
         }
     },
 
@@ -187,8 +238,8 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
 
     consumeFreeClientSize: function(){
-        if(this._parent){
-            this.setSize(this._parent.width, this._parent.height);
+        if(this.parent){
+            this.setSize(this.parent.width, this.parent.height);
         }
     },
 
@@ -224,12 +275,12 @@ pvc.BasePanel = pvc.Abstract.extend({
             return this.pvPanel;
         }
 
-        if(!this._parent){
-            throw new Error("Layers are not possible on a root panel.");
+        if(!this.parent){
+            throw def.error.operationInvalid("Layers are not possible in a root panel.");
         }
 
         if(!this.pvPanel){
-            throw new Error(
+            throw def.error.operationInvalid(
                "Cannot access layer panels without having created the main panel.");
         }
 
@@ -241,7 +292,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
 
         if(!pvPanel){
-            pvPanel = this._parent.pvPanel.add(this.type)
+            pvPanel = this.parent.pvPanel.add(this.type)
                             .extend(this.pvPanel);
 
             this.initLayerPanel(pvPanel, layer);
@@ -269,10 +320,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             var tooltip = '',
                 datum = this.datum();
             if(datum){
-                tooltip = datum.value;
+                tooltip = datum.atoms.value.value;
                 if(tooltipFormat){
-                    var s = datum.elem.series.rawValue,
-                        c = datum.elem.category.rawValue;
+                    var s = datum.atoms.series.rawValue,
+                        c = datum.atoms.category.rawValue;
 
                     tooltip = tooltipFormat.call(myself, s, c, tooltip, datum);
                 }

@@ -3,6 +3,34 @@
  * The main chart component
  */
 pvc.BaseChart = pvc.Abstract.extend({
+    /**
+     * The parent chart.
+     * 
+     * <p>
+     * The root chart has null as the value of its parent property.
+     * </p>
+     * 
+     * @type pvc.BaseChart
+     */
+    parent: null,
+    
+    /**
+     * The root chart.
+     * 
+     * <p>
+     * The root chart has itself as the value of the root property.
+     * </p>
+     * 
+     * @type pvc.BaseChart
+     */
+    root: null,
+    
+    /**
+     * A map from visual role name to visual role specification.
+     * 
+     * @type object
+     */
+    _roleSpecs: null,
 
     isPreRendered: false,
 
@@ -27,22 +55,25 @@ pvc.BaseChart = pvc.Abstract.extend({
 
     _renderVersion: 0,
     
-    // renderCallback
     renderCallback: undefined,
 
     constructor: function(options) {
-
+        this.parent = def.get(options, 'parent') || null;
+        if(this.parent) {
+            this.owner = this.parent.owner;
+            this.dataEngine = def.get(options, 'dataEngine') || 
+                              def.fail.argumentRequired('options.dataEngine');
+            
+            this.left = options.left;
+            this.top  = options.top;
+            this._roleSpecs = this.parent._roleSpecs;
+        } else {
+            this.owner = this;
+        }
+        
         this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
     },
-
-    /**
-     * Creates an appropriate DataEngine
-     * @virtual
-     */
-    createDataEngine: function() {
-        return new pvc.DataEngine(this);
-    },
-
+    
     /**
      * Processes options after user options and defaults have been merged.
      * Applies restrictions,
@@ -97,20 +128,23 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         pvc.log("Prerendering in pvc");
 
-        // If we don't have data, we just need to set a "no data" message
-        // and go on with life.
-        if (!this.allowNoData && this.resultset.length === 0) {
-            throw new NoDataException();
+        if (!this.parent) {
+            // If we don't have data, we just need to set a "no data" message
+            // and go on with life.
+            // Child charts always have some data
+            if(!this.allowNoData && this.resultset.length === 0) {
+                throw new NoDataException();
+            }
+            
+            // Now's as good a time as any to completely clear out all
+            //  tipsy tooltips
+            pvc.removeTipsyLegends();
         }
 
-        // Now's as good a time as any to completely clear out all
-        //  tipsy tooltips
-        pvc.removeTipsyLegends();
-        
         /* Options may be changed between renders */
         this._processOptions();
 
-        // Initialize the data engine and its translator
+        /* Initialize the data engine */
         this.initDataEngine();
 
         // Create color schemes
@@ -123,65 +157,313 @@ pvc.BaseChart = pvc.Abstract.extend({
         this.initTitlePanel();
 
         this.initLegendPanel();
-
-        // ------------
-
+        
+        if(this.parent || !this._isRoleDefined('multiChartColumn')) {
+            this._preRenderCore();
+        } else {
+            this._preRenderMultiChart();
+        }
+        
         this.isPreRendered = true;
     },
 
     /**
+     * Override to create chart specific content panels here.
+     * No need to call base.
+     * @virtual
+     */
+    _preRenderCore: function(){
+        /* NOOP */
+    },
+    
+    _preRenderMultiChart: function(){
+        var data = this._visualRoleData('multiChartColumn', {visible: true}),
+            options = this.options;
+        
+        // multiChartLimit can be Infinity
+        var multiChartLimit = Number(options.multiChartLimit);
+        if(isNaN(multiChartLimit) || multiChartLimit < 1) {
+            multiChartLimit = Infinity;
+        }
+        
+        var leafCount = data.leafs.length,
+            count     = Math.min(leafCount, multiChartLimit);
+        
+        if(count === 0) {
+            if(!this.allowNoData) {
+                throw new NoDataException();
+            }
+            return;
+        }
+        
+        // multiChartWrapColumn can be Infinity
+        var multiChartWrapColumn = Number(options.multiChartWrapColumn);
+        if(isNaN(multiChartWrapColumn) || multiChartLimit < 1) {
+            multiChartWrapColumn = 3;
+        }
+        
+        var colCount   = Math.min(count, multiChartWrapColumn),
+            rowCount   = Math.ceil(count / colCount),
+            childClass = this.constructor,
+            basePanel  = this.basePanel,
+            margins    = basePanel.margins,
+            left       = margins.left,
+            top        = margins.top,
+            width      = basePanel.width  / colCount,
+            height     = basePanel.height / rowCount;
+        
+        for(var index = 0 ; index < count ; index++) {
+            var childData = data.leafs[index],
+                childOptions = def.create(this.options, {
+                    parent:     this,
+                    title:      childData.absLabel,
+                    legend:     false,
+                    dataEngine: childData,
+                    width:      width,
+                    height:     height,
+                    left:       left + ((index % colCount) * width),
+                    top:        top  + (Math.floor(index / colCount) * height)
+                });
+
+            var childChart = new childClass(childOptions);
+            childChart.preRender();
+        }
+    },
+    
+    /**
      * Initializes the data engine
      */
     initDataEngine: function() {
-        var de = this.dataEngine;
-        if(!de){
-            de = this.dataEngine = this.createDataEngine();
+        var dataEngine  = this.dataEngine;
+        
+        if(!this.parent) {
+            if(pvc.debug){
+                this._logResultset();
+            }
+            
+            var complexType = dataEngine ? 
+                                dataEngine.type :
+                                new pvc.data.ComplexType();
+            
+            var translation = this._createTranslation(complexType);
+            if(translation) {
+                translation.configureType();
+            }
+            
+            if(!dataEngine) {
+                dataEngine = this.dataEngine = new pvc.data.Data({type: complexType});
+            } else {
+                // TODO: assert complexType not changed...
+            }
+            
+            this._initRoles();
+            
+            if(translation) {
+                dataEngine.load(translation.execute(dataEngine));
+            }
         }
-//        else {
-//            //de.clearDataCache();
-//        }
-
-        de.setData(this.metadata, this.resultset);
-        de.setCrosstabMode(this.options.crosstabMode);
-        de.setSeriesInRows(this.options.seriesInRows);
-        // TODO: new
-        de.setMultiValued(this.options.isMultiValued);
-
-        // columns where measure values are, for relational data
-        de.setValuesIndexes(this.options.measuresIndexes);
-
-        de.setDataOptions(this.options.dataOptions);
-
-        // ---
-
-        de.createTranslator();
-
-        if(pvc.debug){ 
-            pvc.log(this.dataEngine.getInfo()); 
+        
+        if(pvc.debug){
+            pvc.log(dataEngine.getInfo());
         }
     },
+    
+    _logResultset: function(){
+        pvc.log("ROWS");
+        if(this.resultset){
+            this.resultset.forEach(function(row, index){
+                pvc.log("row " + index + ": " + JSON.stringify(row));
+            });
+        }
 
+        pvc.log("COLS");
+        if(this.metadata){
+            this.metadata.forEach(function(col){
+                pvc.log("column {" +
+                    "index: " + col.colIndex +
+                    ", name: "  + col.colName +
+                    ", label: "  + col.colLabel +
+                    ", type: "  + col.colType + "}"
+                );
+            });
+        }
+    },
+    
+    _createTranslation: function(complexType){
+        var options = this.options,
+            dataOptions = options.dataOptions || {};
+        
+        var translOptions = {
+            secondAxisSeriesIndexes: options.secondAxis ? (options.secondAxisSeriesIndexes || options.secondAxisIdx) : null,
+            seriesInRows:      options.seriesInRows,
+            crosstabMode:      options.crosstabMode,
+            isMultiValued:     options.isMultiValued,
+            dimensions:        options.dimensions,
+            readers:           options.readers,
+            
+            measuresIndexes:   options.measuresIndexes, // relational multi-valued
+            
+            multiChartColumnIndexes: options.multiChartColumnIndexes,
+            multiChartRowIndexes: options.multiChartRowIndexes,
+            
+            // crosstab
+            separator:         dataOptions.separator,
+            measuresInColumns: dataOptions.measuresInColumns,
+            measuresIndex:     dataOptions.measuresIndex || dataOptions.measuresIdx, // measuresInRows
+            measuresCount:     dataOptions.measuresCount || dataOptions.numMeasures, // measuresInRows
+            categoriesCount:   dataOptions.categoriesCount,
+            
+            // Timeseries parse format
+            isCategoryTimeSeries: options.timeSeries,
+            categoryTimeSeriesFormat: options.timeSeries && options.timeSeriesFormat,
+            
+            // Labels
+            categoryFormatter: options.getCategoryLabel,
+            seriesFormatter:   options.getSeriesLabel
+        };
+        
+        var translationClass = translOptions.crosstabMode ? 
+                pvc.data.CrosstabTranslationOper : 
+                pvc.data.RelationalTranslationOper;
+
+        return new translationClass(complexType, this.resultset, this.metadata, translOptions);
+    },
+    
+    _initRoles: function(){
+        var data  = this.dataEngine,
+            type  = data.type,
+            roles = def.copy(this.options.roles);
+        
+        // Default role mappings
+        
+        /**
+         * Roles that support multiple dimensions.  
+         */
+        ['series', 'category', 'multiChartColumn', 'multiChartRow'].forEach(function(roleName){
+            if(!roles[roleName]) {
+                var roleDims = type.groupDimensionsNames(roleName, {assertExists: false});
+                if(roleDims) {
+                    roles[roleName] = roleDims;
+                }
+            }
+        }, this);
+        
+        /**
+         * Roles that only support one dimension.
+         */
+        ['value', 'value2'].forEach(function(roleName){
+            if(!roles[roleName]) {
+                var dimType = type.dimensions(roleName, {assertExists: false});
+                if(dimType) {
+                    roles[roleName] = roleName;
+                }
+            }
+        }, this);
+        
+        // --------------
+        
+        this._roleSpecs = 
+            def.query(def.keys(roles))
+               .where(def.truthy)
+               .object(function(name){
+                   var groupingSpec = new pvc.data.GroupingSpec(roles[name], data);
+                   return new pvc.visual.Role(name, groupingSpec);
+               });
+//        
+//        this._roleSpecs = {};
+//        
+//        for(var name in roles) {
+//            var role = roles[name];
+//            if(role) {
+//                var groupingSpec = new pvc.data.GroupingSpec(role, data);
+//                this._roleSpecs[name] = new pvc.visual.Role(name, groupingSpec);
+//            }
+//        }
+//        
+        // --------------
+        
+        // TODO: validate required roles?
+    },
+    
+    /**
+     * Obtains the data that is assigned to a given role, given its name.
+     * 
+     * @param {string} roleName The role name.
+     * @param {object} keyArgs Keyword arguments.
+     * See additional available arguments in {@link pvc.data.Data#groupBy}.
+     * @param {boolean} assertExists Indicates if an error should be thrown if the specified role name is undefined.
+     * @returns {pvc.data.Data} The role's data if it exists or null if it does not. 
+     */
+    _visualRoleData: function(roleName, keyArgs){
+        var role = this._roleSpecs[roleName];
+        if(!role) {
+            if(def.get(keyArgs, 'assertExists', true)) {
+                throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", roleName);
+            }
+            
+            return null;
+        }
+        
+        return this.dataEngine.groupBy(role.grouping, keyArgs);
+    },
+    
+    /**
+     * Obtains a roles array or a specific role, given its name.
+     * 
+     * @param {string} roleName The role name.
+     * @param {object} keyArgs Keyword arguments.
+     * @param {boolean} assertExists Indicates if an error should be thrown if the specified role name is undefined.
+     * 
+     * @type pvc.data.VisualRole[]|pvc.data.VisualRole 
+     */
+    _visualRoles: function(roleName, keyArgs){
+        if(roleName == null) {
+            return def.own(this._roleSpecs);
+        }
+        
+        var role = def.getOwn(this._roleSpecs, roleName) || null;
+        if(!role && def.get(keyArgs, 'assertExists', true)) {
+            throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", roleName);
+        }
+        
+        return role;
+    },
+    
+    /**
+     * Indicates if a role is defined, given its name. 
+     * 
+     * @param {string} roleName The role name.
+     * @type boolean
+     */
+    _isRoleDefined: function(roleName){
+        return !!this._roleSpecs[roleName];
+    },
+    
     /**
      * Creates and initializes the base (root) panel.
      */
     initBasePanel: function() {
+        var options = this.options;
         // Since we don't have a parent panel
         // we need to manually create the points.
-        this.originalWidth  = this.options.width;
-        this.originalHeight = this.options.height;
+        this.originalWidth  = options.width;
+        this.originalHeight = options.height;
         
-        this.basePanel = new pvc.BasePanel(this);
-        this.basePanel.setSize(this.options.width, this.options.height);
+        this.basePanel = new pvc.BasePanel(this, {isRoot: true});
+        this.basePanel.setSize(options.width, options.height);
         
-        var margins = this.options.margins;
+        var margins = options.margins;
         if(margins){
             this.basePanel.setMargins(margins);
         }
         
-        this.basePanel.create();
-        this.basePanel.applyExtensions();
-
-        this.basePanel.getPvPanel().canvas(this.options.canvas);
+        if(!this.parent) {
+            this.basePanel.create();
+            this.basePanel.applyExtensions();
+            this.basePanel.getPvPanel().canvas(options.canvas);
+        } else {
+            this.basePanel.appendTo(this.parent.basePanel);
+        }
     },
 
     /**
@@ -233,7 +515,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     render: function(bypassAnimation, rebuild) {
         try{
             this._renderAnimationStart = 
-            this.isAnimating = this.options.animate && !bypassAnimation;
+                this.isAnimating = this.options.animate && !bypassAnimation;
             
             if (!this.isPreRendered || rebuild) {
                 this.preRender();
@@ -262,7 +544,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             } else {
                 this._onRenderEnd(false);
             }
-            
+        
         } catch (e) {
             if (e instanceof NoDataException) {
 
@@ -325,6 +607,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Sets the resultset that will be used to build the chart.
      */
     setResultset: function(resultset) {
+        !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
         this.resultset = resultset;
         if (resultset.length == 0) {
             pvc.log("Warning: Resultset is empty");
@@ -336,6 +619,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      * will give more information for building the chart.
      */
     setMetadata: function(metadata) {
+        !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
         this.metadata = metadata;
         if (metadata.length == 0) {
             pvc.log("Warning: Metadata is empty");
@@ -467,21 +751,29 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         width:  400,
         height: 300,
-
+        
+        multiChartLimit: null,
+        multiChartWrapColumn: 3,
+        
         orientation: 'vertical',
-
+        
         extensionPoints:  undefined,
         
-        crosstabMode:     true,
-        isMultiValued:    false,
-        seriesInRows:     false,
-        measuresIndexes:  undefined,
-        dataOptions:      undefined,
-        getCategoryLabel: undefined,
-        getSeriesLabel:   undefined,
-
-        timeSeries:       undefined,
-        timeSeriesFormat: undefined,
+        roles:             undefined,
+        dimensions:        undefined,
+        readers:           undefined,
+        crosstabMode:      true,
+        multiChartColumnIndexes: undefined,
+        multiChartRowIndexes: undefined,
+        isMultiValued:     false,
+        seriesInRows:      false,
+        measuresIndexes:   undefined,
+        dataOptions:       undefined,
+        getCategoryLabel:  undefined,
+        getSeriesLabel:    undefined,
+        
+        timeSeries:        undefined,
+        timeSeriesFormat:  undefined,
 
         animate: true,
 

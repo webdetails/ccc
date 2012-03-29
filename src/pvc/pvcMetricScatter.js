@@ -66,7 +66,6 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         parser;
 
     if(options.timeSeries){
-        parser = pv.Format.date(options.timeSeriesFormat);
         tScale = chart.getTimeseriesScale({bypassAxisSize: true});
     }
     
@@ -75,7 +74,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
     // calculate a position along the base-axis
     myself.DF.baseCalculation = options.timeSeries ?
-          function(d) { return tScale(parser.parse(d.category)); } :
+          function(d) { return tScale   (d.category); } :
           function(d) { return baseScale(d.category); };
       
 
@@ -92,17 +91,16 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 //        };
 //    }
 
-    var sortFun = function(a, b) {return a.category - b.category; };
+    //var sortFun = function(a, b) {return a.category - b.category; };
     myself.DF.getSeriesData =
         function(d){
-            return dataEngine.getObjectsForSeriesIndex(d, sortFun);
+            return dataEngine.getObjectsForSeriesIndex(d);
         };
 
 
     var colors = this.chart.colors(pv.range(dataEngine.getSeriesSize()));
 
     myself.DF.colorFunc = function(d){
-        // return colors(d.serieIndex)
         return colors(dataEngine.getVisibleSeriesIndexes()[this.parent.index])
     };
   },

@@ -69,12 +69,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         return this.isOrientationVertical();
     },
 
-    preRender: function(){
+    _preRenderCore: function(){
         var options = this.options;
-        
-        // NOTE: creates root BasePanel, 
-        //  and its Title and Legend child panels.
-        this.base();
 
         pvc.log("Prerendering in CategoricalAbstract");
 
@@ -84,7 +80,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         this.initYAxis();
         
         // NOTE: must be evaluated before axis panels' creation
-        //  because getZZZZScale calls assume this (bypassAxisSize = false)
+        //  because getZZZZScale calls pass: bypassAxisSize = false
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         if(options.secondAxis){
@@ -140,7 +136,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.xAxisDomainRoundMode,
                 desiredTickCount: options.xAxisDesiredTickCount,
                 minorTicks:  options.xAxisMinorTicks,
-                ordinalDimensionName: this.getAxisOrdinalDimension('x'),
+                ordinalDimensionsNames: this.getAxisOrdinalDimensions('x'),
                 useCompositeAxis: options.useCompositeAxis,
                 font: options.axisLabelFont,
                 title: options.xAxisTitle,
@@ -168,7 +164,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.yAxisDomainRoundMode,
                 desiredTickCount: options.yAxisDesiredTickCount,
                 minorTicks:       options.yAxisMinorTicks,
-                ordinalDimensionName: this.getAxisOrdinalDimension('y'),
+                ordinalDimensionsNames: this.getAxisOrdinalDimensions('y'),
                 useCompositeAxis: options.useCompositeAxis,
                 font: options.axisLabelFont,
                 title: options.yAxisTitle,
@@ -197,7 +193,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.secondAxisDomainRoundMode,
                 desiredTickCount: options.secondAxisDesiredTickCount,
                 minorTicks:       options.secondAxisMinorTicks,
-                ordinalDimensionName: this.getAxisOrdinalDimension('x'),
+                ordinalDimensionsNames: this.getAxisOrdinalDimensions('x'),
                 tickColor: options.secondAxisColor,
                 title: options.secondAxisTitle,
                 titleFont: options.axisTitleFont,
@@ -223,7 +219,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.secondAxisDomainRoundMode,
                 desiredTickCount: options.secondAxisDesiredTickCount,
                 minorTicks:       options.secondAxisMinorTicks,
-                ordinalDimensionName: this.getAxisOrdinalDimension('y'),
+                ordinalDimensionsNames: this.getAxisOrdinalDimensions('y'),
                 tickColor: options.secondAxisColor,
                 title: options.secondAxisTitle,
                 titleFont: options.axisTitleFont,
@@ -251,9 +247,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
 
     /**
-     *  The data dimension name to use on an ordinal axis.
+     *  The data dimensions names to use in an ordinal axis.
      */
-    getAxisOrdinalDimension: function(axis){
+    getAxisOrdinalDimensions: function(axis){
         var onSeries = false;
 
         // onSeries can only be true if the perpendicular axis is ordinal
@@ -263,7 +259,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             onSeries = (axis == "x") ? !isVertical : isVertical;
         }
 
-        return onSeries ? 'series' : 'category';
+        return this.dataEngine.type.groupDimensionsNames(
+                      onSeries ? 'series' : 'category');
     },
 
     /**
@@ -306,7 +303,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var axis = this[axisName + "AxisPanel"];
         return axis ? axis.axisSize : 0;
     },
-
+    
     /**
      * Scale for an ordinal axis.
      * If orthoAxis is null:
@@ -328,12 +325,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             xAxisSize = this._getAxisSize(bypassAxisSize, 'x');
         
         // DOMAIN
-        var data = orthoAxis ?
-                this.dataEngine.getVisibleSeries() :
-                this.dataEngine.getVisibleCategories();
+        var roleName = orthoAxis ? 'series' : 'category',
+            data = this._visualRoleData(roleName, {visible: true}),
+            leafKeys = data.leafs.map(function(leaf){ return leaf.key; });
         
-        // NOTE: assumes data elements convert well to string
-        var scale = new pv.Scale.ordinal(data);
+        var scale = new pv.Scale.ordinal(leafKeys);
         
         // RANGE
         if (orthoAxis) {   // added by CvK
@@ -541,21 +537,26 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             isX = this.isOrientationVertical();
         
         // DOMAIN
-        var categories = this.dataEngine.getVisibleCategories();
+        var role = this._visualRoles('category');//, {visible: true});
+        if(!role.grouping.isSingleDimension) {
+            pvc.log("[WARNING] A timeseries category role can only have one dimension.");
+        } 
+        
+        var dimName = role.grouping.dimensions().first().name,
+            valueDim = this.dataEngine.dimensions(dimName);
         
         // Adding a small offset to the scale's domain:
-        var parser = pv.Format.date(options.timeSeriesFormat),
-            dMin = parser.parse(categories[0]),
-            dMax = parser.parse(categories[categories.length - 1]),
-            dOffset = 0;
+        var dRange = valueDim.range(), // already only contains visibles
+            dMin = dRange.min.value,
+            dMax = dRange.max.value;
         
-        if(!bypassAxisOffset){
-            dOffset = (dMax.getTime() - dMin.getTime()) * options.axisOffset;
+        if(!bypassAxisOffset && options.axisOffset > 0){
+            var dOffset = (dMax.getTime() - dMin.getTime()) * options.axisOffset;
+            dMin = new Date(dMin.getTime() - dOffset);
+            dMax = new Date(dMax.getTime() + dOffset);
         }
 
-        var scale = new pv.Scale.linear(
-                                new Date(dMin.getTime() - dOffset),
-                                new Date(dMax.getTime() + dOffset));
+        var scale = new pv.Scale.linear(dMin, dMax);
 
         // Domain rounding
         // TODO: pvc.scaleTicks(scale) does not like Dates...
@@ -725,7 +726,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
 
     clearSelections: function(){
-        this.dataEngine.clearSelections();
+        this.dataEngine.owner.clearSelected();
         this.categoricalPanel._handleSelectionChanged();
     }
 

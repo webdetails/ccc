@@ -80,16 +80,15 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
     }
 });
 
+/*
 
 pvc.WaterfallDataEngine = pvc.DataEngine.extend({
     constructor: function(chart){
         this.base(chart);
     },
 
-    /**
-     * Creates and prepares the custom WaterfallTranslator.
-     * [override]
-     */
+    // Creates and prepares the custom WaterfallTranslator.
+    // [override]
     createTranslator: function(){
         this.base();
 
@@ -121,16 +120,16 @@ pvc.WaterfallTranslator = pvc.DataTranslator.extend({
         // Call base version
         this.base();
 
-        /*
-         (Total column is for waterfall)
-         Values:
-         [["X",    "Ser1", "Ser2", "Ser3"],
-          ["Cat1", "U",      800,    1200],  // 1800 (depends on visible series)
-          ["Cat2", "D",      100,     600],  //  700
-          ["Cat3", "D",      400,     300],  //  700
-          ["Cat4", "D",      200,     100],  //  300
-          ["Cat5", "D",      100,     200]]  //  300
-         */
+        
+//         (Total column is for waterfall)
+//         Values:
+//         [["X",    "Ser1", "Ser2", "Ser3"],
+//          ["Cat1", "U",      800,    1200],  // 1800 (depends on visible series)
+//          ["Cat2", "D",      100,     600],  //  700
+//          ["Cat3", "D",      400,     300],  //  700
+//          ["Cat4", "D",      200,     100],  //  300
+//          ["Cat5", "D",      100,     200]]  //  300
+//        
 
         this.sourceTranslator.setData(this.metadata, this.resultset);
         this.sourceTranslator.dataEngine = this.dataEngine;
@@ -158,6 +157,7 @@ pvc.WaterfallTranslator = pvc.DataTranslator.extend({
     }
 });
 
+*/
 /**
  * Waterfall chart panel (also bar-chart). Generates a bar chart. Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
@@ -578,17 +578,19 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                                 0 : (seriesCount - 1);
 
         this.DF.colorFunc = function(){
-            var datum = this.datum(),
-                seriesIndex = datum.elem.series.leafIndex;
-
+            var datum = this.datum();
+            
+            var visibleSerIndex = myself.stacked ? this.parent.index : this.index,
+                seriesIndex = dataEngine.getVisibleSeriesIndexes()[visibleSerIndex];
+            
             // Change the color of the totals series
             if (myself.waterfall && seriesIndex == totalsSeriesIndex) {
                 return pv.Color.transparent;
             }
 
             var color = colors(seriesIndex),
-                shouldDimColor = dataEngine.getSelectedCount() > 0 &&
-                                 !datum.isSelected();
+                shouldDimColor = dataEngine.owner.selectedCount() > 0 &&
+                                 !datum.isSelected;
 
             return shouldDimColor ? pvc.toGrayScale(color) : color;
         };
@@ -773,9 +775,10 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
                     if(options.customTooltip){
                         var datum = this.datum(),
-                            v = datum.value,
-                            s = datum.elem.series.rawValue,
-                            c = datum.elem.category.rawValue;
+                            atoms = datum.atoms,
+                            v = atoms.value.value,
+                            s = atoms.series.rawValue,
+                            c = atoms.category.rawValue;
 
                         tooltip = options.customTooltip.call(null, s, c, v, datum);
                     }
@@ -870,8 +873,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             this.doGenOverflMarks(anchor, true, this.DF.maxBarSize,
                 0, this.DF.barScale,
                 function(d){
-                    var res = myself.chart.dataEngine
-                    .getVisibleValuesForCategoryIndex(d);
+                    var res = myself.chart.dataEngine.getVisibleValuesForCategoryIndex(d);
+                    
                     // check for off-grid values (and replace by null)
                     var fixedMin = myself.chart.options.orthoFixedMin;
                     for(var i=0; i<res.length; i++)
@@ -885,8 +888,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             this.doGenOverflMarks(anchor, false, this.DF.maxBarSize,
                 Math.PI, this.DF.barScale,
                 function(d){
-                    var res = myself.chart.dataEngine
-                    .getVisibleValuesForCategoryIndex(d);
+                    var res = myself.chart.dataEngine.getVisibleValuesForCategoryIndex(d);
                     // check for off-grid values (and replace by null)
                     var fixedMax = myself.chart.options.orthoFixedMax;
                     for(var i=0; i<res.length; i++)

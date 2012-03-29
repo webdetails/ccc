@@ -14,9 +14,7 @@ pvc.TimeseriesAbstract = pvc.BaseChart.extend({
         pvc.mergeDefaults(this.options, pvc.TimeseriesAbstract.defaultOptions, options);
     },
 
-    preRender: function(){
-
-        this.base();
+    _preRenderCore: function(){
 
         // Do we have the timeseries panel? add it
         if (this.options.showAllTimeseries){
@@ -50,7 +48,6 @@ pvc.TimeseriesAbstract = pvc.BaseChart.extend({
  */
 pvc.AllTimeseriesPanel = pvc.BasePanel.extend({
 
-    _parent: null,
     pvAllTimeseriesPanel: null,
     anchor: "bottom",
     allTimeseriesSize: 50,

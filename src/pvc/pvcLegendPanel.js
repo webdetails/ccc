@@ -15,7 +15,6 @@
  */
 pvc.LegendPanel = pvc.BasePanel.extend({
 
-  _parent: null,
   pvRule: null,
   pvDot: null,
   pvLabel: null,
@@ -154,21 +153,25 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     // defined font function
     var computeDecoration = function(idx){
-      if(myself.chart.dataEngine.isDimensionVisible(myself.chart.legendSource, idx)){
+      if(myself.chart.dataEngine
+               .dimensions(myself.chart.legendSource)
+               .atoms()[idx]
+               .isVisible){
         return "";
       }
-      else{
-        return "line-through"
-      }
+      
+      return "line-through"
     };
     
     var computeTextStyle = function(idx){
-      if(myself.chart.dataEngine.isDimensionVisible(myself.chart.legendSource, idx)){
+      if(myself.chart.dataEngine
+              .dimensions(myself.chart.legendSource)
+              .atoms()[idx]
+              .isVisible){
         return "black"
       }
-      else{
-        return "#ccc"
-      }
+      
+      return "#ccc"
     };
 
     if(this.drawLine == true && this.drawMarker == true){
@@ -254,12 +257,15 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   toggleVisibility: function(idx){
     
     pvc.log("Worked. Toggling visibility of index " + idx);
-    this.chart.dataEngine.toggleDimensionVisible(this.chart.legendSource, idx);
+    this.chart.dataEngine
+        .dimensions(this.chart.legendSource)
+        .atoms()[idx]
+        .toggleVisible();
 
     // Forcing removal of tipsy legends
     pvc.removeTipsyLegends();
 
-    // Rerender chart
+    // Re-render chart
     this.chart.render(true, true);
     
     return this.pvLabel;

@@ -146,11 +146,11 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         // ------------------
         // DATA
-        var seriesDimension = de.getDimension(this._seriesDimName),
-            visibleSeriesElems = seriesDimension.getVisibleElements(),
+        var seriesDimension = de.dimensions(this._seriesDimName),
+            visibleSeriesAtoms = seriesDimension.atoms({visible: true}),
 
             // Cache series data
-            dataBySeries = this._calcDataBySeries(visibleSeriesElems),
+            dataBySeries = this._calcDataBySeries(visibleSeriesAtoms),
             selDataBySeries = this._calcSelDataBySeries(dataBySeries),
 
             stackedOffsets = options.stacked ?
@@ -177,7 +177,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                         });
 
             signumBasePosition = function(){
-                return baseScale(this.datum().elem.category.value);
+                return baseScale(this.datum().atoms.category.value);
             };
 
             signumSelBasePosition = function(){
@@ -200,7 +200,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             var halfBand = baseScale.range().band / 2;
 
             signumBasePosition = function(){
-                return baseScale(this.datum().elem.category.value) + halfBand;
+                return baseScale(this.datum().atoms.category.value) + halfBand;
             };
 
             signumSelBasePosition = function(){
@@ -246,11 +246,12 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 orthoDomainOffset;
             if(stackedOffsets){
                 // Assuming all categories are visible...
-                var seriesIndex = datum.elem.category.leafIndex;
-                orthoDomainOffset = stackedOffsets[this.parent.index][seriesIndex];
+                var categIndex = de.getVisibleCategoriesIndexes()[this.index];
+                
+                orthoDomainOffset = stackedOffsets[this.parent.index][categIndex];
             }
 
-            var value = (datum.value || 0) + (orthoDomainOffset || 0);
+            var value = (datum.atoms.value.value || 0) + (orthoDomainOffset || 0);
             return orthoScale(value) - orthoZero;
         }
 
@@ -278,7 +279,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         
         function lineSelColorInterceptor(getDatumColor, args){
             
-            if(!myself.showLines || !this.datum().isSelected()){
+            if(!myself.showLines || !this.datum().isSelected){
                 return invisibleFill;
             }
 
@@ -296,7 +297,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 return invisibleFill;
             }
 
-            var hasSelections = de.getSelectedCount() > 0,
+            var hasSelections = de.owner.selectedCount() > 0,
                 grayAlpha = options.stacked && hasSelections ? 1 : null,
                 grayIfSelected = true;
 
@@ -304,7 +305,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         function selAreaColorInterceptor(getDatumColor, args){
-            if(!myself.showAreas || !this.datum().isSelected()){
+            if(!myself.showAreas || !this.datum().isSelected){
                 return invisibleFill;
             }
 
@@ -312,7 +313,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         // Generic color "controller"
-        var colors = chart.colors(pv.range(seriesDimension.getSize()));
+        var colors = chart.colors(pv.range(seriesDimension.count()));
         
         function calcColor(getDatumColor, args, alpha, darker, grayAlpha, grayIfSelected){
             var color;
@@ -325,14 +326,14 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             }
 
             if(color === undefined){
-                var seriesIndex = this.datum().elem[myself._seriesDimName].leafIndex;
+                var seriesIndex = de.getVisibleSeriesIndexes()[this.parent.index];
                 color = colors(seriesIndex);
             }
 
             // ----------
 
-            if(de.getSelectedCount() > 0 &&
-               (grayIfSelected || !this.datum().isSelected())){
+            if(de.owner.selectedCount() > 0 &&
+               (grayIfSelected || !this.datum().isSelected)){
                 return pvc.toGrayScale(color, grayAlpha);
             }
 
@@ -360,10 +361,10 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
               ;
         }
 
-        this.pvScatterPanel = this.pvPanel.add(pv.Panel).data(visibleSeriesElems);
+        this.pvScatterPanel = this.pvPanel.add(pv.Panel).data(visibleSeriesAtoms);
 
         this.pvArea = this.pvScatterPanel.add(pv.Area)
-            .lock('data',  function(seriesElem){ return dataBySeries[seriesElem.absValue]; })
+            .lock('data',  function(seriesAtom){ return dataBySeries[seriesAtom.key]; })
             .lock('datum', function(datum){ return datum; })
             .lock('segmented', false) // fixed
 
@@ -392,7 +393,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         // -- SELECTION --
         this.pvSelArea = this.pvArea.add(pv.Area)
-            .data(function(seriesElem){ return selDataBySeries[seriesElem.absValue]; })
+            .data(function(seriesElem){ return selDataBySeries[seriesElem.key]; })
             // datum function inherited
             .visible(function(){ return !chart.isAnimating; })
             .segmented(true) // fixed
@@ -432,7 +433,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 //        
 //        var lineColor = pv.Color.names.white.alpha(0.3);
 //        function selAreaStrokeColor(){
-//            if(!myself.showAreas || !this.datum().isSelected()){
+//            if(!myself.showAreas || !this.datum().isSelected){
 //                return invisibleFill;
 //            }
 //
@@ -472,7 +473,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 // ------
                 .bottom(0)
                 .text(function(){
-                    return options.valueFormat(this.datum().value);
+                    return options.valueFormat(this.datum().atoms.value.value);
                 })
                 ;
         }
@@ -494,9 +495,10 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
                     if(options.customTooltip){
                         var datum = this.datum(),
-                            v = datum.value,
-                            s = datum.elem.series.rawValue,
-                            c = datum.elem.category.rawValue;
+                            atoms = datum.atoms,
+                            v = atoms.value.value,
+                            s = atoms.series.rawValue,
+                            c = atoms.category.rawValue;
 
                         tooltip = options.customTooltip.call(null, s, c, v, datum);
                     }
@@ -557,16 +559,6 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     },
 
     /**
-     * Returns the datum associated with the
-     * current rendering indexes of this.pvLine.
-     *
-     * @override
-     */
-    _getRenderingDatum: function(mark){
-        return (mark || this.pvLine).datum();
-    },
-    
-    /**
      * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
@@ -590,17 +582,17 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         return marks;
     },
 
-    _calcDataBySeries: function(visibleSeriesElems){
+    _calcDataBySeries: function(visibleSeriesAtoms){
         var dataBySeries = {},
             dataEngine = this.chart.dataEngine;
 
-        visibleSeriesElems.forEach(function(seriesElem){
-            var dimsFilter = {};
-            dimsFilter[this._seriesDimName] = [seriesElem.absValue];
+        visibleSeriesAtoms.forEach(function(seriesAtom){
+            var datumFilter = {};
+            datumFilter[this._seriesDimName] = [seriesAtom];
 
-            var data = dataEngine.getWhere([dimsFilter]);
+            var data = dataEngine.datums(datumFilter, {visible: true}).array();
 
-            dataBySeries[seriesElem.absValue] = data;
+            dataBySeries[seriesAtom.key] = data;
         }, this);
 
         return dataBySeries;

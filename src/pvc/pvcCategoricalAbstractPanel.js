@@ -69,29 +69,17 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
     },
 
     /**
-     * Override to detect the datum that is being rendered.
-     * Called during PV rendering, from within property functions.
-     * This should only be called on places where it is possible,
-     * through the indexes of current PV mark to 'guess' an
-     * associated datum.
-     * @virtual
-     */
-    _getRenderingDatum: function(mark){
-        return null;
-    },
-
-    /**
      * Returns a datum given its visible series and category indexes.
      * @virtual
      */
     _getRenderingDatumByIndexes: function(visibleSerIndex, visibleCatIndex){
         var de = this.chart.dataEngine,
-            datumRef = {
-                category: de.translateDimensionVisibleIndex('category', visibleCatIndex),
-                series:   de.translateDimensionVisibleIndex('series',   visibleSerIndex)
+            datumFilter = {
+                category: de.getVisibleCategories()[visibleCatIndex],
+                series:   de.getVisibleSeries()[visibleSerIndex]
             };
 
-        return de.findDatum(datumRef, true);
+        return de.datum(datumFilter, {createNull: true});
     },
 
     // ----------------------------
@@ -102,9 +90,10 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         if(action){
             var datum = mark.datum();
             if(datum){
-                var s = datum.elem.series.rawValue,
-                    c = datum.elem.category.rawValue,
-                    v = datum.value;
+                var atoms = datum.atoms,
+                    s = atoms.series.rawValue,
+                    c = atoms.category.rawValue,
+                    v = atoms.value.value;
 
                 this._ignoreClicks = 2;
 
@@ -154,10 +143,10 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         // Classic clickAction
         var action = this.chart.options.clickAction;
         if(action){
-            var dims = datum.elem,
-                s = dims.series.rawValue,
-                c = dims.category.rawValue,
-                v = datum.value;
+            var atoms = datum.atoms,
+                s = atoms.series.rawValue,
+                c = atoms.category.rawValue,
+                v = atoms.value.value;
 
             action.call(mark, s, c, v, ev, datum);
         }
@@ -167,7 +156,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         if(options.selectable){
             if(options.ctrlSelectMode && !ev.ctrlKey){
                 // hard select
-                datum.engine.clearSelections();
+                datum.owner.clearSelected();
                 datum.setSelected(true);
             } else {
                 datum.toggleSelected();
@@ -178,14 +167,14 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
     },
 
     _handleSelectionChanged: function(){
-        this._renderSignums();
+        this.topRoot._renderSignums();
 
         // Fire action
         var action = this.chart.options.selectionChangedAction;
         if(action){
-            var selections = this.chart.dataEngine.getSelections();
+            var selections = this.chart.dataEngine.owner.datums(null, {selected: true});
 
-            action.call(null, selections);
+            action.call(null, selections.array());
         }
     },
 
@@ -208,33 +197,6 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
     },
     
     /**
-     * The default implementation renders
-     * the marks returned by #_getSignums, 
-     * or this.pvPanel if none is returned.
-     * which is generally in excess of what actually requires
-     * to be re-rendered.
-     *
-     * Override to render a more specific set of marks.
-     * @virtual
-     */
-    _renderSignums: function(){
-        var marks = this._getSignums();
-        if(!marks || !marks.length){
-            this.pvPanel.render();
-        } else {
-            marks.forEach(function(mark){ mark.render(); });
-        }
-    },
-
-    /**
-     * Returns an array of marks whose instances are associated to a datum, or null.
-     * @virtual
-     */
-    _getSignums: function(){
-        return null;
-    },
-
-    /**
      * The default implementation returns
      * the datums associated with
      * the instances of the marks returned by #_getSignums.
@@ -249,163 +211,66 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
      * Returns an array of being selected datum.
      * @virtual
      */
-    _detectSelectingData: function(){
-        var data = [];
-
+    _detectSelectingDatums: function(){
+        var datums = [];
+        
+        //pvc.log("RubberBand: " + JSON.stringify(this.rubberBand));
+        
         var selectableMarks = this._getSignums();
         if(selectableMarks){
             selectableMarks.forEach(function(mark){
                 this._forEachSelectingMarkInstance(mark, function(datum){
-                    data.push(datum);
+                    datums.push(datum);
                 }, this);
             }, this);
         }
         
-        return data;
+        return datums;
     },
     
     /**
-     * Add rubberband functionality to main panel (includes axis).
+     * Add rubber-band functionality to main panel (includes axis).
      * Override to prevent rubber band selection.
+     * 
      * @virtual
      **/
     _createSelectionOverlay: function(){
-        //TODO: flip support: parallelLength etc..
-
         var myself = this,
-            isHorizontal = this.isOrientationHorizontal(),
             chart = this.chart,
             options  = chart.options,
-            dataEngine = chart.dataEngine,
-            titlePanel = chart.titlePanel,
-            xAxisPanel = chart.xAxisPanel,
-            yAxisPanel = chart.yAxisPanel;
+            dataEngine = chart.dataEngine;
 
         var dMin = 10; // Minimum dx or dy for a rubber band selection to be relevant
 
         var isSelecting = false;
 
-        // Helper
-        // Sets all positions to 0 except the specified one
-        var positions = ['top', 'left', 'bottom', 'right'];
-        function setPositions(position, value){
-            var obj = {};
-            for(var i = 0; i < positions.length ; i++){
-                obj[positions[i]] = (positions[i] == position) ? value : 0;
-            }
-            return obj;
-        }
-
-        // Callback to handle end of rubber band selection
-        function dispatchRubberBandSelection(ev){
-            var rb = myself.rubberBand;
-
-            // Get offsets
-            var titleOffset;
-            if(titlePanel != null){
-                titleOffset = setPositions(options.titlePosition, titlePanel.titleSize);
-            } else {
-                titleOffset = setPositions();
-            }
-
-            var xAxisOffset = setPositions(options.xAxisPosition, xAxisPanel ? xAxisPanel.height : 0),
-                yAxisOffset = setPositions(options.yAxisPosition, yAxisPanel ? yAxisPanel.width  : 0);
-
-            var y = 0,
-                x = 0;
-
-            // Rubber band selects over any of the axes?
-            var xSelections = [],
-                ySelections = [];
-
-            if(options.useCompositeAxis){
-                //1) x axis
-                x = rb.x - titleOffset['left'] - yAxisOffset['left'];
-                y = rb.y - titleOffset['top'];
-
-                if(options.xAxisPosition === 'bottom'){//chart
-                    y -= myself.height;
-                }
-
-                if(xAxisPanel){
-                    xSelections = xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
-                }
-                
-                //2) y axis
-                x = rb.x - titleOffset['left'];
-                y = rb.y - titleOffset['top'] - xAxisOffset['top'];
-
-                if(options.yAxisPosition === 'right'){//chart
-                    x -= myself.width;
-                }
-
-                if(yAxisPanel){
-                    ySelections = yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
-                }
-            }
-
-            var cSelections = isHorizontal ? ySelections : xSelections,
-                sSelections = isHorizontal ? xSelections : ySelections;
-
-            if(options.ctrlSelectMode && !ev.ctrlKey){
-                dataEngine.clearSelections();
-            }
-
-            var selectedData,
-                toggle = false;
-
-            // Rubber band selects on both axes?
-            if(ySelections.length > 0 && xSelections.length > 0){
-                // Select the INTERSECTION
-                selectedData = dataEngine.getWhere([
-                    {series: sSelections, /* AND */ category: cSelections}
-                ]);
-                
-            } else if (ySelections.length > 0 || xSelections.length > 0){
-                // Select the UNION
-                toggle = true;
-
-                selectedData = dataEngine.getWhere([
-                    {series: sSelections}, // OR
-                    {category: cSelections}
-                ]);
-
-            } else {
-                selectedData = myself._detectSelectingData();
-            }
-
-            if(selectedData){
-                if(toggle){
-                    dataEngine.toggleSelections(selectedData);
-                } else {
-                    dataEngine.setSelections(selectedData, true);
-                }
-
-                myself._handleSelectionChanged();
-            }
-        }
-
         // Rubber band
-        var selectBar = this.selectBar = this.pvPanel.root
-            .add(pv.Bar)
-                .visible(function() {return isSelecting;} )
-                .left(function() {return this.parent.selectionRect.x; })
-                .top(function() {return this.parent.selectionRect.y; })
-                .width(function() {return this.parent.selectionRect.dx; })
-                .height(function() {return this.parent.selectionRect.dy; })
-                .fillStyle(options.rubberBandFill)
-                .strokeStyle(options.rubberBandLine);
+        var rubberPvParentPanel = this.chart.basePanel.pvPanel,
+            toScreen;
+        
+        var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
+            .visible(function() {return isSelecting;} )
+            .left(function() {return this.parent.selectionRect.x; })
+            .top(function() {return this.parent.selectionRect.y; })
+            .width(function() {return this.parent.selectionRect.dx; })
+            .height(function() {return this.parent.selectionRect.dy; })
+            .fillStyle(options.rubberBandFill)
+            .strokeStyle(options.rubberBandLine);
 
         // Rubber band selection behavior definition
         if(!options.extensionPoints ||
            !options.extensionPoints.base_fillStyle){
 
             var invisibleFill = 'rgba(127,127,127,0.00001)';
-            this.pvPanel.root.fillStyle(invisibleFill);
+            rubberPvParentPanel.fillStyle(invisibleFill);
         }
-
+        
+        // NOTE: The fact that the selection behavior is
+        // attached to the root panel (screen) causes the selection rectangle to
+        // be in root panel coordinates
+        
         var selectionEndedDate;
-        this.pvPanel.root
+        rubberPvParentPanel
             .event("click", function() {
                 // It happens sometimes that the click is fired 
                 //  after mouse up, ending up clearing a just made selection.
@@ -417,7 +282,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                     }
                 }
                 
-                dataEngine.clearSelections();
+                dataEngine.owner.clearSelected();
                 myself._handleSelectionChanged();
             })
             .event('mousedown', pv.Behavior.selector(false))
@@ -429,24 +294,95 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                     }
 
                     isSelecting = true;
-                    myself.rubberBand = rb;
+                    
+                    toScreen || (toScreen = rubberPvParentPanel.toScreenTransform());
+                    myself.rubberBand = rb.clone().apply(toScreen);
                 }
 
                 selectBar.render();
             })
-            .event('selectend', function(dummy, ev){
+            .event('selectend', function(){
                 if(isSelecting){
+                    var ev = arguments[arguments.length - 1];
+                    
+                    toScreen || (toScreen = rubberPvParentPanel.toScreenTransform());
+                    myself.rubberBand = this.selectionRect.clone().apply(toScreen);
+                    
                     isSelecting = false;
                     selectBar.render(); // hide rubber band
 
                     // Process selection
-                    dispatchRubberBandSelection(ev);
+                    myself._dispatchRubberBandSelection(ev);
 
                     selectionEndedDate = new Date();
                 }
             });
     },
+    
+    // Callback to handle end of rubber band selection
+    _dispatchRubberBandSelection: function(ev){
+        var rb = this.rubberBand,
+            chart = this.chart,    
+            xAxisPanel = chart.xAxisPanel,
+            yAxisPanel = chart.yAxisPanel,
+            selectedDatums,
+            toggle = false,
+            xAxisAny = false,
+            yAxisAny = false,
+            xDatumsByKey,
+            yDatumsByKey;
+        
+        //1) x axis            
+        if(xAxisPanel){
+            xDatumsByKey = {};
+            xAxisAny = xAxisPanel._detectSelectingDatums(xDatumsByKey, rb);
+        }
+        
+        //2) y axis
+        if(yAxisPanel){
+            yDatumsByKey = {};
+            yAxisAny = yAxisPanel._detectSelectingDatums(yDatumsByKey, rb);
+        }
+        
+        // Rubber band selects on both axes?
+        if(xAxisAny && yAxisAny) {
+            // Intersect datums
+            selectedDatums = [];
+            def.forEachOwn(yDatumsByKey, function(datum, key){
+                if(def.hasOwn(xDatumsByKey, key)) {
+                    selectedDatums.push(datum);
+                }
+            });
+            
+            toggle = true;
+            
+        // Rubber band selects over any of the axes?
+        } else if(xAxisAny) { 
+            selectedDatums = def.own(xDatumsByKey);
+        } else if(yAxisAny) {
+            selectedDatums = def.own(yDatumsByKey);
+        } else {
+            // Ask the panel for signum selections
+            selectedDatums = this._detectSelectingDatums();
+        }
+        
+        // ----------------
+        
+        if(!ev.ctrlKey && chart.options.ctrlSelectMode){
+            chart.dataEngine.owner.clearSelected();
+        }
+        
+        if(selectedDatums){
+            if(toggle){
+                pvc.data.Data.toggleSelected(selectedDatums);
+            } else {
+                pvc.data.Data.setSelected(selectedDatums, true);
+            }
 
+            this._handleSelectionChanged();
+        }
+    },
+    
     _forEachSelectingMarkInstance: function(mark, fun, ctx){
         if(mark.type === 'area' || mark.type === 'line'){
             var instancePrev = null,
@@ -455,7 +391,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             this._forEachSignumInstance(mark, function(instance, t){
                 // Skip first instance
                 if(instancePrev){
-                    var series = instance.datum.elem.series.absValue;
+                    var series = instance.datum.atoms.series.absValue; // TODO: this does not seem right...
                     if(series === seriesPrev){
                         var shape = mark.getInstanceShape(instancePrev, instance).apply(t);
                         if (shape.intersectsRect(this.rubberBand)){
@@ -465,11 +401,12 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                 }
 
                 instancePrev = instance;
-                seriesPrev   = instance.datum.elem.series.absValue;
+                seriesPrev   = instance.datum.atoms.series.absValue;
             }, this);
         } else {
             mark.forEachInstance(function(instance, t){
                 var shape = mark.getInstanceShape(instance).apply(t);
+                //pvc.log(instance.datum.atoms.value.value + ": " + JSON.stringify(shape));
                 if (shape.intersectsRect(this.rubberBand)){
                     fun.call(ctx, instance.datum);
                 }
