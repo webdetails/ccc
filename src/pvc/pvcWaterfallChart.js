@@ -801,8 +801,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         if(this.showValues){
-            this.pvBarLabel = this.pvBar
-                .anchor(this.valuesAnchor || 'center')
+            this.pvBarLabel = this.pvBar.anchor(this.valuesAnchor || 'center')
                 .add(pv.Label)
                 .bottom(0)
                 .visible(function(d) { //no space for text otherwise
@@ -812,8 +811,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                     } else {
                         v = parseFloat(d);
                     }
-                    
-                    return !isNaN(v) && Math.abs(v) >= 1;
+                    // Too small a bar to show any value?
+                    return myself.DF.orthoLengthFunc(v) >= 4;
                  })
                 .text(function(d){
                     if(myself.percentageNormalized){

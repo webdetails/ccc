@@ -365,9 +365,11 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._roleSpecs = 
             def.query(def.keys(roles))
                .where(def.truthy)
-               .object(function(name){
-                   var groupingSpec = new pvc.data.GroupingSpec(roles[name], data);
-                   return new pvc.visual.Role(name, groupingSpec);
+               .object({
+                   value: function(name){
+                       var groupingSpec = new pvc.data.GroupingSpec(roles[name], data);
+                       return new pvc.visual.Role(name, groupingSpec);
+                   }
                });
 //        
 //        this._roleSpecs = {};

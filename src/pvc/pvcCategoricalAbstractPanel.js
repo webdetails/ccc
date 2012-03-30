@@ -391,7 +391,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             this._forEachSignumInstance(mark, function(instance, t){
                 // Skip first instance
                 if(instancePrev){
-                    var series = instance.datum.atoms.series.absValue; // TODO: this does not seem right...
+                    var series = instance.datum.atoms.series.key; // TODO: this does not seem right...
                     if(series === seriesPrev){
                         var shape = mark.getInstanceShape(instancePrev, instance).apply(t);
                         if (shape.intersectsRect(this.rubberBand)){
@@ -401,7 +401,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                 }
 
                 instancePrev = instance;
-                seriesPrev   = instance.datum.atoms.series.absValue;
+                seriesPrev   = instance.datum.atoms.series.key;
             }, this);
         } else {
             mark.forEachInstance(function(instance, t){

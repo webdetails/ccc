@@ -111,21 +111,14 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     
     selectNullValues: false,
 
-    valuesToText: function(vals){
-        if(vals != null && vals[0] !== undefined){
-            return vals.join(', ');
-        }
-        else return vals;
-    },
-
     /**
      * @override
      */
     createCore: function(){
 
-        var myself = this,
-            options = this.chart.options,
-            dataEngine = this.chart.dataEngine;
+        var chart = this.chart,
+            options = chart.options,
+            dataEngine = chart.dataEngine;
         
         this.colorValIdx = options.colorValIdx;
         this.sizeValIdx  = options.sizeValIdx;
@@ -170,8 +163,8 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
         // reuse existings scales
-        var xScale = this.chart.xAxisPanel.scale;
-        var yScale = this.chart.yAxisPanel.scale;
+        var xScale = chart.xAxisPanel.scale;
+        var yScale = chart.yAxisPanel.scale;
 
         /* Determine cell dimensions. */
         var w = (xScale.max - xScale.min) / xScale.domain().length;
@@ -193,9 +186,8 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         var keyArgs = {visible: true};
         
         // One multi-dimensional, two-levels data grouping
-        var data = this.chart.dataEngine.groupBy(
-                        colDimNames.join('|') + ',' + 
-                        rowDimNames.join('|'), 
+        var data = dataEngine.groupBy(
+                        colDimNames.join('|') + ',' + rowDimNames.join('|'), 
                         keyArgs);
         
         // Two multi-dimension single-level data groupings
@@ -209,8 +201,14 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         
         /* Color scale */
         var fillColorScaleByColKey;
+        
         if(colorDimName){
-            fillColorScaleByColKey = this.getColorScale(colRootData);
+            fillColorScaleByColKey =  pvc.color.scales(def.create(false, this.chart.options, {
+                /* Override/create these options, inherit the rest */
+                type: this.chart.options.scalingType, 
+                data: colRootData,
+                colorDimension: this.colorDimName
+            }));
         }
         
         function getFillColor(detectSelection){
@@ -400,7 +398,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         maxRadius -= 2;
         
         var maxArea  = maxRadius * maxRadius, // apparently treats as square area even if circle, triangle is different
-            minArea  = 4,
+            minArea  = 12,
             areaSpan = maxArea - minArea;
 
         if(areaSpan <= 1){
@@ -417,9 +415,9 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         if(sizeDimName){
             /* SIZE DOMAIN */
             def.scope(function(){
-                var sizeValRange = dataEngine.dimensions(sizeDimName).range({visible: true}),
-                    sizeValMin   = sizeValRange.min.value,
-                    sizeValMax   = sizeValRange.max.value,
+                var sizeValExtent = dataEngine.dimensions(sizeDimName).extent({visible: true}),
+                    sizeValMin   = sizeValExtent.min.value,
+                    sizeValMax   = sizeValExtent.max.value,
                     sizeValSpan  = Math.abs(sizeValMax - sizeValMin); // may be zero
                 
                 if(isFinite(sizeValSpan) && sizeValSpan > 0.001) {
@@ -529,308 +527,5 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
      */
     _renderSignums: function(){
         this.pvPanel.render();
-    },
-
-    /***********
-     * compute an array of fill-functions. Each column out of "colAbsValues" 
-     * gets it's own scale function assigned to compute the color
-     * for a value. Currently supported scales are:
-     *    -  linear (from min to max
-     *    -  normal distributed from   -numSD*sd to  numSD*sd 
-     *         (where sd is the standard deviation)
-     ********/
-    getColorScale: function(colRootData) {
-        switch (this.chart.options.scalingType) {
-            case "normal": // TODO: implement other color scale modes
-                throw def.error.notImplemented();
-                return this.getNormalColorScale(data, colAbsValues, this.colorDimName, this.origData);//TODO:
-          
-            case "linear":
-                return this.getLinearColorScale(colRootData);
-        
-            case "discrete":
-                throw def.error.notImplemented();
-                return this.getDiscreteColorScale(data, colAbsValues, this.colorDimName);
-                
-            default:
-                throw "Invalid option " + this.scaleType + " in HeatGrid";
-        }
-    },
-  
-    getColorRangeArgs: function(){
-        var options = this.chart.options;
-        var rangeArgs = options.colorRange;
-    
-        if(options.minColor != null && options.maxColor != null){
-            rangeArgs = [options.minColor,options.maxColor];
-        } else if (options.minColor != null){
-            rangeArgs.splice(0,1,options.minColor);
-        } else if (options.maxColor != null){
-            rangeArgs.splice(rangeArgs.length - 1, 1, options.maxColor);
-        }
-    
-        return rangeArgs;
-    },
-  
-  getColorDomainArgs: function(data, colAbsValues, options, rangeArgs, colorDimName){
-    var domainArgs = options.colorRangeInterval;
-    
-    if(domainArgs != null && domainArgs.length > rangeArgs.length){
-        domainArgs = domainArgs.slice(0, rangeArgs.length);
     }
-    
-    if(domainArgs == null){
-        domainArgs = [];
-    }
-    
-    if(domainArgs.length < rangeArgs.length){
-        var myself = this;
-        
-        var min = pv.dict(colAbsValues, function(cat){
-          return pv.min(data, function(d){
-            var val = myself.getValue(d[cat], colorDimName);
-            if(val!= null) return val;
-            else return Number.POSITIVE_INFINITY;//ignore nulls
-          });
-        });
-        
-        var max = pv.dict(colAbsValues, function(cat){
-          return pv.max(data, function(d){
-            var val = myself.getValue(d[cat], colorDimName);
-            if(val!= null) return val;
-            else return Number.NEGATIVE_INFINITY;//ignore nulls
-          });
-        });
-        
-        if(options.normPerBaseCategory){
-            return pv.dict(colAbsValues, function(category){
-                return myself.padColorDomainArgs(rangeArgs, [], min[category], max[category]);  
-            });
-        }
-            
-        var theMin = min[colAbsValues[0]];
-        for (var i=1; i<colAbsValues.length; i++) {
-          if (min[colAbsValues[i]] < theMin) theMin = min[colAbsValues[i]];
-        }
-        
-        var theMax = max[colAbsValues[0]];
-        for (var i=1; i<colAbsValues.length; i++){
-          if (max[colAbsValues[i]] > theMax) theMax = max[colAbsValues[i]];
-        }
-        
-        if(theMax == theMin)
-        {
-            if(theMax >=1){
-                theMin = theMax -1;
-            } else {
-                theMax = theMin +1;
-            }
-        }
-        
-        return this.padColorDomainArgs(rangeArgs, domainArgs, theMin, theMax);
-    }
-    
-    return domainArgs;
-  },
-  
-  padColorDomainArgs: function(rangeArgs, domainArgs, min, max){
-    //use supplied numbers
-    var toPad =
-          domainArgs == null ?
-          rangeArgs.length +1 :
-          rangeArgs.length +1 - domainArgs.length;
-    switch(toPad){
-      case 1:
-          //TODO: should adapt to represent middle?
-          domainArgs.push(max);
-          break;
-      case 2:
-          domainArgs = [min].concat(domainArgs).concat(max);
-          break;
-      default://build domain from range
-          var step = (max - min)/(rangeArgs.length -1);
-          domainArgs = pv.range(min, max +step , step);
-    }
-    return domainArgs;
-  },
-  
-  getDiscreteColorScale: function(data, colAbsValues, colorDimName){
-      var options = this.chart.options;
-      var colorRange = this.getColorRangeArgs();
-      var domain = this.getColorDomainArgs(data, colAbsValues, options, colorRange, colorDimName);
-
-    //d0--cR0--d1--cR1--d2
-    var getColorVal = function(val, domain, colorRange){
-        if(val == null) return options.nullColor;
-        if(val <= domain[0]) return pv.color(colorRange[0]);
-        for(var i=0; i<domain.length-1;i++){
-             if(val > domain[i] && val < domain[i+1]){
-                return pv.color(colorRange[i]);
-             }
-        }
-        return pv.color(colorRange[colorRange.length-1]);
-    };
-    
-    if(options.normPerBaseCategory){
-        return pv.dict(colAbsValues, function (category){
-            var dom = domain[category];
-            return function(val){
-                return getColorVal(val, dom, colorRange);
-            }
-        });
-    }
-    
-    return pv.dict(colAbsValues, function(col){
-        return function(val){
-            return getColorVal(val, domain, colorRange);
-        };
-    });
-  },
-
-    getLinearColorScale: function(colRootData){
-        var scales = {};
-        var options = this.chart.options;
-        var rangeArgs = this.getColorRangeArgs();
-        
-        var domainArgs = options.colorRangeInterval;
-        if(domainArgs != null && domainArgs.length > rangeArgs.length){
-            domainArgs = domainArgs.slice(0, rangeArgs.length);
-        }
-        
-        if(domainArgs == null){
-            domainArgs = [];
-        }
-        
-        // compute a scale-function for each column
-        if(options.normPerBaseCategory){
-            colRootData.children().each(function(colData){
-                var range = colData.dimensions(this.colorDimName).range({visible: true});
-                var min = range.min.value,
-                    max = range.max.value;
-                
-                if(max == min){
-                    if(max >=1){
-                        min = max - 1;
-                    } else {
-                        max = min + 1;    
-                    }
-                }
-                
-                var step = (max - min) / (rangeArgs.length - 1),
-                    scale = pv.Scale.linear();
-                
-                scale.domain.apply(scale, pv.range(min, max + step, step));
-                scale.range.apply(scale,  rangeArgs);
-                
-                scales[colData.absKey] = scale;
-            }, this);
-            
-            return scales;
-        }
-        
-        if(domainArgs.length < rangeArgs.length){
-            var range = colRootData.dimensions(this.colorDimName).range({visible: true}),
-                min = range.min.value,
-                max = range.max.value;
-            
-            if(max == min){
-                if(max >= 1){
-                    min = max - 1;
-                } else {
-                    max = min + 1;    
-                }
-            }
-        
-            //use supplied numbers
-            var toPad = domainArgs == null ? rangeArgs.length : (rangeArgs.length - domainArgs.length);
-            
-            switch(toPad){
-                case 1:
-                    // TODO: should adapt to represent middle?
-                    domainArgs.push(max);
-                    break;
-                    
-                case 2:
-                    domainArgs = [min].concat(domainArgs).concat(max);
-                    break;
-                    
-                default:
-                    var step = (max - min)/ (rangeArgs.length - 1);
-                    domainArgs = pv.range(min, max + step, step);
-          }
-        }
-    
-        var scale = pv.Scale.linear();
-        scale.domain.apply(scale, domainArgs);
-        scale.range.apply(scale, rangeArgs);
-        
-        colRootData.children().each(function(colData){
-            scales[colData.absKey] = scale;
-        });
-        
-        return scales;
-    },
-
-  getNormalColorScale: function (data, colAbsValues, origData){
-    var fillColorScaleByColKey;
-    var options = this.chart.options;
-    if (options.normPerBaseCategory) {
-      // compute the mean and standard-deviation for each column
-      var myself = this;
-      
-      var mean = pv.dict(colAbsValues, function(f){
-        return pv.mean(data, function(d){
-          return myself.getValue(d[f]);
-        })
-      });
-      
-      var sd = pv.dict(colAbsValues, function(f){
-        return pv.deviation(data, function(d){
-          myself.getValue(d[f]);
-        })
-      });
-      
-      //  compute a scale-function for each column (each key)
-      fillColorScaleByColKey = pv.dict(colAbsValues, function(f){
-        return pv.Scale.linear()
-          .domain(-options.numSD * sd[f] + mean[f],
-                  options.numSD * sd[f] + mean[f])
-          .range(options.minColor, options.maxColor);
-      });
-      
-    } else {   // normalize over the whole array
-      
-      var mean = 0.0, sd = 0.0, count = 0;
-      for (var i=0; i<origData.length; i++)
-        for(var j=0; j<origData[i].length; j++)
-          if (origData[i][j] != null){
-            mean += origData[i][j];
-            count++;
-          }
-      mean /= count;
-      for (var i=0; i<origData.length; i++){
-        for(var j=0; j<origData[i].length; j++){
-          if (origData[i][j] != null){
-            var variance = origData[i][j] - mean;
-            sd += variance*variance;
-          }
-        }
-      }
-      
-      sd /= count;
-      sd = Math.sqrt(sd);
-      
-      var scale = pv.Scale.linear()
-        .domain(-options.numSD * sd + mean,
-                options.numSD * sd + mean)
-        .range(options.minColor, options.maxColor);
-      
-      fillColorScaleByColKey = pv.dict(colAbsValues, function(f){
-        return scale;
-      });
-    }
-
-    return fillColorScaleByColKey;  // run an array of values to compute the colors per column
-}
-
-});//end: HeatGridChartPanel
+});

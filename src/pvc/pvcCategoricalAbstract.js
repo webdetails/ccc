@@ -546,9 +546,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             valueDim = this.dataEngine.dimensions(dimName);
         
         // Adding a small offset to the scale's domain:
-        var dRange = valueDim.range(), // already only contains visibles
-            dMin = dRange.min.value,
-            dMax = dRange.max.value;
+        var dExtent = valueDim.extent(), // already only contains visibles
+            dMin = dExtent.min.value,
+            dMax = dExtent.max.value;
         
         if(!bypassAxisOffset && options.axisOffset > 0){
             var dOffset = (dMax.getTime() - dMin.getTime()) * options.axisOffset;
@@ -739,7 +739,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         originIsZero: true,
 
         axisOffset: 0,
-        axisLabelFont: '10px sans-serif',
+        axisLabelFont: '9px sans-serif',
         axisTitleFont: '12px sans-serif', // 'bold '
         
         orthoFixedMin: null, // when percentageNormalized => 0

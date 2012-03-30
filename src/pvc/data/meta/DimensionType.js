@@ -214,7 +214,7 @@ function(complexType, name, keyArgs){
      * To compare two values in descending order multiply the result by -1.
      * </p>
      * <p>
-     * None of the values may be specified as nully.
+     * Values can be nully.
      * </p>
      * @param {any} a A value of the dimension's {@link #valueType}.
      * @param {any} b A value of the dimension's {@link #valueType}.
@@ -225,10 +225,14 @@ function(complexType, name, keyArgs){
      * and 0 if they are considered to have the same order.
      */
     compare: function(a, b){
-        // <Debug>
-        a != null || def.fail.argumentRequired('a');
-        b != null || def.fail.argumentRequired('b');
-        // </Debug>
+        if(a == null) {
+            if(b == null) {
+                return 0;
+            }
+            return -1;
+        } else if(b == null) {
+            return 1;
+        }
         
         return this._compare.call(null, a, b);
     },

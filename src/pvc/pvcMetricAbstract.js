@@ -71,9 +71,9 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
         var isVertical = this.options.orientation=="vertical";
 
         // compute the input-domain of the scale
-        var domain    = this.dataEngine.dimensions('category').range(),
-            domainMin = domain.min.value;
-            domainMax = domain.max.value;
+        var extent    = this.dataEngine.dimensions('category').extent(),
+            domainMin = extent.min.value;
+            domainMax = extent.max.value;
         
         // Adding a small relative offset to the scale to prevent that
         // points are located on top of the axis:

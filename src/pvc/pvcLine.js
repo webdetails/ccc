@@ -447,7 +447,6 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             .extend(this.pvLine)    // receive others, not overriden by anchor from pvLine: text, lineWidth, user extensions
             .add(pv.Line)
             // ----------
-            //.data(function(seriesElem){ return selDataBySeries[seriesElem.absValue]; })
             // datum function inherited
             //.visible(function(){ return !chart.isAnimating; })
             .segmented(true) // fixed

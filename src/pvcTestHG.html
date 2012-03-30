@@ -19,6 +19,7 @@
         <script type="text/javascript" src="def/def.js"></script>
         <script type="text/javascript" src="pvc/pvc.js"></script>
         <script type="text/javascript" src="pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="pvc/pvc.color.js"></script>
         
         <script type="text/javascript" src="pvc/data/_data.js"></script>
         <script type="text/javascript" src="pvc/data/meta/DimensionType.js"></script>
@@ -180,6 +181,7 @@ var heatGrid2 = new pvc.HeatGridChart({
                     height: 300,
                     animate: false,
                     clickable: false,
+                    selectable: true,
                     panelSizeRatio: 0.8,
                     orientation: "vertical",
                     showValues: true,
@@ -221,6 +223,7 @@ var heatGrid3 = new pvc.HeatGridChart({
                     height: 300,
                     animate: false,
                     clickable: false,
+                    selectable: true,
                     orientation: "horizontal",
                     showValues: false,
                     showXScale: true,
@@ -250,7 +253,7 @@ var heatGrid4 = new pvc.HeatGridChart({
                     height: 300,
                     animate: false,
                     clickable: true,
-                    
+                    selectable: true,
                     clickAction: function(series,category,dataValue){
                         alert('series "' + series + '", category "' + category + '", value = ' + dataValue);
                     },

@@ -316,7 +316,7 @@ def.type('pvc.data.Dimension')
      * See {@link #atoms} for a list of available filtering keyword arguments. 
      *
      * @returns {object} 
-     * A range object with 'min' and 'max' properties, 
+     * An extent object with 'min' and 'max' properties, 
      * holding the minimum and the maximum atom, respectively,
      * if at least one atom satisfies the selection;
      * undefined otherwise.
@@ -326,7 +326,7 @@ def.type('pvc.data.Dimension')
      * @see #atoms
      * @see pvc.data.DimensionType.isComparable
      */
-    range: function(keyArgs){
+    extent: function(keyArgs){
         // Assumes atoms are sorted.
         var atoms = this.atoms(keyArgs);
         return atoms.length ? 

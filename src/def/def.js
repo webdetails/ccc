@@ -326,6 +326,10 @@ this['def'] = (function(){
             return v != null ? v : dv;
         },
         
+        within: function(v, min, max){
+            return Math.max(min, Math.min(v, max));
+        },
+        
         // Predicates ----------------
         
         // === null || === undefined
@@ -950,59 +954,36 @@ this['def'] = (function(){
             return array;
         },
         
-        // TODO: review this...
-        binarySearch: function(array, item, comparer, reverse){
-            if(!comparer) {
-                var index = array.indexOf(item);
-                return index < 0 ? 
-                        // Insert at the end;
-                        (reverse ? 0 : (~array.length)) : // TODO: confirm this works
-                        index;
+        binarySearch: function(array, item, comparer){
+            if(!comparer) { comparer = def.compare; }
+            
+            var low  = 0, high = array.length - 1;
+            while(low <= high) {
+                var mid = (low + high) >> 1; // <=>  Math.floor((l+h) / 2)
+                
+                var result = comparer(item, array[mid]);
+                if (result < 0) {
+                    high = mid - 1;
+                } else if (result > 0) {
+                    low = mid + 1;
+                } else {
+                    return mid;
+                }
             }
             
-            var low  = 0,
-                high = array.length - 1,
-                midpoint = 0,
-                dif;
-    
-            while ((dif = high - low) >= 0){
-                if(dif <= 1){
-                    midpoint = low;
-                } else {
-                    midpoint = low + Math.floor(dif / 2);
-                }
-    
-                var compared = comparer(item, array[midpoint]);
-                // Check to see if value is equal to item in array
-                if (!compared){
-                    return midpoint;
-                }
-    
-                // Not an exact match, but nothing else to compare with
-                if(dif === 0){
-                    if (compared > 0) {
-                        midpoint++;
-                    }
-                    
-                    return ~midpoint;
-                }
-                
-                if(dif === 1) {
-                    if (compared > 0) {
-                        low = midpoint + 1;
-                    } else {
-                        return ~midpoint;
-                    }
-                }
-    
-                if (compared < 0)
-                    high = midpoint - 1;
-                else
-                    low = midpoint + 1;
-            }
-    
-            // No items, insert at 0
-            return ~0;
+            /* Item was not found but would be inserted at ~low */
+            return ~low; // two's complement <=> -low - 1
+            
+            /*
+            case low == high (== mid)
+              if result > 0
+                   [low <- mid + 1]  => (low > high)
+                insert at (new) low
+              
+              if result < 0
+                   [high <- mid - 1] => (low > high)
+                insert at low
+           */
         },
     
         /**
@@ -1013,16 +994,13 @@ this['def'] = (function(){
          * @param {Array} array A sorted array.
          * @param item An item to insert in the array.
          * @param {Function} [comparer] A comparer function.
-         * @param {boolean} [reverse=false] When true and a comparer function is not specified, 
-         * indicates that the item should be inserted at the first position, 
-         * instead of at the last one.
          * 
          * @returns {Number}
          * If the item is already contained in the array returns its index.
          * If the item was not contained in the array returns the two's complement
          * of the index where the item was inserted.
          */
-        insert: function(array, item, comparer, reverse){
+        insert: function(array, item, comparer){
             
             var index = def.array.binarySearch(array, item, comparer);
             if(index < 0){
@@ -1109,13 +1087,15 @@ this['def'] = (function(){
         /**
          * Facilitates the construction of dictionaries.
          */
-        object: function(fun, ctx, keyArgs){
-            var target = def.get(keyArgs, 'target') || {},
+        object: function(keyArgs){
+            var ctx    = def.get(keyArgs, 'context'),
+                target = def.get(keyArgs, 'target') || {},
+                valFun = def.get(keyArgs, 'value')  || def.fail.argumentRequired('keyArgs.value'); 
                 keyFun = def.get(keyArgs, 'key');
             
             while(this.next()){
                 var key = '' + (keyFun ? keyFun.call(ctx, this.item, this.index) : this.item);
-                target[key] = fun.call(ctx, this.item, this.index);
+                target[key] = valFun.call(ctx, this.item, this.index);
             }
             
             return target;

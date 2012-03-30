@@ -1,67 +1,68 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>CCC Samples - Bar</title>
+    <head>
+        <title>CCC Samples - Bar</title>
 
-<meta name="svg.render.forceflash" content="true">
+        <meta name="svg.render.forceflash" content="true">
 
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script type="text/javascript" src="cdf/Base.js"></script>
-<script type="text/javascript" src="cdf/jquery.js"></script>
-<script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
-<script type="text/javascript" src="data/q01-01.js"></script>
-<script type="text/javascript" src="lib/protovis-d3.3.js"></script>
-<script type="text/javascript" src="lib/protovis-msie.js"></script>
-<script type="text/javascript" src="lib/jquery.tipsy.js"></script>
-<script type="text/javascript" src="lib/tipsy.js"></script>
-<link type="text/css" href="lib/tipsy.css" rel="stylesheet" />
-
-<script type="text/javascript" src="def/def.js"></script>
-<script type="text/javascript" src="pvc/pvc.js"></script>
-<script type="text/javascript" src="pvc/pvc.text.js"></script>
-
-<script type="text/javascript" src="pvc/data/_data.js"></script>
-<script type="text/javascript" src="pvc/data/meta/DimensionType.js"></script>
-<script type="text/javascript" src="pvc/data/meta/ComplexType.js"></script>
-<script type="text/javascript" src="pvc/data/translation/TranslationOper.js"></script>
-<script type="text/javascript" src="pvc/data/translation/MatrixTranslationOper.js"></script>
-<script type="text/javascript" src="pvc/data/translation/CrosstabTranslationOper.js"></script>
-<script type="text/javascript" src="pvc/data/translation/RelationalTranslationOper.js"></script>
-<script type="text/javascript" src="pvc/data/Atom.js"></script>
-<script type="text/javascript" src="pvc/data/Complex.js"></script>
-<script type="text/javascript" src="pvc/data/Datum.js"></script>
-<script type="text/javascript" src="pvc/data/Dimension.js"></script>
-<script type="text/javascript" src="pvc/data/Data.js"></script>
-<script type="text/javascript" src="pvc/data/Data.load.js"></script>
-<script type="text/javascript" src="pvc/data/Data.selected.js"></script>
-<script type="text/javascript" src="pvc/data/GroupingSpec.js"></script>
-<script type="text/javascript" src="pvc/data/GroupingOper.js"></script>
-<script type="text/javascript" src="pvc/data/Data.operations.js"></script>
-<script type="text/javascript" src="pvc/data/Data.compat.js"></script>
-
-<script type="text/javascript" src="pvc/visual/Role.js"></script>
-
-<script type="text/javascript" src="pvc/pvcAbstract.js"></script>
-<script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
-<script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
-<script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
-<script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
-<script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
-<script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-<script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
-<script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
-<script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
-<script type="text/javascript" src="pvc/pvcBarChart.js"></script>
-
-<link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css" />
-<link type="text/css" rel="stylesheet" href="pvcComponent.css" />
-
-<script type="text/javascript" src="pvcDocUtils.js"></script>
-</head>
-<body>
-	<h2>Examples</h2>
-	<h3>A multi-chart of horizontal stacked bar charts</h3>
-	<textarea cols="58" rows="42" id="pvcMulti1Code">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<script type="text/javascript" src="cdf/Base.js"></script>
+		<script type="text/javascript" src="cdf/jquery.js"></script>
+		<script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
+		<script type="text/javascript" src="data/q01-01.js"></script>
+		<script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+		<script type="text/javascript" src="lib/protovis-msie.js"></script>
+		<script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+		<script type="text/javascript" src="lib/tipsy.js"></script>
+		<link type="text/css" href="lib/tipsy.css" rel="stylesheet" />
+		
+		<script type="text/javascript" src="def/def.js"></script>
+		<script type="text/javascript" src="pvc/pvc.js"></script>
+		<script type="text/javascript" src="pvc/pvc.text.js"></script>
+		<script type="text/javascript" src="pvc/pvc.color.js"></script>
+		
+		<script type="text/javascript" src="pvc/data/_data.js"></script>
+		<script type="text/javascript" src="pvc/data/meta/DimensionType.js"></script>
+		<script type="text/javascript" src="pvc/data/meta/ComplexType.js"></script>
+		<script type="text/javascript" src="pvc/data/translation/TranslationOper.js"></script>
+		<script type="text/javascript" src="pvc/data/translation/MatrixTranslationOper.js"></script>
+		<script type="text/javascript" src="pvc/data/translation/CrosstabTranslationOper.js"></script>
+		<script type="text/javascript" src="pvc/data/translation/RelationalTranslationOper.js"></script>
+		<script type="text/javascript" src="pvc/data/Atom.js"></script>
+		<script type="text/javascript" src="pvc/data/Complex.js"></script>
+		<script type="text/javascript" src="pvc/data/Datum.js"></script>
+		<script type="text/javascript" src="pvc/data/Dimension.js"></script>
+		<script type="text/javascript" src="pvc/data/Data.js"></script>
+		<script type="text/javascript" src="pvc/data/Data.load.js"></script>
+		<script type="text/javascript" src="pvc/data/Data.selected.js"></script>
+		<script type="text/javascript" src="pvc/data/GroupingSpec.js"></script>
+		<script type="text/javascript" src="pvc/data/GroupingOper.js"></script>
+		<script type="text/javascript" src="pvc/data/Data.operations.js"></script>
+		<script type="text/javascript" src="pvc/data/Data.compat.js"></script>
+		
+		<script type="text/javascript" src="pvc/visual/Role.js"></script>
+		
+		<script type="text/javascript" src="pvc/pvcAbstract.js"></script>
+		<script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
+		<script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
+		<script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
+		<script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
+		<script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
+		<script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+		<script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
+		<script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+		<script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
+		<script type="text/javascript" src="pvc/pvcBarChart.js"></script>
+		
+		<link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css" />
+		<link type="text/css" rel="stylesheet" href="pvcComponent.css" />
+		
+		<script type="text/javascript" src="pvcDocUtils.js"></script>
+	</head>
+    <body>
+	   <h2>Examples</h2>
+	   <h3>A multi-chart of horizontal stacked bar charts</h3>
+	   <textarea cols="58" rows="42" id="pvcMulti1Code">
 var multi1 = new pvc.BarChart({
     canvas: "pvcMulti1",
     title:  "Multi-chart of horizontal stacked bar charts",
@@ -104,11 +105,11 @@ multi1.setData(testHeatGridComp);
 multi1.render();
 </textarea>
 
-	<button class="tryMe" onclick='tryMe(this)'>Try me</button>
-	<div id="pvcMulti1"></div>
+	   <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+	   <div id="pvcMulti1"></div>
 	
 	   <h3>A multi-chart of horizontal stacked bar charts II</h3>
-    <textarea cols="58" rows="42" id="pvcMulti2Code">
+        <textarea cols="58" rows="42" id="pvcMulti2Code">
 var multi2 = new pvc.BarChart({
     canvas: "pvcMulti2",
     title:  "Multi-chart of horizontal stacked bar charts II",
@@ -153,7 +154,7 @@ multi2.render();
 
 </textarea>
 
-    <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-    <div id="pvcMulti2"></div>
-</body>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcMulti2"></div>
+    </body>
 </html>

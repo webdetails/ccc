@@ -365,7 +365,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var label = this.pvLabel = labelAnchor.add(pv.Label)
             .zOrder(40)
             .text(this.pvScale.tickFormat)
-            .font("9px sans-serif")
+            .font(this.font)
             .textMargin(0.5) // Just enough for some labels not to be cut (vertical)
             .visible(true);
         
@@ -623,7 +623,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                      d.x + d.dx/2 :
                      ((align == 'right')? d.x + d.dx : d.x);
             })
-            .font(myself.font)
+            .font(this.font)
             .text(function(d){
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){

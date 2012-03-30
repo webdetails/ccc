@@ -1,6 +1,7 @@
 src/def/def.js
 src/pvc/pvc.js
 src/pvc/pvc.text.js
+src/pvc/pvc.color.js
 
 src/pvc/data/_data.js
 src/pvc/data/meta/DimensionType.js
