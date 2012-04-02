@@ -27,12 +27,20 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
             
             this._datums = data_reloadDatums.call(this, atomz);
             
-            data_syncSelected.call(this);
         } else {
             this._datums = data_loadDatums.call(this, atomz);
         }
         
-        this.leafs = this._datums; // Share (only on owner)
+        data_syncDatumsState.call(this);
+        
+        // Allow dimensions to clear their caches
+        if(isReload) {
+            def.forEachOwn(this._dimensions, function(dimension){
+                dim_onDatumsChanged.call(dimension);
+            });
+        }
+        
+        this._leafs = this._datums; // Share (only on owner)
     }
 });
 
@@ -47,8 +55,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  */
 function data_loadDatums(atomz) {
     
-    function createDatum(atoms, index){
-        return new pvc.data.Datum(this, atoms, index);
+    function createDatum(atoms){
+        return new pvc.data.Datum(this, atoms);
     }
     
     return def.query(atomz)
@@ -83,8 +91,8 @@ function data_reloadDatums(atomz) {
     // [atom.dimension.name][atom.key] -> true
     var visitedAtomsKeySetByDimension = pv.dict(dimNames, function(){ return {}; });
     
-    function internDatum(atoms, index){
-        var newDatum = new pvc.data.Datum(this, atoms, index),
+    function internDatum(atoms){
+        var newDatum = new pvc.data.Datum(this, atoms),
             datum = datumsByKey[newDatum.key];
         
         if(!datum) {

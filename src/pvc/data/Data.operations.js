@@ -107,8 +107,10 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {object} [keyArgs] Keyword arguments object.
      * 
      * @param {boolean} [keyArgs.visible=null]
-     *      Only considers datums whose atoms of the <i>filtered</i> dimensions  
-     *      have the specified visible state.
+     *      Only considers datums that have the specified visible state.
+     * 
+     * @param {boolean} [keyArgs.selected=null]
+     *      Only considers datums that have the specified selected state.
      * 
      * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each 
      * datum filter of <i>whereSpec</i>.
@@ -135,17 +137,19 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      */
     datums: function(whereSpec, keyArgs){
         if(!whereSpec){
-            var selected = def.get(keyArgs, 'selected');
-            if(selected == null){
-                return def.query(this._datums);
+            var q = def.query(this._datums),
+                selected = def.get(keyArgs, 'selected'),
+                visible  = def.get(keyArgs, 'visible');
+            
+            if(visible != null){
+                q = q.where(function(datum){ return datum.isVisible === visible;  });
             }
             
-            if(this.isOwner() && selected) {
-                // TODO: def.query support for Object iteration: Object.keys and Own?
-                return def.query(pv.values(this._selectedDatums));
+            if(selected != null){
+                q = q.where(function(datum){ return datum.isSelected === selected; });
             }
             
-            return def.query(this._datums).where(function(datum){ return datum.isSelected === selected; });
+            return q;
         }
         
         whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
@@ -190,7 +194,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         
         whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
         
-        var datum = data_where.call(this, whereSpec, keyArgs).first(null);
+        var datum = data_where.call(this, whereSpec, keyArgs).first() || null;
         if(!datum && def.get(keyArgs, 'createNull') && whereSpec.length) {
             
             var sourceDatumFilter = whereSpec[0],
@@ -203,8 +207,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                 }
             }
             
-            // -1 => null datum
-            datum = new pvc.data.Datum(this.owner, atoms, -1);
+            // true => null datum
+            datum = new pvc.data.Datum(this.owner, atoms, true);
         }
         
         return datum;
@@ -217,7 +221,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * Normalizes and validates the specification syntax, 
  * validates dimension names,
  * readily excludes uninterned (unexistent) values and
- * atoms based on their visible state.
+ * atoms based on their "visible state".
  * </p>
  * 
  * <p>
@@ -290,12 +294,11 @@ function data_processWhereSpec(whereSpec, keyArgs){
         // throws if it doesn't exist
         var dimension = this.dimensions(dimName),
             atoms = def.query(values)
-                       .select(function(value){ return dimension.atom(value); })
+                       .select(function(value){ return dimension.atom(value); }) // null if it doesn't exist
                        .where(visible == null ? 
                               def.notNully : 
-                              function(atom){ return atom && atom.isVisible === visible; })
+                              function(atom){ return atom && dimension.isVisible(atom) === visible; })
                        .distinct(function(atom){ return atom.key; })
-                       
                        .array();
         
         return atoms.length ? atoms : null;
@@ -314,9 +317,7 @@ function data_processWhereSpec(whereSpec, keyArgs){
  * 
  * @param {object} [whereSpec] A <i>processed</i> "where" specification.
  * @param {object} [keyArgs] Keyword arguments object.
- * @param {boolean} [keyArgs.visible=null]
- *      Only considers datums whose atoms of the <i>filtered</i> dimensions  
- *      have the specified visible state.
+ * See {@link #groupBy} for additional available keyword arguments.
  * 
  * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each 
  * datum filter of <i>whereSpec</i>.
@@ -327,10 +328,9 @@ function data_processWhereSpec(whereSpec, keyArgs){
 function data_where(whereSpec, keyArgs) {
     
     var orderBys = def.array(def.get(keyArgs, 'orderBy')),
-        datumKeyArgs = {
-            visible: def.get(keyArgs, 'visible'),
+        datumKeyArgs = def.create({
             orderBy: null
-        };
+        });
     
     var query = def.query(whereSpec)
                    .selectMany(function(datumFilter, index){
@@ -341,11 +341,6 @@ function data_where(whereSpec, keyArgs) {
                       return data_whereDatumFilter.call(this, datumFilter, datumKeyArgs);
                    }, this);
     
-    var selected = def.get(keyArgs, 'selected');
-    if(selected != null) {
-        query = query.where(function(datum){ return datum.isSelected === selected; });
-    }
-     
     return query.distinct(function(datum){ return datum.id; });
     
     /*
@@ -356,7 +351,8 @@ function data_where(whereSpec, keyArgs) {
         return def.query(this._datums).where(datumPredicate, this);
         
         function datumPredicate(datum){
-            if(selected === null || datum.isSelected === selected) {
+            if((selected === null || datum.isSelected === selected) && 
+               (visible  === null || datum.isVisible  === visible)) {
                 var atoms = datum.atoms;
                 for(var dimName in datumFilter) {
                     if(datumFilter[dimName].indexOf(atoms[dimName]) >= 0) {
@@ -379,10 +375,7 @@ function data_where(whereSpec, keyArgs) {
  * @param {string} datumFilter A <i>processed</i> datum filter.
  * 
  * @param {Object} keyArgs Keyword arguments object.
- * 
- * @param {boolean} [keyArgs.visible=null] 
- *      Only considers datums whose atoms of the <i>filtered</i> dimensions  
- *      have the specified visible state.
+ * See {@link #groupBy} for additional available keyword arguments.
  * 
  * @param {string} [keyArgs.orderBy] An "order by" string.
  * When not specified, one is determined to match the specified datum filter.
@@ -406,9 +399,6 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          // TODO: not validating that groupingSpecText actually contains the same dimensions referred in datumFilter...
      }
      
-     var rootData = this.groupBy(groupingSpecText, keyArgs),
-         H = rootData.treeHeight;
-     
      /*
         // NOTE:
         // All the code below is just a stack/state-based translation of 
@@ -431,7 +421,10 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
                 }
             }, this);
         }
-    */
+     */
+     
+     var rootData = this.groupBy(groupingSpecText, keyArgs),
+     H = rootData.treeHeight;
      
      var stateStack = [];
      

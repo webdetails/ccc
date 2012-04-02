@@ -12,7 +12,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     pvScale:    null,
     
     ordinal: false,
-    ordinalDimensionsNames: null,
+    ordinalRoleName: null,
     anchor: "bottom",
     axisSize: undefined,
     tickLength: 6,
@@ -204,16 +204,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
-            data              = this.chart.dataEngine.groupBy(
-                                        this.ordinalDimensionsNames.join('|'), // 1 multi-dimension level
-                                        {visible: true});
+            // Grouping with 1 multi-dimension level
+            data = this.chart.visualRoleData(this.ordinalRoleName, {visible: true, singleLevelGrouping: true});
         
         // Ordinal ticks correspond to ordinal datums.
         // Ordinal ticks are drawn at the center of each band,
         //  and not at the beginning, as in a linear axis.
         this.pvTicks = this.pvRule.add(pv.Rule)
             .zOrder(20) // see pvc.js
-            .data(data.leafs)
+            .data(data._leafs)
             .localProperty('group')
             .group(function(leafData){
                 return leafData;
@@ -275,7 +274,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             
             this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
                 .extend(this.pvRule)
-                .data(data.leafs)
+                .data(data._leafs)
                 .strokeStyle("#f0f0f0")
                 [anchorOpposite   ](-ruleLength)
                 [anchorLength     ](null)
@@ -684,13 +683,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     getLayoutSingleCluster: function(){
         // TODO: extend this to work with chart.orientation?
-        var dataEngine  = this.chart.dataEngine,
-            orientation = this.anchor,
+        var orientation = this.anchor,
             reverse  = orientation == 'bottom' || orientation == 'left',
-            ascDesc  = reverse ? ' desc' : ' asc',
-            groupingSpecText = this.ordinalDimensionsNames.join(ascDesc  + ", ") + ascDesc,
-            
-            data     = dataEngine.groupBy(groupingSpecText, {visible: true}),
+            data     = this.chart.visualRoleData(this.ordinalRoleName, {visible: true, reverse: reverse}),
             maxDepth = data.treeHeight,
             elements = data.nodes(),
             

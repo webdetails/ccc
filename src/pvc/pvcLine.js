@@ -128,10 +128,6 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
     _seriesDimName: 'series',
 
-//    constructor: function(chart, options){
-//        this.base(chart,options);
-//    },
-  
     /**
      * @override
      */
@@ -225,7 +221,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         function signumSelOrthoLength(){
-            var len = calcSignumOrthoLength.call(this);
+            var len = calcSignumOrthoLength.call(this, true);
 
             // Odd indexes correspond to intermediate auxiliary dots
             if(this.index % 2 > 0){
@@ -240,15 +236,29 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         // Not animated
-        function calcSignumOrthoLength(){
+        function calcSignumOrthoLength(isSel){
 
             var datum = this.datum(),
                 orthoDomainOffset;
             if(stackedOffsets){
                 // Assuming all categories are visible...
-                var categIndex = de.getVisibleCategoriesIndexes()[this.index];
-                
+//                var categIndex = de.getVisibleCategoriesIndexes()[this.index];
+                /**
+                 * 0    0
+                 * 
+                 * 1    1
+                 * 2    1
+                 * 
+                 * 3    2
+                 * 4    2
+                 * 
+                 * 2j-1  j
+                 * 2j    j
+                 */
+                var categIndex = isSel ? Math.ceil(this.index / 2) : this.index;
                 orthoDomainOffset = stackedOffsets[this.parent.index][categIndex];
+                
+                pvc.log({index: categIndex,  parentIndex: this.parent.index, offset: orthoDomainOffset});
             }
 
             var value = (datum.atoms.value.value || 0) + (orthoDomainOffset || 0);
@@ -446,11 +456,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             .anchor(anchorOpposite) // receives from pvSelArea/anchor: data, datum, visible, left, top, right, ...
             .extend(this.pvLine)    // receive others, not overriden by anchor from pvLine: text, lineWidth, user extensions
             .add(pv.Line)
-            // ----------
-            // datum function inherited
-            //.visible(function(){ return !chart.isAnimating; })
             .segmented(true) // fixed
-            
             .intercept('strokeStyle', lineSelColorInterceptor, this._getExtension('line', 'strokeStyle'))
             .intercept('fillStyle',   lineSelColorInterceptor, this._getExtension('line', 'fillStyle'))
             .events("all")
@@ -684,7 +690,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
             }
         }
-
+        pvc.log("stackedOffsets=" + JSON.stringify(stackedOffsets));
         return stackedOffsets;
     }
 });

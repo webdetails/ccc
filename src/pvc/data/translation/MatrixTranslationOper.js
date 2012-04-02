@@ -66,7 +66,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
             }
 
             if(seriesIndex < 0){
-                if(seriesIndex >= -seriesCount){
+                if(seriesIndex <= -seriesCount){
                     throw def.error.argumentInvalid('secondAxisSeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
                 }
 
@@ -83,24 +83,31 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
     },
     
     // TODO: docs
-    _value1AndValue2Get: function(axis2SeriesKeySet, seriesDimGet, valueProp) {
-        var value1Name = pvc.data.DimensionType.dimensionGroupLevelName('value', 0),
+    _value1AndValue2Get: function(calcAxis2SeriesKeySet, seriesReader, valueProp) {
+        
+        var me = this,
+            value1Name = pvc.data.DimensionType.dimensionGroupLevelName('value', 0),
             value2Name = pvc.data.DimensionType.dimensionGroupLevelName('value', 1);
         
         this._ensureDimensionType(value1Name);
         this._ensureDimensionType(value2Name);
         
-        var value1Dimension, value2Dimension;
+        var value1Dimension, value2Dimension, axis2SeriesKeySet;
         
         function value1And2Get(item) {
-            var seriesAtom    = seriesDimGet(item),
-                isAxis2Series = def.hasOwn(axis2SeriesKeySet, seriesAtom.key),
-                rawValue      = item[valueProp];
-            
+            /* 
+             * First time initialization.
+             * Done here because *data* isn't available before. 
+             */
             if(!value1Dimension) {
-                value1Dimension = this.data.dimensions(value1Name);
-                value2Dimension = this.data.dimensions(value2Name);
+                axis2SeriesKeySet = calcAxis2SeriesKeySet();
+                value1Dimension = me.data.dimensions(value1Name);
+                value2Dimension = me.data.dimensions(value2Name);
             }
+            
+            var rawValue = item[valueProp],
+                seriesAtom = seriesReader(item),
+                isAxis2Series = def.hasOwn(axis2SeriesKeySet, seriesAtom.key);
             
             return [
                 value1Dimension.intern(isAxis2Series ? null     : rawValue, item),

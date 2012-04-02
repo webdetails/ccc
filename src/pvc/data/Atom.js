@@ -43,11 +43,6 @@
  *           <p>
  *           Only the null atom has a key equal to "".
  *           </p>
- *           
- * @property {boolean} isVisible The visible state of the atom. 
- * 			 Change the visible state of the atom by using 
- * 			 {@link pvc.data.Atom#setVisible} or 
- *  		 {@link pvc.data.Atom#toggleVisible}.
  * 
  * @constructor
  * @private
@@ -66,40 +61,6 @@ function(dimension, value, label, rawValue, key) {
     this.label = label;
     this.rawValue = rawValue;
     this.key = key;
-})
-.add(/** @lends pvc.data.Atom# */{
-	
-    isVisible: true,
-    
-    /**
-	 * Sets the visible state of the atom to a specified value.
-	 * 
-	 * @param {boolean}
-	 *            [visible=true] The desired visible state.
-	 * 
-	 * @returns {boolean} true if the visible state changed and false otherwise.
-	 */
-	setVisible : function(visible) {
-		// Normalize 'visible'
-		visible = (visible == null) || !!visible;
-
-		var changed = this.isVisible !== visible;
-		if (changed) {
-			this.isVisible = visible;
-			if (this.value != null) {
-				dim_onAtomVisibleChanged.call(this.dimension, this, visible);
-			}
-		}
-
-		return changed;
-	},
-
-	/**
-	 * Toggles the visible state of the atom.
-	 */
-	toggleVisible : function() {
-		this.setVisible(!this.isVisible);
-	}
 });
 
 

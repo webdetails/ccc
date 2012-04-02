@@ -2,17 +2,45 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     /**
      * Obtains the number of selected datums.
      * <p>
-     * Can only be called on an owner data.
+     * This method is only optimized when called on an owner data.
      * </p>
      * 
      * @type Number
      */
     selectedCount: function(){
         if(!this.isOwner()){
-            return this.where(null, {selected: true});
+            return this.where(null, {selected: true}).count();
         }
         
-        return this._selectedCount;
+        return this._selectedDatums.count;
+    },
+    
+    /**
+     * Obtains the selected datums, in an unspecified order.
+     * <p>
+     * If the datums should be sorted, 
+     * they can be sorted by their {@link pvc.data.Datum#id}.
+     * 
+     * Alternatively, {@link #datums} can be called,
+     * with the <tt>selected</tt> keyword argument.
+     * </p>
+     * @type pvc.data.Datum[]
+     */
+    selectedDatums: function(){
+        if(!this.isOwner()){
+            return this.datums(null, {selected: true}).array();
+        }
+        
+        return this._selectedDatums.values();
+    },
+    
+    /**
+     * Obtains the number of visible datums.
+     * 
+     * @type Number
+     */
+    visibleCount: function(){
+        return this._visibleDatums.count;
     },
 
     /**
@@ -24,12 +52,11 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     clearSelected: function(){
         data_assertIsOwner.call(this);
         
-        def.forEachOwn(this._selectedDatums, function(datum){
+        this._selectedDatums.values().forEach(function(datum){
             datum_deselect.call(datum);
         });
 
-        this._selectedDatums = {};
-        this._selectedCount  = 0;
+        this._selectedDatums.clear();
     }
 });
 
@@ -46,32 +73,81 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  */
 function data_onDatumSelectedChanged(datum, selected){
     if(selected){
-        this._selectedDatums[datum.id] = datum;
-        this._selectedCount++;
+        this._selectedDatums.set(datum.id, datum);
     } else {
-        delete this._selectedDatums[datum.id];
-        this._selectedCount--;
+        this._selectedDatums.rem(datum.id);
     }
 }
 
 /**
- * Called after reloading datums to recalculate selected datums.
+ * Called by a datum on its owner data 
+ * when its visible state changes.
  * 
- * @name pvc.data.Data#_syncSelected
+ * @name pvc.data.Data#_onDatumVisibleChanged
+ * @function
+ * @param {pvc.data.Datum} datum The datum whose visible state changed.
+ * @param {boolean} selected The new datum visible state.
+ * @type undefined
+ * @internal
+ */
+function data_onDatumVisibleChanged(datum, visible){
+    if(def.hasOwn(this._datumsById, datum.id)) {
+        
+        // <Debug>
+        !datum.isNull || def.assert("Null datums do not notify visible changes");
+        // </Debug>
+        
+        if(visible){
+            this._visibleDatums.set(datum.id, datum);
+        } else {
+            this._visibleDatums.rem(datum.id);
+        }
+        
+        // Notify dimensions
+        def.forEachOwn(this._dimensions, function(dimension){
+            dim_onDatumVisibleChanged.call(dimension, datum, visible);
+        });
+        
+        // Notify child and link child datas
+        this._children.forEach(function(data){
+            data_onDatumVisibleChanged.call(data, datum, visible);
+        });
+        
+        if(this._linkChildren) {
+            this._linkChildren.forEach(function(data){
+                data_onDatumVisibleChanged.call(data, datum, visible);
+            });
+        }
+    }
+}
+
+/**
+ * Called after loading or reloading datums to 
+ * calculate selected, visible datums and index them by id.
+ * 
+ * @name pvc.data.Data#_syncDatumsState
  * @function
  * @type undefined
  * @private
  */
-function data_syncSelected(){
-    this._selectedDatums = {};
-    this._selectedCount  = 0;
+function data_syncDatumsState(){
+    this._selectedDatums && this._selectedDatums.clear();
+    this._visibleDatums.clear();
+    this._datumsById = {};
     
-    this._datums.forEach(function(datum){
-        if(datum.isSelected) {
-            this._selectedDatums[datum.id] = datum;
-            this._selectedCount++;
-        }
-    }, this);
+    if(this._datums) {
+        this._datums.forEach(function(datum){
+            this._datumsById[datum.id] = datum;
+            
+            if(this._selectedDatums && datum.isSelected) {
+                this._selectedDatums.set(datum.id, datum);
+            }
+            
+            if(datum.isVisible) {
+                this._visibleDatums.set(datum.id, datum);
+            }
+        }, this);
+    }
 }
 
 /**
@@ -109,8 +185,47 @@ pvc.data.Data.setSelected = function(datums, selected){
  * @static
  */
 pvc.data.Data.toggleSelected = function(datums){
-    // TODO: improve this code by checking selected state before-hand
-    if(!this.setSelected(datums, true)){
-        this.setSelected(datums, false);
+    datums = def.query(datums).array(); 
+    var allSelected = def.query(datums).all(function(datum){ return datum.isSelected; });
+    this.setSelected(datums, !allSelected);
+};
+
+/**
+ * Sets the visible state of the given datums
+ * to the state 'visible'.
+ * 
+ * @param {def.Query} datums An enumerable of {@link pvc.data.Datum} to set.
+ * @param {boolean} visible The desired visible state.
+ * 
+ * @returns {boolean} true if at least one datum changed its visible state.
+ * @static
+ */
+pvc.data.Data.setVisible = function(datums, visible){
+    var anyChanged = false;
+
+    if(datums){
+        def.query(datums).each(function(datum){
+            if(datum.setVisible(visible)){
+                // data_onDatumVisibleChanged has already been called
+                anyChanged = true;
+            }
+        });
     }
+
+    return anyChanged;
+};
+
+/**
+ * Pseudo-toggles the visible state of the given datums.
+ * If all are visible, hides them.
+ * Otherwise, shows them all.
+ * 
+ * @param {def.Query} datums An enumerable of {@link pvc.data.Datum} to toggle.
+ * 
+ * @static
+ */
+pvc.data.Data.toggleVisible = function(datums){
+    datums = def.query(datums).array(); 
+    var allVisible = def.query(datums).all(function(datum){ return datum.isVisible; });
+    pvc.data.Data.setVisible(datums, !allVisible);
 };

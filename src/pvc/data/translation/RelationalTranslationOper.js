@@ -227,21 +227,32 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
  * @name _value1AndValue2Get
  * @function
  * @param {Array} secondAxisSeriesIndexes The indexes of series that are to be shown on the second axis. 
- * @param {function} seriesDimGet Dimension series atom getter.
+ * @param {function} seriesReader Dimension series atom getter.
  * @param {string} valueProp The property name in a source item that contains the value property.
  * @type function
- *  
+ * 
  * @memberOf pvc.data.RelationalTranslationOper#
  * @private
  */
-function relTransl_value1AndValue2Get(secondAxisSeriesIndexes, seriesDimGet, valueProp) {
-    // NOTE: null series keys are excluded by distinct
-    var seriesKeys = def.query(this.source)
-                        .select(function(item){ return seriesDimGet(item).key || null; })
-                        .distinct()
-                        .array();
+function relTransl_value1AndValue2Get(secondAxisSeriesIndexes, seriesReader, valueProp) {
+    var me = this;
     
-    var axis2SeriesKeySet = this._createSecondAxisSeriesKeySet(secondAxisSeriesIndexes, seriesKeys);
+    /* Create a reader that surely only returns 'series' atoms */
+    seriesReader = this._filterDimensionReader(seriesReader, 'series');
     
-    return this._value1AndValue2Get(axis2SeriesKeySet, seriesDimGet, valueProp);
+    /* Defer calculation of axis2SeriesKeySet because *data* isn't yet available. */
+    function calcAxis2SeriesKeySet() {
+        var seriesKeys = def.query(me.source)
+                            .select(function(item){
+                                var atom = seriesReader(item);
+                                return (atom && atom.key) || null; 
+                             })
+                            /* distinct excludes null keys */
+                            .distinct()
+                            .array();
+        
+        return me._createSecondAxisSeriesKeySet(secondAxisSeriesIndexes, seriesKeys);
+    }
+    
+    return this._value1AndValue2Get(calcAxis2SeriesKeySet, seriesReader, valueProp);
 }

@@ -4,7 +4,12 @@
  */
 pvc.BaseChart = pvc.Abstract.extend({
     /**
-     * The parent chart.
+     * Indicates if the chart has been disposed.
+     */
+    _disposed: false,
+    
+    /**
+     * The chart's parent chart.
      * 
      * <p>
      * The root chart has null as the value of its parent property.
@@ -15,7 +20,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     parent: null,
     
     /**
-     * The root chart.
+     * The chart's root chart.
      * 
      * <p>
      * The root chart has itself as the value of the root property.
@@ -26,36 +31,181 @@ pvc.BaseChart = pvc.Abstract.extend({
     root: null,
     
     /**
-     * A map from visual role name to visual role specification.
+     * A map from visual role name to visual role.
      * 
      * @type object
      */
-    _roleSpecs: null,
-
+    _visualRoles: null,
+    
+    /**
+     * Indicates if the chart has been pre-rendered.
+     * <p>
+     * This field is set to <tt>false</tt>
+     * at the beginning of the {@link #_preRender} method
+     * and set to <tt>true</tt> at the end.
+     * </p>
+     * <p>
+     * When a chart is re-rendered it can, 
+     * optionally, also repeat the pre-render phase. 
+     * </p>
+     * 
+     * @type boolean
+     */
     isPreRendered: false,
 
     /**
-     * Indicates if the chart is rendering with animation.
+     * The version value of the current/last pre-render phase.
+     * 
+     * <p>
+     * This value is changed on each pre-render of the chart.
+     * It can be useful to invalidate cached information that 
+     * is only valid for each pre-render.
+     * </p>
+     * <p>
+     * Version values can be compared using the identity operator <tt>===</tt>.
+     * </p>
+     * 
+     * @type any
      */
-    isAnimating:   false,
-    _renderAnimationStart: false,
+    _preRenderVersion: 0,
+    
+    /**
+     * A callback function that is called 
+     * when the protovis' panel render is about to start.
+     * 
+     * <p>
+     * Note that this is <i>after</i> the pre-render phase.
+     * </p>
+     * 
+     * <p>
+     * The callback is called with no arguments, 
+     * but having the chart instance as its context (<tt>this</tt> value). 
+     * </p>
+     * 
+     * @function
+     */
+    renderCallback: undefined,
+    
+    /**
+     * Indicates if the chart is rendering with animation
+     * and, if so, the current phase of animation.
+     * 
+     * <p>This property can assume the following values:</p>
+     * <ul>
+     * <li>0 - The chart is not rendering with animation (may even not be rendering at all).</li>
+     * <li>1 - The chart is rendering the animation's <i>start</i> point,</li>
+     * <li>2 - The chart is rendering the animation's <i>end</i> point.</li>
+     * </ul>
+     * 
+     * @see #animate
+     * @see #isAnimatingStart
+     * 
+     * @type number
+     */
+    isAnimating: 0,
 
-    // data
+    /**
+     * The data that the chart is to show.
+     * @type pvc.data.Data
+     */
     dataEngine: null,
-    resultset:  [],
-    metadata:   [],
+    
+    /**
+     * The data source of the chart.
+     * <p>
+     * The {@link #dataEngine} of a root chart 
+     * is loaded with the data in this array.
+     * </p>
+     * @type any[]
+     */
+    resultset: [],
+    
+    /**
+     * The meta-data that describes each 
+     * of the data components of {@link #resultset}.
+     * @type any[]
+     */
+    metadata: [],
 
-    // panels
+    /**
+     * The base panel is the root container of a chart.
+     * <p>
+     * The base panel of a <i>root chart</i> is the top-most root container.
+     * It has {@link pvc.BasePanel#isTopRoot} equal to <tt>true</tt>.
+     * </p>
+     * <p>
+     * The base panel of a <i>non-root chart</i> is the root of the chart's panels,
+     * but is not the top-most root panel, over the charts hierarchy.
+     * </p>
+     * 
+     * @type pvc.BasePanel
+     */
     basePanel:   null,
+    
+    /**
+     * The panel that shows the chart's title.
+     * <p>
+     * This panel is the first child of {@link #basePanel} to be created.
+     * It is only created when the chart has a non-empty title.
+     * </p>
+     * <p>
+     * Being the first child causes it to occupy the 
+     * whole length of the side of {@link #basePanel} 
+     * to which it is <i>docked</i>.
+     * </p>
+     * 
+     * @type pvc.TitlePanel
+     */
     titlePanel:  null,
+    
+    /**
+     * The panel that shows the chart's main legend.
+     * <p>
+     * This panel is the second child of {@link #basePanel} to be created.
+     * There is an option to not show the chart's legend,
+     * in which case this panel is not created.
+     * </p>
+     * 
+     * <p>
+     * The current implementation of the legend panel
+     * presents a <i>discrete</i> association of colors and labels.
+     * </p>
+     * 
+     * @type pvc.LegendPanel
+     */
     legendPanel: null,
 
+    /**
+     * The name of the data dimension that
+     * the legend panel will be associated to.
+     * 
+     * <p>
+     * The legend panel associates each distinct dimension value to a color of {@link #colors},
+     * following the dimension's natural order.
+     * </p>
+     * <p>
+     * The default dimension is the 'series' dimension.
+     * </p>
+     * 
+     * @type string
+     */
     legendSource: "series",
-    colors: null,
-
-    _renderVersion: 0,
     
-    renderCallback: undefined,
+    /**
+     * An array of colors, represented as names, codes or {@link pv.Color} objects
+     * that is associated to each distinct value of the {@link #legendSource} dimension.
+     * 
+     * <p>
+     * The legend panel associates each distinct dimension value to a color of {@link #colors},
+     * following the dimension's natural order.
+     * </p>
+     * <p>
+     * The default dimension is the 'series' dimension.
+     * </p>
+     * 
+     * @type (string|pv.Color)[]
+     */
+    colors: null,
 
     constructor: function(options) {
         this.parent = def.get(options, 'parent') || null;
@@ -66,7 +216,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             
             this.left = options.left;
             this.top  = options.top;
-            this._roleSpecs = this.parent._roleSpecs;
+            this._visualRoles = this.parent._visualRoles;
         } else {
             this.owner = this;
         }
@@ -116,14 +266,16 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
     
     /**
-     * Building the visualization has 2 stages:
-     * First the preRender method prepares and builds 
+     * Building the visualization is made in 2 stages:
+     * First, the {@link #_preRender} method prepares and builds 
      * every object that will be used.
-     * Later the render method effectively renders.
+     * 
+     * Later the {@link #render} method effectively renders.
      */
-    preRender: function() {
-        /* Increment render version to allow for cache invalidation  */
-        this._renderVersion++;
+    _preRender: function() {
+        /* Increment pre-render version to allow for cache invalidation  */
+        this._preRenderVersion++;
+        
         this.isPreRendered = false;
 
         pvc.log("Prerendering in pvc");
@@ -131,7 +283,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         if (!this.parent) {
             // If we don't have data, we just need to set a "no data" message
             // and go on with life.
-            // Child charts always have some data
+            // Child charts are created to consume existing data
             if(!this.allowNoData && this.resultset.length === 0) {
                 throw new NoDataException();
             }
@@ -145,18 +297,18 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._processOptions();
 
         /* Initialize the data engine */
-        this.initDataEngine();
+        this._initDataEngine();
 
         // Create color schemes
         this.colors = pvc.createColorScheme(this.options.colors);
         this.secondAxisColor = pvc.createColorScheme(this.options.secondAxisColor);
 
         // Initialize chart panels
-        this.initBasePanel();
+        this._initBasePanel();
 
-        this.initTitlePanel();
+        this._initTitlePanel();
 
-        this.initLegendPanel();
+        this._initLegendPanel();
         
         if(this.parent || !this._isRoleDefined('multiChartColumn')) {
             this._preRenderCore();
@@ -177,8 +329,10 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
     
     _preRenderMultiChart: function(){
-        var data = this._visualRoleData('multiChartColumn', {visible: true}),
+        var data = this.visualRoleData('multiChartColumn', {visible: true}),
             options = this.options;
+        
+        // TODO: reuse/dispose sub-charts
         
         // multiChartLimit can be Infinity
         var multiChartLimit = Number(options.multiChartLimit);
@@ -186,7 +340,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             multiChartLimit = Infinity;
         }
         
-        var leafCount = data.leafs.length,
+        var leafCount = data._leafs.length,
             count     = Math.min(leafCount, multiChartLimit);
         
         if(count === 0) {
@@ -213,7 +367,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             height     = basePanel.height / rowCount;
         
         for(var index = 0 ; index < count ; index++) {
-            var childData = data.leafs[index],
+            var childData = data._leafs[index],
                 childOptions = def.create(this.options, {
                     parent:     this,
                     title:      childData.absLabel,
@@ -226,14 +380,14 @@ pvc.BaseChart = pvc.Abstract.extend({
                 });
 
             var childChart = new childClass(childOptions);
-            childChart.preRender();
+            childChart._preRender();
         }
     },
     
     /**
      * Initializes the data engine
      */
-    initDataEngine: function() {
+    _initDataEngine: function() {
         var dataEngine  = this.dataEngine;
         
         if(!this.parent) {
@@ -362,7 +516,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         // --------------
         
-        this._roleSpecs = 
+        this._visualRoles = 
             def.query(def.keys(roles))
                .where(def.truthy)
                .object({
@@ -371,17 +525,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                        return new pvc.visual.Role(name, groupingSpec);
                    }
                });
-//        
-//        this._roleSpecs = {};
-//        
-//        for(var name in roles) {
-//            var role = roles[name];
-//            if(role) {
-//                var groupingSpec = new pvc.data.GroupingSpec(role, data);
-//                this._roleSpecs[name] = new pvc.visual.Role(name, groupingSpec);
-//            }
-//        }
-//        
+        
         // --------------
         
         // TODO: validate required roles?
@@ -393,11 +537,20 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @param {string} roleName The role name.
      * @param {object} keyArgs Keyword arguments.
      * See additional available arguments in {@link pvc.data.Data#groupBy}.
-     * @param {boolean} assertExists Indicates if an error should be thrown if the specified role name is undefined.
+     * 
+     * @param {boolean} [keyArgs.singleLevelGrouping=false] 
+     * Indicates that a single-grouping level data is desired.
+     * If the role's grouping contains multiple levels, 
+     * a single-level equivalent grouping is evaluated instead.
+     * 
+     * @param {boolean} [keyArgs.reverse=false] 
+     * Indicates that the sort order of dimensions should be reversed.
+     * 
+     * @param {boolean} [keyArgs.assertExists=true] Indicates if an error should be thrown if the specified role name is undefined.
      * @returns {pvc.data.Data} The role's data if it exists or null if it does not. 
      */
-    _visualRoleData: function(roleName, keyArgs){
-        var role = this._roleSpecs[roleName];
+    visualRoleData: function(roleName, keyArgs){
+        var role = this._visualRoles[roleName];
         if(!role) {
             if(def.get(keyArgs, 'assertExists', true)) {
                 throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", roleName);
@@ -406,7 +559,14 @@ pvc.BaseChart = pvc.Abstract.extend({
             return null;
         }
         
-        return this.dataEngine.groupBy(role.grouping, keyArgs);
+        var grouping = role.grouping;
+        if(def.get(keyArgs, 'singleLevelGrouping', false)) { 
+            grouping = grouping.singleLevelGrouping(keyArgs);
+        } else if(def.get(keyArgs, 'reverse', false)){
+            grouping = grouping.reversed();
+        }
+        
+        return this.dataEngine.groupBy(grouping, keyArgs);
     },
     
     /**
@@ -418,12 +578,12 @@ pvc.BaseChart = pvc.Abstract.extend({
      * 
      * @type pvc.data.VisualRole[]|pvc.data.VisualRole 
      */
-    _visualRoles: function(roleName, keyArgs){
+    visualRoles: function(roleName, keyArgs){
         if(roleName == null) {
-            return def.own(this._roleSpecs);
+            return def.own(this._visualRoles);
         }
         
-        var role = def.getOwn(this._roleSpecs, roleName) || null;
+        var role = def.getOwn(this._visualRoles, roleName) || null;
         if(!role && def.get(keyArgs, 'assertExists', true)) {
             throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", roleName);
         }
@@ -438,13 +598,13 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @type boolean
      */
     _isRoleDefined: function(roleName){
-        return !!this._roleSpecs[roleName];
+        return !!this._visualRoles[roleName];
     },
     
     /**
-     * Creates and initializes the base (root) panel.
+     * Creates and initializes the base panel.
      */
-    initBasePanel: function() {
+    _initBasePanel: function() {
         var options = this.options;
         // Since we don't have a parent panel
         // we need to manually create the points.
@@ -472,7 +632,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Creates and initializes the title panel,
      * if the title is specified.
      */
-    initTitlePanel: function(){
+    _initTitlePanel: function(){
         if (this.options.title != null && this.options.title != "") {
             this.titlePanel = new pvc.TitlePanel(this, {
                 title:      this.options.title,
@@ -489,17 +649,17 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Creates and initializes the legend panel,
      * if the legend is active.
      */
-    initLegendPanel: function(){
+    _initLegendPanel: function(){
         if (this.options.legend) {
             this.legendPanel = new pvc.LegendPanel(this, {
                 anchor: this.options.legendPosition,
                 legendSize: this.options.legendSize,
+                font: this.options.legendFont,
                 align: this.options.legendAlign,
                 minMarginX: this.options.legendMinMarginX,
                 minMarginY: this.options.legendMinMarginY,
                 textMargin: this.options.legendTextMargin,
                 padding: this.options.legendPadding,
-                textAdjust: this.options.legendTextAdjust,
                 shape: this.options.legendShape,
                 markerSize: this.options.legendMarkerSize,
                 drawLine: this.options.legendDrawLine,
@@ -516,11 +676,10 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     render: function(bypassAnimation, rebuild) {
         try{
-            this._renderAnimationStart = 
-                this.isAnimating = this.options.animate && !bypassAnimation;
+            this.isAnimating = this.options.animate && !bypassAnimation ? 1 : 0;
             
             if (!this.isPreRendered || rebuild) {
-                this.preRender();
+                this._preRender();
             }
 
             if (this.options.renderCallback) {
@@ -532,17 +691,17 @@ pvc.BaseChart = pvc.Abstract.extend({
 
             // Transition to the animation's 'end' point
             if (this.isAnimating) {
-                this._renderAnimationStart = false;
+                this.isAnimating = 2;
                 
                 var me = this;
                 this.basePanel.getPvPanel()
-                        .transition()
-                        .duration(2000)
-                        .ease("cubic-in-out")
-                        .start(function(){
-                            me.isAnimating = false;
-                            me._onRenderEnd(true);
-                        });
+                    .transition()
+                    .duration(2000)
+                    .ease("cubic-in-out")
+                    .start(function(){
+                        me.isAnimating = 0;
+                        me._onRenderEnd(true);
+                    });
             } else {
                 this._onRenderEnd(false);
             }
@@ -552,7 +711,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 
                 if (!this.basePanel) {
                     pvc.log("No panel");
-                    this.initBasePanel();
+                    this._initBasePanel();
                 }
 
                 pvc.log("creating message");
@@ -577,7 +736,25 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Animation
      */
     animate: function(start, end) {
-        return this._renderAnimationStart ? start : end;
+        return (this.isAnimating === 1) ? start : end;
+    },
+    
+    /**
+     * Indicates if the chart is currently 
+     * rendering the animation start phase.
+     * <p>
+     * This function is just syntax sugar for <tt>this.isAnimating === 1</tt>
+     * </p>
+     * <p>
+     * Prefer using this function instead of {@link #animate} 
+     * whenever its <tt>start</tt> or <tt>end</tt> arguments
+     * involve a non-trivial calculation. 
+     * </p>
+     * 
+     * @type boolean
+     */
+    isAnimatingStart: function() {
+        return (this.isAnimating === 1);
     },
     
     /**
@@ -744,6 +921,20 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
 
         return margins;
+    },
+    
+    _disposed: false,
+    
+    /**
+     * Disposes the chart, any of its panels and child charts.
+     */
+    dispose: function(){
+        if(!this._disposed){
+            
+            // TODO: 
+            
+            this._disposed = true;
+        }
     }
 }, {
     // NOTE: undefined values are not considered by $.extend
@@ -786,13 +977,13 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         legend:           false,
         legendPosition:   "bottom",
+        legendFont:       undefined,
         legendSize:       undefined,
         legendAlign:      undefined,
         legendMinMarginX: undefined,
         legendMinMarginY: undefined,
         legendTextMargin: undefined,
         legendPadding:    undefined,
-        legendTextAdjust: undefined,
         legendShape:      undefined,
         legendDrawLine:   undefined,
         legendDrawMarker: undefined,

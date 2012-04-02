@@ -209,6 +209,42 @@ def.type('pvc.data.TranslationOper')
     },
     
     /**
+     * Builds a dimensions reader that 
+     * filters the atoms returned by a given dimensions reader
+     * and returns the first one that is of a specified dimension.
+     * 
+     * <p>
+     * If the given reader returns no atoms of the desired dimension,
+     * then the built reader returns <tt>undefined</tt>.
+     * </p>
+     * 
+     * @param {function} reader A dimensions reader to filter.
+     * @param {function} dimName The name of the filtered dimension.
+     * 
+     * @type function
+     */
+    _filterDimensionReader: function(reader, dimName){
+        
+        function extractDimensionReader(item) {
+            var atoms = reader(item);
+            if(atoms instanceof Array) {
+                return def.query(seriesAtom)
+                    .first(function(atom){
+                        return atom.dimension.name === dimName;
+                    });
+            }
+            
+            if(atoms.dimension.name === dimName) {
+                return atoms;
+            }
+            
+            //return undefined;
+        }
+        
+        return extractDimensionReader;
+    },
+    
+    /**
      * Performs the translation operation for a data instance.
      * 
      * <p>

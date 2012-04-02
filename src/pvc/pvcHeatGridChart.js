@@ -248,7 +248,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                             def.own(rowData1.atoms),
                             def.own(colData1.atoms));
             
-            return new pvc.data.Datum(data.owner, atoms);
+            return new pvc.data.Datum(data.owner, atoms, true);
         }
         
         /* PV Panels */

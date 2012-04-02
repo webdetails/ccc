@@ -42,9 +42,8 @@
  * 
  * @constructor
  *
- * @param {string|string[]|pvc.data.GroupingOperSpec} specText The grouping specification text,
- * or array of grouping specification level text, 
- * or specification object.
+ * @param {string|string[]} specText The grouping specification text,
+ * or array of grouping specification level text.
  * <p>
  * An example:
  * </p>
@@ -82,7 +81,7 @@ def.type('pvc.data.GroupingSpec')
     this.hasCompositeLevels = false;
     
     levels.forEach(function(levelText){
-        def.isString(levelText) || def.fail.argumentInvalid('groupingSpecText', "Invalid grouping specification.");
+        def.isString(levelText) || def.fail.argumentInvalid('specText', "Invalid grouping specification.");
         
         var levelSpec = groupSpec_parseGroupingLevel(levelText, data);
         if(levelSpec) {
@@ -101,9 +100,85 @@ def.type('pvc.data.GroupingSpec')
     this.key = levelIds.join('||');
 })
 .add(/** @lends pvc.data.GroupingSpec# */{
+    /**
+     * Obtains an enumerable of the contained dimension specifications.
+     * @type def.Query
+     */
     dimensions: function(){
         return def.query(this.levels)
-                  .selectMany(function(level){ return level.dimensions; })
+                  .selectMany(function(level){ return level.dimensions; });
+    },
+    
+    /**
+     * Obtains a single-level version of this grouping specification.
+     * 
+     * <p>
+     * If this grouping specification is itself single-level, 
+     * then it is returned.
+     * </p> 
+     * 
+     * @param {object} [keyArgs] Keyword arguments
+     * @param {boolean} [keyArgs.reverse=false] Indicates that each dimension's order should be reversed.
+     * @type pvc.data.GroupingSpec 
+     */
+    singleLevelGrouping: function(keyArgs){
+        var reverse = !!def.get(keyArgs, 'reverse', false);
+        if(this.isSingleLevel && !reverse) {
+            return this;
+        }
+        
+        this._singleLevelGrouping || (this._singleLevelGrouping = {});
+        
+        var singleLevel = this._singleLevelGrouping[reverse];
+        if(!singleLevel) {
+            // TODO: make this the right way - don't parse things again...
+            /**
+             * rev1 rev2  result
+             *  1    1      asc
+             *  1    0      desc
+             *  0    1      desc
+             *  0    0      asc
+             */
+            var groupingText = this.dimensions()
+                                   .select(function(dimSpec){
+                                       return dimSpec.name + ' ' + ((dimSpec.reverse === reverse) ? 'asc' : 'desc'); 
+                                    })
+                                   .array()
+                                   .join('|');
+            
+            singleLevel = new pvc.data.GroupingSpec(groupingText, this.data);
+            
+            this._singleLevelGrouping[reverse] = singleLevel;
+        }
+        
+        return singleLevel;
+    },
+    
+    /**
+     * Obtains a reversed version of this grouping specification.
+     * 
+     * @type pvc.data.GroupingSpec 
+     */
+    reversed: function(){
+        var reverseGrouping = this._reverseGrouping;
+        if(!reverseGrouping) {
+            // TODO: make this the right way - don't parse things again...
+            var groupingText = def.query(this.levels)
+                                   .select(function(levelSpec){
+                                       return levelSpec.dimensions.map(function(dimSpec){
+                                                   return dimSpec.name + ' ' + (dimSpec.reverse ? 'asc' : 'desc');
+                                               })
+                                               .join('|');
+                                   })
+                                   .array()
+                                   .join(',');
+
+            reverseGrouping = new pvc.data.GroupingSpec(groupingText, this.data);
+            
+            this._reverseGrouping = reverseGrouping;
+        }
+        
+        return reverseGrouping;
     }
 });
 
@@ -131,7 +206,6 @@ function groupSpec_parseGroupingLevel(groupLevelText, data) {
                 
                 dimSpecs.push({
                     name:      name,
-                    dimension: dimension,
                     reverse:   reverse,
                     comparer:  dimType.atomComparer(reverse)
                 });
@@ -161,14 +235,14 @@ function groupSpec_parseGroupingLevel(groupLevelText, data) {
             return 0;
         },
         
-        keyer: function(datum, visible){
+        keyer: function(datum){
             var keys  = [],
                 atoms = [];
             
             for(var i = 0 ; i < D ; i++) {
                 var dimName = dimSpecs[i].name,
                     atom = datum.atoms[dimName];
-                if(atom.value == null || (visible != null && atom.isVisible !== visible)) {
+                if(atom.value == null) {
                     // Signals to ignore datum
                     return null;
                 }
@@ -180,7 +254,7 @@ function groupSpec_parseGroupingLevel(groupLevelText, data) {
             return {
                 key:   keys.join(','),
                 atoms: atoms
-            }
+            };
         }
-    }
+    };
 }

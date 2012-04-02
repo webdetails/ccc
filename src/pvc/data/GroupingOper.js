@@ -19,8 +19,10 @@
  * @param {object} [keyArgs] Keyword arguments.
  * 
  * @param {boolean} [keyArgs.visible=null]
- *      Only considers datums whose atoms of the grouping dimensions 
- *      have the specified visible state.
+ *      Only considers datums that have the specified visible state.
+ *      
+ * @param {boolean} [keyArgs.selected=null]
+ *      Only considers datums that have the specified selected state.
  */
 def.type('pvc.data.GroupingOper')
 .init(function(linkParent, datums, groupingSpecText, keyArgs){
@@ -36,13 +38,15 @@ def.type('pvc.data.GroupingOper')
     
     this._linkParent = linkParent;
     
-    this._datums  = (datums || linkParent._datums).slice();
-    this._visible = def.get(keyArgs, 'visible');
+    this._datums   = (datums || linkParent._datums).slice();
+    this._visible  = def.get(keyArgs, 'visible');
+    this._selected = def.get(keyArgs, 'selected');
     
     // NOTE: datum.id is not a semantic key, yet, ids are unique per script existence
     // Ids are only put in the key when datums are supplied independently
     this.key = this._groupingSpec.key + 
-               "||visible:" + this._visible + 
+               "||visible:"  + this._visible +
+               "||selected:" + this._selected + 
                "||" + (datums ? this._datums.map(function(datum){ return datum.id; }).join(",") : '');
 }).
 add(/** @lends pvc.data.GroupingOper */{
@@ -55,7 +59,8 @@ add(/** @lends pvc.data.GroupingOper */{
     execute: function(){
         var levelSpecs = this._groupingSpec.levels,
             D = levelSpecs.length,
-            visible = this._visible;
+            visible = this._visible,
+            selected = this._selected;
         
         // Create a linked root data
         this._root = new pvc.data.Data({linkParent: this._linkParent, datums: this._datums});
@@ -65,7 +70,7 @@ add(/** @lends pvc.data.GroupingOper */{
             // Leaf data?
             var depth = parent.depth;
             if(depth >= D){
-                var leafs = this._root.leafs;
+                var leafs = this._root._leafs;
                 parent.leafIndex = leafs.length;
                 leafs.push(parent);
                 return;
@@ -79,20 +84,24 @@ add(/** @lends pvc.data.GroupingOper */{
             
             // Group datums on level's dimension
             datums.forEach(function(datum){
-                var groupInfo = levelSpec.keyer(datum, visible);
-                if(groupInfo != null){
-                    var key = groupInfo.key,
-                        keyDatums = datumsByKey[key];
+                if((visible  == null || datum.isVisible  === visible) && 
+                   (selected == null || datum.isSelected === selected)) {
                     
-                    if(keyDatums){
-                        keyDatums.push(datum);
-                    } else {
-                        keyDatums = datumsByKey[key] = [datum];
+                    var groupInfo = levelSpec.keyer(datum);
+                    if(groupInfo != null){
+                        var key = groupInfo.key,
+                            keyDatums = datumsByKey[key];
                         
-                        groupInfo.datums = keyDatums;
-                        
-                        var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
-                        def.array.insertAt(groupInfos, ~datumIndex, groupInfo);
+                        if(keyDatums){
+                            keyDatums.push(datum);
+                        } else {
+                            keyDatums = datumsByKey[key] = [datum];
+                            
+                            groupInfo.datums = keyDatums;
+                            
+                            var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
+                            def.array.insertAt(groupInfos, ~datumIndex, groupInfo);
+                        }
                     }
                 }
             }, this);
@@ -119,6 +128,7 @@ add(/** @lends pvc.data.GroupingOper */{
             
             // TODO: Really ugly....
             // This is to support single-dimension grouping specifications used by "where" operation.
+            // see #data_whereDatumFilter
             parent._childrenKeyDimName = levelSpec.dimensions[0].name;
         }
         

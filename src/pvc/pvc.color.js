@@ -117,9 +117,9 @@ def.scope(function(){
            _createScale: def.method({isAbstract: true}),
            
            _createCategoryScalesMap: function(createCategoryScale){
-               return def.query(this.data.leafs)
+               return this.data.leafs()
                    .object({
-                       key:     function(leafData){ return leafData.absKey; },
+                       name:    function(leafData){ return leafData.absKey; },
                        value:   createCategoryScale,
                        context: this
                    });

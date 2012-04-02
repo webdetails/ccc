@@ -444,15 +444,15 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                     // Consume the index
                     me._userItem[index] = true;
                     
-                    var dimGet = me._propGet(dimName, index);
+                    var reader = me._propGet(dimName, index);
                     
-                    me._userDimsReaders.push(dimGet);
+                    me._userDimsReaders.push(reader);
                     
                     // <Debug>
                     !def.hasOwn(me._userDimsReadersByDim, dimName) || def.assert("Dimension already being read.");
                     // </Debug>
                     
-                    me._userDimsReadersByDim[dimName] = dimGet;
+                    me._userDimsReadersByDim[dimName] = reader;
                     
                     count--;
                 }
@@ -471,13 +471,18 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 // Has 'value' and 'value2' dimensions, fed in a special way 
                 
                 if(!this._userUsedDims.value2) {
-                    var seriesDimReader = this._userDimsReadersByDim['series'];
-                    if(seriesDimReader) {
+                    var seriesReader = this._userDimsReadersByDim['series'];
+                    if(seriesReader) {
                         index = this._nextAvailableItemIndex(index);
                         
                         this._userItem[index] = true;
                         
-                        dimReaders.push(this._value1AndValue2Get(this._axis2SeriesKeySet, seriesDimReader, index));
+                        /* Create a reader that surely only returns 'series' atoms */
+                        seriesReader = this._filterDimensionReader(seriesReader, 'series');
+                        
+                        var calcAxis2SeriesKeySet = def.constant(this._axis2SeriesKeySet);
+                        
+                        dimReaders.push(this._value1AndValue2Get(calcAxis2SeriesKeySet, seriesReader, index));
                         
                         // Add more M-1 measures, starting at 2 (~> 'value3', ...)
                         add('value', 'V', 2, this.M - 1);

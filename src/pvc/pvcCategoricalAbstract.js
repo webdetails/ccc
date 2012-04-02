@@ -136,7 +136,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.xAxisDomainRoundMode,
                 desiredTickCount: options.xAxisDesiredTickCount,
                 minorTicks:  options.xAxisMinorTicks,
-                ordinalDimensionsNames: this.getAxisOrdinalDimensions('x'),
+                ordinalRoleName: this._getAxisOrdinalRole('x'),
                 useCompositeAxis: options.useCompositeAxis,
                 font: options.axisLabelFont,
                 title: options.xAxisTitle,
@@ -164,7 +164,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.yAxisDomainRoundMode,
                 desiredTickCount: options.yAxisDesiredTickCount,
                 minorTicks:       options.yAxisMinorTicks,
-                ordinalDimensionsNames: this.getAxisOrdinalDimensions('y'),
+                ordinalRoleName: this._getAxisOrdinalRole('y'),
                 useCompositeAxis: options.useCompositeAxis,
                 font: options.axisLabelFont,
                 title: options.yAxisTitle,
@@ -193,7 +193,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.secondAxisDomainRoundMode,
                 desiredTickCount: options.secondAxisDesiredTickCount,
                 minorTicks:       options.secondAxisMinorTicks,
-                ordinalDimensionsNames: this.getAxisOrdinalDimensions('x'),
+                ordinalRoleName: this._getAxisOrdinalRole('x'),
                 tickColor: options.secondAxisColor,
                 title: options.secondAxisTitle,
                 titleFont: options.axisTitleFont,
@@ -219,7 +219,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.secondAxisDomainRoundMode,
                 desiredTickCount: options.secondAxisDesiredTickCount,
                 minorTicks:       options.secondAxisMinorTicks,
-                ordinalDimensionsNames: this.getAxisOrdinalDimensions('y'),
+                ordinalRoleName: this._getAxisOrdinalRole('y'),
                 tickColor: options.secondAxisColor,
                 title: options.secondAxisTitle,
                 titleFont: options.axisTitleFont,
@@ -247,9 +247,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
 
     /**
-     *  The data dimensions names to use in an ordinal axis.
+     *  The name of the role to use in an ordinal axis.
      */
-    getAxisOrdinalDimensions: function(axis){
+    _getAxisOrdinalRole: function(axis){
         var onSeries = false;
 
         // onSeries can only be true if the perpendicular axis is ordinal
@@ -259,8 +259,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             onSeries = (axis == "x") ? !isVertical : isVertical;
         }
 
-        return this.dataEngine.type.groupDimensionsNames(
-                      onSeries ? 'series' : 'category');
+        return onSeries ? 'series' : 'category';
     },
 
     /**
@@ -326,8 +325,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         
         // DOMAIN
         var roleName = orthoAxis ? 'series' : 'category',
-            data = this._visualRoleData(roleName, {visible: true}),
-            leafKeys = data.leafs.map(function(leaf){ return leaf.key; });
+            data = this.visualRoleData(roleName, {visible: true}),
+            leafKeys = data.leafs().select(function(leaf){ return leaf.absKey; }).array();
         
         var scale = new pv.Scale.ordinal(leafKeys);
         
@@ -413,7 +412,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if(!isNaN(bound)){
             dMin = bound;
         } else {
-            dMin = this.dataEngine.getVisibleSeriesAbsoluteMin(); // may be < 0 !
+            dMin = this.dataEngine.getVisibleSeriesAbsoluteMin() || 0; // may be < 0 or undefined !
             lockedMin = false;
         }
 
@@ -425,7 +424,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             dMax = this.dataEngine.getCategoriesMaxSumOfVisibleSeries(); // may be < 0 !
             lockedMax = false;
         } else {
-            dMax = this.dataEngine.getVisibleSeriesAbsoluteMax(); // may be < 0 !
+            dMax = this.dataEngine.getVisibleSeriesAbsoluteMax() || 0; // may be < 0 or undefined !
             lockedMax = false;
         }
         
@@ -537,7 +536,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             isX = this.isOrientationVertical();
         
         // DOMAIN
-        var role = this._visualRoles('category');//, {visible: true});
+        var role = this.visualRoles('category');
         if(!role.grouping.isSingleDimension) {
             pvc.log("[WARNING] A timeseries category role can only have one dimension.");
         } 
@@ -546,16 +545,27 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             valueDim = this.dataEngine.dimensions(dimName);
         
         // Adding a small offset to the scale's domain:
-        var dExtent = valueDim.extent(), // already only contains visibles
-            dMin = dExtent.min.value,
-            dMax = dExtent.max.value;
+        var dExtent = valueDim.extent({visible: true}), // null when no data...
+            dMin,
+            dMax;
         
-        if(!bypassAxisOffset && options.axisOffset > 0){
-            var dOffset = (dMax.getTime() - dMin.getTime()) * options.axisOffset;
-            dMin = new Date(dMin.getTime() - dOffset);
-            dMax = new Date(dMax.getTime() + dOffset);
+        if(dExtent) {
+            dMin = dExtent.min.value;
+            dMax = dExtent.max.value;
+            
+            if(!bypassAxisOffset && options.axisOffset > 0){
+                var dOffset = (dMax.getTime() - dMin.getTime()) * options.axisOffset;
+                dMin = new Date(dMin.getTime() - dOffset);
+                dMax = new Date(dMax.getTime() + dOffset);
+            }
+        } else {
+            dMin = dMax = new Date();
         }
-
+        
+        if((dMax - dMin) === 0) {
+            dMax = new Date(dMax.getTime() + 3600000); // 1 h
+        }
+        
         var scale = new pv.Scale.linear(dMin, dMax);
 
         // Domain rounding

@@ -40,9 +40,6 @@ var data_labelSep = " ~ ";
  * 
  * @property {pvc.data.Data} linkParent The link parent data.
  * 
- * @property {pvc.data.Data[]} leafs The leaf data instances of this data.
- * Only defined in root data instances.
- * 
  * @property {Number} depth The depth of the data relative to its root data.
  * @property {string} label The composite label of the (common) atoms in the data.
  * 
@@ -69,20 +66,16 @@ var data_labelSep = " ~ ";
  */
 def.type('pvc.data.Data', pvc.data.Complex)
 .init(function(keyArgs){
-    /**
-     * The dimension instances of this data.
-     * @name pvc.data.Data#_dimensions
-     * @field
-     * @type pvc.data.Dimension[]
-     * @private  
-     */
     this._dimensions = {};
+    this._visibleDatums = new def.Map();
     
-    var owner, 
+    this.parent = def.get(keyArgs, 'parent') || null;
+    
+    var owner,
         atoms,
-        isOwner;
+        isOwner,
+        parent = this.parent;
     
-    var parent = this.parent = def.get(keyArgs, 'parent') || null;
     if(parent){
         // Not a root
         this.root    = parent.root;
@@ -102,11 +95,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
         if(linkParent){
             // A root that is not topmost - owned, linked
             owner = linkParent.owner;
-            //atoms = pv.values(linkParent.atoms); // is atomsBase
+            //atoms = pv.values(linkParent.atoms); // is atomsBase, below
             
             this.type    = owner.type;
             this._datums = def.get(keyArgs, 'datums') || linkParent._datums.slice();
-            this.leafs = [];
+            this._leafs   = [];
             
             data_addLinkChild.call(linkParent, this);
         } else {
@@ -117,24 +110,14 @@ def.type('pvc.data.Data', pvc.data.Complex)
             
             this.type = def.get(keyArgs, 'type') || def.fail.argumentRequired('type');
             
-            // Selection is only handled by owner datas.
-            /**
-             * A map of selected datums by their indexes.
-             * @type object
-             * @private
-             */
-            this._selectedDatums = {};
-
-            /**
-             * The number of selected datums.
-             * @type number
-             * @private
-             */
-            this._selectedCount = 0;
+            // Only owner datas cache selected datums
+            this._selectedDatums = new def.Map();
         }
     }
     
-    // Must antecipate setting this (and not wait for the base constructor)
+    data_syncDatumsState.call(this);
+    
+    // Must anticipate setting this (and not wait for the base constructor)
     // because otherwise new Dimension( ... ) fails.
     this.owner = owner;
     
@@ -189,6 +172,15 @@ def.type('pvc.data.Data', pvc.data.Complex)
     linkParent:   null,
     
     /**
+     * The dimension instances of this data.
+     * @name pvc.data.Data#_dimensions
+     * @field
+     * @type pvc.data.Dimension[]
+     * @private  
+     */
+    _dimensions: null, 
+    
+    /**
      * The child data instances of this data.
      * @type pvc.data.Data[]
      * @internal
@@ -201,6 +193,14 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @internal
      */
     _linkChildren: null,
+    
+    /**
+     * The leaf data instances of this data.
+     * 
+     * @type pvc.data.Data[] 
+     * @internal
+     */
+    _leafs: null,
     
     /** 
      * The map of child datas by their key.
@@ -217,6 +217,18 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @internal
      */
     _childrenKeyDimName: null,
+    
+    /**
+     * A map of visible datums indexed by id.
+     * @type def.Map
+     */
+    _visibleDatums: null,
+    
+    /**
+     * A map of selected datums indexed by id.
+     * @type def.Map
+     */
+    _selectedDatums: null, 
     
     /**
      * Cache of link child data by grouping operation key.
@@ -238,7 +250,13 @@ def.type('pvc.data.Data', pvc.data.Complex)
      */
     _datums: null,
     
-    leafs:    null,
+    /** 
+     * A map of the datums of this data indexed by id.
+     * @type object
+     * @internal
+     */
+    _datumsById: null, 
+    
     depth:    0,
     label:    "",
     absLabel: "",
@@ -303,7 +321,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     },
     
     /**
-     * Obtains an enumerable on the child data instances of this data.
+     * Obtains an enumerable of the child data instances of this data.
      * 
      * @param {object} [keyArgs] Keyword arguments.
      * @param {string} [keyArgs.key=null} The key of the desired child.
@@ -327,6 +345,15 @@ def.type('pvc.data.Data', pvc.data.Complex)
         }
         
         return def.query(this._children);
+    },
+    
+    /**
+     * Obtains an enumerable of the leaf data instances of this data.
+     * 
+     * @type def.Query 
+     */
+    leafs: function(){
+        return def.query(this._leafs);
     },
     
     /**
@@ -369,10 +396,7 @@ function data_disposeChildLists() {
     this._childrenByKey = null;
     this._groupByCache  = null;
     
-    if(this._selectedDatums) {
-        this._selectedDatums = null;
-        this._selectedCount = 0;
-    }
+    this._selectedDatums && this._selectedDatums.clear();
 }
 
 /**

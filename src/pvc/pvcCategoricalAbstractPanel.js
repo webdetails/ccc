@@ -172,9 +172,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         // Fire action
         var action = this.chart.options.selectionChangedAction;
         if(action){
-            var selections = this.chart.dataEngine.owner.datums(null, {selected: true});
-
-            action.call(null, selections.array());
+            var selections = this.chart.dataEngine.owner.selectedDatums();
+            action.call(null, selections);
         }
     },
 

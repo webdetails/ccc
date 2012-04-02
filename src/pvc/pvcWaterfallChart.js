@@ -381,7 +381,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         // Augment the datum's values with 100 percent data
         if(datum && this._hundredPercentData){
-            var renderVersion = this.chart._renderVersion;
+            var renderVersion = this.chart._preRenderVersion;
             if(!datum.percent || datum._pctRV !== renderVersion){
                 datum._pctRV = renderVersion;
                 
@@ -812,7 +812,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                         v = parseFloat(d);
                     }
                     // Too small a bar to show any value?
-                    return myself.DF.orthoLengthFunc(v) >= 4;
+                    return myself.DF.orthoLengthFunc.call(myself.pvBar, v) >= 4;
                  })
                 .text(function(d){
                     if(myself.percentageNormalized){

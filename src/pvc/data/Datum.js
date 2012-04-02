@@ -9,28 +9,37 @@
  *
  * @extends pvc.data.Complex
  * 
- * @property {Number} index The index of the Datum in its owning Data (constant).
- * This is immutable and can thus be used as the datum's key.
- * 
+ * @property {boolean} isNull Indicates if the datum is a null datum.
+ * <p>
+ * A null datum is a datum that doesn't exist in the data source,
+ * but is created for auxiliary reasons (null pattern).
+ * </p>
+ *
  * @property {boolean} isSelected The datum's selected state (read-only).
+ * @property {boolean} isVisible The datum's visible state (read-only).
  * 
  * @constructor
  * @param {pvc.data.Data} data The data instance to which the datum belongs.
- * @param {pvc.data.Atom[]} [atoms] An array of atoms of distinct and complete dimensions.
+ * @param {pvc.data.Atom[]} [atoms] An array of atoms of <i>distinct</i> dimensions.
+ * @param {boolean} [isNull=false] Indicates if the datum is a null datum.
  */
 def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
-function(data, atoms, index){
+function(data, atoms, isNull){
     
     (data && data.isOwner()) || def.assert("Only owner datas can own datums.");
     
     def.base.call(this, data, atoms, data.atoms);
     
-    this.index = index >= 0 ? index : -1; // null atom = -1
+    if(isNull) {
+        this.isNull = true;
+    } // otherwise inherit prototype default value
 })
 .add(/** @lends pvc.data.Datum# */{
     
     isSelected: false,
+    isVisible:  true,
+    isNull: false,
     
     /**
      * Sets the selected state of the datum to a specified value.
@@ -46,7 +55,7 @@ function(data, atoms, index){
         var changed = this.isSelected !== select;
         if(changed){
             this.isSelected = select;
-            if(this.index >= 0){ // not a null datum
+            if(!this.isNull){
                 data_onDatumSelectedChanged.call(this.owner, this, select);
             }
         }
@@ -63,23 +72,40 @@ function(data, atoms, index){
         this.setSelected(!this.isSelected);
     },
     
+    /**
+     * Sets the visible state of the datum to a specified value.
+     * 
+     * @param {boolean} [visible=true] The desired visible state.
+     * 
+     * @returns {boolean} true if the visible state changed, false otherwise.
+     */
+    setVisible: function(visible){
+        // Normalize 'visible'
+        visible = (visible == null) || !!visible;
+
+        var changed = this.isVisible !== visible;
+        if(changed){
+            this.isVisible = visible;
+            if(!this.isNull){
+                data_onDatumVisibleChanged.call(this.owner, this, visible);
+            }
+        }
+
+        return changed;
+    },
     
     /**
-     * Indicates if the datum is a null datum.
-     * <p>
-     * A null datum is a datum that doesn't exist in the data source,
-     * but is created for auxiliary reasons (null pattern).
-     * </p>
+     * Toggles the visible state of the datum.
      * 
-     * @type boolean
+     * @type {undefined}
      */
-    isNull: function(){
-        return this.index < 0;
+    toggleVisible: function(){
+        this.setVisible(!this.isVisible);
     }
 });
 
 /**
- * Called by the owner group to clear the selected state (internal).
+ * Called by the owner data to clear the datum's selected state (internal).
  * @name pvc.data.Datum#_deselect
  * @function
  * @type undefined

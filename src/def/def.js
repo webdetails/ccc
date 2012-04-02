@@ -1036,10 +1036,63 @@ this['def'] = (function(){
     
     // --------------------
     
+    def.type('Map')
+    .init(function(source){
+        this.source = source || {};
+        this.count  = source ? def.ownKeys(source).length : 0;
+    })
+    .add({
+        has: function(p){
+            return objectHasOwn.call(this.source, p);
+        },
+        
+        get: function(p){
+            return objectHasOwn.call(this.source, p) ? 
+                   this.source[p] : 
+                   undefined;
+        },
+        
+        set: function(p, v){
+            if(!objectHasOwn.call(this.source, p)) {
+                this.count++;
+            }
+            
+            this.source[p] = v;
+            return this;
+        },
+        
+        rem: function(p){
+            if(objectHasOwn.call(this.source, p)) {
+                delete this.source[p];
+                this.count--;
+            }
+            
+            return this;
+        },
+        
+        clear: function(){
+            if(this.count) {
+                this.source = {}; 
+                this.count  = 0;
+            }
+            return this;
+        },
+        
+        values: function(){
+            return def.own(this.source);
+        },
+        
+        keys: function(){
+            return def.ownKeys(this.source);
+        }
+    });
+    
+    // --------------------
+    
     def.type('Query')
     .init(function(){
         this.index = -1;
-        this.item  = undefined;
+        this.item = undefined;
     })
     .add({
         next: function(){
@@ -1051,29 +1104,38 @@ this['def'] = (function(){
             var nextIndex = this.index + 1;
             if(!this._next(nextIndex)){
                 this.index = -2;
-                this.item  = undefined;
+                this.item = undefined;
                 return false;
             }
             
             this.index = nextIndex;
             return true;
         },
-    
+        
         /**
          * @name _next
          * @function
          * @param {number} nextIndex The index of the next item, if one exists.
          * @member def.Query#
-         * @returns {boolean} true if there is a next item, false otherwise.
+         * @returns {boolean} truthy if there is a next item, falsy otherwise.
          */
         _next: def.method({isAbstract: true}),
+        
+        _finish: function(){
+            this.index = -2;
+            this.item  = undefined;
+        },
         
         // ------------
         
         each: function(fun, ctx){
             while(this.next()){
-                fun.call(ctx, this.item, this.index);
+                if(fun.call(ctx, this.item, this.index) === false) {
+                    return true;
+                }
             }
+            
+            return false;
         },
         
         array: function(){
@@ -1085,17 +1147,38 @@ this['def'] = (function(){
         },
         
         /**
-         * Facilitates the construction of dictionaries.
+         * Consumes the query and fills an object
+         * with its items.
+         * <p>
+         * A property is created per item in the query.
+         * The default name of each property is the string value of the item.
+         * The default value of the property is the item itself.
+         * </p>
+         * <p>
+         * In the case where two items have the same key, 
+         * the last one overwrites the first. 
+         * </p>
+         * 
+         * @param {object}   [keyArgs] Keyword arguments.
+         * @param {function} [keyArgs.value] A function that computes the value of each property.
+         * @param {function} [keyArgs.name]  A function that computes the name of each property.
+         * @param {object}   [keyArgs.context] The context object on which <tt>keyArgs.name</tt> and <tt>keyArgs.value</tt>
+         * are called.
+         * @param {object}   [keyArgs.target] The object that is to receive the properties, 
+         * instead of a new one being creating.
+         * 
+         * @returns {object} A newly created object, or the specified <tt>keyArgs.target</tt> object,
+         * filled with properties. 
          */
         object: function(keyArgs){
-            var ctx    = def.get(keyArgs, 'context'),
-                target = def.get(keyArgs, 'target') || {},
-                valFun = def.get(keyArgs, 'value')  || def.fail.argumentRequired('keyArgs.value'); 
-                keyFun = def.get(keyArgs, 'key');
+            var target   = def.get(keyArgs, 'target') || {},
+                nameFun  = def.get(keyArgs, 'name' ),    
+                valueFun = def.get(keyArgs, 'value'),
+                ctx      = def.get(keyArgs, 'context');
             
             while(this.next()){
-                var key = '' + (keyFun ? keyFun.call(ctx, this.item, this.index) : this.item);
-                target[key] = valFun.call(ctx, this.item, this.index);
+                var name = '' + (nameFun ? nameFun.call(ctx, this.item, this.index) : this.item);
+                target[name] = valueFun ? valueFun.call(ctx, this.item, this.index) : this.item;
             }
             
             return target;
@@ -1125,7 +1208,8 @@ this['def'] = (function(){
         },
         
         /**
-         * Obtains the number of items of a query.
+         * Consumes the query and obtains the number of items.
+         * 
          * @type number
          */
         count: function(){
@@ -1137,28 +1221,69 @@ this['def'] = (function(){
         },
         
         /**
-         * Obtains the first item of a query.
-         * 
+         * Returns the first item that satisfies a specified predicate.
          * <p>
-         * If there are no items, then the specified <i>dv</i> is returned.
+         * If no predicate is specified, the first item is returned. 
          * </p>
-         * 
-         * @param {any} dv The value returned when there are no items.
-         * When unspecified, the returned value is <i>undefined</i>.
+         *  
+         * @param {function} [pred] A predicate to apply to every item.
+         * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
+         * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
          * 
          * @type any
          */
-        first: function(dv){
-            while(this.next()){ 
-                return this.item; 
+        first: function(pred, ctx, dv){
+            while(this.next()){
+                if(!pred || pred.call(ctx, this.item, this.index)) {
+                    var item = this.item;
+                    this._finish();
+                    return item;
+                }
             }
             
             return dv;
         },
         
-        // TODO: change this to a Query, instead of being an aggregate?
-        // Need object iteration first?
-        // Should be renamed to 'group'
+        /**
+         * Returns <tt>true</tt> if there is at least one item satisfying a specified predicate.
+         * <p>
+         * If no predicate is specified, returns <tt>true</tt> if there is at least one item. 
+         * </p>
+         *  
+         * @param {function} [pred] A predicate to apply to every item.
+         * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
+         * 
+         * @type boolean
+         */
+        any: function(pred, ctx){
+            while(this.next()){
+                if(!pred || pred.call(ctx, this.item, this.index)) {
+                    this._finish();
+                    return true; 
+                }
+            }
+            
+            return false;
+        },
+        
+        /**
+         * Returns <tt>true</tt> if all the query items satisfy the specified predicate.
+         * @param {function} pred A predicate to apply to every item.
+         * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
+         * 
+         * @type boolean
+         */
+        all: function(pred, ctx){
+            while(this.next()){
+                if(!pred.call(ctx, this.item, this.index)) {
+                    this._finish();
+                    return false; 
+                }
+            }
+            
+            return true;
+        },
+        
         index: function(keyFun, ctx){
             var keyIndex = {};
             
@@ -1174,7 +1299,6 @@ this['def'] = (function(){
             return keyIndex;
         },
         
-        // TODO: change this to a Query, instead of being an aggregate?
         uniqueIndex: function(keyFun, ctx){
             var keyIndex = {};
             
@@ -1187,6 +1311,9 @@ this['def'] = (function(){
             
             return keyIndex;
         },
+        
+        // ---------------
+        // Query -> Query
         
         // deferred map
         select: function(fun, ctx){
@@ -1208,7 +1335,26 @@ this['def'] = (function(){
     
         skip: function(n){
             return new def.SkipQuery(this, n);
+        },
+        
+        take: function(n){
+            return new def.TakeQuery(this, n);
+        },
+        
+        wahyl: function(pred, ctx){
+            return new def.WhileQuery(this, pred, ctx);
         }
+    });
+    
+    def.type('NullQuery', def.Query)
+    .add({
+        _next: function(nextIndex){}
+    });
+    
+    def.type('AdhocQuery', def.Query)
+    .init(function(next){
+        def.base.call(this);
+        this._next = next;
     });
     
     def.type('ArrayLikeQuery', def.Query)
@@ -1223,6 +1369,25 @@ this['def'] = (function(){
                 this.item = this._list[nextIndex];
                 return 1;
             }
+        },
+        
+        /**
+         * Obtains the number of items of a query.
+         * 
+         * This is a more efficient implementation for the array-like class.
+         * @type number
+         */
+        count: function(){
+            // Count counts remaining items
+            var remaining = this._count;
+            if(this.index >= 0){
+                remaining -= (this.index + 1);
+            }
+            
+            // Count consumes all remaining items
+            this._finish();
+            
+            return remaining;
         }
     });
     
@@ -1245,6 +1410,26 @@ this['def'] = (function(){
         }
     });
     
+    def.type('WhileQuery', def.Query)
+    .init(function(source, pred, ctx){
+        def.base.call(this);
+        this._pred  = pred;
+        this._ctx    = ctx;
+        this._source = source;
+    })
+    .add({
+        _next: function(nextIndex){
+            while(this._source.next()){
+                var nextItem = this._source.item;
+                if(this._pred.call(this._ctx, nextItem, this._source.index)){
+                    this.item = nextItem;
+                    return 1;
+                }
+                return 0;
+            }
+        }
+    });
+    
     def.type('SelectQuery', def.Query)
     .init(function(source, select, ctx){
         def.base.call(this);
@@ -1260,7 +1445,6 @@ this['def'] = (function(){
             }
         }
     });
-    
     
     def.type('SelectManyQuery', def.Query)
     .init(function(source, selectMany, ctx){
@@ -1345,15 +1529,22 @@ this['def'] = (function(){
         }
     });
     
-    def.type('NullQuery', def.Query)
-    .add({
-        _next: function(nextIndex){}
-    });
-    
-    def.type('AdhocQuery', def.Query)
-    .init(function(next){
+    def.type('TakeQuery', def.Query)
+    .init(function(source, take){
         def.base.call(this);
-        this._next = next;
+        this._source = source;
+        this._take = take;
+    })
+    .add({
+        _next: function(nextIndex){
+            while(this._source.next()){
+                if(this._take > 0){
+                    this._take--;
+                    this.item = this._source.item;
+                    return 1;
+                }
+            }
+        }
     });
     
     def.query = function(q){

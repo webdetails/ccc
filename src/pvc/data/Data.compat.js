@@ -135,21 +135,6 @@ pvc.data.Data
         return this.getValues().map(function(a){
             return a[seriesIdx];
         });
-        
-        /*
-        var seriesAtom = this.dimensions('series').atoms()[seriesIdx];
-        var datumsByCategKey = this.datums({series: seriesAtom})
-                                    .uniqueIndex(function(datum){ return datum.atoms.category.key; });
-        
-        // Sorted (visible) category atoms
-        return this.dimensions('category')
-                   .atoms()
-                   .map(function(atom){
-                        var datum = def.getOwn(datumsByCategKey, atom.key);
-                        return datum ? datum.atoms.value.value : null;
-                    });
-                    
-         */
     },
 
     /**
@@ -160,16 +145,15 @@ pvc.data.Data
     getVisibleValuesForSeriesIndex: function(seriesIdx){
         var seriesAtom = this.dimensions('series').atoms()[seriesIdx];
         var datumsByCategKey = this.datums({series: seriesAtom}, {visible: true})
-                                   .where(function(datum){  return datum.atoms.category.isVisible; })
                                    .uniqueIndex(function(datum){ return datum.atoms.category.key; });
         
-        // Sorted visible category atoms
+        // Sorted "visible" category atoms
         return this.dimensions('category')
                    .atoms({visible: true})
                    .map(function(atom){
                         var datum = def.getOwn(datumsByCategKey, atom.key);
                         return datum ? datum.atoms.value.value : null;
-                    }); 
+                    });
     },
     
     /**
@@ -181,7 +165,7 @@ pvc.data.Data
         var datumsBySeriesKey = this.datums({category: categAtom})
                                     .uniqueIndex(function(datum){ return datum.atoms.series.key; });
         
-        // Sorted (visible) series atoms
+        // Sorted series atoms
         return this.dimensions('series')
                    .atoms()
                    .map(function(atom){
@@ -197,16 +181,15 @@ pvc.data.Data
     getVisibleValuesForCategoryIndex: function(categIdx){
         var categAtom = this.dimensions('category').atoms()[categIdx];
         var datumsBySeriesKey = this.datums({category: categAtom}, {visible: true})
-                                   .where(function(datum){  return datum.atoms.series.isVisible; })
-                                   .uniqueIndex(function(datum){ return datum.atoms.series.key; });
+                                    .uniqueIndex(function(datum){ return datum.atoms.series.key; });
         
-        // Sorted visible series atoms
+        // Sorted "visible" series atoms
         return this.dimensions('series')
                    .atoms({visible: true})
                    .map(function(atom){
                         var datum = def.getOwn(datumsBySeriesKey, atom.key);
                         return datum ? datum.atoms.value.value : null;
-                    }); 
+                    });
     },
     
     /**
@@ -270,6 +253,11 @@ pvc.data.Data
             return pv.max(this._getValuesForSeriesIndex(idx).filter(def.notNully));
         }, this));
         
+        if(!isFinite(max)) { 
+            max = undefined; 
+        }
+        
+        
         pvc.log("getVisibleSeriesAbsoluteMax: " + max);
         
         return max;
@@ -282,9 +270,12 @@ pvc.data.Data
     getVisibleSeriesAbsoluteMin: function(){
 
         var min = pv.min(this.getVisibleSeriesIndexes().map(function(idx){
-            pvc.log("getVisibleSeriesAbsoluteMin idx=" + idx + " values: " + JSON.stringify(this._getValuesForSeriesIndex(idx)));
             return pv.min(this._getValuesForSeriesIndex(idx).filter(def.notNully));
         }, this));
+        
+        if(!isFinite(min)) { 
+            min = undefined; 
+        }
         
         pvc.log("getVisibleSeriesAbsoluteMin: " + min);
         
