@@ -135,6 +135,7 @@ function data_onDatumVisibleChanged(datum, visible){
  * @function
  * @type undefined
  * @private
+ * @internal
  */
 function data_syncDatumsState(){
     this._selectedDatums && this._selectedDatums.clear();

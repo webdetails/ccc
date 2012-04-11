@@ -63,7 +63,7 @@ def.type('pvc.data.Dimension')
             source = data.parent.dimensions(this.name);
             dim_addChild.call(source, this);
             
-            this.root  = parent.root;
+            this.root = parent.root;
         } else {
             // A root that is not topmost
             data.linkParent || def.assert("Data must have a linkParent");
@@ -75,18 +75,22 @@ def.type('pvc.data.Dimension')
         // Not in _atomsKey
         this._nullAtom = this.owner._nullAtom;
         
-        // Collect distinct atoms in data._datums
-        this.data._datums.forEach(function(datum){
-            // NOTE: Not checking if atom is already added,
-            // but it has no adverse side-effect.
-            var atom = datum.atoms[this.name];
-            this._atomsByKey[atom.key] = atom;
-        }, this);
-        
-        // Filter parentEf dimension's atoms; keeps order.
-        this._atoms = source._atoms.filter(function(atom){
-            return def.hasOwn(this._atomsByKey, atom.key);
-        }, this);
+        this._lazyInit = function(){ /* captures 'source' variable */
+            this._lazyInit = null;
+            
+            // Collect distinct atoms in data._datums
+            this.data._datums.forEach(function(datum){
+                // NOTE: Not checking if atom is already added,
+                // but it has no adverse side-effect.
+                var atom = datum.atoms[this.name];
+                this._atomsByKey[atom.key] = atom;
+            }, this);
+            
+            // Filter parentEf dimension's atoms; keeps order.
+            this._atoms = source._atoms.filter(function(atom){
+                return def.hasOwn(this._atomsByKey, atom.key);
+            }, this);
+        };
     }
 })
 .add(/** @lends pvc.data.Dimension# */{
@@ -207,6 +211,7 @@ def.type('pvc.data.Dimension')
      * @see pvc.data.Dimension#owner
      */
     count: function(){
+        this._lazyInit && this._lazyInit();
         return this._atoms.length;
     },
     
@@ -229,6 +234,8 @@ def.type('pvc.data.Dimension')
      * @type boolean
      */
     isVisible: function(atom){
+        this._lazyInit && this._lazyInit();
+        
         // <Debug>
         def.hasOwn(this._atomsByKey, atom.key) || def.assert("Atom must exist in this dimension.");
         // </Debug>
@@ -261,6 +268,8 @@ def.type('pvc.data.Dimension')
      * @see pvc.data.Dimension#owner
      */
     atoms: function(keyArgs){
+        this._lazyInit && this._lazyInit();
+        
         var visible = def.get(keyArgs, 'visible');
         if(visible == null){
             return this._atoms;
@@ -289,6 +298,8 @@ def.type('pvc.data.Dimension')
      * @type number[]
      */
     indexes: function(keyArgs){
+        this._lazyInit && this._lazyInit();
+        
         var visible = def.get(keyArgs, 'visible');
         if(visible == null) {
             // Not used much so generate each time
@@ -317,6 +328,8 @@ def.type('pvc.data.Dimension')
         if(value instanceof pvc.data.Atom) {
             return value;
         }
+        
+        this._lazyInit && this._lazyInit();
         
         var key = this.type._key ? this.type._key.call(null, value) : value;
         return this._atomsByKey[key] || null; // undefined -> null
@@ -554,6 +567,8 @@ def.type('pvc.data.Dimension')
             this.linkParent &&  dim_removeLinkChild.call(this.linkParent, this);
             
             dim_clearVisiblesCache.call(this);
+            
+            this._lazyInit  = null;
             
             this._atoms = 
             this._nullAtom = null;
