@@ -62,12 +62,16 @@
  * The default value depends on the value of {@link valueType};
  * it is true unless the {@link valueType} is Number.
  * 
- * @param {function} [keyArgs.convert] A function used in the translation phase
+ * @param {function} [keyArgs.converter] A function used in the translation phase
  * to convert raw values into values of the dimension's value type.
  * Its signature is:
  * <pre>
  * function(rawValue : any, item : any, dimension : pvc.data.Dimension) : valueType
  * </pre>
+ * 
+ * @param {string} [keyArgs.rawFormat] A protovis format mask adequate to the specified value type.
+ * When specified and a converter is not specified, it is used to create a converter
+ * for the Date and Number value types.
  * 
  * @param {function} [keyArgs.key] A function used in the translation phase
  * to obtain the string key of each value.
@@ -84,7 +88,7 @@
  * The default key is obtained by calling the value's {@link Object#toString} method.
  * </p>
  * 
- * @param {function} [keyArgs.format] A function used in the translation phase
+ * @param {function} [keyArgs.formatter] A function used in the translation phase
  * to format the values of this dimension type.
  * Its signature is:
  * <pre>
@@ -100,8 +104,12 @@
  * The default format is the empty string for null values, 
  * or the result of calling the <i>value</i>'s {@link Object#toString} method.
  * </p>
+ * 
+ * @param {string} [keyArgs.format] A protovis format mask adequate to the specified value type.
+ * When specified and a formatter is not specified, it is used to create a formatter
+ * for the Date and Number value types.
  *
- * @param {function} [keyArgs.compare]
+ * @param {function} [keyArgs.comparer]
  * Specifies a comparator function for the values of this dimension type.
  * Its signature is:
  * <pre>
@@ -112,10 +120,29 @@
  * it is {@link def.compare} when the {@link valueType} is Date,
  * and null otherwise.
  */
+
+/**
+ * Cache of reverse order context-free value comparer function.
+ * 
+ * @name pvc.data.DimensionType#_reverseComparer
+ * @field
+ * @type function
+ * @private
+ */
+
 /**
  * Cache of reverse order context-free atom comparer function.
  * 
  * @name pvc.data.DimensionType#_reverseAtomComparer
+ * @field
+ * @type function
+ * @private
+ */
+
+/**
+ * Cache of normal order context-free value comparer function.
+ * 
+ * @name pvc.data.DimensionType#_directComparer
  * @field
  * @type function
  * @private
@@ -169,7 +196,22 @@ function(complexType, name, keyArgs){
      * @internal
      * @see pvc.data.Dimension#convert
      */
-    this._convert = def.get(keyArgs, 'convert') || null;
+    this._converter = def.get(keyArgs, 'converter') || null;
+    if(!this._converter) {
+        var rawFormat = def.get(keyArgs, 'rawFormat');
+        if(rawFormat) {
+            switch(this.valueType) {
+                case Number:
+                    // TODO: receive extra format configuration arguments
+                    this._converter = pv.Format.createParser(pv.Format.number().fractionDigits(0, 2));
+                    break;
+                    
+                case Date2:
+                    this._converter = pv.Format.createParser(pv.Format.date(rawFormat));
+                    break;
+            }
+        }
+    }
     
     /** 
      * @private
@@ -179,32 +221,47 @@ function(complexType, name, keyArgs){
     this._key = def.get(keyArgs, 'key') || null;
     
     /** @private */
-    this._compare = def.get(keyArgs, 'compare');
-    if(this._compare === undefined){
+    this._comparer = def.get(keyArgs, 'comparer');
+    if(this._comparer === undefined){
         switch(this.valueType){
             case Number:
                 if(!this.isDiscrete) {
-                    this._compare = def.compare;    
+                    this._comparer = def.compare;    
                 }
                 break;
                 
             case Date2:
-                this._compare = def.compare;
+                this._comparer = def.compare;
                 break;
                 
              default:
-                 this._compare = null;
+                 this._comparer = null;
         }
     }
 
-    this.isComparable = this._compare != null;
+    this.isComparable = this._comparer != null;
     
     /** 
      * @private
      * @internal
      * @see pvc.data.Dimension#format
      */
-    this._format = def.get(keyArgs, 'format') || null;
+    this._formatter = def.get(keyArgs, 'formatter') || null;
+    if(!this._formatter) {
+        var format = def.get(keyArgs, 'format');
+        if(format) {
+            switch(this.valueType) {
+                case Number:
+                    // TODO: receive extra format configuration arguments
+                    this._formatter = pv.Format.createFormatter(pv.Format.number().fractionDigits(0, 2));
+                    break;
+                    
+                case Date2:
+                    this._formatter = pv.Format.createFormatter(pv.Format.date(format));
+                    break;
+            }
+        }
+    }
 })
 .add(/** @lends pvc.data.DimensionType# */{
 
@@ -234,11 +291,37 @@ function(complexType, name, keyArgs){
             return 1;
         }
         
-        return this._compare.call(null, a, b);
+        return this._comparer.call(null, a, b);
     },
-
+    
     /**
-     * Gets a context-free atom comparer function.
+     * Gets a context-free comparer function 
+     * for values of the dimension's {@link #valueType}
+     * and for a specified order.
+     * 
+     * <p>When the dimension type is not comparable, <tt>null</tt> is returned.</p>
+     * 
+     * @param {boolean} [reverse=false] Indicates if the comparison order should be reversed.
+     * 
+     * @type function
+     */
+    comparer: function(reverse){
+        if(!this.isComparable) {
+            return null;
+        }
+        
+        var me = this;
+        if(reverse){
+            return this._reverseComparer || 
+                   (this._reverseComparer = function(a, b){ return me.compare(b, a); }); 
+        }
+        
+        return this._directComparer || (this._directComparer = function(a, b){ return me.compare(a, b); }); 
+    },
+    
+    /**
+     * Gets a context-free atom comparer function, 
+     * for a specified order.
      * 
      * @param {boolean} [reverse=false] Indicates if the comparison order should be reversed.
      * 
@@ -256,6 +339,22 @@ function(complexType, name, keyArgs){
         }
         
         return reverse ? atom_idComparerReverse : atom_idComparer;
+    },
+    
+    /**
+     * Gets the dimension type's context-free formatter function, if one is defined, or <tt>null</tt> otherwise.
+     * @type function
+     */
+    formatter: function(){
+        return this._formatter;
+    },
+    
+    /**
+     * Gets the dimension type's context-free converter function, if one is defined, or <tt>null</tt> otherwise.
+     * @type function
+     */
+    converter: function(){
+        return this._converter;
     }
 });
 
@@ -312,4 +411,58 @@ pvc.data.DimensionType.splitDimensionGroupName = function(dimName){
  */
 pvc.data.DimensionType.dimensionGroupLevelName = function(baseDimName, level){
     return baseDimName + (level >= 1 ? (level + 1) : '');
+};
+
+pvc.data.DimensionType.legacyDimensionNames = ['series', 'category', 'multiChartColumn', 'multiChartRow', 'value', 'value2'];
+
+/**
+ * Extends a dimension type specification with defaults based on legacy group name and legacy options.
+ *  
+ * @param {object} [keyArgs] Keyword arguments.
+ * @param {function} [keyArgs.isCategoryTimeSeries=false] Indicates if category dimensions are to be considered time series.
+ * @param {function} [keyArgs.timeSeriesFormat] The parsing format to use to parse a Date dimension when a converter or a rawFormat options are not specified.
+ * @param {object} [keyArgs.dimensionGroups] A map of dimension group names to dimension type specifications to be used as prototypes of corresponding dimensions.
+ * 
+ *  @returns {object} The extended dimension type specification.
+ */
+pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
+    
+    var dimGroup = pvc.data.DimensionType.dimensionGroupName(dimName),
+        userDimGroupsSpec = def.get(keyArgs, 'dimensionGroups');
+    
+    if(userDimGroupsSpec) {
+        var groupDimSpec = userDimGroupsSpec[dimGroup];
+        if(groupDimSpec) {
+            dimSpec = def.create(groupDimSpec, dimSpec /* Can be null */); 
+        }
+    }
+    
+    if(!dimSpec) { 
+        dimSpec = {};
+    }
+    
+    switch(dimGroup) {
+        case 'category':
+            var isCategoryTimeSeries = def.get(keyArgs, 'isCategoryTimeSeries', false);
+            if(isCategoryTimeSeries) {
+                if(dimSpec.valueType === undefined) {
+                    dimSpec.valueType = Date; 
+                }
+            }
+            break;
+        
+        case 'value':
+            if(dimSpec.valueType === undefined) {
+                dimSpec.valueType = Number; 
+            }
+            break;
+    }
+    
+    if(dimSpec.converter === undefined && 
+       dimSpec.valueType === Date && 
+       !dimSpec.rawFormat) {
+        dimSpec.rawFormat = def.get(keyArgs, 'timeSeriesFormat');
+    }
+    
+    return dimSpec;
 };

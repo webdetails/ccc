@@ -35,6 +35,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             if(tipsySettings){
                 tipsySettings = options.tipsySettings = def.create(tipsySettings);
                 this.extend(tipsySettings, "tooltip_");
+                if(tipsySettings.exclusionGroup === undefined) {
+                    tipsySettings.exclusionGroup = 'chart';
+                }
             }
         }
 
@@ -54,13 +57,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             options.secondAxisSize = 0;
         }
 
-        if(options.stacked){
-            options.orthoFixedMin = 0;
-
-            if(options.percentageNormalized){
-                options.orthoFixedMax = 100;
-            }
-        } else {
+        if(!options.stacked){
             options.percentageNormalized = false;
         }
     },
@@ -269,7 +266,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     getXScale: function(){
         if (this.isOrientationVertical()) {
             return this.options.timeSeries? 
-                this.getTimeseriesScale({bypassAxisOffset: true}) :
+                this.getTimeseriesScale() :
                 this.getOrdinalScale();
         }
 
@@ -325,7 +322,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         
         // DOMAIN
         var roleName = orthoAxis ? 'series' : 'category',
-            data = this.visualRoleData(roleName, {visible: true}),
+            data = this.visualRoleData(roleName, {singleLevelGrouping: true, visible: true}),
             leafKeys = data.leafs().select(function(leaf){ return leaf.absKey; }).array();
         
         var scale = new pv.Scale.ordinal(leafKeys);
@@ -402,30 +399,41 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         
         /* 
          * Note that in the following dMin and dMax calculations,
-         * orthFixedMin and orthoFixedMax already take into account if
+         * orthFixedMin and orthoFixedMax don't yet take into account if
          * stacked or percentageNormalized are set.
          * @see _processOptionsCore
          */
-
+        
         // Min
-        bound = parseFloat(options.orthoFixedMin);
-        if(!isNaN(bound)){
-            dMin = bound;
-        } else {
-            dMin = this.dataEngine.getVisibleSeriesAbsoluteMin() || 0; // may be < 0 or undefined !
+        if(options.stacked) {
+            // Includes percentageNormalized
+            dMin = 0;
             lockedMin = false;
+        } else {
+            bound = parseFloat(options.orthoFixedMin);
+            if(!isNaN(bound)){
+                dMin = bound;
+            } else {
+                dMin = this.dataEngine.getVisibleSeriesAbsoluteMin() || 0; // may be < 0 or undefined !
+                lockedMin = false;
+            }
         }
 
         // Max
-        bound = parseFloat(options.orthoFixedMax);
-        if(!isNaN(bound)){
-            dMax = bound;
-        } else if(options.stacked) {
-            dMax = this.dataEngine.getCategoriesMaxSumOfVisibleSeries(); // may be < 0 !
+        if(options.percentageNormalized) {
+            dMax = 100;
             lockedMax = false;
         } else {
-            dMax = this.dataEngine.getVisibleSeriesAbsoluteMax() || 0; // may be < 0 or undefined !
-            lockedMax = false;
+            bound = parseFloat(options.orthoFixedMax);
+            if(!isNaN(bound)){
+                dMax = bound;
+            } else if(options.stacked) {
+                dMax = this.dataEngine.getCategoriesMaxSumOfVisibleSeries() || 0; // may be undefined !
+                lockedMax = false;
+            } else {
+                dMax = this.dataEngine.getVisibleSeriesAbsoluteMax() || 0; // may be < 0 or undefined !
+                lockedMax = false;
+            }
         }
         
         /*
@@ -461,30 +469,36 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             dMax = bound;
         }
 
-        // Adding a small offset to the scale's dMin and dMax,
-        //  as long as they are not 0 and originIsZero=true.
-        // DCL: 'axisOffset' is a percentage??
-        if(!bypassAxisOffset &&
-           options.axisOffset > 0 &&
-           (!lockedMin || !lockedMax)){
-
-            var dOffset = (dMax - dMin) * options.axisOffset;
-            if(!lockedMin){
-                dMin -= dOffset;
-            }
-
-            if(!lockedMax){
-                dMax += dOffset;
-            }
-        }
-        
         var scale = new pv.Scale.linear(dMin, dMax);
         
         // Domain rounding
+        // Must be done before applying offset
         pvc.roundScaleDomain(
                 scale, 
-                isX ? options.xAxisDomainRoundMode  : options.yAxisDomainRoundMode,
+                isX ? options.xAxisDomainRoundMode  : options.yAxisDomainRoundMode, 
                 isX ? options.xAxisDesiredTickCount : options.yAxisDesiredTickCount);
+        
+        // Adding a small offset to the scale's dMin and dMax,
+        //  as long as they are not 0 and originIsZero=true.
+        // We update the domain but do not update the ticks cache.
+        // The result is to show an area with no ticks in the expanded zones.
+        if(!bypassAxisOffset &&
+           options.axisOffset > 0 &&
+           (!lockedMin || !lockedMax)){
+            
+            var domain = scale.domain();
+            dMin = domain[0];
+            dMax = domain[1];
+            
+            var dOffset = (dMax - dMin) * options.axisOffset;
+            if(!lockedMin && !lockedMax){
+                scale.domain(dMin - dOffset, dMax + dOffset);
+            } else if(!lockedMin) {
+                scale.domain(dMin - dOffset, dMax);
+            } else {
+                scale.domain(dMin, dMax + dOffset);
+            }
+        }
         
         // ----------------------------
 
@@ -730,16 +744,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             .add(pv.Label)
             .text(label)
             .textStyle(o.textStyle)
-            .visible(function(d){
-                return this.index==0;
+            .visible(function(){
+                return this.index == 0;
             });
-    },
-
-    clearSelections: function(){
-        this.dataEngine.owner.clearSelected();
-        this.categoricalPanel._handleSelectionChanged();
     }
-
 }, {
     defaultOptions: {
         showAllTimeseries: false,

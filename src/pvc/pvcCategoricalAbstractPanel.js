@@ -166,17 +166,6 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         }
     },
 
-    _handleSelectionChanged: function(){
-        this.topRoot._renderSignums();
-
-        // Fire action
-        var action = this.chart.options.selectionChangedAction;
-        if(action){
-            var selections = this.chart.dataEngine.owner.selectedDatums();
-            action.call(null, selections);
-        }
-    },
-
     _addPropClick: function(mark){
         var myself = this;
         mark.cursor("pointer")
@@ -281,8 +270,9 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                     }
                 }
                 
-                dataEngine.owner.clearSelected();
-                myself._handleSelectionChanged();
+                if(dataEngine.owner.clearSelected()) {
+                    myself._handleSelectionChanged();
+                }
             })
             .event('mousedown', pv.Behavior.selector(false))
             .event('select', function(){

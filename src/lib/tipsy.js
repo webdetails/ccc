@@ -1,3 +1,22 @@
+(function(){
+var tipsysDisposeByGroup = {}; 
+
+function addTipsy(dispose, group) {
+    var tipsysGroup = tipsysDisposeByGroup[group] || (tipsysDisposeByGroup[group] = []);
+    tipsysGroup.push(dispose);
+}
+
+function disposeGroup(group) {
+    var tipsysGroup = tipsysDisposeByGroup[group];
+    if(tipsysGroup && tipsysGroup.length) {
+        tipsysGroup.forEach(function(dispose){
+            dispose();
+        });
+        
+        tipsysGroup.length = 0;
+    }
+}
+
 pv.Behavior.tipsy = function(opts, usesPoint) {
     /**
      * One tip is reused per behavior instance.
@@ -5,16 +24,29 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
      * and this is reused across all its mark instances.
      */
     var tip,
-        tipMark;
+        tipMark,
+        group = opts && opts.exclusionGroup,
+        $mouseleaveTarget;
     
     /**
      * @private When the mouse leaves the root panel, trigger a mouseleave event
      * on the tooltip span. This is necessary for dimensionless marks (e.g.,
      * lines) when the mouse isn't actually over the span.
      */
-    function removeTipsy(ev) {
+    function removeTipsy() {
+        if(group) {
+            disposeGroup(group);
+        } else {
+            disposeTipsy();
+        }
+    }
+    
+    function disposeTipsy() {
         // Do not leak memory
-        $(ev.target).unbind('mouseleave', removeTipsy);
+        if($mouseleaveTarget) {
+            $mouseleaveTarget.unbind('mouseleave', removeTipsy);
+            $mouseleaveTarget = null;
+        }
         
         if (tip) {
             $(tip).tipsy("hide");
@@ -26,6 +58,7 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
             startTooltip.tipMark = null;
         }
     }
+    
 
     function followMouseMoveAbs(ev){
         // TODO: with Dots, only works well if gravity is set to "c"...
@@ -133,6 +166,11 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
             tip.style.position = "absolute";
             tip.style.pointerEvents = "none"; // ignore mouse events
             $(tip).tipsy(opts);
+            
+            if(group) {
+                disposeGroup(group);
+                addTipsy(disposeTipsy, group);
+            }
         }
 
         tipMark = this;
@@ -143,7 +181,8 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
         tip.title = (instance && instance.tooltip) ||
                     (typeof this.tooltip == 'function' && this.tooltip()) ||
                      this.title() ||
-                     this.text();
+                     this.text()  || 
+                     ""; // Prevent "undefined" from showing up
          
         /*
          * Compute bounding box. TODO support area, lines, wedges, stroke. Also
@@ -211,7 +250,11 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
                 this.event('unpoint', removeTipsy);
             }
         } else {
-            $(pv.event.target).mouseleave(removeTipsy);
+            if($mouseleaveTarget) {
+                $mouseleaveTarget.unbind('mouseleave', removeTipsy);
+            }
+            $mouseleaveTarget = $(pv.event.target); 
+            $mouseleaveTarget.mouseleave(removeTipsy);
         }
 
         $(tip).tipsy("show");
@@ -219,3 +262,5 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
 
     return startTooltip;
 };
+
+}());

@@ -496,7 +496,7 @@ def.type('pvc.data.Dimension')
         var type = this.type;
         
         // - CONVERT - 
-        var value = type._convert ? type._convert.call(null, rawValue, sourceItem, this) : rawValue;
+        var value = type._converter ? type._converter.call(null, rawValue, sourceItem, this) : rawValue;
         // <Debug>
         (value != null ) || def.fail.operationInvalid("Cannot convert to null");
         // </Debug>
@@ -521,7 +521,7 @@ def.type('pvc.data.Dimension')
         }
         
         // - LABEL -
-        var label = "" + (type._format ? type._format.call(null, value, sourceItem, this) : value);
+        var label = "" + (type._formatter ? type._formatter.call(null, value, sourceItem, this) : value);
         // <Debug>
         label || def.fail.operationInvalid("Only a null value can have an empty label.");
         // </Debug>
@@ -572,7 +572,7 @@ def.type('pvc.data.Dimension')
  * @private
  */
 function dim_createNullAtom(){
-    var label = "" + (this.type._format ? this.type._format.call(null, null, null, this) : "");
+    var label = "" + (this.type._formatter ? this.type._formatter.call(null, null, null, this) : "");
     
     this._nullAtom = new pvc.data.Atom(this, null, label, null, '');
     

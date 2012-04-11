@@ -15,16 +15,8 @@ pvc.BulletChart = pvc.BaseChart.extend({
      ];
      
       // Force values not to be numbers
-     options.dimensions = {
-         'value':  {},
-         'value2': {},
-         'value3': {},
-         'value4': {},
-         'value5': {},
-         'value6': {},
-         'value7': {},
-         'value8': {},
-         'value9': {}
+     options.dimensionGroups = {
+         'value':  {valueType: null}
      };
              
     this.base(options);
@@ -286,20 +278,21 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
         pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
 
         var data,
+            de = this.chart.dataEngine,
             options = this.chart.options,
-            getSeriesLabel   = options.getSeriesLabel   || pv.identity,
-            getCategoryLabel = options.getCategoryLabel || pv.identity;
+            seriesFormatter   = de.dimensions('series').type.formatter()   || def.identity,
+            categoryFormatter = de.dimensions('category').type.formatter() || def.identity;
         
         var defaultData = {
-            title:      this.chart.options.bulletTitle,
-            subtitle:  this.chart.options.bulletSubtitle,
-            ranges:    this.chart.options.bulletRanges   || [],
-            measures:  this.chart.options.bulletMeasures || [],
-            markers:   this.chart.options.bulletMarkers  || []
+            title:      options.bulletTitle,
+            subtitle:   options.bulletSubtitle,
+            ranges:     options.bulletRanges   || [],
+            measures:   options.bulletMeasures || [],
+            markers:    options.bulletMarkers  || []
         };
     
-        defaultData.formattedTitle = getCategoryLabel(defaultData.title);
-        defaultData.formattedSubtitle = getSeriesLabel(defaultData.subtitle);
+        defaultData.formattedTitle = categoryFormatter(defaultData.title);
+        defaultData.formattedSubtitle = seriesFormatter(defaultData.subtitle);
         
         // Check how many dimensions are effectively supplied
         var de = this.chart.dataEngine,
@@ -341,7 +334,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
                         case 2:
                             // name and value
                             d.title = atoms.value.value;
-                            d.formattedTitle = getCategoryLabel(d.title);
+                            d.formattedTitle = categoryFormatter(d.title);
                             d.measures = [atoms.value2.value];
                             break;
                             
@@ -349,8 +342,8 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
                             // greater or equal 4
                             d.title = atoms.value.value;
                             d.subtitle = atoms.value2.value;
-                            d.formattedTitle = getCategoryLabel(d.title);
-                            d.formattedSubtitle = getSeriesLabel( d.subtitle)
+                            d.formattedTitle = categoryFormatter(d.title);
+                            d.formattedSubtitle = seriesFormatter( d.subtitle)
                             
                             d.measures = [atoms.value3.value];
                             d.markers  = [atoms.value4.value];

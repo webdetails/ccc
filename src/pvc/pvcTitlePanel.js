@@ -19,10 +19,6 @@ pvc.TitlePanel = pvc.BasePanel.extend({
     titleAlign: "center",
     font: "14px sans-serif",
 
-//    constructor: function(chart, options) {
-//        this.base(chart, options);
-//    },
-
     create: function() {
         // Size will depend on positioning and font size mainly
         this.setAnchoredSize(this.titleSize);

@@ -172,16 +172,17 @@ The following is a line chart displaying three time series.<br>
 <textarea cols="55" rows="15" id="pvcLine1Code">
         var line1 = new pvc.LineChart({
           canvas: "pvcLine1",
-          width: 400,
+          width: 800,
           height: 220,
           animate:false,
           title: "Simple Line chart",
           legend: true,
           legendPosition: "top",
           legendAlign: "right",
-          showAreas: true,
           selectable: true,
           orientation: 'vertical',
+          showAreas: true,
+          showDots: false,
           timeSeries: true,
           timeSeriesFormat: "%Y-%m-%d",
 
@@ -209,7 +210,7 @@ that connect the lines.<br>
 <textarea cols="55" rows="15" id="pvcLine2Code">
         var line2 = new pvc.LineChart({
           canvas: "pvcLine2",
-          width: 400,
+          width: 600,
           height: 220,
           animate:false,
           selectable: true,
@@ -217,7 +218,7 @@ that connect the lines.<br>
           legend: true,
           legendPosition: "bottom",
           legendAlign: "left",
-
+          
           orientation: 'vertical',
           timeSeries: true,
           timeSeriesFormat: "%Y-%m-%d",
@@ -228,6 +229,8 @@ that connect the lines.<br>
           yAxisSize: 30,
           xAxisFullGrid: true,
           yAxisFullGrid: true,
+          yAxisDomainRoundMode: 'tick',
+          axisOffset: 0.05,
           extensionPoints: {
             title_fillStyle: "lightYellow",
             dot_shapeRadius: 2,
@@ -246,6 +249,59 @@ that connect the lines.<br>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine2"></div>
         
+
+<h3>A Categorical Line chart</h3>
+<textarea cols="55" rows="15" id="pvcLine3Code">
+var line3 = new pvc.DotChart({
+  canvas: "pvcLine3",
+  width: 1430,
+  height:515,
+  title:"A Categorical Line chart",
+  extensionPoints:{
+	"xAxisLabel_textAngle":-0.5235987755982988,
+	"xAxisLabel_textAlign":"right",
+	"xAxisLabel_textBaseline":"top",
+	"yAxisTicks_strokeStyle":"#A0A0A0",
+	"yAxisRule_strokeStyle":"#A0A0A0",
+	"yAxisEndLine_strokeStyle":"#A0A0A0",
+	"yAxisGrid_strokeWidth":"2px",
+	"yAxisGrid_strokeStyle":"#A0A0A0",
+	"xAxisRule_strokeStyle":"#A0A0A0",
+	"xAxisEndLine_strokeStyle":"#A0A0A0",
+	"xAxisGrid_strokeWidth":"2px",
+	"xAxisGrid_strokeStyle":"#A0A0A0"
+  },
+  animate:false,
+  legend:true,
+  legendPosition:"right",
+  legendAlign:"top",
+  stacked:true,
+  selectable:true,
+  margins: {all: 20},
+  xAxisSize:100,
+  //xAxisFullGrid:true,
+  xAxisEndLine:true,
+  xAxisDomainRoundMode:"tick",
+  yAxisSize:100,
+  //yAxisFullGrid:true,
+  yAxisEndLine:true,
+  yAxisDomainRoundMode:"tick",
+  showTooltips:true,
+  showDots:true,
+  showLines:true,
+  showAreas:true,
+  showValues:false,
+  crosstabMode: false,
+  dimensionGroups: {
+    series:   {formatter: function(value){ return relationalCountrySalesYearLabels[value];    }},
+    category: {formatter: function(value){ return relationalCountrySalesCountryLabels[value]; }}
+  }
+});
+line3.setData(relationalCountrySales);
+line3.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine3"></div>
 
   </body>
 </html>

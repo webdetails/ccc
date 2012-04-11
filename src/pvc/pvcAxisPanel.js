@@ -293,7 +293,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var scale  = this.pvScale,
             ticks  = pvc.scaleTicks(
                         scale, 
-                        this.domainRoundMode === 'tick', 
+                        this.domainRoundMode === 'tick',
                         this.desiredTickCount),
             anchorOpposite    = this.anchorOpposite(),    
             anchorLength      = this.anchorLength(),
@@ -475,8 +475,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
 
         pvc.data.Data.toggleSelected(data.datums().array());
-
-        this.chart.categoricalPanel._handleSelectionChanged();
+        
+        this.chart.updateSelections();
     },
     
     _detectSelectingDatums: function(datumsByKey, rb){
@@ -674,6 +674,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return '';
             })
             .event("mouseover", pv.Behavior.tipsy({
+                exclusionGroup: 'chart',
                 gravity: tipsyGravity,
                 fade: true,
                 offset: diagMargin * 2,

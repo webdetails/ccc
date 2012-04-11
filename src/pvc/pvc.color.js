@@ -251,7 +251,7 @@ def.scope(function(){
             scale.range.apply(scale, this.range);
             
             return scale;
-        },
+        }
     });
     
     def.type('pvc.color.DiscreteScalesBuild', pvc.color.ScalesBuild)
@@ -296,7 +296,7 @@ def.scope(function(){
             }
             
             return scale;
-        },
+        }
     });
     
     /* TODO */ 

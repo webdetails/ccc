@@ -339,7 +339,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         // Build the 100 percent dataSet
         return dataSet.map(function(seriesRow/*, seriesIndex*/){
             return seriesRow.map(function(value, categIndex){
-                value = ((100 * value) / categsTotals[categIndex])
+                value = ((100 * value) / categsTotals[categIndex]);
                 return {
                     value: value,
                     label: percentFormatter(value)
@@ -381,7 +381,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         // Augment the datum's values with 100 percent data
         if(datum && this._hundredPercentData){
-            var renderVersion = this.chart._preRenderVersion;
+            var renderVersion = this.chart.root._preRenderVersion;
             if(!datum.percent || datum._pctRV !== renderVersion){
                 datum._pctRV = renderVersion;
                 
@@ -475,7 +475,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             // NOTE: 'barSizeRatio' affects the space between bars.
             // Space between categories is controlled by panelSizeRatio.
             barScale = new pv.Scale.ordinal(ordDomain)
-                            .splitBanded(0, ordBand, this.barSizeRatio);
+                             .splitBanded(0, ordBand, this.barSizeRatio);
 
             // Export needed for generated overflow markers.
             this.DF.barScale = barScale;
@@ -545,7 +545,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                     var datum = myself._getRenderingDatum(this);
                     var d = datum.percent.value;
                     return chart.animate(0, lScale(d) - rZero);
-                }
+                };
             }
 
             if(this.stacked){
@@ -570,25 +570,27 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
          * functions to determine the color of Bars
          * (fillStyle of this.pvBar)
          */
-        var seriesCount = dataEngine.getSeriesSize(),
-            colors = chart.colors(pv.range(seriesCount)),
+        var seriesValues = dataEngine.owner.getSeries(),
+            colors = chart.colors(seriesValues);
 
-            // Only relevant for stacked:
-            totalsSeriesIndex = this.isOrientationHorizontal() ?
-                                0 : (seriesCount - 1);
+            // TODO: waterfall
+            // Only relevant for waterfall
+//            totalsSeriesIndex = this.isOrientationHorizontal() ?
+//                                0 : (seriesValues.length - 1);
 
         this.DF.colorFunc = function(){
             var datum = this.datum();
             
-            var visibleSerIndex = myself.stacked ? this.parent.index : this.index,
-                seriesIndex = dataEngine.getVisibleSeriesIndexes()[visibleSerIndex];
+//            var visibleSerIndex = myself.stacked ? this.parent.index : this.index,
+//                seriesIndex = dataEngine.owner.getVisibleSeriesIndexes()[visibleSerIndex];
             
+            // TOFO: waterfall
             // Change the color of the totals series
-            if (myself.waterfall && seriesIndex == totalsSeriesIndex) {
-                return pv.Color.transparent;
-            }
-
-            var color = colors(seriesIndex),
+//            if (myself.waterfall && seriesIndex == totalsSeriesIndex) {
+//                return pv.Color.transparent;
+//            }
+            var seriesValue = this.datum().atoms.series.value,
+                color = colors(seriesValue),
                 shouldDimColor = dataEngine.owner.selectedCount() > 0 &&
                                  !datum.isSelected;
 
@@ -774,13 +776,15 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                     var tooltip;
 
                     if(options.customTooltip){
-                        var datum = this.datum(),
-                            atoms = datum.atoms,
-                            v = atoms.value.value,
-                            s = atoms.series.rawValue,
-                            c = atoms.category.rawValue;
+                        var datum = this.datum();
+                        if(!datum.isNull) {
+                            var atoms = datum.atoms,
+                                v = atoms.value.value,
+                                s = atoms.series.rawValue,
+                                c = atoms.category.rawValue;
 
-                        tooltip = options.customTooltip.call(null, s, c, v, datum);
+                            tooltip = options.customTooltip.call(null, s, c, v, datum);
+                        }
                     }
                     
                     return tooltip;

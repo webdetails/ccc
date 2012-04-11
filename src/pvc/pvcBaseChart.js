@@ -1,4 +1,4 @@
-
+    
 /**
  * The main chart component
  */
@@ -210,7 +210,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     constructor: function(options) {
         this.parent = def.get(options, 'parent') || null;
         if(this.parent) {
-            this.owner = this.parent.owner;
+            this.root = this.parent.root;
             this.dataEngine = def.get(options, 'dataEngine') || 
                               def.fail.argumentRequired('options.dataEngine');
             
@@ -218,7 +218,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             this.top  = options.top;
             this._visualRoles = this.parent._visualRoles;
         } else {
-            this.owner = this;
+            this.root = this;
         }
         
         this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
@@ -238,7 +238,11 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         /* DEBUG options */
         if(pvc.debug && options){
-            pvc.log("OPTIONS:\n" + JSON.stringify(options));
+            try {
+                pvc.log("OPTIONS:\n" + JSON.stringify(options));
+            }catch(ex) {
+                /* SWALLOW usually a circular JSON structure */
+            }
         }
 
         return options;
@@ -376,9 +380,18 @@ pvc.BaseChart = pvc.Abstract.extend({
                     width:      width,
                     height:     height,
                     left:       left + ((index % colCount) * width),
-                    top:        top  + (Math.floor(index / colCount) * height)
+                    top:        top  + (Math.floor(index / colCount) * height),
+                    margins:    {all: 5},
+                    extensionPoints: {
+                        // This lets the main bg color show through AND
+                        // allows charts to overflow to other charts without that being covered
+                        // Notably, axes values tend to overflow a little bit.
+                        // Also setting to null, instead of transparent, for example
+                        // allows the rubber band to set its "special transparent" color
+                        base_fillStyle: null
+                    }
                 });
-
+            
             var childChart = new childClass(childOptions);
             childChart._preRender();
         }
@@ -391,10 +404,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         var dataEngine  = this.dataEngine;
         
         if(!this.parent) {
-            if(pvc.debug){
-                this._logResultset();
-            }
-            
             var complexType = dataEngine ? 
                                 dataEngine.type :
                                 new pvc.data.ComplexType();
@@ -422,27 +431,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
     
-    _logResultset: function(){
-        pvc.log("ROWS");
-        if(this.resultset){
-            this.resultset.forEach(function(row, index){
-                pvc.log("row " + index + ": " + JSON.stringify(row));
-            });
-        }
-
-        pvc.log("COLS");
-        if(this.metadata){
-            this.metadata.forEach(function(col){
-                pvc.log("column {" +
-                    "index: " + col.colIndex +
-                    ", name: "  + col.colName +
-                    ", label: "  + col.colLabel +
-                    ", type: "  + col.colType + "}"
-                );
-            });
-        }
-    },
-    
     _createTranslation: function(complexType){
         var options = this.options,
             dataOptions = options.dataOptions || {};
@@ -452,6 +440,8 @@ pvc.BaseChart = pvc.Abstract.extend({
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
+            
+            dimensionGroups:   options.dimensionGroups,
             dimensions:        options.dimensions,
             readers:           options.readers,
             
@@ -467,13 +457,10 @@ pvc.BaseChart = pvc.Abstract.extend({
             measuresCount:     dataOptions.measuresCount || dataOptions.numMeasures, // measuresInRows
             categoriesCount:   dataOptions.categoriesCount,
             
-            // Timeseries parse format
+            // Timeseries *parse* format
             isCategoryTimeSeries: options.timeSeries,
-            categoryTimeSeriesFormat: options.timeSeries && options.timeSeriesFormat,
             
-            // Labels
-            categoryFormatter: options.getCategoryLabel,
-            seriesFormatter:   options.getSeriesLabel
+            timeSeriesFormat:     options.timeSeriesFormat
         };
         
         var translationClass = translOptions.crosstabMode ? 
@@ -521,7 +508,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                .where(def.truthy)
                .object({
                    value: function(name){
-                       var groupingSpec = new pvc.data.GroupingSpec(roles[name], data);
+                       var groupingSpec = pvc.data.GroupingSpec.parse(roles[name], type);
                        return new pvc.visual.Role(name, groupingSpec);
                    }
                });
@@ -804,7 +791,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             pvc.log("Warning: Metadata is empty");
         }
     },
-
+    
     /**
      * This is the method to be used for the extension points
      * for the specific contents of the chart. already ge a pie
@@ -832,13 +819,12 @@ pvc.BaseChart = pvc.Abstract.extend({
                         //  is actually a mark...(ex: scales)
                         // Not locked and
                         // Not intercepted and
+                        var v = points[p];
                         if(mark.isLocked && mark.isLocked(m)){
                             pvc.log("* " + m + ": locked extension point!");
                         } else if(mark.isIntercepted && mark.isIntercepted(m)) {
                             pvc.log("* " + m + ":" + JSON.stringify(v) + " (controlled)");
                         } else {
-                            var v = points[p];
-
                             if(pvc.debug){
                                 pvc.log("* " + m + ": " + JSON.stringify(v));
                             }
@@ -869,7 +855,44 @@ pvc.BaseChart = pvc.Abstract.extend({
         extPoint = pvc.arraySlice.call(arguments).join('_');
         return points[extPoint];
     },
-
+    
+    clearSelections: function(){
+        this.dataEngine.owner.clearSelected();
+        this.updateSelections();
+    },
+    
+    /** 
+     * Re-renders the parts of the chart that show selected marks.
+     * 
+     * @type undefined
+     * @virtual 
+     */
+    updateSelections: function(){
+        if(this === this.root) {
+            if(this._inUpdateSelections) {
+                return;
+            }
+            
+            // Reentry control
+            this._inUpdateSelections = true;
+            try {
+                // Fire action
+                var action = this.options.selectionChangedAction;
+                if(action){
+                    var selections = this.dataEngine.selectedDatums();
+                    action.call(null, selections);
+                }
+                
+                /** Rendering afterwards allows the action to change the selection in between */
+                this.basePanel._renderSignums();
+            } finally {
+                this._inUpdateSelections = false;
+            }
+        } else {
+            this.root.updateSelections();
+        }
+    },
+    
     isOrientationVertical: function(orientation) {
         return (orientation || this.options.orientation) === "vertical";
     },
@@ -937,6 +960,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     }
 }, {
+    
     // NOTE: undefined values are not considered by $.extend
     // and thus BasePanel does not receive null properties...
     defaultOptions: {
@@ -950,11 +974,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         orientation: 'vertical',
         
-        extensionPoints:  undefined,
+        extensionPoints:   undefined,
         
         roles:             undefined,
         dimensions:        undefined,
+        dimensionGroups:   undefined,
         readers:           undefined,
+        
         crosstabMode:      true,
         multiChartColumnIndexes: undefined,
         multiChartRowIndexes: undefined,
@@ -962,8 +988,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         seriesInRows:      false,
         measuresIndexes:   undefined,
         dataOptions:       undefined,
-        getCategoryLabel:  undefined,
-        getSeriesLabel:    undefined,
         
         timeSeries:        undefined,
         timeSeriesFormat:  undefined,

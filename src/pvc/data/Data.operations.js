@@ -208,7 +208,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
             }
             
             // true => null datum
-            datum = new pvc.data.Datum(this.owner, atoms, true);
+            datum = new pvc.data.Datum(this, atoms, true);
         }
         
         return datum;
@@ -220,7 +220,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * <p>
  * Normalizes and validates the specification syntax, 
  * validates dimension names,
- * readily excludes uninterned (unexistent) values and
+ * readily excludes uninterned (unexistent) and duplicate values and
  * atoms based on their "visible state".
  * </p>
  * 
@@ -328,7 +328,7 @@ function data_processWhereSpec(whereSpec, keyArgs){
 function data_where(whereSpec, keyArgs) {
     
     var orderBys = def.array(def.get(keyArgs, 'orderBy')),
-        datumKeyArgs = def.create({
+        datumKeyArgs = def.create(keyArgs || {}, {
             orderBy: null
         });
     

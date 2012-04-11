@@ -178,8 +178,8 @@ pvc.createColorScheme = function(colors){
 	
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
-	scale.domain.apply(scale, arguments); // defines the domain of the color scale
-	return scale;
+        scale.domain.apply(scale, arguments); // defines the domain of the color scale
+        return scale;
     };
 };
 
@@ -206,6 +206,24 @@ pvc.createDateComparer = function(parser, key){
     return function(a, b){
         return parser.parse(key(a)) - parser.parse(key(b));
     };
+};
+
+pv.Format.createParser = function(pvFormat) {
+    
+    function parse(value) {
+        return pvFormat.parse(value);
+    }
+    
+    return parse;
+};
+
+pv.Format.createFormatter = function(pvFormat) {
+    
+    function format(value) {
+        return value != null ? pvFormat.format(value) : "";
+    }
+    
+    return format;
 };
 
 /* Protovis Z-Order support */
@@ -313,7 +331,7 @@ pv.Mark.prototype.localProperty = function(name, cast) {
  * (iii) the resulting ticks are cached.
  * <br/>
  * Only scales with numeric domains are treated specially.
- * The 'syncScale', when not null and falsy, 
+ * The 'syncScale', when not nully and is falsy, 
  * makes every case be treated solely by the protovis implementation.
  * <br /> 
  * In any case, the default of desiredTickCount is 5
@@ -466,9 +484,11 @@ pv.Mark.prototype.getStaticPropertyValue = function(name) {
 pv.Mark.prototype.intercept = function(prop, interceptor, extValue){
     if(extValue !== undefined){
         this[prop](extValue);
+        
+        extValue = this.getStaticPropertyValue(prop);
+    } else if(!this._intercepted || !this._intercepted[prop]) { // Don't intercept any previous interceptor...
+        extValue = this.getStaticPropertyValue(prop);
     }
-
-    extValue = this.getStaticPropertyValue(prop);
         
     // Let undefined pass through as a sign of not-intercepted
     // A 'null' value is considered as an existing property value.

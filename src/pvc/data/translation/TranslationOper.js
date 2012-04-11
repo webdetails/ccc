@@ -19,6 +19,7 @@
  * @param {object} [metadata] A metadata object describing the source.
  * @param {object} [options] An object with translation options.
  * Options are translator specific.
+ * TODO: missing common options here
  */
 def.type('pvc.data.TranslationOper')
 .init(function(complexType, source, metadata, options){
@@ -26,8 +27,17 @@ def.type('pvc.data.TranslationOper')
     this.source   = source;
     this.metadata = metadata || {};
     this.options  = options  || {};
+    
+    if(pvc.debug){
+        this._logSource();
+    }
 })
 .add(/** @lends pvc.data.TranslationOper# */{
+    
+    /**
+     * Logs the contents of the source and metadata properties.
+     */
+    _logSource: def.method({isAbstract: true}),
     
     /**
      * Called once, before {@link #execute}, 
@@ -452,73 +462,9 @@ def.type('pvc.data.TranslationOper')
     _ensureDimensionType: function(dimName, dimSpec){
         var dimType = this.complexType.dimensions(dimName, {assertExists: false});
         if(!dimType) {
-            if(!dimSpec) {
-                var dimGroup = pvc.data.DimensionType.dimensionGroupName(dimName);
-                switch(dimGroup) {
-                    case 'series':
-                        dimSpec = {
-                            valueType: null, // currently no general way to know the type
-                            format:    this._createSeriesFormatter()
-                        };
-                        break;
-                     
-                    case 'category':
-                        dimSpec = {
-                            valueType: this.options.isCategoryTimeSeries ? Date : null,
-                            format:    this._createCategFormatter(),
-                            convert:   this.options.isCategoryTimeSeries && this.options.categoryTimeSeriesFormat ? 
-                                       this._createDateConverter() : 
-                                       null
-                        };
-                        break;
-                    
-                    case 'value':
-                        dimSpec = {
-                            valueType: Number,
-                            compare:   def.compare
-                        };
-                        break;
-                }
-            }
-            
+            /** Passing options: isCategoryTimeSeries, timeSeriesFormat and dimensionGroups */
+            dimSpec = pvc.data.DimensionType.extendSpec(dimName, dimSpec, this.options);
             this.complexType.addDimension(dimName, dimSpec);
         }
-    },
-    
-    // TODO: docs
-    _createCategFormatter: function() {
-        var categFormatter = this.options.categoryFormatter;
-        if(categFormatter) {
-            return (
-                // Named function expression
-                function formatCategory(value) {
-                    return value == null ? '' : categFormatter(value);
-                }
-            );
-        }
-    },
-    
-    // TODO: docs
-    _createSeriesFormatter: function() {
-        var seriesFormatter = this.options.seriesFormatter;
-        if(seriesFormatter) {
-            return (
-                // Named function expression
-                function formatSeries(value) {
-                    return value == null ? '' : seriesFormatter(value);
-                }
-            );
-        }
-    },
-    
-    // TODO: docs
-    _createDateConverter: function() {
-        var parser = pv.Format.date(this.options.categoryTimeSeriesFormat);
-        
-        function parseDate(rawValue) {
-            return parser.parse(rawValue);
-        }
-        
-        return parseDate;
     }
 });

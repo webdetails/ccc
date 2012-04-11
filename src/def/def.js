@@ -420,8 +420,8 @@ this['def'] = (function(){
             throw def.error(error);
         },
         
-        assert: function(msg){
-            throw def.error.assertionFailed(msg);
+        assert: function(msg, scope){
+            throw def.error.assertionFailed(msg, scope);
         },
         
         /**
@@ -612,6 +612,9 @@ this['def'] = (function(){
                     oMixin = asObject(vMixin);
                     if(oMixin){
                         mixinRecursive(oTo, oMixin);
+                    } else {
+                        // Overwrite oTo
+                        instance[p] = vMixin;
                     }
                 } else {
                     oMixin = asNativeObject(vMixin);
@@ -1343,6 +1346,10 @@ this['def'] = (function(){
         
         wahyl: function(pred, ctx){
             return new def.WhileQuery(this, pred, ctx);
+        },
+        
+        reverse: function(){
+            return new def.ReverseQuery(this);
         }
     });
     
@@ -1546,6 +1553,35 @@ this['def'] = (function(){
             }
         }
     });
+    
+    def.type('ReverseQuery', def.Query)
+    .init(function(source){
+        def.base.call(this);
+        this._source = source;
+    })
+    .add({
+        _next: function(nextIndex){
+            if(!nextIndex) {
+                if(this._source instanceof def.Query) {
+                    if(this._source instanceof def.ArrayLikeQuery){
+                        this._source = this._source._list;
+                    } else {
+                        this._source = this._source.array();
+                    }
+                } // else assume array-like
+                
+                this._count  = this._source.length;
+            }
+            
+            if(nextIndex < this._count){
+                this.item = this._source[this._count - nextIndex - 1];
+                return 1;
+            }
+        }
+    });
+    
+    
+    // -------------------
     
     def.query = function(q){
         if(q === undefined) {

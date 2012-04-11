@@ -20,6 +20,9 @@
  * 
  * @constructor
  * @param {pvc.data.Data} data The data instance to which the datum belongs.
+ * Note that the datum will belong instead to the owner of this data. 
+ * However the datums atoms will inherit from the atoms of the specified data.
+ * This is essentially to facilitate the creation of null datums.
  * @param {pvc.data.Atom[]} [atoms] An array of atoms of <i>distinct</i> dimensions.
  * @param {boolean} [isNull=false] Indicates if the datum is a null datum.
  */
@@ -27,9 +30,7 @@ def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
 function(data, atoms, isNull){
     
-    (data && data.isOwner()) || def.assert("Only owner datas can own datums.");
-    
-    def.base.call(this, data, atoms, data.atoms);
+    def.base.call(this, data.owner, atoms, data.atoms);
     
     if(isNull) {
         this.isNull = true;

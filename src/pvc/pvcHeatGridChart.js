@@ -180,24 +180,17 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         this._cellHeight = h;
         
         /* Column and Row datas  */
-        var colDimNames = dataEngine.type.groupDimensionsNames('category');
-        var rowDimNames = dataEngine.type.groupDimensionsNames('series'  );
-        
-        var keyArgs = {visible: true};
-        
-        // One multi-dimensional, two-levels data grouping
-        var data = dataEngine.groupBy(
-                        colDimNames.join('|') + ',' + rowDimNames.join('|'), 
-                        keyArgs);
-        
-        // Two multi-dimension single-level data groupings
-        var colRootData = dataEngine.groupBy(colDimNames.join('|'), keyArgs);
-        var rowRootData = dataEngine.groupBy(rowDimNames.join('|'), keyArgs);
-        
-        /* Tooltip and Value Label*/
-        function getLabel(){
-            return this.datum().atoms.value.label;
-        }
+        var keyArgs = {visible: true},
+            // Two multi-dimension single-level data groupings
+            colGrouping   = chart.visualRoles('category').grouping.singleLevelGrouping(),
+            rowGrouping   = chart.visualRoles('series'  ).grouping.singleLevelGrouping(),
+            
+            // One multi-dimensional, two-levels data grouping
+            crossGrouping = pvc.data.GroupingSpec.multiple([colGrouping, rowGrouping]),
+            
+            colRootData = dataEngine.groupBy(colGrouping, keyArgs),
+            rowRootData = dataEngine.groupBy(rowGrouping, keyArgs),
+            data = dataEngine.groupBy(crossGrouping, keyArgs);
         
         /* Color scale */
         var fillColorScaleByColKey;
@@ -248,7 +241,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                             def.own(rowData1.atoms),
                             def.own(colData1.atoms));
             
-            return new pvc.data.Datum(data.owner, atoms, true);
+            return new pvc.data.Datum(data, atoms, true);
         }
         
         /* PV Panels */
@@ -299,24 +292,29 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         this.shapes
-            .text(getLabel)
+            //.text(getLabel) // Ended up showing when the tooltip should be empty
             .fillStyle(function(){
                 return getFillColor.call(pvHeatGrid, true);
             })
             ;
         
-        if(this.showValues){
+        var valueDimName = colorDimName || sizeDimName;
+        
+        if(this.showValues && valueDimName){
+            
             this.pvHeatGridLabel = pvHeatGrid.anchor("center").add(pv.Label)
                 .bottom(0)
-                .text(getLabel)
+                .text(function(){
+                    return this.datum().atoms[valueDimName].label;
+                })
                 ;
         }
         
-        if(this._shouldHandleClick()){
+        if(this._shouldHandleClick()){ // TODO: should have valueDimName -> value argument
             this._addPropClick(this.shapes);
         }
 
-        if(options.doubleClickAction){
+        if(options.doubleClickAction){ // TODO: should have valueDimName -> value argument
             this._addPropDoubleClick(this.shapes);
         }
         
@@ -326,26 +324,28 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 .tooltip(function(){
                     var tooltip = this.tooltip();
                     if(!tooltip){
-                        var datum = this.datum(),
-                            atoms = datum.atoms;
+                        var datum = this.datum();
+                        if(!datum.isNull) {
+                            var atoms = datum.atoms;
 
-                        if(options.customTooltip){
-                            var s = atoms.series.rawValue,
-                                c = atoms.category.rawValue,
-                                v = atoms.value.value;
-                            
-                            tooltip = options.customTooltip(s, c, v, datum);
-                        } else {
-                            var labels = [];
-                            if(colorDimName) {
-                                labels.push(atoms[colorDimName].label);
+                            if(options.customTooltip){
+                                var s = atoms.series.rawValue,
+                                    c = atoms.category.rawValue,
+                                    v = valueDimName ? atoms[valueDimName].value : null;
+                                
+                                tooltip = options.customTooltip(s, c, v, datum);
+                            } else {
+                                var labels = [];
+                                if(colorDimName) {
+                                    labels.push(atoms[colorDimName].label || "- ");
+                                }
+                                
+                                if(sizeDimName && sizeDimName !== colorDimName) {
+                                    labels.push(atoms[sizeDimName].label || "- ");
+                                }
+                                
+                                tooltip = labels.join(", ");
                             }
-                            
-                            if(sizeDimName && sizeDimName !== colorDimName) {
-                                labels.push(atoms[sizeDimName].label);
-                            }
-                            
-                            tooltip = labels.join(", ");
                         }
                     }
                     
@@ -380,6 +380,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             options = this.chart.options,
             dataEngine = this.chart.dataEngine,
             sizeDimName  = this.sizeDimName,
+            colorDimName = this.colorDimName,
             nullShapeType = options.nullShape,
             shapeType = this.shape;
         
@@ -438,8 +439,8 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         
         /* BORDER WIDTH & COLOR */
         var notNullSelectedBorder = (this.selectedBorder == null || this.selectedBorder == 0) ? 
-                                    this.defaultBorder : 
-                                    this.selectedBorder;
+                                     this.defaultBorder : 
+                                     this.selectedBorder;
         
         var nullSelectedBorder = (this.selectedBorder == null || this.selectedBorder == 0) ? 
                                   this.nullBorder : 
@@ -448,14 +449,14 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         var nullDeselectedBorder = this.defaultBorder > 0 ? this.defaultBorder : this.nullBorder;
         
         function getBorderWidth(){
-            if(sizeDimName == null || !myself._isNullShapeLineOnly() || this.parent.sizeValue() != null){
+            if(!sizeDimName || !myself._isNullShapeLineOnly() || this.parent.sizeValue() != null){
                 return this.selected() ? notNullSelectedBorder : myself.defaultBorder;
             }
 
             // is null
             return this.selected() ? nullSelectedBorder : nullDeselectedBorder;
         }
-        
+
         function getBorderColor(){
             var lineWidth = this.lineWidth();
             if(!(lineWidth > 0)){ //null|<0
@@ -464,9 +465,11 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             
             // has width
             
-            if(this.parent.sizeValue() == null) {
-                return this.fillStyle();
-            }
+            // This was in the previous HG version but did not work,
+            // So the behavior ended up being like it would be commented...
+//            if(this.parent.sizeValue() == null) {
+//                return this.fillStyle();
+//            }
             
             var color = getFillColor.call(this.parent, false);
             return (dataEngine.owner.selectedCount() === 0 || this.selected()) ? 
@@ -476,7 +479,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         
         /* SHAPE TYPE & SIZE */
         var getShapeType;
-        if(sizeDimName == null) {
+        if(!sizeDimName) {
             getShapeType = def.constant(shapeType);
         } else {
             getShapeType = function(){
@@ -485,14 +488,15 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
         
         var getShapeSize;
-        if(sizeDimName == null){
+        if(!sizeDimName){
             getShapeSize = function(){
-                return (nullShapeType == null && this.parent.colorValue() == null) ? 0 : maxArea;
+                /* When neither color nor size dimensions */
+                return (colorDimName && !nullShapeType && this.parent.colorValue() == null) ? 0 : maxArea;
             };
         } else {
             getShapeSize = function(){
                 var sizeValue = this.parent.sizeValue();
-                return (sizeValue == null && nullShapeType == null) ? 0 : sizeValueToArea(sizeValue);
+                return (!sizeValue && !nullShapeType) ? 0 : sizeValueToArea(sizeValue);
             };
         }
         

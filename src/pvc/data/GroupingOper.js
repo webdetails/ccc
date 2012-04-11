@@ -29,11 +29,11 @@ def.type('pvc.data.GroupingOper')
     
     if(groupingSpecText instanceof pvc.data.GroupingSpec) {
         this._groupingSpec = groupingSpecText;
-        if(this._groupingSpec.data !== linkParent.owner) {
-            throw def.error.argumentInvalid('groupingSpecText', "Invalid associated data.");
+        if(this._groupingSpec.type !== linkParent.type) {
+            throw def.error.argumentInvalid('groupingSpecText', "Invalid associated complex type.");
         }
     } else {
-        this._groupingSpec = new pvc.data.GroupingSpec(groupingSpecText, linkParent.owner);
+        this._groupingSpec = pvc.data.GroupingSpec.parse(groupingSpecText, linkParent.type);
     }
     
     this._linkParent = linkParent;
@@ -43,8 +43,9 @@ def.type('pvc.data.GroupingOper')
     this._selected = def.get(keyArgs, 'selected');
     
     // NOTE: datum.id is not a semantic key, yet, ids are unique per script existence
-    // Ids are only put in the key when datums are supplied independently
-    this.key = this._groupingSpec.key + 
+    // Ids are only put in the key when datums are supplied separately
+    
+    this.key = this._groupingSpec.id + // grouping spec id is a semantic key...
                "||visible:"  + this._visible +
                "||selected:" + this._selected + 
                "||" + (datums ? this._datums.map(function(datum){ return datum.id; }).join(",") : '');
@@ -87,7 +88,7 @@ add(/** @lends pvc.data.GroupingOper */{
                 if((visible  == null || datum.isVisible  === visible) && 
                    (selected == null || datum.isSelected === selected)) {
                     
-                    var groupInfo = levelSpec.keyer(datum);
+                    var groupInfo = levelSpec.key(datum);
                     if(groupInfo != null){
                         var key = groupInfo.key,
                             keyDatums = datumsByKey[key];

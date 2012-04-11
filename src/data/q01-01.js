@@ -179,8 +179,8 @@ var relational_01 = {
   ["Green","2011-06-26",23],
   ["Green","2011-07-03",72],
   ["Green","2011-07-10",50],
-  ["Green","2011-07-17",20],
-  ["Green","2011-07-24",23],
+  //["Green","2011-07-17",20],
+  ["Green","2011-07-26",23],
   ["Green","2011-07-31",72],
   ["Green","2011-08-07",50],
   ["Green","2011-08-14",20],
@@ -201,6 +201,7 @@ var relational_01 = {
   ["Red","2011-08-21",43],
   ["Red","2011-08-28",40],
   //
+  ["Blue","2011-06-12",30],
   ["Blue","2011-07-03",60],
   ["Blue","2011-07-10",40],
   ["Blue","2011-07-17",15],
@@ -220,6 +221,57 @@ var relational_01 = {
     "colName":"Value"
   }]
 };
+
+
+var relational_01_neg = {
+        "resultset":[
+        ["Green","2011-06-05",-72],
+        ["Green","2011-06-12",-50],
+        ["Green","2011-06-19",-20],
+        ["Green","2011-06-26",-23],
+        ["Green","2011-07-03",-72],
+        ["Green","2011-07-10",-50],
+        ["Green","2011-07-17",-20],
+        ["Green","2011-07-24",-23],
+        ["Green","2011-07-31",-72],
+        ["Green","2011-08-07",-50],
+        ["Green","2011-08-14",-20],
+        ["Green","2011-08-21",-23],
+        ["Green","2011-08-28",-20],
+        //
+        ["Red","2011-06-05",-27],
+        ["Red","2011-06-12",-5],
+        ["Red","2011-06-19",-2],
+        ["Red","2011-06-26",-32],
+        ["Red","2011-07-03",-24],
+        ["Red","2011-07-10",-4],
+        ["Red","2011-07-17",-90],
+        ["Red","2011-07-24",-53],
+        ["Red","2011-07-31",-17],
+        ["Red","2011-08-07",-20],
+        ["Red","2011-08-14",-0],
+        ["Red","2011-08-21",-43],
+        ["Red","2011-08-28",-40],
+        //
+        ["Blue","2011-07-03",-60],
+        ["Blue","2011-07-10",-40],
+        ["Blue","2011-07-17",-15],
+        ["Blue","2011-07-24",-3],
+        ],
+        "metadata":[{
+          "colIndex":0,
+          "colType":"String",
+          "colName":"Series"
+        },{
+          "colIndex":1,
+          "colType":"String",
+          "colName":"Categories"
+        },{
+          "colIndex":2,
+          "colType":"Numeric",
+          "colName":"Value"
+        }]
+      };
 
 var relational_012 = {
   "resultset":[
@@ -280,8 +332,7 @@ var relational_013 = {
   }]
 };
 
-var relational_test = 
-{
+var relational_test = {
   "resultset":[["Infrastructure Security",3]],
   "metadata":[{
     "colIndex":0,
@@ -292,7 +343,7 @@ var relational_test =
     "colType":"Integer",
     "colName":"value"
   }]
-}
+};
 
 var relational_02 = {
   "resultset":[
@@ -385,6 +436,72 @@ var relational_04 = {
         }]
       };
 
+// {"crosstabMode":false,"seriesInRows":false}
+var relationalCountrySales = {
+  "metadata":[
+      {"colIndex":0,"colName":"Series",  "colLabel":"Series",  "colType":"STRING"},
+      {"colIndex":1,"colName":"Category","colLabel":"Category","colType":"STRING"},
+      {"colIndex":2,"colName":"Value",   "colLabel":"Value",   "colType":"NUMERIC"}
+  ],
+  
+  "resultset":[
+      ["2005~Sales","[Markets].[APAC].[Australia]",145091.97],
+      ["2004~Sales","[Markets].[APAC].[Australia]",232396.68],
+      ["2003~Sales","[Markets].[APAC].[Australia]",253134.45000000007],
+      ["2005~Sales","[Markets].[EMEA].[Austria]",68250.26000000001],
+      ["2004~Sales","[Markets].[EMEA].[Austria]",51694.39],
+      ["2003~Sales","[Markets].[EMEA].[Austria]",82117.88],
+      ["2005~Sales","[Markets].[EMEA].[Belgium]",25040.11],
+      ["2004~Sales","[Markets].[EMEA].[Belgium]",80024.05],
+      ["2003~Sales","[Markets].[EMEA].[Belgium]",3348.46],
+      ["2005~Sales","[Markets].[NA].[Canada]",33692.97],
+      ["2004~Sales","[Markets].[NA].[Canada]",135776.09000000003],
+      ["2003~Sales","[Markets].[NA].[Canada]",54609.49999999999],
+      ["2005~Sales","[Markets].[EMEA].[Denmark]",26012.870000000003],
+      ["2004~Sales","[Markets].[EMEA].[Denmark]",120431.55999999998],
+      ["2003~Sales","[Markets].[EMEA].[Denmark]",99192.72],
+      ["2005~Sales","[Markets].[EMEA].[Finland]",126851.70999999996],
+      ["2004~Sales","[Markets].[EMEA].[Finland]",91575.68999999997],
+      ["2003~Sales","[Markets].[EMEA].[Finland]",111154.51000000002],
+      ["2005~Sales","[Markets].[EMEA].[France]",242956.4],
+      ["2004~Sales","[Markets].[EMEA].[France]",555198.6999999998],
+      ["2003~Sales","[Markets].[EMEA].[France]",312761.42],
+      ["2004~Sales","[Markets].[EMEA].[Germany]",150418.78],
+      ["2003~Sales","[Markets].[EMEA].[Germany]",70053.31],
+      ["2003~Sales","[Markets].[Japan].[Hong Kong]",48784.35999999999],
+      ["2004~Sales","[Markets].[EMEA].[Ireland]",57756.43],
+      ["2005~Sales","[Markets].[EMEA].[Italy]",41509.94],
+      ["2004~Sales","[Markets].[EMEA].[Italy]",199514.58],
+      ["2003~Sales","[Markets].[EMEA].[Italy]",162601.7],
+      ["2005~Sales","[Markets].[Japan].[Japan]",38745.34],
+      ["2004~Sales","[Markets].[Japan].[Japan]",149422.46999999997],
+      ["2005~Sales","[Markets].[APAC].[New Zealand]",189338.63000000006],
+      ["2004~Sales","[Markets].[APAC].[New Zealand]",256298.26],
+      ["2003~Sales","[Markets].[APAC].[New Zealand]",89947.16999999998],
+      ["2004~Sales","[Markets].[EMEA].[Norway]",110931.1],
+      ["2003~Sales","[Markets].[EMEA].[Norway]",196532.60000000006],
+      ["2004~Sales","[Markets].[Japan].[Philippines]",15928.75],
+      ["2003~Sales","[Markets].[Japan].[Philippines]",78086.98],
+      ["2005~Sales","[Markets].[APAC].[Singapore]",6763.18],
+      ["2004~Sales","[Markets].[APAC].[Singapore]",116039.02999999998],
+      ["2005~Sales","[Markets].[Japan].[Singapore]",6763.18],
+      ["2004~Sales","[Markets].[Japan].[Singapore]",116039.02999999998],
+      ["2003~Sales","[Markets].[Japan].[Singapore]",165686.20000000007],
+      ["2005~Sales","[Markets].[EMEA].[Spain]",326798.16999999987],
+      ["2004~Sales","[Markets].[EMEA].[Spain]",483545.36000000004],
+      ["2003~Sales","[Markets].[EMEA].[Spain]",405343.3899999999],
+      ["2005~Sales","[Markets].[EMEA].[Sweden]",31606.72],
+      ["2004~Sales","[Markets].[EMEA].[Sweden]",119947.56999999999],
+      ["2003~Sales","[Markets].[EMEA].[Sweden]",58459.92],
+      ["2004~Sales","[Markets].[EMEA].[Switzerland]",117713.56000000001],
+      ["2005~Sales","[Markets].[EMEA].[UK]",40802.810000000005],
+      ["2004~Sales","[Markets].[EMEA].[UK]",257656.09999999995],
+      ["2003~Sales","[Markets].[EMEA].[UK]",180421.54999999996]
+  ]
+};
+
+var relationalCountrySalesCountryLabels = {"[Markets].[APAC].[Australia]":"Australia","[Markets].[EMEA].[Austria]":"Austria","[Markets].[EMEA].[Belgium]":"Belgium","[Markets].[NA].[Canada]":"Canada","[Markets].[EMEA].[Denmark]":"Denmark","[Markets].[EMEA].[Finland]":"Finland","[Markets].[EMEA].[France]":"France","[Markets].[EMEA].[Germany]":"Germany","[Markets].[Japan].[Hong Kong]":"Hong Kong","[Markets].[EMEA].[Ireland]":"Ireland","[Markets].[EMEA].[Italy]":"Italy","[Markets].[Japan].[Japan]":"Japan","[Markets].[APAC].[New Zealand]":"New Zealand","[Markets].[EMEA].[Norway]":"Norway","[Markets].[Japan].[Philippines]":"Philippines","[Markets].[APAC].[Singapore]":"Singapore","[Markets].[Japan].[Singapore]":"Singapore","[Markets].[EMEA].[Spain]":"Spain","[Markets].[EMEA].[Sweden]":"Sweden","[Markets].[EMEA].[Switzerland]":"Switzerland","[Markets].[EMEA].[UK]":"UK"};
+var relationalCountrySalesYearLabels = {"2005~Sales":"2005","2004~Sales":"2004","2003~Sales":"2003"};
 
 var test = {
   "resultset":[["Shipped",2003,3573701.2500000014],
@@ -577,12 +694,18 @@ var testHeatGridMegaOptions = {
         "base_fillStyle":"#ffffff"
     },
 
-    getCategoryLabel: function(value){
-          return testHeatGridMegaRowLabels[value];
-    },
+    dimensionGroups: {
+        category: {
+            formatter: function(value){
+                return testHeatGridMegaRowLabels[value];
+            }
+        },
 
-    getSeriesLabel: function(value){
-      return testHeatGridMegaColLabels[value];
+        series: {
+            formatter: function(value){
+                return testHeatGridMegaColLabels[value];
+            }
+        }
     }
 };
 

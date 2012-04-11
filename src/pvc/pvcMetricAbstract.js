@@ -17,11 +17,11 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
         
         category.valueType = Number;
         category.isDiscrete = true;
-        category.compare = null;
+        category.comparer = null;
         
         value.valueType  = Number;
         value.isDiscrete = false;
-        //value.compare    = null;
+        //value.comparer = null;
         
         this.base(options);
 

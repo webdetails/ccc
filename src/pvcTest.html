@@ -150,7 +150,7 @@
         var dot2 = new pvc.DotChart({
           // legendPosition: "left",
           canvas: "pvcDot2",
-          width: 300,
+          width: 400,
           height: 200,
           animate: true,
           selectable: true,
@@ -179,7 +179,7 @@
         var dot3 = new pvc.DotChart({
           // legendPosition: "left",
           canvas: "pvcDot3",
-          width: 300,
+          width: 400,
           height: 200,
           animate: true,
           selectable: true,
@@ -190,9 +190,9 @@
           legendPosition: "right",
           legendAlign: "right",
           legendSize: 100,
-
+          
           orientation: 'vertical',
-
+          dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
           showValues: false,
           yAxisSize: 30,
           xAxisSize: 30,
@@ -200,7 +200,7 @@
           yAxisFullGrid: true,
           extensionPoints: {
             titleLabel_font: "13px serif",
-            xAxisLabel_textAngle: 0.3,
+            xAxisLabel_textAngle: 0.4,
             xAxisLabel_textAlign: "center",
             xAxisLabel_textBaseline: "top",
             xAxisLabel_textStyle: "black",
@@ -246,7 +246,6 @@
           //xAxisFullGrid: true,
           //yAxisFullGrid: true,
           extensionPoints: {
-            noDataMessage_text: "Example of a chart with missing data",
             xAxisScale_dateTickFormat: "%Y/%m/%d",
             xAxisScale_dateTickPrecision: 798336000/1.5 //set in miliseconds
           }
@@ -343,9 +342,9 @@
                     //legendSize: null,
 
                     orientation: 'vertical',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
+                    
+                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+                    
                     showValues: false,
                     originIsZero: false,
                     showDots: true,
@@ -384,9 +383,9 @@
                     //legendSize: null,
 
                     orientation: 'vertical',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
+                    
+                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+                    
                     showValues: false,
                     showDots: true,
                     yAxisSize: 30,
@@ -423,9 +422,9 @@
                     //legendSize: null,
 
                     orientation: 'vertical',
-                    timeSeries: false,
-                    timeSeriesFormat: "%Y-%m-%d",
-
+                    
+                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+                    
                     showValues: false,
                     showDots: true,
                     yAxisSize: 30,
@@ -452,9 +451,9 @@
         var stackedLine = new pvc.StackedLineChart({
           // legendPosition: "left",
           canvas: "pvcStackedLine1",
-          width: 300,
+          width: 500,
           height: 200,
-          title: "line chart - vertical",
+          title: "stacked line chart - vertical",
           titlePosition: "top",
           titleSize: 40,
           legend: true,
@@ -464,9 +463,9 @@
           //legendSize: null,
 
           orientation: 'vertical',
-          timeSeries: false,
-          timeSeriesFormat: "%Y-%m-%d",
-
+          
+          dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%m/%d" } },
+          
           showValues: false,
           showDots: false,
           showXScale: true,
@@ -490,7 +489,7 @@
           height: 200,
           animate: true,
           selectable: true,
-          title: "line chart - Timeseries with dots",
+          title: "stacked line chart - Timeseries with dots",
           titlePosition: "top",
           titleSize: 40,
           legend: false,
@@ -522,7 +521,7 @@
           height: 200,
           animate: false,
           selectable: true,
-          title: "line chart - Timeseries with extra options",
+          title: "stacked line chart - Timeseries with extra options",
           titlePosition: "top",
           titleSize: 40,
           legend: true,
@@ -562,30 +561,25 @@
         var stackedArea = new pvc.StackedAreaChart({
           // legendPosition: "left",
           canvas: "pvcStackedArea1",
-          width: 300,
+          width: 400,
           height: 200,
           selectable: true,
-          title: "area chart - vertical",
+          title: "area chart - categorical",
           titlePosition: "top",
           titleSize: 40,
           legend: true,
           legendPosition: "top",
           legendAlign: "right",
-          //legendSize: null,
-
+          
           orientation: 'vertical',
-          timeSeries: false,
-          timeSeriesFormat: "%Y-%m-%d",
-
-          showXScale: true,
-          //showYScale: true,
+          showLines: false,
+          dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%m/%d" } },
+          
           yAxisPosition: "left",
           yAxisSize: 30,
-          //xAxisPosition: "bottom",
-          xAxisSize: 30
-          //xAxisFullGrid: true,
-          //yAxisFullGrid: true,
-
+          
+          xAxisSize: 30,
+          xAxisFullGrid: true
         });
 
         stackedArea.setData(relational_01, {crosstabMode: false, seriesInRows: false});
@@ -598,7 +592,7 @@
           height: 200,
           animate: true,
           selectable: true,
-          title: "area chart - Timeseries",
+          title: "area chart - timeseries",
           titlePosition: "top",
           titleSize: 40,
           legend: true,
@@ -624,7 +618,7 @@
         var stackedArea3 = new pvc.StackedAreaChart({
           // legendPosition: "left",
           canvas: "pvcStackedArea3",
-          width: 300,
+          width: 400,
           height: 200,
           animate: false,
           selectable: true,
@@ -643,12 +637,7 @@
           yAxisSize: 30,
           xAxisSize: 30,
           xAxisFullGrid: true,
-          yAxisFullGrid: true,
-          extensionPoints: {
-            titleLabel_font: "13px serif"
-            //dot_strokeStyle: "white",
-          }
-
+          yAxisFullGrid: true
         });
 
         stackedArea3.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});

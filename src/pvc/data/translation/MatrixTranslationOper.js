@@ -37,6 +37,27 @@
 def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
 .add(/** @lends pvc.data.MatrixTranslationOper# */{
     
+    _logSource: function(){
+        pvc.log("ROWS");
+        if(this.source){
+            this.source.forEach(function(row, index){
+                pvc.log("row " + index + ": " + JSON.stringify(row));
+            });
+        }
+
+        pvc.log("COLS");
+        if(this.metadata){
+            this.metadata.forEach(function(col){
+                pvc.log("column {" +
+                    "index: " + col.colIndex +
+                    ", name: "  + col.colName +
+                    ", label: "  + col.colLabel +
+                    ", type: "  + col.colType + "}"
+                );
+            });
+        }
+    },
+    
     /**
      * Creates the set of second axis series keys
      * corresponding to the specified

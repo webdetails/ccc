@@ -48,15 +48,21 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * <p>
      * Can only be called on an owner data.
      * </p>
+     * 
+     * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise. 
      */
     clearSelected: function(){
         data_assertIsOwner.call(this);
+        if(!this._selectedDatums.count) {
+            return false;
+        }
         
         this._selectedDatums.values().forEach(function(datum){
             datum_deselect.call(datum);
         });
 
         this._selectedDatums.clear();
+        return true;
     }
 });
 

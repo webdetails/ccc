@@ -189,6 +189,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         return null;
     },
     
+    _handleSelectionChanged: function(){
+        this.chart.updateSelections();
+    },
+    
     /**
      * Sets the size for the panel, 
      * for when the parent panel is undefined
