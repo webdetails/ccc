@@ -18,13 +18,19 @@ pvc.TitlePanel = pvc.BasePanel.extend({
     titleSize: 25,
     titleAlign: "center",
     font: "14px sans-serif",
-
-    create: function() {
+    
+    /**
+     * @override
+     */
+    _calcLayout: function(availableSize, layoutInfo){
         // Size will depend on positioning and font size mainly
-        this.setAnchoredSize(this.titleSize);
-        
-        this.base();
-
+        this.setAnchoredSize(this.titleSize, availableSize);
+    },
+    
+    /**
+     * @override
+     */
+    _createCore: function() {
         // Extend title
         this.extend(this.pvPanel, "title_");
 

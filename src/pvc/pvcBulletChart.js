@@ -15,10 +15,16 @@ pvc.BulletChart = pvc.BaseChart.extend({
      ];
      
       // Force values not to be numbers
-     options.dimensionGroups = {
-         'value':  {valueType: null}
-     };
-             
+     if(!options.dimensionGroups) {
+         options.dimensionGroups = {};
+     }
+     
+     if(!options.dimensionGroups.value) {
+         options.dimensionGroups.value = {valueType: null};
+     }
+    
+    options.selectable = false; // not supported yet
+     
     this.base(options);
 
     // Apply options
@@ -29,19 +35,16 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
     pvc.log("Prerendering in bulletChart");
 
-    this.bulletChartPanel = new pvc.BulletChartPanel(this, {
-      showValues: this.options.showValues,
-      showTooltips: this.options.showTooltips,
-      orientation: this.options.orientation
+    this.bulletChartPanel = new pvc.BulletChartPanel(this, this.basePanel, {
+        showValues:   this.options.showValues,
+        showTooltips: this.options.showTooltips,
+        orientation:  this.options.orientation
     });
-
-    this.bulletChartPanel.appendTo(this.basePanel); // Add it
   }
 }, {
   defaultOptions: {
       showValues: true,
       orientation: "horizontal",
-      showTooltips: true,
       legend: false,
 
       bulletSize:     30,  // Bullet size
@@ -57,15 +60,8 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
       axisDoubleClickAction: null,
       
-//      crosstabMode: true,
-//      seriesInRows: true,
       crosstabMode:    false,
-      seriesInRows:    false,
-      
-      tipsySettings: {
-        gravity: "s",
-        fade: true
-      }
+      seriesInRows:    false
     }
 });
 
@@ -92,30 +88,18 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
 
 pvc.BulletChartPanel = pvc.BasePanel.extend({
-
+  anchor: 'fill',
   pvBullets: null,
   pvBullet: null,
   data: null,
   onSelectionChange: null,
-  showTooltips: true,
   showValues: true,
-  tipsySettings: {
-    gravity: "s",
-    fade: true
-  },
 
-//  constructor: function(chart, options){
-//    this.base(chart,options);
-//  },
-
-  create: function(){
-
-    var myself  = this;
-
-    this.consumeFreeClientSize();
-    
-    this.base();
-    
+  /**
+   * @override
+   */
+  _createCore: function() {
+    var myself = this;
     var data = this.buildData();
     
     var anchor = myself.chart.options.orientation=="horizontal"?"left":"bottom";
@@ -180,14 +164,11 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       });
     }
     
-    
-
     this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
     this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
     .text(function(d){
       return myself.chart.options.valueFormat(d);
     });
-
 
     this.pvBulletMarker = this.pvBullet.marker.add(pv.Dot)
     .shape("square")
@@ -199,9 +180,8 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     if(this.showTooltips){
       // Extend default
-      this.extend(this.tipsySettings,"tooltip_");
-      this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
-      this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+      this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.chart.options.tipsySettings));
+      this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.chart.options.tipsySettings));
     }
 
     this.pvBulletRule = this.pvBullet.tick.add(pv.Rule);
@@ -238,12 +218,16 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     }: null;
     
     if (doubleClickAction) {
-    	this.pvBulletTitle.events('all')  //labels don't have events by default
+    	this.pvBulletTitle
+    	    .cursor("pointer")
+    	    .events('all')  //labels don't have events by default
             .event("dblclick", function(d){
                     doubleClickAction(d, arguments[arguments.length-1]);
                 });
 
-    	this.pvBulletSubtitle.events('all')  //labels don't have events by default
+    	this.pvBulletSubtitle
+    	    .cursor("pointer")
+    	    .events('all')  //labels don't have events by default
             .event("dblclick", function(d){
                     doubleClickAction(d, arguments[arguments.length-1]);
                 });

@@ -1,4 +1,4 @@
-    
+
 /**
  * The main chart component
  */
@@ -7,6 +7,9 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Indicates if the chart has been disposed.
      */
     _disposed: false,
+    
+    _updateSelectionSuspendCount: 0,
+    _selectionNeedsUpdate:   false,
     
     /**
      * The chart's parent chart.
@@ -31,11 +34,18 @@ pvc.BaseChart = pvc.Abstract.extend({
     root: null,
     
     /**
-     * A map from visual role name to visual role.
+     * A map of {@link pvc.visual.Role} by name.
      * 
      * @type object
      */
     _visualRoles: null,
+    
+    /**
+     * An array of the {@link pvc.visual.Role} that ate measures.
+     * 
+     * @type pvc.visual.Role[]
+     */
+    _measureVisualRoles: null,
     
     /**
      * Indicates if the chart has been pre-rendered.
@@ -85,24 +95,6 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @function
      */
     renderCallback: undefined,
-    
-    /**
-     * Indicates if the chart is rendering with animation
-     * and, if so, the current phase of animation.
-     * 
-     * <p>This property can assume the following values:</p>
-     * <ul>
-     * <li>0 - The chart is not rendering with animation (may even not be rendering at all).</li>
-     * <li>1 - The chart is rendering the animation's <i>start</i> point,</li>
-     * <li>2 - The chart is rendering the animation's <i>end</i> point.</li>
-     * </ul>
-     * 
-     * @see #animate
-     * @see #isAnimatingStart
-     * 
-     * @type number
-     */
-    isAnimating: 0,
 
     /**
      * The data that the chart is to show.
@@ -174,7 +166,15 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @type pvc.LegendPanel
      */
     legendPanel: null,
-
+    
+    /**
+     * The panel that hosts child chart's base panels.
+     * 
+     * @type pvc.MultiChartPanel
+     */
+    _multiChartPanel: null,
+    
+    
     /**
      * The name of the data dimension that
      * the legend panel will be associated to.
@@ -217,8 +217,12 @@ pvc.BaseChart = pvc.Abstract.extend({
             this.left = options.left;
             this.top  = options.top;
             this._visualRoles = this.parent._visualRoles;
+            this._measureVisualRoles = this.parent._measureVisualRoles;
         } else {
             this.root = this;
+            
+            this._visualRoles = {};
+            this._measureVisualRoles = [];
         }
         
         this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
@@ -237,7 +241,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._processOptionsCore(options);
         
         /* DEBUG options */
-        if(pvc.debug && options){
+        if(pvc.debug >= 3 && options){
             try {
                 pvc.log("OPTIONS:\n" + JSON.stringify(options));
             }catch(ex) {
@@ -266,6 +270,18 @@ pvc.BaseChart = pvc.Abstract.extend({
         var margins = options.margins;
         if(margins){
             options.margins = this._parseMargins(margins);
+        }
+        
+        // Sanitize some options
+        if(options.showTooltips){
+            var tipsySettings = options.tipsySettings;
+            if(tipsySettings){
+                tipsySettings = options.tipsySettings = def.create(tipsySettings);
+                this.extend(tipsySettings, "tooltip_");
+                if(tipsySettings.exclusionGroup === undefined) {
+                    tipsySettings.exclusionGroup = 'chart';
+                }
+            }
         }
     },
     
@@ -299,27 +315,30 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         /* Options may be changed between renders */
         this._processOptions();
+        
+        /* Initialize root chart roles */
+        if(!this.parent && this._preRenderVersion === 1) {
+            this._initVisualRoles();
+        }
 
         /* Initialize the data engine */
-        this._initDataEngine();
+        this._initDataAndVisualRoles();
 
-        // Create color schemes
+        /* Create color schemes */
         this.colors = pvc.createColorScheme(this.options.colors);
         this.secondAxisColor = pvc.createColorScheme(this.options.secondAxisColor);
-
-        // Initialize chart panels
+        
+        /* Initialize chart panels */
         this._initBasePanel();
-
         this._initTitlePanel();
-
         this._initLegendPanel();
         
-        if(this.parent || !this._isRoleDefined('multiChartColumn')) {
-            this._preRenderCore();
+        if(!this.parent && this._isRoleAssigned('multiChartColumn')) {
+            this._initMultiChartPanel();
         } else {
-            this._preRenderMultiChart();
+            this._preRenderCore();
         }
-        
+
         this.isPreRendered = true;
     },
 
@@ -332,76 +351,11 @@ pvc.BaseChart = pvc.Abstract.extend({
         /* NOOP */
     },
     
-    _preRenderMultiChart: function(){
-        var data = this.visualRoleData('multiChartColumn', {visible: true}),
-            options = this.options;
-        
-        // TODO: reuse/dispose sub-charts
-        
-        // multiChartLimit can be Infinity
-        var multiChartLimit = Number(options.multiChartLimit);
-        if(isNaN(multiChartLimit) || multiChartLimit < 1) {
-            multiChartLimit = Infinity;
-        }
-        
-        var leafCount = data._leafs.length,
-            count     = Math.min(leafCount, multiChartLimit);
-        
-        if(count === 0) {
-            if(!this.allowNoData) {
-                throw new NoDataException();
-            }
-            return;
-        }
-        
-        // multiChartWrapColumn can be Infinity
-        var multiChartWrapColumn = Number(options.multiChartWrapColumn);
-        if(isNaN(multiChartWrapColumn) || multiChartLimit < 1) {
-            multiChartWrapColumn = 3;
-        }
-        
-        var colCount   = Math.min(count, multiChartWrapColumn),
-            rowCount   = Math.ceil(count / colCount),
-            childClass = this.constructor,
-            basePanel  = this.basePanel,
-            margins    = basePanel.margins,
-            left       = margins.left,
-            top        = margins.top,
-            width      = basePanel.width  / colCount,
-            height     = basePanel.height / rowCount;
-        
-        for(var index = 0 ; index < count ; index++) {
-            var childData = data._leafs[index],
-                childOptions = def.create(this.options, {
-                    parent:     this,
-                    title:      childData.absLabel,
-                    legend:     false,
-                    dataEngine: childData,
-                    width:      width,
-                    height:     height,
-                    left:       left + ((index % colCount) * width),
-                    top:        top  + (Math.floor(index / colCount) * height),
-                    margins:    {all: 5},
-                    extensionPoints: {
-                        // This lets the main bg color show through AND
-                        // allows charts to overflow to other charts without that being covered
-                        // Notably, axes values tend to overflow a little bit.
-                        // Also setting to null, instead of transparent, for example
-                        // allows the rubber band to set its "special transparent" color
-                        base_fillStyle: null
-                    }
-                });
-            
-            var childChart = new childClass(childOptions);
-            childChart._preRender();
-        }
-    },
-    
     /**
-     * Initializes the data engine
+     * Initializes the data engine and roles
      */
-    _initDataEngine: function() {
-        var dataEngine  = this.dataEngine;
+    _initDataAndVisualRoles: function() {
+        var dataEngine = this.dataEngine;
         
         if(!this.parent) {
             var complexType = dataEngine ? 
@@ -409,9 +363,13 @@ pvc.BaseChart = pvc.Abstract.extend({
                                 new pvc.data.ComplexType();
             
             var translation = this._createTranslation(complexType);
-            if(translation) {
-                translation.configureType();
-            }
+            translation.configureType();
+            
+            // ----------
+            
+            this._bindVisualRoles(complexType);
+            
+            // ----------
             
             if(!dataEngine) {
                 dataEngine = this.dataEngine = new pvc.data.Data({type: complexType});
@@ -419,11 +377,22 @@ pvc.BaseChart = pvc.Abstract.extend({
                 // TODO: assert complexType not changed...
             }
             
-            this._initRoles();
-            
-            if(translation) {
-                dataEngine.load(translation.execute(dataEngine));
+            // ----------
+            var keyArgs,
+                measureDimNames = this.measureDimensionsNames();
+            if(measureDimNames.length) {
+                // Must have at least one measure role dimension not-null
+                keyArgs = {
+                   where: function(datum){
+                        var atoms = datum.atoms;
+                        return def.query(measureDimNames).any(function(dimName){
+                           return atoms[dimName].value != null;
+                        });
+                   }
+                };
             }
+            
+            dataEngine.load(translation.execute(dataEngine), keyArgs);
         }
         
         if(pvc.debug){
@@ -470,52 +439,74 @@ pvc.BaseChart = pvc.Abstract.extend({
         return new translationClass(complexType, this.resultset, this.metadata, translOptions);
     },
     
-    _initRoles: function(){
-        var data  = this.dataEngine,
-            type  = data.type,
-            roles = def.copy(this.options.roles);
-        
-        // Default role mappings
-        
-        /**
-         * Roles that support multiple dimensions.  
-         */
-        ['series', 'category', 'multiChartColumn', 'multiChartRow'].forEach(function(roleName){
-            if(!roles[roleName]) {
-                var roleDims = type.groupDimensionsNames(roleName, {assertExists: false});
-                if(roleDims) {
-                    roles[roleName] = roleDims;
-                }
+    /**
+     * Initializes each chart's specific roles.
+     * @virtual
+     */
+    _initVisualRoles: function(){
+        this._addVisualRoles({
+            multiChartColumn: {defaultDimensionName: 'multiChartColumn*'},
+            multiChartRow:    {defaultDimensionName: 'multiChartRow*'}
+        });
+    },
+    
+    _addVisualRoles: function(roles){
+        def.eachOwn(roles, function(keyArgs, name){
+            var visualRole = new pvc.visual.Role(name, keyArgs);
+            this._visualRoles[name] = visualRole;
+            if(visualRole.isMeasure) {
+                this._measureVisualRoles.push(visualRole);
             }
         }, this);
+    },
+    
+    _bindVisualRoles: function(type){
         
-        /**
-         * Roles that only support one dimension.
-         */
-        ['value', 'value2'].forEach(function(roleName){
-            if(!roles[roleName]) {
-                var dimType = type.dimensions(roleName, {assertExists: false});
-                if(dimType) {
-                    roles[roleName] = roleName;
-                }
-            }
+        /* Process user specified mappings */
+        var assignedVisualRoles = {};
+        def.each(this.options.visualRoles, function(roleSpec, name){
+            this._visualRoles[name] || 
+                def.fail.argumentInvalid("The specified role name '{0}' is not supported by the chart type.", [name]);
+            
+            assignedVisualRoles[name] = pvc.data.GroupingSpec.parse(roleSpec, type);
         }, this);
         
-        // --------------
-        
-        this._visualRoles = 
-            def.query(def.keys(roles))
-               .where(def.truthy)
-               .object({
-                   value: function(name){
-                       var groupingSpec = pvc.data.GroupingSpec.parse(roles[name], type);
-                       return new pvc.visual.Role(name, groupingSpec);
-                   }
-               });
-        
-        // --------------
-        
-        // TODO: validate required roles?
+        /* Bind Visual Roles dimensions assigned by user, 
+         * to default dimensions 
+         * and validate required'ness */
+        def.eachOwn(this._visualRoles, function(role, name){
+            if(def.hasOwn(assignedVisualRoles, name)) {
+                role.bind(assignedVisualRoles[name]);
+            } else {
+                var dimName = role.defaultDimensionName;
+                if(dimName) {
+                    /* An asterisk at the end of the name indicates a dimension group default mapping */
+                    var match = dimName.match(/^(.*?)(\*)?$/);
+                    if(match) {
+                        if(match[2]) {
+                            var roleDimNames = type.groupDimensionsNames(match[1], {assertExists: false});
+                            if(roleDimNames) {
+                                role.bind(pvc.data.GroupingSpec.parse(roleDimNames, type));
+                                return;
+                            }
+                        } else {
+                            var roleDim = type.dimensions(dimName, {assertExists: false});
+                            if(roleDim) {
+                                role.bind(pvc.data.GroupingSpec.parse(dimName, type));
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                if(role.isRequired) {
+                    throw def.error.operationInvalid("Chart type requires unassigned role '{0}'.", [name]);
+                }
+                
+                // Unbind role from any previous binding
+                role.bind(null);
+            }
+        }, this);
     },
     
     /**
@@ -540,7 +531,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         var role = this._visualRoles[roleName];
         if(!role) {
             if(def.get(keyArgs, 'assertExists', true)) {
-                throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", roleName);
+                throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", [roleName]);
             }
             
             return null;
@@ -572,46 +563,42 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         var role = def.getOwn(this._visualRoles, roleName) || null;
         if(!role && def.get(keyArgs, 'assertExists', true)) {
-            throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", roleName);
+            throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", [roleName]);
         }
         
         return role;
     },
     
+    measureDimensionsNames: function(){
+        return def.query(this._measureVisualRoles)
+                   .select(function(visualRole){ return visualRole.firstDimensionName(); })
+                   .where(def.notNully)
+                   .array();
+    },
+    
     /**
-     * Indicates if a role is defined, given its name. 
+     * Indicates if a role is assigned, given its name. 
      * 
      * @param {string} roleName The role name.
      * @type boolean
      */
-    _isRoleDefined: function(roleName){
-        return !!this._visualRoles[roleName];
+    _isRoleAssigned: function(roleName){
+        return !!this._visualRoles[roleName].grouping;
     },
     
     /**
      * Creates and initializes the base panel.
      */
     _initBasePanel: function() {
-        var options = this.options;
-        // Since we don't have a parent panel
-        // we need to manually create the points.
-        this.originalWidth  = options.width;
-        this.originalHeight = options.height;
+        var options = this.options,
+            margins = options.margins,
+            basePanelParent = this.parent && this.parent._multiChartPanel;
         
-        this.basePanel = new pvc.BasePanel(this, {isRoot: true});
+        this.basePanel = new pvc.BasePanel(this, basePanelParent);
         this.basePanel.setSize(options.width, options.height);
         
-        var margins = options.margins;
         if(margins){
             this.basePanel.setMargins(margins);
-        }
-        
-        if(!this.parent) {
-            this.basePanel.create();
-            this.basePanel.applyExtensions();
-            this.basePanel.getPvPanel().canvas(options.canvas);
-        } else {
-            this.basePanel.appendTo(this.parent.basePanel);
         }
     },
 
@@ -620,15 +607,14 @@ pvc.BaseChart = pvc.Abstract.extend({
      * if the title is specified.
      */
     _initTitlePanel: function(){
-        if (this.options.title != null && this.options.title != "") {
-            this.titlePanel = new pvc.TitlePanel(this, {
-                title:      this.options.title,
-                anchor:     this.options.titlePosition,
-                titleSize:  this.options.titleSize,
-                titleAlign: this.options.titleAlign
+        var options = this.options;
+        if (!def.empty(options.title)) {
+            this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
+                title:      options.title,
+                anchor:     options.titlePosition,
+                titleSize:  options.titleSize,
+                titleAlign: options.titleAlign
             });
-
-            this.titlePanel.appendTo(this.basePanel); // Add it
         }
     },
 
@@ -637,77 +623,61 @@ pvc.BaseChart = pvc.Abstract.extend({
      * if the legend is active.
      */
     _initLegendPanel: function(){
-        if (this.options.legend) {
-            this.legendPanel = new pvc.LegendPanel(this, {
-                anchor: this.options.legendPosition,
-                legendSize: this.options.legendSize,
-                font: this.options.legendFont,
-                align: this.options.legendAlign,
-                minMarginX: this.options.legendMinMarginX,
-                minMarginY: this.options.legendMinMarginY,
-                textMargin: this.options.legendTextMargin,
-                padding: this.options.legendPadding,
-                shape: this.options.legendShape,
-                markerSize: this.options.legendMarkerSize,
-                drawLine: this.options.legendDrawLine,
-                drawMarker: this.options.legendDrawMarker
+        var options = this.options;
+        if (options.legend) {
+            this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
+                anchor:     options.legendPosition,
+                legendSize: options.legendSize,
+                font:       options.legendFont,
+                align:      options.legendAlign,
+                minMarginX: options.legendMinMarginX,
+                minMarginY: options.legendMinMarginY,
+                textMargin: options.legendTextMargin,
+                padding:    options.legendPadding,
+                shape:      options.legendShape,
+                markerSize: options.legendMarkerSize,
+                drawLine:   options.legendDrawLine,
+                drawMarker: options.legendDrawMarker
             });
-
-            this.legendPanel.appendTo(this.basePanel); // Add it
         }
     },
 
     /**
+     * Creates and initializes the multi-chart panel.
+     */
+    _initMultiChartPanel: function(){
+        this._multiChartPanel = new pvc.MultiChartPanel(this, this.basePanel);
+    },
+    
+    /**
      * Render the visualization.
      * If not pre-rendered, do it now.
      */
-    render: function(bypassAnimation, rebuild) {
+    render: function(bypassAnimation, recreate) {
         try{
-            this.isAnimating = this.options.animate && !bypassAnimation ? 1 : 0;
-            
-            if (!this.isPreRendered || rebuild) {
+            if (!this.isPreRendered || recreate) {
                 this._preRender();
             }
 
-            if (this.options.renderCallback) {
-                this.options.renderCallback.call(this);
-            }
-
-            // When animating, renders the animation's 'start' point
-            this.basePanel.getPvPanel().render();
-
-            // Transition to the animation's 'end' point
-            if (this.isAnimating) {
-                this.isAnimating = 2;
-                
-                var me = this;
-                this.basePanel.getPvPanel()
-                    .transition()
-                    .duration(2000)
-                    .ease("cubic-in-out")
-                    .start(function(){
-                        me.isAnimating = 0;
-                        me._onRenderEnd(true);
-                    });
-            } else {
-                this._onRenderEnd(false);
-            }
-        
+            this.basePanel.render({
+                bypassAnimation: bypassAnimation, 
+                recreate: recreate
+             });
+            
         } catch (e) {
             if (e instanceof NoDataException) {
-
-                if (!this.basePanel) {
-                    pvc.log("No panel");
-                    this._initBasePanel();
-                }
-
-                pvc.log("creating message");
-                var pvPanel = this.basePanel.getPvPanel(), 
-                    message = pvPanel.anchor("center").add(pv.Label);
                 
-                message.text("No data found");
-
-                this.basePanel.extend(message, "noDataMessage_");
+                pvc.log("No data found. Creating message.");
+                
+                var options = this.options,
+                    pvPanel = new pv.Panel()
+                                .canvas(options.canvas)
+                                .width(options.width)
+                                .height(options.height),
+                    pvMsg   = pvPanel.anchor("center").add(pv.Label)
+                                .text("No data found");
+                
+                this.extend(pvMsg, "noDataMessage_");
                 
                 pvPanel.render();
 
@@ -723,15 +693,12 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Animation
      */
     animate: function(start, end) {
-        return (this.isAnimating === 1) ? start : end;
+        return this.basePanel.animate(start, end);
     },
     
     /**
      * Indicates if the chart is currently 
      * rendering the animation start phase.
-     * <p>
-     * This function is just syntax sugar for <tt>this.isAnimating === 1</tt>
-     * </p>
      * <p>
      * Prefer using this function instead of {@link #animate} 
      * whenever its <tt>start</tt> or <tt>end</tt> arguments
@@ -741,22 +708,9 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @type boolean
      */
     isAnimatingStart: function() {
-        return (this.isAnimating === 1);
+        return this.basePanel.isAnimatingStart();
     },
     
-    /**
-     * Called when a render has ended.
-     * When the render performed an animation
-     * and the 'animated' argument will have the value 'true'.
-     *
-     * The default implementation calls the base panel's
-     * #_onRenderEnd method.
-     * @virtual
-     */
-    _onRenderEnd: function(animated){
-        this.basePanel._onRenderEnd(animated);
-    },
-
     /**
      * Method to set the data to the chart.
      * Expected object is the same as what comes from the CDA: 
@@ -766,9 +720,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         this.setResultset(data.resultset);
         this.setMetadata(data.metadata);
 
+        // TODO: Danger!
         $.extend(this.options, options);
     },
-
+    
     /**
      * Sets the resultset that will be used to build the chart.
      */
@@ -802,7 +757,8 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     extend: function(mark, prefix, keyArgs) {
         // if mark is null or undefined, skip
-        if(pvc.debug){
+        var doLog = pvc.debug >= 3;
+        if(doLog){
             pvc.log("Applying Extension Points for: '" + prefix +
                     "'" + (mark ? "" : "(target mark does not exist)"));
         }
@@ -821,13 +777,11 @@ pvc.BaseChart = pvc.Abstract.extend({
                         // Not intercepted and
                         var v = points[p];
                         if(mark.isLocked && mark.isLocked(m)){
-                            pvc.log("* " + m + ": locked extension point!");
+                            if(doLog) {pvc.log("* " + m + ": locked extension point!");}
                         } else if(mark.isIntercepted && mark.isIntercepted(m)) {
-                            pvc.log("* " + m + ":" + JSON.stringify(v) + " (controlled)");
+                            if(doLog) {pvc.log("* " + m + ":" + JSON.stringify(v) + " (controlled)");}
                         } else {
-                            if(pvc.debug){
-                                pvc.log("* " + m + ": " + JSON.stringify(v));
-                            }
+                            if(doLog) { pvc.log("* " + m + ": " + JSON.stringify(v)); }
 
                             // Distinguish between mark methods and properties
                             if (typeof mark[m] === "function") {
@@ -856,9 +810,39 @@ pvc.BaseChart = pvc.Abstract.extend({
         return points[extPoint];
     },
     
+    /** 
+     * Clears any selections and, if necessary,
+     * re-renders the parts of the chart that show selected marks.
+     * 
+     * @type undefined
+     * @virtual 
+     */
     clearSelections: function(){
-        this.dataEngine.owner.clearSelected();
-        this.updateSelections();
+        if(this.dataEngine.owner.clearSelected()) {
+            this.updateSelections();
+        }
+    },
+    
+    _suspendSelectionUpdate: function(){
+        if(this === this.root) {
+            this._updateSelectionSuspendCount++;
+        } else {
+            this.root._suspendSelectionUpdate();
+        }
+    },
+    
+    _resumeSelectionUpdate: function(){
+        if(this === this.root) {
+            if(this._updateSelectionSuspendCount > 0) {
+                if(!(--this._updateSelectionSuspendCount)) {
+                    if(this._selectionNeedsUpdate) {
+                        this.updateSelections();
+                    }
+                }
+            }
+        } else {
+            this._resumeSelectionUpdate();
+        }
     },
     
     /** 
@@ -870,6 +854,11 @@ pvc.BaseChart = pvc.Abstract.extend({
     updateSelections: function(){
         if(this === this.root) {
             if(this._inUpdateSelections) {
+                return;
+            }
+            
+            if(this._updateSelectionSuspendCount) {
+                this._selectionNeedsUpdate = true;
                 return;
             }
             
@@ -886,7 +875,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 /** Rendering afterwards allows the action to change the selection in between */
                 this.basePanel._renderSignums();
             } finally {
-                this._inUpdateSelections = false;
+                this._inUpdateSelections   = false;
+                this._selectionNeedsUpdate = false;
             }
         } else {
             this.root.updateSelections();
@@ -932,13 +922,17 @@ pvc.BaseChart = pvc.Abstract.extend({
                         break;
 
                     default:
-                        pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
+                        if(pvc.debug) {
+                            pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
+                        }
                         margins = null;
                 }
             } else if (typeof margins === 'number') {
                 margins = {all: margins};
             } else if (typeof margins !== 'object') {
-                pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
+                if(pvc.debug) {
+                    pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
+                }
                 margins = null;
             }
         }
@@ -960,7 +954,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     }
 }, {
-    
     // NOTE: undefined values are not considered by $.extend
     // and thus BasePanel does not receive null properties...
     defaultOptions: {
@@ -976,7 +969,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         extensionPoints:   undefined,
         
-        roles:             undefined,
+        visualRoles:       undefined,
         dimensions:        undefined,
         dimensionGroups:   undefined,
         readers:           undefined,
@@ -1018,12 +1011,22 @@ pvc.BaseChart = pvc.Abstract.extend({
         secondAxis: false,
         secondAxisIdx: -1,
         secondAxisColor: undefined,
-
-        tooltipFormat: function(s, c, v, datum) {
+        
+        showTooltips: true,
+        
+        tooltipFormat: undefined,
+        
+        v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
                    (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");
         },
-
+        
+        tipsySettings: {
+            gravity: "s",
+            html: true,
+            fade: true
+        },
+        
         valueFormat: function(d) {
             return pv.Format.number().fractionDigits(0, 2).format(d);
             // pv.Format.number().fractionDigits(0, 10).parse(d));
@@ -1036,14 +1039,26 @@ pvc.BaseChart = pvc.Abstract.extend({
         percentValueFormat: function(d){
             return pv.Format.number().fractionDigits(0, 2).format(d) + "%";
         },
-
+        
+        // Content/Plot area clicking
         clickable:  false,
+        clickAction: null,
+        doubleClickAction: null,
+        doubleClickMaxDelay: 300, //ms
+//      clickAction: function(s, c, v) {
+//          pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
+//      },
+        
         selectable: false,
-
-        clickAction: function(s, c, v) {
-            pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
-        },
-
+        selectionChangedAction: null,
+        
+        // Selection
+        // Use CTRL key to make fine-grained selections
+        ctrlSelectMode: true,
+        // Selection - Rubber band
+        rubberBandFill: 'rgba(203, 239, 163, 0.6)', // 'rgba(255, 127, 0, 0.15)',
+        rubberBandLine: '#86fe00', //'rgb(255,127,0)',
+        
         renderCallback: undefined,
 
         margins: undefined

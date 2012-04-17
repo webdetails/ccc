@@ -9,7 +9,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      */
     selectedCount: function(){
         if(!this.isOwner()){
-            return this.where(null, {selected: true}).count();
+            return this.datums(null, {selected: true}).count();
         }
         
         return this._selectedDatums.count;
@@ -110,7 +110,7 @@ function data_onDatumVisibleChanged(datum, visible){
         }
         
         // Notify dimensions
-        def.forEachOwn(this._dimensions, function(dimension){
+        def.eachOwn(this._dimensions, function(dimension){
             dim_onDatumVisibleChanged.call(dimension, datum, visible);
         });
         

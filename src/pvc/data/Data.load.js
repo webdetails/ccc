@@ -14,28 +14,30 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * </p>
      * 
      * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
+     * @param {object} [keyArgs] Keyword arguments.
+     * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
      */
-    load: function(atomz){
+    load: function(atomz, keyArgs){
         data_assertIsOwner.call(this);
         
         // TODO: Not guarding against re-entry during load
-        
+        var whereFun = def.get(keyArgs, 'where');
         var isReload = !!this._datums;
         if(isReload) {
             // Dispose child and link child datas...
             data_disposeChildLists.call(this);
             
-            this._datums = data_reloadDatums.call(this, atomz);
+            this._datums = data_reloadDatums.call(this, atomz, whereFun);
             
         } else {
-            this._datums = data_loadDatums.call(this, atomz);
+            this._datums = data_loadDatums.call(this, atomz, whereFun);
         }
         
         data_syncDatumsState.call(this);
         
         // Allow dimensions to clear their caches
         if(isReload) {
-            def.forEachOwn(this._dimensions, function(dimension){
+            def.eachOwn(this._dimensions, function(dimension){
                 dim_onDatumsChanged.call(dimension);
             });
         }
@@ -50,19 +52,24 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @name pvc.data.Data#_loadDatums
  * @function
  * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
+ * @param {function} [whereFun] Filter function that approves or excludes each newly read new datum.
  * @returns {pvc.data.Datum[]} The loaded datums.
  * @private
  */
-function data_loadDatums(atomz) {
+function data_loadDatums(atomz, whereFun) {
     
     function createDatum(atoms){
         return new pvc.data.Datum(this, atoms);
     }
     
-    return def.query(atomz)
-              .select(createDatum, this)
-              .distinct(function(datum){ return datum.key; })
-              .array();
+    var q = def.query(atomz)
+              .select(createDatum, this);
+    if(whereFun) {
+        q = q.where(whereFun);
+    }  
+    
+    return q.distinct(function(datum){ return datum.key; })
+            .array();
 }
 
 /**
@@ -75,10 +82,11 @@ function data_loadDatums(atomz) {
  * @name pvc.data.Data#_reloadDatums
  * @function
  * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
+ * @param {function} [whereFun] Filter function that approves or excludes each newly read new datum.
  * @returns {pvc.data.Datum[]} The loaded datums.
  * @private
  */
-function data_reloadDatums(atomz) {
+function data_reloadDatums(atomz, whereFun) {
     
     // Index existing datums by (semantic) key
     var datumsByKey = def.query(this._datums)
@@ -92,9 +100,12 @@ function data_reloadDatums(atomz) {
     var visitedAtomsKeySetByDimension = pv.dict(dimNames, function(){ return {}; });
     
     function internDatum(atoms){
-        var newDatum = new pvc.data.Datum(this, atoms),
-            datum = datumsByKey[newDatum.key];
+        var newDatum = new pvc.data.Datum(this, atoms);
+        if(whereFun && !whereFun(newDatum)) {
+            return null;
+        }
         
+        var datum = datumsByKey[newDatum.key];
         if(!datum) {
             datumsByKey[newDatum.key] = datum = newDatum;
         }
@@ -113,10 +124,11 @@ function data_reloadDatums(atomz) {
     
     var datums = def.query(atomz)
                     .select(internDatum, this)
+                    .where(def.notNully)
                     .array();
     
     // Unintern unused atoms
-    def.forEachOwn(this._dimensions, function(dimension){
+    def.eachOwn(this._dimensions, function(dimension){
         var visitedAtomsKeySet = visitedAtomsKeySetByDimension[dimension.name];
         
         var uninternAtoms = dimension.atoms().filter(function(atom){

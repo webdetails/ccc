@@ -18,9 +18,9 @@ pvc.DataTree = pvc.BaseChart.extend({
     constructor: function(options){
         // Force the value dimension not to be a number
         options = options || {};
-        options.dimensions = options.dimensions || {};
-        if(!options.dimensions.value) {
-            options.dimensions.value = {};
+        options.dimensionGroups = options.dimensionGroups || {};
+        if(!options.dimensionGroups.value) {
+            options.dimensionGroups.value = {valueType: null};
         }
         
         this.base(options);
@@ -37,7 +37,7 @@ pvc.DataTree = pvc.BaseChart.extend({
 
         this.structMetadata = data.metadata;
         if (this.structMetadata.length == 0){
-            pvc.log("Warning: Structure-Metadata is empty")
+            pvc.log("Warning: Structure-Metadata is empty");
         }
     },
   
@@ -68,7 +68,7 @@ pvc.DataTree = pvc.BaseChart.extend({
         
         // ------------------
         
-        this.dataTreePanel = new pvc.DataTreePanel(this, {
+        this.dataTreePanel = new pvc.DataTreePanel(this, this.basePanel, {
             topRuleOffset : this.options.topRuleOffset,
             botRuleOffset : this.options.botRuleOffset,
             leftRuleOffset : this.options.leftRuleOffset,
@@ -83,8 +83,6 @@ pvc.DataTree = pvc.BaseChart.extend({
             connectorSpace: this.options.connectorSpace,
             minAspectRatio: this.options.minAspectRatio
         });
-
-        this.dataTreePanel.appendTo(this.basePanel); // Add it
     }
 }, {
     defaultOptions: {
@@ -124,7 +122,7 @@ pvc.DataTree = pvc.BaseChart.extend({
  *    << to be filled out >>
  */
 pvc.DataTreePanel = pvc.BasePanel.extend({
-
+  anchor: 'fill',
   pvDataTree: null,
 
   treeElements: null, 
@@ -135,10 +133,6 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
   hRules: null,
   vRules: null,
   rules: null,
-
-//  constructor: function(chart, options){
-//    this.base(chart,options);
-//  },
 
   // generating Perpendicular connectors 
   // (only using horizontal and vertical rules)
@@ -540,13 +534,11 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     }
   } ,
 
-
-  create: function(){
-
-    this.consumeFreeClientSize();
-
-    this.base();
-
+  /**
+   * @override
+   */
+  _createCore: function() {
+      
     var myself  = this;
 
     var options = this.chart.options;

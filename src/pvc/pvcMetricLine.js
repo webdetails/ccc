@@ -4,8 +4,6 @@
  */
 pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
 
-    scatterChartPanel : null,
-  
     constructor: function(options){
 
         this.base(options);
@@ -15,19 +13,18 @@ pvc.MetricScatterAbstract = pvc.MetricAbstract.extend({
     },
 
      /* @override */
-    createCategoricalPanel: function(){
+    _createMainContentPanel: function(parentPanel){
         pvc.log("Prerendering in MetricScatterAbstract");
 
-        this.scatterChartPanel = new pvc.MetricScatterChartPanel(this, {
-            showValues: this.options.showValues,
-            valuesAnchor: this.options.valuesAnchor,
-            showLines: this.options.showLines,
-            showDots: this.options.showDots,
-            showAreas: this.options.showAreas,
-            orientation: this.options.orientation
+        var options = this.options;
+        return new pvc.MetricScatterChartPanel(this, parentPanel, {
+            showValues:   options.showValues,
+            valuesAnchor: options.valuesAnchor,
+            showLines:    options.showLines,
+            showDots:     options.showDots,
+            showAreas:    options.showAreas,
+            orientation:  options.orientation
         });
-
-        return this.scatterChartPanel;
     }
 }, {
     defaultOptions: {

@@ -38,14 +38,14 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
 .add(/** @lends pvc.data.MatrixTranslationOper# */{
     
     _logSource: function(){
-        pvc.log("ROWS");
+        pvc.log("ROWS (" + this.source.length + ")");
         if(this.source){
-            this.source.forEach(function(row, index){
+            def.query(this.source).take(10).each(function(row, index){
                 pvc.log("row " + index + ": " + JSON.stringify(row));
             });
         }
 
-        pvc.log("COLS");
+        pvc.log("COLS (" + this.metadata.length + ")");
         if(this.metadata){
             this.metadata.forEach(function(col){
                 pvc.log("column {" +

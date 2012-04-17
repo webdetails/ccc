@@ -20,8 +20,6 @@
  */
 pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
 
-    wfChartPanel : null,
-
     constructor: function(options){
 
         this.base(options);
@@ -45,6 +43,25 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
     },
 
     /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
+        
+        this.base();
+        
+        this._addVisualRoles({
+            /* value: required, continuous, numeric */
+            value:  { isMeasure: true, isRequired: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' },
+            
+            /* value2: continuous, numeric */
+            value2: { isMeasure: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
+            
+            // TODO: waterfall up/down/total control role
+        });
+    },
+    
+    /**
      * Creates a custom WaterfallDataEngine.
      * [override]
      */
@@ -53,7 +70,7 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
     },
 
     /* @override */
-    createCategoricalPanel: function(){
+    _createMainContentPanel: function(parentPanel){
         var logMessage = "Prerendering a ";
         if (this.options.waterfall)
             logMessage += "WaterfallChart";
@@ -62,15 +79,15 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
                            " BarChart";
         pvc.log(logMessage);
         
-        this.wfChartPanel = new pvc.WaterfallChartPanel(this, {
-            waterfall:      this.options.waterfall,
-            barSizeRatio:   this.options.barSizeRatio,
-            maxBarSize:     this.options.maxBarSize,
-            showValues:     this.options.showValues,
-            orientation:    this.options.orientation
-        });
+        var options = this.options;
         
-        return this.wfChartPanel;
+        return new pvc.WaterfallChartPanel(this, parentPanel, {
+            waterfall:    options.waterfall,
+            barSizeRatio: options.barSizeRatio,
+            maxBarSize:   options.maxBarSize,
+            showValues:   options.showValues,
+            orientation:  options.orientation
+        });
     }
 }, {
     defaultOptions: {
@@ -174,7 +191,7 @@ pvc.WaterfallTranslator = pvc.DataTranslator.extend({
  * <i>barLabel_</i> - for the main bar label
  */
 pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
-
+    
     pvBar: null,
     pvBarLabel: null,
     pvWaterfallLine: null,
@@ -192,8 +209,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
     ruleData: null,
 
-    constructor: function(chart, options){
-          this.base(chart, options);
+    constructor: function(chart, parent, options){
+          this.base(chart, parent, options);
 
           // Cache
           options = this.chart.options;
@@ -430,7 +447,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                                 this.chart,
                                 this.chart.getLinearScale,
                                 true)
-                     : this.chart.getLinearScale({bypassAxisSize: true});
+                     : this.chart.getLinearScale();
         */
         /** start  fix  (need to resolve this nicely  (CvK))**/
         if (this.waterfall) {
@@ -451,11 +468,11 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             options.orthoFixedMax = mx;
         }
 
-        var lScale = chart.getLinearScale({bypassAxisSize: true});
+        var lScale = chart.getLinearScale();
         /** end fix **/
 
-        var l2Scale = chart.getSecondScale({bypassAxisSize: true}),
-            oScale  = chart.getOrdinalScale({bypassAxisSize: true});
+        var l2Scale = chart.getSecondScale(),
+            oScale  = chart.getOrdinalScale();
 
         // determine barPositionOffset and barScale
         var barPositionOffset = 0,
@@ -645,7 +662,9 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
     /**
      * @override
      */
-    createCore: function(){
+    _createCore: function(){
+        this.base();
+         
         var myself = this,
             dataEngine = this.chart.dataEngine,
             options = this.chart.options;
@@ -755,46 +774,9 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 .fillStyle(secondAxisColorScale);
         }
 
-        // For labels, tooltips
-        this.pvBar
-            // Ends up being the default tooltip
-            //  when the property ".tooltip" below evals to falsy.
-            .text(this._createPropDatumTooltip());
-
         if(options.showTooltips){
-            /*
-            this.tipsySettings = {
-                html: true,
-                gravity: "c",
-                fade: false,
-                followMouse:true
-            };
-            */
-            this.pvBar
-                .localProperty("tooltip", String) // see pvc.js
-                .tooltip(function(){
-                    var tooltip;
-
-                    if(options.customTooltip){
-                        var datum = this.datum();
-                        if(!datum.isNull) {
-                            var atoms = datum.atoms,
-                                v = atoms.value.value,
-                                s = atoms.series.rawValue,
-                                c = atoms.category.rawValue;
-
-                            tooltip = options.customTooltip.call(null, s, c, v, datum);
-                        }
-                    }
-                    
-                    return tooltip;
-                })
-                .title(function(){
-                    return ''; // prevent browser tooltip
-                })
-                .event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
+            this._addPropTooltip(this.pvBar);
         }
-
 
         if(this._shouldHandleClick()){
             this._addPropClick(this.pvBar);
@@ -905,7 +887,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
     doGenOverflMarks: function(anchor, underflow, maxBarSize, angle, barScale, dataFunction){
         var myself = this;
         var offGridBarOffset = maxBarSize/2,
-            lScale = this.chart.getLinearScale({bypassAxisSize: true});
+            lScale = this.chart.getLinearScale();
 
         var offGridBorderOffset = underflow
                                     ? lScale.min + 8

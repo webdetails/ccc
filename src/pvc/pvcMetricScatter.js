@@ -32,7 +32,7 @@
  */
 
 pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
-    
+  anchor: 'fill',
   pvLine: null,
   pvArea: null,
   pvDot: null,
@@ -44,10 +44,6 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
   showDots: true,
   showValues: true,
   valuesAnchor: "right",
-  
-//  constructor: function(chart, options){
-//    this.base(chart,options);
-//  },
 
   prepareDataFunctions: function(){
     /*
@@ -60,13 +56,13 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         chart = this.chart,
         dataEngine = chart.dataEngine,
         options = chart.options,
-        baseScale = chart.getLinearBaseScale({bypassAxisSize: true}),
-        orthoScale = chart.getLinearScale({bypassAxisSize: true}),
+        baseScale = chart.getLinearBaseScale(),
+        orthoScale = chart.getLinearScale(),
         tScale,
         parser;
 
     if(options.timeSeries){
-        tScale = chart.getTimeseriesScale({bypassAxisSize: true});
+        tScale = chart.getTimeseriesScale();
     }
     
     // create empty container for the functions and data
@@ -105,10 +101,12 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     };
   },
 
-    /**
-     * @override
-     */
-    createCore: function(){
+  /**
+   * @override
+   */
+   _createCore: function(){
+       this.base();
+       
         // Mantain the panel at its default normal z-order
         this.pvPanel.zOrder(0);
 
@@ -170,7 +168,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                     c = dataEngine.getVisibleCategories()[this.index];
                 }
                 
-                return options.tooltipFormat.call(myself,s,c,v);
+                return options.v1StyleTooltipFormat.call(myself,s,c,v);
             });
 
         if(options.showTooltips){

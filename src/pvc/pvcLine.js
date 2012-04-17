@@ -5,8 +5,6 @@
  */
 pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
-    scatterChartPanel : null,
-    
     constructor: function(options){
 
         this.base(options);
@@ -14,21 +12,42 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
         // Apply options
         pvc.mergeDefaults(this.options, pvc.ScatterAbstract.defaultOptions, options);
     },
-
-    /* @override */
-    createCategoricalPanel: function(){
-        pvc.log("Prerendering in ScatterAbstract");
-
-        this.scatterChartPanel = new pvc.ScatterChartPanel(this, {
-            showValues:     this.options.showValues,
-            valuesAnchor:   this.options.valuesAnchor,
-            showLines:      this.options.showLines,
-            showDots:       this.options.showDots,
-            showAreas:      this.options.showAreas,
-            orientation:    this.options.orientation
+    
+    /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
+        
+        this.base();
+        
+        this._addVisualRoles({
+            /* value: required, continuous, numeric */
+            value: { 
+                isMeasure: true, 
+                isRequired: true, 
+                isPercent: this.options.stacked,  
+                isSingleDimension: true, 
+                isDiscrete: false, 
+                singleValueType: Number, 
+                defaultDimensionName: 'value' 
+            }
         });
-
-        return this.scatterChartPanel;
+    },
+    
+    /* @override */
+    _createMainContentPanel: function(parentPanel){
+        pvc.log("Prerendering in ScatterAbstract");
+        
+        var options = this.options;
+        return new pvc.ScatterChartPanel(this, parentPanel, {
+            showValues:     options.showValues,
+            valuesAnchor:   options.valuesAnchor,
+            showLines:      options.showLines,
+            showDots:       options.showDots,
+            showAreas:      options.showAreas,
+            orientation:    options.orientation
+        });
     }
 }, {
     defaultOptions: {
@@ -112,7 +131,7 @@ pvc.StackedAreaChart = pvc.ScatterAbstract.extend({
  * <i>lineLabel_</i> - for the main line label
  */
 pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
-
+    anchor: 'fill',
     pvLine: null,
     pvLineOrArea: null,
     pvDot: null,
@@ -129,7 +148,9 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     /**
      * @override
      */
-    createCore: function(){
+    _createCore: function(){
+        this.base();
+         
         var myself = this,
             chart = this.chart,
             options = chart.options,
@@ -143,22 +164,19 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         // DATA
         var de = chart.dataEngine,
             // Two multi-dimension single-level data groupings
-            catGrouping = chart.visualRoles('category').grouping.singleLevelGrouping(),
-            serGrouping = chart.visualRoles('series'  ).grouping.singleLevelGrouping(),
+            catGrouping  = chart.visualRoles('category').grouping.singleLevelGrouping(),
+            serGrouping  = chart.visualRoles('series'  ).grouping.singleLevelGrouping(),
+            valueDimName = chart.visualRoles('value').firstDimensionName(),
+            categDimName = catGrouping.firstDimension.name, // For timeseries
             
-            // One multi-dimensional, two-levels data grouping
-            crossGrouping = pvc.data.GroupingSpec.multiple([serGrouping, catGrouping]),
+            keyArgs      = { visible: true },
+            catAxisData  = de.groupBy(catGrouping,   keyArgs),
+            serAxisData  = de.groupBy(serGrouping,   keyArgs),
+            data         = chart._getCategorySeriesVisibleData(), // shared "categ then series" grouped data
             
-            valueDimName = chart.visualRoles('value').grouping.dimensions().first().name,
-            categDimName = catGrouping.dimensions().first().name, // For timeseries
-            
-            keyArgs      = {visible: true},
-            catRootData  = de.groupBy(catGrouping,   keyArgs),
-            serRootData  = de.groupBy(serGrouping,   keyArgs),
-            data         = de.groupBy(crossGrouping, keyArgs),
             isDense      = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
             isSegmented  = !isDense,
-            dotsBySeries = this._doLayout(catRootData, data, valueDimName, categDimName);
+            dotsBySeries = this._doLayout(catAxisData, serAxisData, data, valueDimName, categDimName);
 
         // Disable selection?
         if(!isSegmented && options.selectable) {
@@ -170,7 +188,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         function dotColorInterceptor(getDatumColor, args){
             if(!myself.showDots){
                 var dot = args[0],
-                    showAloneDot = dot.isAlone && (!(showAreas && isDiscreteCateg) || dot.isSingle);
+                    showAloneDot = dot.isAlone && (!(showAreas && isDiscreteCateg && isStacked) || dot.isSingle);
                 
                 if(!showAloneDot) {
                     return invisibleFill;
@@ -300,13 +318,15 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
         
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
-            .lock('data', serRootData._children)
+            .lock('data', serAxisData._children)
             ;
         
         // -- AREA --
         this.pvArea = this.pvScatterPanel.add(pv.Area)
             .lock('data',      function(seriesData1){ return dotsBySeries[seriesData1.absKey]; })
             .lock('datum',     function(dot){ return dot.datum; })
+            .localProperty('group', Object)
+            .lock('group',     function(dot){ return dot.group; })
             .lock('segmented', isSegmented) // fixed
 
             // Physical dimensions
@@ -366,16 +386,19 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                             function(dot){ return !dot.isNull; }
             )
             .lock('segmented', true) // fixed
+            .localProperty('group', Object)
+            .lock('group',  function(dot){ return dot.group; })
             .antialias(true)
             .intercept('strokeStyle', lineColorInterceptor, this._getExtension('line', 'strokeStyle'))
             .intercept('lineWidth',   lineWidthInterceptor, this._getExtension('line', 'lineWidth'  ))
-            .text(this._createPropDatumTooltip())
             ;
         
             
         // -- DOT --
         this.pvDot = this.pvLine.add(pv.Dot)
             .visible(function(dot){ return !dot.isNull && !dot.isIntermediate; })
+            .localProperty('group', Object)
+            .lock('group', function(dot){ return dot.group; })
             .strokeDasharray(null) // prevent default inheritance
             .localProperty('shapeRadiusBackup')
             .intercept('shapeRadius',  dotRadiusInterceptor,  this._getExtension('dot', 'shapeRadius'))
@@ -393,45 +416,14 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 // ------
                 .bottom(0)
                 .text(function(){
-                    return options.valueFormat(this.datum().atoms.value.value);
+                    return options.valueFormat(this.datum().atoms[valueDimName].value);
                 })
                 ;
         }
         
         // -- INTERACTION --
         if(options.showTooltips){
-            // TODO - tooltips centered on areas?
-//            var settings = def.copyOwn(
-//                        def.create(options.tipsySettings),
-//                        {
-//                            gravity: function(){
-//                                return tipsyBehavior.tipMark.type === 'area' ? "c" : "s";
-//                            }
-//                        });
-            this.pvDot
-                .localProperty("tooltip", String) // see pvc.js
-                .tooltip(function(){
-                    var tooltip;
-
-                    if(options.customTooltip){
-                        var datum = this.datum();
-                        if(!datum.isNull) {
-                            var atoms = datum.atoms,
-                                v = atoms.value.value,
-                                s = atoms.series.rawValue,
-                                c = atoms.category.rawValue;
-
-                            tooltip = options.customTooltip.call(null, s, c, v, datum);
-                        }
-                    }
-
-                    return tooltip;
-                })
-                .title(function(){
-                    return ''; // prevent browser tooltip
-                })
-                .event("point", pv.Behavior.tipsy(options.tipsySettings))
-                ;
+            this._addPropTooltip(this.pvDot);
         }
         
         if (this._shouldHandleClick()){
@@ -499,13 +491,14 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         return marks;
     },
   
-    _doLayout: function(catRootData, data, valueDimName, categDimName){
+    _doLayout: function(catAxisData, serAxisData, data, valueDimName, categDimName){
         var chart = this.chart,
             options = chart.options,
+            visibleKeyArgs = {visible: true},
             isDiscreteCateg = !options.timeSeries,
             isStacked = options.stacked,
             createNullIntermediates = this.showAreas,
-            orthoScale = chart.getLinearScale({bypassAxisSize: true}),
+            orthoScale = chart.getLinearScale(),
             orthoNullValue = def.scope(function(){
                 var domain = orthoScale.domain(),
                     dmin = domain[0],
@@ -522,7 +515,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         
         if(options.timeSeries) {
             dotBaseScale = def.scope(function(){
-                var baseScale = chart.getTimeseriesScale({bypassAxisSize: true/*, bypassAxisOffset: true */});
+                var baseScale = chart.getTimeseriesScale();
                 
                 function dotScale(dot){
                     return baseScale(dot.datum.atoms[categDimName].value);
@@ -533,7 +526,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             
         } else { // ~ Discrete base scale
             dotBaseScale = def.scope(function(){
-                var baseScale = chart.getOrdinalScale({bypassAxisSize: true}),
+                var baseScale = chart.getOrdinalScale(),
                     halfBand  = baseScale.range().band / 2;
                 
                 function dotScale(dot){
@@ -548,7 +541,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         
         // --------------
         
-        var categDatas = catRootData._children,
+        var categDatas = catAxisData._children,
             categCount = categDatas.length,
             belowDots2;
         
@@ -557,36 +550,37 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
          * i.e.:
          *   seriesKey -> Dot[] 
          */
-        var dotsBySeriesKey = data.children()
+        var dotsBySeriesKey = serAxisData.children()
             .reverse() // because of stacked offset calculation
             .object({
-                name:  function(seriesData){ return seriesData.key; },
+                name:  function(seriesData1){ return seriesData1.key; },
                 value: calcSeriesDots
             });
         
         /** 
          * Trim leading and trailing null dots.
          */
-        def.forEachOwn(dotsBySeriesKey, function(dots2, key){
+        def.eachOwn(dotsBySeriesKey, function(dots2, key){
             dotsBySeriesKey[key] = trimNullDots(dots2);
         });
         
         return dotsBySeriesKey;
         
-        function calcSeriesDots(seriesData) {
+        function calcSeriesDots(seriesData1) {
             
             var dots = categDatas.map(function(categData1){
-                var categKey = categData1.key,
-                    categData = seriesData._childrenByKey[categKey],
-                    datum = categData && categData._datums[0],
-                    value = datum && datum.atoms[valueDimName].value;
+                var seriesKey  = seriesData1.key,
+                    categKey   = categData1.key,
+                    seriesData = data._childrenByKey[categKey]._childrenByKey[seriesKey],
+                    datum      = seriesData && seriesData._datums[0],
+                    value      = seriesData && seriesData.dimensions(valueDimName).sum(visibleKeyArgs);
                 
                 return {
-                    seriesGroup:   seriesData,
+                    seriesGroup:   seriesData1,
                     categoryGroup: categData1,
-                    group:         categData, // may be null
+                    group:         seriesData, // may be null
                     isNull:        !datum,
-                    datum:         datum || createNullDatum(seriesData, categData1),
+                    datum:         datum || createNullDatum(seriesData1, categData1),
                     value:         value != null ? value : orthoNullValue
                 };
             });
@@ -652,7 +646,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                         }
                         
                         //----------------
-                        dots2[c2 - 1] = def.create(false, toDot, {
+                        dots2[c2 - 1] = def.copyOwn(Object.create(toDot), {
                             isIntermediate: true,
                             value:          interValue,
                             isNull:         interIsNull,
@@ -674,7 +668,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                     isSingle = !fromDot2 && !nextDot;
                 }
                 
-                var toDot2 = dots2[c2] = def.create(false, toDot, {
+                var toDot2 = dots2[c2] = def.copyOwn(Object.create(toDot), {
                     isAlone:       isAlone,
                     isSingle:      isSingle,
                     value:         toValue,

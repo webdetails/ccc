@@ -48,59 +48,59 @@ def.type('pvc.data.Complex')
     
     this.atoms = atomsBase ? Object.create(atomsBase) : {};
 	
-	if (!atoms) {
-	    this.key   = '';
-	} else {
-	    var atomsMap = this.atoms;
+    if (!atoms) {
+        this.key = '';
+    } else {
+        var atomsMap = this.atoms;
 	    
-		atoms.forEach(function(atom) {
-		    atom || def.fail.argumentRequired('atom');
-		    
-	        if(atom.value != null){ // already in proto object
-    	        var atomDim  = atom.dimension, 
-    	            name     = atomDim.name,
-    	            atomBase = atomsBase && atomsBase[name];
+        atoms.forEach(function(atom) {
+            atom || def.fail.argumentRequired('atom');
+
+            if(atom.value != null){ // already in proto object
+                var atomDim  = atom.dimension, 
+                    name     = atomDim.name,
+                    atomBase = atomsBase && atomsBase[name];
     	        
-    	        if(!atomBase || atom !== atomBase) { 
-    	                
-        	        // <Debug>
-        	        if(atomDim !== owner.dimensions(name)){
-        	            throw def.error.operationInvalid("Invalid atom dimension '{0}'.", [name]);
-        	        }
-        	        
-        	        if(def.hasOwn(atomsMap, name)) {
-        	            throw def.error.operationInvalid("An atom of the same dimension has already been added '{0}'.", [name]);
-        	        }
-        	        // </Debug>
-        	        
-        	        atomsMap[name] = atom;
-    	        }
-	        }
-		}, this);
+                if(!atomBase || atom !== atomBase) { 
+                    // <Debug>
+                    if(atomDim !== owner.dimensions(name)){
+                        throw def.error.operationInvalid("Invalid atom dimension '{0}'.", [name]);
+                    }
+
+                    if(def.hasOwn(atomsMap, name)) {
+                        throw def.error.operationInvalid("An atom of the same dimension has already been added '{0}'.", [name]);
+                    }
+                    // </Debug>
+                    
+                    atomsMap[name] = atom;
+                }
+            }
+        }, this);
 		
-		var keys = [];
-		owner.type.dimensionsNames()
+        var keys = [];
+        owner.type
+            .dimensionsNames()
             .forEach(function(dimName){
                 if(def.hasOwn(atomsMap, dimName)) {
                     keys.push(dimName + ":" + atomsMap[dimName].key);
                 }
             });
-                
+
         this.key = keys.join(',');
 	}
 })
 .add(/** @lends pvc.data.Complex# */{
-   toString : function() {
-		var s = [ '' + this.constructor.typeName ];
+    toString : function() {
+       var s = [ '' + this.constructor.typeName ];
+       
+       if (this.index != null) {
+           s.push("#" + this.index);
+       }
 
-		if (this.index != null) {
-			s.push("#" + this.index);
-		}
+       this.owner.type.dimensionsNames().forEach(function(name) {
+           s.push(name + ": " + JSON.stringify(this.atoms[name].value));
+       }, this);
 
-		this.owner.type.dimensionsNames().forEach(function(name) {
-		    s.push(name + ": " + JSON.stringify(this.atoms[name].value));
-		}, this);
-
-		return s.join(" ");
-	}
+       return s.join(" ");
+   }
 });

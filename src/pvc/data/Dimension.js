@@ -87,7 +87,7 @@ def.type('pvc.data.Dimension')
             }, this);
             
             // Filter parentEf dimension's atoms; keeps order.
-            this._atoms = source._atoms.filter(function(atom){
+            this._atoms = source.atoms().filter(function(atom){
                 return def.hasOwn(this._atomsByKey, atom.key);
             }, this);
         };
@@ -444,7 +444,7 @@ def.type('pvc.data.Dimension')
     },
     
     /**
-     * Obtains the sum of the dimension's atom values,
+     * Obtains the sum of this dimension's values over all datums of the data,
      * possibly after filtering.
      * 
      * <p>
@@ -455,23 +455,115 @@ def.type('pvc.data.Dimension')
      * Does not consider the null atom.
      * </p>
      * 
-     * <p>
-     * Consider calling this method on the root or owner dimension.
-     * </p>
-     * 
      * @param {object} [keyArgs] Keyword arguments.
-     * See {@link #atoms} for a list of available filtering keyword arguments. 
+     * See {@link pvc.data.Data#datums} for a list of available filtering keyword arguments. 
      *
-     * @returns {number} The sum of considered atoms or undefined if none.
+     * @returns {number} The sum of considered atoms or <tt>0</tt> if none.
      * 
      * @see #root
      * @see #owner
      * @see #atoms
      */
     sum: function(keyArgs){
-        // TODO: cache, how to key?
-        var atoms = this.atoms(keyArgs);
-        return atoms.length ? pv.sum(atoms) : undefined;
+        var key = '_sum:' + this._buildDatumsFilterKey(keyArgs);
+        var sum = def.getOwn(this, key);
+        if(sum == null) {
+            var dimName = this.name;
+            sum = this.data.datums(null, keyArgs).reduce(function(sum, datum){
+                var atom = datum.atoms[dimName];
+                return sum + (atom.value || 0);
+            },
+            0);
+            this[key] = sum;
+        }
+        
+        return sum; 
+    },
+    
+    /**
+     * Obtains the percentage of a specified atom or value,
+     * over the <i>sum</i> of a specified datum set.
+     * 
+     * <p>
+     * Assumes that the dimension type {@link pvc.data.DimensionType#valueType} is "Number".
+     * </p>
+     * 
+     * <p>
+     * Does not consider the null atom.
+     * </p>
+     * 
+     * @param {pvc.data.Atom|any} [atomOrValue] The atom or value on which to calculate the percent.
+     * 
+     * @param {object} [keyArgs] Keyword arguments.
+     * See {@link pvc.data.Dimension#sum} for a list of available filtering keyword arguments. 
+     *
+     * @returns {number} The calculated percentage.
+     * 
+     * @see #root
+     * @see #owner
+     */
+    percent: function(atomOrValue, keyArgs){
+        var value = (atomOrValue instanceof pvc.data.Atom) ? atomOrValue.value : atomOrValue;
+        if(!value) { // nully or zero
+            return 0;
+        }
+        // if value != 0 => sum != 0, but JIC, we teste for not 0...
+        var sum = this.sum(keyArgs);
+        return sum ? (value / sum) : 0;
+    },
+    
+    /**
+     * Obtains the percentage of the local <i>sum</i> of a specified selection,
+     * over the <i>sum</i> of an analogous selection in the parent data.
+     * 
+     * <p>
+     * Assumes that the dimension type {@link pvc.data.DimensionType#valueType} is "Number".
+     * </p>
+     * 
+     * <p>
+     * Does not consider the null atom.
+     * </p>
+     * 
+     * @param {object} [keyArgs] Keyword arguments.
+     * See {@link pvc.data.Dimension#sum} for a list of available filtering keyword arguments. 
+     *
+     * @returns {number} The calculated percentage.
+     * 
+     * @see #root
+     * @see #owner
+     */
+    percentOverParent: function(keyArgs){
+        var value = this.sum(keyArgs);
+        if(!value) { // nully or zero
+            return 0;
+        }
+        
+        // if value != 0 => sum != 0, but JIC, we teste for not 0...
+        var parentData = this.data.parent;
+        if(!parentData) {
+            return 0;
+        }
+        
+        var sum = parentData.dimensions(this.name).sum(keyArgs);
+        return sum ? (value / sum) : 0;
+    },
+    
+    
+    format: function(value){
+        return "" + (this.type._formatter ? this.type._formatter.call(null, value, null, this) : "");
+    },
+    
+    /**
+     * Builds a key string suitable for identifying a call to {@link pvc.data.Data#datums}
+     * with no where specification.
+     * 
+     *  @param {object} [keyArgs] The keyword arguments used in the call to {@link pvc.data.Data#datums}.
+     *  @type string
+     */
+    _buildDatumsFilterKey: function(keyArgs){
+        var visible  = def.get(keyArgs, 'visible'),
+            selected = def.get(keyArgs, 'selected');
+        return (visible == null ? null : !!visible) + ':' + (selected == null ? null : !!selected);  
     },
     
     /**
@@ -498,6 +590,7 @@ def.type('pvc.data.Dimension')
         
         // NOTE:
         // This function is performance critical!
+      
         // The null path and the existing atom path 
         // are as fast and direct as possible
         

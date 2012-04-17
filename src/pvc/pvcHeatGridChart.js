@@ -12,8 +12,6 @@
  */
 pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
-    heatGridChartPanel : null,
-
     constructor: function(options){
 
         this.base(options);
@@ -55,20 +53,33 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             this.options.isMultiValued = true;
         }
     },
-
+    
+    /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
+        
+        this.base();
+        
+        // TODO
+        this._addVisualRoles({
+            value:  { isMeasure: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value'  },
+            value2: { isMeasure: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
+        });
+    },
+    
     /* @override */
-    createCategoricalPanel: function(){
+    _createMainContentPanel: function(parentPanel){
         pvc.log("Prerendering in heatGridChart");
 
         var options = this.options;
-        this.heatGridChartPanel = new pvc.HeatGridChartPanel(this, {
+        return new pvc.HeatGridChartPanel(this, parentPanel, {
             heatGridSizeRatio:  options.heatGridSizeRatio,
             maxHeatGridSize:    options.maxHeatGridSize,
             showValues:         options.showValues,
             orientation:        options.orientation
         });
-
-        return this.heatGridChartPanel;
     }
 });
 
@@ -88,7 +99,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
  * <i>heatGridLabel_</i> - for the main heatGrid label
  */
 pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
-
+    anchor: 'fill',
     pvHeatGrid: null,
     pvHeatGridLabel: null,
     data: null,
@@ -114,7 +125,8 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     /**
      * @override
      */
-    createCore: function(){
+     _createCore: function(){
+         this.base();
 
         var chart = this.chart,
             options = chart.options,
@@ -319,43 +331,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
         
         if(options.showTooltips){
-            this.shapes
-                .localProperty("tooltip", String) // localProperty: see pvc.js
-                .tooltip(function(){
-                    var tooltip = this.tooltip();
-                    if(!tooltip){
-                        var datum = this.datum();
-                        if(!datum.isNull) {
-                            var atoms = datum.atoms;
-
-                            if(options.customTooltip){
-                                var s = atoms.series.rawValue,
-                                    c = atoms.category.rawValue,
-                                    v = valueDimName ? atoms[valueDimName].value : null;
-                                
-                                tooltip = options.customTooltip(s, c, v, datum);
-                            } else {
-                                var labels = [];
-                                if(colorDimName) {
-                                    labels.push(atoms[colorDimName].label || "- ");
-                                }
-                                
-                                if(sizeDimName && sizeDimName !== colorDimName) {
-                                    labels.push(atoms[sizeDimName].label || "- ");
-                                }
-                                
-                                tooltip = labels.join(", ");
-                            }
-                        }
-                    }
-                    
-                    return tooltip;
-                })
-                .title(function(){
-                    return ''; //prevent browser tooltip
-                })
-                .event("mouseover", pv.Behavior.tipsy(options.tipsySettings))
-                ;
+            this._addPropTooltip(this.shapes, {tipsyEvent: 'mouseover'});
         }
     },
 

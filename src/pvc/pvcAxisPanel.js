@@ -31,17 +31,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     desiredTickCount: null,
     minorTicks:       true,
     
-    clickAction: null,
-    doubleClickAction: null,
-
-    constructor: function(chart, options){
-        
-        this.base(chart,options);
-
-        this._calcLayout();
-    },
-
-    _calcLayout: function(){
+    _calcLayout: function(availableSize, layoutInfo){
 
         var titleSize = 0;
 
@@ -58,10 +48,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             if(this.axisSize  != null &&
                this.titleSize != null &&
                titleSize > this.axisSize){
-                pvc.log("WARNING: Inconsistent options '" +
-                            this.panelName + "TitleSize: " +  JSON.stringify(this.titleSize) +
-                            this.panelName + "Size: " +  JSON.stringify(this.axisSize));
-
+               
+                if(pvc.debug >= 2) {
+                    pvc.log("WARNING: Inconsistent options '" +
+                                this.panelName + "TitleSize: " +  JSON.stringify(this.titleSize) +
+                                this.panelName + "Size: " +  JSON.stringify(this.axisSize));
+               }
+               
                titleSize = this.axisSize;
             }
         }
@@ -71,15 +64,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         if(this.axisSize == null){
             this.axisSize = this.titleSize + 50;
         }
+        
+        this.setAnchoredSize(this.axisSize, availableSize);
     },
-
-    create: function(){
-
-        this.setAnchoredSize(this.axisSize);
-        
-        this.base();
-        
-        // ??
+    
+    _createCore: function() {
         this.extend(this.pvScale, this.panelName + "Scale_");
         
         this.renderAxis();
@@ -408,6 +397,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     // ----------------------------
     // Click / Double-click
+    // TODO: unify this with base panel's code
     _handleDoubleClick: function(d, ev){
         if(!d){
             return;
@@ -479,7 +469,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.chart.updateSelections();
     },
     
-    _detectSelectingDatums: function(datumsByKey, rb){
+    /**
+     * @override
+     */
+    _detectDatumsUnderRubberBand: function(datumsByKey, rb){
         if(!this.ordinal) {
             return false;
         }
@@ -497,11 +490,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var mark = this.pvLabel;
             
             mark.forEachInstance(function(instance, t){
-                var shape = mark.getInstanceShape(instance).apply(t);
-                if (shape.intersectsRect(rb)){
+                if(!instance.isBreak) { 
                     var data = instance.group;
                     if(data) {
-                        addData(data);
+                        var shape = mark.getInstanceShape(instance).apply(t);
+                        if (shape.intersectsRect(rb)){
+                            addData(data);
+                        }
                     }
                 }
             }, this);

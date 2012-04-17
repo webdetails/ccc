@@ -485,12 +485,12 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                         dimReaders.push(this._value1AndValue2Get(calcAxis2SeriesKeySet, seriesReader, index));
                         
                         // Add more M-1 measures, starting at 2 (~> 'value3', ...)
-                        add('value', 'V', 2, this.M - 1);
+                        add('value', 'M', 2, this.M - 1);
                     }
                 }
                 
             } else {
-                add('value', 'V', 0, this.M);
+                add('value', 'M', 0, this.M);
             }
         }
     }

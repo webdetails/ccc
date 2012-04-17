@@ -18,12 +18,10 @@ pvc.TimeseriesAbstract = pvc.BaseChart.extend({
 
         // Do we have the timeseries panel? add it
         if (this.options.showAllTimeseries){
-            this.allTimeseriesPanel = new pvc.AllTimeseriesPanel(this, {
+            this.allTimeseriesPanel = new pvc.AllTimeseriesPanel(this, this.basePanel, {
                 anchor: this.options.allTimeseriesPosition,
                 allTimeseriesSize: this.options.allTimeseriesSize
             });
-
-            this.allTimeseriesPanel.appendTo(this.basePanel); // Add it
         }
     }
 }, {
@@ -52,13 +50,17 @@ pvc.AllTimeseriesPanel = pvc.BasePanel.extend({
     anchor: "bottom",
     allTimeseriesSize: 50,
 
-    constructor: function(chart, options){
-        this.base(chart,options);
+    /**
+     * @override
+     */
+    _calcLayout: function(availableSize, layoutInfo){
+        this.setAnchoredSize(this.allTimeseriesSize, availableSize);
     },
-
-    create: function(){
-        this.setAnchoredSize(this.allTimeseriesSize);
-        
+    
+    /**
+     * @override
+     */
+    applyExtensions: function(){
         this.base();
 
         // Extend panel

@@ -42,9 +42,12 @@
     
     <script type="text/javascript" src="pvc/visual/Role.js"></script>
     
+    <script type="text/javascript" src="pvc/visual/Context.js"></script>
+    
     <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
     <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcMultiChartPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
     <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
@@ -140,6 +143,7 @@ var pie = new pvc.PieChart({
     height: 250,
     title: "Simple Pie",
     animate: false,
+    selectable: true,
     showTooltips: true,
     showValues: false,
 });
@@ -173,6 +177,7 @@ setting colors, fonts, and more.<br/>
           legendTextAdjust: 7,
           innerGap: 0.8,
           showValues: true,
+          selectable: true,
           explodedSliceIndex: 4,
           explodedSliceRadius: 15,
           colors: ["#8ED300","#7CB021","#568000","#3A3A3A","#969696","#F5F4F2"],
@@ -210,7 +215,7 @@ A pie can be converted into a donut by simple adding an extension point:
           showTooltips: true,
           innerGap: 0.8,
           showValues: true,
-        
+          selectable: true,
           extensionPoints: {
             pie_innerRadius:90,
             titleLabel_font: "18px sans-serif",

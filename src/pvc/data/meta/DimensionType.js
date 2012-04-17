@@ -18,7 +18,11 @@
  * @property {string} name
  * The name of this dimension type.
  * The name of a dimension type is unique on its complex type.
- *
+ * 
+ * @property {string} label
+ * The label of this dimension type.
+ * The label <i>should</i> be unique on its complex type.
+ * 
  * @property {string} group The group that the dimension type belongs to.
  * <p>
  * The group name is taken to be the name of the dimension
@@ -35,6 +39,8 @@
  * 
  * The function must be idempotent.
  *
+ * @property {string} valueTypeName A description of the value type.
+ * 
  * @property {boolean} isDiscrete
  * Indicates if the values of this dimension are discrete,
  * as opposed to continuous.
@@ -42,13 +48,17 @@
  * @property {boolean} isComparable
  * Indicates if the values of this dimension can be compared.
  * 
+ * @property {def.Map} playedVisualRoles
+ * A map of {@link pvc.visual.Role} indexed by visual role name, of the visual roles currently being played by this dimension type.
+ * 
  * @constructor
  *
  * @param {pvc.data.ComplexType} complexType The complex type that this dimension belongs to.
  * @param {string} name The name of the dimension type.
  *
  * @param {object} [keyArgs] Keyword arguments.
- * 
+ * @param {string} [keyArgs.label] The label of this dimension type.
+ * Defaults to the name of the dimension type.
  * @param {function} [keyArgs.valueType=null] The type of the values of this dimension type.
  * <p>
  * The supported value types are: <i>null</i> (which really means <i>any</i>), {@link Boolean}, {@link Number}, {@link String}, {@link Date} and {@link Object}.
@@ -161,19 +171,22 @@ def.type('pvc.data.DimensionType')
 function(complexType, name, keyArgs){
     this.complexType = complexType;
     this.name  = name;
+    this.label = def.get(keyArgs, 'label') || name;
     this.group = pvc.data.DimensionType.dimensionGroupName(name);
-       
+    this.playedVisualRoles = new def.Map();
+    
     var valueType = def.get(keyArgs, 'valueType') || null;
+    var valueTypeName;
     if(valueType){
         switch(valueType){
-            case Boolean:
-            case Number:
-            case String:
-            case Object:
-                break;
+            case Boolean: valueTypeName = 'Boolean'; break;
+            case Number:  valueTypeName = 'Number';  break;
+            case String:  valueTypeName = 'String';  break;
+            case Object:  valueTypeName = 'Object';  break;
             
             case Date:
                 valueType = Date2;
+                valueTypeName = 'Date';
                 break;
                 
             default: throw def.error.argumentInvalid('valueType', "Invalid valueType function: '{0}'.", [valueType]);
@@ -181,6 +194,7 @@ function(complexType, name, keyArgs){
     }
     
     this.valueType = valueType;
+    this.valueTypeName = valueTypeName;
     
     this.isDiscrete = def.get(keyArgs, 'isDiscrete');
     if(this.isDiscrete == null){
@@ -248,18 +262,16 @@ function(complexType, name, keyArgs){
      */
     this._formatter = def.get(keyArgs, 'formatter') || null;
     if(!this._formatter) {
-        var format = def.get(keyArgs, 'format');
-        if(format) {
-            switch(this.valueType) {
-                case Number:
-                    // TODO: receive extra format configuration arguments
-                    this._formatter = pv.Format.createFormatter(pv.Format.number().fractionDigits(0, 2));
-                    break;
-                    
-                case Date2:
-                    this._formatter = pv.Format.createFormatter(pv.Format.date(format));
-                    break;
-            }
+        switch(this.valueType) {
+            case Number:
+                // TODO: receive extra format configuration arguments
+                this._formatter = pv.Format.createFormatter(pv.Format.number().fractionDigits(0, 2));
+                break;
+                
+            case Date2:
+                var format = def.get(keyArgs, 'format') || "%Y/%m/%d";
+                this._formatter = pv.Format.createFormatter(pv.Format.date(format));
+                break;
         }
     }
 })
@@ -355,6 +367,18 @@ function(complexType, name, keyArgs){
      */
     converter: function(){
         return this._converter;
+    },
+    
+    /**
+     * Obtains a value indicating if this dimension type plays any visual role 
+     * such that {@link pvc.visual.Role#isPercent} is <tt>true</tt>.
+     * @type boolean
+     */
+    playingPercentVisualRole: function(){
+        return def.query(this.playedVisualRoles.values())
+                  .any(function(visualRole){ 
+                      return visualRole.isPercent; 
+                  }); 
     }
 });
 
@@ -466,3 +490,33 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
     
     return dimSpec;
 };
+
+/**
+ * Adds a visual role to the dimension type.
+ * 
+ * @name pvc.data.DimensionType#_addVisualRole
+ * @function
+ * @param {pvc.visual.Role} visualRole The visual role.
+ * @type undefined
+ * @private
+ * @internal
+ */
+function dimType_addVisualRole(visualRole) {
+    this.playedVisualRoles.set(visualRole.name, visualRole);
+    compType_dimensionRolesChanged.call(this.type, this);
+}
+
+/**
+ * Removes a visual role from the dimension type.
+ * 
+ * @name pvc.data.DimensionType#_removeVisualRole
+ * @function
+ * @param {pvc.visual.Role} visualRole The visual role.
+ * @type undefined
+ * @private
+ * @internal
+ */
+function dimType_removeVisualRole(visualRole) {
+    this.playedVisualRoles.rem(visualRole.name);
+    compType_dimensionRolesChanged.call(this.type, this);
+}

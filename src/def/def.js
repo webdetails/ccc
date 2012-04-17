@@ -182,9 +182,22 @@ this['def'] = (function(){
             return !!o && objectHasOwn.call(o, p);
         },
         
+        set: function(o){
+            if(!o) {
+                o = {};
+            }
+            
+            var a = arguments;
+            for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
+                o[a[i]] = a[i+1];
+            }
+            
+            return o;
+        },
+        
         /**
          * Calls a function 
-         * for every own property of a specified object.
+         * for every <i>own</i> property of a specified object.
          * 
          * @param {object} [o] The object whose own properties are traversed.
          * @param {function} [fun] The function to be called once per own property of <i>o</i>. 
@@ -197,7 +210,7 @@ this['def'] = (function(){
          * 
          * @type undefined
          */
-        forEachOwn: function(o, fun, ctx){
+        eachOwn: function(o, fun, ctx){
             if(o){
                 for(var p in o){
                     if(objectHasOwn.call(o, p)){
@@ -207,15 +220,51 @@ this['def'] = (function(){
             }
         },
         
-        copyOwn: function(to, from){
-            def.forEachOwn(from, function(v, p){
-                to[p] = v;
-            });
+        /**
+         * Calls a function 
+         * for every property of a specified object, own or inherited.
+         * 
+         * @param {object} [o] The object whose own properties are traversed.
+         * @param {function} [fun] The function to be called once per own property of <i>o</i>. 
+         * The signature of the function is:
+         * <pre>
+         * function(value, property : string, o : object) : any
+         * </pre>
+         * 
+         * @param {object} [ctx=null] The context object on which to call <i>fun</i>.
+         * 
+         * @type undefined
+         */
+        each: function(o, fun, ctx){
+            if(o){
+                for(var p in o){
+                    fun.call(ctx, o[p], p, o);
+                }
+            }
+        },
+        
+        copyOwn: function(a, b){
+            var to, from;
+            if(arguments.length >= 2) {
+                to = a || {};
+                from = b;
+            } else {
+                to   = {};
+                from = a;
+            }
             
+            if(from){
+                for(var p in from){
+                    if(objectHasOwn.call(from, p)){
+                        to[p] = from[p];
+                    }
+                }
+            }
+
             return to;
         },
         
-        copy: function(a,b){
+        copy: function(a, b){
             var to, from;
             if(arguments.length >= 2) {
                 to = a || {};
@@ -289,6 +338,8 @@ this['def'] = (function(){
          * @type function
          */
         falsy: function(x){ return !x; },
+        
+        add: function(a, b){ return a + b; },
         
         /**
          * The NO OPeration function.
@@ -379,6 +430,14 @@ this['def'] = (function(){
             return args.join(sep);
         },
         
+        // TODO: lousy implementation!
+        escapeHtml: function(str){
+            return str.replace(/&/gm, "&amp;")
+                      .replace(/</gm, "&lt;")
+                      .replace(/>/gm, "&gt;")
+                      .replace(/"/gm, "&quot;");    
+        },
+        
         /**
          * Formats a string by replacing 
          * place-holder markers, of the form "{foo}",
@@ -467,11 +526,11 @@ this['def'] = (function(){
     
     var errors = {
         operationInvalid: function(msg, scope){
-            return def.error(def.join(". ", "Invalid operation.", def.format(msg, scope)));
+            return def.error(def.join(" ", "Invalid operation.", def.format(msg, scope)));
         },
     
         notImplemented: function(){
-            return def.error("Not implemented");
+            return def.error("Not implemented.");
         },
     
         argumentRequired: function(name){
@@ -496,7 +555,7 @@ this['def'] = (function(){
     def.copyOwn(def.error, errors);
     
     /* Create direct fail versions of errors */
-    def.forEachOwn(errors, function(errorFun, name){
+    def.eachOwn(errors, function(errorFun, name){
         def.fail[name] = function(){
             throw errorFun.apply(null, arguments);
         };
@@ -717,7 +776,7 @@ this['def'] = (function(){
                 var proto = this.prototype,
                     baseState = state.base;
     
-                def.forEachOwn(mixin.prototype || mixin, function(value, p){
+                def.eachOwn(mixin.prototype || mixin, function(value, p){
                     if(value !== undefined){
                         var method = asMethod(value), 
                             baseMethod;
@@ -1056,11 +1115,12 @@ this['def'] = (function(){
         },
         
         set: function(p, v){
-            if(!objectHasOwn.call(this.source, p)) {
+            var source = this.source;
+            if(!objectHasOwn.call(source, p)) {
                 this.count++;
             }
             
-            this.source[p] = v;
+            source[p] = v;
             return this;
         },
         
@@ -1285,6 +1345,49 @@ this['def'] = (function(){
             }
             
             return true;
+        },
+        
+        min: function(){
+            var min = null;
+            while(this.next()){
+                if(min === null || this.item < min) {
+                    min = this.item;
+                }
+            }
+            
+            return min;
+        },
+        
+        max: function(){
+            var max = null;
+            while(this.next()){
+                if(max === null || this.item > max) {
+                    max = this.item;
+                }
+            }
+            
+            return max;
+        },
+        
+        range: function(){
+            var min = null,
+                max = null;
+            
+            while(this.next()){
+                var item = this.item;
+                if(min === null) {
+                    min = max = item;
+                } else {
+                    if(item < min) {
+                        min = item;
+                    }
+                    if(item > max) {
+                        max = item;
+                    }
+                }
+            }
+            
+            return min != null ? {min: min, max: max} : null;
         },
         
         index: function(keyFun, ctx){

@@ -10,18 +10,13 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
   parCoordPanel : null,
   legendSource: 'category',
 
-  tipsySettings: {
-    gravity: "s",
-    fade: true
-  },
-
   constructor: function(options){
 
    // Force the value dimension not to be a number
       options = options || {};
       options.dimensions = options.dimensions || {};
       if(!options.dimensions.value) {
-          options.dimensions.value = {};
+          options.dimensions.value = {valueType: null};
       }
       
       this.base(options);
@@ -34,7 +29,7 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
 
     pvc.log("Prerendering in parallelCoordinates");
 
-    this.parCoordPanel = new pvc.ParCoordPanel(this, {
+    this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, {
       topRuleOffset : this.options.topRuleOffset,
       botRuleOffset : this.options.botRuleOffset,
       leftRuleOffset : this.options.leftRuleOffset,
@@ -43,8 +38,6 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
       mapAllDimensions : this.options.mapAllDimensions,
       numDigits : this.options.numDigits
     });
-
-    this.parCoordPanel.appendTo(this.basePanel); // Add it
   }
 }, {
     defaultOptions: {
@@ -80,18 +73,13 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
 
 
 pvc.ParCoordPanel = pvc.BasePanel.extend({
-
+  anchor: 'fill',
   pvParCoord: null,
 
   dimensions: null, 
   dimensionDescr: null,
 
   data: null,
-
-  constructor: function(chart, options){
-
-      this.base(chart,options);
-  },
 
     /*****
      * retrieve the data from database and transform it to maps.
@@ -312,13 +300,12 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     this.dimensionDescr = genKeyVal(this.dimensions, descrVals);
   },
 
-  create: function(){
+  /**
+   * @override
+   */
+  _createCore: function(){
 
     var myself = this;
-    
-    this.consumeFreeClientSize();
-
-    this.base();
 
     this.retrieveData();
 

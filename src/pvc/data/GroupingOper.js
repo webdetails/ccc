@@ -11,8 +11,6 @@
  * @constructor
  *
  * @param {pvc.data.Data} linkParent The link parent data.
- * @param {pvc.data.Datum[]} [datums] A datums array to group.
- * The default value are all datums of the specified link parent.
  * 
  * @param {string|string[]} groupingSpecText A grouping specification string.
  * 
@@ -25,7 +23,7 @@
  *      Only considers datums that have the specified selected state.
  */
 def.type('pvc.data.GroupingOper')
-.init(function(linkParent, datums, groupingSpecText, keyArgs){
+.init(function(linkParent, groupingSpecText, keyArgs){
     
     if(groupingSpecText instanceof pvc.data.GroupingSpec) {
         this._groupingSpec = groupingSpecText;
@@ -38,17 +36,12 @@ def.type('pvc.data.GroupingOper')
     
     this._linkParent = linkParent;
     
-    this._datums   = (datums || linkParent._datums).slice();
     this._visible  = def.get(keyArgs, 'visible');
     this._selected = def.get(keyArgs, 'selected');
     
-    // NOTE: datum.id is not a semantic key, yet, ids are unique per script existence
-    // Ids are only put in the key when datums are supplied separately
-    
     this.key = this._groupingSpec.id + // grouping spec id is a semantic key...
                "||visible:"  + this._visible +
-               "||selected:" + this._selected + 
-               "||" + (datums ? this._datums.map(function(datum){ return datum.id; }).join(",") : '');
+               "||selected:" + this._selected;
 }).
 add(/** @lends pvc.data.GroupingOper */{
     
@@ -84,7 +77,7 @@ add(/** @lends pvc.data.GroupingOper */{
                 datumsByKey = {};
             
             // Group datums on level's dimension
-            datums.forEach(function(datum){
+            def.query(datums).each(function(datum){
                 if((visible  == null || datum.isVisible  === visible) && 
                    (selected == null || datum.isSelected === selected)) {
                     
@@ -125,9 +118,8 @@ add(/** @lends pvc.data.GroupingOper */{
             // This accounts for possibly excluded datums,
             // in any of the below levels (due to null and invisible atoms).
             // TODO: Does this method respect the initial order? If not, should it?
-            datums = parent._datums;
             parent._children.forEach(function(child){
-                def.array.append(datums, child._datums);
+                def.array.append(parent._datums, child._datums);
             });
             
             // Update datums related state 
@@ -139,7 +131,7 @@ add(/** @lends pvc.data.GroupingOper */{
             parent._childrenKeyDimName = levelSpec.dimensions[0].name;
         }
         
-        groupRecursive.call(this, this._root, this._datums);
+        groupRecursive.call(this, this._root, this._linkParent._datums);
         
         return this._root;
     }

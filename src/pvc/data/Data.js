@@ -173,12 +173,15 @@ def.type('pvc.data.Data', pvc.data.Complex)
     
     /**
      * The dimension instances of this data.
-     * @name pvc.data.Data#_dimensions
-     * @field
      * @type pvc.data.Dimension[]
-     * @private  
      */
     _dimensions: null, 
+    
+    /**
+     * The names of unbound dimensions.
+     * @type string[]
+     */
+    _freeDimensionNames: null,
     
     /**
      * The child data instances of this data.
@@ -312,6 +315,23 @@ def.type('pvc.data.Data', pvc.data.Complex)
     },
     
     /**
+     * Obtains an array of the names of dimensions that are not bound in {@link #atoms}.
+     * @type string[]
+     */
+    freeDimensionNames: function(){
+        if(!this._freeDimensionNames) {
+            var free = this._freeDimensionNames = [];
+            def.eachOwn(this._dimensions, function(dim, dimName){
+                var atom = this.atoms[dimName];
+                if(!(atom instanceof pvc.data.Atom) || atom.value == null){
+                    free.push(dimName);
+                }
+            }, this);
+        }
+        return this._freeDimensionNames;
+    },
+    
+    /**
      * Indicates if the data is an owner.
      * 
      * @type boolean
@@ -363,7 +383,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
         if(!this._disposed){
             data_disposeChildLists.call(this);
             
-            def.forEachOwn(this._dimensions, function(dimension){ dimension.dispose(); });
+            def.eachOwn(this._dimensions, function(dimension){ dimension.dispose(); });
             
             //  myself
             
@@ -405,5 +425,5 @@ function data_disposeChildLists() {
  * @private
  */
 function data_assertIsOwner(){
-    this.isOwner() || pvc.fail("Can only be called on the owner data.");
+    this.isOwner() || def.fail("Can only be called on the owner data.");
 }

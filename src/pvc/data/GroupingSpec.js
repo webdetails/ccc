@@ -1,67 +1,4 @@
 
-def.type('pvc.data.GroupingDimensionSpec')
-.init(function(dimType, reverse){
-    this.name     = dimType.name;
-    this.reverse  = !!reverse;
-    this.type     = dimType;
-    this.comparer = dimType.atomComparer(this.reverse);
-    this.id = this.name + ":" + (this.reverse ? '0' : '1');
-});
-
-def.type('pvc.data.GroupingLevelSpec')
-.init(function(dimSpecs){
-    var ids = [];
-    
-    this.dimensions = def.query(dimSpecs)
-       .select(function(dimSpec){
-           ids.push(dimSpec.id);
-           return dimSpec;
-       })
-       .array();
-    
-    this.id = ids.join(',');
-    this.depth = this.dimensions.length;
-    
-    var me = this;
-    this.comparer = function(a, b){ return me.compare(a, b); };
-})
-.add( /** @lends pvc.data.GroupingLevelSpec */{
-    compare: function(a, b){
-        for(var i = 0, D = this.depth ; i < D ; i++) {  
-            var dimSpec = this.dimensions[i],
-                dimName = dimSpec.name,
-                result  = dimSpec.comparer(a.atoms[dimName], b.atoms[dimName]);
-            if(result !== 0) {
-                return result;
-            }
-        }
-        
-        return 0;
-    },
-    
-    key: function(datum){
-        var keys  = [],
-            atoms = [];
-        
-        for(var i = 0, D = this.depth  ; i < D ; i++) {
-            var dimName = this.dimensions[i].name,
-                atom = datum.atoms[dimName];
-            if(atom.value == null) {
-                // Signals to ignore datum
-                return null;
-            }
-            
-            atoms.push(atom);
-            keys.push(dimName + ":" + atom.key);
-        }
-        
-        return {
-            key:   keys.join(','),
-            atoms: atoms
-        };
-    }
-});
-
 /**
  * Initializes a grouping specification.
  * 
@@ -85,6 +22,7 @@ def.type('pvc.data.GroupingLevelSpec')
  * @property {boolean} hasCompositeLevels Indicates that there is at least one level with more than one dimension.
  * @property {pvc.data.ComplexType} type The complex type against which dimension names were resolved.
  * @property {pvc.data.GroupingLevelSpec} levels An array of level specifications.
+ * @property {pvc.data.DimensionType} firstDimension The first dimension type, if any.
  * 
  * @constructor
  * @param {def.Query} levelSpecs An enumerable of {@link pvc.data.GroupingLevelSpec}.
@@ -118,7 +56,8 @@ def.type('pvc.data.GroupingSpec')
     this.depth = this.levels.length;
     this.isSingleLevel     = this.depth === 1;
     this.isSingleDimension = this.isSingleLevel && !this.hasCompositeLevels;
-    
+    this.firstDimension    = this.depth > 0 ? this.levels[0].dimensions[0] : null;
+        
     this.id = ids.join('||');
 })
 .add(/** @lends pvc.data.GroupingSpec# */{
@@ -196,6 +135,69 @@ def.type('pvc.data.GroupingSpec')
         
         return reverseGrouping;
     }
+});
+
+def.type('pvc.data.GroupingLevelSpec')
+.init(function(dimSpecs){
+    var ids = [];
+    
+    this.dimensions = def.query(dimSpecs)
+       .select(function(dimSpec){
+           ids.push(dimSpec.id);
+           return dimSpec;
+       })
+       .array();
+    
+    this.id = ids.join(',');
+    this.depth = this.dimensions.length;
+    
+    var me = this;
+    this.comparer = function(a, b){ return me.compare(a, b); };
+})
+.add( /** @lends pvc.data.GroupingLevelSpec */{
+    compare: function(a, b){
+        for(var i = 0, D = this.depth ; i < D ; i++) {  
+            var dimSpec = this.dimensions[i],
+                dimName = dimSpec.name,
+                result  = dimSpec.comparer(a.atoms[dimName], b.atoms[dimName]);
+            if(result !== 0) {
+                return result;
+            }
+        }
+        
+        return 0;
+    },
+    
+    key: function(datum){
+        var keys  = [],
+            atoms = [];
+        
+        for(var i = 0, D = this.depth  ; i < D ; i++) {
+            var dimName = this.dimensions[i].name,
+                atom = datum.atoms[dimName];
+            if(atom.value == null) {
+                // Signals to ignore datum
+                return null;
+            }
+            
+            atoms.push(atom);
+            keys.push(dimName + ":" + atom.key);
+        }
+        
+        return {
+            key:   keys.join(','),
+            atoms: atoms
+        };
+    }
+});
+
+def.type('pvc.data.GroupingDimensionSpec')
+.init(function(dimType, reverse){
+    this.name     = dimType.name;
+    this.reverse  = !!reverse;
+    this.type     = dimType;
+    this.comparer = dimType.atomComparer(this.reverse);
+    this.id = this.name + ":" + (this.reverse ? '0' : '1');
 });
 
 /**

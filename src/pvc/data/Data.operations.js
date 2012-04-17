@@ -8,7 +8,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     },
     
     /**
-     * Groups the datums of this data, or a specified subset of it,
+     * Groups the datums of this data,
      * according to a grouping specification.
      * 
      * <p>
@@ -38,10 +38,6 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * 
      * @param {Object} [keyArgs] Keyword arguments object.
      *
-     * @param {pvc.data.Datum[]} [keyArgs.datums] The datums to be grouped.
-     *      These must belong to this data.
-     *      When not specified, all contained datums are grouped.
-     *
      * @param {boolean} [keyArgs.visible=null]
      *      Only considers datums whose atoms of the grouping dimensions 
      *      have the specified visible state.
@@ -52,7 +48,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @returns {pvc.data.Data} The resulting root data.
      */
     groupBy: function(groupingSpecText, keyArgs){
-        var groupOper = new pvc.data.GroupingOper(this, def.get(keyArgs, 'datums'), groupingSpecText, keyArgs),
+        var groupOper = new pvc.data.GroupingOper(this, groupingSpecText, keyArgs),
             groupByCache = this._groupByCache, 
             // Check cache for a linked data with that key
             data = groupByCache && groupByCache[groupOper.key];

@@ -41,14 +41,19 @@
     
     <script type="text/javascript" src="pvc/visual/Role.js"></script>
     
+    <script type="text/javascript" src="pvc/visual/Context.js"></script>
+    
     <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
     <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcMultiChartPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
     <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcCategoricalGridDockingPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
     <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
@@ -699,7 +704,7 @@
 
         bar1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         bar1.render();
-            
+        /* TODO
         var bar2 = new pvc.BarChart({
           canvas: "pvcBar2",
           width: 400,
@@ -746,7 +751,7 @@
 
         bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         bar2.render();
-
+        */
 
         var bar3 = new pvc.BarChart({
           canvas: "pvcBar3",
@@ -858,18 +863,18 @@
 
         var crosstab01 = new pvc.TimeseriesAbstract({});
         crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
-        crosstab01.preRender();
+        crosstab01.render();
 
 
         // Testing some other datasets:
         var relational = new pvc.TimeseriesAbstract({});
         relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
-        relational.preRender();
+        relational.render();
 
 
         var relational2 = new pvc.TimeseriesAbstract({});
         relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
-        relational2.preRender();
+        relational2.render();
 
       });
 

@@ -8,7 +8,7 @@ pvc.data.Data
         var out = ["\n------------------------------------------"];
         out.push("Dataset Information");
         
-        def.forEachOwn(this.dimensions(), function(dimension, name){
+        def.eachOwn(this.dimensions(), function(dimension, name){
             var count = dimension.count(),
                 type = dimension.type,
                 features = [];
@@ -130,13 +130,12 @@ pvc.data.Data
      * Returns the values for a given series index.
      * 
      * @deprecated
-     */
     _getValuesForSeriesIndex: function(seriesIdx){
         return this.getValues().map(function(a){
             return a[seriesIdx];
         });
     },
-
+    */
     /**
      * Returns the visible values for a given series index.
      * Bullet and Pie
@@ -227,7 +226,7 @@ pvc.data.Data
      * For every category in the data, 
      * get the maximum of the sum of the series positive values.
      * @deprecated
-     */
+     
     getCategoriesMaxSumOfVisibleSeries: function(){
 
         var max = pv.max(
@@ -242,11 +241,11 @@ pvc.data.Data
         
         return max;
     },
-
+    */
     /**
      * Get the maximum value in all visible series
      * @deprecated
-     */
+     
     getVisibleSeriesAbsoluteMax: function(){
         
         var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
@@ -262,11 +261,11 @@ pvc.data.Data
         
         return max;
     },
-
+    */
     /**
      * Get the minimum value in all visible series
      * @deprecated
-     */
+     
     getVisibleSeriesAbsoluteMin: function(){
 
         var min = pv.min(this.getVisibleSeriesIndexes().map(function(idx){
@@ -281,7 +280,7 @@ pvc.data.Data
         
         return min;
     },
-    
+    */
     getObjectsForSeriesIndex: function(seriesIndex, sortF){
         
         var result = [];

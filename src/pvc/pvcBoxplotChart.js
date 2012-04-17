@@ -13,8 +13,6 @@
  */
 pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
-    bpChartPanel : null,
-
     constructor: function(options){
 
         this.base(options);
@@ -27,20 +25,18 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
     },
     
     /* @override */
-    createCategoricalPanel: function(){
+    _createMainContentPanel: function(parentPanel){
         pvc.log("Prerendering in boxplotChart");
-
-       this.bpChartPanel = new pvc.BoxplotChartPanel(this, {
-            panelSizeRatio: this.options.panelSizeRatio,
-            boxSizeRatio: this.options.boxSizeRatio,
-            showValues: this.options.showValues,
-            showTooltips: this.options.showTooltips,
-            orientation: this.options.orientation,
-	    // boxplot specific options
-	    boxplotColor: this.options.boxplotColor
+        
+        var options = this.options;
+        return new pvc.BoxplotChartPanel(this, parentPanel, {
+            panelSizeRatio: options.panelSizeRatio,
+            boxSizeRatio:   options.boxSizeRatio,
+            showValues:     options.showValues,
+            orientation:    options.orientation,
+            // boxplot specific options
+            boxplotColor:   options.boxplotColor
         });
-
-        return this.bpChartPanel;
     }
 }, {
     defaultOptions: {
@@ -54,7 +50,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
  * for more information on the options see the documentation file.
  */
 pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
-
+    anchor: 'fill',
     pvBox: null,
     pvBoxLabel: null,
 
@@ -67,14 +63,12 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
     vRules: null,
     bars: null,
 
-//    constructor: function(chart, options){
-//        this.base(chart,options);
-//    },
-
-   /**
+    /**
      * @override
      */
-    createCore: function(){
+    _createCore: function(){
+        this.base();
+        
         var myself = this,
             options = this.chart.options,
             dataEngine = this.chart.dataEngine;
@@ -160,10 +154,10 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
                 var s = dataEngine.getVisibleSeries()[this.parent.index];
                 var c = dataEngine.getVisibleCategories()[this.index];
                 
-                return options.tooltipFormat.call(myself,s,c,d.value);
+                return options.v1StyleTooltipFormat.call(myself,s,c,d.value);
             });
 
-        if(this.showTooltips){
+        if(options.showTooltips){
             this.pvBar.
                 event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
         }
@@ -220,10 +214,9 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
         // create empty container for the functions and data
         this.DF = {};
 
-        var lScale = chart.getLinearScale({bypassAxisSize: true});
-
-        var l2Scale = chart.getSecondScale({bypassAxisSize: true});
-        var oScale = chart.getOrdinalScale({bypassAxisSize: true});
+        var lScale = chart.getLinearScale();
+        var l2Scale = chart.getSecondScale();
+        var oScale = chart.getOrdinalScale();
 
         /*
          * fuctions to determine positions along base axis.

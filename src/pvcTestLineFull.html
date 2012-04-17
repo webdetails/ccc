@@ -42,447 +42,165 @@
     
     <script type="text/javascript" src="pvc/visual/Role.js"></script>
     
+    <script type="text/javascript" src="pvc/visual/Context.js"></script>
+    
     <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
     <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcMultiChartPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
     <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcCategoricalGridDockingPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcLine.js"></script>
     <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
-    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
-    
-    <style type="text/css">
-    body {
-        font-family: sans-serif;
-        font-size: 11pt;
-    }
-    
-    #examples {
-        display:table;
-        width:80%;
-    }
-    
-    #examples>div {
-        display:table-row;
-        height: 200px;
-    }
-    
-    #examples>div>div {
-        display:table-cell;
-    }
-    
-    #examples>div>div:nth-child(2) {
-        width: 200px;
-        vertical-align: top;
-        padding-left: 10px;
-    }
-    
-    #examples>div>div:first-child {
-        padding-bottom:20px;
-    }
-    
-    #examples>div>div:first-child>div {
-        border:1px solid silver;
-    }
-    
-    div.props {
-        display:table;
-        width:90%;
-    }
-    
-    div.props>div {
-        display:table-row;
-    }
-    div.props>div>div {
-        display:table-cell;
-        padding: 2px;
-        border:1px solid silver;
-    }
-    div.props>div>div:first-child {
-        width: 100px;
-        font-weight: bold;
-        text-transform:capitalize;
-    }
-    </style>
-    
+    <link type="text/css" rel="stylesheet" href="pvcDocUtils.css"/>
     <script type="text/javascript" src="pvcDocUtils.js"></script>
     <script type="text/javascript">
-    def.scope(function(){
+
+var lineExamplesShowProps = ['stacked', 'timeSeries', 'showAreas', 'showLines', 'showDots'];
+var baseExampleDef = {
+    dataVar: 'relational_01',
+    def: {
+        animate: false,
+        legend:  true,
+        legendPosition: "right",
+        legendAlign: "top",
+        selectable:  true,
+        xAxisFullGrid: true,
+        yAxisSize: 30,
+        yAxisDomainRoundMode: 'tick',
+        extensionPoints: {
+            xAxisScale_dateTickFormat:    "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5
+        },
+        showAreas:  false,
+        showDots:   false,
+        showValues: false,
+        timeSeries: false,
+        timeSeriesFormat: "%Y-%m-%d",
         
-        var chartExamples = {};
+        /* Data format */
+        crosstabMode: false,
+        seriesInRows: false,
+        dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
+     },
+     showProps: lineExamplesShowProps
+};
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line01',
+	className: 'LineChart',
+	def: {
+	    title:      "Timeseries Line Chart",
+	    timeSeries: true
+	 }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line02',
+	className: 'LineChart',
+	def: {
+	    title:      "Timeseries Line Chart with Areas",
+	    showAreas:  true,
+	    timeSeries: true
+	 }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line03',
+	className: 'LineChart',
+	def: {
+	    title: "Categorical Line Chart"
+	 }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line04',
+	className: 'LineChart',
+	def: {
+	    title:     "Categorical Line Chart with Areas",
+	    showAreas: true
+	 }
+}));
+
+
+// ----------------------
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line05',
+	className: 'StackedLineChart',
+	def: {
+	    title:      "Stacked Timeseries Line Chart",
+	    timeSeries: true
+	 }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line06',
+	className: 'StackedAreaChart',
+	def: {
+	    title:      "Stacked Timeseries Area Chart",
+	    showAreas:  true,
+	    timeSeries: true
+	 }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line07',
+	className: 'StackedLineChart',
+	def: {
+	    title:      "Stacked Timeseries Area Chart with Lines",
+	    showAreas:  true,
+	    timeSeries: true
+	}
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line08',
+	className: 'StackedLineChart',
+	def: {
+	    title: "Stacked Categorical Line Chart"
+	}
+}));
         
-        function registerChartExample(id, chartClass, dataVar, chartDef){
-            chartExamples[id] = {
-                className: chartClass,
-                dataVar:   dataVar,
-                def:       chartDef
-            };
-        }
-        
-        function renderChartExample(id, canvas){
-            var chartExample = chartExamples[id];
-            if(!chartExample){
-                return;
-            }
-            
-            // ----------------------
-            /*
-            <div style="display:table-row;height:300px">
-                <div style="display:table-cell; width:150px"></div>
-                <div style="display:table-cell"></div>
-            </div>
-            */
-            var $table = $("#examples");
-            
-            var $tableRow = $('<div />');
-            $tableRow.appendTo($table);
-            
-            var $tableChartCell = $('<div style="display:table-cell;" />');
-            $tableChartCell.appendTo($tableRow);
-            
-            var $tableChartDiv = $('<div>&nbsp;</div>');
-            $tableChartDiv.appendTo($tableChartCell);
-            
-            var $tablePropsCell = $('<div></div>'); 
-            $tablePropsCell.appendTo($tableRow);
-            
-            // -----------------------
-            
-            var chartClass = pvc[chartExample.className];
-            var options = def.create(false, chartExample.def, {
-                width:  $tableChartDiv.width(),
-                height: $tableRow.height(),
-                canvas: $tableChartDiv[0]
-            });
-            
-            var chart = new chartClass(options);
-            
-            // ----------------------
-         
-            var $propsTable = $('<div class="props" />');
-            $propsTable.appendTo($tablePropsCell);
-            
-            ['stacked', 'timeSeries', 'showAreas', 'showLines', 'showDots'].forEach(function(name){
-                var $propsRow = $('<div />');
-                $propsRow.appendTo($propsTable);
-                
-                $('<div />').appendTo($propsRow)
-                    .text(name);
-                
-                $('<div />').appendTo($propsRow)
-                    .text(JSON.stringify(chart.options[name]));
-            });
-            
-            // ----------------------
-        
-            
-            chart.setData(def.global[chartExample.dataVar]);
-            chart.render();
-        }
-        
-        registerChartExample(
-                'line01',
-                'LineChart',
-                'relational_01',
-                {
-                    title:   "Timeseries Line Chart",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   false,
-                    showDots:    false,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d"
-                 });
-        
-        registerChartExample(
-                'line02',
-                'LineChart',
-                'relational_01',
-                {
-                    title:   "Timeseries Line Chart with Areas",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   true,
-                    showDots:    false,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d"
-                 });
-        
-        registerChartExample(
-                'line03',
-                'LineChart',
-                'relational_01',
-                {
-                    title:   "Categorical Line Chart",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   false,
-                    showDots:    false,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
-                 });
-        
-        registerChartExample(
-                'line04',
-                'LineChart',
-                'relational_01',
-                {
-                    title:   "Categorical Line Chart with Areas",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   true,
-                    showDots:    false,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
-                 });
-        
-        
-        // ----------------------
-        
-        registerChartExample(
-                'line05',
-                'StackedLineChart',
-                'relational_01',
-                {
-                    title:   "Stacked Timeseries Line Chart",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   false,
-                    showDots:    false,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d"
-                 });
-        
-        registerChartExample(
-                'line06',
-                'StackedAreaChart',
-                'relational_01',
-                {
-                    title:   "Stacked Timeseries Area Chart",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   true,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d"
-                 });
-        
-        registerChartExample(
-                'line07',
-                'StackedLineChart',
-                'relational_01',
-                {
-                    title:   "Stacked Timeseries Area Chart with Lines",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   true,
-                    showDots:    false,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    timeSeries: true,
-                    timeSeriesFormat: "%Y-%m-%d"
-                 });
-        
-        registerChartExample(
-                'line08',
-                'StackedLineChart',
-                'relational_01',
-                {
-                    title:   "Stacked Categorical Line Chart",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   false,
-                    showDots:    false,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
-                 });
-        
-        registerChartExample(
-                'line09',
-                'StackedAreaChart',
-                'relational_01',
-                {
-                    title:   "Stacked Categorical Area Chart",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   true,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
-                 });
-        
-        registerChartExample(
-                'line10',
-                'StackedLineChart',
-                'relational_01',
-                {
-                    title:   "Stacked Categorical Area Chart with Lines",
-                    animate: false,
-                    legend:  true,
-                    legendPosition: "right",
-                    legendAlign: "top",
-                    selectable:  true,
-                    showAreas:   true,
-                    showDots:    false,
-                    showValues:  false,
-                    xAxisFullGrid: true,
-                    yAxisSize:   30,
-                    yAxisDomainRoundMode: 'tick',
-                    extensionPoints: {
-                        xAxisScale_dateTickFormat:    "%Y/%m/%d",
-                        xAxisScale_dateTickPrecision: 798336000/1.5
-                    },
-                    
-                    /* Data format */
-                    crosstabMode: false,
-                    seriesInRows: false,
-                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
-                 });
-        
-        function renderExamples(){
-            for(var id in chartExamples){ 
-                renderChartExample(id);
-            }
-        }
-        
-        $(document).ready(renderExamples);
-    });
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line09',
+	className: 'StackedAreaChart',
+	def: {
+	    title:     "Stacked Categorical Area Chart",
+	    showAreas: true
+	 }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+	id: 'line10',
+	className: 'StackedLineChart',
+	def: {
+	    title:     "Stacked Categorical Area Chart with Lines",
+	    showAreas: true
+	 }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line11',
+    className: 'LineChart',
+    dataVar: 'relational_01_neg',
+    def: {
+        title:     "Categorical Line Chart with Negative Values",
+        showAreas: true
+     }
+}));
+
     </script>
   </head>
   <body>
     <h1>
-      Line Chart
+      Line/Area/Dot Charts
     </h1>
     <div id="examples" />
   </body>

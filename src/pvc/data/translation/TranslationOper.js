@@ -28,7 +28,7 @@ def.type('pvc.data.TranslationOper')
     this.metadata = metadata || {};
     this.options  = options  || {};
     
-    if(pvc.debug){
+    if(pvc.debug >= 3){
         this._logSource();
     }
 })
@@ -356,7 +356,7 @@ def.type('pvc.data.TranslationOper')
         // This function is performance critical and so does not use forEach
         // or array helpers, avoiding function calls, closures, etc.
         
-        if(pvc.debug) {
+        if(pvc.debug >= 3) {
             pvc.log('readItem: ' + JSON.stringify(item));
         }
         

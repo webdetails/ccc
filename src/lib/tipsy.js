@@ -178,12 +178,18 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
 
         /* Find the tooltip text. */
         var instance = this.instance();
-        tip.title = (instance && instance.tooltip) ||
+        var title = (instance && instance.tooltip) ||
                     (typeof this.tooltip == 'function' && this.tooltip()) ||
                      this.title() ||
-                     this.text()  || 
-                     ""; // Prevent "undefined" from showing up
+                     this.text();
          
+        // Allow deferred tooltip creation! 
+        if(typeof title === 'function') {
+            title = title();
+        }
+        
+        tip.title = title || ""; // Prevent "undefined" from showing up
+        
         /*
          * Compute bounding box. TODO support area, lines, wedges, stroke. Also
          * note that CSS positioning does not support subpixels, and the current

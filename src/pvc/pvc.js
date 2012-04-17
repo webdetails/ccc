@@ -1,6 +1,10 @@
 
 var pvc = {
-    debug: false
+    // 0 - off
+    // 1 - errors 
+    // 2 - errors, warnings
+    // 3 - errors, warnings, info
+    debug: 0
 };
 
 // Begin private scope
@@ -90,7 +94,7 @@ pvc.arrayStartsWith = function(array, base){
 };
 
 pvc.mergeDefaults = function(to, defaults, from){
-    def.forEachOwn(defaults, function(dv, p){
+    def.eachOwn(defaults, function(dv, p){
         var v;
         to[p] = (from && (v = from[p]) !== undefined) ? v : dv;
     });
@@ -424,13 +428,17 @@ pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
         if(tickMin < domaMin || domaMax < tickMax){
             /* Update the scale to reflect the new domain */
             if(doma.length !== 2){
-                pvc.log("Ticks forced extending a linear scale's domain, " +
-                        "but it is not possible to update the domain because " + 
-                        "it has '" +  doma.length + "' element(s).");
+                if(pvc.debug >= 2) {
+                    pvc.log("Ticks forced extending a linear scale's domain, " +
+                            "but it is not possible to update the domain because " + 
+                            "it has '" +  doma.length + "' element(s).");
+                }
             } else {
-                pvc.log("Ticks forced extending a linear scale's domain from [" +
-                        [domaMin, domaMax] + "] to [" +
-                        [tickMin, tickMax] + "]");
+                if(pvc.debug >= 3) {
+                    pvc.log("Ticks forced extending a linear scale's domain from [" +
+                            [domaMin, domaMax] + "] to [" +
+                            [tickMin, tickMax] + "]");
+                }
                 
                 scale.domain(tickMin, tickMax);
             }
@@ -580,7 +588,11 @@ pv.Mark.prototype.addMargins = function(margins) {
 pv.Mark.prototype.forEachInstance = function(fun, ctx){
     var mark = this,
         indexes = [],
-        instances = [];
+        breakInstance = {
+            isBreak: true,
+            visible: false,
+            datum: {}
+        };
 
     /* Go up to the root and register our way back.
      * The root mark never "looses" its scene.
@@ -593,36 +605,51 @@ pv.Mark.prototype.forEachInstance = function(fun, ctx){
     // mark != null
 
     // root scene exists if rendered at least once
-    var scene = mark.scene;
-    if(scene){
+    var rootScene = mark.scene;
+    if(rootScene){
         var L = indexes.length;
 
-        function collectRecursive(scene, level, t){
-            if(level === L){
-                for(var i = 0, I = scene.length ; i < I ; i++){
-                    fun.call(ctx, scene[i], t);
-                }
-            } else {
-                var childIndex = indexes[level];
-                for(var index = 0, D = scene.length ; index < D ; index++){
-                    var instance = scene[index],
-                        childScene = instance.children[childIndex];
-
+        function collectRecursive(scene, level, toScreen){
+            var isLastLevel = level === L, 
+                childIndex;
+            
+            if(!isLastLevel) {
+                childIndex = indexes[level];
+            }
+            
+            for(var index = 0, D = scene.length; index < D ; index++){
+                var instance = scene[index];
+                if(level === L){
+                    fun.call(ctx, scene[index], toScreen);
+                } else if(instance.visible) {
+                    var childScene = instance.children[childIndex];
+                    
                     // Some nodes might have not been rendered?
                     if(childScene){
-                        var toChild = t.times(instance.transform)
-                                       .translate(instance.left, instance.top);
-
-                        collectRecursive(childScene, level + 1, toChild);
+                        var childToScreen = toScreen
+                                                .times(instance.transform)
+                                                .translate(instance.left, instance.top);
+                        
+                        collectRecursive(childScene, level + 1, childToScreen);
                     }
                 }
             }
+            
+            if(D > 0) {
+                fun.call(ctx, breakInstance, null);
+            }
         }
 
-        collectRecursive(scene, 0, pv.Transform.identity);
+        collectRecursive(rootScene, 0, pv.Transform.identity);
     }
+};
 
-    return instances;
+pv.Mark.prototype.forEachSignumInstance = function(fun, ctx){
+    this.forEachInstance(function(instance, t){
+        if(instance.datum || instance.group){
+            fun.call(ctx, instance, t);
+        }
+    });
 };
 
 /* BOUNDS */
@@ -631,9 +658,9 @@ pv.Mark.prototype.toScreenTransform = function(){
     
     if(this instanceof pv.Panel) {
         t = t.translate(this.left(), this.top())
-            .times(this.transform());
+             .times(this.transform());
     }
-    
+
     var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
     if(parent){
         do {
@@ -677,6 +704,15 @@ pv.Label.prototype.getInstanceShape = function(instance){
             10);
 };
 
+pv.Wedge.prototype.getInstanceShape = function(instance){
+    var midAngle  = instance.startAngle + (instance.angle / 2);
+    var midRadius = (instance.outerRadius + instance.innerRadius) / 2;
+    var dotLeft   = instance.left + midRadius * Math.cos(midAngle);
+    var dotTop    = instance.top  + midRadius * Math.sin(midAngle);
+    
+    return new Circle(dotLeft, dotTop, 10);
+};
+
 pv.Dot.prototype.getInstanceShape = function(instance){
     var radius = instance.shapeRadius,
         cx = instance.left,
@@ -707,6 +743,35 @@ pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
 
 
 // --------------------
+
+var Size = def.type('pvc.Size')
+.init(function(width, height){
+    if(width instanceof Object) {
+        this.width  = width.width  || 0;
+        this.height = width.height || 0;
+    } else {
+        this.width  = width  || 0;
+        this.height = height || 0;
+    }
+})
+.add({
+    clone: function(){
+        return new Size(this.width, this.height);
+    },
+    
+    intersect: function(size){
+        return new Size(
+               Math.min(this.width,  size.width), 
+               Math.min(this.height, size.height));
+    },
+    
+    setProp: function(prop, v){
+        this[prop] = v || 0;
+    }
+});
+
+// --------------------
+
 var Shape = def.type('pvc.Shape')
 .add({
     transform: function(t){

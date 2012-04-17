@@ -61,14 +61,9 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
      * xx if orientation is horizontal, yy otherwise.
      *
      * Keyword arguments:
-     *   bypassAxisSize:   boolean, default is false
      */
     getLinearBaseScale: function(keyArgs){
-        var bypassAxisSize = def.get(keyArgs, 'bypassAxisSize', false),
-            yAxisSize = this._getAxisSize(bypassAxisSize, 'y'),
-            xAxisSize = this._getAxisSize(bypassAxisSize, 'x');
-
-        var isVertical = this.options.orientation=="vertical";
+        var isVertical = this.options.orientation === "vertical";
 
         // compute the input-domain of the scale
         var extent    = this.dataEngine.dimensions('category').extent(),
@@ -82,19 +77,13 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
         domainMax += offset;
 
         // compute the output-range
-        var rangeMin, rangeMax;
-        if (isVertical) {
-          rangeMin = yAxisSize;
-          rangeMax = this.basePanel.width;
-        } else {
-          rangeMin = 0;
-          rangeMax = this.basePanel.height - xAxisSize;
-        }
-
+        var rangeMin = 0,
+            rangeMax = this._mainContentPanel[isVertical ? 'width' : 'height'];
+        
         // create the (linear) Scale
         var scale = new pv.Scale.linear()
-                      .domain(domainMin, domainMax)
-                      .range(rangeMin, rangeMax);
+                          .domain(domainMin, domainMax)
+                          .range(rangeMin, rangeMax);
 
         scale.min = rangeMin;
         scale.max = rangeMax;

@@ -1,0 +1,51 @@
+body {
+    font-family: sans-serif;
+    font-size: 11pt;
+}
+
+#examples {
+    display:table;
+    width:80%;
+}
+
+#examples>div {
+    display:table-row;
+    height: 200px;
+}
+
+#examples>div>div {
+    display:table-cell;
+}
+
+#examples>div>div:nth-child(2) {
+    width: 200px;
+    vertical-align: top;
+    padding-left: 10px;
+}
+
+#examples>div>div:first-child {
+    padding-bottom:20px;
+}
+
+#examples>div>div:first-child>div {
+    border:1px solid silver;
+}
+
+div.props {
+    display:table;
+    width:90%;
+}
+
+div.props>div {
+    display:table-row;
+}
+div.props>div>div {
+    display:table-cell;
+    padding: 2px;
+    border:1px solid silver;
+}
+div.props>div>div:first-child {
+    width: 100px;
+    font-weight: bold;
+    text-transform:capitalize;
+}

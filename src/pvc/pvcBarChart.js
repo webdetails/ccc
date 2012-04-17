@@ -4,8 +4,6 @@
  */
 pvc.BarChart = pvc.CategoricalAbstract.extend({
 
-    barChartPanel : null,
-
     constructor: function(options){
 
         this.base(options);
@@ -25,21 +23,39 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
         
         this.base(options);
     },
-
-    /* @override */
-    createCategoricalPanel: function(){
-        pvc.log("Prerendering in barChart");
-
-        this.barChartPanel = new pvc.WaterfallChartPanel(this, {
-            waterfall:          false,
-            barSizeRatio:       this.options.barSizeRatio,
-            maxBarSize:         this.options.maxBarSize,
-            showValues:         this.options.showValues,
-            valuesAnchor:       this.options.valuesAnchor,
-            orientation:        this.options.orientation
-        });
+    
+    /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
         
-        return this.barChartPanel;
+        this.base();
+        
+        this._addVisualRoles({
+            /* value: required, continuous, numeric */
+            value:  { isMeasure: true, isRequired: true, isPercent: this.options.stacked,  isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' },
+            
+            /* value2: continuous, numeric */
+            value2: { isMeasure: true, isPercent: this.options.stacked, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
+        });
+    },
+    
+    /**
+     * @override 
+     */
+    _createMainContentPanel: function(parentPanel){
+        pvc.log("Prerendering in barChart");
+        
+        var options = this.options;
+        return new pvc.WaterfallChartPanel(this, parentPanel, {
+            waterfall:    false,
+            barSizeRatio: options.barSizeRatio,
+            maxBarSize:   options.maxBarSize,
+            showValues:   options.showValues,
+            valuesAnchor: options.valuesAnchor,
+            orientation:  options.orientation
+        });
     }
 }, {
     defaultOptions: {

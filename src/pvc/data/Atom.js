@@ -61,6 +61,14 @@ function(dimension, value, label, rawValue, key) {
     this.label = label;
     this.rawValue = rawValue;
     this.key = key;
+})
+.add( /** @lends pvc.data.Atom */{
+    /**
+     * Obtains the label of the atom.
+     */
+    toString: function(){
+        return this.label;
+    }
 });
 
 
