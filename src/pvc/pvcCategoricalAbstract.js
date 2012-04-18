@@ -709,6 +709,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         originIsZero: true,
 
         axisOffset: 0,
+        axisHideExcessOrdinalLabels: false,
+        axisLabelMaxOverlapping:  0.2,
+        
         axisLabelFont: '9px sans-serif',
         axisTitleFont: '12px sans-serif', // 'bold '
         

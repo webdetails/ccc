@@ -122,6 +122,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             rSize = rMax - rMin,
             ruleParentPanel = this.pvPanel;
 
+        this._rSize = rSize;
+        
         if(this.title){
            this.pvTitlePanel = this.pvPanel.add(pv.Panel)
                 [this.anchor             ](0)     // bottom (of the axis panel)
@@ -188,13 +190,30 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderOrdinalAxis: function(){
 
         var myself = this,
+            options = this.chart.options,
             scale = this.pvScale,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
             // Grouping with 1 multi-dimension level
-            data = this.chart.visualRoleData(this.ordinalRoleName, {visible: true, singleLevelGrouping: true});
+            data              = this.chart.visualRoleData(this.ordinalRoleName, {visible: true, singleLevelGrouping: true}),
+            itemCount         = data._leafs.length,
+            includeModulo;
+        
+        if(options.axisHideExcessOrdinalLabels && itemCount > 0 && this._rSize > 0) {
+            var overlapFactor = def.within(options.axisLabelMaxOverlapping, 0, 0.9);
+            var textHeight    = pvc.text.getTextHeight("m", this.font) * (1 - overlapFactor);
+            includeModulo = Math.max(1, Math.ceil((itemCount * textHeight) / this._rSize));
+            
+            //pvc.log({overlapFactor: overlapFactor, itemCount: itemCount, textHeight: textHeight, Size: this._rSize, modulo: (itemCount * textHeight) / this._rSize, itemSpan: itemCount * textHeight, itemAvailSpace: this._rSize / itemCount});
+            
+            if(pvc.debug >= 3 && includeModulo > 1) {
+                pvc.log("Hiding every " + includeModulo + " labels in axis " + this.panelName);
+            }
+        } else {
+            includeModulo = 1;
+        }
         
         // Ordinal ticks correspond to ordinal datums.
         // Ordinal ticks are drawn at the center of each band,
@@ -220,6 +239,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         // All ordinal labels are relevant and must be visible
         this.pvLabel = this.pvTicks.anchor(this.anchor).add(pv.Label)
+            .intercept('visible', labelVisibleInterceptor, this._getExtension(this.panelName + "Label", 'visible'))
             .zOrder(40) // see pvc.js
             .textAlign(align)
             //.textBaseline("middle")
@@ -230,6 +250,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return leafData;
             })
             ;
+        
+        function labelVisibleInterceptor(getVisible, args) {
+            var visible = getVisible ? getVisible.apply(this, args) : true;
+            return visible && ((this.index % includeModulo) === 0);
+        }
         
         if(this._shouldHandleClick()){
             this.pvLabel

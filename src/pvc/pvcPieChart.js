@@ -183,7 +183,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                 var value;
                 if(options.showValuePercentage) {
                     value = catGroup.dimensions(valueDimName).percentOverParent(visibleKeyArgs);
-                    return options.valueFormat.call(null, Math.round(value * 1000) / 10);
+                    return options.valueFormat.call(null, Math.round(value * 1000) / 10) + "%";
                 }
                 
                 value = myself.pvPie.value();
