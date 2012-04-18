@@ -17,7 +17,7 @@ function disposeGroup(group) {
     }
 }
 
-pv.Behavior.tipsy = function(opts, usesPoint) {
+pv.Behavior.tipsy = function(opts) {
     /**
      * One tip is reused per behavior instance.
      * Tipically there is one behavior instance per mark,
@@ -26,6 +26,8 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
     var tip,
         tipMark,
         group = opts && opts.exclusionGroup,
+        usesPoint = opts && opts.usesPoint,
+        rootPanel = opts && opts.rootPanel,
         $mouseleaveTarget;
     
     /**
@@ -35,6 +37,7 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
      */
     function removeTipsy() {
         if(group) {
+            //pvc.log('Disposing tipsy group #' + (tipsysDisposeByGroup[group] && tipsysDisposeByGroup[group].length));
             disposeGroup(group);
         } else {
             disposeTipsy();
@@ -42,6 +45,7 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
     }
     
     function disposeTipsy() {
+        //pvc.log('Disposing tipsy');
         // Do not leak memory
         if($mouseleaveTarget) {
             $mouseleaveTarget.unbind('mouseleave', removeTipsy);
@@ -160,8 +164,14 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
         if (!tip) {
             var c = this.root.canvas();
             c.style.position = "relative";
-            $(c).mouseleave(removeTipsy);
-
+            
+            var rootElem = rootPanel && rootPanel.scene && rootPanel.scene.$g;
+            if(rootElem) {
+                //$(rootElem).mouseleave(removeTipsy);
+            } else {
+                $(c).mouseleave(removeTipsy);
+            } 
+            
             tip = c.appendChild(document.createElement("div"));
             tip.style.position = "absolute";
             tip.style.pointerEvents = "none"; // ignore mouse events
@@ -243,18 +253,11 @@ pv.Behavior.tipsy = function(opts, usesPoint) {
          * (so as to not interfere with other mouse events, such as "click");
          * thus the mouseleave event handler is registered on
          * the event target rather than the tip overlay.
-         *
-         * HACK: Accessing protovis private field.
          */
-        var unpoint = usesPoint != null ? 
-                        usesPoint :
-                        (this.$handlers['point'] === startTooltip);
-        if(unpoint){
+        if(usesPoint){
             // Being used as a point handler
             // Should remove the tipsy only in the unpoint event
-            if(!this.$handlers['unpoint']){
-                this.event('unpoint', removeTipsy);
-            }
+            this.event('unpoint', removeTipsy);
         } else {
             if($mouseleaveTarget) {
                 $mouseleaveTarget.unbind('mouseleave', removeTipsy);

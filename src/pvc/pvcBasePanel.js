@@ -691,6 +691,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         var myself = this,
             tipsyEvent = def.get(keyArgs, 'tipsyEvent'), 
             options = this.chart.options,
+            tipsySettings = Object.create(options.tipsySettings),  
             buildTooltip;
         
         if(!tipsyEvent) {
@@ -699,12 +700,15 @@ pvc.BasePanel = pvc.Abstract.extend({
                 case 'line':
                 case 'area':
                     tipsyEvent = 'point';
+                    tipsySettings.usesPoint = true;
                     break;
                     
                 default:
                     tipsyEvent = 'mouseover';
             }
         }
+        
+        tipsySettings.rootPanel = this.chart.basePanel.pvPanel;
         
         var tooltipFormat = options.tooltipFormat;
         if(!tooltipFormat) {
@@ -743,7 +747,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             .title(function(){
                 return '';
             })
-            .event(tipsyEvent, pv.Behavior.tipsy(options.tipsySettings));
+            .event(tipsyEvent, pv.Behavior.tipsy(tipsySettings || options.tipsySettings));
     },
     
     _buildTooltip: function(context){
@@ -1027,8 +1031,10 @@ pvc.BasePanel = pvc.Abstract.extend({
                     
                     // Process selection
                     myself._dispatchRubberBandSelectionTop(ev);
-
+                    
                     selectionEndedDate = new Date();
+                    
+                    myself.rubberBand = null;
                 }
             });
     },

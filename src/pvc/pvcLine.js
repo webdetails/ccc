@@ -179,31 +179,47 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             dotsBySeries = this._doLayout(catAxisData, serAxisData, data, valueDimName, categDimName);
 
         // Disable selection?
-        if(!isSegmented && options.selectable) {
+        if(!isSegmented && (options.selectable || options.hoverable)) {
             options.selectable = false;
-            pvc.log("Warning: Disabling selection because the chart is to \"dense\".");
+            options.hoverable  = false;
+            if(pvc.debug >= 3) {
+                pvc.log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
+            }
         }
         
         // -- DOT --
-        function dotColorInterceptor(getDatumColor, args){
-            if(!myself.showDots){
-                var dot = args[0],
-                    showAloneDot = dot.isAlone && (!(showAreas && isDiscreteCateg && isStacked) || dot.isSingle);
-                
+        function calcDotColor(getDatumColor, args, dot, isActiveDot) {
+            if(!isActiveDot && !myself.showDots){
+                var showAloneDot = dot.isAlone && (!(showAreas && isDiscreteCateg && isStacked) || dot.isSingle);
                 if(!showAloneDot) {
                     return invisibleFill;
                 }
             }
             
-            var darker = !getDatumColor && myself.showAreas ? 0.6 : null;
-            var color = calcColor.call(this, getDatumColor, args, null, darker, /* grayAlpha */ 1);
-//            
-//            if(args[0].isIntermediate) {
-//                return color.darker().darker();
-//            }
-//            
-            return color;
+            var darker = isActiveDot || (!getDatumColor && myself.showAreas) ? 0.6 : null;
+            return calcColor.call(this, getDatumColor, args, null, darker, /* grayAlpha */ 1, /*activeSeriesAsSelected*/ true);
         }
+        
+        function dotColorInterceptor(getDatumColor, args){
+            /* Active dot detection */
+            var dot = args[0],
+                isActiveDot = (myself.pvScatterPanel.activeDot() === dot);
+            
+            return calcDotColor.call(this, getDatumColor, args, dot, isActiveDot);
+        }
+        
+        function dotStrokeColorInterceptor(getDatumStrokeColor, args) {
+            /* Active dot detection */
+            var dot = args[0],
+                isActiveDot = (myself.pvScatterPanel.activeDot() === dot);
+            
+            var color = calcDotColor.call(this, getDatumStrokeColor, args, dot, isActiveDot);
+            if(isActiveDot) {
+                color = color.brighter(1.5);
+            }
+            
+            return color;
+        }   
         
         function dotRadiusInterceptor(getShapeRadius, args) {
             var radius = getShapeRadius ? getShapeRadius.apply(this, args) : null;
@@ -212,21 +228,29 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
         
         function dotSizeInterceptor(getShapeSize, args) {
-            if(!myself.showDots) {
-                var dot = args[0];
-                if(dot.isAlone) {
-                    // Obtain the line Width of the "sibling" line
-                    var lineWidth = Math.max(myself.pvLine.scene[this.index].lineWidth, 0.2) / 2;
-                    return lineWidth * lineWidth;
+            /* Active dot detection */
+            var dot = args[0],
+                isActiveDot = (myself.pvScatterPanel.activeDot() === dot);
+            
+            function calcDotSize() {
+                if(!myself.showDots) {
+                    if(dot.isAlone) {
+                        // Obtain the line Width of the "sibling" line
+                        var lineWidth = Math.max(myself.pvLine.scene[this.index].lineWidth, 0.2) / 2;
+                        return lineWidth * lineWidth;
+                    }
                 }
+                
+                var radius = this.shapeRadiusBackup();
+                if(radius != null) {
+                    return radius * radius;
+                }
+                
+                return getShapeSize ? getShapeSize.apply(null, args) : 12;
             }
             
-            var radius = this.shapeRadiusBackup();
-            if(radius != null) {
-                return radius * radius;
-            }
-            
-            return getShapeSize ? getShapeSize.apply(null, args) : 12;
+            var size = calcDotSize.call(this);
+            return isActiveDot ? (Math.max(size, 12) * 2) : size; 
         }
         
         // -- LINE --
@@ -237,7 +261,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             }
             
             var darker = !getDatumColor && isStacked ? 0.6 : null;
-            return calcColor.call(this, getDatumColor, args, null, darker);
+            return calcColor.call(this, getDatumColor, args, null, darker, null, /*activeSeriesAsSelected*/ true);
         }
         
         function lineWidthInterceptor(getLineWidth, args) {
@@ -258,10 +282,10 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             }
 
             var hasSelections = de.owner.selectedCount() > 0,
-                grayAlpha = isStacked && hasSelections ? 1 : null,
+                grayAlpha = isStacked /*&& hasSelections*/ ? 1 : null,
                 areaAlpha = areaColorAlpha;
            
-            return calcColor.call(this, getDatumColor, args, areaAlpha, null, grayAlpha);
+            return calcColor.call(this, getDatumColor, args, areaAlpha, null, grayAlpha, /*activeSeriesAsSelected*/ true);
         }
 
         // Color "controller"
@@ -275,7 +299,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             return chart.colors(seriesKeys);
         });
         
-        function calcColor(getDatumColor, args, alpha, darker, grayAlpha, grayIfSelected){
+        function calcColor(getDatumColor, args, alpha, darker, grayAlpha, activeSeriesAsSelected){
             var color;
 
             if(getDatumColor){
@@ -285,14 +309,28 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 }
             }
 
+            var dot = args[0];
             if(color === undefined){
-                var dot = args[0];
                 color = colors(dot.seriesGroup.key);
             }
 
             // ----------
-
-            if(de.owner.selectedCount() > 0 && (grayIfSelected || !this.datum().isSelected)){
+            var grayoutColor = false,
+                activeDot = myself.pvScatterPanel.activeDot();
+            
+            if(!this.datum().isSelected) {
+                if(activeDot) {
+                    if(activeSeriesAsSelected) {
+                        grayoutColor = (dot.seriesGroup !== activeDot.seriesGroup); 
+                    } else {
+                        grayoutColor = (dot !== activeDot);
+                    }
+                } else if(de.owner.selectedCount() > 0 /*&& !this.datum().isSelected*/){
+                    grayoutColor = true;
+                }
+            }
+            
+            if(grayoutColor) {
                 color = pvc.toGrayScale(color, grayAlpha);
             } else if(alpha != null){
                 color = color.alpha(alpha);
@@ -309,16 +347,18 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         // BUILD
         //this.pvPanel.zOrder(0);
 
-        if(options.showTooltips || this._shouldHandleClick()){
+        if(options.showTooltips || options.hoverable || this._shouldHandleClick()){
             this.pvPanel
               // Receive events even if in a transparent panel (#events default is "painted")
               .events("all")
-              .event("mousemove", pv.Behavior.point(40)) // fire point and unpoint events
+              .event("mousemove", pv.Behavior.point(Infinity)) // fire point and unpoint events
               ;
         }
         
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
             .lock('data', serAxisData._children)
+            .def('activeDot', Object)
+            .activeDot(null)
             ;
         
         // -- AREA --
@@ -350,7 +390,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         this.pvArea
             .lock('antialias', useAntialias);
             
-    if(isSegmented && useAntialias){
+        if(isSegmented && useAntialias){
             // isDense = false
             
             // We have to try to hide the vertical lines noticeable between areas,
@@ -404,8 +444,8 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             .intercept('shapeRadius',  dotRadiusInterceptor,  this._getExtension('dot', 'shapeRadius'))
             .intercept('shapeSize',    dotSizeInterceptor,    this._getExtension('dot', 'shapeSize'))
             .lineWidth(1.5) // Break inheritance
-            .intercept('strokeStyle', dotColorInterceptor, this._getExtension('dot', 'strokeStyle'))
             .intercept('fillStyle',   dotColorInterceptor, this._getExtension('dot', 'fillStyle'))
+            .intercept('strokeStyle', dotStrokeColorInterceptor, this._getExtension('dot', 'strokeStyle'))
             ;
 
         // -- LABEL --
@@ -424,6 +464,29 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         // -- INTERACTION --
         if(options.showTooltips){
             this._addPropTooltip(this.pvDot);
+        }
+        
+        if(options.hoverable) {
+            // Add hover-active behavior
+            var activeDotPanel = myself.pvScatterPanel;
+            this.pvDot
+                .event('point', function(dot){
+                    activeDotPanel.activeDot(dot);
+                    
+                    if(!myself.topRoot.rubberBand) {
+                        activeDotPanel.render();
+                    }
+                 })
+                .event('unpoint', function(){
+                    var activeDot = activeDotPanel.activeDot();
+                    if(activeDot) {
+                        activeDotPanel.activeDot(null);
+                        
+                        if(!myself.topRoot.rubberBand) {
+                            activeDotPanel.render();
+                        }
+                    }
+                });
         }
         
         if (this._shouldHandleClick()){

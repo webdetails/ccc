@@ -1023,6 +1023,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         tipsySettings: {
             gravity: "s",
+            delayIn: 500,
             html: true,
             fade: true
         },
@@ -1049,6 +1050,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 //          pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
 //      },
         
+        hoverable:  false,
         selectable: false,
         selectionChangedAction: null,
         

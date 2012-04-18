@@ -1,4 +1,4 @@
-// bb677cde2fae25b1bec496d53b551e7f66d41944
+// ec599039867a0aa97b7645c830c5a79aaae28e97
 /**
  * @class The built-in Array class.
  * @name Array
@@ -5650,7 +5650,7 @@ pv.SvgScene.monotoneTangents = function(points) {
 pv.SvgScene.curveMonotone = function(points) {
   if (points.length <= 2) return "";
   return this.curveHermite(points, this.monotoneTangents(points));
-}
+};
 
 /**
  * @private Interpolates the given points using Fritsch-Carlson Monotone cubic
@@ -7671,10 +7671,10 @@ pv.Mark.prototype.mouse = function() {
  * interactive visualization, such as selection.
  *
  * <p>TODO In the current implementation, event handlers are not inherited from
- * prototype marks. They must be defined explicitly on each interactive mark. In
- * addition, only one event handler for a given event type can be defined; when
- * specifying multiple event handlers for the same type, only the last one will
- * be used.
+ * prototype marks. They must be defined explicitly on each interactive mark. 
+ * More than one event handler for a given event type <i>can</i> be defined.
+ * The return values of each handler, if any and are marks, 
+ * are rendered at the end of every handler having been called.
  *
  * @see <a href="http://www.w3.org/TR/SVGTiny12/interact.html#SVGEvents">SVG events</a>
  * @param {string} type the event type.
@@ -7682,7 +7682,18 @@ pv.Mark.prototype.mouse = function() {
  * @returns {pv.Mark} this.
  */
 pv.Mark.prototype.event = function(type, handler) {
-  this.$handlers[type] = pv.functor(handler);
+  handler = pv.functor(handler);
+  
+  var handlers = this.$handlers[type];
+  if(!handlers) {
+      handlers = handler; 
+  } else if(handlers instanceof Array) {
+      handlers.push(handler);
+  } else {
+      handlers = [handlers, handler];
+  }
+  
+  this.$handlers[type] = handlers;
   return this;
 };
 
@@ -7766,12 +7777,34 @@ pv.Mark.prototype.context = function(scene, index, f) {
 
 /** @private Execute the event listener, then re-render. */
 pv.Mark.dispatch = function(type, scene, index, event) {
-  var m = scene.mark, p = scene.parent, l = m.$handlers[type];
-  if (!l) return p && pv.Mark.dispatch(type, p, scene.parentIndex, event);
+  var m = scene.mark, 
+      p = scene.parent, 
+      l = m.$handlers[type];
+  
+  if (!l) {
+      return p && pv.Mark.dispatch(type, p, scene.parentIndex, event);
+  }
+  
   m.context(scene, index, function() {
-      m = l.apply(m, pv.Mark.stack.concat(event));
-      if (m && m.render) m.render();
-    });
+    var stack = pv.Mark.stack.concat(event);
+    if(l instanceof Array) {
+        var ms;
+        l.forEach(function(li){
+            var mi = li.apply(m, stack);
+            if(mi && mi.render) {
+                (ms || (ms = [])).push(mi);
+            }
+        });
+        
+        if(ms) { ms.forEach(function(mi){ mi.render(); }); }
+    } else {
+        m = l.apply(m, stack);
+        if (m && m.render) {
+            m.render();
+        }
+    }
+  });
+  
   return true;
 };
 
@@ -15055,6 +15088,7 @@ pv.Behavior.point = function(r) {
       collapse = null, // dimensions to collapse
       kx = 1, // x-dimension cost scale
       ky = 1, // y-dimension cost scale
+      pointingPanel = null, 
       r2 = arguments.length ? r * r : 900; // fuzzy radius
 
   /** @private Search for the mark closest to the mouse. */
@@ -15109,8 +15143,16 @@ pv.Behavior.point = function(r) {
     if (unpoint = point) {
       pv.Mark.dispatch("point", point.scene, point.index, e);
 
-      /* Unpoint when the mouse leaves the root panel. */
-      pv.listen(this.root.canvas(), "mouseout", mouseout);
+      /* Unpoint when the mouse leaves the pointing panel. */
+      if(!pointingPanel && this.type === 'panel') {
+          pointingPanel = this;
+          pointingPanel.event('mouseout', function(){
+              var ev = arguments[arguments.length - 1];
+              mouseout.call(pointingPanel.scene.$g, ev);
+          });
+      } else {
+          pv.listen(this.root.canvas(), "mouseout", mouseout);
+      }
     }
   }
 
@@ -15150,8 +15192,7 @@ pv.Behavior.point = function(r) {
   };
 
   return mousemove;
-};
-/**
+};/**
  * Returns a new select behavior to be registered on mousedown events.
  *
  * @class Implements interactive selecting starting with mousedown events.
