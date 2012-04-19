@@ -57,7 +57,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             delete this._categSeriesVisibleData;
         }
         
-        this.base();
+        this.base.apply(this, arguments);
     },
     
     /**

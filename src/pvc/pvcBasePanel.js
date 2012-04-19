@@ -708,8 +708,6 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
         }
         
-        tipsySettings.rootPanel = this.chart.basePanel.pvPanel;
-        
         var tooltipFormat = options.tooltipFormat;
         if(!tooltipFormat) {
             buildTooltip = this._buildTooltip;

@@ -10,25 +10,26 @@ pvc.BulletChart = pvc.BaseChart.extend({
   constructor: function(options){
       options = options || {};
       
-     options.readers = [
-        {names: 'value', indexes: [0,1,2,3,4,5,6,7,8]} 
-     ];
+      options.readers = [
+          {names: 'value', indexes: [0,1,2,3,4,5,6,7,8]} 
+      ];
      
       // Force values not to be numbers
-     if(!options.dimensionGroups) {
+      if(!options.dimensionGroups) {
          options.dimensionGroups = {};
-     }
+      }
      
-     if(!options.dimensionGroups.value) {
+      if(!options.dimensionGroups.value) {
          options.dimensionGroups.value = {valueType: null};
-     }
+      }
     
-    options.selectable = false; // not supported yet
+      options.legend = false;
+      options.selectable = false; // not supported yet
      
-    this.base(options);
+      this.base(options);
 
-    // Apply options
-    pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
+      // Apply options
+      pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
   },
 
   _preRenderCore: function(){

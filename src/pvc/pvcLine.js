@@ -57,7 +57,8 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
         showValues: false,
         axisOffset: 0.04,
         valuesAnchor: "right",
-        panelSizeRatio: 1
+        panelSizeRatio: 1,
+        tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15 })
     }
 });
 
@@ -197,7 +198,8 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             }
             
             var darker = isActiveDot || (!getDatumColor && myself.showAreas) ? 0.6 : null;
-            return calcColor.call(this, getDatumColor, args, null, darker, /* grayAlpha */ 1, /*activeSeriesAsSelected*/ true);
+            
+            return calcColor.call(this, getDatumColor, args, {darker: darker, grayAlpha: 1, ignoreIsSelected: isActiveDot, activeAware: true, activeIfSameSeries: !isActiveDot});
         }
         
         function dotColorInterceptor(getDatumColor, args){
@@ -254,22 +256,45 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
         
         // -- LINE --
+        var brightenLinesOnHover = this.showAreas;
+        
         function lineColorInterceptor(getDatumColor, args){
-            if(!myself.showLines) {
-                // This obtains the color of the same index area
-                return myself.pvArea.fillStyle();
+            var dot = args[0],
+                activeDot = myself.pvScatterPanel.activeDot(),
+                isActiveSeries = !!activeDot && (dot.seriesGroup === activeDot.seriesGroup);
+            
+            function calcLineColor() {
+                if(!isActiveSeries && !myself.showLines) {
+                    // This obtains the color of the same index area
+                    return myself.pvArea.fillStyle();
+                }
+                
+                var darker = !isActiveSeries && !getDatumColor && isStacked ? 0.6 : null;
+                
+                return calcColor.call(this, getDatumColor, args, {darker: darker, activeAware: true, activeIfSameSeries: true});
             }
             
-            var darker = !getDatumColor && isStacked ? 0.6 : null;
-            return calcColor.call(this, getDatumColor, args, null, darker, null, /*activeSeriesAsSelected*/ true);
+            var lineColor = calcLineColor.call(this);
+            
+            return isActiveSeries && brightenLinesOnHover ? lineColor.brighter(0.5) : lineColor; 
         }
         
         function lineWidthInterceptor(getLineWidth, args) {
-            if(!myself.showLines || !getLineWidth) {
-                return isDense ? 0.00001 : 1.5;
+            /* Active dot detection */
+            var dot = args[0],
+                activeDot = myself.pvScatterPanel.activeDot(),
+                isActiveSeries = !!activeDot && (dot.seriesGroup === activeDot.seriesGroup);
+            
+            function calcLineWidth() {
+                if(!myself.showLines || !getLineWidth) {
+                    return isDense ? 0.00001 : 1.5;
+                }
+                
+                return getLineWidth.apply(this, args);
             }
             
-            return getLineWidth.apply(this, args);
+            var lineWidth = calcLineWidth.call(this);
+            return isActiveSeries ? (Math.max(1, lineWidth) * 2.5) : lineWidth; 
         }
         
         // -- AREA --
@@ -285,7 +310,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 grayAlpha = isStacked /*&& hasSelections*/ ? 1 : null,
                 areaAlpha = areaColorAlpha;
            
-            return calcColor.call(this, getDatumColor, args, areaAlpha, null, grayAlpha, /*activeSeriesAsSelected*/ true);
+            return calcColor.call(this, getDatumColor, args, {alpha: areaAlpha, grayAlpha: grayAlpha});
         }
 
         // Color "controller"
@@ -299,9 +324,18 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             return chart.colors(seriesKeys);
         });
         
-        function calcColor(getDatumColor, args, alpha, darker, grayAlpha, activeSeriesAsSelected){
-            var color;
-
+        function calcColor(getDatumColor, args, keyArgs){
+            var color, alpha, darker, grayAlpha, ignoreIsSelected, activeAware, activeIfSameSeries;
+             
+            if(keyArgs) {
+                alpha  = keyArgs.alpha;
+                darker = keyArgs.darker;
+                grayAlpha  = keyArgs.grayAlpha;
+                ignoreIsSelected = keyArgs.ignoreIsSelected;
+                activeAware = keyArgs.activeAware;
+                activeIfSameSeries = keyArgs.activeIfSameSeries;
+            }
+            
             if(getDatumColor){
                 color = getDatumColor.apply(this, args);
                 if(color === null){
@@ -315,17 +349,23 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             }
 
             // ----------
-            var grayoutColor = false,
-                activeDot = myself.pvScatterPanel.activeDot();
+            var grayoutColor = false;
             
-            if(!this.datum().isSelected) {
-                if(activeDot) {
-                    if(activeSeriesAsSelected) {
-                        grayoutColor = (dot.seriesGroup !== activeDot.seriesGroup); 
+            if(!ignoreIsSelected && de.owner.selectedCount() > 0 && !this.datum().isSelected) {
+                var activeDot;
+                if(activeAware && (activeDot = myself.pvScatterPanel.activeDot())) {
+                    var isActive = activeIfSameSeries ? 
+                                    (dot.seriesGroup === activeDot.seriesGroup) : 
+                                    (dot === activeDot);
+                    
+                    
+                    if(isActive) {
+                        // Active unselected stuff gets a dark gray
+                        color = pv.Color.names.darkgray.darker().darker();
                     } else {
-                        grayoutColor = (dot !== activeDot);
+                        grayoutColor = true;
                     }
-                } else if(de.owner.selectedCount() > 0 /*&& !this.datum().isSelected*/){
+                } else {
                     grayoutColor = true;
                 }
             }
@@ -351,7 +391,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             this.pvPanel
               // Receive events even if in a transparent panel (#events default is "painted")
               .events("all")
-              .event("mousemove", pv.Behavior.point(Infinity)) // fire point and unpoint events
+              .event("mousemove", pv.Behavior.point(40)) // fire point and unpoint events
               ;
         }
         

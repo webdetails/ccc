@@ -292,7 +292,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      * 
      * Later the {@link #render} method effectively renders.
      */
-    _preRender: function() {
+    _preRender: function(keyArgs) {
         /* Increment pre-render version to allow for cache invalidation  */
         this._preRenderVersion++;
         
@@ -322,7 +322,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
 
         /* Initialize the data engine */
-        this._initDataAndVisualRoles();
+        this._initDataAndVisualRoles(keyArgs);
 
         /* Create color schemes */
         this.colors = pvc.createColorScheme(this.options.colors);
@@ -354,48 +354,55 @@ pvc.BaseChart = pvc.Abstract.extend({
     /**
      * Initializes the data engine and roles
      */
-    _initDataAndVisualRoles: function() {
+    _initDataAndVisualRoles: function(keyArgs) {
         var dataEngine = this.dataEngine;
         
         if(!this.parent) {
-            var complexType = dataEngine ? 
-                                dataEngine.type :
-                                new pvc.data.ComplexType();
-            
-            var translation = this._createTranslation(complexType);
-            translation.configureType();
-            
-            // ----------
-            
-            this._bindVisualRoles(complexType);
-            
-            // ----------
-            
-            if(!dataEngine) {
-                dataEngine = this.dataEngine = new pvc.data.Data({type: complexType});
+            if(!dataEngine || def.get(keyArgs, 'reloadData', true)) {
+                var complexType = dataEngine ? 
+                                    dataEngine.type :
+                                    new pvc.data.ComplexType();
+                
+                var translation = this._createTranslation(complexType);
+                translation.configureType();
+                
+                // ----------
+                
+                this._bindVisualRoles(complexType);
+                
+                // ----------
+                
+                if(!dataEngine) {
+                    dataEngine = this.dataEngine = new pvc.data.Data({type: complexType});
+                } else {
+                    // TODO: assert complexType not changed...
+                }
+                
+                // ----------
+                var loadKeyArgs,
+                    measureDimNames = this.measureDimensionsNames();
+                if(measureDimNames.length) {
+                    // Must have at least one measure role dimension not-null
+                    loadKeyArgs = {
+                       where: function(datum){
+                            var atoms = datum.atoms;
+                            return def.query(measureDimNames).any(function(dimName){
+                               return atoms[dimName].value != null;
+                            });
+                       }
+                    };
+                }
+                
+                dataEngine.load(translation.execute(dataEngine), loadKeyArgs);
             } else {
-                // TODO: assert complexType not changed...
+                // We must at least dispose children and cache...
+                data_disposeChildLists.call(dataEngine);
+                data_syncDatumsState.call(dataEngine);
             }
-            
-            // ----------
-            var keyArgs,
-                measureDimNames = this.measureDimensionsNames();
-            if(measureDimNames.length) {
-                // Must have at least one measure role dimension not-null
-                keyArgs = {
-                   where: function(datum){
-                        var atoms = datum.atoms;
-                        return def.query(measureDimNames).any(function(dimName){
-                           return atoms[dimName].value != null;
-                        });
-                   }
-                };
-            }
-            
-            dataEngine.load(translation.execute(dataEngine), keyArgs);
         }
         
-        if(pvc.debug){
+        if(pvc.debug
+                ){
             pvc.log(dataEngine.getInfo());
         }
     },
@@ -653,10 +660,10 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Render the visualization.
      * If not pre-rendered, do it now.
      */
-    render: function(bypassAnimation, recreate) {
+    render: function(bypassAnimation, recreate, reloadData) {
         try{
             if (!this.isPreRendered || recreate) {
-                this._preRender();
+                this._preRender({reloadData: reloadData});
             }
 
             this.basePanel.render({
@@ -1023,7 +1030,9 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         tipsySettings: {
             gravity: "s",
-            delayIn: 500,
+            delayIn:  400,
+            offset:   2,
+            opacity:  0.7,
             html: true,
             fade: true
         },

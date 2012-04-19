@@ -281,7 +281,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         pvc.removeTipsyLegends();
 
         // Re-render chart
-        this.chart.render(true, true);
+        this.chart.render(true, true, false);
     
         return this.pvLabel; // re-render label
     }

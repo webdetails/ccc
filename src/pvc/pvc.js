@@ -187,11 +187,20 @@ pvc.createColorScheme = function(colors){
     };
 };
 
-//convert to greyscale using YCbCr luminance conv
-pvc.toGrayScale = function(color, alpha){
+// Convert to Grayscale using YCbCr luminance conv.
+pvc.toGrayScale = function(color, alpha, maxGrayLevel){
     var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+    // Don't let the color get near white, or it becomes unperceptible in most monitors
+    if(maxGrayLevel === undefined) {
+        maxGrayLevel = 200;
+    }
+    
+    if(maxGrayLevel != null && avg > maxGrayLevel) {
+        avg = maxGrayLevel;
+    }
+    
     //var avg = Math.round( (color.r + color.g + color.b)/3);
-    return pv.rgb(avg, avg, avg, alpha != null ? alpha : 0.6).brighter();
+    return pv.rgb(avg, avg, avg, alpha != null ? alpha : 0.6);//.brighter();
 };
 
 pvc.removeTipsyLegends = function(){

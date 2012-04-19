@@ -71,9 +71,11 @@ var baseExampleDef = {
         legendPosition: "right",
         legendAlign: "top",
         selectable:  true,
+        hoverable: true,
         xAxisFullGrid: true,
         yAxisSize: 30,
         yAxisDomainRoundMode: 'tick',
+        axisHideExcessOrdinalLabels: true,
         extensionPoints: {
             xAxisScale_dateTickFormat:    "%Y/%m/%d",
             xAxisScale_dateTickPrecision: 798336000/1.5
@@ -193,6 +195,17 @@ pvc.examples.register(def.create(baseExampleDef, {
     def: {
         title:     "Categorical Line Chart with Negative Values",
         showAreas: true
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line12',
+    className: 'LineChart',
+    dataVar: 'relational_01_neg',
+    def: {
+        title:     "Categorical Line Chart with Negative Values",
+        showAreas: true,
+        showDots: true
      }
 }));
 
