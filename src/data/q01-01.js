@@ -565,8 +565,7 @@ var test3 = {
     "colType":"Numeric",
     "colName":"[Measures].[Lost Sales Availability]"
   }]
-}
-
+};
 
 var testHeatGrid = {
   "resultset":[["Product A",null,1278,321,540,110],
@@ -609,8 +608,8 @@ var testHeatGridComp =
                  {"colIndex":6,"colName":"Products~Land~Motorcycles~Sales","colLabel":"Products~Land~Motorcycles~Sales","colType":"NUMERIC"},
                  {"colIndex":7,"colName":"Products~Air~Boeing~Quantity","colLabel":"Products~Planes~Boeing~Quantity","colType":"NUMERIC"},
                  {"colIndex":8,"colName":"Products~Air~Boeing~Sales","colLabel":"Products~Planes~Boeing~Sales","colType":"NUMERIC"}],
-    "resultset":[["APAC","Australia",1818,193085.5400000001,876,89968.76,813,74853.87000000001],
-                 ["APAC","Hong Kong",null,472710.49,35,3845.8,462,39649.31],
+    "resultset":[["APAC","Australia",null,null,876,89968.76,813,74853.87000000001],
+                 ["APAC","Hong Kong",1818,193085.5400000001,35,3845.8,462,39649.31],
                  ["APAC","Japan",314,472710.49,309,26536.41,547,49176.96000000001],
                  ["APAC","New Zealand",1526,167198.22999999995,976,99849.46999999999,517,46572.33000000001],
                  ["APAC","Philippines",478,53112.090000000004,241,18061.68,215,20906.87],
@@ -628,20 +627,68 @@ var testHeatGridComp =
                  ["EMEA","Sweden",552,69088.06000000001,133,15567.25,104,8899.6],
                  ["EMEA","Switzerland",1078,117713.55999999998,null,null,null,null],
                  ["EMEA","UK",1507,159377.69999999998,371,40802.810000000005,479,41163.51]]};
-/*
-//"resultset":[["APAC","Australia",null,13085.5400000001,800,89968.76,876,-74853.87000000001]],
-    //"resultset":[["APAC","Australia",876,13085.5400000001,876,89968.76,876,-74853.87000000001]],
-    
-*/
+
+/* 4 Measures */
+var testHeatGrid4Measures =
+{"metadata":[
+             /* Categories */
+             {"colIndex":0, "colName":"Territory","colLabel":"Territory","colType":"STRING"},
+             {"colIndex":2, "colName":"Country","colLabel":"Country","colType":"STRING"},
+             
+             /* Products ~ Land ~ Classic Cars */
+             {"colIndex":3, "colName":"Products~Land~Classic Cars~Quantity","colLabel":"Products~Land~Classic Cars~Quantity","colType":"NUMERIC"},
+             {"colIndex":4, "colName":"Products~Land~Classic Cars~Sales","colLabel":"Products~Land~Classic Cars~Sales","colType":"NUMERIC"},
+             {"colIndex":5, "colName":"Products~Land~Classic Cars~ExpectedSales","colLabel":"Products~Land~Classic Cars~Expected Sales","colType":"NUMERIC"},
+             {"colIndex":6, "colName":"Products~Land~Classic Cars~PreviousSales","colLabel":"Products~Land~Classic Cars~Previous Sales","colType":"NUMERIC"},
+             
+             /* Products ~ Land ~ Motorcycles */
+             {"colIndex":7, "colName":"Products~Land~Motorcycles~Quantity","colLabel":"Products~Land~Motorcycles~Quantity","colType":"NUMERIC"},
+             {"colIndex":8, "colName":"Products~Land~Motorcycles~Sales","colLabel":"Products~Land~Motorcycles~Sales","colType":"NUMERIC"},
+             {"colIndex":9, "colName":"Products~Land~Motorcycles~ExpectedSales","colLabel":"Products~Land~Motorcycles~Expected Sales","colType":"NUMERIC"},
+             {"colIndex":10,"colName":"Products~Land~Motorcycles~PreviousSales","colLabel":"Products~Land~Motorcycles~Previous Sales","colType":"NUMERIC"},
+             
+             /* Products ~ Air ~ Boeing */
+             {"colIndex":11,"colName":"Products~Air~Boeing~Quantity","colLabel":"Products~Planes~Boeing~Quantity","colType":"NUMERIC"},
+             {"colIndex":12,"colName":"Products~Air~Boeing~Sales","colLabel":"Products~Planes~Boeing~Sales","colType":"NUMERIC"},
+             {"colIndex":13,"colName":"Products~Air~Boeing~ExpectedSales","colLabel":"Products~Land~Motorcycles~Expected Sales","colType":"NUMERIC"},
+             {"colIndex":14,"colName":"Products~Air~Boeing~PreviousSales","colLabel":"Products~Land~Motorcycles~Previous Sales","colType":"NUMERIC"}],
+             
+             /*                     Qty   Sales      ESales  PSales  |Qty  Sales      ESales  PSales |Qty  Sales      ESales  PSales */
+"resultset":[["APAC","Australia",   null, null,      null,   null,   876,  89968.76,  100000, 60000, 813,  74853.87,  null,   null],
+             ["APAC","Hong Kong",   1818, 193085.54, 200000, 150000, 35,   3845.8,    50000,  0,     462,  39649.31,  20000,  null],
+             ["APAC","Japan",       314,  472710.49, 300000, 123400, 309,  26536.41,  30000,  null,  547,  49176.96,  1000,   500],
+             ["APAC","New Zealand", 1526, 167198.22, 150000, 100000, 976,  99849.46,  10000,  2000,  517,  46572.33,  300000, 200000],
+             ["APAC","Philippines", 478,  53112.09,  25234,  40000,  241,  18061.68,  4567,   77889, 215,  20906.87,  30000,  25000],
+             ["APAC","Singapore",   1043, 132890.44, 200000, 500000, 44,   4175.6,    null,   null,  null, null,      null,   23023],
+             ["EMEA","Spain",       937,  101459.47, 50000,  10000,  197,  26047.66,  20000,  10000, 200,  17860.44,  10000,  12345],
+             ["EMEA","Ireland",     202,  31688.82,  200150, 100000, 58,   4953.20,   1000,   2000,  115,  11784.36,  12000,  10000],
+             ["EMEA","Italy",       982,  133182.62, 150000, 20000,  111,  11609.38,  2000,   null,  1276, 113717.56, 100000, 80000],
+             ["EMEA","Belgium",     147,  20136.96,  20000,  10000,  null, null,      1000,   7500,  41,   5624.79,   1000,   12345],
+             ["EMEA","Denmark",     1244, 157182.48, 100000, 70000,  null, null,      null,   null,  70,   7586.45,   3000,   5000],
+             ["EMEA","Finland",     1284, 153552.24, 200000, 100000, 447,  47866.72,  null,   null,  421,  34375.13,  10000,  10000],
+             ["EMEA","France",      3540, 388951.20, 300000, 200000, 2404, 226390.30, 100500, 70452, 1136, 108155.51, 250000, 100000],
+             ["EMEA","Germany",     1281, 148314.99, 123112, null,   121,  7497.50,   3500,   5000,  245,  23001.26,  20000,  15000],
+             ["EMEA","Norway",      1158, 134787.36, null,   25234,  484,  51768.63,  2000,   50000, 325,  29500.7,   10000,  0],
+             ["EMEA","Austria",     4380, 476165.14, 500000, 25000,  780,  74634.82,  null,   50000, 1101, 89985.51,  10000,  10000],
+             ["EMEA","Sweden",      552,  69088.06,  12845,  null,   133,  15567.25,  10000,  12000, 104,  8899.6,    5000,   23456],
+             ["EMEA","Switzerland", 1078, 117713.55, 250234, 250000, null, null,      null,   1234,  null, null,      0,      5000],
+             ["EMEA","UK",          1507, 159377.69, 100000, 243987, 371,  40802.81,  30123,  null,  479,  41163.51,  30000,  25000]]
+};
 
 var testLDot = {
   "resultset":[
+//  [ 10,  10],
+//  [ 20,  20],
+//  [ 30,  30],
+//  [100,  40],
+//  [ 15,  10],
+//  [ 30, -30]
   [ 10,  10],
+  [ 15,  10],
   [ 20,  20],
   [ 30,  30],
-  [100,  40],
-  [ 15,  10],
-  [ 30, -30]
+  [ 30, -30],
+  [100,  40]
   ],
   "metadata":[{
     "colIndex":0,
@@ -655,14 +702,30 @@ var testLDot = {
   ]
 };
 
+var testLDot1 = {
+    "resultset":[
+    [ 15,  10]
+    ],
+    "metadata":[{
+      "colIndex":0,
+      "colType":"Numeric",
+      "colName":"Position"
+    },{
+      "colIndex":1,
+      "colType":"Numeric",
+      "colName":"Measure-1"
+    }
+    ]
+};
+
 var testLDot2 = {
   "resultset":[
   [ 10,  10,  15],
+  [ 15,  10,  25],
   [ 20,  20, -10],
   [ 30,  30,   5],
-  [100,  40,  30],
-  [ 15,  10,  25],
-  [ 30, -30,  10]
+  [ 30, -30,  10],
+  [100,  40,  30]
   ],
   "metadata":[{
     "colIndex":0,
@@ -776,7 +839,7 @@ var bullet_valueOnly = {
     "colName":"Value"
   }
   ]
-}
+};
 
 
 var bullet_NameValue = {
@@ -795,7 +858,7 @@ var bullet_NameValue = {
     "colName":"Value"
   }
   ]
-}
+};
 
 var bullet_NameValueMarker = {
   "resultset":[
@@ -817,7 +880,7 @@ var bullet_NameValueMarker = {
     "colName":"Marker"
   }
   ]
-}
+};
 
 
 var bullet_NameDescValueMarkerRanges = {
@@ -856,7 +919,7 @@ var bullet_NameDescValueMarkerRanges = {
     "colName":"Range3"
   }
   ]
-}
+};
 
 
 var parCoordTest_01 = {

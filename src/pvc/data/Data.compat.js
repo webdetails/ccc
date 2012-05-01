@@ -13,16 +13,9 @@ pvc.data.Data
                 type = dimension.type,
                 features = [];
             
-            var typeName = "any";
-            if(type.valueType) {
-                var match = /^\s*function\s+([^\(]+)/.exec(''+type.valueType);
-                if(match) {
-                    typeName = match[1];
-                }
-            }
-            
-            features.push(typeName);
+            features.push(type.valueTypeName);
             if(type.isComparable) features.push("comparable");
+            if(!type.isDiscrete) features.push("continuous");
             
             out.push(
                 "  " + 
@@ -127,16 +120,6 @@ pvc.data.Data
     },
     
     /**
-     * Returns the values for a given series index.
-     * 
-     * @deprecated
-    _getValuesForSeriesIndex: function(seriesIdx){
-        return this.getValues().map(function(a){
-            return a[seriesIdx];
-        });
-    },
-    */
-    /**
      * Returns the visible values for a given series index.
      * Bullet and Pie
      * @deprecated
@@ -218,89 +201,5 @@ pvc.data.Data
     getCategoriesSize: function(){
         var dim = this.dimensions('category', {assertExists: false});
         return dim ? dim.count() : 0;
-    },
-    
-    // -------
-    
-    /**
-     * For every category in the data, 
-     * get the maximum of the sum of the series positive values.
-     * @deprecated
-     
-    getCategoriesMaxSumOfVisibleSeries: function(){
-
-        var max = pv.max(
-                pv.range(0, this.getCategoriesSize())
-                  .map(function(categIndex){
-                        return pv.sum(
-                                this.getVisibleValuesForCategoryIndex(categIndex)
-                                    .map(function(e){ return Math.max(0, def.number(e)); }));
-                  }, this));
-        
-        pvc.log("getCategoriesMaxSumOfVisibleSeries: " + max);
-        
-        return max;
-    },
-    */
-    /**
-     * Get the maximum value in all visible series
-     * @deprecated
-     
-    getVisibleSeriesAbsoluteMax: function(){
-        
-        var max = pv.max(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.max(this._getValuesForSeriesIndex(idx).filter(def.notNully));
-        }, this));
-        
-        if(!isFinite(max)) { 
-            max = undefined; 
-        }
-        
-        
-        pvc.log("getVisibleSeriesAbsoluteMax: " + max);
-        
-        return max;
-    },
-    */
-    /**
-     * Get the minimum value in all visible series
-     * @deprecated
-     
-    getVisibleSeriesAbsoluteMin: function(){
-
-        var min = pv.min(this.getVisibleSeriesIndexes().map(function(idx){
-            return pv.min(this._getValuesForSeriesIndex(idx).filter(def.notNully));
-        }, this));
-        
-        if(!isFinite(min)) { 
-            min = undefined; 
-        }
-        
-        pvc.log("getVisibleSeriesAbsoluteMin: " + min);
-        
-        return min;
-    },
-    */
-    getObjectsForSeriesIndex: function(seriesIndex, sortF){
-        
-        var result = [];
-        var categories = this.getCategories();
-
-        this.getValues().forEach(function(a, i){
-            var value = a[seriesIndex];
-            if(typeof value != "undefined"){
-                result.push({
-                    serieIndex: seriesIndex,
-                    category:   categories[i],
-                    value:      value
-                });
-            }
-        }, this);
-
-        if (typeof sortF == "function"){
-            return result.sort(sortF);
-        }
-        
-        return result;
     }
 });

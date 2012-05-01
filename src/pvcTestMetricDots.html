@@ -41,9 +41,14 @@
 	    <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
         
         <script type="text/javascript" src="pvc/visual/Role.js"></script>
-        
-        <script type="text/javascript" src="pvc/visual/Context.js"></script>
-        
+	    <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
+	    <script type="text/javascript" src="pvc/visual/Context.js"></script>
+	    <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+	    
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
@@ -51,15 +56,17 @@
         <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalGridDockingPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcMetricAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcMetricScatter.js"></script>
-        <script type="text/javascript" src="pvc/pvcMetricLine.js"></script>
-        <script type="text/javascript" src="pvc/pvcLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcMetricLineDotPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcMetricLineDot.js"></script>
+        <script type="text/javascript" src="pvc/pvcLineDotAreaPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLineDotArea.js"></script>
 
         <!--    <link type="text/css" rel="stylesheet" href="blueprint/screen.css"/>-->
         <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
@@ -139,12 +146,7 @@ MetricsDotChart, false for MetricsLineChart</li>
   <li>showLines - Show or hide lines. Default: false for
 MetricsDotChart, true for MetricsLineChart</li>
   <li>showValues - Show or hide value. Default: false</li>
-  <li>showAreas - Show or hide the areas. Default: false</li>
   <li>panelSizeRatio - Ratio of the band occupied by the pane. Default: 0.5 (50%)</li>
-  <li>lineSizeRatio - In multiple series, percentage of inner
-band occupied by lines. Default: 0.5 (50%)</li>
-  <li>maxLineSize - Maximum size of a line in pixels. Default:
-2000</li>
 </ul>
 <h4>Axis properties</h4>
 <ul>
@@ -219,7 +221,13 @@ var Metrics1 = new pvc.MetricLineChart({
     yAxisSize: 30,
     xAxisSize: 30,
     xAxisFullGrid: true,
-    yAxisFullGrid: true
+    yAxisFullGrid: true,
+    yAxisDomainRoundMode: 'tick',
+    xAxisDomainRoundMode: 'tick',
+    axisOverlappedLabelsHide: true,
+    selectable:  true,
+    hoverable: true,
+    compatVersion: 1
 });
 Metrics1.setData(testLDot , 
                 {crosstabMode: true,
@@ -247,7 +255,13 @@ var Metrics2 = new pvc.MetricLineChart({
     yAxisSize: 30,
     xAxisSize: 30,
     xAxisFullGrid: true,
-    yAxisFullGrid: true
+    yAxisFullGrid: true,
+    yAxisDomainRoundMode: 'tick',
+    xAxisDomainRoundMode: 'tick',
+    axisOverlappedLabelsHide: true,
+    selectable:  true,
+    hoverable: true,
+    compatVersion: 1
 });
 Metrics2.setData(testLDot2,
 {crosstabMode: true,
@@ -278,7 +292,13 @@ var Metrics3 = new pvc.MetricLineChart({
     yAxisSize: 30,
     xAxisSize: 30,
     xAxisFullGrid: true,
-    yAxisFullGrid: true
+    yAxisFullGrid: true,
+    yAxisDomainRoundMode: 'tick',
+    xAxisDomainRoundMode: 'tick',
+    axisOverlappedLabelsHide: true,
+    selectable:  true,
+    hoverable: true,
+    compatVersion: 1
 });
 Metrics3.setData(testLDot2,
 {crosstabMode: true,
@@ -306,7 +326,13 @@ var Metrics4 = new pvc.MetricDotChart({
     yAxisSize: 30,
     xAxisSize: 30,
     xAxisFullGrid: true,
-    yAxisFullGrid: true
+    yAxisFullGrid: true,
+    yAxisDomainRoundMode: 'tick',
+    xAxisDomainRoundMode: 'tick',
+    axisOverlappedLabelsHide: true,
+    selectable:  true,
+    hoverable: true,
+    compatVersion: 1
 });
 Metrics4.setData(testLDot2,
                 {crosstabMode: true,
@@ -316,36 +342,6 @@ Metrics4.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcMetrics4"></div>        
 
-<h3>An Area Metrics Chart</h3>
-Same as above, but with a coloured area (showAreas=true).<br>
-<textarea cols="55" rows="15" id="pvcMetrics5Code">
-var Metrics5 = new pvc.MetricLineChart({
-    canvas: "pvcMetrics5",
-    width: 400,
-    height: 250,
-    animate: false,
-    title: "An Area Metrics Chart",
-    legend: true,
-    legendPosition: "bottom",
-    legendAlign: "right",
-    originIsZero: true,
-    showValues: false,
-    showAreas: true,
-    showDots: false,
-    yAxisSize: 30,
-    xAxisSize: 30,
-    xAxisFullGrid: true,
-    yAxisFullGrid: true
-
-});
-Metrics5.setData(testArea2,
-                {crosstabMode: true,
-                 seriesInRows: false});
-Metrics5.render();
-</textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <div id="pvcMetrics5"></div>
-        
 <script type="text/javascript">
 pv.listenForPageLoad(function() {
 
@@ -383,7 +379,8 @@ pv.listenForPageLoad(function() {
                     yAxisSize: 30,
                     xAxisSize: 30,
                     xAxisFullGrid: true,
-                    yAxisFullGrid: true
+                    yAxisFullGrid: true,
+                    compatVersion: 1
                 });                
                 LineL.setData(testLDot , {crosstabMode: true, seriesInRows: false});
                 LineL.render();

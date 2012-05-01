@@ -42,9 +42,14 @@
         <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
         
         <script type="text/javascript" src="pvc/visual/Role.js"></script>
-        
-        <script type="text/javascript" src="pvc/visual/Context.js"></script>
-        
+	    <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
+	    <script type="text/javascript" src="pvc/visual/Context.js"></script>
+	    <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+	    
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
@@ -52,22 +57,24 @@
         <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalGridDockingPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
         <script type="text/javascript" src="pvc/pvcNormalizedBarChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBulletChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcLine.js"></script>
+        <script type="text/javascript" src="pvc/pvcLineDotAreaPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLineDotArea.js"></script>
         <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
-        
-        <script type="text/javascript" src="pvc/pvcMetricAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcMetricScatter.js"></script>
-        <script type="text/javascript" src="pvc/pvcMetricLine.js"></script>
+
+        <script type="text/javascript" src="pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcMetricLineDotPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcMetricLineDot.js"></script>
         
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
@@ -90,7 +97,7 @@
                 yAxisDomainRoundMode: 'tick',
                 timeSeries: false,
                 //timeSeriesFormat: "%Y-%m-%d",
-                axisHideExcessOrdinalLabels: true,
+                axisOverlappedLabelsHide: true,
                 legendMinMarginX: 10,
                 extensionPoints: {
                     titleLabel_font: "bold 14px sans-serif"
@@ -272,12 +279,86 @@
                 }
              }
         }));
-        </script>
-    </head>
+        
+        pvc.examples.register(def.create(baseExampleDef, {
+            id: 'multi04',
+            className: 'MetricDotChart',
+            dataVar:   'testHeatGrid4Measures',
+            showProps: ['showLines', 'showDots'],
+            def: {
+                /* Top */
+                title:   "Multi-chart of scatter dot charts (Qty x Sales)",
+                height:  800,
+                
+                /* Multi-chart */
+                //multiChartColumnIndexes: 1,
+                //multiChartWrapColumn: Infinity,
+                multiChartLimit: 9,
+                
+                /* Small charts */
+                //orientation: 'horizontal',
+                originIsZero: false,
+                
+                yAxisSize:  60,
+                xAxisSize:  40,
+                showLines:  false,
+                showValues: false,
+                
+                xAxisFullGrid: true,
+                xAxisEndLine: true,
+                xAxisDomainRoundMode:"tick",
+                yAxisFullGrid: true,
+                yAxisEndLine: true,
+                
+                /* Visual Role mapping */
+                visualRoles: {
+                    multiChartColumn: "territory, country",
+                    //series:  "pline, product",
+                    x: "quantity",
+                    y: "sales",
+                    color: "esales",
+                    dotSize: "psales"
+                },
+                
+                /* Data definition */
+                dimensions: {
+                    territory: {label: "Territory" },
+                    country:   {label: "Country" },
+                    pclass:    {label: "Class" },
+                    pline:     {label: "Product Line" },
+                    product:   {label: "Product" },
+                    quantity:  {label: "Quantity",       valueType: Number},
+                    sales:     {label: "Sales",          valueType: Number},
+                    esales:    {label: "Expected Sales", valueType: Number},
+                    psales:    {label: "Previous Sales", valueType: Number}
+                },
+                    
+                /* Data mapping */
+                readers: [
+                   {names: 'territory', indexes: 0},
+                   {names: 'country',   indexes: 1},
+                   {names: 'pclass',    indexes: 2},
+                   {names: 'pline',     indexes: 3},
+                   {names: 'product',   indexes: 4},
+                   {names: 'quantity',  indexes: 5},
+                   {names: 'sales',     indexes: 6},
+                   {names: 'esales',    indexes: 7},
+                   {names: 'psales',    indexes: 8}
+                ],
+                
+                /* Source Data Format */
+                crosstabMode: true,
+                isMultiValued: true,
+                dataOptions: {
+                    categoriesCount :  2,
+                    measuresInColumns: true
+                }
+             }
+        }));
         </script>
     </head>
     <body>
        <h2>Multi-chart examples</h2>
-        <div id="examples" />
+       <div id="examples"></div>
     </body>
 </html>

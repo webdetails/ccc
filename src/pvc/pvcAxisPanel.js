@@ -3,16 +3,17 @@
  * AxisPanel panel.
  */
 pvc.AxisPanel = pvc.BasePanel.extend({
-
+    showAllTimeseries: false, // TODO: ??
+    
     pvRule:     null,
     pvTicks:    null,
     pvLabel:    null,
     pvRuleGrid: null,
-    pvEndLine:  null,
     pvScale:    null,
     
-    ordinal: false,
-    ordinalRoleName: null,
+    isDiscrete: false,
+    roleName: null,
+    
     anchor: "bottom",
     axisSize: undefined,
     tickLength: 6,
@@ -20,7 +21,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     panelName: "axis", // override
     scale: null,
     fullGrid: false,
-    endLine:  false,
     font: '9px sans-serif', // label font
     titleFont: '12px sans-serif',
     title: undefined,
@@ -31,8 +31,21 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     desiredTickCount: null,
     minorTicks:       true,
     
+    constructor: function(chart, parent, axis, options) {
+        
+        options = def.create(options, {
+            anchor: axis.options('Position')
+        });
+        
+        this.base(chart, parent, options);
+        
+        this.axis = axis;
+        this.roleName = axis.role.name;
+        this.isDiscrete = axis.role.grouping.isDiscrete();
+    },
+    
     _calcLayout: function(availableSize, layoutInfo){
-
+        
         var titleSize = 0;
 
         if(this.title){
@@ -69,6 +82,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     _createCore: function() {
+        // Update the scale from the cartesian axis
+        var scale = this.axis.scale; 
+        this.pvScale = scale;
+        this.scale   = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
+        
+        // TODO: danger?
         this.extend(this.pvScale, this.panelName + "Scale_");
         
         this.renderAxis();
@@ -87,15 +106,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvLabel,      this.panelName + "Label_");
         this.extend(this.pvRuleGrid,   this.panelName + "Grid_" );
         this.extend(this.pvTitle,      this.panelName + "TitleLabel_");
-        this.extend(this.pvEndLine,    this.panelName + "EndLine_");
         this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
     },
 
-    setScale: function(scale){
-        this.pvScale = scale;
-        this.scale = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
-    },
-    
     /**
      * Initializes a new layer panel.
      * @override
@@ -160,23 +173,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             [this.anchorLength()  ](rSize) // width  
             [this.anchorOrtho()   ](rMin); // left
 
-
-        if(this.endLine){
-            var anchorOrthoLength = this.anchorOrthoLength(),
-                ruleLength = this.parent[anchorOrthoLength] - 
-                             this[anchorOrthoLength];
-            
-        	this.pvEndLine = this.pvRule.add(pv.Rule)
-                .zOrder(10)
-                .visible(true) // break inheritance of pvRule's visible property
-                .strokeStyle("#f0f0f0")
-                [this.anchorOpposite()](-ruleLength)
-                [this.anchorLength()  ](null)
-                [this.anchorOrtho()   ](rMax)
-                [anchorOrthoLength    ]( ruleLength);
-        }
-         
-        if (this.ordinal){
+        if (this.isDiscrete){
             if(this.useCompositeAxis){
                 this.renderCompositeOrdinalAxis();
             } else {
@@ -197,12 +194,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
             // Grouping with 1 multi-dimension level
-            data              = this.chart.visualRoleData(this.ordinalRoleName, {visible: true, singleLevelGrouping: true}),
-            itemCount         = data._leafs.length,
+            data              = this.chart.visualRoleData(this.roleName, {visible: true, singleLevelGrouping: true}),
+            itemCount         = data._children.length,
             includeModulo;
         
-        if(options.axisHideExcessOrdinalLabels && itemCount > 0 && this._rSize > 0) {
-            var overlapFactor = def.within(options.axisLabelMaxOverlapping, 0, 0.9);
+        if(this.axis.options('OverlappedLabelsHide') && itemCount > 0 && this._rSize > 0) {
+            var overlapFactor = def.within(this.axis.options('OverlappedLabelsMaxPct'), 0, 0.9);
             var textHeight    = pvc.text.getTextHeight("m", this.font) * (1 - overlapFactor);
             includeModulo = Math.max(1, Math.ceil((itemCount * textHeight) / this._rSize));
             
@@ -220,15 +217,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //  and not at the beginning, as in a linear axis.
         this.pvTicks = this.pvRule.add(pv.Rule)
             .zOrder(20) // see pvc.js
-            .data(data._leafs)
+            .data(data._children)
             .localProperty('group')
             .group(function(leafData){
                 return leafData;
             })
             //[anchorOpposite   ](0)
             [anchorLength     ](null)
-            [anchorOrtho      ](function(leaf){
-                return scale(leaf.absKey) + (scale.range().band / 2);
+            [anchorOrtho      ](function(child){
+                return scale(child.value) + (scale.range().band / 2);
             })
             [anchorOrthoLength](this.tickLength)
             .strokeStyle('rgba(0,0,0,0)'); // Transparent by default, but extensible
@@ -243,12 +240,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .zOrder(40) // see pvc.js
             .textAlign(align)
             //.textBaseline("middle")
-            .text(function(leafData){return leafData.absLabel;})
+            .text(function(child){return child.label;})
             .font(this.font)
             .localProperty('group')
-            .group(function(leafData){
-                return leafData;
-            })
+            .group(function(child){ return child; })
             ;
         
         function labelVisibleInterceptor(getVisible, args) {
@@ -284,16 +279,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // The Nth tick separates categ. N-1 from categ. N
             // No grid line is drawn at the end.
             var ruleLength = this.parent[anchorOrthoLength] - 
-                             this[anchorOrthoLength];
+                             this[anchorOrthoLength],
+                halfBand = scale.range().margin / 2;
             
             this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
                 .extend(this.pvRule)
-                .data(data._leafs)
+                .data(data._children)
                 .strokeStyle("#f0f0f0")
                 [anchorOpposite   ](-ruleLength)
                 [anchorLength     ](null)
-                [anchorOrtho      ](function(leaf){
-                    return scale(leaf.absKey) - scale.range().margin / 2;
+                [anchorOrtho      ](function(child){
+                    return scale(child.value) - halfBand;
                 })
                 [anchorOrthoLength]( ruleLength)
                 .visible(function(){return (this.index > 0);});
@@ -313,6 +309,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
+            
             tickStep = Math.abs(ticks[1] - ticks[0]); // ticks.length >= 2
                 
         // (MAJOR) ticks
@@ -348,7 +345,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Now do the full grids
         if(this.fullGrid){
             // Grid rules are visible (only) on MAJOR ticks.
-            // When EndLine is active it is drawn above the last grid line.
             var ruleLength = this.parent[anchorOrthoLength] - 
                              this[anchorOrthoLength];
             
@@ -478,7 +474,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         // TODO: should this be cancellable by the click action?
         var options = this.chart.options;
-        if(options.selectable && this.ordinal){
+        if(options.selectable && this.isDiscrete){
             var toggle = options.ctrlSelectMode && !ev.ctrlKey;
             this._selectOrdinalElement(data, toggle);
         }
@@ -495,10 +491,22 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     /**
+     * Prevents the axis panel from reacting directly to rubber band selections.
+     * 
+     * The panel participates in rubber band selection through 
+     * the mediator {@link pvc.CartesianAbstractPanel}.
+     *   
+     * @override
+     */
+    _dispatchRubberBandSelection: function(ev){
+        /* NOOP */
+    },
+    
+    /**
      * @override
      */
     _detectDatumsUnderRubberBand: function(datumsByKey, rb){
-        if(!this.ordinal) {
+        if(!this.isDiscrete) {
             return false;
         }
         
@@ -706,7 +714,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // TODO: extend this to work with chart.orientation?
         var orientation = this.anchor,
             reverse  = orientation == 'bottom' || orientation == 'left',
-            data     = this.chart.visualRoleData(this.ordinalRoleName, {visible: true, reverse: reverse}),
+            data     = this.chart.visualRoleData(this.roleName, {visible: true, reverse: reverse}),
             maxDepth = data.treeHeight,
             elements = data.nodes(),
             
@@ -765,6 +773,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     // end: composite axis
     /////////////////////////////////////////////////
 });
+
+pvc.AxisPanel.create = function(chart, parentPanel, cartAxis, options){
+    var panelClass = pvc[cartAxis.upperOrientedId + 'AxisPanel'] || 
+        def.fail.argumentInvalid('cartAxis', "Unsupported cartesian axis");
+    
+    return new panelClass(chart, parentPanel, cartAxis, options);
+};
 
 pvc.XAxisPanel = pvc.AxisPanel.extend({
     anchor: "bottom",

@@ -49,14 +49,18 @@ def.type('pvc.data.Complex')
     this.atoms = atomsBase ? Object.create(atomsBase) : {};
 	
     if (!atoms) {
-        this.key = '';
+        this.value = null;
+        this.key   = '';
     } else {
-        var atomsMap = this.atoms;
-	    
+        var atomsMap = this.atoms,
+            count    = 0,
+            singleValue;
+        
         atoms.forEach(function(atom) {
             atom || def.fail.argumentRequired('atom');
-
-            if(atom.value != null){ // already in proto object
+            
+            var value = atom.value; 
+            if(value != null){ // already in proto object
                 var atomDim  = atom.dimension, 
                     name     = atomDim.name,
                     atomBase = atomsBase && atomsBase[name];
@@ -72,7 +76,11 @@ def.type('pvc.data.Complex')
                     }
                     // </Debug>
                     
+                    count++;
                     atomsMap[name] = atom;
+                    if(count === 1){
+                        singleValue = atom.value;
+                    }
                 }
             }
         }, this);
@@ -86,7 +94,8 @@ def.type('pvc.data.Complex')
                 }
             });
 
-        this.key = keys.join(',');
+        this.key   = keys.join(',');
+        this.value = count === 1 ? singleValue : this.key;
 	}
 })
 .add(/** @lends pvc.data.Complex# */{

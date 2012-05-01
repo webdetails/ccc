@@ -1,9 +1,4 @@
 
-var transl_dimsDefaultValue = {
-        'series':   'Series', 
-        'category': 'Category'
-    };
-
 /**
  * @name pvc.data.RelationalTranslationOper
  * 
@@ -37,7 +32,7 @@ var transl_dimsDefaultValue = {
  * </p>
  * <p>
  * If only two metadata columns are provided, 
- * then a dummy 'series' column with the constant value "Series" is added automatically. 
+ * then a dummy 'series' column with the constant null value is added automatically. 
  * </p>
  * 
  * @extends pvc.data.TranslationOper
@@ -82,7 +77,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
     configureType: function(){
         
         // Call base method
-        def.base.call(this);
+        this.base();
         
         var me = this,
             multiChartColIndexes = def.array(this.options.multiChartColumnIndexes),
@@ -142,8 +137,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 //  and supply a dummy value for it
                 var dummyDim = autoColDims.shift();
                 
-                add(this._constGet(dummyDim, transl_dimsDefaultValue[dummyDim]), 
-                    dummyDim);
+                add(this._constGet(dummyDim, null), dummyDim);
                 
                 autoNeededCount--;
             }

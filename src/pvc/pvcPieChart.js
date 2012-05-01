@@ -31,8 +31,8 @@ pvc.PieChart = pvc.BaseChart.extend({
                 isMeasure:  true,
                 isRequired: true,
                 isPercent:  true,
-                isSingleDimension: true, 
-                isDiscrete: false,
+                requireSingleDimension: true, 
+                requireIsDiscrete: false,
                 singleValueType: Number, 
                 defaultDimensionName: 'value' 
             }
@@ -104,17 +104,17 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         var colorProp = def.scope(function(){
          // Color "controller"
             var globalCatData = chart.root.visualRoleData('category', {singleLevelGrouping: true}),  // visible or invisible
-                catKeys = globalCatData.children()
+                catValues = globalCatData.children()
                                 .select(function(catData){ 
-                                    return catData.key; 
+                                    return catData.value; 
                                 })
                                 .array(),
-                colorScale = chart.colors(catKeys);
+                colorScale = chart.colors(catValues);
 
             return function(catGroup) {
-                var color = colorScale(catGroup.key);
+                var color = colorScale(catGroup.value);
                 if(dataEngine.owner.selectedCount() > 0 && !this.hasSelected()) {
-                    return pvc.toGrayScale(color);
+                    return pvc.toGrayScale(color, 0.6);
                 }
                 
                 return color;
@@ -211,7 +211,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
      * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
-    _renderSignums: function(){
+    _renderInteractive: function(){
         this.pvPie.render();
     },
 

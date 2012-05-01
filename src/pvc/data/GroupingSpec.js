@@ -71,6 +71,14 @@ def.type('pvc.data.GroupingSpec')
     },
     
     /**
+     * Indicates if the data resulting from the grouping is discrete or continuous.
+     * @type boolean
+     */
+    isDiscrete: function(){
+        return !this.isSingleDimension || this.firstDimension.type.isDiscrete;
+    },
+    
+    /**
      * Obtains a single-level version of this grouping specification.
      * 
      * <p>
@@ -157,9 +165,7 @@ def.type('pvc.data.GroupingLevelSpec')
 .add( /** @lends pvc.data.GroupingLevelSpec */{
     compare: function(a, b){
         for(var i = 0, D = this.depth ; i < D ; i++) {  
-            var dimSpec = this.dimensions[i],
-                dimName = dimSpec.name,
-                result  = dimSpec.comparer(a.atoms[dimName], b.atoms[dimName]);
+            var result = this.dimensions[i].compareDatums(a, b);
             if(result !== 0) {
                 return result;
             }
@@ -175,11 +181,6 @@ def.type('pvc.data.GroupingLevelSpec')
         for(var i = 0, D = this.depth  ; i < D ; i++) {
             var dimName = this.dimensions[i].name,
                 atom = datum.atoms[dimName];
-            if(atom.value == null) {
-                // Signals to ignore datum
-                return null;
-            }
-            
             atoms.push(atom);
             keys.push(dimName + ":" + atom.key);
         }
@@ -198,6 +199,20 @@ def.type('pvc.data.GroupingDimensionSpec')
     this.type     = dimType;
     this.comparer = dimType.atomComparer(this.reverse);
     this.id = this.name + ":" + (this.reverse ? '0' : '1');
+})
+.add( /** @lends pvc.data.GroupingDimensionSpec */ {
+    compareDatums: function(a, b){
+        //if(this.type.isComparable) {
+            var result  = this.comparer(a.atoms[this.name], b.atoms[this.name]);
+            if(result !== 0) {
+                return result;
+            }
+            return 0;
+        //} 
+        
+        // Use datum source order
+        //return this.reverse ? (b.id - a.id) : (a.id - b.id);
+    }
 });
 
 /**

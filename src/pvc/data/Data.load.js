@@ -24,7 +24,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         var whereFun = def.get(keyArgs, 'where');
         var isReload = !!this._datums;
         if(isReload) {
-            // Dispose child and link child datas...
+            // Dispose child and link child datas, and their dimensions...
             data_disposeChildLists.call(this);
             
             this._datums = data_reloadDatums.call(this, atomz, whereFun);
@@ -52,24 +52,68 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @name pvc.data.Data#_loadDatums
  * @function
  * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
- * @param {function} [whereFun] Filter function that approves or excludes each newly read new datum.
+ * @param {function} [whereFun] Filter function that approves or excludes each newly read datum.
  * @returns {pvc.data.Datum[]} The loaded datums.
  * @private
  */
 function data_loadDatums(atomz, whereFun) {
     
+    // Atom garbage collection
+    var dimNames = this.type.dimensionsNames(),
+        visitedAtomsKeySetByDimension = pv.dict(dimNames, function(){ return {}; }),
+        needGC = false;
+    
     function createDatum(atoms){
-        return new pvc.data.Datum(this, atoms);
+        var datum = new pvc.data.Datum(this, atoms);
+        if(whereFun && !whereFun(datum)){
+            needGC = true;
+            return null;
+        }
+        
+        // Mark Really Used Atoms (includes null atoms)
+        def.each(datum.atoms, function(atom){
+            if(atom){
+                var dim = atom.dimension;
+                if(dim._virtualNullAtom === atom){
+                    /* This is a signal of a dimension for which there was 
+                     * no configured reader, so nulls weren't read.
+                     * We will register the real null, 
+                     * and the virtual null atom will not show up again,
+                     * because it appears through the prototype chain
+                     * as a default value.
+                     */
+                    dim.intern(null);
+                }
+                
+                visitedAtomsKeySetByDimension[atom.dimension.name][atom.key] = true;
+            }
+        });
+        
+        return datum;
     }
     
-    var q = def.query(atomz)
-              .select(createDatum, this);
-    if(whereFun) {
-        q = q.where(whereFun);
-    }  
+    var datums = def.query(atomz)
+          .select(createDatum, this)
+          .where(def.notNully)
+          .distinct(function(datum){ return datum.key; })
+          .array();
     
-    return q.distinct(function(datum){ return datum.key; })
-            .array();
+    if(needGC){
+        // Unintern unused atoms
+        def.eachOwn(this._dimensions, function(dimension){
+            var visitedAtomsKeySet = visitedAtomsKeySetByDimension[dimension.name];
+            
+            var uninternAtoms = dimension.atoms().filter(function(atom){
+                    return !def.hasOwn(visitedAtomsKeySet, atom.key);
+                });
+            
+            uninternAtoms.forEach(function(atom){
+                dim_unintern.call(dimension, atom);
+            });
+        });
+    }
+    
+    return datums;
 }
 
 /**
@@ -93,7 +137,6 @@ function data_reloadDatums(atomz, whereFun) {
                          .uniqueIndex(function(datum){ return datum.key; });
         
     // Atom garbage collection
-    
     var dimNames = this.type.dimensionsNames();
     
     // [atom.dimension.name][atom.key] -> true
@@ -105,19 +148,31 @@ function data_reloadDatums(atomz, whereFun) {
             return null;
         }
         
+        // Mark Really Used Atoms (includes null atoms)
+        def.each(newDatum.atoms, function(atom){
+            if(atom){
+                var dim = atom.dimension;
+                if(dim._virtualNullAtom === atom){
+                    /* This is a signal of a dimension for which there was 
+                     * no configured reader, so nulls weren't read.
+                     * We will register the real null, 
+                     * and the virtual null atom will not show up again,
+                     * because it appears through the prototype chain
+                     * as a default value.
+                     */
+                    dim.intern(null);
+                }
+                
+                visitedAtomsKeySetByDimension[atom.dimension.name][atom.key] = true;
+            }
+        });
+        
+        
+        /* Use already existing same-key datum, if any */
         var datum = datumsByKey[newDatum.key];
         if(!datum) {
             datumsByKey[newDatum.key] = datum = newDatum;
         }
-        
-        // Visit atoms
-        atoms.forEach(function(atom){
-            var name = atom.dimension.name,
-                key = atom.key;
-            if(key) {
-                visitedAtomsKeySetByDimension[name][key] = true;
-            }
-        });
         
         return datum;
     }

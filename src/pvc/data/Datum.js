@@ -30,7 +30,7 @@ def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
 function(data, atoms, isNull){
     
-    def.base.call(this, data.owner, atoms, data.atoms);
+    this.base(data.owner, atoms, data.atoms);
     
     if(isNull) {
         this.isNull = true;
@@ -55,7 +55,12 @@ function(data, atoms, isNull){
 
         var changed = this.isSelected !== select;
         if(changed){
-            this.isSelected = select;
+            if(!select){
+                delete this.isSelected;
+            } else {
+                this.isSelected = true;
+            }
+            
             if(!this.isNull){
                 data_onDatumSelectedChanged.call(this.owner, this, select);
             }

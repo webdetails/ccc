@@ -237,7 +237,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
     configureType: function(){
         
         // Call base method
-        def.base.call(this);
+        this.base();
         
         if(this.metadata.length < 2) {
             return;
@@ -305,9 +305,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                         
                         this._colGroups = this._processEncodedColGroups(encodedColGroups);
                         
-                        var CG = this._colGroups.length;
-                        
-                        CG > 0 || def.assert("CG must be greater that 0.");
+                        var CG = this._colGroups.length; // >= 1
                         
                         this.M = Math.floor(L / CG); // should not be needed, but J.I.C.
                         
@@ -321,7 +319,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                         }, this);
                     }
                     
-                    this.C = this._colGroups[0].length;
+                    this.C = this._colGroups[0].length; // may be 0!
                 }
                 
             } else {
@@ -375,6 +373,14 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         
         // ----------------
         
+        if(pvc.debug >= 3){
+            pvc.log("Crosstab translator " + JSON.stringify({
+                R: this.R,
+                C: this.C,
+                M: this.M
+            }));
+        }
+        
         this._computeDimensionsReaders();
     },
     
@@ -388,18 +394,19 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             var encodedColGroup = encodedColGroups[i],
                 sepIndex = encodedColGroup.lastIndexOf("~");
             
-            // Remove MeasureTitle name from the end of encoded column group
-            // MeasureTitle has precedence, so we may end up with dummy '' column group value. (and C = 1)
-            encodedColGroup = (sepIndex < 0) ? '' : encodedColGroup.slice(0, sepIndex);
-            
-            if(encodedColGroup !== prevEncodedColGroup) {
-                // Split encoded column groups
-                colGroups.push(encodedColGroup.split('~'));
-                prevEncodedColGroup = encodedColGroup;
+            // MeasureTitle has precedence, so we may end up with no column group value. (and C = 0)
+            if(sepIndex > 0){
+                // Remove MeasureTitle name from the end of encoded column group
+                encodedColGroup = encodedColGroup.slice(0, sepIndex);
+                if(encodedColGroup !== prevEncodedColGroup) {
+                    // Split encoded column groups
+                    colGroups.push(encodedColGroup.split('~'));
+                    prevEncodedColGroup = encodedColGroup;
+                }
             }
         }
         
-        return colGroups; 
+        return colGroups.length ? colGroups : [[]]; 
     },
     
     /**
@@ -461,8 +468,13 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
-        add('category', 'R', 0, this.R);
-        add('series',   'C', 0, this.C);
+        if(this.R > 0){
+            add('category', 'R', 0, this.R);
+        }
+        
+        if(this.C > 0){
+            add('series', 'C', 0, this.C);
+        }
         
         if(!this._userUsedDims.value) {
             // The null test is required because secondAxisSeriesIndexes can be a number, a string...

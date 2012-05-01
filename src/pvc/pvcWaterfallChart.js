@@ -52,10 +52,10 @@ pvc.WaterfallChart = pvc.CategoricalAbstract.extend({
         
         this._addVisualRoles({
             /* value: required, continuous, numeric */
-            value:  { isMeasure: true, isRequired: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' },
+            value:  { isMeasure: true, isRequired: true, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' },
             
             /* value2: continuous, numeric */
-            value2: { isMeasure: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
+            value2: { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
             
             // TODO: waterfall up/down/total control role
         });
@@ -190,7 +190,7 @@ pvc.WaterfallTranslator = pvc.DataTranslator.extend({
  * <i>barPanel_</i> - for the panel where the bars sit
  * <i>barLabel_</i> - for the main bar label
  */
-pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
+pvc.WaterfallChartPanel = pvc.CartesianAbstractPanel.extend({
     
     pvBar: null,
     pvBarLabel: null,
@@ -390,12 +390,18 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
     },
 
     /**
-     * Augments the datum with 100% normalized value information.
-     * @override
+     * Obtains a datum given its visible series and category indexes and
+     * augments it with 100% normalized value information.
      */
     _getRenderingDatumByIndexes: function(visibleSerIndex, visibleCatIndex){
-        var datum = this.base(visibleSerIndex, visibleCatIndex);
-
+        var de = this.chart.dataEngine,
+            datumFilter = {
+                category: de.getVisibleCategories()[visibleCatIndex],
+                series:   de.getVisibleSeries()[visibleSerIndex]
+            };
+    
+        var datum = de.datum(datumFilter, {createNull: true});
+    
         // Augment the datum's values with 100 percent data
         if(datum && this._hundredPercentData){
             var renderVersion = this.chart.root._preRenderVersion;
@@ -426,7 +432,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
      *   These helper functions (closures) are all stored in 'this.DF'
      *
      *   Overriding this 'prepareDataFunctions' allows you to implement
-     *   a different ScatterScart.
+     *   a different chart,
      *   however, it is also possible to replace specific functions
      *   from the 'this.DF' object.
      */
@@ -468,11 +474,10 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             options.orthoFixedMax = mx;
         }
 
-        var lScale = chart.getLinearScale();
+        var lScale = chart.axes.ortho.scale;
         /** end fix **/
 
-        var l2Scale = chart.getSecondScale(),
-            oScale  = chart.getOrdinalScale();
+        var oScale  = chart.axes.base.scale;
 
         // determine barPositionOffset and barScale
         var barPositionOffset = 0,
@@ -578,6 +583,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         }.call(this));
 
         if(options.secondAxis){
+            var l2Scale = chart.getSecondScale();
             this.DF.secOrthoLengthFunc = function(d){
                 return chart.animate(0, l2Scale(d.value));
             };
@@ -611,7 +617,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 shouldDimColor = dataEngine.owner.selectedCount() > 0 &&
                                  !datum.isSelected;
 
-            return shouldDimColor ? pvc.toGrayScale(color) : color;
+            return shouldDimColor ? pvc.toGrayScale(color, 0.6) : color;
         };
     },
 
@@ -887,7 +893,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
     doGenOverflMarks: function(anchor, underflow, maxBarSize, angle, barScale, dataFunction){
         var myself = this;
         var offGridBarOffset = maxBarSize/2,
-            lScale = this.chart.getLinearScale();
+            lScale = this.chart.axes.ortho.scale;
 
         var offGridBorderOffset = underflow
                                     ? lScale.min + 8
@@ -922,7 +928,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
      * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
-    _renderSignums: function(){
+    _renderInteractive: function(){
         this.pvBarPanel.render();
     },
 

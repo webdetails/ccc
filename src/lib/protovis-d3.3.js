@@ -231,10 +231,11 @@ pv.extend = function(f) {
   return new g();
 };
 
+/*
 try {
   eval("pv.parse = function(x) x;"); // native support
 } catch (e) {
-
+*/
 /**
  * @private Parses a Protovis specification, which may use JavaScript 1.8
  * function expresses, replacing those function expressions with proper
@@ -276,7 +277,7 @@ try {
     s += js.substring(i);
     return s;
   };
-}
+//}
 
 /**
  * @private Computes the value of the specified CSS property <tt>p</tt> on the

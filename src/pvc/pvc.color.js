@@ -3,6 +3,7 @@
 def.scope(function(){
     
     pvc.color = {
+        scale:  colorScale,
         scales: colorScales
     };
     
@@ -12,9 +13,45 @@ def.scope(function(){
     /**
      * Creates color scales of a specified type for datums grouped by a category.
      * 
+     * @name pvc.color.scales
+     * @function
+     * @param {object} keyArgs Keyword arguments.
+     * See {@link pvc.color.scale} for available arguments.
+     * 
+     * @param {def.Query} keyArgs.data
+     * A {@link pvc.data.Data} that is the result of grouping datums along what are here called "category" dimensions.
+     * <p>
+     * One (possibly equal) color scale is returned per leaf data, indexed by the leaf's absolute key (see {@link pvc.data.Data#absKey}).  
+     * </p>
+     * @param {boolean} [keyArgs.normPerBaseCategory=false] Indicates that a different color scale should be computed per distinct data category.
+     * 
+     * @type function 
+     */
+    function colorScales(keyArgs){
+        keyArgs || def.fail.argumentRequired('keyArgs');
+        
+        var type = keyArgs.type || def.fail.argumentRequired('keyArgs.type');
+        
+        switch (type) {
+            case 'linear':   return new pvc.color.LinearScalesBuild(keyArgs).buildMap();
+            case 'discrete': return new pvc.color.DiscreteScalesBuild(keyArgs).buildMap();
+            case 'normal':   return new pvc.color.NormalScalesBuild(keyArgs).buildMap(); // TODO
+        }
+        
+        throw def.error.argumentInvalid('scaleType', "Unexistent scale type '{0}'.", [type]);
+    }
+    
+    /**
+     * Creates a color scale of a specified type.
+     * 
      * @name pvc.color.scale
      * @function
      * @param {object} keyArgs Keyword arguments.
+     * See {@link pvc.color.scales} for available arguments.
+     * 
+     * @param {def.Query} keyArgs.data A {@link pvc.data.Data} instance that 
+     * may be used to obtain the domain of the color scale.
+     * 
      * @param {string} keyArgs.type The type of color scale.
      * <p>
      * Valid values are 'linear', 'discrete' and 'normal' (normal probability distribution).
@@ -31,18 +68,12 @@ def.scope(function(){
      * <p>
      * When unspecified, the color range is assumed to be 'red', 'yellow' and 'green'. 
      * </p>
-     * @param {def.Query} keyArgs.data
-     * A {@link pvc.data.Data} that is the result of grouping datums along what are here called "category" dimensions.
-     * <p>
-     * One (possibly equal) color scale is returned per leaf data, indexed by the leaf's absolute key (see {@link pvc.data.Data#absKey}).  
-     * </p>
      * @param {string} keyArgs.colorDimension The name of the data dimension that is the <b>domain</b> of the color scale.
      * @param {object[]} [keyArgs.colorRangeInterval] An array of domain values to match colors in the color range.
-     * @param {boolean} [keyArgs.normPerBaseCategory=false] Indicates that a different color scale should be computed per distinct data category.
      * 
-     * @type {function} 
+     * @type function 
      */
-    function colorScales(keyArgs){
+    function colorScale(keyArgs){
         keyArgs || def.fail.argumentRequired('keyArgs');
         
         var type = keyArgs.type || def.fail.argumentRequired('keyArgs.type');
@@ -50,7 +81,7 @@ def.scope(function(){
         switch (type) {
             case 'linear':   return new pvc.color.LinearScalesBuild(keyArgs).build();
             case 'discrete': return new pvc.color.DiscreteScalesBuild(keyArgs).build();
-            case 'normal':   return new pvc.color.NormalScalesBuild(keyArgs).build(); // TODO
+            case 'normal':   return new pvc.color.NormalScalesBuild(keyArgs).build();
         }
         
         throw def.error.argumentInvalid('scaleType', "Unexistent scale type '{0}'.", [type]);
@@ -83,13 +114,24 @@ def.scope(function(){
            this.domainRangeCountDif = 0;
        }).add(/** @lends pvc.color.ScalesBuild# */{
            /**
-            * Builds a map from category keys to scale functions.
+            * Builds one scale function.
             * 
-            * @name build
-            * @function
-            * @type object
+            * @type pv.Scale
             */
            build: function(){
+               this.range = this._getRange();
+               this.desiredDomainCount = this.range.length + this.domainRangeCountDif;
+               
+               var domain = this._getDomain();
+               return this._createScale(domain);
+           },
+           
+           /**
+            * Builds a map from category keys to scale functions.
+            * 
+            * @type object
+            */
+           buildMap: function(){
                this.range = this._getRange();
                this.desiredDomainCount = this.range.length + this.domainRangeCountDif;
                
@@ -105,9 +147,9 @@ def.scope(function(){
                    };
                    
                } else {
+                   var domain = this._getDomain(),
+                       scale  = this._createScale(domain);
                    
-                   var domain = this._getDomain();
-                   var scale  = this._createScale(domain);
                    createCategoryScale = def.constant(scale);
                }
                
@@ -256,7 +298,7 @@ def.scope(function(){
     
     def.type('pvc.color.DiscreteScalesBuild', pvc.color.ScalesBuild)
     .init(function(keyArgs){
-        def.base.call(this, keyArgs);
+        this.base(keyArgs);
         
         this.domainRangeCountDif = 1;
     })

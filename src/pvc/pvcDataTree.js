@@ -294,7 +294,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
         bnds.cellHeight = maxCellHeight;
       bnds.relBottom = (bnds.gridHeight - bnds.cellHeight)/2;
       bnds.numRows = numRows;
-    };
+    }
 
     // generate the elements
     var whitespaceQuote = new RegExp ('[\\s\"\']+',"g"); 

@@ -49,7 +49,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             value2DimName  = value2Role ? value2Role.firstDimensionName() : null,
             legendRoleName = this.chart.legendSource,
             data           = this.chart.visualRoleData(legendRoleName, {singleLevelGrouping: true}),
-            leafCount      = data._leafs.length;
+            leafDatas      = data.leafs().where(function(leaf){ return !!leaf.absLabel; }).array(),
+            leafCount      = leafDatas.length;
         
         function hasDatumValue2(datum) {
             // 2nd axis?
@@ -161,6 +162,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           x: x,
           y: y,
           leafInfos: leafInfos,
+          leafDatas: leafDatas,
           data: data,
           itemColorProp: function(leaf){
               var leafInfo = leafInfos[leaf.id];
@@ -177,10 +179,11 @@ pvc.LegendPanel = pvc.BasePanel.extend({
      */
     _createCore: function(layoutInfo) {
       var myself = this,
-          leafInfos = layoutInfo.leafInfos;
+          leafInfos = layoutInfo.leafInfos,
+          leafDatas = layoutInfo.leafDatas;
       
       this.pvLegendPanel = this.pvPanel.add(pv.Panel)
-          .data(layoutInfo.data._leafs)
+          .data(leafDatas)
           .localProperty('hasVisibleDatums', Boolean)
           .hasVisibleDatums(function(leaf){
               return leaf.datums(null, {visible: true}).any();

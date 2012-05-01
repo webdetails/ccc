@@ -36,7 +36,7 @@ pvc.NormalizedBarChart = pvc.CategoricalAbstract.extend({
         
         this._addVisualRoles({
             /* value: required, continuous, numeric */
-            value: { isMeasure: true, isRequired: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' }
+            value: { isMeasure: true, isRequired: true, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' }
         });
     },
     

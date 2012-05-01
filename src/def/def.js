@@ -58,6 +58,30 @@ if(!Object.create){
     }());
 }
 
+if (!Function.prototype.bind) {  
+    Function.prototype.bind = function (oThis) {  
+        if (typeof this !== "function") {  
+            // closest thing possible to the ECMAScript 5 internal IsCallable function  
+            throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");  
+        }  
+    
+        var aArgs = Array.prototype.slice.call(arguments, 1),   
+            fToBind = this,   
+            fNOP = function () {},  
+            fBound = function () {  
+              return fToBind.apply(this instanceof fNOP  
+                                   ? this  
+                                   : oThis || window,  
+                                 aArgs.concat(Array.prototype.slice.call(arguments)));  
+            };  
+    
+        fNOP.prototype = this.prototype;  
+        fBound.prototype = new fNOP();  
+    
+        return fBound;
+    };
+}
+
 // Basic JSON shim
 if(!this.JSON){
     /** @ignore */
@@ -318,6 +342,19 @@ this['def'] = (function(){
             return function(){ return v; };
         },
         
+        methodCaller: function(p, context){
+            if(context){
+                return function(){
+                    return context[p].apply(context, arguments); 
+                };
+            }
+            
+            /* floating method */
+            return function(){
+                return this[p].apply(this, arguments); 
+            };
+        },
+        
         /**
          * The identity function.
          * @field
@@ -436,6 +473,18 @@ this['def'] = (function(){
                       .replace(/</gm, "&lt;")
                       .replace(/>/gm, "&gt;")
                       .replace(/"/gm, "&quot;");    
+        },
+        
+        /* Ensures the first letter is upper case */
+        firstUpperCase: function(s){
+            if(s) {
+                var c  = s.charAt(0),
+                    cU = c.toUpperCase();
+                if(c !== cU) {
+                    s = cU + s.substr(1);
+                }
+            }
+            return s;
         },
         
         /**
@@ -724,7 +773,7 @@ this['def'] = (function(){
             baseProto = mixins.shift();
         }
     
-        var instance = Object.create(baseProto);
+        var instance = baseProto ? Object.create(baseProto) : {};
         if(deep){
             createRecursive(instance);
         }
@@ -850,12 +899,12 @@ this['def'] = (function(){
         function override(method, base){
             
             return function(){
-                var prevBase = def.base;
-                def.base = base;
+                var prevBase = this.base;
+                this.base = base;
                 try{
                     return method.apply(this, arguments);
                 } finally {
-                    def.base = prevBase;
+                    this.base = prevBase;
                 }
             };
         }
@@ -896,21 +945,21 @@ this['def'] = (function(){
                     return;
                 }
                 
-                var prevBase = def.base;
+                var prevBase = this.base;
                 try{
                     var method = state.init;
                     if(method) {
-                        def.base = state.base.init;
+                        this.base = state.base.init;
                         method.apply(this, arguments);
                     }
                     
                     method = state.post;
                     if(method) {
-                        def.base = state.base.post;
+                        this.base = state.base.post;
                         method.apply(this, arguments);
                     }
                 } finally {
-                    def.base = prevBase;
+                    this.base = prevBase;
                 }
             }
             
@@ -955,9 +1004,19 @@ this['def'] = (function(){
             
             // ----
             
+            var proto;
             if(baseType) {
-                var proto = constructor.prototype = Object.create(baseType.prototype);
+                proto = constructor.prototype = Object.create(baseType.prototype);
                 proto.constructor = constructor;
+            } else {
+                proto = constructor.prototype;
+            }
+            
+            if(!('override' in proto)) {
+                proto.override = function(name, method){
+                    this[name] = override(method, this[name]);
+                    return this;
+                };
             }
             
             constructor.prototype.toString = function(){
@@ -974,7 +1033,8 @@ this['def'] = (function(){
         }
         
         def.type   = type;
-        def.method = method; 
+        def.method = method;
+        def.override = override;
     });
     
     // ----------------------
@@ -1463,13 +1523,13 @@ this['def'] = (function(){
     
     def.type('AdhocQuery', def.Query)
     .init(function(next){
-        def.base.call(this);
+        this.base();
         this._next = next;
     });
     
     def.type('ArrayLikeQuery', def.Query)
     .init(function(list){
-        def.base.call(this);
+        this.base();
         this._list  = def.isArrayLike(list) ? list : [list];
         this._count = this._list.length;
     })
@@ -1503,7 +1563,7 @@ this['def'] = (function(){
     
     def.type('WhereQuery', def.Query)
     .init(function(source, where, ctx){
-        def.base.call(this);
+        this.base();
         this._where  = where;
         this._ctx    = ctx;
         this._source = source;
@@ -1522,7 +1582,7 @@ this['def'] = (function(){
     
     def.type('WhileQuery', def.Query)
     .init(function(source, pred, ctx){
-        def.base.call(this);
+        this.base();
         this._pred  = pred;
         this._ctx    = ctx;
         this._source = source;
@@ -1542,7 +1602,7 @@ this['def'] = (function(){
     
     def.type('SelectQuery', def.Query)
     .init(function(source, select, ctx){
-        def.base.call(this);
+        this.base();
         this._select = select;
         this._ctx    = ctx;
         this._source = source;
@@ -1558,7 +1618,7 @@ this['def'] = (function(){
     
     def.type('SelectManyQuery', def.Query)
     .init(function(source, selectMany, ctx){
-        def.base.call(this);
+        this.base();
         this._selectMany = selectMany;
         this._ctx    = ctx;
         this._source = source;
@@ -1596,7 +1656,7 @@ this['def'] = (function(){
     
     def.type('DistinctQuery', def.Query)
     .init(function(source, key, ctx){
-        def.base.call(this);
+        this.base();
         this._key    = key;
         this._ctx    = ctx;
         this._source = source;
@@ -1622,7 +1682,7 @@ this['def'] = (function(){
     
     def.type('SkipQuery', def.Query)
     .init(function(source, skip){
-        def.base.call(this);
+        this.base();
         this._source = source;
         this._skip = skip;
     })
@@ -1641,7 +1701,7 @@ this['def'] = (function(){
     
     def.type('TakeQuery', def.Query)
     .init(function(source, take){
-        def.base.call(this);
+        this.base();
         this._source = source;
         this._take = take;
     })
@@ -1659,7 +1719,7 @@ this['def'] = (function(){
     
     def.type('ReverseQuery', def.Query)
     .init(function(source){
-        def.base.call(this);
+        this.base();
         this._source = source;
     })
     .add({

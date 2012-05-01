@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html  xmlns="http://www.w3.org/2000/svg"
-     xmlns:xlink="http://www.w3.org/1999/xlink"
-     xmlns:ev="http://www.w3.org/2001/xml-events">
+<html>
     <head>
         <title>CCC Samples - Heat grid</title>
 
@@ -41,9 +39,14 @@
         <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
         
         <script type="text/javascript" src="pvc/visual/Role.js"></script>
-        
-        <script type="text/javascript" src="pvc/visual/Context.js"></script>
-        
+	    <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
+	    <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
+	    <script type="text/javascript" src="pvc/visual/Context.js"></script>
+	    <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+	    
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
@@ -51,10 +54,11 @@
         <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalGridDockingPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianAbstract.js"></script>
+	    <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
+	    <script type="text/javascript" src="pvc/pvcCartesianGridDockingPanel.js"></script>
+	    <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
+	    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
         
         <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
@@ -97,12 +101,8 @@ The intensity or the color of each cell depends on the value that it represents.
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
   <li>showValues - Show or hide heatGrid value. Default: false</li>
-  <li>panelSizeRatio - Ratio of the band occupied by the pane;.
+  <li>panelSizeRatio - Ratio of the band occupied by the panel.
 Default: 0.5 (50%)</li>
-  <li>heatGridSizeRatio - In multiple series, percentage of inner
-band occupied by heatGrids. Default: 0.5 (50%)</li>
-  <li>maxHeatGridSize - Maximum size of a heatGrid in pixels.
-Default: 2000</li>
   <li>normPerBaseCategory - Normalize by column? true or false</li>
   <li>minColor - Default: "white"</li>
   <li>maxColor - Default: "darkgreen"</li>

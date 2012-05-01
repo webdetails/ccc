@@ -48,6 +48,9 @@
  * @property {boolean} isComparable
  * Indicates if the values of this dimension can be compared.
  * 
+ * @property {boolean} isHidden Indicates if the dimension is
+ * hidden from the user, in places like a tooltip, for example, or in the legend.
+ * 
  * @property {def.Map} playedVisualRoles
  * A map of {@link pvc.visual.Role} indexed by visual role name, of the visual roles currently being played by this dimension type.
  * 
@@ -66,6 +69,8 @@
  * <p>
  * Note that internally the {@link Date} value type is switched by {@link Date2}. It allows conversion, as well of construction of Date objects.  
  * </p>
+ * @param {boolean} [keyArgs.isHidden=false] Indicates if the dimension should
+ * be hidden from the user, in places like a tooltip, for example, or in the legend.
  * @param {boolean} [keyArgs.isDiscrete]
  * Indicates if the dimension
  * is considered discrete.
@@ -174,23 +179,14 @@ function(complexType, name, keyArgs){
     this.label = def.get(keyArgs, 'label') || name;
     this.group = pvc.data.DimensionType.dimensionGroupName(name);
     this.playedVisualRoles = new def.Map();
+    this.isHidden = !!def.get(keyArgs, 'isHidden');
     
     var valueType = def.get(keyArgs, 'valueType') || null;
-    var valueTypeName;
-    if(valueType){
-        switch(valueType){
-            case Boolean: valueTypeName = 'Boolean'; break;
-            case Number:  valueTypeName = 'Number';  break;
-            case String:  valueTypeName = 'String';  break;
-            case Object:  valueTypeName = 'Object';  break;
-            
-            case Date:
-                valueType = Date2;
-                valueTypeName = 'Date';
-                break;
-                
-            default: throw def.error.argumentInvalid('valueType', "Invalid valueType function: '{0}'.", [valueType]);
-        }
+    var valueTypeName = pvc.data.DimensionType.valueTypeName(valueType);
+    switch(valueType){
+        case Date:
+            valueType = Date2;
+            break;
     }
     
     this.valueType = valueType;
@@ -203,6 +199,9 @@ function(complexType, name, keyArgs){
     } else {
         // Normalize the value
         this.isDiscrete = !!this.isDiscrete;
+        if(!this.isDiscrete && (this.valueType !== Number && this.valueType !== Date2)) {
+            throw def.error.argumentInvalid('isDiscrete', "The only supported continuous value types are Number and Date.");
+        }
     }
     
     /** 
@@ -276,7 +275,7 @@ function(complexType, name, keyArgs){
     }
 })
 .add(/** @lends pvc.data.DimensionType# */{
-
+    
     /**
      * Compares two values of the dimension's {@link #valueType}, in ascending order.
      * <p>
@@ -344,10 +343,17 @@ function(complexType, name, keyArgs){
         if(this.isComparable) {
             if(reverse){
                 return this._reverseAtomComparer || 
-                       (this._reverseAtomComparer = function(a, b){ return me.compare(b.value, a.value); }); 
+                       (this._reverseAtomComparer = function(a, b){
+                           if(a === b) { return 0; } // Same atom
+                           return me.compare(b.value, a.value); 
+                       }); 
             }
             
-            return this._directAtomComparer || (this._directAtomComparer = function(a, b){ return me.compare(a.value, b.value); }); 
+            return this._directAtomComparer || 
+                    (this._directAtomComparer = function(a, b){
+                        if(a === b) { return 0; } // Same atom
+                        return me.compare(a.value, b.value); 
+                     }); 
         }
         
         return reverse ? atom_idComparerReverse : atom_idComparer;
@@ -419,6 +425,23 @@ pvc.data.DimensionType.splitDimensionGroupName = function(dimName){
     return [match[1],  index];  
 };
 
+// TODO: Docs
+pvc.data.DimensionType.valueTypeName = function(valueType){
+    if(valueType == null){
+        return "Any";
+    }
+    
+    switch(valueType){
+        case Boolean: return 'Boolean';
+        case Number:  return 'Number';
+        case String:  return 'String';
+        case Object:  return 'Object';
+        case Date:
+        case Date2:   return 'Date';
+        default: throw def.error.argumentInvalid('valueType', "Invalid valueType function: '{0}'.", [valueType]);
+    }
+};
+
 /**
  * Computes the name of the nth level dimension 
  * of a dimension group (protected).
@@ -437,7 +460,7 @@ pvc.data.DimensionType.dimensionGroupLevelName = function(baseDimName, level){
     return baseDimName + (level >= 1 ? (level + 1) : '');
 };
 
-pvc.data.DimensionType.legacyDimensionNames = ['series', 'category', 'multiChartColumn', 'multiChartRow', 'value', 'value2'];
+//pvc.data.DimensionType.legacyDimensionNames = ['series', 'category', 'multiChartColumn', 'multiChartRow', 'value', 'value2'];
 
 /**
  * Extends a dimension type specification with defaults based on legacy group name and legacy options.

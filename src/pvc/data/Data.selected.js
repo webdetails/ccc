@@ -192,7 +192,10 @@ pvc.data.Data.setSelected = function(datums, selected){
  * @static
  */
 pvc.data.Data.toggleSelected = function(datums){
-    datums = def.query(datums).array(); 
+    if(!def.isArrayLike(datums)){
+        datums = def.query(datums).array();
+    }
+     
     var allSelected = def.query(datums).all(function(datum){ return datum.isSelected; });
     this.setSelected(datums, !allSelected);
 };

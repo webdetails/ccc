@@ -1,5 +1,5 @@
 
-pvc.debug = true;
+pvc.debug = 3;
 var tryMe = function(e){ 
     try{
         eval( $(e).prev("textarea").val());

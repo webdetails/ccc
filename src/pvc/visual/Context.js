@@ -33,9 +33,7 @@
  */
 def.type('pvc.visual.Context')
 .init(function(panel, mark, event){
-    var chart = panel.chart;
-    
-    this.chart = chart;
+    this.chart = panel.chart;
     this.panel = panel;
     
     visualContext_update.call(this, mark, event);
@@ -97,8 +95,8 @@ function visualContext_update(mark, event){
     
     if(!datum) {
         if(group) {
-            datum = group._datums[0] || def.assert("Group should have at least one datum.");
-            atoms = datum.atoms;
+            datum = group._datums[0];
+            atoms = group.atoms;
         }
     } else {
         atoms = datum.atoms;

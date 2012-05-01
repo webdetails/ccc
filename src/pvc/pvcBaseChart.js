@@ -322,7 +322,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
 
         /* Initialize the data engine */
-        this._initDataAndVisualRoles(keyArgs);
+        this._initData(keyArgs);
 
         /* Create color schemes */
         this.colors = pvc.createColorScheme(this.options.colors);
@@ -354,7 +354,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     /**
      * Initializes the data engine and roles
      */
-    _initDataAndVisualRoles: function(keyArgs) {
+    _initData: function(keyArgs) {
         var dataEngine = this.dataEngine;
         
         if(!this.parent) {
@@ -365,6 +365,10 @@ pvc.BaseChart = pvc.Abstract.extend({
                 
                 var translation = this._createTranslation(complexType);
                 translation.configureType();
+                
+                if(pvc.debug >= 3){
+                    pvc.log(complexType.describe());
+                }
                 
                 // ----------
                 
@@ -401,8 +405,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             }
         }
         
-        if(pvc.debug
-                ){
+        if(pvc.debug){
             pvc.log(dataEngine.getInfo());
         }
     },
@@ -507,6 +510,13 @@ pvc.BaseChart = pvc.Abstract.extend({
                 }
                 
                 if(role.isRequired) {
+                    /* HACK */
+                    if(name === 'series'){
+                        type.addDimension(name, pvc.data.DimensionType.extendSpec(name, {isHidden: true}));
+                        role.bind(pvc.data.GroupingSpec.parse(name, type));
+                        return;
+                    }
+                    
                     throw def.error.operationInvalid("Chart type requires unassigned role '{0}'.", [name]);
                 }
                 
@@ -880,7 +890,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                 }
                 
                 /** Rendering afterwards allows the action to change the selection in between */
-                this.basePanel._renderSignums();
+                this.basePanel._renderInteractive();
             } finally {
                 this._inUpdateSelections   = false;
                 this._selectionNeedsUpdate = false;
@@ -1033,19 +1043,16 @@ pvc.BaseChart = pvc.Abstract.extend({
             delayIn:  400,
             offset:   2,
             opacity:  0.7,
-            html: true,
-            fade: true
+            html:     true,
+            fade:     true
         },
         
         valueFormat: function(d) {
             return pv.Format.number().fractionDigits(0, 2).format(d);
             // pv.Format.number().fractionDigits(0, 10).parse(d));
         },
-
-        stacked: false,
         
-        percentageNormalized: false,
-
+        /* For numeric values in percentage */
         percentValueFormat: function(d){
             return pv.Format.number().fractionDigits(0, 2).format(d) + "%";
         },
@@ -1072,6 +1079,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         renderCallback: undefined,
 
-        margins: undefined
+        margins: undefined,
+        
+        compatVersion: Infinity // numeric, 1 currently recognized
     }
 });

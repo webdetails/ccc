@@ -280,8 +280,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
         defaultData.formattedSubtitle = seriesFormatter(defaultData.subtitle);
         
         // Check how many dimensions are effectively supplied
-        var de = this.chart.dataEngine,
-            dimsByName = de.dimensions(),
+        var dimsByName = de.dimensions(),
             dimNames   = de.type.groupDimensionsNames('value'),
             rangeDimNames,
             dimCount = 0;

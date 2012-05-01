@@ -49,7 +49,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
  * Boxplot chart panel generates the actual box-plot with a categorical base-axis.
  * for more information on the options see the documentation file.
  */
-pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
+pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
     anchor: 'fill',
     pvBox: null,
     pvBoxLabel: null,
@@ -214,9 +214,8 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
         // create empty container for the functions and data
         this.DF = {};
 
-        var lScale = chart.getLinearScale();
-        var l2Scale = chart.getSecondScale();
-        var oScale = chart.getOrdinalScale();
+        var lScale  = chart.axes.ortho.scale;
+        var oScale  = chart.axes.base.scale;
 
         /*
          * fuctions to determine positions along base axis.
@@ -246,12 +245,15 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
          * functions to determine positions along orthogonal axis
          */
         this.DF.orthoLengthFunc = function(d){
-	    return lScale(d);
+            return lScale(d);
         };
 
-        this.DF.secOrthoLengthFunc = function(d){
-            return myself.chart.animate(0,l2Scale(d.value));
-        };
+        if(options.secondAxis){
+            var l2Scale = chart.getSecondScale();
+            this.DF.secOrthoLengthFunc = function(d){
+                return myself.chart.animate(0,l2Scale(d.value));
+            };
+        }
     },
 
     generateBoxPlots: function() {

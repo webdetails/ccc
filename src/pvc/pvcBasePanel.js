@@ -15,7 +15,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     width: null,
     anchor: "top",
     pvPanel: null,
-    fillColor: "red",
+    
     margins:   null,
     isRoot:    false,
     isTopRoot: false,
@@ -401,7 +401,7 @@ pvc.BasePanel = pvc.Abstract.extend({
      * 
      * @virtual
      */
-    _renderSignums: function(){
+    _renderInteractive: function(){
         var marks = this._getSignums();
         if(marks && marks.length){
             marks.forEach(function(mark){ mark.render(); });
@@ -411,7 +411,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         if(this._children){
             this._children.forEach(function(child){
-                child._renderSignums();
+                child._renderInteractive();
             });
         }
     },
@@ -781,13 +781,16 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         def.each(commonAtoms, function(atom, dimName){
-            if(!isMultiDatumGroup || atom.value != null) {
-                var valueLabel = atom.label;
-                if(playingPercentMap.has(dimName)) {
-                    valueLabel += " (" + calcPercent(atom, dimName) + ")";
+            var dimType = atom.dimension.type;
+            if(!dimType.isHidden){
+                if(!isMultiDatumGroup || atom.value != null) {
+                    var valueLabel = atom.label;
+                    if(playingPercentMap.has(dimName)) {
+                        valueLabel += " (" + calcPercent(atom, dimName) + ")";
+                    }
+                    
+                    addDim(def.escapeHtml(atom.dimension.type.label), valueLabel);
                 }
-                
-                addDim(def.escapeHtml(atom.dimension.type.label), valueLabel);
             }
         });
         
@@ -796,23 +799,25 @@ pvc.BasePanel = pvc.Abstract.extend({
             tooltip.push("<b>#</b>: " + group._datums.length + '<br/>');
             
             group.freeDimensionNames().forEach(function(dimName){
-                var dim = group.dimensions(dimName),
-                    dimLabel = def.escapeHtml(dim.type.label),
-                    valueLabel;
-                
-                if(dim.type.valueType === Number) {
-                    // Sum
-                    valueLabel = dim.format(dim.sum(visibleKeyArgs));
-                    if(playingPercentMap.has(dimName)) {
-                        valueLabel += " (" + calcPercent(null, dimName) + ")";
+                var dim = group.dimensions(dimName);
+                if(!dim.type.isHidden){
+                    var dimLabel = def.escapeHtml(dim.type.label),
+                        valueLabel;
+                    
+                    if(dim.type.valueType === Number) {
+                        // Sum
+                        valueLabel = dim.format(dim.sum(visibleKeyArgs));
+                        if(playingPercentMap.has(dimName)) {
+                            valueLabel += " (" + calcPercent(null, dimName) + ")";
+                        }
+                        
+                        dimLabel = "&sum; " + dimLabel;
+                    } else {
+                        valueLabel = dim.atoms(visibleKeyArgs).map(function(atom){ return atom.label; }).join(", ");
                     }
                     
-                    dimLabel = "&sum; " + dimLabel;
-                } else {
-                    valueLabel = dim.atoms(visibleKeyArgs).map(function(atom){ return atom.label; }).join(", ");
+                    addDim(dimLabel, valueLabel);
                 }
-                
-                addDim(dimLabel, valueLabel);
             });
         }
         
@@ -1137,7 +1142,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 if(datums) {
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
-                            if(pvc.debug >= 3) {
+                            if(pvc.debug >= 4) {
                                 pvc.log(datum.key + ": " + JSON.stringify(shape) + " intersects? true " + mark.type.toUpperCase());
                             }
                     

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CCC Samples - Line Chart</title>
+    <title>CCC Samples - Line Chart Full</title>
 
     <meta name="svg.render.forceflash" content="true">
 
@@ -41,8 +41,13 @@
     <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
     
     <script type="text/javascript" src="pvc/visual/Role.js"></script>
-    
+    <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+    <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
+    <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
+    <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
+    <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
     <script type="text/javascript" src="pvc/visual/Context.js"></script>
+    <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
     
     <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
@@ -51,12 +56,14 @@
     <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
     <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
     <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
-    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-    <script type="text/javascript" src="pvc/pvcCategoricalAbstractPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcCartesianAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
-    <script type="text/javascript" src="pvc/pvcCategoricalGridDockingPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcCartesianGridDockingPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
     <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
-    <script type="text/javascript" src="pvc/pvcLine.js"></script>
+    <script type="text/javascript" src="pvc/pvcLineDotAreaPanel.js"></script>
+    <script type="text/javascript" src="pvc/pvcLineDotArea.js"></script>
     <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
     <link type="text/css" rel="stylesheet" href="pvcDocUtils.css"/>
     <script type="text/javascript" src="pvcDocUtils.js"></script>
@@ -75,7 +82,7 @@ var baseExampleDef = {
         xAxisFullGrid: true,
         yAxisSize: 30,
         yAxisDomainRoundMode: 'tick',
-        axisHideExcessOrdinalLabels: true,
+        axisOverlappedLabelsHide: true,
         extensionPoints: {
             xAxisScale_dateTickFormat:    "%Y/%m/%d",
             xAxisScale_dateTickPrecision: 798336000/1.5
@@ -93,6 +100,12 @@ var baseExampleDef = {
      },
      showProps: lineExamplesShowProps
 };
+
+var baseCategDef = def.create(baseExampleDef, {
+    def: {
+        dimensions: { category: {valueType: Date, isDiscrete: true, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
+    }
+});
 
 pvc.examples.register(def.create(baseExampleDef, {
 	id: 'line01',
@@ -114,6 +127,17 @@ pvc.examples.register(def.create(baseExampleDef, {
 }));
 
 pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line02b',
+    className: 'LineChart',
+    def: {
+        title:      "Timeseries Line Chart with Areas and Dots",
+        showAreas:  true,
+        showDots:   true,
+        timeSeries: true
+     }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
 	id: 'line03',
 	className: 'LineChart',
 	def: {
@@ -121,7 +145,7 @@ pvc.examples.register(def.create(baseExampleDef, {
 	 }
 }));
 
-pvc.examples.register(def.create(baseExampleDef, {
+pvc.examples.register(def.create(baseCategDef, {
 	id: 'line04',
 	className: 'LineChart',
 	def: {
@@ -162,7 +186,7 @@ pvc.examples.register(def.create(baseExampleDef, {
 	}
 }));
 
-pvc.examples.register(def.create(baseExampleDef, {
+pvc.examples.register(def.create(baseCategDef, {
 	id: 'line08',
 	className: 'StackedLineChart',
 	def: {
@@ -170,7 +194,7 @@ pvc.examples.register(def.create(baseExampleDef, {
 	}
 }));
         
-pvc.examples.register(def.create(baseExampleDef, {
+pvc.examples.register(def.create(baseCategDef, {
 	id: 'line09',
 	className: 'StackedAreaChart',
 	def: {
@@ -179,7 +203,7 @@ pvc.examples.register(def.create(baseExampleDef, {
 	 }
 }));
 
-pvc.examples.register(def.create(baseExampleDef, {
+pvc.examples.register(def.create(baseCategDef, {
 	id: 'line10',
 	className: 'StackedLineChart',
 	def: {
@@ -188,7 +212,7 @@ pvc.examples.register(def.create(baseExampleDef, {
 	 }
 }));
 
-pvc.examples.register(def.create(baseExampleDef, {
+pvc.examples.register(def.create(baseCategDef, {
     id: 'line11',
     className: 'LineChart',
     dataVar: 'relational_01_neg',
@@ -198,7 +222,7 @@ pvc.examples.register(def.create(baseExampleDef, {
      }
 }));
 
-pvc.examples.register(def.create(baseExampleDef, {
+pvc.examples.register(def.create(baseCategDef, {
     id: 'line12',
     className: 'LineChart',
     dataVar: 'relational_01_neg',
@@ -209,12 +233,46 @@ pvc.examples.register(def.create(baseExampleDef, {
      }
 }));
 
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line13',
+    className: 'DotChart',
+    dataVar: 'testLDot2',
+    def: {
+        title:     "Categorical Dot/Line Chart with Negative Values",
+        showAreas: false,
+        showDots:  true,
+        showLines:  true,
+        crosstabMode: true,
+        dimensions: { 
+            category: {
+                valueType: Number, rawFormat: undefined, format: undefined 
+            }
+        }
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line14',
+    className: 'DotChart',
+    dataVar: 'testLDot2',
+    def: {
+        title:     "Categorical Dot Chart with Negative Values",
+        crosstabMode: true,
+        showLines:  false,
+        dimensions: { 
+            category: {
+                valueType: Number, rawFormat: undefined, format: undefined 
+            }
+        }
+     }
+}));
+
     </script>
   </head>
   <body>
     <h1>
       Line/Area/Dot Charts
     </h1>
-    <div id="examples" />
+    <div id="examples"></div>
   </body>
 </html>

@@ -99,7 +99,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             
             this.type    = owner.type;
             this._datums = def.get(keyArgs, 'datums') || linkParent._datums.slice();
-            this._leafs   = [];
+            this._leafs  = [];
             
             data_addLinkChild.call(linkParent, this);
         } else {
@@ -123,21 +123,24 @@ def.type('pvc.data.Data', pvc.data.Complex)
     
     // Connect .atoms to each other
     var atomsBase = isOwner ? {} : (this.parent || this.linkParent).atoms;
+    if(isOwner){
+        /* Need this because of null interning/uninterning */
+        this._atomsBase = atomsBase;
+    }
     
     this.type.dimensionsList().forEach(function(dimType){
         var name = dimType.name,
             dimension = new pvc.data.Dimension(this, dimType);
         
         this._dimensions[name] = dimension;
-        if(isOwner) {
-            atomsBase[name] = dimension.atom(); // null atom
-        }
     }, this);
     
     // Call base constructors
-    def.base.call(this, owner, atoms, atomsBase);
+    this.base(owner, atoms, atomsBase);
     
     pv.Dom.Node.call(this, /* nodeValue */null);
+    
+    delete this.nodeValue;
     
     this._children = this.childNodes; // pv.Dom.Node#childNodes
     
@@ -158,7 +161,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             this.absLabel = def.join(data_labelSep, parent.absLabel, this.label);
         }
         
-        if(parent.absKey) {
+        if(parent.absKey){
             this.absKey = parent.absKey + "," + this.key;
         }
     }
@@ -351,7 +354,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      */
     children: function(keyArgs){
         if(!this._children) {
-            return def.query([]);
+            return def.query();
         }
         
         var key = def.get(keyArgs, 'key');

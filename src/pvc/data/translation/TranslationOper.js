@@ -385,6 +385,17 @@ def.type('pvc.data.TranslationOper')
         
         atoms.length = a;
         
+        if(pvc.debug >= 3) {
+            var atomsMap = def.query(atoms).object({
+                name:  function(atom){ return atom.dimension.name; },
+                value: function(atom){ 
+                    return { id: atom.id, v: atom.value, f: atom.label };
+                }
+            });
+            
+            pvc.log('\t-> atoms: ' + JSON.stringify(atomsMap));
+        }
+        
         return atoms;
     },
     

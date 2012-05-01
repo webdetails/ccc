@@ -193,6 +193,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         var datum = data_where.call(this, whereSpec, keyArgs).first() || null;
         if(!datum && def.get(keyArgs, 'createNull') && whereSpec.length) {
             
+            /* Create Null Datum */
             var sourceDatumFilter = whereSpec[0],
                 atoms = [];
             
@@ -427,7 +428,8 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
      // Ad-hoq query
      return def.query(function(/* nextIndex */){
          // Advance to next datum
-         
+         var state;
+
          // No current data means starting
          if(!this._data) {
              this._data = rootData;
@@ -452,7 +454,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
              this._datumsQuery = null;
              
              // Pop parent data
-             var state = stateStack.pop();
+             state = stateStack.pop();
              this._data = state.data;
              this._dimAtomsOrQuery = state.dimAtomsOrQuery;
          } 
@@ -470,7 +472,8 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
              
              do {
                  var dimAtomOr = this._dimAtomsOrQuery.item,
-                     childData = this._data._childrenByKey[dimAtomOr.dimension.name + ":" + dimAtomOr.key];
+                     childKey  = dimAtomOr.key ? (dimAtomOr.dimension.name + ":" + dimAtomOr.key) : '',
+                     childData = this._data._childrenByKey[childKey];
                  
                  // Also, advance the test of a leaf child data with no datums, to avoid backtracking
                  if(childData && (depth < H - 1 || childData._datums.length)) {
@@ -499,7 +502,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
              // No more OR atoms in this _data
              
              // Pop parent data, if any
-             var state = stateStack.pop();
+             state = stateStack.pop();
              if(!state) {
                  return 0; // finished
              }

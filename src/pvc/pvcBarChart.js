@@ -34,10 +34,10 @@ pvc.BarChart = pvc.CategoricalAbstract.extend({
         
         this._addVisualRoles({
             /* value: required, continuous, numeric */
-            value:  { isMeasure: true, isRequired: true, isPercent: this.options.stacked,  isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' },
+            value:  { isMeasure: true, isRequired: true, isPercent: this.options.stacked,  requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' },
             
             /* value2: continuous, numeric */
-            value2: { isMeasure: true, isPercent: this.options.stacked, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
+            value2: { isMeasure: true, isPercent: this.options.stacked, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
         });
     },
     

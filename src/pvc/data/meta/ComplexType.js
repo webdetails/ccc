@@ -62,6 +62,25 @@ function(dimTypeSpecs){
     }
 })
 .add(/** @lends pvc.data.ComplexType# */{
+    describe: function(){
+
+        var out = ["\n------------------------------------------"];
+        out.push("Complex Type Information");
+        
+        this._dimsList.forEach(function(type){
+            var features = [];
+            
+            features.push(type.valueTypeName);
+            if(type.isComparable) features.push("comparable");
+            if(!type.isDiscrete)  features.push("continuous");
+            
+            out.push("  " + type.name + " (" + features.join(', ') + ")");
+        });
+        
+        out.push("------------------------------------------");
+
+        return out.join("\n");
+    },
     
     /**
      * Obtains a dimension type given its name.
@@ -218,7 +237,7 @@ function(dimTypeSpecs){
                         def.query(def.own(this._dims))
                             .where(function(dimType){ return dimType.playingPercentVisualRole(); })
                             .object({
-                                name:  function(dimType){ return dimType.name; }, 
+                                name:  function(dimType){ return dimType.name; } 
                             })
                     );
         }

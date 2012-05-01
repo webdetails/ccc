@@ -4,6 +4,7 @@ var pvc = {
     // 1 - errors 
     // 2 - errors, warnings
     // 3 - errors, warnings, info
+    // 4 - verbose
     debug: 0
 };
 
@@ -199,6 +200,11 @@ pvc.toGrayScale = function(color, alpha, maxGrayLevel){
         avg = maxGrayLevel;
     }
     
+    if(alpha == null){
+        alpha = color.opacity;
+        //alpha = 0.6;
+    }
+    
     //var avg = Math.round( (color.r + color.g + color.b)/3);
     return pv.rgb(avg, avg, avg, alpha != null ? alpha : 0.6);//.brighter();
 };
@@ -282,9 +288,37 @@ pv.Panel.prototype.add = function(){
 
 // @replace
 pv.Mark.prototype.render = function(){
-    // ensure zOrder is up to date
+    /* For the first render, take it from the top. */
+    if (this.parent && !this.root.scene) {
+        this.root.render();
+        return;
+    }
+    
+    /* Ensure zOrder is up to date */
     sortChildren.call(this);
-    markRender.apply(this, arraySlice.call(arguments));
+    
+    /* Assign a new render id to the root mark */
+    var rootId = this.root._rootId;
+    if(rootId == null){
+        rootId = this.root._rootId = def.nextId('rootMarks');
+    }
+    
+    this.root._renderId = def.nextId("render" + rootId);
+    
+    if(pvc.debug >= 4){
+        pvc.log("BEGIN RENDER " + this.root._renderId);
+    }
+    
+    /* Render */
+    markRender.apply(this, arguments);
+    
+    if(pvc.debug >= 4){
+        pvc.log("END RENDER " + this.root._renderId);
+    }
+};
+
+pv.Mark.prototype.renderId = function(){
+    return this.root._renderId;
 };
 
 function sortChildren(){
@@ -313,6 +347,65 @@ function sortChildren(){
         }
     }
 }
+
+/* DOM */
+/**
+ * Inserts the specified child <i>n</i> at the given index. 
+ * Any child from the given index onwards will be moved one position to the end. 
+ * If <i>index</i> is null, this method is equivalent to
+ * {@link #appendChild}. 
+ * If <i>n</i> is already part of the DOM, it is first
+ * removed before being inserted.
+ *
+ * @throws Error if <i>index</i> is non-null and greater than the current number of children.
+ * @returns {pv.Dom.Node} the inserted child.
+ */
+pv.Dom.Node.prototype.insertAt = function(n, index) {
+    var L;
+    if (index == null || index === (L = this.childNodes.length)){     
+        return this.appendChild(n);
+    }
+    
+    if(index > L){
+        throw new Error("Index out of range.");
+    }
+    
+    if (n.parentNode) {
+        n.parentNode.removeChild(n);
+    }
+    
+    var r = this.childNodes[index];
+    n.parentNode = this;
+    n.nextSibling = r;
+    n.previousSibling = r.previousSibling;
+    if (r.previousSibling) {
+        r.previousSibling.nextSibling = n;
+    } else {
+        if (r == this.lastChild) this.lastChild = n;
+        this.firstChild = n;
+    }
+    this.childNodes.splice(index, 0, n);
+    return n;
+};
+
+/**
+ * Removes the child node at the specified index from this node.
+ */
+pv.Dom.Node.prototype.removeAt = function(i) {
+  var n = this.childNodes[i];
+  if(n){
+      this.childNodes.splice(i, 1);
+      if (n.previousSibling) n.previousSibling.nextSibling = n.nextSibling;
+      else this.firstChild = n.nextSibling;
+      if (n.nextSibling) n.nextSibling.previousSibling = n.previousSibling;
+      else this.lastChild = n.previousSibling;
+      delete n.nextSibling;
+      delete n.previousSibling;
+      delete n.parentNode;
+  }
+  return n;
+};
+
 
 /* Local Properties */
 /**

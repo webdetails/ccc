@@ -14,6 +14,18 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
     constructor: function(options){
 
+        options = def.set(options, 
+                'orthoAxisOrdinal', true,
+                'legend', false);
+        
+        if(options.useCompositeAxis){
+            options.isMultiValued = true;
+        }
+        
+        if(options.scalingType && !options.colorScaleType){
+            options.colorScaleType = options.scalingType;
+        }
+        
         this.base(options);
 
         var defaultOptions = {
@@ -23,13 +35,13 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             measuresIndexes: [2],
 
             //multi-dimensional clickable label
-            useCompositeAxis:false,
             showValues: true,
             axisOffset: 0,
             
             orientation: "vertical",
-            // use a categorical here based on series labels
-            scalingType: "linear",    // "normal" (distribution) or "linear"
+            
+            colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
+            
             normPerBaseCategory: true,
             numSD: 2,                 // width (only for normal distribution)
             nullShape: undefined,
@@ -41,17 +53,9 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             maxColor: undefined, //"darkgreen",
             nullColor:  "#efc5ad"  // white with a shade of orange
         };
-
+        
         // Apply options
         pvc.mergeDefaults(this.options, defaultOptions, options);
-
-        // enforce some options  for the HeatGridChart
-        this.options.orthoAxisOrdinal = true;
-        this.options.legend = false;
-        this.options.orginIsZero = true;
-        if(this.options.useCompositeAxis){//force array support
-            this.options.isMultiValued = true;
-        }
     },
     
     /**
@@ -64,8 +68,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         
         // TODO
         this._addVisualRoles({
-            value:  { isMeasure: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value'  },
-            value2: { isMeasure: true, isSingleDimension: true, isDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
+            value:  { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value'  },
+            value2: { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
         });
     },
     
@@ -75,10 +79,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
         var options = this.options;
         return new pvc.HeatGridChartPanel(this, parentPanel, {
-            heatGridSizeRatio:  options.heatGridSizeRatio,
-            maxHeatGridSize:    options.maxHeatGridSize,
-            showValues:         options.showValues,
-            orientation:        options.orientation
+            showValues:  options.showValues,
+            orientation: options.orientation
         });
     }
 });
@@ -87,8 +89,6 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
  * HeatGrid chart panel. Generates a heatGrid chart. Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
  * <i>showValues</i> - Show or hide heatGrid value. Default: false
- * <i>heatGridSizeRatio</i> - In multiple series, percentage of inner
- * band occupied by heatGrids. Default: 0.5 (50%)
  * <i>maxHeatGridSize</i> - Maximum size of a heatGrid in pixels. Default: 2000
  *
  * Has the following protovis extension points:
@@ -98,14 +98,11 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
  * <i>heatGridPanel_</i> - for the panel where the heatGrids sit
  * <i>heatGridLabel_</i> - for the main heatGrid label
  */
-pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
+pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
     anchor: 'fill',
     pvHeatGrid: null,
     pvHeatGridLabel: null,
     data: null,
-
-    heatGridSizeRatio: 0.5,
-    maxHeatGridSize: 200,
 
     showValues: true,
     orientation: "vertical",
@@ -119,8 +116,6 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     defaultBorder: 1,
     nullBorder: 2,
     selectedBorder: 2,
-    
-    selectNullValues: false,
 
     /**
      * @override
@@ -160,8 +155,6 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         var sizeDimName = this.sizeDimName;
         var colorDimName = this.colorDimName;
         
-        this.selectNullValues = options.nullShape != null;
-        
         // colors
         options.nullColor = pv.color(options.nullColor);
         
@@ -174,9 +167,9 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
-        // reuse existings scales
-        var xScale = chart.xAxisPanel.scale;
-        var yScale = chart.yAxisPanel.scale;
+        /* Use existing scales */
+        var xScale = chart.axes.x.scale,
+            yScale = chart.axes.y.scale;
 
         /* Determine cell dimensions. */
         var w = (xScale.max - xScale.min) / xScale.domain().length;
@@ -210,7 +203,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         if(colorDimName){
             fillColorScaleByColKey =  pvc.color.scales(def.create(false, this.chart.options, {
                 /* Override/create these options, inherit the rest */
-                type: this.chart.options.scalingType, 
+                type: options.colorScaleType, 
                 data: colRootData,
                 colorDimension: this.colorDimName
             }));
@@ -229,7 +222,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             if(detectSelection && 
                dataEngine.owner.selectedCount() > 0 && 
                !this.datum().isSelected){
-                 color = pvc.toGrayScale(color);
+                 color = pvc.toGrayScale(color, 0.6);
             }
             
             return color;
@@ -505,7 +498,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
      * Renders the heat grid panel.
      * @override
      */
-    _renderSignums: function(){
+    _renderInteractive: function(){
         this.pvPanel.render();
     }
 });
