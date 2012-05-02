@@ -168,8 +168,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             .lockValue('visible', this.showLines)
             
             /* Position & size */
-            .override('x',  function(){ return this.scene.basePosition;  })
-            .override('y',  function(){ return this.scene.orthoPosition; })
+            .override('x', function(){ return this.scene.basePosition;  })
+            .override('y', function(){ return this.scene.orthoPosition; })
             ;
         
         this.pvLine = line.pvMark;
@@ -210,7 +210,15 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         this.pvDot = dot.pvMark;
         
         // -- COLOR --
-        if(hasColorRole){
+        if(!hasColorRole){
+            if(!myself.showLines){
+                dot.override('normalColor', function(type){
+                    var color = this.base(type);
+                    color.opacity = 0.8;
+                    return color;
+                });
+            }
+        } else {
             var colorScale = this._getColorRoleScale(data);
             
             line.override('normalColor', function(type){
@@ -238,14 +246,15 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                         color = color.darker();
                     }
                     
-                    color.opacity = 0.8;
+                    if(!myself.showLines){
+                        color.opacity = 0.8;
+                    }
                 }
                 
                 return color;
             });
             
             dot.override('interactiveColor', function(type, color){
-                var scene = this.scene;
                 if(this.scene.isActive) {
                     // Don't make border lighter on active
                     return color;
