@@ -369,7 +369,16 @@ def.type('pvc.data.Data', pvc.data.Complex)
         
         return def.query(this._children);
     },
-    
+
+    /**
+     * Obtains the number of children.
+     *
+     * @type number
+     */
+    childCount: function(){
+        return this._children ? this._children.length : 0;
+    },
+
     /**
      * Obtains an enumerable of the leaf data instances of this data.
      * 

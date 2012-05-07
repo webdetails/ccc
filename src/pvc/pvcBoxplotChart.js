@@ -237,7 +237,7 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         } else {
             this.DF.secBasePosFunc =
                 function(d){
-                    return oScale(d.category) + oScale.range().band/2;
+                    return oScale(d.category);
                 };
         }
         

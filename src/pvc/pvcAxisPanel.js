@@ -21,6 +21,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     panelName: "axis", // override
     scale: null,
     fullGrid: false,
+    fullGridCrossesMargin: true,
+    ruleCrossesMargin: true,
     font: '9px sans-serif', // label font
     titleFont: '12px sans-serif',
     title: undefined,
@@ -130,8 +132,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //  40 - labels       (on main foreground panel)
         
         // Range
-        var rMin  = this.pvScale.min,
-            rMax  = this.pvScale.max,
+        var rMin  = this.ruleCrossesMargin ?  0 : this.pvScale.min,
+            rMax  = this.ruleCrossesMargin ?  this.pvScale.size : this.pvScale.max,
             rSize = rMax - rMin,
             ruleParentPanel = this.pvPanel;
 
@@ -171,7 +173,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // ex: anchor = bottom
             [this.anchorOpposite()](0)     // top    (of the axis panel)
             [this.anchorLength()  ](rSize) // width  
-            [this.anchorOrtho()   ](rMin); // left
+            [this.anchorOrtho()   ](rMin)  // left
+            .svg({ 'stroke-linecap': 'square' })
+            ;
 
         if (this.isDiscrete){
             if(this.useCompositeAxis){
@@ -183,11 +187,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.renderLinearAxis();
         }
     },
-    
-    renderOrdinalAxis: function(){
 
+    _getOrthoScale: function(){
+        var orthoType = this.axis.type === 'base' ? 'ortho' : 'base';
+        return this.chart.axes[orthoType].scale; // index 0
+    },
+
+    renderOrdinalAxis: function(){
         var myself = this,
-            options = this.chart.options,
             scale = this.pvScale,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
@@ -224,11 +231,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             //[anchorOpposite   ](0)
             [anchorLength     ](null)
-            [anchorOrtho      ](function(child){
-                return scale(child.value) + (scale.range().band / 2);
-            })
+            [anchorOrtho      ](function(child){ return scale(child.value); })
             [anchorOrthoLength](this.tickLength)
-            .strokeStyle('rgba(0,0,0,0)'); // Transparent by default, but extensible
+            //.strokeStyle('black')
+            .strokeStyle('rgba(0,0,0,0)') // Transparent by default, but extensible
+            ;
 
         var align = this.isAnchorTopOrBottom() 
                     ? "center"
@@ -272,28 +279,55 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
         
         if(this.fullGrid){
-            // Grid rules are visible on all ticks,
-            //  but on the first tick. 
-            // The 1st tick is not shown.
-            // The 2nd tick separates categ 1 from categ 2.
-            // The Nth tick separates categ. N-1 from categ. N
-            // No grid line is drawn at the end.
-            var ruleLength = this.parent[anchorOrthoLength] - 
-                             this[anchorOrthoLength],
-                halfBand = scale.range().margin / 2;
+            var fullGridRootScene = this._buildDiscreteFullGridScene(data),
+                orthoScale = this._getOrthoScale(),
+                ruleLength = this.fullGridCrossesMargin ?
+                                    orthoScale.size :
+                                    (orthoScale.max - orthoScale.min),
+                             // this.parent[anchorOrthoLength] - this[anchorOrthoLength],
+                halfStep = scale.range().step / 2,
+                count = fullGridRootScene.childNodes.length;
             
             this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
                 .extend(this.pvRule)
-                .data(data._children)
+                .data(fullGridRootScene.childNodes)
                 .strokeStyle("#f0f0f0")
-                [anchorOpposite   ](-ruleLength)
+                [anchorOpposite   ](this.fullGridCrossesMargin ? -ruleLength : -orthoScale.max)
+                [anchorOrthoLength](ruleLength)
                 [anchorLength     ](null)
                 [anchorOrtho      ](function(child){
-                    return scale(child.value) - halfBand;
+                    var value = scale(child.acts.value.value);
+                    if(this.index +  1 < count){
+                        return value - halfStep;
+                    }
+
+                    // end line
+                    return value + halfStep;
                 })
-                [anchorOrthoLength]( ruleLength)
-                .visible(function(){return (this.index > 0);});
+                ;
         }
+    },
+
+    _buildDiscreteFullGridScene: function(data){
+        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
+        
+        data.children()
+            .each(function(childData){
+                var childScene = new pvc.visual.Scene(rootScene, {group: childData});
+                childScene.acts.value = {
+                    value: childData.value,
+                    label: childData.label
+                };
+            });
+
+        /* Add a last scene, with the same data group */
+        var lastScene  = rootScene.lastChild;
+        if(lastScene){
+            var endScene = new pvc.visual.Scene(rootScene, {group: lastScene.group});
+            endScene.acts.value = lastScene.acts.value;
+        }
+
+        return rootScene;
     },
 
     renderLinearAxis: function(){
@@ -305,7 +339,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                         scale, 
                         this.domainRoundMode === 'tick',
                         this.desiredTickCount),
-            anchorOpposite    = this.anchorOpposite(),    
+            anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
@@ -345,17 +379,22 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Now do the full grids
         if(this.fullGrid){
             // Grid rules are visible (only) on MAJOR ticks.
-            var ruleLength = this.parent[anchorOrthoLength] - 
-                             this[anchorOrthoLength];
+            var orthoScale = this._getOrthoScale(),
+                ruleLength = this.fullGridCrossesMargin ?
+                                    orthoScale.size :
+                                    (orthoScale.max - orthoScale.min)
+                                // this.parent[anchorOrthoLength] - this[anchorOrthoLength],
+                ;
             
             this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
                 .extend(this.pvRule)
             	.data(ticks)
                 .strokeStyle("#f0f0f0")
-                [anchorOpposite   ](-ruleLength)
+                [anchorOpposite   ](this.fullGridCrossesMargin ? -ruleLength : -orthoScale.max)
+                [anchorOrthoLength](ruleLength)
                 [anchorLength     ](null)
                 [anchorOrtho      ](scale)
-                [anchorOrthoLength]( ruleLength);
+                ;
         }
     },
     

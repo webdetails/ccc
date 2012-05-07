@@ -2,14 +2,18 @@
 /**
  * A NormalizedBarChart is a 100% stacked bar chart.
  */
-pvc.NormalizedBarChart = pvc.CategoricalAbstract.extend({
+pvc.NormalizedBarChart = pvc.BarAbstract.extend({
 
     constructor: function(options){
+
+        options = def.set(options,
+                    'stacked', true,
+                    'percentageNormalized', true);
 
         this.base(options);
 
         // Apply options
-        options = pvc.mergeDefaults(this.options, pvc.NormalizedBarChart.defaultOptions, options);
+        pvc.mergeDefaults(this.options, pvc.NormalizedBarChart.defaultOptions, options);
     },
 
     /**
@@ -18,26 +22,10 @@ pvc.NormalizedBarChart = pvc.CategoricalAbstract.extend({
      */
     _processOptionsCore: function(options){
 
-        options.waterfall = false;
         options.stacked = true;
         options.percentageNormalized = true;
 
         this.base(options);
-    },
-    
-
-    /**
-     * Initializes each chart's specific roles.
-     * @override
-     */
-    _initVisualRoles: function(){
-        
-        this.base();
-        
-        this._addVisualRoles({
-            /* value: required, continuous, numeric */
-            value: { isMeasure: true, isRequired: true, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value' }
-        });
     },
     
     /* @override */
@@ -45,8 +33,7 @@ pvc.NormalizedBarChart = pvc.CategoricalAbstract.extend({
         pvc.log("Prerendering in NormalizedBarChart");
 
         var options = this.options;
-        return new pvc.WaterfallChartPanel(this, parentPanel, {
-            waterfall:    false,
+        return new pvc.NormalizedBarPanel(this, parentPanel, {
             barSizeRatio: options.barSizeRatio,
             maxBarSize:   options.maxBarSize,
             showValues:   options.showValues,
@@ -56,9 +43,6 @@ pvc.NormalizedBarChart = pvc.CategoricalAbstract.extend({
     }
 }, {
     defaultOptions: {
-        showValues:   true,
-        barSizeRatio: 0.9,
-        maxBarSize:   2000,
-        valuesAnchor: "center"
+        showValuePercentage: true
     }
 });

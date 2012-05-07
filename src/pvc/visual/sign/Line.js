@@ -6,8 +6,6 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     
     this.base(panel, pvMark, keyArgs);
     
-    var options = this.chart.options;
-    
     this.lockValue('segmented', true) // fixed
         .lockValue('antialias', true)
         ;
@@ -27,6 +25,16 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
         ;
 })
 .add({
+    _addInteractive: function(keyArgs){
+        keyArgs = def.setDefaults(keyArgs, 
+                        'noHoverable',   true,
+                        'noTooltips',    true,
+                        'noClick',       true,
+                        'noDoubleClick', true);
+        
+        this.base(keyArgs);
+    },
+
     /* Sign Spatial Coordinate System
      *  -> Cartesian coordinates
      *  -> Grows Up, vertically, and Right, horizontally
@@ -45,19 +53,25 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     
     /* STROKE WIDTH */
     strokeWidth: function(){
-        var strokeWidth = this.normalStrokeWidth();
+        var strokeWidth = this.baseStrokeWidth();
         if(this.scene.anyInteraction()) {
             strokeWidth = this.interactiveStrokeWidth(strokeWidth);
+        } else {
+            strokeWidth = this.normalStrokeWidth(strokeWidth);
         }
         
         return strokeWidth;
     },
     
-    normalStrokeWidth: function(){
+    baseStrokeWidth: function(){
         /* Delegate to possible lineWidth extension or default to 1.5 */
         return this.delegate(1.5);
     },
-    
+
+    normalStrokeWidth: function(strokeWidth){
+        return strokeWidth;
+    },
+
     interactiveStrokeWidth: function(strokeWidth){
         if(this.isActiveSeriesAware && this.scene.isActiveSeries()){
             /* - Ensure a normal width of at least 1,
@@ -86,9 +100,8 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
                 return pv.Color.names.darkgray.darker().darker();
             }
             
-            switch(type) {
-                case 'stroke':
-                    return pvc.toGrayScale(color);
+            if(type === 'stroke'){
+                return this.dimColor(type, color);
             }
         }
 

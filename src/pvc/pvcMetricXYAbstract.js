@@ -41,6 +41,12 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
             'base':  'x',
             'ortho': 'y'
         };
+
+        var parent = this.parent;
+        if(parent) {
+            this._xRole = parent._xRole;
+            this._yRole = parent._yRole;
+        }
     },
 
     /**
@@ -71,6 +77,17 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
                 defaultDimensionName: isV1Compat ? 'value' : 'value2'
             }
         });
+
+        this._xRole = this.visualRoles('x');
+        this._yRole = this.visualRoles('y');
+    },
+
+    _initData: function(){
+        this.base.apply(this, arguments);
+
+        // Cached
+        this._xDim = this.dataEngine.dimensions(this._xRole.firstDimensionName());
+        this._yDim = this.dataEngine.dimensions(this._yRole.firstDimensionName());
     }
 }, {
     defaultOptions: {

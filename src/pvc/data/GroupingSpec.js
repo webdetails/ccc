@@ -202,16 +202,16 @@ def.type('pvc.data.GroupingDimensionSpec')
 })
 .add( /** @lends pvc.data.GroupingDimensionSpec */ {
     compareDatums: function(a, b){
-        //if(this.type.isComparable) {
+        if(this.type.isComparable) {
             var result  = this.comparer(a.atoms[this.name], b.atoms[this.name]);
             if(result !== 0) {
                 return result;
             }
             return 0;
-        //} 
+        }
         
         // Use datum source order
-        //return this.reverse ? (b.id - a.id) : (a.id - b.id);
+        return this.reverse ? (b.id - a.id) : (a.id - b.id);
     }
 });
 

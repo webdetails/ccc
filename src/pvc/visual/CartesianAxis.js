@@ -52,11 +52,11 @@ def.type('pvc.visual.CartesianAxis')
     
     var options = chart.options;
     
-    this.id = pvc.visual.CartesianAxis.getId(this.type, this.index);
+    this.id = $VCA.getId(this.type, this.index);
     
-    this.orientation = pvc.visual.CartesianAxis.getOrientation(this.type, options.orientation);
-    this.orientedId  = pvc.visual.CartesianAxis.getOrientedId(this.orientation, this.index);
-    this.optionsId   = pvc.visual.CartesianAxis.getOptionsId(this.orientation, this.index);
+    this.orientation = $VCA.getOrientation(this.type, options.orientation);
+    this.orientedId  = $VCA.getOrientedId(this.orientation, this.index);
+    this.optionsId   = $VCA.getOptionsId(this.orientation, this.index);
     
     this.upperOrientedId = def.firstUpperCase(this.orientedId);
     
@@ -93,25 +93,18 @@ def.type('pvc.visual.CartesianAxis')
      * @type function
      */
     sceneScale: function(){
-        var scale = this.scale,
-            roleName = this.role.name,
-            sceneScale;
-        
-        if(this.role.grouping.isDiscrete()){
-            var halfBand = scale.range().band / 2;
-            
-            sceneScale = function(scene){
-                return halfBand + scale(scene.acts[roleName].value);
-            };
-            
-            sceneScale.halfBand = halfBand;
-        } else {
-            sceneScale = function(scene){
-                return scale(scene.acts[roleName].value);
-            };
+        var roleName = this.role.name,
+            grouping = this.role.grouping;
+
+        if(grouping.isSingleDimension && grouping.firstDimension.type.valueType === Number){
+            return this.scale.by(function(scene){
+                return scene.acts[roleName].value || 0; // null -> 0
+            });
         }
-        
-        return sceneScale;
+
+        return this.scale.by(function(scene){
+            return scene.acts[roleName].value;
+        });
     },
     
     /**
@@ -138,6 +131,8 @@ def.type('pvc.visual.CartesianAxis')
     }
 });
 
+var $VCA = pvc.visual.CartesianAxis;
+
 function coreOptions(handler, name) {
     var value;
     
@@ -161,8 +156,18 @@ function coreOptions(handler, name) {
         return value;
     }
     
+    /* Custom option post handler */
+    if(handler && handler.resolvePost) {
+        value = handler.resolvePost.call(this, name);
+        if(value !== undefined) {
+            return value;
+        }
+    }
+
     /* Common (axis) */
-    return commonOptions.call(this, name);
+    value = commonOptions.call(this, name);
+
+    return value;
 }
 
 /**
@@ -172,7 +177,7 @@ function coreOptions(handler, name) {
  * @param {string} chartOrientation The orientation of the chart. One of the values: 'horizontal' or 'vertical'.
  * 
  * @type string
-pvc.visual.CartesianAxis.getTypeFromOrientation = function(axisOrientation, chartOrientation){
+$VCA.getTypeFromOrientation = function(axisOrientation, chartOrientation){
     return ((axisOrientation === 'x') === (chartOrientation === 'vertical')) ? 'base' : 'ortho';  // NXOR
 };
  */
@@ -185,7 +190,7 @@ pvc.visual.CartesianAxis.getTypeFromOrientation = function(axisOrientation, char
  * 
  * @type string
  */
-pvc.visual.CartesianAxis.getOrientation = function(type, chartOrientation){
+$VCA.getOrientation = function(type, chartOrientation){
     return ((type === 'base') === (chartOrientation === 'vertical')) ? 'x' : 'y';  // NXOR
 };
 
@@ -195,7 +200,7 @@ pvc.visual.CartesianAxis.getOrientation = function(type, chartOrientation){
  * @param {number} index The index of the axis within its type. 
  * @type string
  */
-pvc.visual.CartesianAxis.getOrientedId = function(orientation, index){
+$VCA.getOrientedId = function(orientation, index){
     switch(index) {
         case 0: return orientation; // x, y
         case 1: return "second" + orientation.toUpperCase(); // secondX, secondY
@@ -210,7 +215,7 @@ pvc.visual.CartesianAxis.getOrientedId = function(orientation, index){
  * @param {number} index The index of the axis within its type. 
  * @type string
  */
-pvc.visual.CartesianAxis.getId = function(type, index){
+$VCA.getId = function(type, index){
     if(index === 0) {
         return type; // base, ortho
     }
@@ -225,7 +230,7 @@ pvc.visual.CartesianAxis.getId = function(type, index){
  * @param {number} index The index of the axis within its type. 
  * @type string
  */
-pvc.visual.CartesianAxis.getOptionsId = function(orientation, index){
+$VCA.getOptionsId = function(orientation, index){
     switch(index) {
         case 0: return orientation; // x, y
         case 1: return "second"; // second
@@ -234,6 +239,75 @@ pvc.visual.CartesianAxis.getOptionsId = function(orientation, index){
     return orientation + "" + (index + 1); // y3, x4,...
 };
 
+$VCA.createAllDefaultOptions = function(options){
+    var types   = ['base', 'ortho'],
+        indexes = [0, 1],
+        orientations = ['x', 'y'],
+        optionNames = [
+            'Position',
+            'Size',
+            'FullGrid',
+            'FullGridCrossesMargin',
+            'RuleCrossesMargin',
+            'EndLine',
+            'DomainRoundMode',
+            'DesiredTickCount',
+            'MinorTicks',
+            'ClickAction',
+            'DoubleClickAction',
+            'Title',
+            'TitleSize',
+            'LabelFont',
+            'TitleFont',
+            'OriginIsZero',
+            'Offset',
+            'FixedMin',
+            'FixedMax',
+            'OverlappedLabelsHide',
+            'OverlappedLabelsMaxPct',
+            'Composite'
+       ],
+       globalDefaults = {
+           'OriginIsZero':      true,
+           'Offset':            0,
+           'Composite':         false,
+           'OverlappedLabelsHide': false,
+           'OverlappedLabelsMaxPct': 0.2,
+           'LabelFont':         '9px sans-serif',
+           'TitleFont':         '12px sans-serif', // 'bold '
+           'MinorTicks':        true,
+           'FullGrid':          false,
+           'FullGridCrossesMargin': true,
+           'RuleCrossesMargin': true,
+           'EndLine':           false,
+           'DomainRoundMode':   'none'
+       };
+
+    function addOption(optionId, value){
+        if(!(optionId in options)){
+            options[optionId] = value;
+        }
+    }
+    
+    optionNames.forEach(function(name){
+        indexes.forEach(function(index){
+            /* bareId options */
+            types.forEach(function(type){
+                addOption($VCA.getId(type, index) + name);
+            });
+
+            /* legacy options - optionsId */
+            orientations.forEach(function(orientation){
+                addOption($VCA.getOptionsId(orientation, index) + 'Axis' + name);
+            });
+        });
+
+        /* common options */
+        addOption('axis' + name, globalDefaults[name]);
+    });
+
+    return options;
+};
 
 /* PRIVATE STUFF */
 var axisOptionHandlers = {
@@ -292,7 +366,7 @@ var axisOptionHandlers = {
      * 2 <- secondAxisOriginIsZero
      */
     OriginIsZero:  {
-        resolve: function(name){
+        resolvePost: function(name){
             switch(this.index) {
                 case 0: return finalOptions.call(this, 'originIsZero');
                 case 1: return finalOptions.call(this, 'secondAxisOriginIsZero');
@@ -305,7 +379,7 @@ var axisOptionHandlers = {
      * 2 <- secondAxisOffset, 
      */
     Offset:  {
-        resolve: function(name){
+        resolvePost: function(name){
             switch(this.index) {
                 case 0: return finalOptions.call(this, 'axisOffset');
                 case 1: return finalOptions.call(this, 'secondAxisOffset');
@@ -411,7 +485,7 @@ function commonOptions(name){
  * @type string
  */
 function firstOptions(name) {
-    var firstOptionId = pvc.visual.CartesianAxis.getOptionsId(this.orientation, 0);
+    var firstOptionId = $VCA.getOptionsId(this.orientation, 0);
     
     name = buildOptionsIdName.call({optionsId: firstOptionId}, name);
     

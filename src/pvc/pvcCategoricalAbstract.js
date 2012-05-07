@@ -14,6 +14,12 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             'base':  'category',
             'ortho': this.options.orthoAxisOrdinal ? 'series' : 'value'
         };
+
+        var parent = this.parent;
+        if(parent) {
+            this._catRole = parent._catRole;
+            this._catGrouping = parent._catGrouping;
+        }
     },
 
     /**
@@ -40,8 +46,26 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         this._addVisualRoles({
             category: { isRequired: true, defaultDimensionName: 'category*' }
         });
+
+        // ---------
+        // Cached
+        this._catRole = this.visualRoles('category');
     },
-    
+
+    _bindVisualRoles: function(){
+        this.base.apply(this, arguments);
+
+        // Cached
+        this._catGrouping = this._catRole.grouping.singleLevelGrouping();
+    },
+
+    _initData: function(){
+        this.base.apply(this, arguments);
+
+        // Cached
+        this._catAxisData = this.dataEngine.groupBy(this._catGrouping, {visible: true});
+    },
+
     /**
      * @override
      */

@@ -49,19 +49,10 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
 
         // ------------------
         // DATA
-        var de = chart.dataEngine,
-            // Two multi-dimension single-level data groupings
-            catGrouping    = chart.visualRoles('category').grouping.singleLevelGrouping(),
-            serGrouping    = chart.visualRoles('series'  ).grouping.singleLevelGrouping(),
-            valueDimName   = chart.visualRoles('value').firstDimensionName(),
-            isBaseDiscrete = catGrouping.isDiscrete(),
-            
-            keyArgs      = { visible: true },
-            catAxisData  = de.groupBy(catGrouping, keyArgs),
-            serAxisData  = de.groupBy(serGrouping, keyArgs),
-            data         = chart._getVisibleData(), // shared "categ then series" grouped data
-            isDense      = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
-            rootScene = this._buildScene(catAxisData, serAxisData, data, valueDimName, isBaseDiscrete);
+        var isBaseDiscrete = chart._catGrouping.isDiscrete(),
+            data = chart._getVisibleData(), // shared "categ then series" grouped data
+            isDense = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
+            rootScene = this._buildScene(data, isBaseDiscrete);
 
         // Disable selection?
         if(isDense && (options.selectable || options.hoverable)) {
@@ -109,7 +100,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             .override('color', function(type){
                 return showAreas ? this.base(type) : invisibleFill;
             })
-            .override('normalColor', function(type){
+            .override('baseColor', function(type){
                 var color = this.base(type);
                 if(color && !this.hasDelegate() && areaFillColorAlpha != null){
                     color = color.alpha(areaFillColorAlpha);
@@ -183,8 +174,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
                 return this.base(type);
             })
-            .override('normalColor', lineAndDotNormalColor)
-            .override('normalStrokeWidth', function(){
+            .override('baseColor', lineAndDotNormalColor)
+            .override('baseStrokeWidth', function(){
                 if(!showLines || !this.hasDelegate()) {
                     return isDense ? 0.00001 : 1.5;
                 }
@@ -228,8 +219,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 // Follow normal logic
                 return this.base(type);
             })
-            .override('normalColor', lineAndDotNormalColor)
-            .override('normalSize', function(){
+            .override('baseColor', lineAndDotNormalColor)
+            .override('baseSize', function(){
                 /* When not showing dots, 
                  * but a datum is alone and 
                  * wouldn't be visible using lines or areas,  
@@ -303,15 +294,13 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         return marks;
     },
   
-    _buildScene: function(catAxisData, serAxisData, data, valueDimName, isBaseDiscrete){
+    _buildScene: function(data, isBaseDiscrete){
         var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
         
         var chart = this.chart,
-            ownerValueDim = data.owner.dimensions(valueDimName),
             options = chart.options,
             isStacked = options.stacked,
             visibleKeyArgs = {visible: true},
-            createNullIntermediates = this.showAreas,
             orthoScale = chart.axes.ortho.scale,
             orthoNullValue = def.scope(function(){
                 var domain = orthoScale.domain(),
@@ -329,12 +318,12 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         
         // --------------
         
-        var categDatas = catAxisData._children;
+        var categDatas = chart._catAxisData._children;
         
         /** 
          * Create starting scene tree 
          */
-        serAxisData
+        chart._serAxisData
             .children()
             .each(createSeriesScene, this);
         
@@ -381,12 +370,12 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                     label: categData1.label
                 };
                 
-                var value = group ? group.dimensions(valueDimName).sum(visibleKeyArgs) : null;
+                var value = group ? group.dimensions(chart._valueDim.name).sum(visibleKeyArgs) : null;
                 scene.acts.value = {
                     /* accumulated value, for stacked */
                     accValue: value != null ? value : orthoNullValue,
                     value:    value,
-                    label:    ownerValueDim.format(value)
+                    label:    chart._valueDim.format(value)
                 };
                 
                 scene.isNull = !group; // A virtual scene?
@@ -416,23 +405,24 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 seriesScenes2[c2] = toScene;
                 
                 /* Complete toScene */
-                completeMainScene(
-                        seriesScene,
+                completeMainScene.call(this,
                         fromScene, 
                         toScene,
-                        /* belowScene */ belowSeriesScenes2 && belowSeriesScenes2[c2]);
+                        /* belowScene */
+                        belowSeriesScenes2 && belowSeriesScenes2[c2]);
                 
                 
                 /* Possibly create intermediate scene 
                  * (between fromScene and toScene) 
                  */
                 if(fromScene) {
-                    var interScene = createIntermediateScene(
+                    var interScene = createIntermediateScene.call(this,
                             seriesScene,
                             fromScene, 
                             toScene,
                             toChildIndex,
-                            /* belowScene */ belowSeriesScenes2 && belowSeriesScenes2[c2 - 1]);
+                            /* belowScene */
+                            belowSeriesScenes2 && belowSeriesScenes2[c2 - 1]);
                     
                     if(interScene){
                         seriesScenes2[c2 - 1] = interScene;
@@ -450,8 +440,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             } 
         }
         
-        function completeMainScene(
-                      seriesScenes, 
+        function completeMainScene( 
                       fromScene, 
                       toScene, 
                       belowScene){
@@ -493,7 +482,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                      belowScene){
             
             var interIsNull = fromScene.isNull || toScene.isNull;
-            if(interIsNull && !createNullIntermediates) {
+            if(interIsNull && !this.showAreas) {
                 return null;
             }
             
@@ -510,7 +499,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
                 if(isStacked && isBaseDiscrete) {
                     // The intermediate point is at the start of the "to" band
-                    interBasePosition = toScene.basePosition - sceneBaseScale.halfBand;
+                    interBasePosition = toScene.basePosition - (sceneBaseScale.range().band / 2);
                 } else if(fromScene.isNull) { // Come from NULL
                     // Align directly below the (possibly) non-null dot
                     interBasePosition = toScene.basePosition;
@@ -545,7 +534,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             interScene.acts.value = {
                 accValue: interAccValue,
                 value:    interValue,
-                label:    ownerValueDim.format(interValue)
+                label:    chart._valueDim.format(interValue)
             };
             
             interScene.isIntermediate = true;

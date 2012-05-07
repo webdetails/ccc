@@ -37,6 +37,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.base(options);
 
         pvc.mergeDefaults(this.options, pvc.CartesianAbstract.defaultOptions, options);
+
+        var parent = this.parent;
+        if(parent) {
+            this._serRole = parent._serRole;
+            this._serGrouping = parent._serGrouping;
+        }
     },
     
     /**
@@ -50,8 +56,18 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this._addVisualRoles({
             series: { isRequired: true, defaultDimensionName: 'series*' }
         });
+
+        // Cached
+        this._serRole = this.visualRoles('series');
     },
-    
+
+    _bindVisualRoles: function(){
+        this.base.apply(this, arguments);
+
+        // Cached
+        this._serGrouping = this._serRole.grouping.singleLevelGrouping();
+    },
+
     _initData: function(){
         // Clear data related cache
         if(this._visibleDataCache) {
@@ -60,19 +76,21 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         }
         
         this.base.apply(this, arguments);
+
+        // Cached
+        this._serAxisData = this.dataEngine.groupBy(this._serGrouping, {visible: true});
     },
-    
+
     seriesColorScale: function(){
         if(this.parent){
             return this.root.seriesColorScale();
         }
-        
+
         if(!this._seriesColorScale){
-            var serGrouping = this.visualRoles('series').grouping.singleLevelGrouping(),
-                serData = this.dataEngine.owner.groupBy(serGrouping), // visible or invisible
-                seriesValues = serData.children()
-                    .select(function(seriesData){ return seriesData.value; })
-                    .array();
+            // visible or invisible data
+            var seriesValues = this._serAxisData.children()
+                                    .select(function(seriesData){ return seriesData.value; })
+                                    .array();
             
             this._seriesColorScale = this.colors(seriesValues);
         }
@@ -131,20 +149,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.axes[axis.id] = axis;
         this.axes[axis.orientedId] = axis;
         
-        // Create corresponding panel
-        //axesPanels: null,
-        if(axis.visible) {
-            var panel = this._createAxisPanel(axis);
-            
-            this.axesPanels[axis.id] = panel;
-            this.axesPanels[axis.orientedId] = panel;
-            
-            // Legacy fields
-            if(axisIndex <= 1) {
-                this[axis.orientedId + 'Panel'] = panel;
-            }
-        }
-        
         return axis;
     },
     
@@ -162,6 +166,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 anchor:            axis.options('Position'),
                 axisSize:          axis.options('Size'),
                 fullGrid:          axis.options('FullGrid'),
+                fullGridCrossesMargin: axis.options('FullGridCrossesMargin'),
+                ruleCrossesMargin: axis.options('RuleCrossesMargin'),
                 domainRoundMode:   axis.options('DomainRoundMode'),
                 desiredTickCount:  axis.options('DesiredTickCount'),
                 minorTicks:        axis.options('MinorTicks'),
@@ -190,7 +196,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     
     /**
      * Creates a scale for a given axis, assigns it to the axis
-     * and assigns to the scale to special legacy chart instance fields.
+     * and assigns the scale to special v1 chart instance fields.
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
      * @type pv.Scale
@@ -199,7 +205,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var scale = this._createScaleByAxis(axis);
         axis.setScale(scale);
         
-        /* Legacy fields xScale, yScale, secondScale */
+        /* V1 fields xScale, yScale, secondScale */
         if(axis.index == 0) {
             this[axis.orientation + 'Scale'] = scale;
         } else if(axis.index === 1 && axis.type === 'ortho') {
@@ -237,22 +243,17 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         /* DOMAIN */
         var data   = this.dataEngine.groupBy(axis.role.grouping.singleLevelGrouping(), { visible: true }),
             values = data.children().select(function(child){ return child.value; }).array(),
-            scale = new pv.Scale.ordinal(values);
+            scale  = new pv.Scale.ordinal(values);
         
         scale.type = 'Discrete';
         
         /* RANGE */
-        scale.min = 0;
-        scale.max = this._mainContentPanel[(axis.orientation === 'x') ? 'width' : 'height'];
-        
-        var panelSizeRatio = this.options.panelSizeRatio || 0.8;
-        scale.splitBanded(scale.min, scale.max, panelSizeRatio);
-        
-        var range = scale.range(),
-            step  = range.band / panelSizeRatio; // =def (band + margin)
-        
-        range.step   = step;
-        range.margin = step * (1 - panelSizeRatio);
+        this._setAxisScaleRange(scale, axis);
+
+        if(values.length > 0){
+            var bandRatio = this.options.panelSizeRatio || 0.8;
+            scale.splitBandedCenter(scale.min, scale.max, bandRatio);
+        }
         
         return scale;
     },
@@ -283,12 +284,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             dMax = dExtent.max;
             
             // Adding a small offset to the scale's domain:
-            var axisOffset = axis.options('Offset');
-            if(axisOffset > 0){
-                var dOffset = (dMax.getTime() - dMin.getTime()) * axisOffset;
-                dMin = new Date(dMin.getTime() - dOffset);
-                dMax = new Date(dMax.getTime() + dOffset);
-            }
+//            var axisOffset = axis.options('Offset');
+//            if(axisOffset > 0){
+//                var dOffset = (dMax.getTime() - dMin.getTime()) * axisOffset;
+//                dMin = new Date(dMin.getTime() - dOffset);
+//                dMax = new Date(dMax.getTime() + dOffset);
+//            }
         } else {
             dMin = dMax = new Date();
         }
@@ -301,11 +302,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
 
         // Domain rounding
         // TODO: pvc.scaleTicks(scale) does not like Dates...
-        pvc.roundScaleDomain(scale, axis.options('DomainRoundMode'), axis.options('DesiredTickCount'));
+        //pvc.roundScaleDomain(scale, axis.options('DomainRoundMode'), axis.options('DesiredTickCount'));
         
         /* RANGE */
-        scale.min = 0;
-        scale.max = (axis.orientation === 'x') ? this._mainContentPanel.width : this._mainContentPanel.height;
+        this._setAxisScaleRange(scale, axis);
         
         scale.range(scale.min, scale.max);
         
@@ -356,42 +356,64 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         // Domain rounding
         // Must be done before applying offset
+        // because otherwise the offset gets amplified by the rounding
         pvc.roundScaleDomain(scale, axis.options('DomainRoundMode'), axis.options('DesiredTickCount'));
         
         // Adding a small offset to the scale's dMin and dMax,
         //  as long as they are not 0 and originIsZero=true.
         // We update the domain but do not update the ticks cache.
         // The result is we end up showing two zones, on each end, with no ticks.
-        var bypassAxisOffset = false; //def.get(keyArgs, 'bypassAxisOffset', false);
-        var axisOffset = axis.options('Offset');
-        if(!bypassAxisOffset && axisOffset > 0 &&  // TODO axisIndex awareness...
-           (!extent.minLocked || !extent.maxLocked)){ // at least one of min and max isn't locked
-            
-            var domain = scale.domain();
-            dMin = domain[0];
-            dMax = domain[1];
-            
-            var dOffset = (dMax - dMin) * axisOffset;
-            if(!extent.minLocked && !extent.maxLocked){
-                scale.domain(dMin - dOffset, dMax + dOffset);
-            } else if(!extent.minLocked) {
-                scale.domain(dMin - dOffset, dMax);
-            } else {
-                scale.domain(dMin, dMax + dOffset);
-            }
-        }
+//        var bypassAxisOffset = false; //def.get(keyArgs, 'bypassAxisOffset', false);
+//        var axisOffset = axis.options('Offset');
+//        if(!bypassAxisOffset && axisOffset > 0 &&  // TODO axisIndex awareness...
+//           (!extent.minLocked || !extent.maxLocked)){ // at least one of min and max isn't locked
+//
+//            var domain = scale.domain();
+//            dMin = domain[0];
+//            dMax = domain[1];
+//
+//            var dOffset = (dMax - dMin) * axisOffset;
+//            if(!extent.minLocked && !extent.maxLocked){
+//                scale.domain(dMin - dOffset, dMax + dOffset);
+//            } else if(!extent.minLocked) {
+//                scale.domain(dMin - dOffset, dMax);
+//            } else {
+//                scale.domain(dMin, dMax + dOffset);
+//            }
+//        }
         
         // ----------------------------
-
-        /* RANGE */
-        scale.min = 0;
-        scale.max = (axis.orientation === 'x') ? this._mainContentPanel.width : this._mainContentPanel.height;
         
+        /* RANGE */
+        this._setAxisScaleRange(scale, axis);
+
         scale.range(scale.min, scale.max);
         
         return scale;
     },
     
+    _setAxisScaleRange: function(scale, axis){
+        var size = (axis.orientation === 'x') ?
+                        this._mainContentPanel.width :
+                        this._mainContentPanel.height;
+        
+        scale.min    = 0;
+        scale.max    = size; 
+        scale.size   = size; // original size
+        
+        var axisOffset = axis.options('Offset');
+        if(axisOffset > 0){
+            var rOffset = size * axisOffset;
+            scale.offset = rOffset;
+            scale.min += rOffset;
+            scale.max -= rOffset;
+        } else {
+            scale.offset = 0;
+        }
+
+        return scale;
+    },
+
     _getVisibleData: function(){
         var data = this._visibleDataCache;
         if(!data) {
@@ -484,72 +506,26 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         return extent;
     }
 }, {
-    defaultOptions: {
+    defaultOptions: pvc.visual.CartesianAxis.createAllDefaultOptions({
         showAllTimeseries: false,
-        
-        showXScale: true,
-        showYScale: true,
 
-        originIsZero: true,
+        /* Percentage of occupied space over total space in a discrete axis band */
+        panelSizeRatio: 0.9,
 
-        axisOffset: 0,
-                
-        axisOverlappedLabelsHide: false,
-        axisOverlappedLabelsMaxPct:  0.2,
-        
-        axisLabelFont: '9px sans-serif',
-        axisTitleFont: '12px sans-serif', // 'bold '
-        
-        /* Bounds for linear axis */
-        orthoFixedMin: null,
-        orthoFixedMax: null,
-        
-        baseFixedMin: null,
-        baseFixedMax: null,
-        
         // Indicates that the *base* axis is a timeseries
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
         
-        useCompositeAxis: false,
+        originIsZero: true,
 
+        /* Non-standard axes options and defaults */
+        showXScale: true,
+        showYScale: true,
+        
         xAxisPosition: "bottom",
-        xAxisSize: undefined,
-        xAxisFullGrid: false,
-        xAxisEndLine:  false,
-        xAxisDomainRoundMode: 'none',  // for linear scales
-        xAxisDesiredTickCount: null,   // idem
-        xAxisMinorTicks:  true,   // idem
-        xAxisClickAction: null,
-        xAxisDoubleClickAction: null,
-        xAxisTitle: undefined,
-        xAxisTitleSize: undefined,
-
         yAxisPosition: "left",
-        yAxisSize: undefined,
-        yAxisFullGrid: false,
-        yAxisEndLine:  false,
-        yAxisDomainRoundMode: 'none',
-        yAxisDesiredTickCount: null,
-        yAxisMinorTicks:  true,
-        yAxisClickAction: null,
-        yAxisDoubleClickAction: null,
-        yAxisTitle: undefined,
-        yAxisTitleSize: undefined,
-        
-        secondAxisIndependentScale: false,
-        secondAxisOriginIsZero: true,
-        secondAxisOffset: 0,
-        secondAxisColor: "blue",
-        
-        secondAxisSize:  undefined, // defaults to x or y size
-        secondAxisDomainRoundMode: 'none',  // only with independent second scale
-        secondAxisDesiredTickCount: null,   // idem
-        secondAxisMinorTicks: true,
-        secondAxisTitle: undefined,
-        secondAxisTitleSize: undefined,
 
-        /* Percentage of occupied over free space in a discrete axis band */
-        panelSizeRatio: 0.9
-    }
+        secondAxisIndependentScale: false,
+        secondAxisColor: "blue"
+    })
 });

@@ -6,8 +6,6 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     
     this.base(panel, pvMark, keyArgs);
     
-    var options = this.chart.options;
-    
     if(!def.get(keyArgs, 'freePosition', false)){
         var basePosProp  = panel.isOrientationVertical() ? "left" : "bottom",
             orthoPosProp = panel.anchorOrtho(basePosProp);
@@ -29,39 +27,6 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
         .intercept('fillStyle',   'fillColor'  )
         .intercept('strokeStyle', 'strokeColor')
         ;
-    
-    if(options.showTooltips){
-        panel._addPropTooltip(pvMark);
-    }
-    
-    if(options.hoverable) {
-        // Add hover-active behavior
-        // Still requires the point behavior on some ascendant panel
-        pvMark
-            .event('point', function(scene){
-                scene.setActive(true);
-                
-                if(!panel.topRoot.rubberBand) {
-                    panel._renderInteractive();
-                }
-             })
-            .event('unpoint', function(scene){
-                if(scene.clearActive()) {
-                    /* Something was active */
-                    if(!panel.topRoot.rubberBand) {
-                        panel._renderInteractive();
-                    }
-                }
-            });
-    }
-    
-    if (panel._shouldHandleClick()){
-        panel._addPropClick(pvMark);
-    }
-    
-    if(options.doubleClickAction) {
-        panel._addPropDoubleClick(pvMark);
-    }
 })
 .add({
     /* Sign Spatial Coordinate System
@@ -92,15 +57,17 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     
     /* SIZE */
     size: function(){
-        var size = this.normalSize();
+        var size = this.baseSize();
         if(this.scene.anyInteraction()) {
             size = this.interactiveSize(size);
+        } else {
+            size = this.normalSize(size);
         }
         
         return size;
     },
     
-    normalSize: function(){
+    baseSize: function(){
         /* Radius was specified? */
         var radius = this.state.radius;
         if(radius != null) {
@@ -110,7 +77,11 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
         /* Delegate to possible Size extension or default to 12 */
         return this.delegate(12);
     },
-    
+
+    normalSize: function(size){
+        return size;
+    },
+
     interactiveSize: function(size){
         if(this.scene.isActive){
             /* - Ensure a normal size of at least 12,
@@ -151,7 +122,7 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             switch(type) {
                 case 'fill':
                 case 'stroke':
-                    return pvc.toGrayScale(color);
+                    return this.dimColor(type, color);
             }
         }
 

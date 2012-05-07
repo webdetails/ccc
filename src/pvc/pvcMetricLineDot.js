@@ -9,6 +9,12 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         this.base(options);
 
         pvc.mergeDefaults(this.options, pvc.MetricLineDotAbstract.defaultOptions, options);
+
+        var parent = this.parent;
+        if(parent) {
+            this._colorRole = parent._colorRole;
+            this._dotSizeRole = parent._dotSizeRole;
+        }
     },
 
     /**
@@ -48,23 +54,32 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
                 defaultDimensionName: isV1Compat ? 'value3' : 'value4' 
             }
         });
+
+        this._colorRole   = this.visualRoles('color');
+        this._dotSizeRole = this.visualRoles('dotSize');
     },
-    
+
     _initData: function(keyArgs){
         this.base(keyArgs);
-        
-        if(!this.parent) {
-            /* Maybe change the legend source role */
-            var colorRoleGrouping = this.visualRoles('color').grouping;
-            if(colorRoleGrouping){
-                if(colorRoleGrouping.isDiscrete()){
+
+        // Cached
+        var dotSizeGrouping = this._dotSizeRole.grouping;
+        if(dotSizeGrouping){
+            this._dotSizeDim = this.dataEngine.dimensions(dotSizeGrouping.firstDimension.name);
+        }
+
+        /* Change the legend source role */
+        if(!this.parent){
+            var colorGrouping = this._colorRole.grouping;
+            if(colorGrouping) {
+                if(colorGrouping.isDiscrete()){
                     // role is bound and discrete => change legend source
                     this.legendSource = 'color';
                 } else {
-                    /* The color legend has no use 
-                     * but to, possibly, show/hide series, 
-                     * if any 
-                     */
+                    /* The "color legend" has no use
+                        * but to, possibly, show/hide "series",
+                        * if any
+                        */
                     this.options.legend = false;
                 }
             }

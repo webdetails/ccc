@@ -17,11 +17,11 @@
         <script type="text/javascript" src="lib/tipsy.js"></script>
         <link type="text/css" href="lib/tipsy.css" rel="stylesheet" />
         
+        <!-- @SCRIPTSBEG@ -->
         <script type="text/javascript" src="def/def.js"></script>
         <script type="text/javascript" src="pvc/pvc.js"></script>
         <script type="text/javascript" src="pvc/pvc.text.js"></script>
         <script type="text/javascript" src="pvc/pvc.color.js"></script>
-        
         <script type="text/javascript" src="pvc/data/_data.js"></script>
         <script type="text/javascript" src="pvc/data/meta/DimensionType.js"></script>
         <script type="text/javascript" src="pvc/data/meta/ComplexType.js"></script>
@@ -40,16 +40,15 @@
         <script type="text/javascript" src="pvc/data/GroupingOper.js"></script>
         <script type="text/javascript" src="pvc/data/Data.operations.js"></script>
         <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
-        
         <script type="text/javascript" src="pvc/visual/Role.js"></script>
-	    <script type="text/javascript" src="pvc/visual/Scene.js"></script>
-	    <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
-	    <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
-	    <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
-	    <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
-	    <script type="text/javascript" src="pvc/visual/Context.js"></script>
-	    <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
-	    
+        <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
@@ -63,22 +62,27 @@
         <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcBarPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcNormalizedBarPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcNormalizedBarChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
         <script type="text/javascript" src="pvc/pvcLineDotAreaPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLineDotArea.js"></script>
         <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
-
         <script type="text/javascript" src="pvc/pvcMetricXYAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcMetricLineDotPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcMetricLineDot.js"></script>
-        
-        <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
-        
+        <script type="text/javascript" src="pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
+        <!-- @SCRIPTSEND@ -->
+    
         <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css" />
         <link type="text/css" rel="stylesheet" href="pvcDocUtils.css"/>
         <script type="text/javascript" src="pvcDocUtils.js"></script>
@@ -282,6 +286,7 @@
         
         pvc.examples.register(def.create(baseExampleDef, {
             id: 'multi04',
+
             className: 'MetricDotChart',
             dataVar:   'testHeatGrid4Measures',
             showProps: ['showLines', 'showDots'],
@@ -292,6 +297,7 @@
                 
                 /* Multi-chart */
                 //multiChartColumnIndexes: 1,
+
                 //multiChartWrapColumn: Infinity,
                 multiChartLimit: 9,
                 
@@ -313,14 +319,15 @@
                 /* Visual Role mapping */
                 visualRoles: {
                     multiChartColumn: "territory, country",
-                    //series:  "pline, product",
+                    series:  "pline, product",
                     x: "quantity",
                     y: "sales",
-                    color: "esales",
-                    dotSize: "psales"
+                    color: "esales"//,
+                    //dotSize: "psales"
                 },
                 
                 /* Data definition */
+
                 dimensions: {
                     territory: {label: "Territory" },
                     country:   {label: "Country" },

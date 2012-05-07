@@ -11,6 +11,11 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.LineDotAreaAbstract.defaultOptions, options);
+
+        var parent = this.parent;
+        if(parent) {
+            this._valueRole = parent._valueRole;
+        }
     },
     
     /**
@@ -33,8 +38,17 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
                 defaultDimensionName: 'value' 
             }
         });
+
+        this._valueRole = this.visualRoles('value');
     },
-    
+
+    _initData: function(){
+        this.base.apply(this, arguments);
+
+        // Cached
+        this._valueDim = this.dataEngine.dimensions(this._valueRole.firstDimensionName());
+    },
+
     /* @override */
     _createMainContentPanel: function(parentPanel){
         pvc.log("Prerendering in LineDotAreaAbstract");
@@ -55,7 +69,8 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         showLines: false,
         showAreas: false,
         showValues: false,
-        axisOffset: 0.04,
+        orthoOffset: 0.04,
+        baseOffset:  0.01, // TODO: should depend on being discrete or continuous base
         valuesAnchor: "right",
         panelSizeRatio: 1,
         tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15 })

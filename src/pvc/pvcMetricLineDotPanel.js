@@ -48,14 +48,9 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
        
        var chart = this.chart;
        
-       this.dotSizeRole    = chart.visualRoles('dotSize');
-       this.dotSizeDimName = null;
-       
-       if(this.dotSizeRole.grouping){
-           this.dotSizeDimName = this.dotSizeRole.firstDimensionName();
-          
+       if(chart._dotSizeDim){
            /* Determine Max/Min Dot Size */
-           var length = Math.max(Math.min(this.width, this.height), 2);
+           var length = Math.max((this.width + this.height) / 2, 2);
            var maxRadius = length / 8;
            if(this.dotShape === 'diamond'){
                // Protovis draws diamonds inscribed on
@@ -93,16 +88,64 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
            
            if(!chart.root._explicitAxisOffset){
                /* Half a circle must fit at any edge of the main content area */
-               var axisOffset = maxRadius / length;
-               if(axisOffset > pvc.MetricXYAbstract.defaultOptions.axisOffset){
+               // TODO: Something should be wrong with the calculations?
+               // Dots still come out a little bit, and this compensates for it.
+               var offsetRadius  = maxRadius + 6,
+                   minAxisOffset = pvc.MetricXYAbstract.defaultOptions.axisOffset,
+                   axisOffset = offsetRadius / Math.max(this.width, 2);
+
+               if(axisOffset > minAxisOffset){
                    if(pvc.debug >= 3){
-                       pvc.log(def.format("Using axis offset of '{0}' to compensate for dot size.", [axisOffset]));
+                       pvc.log(def.format("Using X axis offset of '{0}' to compensate for dot size.", [axisOffset]));
                    }
                    
-                   chart.options.axisOffset = axisOffset;
+                   chart.options.xAxisOffset = axisOffset;
+               }
+
+               axisOffset = offsetRadius / Math.max(this.height, 2);
+               if(axisOffset > minAxisOffset){
+                   if(pvc.debug >= 3){
+                       pvc.log(def.format("Using Y axis offset of '{0}' to compensate for dot size.", [axisOffset]));
+                   }
+
+                   chart.options.yAxisOffset = axisOffset;
                }
            }
-       }
+        } else {
+            /* Make X and Y axis offsets take the same abs width */
+            /* TODO: should be able to test if any offset, X, or Y is the default value... */
+            var defaultAxisOffset = pvc.MetricXYAbstract.defaultOptions.axisOffset,
+                xAxisOffset = chart.axes.x.options('Offset'),
+                yAxisOffset = chart.axes.y.options('Offset'),
+                adjustX = (xAxisOffset === defaultAxisOffset),
+                adjustY = (yAxisOffset === defaultAxisOffset);
+
+            if(adjustX || adjustY){
+                var offsetLength;
+
+                if(adjustX && adjustY){
+                    offsetLength = Math.max(this.width, this.height) * xAxisOffset;
+                } else if(adjustX){
+                    offsetLength = this.height * yAxisOffset;
+                } else /*if(adjustY) */{
+                    offsetLength = this.width * xAxisOffset;
+                }
+
+                if(adjustX){
+                    this.chart.options.xAxisOffset = xAxisOffset = offsetLength / Math.max(this.width, 2);
+                    if(pvc.debug >= 3){
+                       pvc.log(def.format("Using X axis offset of '{0}' to balance with that of Y axis.", [xAxisOffset]));
+                   }
+                }
+
+                if(adjustY){
+                    this.chart.options.yAxisOffset = yAxisOffset = offsetLength / Math.max(this.height, 2);
+                    if(pvc.debug >= 3){
+                       pvc.log(def.format("Using Y axis offset of '{0}' to balance with that of X axis.", [yAxisOffset]));
+                   }
+                }
+            }
+        }
    },
     
     /**
@@ -120,8 +163,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         // DATA
         var data            = chart._getVisibleData(), // shared "series" grouped data
             isDense         = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
-            hasColorRole    = chart._isRoleAssigned('color'),
-            hasDotSizeRole  = this.showDots && chart._isRoleAssigned('dotSize'),
+            hasColorRole    = !!chart._colorRole.grouping,
+            hasDotSizeRole  = this.showDots && !!chart._dotSizeDim,
             sizeValueToArea; 
         
         if(hasDotSizeRole){
@@ -212,7 +255,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         // -- COLOR --
         if(!hasColorRole){
             if(!myself.showLines){
-                dot.override('normalColor', function(type){
+                dot.override('baseColor', function(type){
                     var color = this.base(type);
                     color.opacity = 0.8;
                     return color;
@@ -221,7 +264,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         } else {
             var colorScale = this._getColorRoleScale(data);
             
-            line.override('normalColor', function(type){
+            line.override('baseColor', function(type){
                 var color = this.delegate();
                 if(color === undefined){
                     var colorValue = this.scene.acts.color.value;
@@ -233,7 +276,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 return color;
             });
             
-            dot.override('normalColor', function(type){
+            dot.override('baseColor', function(type){
                 var color = this.delegate();
                 if(color === undefined){
                     var colorValue = this.scene.acts.color.value;
@@ -266,7 +309,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         
         // -- DOT SIZE --
         if(!hasDotSizeRole){
-            dot.override('normalSize', function(){
+            dot.override('baseSize', function(){
                 /* When not showing dots, 
                  * but a datum is alone and 
                  * wouldn't be visible using lines,  
@@ -285,7 +328,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             });
         } else {
             /* Ignore any extension */
-            dot.override('normalSize', function(){
+            dot.override('baseSize', function(){
                 return sizeValueToArea(this.scene.acts.dotSize.value);
             });
         }
@@ -343,12 +386,11 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
      */
     _getColorRoleScale: function(data){
         var chart = this.chart,
-            options = chart.options,
-            colorRole = chart.visualRoles('color');
+            options = chart.options;
         
-        if(colorRole.grouping.isDiscrete()){
+        if(chart._colorRole.grouping.isDiscrete()){
             /* Legend-like color scale */
-            var grouping  = colorRole.grouping.singleLevelGrouping(),
+            var grouping  = chart._colorRole.grouping.singleLevelGrouping(),
                 colorData = data.owner.groupBy(grouping), // visible or invisible
                 values    = colorData.children()
                               .select(function(child){ return child.value; })
@@ -362,7 +404,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 /* Override/create these options, inherit the rest */
                 type: options.colorScaleType || 'linear', 
                 data: data.owner, // shared scale
-                colorDimension: colorRole.firstDimensionName()
+                colorDimension: chart._colorRole.firstDimensionName()
             }));
     },
     
@@ -370,7 +412,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         /* Per small chart scale */
         
         // TODO ~ copy paste from HeatGrid
-        var sizeValExtent = this.chart.dataEngine.dimensions(this.dotSizeDimName).extent({visible: true}),
+        var sizeValExtent = this.chart._dotSizeDim.extent({visible: true}),
             sizeValMin    = sizeValExtent.min.value,
             sizeValMax    = sizeValExtent.max.value,
             sizeValSpan   = Math.abs(sizeValMax - sizeValMin); // may be zero
@@ -440,33 +482,27 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
         
         var chart = this.chart,
-            baseDimName     = chart.visualRoles('x').firstDimensionName(), // base
-            orthoDimName    = chart.visualRoles('y').firstDimensionName(), // ortho
-            ownerBaseDim    = data.owner.dimensions(baseDimName),
-            ownerOrthoDim   = data.owner.dimensions(orthoDimName),
             sceneBaseScale  = chart.axes.base.sceneScale(),
             sceneOrthoScale = chart.axes.ortho.sceneScale(),
             getColorRoleValue,
             getDotSizeRoleValue;
             
         if(hasColorRole){
-             var colorRole = chart.visualRoles('color'),
-                 colorGrouping = colorRole.grouping.singleLevelGrouping();
-             
+             var colorGrouping = chart._colorRole.grouping.singleLevelGrouping();
              if(colorGrouping.isSingleDimension){ // TODO
-                 var colorDimName = colorRole.firstDimensionName();
+                 var colorDimName = chart._colorRole.firstDimensionName();
                  
                  getColorRoleValue = function(scene){
                      return scene.atoms[colorDimName].value;
                  };
              } else {
                  // TODO - collect grouping value...
-                 
              }
         }
         
-        var dotSizeDimName = this.dotSizeDimName;
-        if(dotSizeDimName){
+        if(chart._dotSizeDim){
+            var dotSizeDimName = chart._dotSizeDim.name;
+            
             getDotSizeRoleValue = function(scene){
                 return scene.atoms[dotSizeDimName].value;
             };
@@ -497,8 +533,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         
         function createSeriesScene(seriesGroup){
             /* Create series scene */
-            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesGroup}),
-                seriesKey   = seriesGroup.key;
+            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesGroup});
             
             seriesScene.acts.series = {
                 value: seriesGroup.value,
@@ -509,13 +544,13 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 /* Create leaf scene */
                 var scene = new pvc.visual.Scene(seriesScene, {datum: datum});
                 
-                var atom = datum.atoms[baseDimName];
+                var atom = datum.atoms[chart._xDim.name];
                 scene.acts.x = {
                     value: atom.value,
                     label: atom.label
                 };
                 
-                atom = datum.atoms[orthoDimName];
+                atom = datum.atoms[chart._yDim.name];
                 scene.acts.y = {
                     value: atom.value,
                     label: atom.label
@@ -529,13 +564,15 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 }
                 
                 if(getDotSizeRoleValue){
+                    var dotSizeValue = getDotSizeRoleValue(scene);
                     scene.acts.dotSize = {
-                        value: getDotSizeRoleValue(scene),
-                        label: null
+                        value: dotSizeValue,
+                        label: chart._dotSizeDim.format(dotSizeValue)
                     };
                 }
                 
                 scene.isIntermediate = false;
+                
                 applyScales(scene);
             });
         }
@@ -600,12 +637,12 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             
             interScene.acts.x = {
                 value: interXValue,
-                label: ownerBaseDim.format(interXValue)
+                label: chart._xDim.format(interXValue)
             };
             
             interScene.acts.y = {
                 value: interYValue,
-                label: ownerOrthoDim.format(interYValue)
+                label: chart._yDim.format(interYValue)
             };
             
             if(getColorRoleValue){

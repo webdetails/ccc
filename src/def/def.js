@@ -218,6 +218,22 @@ this['def'] = (function(){
             
             return o;
         },
+
+        setDefaults: function(o){
+            if(!o) {
+                o = {};
+            }
+
+            var a = arguments;
+            for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
+                var p = a[i];
+                if(o[p] == null){
+                    o[p] = a[i+1];
+                }
+            }
+
+            return o;
+        },
         
         /**
          * Calls a function 

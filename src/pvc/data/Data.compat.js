@@ -120,25 +120,6 @@ pvc.data.Data
     },
     
     /**
-     * Returns the visible values for a given series index.
-     * Bullet and Pie
-     * @deprecated
-     */
-    getVisibleValuesForSeriesIndex: function(seriesIdx){
-        var seriesAtom = this.dimensions('series').atoms()[seriesIdx];
-        var datumsByCategKey = this.datums({series: seriesAtom}, {visible: true})
-                                   .uniqueIndex(function(datum){ return datum.atoms.category.key; });
-        
-        // Sorted "visible" category atoms
-        return this.dimensions('category')
-                   .atoms({visible: true})
-                   .map(function(atom){
-                        var datum = def.getOwn(datumsByCategKey, atom.key);
-                        return datum ? datum.atoms.value.value : null;
-                    });
-    },
-    
-    /**
      * Returns the values for a given category index
      * @deprecated
      */
@@ -156,35 +137,6 @@ pvc.data.Data
                     });
     },
     
-    /**
-     * Returns the visible values for a given category index
-     * @deprecated
-     */
-    getVisibleValuesForCategoryIndex: function(categIdx){
-        var categAtom = this.dimensions('category').atoms()[categIdx];
-        var datumsBySeriesKey = this.datums({category: categAtom}, {visible: true})
-                                    .uniqueIndex(function(datum){ return datum.atoms.series.key; });
-        
-        // Sorted "visible" series atoms
-        return this.dimensions('series')
-                   .atoms({visible: true})
-                   .map(function(atom){
-                        var datum = def.getOwn(datumsBySeriesKey, atom.key);
-                        return datum ? datum.atoms.value.value : null;
-                    });
-    },
-    
-    /**
-     * Returns the transposed values for the visible dataset.
-     * HeatGrid and Stacked Lines and Bars
-     * @deprecated
-     */
-    getVisibleTransposedValues: function(){
-        return this.getVisibleSeriesIndexes().map(function(seriesIndex){
-            return this.getVisibleValuesForSeriesIndex(seriesIndex);
-        }, this);
-    },
-
     /**
      * Returns how many series we have
      * @deprecated

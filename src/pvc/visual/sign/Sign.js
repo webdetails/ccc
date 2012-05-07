@@ -1,9 +1,8 @@
 
 def.type('pvc.visual.Sign')
 .init(function(panel, pvMark, keyArgs){
-    this.chart = panel.chart;
-    this.panel = panel;
-    
+    this.chart  = panel.chart;
+    this.panel  = panel;
     this.pvMark = pvMark;
     
     this.extensionId = def.get(keyArgs, 'extensionId');
@@ -30,7 +29,66 @@ def.type('pvc.visual.Sign')
     /* Intercept the protovis mark's buildInstance */
     pvMark.buildInstance = this._buildInstance.bind(this, pvMark.buildInstance);
 })
+.postInit(function(panel, pvMark, keyArgs){
+    this._addInteractive(keyArgs);
+})
 .add({
+    _addInteractive: function(keyArgs){
+        var panel   = this.panel,
+            pvMark  = this.pvMark,
+            options = this.chart.options;
+
+        if(!def.get(keyArgs, 'noTooltips', false) && options.showTooltips){
+            this.panel._addPropTooltip(pvMark);
+        }
+
+        if(!def.get(keyArgs, 'noHoverable', false) && options.hoverable) {
+            // Add hover-active behavior
+            // May still require the point behavior on some ascendant panel
+            var onEvent,
+                offEvent;
+
+            switch(pvMark.type) {
+                case 'dot':
+                case 'line':
+                case 'area':
+                    onEvent  = 'point';
+                    offEvent = 'unpoint';
+                    break;
+
+                default:
+                    onEvent = 'mouseover';
+                    offEvent = 'mouseout';
+                    break;
+            }
+
+            pvMark
+                .event(onEvent, function(scene){
+                    scene.setActive(true);
+
+                    if(!panel.topRoot.rubberBand) {
+                        panel._renderInteractive();
+                    }
+                })
+                .event(offEvent, function(scene){
+                    if(scene.clearActive()) {
+                        /* Something was active */
+                        if(!panel.topRoot.rubberBand) {
+                            panel._renderInteractive();
+                        }
+                    }
+                });
+        }
+
+        if(!def.get(keyArgs, 'noClick', false) && panel._shouldHandleClick()){
+            panel._addPropClick(pvMark);
+        }
+
+        if(!def.get(keyArgs, 'noDoubleClick', false) && options.doubleClickAction) {
+            panel._addPropDoubleClick(pvMark);
+        }
+    },
+    
     /* SCENE MAINTENANCE */
     _buildInstance: function(baseBuildInstance, instance){
         /* Reset scene/instance state */
@@ -43,11 +101,11 @@ def.type('pvc.visual.Sign')
          * cached data.
          */
         scene_renderId.call(this.scene, this.pvMark.renderId());
-        
-        this._initScene();
-        
+
         /* state per: sign & scene & render */
         this.state = {};
+
+        this._initScene();
         
         baseBuildInstance.call(this.pvMark, instance);
     },
@@ -100,7 +158,19 @@ def.type('pvc.visual.Sign')
     hasDelegate: function(){
         return !!this._extFun;
     },
-    
+
+    lockDimensions: function(){
+        this.pvMark
+            .lock('left')
+            .lock('right')
+            .lock('top')
+            .lock('bottom')
+            .lock('width')
+            .lock('height');
+        
+        return this;
+    },
+
     lock: function(name, method){
         if(typeof method !== 'function'){
             method = def.methodCaller('' + method, this);
@@ -141,13 +211,15 @@ def.type('pvc.visual.Sign')
     
     /* COLOR */
     color: function(type){
-        var color = this.normalColor(type);
+        var color = this.baseColor(type);
         if(color === null){
             return null;
         }
 
         if(this.scene.anyInteraction()) {
             color = this.interactiveColor(type, color);
+        } else {
+            color = this.normalColor(type, color);
         }
 
         return color;
@@ -158,17 +230,29 @@ def.type('pvc.visual.Sign')
                 (this._seriesColorScale = this.chart.seriesColorScale());
     },
     
-    normalColor: function(type){
+    baseColor: function(type){
         var color = this.delegate();
         if(color === undefined){
-            /* Normal color is a function of the series */
-            color = this.seriesColorScale()(this.scene.acts.series.value);
+            color = this.seriesColor(type);
         }
         
         return color;
     },
-    
+
+    seriesColor: function(type){
+        /* Normal color is a function of the series */
+        return this.seriesColorScale()(this.scene.acts.series.value);
+    },
+
+    normalColor: function(type, color){
+        return color;
+    },
+
     interactiveColor: function(type, color){
         return color;
+    },
+
+    dimColor: function(type, color){
+        return pvc.toGrayScale(color);
     }
 });

@@ -54,23 +54,16 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
             .lockValue('lineWidth',   0)
             ;
     }
-    
-    // -- INTERACTION --
-    var handleClick = panel._shouldHandleClick(),
-        handleDblClick = !!this.chart.options.doubleClickAction;
-    if (handleClick || handleDblClick){
-        pvMark.events("all");
-        
-        if(handleClick){
-            panel._addPropClick(pvMark);
-        }
-        
-        if(handleDblClick){
-            panel._addPropDoubleClick(pvMark);
-        }
-    }
 })
 .add({
+    _addInteractive: function(keyArgs){
+        keyArgs = def.setDefaults(keyArgs, 
+                        'noHoverable', true,
+                        'noTooltips',  true);
+
+        this.base(keyArgs);
+    },
+
     /* Sign Spatial Coordinate System
      *  -> Cartesian coordinates
      *  -> Grows Up, vertically, and Right, horizontally
@@ -103,8 +96,8 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
      */
     interactiveColor: function(type, color){
         if(this.scene.anySelected() && !this.scene.isSelected()) {
-            if(type === 'fill'){ 
-                return pvc.toGrayScale(color);
+            if(type === 'fill'){
+                return this.dimColor(type, color);
             }
         }
 

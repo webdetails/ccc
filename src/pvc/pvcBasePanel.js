@@ -505,7 +505,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
         }
     },
-    
+
     /**
      * Sets the size for the panel, 
      * for when the parent panel is undefined
@@ -871,8 +871,8 @@ pvc.BasePanel = pvc.Abstract.extend({
                 context.event);
     },
     
-    _shouldHandleClick: function(){
-        var options = this.chart.options;
+    _shouldHandleClick: function(keyArgs){
+        var options = keyArgs || this.chart.options;
         return options.selectable || (options.clickable && options.clickAction);
     },
     
@@ -1270,5 +1270,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         bottom: "height",
         right: "width",
         left: "width"
+    },
+
+    oppositeLength: {
+        width:  "height",
+        height: "width"
     }
 });
