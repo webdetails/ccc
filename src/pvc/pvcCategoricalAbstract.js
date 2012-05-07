@@ -114,13 +114,54 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                         })
                        .range();
         }
-        
-        // _getCategoriesMaxSumOfVisibleSeries ...
-        var max = data.children()
-                    .select(function(catGroup){ return catGroup.dimensions(valueDimName).sum(); })
-                    .max();
-        
-        return max != null ? {min: 0, max: max} : null;
+
+        return data.children()
+                    /* Sum of negatives and of positives within each category */
+                    .select(function(catGroup){
+                        var posSum = null,
+                            negSum = null;
+                        catGroup
+                            .children()
+                            .select(function(serGroup){
+                                return serGroup.dimensions(valueDimName).sum();
+                            })
+                            .each(function(value){
+                                // Note: +null === 0
+                                if(value != null){
+                                    if(value >= 0){
+                                        posSum += value;
+                                    } else {
+                                        negSum += value;
+                                    }
+                                }
+                            });
+
+                        if(posSum == null && negSum == null){
+                            return null;
+                        }
+
+                        return {max: posSum || 0, min: negSum || 0};
+                    })
+                    .where(def.notNully)
+                    /* A range "union" operator */
+                    .reduce(function(result, range){
+                        if(!result) {
+                            result = {min: range.min, max: range.max};
+                        } else if(range.min < result.min){
+                            result.min = range.min;
+                        } else if(range.max > result.max){
+                            result.max = range.max;
+                        }
+
+                        return result;
+                    }, null);
+
+//        The following would not work:
+//        var max = data.children()
+//                    .select(function(catGroup){ return catGroup.dimensions(valueDimName).sum(); })
+//                    .max();
+//
+//        return max != null ? {min: 0, max: max} : null;
     },
     
     /**
@@ -129,8 +170,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     _getVisibleValueExtentConstrained: function(axis, min, max){
         if(axis.type === 'ortho') {
             if(min == null) {
-                if(this.options.stacked) {
-                    // Includes percentageNormalized
+                if(this.options.percentageNormalized) {
                     min = 0;
                 }
             }

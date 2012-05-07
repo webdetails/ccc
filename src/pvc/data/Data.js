@@ -242,7 +242,14 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @internal
      */
     _groupByCache: null,
-    
+
+    /**
+     * An object with cached results of the {@link #dimensionsSumAbs} method.
+     *
+     * @type object
+     */
+    _sumAbsCache: null,
+
     /**
      * The height of the tree of datas headed by a root data.
      * Only defined in root datas. 

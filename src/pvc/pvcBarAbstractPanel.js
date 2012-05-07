@@ -165,7 +165,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             this.pvOverflowMarker = this._addOverflowMarker(false, orthoAxis.scale);
         }
 
-        if(orthoAxis.options('FixedMin')){
+        if(orthoAxis.options('FixedMin') != null){
             this.pvUnderflowMarker = this._addOverflowMarker(true, orthoAxis.scale);
         }
     },
@@ -185,7 +185,6 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                         (orthoScale.min - orthoScale.offset) :
                         (orthoScale.max + orthoScale.offset),
         
-            orthoPos  = rOrthoBound + (isMin ? 8 : - 8),
             angle;
 
         if(!isMin){
@@ -204,22 +203,25 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                 var targetInstance = this.scene.target[this.index];
                 // Where is the position of the max of the bar??
                 var orthoMaxPos = targetInstance[orthoProp] +
-                                (value > 0 ? targetInstance[lengthProp] : 0);
+                                  (value > 0 ? targetInstance[lengthProp] : 0);
                 return isMin ?
-                            (orthoMaxPos < rOrthoBound) :
-                            (orthoMaxPos > rOrthoBound);
+                        (orthoMaxPos < rOrthoBound) :
+                        (orthoMaxPos > rOrthoBound);
             })
             .shape("triangle")
+            .lock('shapeSize')
             .shapeRadius(function(){
                 return Math.min(
-                            Math.sqrt(10),
-                            this.scene.target[this.index][orthoLengthProp] / 2);
+                        Math.sqrt(10),
+                        this.scene.target[this.index][orthoLengthProp] / 2);
             })
             .shapeAngle(angle)
             .lineWidth(1.5)
             .strokeStyle("red")
             .fillStyle("white")
-            [orthoProp](orthoPos)
+            [orthoProp](function(){
+                return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
+            })
             [this.anchorOpposite(orthoProp)](null)
             ;
     },

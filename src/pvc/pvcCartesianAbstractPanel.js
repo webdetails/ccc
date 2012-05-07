@@ -14,10 +14,10 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
         // Overflow
         var orthoAxis = this.chart.axes.ortho,
             baseAxis  = this.chart.axes.base;
-        if (orthoAxis.options('FixedMin') > 0 ||
-            orthoAxis.options('FixedMax') > 0 ||
-            baseAxis .options('FixedMin') > 0 ||
-            baseAxis .options('FixedMax') > 0){
+        if (orthoAxis.options('FixedMin') != null ||
+            orthoAxis.options('FixedMax') != null ||
+            baseAxis .options('FixedMin') != null ||
+            baseAxis .options('FixedMax') != null){
             this.pvPanel["overflow"]("hidden");
         }
     },

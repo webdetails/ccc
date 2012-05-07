@@ -313,6 +313,7 @@ var bar2b = new pvc.BarChart({
     axisFullGrid: true,
     axisEndLine:  true,
     axisDomainRoundMode: 'tick',
+    axisZeroLine: true,
     baseOffset:  0.04,
     orthoOffset: 0.04,
     extensionPoints: {
@@ -365,7 +366,45 @@ bar3.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar3"></div>
-    
+
+        <h3>A stacked bar chart with negative values</h3>
+<textarea cols="55" rows="15" id="pvcBar3bCode">
+var bar3b = new pvc.BarChart({
+    canvas: "pvcBar3b",
+    width:  400,
+    height: 300,
+    title: "Stacked bar chart with negative values",
+    stacked: true,
+    animate: true,
+    clickable: true,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    showValues: false,
+    baseSize: 70,
+    axisFullGrid: true,
+    axisEndLine:  true,
+    axisZeroLine: true,
+    axisDomainRoundMode: 'tick',
+    baseOffset:  0.04,
+    orthoOffset: 0.04,
+    extensionPoints: {
+    	xAxisLabel_textAngle: -1,
+    	xAxisLabel_textAlign: "right",
+    	xAxisLabel_textBaseline: "top"
+    }
+});
+
+bar3b.setData(relational_01_neg, {
+    crosstabMode: false,
+    seriesInRows: false
+});
+bar3b.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBar3b"></div>
+
 <h3>An horizontal Stacked Bar chart</h3>
 The stacked bar chart of the previous example, but with an 'horizontal' orientation.<br>
 <textarea cols="55" rows="24" id="pvcBar4Code">

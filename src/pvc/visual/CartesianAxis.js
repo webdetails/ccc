@@ -265,7 +265,8 @@ $VCA.createAllDefaultOptions = function(options){
             'FixedMax',
             'OverlappedLabelsHide',
             'OverlappedLabelsMaxPct',
-            'Composite'
+            'Composite',
+            'ZeroLine'
        ],
        globalDefaults = {
            'OriginIsZero':      true,
@@ -280,7 +281,8 @@ $VCA.createAllDefaultOptions = function(options){
            'FullGridCrossesMargin': true,
            'RuleCrossesMargin': true,
            'EndLine':           false,
-           'DomainRoundMode':   'none'
+           'DomainRoundMode':   'none',
+           'ZeroLine':          false
        };
 
     function addOption(optionId, value){

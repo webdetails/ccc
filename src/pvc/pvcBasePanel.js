@@ -762,7 +762,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         var tooltip = [],
-            playingPercentMap = dataEngine.type.getPlayingPercentVisualRoleDimensionMap();
+            playingPercentMap = dataEngine.type.getPlayingPercentVisualRoleDimensionMap(),
             commonAtoms = isMultiDatumGroup ? context.group.atoms : context.atoms;
         
         function addDim(escapedDimLabel, label){

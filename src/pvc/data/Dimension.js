@@ -207,11 +207,16 @@ def.type('pvc.data.Dimension')
      * </p>
      * 
      * @type pvc.data.Atom[]
-     * @private
-     * 
      * @see #_nullAtom
      */
     _atoms: null,
+
+    /**
+     * An object with cached results of the {@link #sum} method.
+     *
+     * @type object
+     */
+    _sumCache: null,
 
     /**
      * Obtains the number of atoms contained in this dimension.
@@ -468,6 +473,8 @@ def.type('pvc.data.Dimension')
      * @param {object} [keyArgs] Keyword arguments.
      * See {@link pvc.data.Data#datums} for a list of available filtering keyword arguments. 
      *
+     * @param {boolean} [keyArgs.abs=false] Indicates if it is the sum of the absolute value that is desired.
+     *
      * @returns {number} The sum of considered atoms or <tt>0</tt> if none.
      * 
      * @see #root
@@ -475,24 +482,30 @@ def.type('pvc.data.Dimension')
      * @see #atoms
      */
     sum: function(keyArgs){
-        var key = '_sum:' + this._buildDatumsFilterKey(keyArgs);
-        var sum = def.getOwn(this, key);
+        var isAbs = !!def.get(keyArgs, 'abs', false),
+            key = dim_buildDatumsFilterKey(keyArgs) + ':' + isAbs;
+              
+        var sum = def.getOwn(this._sumCache, key);
         if(sum == null) {
             var dimName = this.name;
             sum = this.data.datums(null, keyArgs).reduce(function(sum, datum){
-                var atom = datum.atoms[dimName];
-                return sum + (atom.value || 0);
+                var value = datum.atoms[dimName].value || 0;
+                if(isAbs && value < 0){
+                    value = -value;
+                }
+                return sum + value;
             },
             0);
-            this[key] = sum;
+            
+            (this._sumCache || (this._sumCache = {}))[key] = sum;
         }
         
-        return sum; 
+        return sum;
     },
     
     /**
      * Obtains the percentage of a specified atom or value,
-     * over the <i>sum</i> of a specified datum set.
+     * over the <i>sum</i> of the absolute values of a specified datum set.
      * 
      * <p>
      * Assumes that the dimension type {@link pvc.data.DimensionType#valueType} is "Number".
@@ -517,14 +530,14 @@ def.type('pvc.data.Dimension')
         if(!value) { // nully or zero
             return 0;
         }
-        // if value != 0 => sum != 0, but JIC, we teste for not 0...
-        var sum = this.sum(keyArgs);
-        return sum ? (value / sum) : 0;
+        // if value != 0 => sum != 0, but JIC, we test for not 0...
+        var sum = this.sum(def.create(keyArgs, {abs: true}));
+        return sum ? (Math.abs(value) / sum) : 0;
     },
     
     /**
      * Obtains the percentage of the local <i>sum</i> of a specified selection,
-     * over the <i>sum</i> of an analogous selection in the parent data.
+     * over the <i>sum</i> of the absolute values of an analogous selection in the parent data.
      * 
      * <p>
      * Assumes that the dimension type {@link pvc.data.DimensionType#valueType} is "Number".
@@ -543,37 +556,29 @@ def.type('pvc.data.Dimension')
      * @see #owner
      */
     percentOverParent: function(keyArgs){
-        var value = this.sum(keyArgs);
+        var value = this.sum(keyArgs); // normal sum
         if(!value) { // nully or zero
             return 0;
         }
         
-        // if value != 0 => sum != 0, but JIC, we teste for not 0...
+        // if value != 0 => sum != 0, but JIC, we test for not 0...
         var parentData = this.data.parent;
         if(!parentData) {
             return 0;
         }
-        
-        var sum = parentData.dimensions(this.name).sum(keyArgs);
-        return sum ? (value / sum) : 0;
+
+        // The following would not work because, in each group,
+        //  abs would not be used...
+        //var sum = parentData.dimensions(this.name).sum();
+
+        var sum = parentData.dimensionsSumAbs(this.name, keyArgs);
+
+        return sum ? (Math.abs(value) / sum) : 0;
     },
     
     
     format: function(value){
         return "" + (this.type._formatter ? this.type._formatter.call(null, value, null, this) : "");
-    },
-    
-    /**
-     * Builds a key string suitable for identifying a call to {@link pvc.data.Data#datums}
-     * with no where specification.
-     * 
-     *  @param {object} [keyArgs] The keyword arguments used in the call to {@link pvc.data.Data#datums}.
-     *  @type string
-     */
-    _buildDatumsFilterKey: function(keyArgs){
-        var visible  = def.get(keyArgs, 'visible'),
-            selected = def.get(keyArgs, 'selected');
-        return (visible == null ? null : !!visible) + ':' + (selected == null ? null : !!selected);  
     },
     
     /**
@@ -685,6 +690,21 @@ def.type('pvc.data.Dimension')
 });
 
 /**
+ * Builds a key string suitable for identifying a call to {@link pvc.data.Data#datums}
+ * with no where specification.
+ *
+ * @name pvc.data.Dimension#_buildDatumsFilterKey
+ * @function
+ * @param {object} [keyArgs] The keyword arguments used in the call to {@link pvc.data.Data#datums}.
+ * @type string
+ */
+function dim_buildDatumsFilterKey(keyArgs){
+    var visible  = def.get(keyArgs, 'visible'),
+        selected = def.get(keyArgs, 'selected');
+    return (visible == null ? null : !!visible) + ':' + (selected == null ? null : !!selected);
+}
+
+/**
  * Creates the null atom if it isn't created yet.
  * 
  * @name pvc.data.Dimension#_createNullAtom
@@ -772,7 +792,7 @@ function dim_unintern(atom){
 }
 
 /**
- * Clears all visible related caches.
+ * Clears all caches affected by datum/atom visibility.
  * 
  * @name pvc.data.Dimension#_clearVisiblesCache
  * @function
@@ -782,6 +802,7 @@ function dim_unintern(atom){
  */
 function dim_clearVisiblesCache(){
     this._atomVisibleDatumsCount =
+    this._sumCache =
     this._visibleAtoms = 
     this._visibleIndexes = null;
 }
@@ -884,7 +905,8 @@ function dim_onDatumVisibleChanged(datum, visible) {
         map[key] = (count || 0) + (visible ? 1 : -1);
         
         // clear dependent caches
-        this._visibleAtoms = 
+        this._visibleAtoms =
+        this._sumCache = 
         this._visibleIndexes = null;
     }
 }

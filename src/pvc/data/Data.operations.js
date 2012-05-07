@@ -209,6 +209,33 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         }
         
         return datum;
+    },
+
+    /**
+     * Sums the absolute value 
+     * of the sum of a specified dimension on each child.
+     *
+     * @param {string} dimName The name of the dimension to sum on each child data.
+     * @param {object} [keyArgs] Optional keyword arguments that are
+     * passed to each dimension's {@link pvc.data.Dimension#sum} method.
+     * 
+     * @type number
+     */
+    dimensionsSumAbs: function(dimName, keyArgs){
+        var key = dimName + ":" + dim_buildDatumsFilterKey(keyArgs),
+            sum = def.getOwn(this._sumAbsCache, key);
+
+        if(sum == null) {
+            sum = this.children()
+                    .select(function(childData){
+                        return Math.abs(childData.dimensions(dimName).sum(keyArgs));
+                    }, this)
+                    .reduce(def.add, 0);
+
+            (this._sumAbsCache || (this._sumAbsCache = {}))[key] = sum;
+        }
+
+        return sum;
     }
 });
 

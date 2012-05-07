@@ -87,8 +87,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         }
 
         if(!this._seriesColorScale){
-            // visible or invisible data
-            var seriesValues = this._serAxisData.children()
+            // visible or *invisible* data!!
+            var serData = this.dataEngine.owner.groupBy(this._serGrouping),
+                seriesValues = serData.children()
                                     .select(function(seriesData){ return seriesData.value; })
                                     .array();
             
@@ -168,6 +169,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 fullGrid:          axis.options('FullGrid'),
                 fullGridCrossesMargin: axis.options('FullGridCrossesMargin'),
                 ruleCrossesMargin: axis.options('RuleCrossesMargin'),
+                zeroLine:          axis.options('ZeroLine'),
                 domainRoundMode:   axis.options('DomainRoundMode'),
                 desiredTickCount:  axis.options('DesiredTickCount'),
                 minorTicks:        axis.options('MinorTicks'),

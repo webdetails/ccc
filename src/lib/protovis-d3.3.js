@@ -12515,7 +12515,7 @@ pv.Layout.Band = function() {
      * The prototype mark of the items mark.
      */
     var itemProto = new pv.Mark()
-        .data  (function(){ return values[this.parent.index]; })
+        .data  (function(){return values[this.parent.index];})
         .top   (proxy("t"))
         .left  (proxy("l"))
         .right (proxy("r"))
@@ -12583,7 +12583,7 @@ pv.Layout.Band = function() {
 
         add: function(type) {
             return that.add(pv.Panel)
-                    .data(function(){ return that.layers(); })
+                    .data(function(){return that.layers();})
                     .add(type)
                     .extend(itemProto);
         },
@@ -12702,8 +12702,8 @@ pv.Layout.Band = function() {
 };
 
 pv.Layout.Band.$baseItemProps = (function(){
-    var none = function() { return null; };
-    return {t: none, b: none, r: none, b: none, w: none, h: none};
+    var none = function() {return null;};
+    return {t: none, l: none, r: none, b: none, w: none, h: none};
 }());
 
 pv.Layout.Band.prototype = pv.extend(pv.Layout)
@@ -12817,21 +12817,13 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
                 };
             }
 
-            var iy = (scene.yZero || 0),
-                iw = this.$iw.apply(o, stack),
-                ih = this.$ih.apply(o, stack);
-
-            /* Negative heights are transformed into a lower iy */
-            if(ih < 0){
-                ih = -ih;
-                iy -= ih;
-            }
-
+            var ih = this.$ih.apply(o, stack);
             band.items[l] = {
-                y: iy,
+                y: (scene.yZero || 0),
                 x: 0,
-                w: iw,
-                h: ih
+                w: this.$iw.apply(o, stack),
+                h: Math.abs(ih),
+                dir: ih < 0 ? -1 : 1
             };
         }
         stack.shift();
@@ -12897,15 +12889,16 @@ pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
             var item = items[l];
             item.x = ix;
             ix += item.w + margin;
+
+            /* Negative direction turns into a lower iy */
+            if(item.dir < 0){
+                item.y -= item.h;
+            }
         }
     }
 };
 
 pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
-    /*
-     * Calculate layer 0 item offset
-     * (default already is items[l].y=0)
-     */
     var B = bands.length,
         items;
 
@@ -12916,10 +12909,17 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
             /* Sum across layers for this band */
             var hSum = 0;
             for (var l = 0; l < L; l++) {
-                hSum += items[l].h;
+                /* We get rid of negative heights
+                 * because it is preferable to respect the layer's order
+                 * in this case, than to group negative and positive layers,
+                 * taking them out of order.
+                 */
+                var item = items[l];
+                item.dir = 1;
+                hSum += item.h;
             }
 
-            /* Scale dys */
+            /* Scale hs */
             if (hSum) {
                 var hScale = bh / hSum;
                 for (var l = 0; l < L; l++) {
@@ -12942,36 +12942,42 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
      */
     for (var b = 0; b < B; b++) {
         var band = bands[b],
-            x = band.x, // centered on band
-            vertiMargin  = band.vertiMargin > 0 ? band.vertiMargin : 0,
-            vertiMargin2 = vertiMargin / 2;
+            bx = band.x, // centered on band
+            vertiMargin  = band.vertiMargin > 0 ? band.vertiMargin : 0;
 
         items = band.items;
 
-        var prevItem = items[0];
-        prevItem.x = x - prevItem.w / 2;
-        if(vertiMargin2){
-            prevItem.y += vertiMargin2;
-            prevItem.h -= vertiMargin;
-        }
-        
-        var yOffset = prevItem.y;
-
-        for (var l = 1 ; l < L ; l++) {
-            var item = items[l];
-            
-            yOffset += prevItem.h + vertiMargin;
-            
-            if(vertiMargin){
-                prevItem.h -= vertiMargin;
-            }
-
-            item.y = yOffset;
-            item.x = x - item.w / 2;
-
-            prevItem = item;
+        if(this._layoutItemsOfDir(+1,  items, vertiMargin, bx)){
+            this._layoutItemsOfDir(-1, items, vertiMargin, bx);
         }
     }
+};
+
+pv.Layout.Band.prototype._layoutItemsOfDir = function(dir, items, vertiMargin, bx){
+    var existsOtherDir = false,
+        vertiMargin2 = vertiMargin / 2,
+        yOffset = 0;
+    
+    for (var l = 0, L = items.length ; l < L ; l+=1) {
+        var item = items[dir > 0 ? l : (L -l -1)];
+
+        if(item.dir === dir){
+            var h = item.h;
+            if(dir > 0){
+                item.y += (yOffset + vertiMargin2);
+            } else {
+                item.y -= (yOffset + h - vertiMargin2);
+            }
+            
+            yOffset += h;
+            item.h -= vertiMargin;
+            item.x = bx - item.w / 2;
+        } else {
+            existsOtherDir = true;
+        }
+    }
+
+    return existsOtherDir;
 };
 
 pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, horizontal){
@@ -12999,10 +13005,10 @@ pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, hor
         */
         py  = orient.charAt(0);
 
-    itemProps[px] = function(b, l) { return bands[b].items[l].x; };
-    itemProps[py] = function(b, l) { return bands[b].items[l].y; };
-    itemProps[pw] = function(b, l) { return bands[b].items[l].w; };
-    itemProps[ph] = function(b, l) { return bands[b].items[l].h; };
+    itemProps[px] = function(b, l) {return bands[b].items[l].x;};
+    itemProps[py] = function(b, l) {return bands[b].items[l].y;};
+    itemProps[pw] = function(b, l) {return bands[b].items[l].w;};
+    itemProps[ph] = function(b, l) {return bands[b].items[l].h;};
 };
 /**
  * Constructs a new, empty treemap layout. Layouts are not typically

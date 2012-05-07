@@ -16,7 +16,7 @@ def.type('pvc.visual.Sign')
     this.lock('_scene', function(){ 
             return this.scene; 
         })
-        /* TODO: remove these when possible and favor through scene access */
+        /* TODO: remove these when possible and favor access through scene */
         .lock('group', function(){ 
             return this.scene.group; 
         })

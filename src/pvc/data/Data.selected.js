@@ -83,6 +83,8 @@ function data_onDatumSelectedChanged(datum, selected){
     } else {
         this._selectedDatums.rem(datum.id);
     }
+
+    this._sumAbsCache = null;
 }
 
 /**
@@ -109,6 +111,8 @@ function data_onDatumVisibleChanged(datum, visible){
             this._visibleDatums.rem(datum.id);
         }
         
+        this._sumAbsCache = null;
+
         // Notify dimensions
         def.eachOwn(this._dimensions, function(dimension){
             dim_onDatumVisibleChanged.call(dimension, datum, visible);
@@ -141,6 +145,7 @@ function data_syncDatumsState(){
     this._selectedDatums && this._selectedDatums.clear();
     this._visibleDatums.clear();
     this._datumsById = {};
+    this._sumAbsCache = null;
     
     if(this._datums) {
         this._datums.forEach(function(datum){

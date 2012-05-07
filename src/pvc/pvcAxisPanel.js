@@ -23,6 +23,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     fullGrid: false,
     fullGridCrossesMargin: true,
     ruleCrossesMargin: true,
+    zeroLine: false, // continuous axis
     font: '9px sans-serif', // label font
     titleFont: '12px sans-serif',
     title: undefined,
@@ -243,10 +244,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         // All ordinal labels are relevant and must be visible
         this.pvLabel = this.pvTicks.anchor(this.anchor).add(pv.Label)
-            .intercept('visible', labelVisibleInterceptor, this._getExtension(this.panelName + "Label", 'visible'))
+            .intercept(
+                'visible',
+                labelVisibleInterceptor,
+                this._getExtension(this.panelName + "Label", 'visible'))
             .zOrder(40) // see pvc.js
             .textAlign(align)
-            //.textBaseline("middle")
             .text(function(child){return child.label;})
             .font(this.font)
             .localProperty('group')
@@ -335,6 +338,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // so "d" may be a number or a Date object...
         
         var scale  = this.pvScale,
+            orthoScale = this._getOrthoScale(),
             ticks  = pvc.scaleTicks(
                         scale, 
                         this.domainRoundMode === 'tick',
@@ -376,16 +380,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         this.renderLinearAxisLabel(ticks);
         
-        // Now do the full grids
+        // Now do the full grid lines
         if(this.fullGrid){
             // Grid rules are visible (only) on MAJOR ticks.
-            var orthoScale = this._getOrthoScale(),
-                ruleLength = this.fullGridCrossesMargin ?
+            var ruleLength = this.fullGridCrossesMargin ?
                                     orthoScale.size :
                                     (orthoScale.max - orthoScale.min)
-                                // this.parent[anchorOrthoLength] - this[anchorOrthoLength],
-                ;
-            
+                                    ;
+                                    // this.parent[anchorOrthoLength] - this[anchorOrthoLength]
+                                
             this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
                 .extend(this.pvRule)
             	.data(ticks)
@@ -395,6 +398,23 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 [anchorLength     ](null)
                 [anchorOrtho      ](scale)
                 ;
+        }
+
+        if(this.zeroLine){
+            // Domain crosses zero?
+            var domain = scale.domain();
+            if((domain[0] * domain[1]) <= 0){
+                this.pvZeroLine = this.pvRule.add(pv.Rule)
+                    .data([0])
+                    .zOrder(29)
+                    .strokeStyle("#808285")
+                    [anchorOpposite   ](this.fullGridCrossesMargin ? -ruleLength : -orthoScale.max)
+                    [anchorOrthoLength](ruleLength)
+                    [anchorLength     ](null)
+                    [anchorOrtho](scale)
+                    .svg(null)
+                    ;
+            }
         }
     },
     
