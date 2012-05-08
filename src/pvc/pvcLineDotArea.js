@@ -69,8 +69,8 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         showLines: false,
         showAreas: false,
         showValues: false,
-        orthoOffset: 0.04,
-        baseOffset:  0.01, // TODO: should depend on being discrete or continuous base
+        orthoAxisOffset: 0.04,
+        baseAxisOffset:  0.01, // TODO: should depend on being discrete or continuous base
         valuesAnchor: "right",
         panelSizeRatio: 1,
         tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15 })

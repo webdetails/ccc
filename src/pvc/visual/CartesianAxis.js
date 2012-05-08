@@ -144,8 +144,8 @@ function coreOptions(handler, name) {
         }
     }
  
-    /* By Bare Id  (base, ortho, base2, ortho2, ...) */
-    value = bareIdOptions.call(this, name);
+    /* By Id  (baseAxis, orthoAxis, base2Axis, ortho2Axis, ...) */
+    value = idOptions.call(this, name);
     if(value !== undefined) {
         return value;
     }
@@ -293,9 +293,9 @@ $VCA.createAllDefaultOptions = function(options){
     
     optionNames.forEach(function(name){
         indexes.forEach(function(index){
-            /* bareId options */
+            /* id options */
             types.forEach(function(type){
-                addOption($VCA.getId(type, index) + name);
+                addOption($VCA.getId(type, index) + "Axis" + name);
             });
 
             /* legacy options - optionsId */
@@ -360,11 +360,25 @@ var axisOptionHandlers = {
         }
     },
     
-    /* orthoFixedMin, baseFixedMin, ortho2FixedMin */
-    FixedMin: { cast: Number2 },
-    FixedMax: { cast: Number2 },
+    /* orthoFixedMin, orthoFixedMax */
+    FixedMin: {
+        resolvePost: function(name){
+            if(!this.index && this.type === 'ortho') {
+                return bareIdOptions.call(this, name);
+            }
+        },
+        cast: Number2
+    },
+    FixedMax: {
+        resolvePost: function(name){
+            if(!this.index && this.type === 'ortho') {
+                return bareIdOptions.call(this, name);
+            }
+        },
+        cast: Number2
+    },
     
-    /* 1 <- originIsZero, 
+    /* 1 <- originIsZero
      * 2 <- secondAxisOriginIsZero
      */
     OriginIsZero:  {
@@ -440,22 +454,24 @@ function Number2(value) {
     return value;
 }
 
-function axisBoundsOptions(name){
-    var bound = bareIdOptions.call(this, name);
-    if(bound != null) {
-        bound = +bound; // to number
-        if(isNaN(bound)) {
-            bound = null;
-        }
-    }
-    
-    return bound;
+/**
+ * Obtains the value of an option that uses the axis id followed by "Axis" as a prefix
+ * (ex. <tt>orthoAxisFixedMax</tt>, <tt>baseAxisFixedMin</tt>, <tt>ortho2AxisFixedMin</tt>).
+ * 
+ * @name pvc.visual.CartesianAxis#_idOptions
+ * @function
+ * @param {string} name The option name.
+ * @private
+ * @type string
+ */
+function idOptions(name){
+    return finalOptions.call(this, this.id + "Axis" + name);
 }
 
 /**
- * Obtains the value of an option that uses the axis id as a prefix
- * (ex. <tt>orthoFixedMax</tt>, <tt>baseFixedMin</tt>, <tt>ortho2FixedMin</tt>).
- * 
+ * Obtains the value of an option that uses only the axis id as a prefix
+ * (ex. <tt>orthoFixedMax</tt>, <tt>orthoFixedMin</tt>).
+ *
  * @name pvc.visual.CartesianAxis#_bareIdOptions
  * @function
  * @param {string} name The option name.

@@ -403,18 +403,20 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                         this._mainContentPanel.width :
                         this._mainContentPanel.height;
         
-        scale.min    = 0;
-        scale.max    = size; 
-        scale.size   = size; // original size
+        scale.min  = 0;
+        scale.max  = size; 
+        scale.size = size; // original size
         
         var axisOffset = axis.options('Offset');
         if(axisOffset > 0){
             var rOffset = size * axisOffset;
-            scale.offset = rOffset;
             scale.min += rOffset;
             scale.max -= rOffset;
+            scale.offset = rOffset;
+            scale.offsetSize = scale.max - scale.min;
         } else {
             scale.offset = 0;
+            scale.offsetSize = scale.size;
         }
 
         return scale;
@@ -523,6 +525,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         timeSeriesFormat: "%Y-%m-%d",
         
         originIsZero: true,
+
+        orthoFixedMin: undefined,
+        orthoFixedMax: undefined,
 
         useCompositeAxis: false,
 

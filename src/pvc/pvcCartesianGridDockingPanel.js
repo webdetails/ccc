@@ -43,6 +43,48 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                 // Frame lines parallel to y axis
                 this.yFrameRule = this._createFrameRule(axes.y);
             }
+
+            if(axes.x.options('ZeroLine')) {
+                this.xFrameRule = this._createZeroLine(axes.x);
+            }
+
+            if(axes.y.options('ZeroLine')) {
+                this.yFrameRule = this._createZeroLine(axes.y);
+            }
+        }
+    },
+
+    _createZeroLine: function(axis){
+        var scale  = axis.scale,
+            domain = scale.domain();
+
+        // Domain crosses zero?
+        if(domain[0] * domain[1] <= 0){
+            var a = axis.orientation === 'x' ? 'bottom' : 'left',
+                ao = this.anchorOrtho(a),
+                orthoAxis = this._getOrthoAxis(axis.type),
+                orthoScale = orthoAxis.scale,
+                orthoFullGridCrossesMargin = orthoAxis.options('FullGridCrossesMargin'),
+                contentPanel = this.chart._mainContentPanel,
+                zeroPosition = contentPanel.position[ao] + scale(0),
+                position = contentPanel.position[a] + 
+                            (orthoFullGridCrossesMargin ?
+                                0 :
+                                orthoScale.offset),
+
+                length   = orthoFullGridCrossesMargin ?
+                                    orthoScale.size :
+                                    orthoScale.offsetSize;
+            
+            this.pvZeroLine = this.pvPanel.add(pv.Rule)
+                .zOrder(-6) // below End Line (see below)
+                .strokeStyle("#808285")
+                [a](position)
+                [this.anchorOrthoLength(a)](length)
+                [this.anchorLength(a)](null)
+                [ao](zeroPosition)
+                //.svg(null)
+                ;
         }
     },
 
