@@ -320,6 +320,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             dMin = extent.min,
             dMax = extent.max;
 
+         if(pvc.debug >= 3){
+             pvc.log("Continuous scale extent: " + JSON.stringify(extent));
+         }
+
         /*
          * If both negative or both positive
          * the scale does not contain the number 0.
@@ -519,6 +523,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         timeSeriesFormat: "%Y-%m-%d",
         
         originIsZero: true,
+
+        useCompositeAxis: false,
 
         /* Non-standard axes options and defaults */
         showXScale: true,
