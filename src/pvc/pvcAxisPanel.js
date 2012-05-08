@@ -210,8 +210,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var overlapFactor = def.within(this.axis.options('OverlappedLabelsMaxPct'), 0, 0.9);
             var textHeight    = pvc.text.getTextHeight("m", this.font) * (1 - overlapFactor);
             includeModulo = Math.max(1, Math.ceil((itemCount * textHeight) / this._rSize));
-            
-            //pvc.log({overlapFactor: overlapFactor, itemCount: itemCount, textHeight: textHeight, Size: this._rSize, modulo: (itemCount * textHeight) / this._rSize, itemSpan: itemCount * textHeight, itemAvailSpace: this._rSize / itemCount});
+
+            if(pvc.debug >= 4){
+                pvc.log({overlapFactor: overlapFactor, itemCount: itemCount, textHeight: textHeight, Size: this._rSize, modulo: (itemCount * textHeight) / this._rSize, itemSpan: itemCount * textHeight, itemAvailSpace: this._rSize / itemCount});
+            }
             
             if(pvc.debug >= 3 && includeModulo > 1) {
                 pvc.log("Hiding every " + includeModulo + " labels in axis " + this.panelName);

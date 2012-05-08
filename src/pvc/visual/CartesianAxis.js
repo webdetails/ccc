@@ -282,7 +282,7 @@ $VCA.createAllDefaultOptions = function(options){
            'RuleCrossesMargin': true,
            'EndLine':           false,
            'DomainRoundMode':   'none',
-           'ZeroLine':          false
+           'ZeroLine':          true
        };
 
     function addOption(optionId, value){
@@ -397,7 +397,10 @@ var axisOptionHandlers = {
     EndLine:  {cast: Boolean },
     DesiredTickCount: {cast: Number2 },
     MinorTicks: {cast: Number2 },
-    TitleSize: {cast: Number2 }
+    TitleSize: {cast: Number2 },
+    FullGridCrossesMargin: {cast: Boolean },
+    RuleCrossesMargin: {cast: Boolean },
+    ZeroLine: {cast: Boolean }
 };
 
 /**
