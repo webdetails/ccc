@@ -8,7 +8,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     },
     
     /**
-     * Groups the datums of this data,
+     * Groups the datums of this data, possibly filtered,
      * according to a grouping specification.
      * 
      * <p>
@@ -37,7 +37,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * </pre>
      * 
      * @param {Object} [keyArgs] Keyword arguments object.
-     *
+     * See additional keyword arguments in {@link pvc.data.GroupingOper}
+     * 
      * @param {boolean} [keyArgs.visible=null]
      *      Only considers datums whose atoms of the grouping dimensions 
      *      have the specified visible state.
@@ -49,14 +50,23 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      */
     groupBy: function(groupingSpecText, keyArgs){
         var groupOper = new pvc.data.GroupingOper(this, groupingSpecText, keyArgs),
-            groupByCache = this._groupByCache, 
+            cacheKey  = groupOper.key,
+            groupByCache,
+            data;
+
+        if(cacheKey){
+            groupByCache = this._groupByCache;
+
             // Check cache for a linked data with that key
-            data = groupByCache && groupByCache[groupOper.key];
-        
+            data = groupByCache && groupByCache[cacheKey];
+        }
+
         if(!data) {
             data = groupOper.execute();
-            
-            (groupByCache || (this._groupByCache = {}))[groupOper.key] = data;
+
+            if(cacheKey){
+                (groupByCache || (this._groupByCache = {}))[cacheKey] = data;
+            }
         }
         
         return data;
@@ -499,8 +509,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
              
              do {
                  var dimAtomOr = this._dimAtomsOrQuery.item,
-                     childKey  = dimAtomOr.key ? (dimAtomOr.dimension.name + ":" + dimAtomOr.key) : '',
-                     childData = this._data._childrenByKey[childKey];
+                     childData = this._data._childrenByKey[dimAtomOr.globalKey()];
                  
                  // Also, advance the test of a leaf child data with no datums, to avoid backtracking
                  if(childData && (depth < H - 1 || childData._datums.length)) {

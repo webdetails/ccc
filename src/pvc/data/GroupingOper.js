@@ -21,6 +21,22 @@
  *      
  * @param {boolean} [keyArgs.selected=null]
  *      Only considers datums that have the specified selected state.
+ *
+ * @param {function} [keyArgs.where] A datum predicate.
+ * @param {string} [keyArgs.whereKey] A key for the specified datum predicate,
+ * previously returned by this function.
+ * <p>
+ * If this argument is specified it can be used to cache results.
+ * If it is not specified, and <tt>keyArgs</tt> is specified,
+ * one is returned.
+ * If it is not specified and <tt>keyArgs</tt> is not specified,
+ * then the instance will have a null {@link #key} property value.
+ * </p>
+ * <p>
+ * If it a key not returned by this operation is specified, 
+ * then it should be prefixed by a "_" character,
+ * in order to not colide with keys generated internally.
+ * </p>
  */
 def.type('pvc.data.GroupingOper')
 .init(function(linkParent, groupingSpecText, keyArgs){
@@ -35,16 +51,36 @@ def.type('pvc.data.GroupingOper')
     }
     
     this._linkParent = linkParent;
-    
+    this._where    = def.get(keyArgs, 'where');
     this._visible  = def.get(keyArgs, 'visible');
     this._selected = def.get(keyArgs, 'selected');
     
-    this.key = this._groupingSpec.id + // grouping spec id is a semantic key...
-               "||visible:"  + this._visible +
-               "||selected:" + this._selected;
+    var hasKey = true,
+        whereKey = '';
+    if(this._where){
+        whereKey = def.get(keyArgs, 'whereKey');
+        if(!whereKey){
+            if(!keyArgs){
+                // Force no key
+                hasKey = false;
+            } else {
+                whereKey = '' + def.nextId('groupOperWhereKey');
+                keyArgs.whereKey = whereKey;
+            }
+        }
+    }
+
+    if(hasKey){
+        this.key = this._groupingSpec.id + // grouping spec id is a semantic key...
+                "||visible:"  + this._visible +
+                "||selected:" + this._selected +
+                "||where:"    + whereKey;
+    }
 }).
 add(/** @lends pvc.data.GroupingOper */{
     
+    key: null,
+
     /**
      * Performs the grouping operation.
      * 
@@ -54,7 +90,8 @@ add(/** @lends pvc.data.GroupingOper */{
         var levelSpecs = this._groupingSpec.levels,
             D = levelSpecs.length,
             visible = this._visible,
-            selected = this._selected;
+            selected = this._selected,
+            where = this._where;
         
         // Create a linked root data
         this._root = new pvc.data.Data({linkParent: this._linkParent, datums: []});
@@ -78,24 +115,20 @@ add(/** @lends pvc.data.GroupingOper */{
             
             // Group datums on level's dimension
             def.query(datums).each(function(datum){
-                if((visible  == null || datum.isVisible  === visible) && 
-                   (selected == null || datum.isSelected === selected)) {
-                    
-                    var groupInfo = levelSpec.key(datum);
-                    if(groupInfo != null){
-                        var key = groupInfo.key,
-                            keyDatums = datumsByKey[key];
-                        
-                        if(keyDatums){
-                            keyDatums.push(datum);
-                        } else {
-                            keyDatums = datumsByKey[key] = [datum];
-                            
-                            groupInfo.datums = keyDatums;
-                            
-                            var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
-                            def.array.insertAt(groupInfos, ~datumIndex, groupInfo);
-                        }
+                var groupInfo = levelSpec.key(datum);
+                if(groupInfo != null){
+                    var key = groupInfo.key,
+                        keyDatums = datumsByKey[key];
+
+                    if(keyDatums){
+                        keyDatums.push(datum);
+                    } else {
+                        keyDatums = datumsByKey[key] = [datum];
+
+                        groupInfo.datums = keyDatums;
+
+                        var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
+                        def.array.insertAt(groupInfos, ~datumIndex, groupInfo);
                     }
                 }
             }, this);
@@ -130,8 +163,22 @@ add(/** @lends pvc.data.GroupingOper */{
             // see #data_whereDatumFilter
             parent._childrenKeyDimName = levelSpec.dimensions[0].name;
         }
-        
-        groupRecursive.call(this, this._root, this._linkParent._datums);
+
+        var rootDatums = def.query(this._linkParent._datums);
+
+        if(visible != null){
+            rootDatums = rootDatums.where(function(datum){ return datum.isVisible === visible; });
+        }
+
+        if(selected != null){
+            rootDatums = rootDatums.where(function(datum){ return datum.isSelected === selected; });
+        }
+
+        if(where){
+            rootDatums = rootDatums.where(where);
+        }
+
+        groupRecursive.call(this, this._root, rootDatums);
         
         return this._root;
     }

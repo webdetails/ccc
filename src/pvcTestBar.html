@@ -432,6 +432,50 @@ bar4.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar4"></div>
 
+        <h3>A stacked bar chart with line series</h3>
+<textarea cols="55" rows="15" id="pvcBar6Code">
+var bar6 = new pvc.BarChart({
+    canvas: "pvcBar6",
+    width:  400,
+    height: 300,
+    title: "Stacked bar chart with line series",
+    stacked: true,
+    secondAxis: true,
+    secondAxisIndependentScale: true,
+    //secondAxisSeriesIndexes: -1,
+    //secondAxisSeriesIndexes: [0,1],
+    //secondAxisOwnColors: true,
+    //secondAxisColor: ['orange', 'pink'],
+    //legendDrawLine: true,legendDrawMarker: true,
+    animate: true,
+    clickable: true,
+    selectable: true,
+    hoverable: true,
+    legend: true,
+    legendPosition: "right",
+    showValues: false,
+    baseAxisSize: 70,
+    axisFullGrid: true,
+    axisEndLine:  true,
+    axisZeroLine: true,
+    axisDomainRoundMode: 'tick',
+    axisOffset:  0.04,
+    extensionPoints: {
+    	xAxisLabel_textAngle: -1,
+    	xAxisLabel_textAlign: "right",
+    	xAxisLabel_textBaseline: "top"
+    }
+});
+
+bar6.setData(relational_01_neg, {
+    crosstabMode: false,
+    seriesInRows: false
+});
+bar6.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcBar6"></div>
+
 <h3>Yet Another Stacked Bar chart</h3>
 Consumes crosstab data and contains null values<br>
 <textarea cols="55" rows="24" id="pvcBar5Code">

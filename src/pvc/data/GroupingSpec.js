@@ -182,7 +182,7 @@ def.type('pvc.data.GroupingLevelSpec')
             var dimName = this.dimensions[i].name,
                 atom = datum.atoms[dimName];
             atoms.push(atom);
-            keys.push(dimName + ":" + atom.key);
+            keys.push(atom.globalKey());
         }
         
         return {

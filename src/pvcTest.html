@@ -90,7 +90,8 @@
       CCC playground
     </h1>
 
-    <h1>Dot</h1>
+    <h1>Dot</h1>
+
     <div id="pvcDot1"></div>
     <div id="pvcDot2"></div>
     <div id="pvcDot3"></div>
@@ -160,7 +161,6 @@
           orientation: 'vertical',
           extensionPoints: {
             noDataMessage_text: "Example of a chart with missing data"
-            /*xAxisLabel_text: function(d){return d.substr(5)}*/
           }
         });
 
@@ -228,7 +228,9 @@
             xAxisLabel_textAlign: "center",
             xAxisLabel_textBaseline: "top",
             xAxisLabel_textStyle: "black",
-            xAxisLabel_text: function(e){return e.label.substr(5)},
+            xAxisLabel_text: function(d){
+                return pv.Format.date('%m-%d').format(d);
+            },
             //dot_strokeStyle: "white",
             dot_fillStyle: "white",
             dot_shape: "square",
@@ -386,7 +388,8 @@
                         line_lineWidth: 0.5
                     }
 
-                });
+                });
+
 
                 line4.setData(constant_01, {crosstabMode: false, seriesInRows: false});
                 line4.render();
@@ -515,7 +518,8 @@
           selectable: true,
           title: "stacked line chart - Timeseries with dots",
           titlePosition: "top",
-          titleSize: 40,
+          titleSize: 40,
+
           legend: false,
           legendPosition: "top",
           legendAlign: "right",
@@ -723,7 +727,7 @@
 
         bar1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         bar1.render();
-        /* TODO
+        
         var bar2 = new pvc.BarChart({
           canvas: "pvcBar2",
           width: 400,
@@ -757,9 +761,10 @@
           secondAxis: true,
           secondAxisIndependentScale: true,
           secondAxisIdx: -1, // default
-          secondAxisOriginIsZero: true, // default
-          secondAxisOffset: 0.1, // default
+          secondAxisOriginIsZero: true,
+          axisOffset: 0.1,
           secondAxisColor: "red",
+          secondAxisOwnColors: true,
           secondAxisDomainRoundMode: 'tick',
           extensionPoints: {
              xAxisLabel_textAngle: -1,
@@ -770,8 +775,7 @@
 
         bar2.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         bar2.render();
-        */
-
+        
         var bar3 = new pvc.BarChart({
           canvas: "pvcBar3",
           width: 400,

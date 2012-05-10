@@ -3,7 +3,7 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
     anchor: 'fill',
     orientation: "vertical",
     stacked: false,
-
+    
     /**
      * @override
      */

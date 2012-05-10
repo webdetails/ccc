@@ -63,7 +63,7 @@ def.type('pvc.visual.CartesianAxis')
     if(this.index !== 1) {
         this.isVisible = options['show' + this.upperOrientedId + 'Scale'];
     } else {
-        this.isVisible = (options.secondAxis && options.secondAxisIndependentScale);
+        this.isVisible = !!options.secondAxisIndependentScale; // options.secondAxis is already true or wouldn't be here
     }
 })
 .add(/** @lends pvc.visual.CartesianAxis# */{
@@ -407,7 +407,15 @@ var axisOptionHandlers = {
     
     OverlappedLabelsHide: {cast: Boolean },
     OverlappedLabelsMaxPct: {cast: Number2 },
-    FullGrid: {cast: Boolean },
+    FullGrid: {
+        resolve: function(name){
+            // TODO: is this too restrictive?
+            if(this.index !== 0){
+                return false;
+            }
+        },
+        cast: Boolean
+    },
     EndLine:  {cast: Boolean },
     DesiredTickCount: {cast: Number2 },
     MinorTicks: {cast: Number2 },
@@ -510,7 +518,7 @@ function firstOptions(name) {
     
     name = buildOptionsIdName.call({optionsId: firstOptionId}, name);
     
-    return finalOptions.call(this, optionName);
+    return finalOptions.call(this, name);
 }
 
 /** 

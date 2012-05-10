@@ -41,7 +41,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     _visualRoles: null,
     
     /**
-     * An array of the {@link pvc.visual.Role} that ate measures.
+     * An array of the {@link pvc.visual.Role} that are measures.
      * 
      * @type pvc.visual.Role[]
      */
@@ -101,7 +101,10 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @type pvc.data.Data
      */
     dataEngine: null,
+    data: null,
     
+    __partData: null,
+
     /**
      * The data source of the chart.
      * <p>
@@ -176,12 +179,15 @@ pvc.BaseChart = pvc.Abstract.extend({
     
     
     /**
-     * The name of the data dimension that
+     * The name of the visual role that
      * the legend panel will be associated to.
      * 
      * <p>
-     * The legend panel associates each distinct dimension value to a color of {@link #colors},
-     * following the dimension's natural order.
+     * The legend panel displays each distinct role value
+     * with a marker and a label.
+     * 
+     * The marker's color is obtained from the parts color scales,
+     * given the role's value.
      * </p>
      * <p>
      * The default dimension is the 'series' dimension.
@@ -206,13 +212,15 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @type (string|pv.Color)[]
      */
     colors: null,
+    secondAxisColor: null,
 
     constructor: function(options) {
         this.parent = def.get(options, 'parent') || null;
         if(this.parent) {
             this.root = this.parent.root;
-            this.dataEngine = def.get(options, 'dataEngine') || 
-                              def.fail.argumentRequired('options.dataEngine');
+            this.dataEngine =
+            this.data = def.get(options, 'dataEngine') ||
+                        def.fail.argumentRequired('options.dataEngine');
             
             this.left = options.left;
             this.top  = options.top;
@@ -293,6 +301,8 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Later the {@link #render} method effectively renders.
      */
     _preRender: function(keyArgs) {
+        var options = this.options;
+        
         /* Increment pre-render version to allow for cache invalidation  */
         this._preRenderVersion++;
         
@@ -325,8 +335,19 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._initData(keyArgs);
 
         /* Create color schemes */
-        this.colors = pvc.createColorScheme(this.options.colors);
-        this.secondAxisColor = pvc.createColorScheme(this.options.secondAxisColor);
+        this.colors = pvc.createColorScheme(options.colors);
+
+        if(options.secondAxis){
+            var ownColors = options.secondAxisOwnColors;
+            if(ownColors == null){
+                ownColors = options.compatVersion <= 1;
+            }
+            
+            if(ownColors){
+                /* if secondAxisColor is unspecified, assumes default color scheme. */
+                this.secondAxisColor = pvc.createColorScheme(options.secondAxisColor);
+            }
+        }
         
         /* Initialize chart panels */
         this._initBasePanel();
@@ -359,7 +380,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         if(!this.parent) {
             if(!dataEngine || def.get(keyArgs, 'reloadData', true)) {
-                var complexType = dataEngine ? 
+                
+                var isReload = !!dataEngine;
+
+                var complexType = dataEngine ?
                                     dataEngine.type :
                                     new pvc.data.ComplexType();
                 
@@ -371,18 +395,23 @@ pvc.BaseChart = pvc.Abstract.extend({
                 }
                 
                 // ----------
-                
+                // Roles are bound before loading data,
+                // in order to be able to filter datums
+                // whose "every dimension in a measure role is null".
                 this._bindVisualRoles(complexType);
                 
                 // ----------
                 
                 if(!dataEngine) {
-                    dataEngine = this.dataEngine = new pvc.data.Data({type: complexType});
+                    dataEngine =
+                        this.dataEngine =
+                        this.data = new pvc.data.Data({type: complexType});
                 } else {
-                    // TODO: assert complexType not changed...
+                    // TODO: assert complexType has not changed...
                 }
                 
                 // ----------
+
                 var loadKeyArgs,
                     measureDimNames = this.measureDimensionsNames();
                 if(measureDimNames.length) {
@@ -399,10 +428,19 @@ pvc.BaseChart = pvc.Abstract.extend({
                 
                 dataEngine.load(translation.execute(dataEngine), loadKeyArgs);
             } else {
+                // TODO: Do this in a cleaner way. Give control to Data
                 // We must at least dispose children and cache...
                 data_disposeChildLists.call(dataEngine);
                 data_syncDatumsState.call(dataEngine);
             }
+        }
+
+        if(this._legendColorScales){
+            delete this._legendColorScales;
+        }
+        
+        if(this.__partData){
+            delete this.__partData;
         }
         
         if(pvc.debug){
@@ -413,9 +451,21 @@ pvc.BaseChart = pvc.Abstract.extend({
     _createTranslation: function(complexType){
         var options = this.options,
             dataOptions = options.dataOptions || {};
-        
+
+        var secondAxisSeriesIndexes;
+        if(options.secondAxis){
+            secondAxisSeriesIndexes = options.secondAxisSeriesIndexes;
+            if(secondAxisSeriesIndexes === undefined){
+                secondAxisSeriesIndexes = options.secondAxisIdx;
+            }
+
+            if(secondAxisSeriesIndexes == null){
+                options.secondAxis = false;
+            }
+        }
+
         var translOptions = {
-            secondAxisSeriesIndexes: options.secondAxis ? (options.secondAxisSeriesIndexes || options.secondAxisIdx) : null,
+            secondAxisSeriesIndexes: secondAxisSeriesIndexes,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
@@ -448,7 +498,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         return new translationClass(complexType, this.resultset, this.metadata, translOptions);
     },
-    
+
     /**
      * Initializes each chart's specific roles.
      * @virtual
@@ -458,6 +508,20 @@ pvc.BaseChart = pvc.Abstract.extend({
             multiChartColumn: {defaultDimensionName: 'multiChartColumn*'},
             multiChartRow:    {defaultDimensionName: 'multiChartRow*'}
         });
+
+        if(this._hasDataPartRole()){
+            this._addVisualRoles({
+                dataPart: {
+                    defaultDimensionName: 'dataPart',
+                    requireSingleDimension: true,
+                    requireIsDiscrete: true
+                }
+            });
+        }
+    },
+
+    _hasDataPartRole: function(){
+        return false;
     },
     
     _addVisualRoles: function(roles){
@@ -602,7 +666,75 @@ pvc.BaseChart = pvc.Abstract.extend({
     _isRoleAssigned: function(roleName){
         return !!this._visualRoles[roleName].grouping;
     },
-    
+
+    _partData: function(dataPartValue){
+        if(!this.__partData){
+            var dataPartRole = this.visualRoles('dataPart', {assertExists: false});
+            if(!dataPartRole || !dataPartRole.grouping){
+                this.__partData = this.data;
+            } else {
+                // Visible and not
+                this.__partData = this.data.groupBy(dataPartRole.grouping.singleLevelGrouping());
+            }
+        }
+
+        if(!dataPartValue){
+            return this.__partData;
+        }
+        
+        // TODO: should, at least, call some static method of Atom to build a global key
+        return this.__partData._childrenByKey['dataPart:' + dataPartValue];
+    },
+
+    _partValues: function(){
+        var dataPartRole = this.visualRoles('dataPart', {assertExists: false});
+        if(!dataPartRole || !dataPartRole.grouping){
+            return null;
+        }
+        
+        return this._partData()
+                   .children()
+                   .select(function(child){ return child.value; })
+                   .array();
+    },
+
+    _legendData: function(dataPartValue){
+        var grouping = this.visualRoles(this.legendSource)
+                           .grouping
+                           .singleLevelGrouping();
+        
+        return this._partData(dataPartValue).groupBy(grouping);
+    },
+
+    _legendColorScale: function(dataPartValue){
+        if(this.parent){
+            return this.root._legendColorScale(dataPartValue);
+        }
+
+        if(!dataPartValue || !this.secondAxisColor){
+            dataPartValue = '';
+        }
+
+        var scale = def.getOwn(this._legendColorScales, dataPartValue);
+        if(!scale){
+            var legendData = this._legendData(dataPartValue);
+            var legendValues = legendData.children()
+                                         .select(function(leaf){ return leaf.value; })
+                                         .array();
+
+            var colorsFactory = (!dataPartValue || dataPartValue === '0') ?
+                                    this.colors :
+                                    this.secondAxisColor;
+
+            scale = colorsFactory(legendValues);
+            
+            (this._legendColorScales || (this._legendColorScales = {}))
+                [dataPartValue] = scale;
+        }
+
+        return scale;
+    },
+
     /**
      * Creates and initializes the base panel.
      */
@@ -957,8 +1089,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         return margins;
     },
     
-    _disposed: false,
-    
     /**
      * Disposes the chart, any of its panels and child charts.
      */
@@ -1027,8 +1157,10 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         secondAxis: false,
         secondAxisIdx: -1,
+        secondAxisSeriesIndexes: undefined,
         secondAxisColor: undefined,
-        
+        secondAxisOwnColors: undefined, // false
+
         showTooltips: true,
         
         tooltipFormat: undefined,

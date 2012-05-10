@@ -59,23 +59,15 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         this._catGrouping = this._catRole.grouping.singleLevelGrouping();
     },
 
-    _initData: function(){
-        this.base.apply(this, arguments);
-
-        // Cached
-        this._catAxisData = this.dataEngine.groupBy(this._catGrouping, {visible: true});
-    },
-
     /**
      * @override
      */
-    _createVisibleData: function(){
-        var catGrouping = this.visualRoles('category').grouping.singleLevelGrouping(),
-            serGrouping = this.visualRoles('series'  ).grouping.singleLevelGrouping(),
-            // One multi-dimensional, two-levels data grouping
-            crossGrouping = pvc.data.GroupingSpec.multiple([catGrouping, serGrouping]);
+    _createVisibleData: function(dataPartValue){
+        
+        var crossGrouping = pvc.data.GroupingSpec.multiple([this._catGrouping, this._serGrouping]);
 
-        return this.dataEngine.groupBy(crossGrouping, { visible: true });
+        return this._partData(dataPartValue)
+                   .groupBy(crossGrouping, { visible: true });
     },
     
     /**
@@ -86,10 +78,14 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      * When more than one datum exists per series <i>and</i> category,
      * the sum of its values is considered.
      * </p>
+     *
+     * @param {pvc.visual.Role} valueRole The value role.
+     * @param {string} [dataPartValue=null] The desired data part value.
+     * @type object
      * 
      * @override
      */
-    _getVisibleValueExtent: function(valueRole){
+    _getVisibleValueExtent: function(valueRole, dataPartValue){
         switch(valueRole.name){
             case 'series':// (series throws in base)
             case 'category':
@@ -99,13 +95,13 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                  * 
                  * Continuous baseScale's, like timeSeries go this way.
                  */
-                return this.base(valueRole);
+                return this.base(valueRole, dataPartValue);
         }
         
         this._assertSingleContinuousValueRole(valueRole);
         
         var valueDimName = valueRole.firstDimensionName(),
-            data = this._getVisibleData();
+            data = this._getVisibleData(dataPartValue);
         
         if(!this.options.stacked){
             return data.leafs()
@@ -116,45 +112,45 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         }
 
         return data.children()
-                    /* Sum of negatives and of positives within each category */
-                    .select(function(catGroup){
-                        var posSum = null,
-                            negSum = null;
-                        catGroup
-                            .children()
-                            .select(function(serGroup){
-                                return serGroup.dimensions(valueDimName).sum();
-                            })
-                            .each(function(value){
-                                // Note: +null === 0
-                                if(value != null){
-                                    if(value >= 0){
-                                        posSum += value;
-                                    } else {
-                                        negSum += value;
-                                    }
-                                }
-                            });
-
-                        if(posSum == null && negSum == null){
-                            return null;
-                        }
-
-                        return {max: posSum || 0, min: negSum || 0};
+            /* Sum of negatives and of positives within each category */
+            .select(function(catGroup){
+                var posSum = null,
+                    negSum = null;
+                catGroup
+                    .children()
+                    .select(function(serGroup){
+                        return serGroup.dimensions(valueDimName).sum();
                     })
-                    .where(def.notNully)
-                    /* A range "union" operator */
-                    .reduce(function(result, range){
-                        if(!result) {
-                            result = {min: range.min, max: range.max};
-                        } else if(range.min < result.min){
-                            result.min = range.min;
-                        } else if(range.max > result.max){
-                            result.max = range.max;
+                    .each(function(value){
+                        // Note: +null === 0
+                        if(value != null){
+                            if(value >= 0){
+                                posSum += value;
+                            } else {
+                                negSum += value;
+                            }
                         }
+                    });
 
-                        return result;
-                    }, null);
+                if(posSum == null && negSum == null){
+                    return null;
+                }
+
+                return {max: posSum || 0, min: negSum || 0};
+            })
+            .where(def.notNully)
+            /* A range "union" operator */
+            .reduce(function(result, range){
+                if(!result) {
+                    result = {min: range.min, max: range.max};
+                } else if(range.min < result.min){
+                    result.min = range.min;
+                } else if(range.max > result.max){
+                    result.max = range.max;
+                }
+
+                return result;
+            }, null);
 
 //        The following would not work:
 //        var max = data.children()
@@ -167,7 +163,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     /**
      * @override
      */
-    _getVisibleValueExtentConstrained: function(axis, min, max){
+    _getVisibleValueExtentConstrained: function(axis, dataPartValue, min, max){
         if(axis.type === 'ortho') {
             if(min == null) {
                 if(this.options.percentageNormalized) {
@@ -183,7 +179,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             }
         }
         
-        return this.base(axis, min, max);
+        return this.base(axis, dataPartValue, min, max);
     },
      
     /**

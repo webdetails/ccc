@@ -119,7 +119,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
      */
     initLayerPanel: function(pvPanel, layer){
         if(layer === 'gridLines'){
-            pvPanel.zOrder(-10);
+            pvPanel.zOrder(-12);
         }
     },
 

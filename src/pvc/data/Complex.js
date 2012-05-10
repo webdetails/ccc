@@ -90,7 +90,7 @@ def.type('pvc.data.Complex')
             .dimensionsNames()
             .forEach(function(dimName){
                 if(def.hasOwn(atomsMap, dimName)) {
-                    keys.push(dimName + ":" + atomsMap[dimName].key);
+                    keys.push(atomsMap[dimName].globalKey());
                 }
             });
 

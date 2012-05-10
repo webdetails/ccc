@@ -57,7 +57,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
             });
         }
     },
-    
+
     /**
      * Creates the set of second axis series keys
      * corresponding to the specified
@@ -69,17 +69,15 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
      * @param {Array} secondAxisSeriesIndexes Array of indexes of the second axis series values.
      * @param {Array} seriesKeys Array of the data source's series atom keys.
      *
-     * @returns {Object} A set of series keys.
+     * @returns {Object} A set of second axis series values or null if none.
      *
      * @private
      * @protected
      */
     _createSecondAxisSeriesKeySet: function(secondAxisSeriesIndexes, seriesKeys){
-        var secondAxisSeriesKeySet = {},
+        var secondAxisSeriesKeySet = null,
             seriesCount = seriesKeys.length;
-
         def.query(secondAxisSeriesIndexes).each(function(indexText){
-            
             // Validate
             var seriesIndex = +indexText; // + -> convert to number
             if(isNaN(seriesIndex)){
@@ -97,45 +95,51 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
             }
 
             // Set
+            if(!secondAxisSeriesKeySet){
+                secondAxisSeriesKeySet = {};
+            }
+            
             secondAxisSeriesKeySet[seriesKeys[seriesIndex]] = true;
         });
 
         return secondAxisSeriesKeySet;
     },
-    
+
     // TODO: docs
-    _value1AndValue2Get: function(calcAxis2SeriesKeySet, seriesReader, valueProp) {
-        
-        var me = this,
-            value1Name = pvc.data.DimensionType.dimensionGroupLevelName('value', 0),
-            value2Name = pvc.data.DimensionType.dimensionGroupLevelName('value', 1);
-        
-        this._ensureDimensionType(value1Name);
-        this._ensureDimensionType(value2Name);
-        
-        var value1Dimension, value2Dimension, axis2SeriesKeySet;
-        
-        function value1And2Get(item) {
-            /* 
+    _dataPartGet: function(calcAxis2SeriesKeySet, seriesReader) {
+
+        var me = this;
+
+        this._ensureDimensionType('dataPart');
+
+        var dataPartDimension,
+            axis2SeriesKeySet,
+            part1Atom,
+            part2Atom;
+
+        function dataPartGet(item) {
+            /*
              * First time initialization.
-             * Done here because *data* isn't available before. 
+             * Done here because *data* isn't available before.
              */
-            if(!value1Dimension) {
+            if(!dataPartDimension) {
                 axis2SeriesKeySet = calcAxis2SeriesKeySet();
-                value1Dimension = me.data.dimensions(value1Name);
-                value2Dimension = me.data.dimensions(value2Name);
+                dataPartDimension = me.data.dimensions('dataPart');
+
+                if(pvc.debug >=3 && axis2SeriesKeySet){
+                    pvc.log("Second axis series values: " +
+                        JSON.stringify(def.keys(axis2SeriesKeySet)));
+                }
+            }
+
+            var seriesAtom = seriesReader(item);
+            if(def.hasOwn(axis2SeriesKeySet, seriesAtom.key)){
+                return part2Atom || (part2Atom = dataPartDimension.intern("1"));
             }
             
-            var rawValue = item[valueProp],
-                seriesAtom = seriesReader(item),
-                isAxis2Series = def.hasOwn(axis2SeriesKeySet, seriesAtom.key);
-            
-            return [
-                value1Dimension.intern(isAxis2Series ? null     : rawValue, item),
-                value2Dimension.intern(isAxis2Series ? rawValue : null,     item)
-            ];
+            return part1Atom || (part1Atom = dataPartDimension.intern("0"));
         }
-        
-        return value1And2Get;
+
+        return dataPartGet;
     }
 });

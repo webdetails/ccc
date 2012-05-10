@@ -68,6 +68,13 @@ function(dimension, value, label, rawValue, key) {
      */
     toString: function(){
         return this.label;
+    },
+
+    /**
+     * A semantic key that is unique across atoms of every dimensions.
+     */
+    globalKey: function(){
+        return this.key ? (this.dimension.name + ":" + this.key) : '';
     }
 });
 

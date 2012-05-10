@@ -23,14 +23,15 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
         .intercept('strokeStyle', 'strokeColor')
         .intercept('lineWidth',   'strokeWidth')
         ;
+
+    // Segmented lines use fill color instead of stroke...so this doesn't work.
+    //this.pvMark.svg({ 'stroke-linecap': 'square' });
 })
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs, 
-                        'noHoverable',   true,
-                        'noTooltips',    true,
-                        'noClick',       true,
-                        'noDoubleClick', true);
+                        'noHoverable', true,
+                        'noTooltips',  true);
         
         this.base(keyArgs);
     },

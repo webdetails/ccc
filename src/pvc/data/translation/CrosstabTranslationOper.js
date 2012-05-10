@@ -477,32 +477,21 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         }
         
         if(!this._userUsedDims.value) {
-            // The null test is required because secondAxisSeriesIndexes can be a number, a string...
-            var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;
-            if(axis2SeriesIndexes != null){
-                // Has 'value' and 'value2' dimensions, fed in a special way 
+            add('value', 'M', 0, this.M);
+        }
+
+        if(this._axis2SeriesKeySet){
+            var seriesReader = this._userDimsReadersByDim['series'];
+            if(seriesReader) {
+                var calcAxis2SeriesKeySet = def.constant(this._axis2SeriesKeySet);
+
+                /* Create a reader that surely only returns 'series' atoms */
+                seriesReader = this._filterDimensionReader(seriesReader, 'series');
+
+                this._dataPartGet(calcAxis2SeriesKeySet, seriesReader)
                 
-                if(!this._userUsedDims.value2) {
-                    var seriesReader = this._userDimsReadersByDim['series'];
-                    if(seriesReader) {
-                        index = this._nextAvailableItemIndex(index);
-                        
-                        this._userItem[index] = true;
-                        
-                        /* Create a reader that surely only returns 'series' atoms */
-                        seriesReader = this._filterDimensionReader(seriesReader, 'series');
-                        
-                        var calcAxis2SeriesKeySet = def.constant(this._axis2SeriesKeySet);
-                        
-                        dimReaders.push(this._value1AndValue2Get(calcAxis2SeriesKeySet, seriesReader, index));
-                        
-                        // Add more M-1 measures, starting at 2 (~> 'value3', ...)
-                        add('value', 'M', 2, this.M - 1);
-                    }
-                }
-                
-            } else {
-                add('value', 'M', 0, this.M);
+                this._userDimsReaders.push(
+                    this._value1AndValue2Get(calcAxis2SeriesKeySet, seriesReader, index));
             }
         }
     }

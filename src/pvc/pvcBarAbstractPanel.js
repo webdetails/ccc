@@ -30,6 +30,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     maxBarSize: 200,
     showValues: true,
 
+    _linePanel: null,
+
     constructor: function(chart, parent, options){
         this.base(chart, parent, options);
 
@@ -50,8 +52,9 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             isStacked = !!this.stacked,
             isVertical = this.isOrientationVertical();
 
-        var data = chart._getVisibleData(), // shared "categ then series" grouped data
-            rootScene = this._buildScene(data)
+        var data = chart._getVisibleData(this.dataPartValue), // shared "categ then series" grouped data
+            seriesData = data.groupBy(chart._serGrouping),
+            rootScene = this._buildScene(data, seriesData)
             ;
 
         var orthoScale = chart.axes.ortho.scale,
@@ -67,7 +70,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         if(isStacked){
             barWidth = bandWidth;
         } else {
-            var S = chart._serAxisData.childCount();
+            var S = seriesData.childCount();
             barWidth = S > 0 ? (bandWidth * this.barSizeRatio / S) : 0;
         }
         
@@ -112,8 +115,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         if(this.showValues){
             this.pvBarLabel = this.pvBar.anchor(this.valuesAnchor || 'center')
                 .add(pv.Label)
-                .localProperty('valueAct')
-                .valueAct(function(scene){
+                .localProperty('_valueAct')
+                ._valueAct(function(scene){
                     return options.showValuePercentage ?
                             scene.acts.value.percent :
                             scene.acts.value;
@@ -124,11 +127,14 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                     return length >= 4;
                 })
                 .text(function(){
-                    return this.valueAct().label;
+                    return this._valueAct().label;
                 });
         }
     },
 
+    /**
+     * @virtual
+     */
     _barVerticalMode: function(){
         return null;
     },
@@ -149,14 +155,10 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
 
         this.extend(this.pvBarLabel, "barLabel_");
         
-        // Extend secondAxis
-//        if(this.pvSecondLine){
-//            this.extend(this.pvSecondLine, "barSecondLine_");
-//        }
-//
-//        if(this.pvSecondDot){
-//            this.extend(this.pvSecondDot, "barSecondDot_");
-//        }
+        if(this._linePanel){
+            this.extend(this._linePanel.pvLine, "barSecondLine_");
+            this.extend(this._linePanel.pvDot,  "barSecondDot_" );
+        }
     },
 
     _addOverflowMarkers: function(){
@@ -242,15 +244,14 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         return [this.pvBar];
     },
 
-    _buildScene: function(data){
-        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data}),
-            chart = this.chart,
-            categDatas = chart._catAxisData._children;
+    _buildScene: function(data, seriesData){
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data}),
+            categDatas = data._children;
 
         /**
          * Create starting scene tree
          */
-        chart._serAxisData
+        seriesData
             .children()
             .each(createSeriesScene, this);
 

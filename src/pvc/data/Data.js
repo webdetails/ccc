@@ -73,7 +73,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     
     var owner,
         atoms,
-        isOwner,
+        atomsBase,
         parent = this.parent;
     
     if(parent){
@@ -85,7 +85,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
         
         owner = parent.owner;
         atoms = def.get(keyArgs, 'atoms') || def.fail.argumentRequired('atoms');
-        
+        atomsBase = parent.atoms;
     } else {
         // Root (topmost or not)
         this.root = this;
@@ -101,13 +101,20 @@ def.type('pvc.data.Data', pvc.data.Complex)
             this._datums = def.get(keyArgs, 'datums') || linkParent._datums.slice();
             this._leafs  = [];
             
+            /* 
+             * Clone link parent atoms
+             * End up with the same set of own atoms
+             */
+            atomsBase = linkParent._atomsBase;
+            atoms = def.own(linkParent.atoms);
+
             data_addLinkChild.call(linkParent, this);
         } else {
             // Topmost root - an owner
-            isOwner = true;
             owner = this;
             //atoms = null
-            
+            atomsBase = {};
+
             this.type = def.get(keyArgs, 'type') || def.fail.argumentRequired('type');
             
             // Only owner datas cache selected datums
@@ -121,12 +128,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
     // because otherwise new Dimension( ... ) fails.
     this.owner = owner;
     
-    // Connect .atoms to each other
-    var atomsBase = isOwner ? {} : (this.parent || this.linkParent).atoms;
-    if(isOwner){
-        /* Need this because of null interning/uninterning */
-        this._atomsBase = atomsBase;
-    }
+    /* Need this because of null interning/uninterning and atoms chaining */
+    this._atomsBase = atomsBase;
     
     this.type.dimensionsList().forEach(function(dimType){
         var name = dimType.name,
@@ -138,7 +141,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     // Call base constructors
     this.base(owner, atoms, atomsBase);
     
-    pv.Dom.Node.call(this, /* nodeValue */null);
+    pv.Dom.Node.call(this, /* nodeValue */null); // TODO: remove this when possible
     
     delete this.nodeValue;
     

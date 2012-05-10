@@ -225,23 +225,26 @@ def.type('pvc.visual.Sign')
         return color;
     },
     
-    seriesColorScale: function(){
-        return this._seriesColorScale || 
-                (this._seriesColorScale = this.chart.seriesColorScale());
+    legendColorScale: function(){
+        return this._legendColorScale ||
+                (this._legendColorScale = this.chart._legendColorScale(this.panel.dataPartValue));
     },
     
     baseColor: function(type){
         var color = this.delegate();
         if(color === undefined){
-            color = this.seriesColor(type);
+            color = this.legendColor(type);
         }
         
         return color;
     },
 
-    seriesColor: function(type){
-        /* Normal color is a function of the series */
-        return this.seriesColorScale()(this.scene.acts.series.value);
+    legendColor: function(type){
+        /* Legend color is a function of the chart's legendSource */
+        return this.legendColorScale()(
+            // Better there exists an act for legendSource role...
+            this.scene.acts[this.chart.legendSource].value
+        );
     },
 
     normalColor: function(type, color){

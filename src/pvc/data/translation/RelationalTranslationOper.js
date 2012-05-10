@@ -157,78 +157,58 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         }
         
         // ----
-        
+
         if(!this._userUsedDims.value) {
-            
-            // Get the index for the first value column
-            var value1ColIndex = this._nextAvailableItemIndex(index);
-            
-            // The null test is required because secondAxisSeriesIndexes can be a number, a string...
-            var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;
-            if(axis2SeriesIndexes != null){
-                // Has 'value' and 'value2' dimensions, fed in a special way 
-                
-                if(!this._userUsedDims.value2) {
-                    var seriesReader = this._userDimsReadersByDim['series'];
-                    if(seriesReader) {
-                        this._userItem[value1ColIndex] = true;
-                        
-                        // The "value column" is fed to 'value' or to 'value2', 
-                        // according to the the series value of each row.
-                        add(relTransl_value1AndValue2Get.call(this,
-                                axis2SeriesIndexes,
-                                seriesReader, 
-                                value1ColIndex));
-                    }
-                } 
-                
-            } else {
-                // The null test is required because measuresIndexes can be a number, a string...
-                var valuesColIndexes;
-                if(!this.options.isMultiValued || (valuesColIndexes = this.options.measuresIndexes) == null) {
-                    // Has 'value' dimension only
-                    
-                    this._userItem[value1ColIndex] = true;
-                    
-                    add(this._propGet('value', value1ColIndex));
-                    
-                } else if(!this._userUsedDims.value2) {
-                    // Has multiple 'value' dimensions
-                    // Does not validate/consume indexes on purpose.
-                    def.query(valuesColIndexes)
-                       .distinct()
-                       .each(function(valueColIndex, level){
-                            var dim = pvc.data.DimensionType.dimensionGroupLevelName('value', level);
-                            if(this._userUsedDims[dim]) {
-                                throw def.error.argumentInvalid('measuresIndexes', "The dimension named '{0}' is already bound.", [dim]);
-                            }
-                            
-                            add(this._propGet(dim, +valueColIndex)); // + -> convert to number
-                        }, this);
-                }
+            // The null test is required because measuresIndexes can be a number, a string...
+            var valuesColIndexes;
+            if(!this.options.isMultiValued || (valuesColIndexes = this.options.measuresIndexes) == null) {
+                // Has 'value' dimension only
+
+                // Get the index for the first value column
+                var value1ColIndex = this._nextAvailableItemIndex(index);
+
+                this._userItem[value1ColIndex] = true;
+
+                add(this._propGet('value', value1ColIndex));
+
+            } else if(!this._userUsedDims.value2) { // TODO: Why this test?
+                // Has multiple 'value' dimensions
+                // Does not validate/consume indexes on purpose.
+                def.query(valuesColIndexes)
+                    .distinct()
+                    .each(function(valueColIndex, level){
+                        var dim = pvc.data.DimensionType.dimensionGroupLevelName('value', level);
+                        if(this._userUsedDims[dim]) {
+                            throw def.error.argumentInvalid('measuresIndexes', "The dimension named '{0}' is already bound.", [dim]);
+                        }
+
+                        add(this._propGet(dim, +valueColIndex)); // + -> convert to number
+                    }, this);
+            }
+        }
+
+        // ----
+        // The null test is required because secondAxisSeriesIndexes can be a number, a string...
+        var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;
+        if(axis2SeriesIndexes != null){
+            var seriesReader = this._userDimsReadersByDim['series'];
+            if(seriesReader) {
+                add(relTransl_dataPartGet.call(this, axis2SeriesIndexes, seriesReader));
             }
         }
     }
 });
 
 /**
- * Obtains the dimension reader for dimensions 'value' and 'value2'.
+ * Obtains the dimension reader for dimension 'dataPart'.
  * 
- * It directs a source item's property 'value'
- * to one or the other dimension,
- * according to the item's series value.
- * 
- * @name _value1AndValue2Get
+ * @name pvc.data.RelationalTranslationOper#_dataPartGet
  * @function
  * @param {Array} secondAxisSeriesIndexes The indexes of series that are to be shown on the second axis. 
  * @param {function} seriesReader Dimension series atom getter.
- * @param {string} valueProp The property name in a source item that contains the value property.
  * @type function
- * 
- * @memberOf pvc.data.RelationalTranslationOper#
- * @private
  */
-function relTransl_value1AndValue2Get(secondAxisSeriesIndexes, seriesReader, valueProp) {
+function relTransl_dataPartGet(secondAxisSeriesIndexes, seriesReader) {
     var me = this;
     
     /* Create a reader that surely only returns 'series' atoms */
@@ -237,16 +217,16 @@ function relTransl_value1AndValue2Get(secondAxisSeriesIndexes, seriesReader, val
     /* Defer calculation of axis2SeriesKeySet because *data* isn't yet available. */
     function calcAxis2SeriesKeySet() {
         var seriesKeys = def.query(me.source)
-                            .select(function(item){
-                                var atom = seriesReader(item);
-                                return (atom && atom.key) || null; 
-                             })
-                            /* distinct excludes null keys */
-                            .distinct()
-                            .array();
-        
+                                .select(function(item){
+                                    var atom = seriesReader(item);
+                                    return (atom && atom.key) || null;
+                                })
+                                /* distinct excludes null keys */
+                                .distinct()
+                                .array();
+
         return me._createSecondAxisSeriesKeySet(secondAxisSeriesIndexes, seriesKeys);
     }
     
-    return this._value1AndValue2Get(calcAxis2SeriesKeySet, seriesReader, valueProp);
+    return this._dataPartGet(calcAxis2SeriesKeySet, seriesReader);
 }

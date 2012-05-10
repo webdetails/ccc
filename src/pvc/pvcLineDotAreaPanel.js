@@ -18,7 +18,7 @@
  */
 pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     anchor: 'fill',
-    
+    stacked: false,
     pvLine: null,
     pvArea: null,
     pvDot: null,
@@ -40,7 +40,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         var myself = this,
             chart = this.chart,
             options = chart.options,
-            isStacked = options.stacked,
+            isStacked = this.stacked,
             showDots  = this.showDots,
             showAreas = this.showAreas,
             showLines = this.showLines,
@@ -50,7 +50,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         // ------------------
         // DATA
         var isBaseDiscrete = chart._catGrouping.isDiscrete(),
-            data = chart._getVisibleData(), // shared "categ then series" grouped data
+            data = chart._getVisibleData(this.dataPartValue), // shared "categ then series" grouped data
             isDense = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
             rootScene = this._buildScene(data, isBaseDiscrete);
 
@@ -65,14 +65,11 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
        
         // ---------------
         // BUILD
-        //this.pvPanel.zOrder(0);
+        this.pvPanel.zOrder(-7);
 
         if(options.showTooltips || options.hoverable || this._shouldHandleClick()){
-            this.pvPanel
-              // Receive events even if in a transparent panel (#events default is "painted")
-              .events("all")
-              .event("mousemove", pv.Behavior.point(40)) // fire point and unpoint events
-              ;
+            // fire point and unpoint events
+            this.pvPanel.event("mousemove", pv.Behavior.point(40));
         }
         
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
@@ -98,7 +95,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             
             /* Color & Line */
             .override('color', function(type){
-                return showAreas ? this.base(type) : invisibleFill;
+                return showAreas ? this.base(type) : null;
             })
             .override('baseColor', function(type){
                 var color = this.base(type);
@@ -113,9 +110,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                    (this.scene.isNull && (!this.scene.nextSibling || this.scene.nextSibling.isNull))) {
                     // Hide a vertical line from 0 to the alone dot
                     // Hide horizontal lines of nulls near zero
-                    return 0.00001;
+                    return 0;
                 }
-                
+
                 return this.base();
             })
             .pvMark
@@ -185,7 +182,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             .pvMark
             ;
         
-            
+           
         // -- DOT --
         var showAloneDots = !(showAreas && isBaseDiscrete && isStacked);
         
@@ -260,14 +257,12 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
 
         this.base();
 
-        // Extend lineLabel
-        this.extend(this.pvLabel, "lineLabel_");
-        
         this.extend(this.pvScatterPanel, "scatterPanel_");
         this.extend(this.pvArea,  "area_");
         this.extend(this.pvLine,  "line_");
         this.extend(this.pvDot,   "dot_");
         this.extend(this.pvLabel, "label_");
+        this.extend(this.pvLabel, "lineLabel_");
     },
 
     /**
@@ -295,13 +290,17 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     },
   
     _buildScene: function(data, isBaseDiscrete){
-        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
+        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data}),
+            categDatas = data._children;
         
         var chart = this.chart,
-            options = chart.options,
-            isStacked = options.stacked,
+            isStacked = this.stacked,
             visibleKeyArgs = {visible: true},
-            orthoScale = chart.axes.ortho.scale,
+            /* TODO: BIG HACK */
+            orthoScale = this.dataPartValue !== '1' ?
+                            chart.axes.ortho.scale :
+                            chart.axes.ortho2.scale,
+                        
             orthoNullValue = def.scope(function(){
                 var domain = orthoScale.domain(),
                     dmin = domain[0],
@@ -318,12 +317,10 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         
         // --------------
         
-        var categDatas = chart._catAxisData._children;
-        
         /** 
          * Create starting scene tree 
          */
-        chart._serAxisData
+        data.groupBy(chart._serGrouping)
             .children()
             .each(createSeriesScene, this);
         

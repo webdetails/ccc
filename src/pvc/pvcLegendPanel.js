@@ -27,150 +27,116 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     minMarginY: 20,
     textMargin: 6,
     padding:    24,
-    shape:      "square",
+    shape:      null, //"square",
     markerSize: 15,
     drawLine:   false,
     drawMarker: true,
     font:       '10px sans-serif',
-    
+
+    constructor: function(chart, parent, options){
+        this.base(chart, parent, options);
+
+        if(!this.shape && (!options || options.shape === undefined)){
+            var isV1Compat = (this.chart.options.compatVersion <= 1);
+            if(isV1Compat){
+                this.shape = 'square';
+            }
+        }
+    },
+
     /**
      * @override
      */
     _calcLayout: function(availableSize, layoutInfo){
         var myself = this,
-            c1 = this.chart.colors(),
-            c2 = this.chart.secondAxisColor(),
+            rootScene = this._buildScene(),
             x,
             y;
         
-        var value2Role     = this.chart.options.secondAxis ? 
-                             this.chart.visualRoles('value2', {assertExists: false}) : 
-                             null,
-            value2DimName  = value2Role ? value2Role.firstDimensionName() : null,
-            legendRoleName = this.chart.legendSource,
-            data           = this.chart.visualRoleData(legendRoleName, {singleLevelGrouping: true}),
-            leafDatas      = data.leafs().where(function(leaf){ return !!leaf.absLabel; }).array(),
-            leafCount      = leafDatas.length;
-        
-        function hasDatumValue2(datum) {
-            // 2nd axis?
-            if(value2DimName) {
-                valueAtom = datum.atoms[value2DimName];
-                if(valueAtom && valueAtom.value != null) {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
+        var legendRoleName = this.chart.legendSource,
+            leafCount      = rootScene.childNodes.length;
         
         // Determine the size of the biggest cell
-        var maxLabelLen = 0,
-            value1Index = 0,
-            value2Index = 0,
-            leafInfos = data.leafs().object({
-                name:  function(leaf){ return leaf.id; },
-                value: function(leaf){
-                    var label = leaf.absLabel,
-                        labelLen = pvc.text.getTextLength(label, this.font),
-                        isValue2 = leaf.datums(null, {visible: true}).any(hasDatumValue2);
-                    
-                    if(maxLabelLen < labelLen) {
-                        maxLabelLen = labelLen;
-                    }
-                    
-                    return {
-                        label:    label,
-                        length:   labelLen,
-                        isValue2: isValue2,
-                        index:    isValue2 ? value2Index++ : value1Index++
-                    };
-                },
-                context: this}
-            );
+        var maxLabelLen = rootScene.acts[legendRoleName].maxLabelTextLen;
         
         var cellSize = this.markerSize + this.textMargin + maxLabelLen; // ignoring textAdjust
-        
-        var realWidth, realHeight;
-        
-        if (this.anchor === "top" || this.anchor === "bottom"){
-            this.setWidth(availableSize.width);
-            
-            var maxPerLine = leafCount,
-                paddedCellSize = cellSize + this.padding;
 
-            // If the legend is bigger than the available size, multi-line and left align
-            var margin = this.minMarginX - this.padding;
-            
-            realWidth = maxPerLine * paddedCellSize + margin;
-            
-            if(realWidth > this.width){
-                this.align = "left";
-                maxPerLine = Math.floor((this.width - margin) / paddedCellSize);
+        if(!leafCount){
+            this.setWidth(1);
+            this.setHeight(1);
+        } else {
+            var realWidth, realHeight;
+
+            if (this.anchor === "top" || this.anchor === "bottom"){
+                this.setWidth(availableSize.width);
+
+                var maxPerLine = leafCount,
+                    paddedCellSize = cellSize + this.padding;
+
+                // If the legend is bigger than the available size, multi-line and left align
+                var margin = this.minMarginX - this.padding;
+
                 realWidth = maxPerLine * paddedCellSize + margin;
+
+                if(realWidth > this.width){
+                    this.align = "left";
+                    maxPerLine = Math.floor((this.width - margin) / paddedCellSize);
+                    realWidth = maxPerLine * paddedCellSize + margin;
+                }
+
+                realHeight = this.padding * Math.ceil(leafCount / maxPerLine);
+
+                if(this.height == null){ // ??
+                    this.setHeight(Math.min(availableSize.height, realHeight));
+                }
+
+                // Changing margins if the alignment is not "left"
+                if(this.align === "right"){
+                    this.minMarginX = this.width - realWidth;
+                } else if (this.align === "center"){
+                    this.minMarginX = (this.width - realWidth) / 2;
+                }
+
+                x = function(){
+                    return (this.index % maxPerLine) * paddedCellSize + myself.minMarginX;
+                };
+
+                this.minMarginY = (this.height - realHeight) / 2;
+
+                y = function(){
+                    var n = Math.floor(this.index / maxPerLine);
+                    return myself.height  - n * myself.padding - myself.minMarginY - myself.padding / 2;
+                };
+
+        } else {
+
+            this.setHeight(availableSize.height);
+
+            realWidth = cellSize + this.minMarginX;
+            realHeight = this.padding * leafCount;
+
+            if(this.width == null){ // ??
+                this.setWidth(Math.min(availableSize.width, realWidth));
             }
 
-            realHeight = this.padding * Math.ceil(leafCount / maxPerLine);
-            
-            if(this.height == null){ // ??
-                this.setHeight(Math.min(availableSize.height, realHeight));
-            }
-            
-            // Changing margins if the alignment is not "left"
-            if(this.align === "right"){
-                this.minMarginX = this.width - realWidth;
-            } else if (this.align === "center"){
-                this.minMarginX = (this.width - realWidth) / 2;
+            if(this.align === "middle"){
+                this.minMarginY = (this.height - realHeight + this.padding) / 2  ;
+            } else if (this.align === "bottom"){
+                this.minMarginY = this.height - realHeight;
             }
 
-            x = function(){
-                return (this.index % maxPerLine) * paddedCellSize + myself.minMarginX;
-            };
-      
-            this.minMarginY = (this.height - realHeight) / 2;
-      
+            x = this.minMarginX;
             y = function(){
-                var n = Math.floor(this.index / maxPerLine); 
-                return myself.height  - n * myself.padding - myself.minMarginY - myself.padding / 2;
+                return myself.height - this.index * myself.padding - myself.minMarginY;
             };
-      
-      } else {
-          
-          this.setHeight(availableSize.height);
-                
-          realWidth = cellSize + this.minMarginX;
-          realHeight = this.padding * leafCount;
-          
-          if(this.width == null){ // ??
-              this.setWidth(Math.min(availableSize.width, realWidth));
-          }
-          
-          if(this.align === "middle"){
-              this.minMarginY = (this.height - realHeight + this.padding) / 2  ;
-          } else if (this.align === "bottom"){
-              this.minMarginY = this.height - realHeight;
-          }
-          
-          x = this.minMarginX;
-          y = function(){
-              return myself.height - this.index * myself.padding - myself.minMarginY;
-          };
+        }
       }
       
       /** Other exports */
       def.copy(layoutInfo, {
           x: x,
           y: y,
-          leafInfos: leafInfos,
-          leafDatas: leafDatas,
-          data: data,
-          itemColorProp: function(leaf){
-              var leafInfo = leafInfos[leaf.id];
-              return (leafInfo.isValue2 ? c2 : c1)(leafInfo.index);
-          },
-          itemRuleColorProp: function(){
-              return c1(this.index); // DCL: always 0 ?? // TODO: what to do here??
-          }
+          rootScene: rootScene
       });
     },
     
@@ -179,17 +145,18 @@ pvc.LegendPanel = pvc.BasePanel.extend({
      */
     _createCore: function(layoutInfo) {
       var myself = this,
-          leafInfos = layoutInfo.leafInfos,
-          leafDatas = layoutInfo.leafDatas;
+          legendRoleName = this.chart.legendSource,
+          rootScene = layoutInfo.rootScene,
+          sceneColorProp = function(scene){
+              return scene.acts[legendRoleName].color;
+          };
       
       this.pvLegendPanel = this.pvPanel.add(pv.Panel)
-          .data(leafDatas)
+          .data(rootScene.childNodes)
           .localProperty('hasVisibleDatums', Boolean)
-          .hasVisibleDatums(function(leaf){
-              return leaf.datums(null, {visible: true}).any();
+          .hasVisibleDatums(function(scene){
+              return scene.group.datums(null, {visible: true}).any();
           })
-          .localProperty('isValue2', Boolean)
-          .isValue2(function(leaf){ return leafInfos[leaf.id].isValue2; })
           .def("hidden", "false")
           .left(layoutInfo.x)
           .bottom(layoutInfo.y)
@@ -201,9 +168,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                  : "rgba(200,200,200,0.0001)";
           })
           .localProperty('itemColor')
-          .itemColor(layoutInfo.itemColorProp)
-          .event("click", function(leaf){
-              return myself._toggleVisible(leaf);
+          .event("click", function(scene){
+              return myself._toggleVisible(scene);
           });
       
       var pvLegendProto;
@@ -214,17 +180,19 @@ pvc.LegendPanel = pvc.BasePanel.extend({
               .left(0)
               .width(this.markerSize)
               .lineWidth(1)
-              .strokeStyle(layoutInfo.itemRuleColorProp);
+              .strokeStyle(sceneColorProp);
 
           this.pvDot = this.pvRule.anchor("center").add(pv.Dot)
               .shapeSize(this.markerSize)
-              .shape(function(){
-                  return myself.shape ? 
-                         myself.shape :
-                         (this.parent.isValue2()  ? 'bar' : 'square');
+              .shape(function(scene){
+                  if(myself.shape){
+                      return myself.shape;
+                  }
+                  var dataPartValue = scene.acts.dataPart.value;
+                  return !dataPartValue || dataPartValue === '0' ? 'square' : 'bar';
               })
              .lineWidth(0)
-             .fillStyle(function(){ return this.parent.itemColor(); })
+             .fillStyle(sceneColorProp)
              ;
 
           pvLegendProto = this.pvDot;
@@ -235,50 +203,52 @@ pvc.LegendPanel = pvc.BasePanel.extend({
               .left(0)
               .width(this.markerSize)
               .lineWidth(1)
-              .strokeStyle(function(){ return this.parent.itemColor(); })
+              .strokeStyle(sceneColorProp)
               ;
 
           pvLegendProto = this.pvRule;
           
-      } else if(this.drawMarker) {
+      } else { // => if(this.drawMarker) {
           this.pvDot = this.pvLegendPanel.add(pv.Dot)
               .left(this.markerSize / 2)
               .shapeSize(this.markerSize)
-              .shape(function(){
-                  return myself.shape ? 
-                         myself.shape :
-                         (this.parent.isValue2()  ? 'bar' : 'square');
+              .shape(function(scene){
+                  if(myself.shape){
+                      return myself.shape;
+                  }
+                  var dataPartValue = scene.acts.dataPart.value;
+                  return !dataPartValue || dataPartValue === '0' ? 'square' : 'bar';
               })
               .angle(Math.PI/2)
               .lineWidth(2)
-              .strokeStyle(function(){ return this.parent.itemColor(); })
-              .fillStyle  (function(){ return this.parent.itemColor(); })
+              .strokeStyle(sceneColorProp)
+              .fillStyle  (sceneColorProp)
               ;
 
           pvLegendProto = this.pvDot;
       }
     
       this.pvLabel = pvLegendProto.anchor("right").add(pv.Label)
-          .text(function(leaf){
+          .text(function(scene){
               // TODO: trim to width - the above algorithm does not update the cellSize...
-              //leafInfos[leaf.id];
-              return leaf.absLabel;
+              return scene.acts[legendRoleName].label;
           })
           .font(this.font)
           .textMargin(this.textMargin)
           .textDecoration(function(){ return this.parent.hasVisibleDatums() ? ""      : "line-through"; })
           .textStyle     (function(){ return this.parent.hasVisibleDatums() ? "black" : "#ccc";         });
-
-      // Extend legend
-      this.extend(this.pvPanel,      "legendArea_");
-      this.extend(this.pvLegendPanel,"legendPanel_");
-      this.extend(this.pvRule,       "legendRule_");
-      this.extend(this.pvDot,        "legendDot_");
-      this.extend(this.pvLabel,      "legendLabel_");
     },
 
-    _toggleVisible: function(leaf){
-        pvc.data.Data.toggleVisible(leaf.datums());
+    applyExtensions: function(){
+        this.extend(this.pvPanel,      "legendArea_");
+        this.extend(this.pvLegendPanel,"legendPanel_");
+        this.extend(this.pvRule,       "legendRule_");
+        this.extend(this.pvDot,        "legendDot_");
+        this.extend(this.pvLabel,      "legendLabel_");
+    },
+    
+    _toggleVisible: function(scene){
+        pvc.data.Data.toggleVisible(scene.group.datums());
         
         // Forcing removal of tipsy legends
         pvc.removeTipsyLegends();
@@ -287,5 +257,59 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         this.chart.render(true, true, false);
     
         return this.pvLabel; // re-render label
+    },
+
+    _buildScene: function(){
+        var chart = this.chart,
+            partValues = chart._partValues() || [null],
+            maxLabelTextLen = 0,
+
+            /* A root scene that contains all datums */
+            rootScene  = new pvc.visual.Scene(null, {panel: this, group: chart.data});
+
+        partValues.forEach(function(partValue){
+                createPartScenes.call(this, chart._legendData(partValue));
+            },
+            this);
+
+        rootScene.acts[chart.legendSource] = {
+            maxLabelTextLen: maxLabelTextLen
+        };
+        
+        return rootScene;
+
+        function createPartScenes(partData){
+            var partValue = partData.value,
+                partColorScale = chart._legendColorScale(partValue);
+
+            var dataPartAct = {
+                value: partValue,
+                label: partData.label
+            };
+
+            partData
+                .children()
+                .each(function(leafData){
+                    /* Create leaf scene */
+                    var scene = new pvc.visual.Scene(rootScene, {group: leafData});
+
+                    scene.acts.dataPart = dataPartAct;
+
+                    var legendValue  = leafData.value,
+                        legendLabel  = leafData.label,
+                        labelTextLen = pvc.text.getTextLength(legendLabel, chart.font);
+
+                    if(maxLabelTextLen < labelTextLen) {
+                        maxLabelTextLen = labelTextLen;
+                    }
+                    
+                    scene.acts[chart.legendSource] = {
+                        value: legendValue,
+                        label: leafData.label,
+                        color: partColorScale(legendValue),
+                        labelTextLength: labelTextLen
+                    };
+                }, this);
+        }
     }
 });

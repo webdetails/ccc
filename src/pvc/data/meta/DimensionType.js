@@ -503,6 +503,20 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
                 dimSpec.valueType = Number; 
             }
             break;
+
+        default:
+            if(dimName === 'dataPart'){
+                if(dimSpec.isDiscrete === undefined){
+                    dimSpec.isDiscrete = true;
+                }
+                if(dimSpec.isHidden === undefined){
+                    dimSpec.isHidden = true;
+                }
+                if(dimSpec.comparer === undefined){
+                    dimSpec.comparer = def.compare;
+                }
+            }
+            break;
     }
     
     if(dimSpec.converter === undefined && 

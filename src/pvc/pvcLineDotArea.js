@@ -55,6 +55,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         
         var options = this.options;
         return new pvc.LineDotAreaPanel(this, parentPanel, {
+            stacked:        options.stacked,
             showValues:     options.showValues,
             valuesAnchor:   options.valuesAnchor,
             showLines:      options.showLines,

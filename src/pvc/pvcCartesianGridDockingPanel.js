@@ -13,17 +13,6 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
     },
 
     /**
-     * Initializes the content's frame layer panel.
-     * @override
-     */
-    initLayerPanel: function(pvPanel, layer){
-        if(layer === 'frame'){
-            // Below axis, at zOrder 30, and above content, at zOrder 0/-10
-            pvPanel.zOrder(20);
-        }
-    },
-
-    /**
      * @override
      */
     _createCore: function(layoutInfo){
@@ -77,7 +66,20 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                                     orthoScale.offsetSize;
             
             this.pvZeroLine = this.pvPanel.add(pv.Rule)
-                .zOrder(-6) // below End Line (see below)
+                /* zOrder
+                 *
+                 * TOP
+                 * -------------------
+                 * Axis Rules:     0
+                 * Frame/EndLine: -5
+                 * Line/Dot/Area Content: -7
+                 * ZeroLine:      -9   <<------
+                 * Content:       -10 (default)
+                 * FullGrid:      -12
+                 * -------------------
+                 * BOT
+                 */
+                .zOrder(-9)
                 .strokeStyle("#808285")
                 [a](position)
                 [this.anchorOrthoLength(a)](length)

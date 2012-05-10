@@ -24,6 +24,8 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     _layoutInfo: null,
     
+    dataPartValue: null,
+
     /**
      * Indicates if the top root panel is rendering with animation
      * and, if so, the current phase of animation.
@@ -196,7 +198,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         };
         
         var aolMap = pvc.BasePanel.orthogonalLength,
-            aoMap   = pvc.BasePanel.relativeAnchor;
+            aoMap  = pvc.BasePanel.relativeAnchor;
         
         // Decreases available size and increases margins
         function updateSide(side, child) {
@@ -762,7 +764,13 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         var tooltip = [],
-            playingPercentMap = dataEngine.type.getPlayingPercentVisualRoleDimensionMap(),
+            /*
+             * TODO: Big HACK to prevent percentages from
+             * showing up in the Lines of BarLine
+             */
+            playingPercentMap = context.panel.stacked === false ? 
+                                null :
+                                dataEngine.type.getPlayingPercentVisualRoleDimensionMap(),
             commonAtoms = isMultiDatumGroup ? context.group.atoms : context.atoms;
         
         function addDim(escapedDimLabel, label){
@@ -785,7 +793,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             if(!dimType.isHidden){
                 if(!isMultiDatumGroup || atom.value != null) {
                     var valueLabel = atom.label;
-                    if(playingPercentMap.has(dimName)) {
+                    if(playingPercentMap && playingPercentMap.has(dimName)) {
                         valueLabel += " (" + calcPercent(atom, dimName) + ")";
                     }
                     
@@ -807,7 +815,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     if(dim.type.valueType === Number) {
                         // Sum
                         valueLabel = dim.format(dim.sum(visibleKeyArgs));
-                        if(playingPercentMap.has(dimName)) {
+                        if(playingPercentMap && playingPercentMap.has(dimName)) {
                             valueLabel += " (" + calcPercent(null, dimName) + ")";
                         }
                         
@@ -834,7 +842,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         mark.cursor("pointer")
-            .events('all') // some marks, like labels, need this  
+            //.events('all') // some marks, like labels, need this
             .event("click", onClick);
     },
 
@@ -847,7 +855,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         mark.cursor("pointer")
-            .events('all') // some marks, like labels, need this
+            //.events('all') // some marks, like labels, need this
             .event("dblclick", onDoubleClick);
     },
     

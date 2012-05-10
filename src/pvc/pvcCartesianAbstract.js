@@ -1,4 +1,8 @@
 
+// TODO: Everything related to "dataPartValue"
+// is to make secondAxis work, and not necessarily a good solution.
+// Review this later when chart "superposition" is approached.
+
 /**
  * CartesianAbstract is the base class for all 2D cartesian space charts.
  */
@@ -7,7 +11,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     
     axes: null,
     axesPanels: null, 
-    _seriesColorScale: null,
     
     yAxisPanel : null,
     xAxisPanel : null,
@@ -72,33 +75,11 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // Clear data related cache
         if(this._visibleDataCache) {
             delete this._visibleDataCache;
-            delete this._seriesColorScale;
         }
         
         this.base.apply(this, arguments);
-
-        // Cached
-        this._serAxisData = this.dataEngine.groupBy(this._serGrouping, {visible: true});
     },
 
-    seriesColorScale: function(){
-        if(this.parent){
-            return this.root.seriesColorScale();
-        }
-
-        if(!this._seriesColorScale){
-            // visible or *invisible* data!!
-            var serData = this.dataEngine.owner.groupBy(this._serGrouping),
-                seriesValues = serData.children()
-                                    .select(function(seriesData){ return seriesData.value; })
-                                    .array();
-            
-            this._seriesColorScale = this.colors(seriesValues);
-        }
-        
-        return this._seriesColorScale;
-    },
-    
     _preRenderCore: function(){
         var options = this.options;
 
@@ -143,7 +124,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      *
      * @type pvc.visual.CartesianAxis
      */
-    _createAxis: function(axisType, axisIndex){ 
+    _createAxis: function(axisType, axisIndex){
         var role = this.visualRoles(this._axisRoleNameMap[axisType]); // TODO: axis index?
         var axis = new pvc.visual.CartesianAxis(this, axisType, axisIndex, role);
         
@@ -204,14 +185,22 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @type pv.Scale
      */
     _createAxisScale: function(axis){
-        var scale = this._createScaleByAxis(axis);
+        var isSecondOrtho = axis.index === 1 && axis.type === 'ortho';
+        
+        var scale;
+
+        if(isSecondOrtho && !this.options.secondAxisIndependentScale){
+            scale = this.axes.ortho.scale; // better already exist...
+        } else {
+            scale = this._createScaleByAxis(axis);
+        }
         axis.setScale(scale);
         
         /* V1 fields xScale, yScale, secondScale */
-        if(axis.index == 0) {
-            this[axis.orientation + 'Scale'] = scale;
-        } else if(axis.index === 1 && axis.type === 'ortho') {
+        if(isSecondOrtho) {
             this.secondScale = scale;
+        } else if(axis.index == 0) {
+            this[axis.orientation + 'Scale'] = scale;
         }
         
         return scale;
@@ -228,9 +217,15 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         var createScaleMethod = this['_create' + scaleType + 'ScaleByAxis'];
         
-        return createScaleMethod.call(this, axis);
+        var dataPartValue = this._getAxisDataPart(axis);
+        
+        return createScaleMethod.call(this, axis, dataPartValue);
     },
-    
+
+    _getAxisDataPart: function(axis){
+        return null;
+    },
+
     /**
      * Creates a discrete scale for a given axis.
      * <p>
@@ -238,12 +233,13 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
+     * @param {string} [dataPartValue=null] The desired data part value.
      * @virtual
      * @type pv.Scale
      */
-    _createDiscreteScaleByAxis: function(axis){
+    _createDiscreteScaleByAxis: function(axis, dataPartValue){
         /* DOMAIN */
-        var data   = this.dataEngine.groupBy(axis.role.grouping.singleLevelGrouping(), { visible: true }),
+        var data   = this._getVisibleData(dataPartValue).groupBy(axis.role.grouping.singleLevelGrouping(), { visible: true }),
             values = data.children().select(function(child){ return child.value; }).array(),
             scale  = new pv.Scale.ordinal(values);
         
@@ -272,26 +268,19 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
+     * @param {string} [dataPartValue=null] The desired data part value.
      * @virtual
      * @type pv.Scale
      */
-    _createTimeseriesScaleByAxis: function(axis){
+    _createTimeseriesScaleByAxis: function(axis, dataPartValue){
         /* DOMAIN */
-        var dExtent = this._getVisibleValueExtent(axis.role), // null when no data...
+        var dExtent = this._getVisibleValueExtent(axis.role, dataPartValue), // null when no data...
             dMin,
             dMax;
         
         if(dExtent) {
             dMin = dExtent.min;
             dMax = dExtent.max;
-            
-            // Adding a small offset to the scale's domain:
-//            var axisOffset = axis.options('Offset');
-//            if(axisOffset > 0){
-//                var dOffset = (dMax.getTime() - dMin.getTime()) * axisOffset;
-//                dMin = new Date(dMin.getTime() - dOffset);
-//                dMax = new Date(dMax.getTime() + dOffset);
-//            }
         } else {
             dMin = dMax = new Date();
         }
@@ -314,9 +303,25 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         return scale;
     },
 
-    _createContinuousScaleByAxis: function(axis){
+    /**
+     * Creates a continuous scale for a given axis.
+     *
+     * <p>
+     * Uses the axis' option <tt>Offset</tt> to calculate excess domain margins at each end of the scale.
+     * </p>
+     * <p>
+     * Also takes into account the specified axis' options
+     * <tt>DomainRoundMode</tt> and <tt>DesiredTickCount</tt>.
+     * </p>
+     *
+     * @param {pvc.visual.CartesianAxis} axis The axis.
+     * @param {string} [dataPartValue=null] The desired data part value.
+     * @virtual
+     * @type pv.Scale
+     */
+    _createContinuousScaleByAxis: function(axis, dataPartValue){
         /* DOMAIN */
-        var extent = this._getVisibleValueExtentConstrained(axis),
+        var extent = this._getVisibleValueExtentConstrained(axis, dataPartValue),
             dMin = extent.min,
             dMax = extent.max;
 
@@ -363,30 +368,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // Domain rounding
         // Must be done before applying offset
         // because otherwise the offset gets amplified by the rounding
-        pvc.roundScaleDomain(scale, axis.options('DomainRoundMode'), axis.options('DesiredTickCount'));
-        
-        // Adding a small offset to the scale's dMin and dMax,
-        //  as long as they are not 0 and originIsZero=true.
-        // We update the domain but do not update the ticks cache.
+        // Then, the scale range is updated but the ticks cache is not.
         // The result is we end up showing two zones, on each end, with no ticks.
-//        var bypassAxisOffset = false; //def.get(keyArgs, 'bypassAxisOffset', false);
-//        var axisOffset = axis.options('Offset');
-//        if(!bypassAxisOffset && axisOffset > 0 &&  // TODO axisIndex awareness...
-//           (!extent.minLocked || !extent.maxLocked)){ // at least one of min and max isn't locked
-//
-//            var domain = scale.domain();
-//            dMin = domain[0];
-//            dMax = domain[1];
-//
-//            var dOffset = (dMax - dMin) * axisOffset;
-//            if(!extent.minLocked && !extent.maxLocked){
-//                scale.domain(dMin - dOffset, dMax + dOffset);
-//            } else if(!extent.minLocked) {
-//                scale.domain(dMin - dOffset, dMax);
-//            } else {
-//                scale.domain(dMin, dMax + dOffset);
-//            }
-//        }
+        pvc.roundScaleDomain(scale, axis.options('DomainRoundMode'), axis.options('DesiredTickCount'));
         
         // ----------------------------
         
@@ -422,22 +406,45 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         return scale;
     },
 
-    _getVisibleData: function(){
-        var data = this._visibleDataCache;
+    /*
+     * Obtains the chart's visible data
+     * grouped according to the charts "main grouping".
+     * 
+     * @param {string} [dataPartValue=null] The desired data part value.
+     * 
+     * @type pvc.data.Data
+     */
+    _getVisibleData: function(dataPartValue){
+        var data = def.getOwn(this._visibleDataCache, dataPartValue);
         if(!data) {
-            data = this._visibleDataCache = this._createVisibleData();
+            data = this._createVisibleData(dataPartValue);
+            
+            (this._visibleDataCache || (this._visibleDataCache = {}))
+                [dataPartValue] = data;
         }
         
         return data;
     },
-    
-    /**
+
+    /*
+     * Creates the chart's visible data
+     * grouped according to the charts "main grouping".
+     *
+     * <p>
+     * The default implementation groups data by series visual role.
+     * </p>
+     *
+     * @param {string} [dataPartValue=null] The desired data part value.
+     *
+     * @type pvc.data.Data
+     * @protected
      * @virtual
      */
-    _createVisibleData: function(){
+    _createVisibleData: function(dataPartValue){
         var seriesGrouping = this.visualRoles('series').grouping.singleLevelGrouping();
-        
-        return this.dataEngine.groupBy(seriesGrouping, { visible: true });
+            
+        return this._partData(dataPartValue)
+                   .groupBy(seriesGrouping, { visible: true });
     },
     
     _assertSingleContinuousValueRole: function(valueRole){
@@ -455,11 +462,13 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * over all datums of the visible data.
      * 
      * @param {pvc.visual.Role} valueRole The value role.
+     * @param {string} [dataPartValue=null] The desired data part value.
      * @type object
-     * 
+     *
+     * @protected
      * @virtual
      */
-    _getVisibleValueExtent: function(valueRole){
+    _getVisibleValueExtent: function(valueRole, dataPartValue){
         this._assertSingleContinuousValueRole(valueRole);
         
         if(valueRole.name === 'series') { 
@@ -468,14 +477,14 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         }
         
         var valueDimName = valueRole.firstDimensionName();
-        var extent = this._getVisibleData().dimensions(valueDimName).extent();
+        var extent = this._getVisibleData(dataPartValue).dimensions(valueDimName).extent();
         return extent ? {min: extent.min.value, max: extent.max.value} : undefined;
     },
     
     /**
      * @virtual
      */
-    _getVisibleValueExtentConstrained: function(axis, min, max){
+    _getVisibleValueExtentConstrained: function(axis, dataPartValue, min, max){
         var extent = {
                 minLocked: false,
                 maxLocked: false
@@ -497,7 +506,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         var baseExtent;
         if(min == null || max == null) {
-            baseExtent = this._getVisibleValueExtent(axis.role); // null when no data
+            baseExtent = this._getVisibleValueExtent(axis.role, dataPartValue); // null when no data
             
             if(min == null){
                 min = baseExtent ? baseExtent.min : 0;
