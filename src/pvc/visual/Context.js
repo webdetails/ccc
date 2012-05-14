@@ -53,20 +53,20 @@ def.type('pvc.visual.Context')
                     (this.group ? this.group.datums() : def.query());
     },
     
-    /* LEGACY DIMENSION ACCESSORS */
+    /* V1 DIMENSION ACCESSORS */
     getSeries: function(){
         var s;
-        return this.atoms && (s = this.atoms[this.panel._getLegacyDimName('series')]) && s.rawValue;
+        return this.atoms && (s = this.atoms[this.panel._getV1DimName('series')]) && s.rawValue;
     },
     
     getCategory: function(){
         var c;
-        return this.atoms && (c = this.atoms[this.panel._getLegacyDimName('category')]) && c.rawValue;
+        return this.atoms && (c = this.atoms[this.panel._getV1DimName('category')]) && c.rawValue;
     },
                
     getValue: function(){
         var v;
-        return this.atoms && (v = this.atoms[this.panel._getLegacyDimName('value')]) && v.value;
+        return this.atoms && (v = this.atoms[this.panel._getV1DimName('value')]) && v.value;
     }
 });
 

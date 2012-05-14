@@ -31,7 +31,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
     
     dotShape: "circle",
     
-    _legacyDimRole: {
+    _v1DimRoleName: {
         'series':   'series',
         'category': 'x',
         'value':    'y'

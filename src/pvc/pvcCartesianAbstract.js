@@ -1,8 +1,4 @@
 
-// TODO: Everything related to "dataPartValue"
-// is to make secondAxis work, and not necessarily a good solution.
-// Review this later when chart "superposition" is approached.
-
 /**
  * CartesianAbstract is the base class for all 2D cartesian space charts.
  */
@@ -163,7 +159,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             this.axesPanels[axis.id] = panel;
             this.axesPanels[axis.orientedId] = panel;
             
-            // Legacy fields
+            // V1 fields
             if(axis.index <= 1) {
                 this[axis.orientedId + 'AxisPanel'] = panel;
             }

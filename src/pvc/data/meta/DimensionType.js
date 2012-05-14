@@ -460,10 +460,9 @@ pvc.data.DimensionType.dimensionGroupLevelName = function(baseDimName, level){
     return baseDimName + (level >= 1 ? (level + 1) : '');
 };
 
-//pvc.data.DimensionType.legacyDimensionNames = ['series', 'category', 'multiChartColumn', 'multiChartRow', 'value', 'value2'];
-
 /**
- * Extends a dimension type specification with defaults based on legacy group name and legacy options.
+ * Extends a dimension type specification with defaults based on
+ * group name and specified options.
  *  
  * @param {object} [keyArgs] Keyword arguments.
  * @param {function} [keyArgs.isCategoryTimeSeries=false] Indicates if category dimensions are to be considered time series.

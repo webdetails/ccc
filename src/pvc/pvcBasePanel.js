@@ -50,15 +50,15 @@ pvc.BasePanel = pvc.Abstract.extend({
     _ignoreClicks: 0,
     
     /**
-     * Indicates the name of the role that should be used to whenever a legacy dimension value is required.
+     * Indicates the name of the role that should be used whenever a V1 dimension value is required.
      * Only the first dimension of the specified role is considered.
      * <p>
      * In a derived class use {@link Object.create} to override this object for only certain
-     * legacy dimensions.
+     * v1 dimensions.
      * </p>
      * @ type string
      */
-    _legacyDimRole: {
+    _v1DimRoleName: {
         'series':   'series',
         'category': 'category',
         'value':    'value'
@@ -635,13 +635,13 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     /* EVENTS & VISUALIZATION CONTEXT */
-    _getLegacyDimName: function(legacyDim){
-        var dimNames = this._legacyDimName || (this._legacyDimName = {});
-        var dimName  = dimNames[legacyDim];
+    _getV1DimName: function(v1Dim){
+        var dimNames = this._v1DimName || (this._v1DimNameCache = {});
+        var dimName  = dimNames[v1Dim];
         if(dimName == null) {
-            var role = this.chart.visualRoles(this._legacyDimRole[legacyDim], {assertExists: false});
+            var role = this.chart.visualRoles(this._v1DimRoleName[v1Dim], {assertExists: false});
             dimName = role ? role.firstDimensionName() : '';
-            dimNames[legacyDim] = dimName;
+            dimNames[v1Dim] = dimName;
         }
         
         return dimName;
@@ -716,9 +716,9 @@ pvc.BasePanel = pvc.Abstract.extend({
         } else {
             buildTooltip = function(context){
                 return tooltipFormat.call(context, 
-                                context.getSeries(), 
-                                context.getCategory(), 
-                                context.getValue() || '', 
+                                context.getV1Series(),
+                                context.getV1Category(),
+                                context.getV1Value() || '',
                                 context.datum);
             };
         } 
@@ -872,10 +872,10 @@ pvc.BasePanel = pvc.Abstract.extend({
     _onDoubleClick: function(context){
         var handler = this.chart.options.doubleClickAction;
         handler.call(context, 
-                /* LEGACY ARGS */
-                context.getSeries(), 
-                context.getCategory(), 
-                context.getValue(), 
+                /* V1 ARGS */
+                context.getV1Series(),
+                context.getV1Category(),
+                context.getV1Value(),
                 context.event);
     },
     
@@ -930,10 +930,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         var handler = this.chart.options.clickAction;
         if(handler){
             handler.call(context, 
-                    /* LEGACY ARGS */
-                    context.getSeries(), 
-                    context.getCategory(), 
-                    context.getValue(), 
+                    /* V1 ARGS */
+                    context.getV1Series(),
+                    context.getV1Category(),
+                    context.getV1Value(),
                     context.event);
         }
     },

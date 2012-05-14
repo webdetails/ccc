@@ -266,7 +266,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             colNames = lines.shift();
         }
         
-        // Legacy options
         // --------------
         // * crosstabMode = true;
         // * isMultiValued (Some space is multi...)

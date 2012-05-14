@@ -151,7 +151,7 @@ function coreOptions(handler, name) {
     }
     
     /* By Options Id (xAxis, yAxis, secondAxis) */
-    value = legacyOptions.call(this, name);
+    value = v1OptionIdOptions.call(this, name);
     if(value !== undefined) {
         return value;
     }
@@ -298,7 +298,7 @@ $VCA.createAllDefaultOptions = function(options){
                 addOption($VCA.getId(type, index) + "Axis" + name);
             });
 
-            /* legacy options - optionsId */
+            /* by optionsId */
             orientations.forEach(function(orientation){
                 addOption($VCA.getOptionsId(orientation, index) + 'Axis' + name);
             });
@@ -334,7 +334,7 @@ var axisOptionHandlers = {
      */
     Size: {
         resolve:  function(name){
-            var value = legacyOptions.call(this, name);
+            var value = v1OptionIdOptions.call(this, name);
             if(!value && this.index > 0) {
                 // Default to the size of the first axis of same orientation
                 value = firstOptions.call(this, name);
@@ -356,7 +356,7 @@ var axisOptionHandlers = {
                 return pvc.BasePanel.oppositeAnchor[firstPosition || 'left'];
             }
             
-            return legacyOptions.call(this, name);
+            return v1OptionIdOptions.call(this, name);
         }
     },
     
@@ -439,16 +439,16 @@ function finalOptions(name) {
 }
 
 /**
- * Obtains the value of an option using its legacy options id. format.
+ * Obtains the value of an option using the V1 options id. format.
  * using {@link #_buildOptionsIdName}.
  * 
- * @name pvc.visual.CartesianAxis#_legacyOptions
+ * @name pvc.visual.CartesianAxis#_v1OptionIdOptions
  * @function
  * @param {string} name The option name.
  * @private
  * @type string
  */
-function legacyOptions(name){
+function v1OptionIdOptions(name){
     return finalOptions.call(this, buildOptionsIdName.call(this, name)); 
 }
 
