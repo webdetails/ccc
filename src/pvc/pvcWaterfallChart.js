@@ -63,13 +63,9 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
 
     /* @override */
     _createMainContentPanel: function(parentPanel){
-        var logMessage = "Prerendering a ";
-        if (this.options.waterfall)
-            logMessage += "WaterfallChart";
-        else
-            logMessage +=  (this.options.stacked ? "stacked" : "normal") +
-                           " BarChart";
-        pvc.log(logMessage);
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in WaterfallChart");
+        }
         
         var options = this.options;
         

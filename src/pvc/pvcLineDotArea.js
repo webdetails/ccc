@@ -51,7 +51,9 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
 
     /* @override */
     _createMainContentPanel: function(parentPanel){
-        pvc.log("Prerendering in LineDotAreaAbstract");
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in LineDotAreaAbstract");
+        }
         
         var options = this.options;
         return new pvc.LineDotAreaPanel(this, parentPanel, {

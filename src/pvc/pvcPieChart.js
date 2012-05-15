@@ -43,8 +43,10 @@ pvc.PieChart = pvc.BaseChart.extend({
 
         this.base();
 
-        pvc.log("Prerendering in pieChart");
-
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in pieChart");
+        }
+        
         this.pieChartPanel = new pvc.PieChartPanel(this, this.basePanel, {
             innerGap: this.options.innerGap,
             explodedSliceRadius: this.options.explodedSliceRadius,

@@ -27,7 +27,9 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
 
   _preRenderCore: function(){
 
-    pvc.log("Prerendering in parallelCoordinates");
+    if(pvc.debug >= 3){
+      pvc.log("Prerendering in parallelCoordinates");
+    }
 
     this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, {
       topRuleOffset : this.options.topRuleOffset,

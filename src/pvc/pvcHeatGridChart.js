@@ -75,8 +75,10 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
     
     /* @override */
     _createMainContentPanel: function(parentPanel){
-        pvc.log("Prerendering in heatGridChart");
-
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in heatGridChart");
+        }
+        
         var options = this.options;
         return new pvc.HeatGridChartPanel(this, parentPanel, {
             showValues:  options.showValues,

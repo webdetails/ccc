@@ -78,8 +78,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
 
     _preRenderCore: function(){
         var options = this.options;
-
-        pvc.log("Prerendering in CartesianAbstract");
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in CartesianAbstract");
+        }
         
         /* Create the grid/docking panel */
         this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel);

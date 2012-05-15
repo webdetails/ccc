@@ -17,8 +17,6 @@ pvc.BarChart = pvc.BarAbstract.extend({
      * @override
      */
     _processOptionsCore: function(options){
-        // TODO
-        options.waterfall = false;
         options.percentageNormalized = false;
         
         this.base(options);
@@ -36,8 +34,9 @@ pvc.BarChart = pvc.BarAbstract.extend({
      * @override 
      */
     _createMainContentPanel: function(parentPanel){
-        pvc.log("Prerendering in barChart");
-        
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in barChart");
+        }
         var options = this.options;
         var barPanel = new pvc.BarPanel(this, parentPanel, {
             dataPartValue:  options.secondAxis ? '0' : null,

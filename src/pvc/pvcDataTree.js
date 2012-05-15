@@ -42,8 +42,9 @@ pvc.DataTree = pvc.BaseChart.extend({
     },
   
     _preRenderCore: function(){
-
-        pvc.log("Prerendering in data-tree");
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in data-tree");
+        }
         
         // Create DataEngine
         var structEngine  = this.structEngine;

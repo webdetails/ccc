@@ -30,8 +30,10 @@ pvc.NormalizedBarChart = pvc.BarAbstract.extend({
     
     /* @override */
     _createMainContentPanel: function(parentPanel){
-        pvc.log("Prerendering in NormalizedBarChart");
-
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in NormalizedBarChart");
+        }
+        
         var options = this.options;
         return new pvc.NormalizedBarPanel(this, parentPanel, {
             barSizeRatio: options.barSizeRatio,

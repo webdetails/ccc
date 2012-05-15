@@ -90,8 +90,10 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
       * @override 
       */
     _createMainContentPanel: function(parentPanel){
-        pvc.log("Prerendering in MetricLineDot");
-
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in MetricLineDot");
+        }
+        
         var options = this.options;
         
         return new pvc.MetricLineDotPanel(this, parentPanel, {

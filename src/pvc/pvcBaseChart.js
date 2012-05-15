@@ -308,8 +308,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         this.isPreRendered = false;
 
-        pvc.log("Prerendering in pvc");
-
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in pvc");
+        }
+        
         if (!this.parent) {
             // If we don't have data, we just need to set a "no data" message
             // and go on with life.

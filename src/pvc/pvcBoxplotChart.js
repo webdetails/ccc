@@ -26,7 +26,9 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
     
     /* @override */
     _createMainContentPanel: function(parentPanel){
-        pvc.log("Prerendering in boxplotChart");
+        if(pvc.debug >= 3){
+            pvc.log("Prerendering in boxplotChart");
+        }
         
         var options = this.options;
         return new pvc.BoxplotChartPanel(this, parentPanel, {
