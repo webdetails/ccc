@@ -60,7 +60,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     /**
      * Obtains the extent of the specified value role,
      * taking into account that values are shown for each category.
-     * 
+     *
      * <p>
      * When more than one datum exists per series <i>and</i> category,
      * the sum of its values is considered.
@@ -69,27 +69,27 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      * @param {pvc.visual.Role} valueRole The value role.
      * @param {string} [dataPartValue=null] The desired data part value.
      * @type object
-     * 
+     *
      * @override
      */
     _getVisibleValueExtent: function(valueRole, dataPartValue){
         switch(valueRole.name){
             case 'series':// (series throws in base)
             case 'category':
-                /* Special case. 
+                /* Special case.
                  * The category role's single dimension belongs to the grouping dimensions of data.
                  * As such, the default method is adequate.
-                 * 
+                 *
                  * Continuous baseScale's, like timeSeries go this way.
                  */
                 return this.base(valueRole, dataPartValue);
         }
-        
+
         this._assertSingleContinuousValueRole(valueRole);
-        
+
         var valueDimName = valueRole.firstDimensionName(),
             data = this._getVisibleData(dataPartValue);
-        
+
         if(!this.options.stacked){
             return data.leafs()
                        .select(function(serGroup){
@@ -99,45 +99,21 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         }
 
         return data.children()
-            /* Sum of negatives and of positives within each category */
             .select(function(catGroup){
-                var posSum = null,
-                    negSum = null;
-                catGroup
-                    .children()
-                    .select(function(serGroup){
-                        return serGroup.dimensions(valueDimName).sum();
-                    })
-                    .each(function(value){
-                        // Note: +null === 0
-                        if(value != null){
-                            if(value >= 0){
-                                posSum += value;
-                            } else {
-                                negSum += value;
-                            }
-                        }
-                    });
-
-                if(posSum == null && negSum == null){
-                    return null;
+                var range = this._getStackedCategoryValueExtent(catGroup, valueDimName);
+                if(range){
+                    return {range: range, group: catGroup};
                 }
-
-                return {max: posSum || 0, min: negSum || 0};
-            })
+            }, this)
             .where(def.notNully)
-            /* A range "union" operator */
-            .reduce(function(result, range){
-                if(!result) {
-                    result = {min: range.min, max: range.max};
-                } else if(range.min < result.min){
-                    result.min = range.min;
-                } else if(range.max > result.max){
-                    result.max = range.max;
-                }
+            .reduce(function(result, rangeInfo){
+                var range = rangeInfo.range;
+                return !result ?
+                        // Copy the range object
+                        {min: range.min, max: range.max} :
 
-                return result;
-            }, null);
+                        this._reduceStackedCategoryValueExtent(result, range, rangeInfo.group);
+            }.bind(this), null);
 
 //        The following would not work:
 //        var max = data.children()
@@ -145,6 +121,58 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
 //                    .max();
 //
 //        return max != null ? {min: 0, max: max} : null;
+    },
+
+    /**
+     * Obtains the extent of a value dimension in a given category group.
+     * The default implementation determines the extent by separately
+     * summing negative and positive values.
+     */
+    _getStackedCategoryValueExtent: function(catGroup, valueDimName){
+        var posSum = null,
+            negSum = null;
+        catGroup
+            .children()
+            .select(function(serGroup){
+                return serGroup.dimensions(valueDimName).sum();
+            })
+            .each(function(value){
+                // Note: +null === 0
+                if(value != null){
+                    if(value >= 0){
+                        posSum += value;
+                    } else {
+                        negSum += value;
+                    }
+                }
+            });
+
+        if(posSum == null && negSum == null){
+            return null;
+        }
+
+        return {max: posSum || 0, min: negSum || 0};
+    },
+
+    /**
+     * Reduce operation of category ranges, into a global range.
+     *
+     * The default implementation performs a range "union" operation.
+     */
+    _reduceStackedCategoryValueExtent: function(result, catRange, catGroup){
+        if(!result) {
+            result = {min: catRange.min, max: catRange.max};
+        } else {
+            if(catRange.min < result.min){
+                result.min = catRange.min;
+            }
+
+            if(catRange.max > result.max){
+                result.max = catRange.max;
+            }
+        }
+
+        return result;
     },
      
     /**
