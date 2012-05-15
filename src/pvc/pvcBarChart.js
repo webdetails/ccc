@@ -12,16 +12,6 @@ pvc.BarChart = pvc.BarAbstract.extend({
         pvc.mergeDefaults(this.options, pvc.BarChart.defaultOptions, options);
     },
     
-    /**
-     * Processes options after user options and default options have been merged.
-     * @override
-     */
-    _processOptionsCore: function(options){
-        options.percentageNormalized = false;
-        
-        this.base(options);
-    },
-
     _hasDataPartRole: function(){
         return true;
     },

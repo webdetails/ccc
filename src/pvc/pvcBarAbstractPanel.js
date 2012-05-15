@@ -38,7 +38,6 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         // Cache
         options = this.chart.options;
         this.stacked = options.stacked;
-        this.percentageNormalized = this.stacked && options.percentageNormalized;
     },
 
     /**
@@ -88,6 +87,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             .band // categories
                 .x(chart.axes.base.sceneScale())
                 .w(bandWidth)
+                //.differentialControl(this._barDifferentialControl())
             .item
                 // Stacked Vertical bar charts show series from
                 // top to bottom (according to the legend)
@@ -136,6 +136,13 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
      * @virtual
      */
     _barVerticalMode: function(){
+        return null;
+    },
+
+    /**
+     * @virtual
+     */
+    _barDifferentialControl: function(){
         return null;
     },
     

@@ -21,19 +21,6 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             this._catGrouping = parent._catGrouping;
         }
     },
-
-    /**
-     * Processes options after user options and default options have been merged.
-     * @override
-     */
-    _processOptionsCore: function(options){
-
-        this.base(options);
-
-        if(!options.stacked){
-            options.percentageNormalized = false;
-        }
-    },
     
     /**
      * Initializes each chart's specific roles.
@@ -159,28 +146,6 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
 //
 //        return max != null ? {min: 0, max: max} : null;
     },
-    
-    /**
-     * @override
-     */
-    _getVisibleValueExtentConstrained: function(axis, dataPartValue, min, max){
-        if(axis.type === 'ortho') {
-            if(min == null) {
-                if(this.options.percentageNormalized) {
-                    min = 0;
-                }
-            }
-            
-            if(max == null) {
-                if(this.options.percentageNormalized) {
-                    max = 100;
-                }
-                // max of stacked is handled by _getVisibleValueExtent
-            }
-        }
-        
-        return this.base(axis, dataPartValue, min, max);
-    },
      
     /**
      * Scale for the second linear axis. yy if orientation is vertical, xx otherwise.
@@ -300,8 +265,6 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         // Ortho <- value role
         orthoAxisOrdinal: false, // when true => _axisRoleNameMap['ortho'] = 'series' (instead of value)
         
-        stacked: false,
-        
-        percentageNormalized: false
+        stacked: false
     }
 });

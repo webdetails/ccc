@@ -34,10 +34,8 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
      */
     _processOptionsCore: function(options){
 
-        // Waterfall charts are always stacked and not percentageNormalized
-        options.waterfall = true;
+        // Waterfall charts are always stacked
         options.stacked = true;
-        options.percentageNormalized = false;
 
         this.base(options);
     },
