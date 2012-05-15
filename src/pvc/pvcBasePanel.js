@@ -731,7 +731,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     context = myself._createContext(mark, null);
                 
                 // No group or datum?
-                if(!context.atoms) {
+                if(!context.scene.atoms) {
                     return "";
                 }
                 
@@ -751,15 +751,16 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     _buildTooltip: function(context){
-        
+
         var chart = this.chart,
             dataEngine = chart.dataEngine,
             visibleKeyArgs = {visible: true},
-            group = context.group,
+            scene = context.scene,
+            group = scene.group,
             isMultiDatumGroup = group && group._datums.length > 1;
         
         // Single null datum?
-        if(!isMultiDatumGroup && context.datum.isNull) {
+        if(!isMultiDatumGroup && scene.datum.isNull) {
             return "";
         }
         
@@ -771,7 +772,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             playingPercentMap = context.panel.stacked === false ? 
                                 null :
                                 dataEngine.type.getPlayingPercentVisualRoleDimensionMap(),
-            commonAtoms = isMultiDatumGroup ? context.group.atoms : context.atoms;
+            commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
         
         function addDim(escapedDimLabel, label){
             tooltip.push('<b>' + escapedDimLabel + "</b>: " + (def.escapeHtml(label) || " - ") + '<br/>');
@@ -842,7 +843,6 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         mark.cursor("pointer")
-            //.events('all') // some marks, like labels, need this
             .event("click", onClick);
     },
 
@@ -855,7 +855,6 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         mark.cursor("pointer")
-            //.events('all') // some marks, like labels, need this
             .event("dblclick", onDoubleClick);
     },
     
@@ -919,11 +918,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         } else {
             this._onClick(context);
             
-            if(this.chart.options.selectable && context.datum){
+            if(this.chart.options.selectable && context.scene.datum){
                 this._onSelect(context);
             }
         }
-        
     },
     
     _onClick: function(context){
@@ -940,7 +938,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     /* SELECTION & RUBBER-BAND */
     _onSelect: function(context){
-        var datums = context.datums(),
+        var datums = context.scene.datums(),
             chart  = this.chart;
         if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
             chart.dataEngine.owner.clearSelected();

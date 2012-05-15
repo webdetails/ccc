@@ -92,7 +92,7 @@ def.type('pvc.visual.Scene')
     // TODO: shouldn't group take precedence over datum?
     if(!datum) {
         if(group) {
-            datum = group._datums[0] || null; // null on empty datas (try hiding all series)
+            datum = group._datums[0] || null; // null on empty datas (just try hiding all series with the legend)
             atoms = group.atoms;
         }
     } else {
@@ -109,7 +109,17 @@ def.type('pvc.visual.Scene')
 .add(pv.Dom.Node)
 
 .add(/** @lends pvc.visual.Scene# */{
-    
+    /**
+     * Obtains an enumerable of the datums present in the scene.
+     *
+     * @type def.Query
+     */
+    datums: function(){
+        return this.group ?
+                    this.group.datums() :
+                    (this.datum ? def.query(this.datum) : def.query());
+    },
+
     isRoot: function(){
         return this.root === this;   
     },
@@ -139,7 +149,7 @@ def.type('pvc.visual.Scene')
     anyInteraction: function(){
         return (!!this.root._active || this.anySelected());
     },
-        
+
     /* ACTIVITY */
     isActive: false,
     

@@ -75,7 +75,7 @@
  * Indicates if the dimension
  * is considered discrete.
  * The default value depends on the value of {@link valueType};
- * it is true unless the {@link valueType} is Number.
+ * it is true unless the {@link valueType} is Number or Date.
  * 
  * @param {function} [keyArgs.converter] A function used in the translation phase
  * to convert raw values into values of the dimension's value type.
@@ -466,7 +466,8 @@ pvc.data.DimensionType.dimensionGroupLevelName = function(baseDimName, level){
  *  
  * @param {object} [keyArgs] Keyword arguments.
  * @param {function} [keyArgs.isCategoryTimeSeries=false] Indicates if category dimensions are to be considered time series.
- * @param {function} [keyArgs.timeSeriesFormat] The parsing format to use to parse a Date dimension when a converter or a rawFormat options are not specified.
+ * @param {string} [keyArgs.timeSeriesFormat] The parsing format to use to parse a Date dimension when the converter and rawFormat options are not specified.
+ * @param {function} [keyArgs.valueNumberFormatter] The formatter to use to parse a numeric dimension of the 'value' dimension group, when the formatter and format options are not specified.
  * @param {object} [keyArgs.dimensionGroups] A map of dimension group names to dimension type specifications to be used as prototypes of corresponding dimensions.
  * 
  *  @returns {object} The extended dimension type specification.
@@ -499,7 +500,14 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
         
         case 'value':
             if(dimSpec.valueType === undefined) {
-                dimSpec.valueType = Number; 
+                dimSpec.valueType = Number;
+            }
+
+            if(dimSpec.valueType === Number) {
+                if(dimSpec.formatter === undefined && 
+                   !dimSpec.format){
+                    dimSpec.formatter = def.get(keyArgs, 'valueNumberFormatter');
+                }
             }
             break;
 

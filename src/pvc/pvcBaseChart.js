@@ -489,7 +489,8 @@ pvc.BaseChart = pvc.Abstract.extend({
             // Timeseries *parse* format
             isCategoryTimeSeries: options.timeSeries,
             
-            timeSeriesFormat:     options.timeSeriesFormat
+            timeSeriesFormat:     options.timeSeriesFormat,
+            valueNumberFormatter: options.valueFormat
         };
         
         var translationClass = translOptions.crosstabMode ? 

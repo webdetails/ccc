@@ -4,27 +4,19 @@
  * @name pvc.visual.Context
  * 
  * @class Represents a visualization context.  
- * The visualization context should give access to all relevant information
- * for rendering or for interacting with a visualization.
+ * The visualization context gives access to all relevant information
+ * for rendering or interacting with a visualization.
  * <p>
- * Its main goal is to support marks' extensions points and action handlers. 
- * </p>
- * <p>
- * The visualization context of a panel <i>may</i> be reused 
- * across extension points invocations and actions. 
+ * A visualization context object <i>may</i> be reused
+ * across extension points invocations and actions.
  * </p>
  * 
  * @property {pvc.BaseChart} chart The chart instance.
  * @property {pvc.BasePanel} panel The panel instance.
- * @property {pv.Mark} mark The protovis mark.
- * @property {number} index The current rendering index. Only defined during extension points evaluation.
+ * @property {number} index The render index.
+ * @property {pvc.visual.Scene} scene The render scene.
  * @property {object} event An event object, present when a click or double-click action is being processed.
- * @property {pvc.data.Data}  group The data instance associated with the mark.
- * @property {pvc.data.Datum} datum The datum associated with the mark.
- * @property {object} atoms The map of atoms by dimension name.
- * <p>
- * Do <b>NOT</b> modify this object.
- * </p>
+ * @property {pv.Mark} pvMark The protovis mark.
  * 
  * @constructor
  * @param {pvc.BasePanel} panel The panel instance.
@@ -39,34 +31,21 @@ def.type('pvc.visual.Context')
     visualContext_update.call(this, mark, event);
 })
 .add(/** @lends pvc.visual.Context */{
-    /**
-     * Obtains an enumerable of the datums of the context.
-     * <p>
-     * Do <b>NOT</b> modify the returned array.
-     * </p>
-     * 
-     * @type def.Query
-     */
-    datums: function(){
-        return this.datum ? 
-                    def.query(this.datum) : 
-                    (this.group ? this.group.datums() : def.query());
-    },
     
     /* V1 DIMENSION ACCESSORS */
     getSeries: function(){
         var s;
-        return this.atoms && (s = this.atoms[this.panel._getV1DimName('series')]) && s.rawValue;
+        return this.scene.atoms && (s = this.scene.atoms[this.panel._getV1DimName('series')]) && s.rawValue;
     },
     
     getCategory: function(){
         var c;
-        return this.atoms && (c = this.atoms[this.panel._getV1DimName('category')]) && c.rawValue;
+        return this.scene.atoms && (c = this.scene.atoms[this.panel._getV1DimName('category')]) && c.rawValue;
     },
                
     getValue: function(){
         var v;
-        return this.atoms && (v = this.atoms[this.panel._getV1DimName('value')]) && v.value;
+        return this.scene.atoms && (v = this.scene.atoms[this.panel._getV1DimName('value')]) && v.value;
     }
 });
 
@@ -83,29 +62,25 @@ def.type('pvc.visual.Context')
  * @internal
  */
 function visualContext_update(mark, event){
-    
+
+    this.sign   = mark.sign ? mark.sign() : null;
+    this.event  = event || null;
+    this.index  = mark.index; // !scene => index = null
+    this.pvMark = mark;
+
     var instance = mark.instance(),
-        datum = instance.datum,
-        group = instance.group,
-        atoms;
+        scene = instance.scene;
     
-    // datum /=> group
-    // group => datum
-    // or both or none
-    
-    if(!datum) {
-        if(group) {
-            datum = group._datums[0];
-            atoms = group.atoms;
-        }
-    } else {
-        atoms = datum.atoms;
+    if(!scene){
+        var group = instance.group,
+            datum = group ? null : instance.datum;
+        
+        scene = new pvc.visual.Scene(null, {
+            panel: this.panel,
+            group: group,
+            datum: datum
+        });
     }
-    
-    this.event = event || null;
-    this.mark  = mark;
-    this.index = mark.index;
-    this.datum = datum;
-    this.group = group;
-    this.atoms = atoms;
+
+    this.scene = scene;
 }

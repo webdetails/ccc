@@ -13,7 +13,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     isDiscrete: false,
     roleName: null,
-    
+    axis: null,
     anchor: "bottom",
     axisSize: undefined,
     tickLength: 6,
