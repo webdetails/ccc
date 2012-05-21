@@ -82,7 +82,7 @@ def.type('pvc.visual.CartesianAxis')
         var grouping = this.role.grouping;
         return grouping.isDiscrete() ? 
                  'Discrete' : 
-                 (grouping.firstDimension.type.valueType === Date2 ?
+                 (grouping.firstDimension.type.valueType === Date ?
                   'Timeseries' : 
                   'Continuous'); 
     },

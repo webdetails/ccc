@@ -4,7 +4,7 @@
  * 
  * @name pvc.visual.Role
  * 
- * @class Represents a role that is somehow played by visualization.  
+ * @class Represents a role that is somehow played by a visualization.
  * 
  * @property {string} name The name of the role.
  * 
@@ -28,7 +28,10 @@
  * groupings are accepted.
  * 
  * @property {string} defaultDimensionName The default dimension name.
- * 
+ *
+ * @property {boolean} autoCreateDimension Indicates if a dimension with the default name (the first level of, when a group name),
+ * should be created when the role is required and it has not been read by a translator.
+ *
  * @constructor
  * @param {string} name The name of the role.
  * @param {object} [keyArgs] Keyword arguments.
@@ -46,6 +49,13 @@
  * @param {boolean|null} [keyArgs.requireIsDiscrete=null] Indicates if the grouping should be discrete, continuous or any.
  * 
  * @param {string} [keyArgs.defaultDimensionName] The default dimension name.
+ * @param {boolean} [keyArgs.autoCreateDimension=false]
+ * Indicates if a dimension with the default name (the first level of, when a group name),
+ * should be created when the role is required and it has not been read by a translator.
+ *
+ * @param {string} [keyArgs.flatteningMode='singleLevel'] Indicates if the role presents
+ * the leaf data nodes or all the nodes in the tree, in pre or post order.
+ * Possible values are <tt>'singleLevel'</tt>, <tt>'tree-pre'</tt> and <tt>'tree-post'</tt>.
  */
 def.type('pvc.visual.Role')
 .init(function(name, keyArgs){
@@ -53,11 +63,19 @@ def.type('pvc.visual.Role')
     
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
+
+        if(def.get(keyArgs, 'autoCreateDimension', false)) {
+            this.autoCreateDimension = true;
+        }
     }
     
     var defaultDimensionName = def.get(keyArgs, 'defaultDimensionName'); 
     if(defaultDimensionName) {
         this.defaultDimensionName = defaultDimensionName;
+    }
+
+    if(!defaultDimensionName && this.autoCreateDimension){
+        throw def.error.argumentRequired('defaultDimensionName');
     }
     
     var requireSingleDimension;
@@ -93,6 +111,11 @@ def.type('pvc.visual.Role')
     if(requireIsDiscrete != this.requireIsDiscrete) {
         this.requireIsDiscrete = !!requireIsDiscrete;
     }
+
+    var flatteningMode = def.get(keyArgs, 'flatteningMode');
+    if(flatteningMode && flatteningMode != this.flatteningMode) {
+        this.flatteningMode = flatteningMode;
+    }
 })
 .add(/** @lends pvc.visual.Role# */{
     isRequired:        false,
@@ -103,6 +126,9 @@ def.type('pvc.visual.Role')
     isPercent:         false,
     defaultDimensionName: null,
     grouping: null,
+    flatteningMode:   'singleLevel',
+    flattenRootLabel: '',
+    autoCreateDimension: false,
     
     /** 
      * Obtains the name of the first dimension type that is bound to the role.
@@ -119,7 +145,58 @@ def.type('pvc.visual.Role')
     firstDimension: function(){
         return this.grouping && this.grouping.firstDimension;
     },
-    
+
+    setFlatteningMode: function(flatteningMode){
+        if(!flatteningMode || flatteningMode === 'singleLevel'){ // default value
+            delete this.flatteningMode;
+        } else {
+            this.flatteningMode = flatteningMode;
+        }
+    },
+
+    setFlattenRootLabel: function(flattenRootLabel){
+        if(!flattenRootLabel){ // default value
+            delete this.flattenRootLabel;
+        } else {
+            this.flattenRootLabel = flattenRootLabel;
+        }
+    },
+
+    /**
+     * Applies this role's grouping to the specified data
+     * after ensuring the grouping is of a certain type.
+     *
+     * @param {pvc.data.Data} data The data on which to apply the operation.
+     * @param {object} [keyArgs] Keyword arguments.
+     * ...
+     * 
+     * @type pvc.data.Data
+     */
+    flatten: function(data, keyArgs){
+        var grouping = this.flattenedGrouping(keyArgs);
+        if(grouping){
+            return data.groupBy(grouping, keyArgs);
+        }
+    },
+
+    flattenedGrouping: function(keyArgs){
+        var grouping = this.grouping;
+        if(grouping){
+            keyArgs = def.setDefaults(keyArgs,
+                'flatteningMode', this.flatteningMode,
+                'flattenRootLabel', this.flattenRootLabel);
+
+            return grouping.ensure(keyArgs);
+        }
+    },
+
+    select: function(data, keyArgs){
+        var grouping = this.grouping;
+        if(grouping){
+            return data.groupBy(grouping.ensure(keyArgs), keyArgs);
+        }
+    },
+
     /**
      * Binds a grouping specification to playing this role.
      * 
@@ -127,9 +204,10 @@ def.type('pvc.visual.Role')
      */
     bind: function(groupingSpec){
         if(groupingSpec) {
-            if(groupingSpec.hasCompositeLevels) {
-                throw def.error.argumentInvalid(def.format('visualRoles.{0}', [name]), "Role assigned to a composite level grouping, which is invalid.");
-            }
+//// TODO: delete this when sure it is not needed 17-05-2012
+//            if(groupingSpec.hasCompositeLevels) {
+//                throw def.error.argumentInvalid(def.format('visualRoles.{0}', [name]), "Role assigned to a composite level grouping, which is invalid.");
+//            }
             
             var singleDimSpec = groupingSpec.isSingleDimension ? groupingSpec.firstDimension : null;
             
@@ -169,7 +247,7 @@ def.type('pvc.visual.Role')
         this.grouping = groupingSpec;
         
         if(this.grouping) {
-            // register from current dimension types
+            // register in current dimension types
             this.grouping.dimensions().each(function(dimSpec){
                 dimType_addVisualRole.call(dimSpec.type, this);  
             }, this);

@@ -25,7 +25,7 @@ pvc.NormalizedBarChart = pvc.BarAbstract.extend({
     /**
      * @override
      */
-    _getVisibleValueExtentConstrained: function(axis, dataPartValue, min, max){
+    _getVisibleValueExtentConstrained: function(axis, dataPartValues, min, max){
         if(axis.type === 'ortho') {
             /* 
              * Forces showing 0-100 in the axis.
@@ -38,7 +38,7 @@ pvc.NormalizedBarChart = pvc.BarAbstract.extend({
             max = 100;
         }
 
-        return this.base(axis, dataPartValue, min, max);
+        return this.base(axis, dataPartValues, min, max);
     },
 
     /* @override */

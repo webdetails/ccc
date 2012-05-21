@@ -29,7 +29,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     barSizeRatio: 0.9,
     maxBarSize: 200,
     showValues: true,
-
+    barWidth: null,
+    barStepWidth: null,
     _linePanel: null,
 
     constructor: function(chart, parent, options){
@@ -51,8 +52,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             isStacked = !!this.stacked,
             isVertical = this.isOrientationVertical();
 
-        var data = chart._getVisibleData(this.dataPartValue), // shared "categ then series" grouped data
-            seriesData = data.groupBy(chart._serGrouping),
+        var data = this._getVisibleData(), // shared "categ then series" grouped data
+            seriesData = chart._serRole.flatten(data),
             rootScene = this._buildScene(data, seriesData)
             ;
 
@@ -61,6 +62,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             sceneOrthoScale = chart.axes.ortho.sceneScale(),
             
             bandWidth = chart.axes.base.scale.range().band,
+            barStepWidth = chart.axes.base.scale.range().step,
             barWidth,
 
             reverseSeries = isVertical === isStacked // (V && S) || (!V && !S)
@@ -77,6 +79,9 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             barWidth = this.maxBarSize;
         }
 
+        this.barWidth  = barWidth;
+        this.barStepWidth = barStepWidth;
+        
         this.pvBarPanel = this.pvPanel.add(pv.Layout.Band)
             .layers(rootScene.childNodes) // series -> categories
             .values(function(seriesScene){ return seriesScene.childNodes; })
@@ -87,7 +92,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             .band // categories
                 .x(chart.axes.base.sceneScale())
                 .w(bandWidth)
-                //.differentialControl(this._barDifferentialControl())
+                .differentialControl(this._barDifferentialControl())
             .item
                 // Stacked Vertical bar charts show series from
                 // top to bottom (according to the legend)
@@ -133,6 +138,9 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     },
 
     /**
+     * Called to obtain the bar verticalMode property value.
+     * If it returns a function,
+     * that function will be called once.
      * @virtual
      */
     _barVerticalMode: function(){
@@ -140,6 +148,10 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     },
 
     /**
+     * Called to obtain the bar differentialControl property value.
+     * If it returns a function,
+     * that function will be called once per category,
+     * on the first series.
      * @virtual
      */
     _barDifferentialControl: function(){
@@ -236,11 +248,11 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     },
 
     /**
-     * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
+     * Renders this.pvPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
     _renderInteractive: function(){
-        this.pvBarPanel.render();
+        this.pvPanel.render();
     },
 
     /**
@@ -304,7 +316,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     _onNewSeriesCategoryScene: function(categScene, categData1, seriesData1){
         categScene.acts.category = {
             value: categData1.value,
-            label: categData1.label
+            label: categData1.label,
+            group: categData1
         };
 
         var chart = this.chart,

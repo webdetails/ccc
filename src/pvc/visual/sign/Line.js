@@ -9,16 +9,16 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     this.lockValue('segmented', true) // fixed
         .lockValue('antialias', true)
         ;
-    
+
     if(!def.get(keyArgs, 'freePosition', false)){
         var basePosProp  = panel.isOrientationVertical() ? "left" : "bottom",
             orthoPosProp = panel.anchorOrtho(basePosProp);
-        
+
         this/* Positions */
             .lock(orthoPosProp, 'y')
             .lock(basePosProp,  'x');
     }
-    
+
     this/* Colors & Line */
         .intercept('strokeStyle', 'strokeColor')
         .intercept('lineWidth',   'strokeWidth')
@@ -42,7 +42,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
      *  -> Independent of the chart's orientation
      *  -> X - horizontal axis
      *  -> Y - vertical axis
-     *  
+     *
      *  y
      *  ^
      *  |
@@ -51,7 +51,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
      */
     y: function(){ return 0; },
     x: function(){ return 0; },
-    
+
     /* STROKE WIDTH */
     strokeWidth: function(){
         var strokeWidth = this.baseStrokeWidth();
@@ -80,7 +80,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
              */
             return Math.max(1, strokeWidth) * 2.5;
         }
-        
+
         return strokeWidth;
     },
     

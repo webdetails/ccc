@@ -260,8 +260,9 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
    */
 
     buildData: function(){
-
-        pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
+        if(pvc.debug >= 3){
+            pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
+        }
 
         var data,
             de = this.chart.dataEngine,

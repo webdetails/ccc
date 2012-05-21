@@ -40,7 +40,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var parent = this.parent;
         if(parent) {
             this._serRole = parent._serRole;
-            this._serGrouping = parent._serGrouping;
         }
     },
     
@@ -53,18 +52,11 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.base();
         
         this._addVisualRoles({
-            series: { isRequired: true, defaultDimensionName: 'series*' }
+            series: { isRequired: true, defaultDimensionName: 'series*', autoCreateDimension: true }
         });
 
         // Cached
         this._serRole = this.visualRoles('series');
-    },
-
-    _bindVisualRoles: function(){
-        this.base.apply(this, arguments);
-
-        // Cached
-        this._serGrouping = this._serRole.grouping.singleLevelGrouping();
     },
 
     _initData: function(){
@@ -214,12 +206,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         var createScaleMethod = this['_create' + scaleType + 'ScaleByAxis'];
         
-        var dataPartValue = this._getAxisDataPart(axis);
+        var dataPartValues = this._getAxisDataParts(axis);
         
-        return createScaleMethod.call(this, axis, dataPartValue);
+        return createScaleMethod.call(this, axis, dataPartValues);
     },
 
-    _getAxisDataPart: function(axis){
+    _getAxisDataParts: function(axis){
         return null;
     },
 
@@ -230,13 +222,20 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @param {string} [dataPartValue=null] The desired data part value.
+     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @virtual
      * @type pv.Scale
      */
-    _createDiscreteScaleByAxis: function(axis, dataPartValue){
+    _createDiscreteScaleByAxis: function(axis, dataPartValues){
         /* DOMAIN */
-        var data   = this._getVisibleData(dataPartValue).groupBy(axis.role.grouping.singleLevelGrouping(), { visible: true }),
+
+        // With composite axis, only 'singleLevel' flattening works well
+        var flatteningMode = axis.options('Composite') ? 'singleLevel' : null,
+            baseData = this._getVisibleData(dataPartValues),
+            data = axis.role.flatten(baseData, {
+                                visible: true,
+                                flatteningMode: flatteningMode
+                            }),
             values = data.children().select(function(child){ return child.value; }).array(),
             scale  = new pv.Scale.ordinal(values);
         
@@ -265,13 +264,13 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @param {string} [dataPartValue=null] The desired data part value.
+     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @virtual
      * @type pv.Scale
      */
-    _createTimeseriesScaleByAxis: function(axis, dataPartValue){
+    _createTimeseriesScaleByAxis: function(axis, dataPartValues){
         /* DOMAIN */
-        var dExtent = this._getVisibleValueExtent(axis.role, dataPartValue), // null when no data...
+        var dExtent = this._getVisibleValueExtent(axis, dataPartValues), // null when no data...
             dMin,
             dMax;
         
@@ -312,13 +311,13 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      *
      * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @param {string} [dataPartValue=null] The desired data part value.
+     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @virtual
      * @type pv.Scale
      */
-    _createContinuousScaleByAxis: function(axis, dataPartValue){
+    _createContinuousScaleByAxis: function(axis, dataPartValues){
         /* DOMAIN */
-        var extent = this._getVisibleValueExtentConstrained(axis, dataPartValue),
+        var extent = this._getVisibleValueExtentConstrained(axis, dataPartValues),
             dMin = extent.min,
             dMax = extent.max;
 
@@ -407,17 +406,18 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * Obtains the chart's visible data
      * grouped according to the charts "main grouping".
      * 
-     * @param {string} [dataPartValue=null] The desired data part value.
+     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * 
      * @type pvc.data.Data
      */
-    _getVisibleData: function(dataPartValue){
-        var data = def.getOwn(this._visibleDataCache, dataPartValue);
+    _getVisibleData: function(dataPartValues){
+        var key = '' + (dataPartValues ? dataPartValues : ''), // relying on Array.toString
+            data = def.getOwn(this._visibleDataCache, key);
         if(!data) {
-            data = this._createVisibleData(dataPartValue);
+            data = this._createVisibleData(dataPartValues);
             
             (this._visibleDataCache || (this._visibleDataCache = {}))
-                [dataPartValue] = data;
+                [key] = data;
         }
         
         return data;
@@ -431,17 +431,15 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * The default implementation groups data by series visual role.
      * </p>
      *
-     * @param {string} [dataPartValue=null] The desired data part value.
+     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      *
      * @type pvc.data.Data
      * @protected
      * @virtual
      */
-    _createVisibleData: function(dataPartValue){
-        var seriesGrouping = this.visualRoles('series').grouping.singleLevelGrouping();
-            
-        return this._partData(dataPartValue)
-                   .groupBy(seriesGrouping, { visible: true });
+    _createVisibleData: function(dataPartValues){
+        return this.visualRoles('series')
+                   .flatten(this._partData(dataPartValues), { visible: true });
     },
     
     _assertSingleContinuousValueRole: function(valueRole){
@@ -458,14 +456,15 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * Gets the extent of the values of the specified role
      * over all datums of the visible data.
      * 
-     * @param {pvc.visual.Role} valueRole The value role.
-     * @param {string} [dataPartValue=null] The desired data part value.
+     * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
+     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @type object
      *
      * @protected
      * @virtual
      */
-    _getVisibleValueExtent: function(valueRole, dataPartValue){
+    _getVisibleValueExtent: function(valueAxis, dataPartValues){
+        var valueRole = valueAxis.role;
         this._assertSingleContinuousValueRole(valueRole);
         
         if(valueRole.name === 'series') { 
@@ -474,14 +473,14 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         }
         
         var valueDimName = valueRole.firstDimensionName();
-        var extent = this._getVisibleData(dataPartValue).dimensions(valueDimName).extent();
+        var extent = this._getVisibleData(dataPartValues).dimensions(valueDimName).extent();
         return extent ? {min: extent.min.value, max: extent.max.value} : undefined;
     },
     
     /**
      * @virtual
      */
-    _getVisibleValueExtentConstrained: function(axis, dataPartValue, min, max){
+    _getVisibleValueExtentConstrained: function(axis, dataPartValues, min, max){
         var extent = {
                 minLocked: false,
                 maxLocked: false
@@ -503,7 +502,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         var baseExtent;
         if(min == null || max == null) {
-            baseExtent = this._getVisibleValueExtent(axis.role, dataPartValue); // null when no data
+            baseExtent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data
             
             if(min == null){
                 min = baseExtent ? baseExtent.min : 0;

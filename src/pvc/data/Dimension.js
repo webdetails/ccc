@@ -625,10 +625,12 @@ def.type('pvc.data.Dimension')
         // </Debug>
         
         // - CAST -
-        // Any type?
-        if(type.valueType) {
-            // Assume valueType functions do not return null values
-            value = type.valueType.call(null, value);
+        // Any cast function?
+        if(type.cast) {
+            value = type.cast.call(null, value);
+            if(value == null || value === ''){
+                return this._nullAtom || dim_createNullAtom.call(this);
+            }
         }
         
         // - KEY -

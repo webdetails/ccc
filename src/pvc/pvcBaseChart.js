@@ -177,7 +177,16 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     _multiChartPanel: null,
     
-    
+    /**
+     * List of legend groups.
+     */
+    legendGroupsList: null,
+
+    /**
+     * Map of legend groups by id.
+     */
+    legendGroups: null,
+
     /**
      * The name of the visual role that
      * the legend panel will be associated to.
@@ -232,7 +241,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._visualRoles = {};
             this._measureVisualRoles = [];
         }
-        
+
         this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
     },
     
@@ -354,7 +363,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         /* Initialize chart panels */
         this._initBasePanel();
         this._initTitlePanel();
-        this._initLegendPanel();
+        this._initLegend();
         
         if(!this.parent && this._isRoleAssigned('multiChartColumn')) {
             this._initMultiChartPanel();
@@ -383,8 +392,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(!this.parent) {
             if(!dataEngine || def.get(keyArgs, 'reloadData', true)) {
                 
-                var isReload = !!dataEngine;
-
                 var complexType = dataEngine ?
                                     dataEngine.type :
                                     new pvc.data.ComplexType();
@@ -445,7 +452,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             delete this.__partData;
         }
         
-        if(pvc.debug){
+        if(pvc.debug >= 3){
             pvc.log(dataEngine.getInfo());
         }
     },
@@ -577,10 +584,14 @@ pvc.BaseChart = pvc.Abstract.extend({
                 }
                 
                 if(role.isRequired) {
-                    /* HACK */
-                    if(name === 'series'){
-                        type.addDimension(name, pvc.data.DimensionType.extendSpec(name, {isHidden: true}));
-                        role.bind(pvc.data.GroupingSpec.parse(name, type));
+                    if(role.autoCreateDimension){
+                        var defaultName = role.defaultDimensionName;
+                        if(defaultName.charAt(defaultName.length - 1) === '*'){
+                            defaultName = defaultName.substr(0, defaultName.length - 1);
+                        }
+                        
+                        type.addDimension(defaultName, pvc.data.DimensionType.extendSpec(defaultName, {isHidden: true}));
+                        role.bind(pvc.data.GroupingSpec.parse(defaultName, type));
                         return;
                     }
                     
@@ -591,44 +602,6 @@ pvc.BaseChart = pvc.Abstract.extend({
                 role.bind(null);
             }
         }, this);
-    },
-    
-    /**
-     * Obtains the data that is assigned to a given role, given its name.
-     * 
-     * @param {string} roleName The role name.
-     * @param {object} keyArgs Keyword arguments.
-     * See additional available arguments in {@link pvc.data.Data#groupBy}.
-     * 
-     * @param {boolean} [keyArgs.singleLevelGrouping=false] 
-     * Indicates that a single-grouping level data is desired.
-     * If the role's grouping contains multiple levels, 
-     * a single-level equivalent grouping is evaluated instead.
-     * 
-     * @param {boolean} [keyArgs.reverse=false] 
-     * Indicates that the sort order of dimensions should be reversed.
-     * 
-     * @param {boolean} [keyArgs.assertExists=true] Indicates if an error should be thrown if the specified role name is undefined.
-     * @returns {pvc.data.Data} The role's data if it exists or null if it does not. 
-     */
-    visualRoleData: function(roleName, keyArgs){
-        var role = this._visualRoles[roleName];
-        if(!role) {
-            if(def.get(keyArgs, 'assertExists', true)) {
-                throw def.error.argumentInvalid('roleName', "Undefined role name '{0}'.", [roleName]);
-            }
-            
-            return null;
-        }
-        
-        var grouping = role.grouping;
-        if(def.get(keyArgs, 'singleLevelGrouping', false)) { 
-            grouping = grouping.singleLevelGrouping(keyArgs);
-        } else if(def.get(keyArgs, 'reverse', false)){
-            grouping = grouping.reversed();
-        }
-        
-        return this.dataEngine.groupBy(grouping, keyArgs);
     },
     
     /**
@@ -670,28 +643,42 @@ pvc.BaseChart = pvc.Abstract.extend({
         return !!this._visualRoles[roleName].grouping;
     },
 
-    _partData: function(dataPartValue){
+    _partData: function(dataPartValues){
         if(!this.__partData){
             var dataPartRole = this.visualRoles('dataPart', {assertExists: false});
             if(!dataPartRole || !dataPartRole.grouping){
+                /* Undefined or unbound */
                 this.__partData = this.data;
             } else {
                 // Visible and not
-                this.__partData = this.data.groupBy(dataPartRole.grouping.singleLevelGrouping());
+                this.__partData = dataPartRole.flatten(this.data);
             }
         }
-
-        if(!dataPartValue){
+        
+        if(!dataPartValues){
             return this.__partData;
         }
-        
-        // TODO: should, at least, call some static method of Atom to build a global key
-        return this.__partData._childrenByKey['dataPart:' + dataPartValue];
+
+        dataPartValues = def.query(dataPartValues).distinct().array();
+        dataPartValues.sort();
+
+        var dataPartDim = this.visualRoles('dataPart').firstDimensionName();
+
+        if(dataPartValues.length === 1){
+            // Faster this way...
+            // TODO: should, at least, call some static method of Atom to build a global key
+            return this.__partData._childrenByKey[dataPartDim + ':' + dataPartValues[0]];
+        }
+
+        return this.__partData.where([
+                    def.set({}, dataPartDim, dataPartValues)
+                ]);
     },
 
     _partValues: function(){
         var dataPartRole = this.visualRoles('dataPart', {assertExists: false});
         if(!dataPartRole || !dataPartRole.grouping){
+            /* Undefined or unbound */
             return null;
         }
         
@@ -701,38 +688,33 @@ pvc.BaseChart = pvc.Abstract.extend({
                    .array();
     },
 
-    _legendData: function(dataPartValue){
-        var grouping = this.visualRoles(this.legendSource)
-                           .grouping
-                           .singleLevelGrouping();
-        
-        return this._partData(dataPartValue).groupBy(grouping);
+    _legendData: function(dataPartValues){
+        return this.visualRoles(this.legendSource)
+                   .flatten(this._partData(dataPartValues));
     },
 
-    _legendColorScale: function(dataPartValue){
+    _legendColorScale: function(dataPartValues){
         if(this.parent){
-            return this.root._legendColorScale(dataPartValue);
+            return this.root._legendColorScale(dataPartValues);
         }
 
-        if(!dataPartValue || !this.secondAxisColor){
-            dataPartValue = '';
+        if(!dataPartValues || !this.secondAxisColor){
+            dataPartValues = '';
         }
 
-        var scale = def.getOwn(this._legendColorScales, dataPartValue);
+        var key = '' + (dataPartValues ? dataPartValues : ''), // relying on Array.toString;
+            scale = def.getOwn(this._legendColorScales, key);
         if(!scale){
-            var legendData = this._legendData(dataPartValue);
+            var legendData = this._legendData(dataPartValues);
             var legendValues = legendData.children()
                                          .select(function(leaf){ return leaf.value; })
                                          .array();
 
-            var colorsFactory = (!dataPartValue || dataPartValue === '0') ?
-                                    this.colors :
-                                    this.secondAxisColor;
+            var colorsFactory = (!key || key === '0') ? this.colors : this.secondAxisColor;
 
             scale = colorsFactory(legendValues);
             
-            (this._legendColorScales || (this._legendColorScales = {}))
-                [dataPartValue] = scale;
+            (this._legendColorScales || (this._legendColorScales = {}))[key] = scale;
         }
 
         return scale;
@@ -771,27 +753,102 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
 
     /**
-     * Creates and initializes the legend panel,
+     * Initializes the legend,
      * if the legend is active.
+     */
+    _initLegend: function(){
+        if (this.options.legend) {
+            this.legendGroupsList = [];
+            this.legendGroups     = {};
+
+            this._initLegendGroups();
+            this._initLegendPanel();
+        }
+    },
+
+    /**
+     * Initializes the legend groups of a chart.
+     *
+     * The default implementation registers
+     * one legend group for each existing data part value
+     * for the dimension in {@link #legendSource}.
+     *
+     * Legend groups are registered with the id prefix "part"
+     * followed by the corresponding part value.
+     */
+    _initLegendGroups: function(){
+        var partValues = this._partValues() || [null],
+            me = this;
+        partValues.forEach(function(partValue){
+            var partData = this._legendData(partValue),
+                partColorScale = this._legendColorScale(partValue),
+                partShape = (!partValue || partValue === '0' ? 'square' : 'bar');
+                
+            var legendGroup = {
+                    id:        "part" + partValue,
+                    type:      "discreteColorAndShape",
+                    partValue: partValue,
+                    partLabel: partData.label,
+                    group:     partData,
+                    items:     []
+                },
+                legendItems = legendGroup.items;
+            
+            partData
+                .children()
+                .each(function(itemData){
+                    legendItems.push({
+                        value:    itemData.value,
+                        label:    itemData.label,
+                        group:    itemData,
+                        color:    partColorScale(itemData.value),
+                        useRule:  undefined,
+                        shape:    partShape,
+                        isOn: function(){
+                            return this.group.datums(null, {visible: true}).any();
+                        },
+                        click: function(){
+                            pvc.data.Data.toggleVisible(this.group.datums());
+                            
+                            // Re-render chart
+                            me.render(true, true, false);
+                        }
+                    });
+                }, this);
+
+           this._addLegendGroup(legendGroup);
+        }, this);
+    },
+
+    _addLegendGroup: function(legendGroup){
+        var id = legendGroup.id;
+        !def.hasOwn(this.legendGroups, id) || 
+            def.fail.argumentInvalid('legendGroup', "Duplicate legend group id.");
+        
+        legendGroup.index = this.legendGroupsList.length;
+        this.legendGroups[id] = legendGroup;
+        this.legendGroupsList.push(legendGroup);
+    },
+
+    /**
+     * Creates and initializes the legend panel.
      */
     _initLegendPanel: function(){
         var options = this.options;
-        if (options.legend) {
-            this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
-                anchor:     options.legendPosition,
-                legendSize: options.legendSize,
-                font:       options.legendFont,
-                align:      options.legendAlign,
-                minMarginX: options.legendMinMarginX,
-                minMarginY: options.legendMinMarginY,
-                textMargin: options.legendTextMargin,
-                padding:    options.legendPadding,
-                shape:      options.legendShape,
-                markerSize: options.legendMarkerSize,
-                drawLine:   options.legendDrawLine,
-                drawMarker: options.legendDrawMarker
-            });
-        }
+        this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
+            anchor:     options.legendPosition,
+            legendSize: options.legendSize,
+            font:       options.legendFont,
+            align:      options.legendAlign,
+            minMarginX: options.legendMinMarginX,
+            minMarginY: options.legendMinMarginY,
+            textMargin: options.legendTextMargin,
+            padding:    options.legendPadding,
+            shape:      options.legendShape,
+            markerSize: options.legendMarkerSize,
+            drawLine:   options.legendDrawLine,
+            drawMarker: options.legendDrawMarker
+        });
     },
 
     /**
@@ -809,6 +866,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         try{
             if (!this.isPreRendered || recreate) {
                 this._preRender({reloadData: reloadData});
+            } else if(!this.parent && this.isPreRendered) {
+                pvc.removeTipsyLegends();
             }
 
             this.basePanel.render({
@@ -817,28 +876,39 @@ pvc.BaseChart = pvc.Abstract.extend({
              });
             
         } catch (e) {
-            if (e instanceof NoDataException) {
-                
-                pvc.log("No data found. Creating message.");
-                
-                var options = this.options,
-                    pvPanel = new pv.Panel()
-                                .canvas(options.canvas)
-                                .width(options.width)
-                                .height(options.height),
-                    pvMsg   = pvPanel.anchor("center").add(pv.Label)
-                                .text("No data found");
-                
-                this.extend(pvMsg, "noDataMessage_");
-                
-                pvPanel.render();
+            var isNoData = (e instanceof NoDataException);
+            if (isNoData) {
+                if(pvc.debug > 1){
+                    pvc.log("No data found.");
+                }
 
+                this._addErrorPanelMessage("No data found", true);
             } else {
                 // We don't know how to handle this
                 pvc.logError(e.message);
-                throw e;
+                
+                if(pvc.debug > 0){
+                    this._addErrorPanelMessage("Error: " + e.message, false);
+                }
+                //throw e;
             }
         }
+    },
+
+    _addErrorPanelMessage: function(text, isNoData){
+        var options = this.options,
+            pvPanel = new pv.Panel()
+                        .canvas(options.canvas)
+                        .width(options.width)
+                        .height(options.height),
+            pvMsg = pvPanel.anchor("center").add(pv.Label)
+                        .text(text);
+
+        if(isNoData){
+            this.extend(pvMsg, "noDataMessage_");
+        }
+        
+        pvPanel.render();
     },
 
     /**

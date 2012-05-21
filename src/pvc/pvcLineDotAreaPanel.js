@@ -49,8 +49,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
 
         // ------------------
         // DATA
-        var isBaseDiscrete = chart._catGrouping.isDiscrete(),
-            data = chart._getVisibleData(this.dataPartValue), // shared "categ then series" grouped data
+        var isBaseDiscrete = chart._catRole.grouping.isDiscrete(),
+            data = this._getVisibleData(), // shared "categ then series" grouped data
             isDense = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
             rootScene = this._buildScene(data, isBaseDiscrete);
 
@@ -320,9 +320,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         /** 
          * Create starting scene tree 
          */
-        data.groupBy(chart._serGrouping)
-            .children()
-            .each(createSeriesScene, this);
+        chart._serRole.flatten(data)
+             .children()
+             .each(createSeriesScene, this);
         
         /** 
          * Update the scene tree to include intermediate leaf-scenes,

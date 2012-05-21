@@ -16,8 +16,21 @@ pvc.BarChart = pvc.BarAbstract.extend({
         return true;
     },
 
-    _getAxisDataPart: function(axis){
-        return this.options.secondAxis && axis.type === 'ortho' ? (''+axis.index) : null;
+    _getAxisDataParts: function(axis){
+        if(this.options.secondAxis && axis.type === 'ortho'){
+            if(this.options.secondAxisIndependentScale){
+                return (''+axis.index);
+            }
+
+            // The axis 0 must include both axes
+            return ['0', '1'];
+        }
+        
+        return null;
+    },
+
+    _isDataPartStacked: function(dataPartValue){
+        return !dataPartValue || (dataPartValue === '0') ? this.options.stacked : false;
     },
 
     /**
@@ -27,6 +40,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
         if(pvc.debug >= 3){
             pvc.log("Prerendering in barChart");
         }
+        
         var options = this.options;
         var barPanel = new pvc.BarPanel(this, parentPanel, {
             dataPartValue:  options.secondAxis ? '0' : null,
@@ -53,7 +67,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 orientation:    options.orientation
             });
 
-            this._secContentPanel = linePanel;
+            this._linePanel = linePanel;
             
             barPanel._linePanel = linePanel;
         }

@@ -272,8 +272,14 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         // * measuresInColumns
         // * measuresIndex, [measuresCount=1]
         // * [categoriesCount = 1]
-        
+        var categoriesCount;
         if(!this.options.isMultiValued) {
+            categoriesCount = def.get(this.options, 'categoriesCount', 1);
+            
+            // TODO: >= 1 check
+            // TODO: Multiples consume row space?
+            this.R = categoriesCount;
+
             this._colGroups = colNames.slice(this.R);
             
             // To Array
@@ -282,12 +288,10 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }, this);
             
         } else {
-            if(this.options.measuresInColumns || this.options.measuresIndex == null) {
+            var measuresInColumns = def.get(this.options, 'measuresInColumns', true);
+            if(measuresInColumns || this.options.measuresIndex == null) {
                 
-                var categoriesCount = this.options.categoriesCount;
-                if(categoriesCount == null) {
-                    categoriesCount = 1;
-                }
+                categoriesCount = def.get(this.options, 'categoriesCount', 1);
                 
                 // TODO: >= 1 check
                 // TODO: Multiples consume row space?
@@ -299,7 +303,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 
                 // Any results in column direction...
                 if(L > 0) {
-                    if(this.options.measuresInColumns) {
+                    if(measuresInColumns) {
                         this.measuresDirection = 'columns';
                         
                         this._colGroups = this._processEncodedColGroups(encodedColGroups);
@@ -421,17 +425,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         }
         
         var me = this,
-            index = 0,
-            multiChartColIndexes = def.array(this.options.multiChartColumnIndexes),
-            multiChartRowIndexes = def.array(this.options.multiChartRowIndexes);
-        
-        if(multiChartColIndexes) {
-            this._addGroupReaders('multiChartColumn', multiChartColIndexes);
-        }
-        
-        if(multiChartRowIndexes) {
-            this._addGroupReaders('multiChartRow', multiChartRowIndexes);
-        }
+            index = 0;
         
         function add(dimGroupName, crossGroup, level, count) {
             var crossEndIndex = me._itemCrossGroupIndex[crossGroup] + count; // exclusive

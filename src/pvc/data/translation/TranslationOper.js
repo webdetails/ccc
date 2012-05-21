@@ -86,6 +86,17 @@ def.type('pvc.data.TranslationOper')
         if(userDimReaders) {
             userDimReaders.forEach(this._processDimsReaderSpec, this);
         }
+
+        var multiChartColIndexes = def.array(this.options.multiChartColumnIndexes),
+            multiChartRowIndexes = def.array(this.options.multiChartRowIndexes);
+
+        if(multiChartColIndexes) {
+            this._addGroupReaders('multiChartColumn', multiChartColIndexes);
+        }
+
+        if(multiChartRowIndexes) {
+            this._addGroupReaders('multiChartRow', multiChartRowIndexes);
+        }
     },
     
     _addGroupReaders: function(groupName, indexes) {
@@ -129,6 +140,8 @@ def.type('pvc.data.TranslationOper')
         var indexes = def.array(dimReaderSpec.indexes);
         if(indexes) {
             indexes.forEach(function(index){
+                index = +index; // to number
+                
                 (index >= 0) || def.fail.argumentInvalid('readers[i].indexes', "Invalid index: '{0}'.", [index]); 
                 
                 !def.hasOwn(this._userUsedIndexes, index) || def.fail.argumentInvalid('readers[i].indexes', "Virtual item index '{0}' has already been reserved.", [index]);
@@ -136,7 +149,7 @@ def.type('pvc.data.TranslationOper')
                 this._userUsedIndexes[index] = true;
                 this._userUsedIndexesCount++;
                 
-                // Mark the index with a 'null' in the virtual item indexes array
+                // Mark the index in the virtual item indexes array
                 this._userItem[index] = true;
             }, this);
         }
@@ -179,7 +192,12 @@ def.type('pvc.data.TranslationOper')
                 
                 for(var i = L ; i < I ; i++, level++) {
                     dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
-                
+                    if(i > L){
+                        !def.hasOwn(this._userUsedDims, dimName) || def.fail.argumentInvalid('readers[i].names', "Dimension name '{0}' of last dimension group name is already being read.", [dimName]);
+                        this._userUsedDims[dimName] = true;
+                        // propGet ensures dim exists
+                    }
+                    
                     reader = this._propGet(dimName, indexes[i]);
                 
                     this._userDimsReadersByDim[dimName] = reader;
@@ -457,16 +475,19 @@ def.type('pvc.data.TranslationOper')
     },
     
     // TODO: docs
-    _nextAvailableItemIndex: function(index){
+    _nextAvailableItemIndex: function(index, L){
         if(index == null) {
             index = 0;
         }
-        
-        while(def.hasOwn(this._userItem, index)) {
+        if(L == null){
+            L = Infinity;
+        }
+
+        while(index < L && def.hasOwn(this._userItem, index)) {
             index++;
         }
         
-        return index;
+        return index < L ? index : -1;
     },
     
     // TODO: docs

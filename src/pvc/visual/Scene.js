@@ -81,27 +81,19 @@ def.type('pvc.visual.Scene')
     }
     
     /* DATA */
-    var datum = def.get(keyArgs, 'datum', null),
-        group = def.get(keyArgs, 'group', null),
-        atoms = null;
-    
-    // datum /=> group
-    // group => datum
-    // or both or none
-    
-    // TODO: shouldn't group take precedence over datum?
-    if(!datum) {
-        if(group) {
-            datum = group._datums[0] || null; // null on empty datas (just try hiding all series with the legend)
-            atoms = group.atoms;
-        }
+    var group = def.get(keyArgs, 'group', null),
+        datum;
+    if(group){
+        datum = group._datums[0]; // null on empty datas (just try hiding all series with the legend)
     } else {
-        atoms = datum.atoms;
+        datum = def.get(keyArgs, 'datum');
     }
     
-    this.datum = datum;
+    this.datum = datum || null;
     this.group = group;
-    this.atoms = atoms;
+
+    var source = (datum || group);
+    this.atoms = source ? source.atoms : null;
     
     /* ACTS */
     this.acts = parent ? Object.create(parent.acts) : {};
@@ -202,7 +194,9 @@ def.type('pvc.visual.Scene')
     
     _createSelectedData: function(){
         var any = this.panel().chart.dataEngine.owner.selectedCount() > 0,
-            isSelected = any && !!this.datum && this.datum.isSelected;
+            isSelected = any && 
+                         this.datums()
+                             .any(function(datum){ return datum.isSelected; });
         
         return {
             any: any,

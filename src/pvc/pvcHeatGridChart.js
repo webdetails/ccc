@@ -188,16 +188,15 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         
         /* Column and Row datas  */
         var keyArgs = {visible: true},
+            // TODO: isn't this visibleData?
             // Two multi-dimension single-level data groupings
-            colGrouping   = chart.visualRoles('category').grouping.singleLevelGrouping(),
-            rowGrouping   = chart.visualRoles('series'  ).grouping.singleLevelGrouping(),
-            
-            // One multi-dimensional, two-levels data grouping
-            crossGrouping = pvc.data.GroupingSpec.multiple([colGrouping, rowGrouping]),
-            
+            colGrouping   = chart._catRole.flattenedGrouping(),
+            rowGrouping   = chart._serRole.flattenedGrouping(),
             colRootData = dataEngine.groupBy(colGrouping, keyArgs),
             rowRootData = dataEngine.groupBy(rowGrouping, keyArgs),
-            data = dataEngine.groupBy(crossGrouping, keyArgs);
+
+            // <=> One multi-dimensional, two-levels data grouping
+            data = this._getVisibleData();// dataEngine.groupBy([colGrouping, rowGrouping], keyArgs);
         
         /* Color scale */
         var fillColorScaleByColKey;

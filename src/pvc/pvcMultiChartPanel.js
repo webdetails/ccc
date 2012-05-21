@@ -11,8 +11,9 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
     _calcLayout: function(availableSize, layoutInfo){
         
         this.setSize(availableSize);
-        var chart = this.chart;
-        var data = chart.visualRoleData('multiChartColumn', {visible: true}),
+        var chart = this.chart,
+            data  = chart.visualRoles('multiChartColumn')
+                         .flatten(chart.data, {visible: true}),
             options = chart.options;
         
         // TODO: reuse/dispose sub-charts
@@ -23,7 +24,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             multiChartLimit = Infinity;
         }
         
-        var leafCount = data._leafs.length,
+        var leafCount = data._children.length,
             count     = Math.min(leafCount, multiChartLimit);
         
         if(count === 0) {
@@ -49,7 +50,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             height     = availHeight / rowCount;
         
         for(var index = 0 ; index < count ; index++) {
-            var childData = data._leafs[index],
+            var childData = data._children[index],
                 childOptions = def.create(options, {
                     parent:     chart,
                     title:      childData.absLabel,

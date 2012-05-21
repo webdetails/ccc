@@ -98,20 +98,13 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             dataEngine = chart.dataEngine;
 
         // Add the chart. For a pie chart we have one series only
-        var catGrouping  = chart.visualRoles('category').grouping.singleLevelGrouping(),
-            valueDimName = chart.visualRoles('value').firstDimensionName(),
+        var valueDimName = chart.visualRoles('value').firstDimensionName(),
             valueDim     = dataEngine.dimensions(valueDimName), 
-            data = dataEngine.groupBy(catGrouping, {visible: true});
+            data = chart.visualRoles('category').flatten(dataEngine, {visible: true});
         
         var colorProp = def.scope(function(){
          // Color "controller"
-            var globalCatData = chart.root.visualRoleData('category', {singleLevelGrouping: true}),  // visible or invisible
-                catValues = globalCatData.children()
-                                .select(function(catData){ 
-                                    return catData.value; 
-                                })
-                                .array(),
-                colorScale = chart.colors(catValues);
+            var colorScale = chart._legendColorScale(this.dataPartValue);
 
             return function(catGroup) {
                 var color = colorScale(catGroup.value);

@@ -18,7 +18,6 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         var parent = this.parent;
         if(parent) {
             this._catRole = parent._catRole;
-            this._catGrouping = parent._catGrouping;
         }
     },
     
@@ -31,7 +30,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         this.base();
         
         this._addVisualRoles({
-            category: { isRequired: true, defaultDimensionName: 'category*' }
+            category: { isRequired: true, defaultDimensionName: 'category*', autoCreateDimension: true }
         });
 
         // ---------
@@ -39,58 +38,83 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         this._catRole = this.visualRoles('category');
     },
 
-    _bindVisualRoles: function(){
-        this.base.apply(this, arguments);
-
-        // Cached
-        this._catGrouping = this._catRole.grouping.singleLevelGrouping();
-    },
-
     /**
      * @override
      */
-    _createVisibleData: function(dataPartValue){
-        
-        var crossGrouping = pvc.data.GroupingSpec.multiple([this._catGrouping, this._serGrouping]);
+    _createVisibleData: function(dataPartValues){
+        var serGrouping = this._serRole.flattenedGrouping(),
+            catGrouping = this._catRole.flattenedGrouping();
 
-        return this._partData(dataPartValue)
-                   .groupBy(crossGrouping, { visible: true });
+        return this._partData(dataPartValues)
+                   // <=> One multi-dimensional, two-levels data grouping
+                   .groupBy([catGrouping, serGrouping], { visible: true });
     },
     
     /**
-     * Obtains the extent of the specified value role,
-     * taking into account that values are shown for each category.
+     * Obtains the extent of the specified value axis' role
+     * and data part values.
+     *
+     * <p>
+     * Takes into account that values are shown grouped per category.
+     * </p>
+     *
+     * <p>
+     * The fact that values are stacked or not, per category,
+     * is also taken into account.
+     * Each data part can have its own stacking.
+     * </p>
      *
      * <p>
      * When more than one datum exists per series <i>and</i> category,
      * the sum of its values is considered.
      * </p>
      *
-     * @param {pvc.visual.Role} valueRole The value role.
-     * @param {string} [dataPartValue=null] The desired data part value.
+     * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
+     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @type object
      *
      * @override
      */
-    _getVisibleValueExtent: function(valueRole, dataPartValue){
+    _getVisibleValueExtent: function(valueAxis, dataPartValues){
+        if(!dataPartValues){
+            // Most common case is faster
+            return this._getVisiblePartValueExtent(valueAxis, null);
+        }
+
+        return def.query(dataPartValues)
+                  .select(function(dataPartValue){
+                      return this._getVisiblePartValueExtent(valueAxis, dataPartValue);
+                  }, this)
+                  .reduce(this._unionReduceExtent, null);
+    },
+
+    _isDataPartStacked: function(dataPartValue){
+        return this.options.stacked;
+    },
+
+    _getVisiblePartValueExtent: function(valueAxis, dataPartValue){
+        var valueRole = valueAxis.role;
+        
         switch(valueRole.name){
             case 'series':// (series throws in base)
             case 'category':
                 /* Special case.
                  * The category role's single dimension belongs to the grouping dimensions of data.
-                 * As such, the default method is adequate.
+                 * As such, the default method is adequate
+                 * (gets the extent of the value dim on visible data).
                  *
                  * Continuous baseScale's, like timeSeries go this way.
                  */
-                return this.base(valueRole, dataPartValue);
+                return pvc.CartesianAbstract.prototype._getVisibleValueExtent.call(
+                            this, valueAxis, dataPartValue);
         }
-
+        
         this._assertSingleContinuousValueRole(valueRole);
 
         var valueDimName = valueRole.firstDimensionName(),
             data = this._getVisibleData(dataPartValue);
 
-        if(!this.options.stacked){
+        if(valueAxis.type !== 'ortho' || !this._isDataPartStacked(dataPartValue)){
             return data.leafs()
                        .select(function(serGroup){
                            return serGroup.dimensions(valueDimName).sum();
@@ -98,7 +122,12 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                        .range();
         }
 
+        /*
+         * data is grouped by category and then by series
+         * So direct childs of data are category groups
+         */
         return data.children()
+            /* Obtain the value extent of each category */
             .select(function(catGroup){
                 var range = this._getStackedCategoryValueExtent(catGroup, valueDimName);
                 if(range){
@@ -106,13 +135,13 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                 }
             }, this)
             .where(def.notNully)
-            .reduce(function(result, rangeInfo){
-                var range = rangeInfo.range;
-                return !result ?
-                        // Copy the range object
-                        {min: range.min, max: range.max} :
 
-                        this._reduceStackedCategoryValueExtent(result, range, rangeInfo.group);
+            /* Combine the value extents of all categories */
+            .reduce(function(result, rangeInfo){
+                return this._reduceStackedCategoryValueExtent(
+                            result,
+                            rangeInfo.range,
+                            rangeInfo.group);
             }.bind(this), null);
 
 //        The following would not work:
@@ -122,20 +151,24 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
 //
 //        return max != null ? {min: 0, max: max} : null;
     },
-
+    
     /**
      * Obtains the extent of a value dimension in a given category group.
      * The default implementation determines the extent by separately
      * summing negative and positive values.
+     * Supports {@link #_getVisibleValueExtent}.
      */
     _getStackedCategoryValueExtent: function(catGroup, valueDimName){
         var posSum = null,
             negSum = null;
+
         catGroup
             .children()
+            /* Sum all datum's values on the same leaf */
             .select(function(serGroup){
                 return serGroup.dimensions(valueDimName).sum();
             })
+            /* Add to positive or negative totals */
             .each(function(value){
                 // Note: +null === 0
                 if(value != null){
@@ -158,67 +191,36 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      * Reduce operation of category ranges, into a global range.
      *
      * The default implementation performs a range "union" operation.
+     *
+     * Supports {@link #_getVisibleValueExtent}.
      */
     _reduceStackedCategoryValueExtent: function(result, catRange, catGroup){
+        return this._unionReduceExtent(result, catRange);
+    },
+
+    /**
+     * Could/Should be static
+     */
+    _unionReduceExtent: function(result, range){
         if(!result) {
-            result = {min: catRange.min, max: catRange.max};
-        } else {
-            if(catRange.min < result.min){
-                result.min = catRange.min;
+            if(!range){
+                return null;
+            }
+            
+            result = {min: range.min, max: range.max};
+        } else if(range){
+            if(range.min < result.min){
+                result.min = range.min;
             }
 
-            if(catRange.max > result.max){
-                result.max = catRange.max;
+            if(range.max > result.max){
+                result.max = range.max;
             }
         }
 
         return result;
     },
-     
-    /**
-     * Scale for the second linear axis. yy if orientation is vertical, xx otherwise.
-     *
-     * Keyword arguments:
-     *   bypassAxisOffset: boolean, default is false (only implemented for not independent scale)
-     */
-    getSecondScale: function(keyArgs){ // TODO
 
-        var options = this.options;
-        
-        if(!options.secondAxis || !options.secondAxisIndependentScale){
-            return this.getLinearScale(keyArgs);
-        }
-        
-        // DOMAIN
-        var dMax = this.dataEngine.getSecondAxisMax(),
-            dMin = this.dataEngine.getSecondAxisMin();
-
-        if(dMin * dMax > 0 && options.secondAxisOriginIsZero){
-            if(dMin > 0){
-                dMin = 0;
-            } else {
-                dMax = 0;
-            }
-        }
-
-        // Adding a small offset to the scale's domain:
-        var dOffset = (dMax - dMin) * options.secondAxisOffset,
-            scale = new pv.Scale.linear(
-                        dMin - (options.secondAxisOriginIsZero && dMin == 0 ? 0 : dOffset),
-                        dMax + (options.secondAxisOriginIsZero && dMax == 0 ? 0 : dOffset));
-
-        // Domain rounding
-        pvc.roundScaleDomain(scale, options.secondAxisRoundDomain, options.secondAxisDesiredTickCount);
-                
-        // RANGE
-        var isX = !this.isOrientationVertical();
-        scale.min = 0;
-        scale.max = isX ? this._mainContentPanel.width : this._mainContentPanel.height;
-        scale.range(scale.min, scale.max);
-        
-        return scale;
-    },
-    
     markEventDefaults: {
         strokeStyle: "#5BCBF5",  /* Line Color */
         lineWidth: "0.5",  /* Line Width */

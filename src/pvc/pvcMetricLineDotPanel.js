@@ -161,7 +161,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
 
         // ------------------
         // DATA
-        var data            = chart._getVisibleData(), // shared "series" grouped data
+        var data            = this._getVisibleData(), // shared "series" grouped data
             isDense         = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
             hasColorRole    = !!chart._colorRole.grouping,
             hasDotSizeRole  = this.showDots && !!chart._dotSizeDim,
@@ -390,13 +390,13 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         
         if(chart._colorRole.grouping.isDiscrete()){
             /* Legend-like color scale */
-            var grouping  = chart._colorRole.grouping.singleLevelGrouping(),
-                colorData = data.owner.groupBy(grouping), // visible or invisible
-                values    = colorData.children()
-                              .select(function(child){ return child.value; })
-                              .array();
+            var colorValues = chart._colorRole
+                                .flatten(data.owner) // visible or invisible
+                                .children()
+                                .select(function(child){ return child.value; })
+                                .array();
             
-            return chart.colors(values);
+            return chart.colors(colorValues);
         }
         
         return pvc.color.scale(
@@ -488,7 +488,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             getDotSizeRoleValue;
             
         if(hasColorRole){
-             var colorGrouping = chart._colorRole.grouping.singleLevelGrouping();
+             var colorGrouping = chart._colorRole.grouping;//.singleLevelGrouping();
              if(colorGrouping.isSingleDimension){ // TODO
                  var colorDimName = chart._colorRole.firstDimensionName();
                  

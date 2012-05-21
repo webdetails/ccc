@@ -23,14 +23,20 @@
  * @property {pvc.data.ComplexType} type The complex type against which dimension names were resolved.
  * @property {pvc.data.GroupingLevelSpec} levels An array of level specifications.
  * @property {pvc.data.DimensionType} firstDimension The first dimension type, if any.
- * 
+ * @property {string} flatteningMode Indicates if the grouping is
+ * flattened using pre or post order depth-first search.
+ * Possible values are <tt>null</tt>, <tt>'tree-pre'</tt> and <tt>'tree-post'</tt>.
+ * @property {string} flattenRootLabel The label of the root node of a flattening operation.
+ *
  * @constructor
  * @param {def.Query} levelSpecs An enumerable of {@link pvc.data.GroupingLevelSpec}.
  * @param {pvc.data.ComplexType} complexType A complex type.
- * 
+ * @param {object} [keyArgs] Keyword arguments.
+ * @param {string} [keyArgs.flatteningMode=null] The flattening mode.
+ * @param {string} [keyArgs.flattenRootLabel=''] The label of the root node of a flattening operation.
  */
 def.type('pvc.data.GroupingSpec')
-.init(function(levelSpecs, complexType){
+.init(function(levelSpecs, complexType, keyArgs){
     levelSpecs  || def.fail.argumentRequired('levelSpecs');
     complexType || def.fail.argumentRequired('complexType');
     
@@ -53,12 +59,19 @@ def.type('pvc.data.GroupingSpec')
         }, this)
         .array();
     
+    this.levels.length || def.fail.argumentInvalid('levelSpecs', 'Must have at least one element.');
+
     this.depth = this.levels.length;
     this.isSingleLevel     = this.depth === 1;
     this.isSingleDimension = this.isSingleLevel && !this.hasCompositeLevels;
     this.firstDimension    = this.depth > 0 ? this.levels[0].dimensions[0] : null;
-        
-    this.id = ids.join('||');
+    
+    this.flatteningMode   = def.get(keyArgs, 'flatteningMode') || null;
+    this.flattenRootLabel = def.get(keyArgs, 'flattenRootLabel') || '';
+    
+    this.id = (this.flatteningMode || '') + "##" +
+              this.flattenRootLabel + "##" +
+              ids.join('||');
 })
 .add(/** @lends pvc.data.GroupingSpec# */{
     /**
@@ -77,7 +90,44 @@ def.type('pvc.data.GroupingSpec')
     isDiscrete: function(){
         return !this.isSingleDimension || this.firstDimension.type.isDiscrete;
     },
-    
+
+    /**
+     * Obtains a version of this grouping specification
+     * that conforms to the specified arguments.
+     *
+     * @param {string} [keyArgs.flatteningMode] The desired flatening mode.
+     * Supports the value 'singleLevel' as a way to signify the same as
+     * what the method {@link #singleLevelGrouping} does.
+     *
+     * @param {boolean} [keyArgs.reverse=false] Indicates that each dimension's order should be reversed.
+     * @type pvc.data.GroupingSpec
+     */
+    ensure: function(keyArgs){
+        var grouping = this,
+            flatteningMode = def.get(keyArgs, 'flatteningMode');
+
+        if(flatteningMode){
+            if(flatteningMode === 'singleLevel'){
+                // Supports reverse
+                return grouping.singleLevelGrouping(keyArgs);
+            }
+
+            var flattenRootLabel = def.get(keyArgs, 'flattenRootLabel') || '';
+            if(this.flatteningMode !== flatteningMode || (this.flattenRootLabel !== flattenRootLabel)){
+                grouping = new pvc.data.GroupingSpec(grouping.levels, grouping.type, {
+                    flatteningMode:   flatteningMode,
+                    flattenRootLabel: flattenRootLabel
+                });
+            }
+        }
+
+        if (def.get(keyArgs, 'reverse', false)){
+            grouping = grouping.reversed();
+        }
+
+        return grouping;
+    },
+
     /**
      * Obtains a single-level version of this grouping specification.
      * 
@@ -109,7 +159,7 @@ def.type('pvc.data.GroupingSpec')
                             
             var levelSpec = new pvc.data.GroupingLevelSpec(dimSpecs);
             
-            singleLevel = new pvc.data.GroupingSpec([levelSpec], this.type);
+            singleLevel = new pvc.data.GroupingSpec([levelSpec], this.type, {flatteningMode: this.flatteningMode});
             
             this._singleLevelGrouping[reverse] = singleLevel;
         }
@@ -136,7 +186,7 @@ def.type('pvc.data.GroupingSpec')
                         return new pvc.data.GroupingLevelSpec(dimSpecs);
                     });
 
-            reverseGrouping = new pvc.data.GroupingSpec(levelSpecs, this.type);
+            reverseGrouping = new pvc.data.GroupingSpec(levelSpecs, this.type, {flatteningMode: this.flatteningMode});
             
             this._reverseGrouping = reverseGrouping;
         }
@@ -202,16 +252,16 @@ def.type('pvc.data.GroupingDimensionSpec')
 })
 .add( /** @lends pvc.data.GroupingDimensionSpec */ {
     compareDatums: function(a, b){
-        if(this.type.isComparable) {
+        //if(this.type.isComparable) {
             var result  = this.comparer(a.atoms[this.name], b.atoms[this.name]);
             if(result !== 0) {
                 return result;
             }
             return 0;
-        }
+        //}
         
         // Use datum source order
-        return this.reverse ? (b.id - a.id) : (a.id - b.id);
+        //return this.reverse ? (b.id - a.id) : (a.id - b.id);
     }
 });
 
@@ -258,18 +308,27 @@ pvc.data.GroupingSpec.parse = function(specText, type){
 };
 
 /**
- * Creates a grouping specification that is the result of 
- * flattening each specified grouping specification into its own grouping level.
+ * Creates a combined grouping specification.
+ *
+ * <p>
+ * TODO:
+ * If all the specified grouping specifications have the same flattening mode
+ * then each of the specified is destructured into a single grouping level.
+ *
+ * Otherwise, a composite grouping specification is returned.
+ * </p>
  * 
  * @param {pvc.data.GroupingSpec[]} groupings An enumerable of grouping specifications.
  * @param {object} [keyArgs] Keyword arguments
  * @param {boolean} [keyArgs.reverse=false] Indicates that each dimension's order should be reversed.
  * 
  * @type pvc.data.GroupingSpec
- */
+ 
 pvc.data.GroupingSpec.multiple = function(groupings, keyArgs){
     var reverse = !!def.get(keyArgs, 'reverse', false);
     var type = null;
+    
+    // One level per specified grouping
     var levelSpecs = def.query(groupings)
            .select(function(grouping){
                var dimSpecs = grouping.dimensions().select(function(dimSpec){
@@ -289,6 +348,7 @@ pvc.data.GroupingSpec.multiple = function(groupings, keyArgs){
     
     return type ? new pvc.data.GroupingSpec(levelSpecs, type) : null;
 };
+*/
 
 var groupSpec_matchDimSpec = /^\s*(.+?)(?:\s+(asc|desc))?\s*$/i;
 
@@ -302,7 +362,8 @@ function groupSpec_parseGroupingLevel(groupLevelText, type) {
     return def.query(groupLevelText.split(/\s*\|\s*/))
        .where(def.truthy)
        .select(function(dimSpecText){
-            var match   = groupSpec_matchDimSpec.exec(dimSpecText) || def.fail.argumentInvalid('groupLevelText', "Invalid grouping level syntax '{0}'.", [dimSpecText]),
+            var match   = groupSpec_matchDimSpec.exec(dimSpecText) ||
+                            def.fail.argumentInvalid('groupLevelText', "Invalid grouping level syntax '{0}'.", [dimSpecText]),
                 name    = match[1],
                 dimType = type.dimensions(name),
                 order   = (match[2] || '').toLowerCase(),

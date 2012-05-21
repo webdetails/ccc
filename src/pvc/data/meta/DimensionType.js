@@ -66,9 +66,6 @@
  * <p>
  * The supported value types are: <i>null</i> (which really means <i>any</i>), {@link Boolean}, {@link Number}, {@link String}, {@link Date} and {@link Object}.
  * </p>
- * <p>
- * Note that internally the {@link Date} value type is switched by {@link Date2}. It allows conversion, as well of construction of Date objects.  
- * </p>
  * @param {boolean} [keyArgs.isHidden=false] Indicates if the dimension should
  * be hidden from the user, in places like a tooltip, for example, or in the legend.
  * @param {boolean} [keyArgs.isDiscrete]
@@ -183,23 +180,20 @@ function(complexType, name, keyArgs){
     
     var valueType = def.get(keyArgs, 'valueType') || null;
     var valueTypeName = pvc.data.DimensionType.valueTypeName(valueType);
-    switch(valueType){
-        case Date:
-            valueType = Date2;
-            break;
-    }
+    var cast = def.getOwn(pvc.data.DimensionType.cast, valueTypeName, null);
     
     this.valueType = valueType;
     this.valueTypeName = valueTypeName;
+    this.cast = cast;
     
     this.isDiscrete = def.get(keyArgs, 'isDiscrete');
     if(this.isDiscrete == null){
         this.isDiscrete = (this.valueType !== Number && 
-                           this.valueType !== Date2);
+                           this.valueType !== Date);
     } else {
         // Normalize the value
         this.isDiscrete = !!this.isDiscrete;
-        if(!this.isDiscrete && (this.valueType !== Number && this.valueType !== Date2)) {
+        if(!this.isDiscrete && (this.valueType !== Number && this.valueType !== Date)) {
             throw def.error.argumentInvalid('isDiscrete', "The only supported continuous value types are Number and Date.");
         }
     }
@@ -219,7 +213,7 @@ function(complexType, name, keyArgs){
                     this._converter = pv.Format.createParser(pv.Format.number().fractionDigits(0, 2));
                     break;
                     
-                case Date2:
+                case Date:
                     this._converter = pv.Format.createParser(pv.Format.date(rawFormat));
                     break;
             }
@@ -243,7 +237,7 @@ function(complexType, name, keyArgs){
                 }
                 break;
                 
-            case Date2:
+            case Date:
                 this._comparer = def.compare;
                 break;
                 
@@ -267,7 +261,7 @@ function(complexType, name, keyArgs){
                 this._formatter = pv.Format.createFormatter(pv.Format.number().fractionDigits(0, 2));
                 break;
                 
-            case Date2:
+            case Date:
                 var format = def.get(keyArgs, 'format') || "%Y/%m/%d";
                 this._formatter = pv.Format.createFormatter(pv.Format.date(format));
                 break;
@@ -388,10 +382,21 @@ function(complexType, name, keyArgs){
     }
 });
 
-/** Casts values to a Date object */
-function Date2(value) {
-    return value instanceof Date ? value : new Date(value);
-}
+pvc.data.DimensionType.cast = {
+    'Date': function(value) {
+        return value instanceof Date ? value : new Date(value);
+    },
+
+    'Number': function(value) {
+        value = Number(value);
+        return isNaN(value) ? null : value;
+    },
+
+    'String':  String,
+    'Boolean': Boolean,
+    'Object':  Object,
+    'Any':     null
+};
 
 /**
  * Obtains the default group name for a given dimension name.
@@ -436,8 +441,7 @@ pvc.data.DimensionType.valueTypeName = function(valueType){
         case Number:  return 'Number';
         case String:  return 'String';
         case Object:  return 'Object';
-        case Date:
-        case Date2:   return 'Date';
+        case Date:    return 'Date';
         default: throw def.error.argumentInvalid('valueType', "Invalid valueType function: '{0}'.", [valueType]);
     }
 };

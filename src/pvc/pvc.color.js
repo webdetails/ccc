@@ -262,8 +262,10 @@ def.scope(function(){
                                
                            default:
                                /* Ignore args domain altogether */
-                               pvc.log("Ignoring option 'colorRangeInterval' due to unsupported length." + 
-                                       def.format(" Should have '{0}', but instead has '{1}'.", [this.desiredDomainCount, domain.length]));
+                               if(pvc.debug >= 2){
+                                    pvc.log("Ignoring option 'colorRangeInterval' due to unsupported length." +
+                                            def.format(" Should have '{0}', but instead has '{1}'.", [this.desiredDomainCount, domain.length]));
+                               }
                                domain = null;
                        }
                    }

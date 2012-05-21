@@ -14,9 +14,6 @@ pvc.BarAbstract = pvc.CategoricalAbstract.extend({
         var parent = this.parent;
         if(parent) {
             this._valueRole = parent._valueRole;
-            if(parent._value2Role){
-                this._value2Role = parent._value2Role;
-            }
         }
     },
 
@@ -42,22 +39,6 @@ pvc.BarAbstract = pvc.CategoricalAbstract.extend({
         });
 
         this._valueRole = this.visualRoles('value');
-
-        if(this.options.secondAxis){
-            this._addVisualRoles({
-                /* value2: continuous, numeric */
-                value2: {
-                    isMeasure: true,
-                    isPercent: this.options.stacked,
-                    requireSingleDimension: true,
-                    requireIsDiscrete: false,
-                    singleValueType: Number,
-                    defaultDimensionName: 'value2'
-                }
-            });
-
-            this._value2Role = this.visualRoles('value2');
-        }
     },
 
     _initData: function(){
@@ -67,10 +48,6 @@ pvc.BarAbstract = pvc.CategoricalAbstract.extend({
 
         // Cached
         this._valueDim = data.dimensions(this._valueRole.firstDimensionName());
-
-        if(this._value2Role){
-            this._value2Dim = data.dimensions(this._value2Role.firstDimensionName());
-        }
     }
 }, {
     defaultOptions: {

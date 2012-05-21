@@ -71,7 +71,28 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         
         return data;
     },
-    
+
+    /**
+     * Creates a linked data with the result of filtering
+     * the datums of this data.
+     *
+     * <p>
+     * This operation differs from {@link #datums} only in the type of output,
+     * which is a new linked data, instead of an enumerable of the filtered datums.
+     * See {@link #datums} for more information on the filtering operation.
+     * </p>
+     *
+     * @param {object} [whereSpec] A "where" specification.
+     * @param {object} [keyArgs] Keyword arguments object.
+     * See {@link #datums} for information on available keyword arguments.
+     *
+     * @returns {pvc.data.Data} A linked data containing the filtered datums.
+     */
+    where: function(whereSpec, keyArgs){
+        var datums = this.datums(whereSpec, keyArgs).array();
+        return new pvc.data.Data({linkParent: this, datums: datums});
+    },
+
     /**
      * Obtains the datums of this data, 
      * possibly filtered according 
@@ -117,7 +138,9 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * 
      * @param {boolean} [keyArgs.selected=null]
      *      Only considers datums that have the specified selected state.
-     * 
+     *
+     * @param {function} [keyArgs.where] A arbitrary datum predicate.
+     *
      * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each 
      * datum filter of <i>whereSpec</i>.
      * <p>
@@ -143,9 +166,11 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      */
     datums: function(whereSpec, keyArgs){
         if(!whereSpec){
-            var q = def.query(this._datums),
+            var q        = def.query(this._datums),
                 selected = def.get(keyArgs, 'selected'),
-                visible  = def.get(keyArgs, 'visible');
+                visible  = def.get(keyArgs, 'visible'),
+                where    = def.get(keyArgs, 'where')
+                ;
             
             if(visible != null){
                 q = q.where(function(datum){ return datum.isVisible === visible;  });
@@ -153,6 +178,10 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
             
             if(selected != null){
                 q = q.where(function(datum){ return datum.isSelected === selected; });
+            }
+
+            if(where){
+                q = q.where(where);
             }
             
             return q;
@@ -237,6 +266,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 
         if(sum == null) {
             sum = this.children()
+                    /* flattened parent groups would account for the same values more than once */
+                    .where(function(childData){ return !childData._isFlattenGroup; })
                     .select(function(childData){
                         return Math.abs(childData.dimensions(dimName).sum(keyArgs));
                     }, this)

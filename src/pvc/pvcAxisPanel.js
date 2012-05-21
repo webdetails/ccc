@@ -207,8 +207,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
-            // Grouping with 1 multi-dimension level
-            data              = this.chart.visualRoleData(this.roleName, {visible: true, singleLevelGrouping: true}),
+            data              = this.chart.visualRoles(this.roleName)
+                                    .flatten(this.chart.data, {visible: true}),
             itemCount         = data._children.length,
             includeModulo;
         
@@ -228,16 +228,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             includeModulo = 1;
         }
         
-        // Ordinal ticks correspond to ordinal datums.
-        // Ordinal ticks are drawn at the center of each band,
-        //  and not at the beginning, as in a linear axis.
+        // Ticks correspond to each data in datas.
+        // Ticks are drawn at the center of each band.
         this.pvTicks = this.pvRule.add(pv.Rule)
             .zOrder(20) // see pvc.js
             .data(data._children)
             .localProperty('group')
-            .group(function(leafData){
-                return leafData;
-            })
+            .group(function(child){ return child; })
             //[anchorOpposite   ](0)
             [anchorLength     ](null)
             [anchorOrtho      ](function(child){ return scale(child.value); })
@@ -258,7 +255,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this._getExtension(this.panelName + "Label", 'visible'))
             .zOrder(40) // see pvc.js
             .textAlign(align)
-            .text(function(child){return child.label;})
+            .text(function(child){return child.absLabel;})
             .font(this.font)
             .localProperty('group')
             .group(function(child){ return child; })
@@ -273,9 +270,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.pvLabel
                 .cursor("pointer")
                 .events('all') //labels don't have events by default
-                .event('click', function(data){
+                .event('click', function(child){
                     var ev = arguments[arguments.length - 1];
-                    return myself._handleClick(data, ev);
+                    return myself._handleClick(child, ev);
                 });
         }
 
@@ -283,9 +280,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.pvLabel
                 .cursor("pointer")
                 .events('all') //labels don't have events by default
-                .event("dblclick", function(data){
+                .event("dblclick", function(child){
                     var ev = arguments[arguments.length - 1];
-                    myself._handleDoubleClick(data, ev);
+                    myself._handleDoubleClick(child, ev);
                 });
         }
         
@@ -308,8 +305,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 [anchorOpposite   ](orthoFullGridCrossesMargin ? -ruleLength : -orthoScale.max)
                 [anchorOrthoLength](ruleLength)
                 [anchorLength     ](null)
-                [anchorOrtho      ](function(child){
-                    var value = scale(child.acts.value.value);
+                [anchorOrtho      ](function(scene){
+                    var value = scale(scene.acts.value.value);
                     if(this.index +  1 < count){
                         return value - halfStep;
                     }
@@ -329,9 +326,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 var childScene = new pvc.visual.Scene(rootScene, {group: childData});
                 childScene.acts.value = {
                     value: childData.value,
-                    label: childData.label
-                };
-            });
+                    label: childData.label,
+                    absLabel: childData.absLabel
+            };
+        });
 
         /* Add a last scene, with the same data group */
         var lastScene  = rootScene.lastChild;
@@ -586,7 +584,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             
         } else {
             var t = this._pvLayout.toScreenTransform();
-            this._elements[0].visitBefore(function(data, i){
+            this._rootElement.visitBefore(function(data, i){
                 if(i > 0){
                     var centerX = t.transformHPosition(data.x + data.dx /2),
                         centerY = t.transformVPosition(data.y + data.dy /2);
@@ -763,14 +761,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     getLayoutSingleCluster: function(){
         // TODO: extend this to work with chart.orientation?
         var orientation = this.anchor,
-            reverse  = orientation == 'bottom' || orientation == 'left',
-            data     = this.chart.visualRoleData(this.roleName, {visible: true, reverse: reverse}),
-            maxDepth = data.treeHeight,
-            elements = data.nodes(),
+            reverse   = orientation == 'bottom' || orientation == 'left',
+            data      = this.chart.visualRoles(this.roleName)
+                            .select(this.chart.data, {visible: true, reverse: reverse}),
+            
+            maxDepth  = data.treeHeight,
+            elements  = data.nodes(),
             
             depthLength = this.axisSize - this.titleSize;
         
-        this._elements = elements; // lasso 
+        this._rootElement = elements[0]; // lasso
             
         // displace to take out bogus-root
         maxDepth++;

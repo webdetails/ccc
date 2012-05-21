@@ -105,9 +105,9 @@ def.type('pvc.data.Data', pvc.data.Complex)
              * Clone link parent atoms
              * End up with the same set of own atoms
              */
-            atomsBase = linkParent._atomsBase;
-            atoms = def.own(linkParent.atoms);
-
+            atomsBase = linkParent.atoms;
+            //atoms = null
+            
             data_addLinkChild.call(linkParent, this);
         } else {
             // Topmost root - an owner
@@ -165,7 +165,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
         }
         
         if(parent.absKey){
-            this.absKey = parent.absKey + "," + this.key;
+            if(this.key){
+                this.absKey = parent.absKey + "," + this.key;
+            } else {
+                this.absKey = parent.absKey;
+            }
         }
     }
 })
@@ -285,6 +289,13 @@ def.type('pvc.data.Data', pvc.data.Complex)
     _disposed: false,
     
     /**
+     * Indicates the data was a parent group in the flattening group operation.
+     * 
+     * @type boolean
+     */
+    _isFlattenGroup: false,
+
+    /**
      * Obtains a dimension given its name.
      * 
      * <p>
@@ -397,7 +408,88 @@ def.type('pvc.data.Data', pvc.data.Complex)
     leafs: function(){
         return def.query(this._leafs);
     },
-    
+
+//    /**
+//     * Enumerates each data in the data hierarchy in pre or post order.
+//     *
+//     * @param {boolean} [isPostOrder=false] Indicates the enumeration should be in post order.
+//     * @type def.Query
+//     */
+//    tree: function(isPostOrder) {
+//        /*
+//         * State phases
+//         * 0 - entered node
+//         * 1 - pre phase (if !isPostOrder)
+//         * 2 - children phase
+//         * 3 - post phase (if isPostOrder)
+//         */
+//        var rootData = this,
+//            stateStack = [];
+//
+//        // Ad-hoq query
+//        return def.query(function(nextIndex){
+//            /* Starting? */
+//            if(!nextIndex){
+//                stateStack.push({data: rootData, phase: 0});
+//            }
+//
+//            var L;
+//            while((L = stateStack.length)){
+//                var state = stateStack[L - 1];
+//
+//                switch(state.phase){
+//                    /* New node */
+//                    case 0:
+//                        if(!isPostOrder){
+//                            state.phase = 1; // enter pre phase
+//                            this.item = state.data;
+//                            return 1; // has next
+//                        }
+//                        break;
+//
+//                    /* In pre phase */
+//                    case 1:
+//                        // Go to children phase
+//                        state.phase = 2;
+//                        break;
+//
+//                    /* In children phase */
+//                    case 2:
+//                        var data = state.data,
+//                            childQuery = state.childQuery;
+//
+//                        if(!childQuery && data.childCount()){
+//                            childQuery = state.childQuery = def.query(state.data._children);
+//                        }
+//
+//                        if(childQuery && childQuery.next()){
+//                            stateStack.push({data: childQuery.item, phase: 0});
+//
+//                        } else {
+//                            if(isPostOrder) {
+//                                state.phase = 3; // enter post phase
+//                                this.item = state.data;
+//                                return 1; // has next
+//                            }
+//
+//                            /* Pop current level */
+//                            stateStack.pop();
+//                        }
+//                        break;
+//
+//                    /* In post phase */
+//                    case 3:
+//                        /* Pop current level */
+//                        stateStack.pop();
+//                        break;
+//                }
+//            }
+//
+//            /* Finished */
+//            return 0;
+//        });
+//    },
+
     /**
      * Disposes the child datas, the link child datas and the dimensions.
      */

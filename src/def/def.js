@@ -1,4 +1,3 @@
-// ECMAScript 5 shim
 if(!Object.keys) {
     /** @ignore */
     Object.keys = function(o){
@@ -351,7 +350,14 @@ this['def'] = (function(){
          * @type function
          */
         compare: function(a, b){
-            return (a < b) ? -1 : ((a > b) ? 1 : 0);
+            /* Identity is favored because, otherwise,
+             * comparisons like: compare(NaN, 0) would return 0...
+             * This isn't perfect either, because:
+             * compare(NaN, 0) === compare(0, NaN) === -1
+             * so sorting may end in an end or the other...
+             */
+            return (a === b) ? 0 : ((a > b) ? 1 : -1);
+            //return (a < b) ? -1 : ((a > b) ? 1 : 0);
         },
         
         constant: function(v){

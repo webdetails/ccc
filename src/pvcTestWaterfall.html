@@ -36,6 +36,7 @@
         <script type="text/javascript" src="pvc/data/Data.load.js"></script>
         <script type="text/javascript" src="pvc/data/Data.selected.js"></script>
         <script type="text/javascript" src="pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="pvc/data/DataOper.js"></script>
         <script type="text/javascript" src="pvc/data/GroupingOper.js"></script>
         <script type="text/javascript" src="pvc/data/Data.operations.js"></script>
         <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
@@ -46,6 +47,7 @@
         <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
@@ -134,11 +136,10 @@ in a waterfall chart you just compare the size of bars as all bars are parallel 
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
   <li>showValues - Show or hide bar value. Default: false</li>
-  <li>stacked -&nbsp; Stacked? Default: false</li>
+  <li>waterDirection - Should the water fall? 'down', or not: 'up'. Default: 'down'</li>
+  <li>allCategoryLabel - The label of the root group. Default: 'All'</li>
   <li>panelSizeRatio - Ratio of the band occupied by the pane.
 Default: 0.5 (50%)</li>
-  <li>barSizeRatio - In multiple series, percentage of inner band
-occupied by bars. Default: 0.5 (50%)</li>
   <li>maxBarSize - Maximum size of a bar in pixels. Default: 2000</li>
 </ul>
 
@@ -160,10 +161,6 @@ occupied by bars. Default: 0.5 (50%)</li>
   <li>{x,y,second}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
   <li>{x,y,second}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
   <li>{x,y,second}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
-  <li>secondAxisIdx - Array of indexes of the series that are shown on the second axis</li>
-  <li>secondAxisIndependentScale (true | false) - if the second axis has an independent scale</li>
-  <li>secondAxisOriginIsZero (true | false) - if the second axis should show the 0 value at the origin. Default: 0</li>
-  <li>secondAxisColor - line and scale color. Default: blue</li>
 </ul>
 
 <h2>Extension Points</h2>
@@ -208,40 +205,81 @@ When you move to the right you see the split of this total across the four sales
 In each sales region as well as in the totals column you can also observe a split into two product lines.<br>
 <textarea cols="55" rows="20" id="pvcWf1Code">
 var wf1 = new pvc.WaterfallChart({
-         canvas: "pvcWf1",
-         width: 450,
-         height: 400,
-         title: "Sales by region and product",
-         titlePosition: "bottom",
-         titleSize: 40,
-         legend: true,
-         legendPosition: "top",
-         legendAlign: "right",
-         animate: false,
-         clickable: true,
-         orientation: 'vertical',
-         stacked: true,
-         maxBarSize: 100,
-         panelSizeRatio:0.75,
-         barSizeRatio: 1.0,
-         selectable: true,
-         showValues: true,
-         showXScale: true,
-         showYScale: true,
-         yAxisPosition: "left",
-         yAxisSize: 30,
-         xAxisPosition: "bottom",
-         xAxisSize: 30,
-        
-         extensionPoints: {
-          titleLabel_font: "16px sans-serif",         
-         }
-       });
+    canvas: "pvcWf1",
+    width:  800,
+    height: 400,
 
-       wf1.setData(testWaterfall_01,
-                  {crosstabMode: true,
-                   seriesInRows: false});
-       wf1.render();
+    title: "Sales by territory, region, year and product",
+    titlePosition: "top",
+    titleSize: 40,
+
+    legend: true,
+    legendPosition: "right",
+
+    orientation: 'vertical',
+    waterDirection: 'down',  // 'up',
+    //allCategoryLabel: "All",
+    //accumulatedLineLabel: "Accumulated",
+
+    animate: false,
+    clickable:  true,
+    selectable: true,
+    hoverable:  true,
+
+    maxBarSize: 200,
+    panelSizeRatio:0.75,
+
+    showValues: true,
+
+    showXScale: true,
+    showYScale: true,
+    yAxisPosition: "left",
+    xAxisPosition: "bottom",
+
+    orthoAxisSize: 40,
+    orthoAxisDomainRoundMode: 'tick',
+    baseAxisSize:  100,
+
+    extensionPoints: {
+        xAxisLabel_textAngle:    -Math.PI/3,
+        xAxisLabel_textAlign:    "right",
+        xAxisLabel_textBaseline: "top",
+        titleLabel_font: "bold 16px sans-serif"
+    },
+
+    /* Visual Role mapping */
+    visualRoles: {
+        //multiChartColumn: "territory",
+        series:           "product",
+        category:         "territory, region, year",
+        value:            "sales"
+    },
+
+    /* Data definition */
+    dimensions: {
+        territory: {label: "Territory"},
+        region:    {label: "Region"},
+        year:      {label: "Year"},
+        product:   {label: "Product"},
+        sales:     {label: "Sales", valueType: Number}
+    },
+
+    /* Data mapping */
+    readers: [
+        {names: 'territory', indexes: 0},
+        {names: 'region',    indexes: 1},
+        {names: 'year',      indexes: 2},
+        {names: 'product',   indexes: 3},
+        {names: 'sales',     indexes: 4}
+    ],
+
+    crosstabMode: true,
+    seriesInRows: false,
+    dataOptions: {categoriesCount: 3}
+});
+
+wf1.setData(testWaterfall1);
+wf1.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcWf1"></div>
@@ -259,8 +297,11 @@ var wf2 = new pvc.WaterfallChart({
     legend: true,
     legendPosition: "top",
     legendAlign:    "right",
+    margins: {right: 40},
     animate: false,
     clickable: true,
+    selectable: true,
+    hoverable: true,
     orientation: 'horizontal',
     stacked: true,
     maxBarSize: 100,
@@ -287,7 +328,8 @@ wf2.setData(testWaterfall_01, {
 
 wf2.render();
 </textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+
         <div id="pvcWf2"></div>
 
 <h3>An Advanced Waterfall</h3>
@@ -297,7 +339,7 @@ Then, the RoW region is in turn split into its different sub-regions.<br>
 <textarea cols="55" rows="25" id="pvcWf3Code">
 var wf3 = new pvc.WaterfallChart({
     canvas: "pvcWf3",
-    width: 450,
+    width: 500,
     height: 400,
     title: "Sales by region and product - Detailed",
     titlePosition: "bottom",
@@ -307,6 +349,8 @@ var wf3 = new pvc.WaterfallChart({
     legendAlign: "right",
     animate: false,
     clickable: true,
+    selectable: true,
+    hoverable: true,
     orientation: 'vertical',
     stacked: true,
     maxBarSize: 100,
@@ -341,7 +385,8 @@ wf3.render();
 The example 'An Advanced Waterfall' with an 'horizontal' orientation.<br>
 <textarea cols="55" rows="25" id="pvcWf4Code">
 var wf4 = new pvc.WaterfallChart({
-    canvas: "pvcWf4",
+    canvas: "pvcWf4",
+
     width: 450,
     height: 400,
     title: "Sales by region and product - Detailed - Horizontal",
@@ -352,6 +397,8 @@ var wf4 = new pvc.WaterfallChart({
     legendAlign: "right",
     animate: false,
     clickable: true,
+    selectable: true,
+    hoverable: true,
     orientation: 'horizontal',
     stacked: true,
     maxBarSize: 100,

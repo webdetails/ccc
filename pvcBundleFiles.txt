@@ -18,6 +18,7 @@ src/pvc/data/Data.js
 src/pvc/data/Data.load.js
 src/pvc/data/Data.selected.js
 src/pvc/data/GroupingSpec.js
+src/pvc/data/DataOper.js
 src/pvc/data/GroupingOper.js
 src/pvc/data/Data.operations.js
 src/pvc/data/Data.compat.js
@@ -28,6 +29,7 @@ src/pvc/visual/sign/Dot.js
 src/pvc/visual/sign/Line.js
 src/pvc/visual/sign/Area.js
 src/pvc/visual/sign/Bar.js
+src/pvc/visual/sign/Rule.js
 src/pvc/visual/Context.js
 src/pvc/visual/CartesianAxis.js
 

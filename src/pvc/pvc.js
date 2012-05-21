@@ -56,42 +56,10 @@ pvc.sum = function(v1, v2){
             (v1 == null ? v1 : (v1 + v2));
 };
 
-pvc.padMatrixWithZeros = function(d){
-    return d.map(function(v){
-        return v.map(function(a){
-            return typeof a == "undefined"?0:a;
-        });
-    });
-};
-
-pvc.padArrayWithZeros = function(a){
-    return a.map(function(d){
-        return d == null ? 0 : d;
-    });
-};
-
 pvc.cloneMatrix = function(m){
     return m.map(function(d){
         return d.slice();
     });
-};
-
-/**
- * ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
- *      arrayStartsWith(a, a) -> true
- **/
-pvc.arrayStartsWith = function(array, base){
-    if(array.length < base.length) { 
-        return false;
-    }
-
-    for(var i = 0; i < base.length ; i++){
-        if(base[i] != array[i]) {
-            return false;
-        }
-    }
-
-    return true;
 };
 
 pvc.mergeDefaults = function(to, defaults, from){
@@ -190,6 +158,8 @@ pvc.createColorScheme = function(colors){
 
 // Convert to Grayscale using YCbCr luminance conv.
 pvc.toGrayScale = function(color, alpha, maxGrayLevel){
+    color = pv.color(color);
+    
     var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
     // Don't let the color get near white, or it becomes unperceptible in most monitors
     if(maxGrayLevel === undefined) {

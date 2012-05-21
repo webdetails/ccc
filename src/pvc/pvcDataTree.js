@@ -64,9 +64,11 @@ pvc.DataTree = pvc.BaseChart.extend({
         }
         
         structEngine.load(translation.execute(structEngine));
-        
-        pvc.log(this.structEngine.getInfo());
-        
+
+        if(pvc.debug >= 3){
+            pvc.log(this.structEngine.getInfo());
+        }
+
         // ------------------
         
         this.dataTreePanel = new pvc.DataTreePanel(this, this.basePanel, {

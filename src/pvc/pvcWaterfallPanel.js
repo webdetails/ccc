@@ -19,233 +19,170 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
     pvWaterfallLine: null,
     ruleData: null,
 
-    /***
-    * Function that transform a dataSet to waterfall-format.
-    *
-    * The assumption made is that the first category is a tekst column
-    * containing one of the following values:
-    *    - "U":  If this category (row) needs go upwards (height
-    *       increases)
-    *    - "D": If the waterfall goes downward.
-    *    - other values: the waterfall resets to zero (used represent
-    *        intermediate subtotal) Currently subtotals need to be
-    *        provided in the dataSet.
-    *  This function computes the offsets of each bar and stores the
-    *  offset in the first category (for stacked charts)
-    */
-    constructWaterfall: function(dataSet){
-        var cumulated = 0,
-            categoryIndexes = [],
-            categoryTotals = [],
-            cats = this.chart.dataEngine.getVisibleCategoriesIndexes(),
-            seriesCount  = dataSet.length,
-            totalsSeriesIndex = this.isOrientationHorizontal()
-                                ? 0
-                                : (seriesCount - 1),
-            totalsSeries = dataSet[totalsSeriesIndex],
-            catCount = cats.length;
+    /**
+     * Called to obtain the bar differentialControl property value.
+     * If it returns a function,
+     * that function will be called once per category,
+     * on the first series.
+     * @virtual
+     */
+    _barDifferentialControl: function(){
+        var isFalling = this.chart._isFalling;
 
-        for(var c = 0 ; c < catCount; c++) {
-            categoryIndexes.push(cats[c]);
-
-            // Determine next action (direction)
-            var mult;
-            if (totalsSeries[c] == "U") {
-                mult = 1;
-            } else if (totalsSeries[c] == "D") {
-                mult = -1;
-            } else {
-                mult = 1;
-                cumulated = 0;
+        /*
+         * From protovis help:
+         *
+         * Band differential control pseudo-property.
+         *  2 - Drawn starting at previous band offset. Multiply values by  1. Don't update offset.
+         *  1 - Drawn starting at previous band offset. Multiply values by  1. Update offset.
+         *  0 - Reset offset to 0. Drawn starting at 0. Default. Leave offset at 0.
+         * -1 - Drawn starting at previous band offset. Multiply values by -1. Update offset.
+         * -2 - Drawn starting at previous band offset. Multiply values by -1. Don't update offset.
+         */
+        return function(scene){
+            if(isFalling && !this.index){
+                // First falling bar is the main total
+                // Must be accounted up and update the total
+                return 1;
             }
 
-            if (mult > 0){
-                totalsSeries[c] = cumulated;
+            if(scene.acts.category.group._isFlattenGroup){
+                // Groups don't update the total
+                // Groups, always down, except the first falling...
+                return -2;
             }
-
-            // Update the other series and determine new cumulated
-            for(var seriesIndex = 0 ; seriesIndex < seriesCount ; seriesIndex++) {
-                if(seriesIndex !== totalsSeriesIndex){
-                    var series = dataSet[seriesIndex],
-                        val = Math.abs(series[c]);
-
-                    // Negative values not allowed
-                    series[c] = val;
-
-                    // Only use negative values internally for the waterfall
-                    //  to control Up or Down
-                    cumulated += mult * val;
-                }
-            }
-
-            if (mult < 0) {
-                totalsSeries[c] = cumulated;
-            }
-
-            categoryTotals.push(cumulated);
-        }
-
-        return {
-            categoryIndexes: categoryIndexes,
-            categoryTotals: categoryTotals
+            
+            return isFalling ? -1 : 1;
         };
     },
 
-    getDataSet: function() {
-        /*
-            Values
-            Total  A     B
-            [["U", 800, 1200],  // 1800 (depends on visible series)
-             ["D", 100,  600],  //  700
-             ["D", 400,  300],  //  700
-             ["D", 200,  100],  //  300
-             ["D", 100,  200]]  //  300
-
-            Values Transposed
-            [[ "U", "D", "D", "D", "D"],
-             [ 800, 100, 400, 200, 100],
-             [1200, 600, 300, 100, 200]]
-           */
-        var dataSet = pvc.padMatrixWithZeros(
-                        this.chart.dataEngine.getVisibleTransposedValues());
-
-        // NOTE: changes dataSet
-        this.ruleData = this.constructWaterfall(dataSet);
-        
-        return dataSet;
-    },
-
-    
-    prepareDataFunctions:  function(dataSet) {
-        var chart  = this.chart,
-            options = chart.options,
-            dataEngine = chart.dataEngine;
-
-        // create empty container for the functions and data
-        this.DF = {};
-
-        // first series are symbolic labels, so hide it such that
-        // the axis-range computation is possible.
-        /*
-            var lScale = this.waterfall
-                         ? this.callWithHiddenFirstSeries(
-                                this.chart,
-                                this.chart.getLinearScale,
-                                true)
-                     : this.chart.getLinearScale();
-        */
-        /** start  fix  (need to resolve this nicely  (CvK))**/
-        // TODO: ???
-        if (this.waterfall) {
-            // extract the maximum
-            var mx = 0,
-                catCount = dataSet[0].length;
-            for(var c = 0 ; c < catCount ; c++) {
-                var h = 0;
-                for(var s = 0 ; s < dataSet.length ; s++){
-                    h += dataSet[s][c];
-                }
-                if (h > mx) {
-                	mx = h;
-                }
-            }
-
-            // set maximum as a fixed bound
-            options.orthoFixedMax = mx;
-        }
-        /** end fix **/
-
-        /*
-         * functions to determine positions along BASE axis.
-         */
-        if(this.stacked){
-            this.DF.basePositionFunc = function(d){
-                return barPositionOffset + 
-                       oScale(dataEngine.getVisibleCategories()[this.index]);
-            };
-
-            // for drawRules
-            if (this.waterfall){
-                this.DF.baseRulePosFunc = function(d){
-                    return barPositionOffset + oScale(d);
-                };
-            }
-        }
-
-        /*
-         * functions to determine the color of Bars
-         * (fillStyle of this.pvBar)
-         */
-        var seriesValues = dataEngine.owner.getSeries(),
-            colors = chart.colors(seriesValues);
-
-            // TODO: waterfall
-            // Only relevant for waterfall
-//            totalsSeriesIndex = this.isOrientationHorizontal() ?
-//                                0 : (seriesValues.length - 1);
-
-        this.DF.colorFunc = function(){
-            var datum = this.datum();
-            
-//            var visibleSerIndex = myself.stacked ? this.parent.index : this.index,
-//                seriesIndex = dataEngine.owner.getVisibleSeriesIndexes()[visibleSerIndex];
-            
-            // TODO: waterfall
-            // Change the color of the totals series
-//            if (myself.waterfall && seriesIndex == totalsSeriesIndex) {
-//                return pv.Color.transparent;
-//            }
-            var seriesValue = this.datum().atoms.series.value,
-                color = colors(seriesValue),
-                shouldDimColor = dataEngine.owner.selectedCount() > 0 &&
-                                 !datum.isSelected;
-
-            return shouldDimColor ? pvc.toGrayScale(color, 0.6) : color;
-        };
-    },
-
-    /**
-     * Function used to draw a set of horizontal rules that connect
-     * the bars that compose the waterfall.
-     */
-
-    drawWaterfallRules: function(panel, cats, vals, offset) {
-        var data = [],
-            anchor = this.isOrientationVertical() ? "bottom" : "left";
-
-        // build the dataSet as a hashmap
-        var x1 = offset + this.DF.baseRulePosFunc(cats[0]);
-        for(var i = 0; i < cats.length-1 ; i++){
-            var x2 = offset + this.DF.baseRulePosFunc(cats[i+1]);
-            data.push({
-                x: x1,
-                y: this.DF.orthoLengthFunc(vals[i]),
-                w: x2 - x1
-            });
-            x1 = x2;  // go to next element
-        }
-
-        this.pvWaterfallLine = panel.add(pv.Rule)
-            .data(data)
-            [this.anchorOrtho(anchor) ](function(d) {return d.x;})
-            [anchor                   ](function(d) {return d.y;})
-            [this.anchorLength(anchor)](function(d) {return d.w;})
-            .strokeStyle("#c0c0c0");
-    },
-
-    /**
-     * @override
-     */
     _createCore: function(){
-        this.base();
-         
-        var ruleData = this.ruleData;
 
-        this.drawWaterfallRules(
-                    this.pvPanel,
-                    ruleData.categoryIndexes,
-                    ruleData.categoryTotals,
-                    2);
+        this.base();
+
+        var chart = this.chart,
+            options = chart.options,
+            isVertical = this.isOrientationVertical(),
+            anchor = isVertical ? "bottom" : "left",
+            ao = this.anchorOrtho(anchor),
+            ruleRootScene = this._buildRuleScene(),
+            bgPanelRootScene = this._buildBgPanelScene(),
+            orthoScale = chart.axes.ortho.scale,
+            orthoPanelMargin = 0.04 * (orthoScale.range()[1] - orthoScale.range()[0]),
+            orthoZero = orthoScale(0),
+            sceneOrthoScale = chart.axes.ortho.sceneScale(),
+            sceneBaseScale  = chart.axes.base.sceneScale(),
+            baseScale = chart.axes.base.scale,
+            barWidth2 = this.barWidth/2,
+            barWidth = this.barWidth,
+            barStepWidth = this.barStepWidth,
+            isFalling = chart._isFalling,
+            waterColor = chart._waterColor
+            ;
+
+        var panelColors = pv.Colors.category10();
+        this.pvWaterGroupStepPanel = this.pvPanel.add(pv.Panel)
+            .data(bgPanelRootScene.childNodes)
+            .zOrder(-1)
+            .fillStyle(function(scene){
+                return panelColors(scene.acts.category.level - 1).alpha(0.3);
+            })
+            [ao](function(scene){
+                var categAct = scene.acts.category;
+                return baseScale(categAct.leftValue) - barStepWidth / 2;
+            })
+            [this.anchorLength(anchor)](function(scene){
+                var categAct = scene.acts.category,
+                    length = Math.abs(baseScale(categAct.rightValue) -
+                             baseScale(categAct.leftValue))
+                    ;
+                
+                return length + barStepWidth;
+            })
+            [anchor](function(scene){
+                return orthoScale(scene.acts.value.bottomValue) - orthoPanelMargin/2;
+            })
+            [this.anchorOrthoLength(anchor)](function(scene){
+                return orthoScale(scene.acts.value.heightValue) + orthoPanelMargin;
+                //return chart.animate(orthoZero, orthoScale(scene.categ) - orthoZero);
+            })
+            ;
+
+//        this.pvWaterGroupStepPanel.anchor('top').add(pv.Label)
+//            .text(function(scene){ return scene.acts.category.label || "All"; });
+
+        this.pvBar
+            .sign()
+            .override('baseColor', function(type){
+                var color = this.base(type);
+                if(type === 'fill'){
+                    if(this.scene.acts.category.group._isFlattenGroup){
+                        return pv.color(color).alpha(0.75);
+                    }
+                }
+                
+                return color;
+            })
+            ;
+
+        if(options.showTooltips || options.hoverable){
+            // fire point and unpoint events
+            this.pvPanel.event("mousemove", pv.Behavior.point(40));
+        }
+        
+        this.pvWaterfallLine = new pvc.visual.Rule(this, this.pvPanel, {
+                extensionId: 'barWaterfallLine',
+                noTooltips:  false,
+                noHoverable: false
+            })
+            .lockValue('data', ruleRootScene.childNodes)
+            .optional('visible', function(){
+                return ( isFalling && !!this.scene.previousSibling) ||
+                       (!isFalling && !!this.scene.nextSibling);
+            })
+            .optional(anchor, function(){ return chart.animate(orthoZero, sceneOrthoScale(this.scene) - orthoZero); })
+            .optionalValue(this.anchorLength(anchor), barStepWidth + barWidth)
+            .optional(ao,
+                isFalling ?
+                    function(){ return sceneBaseScale(this.scene) - barStepWidth - barWidth2; } :
+                    function(){ return sceneBaseScale(this.scene) - barWidth2; })
+            .override('baseColor', function(){ return this.delegate(waterColor); })
+            .pvMark
+            .svg({ 'stroke-linecap': 'round' })
+            ;
+
+        if(this.showValues){
+            this.pvWaterfallLabel = this.pvWaterfallLine
+                .add(pv.Label)
+                [anchor](function(scene){ return chart.animate(orthoZero, sceneOrthoScale(scene) - orthoZero); })
+//                .localProperty('barDirection')
+//                .barDirection(function(scene){
+//                    if(isFalling && !this.index){
+//                        return 1;
+//                    }
+//
+//                    if(scene.acts.category.group._isFlattenGroup){
+//                        // Groups don't update the total
+//                        // Groups, always down, except the first falling...
+//                        return 0;
+//                    }
+//
+//                    return isFalling ? -1 : 1;
+//                })
+                .visible(function(scene){
+                     if(scene.acts.category.group._isFlattenGroup){
+                         return false;
+                     }
+
+                     return isFalling || !!scene.nextSibling;
+                 })
+                [this.anchorOrtho(anchor)](sceneBaseScale)
+                .textAlign(isVertical ? 'center' : 'left')
+                .textBaseline(isVertical ? 'bottom' : 'middle')
+                .textStyle(pv.Color.names.darkgray.darker(2))
+                .textMargin(5)
+                .text(function(scene){ return scene.acts.value.label; });
+        }
     },
 
     /**
@@ -256,5 +193,110 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         this.base();
 
         this.extend(this.pvWaterfallLine, "barWaterfallLine_");
+    },
+
+    _buildRuleScene: function(){
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: this._getVisibleData()});
+        
+        /**
+         * Create starting scene tree
+         */
+        this.chart._ruleInfos
+            .forEach(createCategScene, this);
+
+        return rootScene;
+
+        function createCategScene(ruleInfo){
+            var categData1 = ruleInfo.group,
+                categScene = new pvc.visual.Scene(rootScene, {group: categData1});
+
+            categScene.acts.category = {
+                value: categData1.value,
+                label: categData1.label,
+                group: categData1
+            };
+
+            var value = ruleInfo.offset;
+            categScene.acts.value = {
+                value: value,
+                label: this.chart._valueDim.format(value)
+            };
+        }
+    },
+
+    _buildBgPanelScene: function(){
+        var chart = this.chart,
+            ruleInfoByCategKey = def.query(this.chart._ruleInfos)
+                                  .object({
+                                      name:  function(ruleInfo){ return ruleInfo.group.absKey; },
+                                      value: function(ruleInfo){ return ruleInfo; }
+                                  }),
+            //valueDim = chart._valueDim,
+            isFalling = chart._isFalling,
+            rootCatData = chart._catRole.select(
+                            chart._partData(this.dataPartValue),
+                            {visible: true}),
+            rootScene  = new pvc.visual.Scene(null, {panel: this, group: rootCatData});
+
+        createCategSceneRecursive(rootCatData, 0);
+        
+        return rootScene;
+
+        function createCategSceneRecursive(catData, level){
+            var children = catData.children()
+                                  .where(function(child){ return child.key != ""; })
+                                  .array();
+            if(children.length){
+                // Group node
+                if(level){
+                    var categScene = new pvc.visual.Scene(rootScene, {group: catData});
+
+                    var categAct = categScene.acts.category = {
+                        value: catData.value,
+                        label: catData.label,
+                        group: catData,
+                        level: level
+                    };
+
+                    var valueAct = categScene.acts.value = {};
+                    var ruleInfo = ruleInfoByCategKey[catData.absKey];
+                    var offset = ruleInfo.offset,
+                        range = ruleInfo.range,
+                        height = -range.min + range.max
+                        ;
+
+                    if(isFalling){
+                        var lastChild = lastLeaf(catData);
+                        var lastRuleInfo = ruleInfoByCategKey[lastChild.absKey];
+                        categAct.leftValue  = ruleInfo.group.value;
+                        categAct.rightValue = lastRuleInfo.group.value;
+                        valueAct.bottomValue = offset - range.max;
+
+                    } else {
+                        var firstChild = firstLeaf(catData);
+                        var firstRuleInfo = ruleInfoByCategKey[firstChild.absKey];
+                        categAct.leftValue = firstRuleInfo.group.value;
+                        categAct.rightValue = ruleInfo.group.value;
+                        valueAct.bottomValue = offset - range.max;
+                    }
+
+                    valueAct.heightValue = height;
+                }
+
+                children.forEach(function(child){
+                    createCategSceneRecursive(child, level + 1);
+                });
+            }
+        }
+
+        function firstLeaf(data){
+            var firstChild = data._children && data._children[0];
+            return firstChild ? firstLeaf(firstChild) : data;
+        }
+
+        function lastLeaf(data){
+            var lastChild = data._children && data._children[data._children.length - 1];
+            return lastChild ? lastLeaf(lastChild) : data;
+        }
     }
 });

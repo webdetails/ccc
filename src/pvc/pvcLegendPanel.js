@@ -53,11 +53,10 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             x,
             y;
         
-        var legendRoleName = this.chart.legendSource,
-            leafCount      = rootScene.childNodes.length;
+        var leafCount = rootScene.childNodes.length;
         
         // Determine the size of the biggest cell
-        var maxLabelLen = rootScene.acts[legendRoleName].maxLabelTextLen;
+        var maxLabelLen = rootScene.acts.legendItem.maxLabelTextLen;
         
         var cellSize = this.markerSize + this.textMargin + maxLabelLen; // ignoring textAdjust
 
@@ -145,31 +144,32 @@ pvc.LegendPanel = pvc.BasePanel.extend({
      */
     _createCore: function(layoutInfo) {
       var myself = this,
-          legendRoleName = this.chart.legendSource,
           rootScene = layoutInfo.rootScene,
           sceneColorProp = function(scene){
-              return scene.acts[legendRoleName].color;
+              return scene.acts.legendItem.color;
           };
       
       this.pvLegendPanel = this.pvPanel.add(pv.Panel)
           .data(rootScene.childNodes)
-          .localProperty('hasVisibleDatums', Boolean)
-          .hasVisibleDatums(function(scene){
-              return scene.group.datums(null, {visible: true}).any();
-          })
+          .localProperty('isOn', Boolean)
+          .isOn(function(scene){ return scene.acts.legendItem.isOn(); })
           .def("hidden", "false")
           .left(layoutInfo.x)
           .bottom(layoutInfo.y)
           .height(this.markerSize)
-          .cursor("pointer")
+          .cursor(function(scene){
+              return scene.acts.legendItem.click ? "pointer" : null;
+          })
           .fillStyle(function(){
               return this.hidden() == "true"
                  ? "rgba(200,200,200,1)"
                  : "rgba(200,200,200,0.0001)";
           })
-          .localProperty('itemColor')
           .event("click", function(scene){
-              return myself._toggleVisible(scene);
+              var legendItem = scene.acts.legendItem;
+              if(legendItem.click){
+                  return legendItem.click();
+              }
           });
       
       var pvLegendProto;
@@ -185,11 +185,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           this.pvDot = this.pvRule.anchor("center").add(pv.Dot)
               .shapeSize(this.markerSize)
               .shape(function(scene){
-                  if(myself.shape){
-                      return myself.shape;
-                  }
-                  var dataPartValue = scene.acts.dataPart.value;
-                  return !dataPartValue || dataPartValue === '0' ? 'square' : 'bar';
+                  return myself.shape ?
+                            myself.shape :
+                            scene.acts.legendItem.shape;
               })
              .lineWidth(0)
              .fillStyle(sceneColorProp)
@@ -213,11 +211,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
               .left(this.markerSize / 2)
               .shapeSize(this.markerSize)
               .shape(function(scene){
-                  if(myself.shape){
-                      return myself.shape;
-                  }
-                  var dataPartValue = scene.acts.dataPart.value;
-                  return !dataPartValue || dataPartValue === '0' ? 'square' : 'bar';
+                  return myself.shape ?
+                            myself.shape :
+                            scene.acts.legendItem.shape;
               })
               .angle(Math.PI/2)
               .lineWidth(2)
@@ -231,12 +227,12 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       this.pvLabel = pvLegendProto.anchor("right").add(pv.Label)
           .text(function(scene){
               // TODO: trim to width - the above algorithm does not update the cellSize...
-              return scene.acts[legendRoleName].label;
+              return scene.acts.legendItem.label;
           })
           .font(this.font)
           .textMargin(this.textMargin)
-          .textDecoration(function(){ return this.parent.hasVisibleDatums() ? ""      : "line-through"; })
-          .textStyle     (function(){ return this.parent.hasVisibleDatums() ? "black" : "#ccc";         });
+          .textDecoration(function(){ return this.parent.isOn() ? ""      : "line-through"; })
+          .textStyle     (function(){ return this.parent.isOn() ? "black" : "#ccc";         });
     },
 
     applyExtensions: function(){
@@ -247,69 +243,49 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         this.extend(this.pvLabel,      "legendLabel_");
     },
     
-    _toggleVisible: function(scene){
-        pvc.data.Data.toggleVisible(scene.group.datums());
-        
-        // Forcing removal of tipsy legends
-        pvc.removeTipsyLegends();
-
-        // Re-render chart
-        this.chart.render(true, true, false);
-    
-        return this.pvLabel; // re-render label
-    },
-
     _buildScene: function(){
         var chart = this.chart,
-            partValues = chart._partValues() || [null],
             maxLabelTextLen = 0,
 
             /* A root scene that contains all datums */
             rootScene  = new pvc.visual.Scene(null, {panel: this, group: chart.data});
 
-        partValues.forEach(function(partValue){
-                createPartScenes.call(this, chart._legendData(partValue));
+        chart.legendGroupsList.forEach(function(legendGroup){
+                createLegendGroupScenes.call(this, legendGroup);
             },
             this);
 
-        rootScene.acts[chart.legendSource] = {
+        rootScene.acts.legendItem = {
             maxLabelTextLen: maxLabelTextLen
         };
         
         return rootScene;
 
-        function createPartScenes(partData){
-            var partValue = partData.value,
-                partColorScale = chart._legendColorScale(partValue);
+        function createLegendGroupScenes(legendGroup){
+            var dataPartAct = ('partValue' in legendGroup) ? {
+                                value: legendGroup.partValue,
+                                label: legendGroup.partLabel
+                              } :
+                              null;
 
-            var dataPartAct = {
-                value: partValue,
-                label: partData.label
-            };
+            legendGroup.items.forEach(function(legendItem){
+                /* Create leaf scene */
+                var scene = new pvc.visual.Scene(rootScene, {group: legendItem.group});
 
-            partData
-                .children()
-                .each(function(leafData){
-                    /* Create leaf scene */
-                    var scene = new pvc.visual.Scene(rootScene, {group: leafData});
-
+                if(dataPartAct){
                     scene.acts.dataPart = dataPartAct;
+                }
 
-                    var legendValue  = leafData.value,
-                        legendLabel  = leafData.label,
-                        labelTextLen = pvc.text.getTextLength(legendLabel, chart.font);
+                var labelTextLen = pvc.text.getTextLength(legendItem.label, chart.font);
+                if(labelTextLen > maxLabelTextLen) {
+                    maxLabelTextLen = labelTextLen;
+                }
 
-                    if(maxLabelTextLen < labelTextLen) {
-                        maxLabelTextLen = labelTextLen;
-                    }
-                    
-                    scene.acts[chart.legendSource] = {
-                        value: legendValue,
-                        label: leafData.label,
-                        color: partColorScale(legendValue),
-                        labelTextLength: labelTextLen
-                    };
-                }, this);
+                legendItem.labelTextLength = labelTextLen;
+
+                /* legendItem special role? */
+                scene.acts.legendItem = legendItem;
+            }, this);
         }
     }
 });

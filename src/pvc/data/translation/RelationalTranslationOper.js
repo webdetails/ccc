@@ -75,22 +75,11 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
      * @override
      */
     configureType: function(){
+        var me = this;
         
         // Call base method
         this.base();
-        
-        var me = this,
-            multiChartColIndexes = def.array(this.options.multiChartColumnIndexes),
-            multiChartRowIndexes = def.array(this.options.multiChartRowIndexes);
-        
-        if(multiChartColIndexes) {
-            this._addGroupReaders('multiChartColumn', multiChartColIndexes);
-        }
-        
-        if(multiChartRowIndexes) {
-            this._addGroupReaders('multiChartRow', multiChartRowIndexes);
-        }
-        
+
         function add(dimGet, dim) {
             me._userDimsReaders.push(dimGet);
             if(dim){
@@ -101,92 +90,51 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 me._userDimsReadersByDim[dim] = dimGet;
             }
         }
-        
-        // 1 - Determine the dimension of each column of the matrix
-        // 2 - Add dimensions readers
-        
-        var autoColDims = [];
-        
-        if(!this._userUsedDims.series) {
-            autoColDims.push('series');
-        }
-        
-        if(!this._userUsedDims.category) {
-            autoColDims.push('category');
-        }
-        
-        if(autoColDims.length > 1 && this.options.seriesInRows) {
-            autoColDims.reverse();
-        }
-        
-        var autoNeededCount = autoColDims.length;
-        
-        // Supposing at least one value...
-        if(!this._userUsedDims.value) {
-            autoNeededCount += 1;
-        }
-        
-        var index = 0;
-        
-        if(autoNeededCount > 0) {
-            var autoAvailableCount = this.metadata.length - this._userUsedIndexesCount;
-            
-            while(autoNeededCount > autoAvailableCount && autoColDims.length) {
-                // Not enough columns for everything (series, category and value)
-                // Assume that it's the first column that's missing (series or category)
-                //  and supply a dummy value for it
-                var dummyDim = autoColDims.shift();
-                
-                add(this._constGet(dummyDim, null), dummyDim);
-                
-                autoNeededCount--;
-            }
-            
-            /* Place autoColDims in first available indexes in _userItem */
-            var dimName;
-            while((dimName = autoColDims.shift())) {
-                // use first available slot for auto dims readers
-                index = this._nextAvailableItemIndex(index);
-                // Consume the index
-                this._userItem[index] = true;
-                
-                add(this._propGet(dimName, index), dimName);
-                
-                index++;
-            }
-        }
-        
-        // ----
 
-        if(!this._userUsedDims.value) {
-            // The null test is required because measuresIndexes can be a number, a string...
+        var L = this.metadata.length,
+            unmappedColCount = L - this._userUsedIndexesCount;
+         
+        if(unmappedColCount > 0){
+
+            /* Value dimension(s) (fixed multiple indexes) */
             var valuesColIndexes;
-            if(!this.options.isMultiValued || (valuesColIndexes = this.options.measuresIndexes) == null) {
-                // Has 'value' dimension only
+            if(!this._userUsedDims.value &&
+               this.options.isMultiValued &&
+               // The null test is required because measuresIndexes can be a number, a string...
+               (valuesColIndexes = this.options.measuresIndexes) != null) {
 
-                // Get the index for the first value column
-                var value1ColIndex = this._nextAvailableItemIndex(index);
+                this._addGroupReaders('value', def.array(valuesColIndexes));
 
-                this._userItem[value1ColIndex] = true;
+                unmappedColCount = L - this._userUsedIndexesCount;
+            }
 
-                add(this._propGet('value', value1ColIndex));
+            if(unmappedColCount > 0){
+                /* Build the dimensions that can be read automatically */
+                var autoColDims = !this.options.seriesInRows ?
+                                  ['value', 'category', 'series'] :
+                                  ['value', 'series',   'category'];
 
-            } else if(!this._userUsedDims.value2) { // TODO: Why this test?
-                // Has multiple 'value' dimensions
-                // Does not validate/consume indexes on purpose.
-                def.query(valuesColIndexes)
-                    .distinct()
-                    .each(function(valueColIndex, level){
-                        var dim = pvc.data.DimensionType.dimensionGroupLevelName('value', level);
-                        if(this._userUsedDims[dim]) {
-                            throw def.error.argumentInvalid('measuresIndexes', "The dimension named '{0}' is already bound.", [dim]);
-                        }
+                /* Leave only those not already mapped by the user */
+                autoColDims = autoColDims.filter(function(colDim){
+                                    return !this._userUsedDims[colDim];
+                                }, this)
+                                .slice(0, unmappedColCount);
 
-                        add(this._propGet(dim, +valueColIndex)); // + -> convert to number
-                    }, this);
+                var dimName,
+                    index = 0;
+                while(autoColDims.length && (dimName = autoColDims.pop())) {
+                    index = this._nextAvailableItemIndex(index);
+
+                    // mark the index as mapped
+                    this._userItem[index] = true;
+
+                    add(this._propGet(dimName, index), dimName);
+
+                    index++;
+                }
             }
         }
-
+        
         // ----
         // The null test is required because secondAxisSeriesIndexes can be a number, a string...
         var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;

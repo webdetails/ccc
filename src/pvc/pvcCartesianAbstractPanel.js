@@ -22,6 +22,10 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
         }
     },
 
+    _getVisibleData: function(dataPartValues){
+        return this.chart._getVisibleData(dataPartValues || this.dataPartValue);
+    },
+
     /**
      * @override
      */

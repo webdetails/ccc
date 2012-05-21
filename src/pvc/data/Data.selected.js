@@ -148,17 +148,53 @@ function data_syncDatumsState(){
     this._sumAbsCache = null;
     
     if(this._datums) {
-        this._datums.forEach(function(datum){
-            this._datumsById[datum.id] = datum;
-            
-            if(this._selectedDatums && datum.isSelected) {
-                this._selectedDatums.set(datum.id, datum);
-            }
-            
-            if(datum.isVisible) {
-                this._visibleDatums.set(datum.id, datum);
-            }
-        }, this);
+        this._datums.forEach(data_onReceiveDatum, this);
+    }
+}
+
+/**
+ * Called to add a datum to the data.
+ * The datum is only added if it is not present yet.
+ * 
+ * Used when synchonizing datum state, after a load,
+ * or by the group operation.
+ *
+ * @name pvc.data.Data#_addDatum
+ * @function
+ * @param {pvc.data.Datum} datum The datum to add.
+ * @type undefined
+ * @private
+ * @internal
+ */
+function data_addDatum(datum){
+    if(!def.hasOwn(this._datumsById, datum.id)){
+        this._datums.push(datum);
+        data_onReceiveDatum.call(this, datum);
+    }
+}
+
+/**
+ * Accounts for an datum that has been added to the datums list.
+ * Used when synchonizing datum state, after a load,
+ * and by the group operation.
+ *
+ * @name pvc.data.Data#_onReceiveDatum
+ * @function
+ * @param {pvc.data.Datum} datum The datum to add.
+ * @type undefined
+ * @private
+ * @internal
+ */
+function data_onReceiveDatum(datum){
+    var id = datum.id;
+    this._datumsById[id] = datum;
+
+    if(this._selectedDatums && datum.isSelected) {
+        this._selectedDatums.set(id, datum);
+    }
+
+    if(datum.isVisible) {
+        this._visibleDatums.set(id, datum);
     }
 }
 

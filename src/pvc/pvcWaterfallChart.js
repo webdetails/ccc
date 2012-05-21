@@ -20,12 +20,21 @@
  */
 pvc.WaterfallChart = pvc.BarAbstract.extend({
 
+    _isFalling: true,
+    _ruleInfos: null,
+    _waterColor: pv.Color.names.darkblue,//darkblue,darkslateblue,royalblue,seagreen, //pv.color("#808285").darker(),
+
     constructor: function(options){
 
         this.base(options);
-
+        
         // Apply options
         pvc.mergeDefaults(this.options, pvc.WaterfallChart.defaultOptions, options);
+
+        var parent = this.parent;
+        if(parent) {
+            this._isFalling = parent._isFalling;
+        }
     },
 
     /**
@@ -36,7 +45,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
 
         // Waterfall charts are always stacked
         options.stacked = true;
-
+        
         this.base(options);
     },
 
@@ -48,17 +57,120 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         
         this.base();
 
-        // TODO: waterfall up/down/total control role
+        this._isFalling = (this.options.waterDirection === 'down');
+        
+        this._catRole.setFlatteningMode(this._isFalling ? 'tree-pre' : 'tree-post');
+        this._catRole.setFlattenRootLabel(this.options.allCategoryLabel);
+    },
+
+    _initLegendGroups: function(){
+        
+        this.base();
+
+        var strokeStyle = this._getExtension("barWaterfallLine", "strokeStyle");
+        if(strokeStyle && !def.isFun(strokeStyle)){
+            this._waterColor = pv.color(strokeStyle);
+        }
+
+        this._addLegendGroup({
+            id:        "waterfallTotalLine",
+            type:      "discreteColorAndShape",
+            items:     [{
+                value: null,
+                label: this.options.accumulatedLineLabel,
+                color: this._waterColor,
+                shape: 'bar',
+                isOn:  def.constant(true),
+                click: null
+            }]
+        });
     },
     
     /**
-     * Creates a custom WaterfallDataEngine.
-     * [override]
+     * Reduce operation of category ranges, into a global range.
+     *
+     * Propagates the total value.
+     *
+     * Also creates the array of rule information {@link #_ruleInfos}
+     * used by the waterfall panel to draw the rules.
+     *
+     * Supports {@link #_getVisibleValueExtent}.
      */
-    createDataEngine: function(){
-        return new pvc.WaterfallDataEngine(this);
-    },
+    _reduceStackedCategoryValueExtent: function(result, catRange, catGroup){
+        /*
+         * That min + max are the variation of this category
+         * relies on the concrete base._getStackedCategoryValueExtent() implementation...
+         * Max always contains the sum of positives, if any, or 0
+         * Min always contains the sum of negatives, if any, or 0
+         * max >= 0
+         * min <= 0
+         */
+        /*
+         * When falling, the first category is surely *the* global total.
+         * When falling, the first category must set the initial offset
+         * and, unlike every other category group such that _isFlattenGroup===true,
+         * it does contribute to the offset, and positively.
+         * The offset property accumulates the values.
+         */
+        var offset;
+        if(!result){
+            if(catRange){
+                offset = catRange.max + catRange.min;
+                this._ruleInfos = [{
+                    offset: offset,
+                    group:  catGroup,
+                    range:  catRange
+                }];
 
+                // Copy the range object
+                return {
+                    min: catRange.min,
+                    max: catRange.max,
+                    offset: offset
+                };
+            }
+
+            return null;
+        }
+
+        offset = result.offset;
+        if(this._isFalling){
+            this._ruleInfos.push({
+                offset: offset,
+                group:  catGroup,
+                range:  catRange
+            });
+        }
+
+        if(!catGroup._isFlattenGroup){
+            var dir = this._isFalling ? -1 : 1;
+            
+            var min = offset + dir * catRange.min,
+                max = offset + dir * catRange.max;
+            
+            if(min < result.min){
+                result.min = min;
+            }
+
+            if(max > result.max){
+                result.max = max;
+            }
+
+            /* Update offset, for next category, if any. */
+            offset = result.offset = offset + dir * (catRange.min + catRange.max);
+        }
+
+        if(!this._isFalling){
+            this._ruleInfos.push({
+                offset: offset,
+                group:  catGroup,
+                range:  catRange
+            });
+        }
+        
+        return result;
+    },
+    
     /* @override */
     _createMainContentPanel: function(parentPanel){
         if(pvc.debug >= 3){
@@ -75,84 +187,12 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
             orientation:  options.orientation
         });
     }
-});
-
-/*
-
-pvc.WaterfallDataEngine = pvc.DataEngine.extend({
-    constructor: function(chart){
-        this.base(chart);
-    },
-
-    // Creates and prepares the custom WaterfallTranslator.
-    // [override]
-    createTranslator: function(){
-        this.base();
-
-        var sourceTranslator = this.translator;
-
-        this.translator = new pvc.WaterfallTranslator(
-                            sourceTranslator,
-                            this.chart.options.waterfall,
-                            this.chart.isOrientationVertical());
-
-        pvc.log("Creating WaterfallTranslator wrapper");
-
-        this.prepareTranslator();
-    }
-});
-
-pvc.WaterfallTranslator = pvc.DataTranslator.extend({
-
-    constructor: function(sourceTranslator, isWaterfall, isVertical){
-        this.base();
-
-        this.sourceTranslator = sourceTranslator;
-
-        this.isWaterfall = isWaterfall;
-        this.isVertical  = isVertical;
-    },
-
-    prepareImpl: function(){
-        // Call base version
-        this.base();
-
+}, {
+    defaultOptions: {
+        // down or up
+        waterDirection: 'down',
         
-//         (Total column is for waterfall)
-//         Values:
-//         [["X",    "Ser1", "Ser2", "Ser3"],
-//          ["Cat1", "U",      800,    1200],  // 1800 (depends on visible series)
-//          ["Cat2", "D",      100,     600],  //  700
-//          ["Cat3", "D",      400,     300],  //  700
-//          ["Cat4", "D",      200,     100],  //  300
-//          ["Cat5", "D",      100,     200]]  //  300
-//        
-
-        this.sourceTranslator.setData(this.metadata, this.resultset);
-        this.sourceTranslator.dataEngine = this.dataEngine;
-        this.sourceTranslator.prepareImpl();
-
-        // The MultiValueTranslator doesn't support this kind of treatment...
-        this.values = this.sourceTranslator.values;
-        this.metadata = this.sourceTranslator.metadata;
-        this.resultset = this.sourceTranslator.resultset;
-
-        if(this.isWaterfall && this.isVertical){
-            // Put the Total column in the last position
-            //  so that when drawing, reversed,
-            //  it remains at the bottom
-            // ... ["Cat1",  800, 1200, "U"],
-            // row[1] -> row[L-1]
-            this.values = this.values.map(function(row){
-                row = row.slice(0);
-                row.push(row[1]);
-                row.splice(1, 1);
-
-                return row;
-            });
-        }
+        allCategoryLabel: "All",
+        accumulatedLineLabel: "Accumulated"
     }
 });
-
-*/
-
