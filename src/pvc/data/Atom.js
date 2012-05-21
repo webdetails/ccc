@@ -56,7 +56,7 @@ def.type('pvc.data.Atom')
 .init(
 function(dimension, value, label, rawValue, key) {
     this.dimension = dimension;
-    this.id = value == null ? 0 : def.nextId(); // Ensure they sort first, when sorted by id
+    this.id = value == null ? 0 : def.nextId(); // Ensure null sorts first, when sorted by id
     this.value = value;
     this.label = label;
     this.rawValue = rawValue;
@@ -74,7 +74,7 @@ function(dimension, value, label, rawValue, key) {
      * A semantic key that is unique across atoms of every dimensions.
      */
     globalKey: function(){
-        return this.key ? (this.dimension.name + ":" + this.key) : '';
+        return this.dimension.name + ":" + this.key;
     }
 });
 

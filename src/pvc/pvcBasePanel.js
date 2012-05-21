@@ -822,7 +822,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                         
                         dimLabel = "&sum; " + dimLabel;
                     } else {
-                        valueLabel = dim.atoms(visibleKeyArgs).map(function(atom){ return atom.label; }).join(", ");
+                        valueLabel = dim.atoms(visibleKeyArgs).map(function(atom){ return atom.label || "- "; }).join(", ");
                     }
                     
                     addDim(dimLabel, valueLabel);

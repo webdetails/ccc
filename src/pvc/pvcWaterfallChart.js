@@ -45,7 +45,13 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
 
         // Waterfall charts are always stacked
         options.stacked = true;
-        
+        if(options.showWaterValues === undefined){
+            options.showWaterValues = options.showValues;
+        }
+
+        // Doesn't work (yet?)
+        options.useCompositeAxis = false;
+
         this.base(options);
     },
 
@@ -191,7 +197,8 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
     defaultOptions: {
         // down or up
         waterDirection: 'down',
-        
+        showWaterValues: undefined, // defaults to showValues
+        showWaterGroupAreas: true,
         allCategoryLabel: "All",
         accumulatedLineLabel: "Accumulated"
     }

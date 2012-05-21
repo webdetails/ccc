@@ -33,17 +33,17 @@ def.type('pvc.visual.Context')
 .add(/** @lends pvc.visual.Context */{
     
     /* V1 DIMENSION ACCESSORS */
-    getSeries: function(){
+    getV1Series: function(){
         var s;
         return this.scene.atoms && (s = this.scene.atoms[this.panel._getV1DimName('series')]) && s.rawValue;
     },
     
-    getCategory: function(){
+    getV1Category: function(){
         var c;
         return this.scene.atoms && (c = this.scene.atoms[this.panel._getV1DimName('category')]) && c.rawValue;
     },
                
-    getValue: function(){
+    getV1Value: function(){
         var v;
         return this.scene.atoms && (v = this.scene.atoms[this.panel._getV1DimName('value')]) && v.value;
     }

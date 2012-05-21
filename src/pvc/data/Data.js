@@ -69,13 +69,10 @@ def.type('pvc.data.Data', pvc.data.Complex)
     this._dimensions = {};
     this._visibleDatums = new def.Map();
     
-    this.parent = def.get(keyArgs, 'parent') || null;
-    
     var owner,
         atoms,
         atomsBase,
-        parent = this.parent;
-    
+        parent = this.parent = def.get(keyArgs, 'parent') || null;
     if(parent){
         // Not a root
         this.root    = parent.root;
@@ -156,6 +153,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
                         .join(data_labelSep);
     }
 
+    // The absolute key is relative to the root data (not the owner)
     this.absKey = this.key;
     if(parent){
         data_addChild.call(parent, this);

@@ -66,7 +66,6 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             anchor = isVertical ? "bottom" : "left",
             ao = this.anchorOrtho(anchor),
             ruleRootScene = this._buildRuleScene(),
-            bgPanelRootScene = this._buildBgPanelScene(),
             orthoScale = chart.axes.ortho.scale,
             orthoPanelMargin = 0.04 * (orthoScale.range()[1] - orthoScale.range()[0]),
             orthoZero = orthoScale(0),
@@ -80,37 +79,41 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             waterColor = chart._waterColor
             ;
 
-        var panelColors = pv.Colors.category10();
-        this.pvWaterGroupStepPanel = this.pvPanel.add(pv.Panel)
-            .data(bgPanelRootScene.childNodes)
-            .zOrder(-1)
-            .fillStyle(function(scene){
-                return panelColors(scene.acts.category.level - 1).alpha(0.3);
-            })
-            [ao](function(scene){
-                var categAct = scene.acts.category;
-                return baseScale(categAct.leftValue) - barStepWidth / 2;
-            })
-            [this.anchorLength(anchor)](function(scene){
-                var categAct = scene.acts.category,
-                    length = Math.abs(baseScale(categAct.rightValue) -
-                             baseScale(categAct.leftValue))
-                    ;
-                
-                return length + barStepWidth;
-            })
-            [anchor](function(scene){
-                return orthoScale(scene.acts.value.bottomValue) - orthoPanelMargin/2;
-            })
-            [this.anchorOrthoLength(anchor)](function(scene){
-                return orthoScale(scene.acts.value.heightValue) + orthoPanelMargin;
-                //return chart.animate(orthoZero, orthoScale(scene.categ) - orthoZero);
-            })
-            ;
+        if(chart.options.showWaterGroupAreas){
+            var panelColors = pv.Colors.category10();
+            var waterGroupRootScene = this._buildWaterGroupScene();
+            
+            this.pvWaterfallGroupPanel = this.pvPanel.add(pv.Panel)
+                .data(waterGroupRootScene.childNodes)
+                .zOrder(-1)
+                .fillStyle(function(scene){
+                    return panelColors(0)/* panelColors(scene.acts.category.level - 1)*/.alpha(0.15);
+                })
+                [ao](function(scene){
+                    var categAct = scene.acts.category;
+                    return baseScale(categAct.leftValue) - barStepWidth / 2;
+                })
+                [this.anchorLength(anchor)](function(scene){
+                    var categAct = scene.acts.category,
+                        length = Math.abs(baseScale(categAct.rightValue) -
+                                baseScale(categAct.leftValue))
+                        ;
 
-//        this.pvWaterGroupStepPanel.anchor('top').add(pv.Label)
-//            .text(function(scene){ return scene.acts.category.label || "All"; });
+                    return length + barStepWidth;
+                })
+                [anchor](function(scene){
+                    return orthoScale(scene.acts.value.bottomValue) - orthoPanelMargin/2;
+                })
+                [this.anchorOrthoLength(anchor)](function(scene){
+                    return orthoScale(scene.acts.value.heightValue) + orthoPanelMargin;
+                    //return chart.animate(orthoZero, orthoScale(scene.categ) - orthoZero);
+                })
+                ;
 
+    //        this.pvWaterfallGroupPanel.anchor('top').add(pv.Label)
+    //            .text(function(scene){ return scene.acts.category.label || "All"; });
+        }
+        
         this.pvBar
             .sign()
             .override('baseColor', function(type){
@@ -151,7 +154,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             .svg({ 'stroke-linecap': 'round' })
             ;
 
-        if(this.showValues){
+        if(chart.options.showWaterValues){
             this.pvWaterfallLabel = this.pvWaterfallLine
                 .add(pv.Label)
                 [anchor](function(scene){ return chart.animate(orthoZero, sceneOrthoScale(scene) - orthoZero); })
@@ -192,7 +195,9 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
 
         this.base();
 
-        this.extend(this.pvWaterfallLine, "barWaterfallLine_");
+        this.extend(this.pvWaterfallLine,       "barWaterfallLine_");
+        this.extend(this.pvWaterfallLabel,      "barWaterfallLabel_");
+        this.extend(this.pvWaterfallGroupPanel, "barWaterfallGroup_")
     },
 
     _buildRuleScene: function(){
@@ -201,9 +206,11 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         /**
          * Create starting scene tree
          */
-        this.chart._ruleInfos
-            .forEach(createCategScene, this);
-
+        if(this.chart._ruleInfos){
+            this.chart._ruleInfos
+                .forEach(createCategScene, this);
+        }
+        
         return rootScene;
 
         function createCategScene(ruleInfo){
@@ -224,9 +231,10 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         }
     },
 
-    _buildBgPanelScene: function(){
+    _buildWaterGroupScene: function(){
         var chart = this.chart,
-            ruleInfoByCategKey = def.query(this.chart._ruleInfos)
+            ruleInfos = this.chart._ruleInfos,
+            ruleInfoByCategKey = ruleInfos && def.query(ruleInfos)
                                   .object({
                                       name:  function(ruleInfo){ return ruleInfo.group.absKey; },
                                       value: function(ruleInfo){ return ruleInfo; }

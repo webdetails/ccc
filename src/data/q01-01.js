@@ -892,7 +892,7 @@ var testWaterfall1 = {
   },{
     "colIndex":2,
     "colType":"String",
-    "colName":"Year"
+    "colName":"Market"
   },{
     "colIndex":3,
     "colType":"Numeric",
@@ -904,20 +904,20 @@ var testWaterfall1 = {
   }
   ],
   "resultset": [
-  ["USA",    'Kansas',     null, 100,  600],
-  ["USA",    'New York',   2010, 500,  600],
-  ["USA",    'New York',   2011, 200,  100],
-  ["USA",    'New York',   2012, 100,  200],
-  ["USA",    'Idaho',      2010, 200,  100],
-  ["USA",    'Idaho',      2011, 500,  600],
-  ["USA",    'Idaho',      2012, 400,  100],
-  ["USA",    'Idaho',      2013, 200,  300],
-  ["Europe", null,         null, 400,  300],
-  ["RoW",    "Japan",      null, 100,  75],
-  ["RoW",    "China",      null, 100,  25],
-  ["RoW",    "S. America", null, 50,  80],
-  ["RoW",    "MEA",        null, 25,  80],
-  ["RoW",    "Mexico",     null, 25,  40]
+  ["USA",    'Kansas',     null,         100,  600],
+  ["USA",    'New York',   'Fair',       500,  600],
+  ["USA",    'New York',   'Restaurant', 200,  100],
+  ["USA",    'New York',   'House',      100,  200],
+  ["USA",    'Idaho',      'Farm',       200,  100],
+  ["USA",    'Idaho',      'Fair',       500,  600],
+  ["USA",    'Idaho',      'House',      400,  100],
+  ["USA",    'Idaho',      'Grocery',    200,  300],
+  ["Europe", null,         null,         400,  300],
+  ["RoW",    "Japan",      null,         100,   75],
+  ["RoW",    "China",      null,         100,   25],
+  ["RoW",    "S. America", null,          50,   80],
+  ["RoW",    "MEA",        null,          25,   80],
+  ["RoW",    "Mexico",     null,          25,   40]
   ]
 };
 

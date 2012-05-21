@@ -126,7 +126,11 @@ add(/** @lends pvc.data.GroupingOper */{
         var root = {
             isRoot:     true,
             treeHeight: def.query(this._groupSpecs)
-                           .select(function(spec){return spec.levels.length;})
+                           .select(function(spec){
+                               var levelCount = spec.levels.length;
+                               if(!levelCount) { return 0; }
+                               return !!spec.flatteningMode ? 1 : levelCount;
+                           })
                            .reduce(def.add, 0),
             datums:   []
             // children
@@ -158,10 +162,12 @@ add(/** @lends pvc.data.GroupingOper */{
         
         if(doFlatten){
             specParent.children = [];
-
+            specParent.childrenByKey = {}; // Don't create children with equal keys
+            
             // Must create a root for the grouping operation
             // Cannot be specParent
             specGroupParent = {
+                key:    '',
                 atoms:  [],
                 datums: [],
                 label:  groupSpec.flattenRootLabel
@@ -169,6 +175,7 @@ add(/** @lends pvc.data.GroupingOper */{
 
             if(!isPostOrder){
                 specParent.children.push(specGroupParent);
+                specParent.childrenByKey[''] = specGroupParent;
             }
         } else {
             specGroupParent = specParent;
@@ -212,8 +219,6 @@ add(/** @lends pvc.data.GroupingOper */{
                 // This is to support single-dimension grouping specifications used
                 // internally by the "where" operation. See #data_whereDatumFilter
                 groupParent.childrenKeyDimName = levelSpec.dimensions[0].name;
-            } else {
-                groupParent.isFlattenGroup = true;
             }
             
             // Group, and possibly filter, received datums on level's key
@@ -243,25 +248,42 @@ add(/** @lends pvc.data.GroupingOper */{
             var isLastSpecLevel = specDepth === D - 1;
                 
             groupInfos.forEach(function(groupInfo){
-                var child = {
-                    atoms:  groupInfo.atoms, // array of atoms
-                    /*
-                     * On all but the last level,
-                     * datums are only added to *child* at the end of the
-                     * following recursive call,
-                     * to the "union" of the datums of its own children.
-                     */
-                    datums: isLastSpec && isLastSpecLevel ? groupInfo.datums : []
-                };
+                var child = Object.create(groupInfo);
+                /*
+                 * On all but the last level,
+                 * datums are only added to *child* at the end of the
+                 * following recursive call,
+                 * to the "union" of the datums of its own children.
+                 */
+                child.datums = isLastSpec && isLastSpecLevel ? groupInfo.datums : [];
 
+                var key;
                 if(!doFlatten){
                     groupParent.children.push(child);
                 } else {
                     // Atoms must contain those of the groupParent
                     child.atoms = groupParent.atoms.concat(child.atoms);
-                    
+
+                    /* A key that does not include null atoms */
+                    key = def.query(child.atoms)
+                             .where (function(atom){ return atom.value != null; })
+                             .select(function(atom){ return atom.globalKey();   })
+                             .array()
+                             .join(',')
+                             ;
+
+                    if(def.hasOwn(specParent.childrenByKey, key)){
+                        // Duplicate key
+                        // We need datums added to parent anyway
+                        groupChildren.push({datums: groupInfo.datums});
+                        return;
+                    }
+
                     if(!isPostOrder){
                         specParent.children.push(child);
+                        specParent.childrenByKey[key] = child;
+
+                        groupParent.isFlattenGroup = true;
                     }
                 }
                 
@@ -277,6 +299,9 @@ add(/** @lends pvc.data.GroupingOper */{
 
                 if(doFlatten && isPostOrder){
                     specParent.children.push(child);
+                    specParent.childrenByKey[key] = child;
+
+                    groupParent.isFlattenGroup = true;
                 }
             }, this);
 

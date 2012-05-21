@@ -230,7 +230,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         /* DOMAIN */
 
         // With composite axis, only 'singleLevel' flattening works well
-        var flatteningMode = axis.options('Composite') ? 'singleLevel' : null,
+        var flatteningMode = null, //axis.options('Composite') ? 'singleLevel' : null,
             baseData = this._getVisibleData(dataPartValues),
             data = axis.role.flatten(baseData, {
                                 visible: true,

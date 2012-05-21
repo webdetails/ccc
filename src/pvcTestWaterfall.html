@@ -138,6 +138,9 @@ in a waterfall chart you just compare the size of bars as all bars are parallel 
   <li>showValues - Show or hide bar value. Default: false</li>
   <li>waterDirection - Should the water fall? 'down', or not: 'up'. Default: 'down'</li>
   <li>allCategoryLabel - The label of the root group. Default: 'All'</li>
+  <li>accumulatedLineLabel - The legend label of the accumulated line. Default: 'Accumulated'</li>
+  <li>showWaterValues - Show or hide waterfall line values. Default: showValues</li>
+  <li>showWaterGroupAreas - Show or hide the areas that enclose waterfall groups. Default: true</li>
   <li>panelSizeRatio - Ratio of the band occupied by the pane.
 Default: 0.5 (50%)</li>
   <li>maxBarSize - Maximum size of a bar in pixels. Default: 2000</li>
@@ -152,15 +155,15 @@ Default: 0.5 (50%)</li>
   <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
   <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
   <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
-  <li>{x,y,second}AxisTitle - The axis title text. Default: null</li>
-  <li>{x,y,second}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
-  <li>{x,y,second}AxisTitleSize - The size of the axis title.
+  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y}AxisTitleSize - The size of the axis title.
       The size is the width when the axis is vertical and the height when it is horizontal.
       The title consumes space from the specified {x|y|second}AxisSize.
       Default: The required by the font height plus a proportional margin.</li>
-  <li>{x,y,second}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
-  <li>{x,y,second}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
-  <li>{x,y,second}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
+  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
 </ul>
 
 <h2>Extension Points</h2>
@@ -190,6 +193,8 @@ for Waterfall extension points:
   <li>bar_</li>
   <li>chart_</li>
   <li>barWaterfallLine_</li>
+  <li>barWaterfallLabel_</li>
+  <li>barWaterfallGroup_</li>
 </ul>
 Sample extension points:<br>
 <ul>
@@ -207,7 +212,7 @@ In each sales region as well as in the totals column you can also observe a spli
 var wf1 = new pvc.WaterfallChart({
     canvas: "pvcWf1",
     width:  800,
-    height: 400,
+    height: 500,
 
     title: "Sales by territory, region, year and product",
     titlePosition: "top",
@@ -217,9 +222,12 @@ var wf1 = new pvc.WaterfallChart({
     legendPosition: "right",
 
     orientation: 'vertical',
+
     waterDirection: 'down',  // 'up',
-    //allCategoryLabel: "All",
-    //accumulatedLineLabel: "Accumulated",
+    showWaterGroupAreas: true,
+    showWaterValues: true,
+    allCategoryLabel: "All",
+    accumulatedLineLabel: "Accumulated",
 
     animate: false,
     clickable:  true,
@@ -238,20 +246,23 @@ var wf1 = new pvc.WaterfallChart({
 
     orthoAxisSize: 40,
     orthoAxisDomainRoundMode: 'tick',
-    baseAxisSize:  100,
+    orthoAxisDesiredTickCount: 10,
+    baseAxisSize:  120,
 
     extensionPoints: {
+        //barWaterfallLine_strokeStyle: 'red',
         xAxisLabel_textAngle:    -Math.PI/3,
         xAxisLabel_textAlign:    "right",
         xAxisLabel_textBaseline: "top",
-        titleLabel_font: "bold 16px sans-serif"
+        titleLabel_font: "bold 16px sans-serif",
+        barLabel_font: "8px sans-serif"
     },
 
     /* Visual Role mapping */
     visualRoles: {
         //multiChartColumn: "territory",
         series:           "product",
-        category:         "territory, region, year",
+        category:         "territory, region, market",
         value:            "sales"
     },
 
@@ -259,7 +270,7 @@ var wf1 = new pvc.WaterfallChart({
     dimensions: {
         territory: {label: "Territory"},
         region:    {label: "Region"},
-        year:      {label: "Year"},
+        market:    {label: "Market"},
         product:   {label: "Product"},
         sales:     {label: "Sales", valueType: Number}
     },
@@ -268,7 +279,7 @@ var wf1 = new pvc.WaterfallChart({
     readers: [
         {names: 'territory', indexes: 0},
         {names: 'region',    indexes: 1},
-        {names: 'year',      indexes: 2},
+        {names: 'market',    indexes: 2},
         {names: 'product',   indexes: 3},
         {names: 'sales',     indexes: 4}
     ],
