@@ -115,8 +115,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             /* Make X and Y axis offsets take the same abs width */
             /* TODO: should be able to test if any offset, X, or Y is the default value... */
             var defaultAxisOffset = pvc.MetricXYAbstract.defaultOptions.axisOffset,
-                xAxisOffset = chart.axes.x.options('Offset'),
-                yAxisOffset = chart.axes.y.options('Offset'),
+                xAxisOffset = chart.axes.x.option('Offset'),
+                yAxisOffset = chart.axes.y.option('Offset'),
                 adjustX = (xAxisOffset === defaultAxisOffset),
                 adjustY = (yAxisOffset === defaultAxisOffset);
 

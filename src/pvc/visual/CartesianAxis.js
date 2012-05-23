@@ -118,7 +118,7 @@ def.type('pvc.visual.CartesianAxis')
      * @param {string} name The option name.
      * @type string
      */
-    options: function(name){
+    option: function(name){
         /* Custom option handler */
         var handler = axisOptionHandlers[name];
         

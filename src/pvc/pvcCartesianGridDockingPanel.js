@@ -23,21 +23,21 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
             contentPanel = chart._mainContentPanel;
         if(contentPanel) {
             var axes = chart.axes;
-            if(axes.x.options('EndLine')) {
+            if(axes.x.option('EndLine')) {
                 // Frame lines parallel to x axis
                 this.xFrameRule = this._createFrameRule(axes.x);
             }
 
-            if(axes.y.options('EndLine')) {
+            if(axes.y.option('EndLine')) {
                 // Frame lines parallel to y axis
                 this.yFrameRule = this._createFrameRule(axes.y);
             }
 
-            if(axes.x.options('ZeroLine')) {
+            if(axes.x.option('ZeroLine')) {
                 this.xFrameRule = this._createZeroLine(axes.x);
             }
 
-            if(axes.y.options('ZeroLine')) {
+            if(axes.y.option('ZeroLine')) {
                 this.yFrameRule = this._createZeroLine(axes.y);
             }
         }
@@ -53,7 +53,7 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                 ao = this.anchorOrtho(a),
                 orthoAxis = this._getOrthoAxis(axis.type),
                 orthoScale = orthoAxis.scale,
-                orthoFullGridCrossesMargin = orthoAxis.options('FullGridCrossesMargin'),
+                orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
                 contentPanel = this.chart._mainContentPanel,
                 zeroPosition = contentPanel.position[ao] + scale(0),
                 position = contentPanel.position[a] + 
@@ -91,12 +91,12 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
     },
 
     _createFrameRule: function(axis){
-        var a = axis.options('Position'),
+        var a = axis.option('Position'),
             scale = axis.scale,
             orthoAxis = this._getOrthoAxis(axis.type),
             orthoScale = orthoAxis.scale,
-            fullGridCrossesMargin = axis.options('FullGridCrossesMargin'),
-            orthoFullGridCrossesMargin = orthoAxis.options('FullGridCrossesMargin')
+            fullGridCrossesMargin = axis.option('FullGridCrossesMargin'),
+            orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin')
             ;
         
         var contentPanel = this.chart._mainContentPanel;

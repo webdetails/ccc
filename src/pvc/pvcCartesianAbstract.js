@@ -114,22 +114,22 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     _createAxisPanel: function(axis){
         if(axis.isVisible) {
             var panel = pvc.AxisPanel.create(this, this._gridDockPanel, axis, {
-                useCompositeAxis:  axis.options('Composite'),
-                font:              axis.options('LabelFont'),
-                titleFont:         axis.options('TitleFont'),
-                anchor:            axis.options('Position'),
-                axisSize:          axis.options('Size'),
-                fullGrid:          axis.options('FullGrid'),
-                fullGridCrossesMargin: axis.options('FullGridCrossesMargin'),
-                ruleCrossesMargin: axis.options('RuleCrossesMargin'),
-                zeroLine:          axis.options('ZeroLine'),
-                domainRoundMode:   axis.options('DomainRoundMode'),
-                desiredTickCount:  axis.options('DesiredTickCount'),
-                minorTicks:        axis.options('MinorTicks'),
-                title:             axis.options('Title'),
-                titleSize:         axis.options('TitleSize'),
-                clickAction:       axis.options('ClickAction'),
-                doubleClickAction: axis.options('DoubleClickAction')
+                useCompositeAxis:  axis.option('Composite'),
+                font:              axis.option('LabelFont'),
+                titleFont:         axis.option('TitleFont'),
+                anchor:            axis.option('Position'),
+                axisSize:          axis.option('Size'),
+                fullGrid:          axis.option('FullGrid'),
+                fullGridCrossesMargin: axis.option('FullGridCrossesMargin'),
+                ruleCrossesMargin: axis.option('RuleCrossesMargin'),
+                zeroLine:          axis.option('ZeroLine'),
+                domainRoundMode:   axis.option('DomainRoundMode'),
+                desiredTickCount:  axis.option('DesiredTickCount'),
+                minorTicks:        axis.option('MinorTicks'),
+                title:             axis.option('Title'),
+                titleSize:         axis.option('TitleSize'),
+                clickAction:       axis.option('ClickAction'),
+                doubleClickAction: axis.option('DoubleClickAction')
             });
             
             this.axesPanels[axis.id] = panel;
@@ -213,7 +213,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         /* DOMAIN */
 
         // With composite axis, only 'singleLevel' flattening works well
-        var flatteningMode = null, //axis.options('Composite') ? 'singleLevel' : null,
+        var flatteningMode = null, //axis.option('Composite') ? 'singleLevel' : null,
             baseData = this._getVisibleData(dataPartValues),
             data = axis.role.flatten(baseData, {
                                 visible: true,
@@ -272,7 +272,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
 
         // Domain rounding
         // TODO: pvc.scaleTicks(scale) does not like Dates...
-        //pvc.roundScaleDomain(scale, axis.options('DomainRoundMode'), axis.options('DesiredTickCount'));
+        //pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
         
         /* RANGE */
         this._setAxisScaleRange(scale, axis);
@@ -314,7 +314,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
          *
          * Currently this option ignores locks. Is this all right?
          */
-        var originIsZero = axis.options('OriginIsZero');
+        var originIsZero = axis.option('OriginIsZero');
         if(originIsZero && (dMin * dMax > 0)){
             if(dMin > 0){
                 dMin = 0;
@@ -349,7 +349,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // because otherwise the offset gets amplified by the rounding
         // Then, the scale range is updated but the ticks cache is not.
         // The result is we end up showing two zones, on each end, with no ticks.
-        pvc.roundScaleDomain(scale, axis.options('DomainRoundMode'), axis.options('DesiredTickCount'));
+        pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
         
         // ----------------------------
         
@@ -370,7 +370,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         scale.max  = size; 
         scale.size = size; // original size
         
-        var axisOffset = axis.options('Offset');
+        var axisOffset = axis.option('Offset');
         if(axisOffset > 0){
             var rOffset = size * axisOffset;
             scale.min += rOffset;
@@ -472,14 +472,14 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             };
         
         if(min == null) {
-            min = axis.options('FixedMin');
+            min = axis.option('FixedMin');
             if(min != null){
                 extent.minLocked = true;
             }
         }
         
         if(max == null) {
-            max = axis.options('FixedMax');
+            max = axis.option('FixedMax');
             if(max != null){
                 extent.maxLocked = true;
             }

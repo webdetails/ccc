@@ -182,11 +182,11 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
 
     _addOverflowMarkers: function(){
         var orthoAxis = this.chart.axes.ortho;
-        if(orthoAxis.options('FixedMax') != null){
+        if(orthoAxis.option('FixedMax') != null){
             this.pvOverflowMarker = this._addOverflowMarker(false, orthoAxis.scale);
         }
 
-        if(orthoAxis.options('FixedMin') != null){
+        if(orthoAxis.option('FixedMin') != null){
             this.pvUnderflowMarker = this._addOverflowMarker(true, orthoAxis.scale);
         }
     },

@@ -336,7 +336,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         if (!this.parent) {
             // If we don't have data, we just need to set a "no data" message
             // and go on with life.
-            // Child charts are created to consume existing data
+            // Child charts are created to consume *existing* data
             if(!this.allowNoData && this.resultset.length === 0) {
                 throw new NoDataException();
             }
@@ -425,12 +425,9 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
 
     _onLoadData: function(){
-        var data = this.data;
-        var complexType = data ?
-                            data.type :
-                            new pvc.data.ComplexType();
-
-        var translation = this._createTranslation(complexType);
+        var data = this.data,
+            complexType = data ? data.type : new pvc.data.ComplexType(),
+            translation = this._createTranslation(complexType);
 
         translation.configureType();
 
@@ -439,7 +436,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
 
         // ----------
-        // Roles are bound before loading data,
+        // Roles are bound before actually loading data,
         // in order to be able to filter datums
         // whose "every dimension in a measure role is null".
         this._bindVisualRoles(complexType);
@@ -454,27 +451,31 @@ pvc.BaseChart = pvc.Abstract.extend({
             data =
                 this.dataEngine =
                 this.data = new pvc.data.Data({type: complexType});
-        } else {
-            // TODO: assert complexType has not changed...
-        }
-
+        } // else TODO: assert complexType has not changed...
+        
         // ----------
 
-        var loadKeyArgs,
-            measureDimNames = this.measureDimensionsNames();
-        if(measureDimNames.length) {
-            // Must have at least one measure role dimension not-null
-            loadKeyArgs = {
-                where: function(datum){
-                    var atoms = datum.atoms;
-                    return def.query(measureDimNames).any(function(dimName){
-                        return atoms[dimName].value != null;
-                    });
-                }
-            };
-        }
+        var loadFilter = this._getLoadFilter(),
+            loadKeyArgs = loadFilter ? {where: loadFilter} : null;
 
         data.load(translation.execute(data), loadKeyArgs);
+    },
+
+    _getLoadFilter: function(){
+        var measureDimNames = this.measureDimensionsNames(),
+            M = measureDimNames.length;
+        if(M) {
+            // Must have at least one measure role dimension not-null
+            return function(datum){
+                var atoms = datum.atoms;
+                for(var i = 0 ; i < M ; i++){
+                    if(atoms[measureDimNames[i]].value != null){
+                        return true;
+                    }
+                }
+                return false;
+            };
+        }
     },
 
     _createTranslation: function(complexType){
@@ -573,7 +574,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         def.eachOwn(roles, function(keyArgs, name){
             var visualRole = new pvc.visual.Role(name, keyArgs);
             this._visualRoles[name] = visualRole;
-            if(visualRole.isMeasure) {
+            if(visualRole.isMeasure){
                 this._measureVisualRoles.push(visualRole);
             }
         }, this);
@@ -671,7 +672,6 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
 
     _logVisualRoles: function(){
-
         var out = ["\n------------------------------------------"];
         out.push("Visual Roles Information");
 
@@ -742,16 +742,16 @@ pvc.BaseChart = pvc.Abstract.extend({
         dataPartValues = def.query(dataPartValues).distinct().array();
         dataPartValues.sort();
 
-        var dataPartDim = this._dataPartRole.firstDimensionName();
+        var dataPartDimName = this._dataPartRole.firstDimensionName();
 
         if(dataPartValues.length === 1){
             // Faster this way...
             // TODO: should, at least, call some static method of Atom to build a global key
-            return this.__partData._childrenByKey[dataPartDim + ':' + dataPartValues[0]];
+            return this.__partData._childrenByKey[dataPartDimName + ':' + dataPartValues[0]];
         }
 
         return this.__partData.where([
-                    def.set({}, dataPartDim, dataPartValues)
+                    def.set({}, dataPartDimName, dataPartValues)
                 ]);
     },
 

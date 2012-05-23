@@ -23,7 +23,13 @@ pvc.BasePanel = pvc.Abstract.extend({
     topRoot:   null,
     
     _layoutInfo: null,
-    
+
+    /**
+     * The data that the panel uses to obtain "data".
+     * @type pvc.data.Data
+     */
+    data: null,
+
     dataPartValue: null,
 
     /**
@@ -70,7 +76,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         $.extend(this, options);
         
         this.chart = chart;
-        
+
         this.position = {
             /*
             top:    0,
@@ -93,13 +99,16 @@ pvc.BasePanel = pvc.Abstract.extend({
             this.topRoot   = this;
             this.isRoot    = true;
             this.isTopRoot = true;
+            this.data      = this.chart.data;
+            
         } else {
             this.parent    = parent;
             this.root      = parent.root;
             this.topRoot   = parent.topRoot;
             this.isTopRoot = false;
             this.isRoot    = (parent.chart !== chart);
-            
+            this.data      = parent.data; // TODO
+
             if(this.isRoot) {
                 this.position.left = chart.left; 
                 this.position.top  = chart.top;

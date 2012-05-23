@@ -37,7 +37,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     constructor: function(chart, parent, axis, options) {
         
         options = def.create(options, {
-            anchor: axis.options('Position')
+            anchor: axis.option('Position')
         });
         
         this.base(chart, parent, options);
@@ -212,8 +212,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             itemCount         = data._children.length,
             includeModulo;
         
-        if(this.axis.options('OverlappedLabelsHide') && itemCount > 0 && this._rSize > 0) {
-            var overlapFactor = def.within(this.axis.options('OverlappedLabelsMaxPct'), 0, 0.9);
+        if(this.axis.option('OverlappedLabelsHide') && itemCount > 0 && this._rSize > 0) {
+            var overlapFactor = def.within(this.axis.option('OverlappedLabelsMaxPct'), 0, 0.9);
             var textHeight    = pvc.text.getTextHeight("m", this.font) * (1 - overlapFactor);
             includeModulo = Math.max(1, Math.ceil((itemCount * textHeight) / this._rSize));
 
@@ -290,7 +290,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var fullGridRootScene = this._buildDiscreteFullGridScene(data),
                 orthoAxis  = this._getOrthoAxis(),
                 orthoScale = orthoAxis.scale,
-                orthoFullGridCrossesMargin = orthoAxis.options('FullGridCrossesMargin'),
+                orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
                 ruleLength = orthoFullGridCrossesMargin ?
                                     orthoScale.size :
                                     (orthoScale.max - orthoScale.min),
@@ -391,7 +391,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         // Now do the full grid lines
         if(this.fullGrid) {
-            var orthoFullGridCrossesMargin = orthoAxis.options('FullGridCrossesMargin'),
+            var orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
                 ruleLength = orthoFullGridCrossesMargin ? orthoScale.size : orthoScale.offsetSize;
 
             // Grid rules are visible (only) on MAJOR ticks.
