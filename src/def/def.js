@@ -1067,7 +1067,7 @@ this['def'] = (function(){
          * and, optionally, initializes it with the specified default value.
          */
         create: function(len, dv){
-            var a = new Array(len);
+            var a = len >= 0 ? new Array(len) : [];
             if(dv !== undefined){
                 for(var i = 0 ; i < len ; i++){
                     a[i] = dv;

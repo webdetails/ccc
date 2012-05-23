@@ -444,6 +444,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         // whose "every dimension in a measure role is null".
         this._bindVisualRoles(complexType);
 
+        if(pvc.debug >= 3){
+            this._logVisualRoles();
+        }
+
         // ----------
 
         if(!dataEngine) {
@@ -665,7 +669,22 @@ pvc.BaseChart = pvc.Abstract.extend({
             }
         }, this);
     },
-    
+
+    _logVisualRoles: function(){
+
+        var out = ["\n------------------------------------------"];
+        out.push("Visual Roles Information");
+
+        def.eachOwn(this._visualRoles, function(role, name){
+            out.push("  " + name + def.array.create(18 - name.length, " ").join("") +
+                    (role.grouping ? (" <-- " + role.grouping) : ''));
+        });
+        
+        out.push("------------------------------------------");
+
+        pvc.log(out.join("\n"));
+    },
+
     /**
      * Obtains a roles array or a specific role, given its name.
      * 
@@ -1039,13 +1058,9 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     extend: function(mark, prefix, keyArgs) {
         // if mark is null or undefined, skip
-        var doLog = pvc.debug >= 3;
-        if(doLog){
-            pvc.log("Applying Extension Points for: '" + prefix +
-                    "'" + (mark ? "" : "(target mark does not exist)"));
-        }
-
         if (mark) {
+            var logOut = pvc.debug >= 3 ? [] : null;
+            
             var points = this.options.extensionPoints;
             if(points){
                 for (var p in points) {
@@ -1059,11 +1074,11 @@ pvc.BaseChart = pvc.Abstract.extend({
                         // Not intercepted and
                         var v = points[p];
                         if(mark.isLocked && mark.isLocked(m)){
-                            if(doLog) {pvc.log("* " + m + ": locked extension point!");}
+                            if(logOut) {logOut.push(m + ": locked extension point!");}
                         } else if(mark.isIntercepted && mark.isIntercepted(m)) {
-                            if(doLog) {pvc.log("* " + m + ":" + JSON.stringify(v) + " (controlled)");}
+                            if(logOut) {logOut.push(m + ":" + JSON.stringify(v) + " (controlled)");}
                         } else {
-                            if(doLog) { pvc.log("* " + m + ": " + JSON.stringify(v)); }
+                            if(logOut) {logOut.push(m + ": " + JSON.stringify(v)); }
 
                             // Distinguish between mark methods and properties
                             if (typeof mark[m] === "function") {
@@ -1074,7 +1089,17 @@ pvc.BaseChart = pvc.Abstract.extend({
                         }
                     }
                 }
+
+                if(logOut){
+                    if(logOut.length){
+                        pvc.log("Applying Extension Points for: '" + prefix + "'\n\t* " + logOut.join("\n\t* "));
+                    } else if(pvc.debug >= 4) {
+                        pvc.log("Applying Extension Points for: '" + prefix + "' (none)");
+                    }
+                }
             }
+        } else if(pvc.debug >= 4){
+            pvc.log("Applying Extension Points for: '" + prefix + "' (target mark does not exist)");
         }
     },
 

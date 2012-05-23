@@ -118,15 +118,15 @@ def.type('pvc.visual.Role')
     }
 })
 .add(/** @lends pvc.visual.Role# */{
-    isRequired:        false,
+    isRequired: false,
     requireSingleDimension: false,
-    valueType:   null,
+    valueType: null,
     requireIsDiscrete: null,
-    isMeasure:         false,
-    isPercent:         false,
+    isMeasure: false,
+    isPercent: false,
     defaultDimensionName: null,
     grouping: null,
-    flatteningMode:   'singleLevel',
+    flatteningMode: 'singleLevel',
     flattenRootLabel: '',
     autoCreateDimension: false,
     

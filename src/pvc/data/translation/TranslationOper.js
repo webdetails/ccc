@@ -393,7 +393,7 @@ def.type('pvc.data.TranslationOper')
         // This function is performance critical and so does not use forEach
         // or array helpers, avoiding function calls, closures, etc.
         
-        if(pvc.debug >= 3) {
+        if(pvc.debug >= 4) {
             pvc.log('readItem: ' + JSON.stringify(item));
         }
         
@@ -422,7 +422,7 @@ def.type('pvc.data.TranslationOper')
         
         atoms.length = a;
         
-        if(pvc.debug >= 3) {
+        if(pvc.debug >= 4) {
             var atomsMap = def.query(atoms).object({
                 name:  function(atom){ return atom.dimension.name; },
                 value: function(atom){ 

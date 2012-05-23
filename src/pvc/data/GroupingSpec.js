@@ -206,6 +206,13 @@ def.type('pvc.data.GroupingSpec')
         }
         
         return reverseGrouping;
+    },
+
+    toString: function(){
+        return def.query(this.levels)
+                .select(function(level){ return '' + level; })
+                .array()
+                .join(', ');
     }
 });
 
@@ -253,6 +260,13 @@ def.type('pvc.data.GroupingLevelSpec')
             key:   keys.join(','),
             atoms: atoms
         };
+    },
+
+    toString: function(){
+        return def.query(this.dimensions)
+                .select(function(dimSpec){ return '' + dimSpec; })
+                .array()
+                .join('|');
     }
 });
 
@@ -276,6 +290,10 @@ def.type('pvc.data.GroupingDimensionSpec')
         
         // Use datum source order
         //return this.reverse ? (b.id - a.id) : (a.id - b.id);
+    },
+
+    toString: function(){
+        return this.name + (this.reverse ? ' desc' : '');
     }
 });
 
