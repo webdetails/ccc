@@ -118,12 +118,14 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
          * it does contribute to the offset, and positively.
          * The offset property accumulates the values.
          */
-        var offset;
+        var offset, negOffset;
         if(!result){
             if(catRange){
-                offset = catRange.max + catRange.min;
+                offset    = catRange.max;
+                negOffset = catRange.min;
                 this._ruleInfos = [{
                     offset: offset,
+                    negOffset: negOffset,
                     group:  catGroup,
                     range:  catRange
                 }];
@@ -132,7 +134,8 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
                 return {
                     min: catRange.min,
                     max: catRange.max,
-                    offset: offset
+                    offset: offset,
+                    negOffset: negOffset
                 };
             }
 
@@ -140,9 +143,11 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         }
 
         offset = result.offset;
+        negOffset = result.negOffset;
         if(this._isFalling){
             this._ruleInfos.push({
                 offset: offset,
+                negOffset: negOffset,
                 group:  catGroup,
                 range:  catRange
             });
@@ -150,25 +155,23 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
 
         if(!catGroup._isFlattenGroup){
             var dir = this._isFalling ? -1 : 1;
-            
-            var min = offset + dir * catRange.min,
-                max = offset + dir * catRange.max;
-            
-            if(min < result.min){
-                result.min = min;
+
+            offset    = result.offset    = offset    + dir * catRange.max,
+            negOffset = result.negOffset = negOffset - dir * catRange.min;
+
+            if(negOffset < result.min){
+                result.min = negOffset;
             }
 
-            if(max > result.max){
-                result.max = max;
+            if(offset > result.max){
+                result.max = offset;
             }
-
-            /* Update offset, for next category, if any. */
-            offset = result.offset = offset + dir * (catRange.min + catRange.max);
         }
 
         if(!this._isFalling){
             this._ruleInfos.push({
                 offset: offset,
+                negOffset: negOffset,
                 group:  catGroup,
                 range:  catRange
             });

@@ -48,7 +48,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
 
             if(scene.acts.category.group._isFlattenGroup){
                 // Groups don't update the total
-                // Groups, always down, except the first falling...
+                // Groups, always go down, except the first falling...
                 return -2;
             }
             
@@ -143,7 +143,9 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                 return ( isFalling && !!this.scene.previousSibling) ||
                        (!isFalling && !!this.scene.nextSibling);
             })
-            .optional(anchor, function(){ return chart.animate(orthoZero, sceneOrthoScale(this.scene) - orthoZero); })
+            .optional(anchor, function(){ 
+                return orthoZero + chart.animate(0, sceneOrthoScale(this.scene) - orthoZero);
+            })
             .optionalValue(this.anchorLength(anchor), barStepWidth + barWidth)
             .optional(ao,
                 isFalling ?
@@ -157,7 +159,9 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         if(chart.options.showWaterValues){
             this.pvWaterfallLabel = this.pvWaterfallLine
                 .add(pv.Label)
-                [anchor](function(scene){ return chart.animate(orthoZero, sceneOrthoScale(scene) - orthoZero); })
+                [anchor](function(scene){
+                    return orthoZero + chart.animate(0, sceneOrthoScale(scene) - orthoZero);
+                })
 //                .localProperty('barDirection')
 //                .barDirection(function(scene){
 //                    if(isFalling && !this.index){
@@ -239,7 +243,6 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                                       name:  function(ruleInfo){ return ruleInfo.group.absKey; },
                                       value: function(ruleInfo){ return ruleInfo; }
                                   }),
-            //valueDim = chart._valueDim,
             isFalling = chart._isFalling,
             rootCatData = chart._catRole.select(
                             chart._partData(this.dataPartValue),

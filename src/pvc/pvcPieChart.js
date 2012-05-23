@@ -33,7 +33,7 @@ pvc.PieChart = pvc.BaseChart.extend({
                 isPercent:  true,
                 requireSingleDimension: true, 
                 requireIsDiscrete: false,
-                singleValueType: Number, 
+                valueType: Number, 
                 defaultDimensionName: 'value' 
             }
         });

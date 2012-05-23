@@ -387,55 +387,10 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Initializes the data engine and roles
      */
     _initData: function(keyArgs) {
-        var dataEngine = this.dataEngine;
-        
         if(!this.parent) {
+            var dataEngine = this.dataEngine;
             if(!dataEngine || def.get(keyArgs, 'reloadData', true)) {
-                
-                var complexType = dataEngine ?
-                                    dataEngine.type :
-                                    new pvc.data.ComplexType();
-                
-                var translation = this._createTranslation(complexType);
-                translation.configureType();
-                
-                if(pvc.debug >= 3){
-                    pvc.log(complexType.describe());
-                }
-                
-                // ----------
-                // Roles are bound before loading data,
-                // in order to be able to filter datums
-                // whose "every dimension in a measure role is null".
-                this._bindVisualRoles(complexType);
-                
-                // ----------
-                
-                if(!dataEngine) {
-                    dataEngine =
-                        this.dataEngine =
-                        this.data = new pvc.data.Data({type: complexType});
-                } else {
-                    // TODO: assert complexType has not changed...
-                }
-                
-                // ----------
-
-                var loadKeyArgs,
-                    measureDimNames = this.measureDimensionsNames();
-                if(measureDimNames.length) {
-                    // Must have at least one measure role dimension not-null
-                    loadKeyArgs = {
-                       where: function(datum){
-                            var atoms = datum.atoms;
-                            return def.query(measureDimNames).any(function(dimName){
-                               return atoms[dimName].value != null;
-                            });
-                       }
-                    };
-                }
-                
-                dataEngine.load(translation.execute(dataEngine), loadKeyArgs);
+               this._onLoadData();
             } else {
                 // TODO: Do this in a cleaner way. Give control to Data
                 // We must at least dispose children and cache...
@@ -453,10 +408,59 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
         
         if(pvc.debug >= 3){
-            pvc.log(dataEngine.getInfo());
+            pvc.log(this.dataEngine.getInfo());
         }
     },
-    
+
+    _onLoadData: function(){
+        var dataEngine = this.dataEngine;
+        var complexType = dataEngine ?
+                            dataEngine.type :
+                            new pvc.data.ComplexType();
+
+        var translation = this._createTranslation(complexType);
+
+        translation.configureType();
+
+        if(pvc.debug >= 3){
+            pvc.log(complexType.describe());
+        }
+
+        // ----------
+        // Roles are bound before loading data,
+        // in order to be able to filter datums
+        // whose "every dimension in a measure role is null".
+        this._bindVisualRoles(complexType);
+
+        // ----------
+
+        if(!dataEngine) {
+            dataEngine =
+                this.dataEngine =
+                this.data = new pvc.data.Data({type: complexType});
+        } else {
+            // TODO: assert complexType has not changed...
+        }
+
+        // ----------
+
+        var loadKeyArgs,
+            measureDimNames = this.measureDimensionsNames();
+        if(measureDimNames.length) {
+            // Must have at least one measure role dimension not-null
+            loadKeyArgs = {
+                where: function(datum){
+                    var atoms = datum.atoms;
+                    return def.query(measureDimNames).any(function(dimName){
+                        return atoms[dimName].value != null;
+                    });
+                }
+            };
+        }
+
+        dataEngine.load(translation.execute(dataEngine), loadKeyArgs);
+    },
+
     _createTranslation: function(complexType){
         var options = this.options,
             dataOptions = options.dataOptions || {};
@@ -546,13 +550,19 @@ pvc.BaseChart = pvc.Abstract.extend({
     
     _bindVisualRoles: function(type){
         
+        var usedDimTypes = {};
+
         /* Process user specified mappings */
         var assignedVisualRoles = {};
         def.each(this.options.visualRoles, function(roleSpec, name){
             this._visualRoles[name] || 
-                def.fail.argumentInvalid("The specified role name '{0}' is not supported by the chart type.", [name]);
+                def.fail.argumentInvalid("Role '{0}' is not supported by the chart type.", [name]);
             
-            assignedVisualRoles[name] = pvc.data.GroupingSpec.parse(roleSpec, type);
+            var grouping = assignedVisualRoles[name] = pvc.data.GroupingSpec.parse(roleSpec, type);
+
+            grouping.dimensions().each(function(dimSpec){
+                usedDimTypes[dimSpec.type.name] = true;
+            });
         }, this);
         
         /* Bind Visual Roles dimensions assigned by user, 
@@ -564,37 +574,62 @@ pvc.BaseChart = pvc.Abstract.extend({
             } else {
                 var dimName = role.defaultDimensionName;
                 if(dimName) {
-                    /* An asterisk at the end of the name indicates a dimension group default mapping */
+                    /* An asterisk at the end of the name indicates
+                     * that any dimension of that group is allowed.
+                     * If the role allows multiple dimensions,
+                     * then the meaning is greedy - use them all.
+                     * Otherwise, use only one.
+                     */
                     var match = dimName.match(/^(.*?)(\*)?$/);
                     if(match) {
-                        if(match[2]) {
-                            var roleDimNames = type.groupDimensionsNames(match[1], {assertExists: false});
-                            if(roleDimNames) {
-                                role.bind(pvc.data.GroupingSpec.parse(roleDimNames, type));
-                                return;
+                        var anyLevel = !!match[2];
+                        if(anyLevel) {
+                            var groupDimNames = type.groupDimensionsNames(match[1], {assertExists: false});
+                            if(groupDimNames){
+                                var freeGroupDimNames = 
+                                        def.query(groupDimNames)
+                                           .where(function(dimName){ return !def.hasOwn(usedDimTypes, dimName); });
+
+                                if(role.requireSingleDimension){
+                                    var freeDimName = freeGroupDimNames.first();
+                                    if(freeDimName){
+                                        role.bind(pvc.data.GroupingSpec.parse(freeDimName, type));
+                                        usedDimTypes[freeDimName] = true;
+                                        return;
+                                    }
+                                } else {
+                                    freeGroupDimNames = freeGroupDimNames.array();
+                                    if(freeGroupDimNames.length){
+                                        role.bind(pvc.data.GroupingSpec.parse(freeGroupDimNames, type));
+                                        freeGroupDimNames.forEach(function(dimName2){
+                                            usedDimTypes[dimName2] = true;
+                                        });
+                                        return;
+                                    }
+                                }
                             }
-                        } else {
-                            var roleDim = type.dimensions(dimName, {assertExists: false});
-                            if(roleDim) {
-                                role.bind(pvc.data.GroupingSpec.parse(dimName, type));
-                                return;
-                            }
+                        } else if(!def.hasOwn(usedDimTypes, dimName) &&
+                                  type.dimensions(dimName, {assertExists: false})){
+                            
+                            role.bind(pvc.data.GroupingSpec.parse(dimName, type));
+                            usedDimTypes[dimName] = true;
+                            return;
                         }
                     }
                 }
-                
-                if(role.isRequired) {
-                    if(role.autoCreateDimension){
-                        var defaultName = role.defaultDimensionName;
-                        if(defaultName.charAt(defaultName.length - 1) === '*'){
-                            defaultName = defaultName.substr(0, defaultName.length - 1);
-                        }
-                        
-                        type.addDimension(defaultName, pvc.data.DimensionType.extendSpec(defaultName, {isHidden: true}));
-                        role.bind(pvc.data.GroupingSpec.parse(defaultName, type));
-                        return;
+
+                if(role.autoCreateDimension){
+                    var defaultName = role.defaultDimensionName;
+                    if(defaultName.charAt(defaultName.length - 1) === '*'){
+                        defaultName = defaultName.substr(0, defaultName.length - 1);
                     }
-                    
+
+                    type.addDimension(defaultName, pvc.data.DimensionType.extendSpec(defaultName, {isHidden: true}));
+                    role.bind(pvc.data.GroupingSpec.parse(defaultName, type));
+                    return;
+                }
+
+                if(role.isRequired) {
                     throw def.error.operationInvalid("Chart type requires unassigned role '{0}'.", [name]);
                 }
                 

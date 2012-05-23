@@ -110,7 +110,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
 
         var me = this;
 
-        this._ensureDimensionType('dataPart');
+        this.ensureDimensionType('dataPart');
 
         var dataPartDimension,
             axis2SeriesKeySet,

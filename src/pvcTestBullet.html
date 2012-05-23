@@ -85,7 +85,8 @@
     <!-- @SCRIPTSEND@ -->
     
     <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
-    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+
         
     <script type="text/javascript" src="pvcDocUtils.js"></script>
   </head>
@@ -184,8 +185,8 @@ var bullet1 = new pvc.BulletChart({
       "bulletMarker_shape":"dot",
       "bulletTitle_textStyle":"green"
       }    
-    });
-    bullet1.render();
+});
+bullet1.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBullet1"></div>
@@ -244,9 +245,9 @@ var bullet2 = new pvc.BulletChart({
     bulletTitle: "My Test",
     bulletSubtitle: "value",
     bulletTitlePosition: "top"
-    });
-    bullet2.setData(bullet_valueOnly);
-    bullet2.render();
+});
+bullet2.setData(bullet_valueOnly);
+bullet2.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBullet2"></div>
@@ -269,10 +270,10 @@ var bullet3 = new pvc.BulletChart({
     // Specific values
     bulletRanges: [200,500,1000],
     bulletSubtitle: "description",
-    bulletTitlePosition: "bottom",
-    });
-    bullet3.setData(bullet_NameValue);
-    bullet3.render();
+    bulletTitlePosition: "bottom"
+});
+bullet3.setData(bullet_NameValue);
+bullet3.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBullet3"></div>
@@ -296,9 +297,9 @@ var bullet4 = new pvc.BulletChart({
     bulletRanges: [200,500,1000],
     bulletMarkers: [600],
     bulletSubtitle: "description"
-    });
-    bullet4.setData(bullet_NameValueMarker);
-    bullet4.render();
+});
+bullet4.setData(bullet_NameValueMarker);
+bullet4.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBullet4"></div>
@@ -319,10 +320,10 @@ var bullet5 = new pvc.BulletChart({
     bulletSpacing: 80,
     bulletMargin: 30,
     bulletTitlePosition: "left"
-    });
+});
 
-    bullet5.setData(bullet_NameDescValueMarkerRanges);
-    bullet5.render();
+bullet5.setData(bullet_NameDescValueMarkerRanges);
+bullet5.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBullet5"></div>

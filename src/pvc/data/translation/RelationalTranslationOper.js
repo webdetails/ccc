@@ -77,9 +77,6 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
     configureType: function(){
         var me = this;
         
-        // Call base method
-        this.base();
-
         function add(dimGet, dim) {
             me._userDimsReaders.push(dimGet);
             if(dim){
@@ -103,8 +100,8 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                // The null test is required because measuresIndexes can be a number, a string...
                (valuesColIndexes = this.options.measuresIndexes) != null) {
 
-                this._addGroupReaders('value', def.array(valuesColIndexes));
-
+                this.defReader({names: 'value', indexes: valuesColIndexes });
+                
                 unmappedColCount = L - this._userUsedIndexesCount;
             }
 
@@ -114,12 +111,16 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                                   ['value', 'category', 'series'] :
                                   ['value', 'series',   'category'];
 
-                /* Leave only those not already mapped by the user */
+                /*
+                 * Leave only those not already mapped by the user,
+                 * giving priority to those on the left.
+                 */
                 autoColDims = autoColDims.filter(function(colDim){
                                     return !this._userUsedDims[colDim];
                                 }, this)
                                 .slice(0, unmappedColCount);
 
+                /* Assign virtual item indexes to remaining auto dims */
                 var dimName,
                     index = 0;
                 while(autoColDims.length && (dimName = autoColDims.pop())) {

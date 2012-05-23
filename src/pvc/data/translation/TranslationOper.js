@@ -31,6 +31,8 @@ def.type('pvc.data.TranslationOper')
     if(pvc.debug >= 3){
         this._logSource();
     }
+
+    this._initType();
 })
 .add(/** @lends pvc.data.TranslationOper# */{
     
@@ -38,184 +40,201 @@ def.type('pvc.data.TranslationOper')
      * Logs the contents of the source and metadata properties.
      */
     _logSource: def.method({isAbstract: true}),
-    
+
     /**
-     * Called once, before {@link #execute}, 
-     * for the translation to configure the complex type (abstract).
+     * Obtains the number of fields of the virtual item.
+     * <p>
+     * The default implementation returns the length of the metadata.
+     * </p>
      * 
+     * @type number
+     * @virtual
+     */
+    virtualItemSize: function(){
+        return this.metadata.length;
+    },
+
+    /**
+     * Defines a dimension reader.
+     *
+     * @param {object} dimReaderSpec A dimensions reader specification.
+     *
+     * @type undefined
+     */
+    defReader: function(dimReaderSpec){
+        dimReaderSpec || def.fail.argumentRequired('readerSpec');
+
+        var dimNames =  def.array(dimReaderSpec.names);
+
+        (dimNames && dimNames.length) || def.fail.argumentRequired('readers.names');
+
+        dimNames.forEach(function(name){
+            name || def.fail.argumentRequired('readers[i].names');
+
+            name = name.replace(/^\s*(.+?)\s*$/, "$1"); // trim
+
+            !def.hasOwn(this._userUsedDims, name) || def.fail.argumentInvalid('readers[i].names', "Dimension name '{0}' is already being read.", [name]);
+            this._userUsedDims[name] = true;
+            this.ensureDimensionType(name);
+        }, this);
+
+        // Consumed/Reserved virtual item indexes
+        var indexes = def.array(dimReaderSpec.indexes);
+        if(indexes) {
+            indexes.forEach(this._userUseIndex, this);
+        }
+
+        var reader = dimReaderSpec.reader;
+        if(!reader) {
+            this._userCreateReaders(dimNames, indexes);
+        } else {
+            this._userRead(this._wrapReader(reader, dimNames), dimNames);
+        }
+    },
+
+    /**
+     * Called once, before {@link #execute},
+     * for the translation to configure the complex type (abstract).
+     *
      * <p>
      *    If this method is called more than once,
      *    the consequences are undefined.
      * </p>
-     * 
+     *
      * @name pvc.data.TranslationOper#configureType
      * @function
      * @type undefined
      * @virtual
      */
-    configureType: function(){
+    configureType: def.method({isAbstract: true}),
+    
+    _initType: function(){
         this._userDimsReaders = [];
         this._userDimsReadersByDim = {};
         this._userItem = [];
-        this._userDefDims     = {};
-        this._userUsedDims    = {};
+        this._userDefDims = {};
+        this._userUsedDims = {};
         this._userUsedIndexes = {};
         this._userUsedIndexesCount = 0;
         
         // -------------
         
         var userDimsSpec = this.options.dimensions;
-        if(userDimsSpec) {
-            for(var dimName in userDimsSpec) {
-                processUserDim.call(this, dimName, userDimsSpec[dimName]);
-            }
-        }
-        
-        function processUserDim(name, userDimSpec) {
-            name || def.fail.argumentInvalid('dimensions[i]', "Invalid dimension name.");
-            !def.hasOwn(this._userDefDims, name) || def.fail.argumentInvalid('dimensions[i]', "A dimension with name '{0}' is already defined.", [name]);
-            
-            this._userDefDims[name] = true;
-            
-            this._ensureDimensionType(name, userDimSpec);
+        for(var dimName in userDimsSpec) { // userDimsSpec can be null
+            this._userDefDimension(dimName, userDimsSpec[dimName]);
         }
         
         // -------------
         
         var userDimReaders = this.options.readers;
         if(userDimReaders) {
-            userDimReaders.forEach(this._processDimsReaderSpec, this);
+            userDimReaders.forEach(this.defReader, this);
         }
 
-        var multiChartColIndexes = def.array(this.options.multiChartColumnIndexes),
-            multiChartRowIndexes = def.array(this.options.multiChartRowIndexes);
-
-        if(multiChartColIndexes) {
-            this._addGroupReaders('multiChartColumn', multiChartColIndexes);
+        var multiChartColIndexes = this.options.multiChartColumnIndexes;
+        if(multiChartColIndexes != null) {
+            this.defReader({names: 'multiChartColumn', indexes: multiChartColIndexes });
         }
 
-        if(multiChartRowIndexes) {
-            this._addGroupReaders('multiChartRow', multiChartRowIndexes);
+        var multiChartRowIndexes = this.options.multiChartRowIndexes;
+        if(multiChartRowIndexes != null) {
+            this.defReader({names: 'multiChartRow', indexes: multiChartRowIndexes });
         }
     },
-    
-    _addGroupReaders: function(groupName, indexes) {
-     // TODO: make a single reader that reads all atoms??
-        indexes.forEach(function(index, level){
-            var dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
-            
-            this._processDimsReaderSpec({
-                names:   dimName,
-                indexes: index,
-                reader:  this._propGet(dimName, index)
-            });
-        }, this);
+
+    _userDefDimension: function(name, userDimSpec){
+        name || def.fail.argumentInvalid('dimensions[i]', "Invalid dimension name.");
+        !def.hasOwn(this._userDefDims, name) ||
+            def.fail.argumentInvalid('dimensions[i]', "A dimension with name '{0}' is already defined.", [name]);
+
+        this._userDefDims[name] = true;
+        this.ensureDimensionType(name, userDimSpec);
     },
-    
-    /**
-     * Processes a dimension reader specification.
-     * 
-     * @param {object} dimReaderSpec A dimensions reader specification.
-     * 
-     * @type undefined
-     */
-    _processDimsReaderSpec: function(dimReaderSpec){
-        dimReaderSpec || def.fail.argumentInvalid('readers', "Null element");
-        
-        var dimNames =  def.array(dimReaderSpec.names);
-        
-        (dimNames && dimNames.length) || def.fail.argumentRequired('readers.names');
-        
-        dimNames.forEach(function(name){
-            name || def.fail.argumentRequired('readers[i].names');
-            
-            name = name.replace(/^\s*(.+?)\s*$/, "$1"); // trim
-                
-            !def.hasOwn(this._userUsedDims, name) || def.fail.argumentInvalid('readers[i].names', "Dimension name '{0}' is already being read.", [name]);
-            this._userUsedDims[name] = true;
-            this._ensureDimensionType(name);
-        }, this);
-        
-        // Consumed/Reserved virtual item indexes
-        var indexes = def.array(dimReaderSpec.indexes);
-        if(indexes) {
-            indexes.forEach(function(index){
-                index = +index; // to number
-                
-                (index >= 0) || def.fail.argumentInvalid('readers[i].indexes', "Invalid index: '{0}'.", [index]); 
-                
-                !def.hasOwn(this._userUsedIndexes, index) || def.fail.argumentInvalid('readers[i].indexes', "Virtual item index '{0}' has already been reserved.", [index]);
-                
-                this._userUsedIndexes[index] = true;
-                this._userUsedIndexesCount++;
-                
-                // Mark the index in the virtual item indexes array
-                this._userItem[index] = true;
-            }, this);
+
+    _userUseIndex: function(index){
+        index = +index; // to number
+
+        (index >= 0) ||
+            def.fail.argumentInvalid('index', "Invalid reader index: '{0}'.", [index]);
+
+        !def.hasOwn(this._userUsedIndexes, index) ||
+            def.fail.argumentInvalid('index', "Virtual item index '{0}' is already assigned.", [index]);
+
+        this._userUsedIndexes[index] = true;
+        this._userUsedIndexesCount++;
+        this._userItem[index] = true;
+    },
+
+    _userCreateReaders: function(dimNames, indexes){
+        if(!indexes){
+            indexes = [];
         }
-        
-        var reader = dimReaderSpec.reader;
-        if(!reader) {
-            indexes || def.fail.argumentRequired('readers[i].reader');
-            
-            // Distribute indexes to names, from left to right
-            // Remaining indexes go all to the last *group* name
-            // Missing indexes for names is an error
-            var I = indexes.length,
-                N = dimNames.length,
-                dimName;
-            
-            if(!(N <= I)) {
-                throw def.error.argumentInvalid('readers[i].indexes', "Not enough indexes '[{0}]' to satisfy names: '[{1}]'.", [indexes, dimNames]);
-            }
-            
-            // If they match, it's one-one name <-- index
-            var L = (I === N) ? N : (N - 1);   
-                    
-            // The first N-1 names get the first N-1 indexes
-            for(var n = 0 ; n < L ; n++) {
-                dimName = dimNames[n];
-                
-                reader = this._propGet(dimName, indexes[n]);
-                
-                this._userDimsReadersByDim[dimName] = reader;
-                this._userDimsReaders.push(reader);
-            }
-            
-            // The last name is the dimension group name that gets all remaining indexes
-            if(L < N) {
-                // TODO: make a single reader that reads all atoms??
-                // Last is a *group* (start) name
-                var splitGroupName = pvc.data.DimensionType.splitDimensionGroupName(dimNames[N - 1]),
-                    groupName = splitGroupName[0],
-                    level     = def.nullyTo(splitGroupName[1], 0);
-                
-                for(var i = L ; i < I ; i++, level++) {
-                    dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
-                    if(i > L){
-                        !def.hasOwn(this._userUsedDims, dimName) || def.fail.argumentInvalid('readers[i].names', "Dimension name '{0}' of last dimension group name is already being read.", [dimName]);
-                        this._userUsedDims[dimName] = true;
-                        // propGet ensures dim exists
-                    }
-                    
-                    reader = this._propGet(dimName, indexes[i]);
-                
-                    this._userDimsReadersByDim[dimName] = reader;
-                    this._userDimsReaders.push(reader);
+
+        // Distribute indexes to names, from left to right
+        // Excess indexes go to the last *group* name
+        // Missing indexes are padded from available indexes starting from the last provided index
+        var I = indexes.length,
+            N = dimNames.length,
+            dimName;
+
+        if(N > I) {
+            // Pad indexes
+            var nextIndex = I > 0 ? (indexes[I - 1] + 1) : 0;
+            do{
+                nextIndex = this._nextAvailableItemIndex(nextIndex);
+                indexes[I] = nextIndex;
+                this._userUseIndex(nextIndex);
+
+                I++;
+            }while(N > I);
+        }
+
+        // If they match, it's one-one name <-- index
+        var L = (I === N) ? N : (N - 1);
+
+        // The first N-1 names get the first N-1 indexes
+        for(var n = 0 ; n < L ; n++) {
+            dimName = dimNames[n];
+            this._userRead(this._propGet(dimName, indexes[n]), dimName);
+        }
+
+        // The last name is the dimension group name that gets all remaining indexes
+        if(L < N) {
+            // TODO: make a single reader that reads all atoms??
+            // Last is a *group* START name
+            var splitGroupName = pvc.data.DimensionType.splitDimensionGroupName(dimNames[N - 1]),
+                groupName = splitGroupName[0],
+                level     = def.nullyTo(splitGroupName[1], 0);
+
+            for(var i = L ; i < I ; i++, level++) {
+                dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
+                if(i > L){ // first name was already registered
+                    !def.hasOwn(this._userUsedDims, dimName) ||
+                        def.fail.argumentInvalid('readers[i].names', "Dimension name '{0}' of last dimension group name is already being read.", [dimName]);
+                    this._userUsedDims[dimName] = true;
+                    // propGet ensures dim exists
                 }
+
+                this._userRead(this._propGet(dimName, indexes[i]), dimName);
             }
-            
-        } else {
-            def.isFun(reader) || def.fail.argumentInvalid('readers[i].reader', "Reader must be a function.");
+        }
+    },
+
+    _userRead: function(reader, dimNames){
+        def.isFun(reader) ||
+            def.fail.argumentInvalid('reader', "Reader must be a function.");
         
+        if(def.isArray(dimNames)){
             dimNames.forEach(function(name){
                 this._userDimsReadersByDim[name] = reader;
             }, this);
-        
-            this._userDimsReaders.push(this._wrapReader(reader, dimNames));
+        } else {
+            this._userDimsReadersByDim[dimNames] = reader;
         }
+
+        this._userDimsReaders.push(reader);
     },
-    
+
     //  TODO: docs
     _wrapReader: function(reader, dimNames){
         var me = this,
@@ -434,7 +453,7 @@ def.type('pvc.data.TranslationOper')
             dimension;
         
         if(def.get(keyArgs, 'ensureDim', true)) {
-            this._ensureDimensionType(dimName);
+            this.ensureDimensionType(dimName);
         }
         
         function propGet(item) {
@@ -463,7 +482,7 @@ def.type('pvc.data.TranslationOper')
             constAtom;
         
         if(def.get(keyArgs, 'ensureDim', true)) {
-            this._ensureDimensionType(dimName);
+            this.ensureDimensionType(dimName);
         }
         
         function constGet(/* item */) {
@@ -491,7 +510,7 @@ def.type('pvc.data.TranslationOper')
     },
     
     // TODO: docs
-    _ensureDimensionType: function(dimName, dimSpec){
+    ensureDimensionType: function(dimName, dimSpec){
         var dimType = this.complexType.dimensions(dimName, {assertExists: false});
         if(!dimType) {
             /** Passing options: isCategoryTimeSeries, timeSeriesFormat and dimensionGroups */

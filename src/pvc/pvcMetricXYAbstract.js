@@ -65,7 +65,7 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                singleValueType: Number,
+                valueType: Number,
                 defaultDimensionName: isV1Compat ? 'category' : 'value'
             },
             y: {
@@ -73,7 +73,7 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                singleValueType: Number,
+                valueType: Number,
                 defaultDimensionName: isV1Compat ? 'value' : 'value2'
             }
         });

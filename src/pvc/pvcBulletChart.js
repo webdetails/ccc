@@ -10,19 +10,18 @@ pvc.BulletChart = pvc.BaseChart.extend({
   constructor: function(options){
       options = options || {};
       
-      options.readers = [
-          {names: 'value', indexes: [0,1,2,3,4,5,6,7,8]} 
-      ];
-     
-      // Force values not to be numbers
-      if(!options.dimensionGroups) {
-         options.dimensionGroups = {};
+      // Add range and marker dimension group defaults
+      var dimGroups = options.dimensionGroups || (options.dimensionGroups = {});
+      var rangeDimGroup = dimGroups.range  || (dimGroups.range  = {});
+      if(rangeDimGroup.valueType === undefined){
+          rangeDimGroup.valueType = Number;
       }
-     
-      if(!options.dimensionGroups.value) {
-         options.dimensionGroups.value = {valueType: null};
+
+      var markerDimGroup = dimGroups.marker || (dimGroups.marker = {});
+      if(markerDimGroup.valueType === undefined){
+          markerDimGroup.valueType = Number;
       }
-    
+      
       options.legend = false;
       options.selectable = false; // not supported yet
      
@@ -30,6 +29,82 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
       // Apply options
       pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
+  },
+
+    _createTranslation: function(complexType){
+        var translation = this.base(complexType),
+            /*
+             * By now the translation has already been initialized
+             * and its virtualItemSize can be called.
+             */
+            size = translation.virtualItemSize()
+            ;
+
+        /* Configure the translation with default dimensions.
+         *  1       Value
+         *  2       Title | Value
+         *  3       Title | Value | Marker
+         *  >= 4    Title | Subtitle | Value | Marker | Ranges
+         */
+        if(size){
+            switch(size){
+                case 1:
+                    translation.defReader({names: 'value'});
+                    break;
+
+                case 2:
+                    translation.defReader({names: ['title', 'value']});
+                    break;
+
+                case 3:
+                    translation.defReader({names: ['title', 'value', 'marker']});
+                    break;
+
+                default:
+                    translation.defReader({names: ['title', 'subTitle', 'value', 'marker']});
+                    if(size > 4){
+                        // 4, 5, 6, ...
+                        translation.defReader({names: 'range', indexes: pv.range(4, size)});
+                    }
+                    break;
+            }
+        }
+        
+        return translation;
+    },
+
+    /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
+
+        this.base();
+
+        this._addVisualRoles({
+            title: { defaultDimensionName: 'title*' },
+            subTitle: { defaultDimensionName: 'subTitle*' },
+            value: {
+                isMeasure:  true,
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimensionName: 'value*'
+            },
+            marker: {
+                isMeasure:  true,
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimensionName: 'marker*'
+            },
+            range: {
+                isMeasure:  true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimensionName: 'range*'
+            }
+        });
   },
 
   _preRenderCore: function(){
@@ -61,12 +136,10 @@ pvc.BulletChart = pvc.BaseChart.extend({
       bulletSubtitle: "",       // Subtitle
       bulletTitlePosition: "left", // Position of bullet title relative to bullet
 
-
-
       axisDoubleClickAction: null,
-      
-      crosstabMode:    false,
-      seriesInRows:    false
+
+      crosstabMode: false,
+      seriesInRows: false
     }
 });
 
@@ -104,55 +177,56 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
    * @override
    */
   _createCore: function() {
-    var myself = this;
-    var data = this.buildData();
+    var chart  = this.chart,
+        options = chart.options,
+        data = this.buildData();
     
-    var anchor = myself.chart.options.orientation=="horizontal"?"left":"bottom";
+    var anchor = options.orientation=="horizontal"?"left":"bottom";
     var size, angle, align, titleLeftOffset, titleTopOffset, ruleAnchor, leftPos, topPos, titleSpace;
     
-    if(myself.chart.options.orientation=="horizontal"){
+    if(options.orientation=="horizontal"){
       size = this.width - this.chart.options.bulletMargin - 20;
       angle=0;
-      switch (myself.chart.options.bulletTitlePosition) {
+      switch (options.bulletTitlePosition) {
         case 'top':
           leftPos = this.chart.options.bulletMargin;
           titleLeftOffset = 0;
           align = 'left';
           titleTopOffset = -12;
-          titleSpace = parseInt(myself.chart.options.titleSize/2);
+          titleSpace = parseInt(options.titleSize/2);
           break;
         case 'bottom':
           leftPos = this.chart.options.bulletMargin;
           titleLeftOffset = 0;
           align = 'left';
-          titleTopOffset = myself.chart.options.bulletSize + 32;
+          titleTopOffset = options.bulletSize + 32;
           titleSpace = 0;
           break;
         case 'right':
           leftPos = 5;
           titleLeftOffset = size + 5;
           align = 'left';
-          titleTopOffset = parseInt(myself.chart.options.bulletSize/2);
+          titleTopOffset = parseInt(options.bulletSize/2);
           titleSpace = 0;
           break;
         case 'left':
         default:
           leftPos = this.chart.options.bulletMargin;
           titleLeftOffset = 0;
-          titleTopOffset = parseInt(myself.chart.options.bulletSize/2);
+          titleTopOffset = parseInt(options.bulletSize/2);
           align = 'right';
           titleSpace = 0;
       }
       ruleAnchor = "bottom";
       topPos = function(){
         //TODO: 10
-        return (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing)) + titleSpace;
+        return (this.index * (options.bulletSize + options.bulletSpacing)) + titleSpace;
       };
     }
     else
     {
       size = this.height - this.chart.options.bulletMargin - 20;
-      switch (myself.chart.options.bulletTitlePosition) {
+      switch (options.bulletTitlePosition) {
         case 'top':
           leftPos = this.chart.options.bulletMargin;
           titleLeftOffset = 0;
@@ -188,7 +262,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       }
       ruleAnchor = "right";
       leftPos = function(){
-        return myself.chart.options.bulletMargin + this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing);
+        return options.bulletMargin + this.index * (options.bulletSize + options.bulletSpacing);
       };
 
     }
@@ -215,28 +289,28 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     });
     
     
-    if (myself.chart.options.clickable){
+    if (options.clickable){
       this.pvBullet
       .cursor("pointer")
       .event("click",function(d){
         var s = d.title;
         var c = d.subtitle;
         var ev = pv.event;
-        return myself.chart.options.clickAction(s,c, d.measures, ev);
+        return options.clickAction(s,c, d.measures, ev);
       });
     }
     
     this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
     this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
     .text(function(d){
-      return myself.chart.options.valueFormat(d);
+      return options.valueFormat(d);
     });
 
     this.pvBulletMarker = this.pvBullet.marker.add(pv.Dot)
     .shape("square")
     .fillStyle("white")
     .text(function(d){
-      return myself.chart.options.valueFormat(d);
+      return options.valueFormat(d);
     });
 
 
@@ -274,10 +348,10 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       return d.formattedSubtitle;
     });
 
-    var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ?
+    var doubleClickAction = (typeof(options.axisDoubleClickAction) == 'function') ?
     function(d, e) {
             //ignoreClicks = 2;
-            myself.chart.options.axisDoubleClickAction(d, e);
+            options.axisDoubleClickAction(d, e);
 
     }: null;
     
@@ -313,101 +387,82 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     this.extend(this.pvPanel,"chart_");
   },
 
-  /*
-   * Data array to back up bullet charts; Case 1:
-   *
-   * <i>1) No data is passed</i> - In this case, we'll grab all the value from the options
-   * and generate only one bullet
-   *
-   */
-
+    /*
+     * Data array to back up bullet charts.
+     */
     buildData: function(){
         if(pvc.debug >= 3){
             pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
         }
 
         var data,
-            de = this.chart.dataEngine,
-            options = this.chart.options,
-            seriesFormatter   = de.dimensions('series').type.formatter()   || def.identity,
-            categoryFormatter = de.dimensions('category').type.formatter() || def.identity;
+            chart = this.chart,
+            de = chart.dataEngine,
+            options = chart.options,
+            titleRole = chart.visualRoles('title'),
+            subTitleRole = chart.visualRoles('subTitle'),
+            valueRole = chart.visualRoles('value'),
+            markerRole = chart.visualRoles('marker'),
+            rangeRole = chart.visualRoles('range'),
+            rangeDimNames = rangeRole.grouping && 
+                            rangeRole.grouping
+                                     .dimensions()
+                                     .select(function(dimSpec){ return dimSpec.name; })
+                                     .array(),
+            titleFormatter    = (   titleRole.grouping &&    titleRole.firstDimension().formatter()) || def.identity,
+            subTitleFormatter = (subTitleRole.grouping && subTitleRole.firstDimension().formatter()) || def.identity;
         
         var defaultData = {
             title:      options.bulletTitle,
+            formattedTitle: titleFormatter(options.bulletTitle),
             subtitle:   options.bulletSubtitle,
+            formattedSubtitle: subTitleFormatter(options.bulletSubtitle),
             ranges:     options.bulletRanges   || [],
             measures:   options.bulletMeasures || [],
             markers:    options.bulletMarkers  || []
         };
-    
-        defaultData.formattedTitle = categoryFormatter(defaultData.title);
-        defaultData.formattedSubtitle = seriesFormatter(defaultData.subtitle);
-        
-        // Check how many dimensions are effectively supplied
-        var dimsByName = de.dimensions(),
-            dimNames   = de.type.groupDimensionsNames('value'),
-            rangeDimNames,
-            dimCount = 0;
-    
-        for(var i = 0, L = dimNames.length ; i < L ; i++) {
-            if(dimsByName[dimNames[i]].count() === 0) {
-                break;
-            }
-            dimCount++;
+
+        if(!valueRole.grouping &&
+           !titleRole.grouping &&
+           !markerRole.grouping &&
+           !subTitleRole.grouping &&
+           !rangeRole.grouping){
+
+            data = [defaultData];
+       } else {
+            data = de.datums().select(function(datum){
+                var d = Object.create(defaultData),
+                    atoms = datum.atoms;
+
+                if(atoms.value){
+                    d.measures = [atoms.value.value];
+                }
+
+                if(atoms.title){
+                    d.title = atoms.title.value;
+                    d.formattedTitle = titleFormatter(d.title);
+                }
+
+                if(atoms.subTitle){
+                    d.subtitle = atoms.subTitle.value;
+                    d.formattedSubtitle = subTitleFormatter(d.subtitle);
+                }
+
+                if(atoms.marker){
+                    d.markers = [atoms.marker.value];
+                }
+
+                if(rangeDimNames){
+                    d.ranges = rangeDimNames.map(function(dimName){
+                        return atoms[dimName].value;
+                    });
+                }
+
+                return d;
+            }, this)
+            .array();
         }
-    
-        if(dimCount === 0 ) {
-            // No data
-            data = [def.copy(defaultData)];
-        } else {
-            if(dimCount > 4) {
-                rangeDimNames = dimNames.slice(4, dimCount);
-            }
-            
-            data = de.datums()
-                .select(function(datum){
-                    var d = def.copy(defaultData),
-                        atoms = datum.atoms;
-                    
-                    switch(dimCount) {
-                        case 1:
-                            // Value only
-                            d.measures = [atoms.value.value];
-                            break;
-                            
-                        case 3:
-                            // Name, value and markers
-                            d.markers = [atoms.value3.value];
-                            // NO break!
-                        case 2:
-                            // name and value
-                            d.title = atoms.value.value;
-                            d.formattedTitle = categoryFormatter(d.title);
-                            d.measures = [atoms.value2.value];
-                            break;
-                            
-                        default:
-                            // greater or equal 4
-                            d.title = atoms.value.value;
-                            d.subtitle = atoms.value2.value;
-                            d.formattedTitle = categoryFormatter(d.title);
-                            d.formattedSubtitle = seriesFormatter( d.subtitle)
-                            
-                            d.measures = [atoms.value3.value];
-                            d.markers  = [atoms.value4.value];
-                            
-                            if (rangeDimNames){
-                                d.ranges = rangeDimNames.map(function(dimName){
-                                    return atoms[dimName].value;
-                                });
-                            }
-                    }
-                    
-                    return d;
-                }, this)
-                .array();
+        
+        return data;
     }
-   
-    return data;
-  }
 });

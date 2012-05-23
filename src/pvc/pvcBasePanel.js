@@ -719,7 +719,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                                 context.getV1Series(),
                                 context.getV1Category(),
                                 context.getV1Value() || '',
-                                context.datum);
+                                context.scene.datum);
             };
         } 
         

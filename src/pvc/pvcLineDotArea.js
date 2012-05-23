@@ -34,7 +34,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
                 isPercent: this.options.stacked,  
                 requireSingleDimension: true, 
                 requireIsDiscrete: false, 
-                singleValueType: Number, 
+                valueType: Number, 
                 defaultDimensionName: 'value' 
             }
         });

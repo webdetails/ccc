@@ -25,6 +25,12 @@
  * @extends pvc.data.MatrixTranslationOper
  */
 def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
+.init(function(complexType, source, metadata, options){
+    
+    this.base(complexType, source, metadata, options);
+
+    this._measureData();
+})
 .add(/** @lends pvc.data.CrosstabTranslationOper# */{
     /* LEGEND
      * ======
@@ -163,6 +169,15 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      *   
      *  virtual-item-component * <-> * dimension + <-> 1 dimensions reader
      */
+
+    /**
+     * Obtains the number of fields of the virtual item.
+     * @type number
+     * @override
+     */
+    virtualItemSize: function(){
+        return this.R + this.C + this.M;
+    },
     
     /**
      * Performs the translation operation (override).
@@ -180,10 +195,9 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         // ----------------
         // Virtual item
         
-        var item  = new Array(this.R + this.C + this.M);
-        
-        var itemCrossGroupIndex = this._itemCrossGroupIndex,
-            crossGroupDepth     = this; // Quick and dirty (this.R, this.C, this.M)
+        var item  = new Array(this.R + this.C + this.M),
+            itemCrossGroupIndex = this._itemCrossGroupIndex,
+            crossGroupDepth = this; // Quick and dirty (this.R, this.C, this.M)
         
         function updateItemCrossGroup(crossGroupId, source) {
             // Start index of cross group in item
@@ -227,45 +241,34 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                   .selectMany(expandLine, this);
     },
     
-    /**
-     * Called once, before {@link #execute}, 
-     * for the translation to configure the complex type.
-     * 
-     * @type undefined
-     * @override
-     */
-    configureType: function(){
-        
-        // Call base method
-        this.base();
-        
+    _measureData: function(){
         if(this.metadata.length < 2) {
             return;
         }
-        
+
         /* Don't change source */
         var lines = pvc.cloneMatrix(this.source);
-        
+
         this._lines = lines;
-        
+
         /* Initialize Space and Formatting Options */
-        
+
         // Space depth / number of components
         // Default values
         this.R = 1;
         this.C = 1;
-        
+
         // Single measure
         this.M = 1;
         this.measuresDirection = null;
-        
+
         var colNames = this.metadata.map(function(d){ return d.colName; });
         if(this.options.seriesInRows){
             lines.unshift(colNames);
             pv.transpose(lines); // Transposes, in-place
             colNames = lines.shift();
         }
-        
+
         // --------------
         // * crosstabMode = true;
         // * isMultiValued (Some space is multi...)
@@ -275,85 +278,85 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         var categoriesCount;
         if(!this.options.isMultiValued) {
             categoriesCount = def.get(this.options, 'categoriesCount', 1);
-            
+
             // TODO: >= 1 check
             // TODO: Multiples consume row space?
             this.R = categoriesCount;
 
             this._colGroups = colNames.slice(this.R);
-            
+
             // To Array
             this._colGroups.forEach(function(colGroup, cg){
                 this._colGroups[cg] = [colGroup];
             }, this);
-            
+
         } else {
             var measuresInColumns = def.get(this.options, 'measuresInColumns', true);
             if(measuresInColumns || this.options.measuresIndex == null) {
-                
+
                 categoriesCount = def.get(this.options, 'categoriesCount', 1);
-                
+
                 // TODO: >= 1 check
                 // TODO: Multiples consume row space?
                 this.R = categoriesCount;
-                
+
                 // First R columns are from row space
                 var encodedColGroups = colNames.slice(this.R),
                     L = encodedColGroups.length;
-                
+
                 // Any results in column direction...
                 if(L > 0) {
                     if(measuresInColumns) {
                         this.measuresDirection = 'columns';
-                        
+
                         this._colGroups = this._processEncodedColGroups(encodedColGroups);
-                        
+
                         var CG = this._colGroups.length; // >= 1
-                        
+
                         this.M = Math.floor(L / CG); // should not be needed, but J.I.C.
-                        
+
                     } else {
                         // M = 1
                         this._colGroups = encodedColGroups;
-                        
+
                         // Split encoded column groups
                         this._colGroups.forEach(function(colGroup, cg){
                             this._colGroups[cg] = colGroup.split('~');
                         }, this);
                     }
-                    
+
                     this.C = this._colGroups[0].length; // may be 0!
                 }
-                
+
             } else {
                 this.measuresDirection = 'rows';
-                
+
                 // C = 1 (could also be more if an option to make ~ on existed)
                 // R = 1 (could be more...)
                 // M >= 1
-                
+
                 // The column index at which measure values (of each series) start
                 // is the number of row components
                 this.R = +this.options.measuresIndex;
-                
+
                 var measuresCount = this.options.measuresCount;
                 if (measuresCount == null) {
-                    measuresCount = 1; 
+                    measuresCount = 1;
                 }
-                
+
                 // TODO: >= 1 check
                 this.M = measuresCount;
-                
+
                 // First R columns are from row space
                 // Next follows a non-relevant Measure title column
                 this._colGroups = colNames.slice(this.R + 1);
-                
+
                 // To Array
                 this._colGroups.forEach(function(colGroup, cg){
                     this._colGroups[cg] = [colGroup];
                 }, this);
             }
-            
+
             /* secondAxisSeriesIndexes only implemented for single-series */
             if(this.C === 1) {
                 // The null test is required because secondAxisSeriesIndexes can be a number, a string...
@@ -364,18 +367,18 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 }
             }
         }
-        
+
         // ----------------
-        // The index at which the first component of 
+        // The index at which the first component of
         // each cross group starts in item
         this._itemCrossGroupIndex = {
                 'R': 0,
                 'C': this.R,
                 'M': this.R + this.C
             };
-        
+
         // ----------------
-        
+
         if(pvc.debug >= 3){
             pvc.log("Crosstab translator " + JSON.stringify({
                 R: this.R,
@@ -383,10 +386,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 M: this.M
             }));
         }
-        
-        this._computeDimensionsReaders();
     },
-    
+
     // TODO: docs
     _processEncodedColGroups: function(encodedColGroups){
         var L = encodedColGroups.length,
@@ -413,15 +414,20 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
     },
     
     /**
-     * Computes the dimensions readers array.
-     * 
+     * Called once, before {@link #execute},
+     * for the translation to configure the complex type.
+     *
      * @type undefined
+     * @override
      */
-    _computeDimensionsReaders: function(){
+    configureType: function(){
         // Map: Dimension Group -> Item cross-groups indexes
-
         if(this.measuresDirection === 'rows') {
             throw def.error.notImplemented();
+        }
+
+        if(this.metadata.length < 2) {
+            return;
         }
         
         var me = this,

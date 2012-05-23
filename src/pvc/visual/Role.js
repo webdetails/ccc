@@ -16,7 +16,7 @@
  * A {@link pvc.visual.Role} of this type must have an associated {@link pvc.data.GroupingSpec}
  * that has {@link pvc.data.GroupingSpec#isSingleDimension} equal to <tt>true</tt>.
  * 
- * @property {boolean} singleValueType When not nully, 
+ * @property {boolean} valueType When not nully, 
  * restricts the allowed value type of the single dimension of the 
  * associated {@link pvc.data.GroupingSpec} to this type.
  * 
@@ -30,7 +30,7 @@
  * @property {string} defaultDimensionName The default dimension name.
  *
  * @property {boolean} autoCreateDimension Indicates if a dimension with the default name (the first level of, when a group name),
- * should be created when the role is required and it has not been read by a translator.
+ * should be created when the role has not been read by a translator (required or not).
  *
  * @constructor
  * @param {string} name The name of the role.
@@ -44,7 +44,7 @@
  * @param {boolean} [keyArgs.isMeasure=false] Indicates that <b>datums</b> that do not 
  * contain a non-null atom in any of the dimensions bound to measure roles should be readily excluded.
  * 
- * @param {boolean} [keyArgs.singleValueType] Restricts the allowed value type of the single dimension.
+ * @param {boolean} [keyArgs.valueType] Restricts the allowed value type of dimensions.
  * 
  * @param {boolean|null} [keyArgs.requireIsDiscrete=null] Indicates if the grouping should be discrete, continuous or any.
  * 
@@ -63,13 +63,13 @@ def.type('pvc.visual.Role')
     
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
+    }
 
-        if(def.get(keyArgs, 'autoCreateDimension', false)) {
-            this.autoCreateDimension = true;
-        }
+    if(def.get(keyArgs, 'autoCreateDimension', false)) {
+        this.autoCreateDimension = true;
     }
     
-    var defaultDimensionName = def.get(keyArgs, 'defaultDimensionName'); 
+    var defaultDimensionName = def.get(keyArgs, 'defaultDimensionName');
     if(defaultDimensionName) {
         this.defaultDimensionName = defaultDimensionName;
     }
@@ -97,9 +97,9 @@ def.type('pvc.visual.Role')
                 }
             }
             
-            var singleValueType = def.get(keyArgs, 'singleValueType', null);
-            if(singleValueType !== this.singleValueType) {
-                this.singleValueType = singleValueType;
+            var valueType = def.get(keyArgs, 'valueType', null);
+            if(valueType !== this.valueType) {
+                this.valueType = valueType;
             }
         }
     }
@@ -120,7 +120,7 @@ def.type('pvc.visual.Role')
 .add(/** @lends pvc.visual.Role# */{
     isRequired:        false,
     requireSingleDimension: false,
-    singleValueType:   null,
+    valueType:   null,
     requireIsDiscrete: null,
     isMeasure:         false,
     isPercent:         false,
@@ -139,11 +139,11 @@ def.type('pvc.visual.Role')
     },
     
     /** 
-     * Obtains the first dimension type that is bound to the role.
+     * Obtains the first dimension that is bound to the role.
      * @type pvc.data.Dimension
      */
     firstDimension: function(){
-        return this.grouping && this.grouping.firstDimension;
+        return this.grouping && this.grouping.firstDimension.type;
     },
 
     setFlatteningMode: function(flatteningMode){
@@ -204,35 +204,31 @@ def.type('pvc.visual.Role')
      */
     bind: function(groupingSpec){
         if(groupingSpec) {
-//// TODO: delete this when sure it is not needed 17-05-2012
-//            if(groupingSpec.hasCompositeLevels) {
-//                throw def.error.argumentInvalid(def.format('visualRoles.{0}', [name]), "Role assigned to a composite level grouping, which is invalid.");
-//            }
-            
-            var singleDimSpec = groupingSpec.isSingleDimension ? groupingSpec.firstDimension : null;
-            
-            /** Validate grouping spec according to role */
-            if(this.requireSingleDimension) {
-                singleDimSpec || def.fail.operationInvalid("Role '{0}' only accepts a single dimension.", [this.name]);
-                
-                var dimType = singleDimSpec.type,
-                    valueType = this.singleValueType;
+            /* Validate grouping spec according to role */
+
+            if(this.requireSingleDimension && !groupingSpec.isSingleDimension) {
+                throw def.error.operationInvalid(
+                        "Role '{0}' only accepts a single dimension.",
+                        [this.name]);
+            }
+
+            var valueType = this.valueType;
+            var requireIsDiscrete = this.requireIsDiscrete;
+            groupingSpec.dimensions().each(function(dimSpec){
+                var dimType = dimSpec.type;
                 if(valueType && dimType.valueType !== valueType) {
                     throw def.error.operationInvalid(
-                            "Role '{0}' cannot be bound to dimension '{1}'; it only accepts a single dimension of type '{2}' and not of type '{3}'.",
+                            "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts dimensions of type '{2}' and not of type '{3}'.",
                             [this.name, dimType.name, pvc.data.DimensionType.valueTypeName(valueType), dimType.valueTypeName]);
                 }
-            }
-            
-            var requireIsDiscrete = this.requireIsDiscrete;
-            if(requireIsDiscrete != null) {
-                var isDiscrete = !singleDimSpec || singleDimSpec.type.isDiscrete;
-                if(isDiscrete !== requireIsDiscrete) {
+
+                if(requireIsDiscrete != null &&
+                   dimType.isDiscrete !== requireIsDiscrete) {
                     throw def.error.operationInvalid(
-                            "Role '{0}' only accepts '{1}' groupings.", 
-                            [this.name, requireIsDiscrete ? 'discrete' : 'continuous']);
+                            "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts {2} dimensions.",
+                            [this.name, dimType.name, requireIsDiscrete ? 'discrete' : 'continuous']);
                 }
-            }
+            }, this);
         }
         
         // ----------

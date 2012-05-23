@@ -207,12 +207,7 @@
                     
                 /* Data mapping */
                 readers: [
-                   {names: 'territory', indexes: 0},
-                   {names: 'country',   indexes: 1},
-                   {names: 'line',      indexes: 2},
-                   {names: 'year',      indexes: 3},
-                   {names: 'quarter',   indexes: 4},
-                   {names: 'sales',     indexes: 5}
+                   {names: ['territory', 'country', 'line', 'year', 'quarter', 'sales']}
                 ],
                 
                 /* Source Data Format */
@@ -239,7 +234,8 @@
                 //multiChartColumnIndexes: 1,
                 //multiChartWrapColumn: Infinity,
                 multiChartLimit: 9,
-                
+                
+
                 /* Small charts */
                 showValues:  true,
                 innerGap: 0.9,
@@ -268,12 +264,7 @@
                     
                 /* Data mapping */
                 readers: [
-                   {names: 'territory', indexes: 0},
-                   {names: 'country',   indexes: 1},
-                   {names: 'line',      indexes: 2},
-                   {names: 'year',      indexes: 3},
-                   {names: 'quarter',   indexes: 4},
-                   {names: 'sales',     indexes: 5}
+                    {names: ['territory', 'country', 'line', 'year', 'quarter', 'sales']}
                 ],
                 
                 /* Source Data Format */
@@ -344,15 +335,9 @@
                     
                 /* Data mapping */
                 readers: [
-                   {names: 'territory', indexes: 0},
-                   {names: 'country',   indexes: 1},
-                   {names: 'pclass',    indexes: 2},
-                   {names: 'pline',     indexes: 3},
-                   {names: 'product',   indexes: 4},
-                   {names: 'quantity',  indexes: 5},
-                   {names: 'sales',     indexes: 6},
-                   {names: 'esales',    indexes: 7},
-                   {names: 'psales',    indexes: 8}
+                   {names: ['territory', 'country', 'pclass', 'pline', 
+                            'product', 'quantity', 
+                            'sales', 'esales', 'psales']}
                 ],
                 
                 /* Source Data Format */
@@ -410,12 +395,7 @@
 
                 /* Data mapping */
                 readers: [
-                   {names: 'territory', indexes: 0},
-                   {names: 'country',   indexes: 1},
-                   {names: 'line',      indexes: 2},
-                   {names: 'year',      indexes: 3},
-                   {names: 'quarter',   indexes: 4},
-                   {names: 'sales',     indexes: 5}
+                   {names: ['territory', 'country', 'line', 'year', 'quarter', 'sales']}
                 ],
 
                 /* Source Data Format */

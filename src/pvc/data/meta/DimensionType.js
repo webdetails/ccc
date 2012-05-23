@@ -30,7 +30,9 @@
  * So, if the name of a dimension type is 'series2',
  * then its default group is 'series'.
  * </p>
- * 
+ *
+ * @property {number} groupLevel The index within the group that the dimension type belongs to.
+ *
  * @property {Function} valueType
  * The type of the value of atoms belonging to dimensions of this type.
  * It is a function that casts values to the represented type.
@@ -174,7 +176,11 @@ function(complexType, name, keyArgs){
     this.complexType = complexType;
     this.name  = name;
     this.label = def.get(keyArgs, 'label') || name;
-    this.group = pvc.data.DimensionType.dimensionGroupName(name);
+
+    var groupAndLevel = pvc.data.DimensionType.splitDimensionGroupName(name);
+    this.group = groupAndLevel[0];
+    this.groupLevel = groupAndLevel[1];
+
     this.playedVisualRoles = new def.Map();
     this.isHidden = !!def.get(keyArgs, 'isHidden');
     

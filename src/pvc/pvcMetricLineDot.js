@@ -43,14 +43,14 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
                 isMeasure: true, 
                 //requireSingleDimension: true,  // TODO: generalize this...
                 //requireIsDiscrete: false, 
-                //singleValueType: Number,
+                //valueType: Number,
                 defaultDimensionName: isV1Compat ? 'value2' : 'value3'
             },
             dotSize: { 
                 isMeasure: true, 
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                singleValueType: Number,
+                valueType: Number,
                 defaultDimensionName: isV1Compat ? 'value3' : 'value4' 
             }
         });

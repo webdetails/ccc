@@ -68,8 +68,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         
         // TODO
         this._addVisualRoles({
-            value:  { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value'  },
-            value2: { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, singleValueType: Number, defaultDimensionName: 'value2' }
+            value:  { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, valueType: Number, defaultDimensionName: 'value'  },
+            value2: { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, valueType: Number, defaultDimensionName: 'value2' }
         });
     },
     
