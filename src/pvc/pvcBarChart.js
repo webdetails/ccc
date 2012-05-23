@@ -19,13 +19,17 @@ pvc.BarChart = pvc.BarAbstract.extend({
     _getAxisDataParts: function(axis){
         if(this.options.secondAxis && axis.type === 'ortho'){
             if(this.options.secondAxisIndependentScale){
+                // Separate scales =>
+                // axis ortho 0 represents data 0
+                // axis ortho 1 represents data 1
                 return (''+axis.index);
             }
 
-            // The axis 0 must include both axes
+            // Common scale => axis ortho 0 represents both data parts
             return ['0', '1'];
         }
-        
+
+        // The base axis represents categories of all data parts
         return null;
     },
 

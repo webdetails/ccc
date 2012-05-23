@@ -393,12 +393,11 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
      */
     buildData: function(){
         if(pvc.debug >= 3){
-            pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
+            pvc.log("In buildData: " + this.chart.data.getInfo() );
         }
 
         var data,
             chart = this.chart,
-            de = chart.dataEngine,
             options = chart.options,
             titleRole = chart.visualRoles('title'),
             titleGrouping = titleRole.grouping,
@@ -441,7 +440,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
             data = [defaultData];
        } else {
-            data = de.datums().select(function(datum){
+            data = chart.data.datums().select(function(datum){
                 var d = Object.create(defaultData),
                     atoms = datum.atoms,
                     view;

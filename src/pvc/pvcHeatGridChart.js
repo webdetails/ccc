@@ -126,8 +126,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
          this.base();
 
         var chart = this.chart,
-            options = chart.options,
-            dataEngine = chart.dataEngine;
+            options = chart.options;
         
         this.colorValIdx = options.colorValIdx;
         this.sizeValIdx  = options.sizeValIdx;
@@ -188,15 +187,12 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         
         /* Column and Row datas  */
         var keyArgs = {visible: true},
-            // TODO: isn't this visibleData?
             // Two multi-dimension single-level data groupings
-            colGrouping   = chart._catRole.flattenedGrouping(),
-            rowGrouping   = chart._serRole.flattenedGrouping(),
-            colRootData = dataEngine.groupBy(colGrouping, keyArgs),
-            rowRootData = dataEngine.groupBy(rowGrouping, keyArgs),
+            colRootData = chart._catRole.flatten(chart.data, keyArgs),
+            rowRootData = chart._serRole.flatten(chart.data, keyArgs),
 
             // <=> One multi-dimensional, two-levels data grouping
-            data = this._getVisibleData();// dataEngine.groupBy([colGrouping, rowGrouping], keyArgs);
+            data = this._getVisibleData();
         
         /* Color scale */
         var fillColorScaleByColKey;
@@ -221,7 +217,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
             }
             
             if(detectSelection && 
-               dataEngine.owner.selectedCount() > 0 && 
+               data.owner.selectedCount() > 0 && 
                !this.datum().isSelected){
                  color = pvc.toGrayScale(color, 0.6);
             }
@@ -348,7 +344,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
     createHeatMap: function(w, h, getFillColor){
         var myself = this,
             options = this.chart.options,
-            dataEngine = this.chart.dataEngine,
+            data = this.chart.data,
             sizeDimName  = this.sizeDimName,
             colorDimName = this.colorDimName,
             nullShapeType = options.nullShape,
@@ -386,7 +382,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         if(sizeDimName){
             /* SIZE DOMAIN */
             def.scope(function(){
-                var sizeValExtent = dataEngine.dimensions(sizeDimName).extent({visible: true}),
+                var sizeValExtent = data.dimensions(sizeDimName).extent({visible: true}),
                     sizeValMin   = sizeValExtent.min.value,
                     sizeValMax   = sizeValExtent.max.value,
                     sizeValSpan  = Math.abs(sizeValMax - sizeValMin); // may be zero
@@ -442,7 +438,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
 //            }
             
             var color = getFillColor.call(this.parent, false);
-            return (dataEngine.owner.selectedCount() === 0 || this.selected()) ? 
+            return (data.owner.selectedCount() === 0 || this.selected()) ? 
                     color.darker() : 
                     color;
         }

@@ -90,16 +90,16 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
      *    - this.data: array with hashmap per data-point
      *****/
   retrieveData: function () {
-    var de = this.chart.dataEngine;
+    var data = this.chart.data;
     var numDigit = this.chart.options.numDigits;
 
-    this.dimensions = de.getVisibleCategories();
-    var values = de.getValues();
+    this.dimensions = data.getVisibleCategories();
+    var values = data.getValues();
 
-    var dataRowIndex = de.getVisibleSeriesIndexes();
-    var pCoordIndex = de.getVisibleCategoriesIndexes();
+    var dataRowIndex = data.getVisibleSeriesIndexes();
+    var pCoordIndex = data.getVisibleCategoriesIndexes();
 
-    var pCoordKeys = de.getCategories();
+    var pCoordKeys = data.getCategories();
 
     /******
      *  Generate a Coordinate mapping. 

@@ -86,8 +86,8 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
         this.base.apply(this, arguments);
 
         // Cached
-        this._xDim = this.dataEngine.dimensions(this._xRole.firstDimensionName());
-        this._yDim = this.dataEngine.dimensions(this._yRole.firstDimensionName());
+        this._xDim = this.data.dimensions(this._xRole.firstDimensionName());
+        this._yDim = this.data.dimensions(this._yRole.firstDimensionName());
     }
 }, {
     defaultOptions: {

@@ -65,7 +65,7 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         // Cached
         var dotSizeGrouping = this._dotSizeRole.grouping;
         if(dotSizeGrouping){
-            this._dotSizeDim = this.dataEngine.dimensions(dotSizeGrouping.firstDimension.name);
+            this._dotSizeDim = this.data.dimensions(dotSizeGrouping.firstDimension.name);
         }
 
         /* Change the legend source role */

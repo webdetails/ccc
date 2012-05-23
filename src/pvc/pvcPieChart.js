@@ -94,13 +94,15 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     _createCore: function() {
         var myself = this,
             chart = this.chart,
-            options = chart.options,
-            dataEngine = chart.dataEngine;
+            options = chart.options;
 
         // Add the chart. For a pie chart we have one series only
-        var valueDimName = chart.visualRoles('value').firstDimensionName(),
-            valueDim     = dataEngine.dimensions(valueDimName), 
-            data = chart.visualRoles('category').flatten(dataEngine, {visible: true});
+        var visibleKeyArgs = {visible: true},
+            data = chart.visualRoles('category').flatten(chart.data, visibleKeyArgs),
+            valueDimName = chart.visualRoles('value').firstDimensionName(),
+            valueDim = data.dimensions(valueDimName);
+
+        this.sum = valueDim.sum(visibleKeyArgs);
         
         var colorProp = def.scope(function(){
          // Color "controller"
@@ -108,16 +110,13 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
 
             return function(catGroup) {
                 var color = colorScale(catGroup.value);
-                if(dataEngine.owner.selectedCount() > 0 && !this.hasSelected()) {
+                if(data.owner.selectedCount() > 0 && !this.hasSelected()) {
                     return pvc.toGrayScale(color, 0.6);
                 }
                 
                 return color;
             };
         });
-        
-        var visibleKeyArgs = {visible: true};
-        this.sum = data.dimensions(valueDimName).sum(visibleKeyArgs);
         
         var angleScale = pv.Scale
                            .linear(0, this.sum)

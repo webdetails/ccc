@@ -111,7 +111,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     /**
      * The data source of the chart.
      * <p>
-     * The {@link #dataEngine} of a root chart 
+     * The {@link #data} of a root chart 
      * is loaded with the data in this array.
      * </p>
      * @type any[]
@@ -231,8 +231,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(parent) {
             this.root = parent.root;
             this.dataEngine =
-            this.data = def.get(options, 'dataEngine') ||
-                        def.fail.argumentRequired('options.dataEngine');
+            this.data = def.get(options, 'data') ||
+                        def.fail.argumentRequired('options.data');
             
             this.left = options.left;
             this.top  = options.top;
@@ -400,14 +400,14 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     _initData: function(keyArgs) {
         if(!this.parent) {
-            var dataEngine = this.dataEngine;
-            if(!dataEngine || def.get(keyArgs, 'reloadData', true)) {
+            var data = this.data;
+            if(!data || def.get(keyArgs, 'reloadData', true)) {
                this._onLoadData();
             } else {
                 // TODO: Do this in a cleaner way. Give control to Data
                 // We must at least dispose children and cache...
-                data_disposeChildLists.call(dataEngine);
-                data_syncDatumsState.call(dataEngine);
+                data_disposeChildLists.call(data);
+                data_syncDatumsState.call(data);
             }
         }
 
@@ -420,14 +420,14 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
         
         if(pvc.debug >= 3){
-            pvc.log(this.dataEngine.getInfo());
+            pvc.log(this.data.getInfo());
         }
     },
 
     _onLoadData: function(){
-        var dataEngine = this.dataEngine;
-        var complexType = dataEngine ?
-                            dataEngine.type :
+        var data = this.data;
+        var complexType = data ?
+                            data.type :
                             new pvc.data.ComplexType();
 
         var translation = this._createTranslation(complexType);
@@ -450,8 +450,8 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         // ----------
 
-        if(!dataEngine) {
-            dataEngine =
+        if(!data) {
+            data =
                 this.dataEngine =
                 this.data = new pvc.data.Data({type: complexType});
         } else {
@@ -474,7 +474,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             };
         }
 
-        dataEngine.load(translation.execute(dataEngine), loadKeyArgs);
+        data.load(translation.execute(data), loadKeyArgs);
     },
 
     _createTranslation: function(complexType){
@@ -1125,7 +1125,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @virtual 
      */
     clearSelections: function(){
-        if(this.dataEngine.owner.clearSelected()) {
+        if(this.data.owner.clearSelected()) {
             this.updateSelections();
         }
     },
@@ -1175,7 +1175,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                 // Fire action
                 var action = this.options.selectionChangedAction;
                 if(action){
-                    var selections = this.dataEngine.selectedDatums();
+                    var selections = this.data.selectedDatums();
                     action.call(null, selections);
                 }
                 

@@ -753,7 +753,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     _buildTooltip: function(context){
 
         var chart = this.chart,
-            dataEngine = chart.dataEngine,
+            data = chart.data,
             visibleKeyArgs = {visible: true},
             scene = context.scene,
             group = scene.group,
@@ -771,7 +771,7 @@ pvc.BasePanel = pvc.Abstract.extend({
              */
             playingPercentMap = context.panel.stacked === false ? 
                                 null :
-                                dataEngine.type.getPlayingPercentVisualRoleDimensionMap(),
+                                data.type.getPlayingPercentVisualRoleDimensionMap(),
             commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
         
         function addDim(escapedDimLabel, label){
@@ -783,7 +783,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             if(group) {
                 pct = group.dimensions(dimName).percentOverParent(visibleKeyArgs);
             } else {
-                pct = dataEngine.dimensions(dimName).percent(atom.value);
+                pct = data.dimensions(dimName).percent(atom.value);
             }
             
             return chart.options.valueFormat.call(null, Math.round(pct * 1000) / 10) + "%";
@@ -941,7 +941,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         var datums = context.scene.datums(),
             chart  = this.chart;
         if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
-            chart.dataEngine.owner.clearSelected();
+            chart.data.owner.clearSelected();
             
             pvc.data.Data.setSelected(datums, true);
         } else {
@@ -965,7 +965,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         var myself = this,
             chart = this.chart,
             options  = chart.options,
-            dataEngine = chart.dataEngine;
+            data = chart.data;
 
         var dMin = 10; // Minimum dx or dy for a rubber band selection to be relevant
 
@@ -1008,7 +1008,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     }
                 }
                 
-                if(dataEngine.owner.clearSelected()) {
+                if(data.owner.clearSelected()) {
                     myself._onSelectionChanged();
                 }
             })
@@ -1059,7 +1059,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         chart._suspendSelectionUpdate();
         try {
             if(!ev.ctrlKey && chart.options.ctrlSelectMode){
-                chart.dataEngine.owner.clearSelected();
+                chart.data.owner.clearSelected();
             }
             
             this._dispatchRubberBandSelection();

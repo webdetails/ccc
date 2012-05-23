@@ -234,12 +234,12 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
   },
 
   retrieveStructure: function () {
-    var de = this.chart.structEngine;
+    var data = this.chart.structEngine;
     var options = this.chart.options;
 
-    var colLabels = de.getVisibleCategories();
-    this.treeElements = de.getVisibleSeries();
-    var values = de.getValues();
+    var colLabels = data.getVisibleCategories();
+    this.treeElements = data.getVisibleSeries();
+    var values = data.getValues();
 
     // if a fifth column is added, then
     //  bottom and height are provided in the dataset.
@@ -493,12 +493,12 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
   }, 
 
   retrieveData: function () {
-    var de = this.chart.dataEngine;
+    var data = this.chart.data;
     var options = this.chart.options;
 
-    var colLabels = de.getVisibleCategories();
-    var selectors = de.getVisibleSeries();
-    var values = de.getValues();
+    var colLabels = data.getVisibleCategories();
+    var selectors = data.getVisibleSeries();
+    var values = data.getValues();
     var selMap = {}
     
     // create empty datasets and selMap

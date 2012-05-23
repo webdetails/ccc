@@ -20,10 +20,41 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         // Apply options
         pvc.mergeDefaults(this.options, pvc.BoxplotChart.defaultOptions, options);
 
+        //this._axisRoleNameMap.ortho = 'median';
+
         // This categorical chart does not support selection, yet
         this.options.selectable = false;
     },
-    
+
+    /**
+     * Prevents creation of the series role by the cartesian charts base class.
+     */
+    _getSeriesRoleSpec: function(){
+        return null;
+    },
+
+    /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
+
+        this.base();
+
+        /*
+         * Inherited 'category' role.
+         *
+         * Then:
+         * 1) value(_percentil50), (Median)
+         *
+         * 2) value_percentil25, (25% percentil)
+         * 3) value_percentil75, (75% percentil)
+         * 4) value_percentil5,  (5% percentil)
+         * 5) value_percentil95  (95% percentil)
+         *
+         */
+    },
+
     /* @override */
     _createMainContentPanel: function(parentPanel){
         if(pvc.debug >= 3){
@@ -73,7 +104,7 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         
         var myself = this,
             options = this.chart.options,
-            dataEngine = this.chart.dataEngine;
+            data = this.chart.data;
 
         this.hRules = [];
         this.vRules = [];
@@ -125,7 +156,7 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
             // Second axis - support for lines
             this.pvSecondLine = this.pvPanel.add(pv.Line)
                 .data(function(d){
-                    return dataEngine.getObjectsForSecondAxis(d,
+                    return data.getObjectsForSecondAxis(d,
                         timeSeries ?
                             function(a,b){
                                 return parser.parse(a.category) - parser.parse(b.category);
@@ -153,8 +184,8 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         // add Labels:
         this.pvBar
             .text(function(d){
-                var s = dataEngine.getVisibleSeries()[this.parent.index];
-                var c = dataEngine.getVisibleCategories()[this.index];
+                var s = data.getVisibleSeries()[this.parent.index];
+                var c = data.getVisibleCategories()[this.index];
                 
                 return options.v1StyleTooltipFormat.call(myself,s,c,d.value);
             });
@@ -169,8 +200,8 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
             this.pvBar
                 .cursor("pointer")
                 .event("click", function(d){
-                    var s = dataEngine.getVisibleSeries()[this.parent.index];
-                    var c = dataEngine.getVisibleCategories()[this.index];
+                    var s = data.getVisibleSeries()[this.parent.index];
+                    var c = data.getVisibleCategories()[this.index];
 
                     var ev = arguments[arguments.length-1];
                     return options.clickAction(s,c, d.value, ev);
@@ -259,10 +290,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
     },
 
     generateBoxPlots: function() {
-        var de = this.chart.dataEngine;
-        var categories = de.getVisibleCategories();
-        //var visibleSeries = de.getVisibleSeries();
-        var values = de.getValues();
+        var data = this.chart.data;
+        var categories = data.getVisibleCategories();
+        //var visibleSeries = data.getVisibleSeries();
+        var values = data.getValues();
 
         var lwa = 2;   // lineWidth of average.
 
@@ -274,7 +305,8 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
             p95 = 4;
 
         // boxplot covers third of width of container
-        var widthBox = this.DF.catContainerWidth/3;
+        var widthBox = this.DF.catContainerWidth/3,
+            widthBox2 = widthBox/2;
         
         // to do: adjust for max-width and minWidth
         var leftOffset = (this.DF.catContainerWidth - widthBox)/2;
@@ -285,9 +317,9 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
             var valuesRow = values[index],
                 dat = valuesRow.map(this.DF.orthoLengthFunc);
 
-            var leftBox = this.DF.catContainerBasePosFunc(index) + leftOffset,
-                rightBox = leftBox + widthBox,
-                midBox = (leftBox + rightBox)/2;
+            var midBox   = this.DF.catContainerBasePosFunc(index),
+                leftBox  = midBox - widthBox2,
+                rightBox = midBox + widthBox2;
 
             this.vRules.push({
                     "left": midBox,
@@ -297,14 +329,14 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 });
 
             this.vRules.push({
-                    "left": leftBox,
+                    "left":   leftBox,
                     "height": dat[p75] - dat[p25],
                     "lWidth": 1,
                     "bottom": dat[p25]
                 });
 
             this.vRules.push({
-                    "left": rightBox,
+                    "left":   rightBox,
                     "height": dat[p75] - dat[p25],
                     "lWidth": 1,
                     "bottom": dat[p25]
@@ -327,13 +359,13 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
             }
             
             this.bars.push({
-                    "value":     valuesRow[median],
-                    "left":      leftBox,
-                    "bottom":    dat[p25],
-                    "width":     widthBox,
-                    "height":    dat[p75]-dat[p25],
-                    "fillStyle": "limegreen"
-                  });
+                "value":     valuesRow[median],
+                "left":      leftBox,
+                "bottom":    dat[p25],
+                "width":     widthBox,
+                "height":    dat[p75]-dat[p25],
+                "fillStyle": "limegreen"
+            });
           }
     }
 });

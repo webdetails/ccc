@@ -530,7 +530,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     _selectOrdinalElement: function(data, toggle){
         if(toggle){
-            this.chart.dataEngine.owner.clearSelected();
+            this.chart.data.owner.clearSelected();
         }
 
         pvc.data.Data.toggleSelected(data.datums().array());

@@ -46,7 +46,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         this.base.apply(this, arguments);
 
         // Cached
-        this._valueDim = this.dataEngine.dimensions(this._valueRole.firstDimensionName());
+        this._valueDim = this.data.dimensions(this._valueRole.firstDimensionName());
     },
 
     /* @override */

@@ -44,7 +44,7 @@ pvc.BarAbstract = pvc.CategoricalAbstract.extend({
     _initData: function(){
         this.base.apply(this, arguments);
 
-        var data = this.dataEngine;
+        var data = this.data;
 
         // Cached
         this._valueDim = data.dimensions(this._valueRole.firstDimensionName());

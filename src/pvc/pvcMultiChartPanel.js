@@ -55,7 +55,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                     parent:     chart,
                     title:      childData.absLabel,
                     legend:     false,
-                    dataEngine: childData,
+                    data:       childData,
                     width:      width,
                     height:     height,
                     left:       left + ((index % colCount) * width),

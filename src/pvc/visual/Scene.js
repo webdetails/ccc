@@ -193,7 +193,7 @@ def.type('pvc.visual.Scene')
     },
     
     _createSelectedData: function(){
-        var any = this.panel().chart.dataEngine.owner.selectedCount() > 0,
+        var any = this.panel().chart.data.owner.selectedCount() > 0,
             isSelected = any && 
                          this.datums()
                              .any(function(datum){ return datum.isSelected; });
