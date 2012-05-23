@@ -1,3 +1,5 @@
+var complex_labelSep = " ~ ";
+
 /**
  * Initializes a complex instance.
  * 
@@ -99,6 +101,18 @@ def.type('pvc.data.Complex')
 	}
 })
 .add(/** @lends pvc.data.Complex# */{
+
+    buildLabel: function(){
+        return def.own(this.atoms)
+                .map(function(atom){ return atom.label; })
+                .filter(def.notEmpty)
+                .join(complex_labelSep);
+    },
+
+    view: function(dimNames){
+        return new pvc.data.ComplexView(this, dimNames);
+    },
+
     toString : function() {
        var s = [ '' + this.constructor.typeName ];
        

@@ -12,6 +12,7 @@ src/pvc/data/translation/CrosstabTranslationOper.js
 src/pvc/data/translation/RelationalTranslationOper.js
 src/pvc/data/Atom.js
 src/pvc/data/Complex.js
+src/pvc/data/ComplexView.js
 src/pvc/data/Datum.js
 src/pvc/data/Dimension.js
 src/pvc/data/Data.js

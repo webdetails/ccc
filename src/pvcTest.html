@@ -29,6 +29,7 @@
         <script type="text/javascript" src="pvc/data/translation/RelationalTranslationOper.js"></script>
         <script type="text/javascript" src="pvc/data/Atom.js"></script>
         <script type="text/javascript" src="pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="pvc/data/ComplexView.js"></script>
         <script type="text/javascript" src="pvc/data/Datum.js"></script>
         <script type="text/javascript" src="pvc/data/Dimension.js"></script>
         <script type="text/javascript" src="pvc/data/Data.js"></script>
@@ -239,7 +240,7 @@
             dot_shapeRadius: 4
           }
 
-        });
+        });
 
         dot3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         dot3.render();
@@ -511,7 +512,7 @@
         stackedLine.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         stackedLine.render();
 
-        var stackedLine2 = new pvc.StackedLineChart({
+        var stackedLine2 = new pvc.StackedLineChart({
           // legendPosition: "left",
           canvas: "pvcStackedLine2",
           width: 300,
@@ -796,7 +797,7 @@
           showValues: true,
           showXScale: true,
           showYScale: true,
-          yAxisPosition: "left",
+          yAxisPosition: "left",
           yAxisSize: 80,
           xAxisPosition: "bottom",
           xAxisSize: 20,

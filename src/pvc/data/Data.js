@@ -1,4 +1,3 @@
-var data_labelSep = " ~ ";
 
 /**
  * Initializes a data instance.
@@ -99,8 +98,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             this._leafs  = [];
             
             /* 
-             * Clone link parent atoms
-             * End up with the same set of own atoms
+             * Inherit link parent atoms.
              */
             atomsBase = linkParent.atoms;
             //atoms = null
@@ -145,13 +143,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     this._children = this.childNodes; // pv.Dom.Node#childNodes
     
     // Build label and child key
-    if(this.atoms){
-        this.absLabel = 
-        this.label = def.own(this.atoms)
-                        .map(function(atom){ return atom.label; })
-                        .filter(def.notEmpty)
-                        .join(data_labelSep);
-    }
+    this.absLabel = this.label = this.buildLabel();
 
     // The absolute key is relative to the root data (not the owner)
     this.absKey = this.key;
@@ -159,15 +151,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
         data_addChild.call(parent, this);
         
         if(parent.absLabel){
-            this.absLabel = def.join(data_labelSep, parent.absLabel, this.label);
+            this.absLabel = def.join(complex_labelSep, parent.absLabel, this.label);
         }
         
         if(parent.absKey){
-            if(this.key){
-                this.absKey = parent.absKey + "," + this.key;
-            } else {
-                this.absKey = parent.absKey;
-            }
+            this.absKey = def.join(",", parent.absKey, this.key);
         }
     }
 })

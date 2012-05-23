@@ -4,32 +4,32 @@
  */
 pvc.BulletChart = pvc.BaseChart.extend({
 
-  bulletChartPanel : null,
-  allowNoData: true,
+    bulletChartPanel : null,
+    allowNoData: true,
 
-  constructor: function(options){
-      options = options || {};
+    constructor: function(options){
+        options = options || {};
       
-      // Add range and marker dimension group defaults
-      var dimGroups = options.dimensionGroups || (options.dimensionGroups = {});
-      var rangeDimGroup = dimGroups.range  || (dimGroups.range  = {});
-      if(rangeDimGroup.valueType === undefined){
-          rangeDimGroup.valueType = Number;
-      }
+        // Add range and marker dimension group defaults
+        var dimGroups = options.dimensionGroups || (options.dimensionGroups = {});
+        var rangeDimGroup = dimGroups.range  || (dimGroups.range  = {});
+        if(rangeDimGroup.valueType === undefined){
+            rangeDimGroup.valueType = Number;
+        }
 
-      var markerDimGroup = dimGroups.marker || (dimGroups.marker = {});
-      if(markerDimGroup.valueType === undefined){
-          markerDimGroup.valueType = Number;
-      }
-      
-      options.legend = false;
-      options.selectable = false; // not supported yet
-     
-      this.base(options);
+        var markerDimGroup = dimGroups.marker || (dimGroups.marker = {});
+        if(markerDimGroup.valueType === undefined){
+            markerDimGroup.valueType = Number;
+        }
 
-      // Apply options
-      pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
-  },
+        options.legend = false;
+        options.selectable = false; // not supported yet
+
+        this.base(options);
+
+        // Apply options
+        pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
+    },
 
     _createTranslation: function(complexType){
         var translation = this.base(complexType),
@@ -46,6 +46,7 @@ pvc.BulletChart = pvc.BaseChart.extend({
          *  3       Title | Value | Marker
          *  >= 4    Title | Subtitle | Value | Marker | Ranges
          */
+        // TODO: respect user reader definitions (names and indexes)
         if(size){
             switch(size){
                 case 1:
@@ -400,62 +401,73 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             de = chart.dataEngine,
             options = chart.options,
             titleRole = chart.visualRoles('title'),
+            titleGrouping = titleRole.grouping,
             subTitleRole = chart.visualRoles('subTitle'),
+            subTitleGrouping = subTitleRole.grouping,
             valueRole = chart.visualRoles('value'),
+            valueDimName = valueRole.grouping && valueRole.firstDimensionName(),
             markerRole = chart.visualRoles('marker'),
+            markerDimName = markerRole.grouping && markerRole.firstDimensionName(),
             rangeRole = chart.visualRoles('range'),
-            rangeDimNames = rangeRole.grouping && 
-                            rangeRole.grouping
-                                     .dimensions()
-                                     .select(function(dimSpec){ return dimSpec.name; })
-                                     .array(),
-            titleFormatter    = (   titleRole.grouping &&    titleRole.firstDimension().formatter()) || def.identity,
-            subTitleFormatter = (subTitleRole.grouping && subTitleRole.firstDimension().formatter()) || def.identity;
+            rangeGrouping = rangeRole.grouping;
         
         var defaultData = {
-            title:      options.bulletTitle,
-            formattedTitle: titleFormatter(options.bulletTitle),
-            subtitle:   options.bulletSubtitle,
-            formattedSubtitle: subTitleFormatter(options.bulletSubtitle),
-            ranges:     options.bulletRanges   || [],
-            measures:   options.bulletMeasures || [],
-            markers:    options.bulletMarkers  || []
+            title: options.bulletTitle,
+            formattedTitle: def.scope(function(){
+                var formatter = titleGrouping && titleRole.firstDimension().formatter();
+                if(formatter){
+                    return formatter(options.bulletTitle);
+                }
+                return options.bulletTitle;
+            }),
+            subtitle: options.bulletSubtitle,
+            formattedSubtitle: def.scope(function(){
+                var formatter = subTitleGrouping && subTitleRole.firstDimension().formatter();
+                if(formatter){
+                    return formatter(options.bulletSubtitle);
+                }
+                return options.bulletSubtitle;
+            }),
+            ranges:   options.bulletRanges   || [],
+            measures: options.bulletMeasures || [],
+            markers:  options.bulletMarkers  || []
         };
 
         if(!valueRole.grouping &&
-           !titleRole.grouping &&
+           !titleGrouping &&
            !markerRole.grouping &&
-           !subTitleRole.grouping &&
-           !rangeRole.grouping){
+           !subTitleGrouping &&
+           !rangeGrouping){
 
             data = [defaultData];
        } else {
             data = de.datums().select(function(datum){
                 var d = Object.create(defaultData),
-                    atoms = datum.atoms;
+                    atoms = datum.atoms,
+                    view;
 
-                if(atoms.value){
-                    d.measures = [atoms.value.value];
+                if(valueDimName){
+                    d.measures = [atoms[valueDimName].value];
                 }
 
-                if(atoms.title){
-                    d.title = atoms.title.value;
-                    d.formattedTitle = titleFormatter(d.title);
+                if(titleGrouping){
+                    view = titleGrouping.view(datum);
+                    d.title = view.value;
+                    d.formattedTitle = view.label;
                 }
 
-                if(atoms.subTitle){
-                    d.subtitle = atoms.subTitle.value;
-                    d.formattedSubtitle = subTitleFormatter(d.subtitle);
+                if(subTitleGrouping){
+                    view = subTitleGrouping.view(datum);
+                    d.subtitle = view.value;
+                    d.formattedSubtitle = view.label;
                 }
 
-                if(atoms.marker){
-                    d.markers = [atoms.marker.value];
+                if(markerDimName){
+                    d.markers = [atoms[markerDimName].value];
                 }
 
-                if(rangeDimNames){
-                    d.ranges = rangeDimNames.map(function(dimName){
-                        return atoms[dimName].value;
-                    });
+                if(rangeGrouping){
+                    d.ranges = rangeGrouping.view(datum).values();
                 }
 
                 return d;

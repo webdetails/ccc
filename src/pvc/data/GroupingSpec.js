@@ -82,7 +82,21 @@ def.type('pvc.data.GroupingSpec')
         return def.query(this.levels)
                   .selectMany(function(level){ return level.dimensions; });
     },
+
+    dimensionNames: function(){
+        if(!this._dimNames){
+            this._dimNames = this.dimensions()
+                                 .select(function(dimSpec){ return dimSpec.name; })
+                                 .array();
+        }
+        
+        return this._dimNames;
+    },
     
+    view: function(complex){
+        return complex.view(this.dimensionNames());
+    },
+
     /**
      * Indicates if the data resulting from the grouping is discrete or continuous.
      * @type boolean

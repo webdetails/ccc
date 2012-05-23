@@ -197,6 +197,13 @@ def.type('pvc.visual.Role')
         }
     },
 
+    view: function(complex){
+        var grouping = this.grouping;
+        if(grouping){
+            return grouping.view(complex);
+        }
+    },
+
     /**
      * Binds a grouping specification to playing this role.
      * 
