@@ -42,12 +42,14 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      * @override
      */
     _createVisibleData: function(dataPartValues){
-        var serGrouping = this._serRole.flattenedGrouping(),
-            catGrouping = this._catRole.flattenedGrouping();
+        var serGrouping = this._serRole && this._serRole.flattenedGrouping(),
+            catGrouping = this._catRole.flattenedGrouping(),
+            partData    = this._partData(dataPartValues);
 
-        return this._partData(dataPartValues)
-                   // <=> One multi-dimensional, two-levels data grouping
-                   .groupBy([catGrouping, serGrouping], { visible: true });
+        return serGrouping ?
+                // <=> One multi-dimensional, two-levels data grouping
+                partData.groupBy([catGrouping, serGrouping], { visible: true }) :
+                partData.groupBy(catGrouping, { visible: true });
     },
     
     /**

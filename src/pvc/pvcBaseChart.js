@@ -39,6 +39,9 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @type object
      */
     _visualRoles: null,
+
+    _serRole: null,
+    _dataPartRole: null,
     
     /**
      * An array of the {@link pvc.visual.Role} that are measures.
@@ -224,17 +227,26 @@ pvc.BaseChart = pvc.Abstract.extend({
     secondAxisColor: null,
 
     constructor: function(options) {
-        this.parent = def.get(options, 'parent') || null;
-        if(this.parent) {
-            this.root = this.parent.root;
+        var parent = this.parent = def.get(options, 'parent') || null;
+        if(parent) {
+            this.root = parent.root;
             this.dataEngine =
             this.data = def.get(options, 'dataEngine') ||
                         def.fail.argumentRequired('options.dataEngine');
             
             this.left = options.left;
             this.top  = options.top;
-            this._visualRoles = this.parent._visualRoles;
-            this._measureVisualRoles = this.parent._measureVisualRoles;
+            this._visualRoles = parent._visualRoles;
+            this._measureVisualRoles = parent._measureVisualRoles;
+
+            if(parent._serRole) {
+                this._serRole = parent._serRole;
+            }
+
+            if(parent._dataPartRole) {
+                this._dataPartRole = parent._dataPartRole;
+            }
+            
         } else {
             this.root = this;
             
@@ -531,13 +543,28 @@ pvc.BaseChart = pvc.Abstract.extend({
                     requireIsDiscrete: true
                 }
             });
+
+            // Cached
+            this._dataPartRole = this.visualRoles('dataPart');
+        }
+
+        var serRoleSpec = this._getSeriesRoleSpec();
+        if(serRoleSpec){
+            this._addVisualRoles({series: serRoleSpec});
+
+            // Cached
+            this._serRole = this.visualRoles('series');
         }
     },
 
     _hasDataPartRole: function(){
         return false;
     },
-    
+
+    _getSeriesRoleSpec: function(){
+        return null;
+    },
+
     _addVisualRoles: function(roles){
         def.eachOwn(roles, function(keyArgs, name){
             var visualRole = new pvc.visual.Role(name, keyArgs);
@@ -680,13 +707,12 @@ pvc.BaseChart = pvc.Abstract.extend({
 
     _partData: function(dataPartValues){
         if(!this.__partData){
-            var dataPartRole = this.visualRoles('dataPart', {assertExists: false});
-            if(!dataPartRole || !dataPartRole.grouping){
+            if(!this._dataPartRole || !this._dataPartRole.grouping){
                 /* Undefined or unbound */
                 this.__partData = this.data;
             } else {
                 // Visible and not
-                this.__partData = dataPartRole.flatten(this.data);
+                this.__partData = this._dataPartRole.flatten(this.data);
             }
         }
         
@@ -697,7 +723,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         dataPartValues = def.query(dataPartValues).distinct().array();
         dataPartValues.sort();
 
-        var dataPartDim = this.visualRoles('dataPart').firstDimensionName();
+        var dataPartDim = this._dataPartRole.firstDimensionName();
 
         if(dataPartValues.length === 1){
             // Faster this way...
@@ -711,8 +737,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
 
     _partValues: function(){
-        var dataPartRole = this.visualRoles('dataPart', {assertExists: false});
-        if(!dataPartRole || !dataPartRole.grouping){
+        if(!this._dataPartRole || !this._dataPartRole.grouping){
             /* Undefined or unbound */
             return null;
         }

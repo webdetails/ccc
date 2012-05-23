@@ -36,27 +36,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.base(options);
 
         pvc.mergeDefaults(this.options, pvc.CartesianAbstract.defaultOptions, options);
-
-        var parent = this.parent;
-        if(parent) {
-            this._serRole = parent._serRole;
-        }
     },
     
-    /**
-     * Initializes each chart's specific roles.
-     * @override
-     */
-    _initVisualRoles: function(){
-        
-        this.base();
-        
-        this._addVisualRoles({
-            series: { isRequired: true, defaultDimensionName: 'series*', autoCreateDimension: true }
-        });
-
-        // Cached
-        this._serRole = this.visualRoles('series');
+    _getSeriesRoleSpec: function(){
+        return { isRequired: true, defaultDimensionName: 'series*', autoCreateDimension: true };
     },
 
     _initData: function(){
@@ -438,8 +421,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @virtual
      */
     _createVisibleData: function(dataPartValues){
-        return this.visualRoles('series')
-                   .flatten(this._partData(dataPartValues), { visible: true });
+        var partData = this._partData(dataPartValues);
+        return this._serRole && this._serRole.grouping ?
+                   this._serRole.flatten(partData, {visible: true}) :
+                   partData;
     },
     
     _assertSingleContinuousValueRole: function(valueRole){
