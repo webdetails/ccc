@@ -11,6 +11,7 @@ pvc.BulletChart = pvc.BaseChart.extend({
         options = options || {};
       
         // Add range and marker dimension group defaults
+        // This only helps in default bindings...
         var dimGroups = options.dimensionGroups || (options.dimensionGroups = {});
         var rangeDimGroup = dimGroups.range  || (dimGroups.range  = {});
         if(rangeDimGroup.valueType === undefined){
@@ -31,11 +32,45 @@ pvc.BulletChart = pvc.BaseChart.extend({
         pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
     },
 
+    /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
+
+        this.base();
+
+        this._addVisualRoles({
+            title:    { defaultDimensionName: 'title*'    },
+            subTitle: { defaultDimensionName: 'subTitle*' },
+            value: {
+                isMeasure:  true,
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimensionName: 'value*'
+            },
+            marker: {
+                isMeasure:  true,
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimensionName: 'marker*'
+            },
+            range: {
+                isMeasure:  true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimensionName: 'range*'
+            }
+        });
+    },
+
     _createTranslation: function(complexType){
         var translation = this.base(complexType),
             /*
              * By now the translation has already been initialized
-             * and its virtualItemSize can be called.
+             * and its virtualItemSize is determined.
              */
             size = translation.virtualItemSize()
             ;
@@ -70,44 +105,10 @@ pvc.BulletChart = pvc.BaseChart.extend({
                     break;
             }
         }
-        
+
         return translation;
     },
-
-    /**
-     * Initializes each chart's specific roles.
-     * @override
-     */
-    _initVisualRoles: function(){
-
-        this.base();
-
-        this._addVisualRoles({
-            title: { defaultDimensionName: 'title*' },
-            subTitle: { defaultDimensionName: 'subTitle*' },
-            value: {
-                isMeasure:  true,
-                requireSingleDimension: true,
-                requireIsDiscrete: false,
-                valueType: Number,
-                defaultDimensionName: 'value*'
-            },
-            marker: {
-                isMeasure:  true,
-                requireSingleDimension: true,
-                requireIsDiscrete: false,
-                valueType: Number,
-                defaultDimensionName: 'marker*'
-            },
-            range: {
-                isMeasure:  true,
-                requireIsDiscrete: false,
-                valueType: Number,
-                defaultDimensionName: 'range*'
-            }
-        });
-  },
-
+    
   _preRenderCore: function(){
     if(pvc.debug >= 3){
       pvc.log("Prerendering in bulletChart");

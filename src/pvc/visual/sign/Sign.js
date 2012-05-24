@@ -6,7 +6,8 @@ def.type('pvc.visual.Sign')
     this.pvMark = pvMark;
     
     this.extensionId = def.get(keyArgs, 'extensionId');
-    this.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true);
+    this.isActiveSeriesAware = !!this.chart.visualRoles('series', {assertExists: false}) &&
+                               def.get(keyArgs, 'activeSeriesAware', true);
             
     /* Extend the pv mark */
     pvMark
@@ -233,18 +234,16 @@ def.type('pvc.visual.Sign')
     baseColor: function(type){
         var color = this.delegate();
         if(color === undefined){
-            color = this.legendColor(type);
+            color = this.defaultColor(type);
         }
         
         return color;
     },
 
-    legendColor: function(type){
+    defaultColor: function(type){
+        var colorAct = this.scene.acts[this.chart.legendSource];
         /* Legend color is a function of the chart's legendSource */
-        return this.legendColorScale()(
-            // Better there exists an act for legendSource role...
-            this.scene.acts[this.chart.legendSource].value
-        );
+        return this.legendColorScale()(colorAct && colorAct.value);
     },
 
     normalColor: function(type, color){

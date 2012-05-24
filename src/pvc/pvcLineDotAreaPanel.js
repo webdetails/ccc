@@ -30,13 +30,16 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     showValues: true,
     
     valuesAnchor: "right",
-    
+    valueRoleName: null,
+
     /**
      * @override
      */
     _createCore: function(){
         this.base();
-         
+        
+        this.valueRoleName = this.chart.axes.ortho.role.name;
+
         var myself = this,
             chart = this.chart,
             options = chart.options,
@@ -245,7 +248,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 .add(pv.Label)
                 // ------
                 .bottom(0)
-                .text(function(scene){ return scene.acts.value.label; })
+                .text(function(scene){ return scene.acts[this.valueRoleName].label; })
                 ;
         }
     },
@@ -294,6 +297,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             categDatas = data._children;
         
         var chart = this.chart,
+            valueDim = data.owner.dimensions(chart.axes.ortho.role.firstDimensionName()),
             isStacked = this.stacked,
             visibleKeyArgs = {visible: true},
             /* TODO: BIG HACK */
@@ -320,9 +324,14 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         /** 
          * Create starting scene tree 
          */
-        chart._serRole.flatten(data)
-             .children()
-             .each(createSeriesScene, this);
+        if(chart._serRole && chart._serRole.grouping){
+            chart._serRole
+                .flatten(data)
+                .children()
+                .each(createSeriesScene, this);
+        } else {
+            createNullSeriesScene.call(this);
+        }
         
         /** 
          * Update the scene tree to include intermediate leaf-scenes,
@@ -342,24 +351,44 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             .each(trimNullSeriesScenes, this);
         
         return rootScene;
-        
+
         function createSeriesScene(seriesData1){
             /* Create series scene */
-            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1}),
-                seriesKey   = seriesData1.key;
-            
+            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1});
+
             seriesScene.acts.series = {
                 value: seriesData1.value,
                 label: seriesData1.label
             };
-            
+
+            createSeriesSceneCategories.call(this, seriesScene, seriesData1);
+        }
+
+        function createNullSeriesScene(){
+            /* Create series scene */
+            var seriesScene = new pvc.visual.Scene(rootScene, {group: data});
+
+            seriesScene.acts.series = {
+                value: null,
+                label: ""
+            };
+
+            createSeriesSceneCategories.call(this, seriesScene);
+        }
+
+        function createSeriesSceneCategories(seriesScene, seriesData1){
             categDatas.forEach(function(categData1){
                 /* Create leaf scene */
                 var categKey = categData1.key,
-                    group = data._childrenByKey[categKey]._childrenByKey[seriesKey],
+                    group = data._childrenByKey[categKey]
+                    ;
                     
+                if(seriesData1){
+                    group = group._childrenByKey[seriesData1.key];
+                }
+
                     /* If there's no group, provide, at least, a null datum */
-                    datum = group ? null : createNullDatum(seriesData1, categData1),
+                var datum = group ? null : createNullDatum(seriesData1, categData1),
                     scene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
                 
                 scene.acts.category = {
@@ -367,17 +396,17 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                     label: categData1.label
                 };
                 
-                var value = group ? group.dimensions(chart._valueDim.name).sum(visibleKeyArgs) : null;
-                scene.acts.value = {
+                var value = group ? group.dimensions(valueDim.name).sum(visibleKeyArgs) : null;
+                scene.acts[this.valueRoleName] = {
                     /* accumulated value, for stacked */
                     accValue: value != null ? value : orthoNullValue,
                     value:    value,
-                    label:    chart._valueDim.format(value)
+                    label:    valueDim.format(value)
                 };
                 
                 scene.isNull = !group; // A virtual scene?
                 scene.isIntermediate = false;
-            });
+            }, this);
         }
         
         function completeSeriesScenes(seriesScene) {
@@ -442,16 +471,16 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                       toScene, 
                       belowScene){
             
-            var toAccValue = toScene.acts.value.accValue;
+            var toAccValue = toScene.acts[this.valueRoleName].accValue;
             
             if(belowScene) {
                 if(toScene.isNull && !isBaseDiscrete) {
                     toAccValue = orthoNullValue;
                 } else {
-                    toAccValue += belowScene.acts.value.accValue;
+                    toAccValue += belowScene.acts[this.valueRoleName].accValue;
                 }
                 
-                toScene.acts.value.accValue = toAccValue;
+                toScene.acts[this.valueRoleName].accValue = toAccValue;
             }
             
             toScene.basePosition  = sceneBaseScale(toScene);
@@ -487,9 +516,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
             if(interIsNull) {
                 if(belowScene && isBaseDiscrete) {
-                    var belowValueAct = belowScene.acts.value;
+                    var belowValueAct = belowScene.acts[this.valueRoleName];
                     interAccValue = belowValueAct.accValue;
-                    interValue = belowValueAct.value;
+                    interValue = belowValueAct[this.valueRoleName];
                 } else {
                     interValue = interAccValue = orthoNullValue;
                 }
@@ -508,8 +537,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
 //                        interBasePosition = (toScene.basePosition + fromScene.basePosition) / 2;
 //                    }
             } else {
-                var fromValueAct = fromScene.acts.value,
-                    toValueAct   = toScene.acts.value;
+                var fromValueAct = fromScene.acts[this.valueRoleName],
+                    toValueAct   = toScene.acts[this.valueRoleName];
                 
                 interValue = (toValueAct.value + fromValueAct.value) / 2;
                 
@@ -528,10 +557,10 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 });
             
             interScene.acts.category = toScene.acts.category;
-            interScene.acts.value = {
+            interScene.acts[this.valueRoleName] = {
                 accValue: interAccValue,
                 value:    interValue,
-                label:    chart._valueDim.format(interValue)
+                label:    valueDim.format(interValue)
             };
             
             interScene.isIntermediate = true;
@@ -562,9 +591,12 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         
         function createNullDatum(serData1, catData1) {
             // Create a null datum with col and row coordinate atoms
-            var atoms = def.array.append(
-                            def.own(serData1.atoms),
-                            def.own(catData1.atoms));
+            var atoms = serData1 ?
+                            def.array.append(
+                                def.own(serData1.atoms),
+                                def.own(catData1.atoms)) :
+                            catData1.atoms
+                            ;
             
             return new pvc.data.Datum(data, atoms, true);
         }

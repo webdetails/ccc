@@ -33,10 +33,18 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     baseStrokeWidth: function(){
-        /* Delegate to possible lineWidth extension or default to 1.5 */
-        return this.delegate(1);
+        var value = this.delegate();
+        if(value === undefined){
+            value = this.defaultStrokeWidth();
+        }
+
+        return value;
     },
 
+    defaultStrokeWidth: function(){
+        return 1;
+    },
+    
     normalStrokeWidth: function(strokeWidth){
         return strokeWidth;
     },

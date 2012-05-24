@@ -175,11 +175,15 @@ def.type('pvc.data.DimensionType')
 function(complexType, name, keyArgs){
     this.complexType = complexType;
     this.name  = name;
-    this.label = def.get(keyArgs, 'label') || name;
+    this.label = def.get(keyArgs, 'label') || def.firstUpperCase(name);
 
     var groupAndLevel = pvc.data.DimensionType.splitDimensionGroupName(name);
     this.group = groupAndLevel[0];
-    this.groupLevel = groupAndLevel[1];
+    this.groupLevel = def.nullyTo(groupAndLevel[1], 0);
+
+    if(this.label.indexOf('{') >= 0){
+        this.label = def.format(this.label, [this.groupLevel+1]);
+    }
 
     this.playedVisualRoles = new def.Map();
     this.isHidden = !!def.get(keyArgs, 'isHidden');
@@ -428,12 +432,14 @@ pvc.data.DimensionType.splitDimensionGroupName = function(dimName){
     
     if(match[2]) {
         index = Number(match[2]);
-        if(index === 1) {
-            index = 0;
+        if(index <= 1) {
+            index = 1;
+        } else {
+            index--;
         }
     }
     
-    return [match[1],  index];  
+    return [match[1], index];
 };
 
 // TODO: Docs

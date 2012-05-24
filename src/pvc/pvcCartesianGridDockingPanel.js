@@ -10,6 +10,8 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
         this.extend(this.pvPanel,    "content_");
         this.extend(this.xFrameRule, "xAxisEndLine_");
         this.extend(this.yFrameRule, "yAxisEndLine_");
+        this.extend(this.xZeroLine,  "xAxisZeroLine_");
+        this.extend(this.yZeroLine,  "yAxisZeroLine_");
     },
 
     /**
@@ -34,11 +36,11 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
             }
 
             if(axes.x.option('ZeroLine')) {
-                this.xFrameRule = this._createZeroLine(axes.x);
+                this.xZeroLine = this._createZeroLine(axes.x);
             }
 
             if(axes.y.option('ZeroLine')) {
-                this.yFrameRule = this._createZeroLine(axes.y);
+                this.yZeroLine = this._createZeroLine(axes.y);
             }
         }
     },

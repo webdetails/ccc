@@ -54,6 +54,10 @@ def.type('pvc.data.TranslationOper')
         return this.metadata.length;
     },
 
+    freeVirtualItemSize: function(){
+        return this.virtualItemSize() - this._userUsedIndexesCount;
+    },
+
     /**
      * Defines a dimension reader.
      *

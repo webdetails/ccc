@@ -5,7 +5,9 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     var pvMark = protoMark.add(pv.Bar);
     
     this.base(panel, pvMark, keyArgs);
-    
+
+    this.normalStroke = def.get(keyArgs, 'normalStroke', false);
+
     this/* Colors */
         .intercept('fillStyle',   'fillColor'  )
         .intercept('strokeStyle', 'strokeColor')
@@ -26,7 +28,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
      * @override
      */
     normalColor: function(type, color){
-        if(type === 'stroke'){
+        if(type === 'stroke' && !this.normalStroke){
             return null;
         }
 
@@ -43,10 +45,19 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
             if(scene.isActive){
                return color.brighter().alpha(0.7);
             }
-            return null;
-        }
+            if(!this.normalStroke){
+                return null;
+            }
 
-        if(type === 'fill'){
+            if(scene.anySelected() && !scene.isSelected()) {
+                if(this.isActiveSeriesAware && scene.isActiveSeries()) {
+                    return pv.Color.names.darkgray.darker().darker();
+                }
+
+                return this.dimColor(type, color);
+            }
+
+        } else if(type === 'fill'){
             if(scene.isActive) {
                 if(scene.isActive) {
                     return color.alpha(0.8);
@@ -82,8 +93,16 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     },
 
     baseStrokeWidth: function(){
-        /* Delegate to possible lineWidth extension or default to 0.5 */
-        return this.delegate(0.5);
+        var value = this.delegate();
+        if(value === undefined){
+            value = this.defaultStrokeWidth();
+        }
+
+        return value;
+    },
+
+    defaultStrokeWidth: function(){
+        return 0.5;
     },
 
     normalStrokeWidth: function(strokeWidth){

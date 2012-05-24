@@ -30,17 +30,16 @@
  *
  * @constructor
  * @param {def.Query} levelSpecs An enumerable of {@link pvc.data.GroupingLevelSpec}.
- * @param {pvc.data.ComplexType} complexType A complex type.
+ * @param {pvc.data.ComplexType} [type] A complex type.
  * @param {object} [keyArgs] Keyword arguments.
  * @param {string} [keyArgs.flatteningMode=null] The flattening mode.
  * @param {string} [keyArgs.flattenRootLabel=''] The label of the root node of a flattening operation.
  */
 def.type('pvc.data.GroupingSpec')
-.init(function(levelSpecs, complexType, keyArgs){
+.init(function(levelSpecs, type, keyArgs){
     levelSpecs  || def.fail.argumentRequired('levelSpecs');
-    complexType || def.fail.argumentRequired('complexType');
     
-    this.type = complexType;
+    this.type = type || null;
     
     var ids = [];
     
@@ -74,6 +73,17 @@ def.type('pvc.data.GroupingSpec')
               ids.join('||');
 })
 .add(/** @lends pvc.data.GroupingSpec# */{
+    /**
+     * Late binds a grouping specification to a complex type.
+     * @param {pvc.data.ComplexType} type A complex type.
+     */
+    bind: function(type){
+        this.type = type || def.fail.argumentRequired('type');
+        this.dimensions().each(function(dimSpec){
+            dimSpec.bind(type);
+        })
+    },
+
     /**
      * Obtains an enumerable of the contained dimension specifications.
      * @type def.Query
@@ -167,7 +177,7 @@ def.type('pvc.data.GroupingSpec')
             var dimSpecs = this.dimensions()
                             .select(function(dimSpec){
                                 return reverse ? 
-                                    new pvc.data.GroupingDimensionSpec(dimSpec.type, !dimSpec.reverse) :
+                                    new pvc.data.GroupingDimensionSpec(dimSpec.name, !dimSpec.reverse, dimSpec.type.complexType) :
                                     dimSpec;
                             });
                             
@@ -194,7 +204,7 @@ def.type('pvc.data.GroupingSpec')
                     .select(function(levelSpec){
                         var dimSpecs = def.query(levelSpec.dimensions)
                                 .select(function(dimSpec){
-                                    return new pvc.data.GroupingDimensionSpec(dimSpec.type, !dimSpec.reverse);
+                                    return new pvc.data.GroupingDimensionSpec(dimSpec.name, !dimSpec.reverse, dimSpec.type.complexType);
                                 });
                         
                         return new pvc.data.GroupingLevelSpec(dimSpecs);
@@ -271,14 +281,28 @@ def.type('pvc.data.GroupingLevelSpec')
 });
 
 def.type('pvc.data.GroupingDimensionSpec')
-.init(function(dimType, reverse){
-    this.name     = dimType.name;
+.init(function(name, reverse, type){
+    this.name     = name;
     this.reverse  = !!reverse;
-    this.type     = dimType;
-    this.comparer = dimType.atomComparer(this.reverse);
     this.id = this.name + ":" + (this.reverse ? '0' : '1');
+    if(type){
+        this.bind(type);
+    }
 })
 .add( /** @lends pvc.data.GroupingDimensionSpec */ {
+    type: null,
+    comparer: null,
+
+    /**
+     * Late binds a dimension specification to a complex type.
+     * @param {pvc.data.ComplexType} type A complex type.
+     */
+    bind: function(type){
+        type || def.fail.argumentRequired('type');
+        this.type     = type.dimensions(this.name);
+        this.comparer = this.type.atomComparer(this.reverse);
+    },
+
     compareDatums: function(a, b){
         //if(this.type.isComparable) {
             var result  = this.comparer(a.atoms[this.name], b.atoms[this.name]);
@@ -315,13 +339,12 @@ def.type('pvc.data.GroupingDimensionSpec')
  * "series1 asc|series2 desc, category"
  * </pre>
  * 
- * @param {pvc.data.ComplexType} type A complex type against which to resolve dimension names.
+ * @param {pvc.data.ComplexType} [type] A complex type against which to resolve dimension names.
  * 
  * @type pvc.data.GroupingSpec
  */
 pvc.data.GroupingSpec.parse = function(specText, type){
-    specText || def.fail.argumentRequired('groupingSpecText');
-    type     || def.fail.argumentRequired('type');
+    specText || def.fail.argumentRequired('specText');
     
     var levels;
     if(def.isArray(specText)) {
@@ -371,7 +394,7 @@ pvc.data.GroupingSpec.multiple = function(groupings, keyArgs){
                            throw def.error.operationInvalid("Multiple groupings must have the same complex type.");
                        }
                        
-                       return new pvc.data.GroupingDimensionSpec(dimSpec.type, !asc);
+                       return new pvc.data.GroupingDimensionSpec(dimSpec.name, !asc, dimSpec.type.complexType);
                    });
                
                return new pvc.data.GroupingLevelSpec(dimSpecs);
@@ -397,10 +420,10 @@ function groupSpec_parseGroupingLevel(groupLevelText, type) {
             var match   = groupSpec_matchDimSpec.exec(dimSpecText) ||
                             def.fail.argumentInvalid('groupLevelText', "Invalid grouping level syntax '{0}'.", [dimSpecText]),
                 name    = match[1],
-                dimType = type.dimensions(name),
                 order   = (match[2] || '').toLowerCase(),
                 reverse = order === 'desc';
                
-            return new pvc.data.GroupingDimensionSpec(dimType, reverse);
+            var dimSpec = new pvc.data.GroupingDimensionSpec(name, reverse, type);
+            return dimSpec;
         });
 }

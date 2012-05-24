@@ -72,31 +72,31 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      * </p>
      *
      * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
+     * @param {pvc.visual.Role} valueRole The role.
      * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @type object
      *
      * @override
      */
-    _getVisibleValueExtent: function(valueAxis, dataPartValues){
+    _getVisibleRoleValueExtent: function(valueAxis, valueRole, dataPartValues){
         if(!dataPartValues){
             // Most common case is faster
-            return this._getVisiblePartValueExtent(valueAxis, null);
+            return this._getVisibleCellValueExtent(valueAxis, valueRole, dataPartValues);
         }
 
         return def.query(dataPartValues)
-                  .select(function(dataPartValue){
-                      return this._getVisiblePartValueExtent(valueAxis, dataPartValue);
-                  }, this)
-                  .reduce(this._unionReduceExtent, null);
+                    .select(function(dataPartValue){
+                        return this._getVisibleCellValueExtent(valueAxis, valueRole, dataPartValue);
+                    }, this)
+                    .reduce(this._unionReduceExtent, null)
+                    ;
     },
 
-    _isDataPartStacked: function(dataPartValue){
+    _isDataCellStacked: function(valueRole, dataPartValue){
         return this.options.stacked;
     },
 
-    _getVisiblePartValueExtent: function(valueAxis, dataPartValue){
-        var valueRole = valueAxis.role;
-        
+    _getVisibleCellValueExtent: function(valueAxis, valueRole, dataPartValue){
         switch(valueRole.name){
             case 'series':// (series throws in base)
             case 'category':
@@ -107,8 +107,8 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                  *
                  * Continuous baseScale's, like timeSeries go this way.
                  */
-                return pvc.CartesianAbstract.prototype._getVisibleValueExtent.call(
-                            this, valueAxis, dataPartValue);
+                return pvc.CartesianAbstract.prototype._getVisibleRoleValueExtent.call(
+                                this, valueAxis, valueRole, dataPartValue);
         }
         
         this._assertSingleContinuousValueRole(valueRole);
@@ -116,7 +116,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         var valueDimName = valueRole.firstDimensionName(),
             data = this._getVisibleData(dataPartValue);
 
-        if(valueAxis.type !== 'ortho' || !this._isDataPartStacked(dataPartValue)){
+        if(valueAxis.type !== 'ortho' || !this._isDataCellStacked(valueRole, dataPartValue)){
             return data.leafs()
                        .select(function(serGroup){
                            return serGroup.dimensions(valueDimName).sum();
@@ -198,29 +198,6 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      */
     _reduceStackedCategoryValueExtent: function(result, catRange, catGroup){
         return this._unionReduceExtent(result, catRange);
-    },
-
-    /**
-     * Could/Should be static
-     */
-    _unionReduceExtent: function(result, range){
-        if(!result) {
-            if(!range){
-                return null;
-            }
-            
-            result = {min: range.min, max: range.max};
-        } else if(range){
-            if(range.min < result.min){
-                result.min = range.min;
-            }
-
-            if(range.max > result.max){
-                result.max = range.max;
-            }
-        }
-
-        return result;
     },
 
     markEventDefaults: {

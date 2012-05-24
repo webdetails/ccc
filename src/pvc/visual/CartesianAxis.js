@@ -35,17 +35,46 @@ def.scope(function(){
  * @param {pvc.CartesianAbstract} chart The associated cartesian chart.
  * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
  * @param {number} [index=0] The index of the axis within its type.
- * @param {pvc.visual.Role} role The associated visual role.
+ * @param {pvc.visual.Role || pvc.visual.Role[]} roles The associated visual role or roles.
  * 
  * @param {object} [keyArgs] Keyword arguments.
  * @param {pv.Scale} scale The associated scale.
  */
 def.type('pvc.visual.CartesianAxis')
-.init(function(chart, type, index, role, keyArgs){
+.init(function(chart, type, index, roles, keyArgs){
+    roles || def.fail.argumentRequired('roles');
+
     this.chart = chart;
     this.type  = type;
     this.index = index == null ? 0 : index;
-    this.role  = role;
+
+    this.roles = def.array(roles);
+    this.role  = this.roles[0];
+    this.scaleType = groupingScaleType(this.role.grouping);
+
+    // Role compatibility checks
+    var L = this.roles.length;
+    if(L > 1){
+        var grouping = this.role.grouping;
+        if(this.scaleType === 'Discrete'){
+            for(var i = 1; i < L ; i++){
+                if(grouping.id !== this.roles[i].grouping.id){
+                    throw def.error.operationInvalid("Discrete roles on the same axis must have equal groupings.");
+                }
+            }
+        } else {
+            if(!grouping.firstDimension.type.isComparable){
+                throw def.error.operationInvalid("Continuous roles on the same axis must have comparable groupings.");
+            }
+
+            for(var i = 1; i < L ; i++){
+                if(this.scaleType !== groupingScaleType(this.roles[i].grouping)){
+                    throw def.error.operationInvalid("Continuous roles on the same axis must have equal scales of the same type.");
+                }
+            }
+        }
+    }
+
     this.scale = def.get(keyArgs, 'scale');
     
     // ------------
@@ -79,16 +108,11 @@ def.type('pvc.visual.CartesianAxis')
      * @type string
      */
     scaleType: function(){
-        var grouping = this.role.grouping;
-        return grouping.isDiscrete() ? 
-                 'Discrete' : 
-                 (grouping.firstDimension.type.valueType === Date ?
-                  'Timeseries' : 
-                  'Continuous'); 
+        return groupingScaleType(this.role.grouping);
     },
     
     /**
-     * Obtains a scene-scale function to compute values of this axis.
+     * Obtains a scene-scale function to compute values of this axis' main role.
      * 
      * @type function
      */
@@ -533,6 +557,15 @@ function firstOptions(name) {
  */
 function buildOptionsIdName(name) {
     return this.optionsId + 'Axis' + name;
+}
+
+
+function groupingScaleType(grouping){
+    return grouping.isDiscrete() ?
+                'Discrete' :
+                (grouping.firstDimension.type.valueType === Date ?
+                'Timeseries' :
+                'Continuous');
 }
 
 });

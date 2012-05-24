@@ -33,7 +33,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
         return null;
     },
 
-    _isDataPartStacked: function(dataPartValue){
+    _isDataCellStacked: function(role, dataPartValue){
         return !dataPartValue || (dataPartValue === '0') ? this.options.stacked : false;
     },
 

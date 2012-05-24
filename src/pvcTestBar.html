@@ -133,8 +133,7 @@ proportional to the values that they represent.
   <li>orientation (horizontal | vertical)</li>
   <li>showValues (true|false)</li>
   <li>stacked (true|false)</li>
-  <li>panelSizeRatio - Ratio of the band occupied by the pane.
-Default: 0.5 (50%)</li>
+  <li>panelSizeRatio - Ratio of occupied vs total size of category band. Default: 0.9 (90%)</li>
   <li>barSizeRatio - In multiple series, percentage of inner band
 occupied by bars. Default: 0.9 (90%)</li>
   <li>maxBarSize - Maximum size of a bar in pixels.</li>
@@ -479,7 +478,8 @@ bar6.render();
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBar6"></div>
 
-<h3>Yet Another Stacked Bar chart</h3>
+<h3>Yet Another Stacked Bar chart</h3>
+
 Consumes crosstab data and contains null values<br>
 <textarea cols="55" rows="24" id="pvcBar5Code">
 var bar5 = new pvc.BarChart({

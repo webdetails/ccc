@@ -352,6 +352,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         /* Initialize root chart roles */
         if(!this.parent && this._preRenderVersion === 1) {
             this._initVisualRoles();
+            this._bindVisualRolesPre();
         }
 
         /* Initialize the data engine */
@@ -494,6 +495,14 @@ pvc.BaseChart = pvc.Abstract.extend({
             }
         }
 
+        var valueFormat = options.valueFormat,
+            valueFormatter;
+        if(valueFormat && valueFormat !== pvc.BaseChart.defaultOptions.valueFormat){
+            valueFormatter = function(v) {
+                return v != null ? valueFormat(v) : "";
+            };
+        }
+
         var translOptions = {
             secondAxisSeriesIndexes: secondAxisSeriesIndexes,
             seriesInRows:      options.seriesInRows,
@@ -520,7 +529,8 @@ pvc.BaseChart = pvc.Abstract.extend({
             isCategoryTimeSeries: options.timeSeries,
             
             timeSeriesFormat:     options.timeSeriesFormat,
-            valueNumberFormatter: options.valueFormat
+            valueNumberFormatter: valueFormatter
+                
         };
         
         var translationClass = translOptions.crosstabMode ? 
@@ -562,6 +572,53 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
 
+    /**
+     * Binds visual roles to grouping specifications
+     * that have not yet been bound to and validated against a complex type.
+     *
+     * This allows infering proper defaults to
+     * dimensions bound to roles, by taking them from the roles requirements.
+     */
+    _bindVisualRolesPre: function(){
+        /* Process user specified bindings */
+        var boundDimNames = {};
+        def.each(this.options.visualRoles, function(roleSpec, name){
+            var visualRole = this._visualRoles[name] ||
+                def.fail.argumentInvalid("Role '{0}' is not supported by the chart type.", [name]);
+
+            var grouping = pvc.data.GroupingSpec.parse(roleSpec);
+
+            visualRole.preBind(grouping);
+
+            /* Collect dimension names bound to a *single* role */
+            grouping.dimensions().each(function(dimSpec){
+                if(def.hasOwn(boundDimNames, dimSpec.name)){
+                    // two roles => no defaults at all
+                    delete boundDimNames[dimSpec.name];
+                } else {
+                    boundDimNames[dimSpec.name] = visualRole;
+                }
+            });
+        }, this);
+
+        /* Provide defaults to dimensions bound to a single role */
+        var dimsSpec = (this.options.dimensions || (this.options.dimensions = {}));
+        def.eachOwn(boundDimNames, function(role, name){
+            var dimSpec = dimsSpec[name] || (dimsSpec[name] = {});
+            if(role.valueType && dimSpec.valueType === undefined){
+                dimSpec.valueType = role.valueType;
+
+                if(role.requireIsDiscrete != null && dimSpec.isDiscrete === undefined){
+                    dimSpec.isDiscrete = role.requireIsDiscrete;
+                }
+            }
+
+            if(dimSpec.label === undefined){
+                dimSpec.label = role.label;
+            }
+        }, this);
+    },
+
     _hasDataPartRole: function(){
         return false;
     },
@@ -582,28 +639,35 @@ pvc.BaseChart = pvc.Abstract.extend({
     
     _bindVisualRoles: function(type){
         
-        var usedDimTypes = {};
+        var boundDimTypes = {};
 
-        /* Process user specified mappings */
-        var assignedVisualRoles = {};
-        def.each(this.options.visualRoles, function(roleSpec, name){
-            this._visualRoles[name] || 
-                def.fail.argumentInvalid("Role '{0}' is not supported by the chart type.", [name]);
-            
-            var grouping = assignedVisualRoles[name] = pvc.data.GroupingSpec.parse(roleSpec, type);
-
-            grouping.dimensions().each(function(dimSpec){
-                usedDimTypes[dimSpec.type.name] = true;
+        function bind(role, dimNames){
+            role.bind(pvc.data.GroupingSpec.parse(dimNames, type));
+            def.array(dimNames).forEach(function(dimName){
+                boundDimTypes[dimName] = true;
             });
+        }
+        
+        /* Process role pre binding */
+        def.eachOwn(this._visualRoles, function(visualRole, name){
+            if(visualRole.isPreBound()){
+                visualRole
+                    .postBind(type)
+                    .grouping
+                    .dimensions().each(function(dimSpec){
+                        boundDimTypes[dimSpec.name] = true;
+                    });
+            }
         }, this);
         
-        /* Bind Visual Roles dimensions assigned by user, 
-         * to default dimensions 
-         * and validate required'ness */
+        /*
+         * (Try to) Automatically bind unbound roles.
+         * Validate role required'ness.
+         */
         def.eachOwn(this._visualRoles, function(role, name){
-            if(def.hasOwn(assignedVisualRoles, name)) {
-                role.bind(assignedVisualRoles[name]);
-            } else {
+            if(!role.grouping){
+
+                /* Try to bind automatically, to defaultDimensionName */
                 var dimName = role.defaultDimensionName;
                 if(dimName) {
                     /* An asterisk at the end of the name indicates
@@ -612,53 +676,47 @@ pvc.BaseChart = pvc.Abstract.extend({
                      * then the meaning is greedy - use them all.
                      * Otherwise, use only one.
                      */
-                    var match = dimName.match(/^(.*?)(\*)?$/);
-                    if(match) {
-                        var anyLevel = !!match[2];
-                        if(anyLevel) {
-                            var groupDimNames = type.groupDimensionsNames(match[1], {assertExists: false});
-                            if(groupDimNames){
-                                var freeGroupDimNames = 
-                                        def.query(groupDimNames)
-                                           .where(function(dimName){ return !def.hasOwn(usedDimTypes, dimName); });
+                    var match = dimName.match(/^(.*?)(\*)?$/) ||
+                            def.fail.argumentInvalid('defaultDimensionName');
+                    
+                    var anyLevel = !!match[2];
+                    if(anyLevel) {
+                        // TODO: does not respect any index explicitly specified
+                        // before the *. Could mean >=...
+                        var groupDimNames = type.groupDimensionsNames(match[1], {assertExists: false});
+                        if(groupDimNames){
+                            var freeGroupDimNames = 
+                                    def.query(groupDimNames)
+                                        .where(function(dimName){ return !def.hasOwn(boundDimTypes, dimName); });
 
-                                if(role.requireSingleDimension){
-                                    var freeDimName = freeGroupDimNames.first();
-                                    if(freeDimName){
-                                        role.bind(pvc.data.GroupingSpec.parse(freeDimName, type));
-                                        usedDimTypes[freeDimName] = true;
-                                        return;
-                                    }
-                                } else {
-                                    freeGroupDimNames = freeGroupDimNames.array();
-                                    if(freeGroupDimNames.length){
-                                        role.bind(pvc.data.GroupingSpec.parse(freeGroupDimNames, type));
-                                        freeGroupDimNames.forEach(function(dimName2){
-                                            usedDimTypes[dimName2] = true;
-                                        });
-                                        return;
-                                    }
+                            if(role.requireSingleDimension){
+                                var freeDimName = freeGroupDimNames.first();
+                                if(freeDimName){
+                                    bind(role, freeDimName);
+                                    return;
+                                }
+                            } else {
+                                freeGroupDimNames = freeGroupDimNames.array();
+                                if(freeGroupDimNames.length){
+                                    bind(role, freeGroupDimNames);
+                                    return;
                                 }
                             }
-                        } else if(!def.hasOwn(usedDimTypes, dimName) &&
-                                  type.dimensions(dimName, {assertExists: false})){
-                            
-                            role.bind(pvc.data.GroupingSpec.parse(dimName, type));
-                            usedDimTypes[dimName] = true;
-                            return;
                         }
-                    }
-                }
-
-                if(role.autoCreateDimension){
-                    var defaultName = role.defaultDimensionName;
-                    if(defaultName.charAt(defaultName.length - 1) === '*'){
-                        defaultName = defaultName.substr(0, defaultName.length - 1);
+                    } else if(!def.hasOwn(boundDimTypes, dimName) &&
+                              type.dimensions(dimName, {assertExists: false})){
+                        bind(role, dimName);
+                        return;
                     }
 
-                    type.addDimension(defaultName, pvc.data.DimensionType.extendSpec(defaultName, {isHidden: true}));
-                    role.bind(pvc.data.GroupingSpec.parse(defaultName, type));
-                    return;
+                    if(role.autoCreateDimension){
+                        /* Create a hidden dimension and bind the role and the dimension */
+                        var defaultName = match[1];
+                        type.addDimension(defaultName,
+                            pvc.data.DimensionType.extendSpec(defaultName, {isHidden: true}));
+                        bind(role, defaultName);
+                        return;
+                    }
                 }
 
                 if(role.isRequired) {
@@ -706,7 +764,11 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         return role;
     },
-    
+
+    measureVisualRoles: function(){
+        return this._measureVisualRoles;
+    },
+
     measureDimensionsNames: function(){
         return def.query(this._measureVisualRoles)
                    .select(function(visualRole){ return visualRole.firstDimensionName(); })
@@ -768,8 +830,8 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
 
     _legendData: function(dataPartValues){
-        return this.visualRoles(this.legendSource)
-                   .flatten(this._partData(dataPartValues));
+        var role = this.visualRoles(this.legendSource, {assertExists: false});
+        return role ? role.flatten(this._partData(dataPartValues)) : null;
     },
 
     _legendColorScale: function(dataPartValues){
@@ -783,15 +845,22 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         var key = '' + (dataPartValues ? dataPartValues : ''), // relying on Array.toString;
             scale = def.getOwn(this._legendColorScales, key);
+
         if(!scale){
-            var legendData = this._legendData(dataPartValues);
-            var legendValues = legendData.children()
-                                         .select(function(leaf){ return leaf.value; })
-                                         .array();
+            var legendData = this._legendData(dataPartValues),
+                colorsFactory = (!key || key === '0') ? this.colors : this.secondAxisColor
+                ;
+            if(legendData){
+                var legendValues = legendData.children()
+                                            .select(function(leaf){ return leaf.value; })
+                                            .array();
 
-            var colorsFactory = (!key || key === '0') ? this.colors : this.secondAxisColor;
+                
 
-            scale = colorsFactory(legendValues);
+                scale = colorsFactory(legendValues);
+            } else {
+                scale = colorsFactory();
+            }
             
             (this._legendColorScales || (this._legendColorScales = {}))[key] = scale;
         }
@@ -858,6 +927,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     _initLegendGroups: function(){
         var partValues = this._partValues() || [null],
             me = this;
+
         partValues.forEach(function(partValue){
             var partData = this._legendData(partValue),
                 partColorScale = this._legendColorScale(partValue),
@@ -1080,6 +1150,14 @@ pvc.BaseChart = pvc.Abstract.extend({
                         } else {
                             if(logOut) {logOut.push(m + ": " + JSON.stringify(v)); }
 
+                            // Extend object css and svg properties
+                            if(v && (m === 'svg' || m === 'css') && typeof v === 'object'){
+                                var v2 = mark.getStaticPropertyValue(m);
+                                if(v2){
+                                    v = def.copy(v2, v);
+                                }
+                            }
+                            
                             // Distinguish between mark methods and properties
                             if (typeof mark[m] === "function") {
                                 mark[m](v);

@@ -921,6 +921,54 @@ var testWaterfall1 = {
   ]
 };
 
+var testWaterfall1Neg = {
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"Territory"
+  },{
+    "colIndex":1,
+    "colType":"String",
+    "colName":"Region"
+  },{
+    "colIndex":2,
+    "colType":"String",
+    "colName":"Market"
+  },{
+    "colIndex":3,
+    "colType":"Numeric",
+    "colName":"Product A"
+  },{
+    "colIndex":4,
+    "colType":"Numeric",
+    "colName":"Product B"
+  },{
+    "colIndex":5,
+    "colType":"Numeric",
+    "colName":"Product C"
+  }
+  ],
+  "resultset": [
+//  USA                                  600    200   100      // delta=900,-0   (+900) acc=1900
+  ["USA",    'Kansas',     null,        -100,   600,  300],    // delta=900,-100 (+800) acc=1000
+
+//  USA       New York                   700   -400  -200      // delta=700,-600 (+100) acc=200
+  ["USA",    'New York',   'Fair',       500,  -600, -100],    // delta=500,-700 (-200) acc=100
+  //["USA",    'New York',   'Restaurant', 200,   100, -234],
+  ["USA",    'New York',   'House',      200,   200, -100]//,  // delta=400,-100 (+300) acc=300
+//  ["USA",    'Idaho',      'Farm',       -200, -100,   50],
+//  ["USA",    'Idaho',      'Fair',       -500, -600,  -14],
+//  ["USA",    'Idaho',      'House',      400,   100,  230],
+//  ["USA",    'Idaho',      'Grocery',    200,   300,  150],
+//  ["Europe", null,         null,         400,  -300,  360],
+//  ["RoW",    "Japan",      null,         100,    75,    0],
+//  ["RoW",    "China",      null,         100,    25, null],
+//  ["RoW",    "S. America", null,          50,    80,  -35],
+//  ["RoW",    "MEA",        null,          25,    80,  -90],
+//  ["RoW",    "Mexico",     null,          25,    40,  -20]
+  ]
+};
+
 var bullet_valueOnly = {
   "resultset":[
   [80],[60]

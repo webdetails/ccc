@@ -7,7 +7,11 @@
  * @class Represents a role that is somehow played by a visualization.
  * 
  * @property {string} name The name of the role.
- * 
+ *
+ * @property {string} label
+ * The label of this role.
+ * The label <i>should</i> be unique on a visualization.
+ *
  * @property {pvc.data.GroupingSpec} grouping The grouping specification currently bound to the visual role.
  * 
  * @property {boolean} isRequired Indicates that the role is required and must be satisfied.
@@ -35,7 +39,8 @@
  * @constructor
  * @param {string} name The name of the role.
  * @param {object} [keyArgs] Keyword arguments.
- * 
+ * @param {string} [keyArgs.label] The label of this role.
+ *
  * @param {boolean} [keyArgs.isRequired=false] Indicates a required role.
  * 
  * @param {boolean} [keyArgs.requireSingleDimension=false] Indicates that the role 
@@ -60,7 +65,8 @@
 def.type('pvc.visual.Role')
 .init(function(name, keyArgs){
     this.name = name;
-    
+    this.label = def.get(keyArgs, 'label') || name;
+
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
     }
@@ -129,7 +135,8 @@ def.type('pvc.visual.Role')
     flatteningMode: 'singleLevel',
     flattenRootLabel: '',
     autoCreateDimension: false,
-    
+    label: null,
+
     /** 
      * Obtains the name of the first dimension type that is bound to the role.
      * @type string 
@@ -205,6 +212,41 @@ def.type('pvc.visual.Role')
     },
 
     /**
+     * Pre-binds a grouping specification to playing this role.
+     * 
+     * @param {pvc.data.GroupingSpec} groupingSpec The grouping specification of the visual role.
+     */
+    preBind: function(groupingSpec){
+        this.__grouping = groupingSpec;
+
+        return this;
+    },
+
+    isPreBound: function(){
+        return !!this.__grouping;
+    },
+
+    /**
+     * Finalizes a binding initiated with {@link #preBind}.
+     *
+     * @param {pvc.data.ComplexType} type The complex type with which
+     * to bind the pre-bound grouping and then validate the
+     * grouping and role binding.
+     */
+    postBind: function(type){
+        var grouping = this.__grouping;
+        if(grouping){
+            delete this.__grouping;
+
+            grouping.bind(type);
+
+            this.bind(grouping);
+        }
+        
+        return this;
+    },
+
+    /**
      * Binds a grouping specification to playing this role.
      * 
      * @param {pvc.data.GroupingSpec} groupingSpec The grouping specification of the visual role.
@@ -243,7 +285,9 @@ def.type('pvc.visual.Role')
         if(this.grouping) {
             // unregister from current dimension types
             this.grouping.dimensions().each(function(dimSpec){
-                dimType_removeVisualRole.call(dimSpec.type, this);  
+                if(dimSpec.type){
+                    dimType_removeVisualRole.call(dimSpec.type, this);
+                }
             }, this);
         }
         
@@ -255,5 +299,7 @@ def.type('pvc.visual.Role')
                 dimType_addVisualRole.call(dimSpec.type, this);  
             }, this);
         }
+
+        return this;
     }
 });

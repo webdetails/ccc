@@ -97,8 +97,11 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @type pvc.visual.CartesianAxis
      */
     _createAxis: function(axisType, axisIndex){
-        var role = this.visualRoles(this._axisRoleNameMap[axisType]); // TODO: axis index?
-        var axis = new pvc.visual.CartesianAxis(this, axisType, axisIndex, role);
+        var roles = def.array(this._axisRoleNameMap[axisType])
+                        .map(function(roleName){
+                            return this.visualRoles(roleName);
+                        }, this);
+        var axis = new pvc.visual.CartesianAxis(this, axisType, axisIndex, roles);
         
         this.axes[axis.id] = axis;
         this.axes[axis.orientedId] = axis;
@@ -185,9 +188,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @type pv.Scale
      */
     _createScaleByAxis: function(axis){
-        var scaleType = axis.scaleType();
-        
-        var createScaleMethod = this['_create' + scaleType + 'ScaleByAxis'];
+        var createScaleMethod = this['_create' + axis.scaleType + 'ScaleByAxis'];
         
         var dataPartValues = this._getAxisDataParts(axis);
         
@@ -247,6 +248,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
+     * @param {pvc.visual.Role} role The role.
      * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @virtual
      * @type pv.Scale
@@ -438,7 +440,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     },
     
     /**
-     * Gets the extent of the values of the specified role
+     * Gets the extent of the values of the specified axis' roles
      * over all datums of the visible data.
      * 
      * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
@@ -449,14 +451,62 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @virtual
      */
     _getVisibleValueExtent: function(valueAxis, dataPartValues){
-        var valueRole = valueAxis.role;
+        var roles = valueAxis.roles;
+        if(roles.length === 1){
+            // Most common case is faster
+            return this._getVisibleRoleValueExtent(valueAxis, roles[0], dataPartValues);
+        }
+
+        return def.query(roles)
+                .select(function(role){
+                    return this._getVisibleRoleValueExtent(valueAxis, role, dataPartValues);
+                }, this)
+                .reduce(this._unionReduceExtent, null);
+    },
+
+    /**
+     * Could/Should be static
+     */
+    _unionReduceExtent: function(result, range){
+        if(!result) {
+            if(!range){
+                return null;
+            }
+
+            result = {min: range.min, max: range.max};
+        } else if(range){
+            if(range.min < result.min){
+                result.min = range.min;
+            }
+
+            if(range.max > result.max){
+                result.max = range.max;
+            }
+        }
+
+        return result;
+    },
+
+    /**
+     * Gets the extent of the values of the specified role
+     * over all datums of the visible data.
+     *
+     * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
+     * @param {pvc.visual.Role} valueRole The role.
+     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
+     * @type object
+     *
+     * @protected
+     * @virtual
+     */
+    _getVisibleRoleValueExtent: function(valueAxis, valueRole, dataPartValues){
         this._assertSingleContinuousValueRole(valueRole);
-        
-        if(valueRole.name === 'series') { 
+
+        if(valueRole.name === 'series') {
             /* not supported/implemented? */
             throw def.error.notImplemented();
         }
-        
+
         var valueDimName = valueRole.firstDimensionName();
         var extent = this._getVisibleData(dataPartValues).dimensions(valueDimName).extent();
         return extent ? {min: extent.min.value, max: extent.max.value} : undefined;

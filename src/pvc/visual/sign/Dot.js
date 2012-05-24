@@ -84,10 +84,7 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
 
     interactiveSize: function(size){
         if(this.scene.isActive){
-            /* - Ensure a normal size of at least 12,
-             * - Double that 
-             */
-            return Math.max(size, 12) * 2;
+            return Math.max(size, 5) * 2.5;
         }
         
         return size;
