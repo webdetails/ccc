@@ -35,7 +35,7 @@
  * then a dummy 'series' column with the constant null value is added automatically. 
  * </p>
  * 
- * @extends pvc.data.TranslationOper
+ * @extends pvc.data.MatrixTranslationOper
  *  
  * @constructor
  * @param {pvc.data.ComplexType} complexType The complex type that will represent the translated data.
@@ -107,22 +107,52 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
 
             if(unmappedColCount > 0){
                 /* Build the dimensions that can be read automatically */
-                var autoColDims = !this.options.seriesInRows ?
-                                  ['value', 'category', 'series'] :
-                                  ['value', 'series',   'category'];
+                var dimName,
+                    autoColDims = !this.options.seriesInRows ?
+                                  ['value', 'category', 'series'  ] :
+                                  ['value', 'series',   'category']
+                                  ;
 
                 /*
                  * Leave only those not already mapped by the user,
                  * giving priority to those on the left.
                  */
-                autoColDims = autoColDims.filter(function(colDim){
-                                    return !this._userUsedDims[colDim];
-                                }, this)
-                                .slice(0, unmappedColCount);
+                autoColDims = autoColDims.filter(function(dimName2){
+                                return !this._userUsedDims[dimName2];
+                              }, this)
+                              .slice(0, unmappedColCount);
+
+                unmappedColCount -= autoColDims.length;
+                if(unmappedColCount > 0){
+                    var desiredCatCount = def.get(this.options, 'categoriesCount', 1);
+                    if(desiredCatCount > 1){
+                        var catIndex = autoColDims.indexOf('category');
+                        if(catIndex < 0){
+                            if(this.options.seriesInRows){
+                                catIndex = autoColDims.length;
+                            } else {
+                                catIndex = autoColDims.indexOf('value') + 1;
+                            }
+                        } else {
+                            // Insert after the 1st category
+                            catIndex++;
+                        }
+
+                        var catLevel = 1
+                        while(catLevel < desiredCatCount){
+                            dimName = pvc.data.DimensionType.dimensionGroupLevelName('category', catLevel++);
+                            if(!this._userUsedDims[dimName]){
+                                def.array.insertAt(
+                                    autoColDims,
+                                    catIndex++,
+                                    dimName);
+                            }
+                        }
+                    }
+                }
 
                 /* Assign virtual item indexes to remaining auto dims */
-                var dimName,
-                    index = 0;
+                var index = 0;
                 while(autoColDims.length && (dimName = autoColDims.pop())) {
                     index = this._nextAvailableItemIndex(index);
 

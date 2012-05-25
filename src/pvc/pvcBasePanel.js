@@ -730,7 +730,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                                 context.getV1Value() || '',
                                 context.scene.datum);
             };
-        } 
+        }
         
         mark.localProperty("tooltip")
             /* Lazy tooltip creation, when requested */
@@ -758,7 +758,23 @@ pvc.BasePanel = pvc.Abstract.extend({
             })
             .event(tipsyEvent, pv.Behavior.tipsy(tipsySettings || options.tipsySettings));
     },
-    
+
+    _requirePointEvent: function(radius){
+        if(!this.isTopRoot) {
+            return this.topRoot._requirePointEvent(radius);
+        }
+
+        if(!this._attachedPointEvent){
+
+            // Fire point and unpoint events
+            this.pvPanel
+                .events('all')
+                .event("mousemove", pv.Behavior.point(radius || 20));
+
+            this._attachedPointEvent = true;
+        }
+    },
+
     _buildTooltip: function(context){
 
         var chart = this.chart,
@@ -1022,7 +1038,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 }
             })
             .event('select', function(){
-                if(!isSelecting && !chart.isAnimating){
+                if(!isSelecting && !myself.isAnimating()){
                     var rb = this.selectionRect;
                     if(Math.sqrt(rb.dx * rb.dx + rb.dy * rb.dy) <= dMin){
                         return;

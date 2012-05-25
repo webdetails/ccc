@@ -427,8 +427,9 @@ pvc.BaseChart = pvc.Abstract.extend({
 
     _onLoadData: function(){
         var data = this.data,
-            complexType = data ? data.type : new pvc.data.ComplexType(),
-            translation = this._createTranslation(complexType);
+            complexType   = data ? data.type : new pvc.data.ComplexType(),
+            translOptions = this._createTranslationOptions(),
+            translation   = this._createTranslation(complexType, translOptions);
 
         translation.configureType();
 
@@ -479,7 +480,16 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
 
-    _createTranslation: function(complexType){
+    _createTranslation: function(complexType, translOptions){
+        
+        var translationClass = translOptions.crosstabMode ? 
+                pvc.data.CrosstabTranslationOper : 
+                pvc.data.RelationalTranslationOper;
+
+        return new translationClass(complexType, this.resultset, this.metadata, translOptions);
+    },
+
+    _createTranslationOptions: function(){
         var options = this.options,
             dataOptions = options.dataOptions || {};
 
@@ -503,41 +513,34 @@ pvc.BaseChart = pvc.Abstract.extend({
             };
         }
 
-        var translOptions = {
+        return {
             secondAxisSeriesIndexes: secondAxisSeriesIndexes,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
-            
+
             dimensionGroups:   options.dimensionGroups,
             dimensions:        options.dimensions,
             readers:           options.readers,
-            
+
             measuresIndexes:   options.measuresIndexes, // relational multi-valued
-            
+
             multiChartColumnIndexes: options.multiChartColumnIndexes,
             multiChartRowIndexes: options.multiChartRowIndexes,
-            
+
             // crosstab
             separator:         dataOptions.separator,
             measuresInColumns: dataOptions.measuresInColumns,
             measuresIndex:     dataOptions.measuresIndex || dataOptions.measuresIdx, // measuresInRows
             measuresCount:     dataOptions.measuresCount || dataOptions.numMeasures, // measuresInRows
             categoriesCount:   dataOptions.categoriesCount,
-            
+
             // Timeseries *parse* format
             isCategoryTimeSeries: options.timeSeries,
-            
+
             timeSeriesFormat:     options.timeSeriesFormat,
             valueNumberFormatter: valueFormatter
-                
         };
-        
-        var translationClass = translOptions.crosstabMode ? 
-                pvc.data.CrosstabTranslationOper : 
-                pvc.data.RelationalTranslationOper;
-
-        return new translationClass(complexType, this.resultset, this.metadata, translOptions);
     },
 
     /**

@@ -50,16 +50,22 @@ def.type('pvc.visual.Sign')
                 offEvent;
 
             switch(pvMark.type) {
-                case 'dot':
-                case 'line':
-                case 'area':
+                default:
+//                case 'dot':
+//                case 'line':
+//                case 'area':
+//                case 'rule':
                     onEvent  = 'point';
                     offEvent = 'unpoint';
+                    panel._requirePointEvent();
                     break;
 
-                default:
-                    onEvent = 'mouseover';
-                    offEvent = 'mouseout';
+//                default:
+//                    onEvent  = 'point';
+//                    offEvent = 'unpoint';
+//                    panel._requirePointEvent();
+//                    onEvent = 'mouseover';
+//                    offEvent = 'mouseout';
                     break;
             }
 
@@ -67,14 +73,14 @@ def.type('pvc.visual.Sign')
                 .event(onEvent, function(scene){
                     scene.setActive(true);
 
-                    if(!panel.topRoot.rubberBand) {
+                    if(!panel.topRoot.rubberBand || panel.isAnimating()) {
                         panel._renderInteractive();
                     }
                 })
                 .event(offEvent, function(scene){
                     if(scene.clearActive()) {
                         /* Something was active */
-                        if(!panel.topRoot.rubberBand) {
+                        if(!panel.topRoot.rubberBand || panel.isAnimating()) {
                             panel._renderInteractive();
                         }
                     }

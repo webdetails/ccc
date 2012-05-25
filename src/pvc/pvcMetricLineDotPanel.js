@@ -187,16 +187,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
        
         // ---------------
         // BUILD
-        //this.pvPanel.zOrder(0);
-
-        if(options.showTooltips || options.hoverable || this._shouldHandleClick()){
-            this.pvPanel
-              // Receive events even if in a transparent panel (#events default is "painted")
-              .events("all")
-              .event("mousemove", pv.Behavior.point(40)) // fire point and unpoint events
-              ;
-        }
-        
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
             .lock('data', rootScene.childNodes)
             ;

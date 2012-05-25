@@ -43,7 +43,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
         
         if(type === 'stroke'){
             if(scene.isActive){
-               return color.brighter().alpha(0.7);
+               return color.brighter(1.3).alpha(0.7);
             }
             if(!this.normalStroke){
                 return null;
@@ -59,18 +59,16 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
 
         } else if(type === 'fill'){
             if(scene.isActive) {
-                if(scene.isActive) {
-                    return color.alpha(0.8);
-                }
-            } else {
-                if(scene.anySelected() && !scene.isSelected()) {
-                    if(this.isActiveSeriesAware && scene.isActiveSeries()) {
-                        return pv.Color.names.darkgray.darker(2).alpha(0.8);
-                    }
+                return color.brighter(0.2).alpha(0.8);
+            } 
 
-                    return this.dimColor(type, color);
+            if(scene.anySelected() && !scene.isSelected()) {
+                if(this.isActiveSeriesAware && scene.isActiveSeries()) {
+                    return pv.Color.names.darkgray.darker(2).alpha(0.8);
                 }
-           }
+
+                return this.dimColor(type, color);
+            }
         }
 
         return this.base(type, color);
@@ -110,11 +108,8 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     },
 
     interactiveStrokeWidth: function(strokeWidth){
-        if(this.scene.isActive){// this.isActiveSeriesAware && this.scene.isActiveSeries()){
-            /* - Ensure a normal width of at least 1,
-             * - Double
-             */
-            return Math.max(1, strokeWidth) * 1.2;
+        if(this.scene.isActive){
+            return Math.max(1, strokeWidth) * 1.3;
         }
 
         return strokeWidth;

@@ -68,8 +68,13 @@ def.type('pvc.data.TranslationOper')
     defReader: function(dimReaderSpec){
         dimReaderSpec || def.fail.argumentRequired('readerSpec');
 
-        var dimNames =  def.array(dimReaderSpec.names);
-
+        var dimNames =  dimReaderSpec.names;
+        if(typeof dimNames === 'string'){
+            dimNames = dimNames.split(/\s*\,\s*/);
+        } else {
+            dimNames =  def.array(dimNames);
+        }
+        
         (dimNames && dimNames.length) || def.fail.argumentRequired('readers.names');
 
         dimNames.forEach(function(name){
@@ -408,19 +413,20 @@ def.type('pvc.data.TranslationOper')
         while(r < R) {
             
             var result = dimsReaders[r++](item);
-            
-            if(result instanceof Array) {
-                var j = 0, J = result.length;
-                while(j < J) {
-                    if(result.value != null) { // no null atoms
-                        atoms[a++] = result[j];
+            if(result != null){
+                if(result instanceof Array) {
+                    var j = 0, J = result.length;
+                    while(j < J) {
+                        if(result.value != null) { // no null atoms
+                            atoms[a++] = result[j];
+                        }
+
+                        j++;
                     }
-                    
-                    j++;
+
+                } else if(result.value != null){
+                    atoms[a++] = result;
                 }
-                
-            } else if(result.value != null){
-                atoms[a++] = result;
             }
         }
         
@@ -517,9 +523,13 @@ def.type('pvc.data.TranslationOper')
     ensureDimensionType: function(dimName, dimSpec){
         var dimType = this.complexType.dimensions(dimName, {assertExists: false});
         if(!dimType) {
-            /** Passing options: isCategoryTimeSeries, timeSeriesFormat and dimensionGroups */
-            dimSpec = pvc.data.DimensionType.extendSpec(dimName, dimSpec, this.options);
-            this.complexType.addDimension(dimName, dimSpec);
+            this.defDimensionType(dimName, dimSpec);
         }
+    },
+
+    defDimensionType: function(dimName, dimSpec){
+        /** Passing options: isCategoryTimeSeries, timeSeriesFormat and dimensionGroups */
+        dimSpec = pvc.data.DimensionType.extendSpec(dimName, dimSpec, this.options);
+        return this.complexType.addDimension(dimName, dimSpec);
     }
 });

@@ -70,11 +70,6 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         // BUILD
         this.pvPanel.zOrder(-7);
 
-        if(options.showTooltips || options.hoverable || this._shouldHandleClick()){
-            // fire point and unpoint events
-            this.pvPanel.event("mousemove", pv.Behavior.point(40));
-        }
-        
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
             .lock('data', rootScene.childNodes)
             ;
@@ -299,7 +294,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         var chart = this.chart,
             valueDim = data.owner.dimensions(chart.axes.ortho.role.firstDimensionName()),
             isStacked = this.stacked,
-            visibleKeyArgs = {visible: true},
+            visibleKeyArgs = {visible: true, zeroIfNone: false},
             /* TODO: BIG HACK */
             orthoScale = this.dataPartValue !== '1' ?
                             chart.axes.ortho.scale :
@@ -404,7 +399,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                     label:    valueDim.format(value)
                 };
                 
-                scene.isNull = !group; // A virtual scene?
+                scene.isNull = !group || value == null; // A virtual scene?
                 scene.isIntermediate = false;
             }, this);
         }

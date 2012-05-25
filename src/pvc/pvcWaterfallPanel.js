@@ -127,11 +127,6 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                 return color;
             })
             ;
-
-        if(options.showTooltips || options.hoverable){
-            // fire point and unpoint events
-            this.pvPanel.event("mousemove", pv.Behavior.point(40));
-        }
         
         this.pvWaterfallLine = new pvc.visual.Rule(this, this.pvPanel, {
                 extensionId: 'barWaterfallLine',

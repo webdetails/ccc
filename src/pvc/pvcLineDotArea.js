@@ -11,11 +11,6 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.LineDotAreaAbstract.defaultOptions, options);
-
-        var parent = this.parent;
-        if(parent) {
-            this._valueRole = parent._valueRole;
-        }
     },
     
     /**
@@ -38,15 +33,6 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
                 defaultDimensionName: 'value' 
             }
         });
-
-        this._valueRole = this.visualRoles('value');
-    },
-
-    _initData: function(){
-        this.base.apply(this, arguments);
-
-        // Cached
-        this._valueDim = this.data.dimensions(this._valueRole.firstDimensionName());
     },
 
     /* @override */

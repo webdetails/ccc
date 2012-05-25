@@ -82,6 +82,7 @@
         <script type="text/javascript" src="pvc/pvcBulletChart.js"></script>
         <script type="text/javascript" src="pvc/pvcParallelCoordinates.js"></script>
         <script type="text/javascript" src="pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/BoxplotChartTranslationOper.js"></script>
         <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
     <!-- @SCRIPTSEND@ -->
 
@@ -260,7 +261,7 @@ box2.render();
     
 <h3>A Boxplot with line chart</h3>
 The line shows the median role.<br>
-<textarea cols="55" rows="15" id="pvcBox3Code">
+<textarea cols="55" rows="20" id="pvcBox3Code">
 var box3 = new pvc.BoxplotChart({
     canvas:  "pvcBox3",
     width:   400,
@@ -288,6 +289,40 @@ box3.render();
 </textarea>
     <button class="tryMe" onclick='tryMe(this)'>Try me</button>
     <div id="pvcBox3"></div>
+
+<h3>A Boxplot with two categories</h3>
+Notice the base axis values, as well as what the tooltip shows.<br>
+<textarea cols="55" rows="20" id="pvcBox4Code">
+var box4 = new pvc.BoxplotChart({
+    canvas:  "pvcBox4",
+    width:   400,
+    height:  300,
+    title:   "Boxplot with two categories",
+    animate: true,
+    orientation: 'vertical',
+    orthoAxisDomainRoundMode: 'tick',
+    baseAxisFullGrid: true,
+    axisEndLine: true,
+    maxBoxSize: 20,
+    showLines: true,
+    showDots: true,
+    showAreas: true,
+    selectable: true,
+    hoverable: true,
+    axisOffset: 0.01,
+    extensionPoints: {
+        boxVRule_svg: {'stroke-dasharray': '5, 5'},
+        line_shape: 'triangle'
+    }
+});
+
+box4.setData(boxplotData_02, {dataOptions: {categoriesCount: 2} });
+box4.render();
+
+</textarea>
+    <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+    <div id="pvcBox4"></div>
+
     <hr/>
     If you have an issue or suggestions regarding the ccc BoxPlot-charts
     please contact Cees at cde@vinzi.nl

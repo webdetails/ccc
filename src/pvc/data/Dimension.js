@@ -474,8 +474,11 @@ def.type('pvc.data.Dimension')
      * See {@link pvc.data.Data#datums} for a list of available filtering keyword arguments. 
      *
      * @param {boolean} [keyArgs.abs=false] Indicates if it is the sum of the absolute value that is desired.
+     * @param {boolean} [keyArgs.zeroIfNone=true] Indicates that zero should be returned when there are no datums
+     * or no datums with non-null values.
+     * When <tt>false</tt>, <tt>null</tt> is returned, in that situation.
      *
-     * @returns {number} The sum of considered atoms or <tt>0</tt> if none.
+     * @returns {number} The sum of considered datums or <tt>0</tt> or <tt>null</tt>, if none.
      * 
      * @see #root
      * @see #owner
@@ -483,24 +486,26 @@ def.type('pvc.data.Dimension')
      */
     sum: function(keyArgs){
         var isAbs = !!def.get(keyArgs, 'abs', false),
-            key = dim_buildDatumsFilterKey(keyArgs) + ':' + isAbs;
+            zeroIfNone = def.get(keyArgs, 'zeroIfNone', true),
+            key   = dim_buildDatumsFilterKey(keyArgs) + ':' + isAbs;
               
         var sum = def.getOwn(this._sumCache, key);
-        if(sum == null) {
+        if(sum === undefined) {
             var dimName = this.name;
             sum = this.data.datums(null, keyArgs).reduce(function(sum, datum){
-                var value = datum.atoms[dimName].value || 0;
-                if(isAbs && value < 0){
+                var value = datum.atoms[dimName].value;
+                if(isAbs && value < 0){ // null < 0 is false
                     value = -value;
                 }
-                return sum + value;
+
+                return sum != null ? (sum + value) : value; // null preservation
             },
-            0);
+            null);
             
             (this._sumCache || (this._sumCache = {}))[key] = sum;
         }
         
-        return sum;
+        return zeroIfNone ? (sum || 0) : sum;
     },
     
     /**

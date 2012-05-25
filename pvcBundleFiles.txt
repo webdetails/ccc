@@ -68,4 +68,5 @@ src/pvc/pvcMetricLineDot.js
 src/pvc/pvcBulletChart.js
 src/pvc/pvcParallelCoordinates.js
 src/pvc/pvcDataTree.js
+src/pvc/data/translation/BoxplotChartTranslationOper.js
 src/pvc/pvcBoxplotChart.js

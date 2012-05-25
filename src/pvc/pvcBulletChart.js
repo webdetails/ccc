@@ -9,7 +9,7 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
     constructor: function(options){
         options = options || {};
-      
+
         // Add range and marker dimension group defaults
         // This only helps in default bindings...
         var dimGroups = options.dimensionGroups || (options.dimensionGroups = {});
@@ -25,6 +25,13 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
         options.legend = false;
         options.selectable = false; // not supported yet
+
+        if(options.compatVersion <= 1 && options.tooltipFormat === undefined){
+            // Backwards compatible tooltip format
+            options.tooltipFormat = function(s, c, v) {
+                return this.chart.options.valueFormat(v);
+            };
+        }
 
         this.base(options);
 
@@ -66,8 +73,8 @@ pvc.BulletChart = pvc.BaseChart.extend({
         });
     },
 
-    _createTranslation: function(complexType){
-        var translation = this.base(complexType),
+    _createTranslation: function(complexType, translOptions){
+        var translation = this.base(complexType, translOptions),
             /*
              * By now the translation has already been initialized
              * and its virtualItemSize is determined.
@@ -318,8 +325,30 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     if(this.showTooltips){
       // Extend default
-      this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.chart.options.tipsySettings));
-      this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.chart.options.tipsySettings));
+      // TODO: how to deal with different measures in tooltips depending on mark
+      
+//      this._addPropTooltip(this.pvBulletMeasure);
+//      this._addPropTooltip(this.pvBulletMarker);
+        this.pvBulletMeasure
+            .localProperty('tooltip')
+            .tooltip(function(v, d){
+                var s = d.title;
+                var c = d.subtitle;
+                return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+            })
+            ;
+
+        this.pvBulletMarker
+            .localProperty('tooltip')
+            .tooltip(function(v, d){
+                var s = d.title;
+                var c = d.subtitle;
+                return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+            })
+            ;
+      
+        this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.chart.options.tipsySettings));
+        this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.chart.options.tipsySettings));
     }
 
     this.pvBulletRule = this.pvBullet.tick.add(pv.Rule);
