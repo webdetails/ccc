@@ -138,7 +138,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                             catIndex++;
                         }
 
-                        var catLevel = 1
+                        var catLevel = 1;
                         while(catLevel < desiredCatCount){
                             dimName = pvc.data.DimensionType.dimensionGroupLevelName('category', catLevel++);
                             if(!this._userUsedDims[dimName]){

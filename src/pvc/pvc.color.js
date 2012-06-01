@@ -97,8 +97,8 @@ def.scope(function(){
     def.type('pvc.color.ScalesBuild')
        .init(function(keyArgs){
            this.keyArgs        = keyArgs;
-           this.data           = keyArgs.data || def.fail.argumentRequired('keyArgs.data'),
-           this.domainDimName  = keyArgs.colorDimension || def.fail.argumentRequired('keyArgs.colorDimension'),
+           this.data           = keyArgs.data || def.fail.argumentRequired('keyArgs.data');
+           this.domainDimName  = keyArgs.colorDimension || def.fail.argumentRequired('keyArgs.colorDimension');
            this.domainDim      = this.data.dimensions(this.domainDimName);
            
            var dimType = this.domainDim.type;

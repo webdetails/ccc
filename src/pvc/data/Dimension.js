@@ -63,7 +63,7 @@ def.type('pvc.data.Dimension')
             source = data.parent.dimensions(this.name);
             dim_addChild.call(source, this);
             
-            this.root = parent.root;
+            this.root = data.parent.root;
         } else {
             // A root that is not topmost
             data.linkParent || def.assert("Data must have a linkParent");
@@ -231,7 +231,7 @@ def.type('pvc.data.Dimension')
      * @see pvc.data.Dimension#owner
      */
     count: function(){
-        this._lazyInit && this._lazyInit();
+        if(this._lazyInit) { this._lazyInit(); }
         return this._atoms.length;
     },
     
@@ -250,7 +250,7 @@ def.type('pvc.data.Dimension')
      * @type boolean
      */
     isVisible: function(atom){
-        this._lazyInit && this._lazyInit();
+        if(this._lazyInit) { this._lazyInit(); }
         
         // <Debug>
         def.hasOwn(this._atomsByKey, atom.key) || def.assert("Atom must exist in this dimension.");
@@ -279,7 +279,7 @@ def.type('pvc.data.Dimension')
      * @see pvc.data.Dimension#owner
      */
     atoms: function(keyArgs){
-        this._lazyInit && this._lazyInit();
+        if(this._lazyInit) { this._lazyInit(); }
         
         var visible = def.get(keyArgs, 'visible');
         if(visible == null){
@@ -305,7 +305,7 @@ def.type('pvc.data.Dimension')
      * @type number[]
      */
     indexes: function(keyArgs){
-        this._lazyInit && this._lazyInit();
+        if(this._lazyInit) { this._lazyInit(); }
         
         var visible = def.get(keyArgs, 'visible');
         if(visible == null) {
@@ -336,8 +336,8 @@ def.type('pvc.data.Dimension')
             return value;
         }
         
-        this._lazyInit && this._lazyInit();
-        
+        if(this._lazyInit) { this._lazyInit(); }
+
         var key = this.type._key ? this.type._key.call(null, value) : value;
         return this._atomsByKey[key] || null; // undefined -> null
     },

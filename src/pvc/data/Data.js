@@ -492,7 +492,9 @@ def.type('pvc.data.Data', pvc.data.Complex)
                 this.parent = null;
             }
             
-            this.linkParent && data_removeLinkChild.call(this.linkParent, this);
+            if(this.linkParent) {
+                data_removeLinkChild.call(this.linkParent, this);
+            }
             
             this._disposed = true;
         }
@@ -516,7 +518,9 @@ function data_disposeChildLists() {
     this._childrenByKey = null;
     this._groupByCache  = null;
     
-    this._selectedDatums && this._selectedDatums.clear();
+    if(this._selectedDatums) {
+        this._selectedDatums.clear();
+    }
 }
 
 /**

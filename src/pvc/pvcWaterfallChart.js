@@ -156,7 +156,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         if(!catGroup._isFlattenGroup){
             var dir = this._isFalling ? -1 : 1;
 
-            offset    = result.offset    = offset    + dir * catRange.max,
+            offset    = result.offset    = offset    + dir * catRange.max;
             negOffset = result.negOffset = negOffset - dir * catRange.min;
 
             if(negOffset < result.min){

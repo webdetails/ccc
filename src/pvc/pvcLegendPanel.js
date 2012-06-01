@@ -185,9 +185,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           this.pvDot = this.pvRule.anchor("center").add(pv.Dot)
               .shapeSize(this.markerSize)
               .shape(function(scene){
-                  return myself.shape ?
-                            myself.shape :
-                            scene.acts.legendItem.shape;
+                  return myself.shape || scene.acts.legendItem.shape;
               })
              .lineWidth(0)
              .fillStyle(sceneColorProp)
@@ -211,9 +209,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
               .left(this.markerSize / 2)
               .shapeSize(this.markerSize)
               .shape(function(scene){
-                  return myself.shape ?
-                            myself.shape :
-                            scene.acts.legendItem.shape;
+                  return myself.shape || scene.acts.legendItem.shape;
               })
               .angle(Math.PI/2)
               .lineWidth(2)

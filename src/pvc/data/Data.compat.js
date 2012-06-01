@@ -14,9 +14,9 @@ pvc.data.Data
                 features = [];
             
             features.push(type.valueTypeName);
-            if(type.isComparable) features.push("comparable");
-            if(!type.isDiscrete) features.push("continuous");
-            if(type.isHidden) features.push("hidden");
+            if(type.isComparable){ features.push("comparable"); }
+            if(!type.isDiscrete){ features.push("continuous"); }
+            if(type.isHidden){ features.push("hidden"); }
             
             out.push(
                 "  " + 

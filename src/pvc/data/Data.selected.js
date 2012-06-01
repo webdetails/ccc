@@ -142,7 +142,7 @@ function data_onDatumVisibleChanged(datum, visible){
  * @internal
  */
 function data_syncDatumsState(){
-    this._selectedDatums && this._selectedDatums.clear();
+    if(this._selectedDatums) { this._selectedDatums.clear(); }
     this._visibleDatums.clear();
     this._datumsById = {};
     this._sumAbsCache = null;

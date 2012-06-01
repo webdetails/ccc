@@ -196,7 +196,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
 
         this.extend(this.pvWaterfallLine,       "barWaterfallLine_");
         this.extend(this.pvWaterfallLabel,      "barWaterfallLabel_");
-        this.extend(this.pvWaterfallGroupPanel, "barWaterfallGroup_")
+        this.extend(this.pvWaterfallGroupPanel, "barWaterfallGroup_");
     },
 
     _buildRuleScene: function(){

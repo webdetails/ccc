@@ -78,7 +78,7 @@ def.type('pvc.data.GroupingSpec')
         this.type = type || def.fail.argumentRequired('type');
         this.dimensions().each(function(dimSpec){
             dimSpec.bind(type);
-        })
+        });
     },
 
     /**

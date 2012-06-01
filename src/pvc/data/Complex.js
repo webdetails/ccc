@@ -1,3 +1,6 @@
+/**
+ * The separator used between labels of dimensions of a complex.
+ */
 var complex_labelSep = " ~ ";
 
 /**
@@ -39,7 +42,8 @@ var complex_labelSep = " ~ ";
  *        The key of the complex is thus affected.
  *        </p>  
  */
-def.type('pvc.data.Complex')
+def
+.type('pvc.data.Complex')
 .init(function(owner, atoms, atomsBase) {
     // <Debug>
     (owner && owner.isOwner()) || def.fail.argumentInvalid('owner', "Must be an owner data.");
@@ -66,7 +70,7 @@ def.type('pvc.data.Complex')
                 var atomDim  = atom.dimension, 
                     name     = atomDim.name,
                     atomBase = atomsBase && atomsBase[name];
-    	        
+
                 if(!atomBase || atom !== atomBase) { 
                     // <Debug>
                     if(atomDim !== owner.dimensions(name)){

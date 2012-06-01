@@ -373,7 +373,7 @@ var axisOptionHandlers = {
      * secondAxisPosition <- opposite(xAxisPosition) 
      */
     Position: {
-        resolve: function(){
+        resolve: function(name){
             if(this.index > 0) {
                 // Use the position opposite to that of the first axis of same orientation
                 var firstPosition = firstOptions.call(this, name);

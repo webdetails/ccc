@@ -66,7 +66,7 @@ def.type('pvc.visual.Sign')
 //                    panel._requirePointEvent();
 //                    onEvent = 'mouseover';
 //                    offEvent = 'mouseout';
-                    break;
+//                    break;
             }
 
             pvMark
@@ -135,11 +135,13 @@ def.type('pvc.visual.Sign')
                 name,
                 function(fun, args){
                     var prevExtFun = me._extFun, prevExtArgs = me._extArgs;
-                    me._extFun = fun, me._extArgs = args;
+                    me._extFun = fun;
+                    me._extArgs = args;
                     try {
                         return method.apply(me, args);
                     } finally{
-                        me._extFun = prevExtFun, me._extArgs = prevExtArgs;
+                        me._extFun = prevExtFun;
+                        me._extArgs = prevExtArgs;
                     }
                 },
                 this._getExtension(name));

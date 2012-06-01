@@ -2,9 +2,9 @@
 
 var boxplotData_01 = {
   "resultset":[
-  	["product A", 50, 40, 60, 30, 70] ,
-  	["product B", 80, 65, 95, 45, 110] ,
-  	["product C", 50, 45, 56, 20, 63]
+    ["product A", 50, 40, 60, 30, 70] ,
+    ["product B", 80, 65, 95, 45, 110] ,
+    ["product C", 50, 45, 56, 20, 63]
   ],
   "metadata":[{
     "colIndex":0,

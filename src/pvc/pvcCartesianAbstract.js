@@ -396,7 +396,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @type pvc.data.Data
      */
     _getVisibleData: function(dataPartValues){
-        var key = '' + (dataPartValues ? dataPartValues : ''), // relying on Array.toString
+        var key = '' + (dataPartValues || ''), // relying on Array.toString
             data = def.getOwn(this._visibleDataCache, key);
         if(!data) {
             data = this._createVisibleData(dataPartValues);

@@ -32,7 +32,7 @@ pvc.DataTree = pvc.BaseChart.extend({
     setStructData: function(data){
         this.structDataset = data.resultset;
         if (this.structDataset.length == 0){
-            pvc.log("Warning: Structure-dataset is empty")
+            pvc.log("Warning: Structure-dataset is empty");
         }
 
         this.structMetadata = data.metadata;

@@ -389,16 +389,16 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     }: null;
     
     if (doubleClickAction) {
-    	this.pvBulletTitle
-    	    .cursor("pointer")
-    	    .events('all')  //labels don't have events by default
+        this.pvBulletTitle
+            .cursor("pointer")
+            .events('all')  //labels don't have events by default
             .event("dblclick", function(d){
                     doubleClickAction(d, arguments[arguments.length-1]);
                 });
 
-    	this.pvBulletSubtitle
-    	    .cursor("pointer")
-    	    .events('all')  //labels don't have events by default
+        this.pvBulletSubtitle
+            .cursor("pointer")
+            .events('all')  //labels don't have events by default
             .event("dblclick", function(d){
                     doubleClickAction(d, arguments[arguments.length-1]);
                 });

@@ -183,8 +183,8 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         // colors
         options.nullColor = pv.color(options.nullColor);
         
-        if(options.minColor != null) options.minColor = pv.color(options.minColor);
-        if(options.maxColor != null) options.maxColor = pv.color(options.maxColor);
+        if(options.minColor != null) { options.minColor = pv.color(options.minColor); }
+        if(options.maxColor != null) { options.maxColor = pv.color(options.maxColor); }
         
         if(options.shape != null) {
             this.shape = options.shape;
