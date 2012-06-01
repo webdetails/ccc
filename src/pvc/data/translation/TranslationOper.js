@@ -468,7 +468,7 @@ def.type('pvc.data.TranslationOper')
         
         function propGet(item) {
             return (dimension || (dimension = me.data.dimensions(dimName)))
-                   .intern(item[prop], item);
+                   .intern(item[prop]);
         }
         
         return propGet;

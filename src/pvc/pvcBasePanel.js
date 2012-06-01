@@ -710,6 +710,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 case 'dot':
                 case 'line':
                 case 'area':
+                    this._requirePointEvent();
                     tipsyEvent = 'point';
                     tipsySettings.usesPoint = true;
                     break;

@@ -239,44 +239,47 @@ def.scope(function(){
                    var domainPointsMissing = this.desiredDomainCount - domain.length;
                    if(domainPointsMissing > 0){ 
                        extent = this._getDataExtent(data);
-                       
-                       // Assume domain is sorted
-                       switch(domainPointsMissing){  // + 1 in discrete ?????
-                           case 1:
-                               if(this.domainComparer) {
-                                   def.array.insert(domain, extent.max, this.domainComparer);
-                               } else {
-                                   domain.push(extent.max);
-                               }
-                               break;
-                               
-                           case 2:
-                               if(this.domainComparer) {
-                                   def.array.insert(domain, extent.min, this.domainComparer);
-                                   def.array.insert(domain, extent.max, this.domainComparer);
-                               } else {
-                                   domain.unshift(extent.min);
-                                   domain.push(extent.max);
-                               }
-                               break;
-                               
-                           default:
-                               /* Ignore args domain altogether */
-                               if(pvc.debug >= 2){
-                                    pvc.log("Ignoring option 'colorRangeInterval' due to unsupported length." +
-                                            def.format(" Should have '{0}', but instead has '{1}'.", [this.desiredDomainCount, domain.length]));
-                               }
-                               domain = null;
-                       }
+                       if(extent){
+                            // Assume domain is sorted
+                            switch(domainPointsMissing){  // + 1 in discrete ?????
+                                case 1:
+                                    if(this.domainComparer) {
+                                        def.array.insert(domain, extent.max, this.domainComparer);
+                                    } else {
+                                        domain.push(extent.max);
+                                    }
+                                    break;
+
+                                case 2:
+                                    if(this.domainComparer) {
+                                        def.array.insert(domain, extent.min, this.domainComparer);
+                                        def.array.insert(domain, extent.max, this.domainComparer);
+                                    } else {
+                                        domain.unshift(extent.min);
+                                        domain.push(extent.max);
+                                    }
+                                    break;
+
+                                default:
+                                    /* Ignore args domain altogether */
+                                    if(pvc.debug >= 2){
+                                            pvc.log("Ignoring option 'colorRangeInterval' due to unsupported length." +
+                                                    def.format(" Should have '{0}', but instead has '{1}'.", [this.desiredDomainCount, domain.length]));
+                                    }
+                                    domain = null;
+                            }
+                        }
                    }
                }
                
                if(!domain) {
                    extent || (extent = this._getDataExtent(data));
-                   var min = extent.min,
-                       max = extent.max;
-                   var step = (max - min) / (this.desiredDomainCount - 1);
-                   domain = pv.range(min, max + step, step);
+                   if(extent){
+                       var min = extent.min,
+                           max = extent.max;
+                       var step = (max - min) / (this.desiredDomainCount - 1);
+                       domain = pv.range(min, max + step, step);
+                   }
                }
                
                return domain;
@@ -289,8 +292,11 @@ def.scope(function(){
         
         _createScale: function(domain){
             var scale = pv.Scale.linear();
+
+            if(domain){
+                scale.domain.apply(scale, domain);
+            }
             
-            scale.domain.apply(scale, domain);
             scale.range.apply(scale, this.range);
             
             return scale;

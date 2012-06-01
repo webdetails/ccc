@@ -106,7 +106,8 @@
                 timeSeries: false,
                 //timeSeriesFormat: "%Y-%m-%d",
                 axisOverlappedLabelsHide: true,
-                legendMinMarginX: 10,
+                legendMinMarginX: 10,
+
                 extensionPoints: {
                     titleLabel_font: "bold 14px sans-serif"
                 },
@@ -147,9 +148,9 @@
                 /* Data translation */
                 crosstabMode: true,
                 readers: [
-                   {names: 'multiChartColumn', indexes: 0}, // Territory
-                   {names: 'category',         indexes: 1}, // Country
-                   {names: 'series',           indexes: 4},
+                   {names: 'series',           indexes: 2}, // Product
+                   {names: 'multiChartColumn', indexes: 3}, // Territory
+                   {names: 'category',         indexes: 4}, // Country
                    {names: 'value',            indexes: 5}
                 ],
                 isMultiValued: true,
@@ -209,7 +210,7 @@
                     
                 /* Data mapping */
                 readers: [
-                   {names: ['territory', 'country', 'line', 'year', 'quarter', 'sales']}
+                   {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
                 ],
                 
                 /* Source Data Format */
@@ -266,7 +267,7 @@
                     
                 /* Data mapping */
                 readers: [
-                    {names: ['territory', 'country', 'line', 'year', 'quarter', 'sales']}
+                    {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
                 ],
                 
                 /* Source Data Format */
@@ -337,9 +338,9 @@
                     
                 /* Data mapping */
                 readers: [
-                   {names: ['territory', 'country', 'pclass', 'pline', 
-                            'product', 'quantity', 
-                            'sales', 'esales', 'psales']}
+                   {names: ['pclass', 'pline', 'product',
+                            'territory', 'country',
+                            'quantity', 'sales', 'esales', 'psales']}
                 ],
                 
                 /* Source Data Format */
@@ -397,7 +398,7 @@
 
                 /* Data mapping */
                 readers: [
-                   {names: ['territory', 'country', 'line', 'year', 'quarter', 'sales']}
+                   {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
                 ],
 
                 /* Source Data Format */

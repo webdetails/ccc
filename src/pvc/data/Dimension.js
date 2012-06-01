@@ -582,12 +582,12 @@ def.type('pvc.data.Dimension')
     },
     
     
-    format: function(value){
-        return "" + (this.type._formatter ? this.type._formatter.call(null, value, null, this) : "");
+    format: function(value, sourceValue){
+        return "" + (this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : "");
     },
     
     /**
-     * Obtains an atom that represents the specified rawValue, 
+     * Obtains an atom that represents the specified sourceValue,
      * creating one if one does not yet exist.
      * 
      * <p>
@@ -600,12 +600,11 @@ def.type('pvc.data.Dimension')
      * <p>
      * An empty string value is considered equal to a null value. 
      * </P>
-     * @param {any} rawValue A raw value.
-     * @param {any} [sourceItem] A translation source item.
+     * @param {any} sourceValue The source value.
      *
      * @type pvc.data.Atom
      */
-    intern: function(rawValue, sourceItem){
+    intern: function(sourceValue){
         // <Debug>
         (this.owner === this) || def.assert("Can only internalize on an owner dimension.");
         // </Debug>
@@ -617,23 +616,35 @@ def.type('pvc.data.Dimension')
         // are as fast and direct as possible
         
         // - NULL -
-        if(rawValue == null || rawValue === '') {
-            return this._nullAtom || dim_createNullAtom.call(this);
+        if(sourceValue == null || sourceValue === '') {
+            return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
         }
         
         var type = this.type;
         
         // - CONVERT - 
-        var value = type._converter ? type._converter.call(null, rawValue, sourceItem, this) : rawValue;
-        // <Debug>
-        (value != null ) || def.fail.operationInvalid("Cannot convert to null");
-        // </Debug>
+        var value, label;
+        if(type._converter){
+            value = type._converter.call(null, sourceValue);
+        } else if(typeof sourceValue === 'object' && ('v' in sourceValue)){
+            // Assume google table style cell {v: , f: }
+            value = sourceValue.v;
+            label = sourceValue.f;
+        } else {
+            value = sourceValue;
+        }
+        
+        if(value == null || value === '') {
+            // Null after all
+            return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
+        }
         
         // - CAST -
         // Any cast function?
         if(type.cast) {
             value = type.cast.call(null, value);
             if(value == null || value === ''){
+                // Null after all (normally a cast failure)
                 return this._nullAtom || dim_createNullAtom.call(this);
             }
         }
@@ -651,13 +662,22 @@ def.type('pvc.data.Dimension')
         }
         
         // - LABEL -
-        var label = "" + (type._formatter ? type._formatter.call(null, value, sourceItem, this) : value);
-        // <Debug>
-        label || def.fail.operationInvalid("Only a null value can have an empty label.");
-        // </Debug>
+        if(label == null){
+            if(type._formatter){
+                label = type._formatter.call(null, value, sourceValue);
+            } else {
+                label = value;
+            }
+        }
+
+        label = "" + label; // J.I.C.
+        
+        if(!label && pvc.debug >= 2){
+            pvc.log("Only the null value should have an empty label.");
+        }
         
         // - ATOM! -
-        atom = new pvc.data.Atom(this, value, label, rawValue, key);
+        atom = new pvc.data.Atom(this, value, label, sourceValue, key);
         
         // Insert atom in order (or at the end when !_atomComparer)
         def.array.insert(this._atoms, atom, this._atomComparer);
@@ -716,16 +736,17 @@ function dim_buildDatumsFilterKey(keyArgs){
  * 
  * @name pvc.data.Dimension#_createNullAtom
  * @function
+ * @param {any} [sourceValue] The source value of null. Can be used to obtain the null format.
  * @type undefined
  * @private
  */
-function dim_createNullAtom(){
+function dim_createNullAtom(sourceValue){
     // <Debug>
     (this.owner === this) || def.assert("Can only create atoms on an owner dimension.");
     // </Debug>
     
     if(!this._nullAtom){
-        var label = "" + (this.type._formatter ? this.type._formatter.call(null, null, null, this) : "");
+        var label = "" + (this.type._formatter ? this.type._formatter.call(null, null, sourceValue) : "");
         
         this._nullAtom = new pvc.data.Atom(this, null, label, null, '');
         
@@ -753,7 +774,7 @@ function dim_createVirtualNullAtom(){
     // </Debug>
     
     if(!this._virtualNullAtom){
-        var label = "" + (this.type._formatter ? this.type._formatter.call(null, null, null, this) : "");
+        var label = "" + (this.type._formatter ? this.type._formatter.call(null, null, null) : "");
         
         this._virtualNullAtom = new pvc.data.Atom(this, null, label, null, '');
 

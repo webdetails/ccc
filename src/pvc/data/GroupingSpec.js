@@ -37,15 +37,13 @@
  */
 def.type('pvc.data.GroupingSpec')
 .init(function(levelSpecs, type, keyArgs){
-    levelSpecs  || def.fail.argumentRequired('levelSpecs');
-    
     this.type = type || null;
     
     var ids = [];
     
     this.hasCompositeLevels = false;
     
-    this.levels = def.query(levelSpecs)
+    this.levels = def.query(levelSpecs || undefined) // -> null query
         .where(function(levelSpec){ return levelSpec.dimensions.length > 0; })
         .select(function(levelSpec){
             ids.push(levelSpec.id);
@@ -57,15 +55,14 @@ def.type('pvc.data.GroupingSpec')
             return levelSpec;
         }, this)
         .array();
-    
-    this.levels.length || def.fail.argumentInvalid('levelSpecs', 'Must have at least one element.');
 
-    this.depth = this.levels.length;
+    // The null grouping has zero levels
+    this.depth             = this.levels.length;
     this.isSingleLevel     = this.depth === 1;
     this.isSingleDimension = this.isSingleLevel && !this.hasCompositeLevels;
     this.firstDimension    = this.depth > 0 ? this.levels[0].dimensions[0] : null;
     
-    this.flatteningMode   = def.get(keyArgs, 'flatteningMode') || null;
+    this.flatteningMode   = def.get(keyArgs, 'flatteningMode'  ) || null;
     this.flattenRootLabel = def.get(keyArgs, 'flattenRootLabel') || '';
     
     this.id = (this.flatteningMode || '') + "##" +
@@ -113,6 +110,14 @@ def.type('pvc.data.GroupingSpec')
      */
     isDiscrete: function(){
         return !this.isSingleDimension || this.firstDimension.type.isDiscrete;
+    },
+
+    /**
+     * Indicates if the grouping has no levels.
+     * @type boolean
+     */
+    isNull: function(){
+        return !this.levels.length;
     },
 
     /**
@@ -324,8 +329,10 @@ def.type('pvc.data.GroupingDimensionSpec')
 /**
  * Parses a grouping specification string.
  * 
- * @param {string|string[]} specText The grouping specification text,
+ * @param {string|string[]} [specText] The grouping specification text,
  * or array of grouping specification level text.
+ * When unspecified, a null grouping is returned.
+ * 
  * <p>
  * An example:
  * </p>
@@ -344,7 +351,9 @@ def.type('pvc.data.GroupingDimensionSpec')
  * @type pvc.data.GroupingSpec
  */
 pvc.data.GroupingSpec.parse = function(specText, type){
-    specText || def.fail.argumentRequired('specText');
+    if(!specText){
+        return new pvc.data.GroupingSpec(null, type);
+    }
     
     var levels;
     if(def.isArray(specText)) {

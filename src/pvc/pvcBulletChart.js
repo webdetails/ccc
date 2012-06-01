@@ -26,12 +26,13 @@ pvc.BulletChart = pvc.BaseChart.extend({
         options.legend = false;
         options.selectable = false; // not supported yet
 
-        if(options.compatVersion <= 1 && options.tooltipFormat === undefined){
+        // TODO
+        //if(options.compatVersion <= 1 && options.tooltipFormat === undefined){
             // Backwards compatible tooltip format
             options.tooltipFormat = function(s, c, v) {
                 return this.chart.options.valueFormat(v);
             };
-        }
+        //}
 
         this.base(options);
 
@@ -329,12 +330,13 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       
 //      this._addPropTooltip(this.pvBulletMeasure);
 //      this._addPropTooltip(this.pvBulletMarker);
+        var myself = this;
         this.pvBulletMeasure
             .localProperty('tooltip')
             .tooltip(function(v, d){
                 var s = d.title;
                 var c = d.subtitle;
-                return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+                return chart.options.tooltipFormat.call(myself,s,c,v);
             })
             ;
 
@@ -343,7 +345,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             .tooltip(function(v, d){
                 var s = d.title;
                 var c = d.subtitle;
-                return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+                return chart.options.tooltipFormat.call(myself,s,c,v);
             })
             ;
       

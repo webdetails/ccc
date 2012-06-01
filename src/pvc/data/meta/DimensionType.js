@@ -80,7 +80,7 @@
  * to convert raw values into values of the dimension's value type.
  * Its signature is:
  * <pre>
- * function(rawValue : any, item : any, dimension : pvc.data.Dimension) : valueType
+ * function(rawValue : any) : valueType
  * </pre>
  * 
  * @param {string} [keyArgs.rawFormat] A protovis format mask adequate to the specified value type.
@@ -106,10 +106,10 @@
  * to format the values of this dimension type.
  * Its signature is:
  * <pre>
- * function(value : valueType, item : any, dimension : pvc.data.Dimension) : string
+ * function(value : valueType, rawValue : any) : string
  * </pre>
  * <p>
- * Only a "nully" value can have an empty label.
+ * Only a "nully" value <i>should</i> have an empty label.
  * </p>
  * <p>
  * The label is not necessarily unique.

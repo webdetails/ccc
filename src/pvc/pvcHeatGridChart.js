@@ -18,10 +18,10 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
                 'orthoAxisOrdinal', true,
                 'legend', false);
         
-        if(options.useCompositeAxis){
-            options.isMultiValued = true;
-        }
-        
+//        if(options.useCompositeAxis){
+//            options.isMultiValued = true;
+//        }
+//
         if(options.scalingType && !options.colorScaleType){
             options.colorScaleType = options.scalingType;
         }
@@ -30,8 +30,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
         var defaultOptions = {
             colorValIdx: 0,
-            sizeValIdx: 0,
-            defaultValIdx: 0,
+            sizeValIdx:  1,
             measuresIndexes: [2],
 
             //multi-dimensional clickable label
@@ -56,6 +55,12 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         
         // Apply options
         pvc.mergeDefaults(this.options, defaultOptions, options);
+
+        var parent = this.parent;
+        if(parent) {
+            this._colorRole   = parent._colorRole;
+            this._dotSizeRole = parent._dotSizeRole;
+        }
     },
     
     /**
@@ -65,12 +70,60 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
     _initVisualRoles: function(){
         
         this.base();
-        
-        // TODO
+
+        var colorDimName = 'value',
+            sizeDimName  = 'value2';
+
+        if(this.options.compatVersion <= 1){
+            switch(this.options.colorValIdx){
+                case 0:  colorDimName = 'value';  break;
+                case 1:  colorDimName = 'value2'; break;
+                default: colorDimName = undefined;
+            }
+
+            switch(this.options.sizeValIdx){
+                case 0:  sizeDimName = 'value';  break;
+                case 1:  sizeDimName = 'value2'; break;
+                default: sizeDimName = undefined;
+            }
+        }
+
         this._addVisualRoles({
-            value:  { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, valueType: Number, defaultDimensionName: 'value'  },
-            value2: { isMeasure: true, requireSingleDimension: true, requireIsDiscrete: false, valueType: Number, defaultDimensionName: 'value2' }
+            color:  {
+                isMeasure: true,
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimensionName: colorDimName
+            },
+            
+            dotSize: {
+                isMeasure: true,
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number,
+                defaultDimensionName: sizeDimName
+            }
         });
+
+        this._colorRole   = this.visualRoles('color');
+        this._dotSizeRole = this.visualRoles('dotSize');
+    },
+
+    _initData: function(keyArgs){
+        
+        this.base(keyArgs);
+
+        // Cached
+        var dotSizeGrouping = this._dotSizeRole.grouping;
+        if(dotSizeGrouping){
+            this._dotSizeDim = this.data.dimensions(dotSizeGrouping.firstDimension.name);
+        }
+
+        var colorGrouping = this._colorRole.grouping;
+        if(colorGrouping) {
+            this._colorDim = this.data.dimensions(colorGrouping.firstDimension.name);
+        }
     },
     
     /* @override */
@@ -108,10 +161,6 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
 
     showValues: true,
     orientation: "vertical",
-
-    colorValIdx:   0,
-    sizeValIdx:    0,
-    defaultValIdx: 0,
     shape: "square",
     nullShape: "cross",
 
@@ -127,34 +176,9 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
 
         var chart = this.chart,
             options = chart.options;
-        
-        this.colorValIdx = options.colorValIdx;
-        this.sizeValIdx  = options.sizeValIdx;
-        
-        switch(options.colorValIdx){
-            case 0:
-                this.colorDimName = 'value';
-                break;
-            case 1:
-                this.colorDimName = 'value2';
-                break;
-            default:
-                this.colorDimName = null;
-        }
-        
-        switch(options.sizeValIdx){
-            case 0:
-                this.sizeDimName = 'value';
-                break;
-            case 1:
-                this.sizeDimName = 'value2';
-                break;
-            default:
-                this.sizeDimName = null;
-        }
-        
-        var sizeDimName = this.sizeDimName;
-        var colorDimName = this.colorDimName;
+
+        var colorDimName = this.colorDimName = chart._colorDim   && chart._colorDim.name,
+            sizeDimName  = this.sizeDimName  = chart._dotSizeDim && chart._dotSizeDim.name;
         
         // colors
         options.nullColor = pv.color(options.nullColor);
@@ -202,7 +226,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
                 /* Override/create these options, inherit the rest */
                 type: options.colorScaleType, 
                 data: colRootData,
-                colorDimension: this.colorDimName
+                colorDimension: colorDimName
             }));
         }
         

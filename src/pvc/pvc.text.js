@@ -115,7 +115,12 @@ def.scope(function(){
         return $textSizePlaceholder;
     }
 
+    // TODO: the following method fails on empty text...
     function getTextSizePvLabel(text, font){
+        if(text === ""){
+            text = "m";
+        }
+
         if(!$textSizePvLabel || textSizePvLabelFont != font){
             var holder   = getTextSizePlaceholder();
             var holderId = holder.attr('id');

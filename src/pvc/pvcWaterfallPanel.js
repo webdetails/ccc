@@ -244,7 +244,9 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                             {visible: true}),
             rootScene  = new pvc.visual.Scene(null, {panel: this, group: rootCatData});
 
-        createCategSceneRecursive(rootCatData, 0);
+        if(ruleInfoByCategKey){
+            createCategSceneRecursive(rootCatData, 0);
+        }
         
         return rootScene;
 

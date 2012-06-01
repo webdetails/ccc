@@ -253,31 +253,35 @@ def.type('pvc.visual.Role')
      */
     bind: function(groupingSpec){
         if(groupingSpec) {
-            /* Validate grouping spec according to role */
+            if(groupingSpec.isNull()){
+                groupingSpec = null;
+           } else {
+                /* Validate grouping spec according to role */
 
-            if(this.requireSingleDimension && !groupingSpec.isSingleDimension) {
-                throw def.error.operationInvalid(
-                        "Role '{0}' only accepts a single dimension.",
-                        [this.name]);
+                if(this.requireSingleDimension && !groupingSpec.isSingleDimension) {
+                    throw def.error.operationInvalid(
+                            "Role '{0}' only accepts a single dimension.",
+                            [this.name]);
+                }
+
+                var valueType = this.valueType;
+                var requireIsDiscrete = this.requireIsDiscrete;
+                groupingSpec.dimensions().each(function(dimSpec){
+                    var dimType = dimSpec.type;
+                    if(valueType && dimType.valueType !== valueType) {
+                        throw def.error.operationInvalid(
+                                "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts dimensions of type '{2}' and not of type '{3}'.",
+                                [this.name, dimType.name, pvc.data.DimensionType.valueTypeName(valueType), dimType.valueTypeName]);
+                    }
+
+                    if(requireIsDiscrete != null &&
+                    dimType.isDiscrete !== requireIsDiscrete) {
+                        throw def.error.operationInvalid(
+                                "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts {2} dimensions.",
+                                [this.name, dimType.name, requireIsDiscrete ? 'discrete' : 'continuous']);
+                    }
+                }, this);
             }
-
-            var valueType = this.valueType;
-            var requireIsDiscrete = this.requireIsDiscrete;
-            groupingSpec.dimensions().each(function(dimSpec){
-                var dimType = dimSpec.type;
-                if(valueType && dimType.valueType !== valueType) {
-                    throw def.error.operationInvalid(
-                            "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts dimensions of type '{2}' and not of type '{3}'.",
-                            [this.name, dimType.name, pvc.data.DimensionType.valueTypeName(valueType), dimType.valueTypeName]);
-                }
-
-                if(requireIsDiscrete != null &&
-                   dimType.isDiscrete !== requireIsDiscrete) {
-                    throw def.error.operationInvalid(
-                            "Role '{0}' cannot be bound to dimension '{1}'. \nIt only accepts {2} dimensions.",
-                            [this.name, dimType.name, requireIsDiscrete ? 'discrete' : 'continuous']);
-                }
-            }, this);
         }
         
         // ----------

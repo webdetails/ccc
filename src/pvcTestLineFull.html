@@ -168,7 +168,8 @@ pvc.examples.register(def.create(baseCategDef, {
 }));
 
 pvc.examples.register(def.create(baseCategDef, {
-	id: 'line04',
+	id: 'line04',
+
 	className: 'LineChart',
 	def: {
 	    title:     "Categorical Line Chart with Areas",
@@ -235,17 +236,28 @@ pvc.examples.register(def.create(baseCategDef, {
 }));
 
 pvc.examples.register(def.create(baseCategDef, {
-    id: 'line11',
+	id: 'line11',
+	className: 'StackedAreaChart',
+	def: {
+	    title:     "Stacked Categorical Area Chart with Lines and Dots",
+	    showLines: true,
+            showDots:  true
+	 }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line12',
     className: 'LineChart',
     dataVar: 'relational_01_neg',
     def: {
         title:     "Categorical Line Chart with Negative Values",
         showAreas: true
      }
-}));
+}));
+
 
 pvc.examples.register(def.create(baseCategDef, {
-    id: 'line12',
+    id: 'line13',
     className: 'LineChart',
     dataVar: 'relational_01_neg',
     def: {
@@ -256,7 +268,7 @@ pvc.examples.register(def.create(baseCategDef, {
 }));
 
 pvc.examples.register(def.create(baseExampleDef, {
-    id: 'line13',
+    id: 'line14',
     className: 'DotChart',
     dataVar: 'testLDot2',
     def: {
@@ -274,7 +286,7 @@ pvc.examples.register(def.create(baseExampleDef, {
 }));
 
 pvc.examples.register(def.create(baseExampleDef, {
-    id: 'line14',
+    id: 'line15',
     className: 'DotChart',
     dataVar: 'testLDot2',
     def: {
@@ -289,7 +301,8 @@ pvc.examples.register(def.create(baseExampleDef, {
      }
 }));
 
-    </script>
+    </script>
+
   </head>
   <body>
     <h1>

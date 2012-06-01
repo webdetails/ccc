@@ -18,6 +18,8 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.BoxplotChart.defaultOptions, options);
+
+        this._axisRoleNameMap.ortho = pvc.BoxplotChart.measureRolesNames;
     },
 
      _processOptionsCore: function(options){
@@ -27,6 +29,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
          // Not supported
          options.secondAxisIndependentScale = false;
          options.stacked = false;
+         options.legend  = false;
      },
 
     /**
@@ -71,8 +74,6 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         });
 
         this._addVisualRoles(rolesSpec);
-
-        this._axisRoleNameMap.ortho = pvc.BoxplotChart.measureRolesNames;
     },
     
     _createTranslation: function(complexType, translOptions){

@@ -10,10 +10,10 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
 
         pvc.mergeDefaults(this.options, pvc.CategoricalAbstract.defaultOptions, options);
         
-        this._axisRoleNameMap = {
-            'base':  'category',
-            'ortho': this.options.orthoAxisOrdinal ? 'series' : 'value'
-        };
+        def.set(this._axisRoleNameMap,
+            'base', 'category',
+            'ortho', this.options.orthoAxisOrdinal ? 'series' : 'value'
+        );
 
         var parent = this.parent;
         if(parent) {

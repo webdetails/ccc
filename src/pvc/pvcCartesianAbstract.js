@@ -564,8 +564,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
         
-        originIsZero: true,
-
+        originIsZero:  undefined,
+        
         orthoFixedMin: undefined,
         orthoFixedMax: undefined,
 

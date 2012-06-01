@@ -213,7 +213,7 @@ def.type('pvc.visual.Scene')
  */
 function scene_renderId(renderId){
     if(this._renderId !== renderId){
-        if(pvc.debug >= 4){
+        if(pvc.debug >= 5){
             pvc.log({sceneId: this.id, oldRenderId: this._renderId, newRenderId: renderId});
         }
         

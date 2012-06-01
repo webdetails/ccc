@@ -58,6 +58,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         showLines: false,
         showAreas: false,
         showValues: false,
+        // TODO: Set this way, setting, "axisOffset: 0" has no effect...
         orthoAxisOffset: 0.04,
         baseAxisOffset:  0.01, // TODO: should depend on being discrete or continuous base
         valuesAnchor: "right",

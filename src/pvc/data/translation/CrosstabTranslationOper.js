@@ -29,6 +29,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
     
     this.base(complexType, source, metadata, options);
 
+    this._separator = this.options.separator || '~';
+
     this._measureData();
 })
 .add(/** @lends pvc.data.CrosstabTranslationOper# */{
@@ -112,7 +114,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      * 
      * ----
      * 
-     * Format: "Measures in columns"
+     * Format: "Measures in columns" (uniform)
      * 
      *             0            R           R+M    R+M*(CG-1)   R+M*CG
      *             o------------+------------+ ... +------------o (j - matrix column)
@@ -140,15 +142,18 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      *       
      * i = rg
      * j = R + M*cg
-     * 
+     *
+     * Unfortunately, not all measures have to be specified in all column groups.
+     * When a measure in column group would have all rows with a null value, it can be omitted.
      * 
      * Virtual Item Structure
      * ----------------------
      * A relational view of the cross groups
      *  
-     *    [<...RG...>, <...CG...>, <...MG...>]
+     *    [<...CG...>, <...RG...>, <...MG...>]
      * 
-     * 
+     * This order is chosen to match that of the relational translation.
+     *
      * Virtual Item to Dimensions mapping
      * ----------------------------------
      * 
@@ -195,38 +200,44 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         // ----------------
         // Virtual item
         
-        var item  = new Array(this.R + this.C + this.M),
+        var item  = new Array(this.virtualItemSize()),
             itemCrossGroupIndex = this._itemCrossGroupIndex,
-            crossGroupDepth = this; // Quick and dirty (this.R, this.C, this.M)
+            me = this
+            ;
         
-        function updateItemCrossGroup(crossGroupId, source) {
+        function updateVItemCrossGroup(crossGroupId, source) {
             // Start index of cross group in item
             var itemIndex   = itemCrossGroupIndex[crossGroupId],
                 sourceIndex = 0,
-                depth       = crossGroupDepth[crossGroupId];
+                depth       = me[crossGroupId];
             
             while((depth--) > 0) {
                 item[itemIndex++] = source[sourceIndex++];
             }
         }
         
+        function updateVItemMeasure(line, cg) {
+            // Start index of cross group in item
+            var itemIndex = itemCrossGroupIndex.M,
+                cgIndexes = me._colGroupsIndexes[cg],
+                depth = me.M;
+            
+            for(var i = 0 ; i < depth ; i++){
+                var lineIndex = cgIndexes[i];
+                item[itemIndex++] = lineIndex != null ? line[lineIndex] : null;
+            }
+        }
+        
         // ----------------
 
-        function expandLine(line, i){
-            updateItemCrossGroup('R', line);
+        function expandLine(line/*, i*/){
+            updateVItemCrossGroup('R', line);
             
-            // Every this.M is a new measureGroup/colGroup
-            var meaGroups = [];
-            for(var j = this.R, J = line.length ; j < J; j += this.M) {
-                // TODO: avoid instanciating so many arrays...
-                meaGroups.push(  line.slice(j, j + this.M)  );
-            }
-            
-            return def.query(meaGroups).select(function(meaGroup, cg){
+            return def.query(this._colGroups).select(function(colGroup, cg){
                   
                   // Update ITEM
-                  updateItemCrossGroup('C', this._colGroups[cg]);
-                  updateItemCrossGroup('M', meaGroup);
+                  updateVItemCrossGroup('C', colGroup);
+                  updateVItemMeasure(line, cg);
                   
                   // Naive approach...
                   // Call all readers every time
@@ -262,11 +273,21 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         this.M = 1;
         this.measuresDirection = null;
 
-        var colNames = this.metadata.map(function(d){ return d.colName; });
+        var colNames;
         if(this.options.seriesInRows){
+            colNames = this.metadata.map(function(d){ return d.colName; }),
+
             lines.unshift(colNames);
             pv.transpose(lines); // Transposes, in-place
             colNames = lines.shift();
+            colNames.forEach(function(value, i){
+                colNames[i] = {v: value}; // may be null ....
+            });
+            
+        } else if(this.options.compatVersion <= 1){
+            colNames = this.metadata.map(function(d){ return {v: d.colName}; });
+        } else {
+            colNames = this.metadata.map(function(d){ return {v: d.colName, f: d.colLabel }; });
         }
 
         // --------------
@@ -280,14 +301,15 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             categoriesCount = def.get(this.options, 'categoriesCount', 1);
 
             // TODO: >= 1 check
-            // TODO: Multiples consume row space?
             this.R = categoriesCount;
 
             this._colGroups = colNames.slice(this.R);
-
+            this._colGroupsIndexes = new Array(this._colGroups.length);
+            
             // To Array
             this._colGroups.forEach(function(colGroup, cg){
                 this._colGroups[cg] = [colGroup];
+                this._colGroupsIndexes[cg] = [this.R + cg]; // all the same
             }, this);
 
         } else {
@@ -309,19 +331,21 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                     if(measuresInColumns) {
                         this.measuresDirection = 'columns';
 
-                        this._colGroups = this._processEncodedColGroups(encodedColGroups);
-
-                        var CG = this._colGroups.length; // >= 1
-
-                        this.M = Math.floor(L / CG); // should not be needed, but J.I.C.
+                        this._processEncodedColGroups(encodedColGroups);
+                        // Updates:
+                        // this._colGroups
+                        // this._colGroupsIndexes
+                        // this.M
 
                     } else {
                         // M = 1
                         this._colGroups = encodedColGroups;
+                        this._colGroupsIndexes = [];
 
                         // Split encoded column groups
                         this._colGroups.forEach(function(colGroup, cg){
-                            this._colGroups[cg] = colGroup.split('~');
+                            this._colGroups[cg] = this._splitEncodedColGroupCell(colGroup);
+                            this._colGroupsIndexes[cg] = [this.R + cg]; // all the same
                         }, this);
                     }
 
@@ -351,7 +375,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 // Next follows a non-relevant Measure title column
                 this._colGroups = colNames.slice(this.R + 1);
 
-                // To Array
+                // To Array of Cells
                 this._colGroups.forEach(function(colGroup, cg){
                     this._colGroups[cg] = [colGroup];
                 }, this);
@@ -362,7 +386,9 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 // The null test is required because secondAxisSeriesIndexes can be a number, a string...
                 var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;
                 if(axis2SeriesIndexes != null){
-                    var seriesKeys = this._colGroups.map(function(colGroup){ return '' + colGroup[0]; });
+                    var seriesKeys = this._colGroups.map(function(colGroup){
+                        return '' + colGroup[0].v;
+                    });
                     this._axis2SeriesKeySet = this._createSecondAxisSeriesKeySet(axis2SeriesIndexes, seriesKeys);
                 }
             }
@@ -370,11 +396,11 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
 
         // ----------------
         // The index at which the first component of
-        // each cross group starts in item
+        // each cross group starts in virtual item
         this._itemCrossGroupIndex = {
-                'R': 0,
-                'C': this.R,
-                'M': this.R + this.C
+                'C': 0,
+                'R': this.C,
+                'M': this.C + this.R
             };
 
         // ----------------
@@ -388,29 +414,154 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         }
     },
 
-    // TODO: docs
+    _splitEncodedColGroupCell: function(colGroup){
+        var values = colGroup.v,
+            labels = colGroup.f;
+
+        if(values == null){
+            values = [];
+            labels = undefined;
+        } else {
+            values = values.split(this._separator);
+            labels = labels && labels.split(this._separator);
+        }
+
+        return values.map(function(value, index){
+            return {
+                v: value,
+                f: labels && labels[index]
+            };
+        });
+    },
+
+    /**
+     * Analyzes the array of encoded column groups.
+     * <p>
+     * Creates and array of column groups
+     * where each element is an array of column group values.
+     * </p>
+     * <p>
+     * In the process the number of encoded measures is determined, {@link #M}.
+     * In this respect, note that not all measures need to be supplied
+     * in every column group.
+     * When a measure is not present, that means that the value of the measure
+     * in every row is null.
+     * </p>
+     * <p>
+     * It is assumed that the order of measures in column groups is stable.
+     * So, if in one column group "measure 1" is before "measure 2",
+     * then it must be also the case in every other column group.
+     * This order is then used to place values in the virtual item.
+     * </p>
+     */
     _processEncodedColGroups: function(encodedColGroups){
-        var L = encodedColGroups.length,
-            colGroups = [];
-        
-        var prevEncodedColGroup = null;
+        var L = encodedColGroups.length || def.assert("Must have columns"),
+            colGroups = [],
+            colGroup,
+            /*
+             * measureName -> {
+             *     groupIndex: 0, // Global order of measures within a column group
+             *     index: 0       // Index (i, below) of measure's first appearance
+             * }
+             *
+             */
+            measuresInfo  = {},
+            measuresInfoList = []
+            ;
+
         for(var i = 0 ; i < L ; i++){
-            var encodedColGroup = encodedColGroups[i],
-                sepIndex = encodedColGroup.lastIndexOf("~");
+            var colGroupCell = encodedColGroups[i],
+                encColGroupValues = colGroupCell.v,
+                sepIndex = colGroupCell.v.lastIndexOf(this._separator),
+                meaName,
+                colGroupValues;
             
-            // MeasureTitle has precedence, so we may end up with no column group value. (and C = 0)
-            if(sepIndex > 0){
-                // Remove MeasureTitle name from the end of encoded column group
-                encodedColGroup = encodedColGroup.slice(0, sepIndex);
-                if(encodedColGroup !== prevEncodedColGroup) {
-                    // Split encoded column groups
-                    colGroups.push(encodedColGroup.split('~'));
-                    prevEncodedColGroup = encodedColGroup;
+            // MeasureName has precedence,
+            // so we may end up with no column group value (and C = 0).
+            if(sepIndex < 0){
+                // C = 0
+                meaName = encColGroupValues;
+                encColGroupValues = '';
+                colGroupValues = [];
+            } else {
+                meaName = encColGroupValues.substring(sepIndex + 1);
+                encColGroupValues = encColGroupValues.substring(0, sepIndex);
+                colGroupValues = encColGroupValues.split(this._separator);
+
+                var colGroupLabels;
+                if(colGroupCell.f != null){
+                    colGroupLabels = colGroupCell.f.split(this._separator);
+                    colGroupLabels.pop(); // measure label
                 }
+
+                colGroupValues.forEach(function(value, index){
+                    var label = colGroupLabels && colGroupLabels[index];
+                    colGroupValues[index] = {v: value, f: label};
+                });
+            }
+
+            // New column group?
+            if(!colGroup || colGroup.encValues !== encColGroupValues){
+                colGroup = {
+                    index:        i,
+                    encValues:    encColGroupValues,
+                    values:       colGroupValues,
+                    measureNames: [meaName]
+                };
+
+                colGroups.push(colGroup);
+            } else {
+                colGroup.measureNames.push(meaName);
+            }
+
+            // Check the measure
+            var currMeaIndex = (i - colGroup.index),
+                meaInfo = def.getOwn(measuresInfo, meaName);
+            if(!meaInfo){
+                measuresInfo[meaName] = meaInfo = {
+                    name: meaName,
+                    groupIndex: currMeaIndex,
+                    index: i
+                };
+                measuresInfoList.push(meaInfo);
+            } else if(currMeaIndex > meaInfo.groupIndex) {
+                meaInfo.groupIndex = currMeaIndex;
             }
         }
+
+        // Sort measures
+        measuresInfoList.sort(function(infoa, infob){
+            return def.compare(infoa.groupIndex, infob.groupIndex) ||
+                   def.compare(infoa.index, infob.index)
+                   ;
+        });
+
+        // Reassign measure group indexes
+        measuresInfoList.forEach(function(meaInfo, index){
+            meaInfo.groupIndex = index;
+        });
+
+        // Publish colgroups and colgroupIndexes, keeping only relevant information
+        var CG = colGroups.length,
+            colGroupsValues  = new Array(CG),
+            colGroupsIndexes = new Array(CG),
+            M = measuresInfoList.length,
+            R = this.R
+            ;
         
-        return colGroups.length ? colGroups : [[]]; 
+        colGroups.map(function(colGroup, cg){
+            colGroupsValues[cg] = colGroup.values;
+
+            // The index in source *line* where each of the M measures can be read
+            var meaIndexes = colGroupsIndexes[cg] = new Array(M);
+            colGroup.measureNames.forEach(function(meaName, index){
+                meaIndexes[measuresInfo[meaName].groupIndex] = R + colGroup.index + index;
+            });
+        });
+
+        this._colGroups        = colGroupsValues;
+        this._colGroupsIndexes = colGroupsIndexes;
+        this.M = M;
     },
     
     /**
@@ -467,12 +618,12 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
-        if(this.R > 0){
-            add('category', 'R', 0, this.R);
-        }
-        
         if(this.C > 0){
             add('series', 'C', 0, this.C);
+        }
+        
+        if(this.R > 0){
+            add('category', 'R', 0, this.R);
         }
         
         if(!this._userUsedDims.value) {

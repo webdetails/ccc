@@ -475,6 +475,11 @@ pvc.BaseChart = pvc.Abstract.extend({
                         return true;
                     }
                 }
+
+                if(pvc.debug >= 4){
+                    pvc.log("Datum excluded.");
+                }
+
                 return false;
             };
         }
@@ -514,6 +519,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
 
         return {
+            compatVersion:     options.compatVersion,
             secondAxisSeriesIndexes: secondAxisSeriesIndexes,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
@@ -589,19 +595,23 @@ pvc.BaseChart = pvc.Abstract.extend({
             var visualRole = this._visualRoles[name] ||
                 def.fail.argumentInvalid("Role '{0}' is not supported by the chart type.", [name]);
 
-            var grouping = pvc.data.GroupingSpec.parse(roleSpec);
+            // !roleSpec results in a null grouping being preBound
+            // A pre bound null grouping is later discarded in the post bind
+            if(roleSpec !== undefined){
+                var grouping = pvc.data.GroupingSpec.parse(roleSpec);
 
-            visualRole.preBind(grouping);
+                visualRole.preBind(grouping);
 
-            /* Collect dimension names bound to a *single* role */
-            grouping.dimensions().each(function(dimSpec){
-                if(def.hasOwn(boundDimNames, dimSpec.name)){
-                    // two roles => no defaults at all
-                    delete boundDimNames[dimSpec.name];
-                } else {
-                    boundDimNames[dimSpec.name] = visualRole;
-                }
-            });
+                /* Collect dimension names bound to a *single* role */
+                grouping.dimensions().each(function(dimSpec){
+                    if(def.hasOwn(boundDimNames, dimSpec.name)){
+                        // two roles => no defaults at all
+                        delete boundDimNames[dimSpec.name];
+                    } else {
+                        boundDimNames[dimSpec.name] = visualRole;
+                    }
+                });
+            }
         }, this);
 
         /* Provide defaults to dimensions bound to a single role */
@@ -654,12 +664,15 @@ pvc.BaseChart = pvc.Abstract.extend({
         /* Process role pre binding */
         def.eachOwn(this._visualRoles, function(visualRole, name){
             if(visualRole.isPreBound()){
-                visualRole
-                    .postBind(type)
-                    .grouping
-                    .dimensions().each(function(dimSpec){
-                        boundDimTypes[dimSpec.name] = true;
-                    });
+                visualRole.postBind(type);
+                // Null groupings are discarded
+                if(visualRole.grouping){
+                    visualRole
+                        .grouping
+                        .dimensions().each(function(dimSpec){
+                            boundDimTypes[dimSpec.name] = true;
+                        });
+                }
             }
         }, this);
         
@@ -932,43 +945,44 @@ pvc.BaseChart = pvc.Abstract.extend({
             me = this;
 
         partValues.forEach(function(partValue){
-            var partData = this._legendData(partValue),
-                partColorScale = this._legendColorScale(partValue),
-                partShape = (!partValue || partValue === '0' ? 'square' : 'bar');
-                
-            var legendGroup = {
-                    id:        "part" + partValue,
-                    type:      "discreteColorAndShape",
-                    partValue: partValue,
-                    partLabel: partData.label,
-                    group:     partData,
-                    items:     []
-                },
-                legendItems = legendGroup.items;
+            var partData = this._legendData(partValue);
+            if(partData){
+                var partColorScale = this._legendColorScale(partValue),
+                    partShape = (!partValue || partValue === '0' ? 'square' : 'bar'),
+                    legendGroup = {
+                        id:        "part" + partValue,
+                        type:      "discreteColorAndShape",
+                        partValue: partValue,
+                        partLabel: partData.label,
+                        group:     partData,
+                        items:     []
+                    },
+                    legendItems = legendGroup.items;
             
-            partData
-                .children()
-                .each(function(itemData){
-                    legendItems.push({
-                        value:    itemData.value,
-                        label:    itemData.label,
-                        group:    itemData,
-                        color:    partColorScale(itemData.value),
-                        useRule:  undefined,
-                        shape:    partShape,
-                        isOn: function(){
-                            return this.group.datums(null, {visible: true}).any();
-                        },
-                        click: function(){
-                            pvc.data.Data.toggleVisible(this.group.datums());
-                            
-                            // Re-render chart
-                            me.render(true, true, false);
-                        }
-                    });
-                }, this);
+                partData
+                    .children()
+                    .each(function(itemData){
+                        legendItems.push({
+                            value:    itemData.value,
+                            label:    itemData.label,
+                            group:    itemData,
+                            color:    partColorScale(itemData.value),
+                            useRule:  undefined,
+                            shape:    partShape,
+                            isOn: function(){
+                                return this.group.datums(null, {visible: true}).any();
+                            },
+                            click: function(){
+                                pvc.data.Data.toggleVisible(this.group.datums());
 
-           this._addLegendGroup(legendGroup);
+                                // Re-render chart
+                                me.render(true, true, false);
+                            }
+                        });
+                    }, this);
+
+                this._addLegendGroup(legendGroup);
+            }
         }, this);
     },
 

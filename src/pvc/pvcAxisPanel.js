@@ -381,12 +381,20 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     return scale((+d) + (tickStep / 2)); // NOTE: (+d) converts Dates to numbers, just like d.getTime()
                 })
                 [anchorOrthoLength](this.tickLength / 2)
-                .visible(function(){
-                    return (!pvTicks.scene || pvTicks.scene[this.index].visible) &&
-                           (this.index < ticks.length - 1); 
-                });
+                .intercept(
+                    'visible',
+                    minorTicksVisibleInterceptor,
+                    this._getExtension(this.panelName + "MinorTicks", 'visible'))
+                ;
         }
-        
+
+        function minorTicksVisibleInterceptor(getVisible, args){
+            var visible = (!pvTicks.scene || pvTicks.scene[this.index].visible) &&
+                          (this.index < ticks.length - 1);
+
+            return visible && (getVisible ? getVisible.apply(this, args) : true);
+        }
+
         this.renderLinearAxisLabel(ticks);
 
         // Now do the full grid lines

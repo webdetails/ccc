@@ -224,7 +224,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                  * (ideally, a line would show as a dot when only one point?)
                  */
                 if(!showDots) {
-                    if(this.scene.isAlone) {
+                    if(!this.scene.isActive && this.scene.isAlone) {
                         // Obtain the line Width of the "sibling" line
                         var lineWidth = Math.max(myself.pvLine.lineWidth(), 0.2) / 2;
                         return lineWidth * lineWidth;
@@ -243,7 +243,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 .add(pv.Label)
                 // ------
                 .bottom(0)
-                .text(function(scene){ return scene.acts[this.valueRoleName].label; })
+                .text(function(scene){ return scene.acts[myself.valueRoleName].label; })
                 ;
         }
     },
@@ -482,13 +482,14 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             toScene.orthoPosition = orthoZero;
             toScene.orthoLength   = orthoScale(toAccValue) - orthoZero;
             
-            var isAlone  = !toScene.isNull && (!fromScene || fromScene.isNull),
-                isSingle = isAlone;
+            var isNullFrom = (!fromScene || fromScene.isNull),
+                isAlone    = !toScene.isNull && isNullFrom,
+                isSingle   = isAlone;
             if(isAlone) {
                 // Look ahead
                 var nextScene = toScene.nextSibling;
                 isAlone  = !nextScene || nextScene.isNull;
-                isSingle = !fromScene && !nextScene;
+                isSingle = isNullFrom && isAlone;
             }
             
             toScene.isAlone  = isAlone;
