@@ -61,7 +61,7 @@ def.type('pvc.data.BoxplotChartTranslationOper', pvc.data.MatrixTranslationOper)
                 }
             }
         }
-
+        
         var catCount = def.get(this.options, 'categoriesCount', 1);
         if(!(catCount >= 1)){
             catCount = 1;

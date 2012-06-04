@@ -54,6 +54,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         function layoutChildI(child) {
             var a = child.anchor;
             if(a && a !== 'fill') {
+                /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
                 child.layout(new pvc.Size(remSize), childKeyArgs);

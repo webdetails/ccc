@@ -81,6 +81,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
             me._userDimsReaders.push(dimGet);
             if(dim){
                 // <Debug>
+                /*jshint expr:true */
                 !def.hasOwn(me._userDimsReadersByDim, dim) || def.assert("Dimension already being read.");
                 // </Debug>
                 
@@ -170,7 +171,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         // The null test is required because secondAxisSeriesIndexes can be a number, a string...
         var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;
         if(axis2SeriesIndexes != null){
-            var seriesReader = this._userDimsReadersByDim['series'];
+            var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 add(relTransl_dataPartGet.call(this, axis2SeriesIndexes, seriesReader));
             }

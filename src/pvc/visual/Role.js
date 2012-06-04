@@ -290,6 +290,7 @@ def.type('pvc.visual.Role')
             // unregister from current dimension types
             this.grouping.dimensions().each(function(dimSpec){
                 if(dimSpec.type){
+                    /*global dimType_removeVisualRole:true */
                     dimType_removeVisualRole.call(dimSpec.type, this);
                 }
             }, this);
@@ -300,6 +301,7 @@ def.type('pvc.visual.Role')
         if(this.grouping) {
             // register in current dimension types
             this.grouping.dimensions().each(function(dimSpec){
+                /*global dimType_addVisualRole:true */
                 dimType_addVisualRole.call(dimSpec.type, this);  
             }, this);
         }

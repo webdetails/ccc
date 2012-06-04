@@ -338,6 +338,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             // and go on with life.
             // Child charts are created to consume *existing* data
             if(!this.allowNoData && this.resultset.length === 0) {
+                /*global NoDataException:true */
                 throw new NoDataException();
             }
             
@@ -407,6 +408,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             } else {
                 // TODO: Do this in a cleaner way. Give control to Data
                 // We must at least dispose children and cache...
+                /*global data_disposeChildLists:true, data_syncDatumsState:true */
                 data_disposeChildLists.call(data);
                 data_syncDatumsState.call(data);
             }
@@ -487,11 +489,11 @@ pvc.BaseChart = pvc.Abstract.extend({
 
     _createTranslation: function(complexType, translOptions){
         
-        var translationClass = translOptions.crosstabMode ? 
-                pvc.data.CrosstabTranslationOper : 
-                pvc.data.RelationalTranslationOper;
+        var TranslationClass = translOptions.crosstabMode ? 
+                    pvc.data.CrosstabTranslationOper : 
+                    pvc.data.RelationalTranslationOper;
 
-        return new translationClass(complexType, this.resultset, this.metadata, translOptions);
+        return new TranslationClass(complexType, this.resultset, this.metadata, translOptions);
     },
 
     _createTranslationOptions: function(){
@@ -703,7 +705,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                         if(groupDimNames){
                             var freeGroupDimNames = 
                                     def.query(groupDimNames)
-                                        .where(function(dimName){ return !def.hasOwn(boundDimTypes, dimName); });
+                                        .where(function(dimName2){ return !def.hasOwn(boundDimTypes, dimName2); });
 
                             if(role.requireSingleDimension){
                                 var freeDimName = freeGroupDimNames.first();
@@ -988,6 +990,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 
     _addLegendGroup: function(legendGroup){
         var id = legendGroup.id;
+        /*jshint expr:true */
         !def.hasOwn(this.legendGroups, id) || 
             def.fail.argumentInvalid('legendGroup', "Duplicate legend group id.");
         
@@ -1116,9 +1119,11 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Sets the resultset that will be used to build the chart.
      */
     setResultset: function(resultset) {
+        /*jshint expr:true */
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
+        
         this.resultset = resultset;
-        if (resultset.length == 0) {
+        if (!resultset.length) {
             pvc.log("Warning: Resultset is empty");
         }
     },
@@ -1128,9 +1133,11 @@ pvc.BaseChart = pvc.Abstract.extend({
      * will give more information for building the chart.
      */
     setMetadata: function(metadata) {
+        /*jshint expr:true */
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
+        
         this.metadata = metadata;
-        if (metadata.length == 0) {
+        if (!metadata.length) {
             pvc.log("Warning: Metadata is empty");
         }
     },

@@ -252,7 +252,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
 
         function createCategSceneRecursive(catData, level){
             var children = catData.children()
-                                  .where(function(child){ return child.key != ""; })
+                                  .where(function(child){ return child.key !== ""; })
                                   .array();
             if(children.length){
                 // Group node

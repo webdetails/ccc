@@ -38,6 +38,7 @@
 def.type('pvc.data.GroupingOper', pvc.data.DataOper)
 .init(function(linkParent, groupingSpecs, keyArgs){
     /* Grouping spec may be specified as text or object */
+    /*jshint expr:true */
     groupingSpecs || def.fail.argumentRequired('groupingSpecs');
 
     this.base(linkParent, keyArgs);
@@ -146,7 +147,7 @@ add(/** @lends pvc.data.GroupingOper */{
         return root;
     },
 
-    _groupSpecRecursive: function(specParent, datums, specIndex){
+    _groupSpecRecursive: function(specParent, specDatums, specIndex){
         var groupSpec  = this._groupSpecs[specIndex],
             levelSpecs = groupSpec.levels,
             D = levelSpecs.length,
@@ -157,6 +158,7 @@ add(/** @lends pvc.data.GroupingOper */{
             specGroupParent;
 
         // <Debug>
+        /*jshint expr:true */
         D || def.fail.operationInvalid("Must have levels");
         // </Debug>
         
@@ -182,7 +184,7 @@ add(/** @lends pvc.data.GroupingOper */{
         }
 
         /* Group datums */
-        groupLevelRecursive.call(this, specGroupParent, datums, 0);
+        groupLevelRecursive.call(this, specGroupParent, specDatums, 0);
 
         if(doFlatten){
 

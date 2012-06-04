@@ -42,8 +42,9 @@ def.scope(function(){
  */
 def.type('pvc.visual.CartesianAxis')
 .init(function(chart, type, index, roles, keyArgs){
+    /*jshint expr:true */
     roles || def.fail.argumentRequired('roles');
-
+    
     this.chart = chart;
     this.type  = type;
     this.index = index == null ? 0 : index;
@@ -55,9 +56,10 @@ def.type('pvc.visual.CartesianAxis')
     // Role compatibility checks
     var L = this.roles.length;
     if(L > 1){
-        var grouping = this.role.grouping;
+        var grouping = this.role.grouping, 
+            i;
         if(this.scaleType === 'Discrete'){
-            for(var i = 1; i < L ; i++){
+            for(i = 1; i < L ; i++){
                 if(grouping.id !== this.roles[i].grouping.id){
                     throw def.error.operationInvalid("Discrete roles on the same axis must have equal groupings.");
                 }
@@ -67,7 +69,7 @@ def.type('pvc.visual.CartesianAxis')
                 throw def.error.operationInvalid("Continuous roles on the same axis must have comparable groupings.");
             }
 
-            for(var i = 1; i < L ; i++){
+            for(i = 1; i < L ; i++){
                 if(this.scaleType !== groupingScaleType(this.roles[i].grouping)){
                     throw def.error.operationInvalid("Continuous roles on the same axis must have equal scales of the same type.");
                 }

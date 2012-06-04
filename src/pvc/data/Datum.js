@@ -62,6 +62,7 @@ function(data, atoms, isNull){
             }
             
             if(!this.isNull){
+                /*global data_onDatumSelectedChanged:true */
                 data_onDatumSelectedChanged.call(this.owner, this, select);
             }
         }
@@ -93,6 +94,7 @@ function(data, atoms, isNull){
         if(changed){
             this.isVisible = visible;
             if(!this.isNull){
+                /*global data_onDatumVisibleChanged:true */
                 data_onDatumVisibleChanged.call(this.owner, this, visible);
             }
         }

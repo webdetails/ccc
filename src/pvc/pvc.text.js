@@ -14,6 +14,7 @@ def.scope(function(){
 
                 // NOTE: the global function 'getTextLenCGG' must be
                 // defined by the CGG loading environment
+                /*global getTextLenCGG:true */
                 return getTextLenCGG(text, font.fontFamily, font.fontSize);
 
             //case 'svg':
@@ -32,6 +33,7 @@ def.scope(function(){
 
                 // NOTE: the global function 'getTextHeightCGG' must be
                 // defined by the CGG loading environment
+                /*global getTextHeightCGG:true */
                 return getTextHeightCGG(text, font.fontFamily, font.fontSize);
 
             //case 'svg':
@@ -45,16 +47,16 @@ def.scope(function(){
         if(pv.renderer() == 'batik'){
             var sty = document.createElementNS('http://www.w3.org/2000/svg','text').style;
             sty.setProperty('font',font);
-            return parseInt(sty.getProperty('font-size'));
+            return parseInt(sty.getProperty('font-size'), 10);
         }
 
         var holder = getTextSizePlaceholder();
         holder.css('font', font);
-        return parseInt(holder.css('font-size'));
+        return parseInt(holder.css('font-size'), 10);
     }
 
     function getFitInfo(w, h, text, font, diagMargin){
-        if(text == '') {
+        if(text === '') {
             return {h: true, v: true, d: true};
         }
         
@@ -67,7 +69,7 @@ def.scope(function(){
     }
 
     function trimToWidth(len, text, font, trimTerminator){
-      if(text == '') {
+      if(text === '') {
           return text;
       }
       
@@ -96,7 +98,7 @@ def.scope(function(){
         textSizePlaceholderId = 'cccTextSizeTest_' + new Date().getTime();
 
     function getTextSizePlaceholder(){
-        if(!$textSizePlaceholder || $textSizePlaceholder.parent().length == 0){
+        if(!$textSizePlaceholder || !$textSizePlaceholder.parent().length){
             
             $textSizePlaceholder = $(textSizePlaceholderId);
 

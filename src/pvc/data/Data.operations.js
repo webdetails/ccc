@@ -225,6 +225,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @see pvc.data.Data#datums 
      */
     datum: function(whereSpec, keyArgs){
+        /*jshint expr:true */
         whereSpec || def.fail.argumentRequired('whereSpec');
         
         whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
@@ -261,6 +262,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @type number
      */
     dimensionsSumAbs: function(dimName, keyArgs){
+        /*global dim_buildDatumsFilterKey:true */
         var key = dimName + ":" + dim_buildDatumsFilterKey(keyArgs),
             sum = def.getOwn(this._sumAbsCache, key);
 
@@ -336,6 +338,7 @@ function data_processWhereSpec(whereSpec, keyArgs){
     
     function processDatumFilter(datumFilter){
         if(datumFilter != null) {
+            /*jshint expr:true */
             (typeof datumFilter === 'object') || def.fail.invalidArgument('datumFilter');
             
             /* Map: {dimName1: atoms1, dimName2: atoms2, ...} */
@@ -507,6 +510,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          } else if(this._datumsQuery) { 
              
              // <Debug>
+             /*jshint expr:true */
              this._data || def.assert("Must have a current data");
              stateStack.length || def.assert("Must have a parent data"); // cause the root node is "dummy"
              !this._dimAtomsOrQuery || def.assert();

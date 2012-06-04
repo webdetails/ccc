@@ -46,6 +46,7 @@ def
 .type('pvc.data.Complex')
 .init(function(owner, atoms, atomsBase) {
     // <Debug>
+    /*jshint expr:true */
     (owner && owner.isOwner()) || def.fail.argumentInvalid('owner', "Must be an owner data.");
     // </Debug>
     

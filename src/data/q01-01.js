@@ -307,7 +307,7 @@ var relational_01_neg = {
         ["Blue","2011-07-03",60],
         ["Blue","2011-07-10",40],
         ["Blue","2011-07-17",105],
-        ["Blue","2011-07-24",-30],
+        ["Blue","2011-07-24",-30]
         ],
         "metadata":[{
           "colIndex":0,
@@ -336,7 +336,7 @@ var relational_012 = {
   ["Blue","2011-07-03",60],
   ["Blue","2011-07-10",40],
   ["Blue","2011-07-17",15],
-  ["Blue","2011-07-24",3],
+  ["Blue","2011-07-24",3]
   ],
   "metadata":[{
     "colIndex":0,
@@ -366,7 +366,7 @@ var relational_013 = {
   ["Blue","2011-07-10",40],
   ["Blue","2011-07-17",15],
   ["Blue","2011-07-24",3],
-  ["Blue","2011-09-30",30],
+  ["Blue","2011-09-30",30]
   ],
   "metadata":[{
     "colIndex":0,
@@ -470,7 +470,7 @@ var relational_04 = {
         ["Blue","Fiat",60],
         ["Blue","Peugeut",40],
         ["Blue","Honda",15],
-        ["Blue","Audi",3],
+        ["Blue","Audi",3]
         ],
         "metadata":[{
           "colIndex":0,

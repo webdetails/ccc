@@ -161,9 +161,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
               return scene.acts.legendItem.click ? "pointer" : null;
           })
           .fillStyle(function(){
-              return this.hidden() == "true"
-                 ? "rgba(200,200,200,1)"
-                 : "rgba(200,200,200,0.0001)";
+              return this.hidden() == "true" ? 
+                     "rgba(200,200,200,1)" : 
+                     "rgba(200,200,200,0.0001)";
           })
           .event("click", function(scene){
               var legendItem = scene.acts.legendItem;

@@ -40,7 +40,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         
         var colCount   = Math.min(count, multiChartWrapColumn),
             rowCount   = Math.ceil(count / colCount),
-            childClass = chart.constructor,
+            ChildClass = chart.constructor,
             margins    = this.margins,
             left       = margins.left,
             top        = margins.top,
@@ -71,7 +71,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                     }
                 });
             
-            var childChart = new childClass(childOptions);
+            var childChart = new ChildClass(childOptions);
             childChart._preRender();
             childChart.basePanel.layout();
         }

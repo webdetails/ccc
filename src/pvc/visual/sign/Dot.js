@@ -106,8 +106,8 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     interactiveColor: function(type, color){
         var scene = this.scene;
         if(scene.isActive) {
-            switch(type) {
-                case 'stroke': return color.brighter(1);
+            if(type === 'stroke') {
+                return color.brighter(1);
             }
         } else if(scene.anySelected() && !scene.isSelected()) {
             

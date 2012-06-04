@@ -31,12 +31,12 @@ pvc.DataTree = pvc.BaseChart.extend({
 
     setStructData: function(data){
         this.structDataset = data.resultset;
-        if (this.structDataset.length == 0){
+        if (!this.structDataset.length){
             pvc.log("Warning: Structure-dataset is empty");
         }
 
         this.structMetadata = data.metadata;
-        if (this.structMetadata.length == 0){
+        if (!this.structMetadata.length){
             pvc.log("Warning: Structure-Metadata is empty");
         }
     },
@@ -159,18 +159,19 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
         for(var i in elem.children) {
           var child = this.structMap[ elem.children[i] ];
           var theBottom = child.bottom + child.height/2;
-          if (theBottom > max) max = theBottom;
-          if (theBottom < min) min = theBottom;
+          if (theBottom > max) { max = theBottom; }
+          if (theBottom < min) { min = theBottom; }
           this.hRules.push({"left": theLeft,
                       "width": child.left - theLeft,
                       "bottom": theBottom});
         }
 
         // a vertical rule is only added when needed
-        if (max > min)
+        if (max > min) {
           this.vRules.push({"left": theLeft,
                       "bottom": min,
-                      "height": max - min})
+                      "height": max - min});
+        }
       }
     }
   },
@@ -203,16 +204,17 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     for(var e in this.structMap) {
       var elem = this.structMap[e];
       if (elem.children != null) {
-
+        var theCenter, child, i;
+        
         // compute the mid-point
         var min = +10000, max = -10000;
-        for(var i in elem.children) {
-          var child = this.structMap[ elem.children[i] ];
-          var theCenter = child.bottom + child.height/2;
-          if (theCenter > max) max = theCenter;
-          if (theCenter < min) min = theCenter;
+        for(i in elem.children) {
+          child = this.structMap[ elem.children[i] ];
+          theCenter = child.bottom + child.height/2;
+          if (theCenter > max) { max = theCenter; }
+          if (theCenter < min) { min = theCenter; }
         }
-        var mid = (max + min)/2
+        var mid = (max + min)/2;
 
         var theLeft1 = elem.left + elem.width;
         var theLeft2 = theLeft1 + leftLength;
@@ -222,9 +224,9 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
                                 theLeft2, mid);
 
         // incoming lines of the right-hand boxes
-        for(var i in elem.children) {
-          var child = this.structMap[ elem.children[i] ];
-          var theCenter = child.bottom + child.height/2;
+        for(i in elem.children) {
+          child = this.structMap[ elem.children[i] ];
+          theCenter = child.bottom + child.height/2;
 
           this.generateLineSegment(theLeft2, mid,
                                    child.left, theCenter);
@@ -244,33 +246,42 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     // if a fifth column is added, then
     //  bottom and height are provided in the dataset.
     var bottomHeightSpecified = (colLabels.length > 4);
-
+    
+    var e;
+    
     // trim al element labels (to allow for matching without spaces)
-    for(var e in this.treeElements) 
+    for(e in this.treeElements) { 
       this.treeElements[e] = $.trim(this.treeElements[e]);
+    }
 
     // get the bounds (minimal and maximum column and row indices)
     // first a bounds object with two helper-functions is introduced
     var bounds = [];
     bounds.getElement = function(label) {
       // create the element if it does not exist
-      if (bounds[label] == null)
+      if (bounds[label] == null){
         bounds[label] = {"min": +10000, "max": -10000};
+      }
       return bounds[label];
-    }
+    };
+    
     bounds.addValue = function(label, value) {
       var bnd = bounds.getElement(label);
-      if (value < bnd.min)
+      if (value < bnd.min){
         bnd.min = value;
-      if (value > bnd.max)
+      }
+      if (value > bnd.max){
         bnd.max = value;
+      }
       return bnd;
-    }
-    for(var e in this.treeElements) {
-      var elem = this.treeElements[e];
-      var col = elem[0];
-      var colnr = col.charCodeAt(0);
-      var row = parseInt(elem.slice(1));
+    };
+    
+    var col, colnr, elem, row;
+    for(e in this.treeElements) {
+      elem = this.treeElements[e];
+      col = elem[0];
+      colnr = col.charCodeAt(0);
+      row = parseInt(elem.slice(1), 10);
       bounds.addValue("__cols", colnr);
       bounds.addValue(col,row);
     }
@@ -282,19 +293,22 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     var cellWidth = gridWidth - connectorWidth;
     var maxCellHeight = cellWidth/options.minAspectRatio;
     var colBase = bnds.min;
-    delete bounds["__cols"];
+    delete bounds.__cols;
 
     // compute additional values for each column
-    for (var e in bounds) {
-      var bnds = bounds[e];
-      if (typeof bnds == "function")
+    for (e in bounds) {
+      bnds = bounds[e];
+      
+      if (typeof bnds == "function"){
         continue;
+      }
       var numRows = bnds.max - bnds.min + 1;
 
       bnds.gridHeight = this.innerHeight/numRows;
       bnds.cellHeight = bnds.gridHeight*(1.0 - options.minVerticalSpace);
-      if (bnds.cellHeight > maxCellHeight)
+      if (bnds.cellHeight > maxCellHeight){
         bnds.cellHeight = maxCellHeight;
+      }
       bnds.relBottom = (bnds.gridHeight - bnds.cellHeight)/2;
       bnds.numRows = numRows;
     }
@@ -302,16 +316,16 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     // generate the elements
     var whitespaceQuote = new RegExp ('[\\s\"\']+',"g"); 
     this.structMap = {};
-    for(var e in this.treeElements) {
+    for(e in this.treeElements) {
       var box = {};
-      var elem = this.treeElements[e];
+      elem = this.treeElements[e];
       box.box_id = elem;
       this.structMap[elem] = box;
 
-      var col = elem[0];
-      var colnr = col.charCodeAt(0);
-      var row = parseInt(elem.slice(1));
-      var bnds = bounds.getElement(col);
+      col = elem[0];
+      colnr = col.charCodeAt(0);
+      row = parseInt(elem.slice(1), 10);
+      bnds = bounds.getElement(col);
 
       box.colIndex = colnr - colBase;
       box.rowIndex = bnds.numRows - (row - bnds.min) - 1;
@@ -319,19 +333,20 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
       box.left = this.leftOffs + box.colIndex * gridWidth;
       box.width = cellWidth;
       if (bottomHeightSpecified) {
-	  box.bottom = values[4][e];
-	  box.height = values[5][e];
+          box.bottom = values[4][e];
+          box.height = values[5][e];
       } else {
-	  box.bottom = this.botOffs + box.rowIndex * bnds.gridHeight
-	      + bnds.relBottom;
-	  box.height = bnds.cellHeight;
+          box.bottom = this.botOffs + box.rowIndex * bnds.gridHeight + bnds.relBottom;
+          box.height = bnds.cellHeight;
       }
+      
       box.label = values[0][e];
       box.selector = values[1][e];
       box.aggregation = values[2][e];
+      
       var children = (values[3][e] || '').replace(whitespaceQuote, " ");
       
-      box.children = (children == " " || children ==  "") ?
+      box.children = (children === " " || children ===  "") ?
          null : children.split(" ");
     }
 
@@ -339,18 +354,20 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
 
     // translate the map to an array (needed by protovis)
     this.structArr = [];
-    for(var e in this.structMap) {
-      var elem = this.structMap[e];
+    for(e in this.structMap) {
+      elem = this.structMap[e];
       this.structArr.push(elem);
     }
   },
 
   findDataValue: function(key, data) {
-    for(var i=0; i < data[0].length; i++)
-      if (data[0][ i ] == key)
+    for(var i=0; i < data[0].length; i++) {
+      if (data[0][ i ] == key) {
         return data[1][ i ];
-
-    pvc.log("Error: value with key : "+key+" not found.")
+      }
+    }
+    
+    pvc.log("Error: value with key : "+key+" not found.");
   },
 
   generateBoxPlots: function() {
@@ -358,9 +375,10 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
 
     for(var e in this.structArr) {
       var elem = this.structArr[e];
-      if (elem.values.length == 0)
+      if (!elem.values.length) {
         continue;
-
+      }
+      
       elem.subplot = {};
       var sp = elem.subplot;
 
@@ -389,22 +407,26 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
         if (dat[4] < dat[0]) {
           dat = dat.reverse();
           pvc.log(" dataset "+ elem.box_id +
-	  	" repaired (_p95 was smaller than _p5)");
+                  " repaired (_p95 was smaller than _p5)");
           }
-        if (dat[4] > dat[0])
+        if (dat[4] > dat[0]) {
           sp.hScale = pv.Scale.linear( dat[0], dat[4]);
-        else {
+        } else {
           noBox = true;
           // generate a fake scale centered around dat[0] (== dat[4])
           sp.hScale = pv.Scale.linear( dat[0] - 1e-10, dat[0] + 1e-10);
         }
         sp.hScale.range(elem.left + rlMargin, elem.left + elem.width - rlMargin);
         var avLabel = "" + dat[2];   // prepare the label
+        
+        var i;
+        
+        for(i=0; i< dat.length; i++) {
+            dat[i] = sp.hScale( dat[i]);
+        }
 
-        for(var i=0; i< dat.length; i++) dat[i] = sp.hScale( dat[i]) 
-
-        sp.bot = elem.bottom + elem.height / 3,
-        sp.top = elem.bottom + 2 * elem.height / 3,
+        sp.bot = elem.bottom + elem.height / 3;
+        sp.top = elem.bottom + 2 * elem.height / 3;
         sp.mid = (sp.top + sp.bot) / 2;   // 2/3 of height
         sp.textBottom = elem.bottom + margin;
         sp.textBottom = sp.bot - options.valueFontsize - 1;
@@ -433,11 +455,12 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
                         "width":  dat[4] - dat[3],
                         "lWidth": 1,
                         "bottom": sp.mid});
-          for(var i=0; i<dat.length; i++)
+          for(i=0; i<dat.length; i++) {
             sp.vRules.push({"left": dat[i],
                           "bottom": sp.bot,
                           "lWidth": (i == 2) ? lwa : 1,
                           "height": sp.top - sp.bot});
+          }
         }
 
         sp.labels.push({left: dat[2],
@@ -450,8 +473,9 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
   } ,
 
   labelFixedDigits: function(value) {
-    if (typeof value == "string")
+    if (typeof value == "string") {
         value = parseFloat(value);
+    }
 
     if (typeof value == "number") {
       var nd = this.chart.options.numDigits;
@@ -469,12 +493,15 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     for(var e in this.structArr) {
       var elem = this.structArr[e];
 
-      if (elem.values.length == 0)
+      if (!elem.values.length) {
         continue;
-      var value = this.findDataValue(key, elem.values)
-      if (typeof value == "undefined")
+      }
+      
+      var value = this.findDataValue(key, elem.values);
+      if (typeof value == "undefined") {
         continue;
-
+      }
+      
       var sp = elem.subplot;
       var theLeft = sp.hScale(value); 
 
@@ -482,7 +509,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
       sp.marks.push( {
         left: theLeft,
         bottom: sp.mid,
-        color: theColor })
+        color: theColor });
       
       sp.labels.push({left: theLeft,
                       bottom: sp.textBottom,
@@ -499,39 +526,46 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     var colLabels = data.getVisibleCategories();
     var selectors = data.getVisibleSeries();
     var values = data.getValues();
-    var selMap = {}
+    var selMap = {};
+    var i;
     
     // create empty datasets and selMap
     var numCols = values.length;
     for(var e in this.structArr) {
       var elem = this.structArr[e];
       elem.values = [];
-      for(var i=0; i<numCols; i++) elem.values.push([]);
+      for(i=0; i<numCols; i++) {
+          elem.values.push([]);
+      }
       selMap[ elem.selector ] = elem; 
     }
 
     // distribute the dataset over the elements based on the selector
     var boxNotFound = {};
-    for(var i in selectors) {
+    for(i in selectors) {
       var box = selMap[ selectors[ i ] ];
-      if (typeof(box) != "undefined")
-        for(var j in values) box.values[j].push(values[ j ][ i ])
-      else
-        boxNotFound[ selectors[i] ] = true
+      if (typeof(box) != "undefined") {
+        for(var j in values) {
+            box.values[j].push(values[ j ][ i ]);
+        }
+      } else {
+        boxNotFound[ selectors[i] ] = true;
+      }
     }
 
-    for (var sel in boxNotFound)
-        pvc.log("Could'nt find box for selector: "+ sel)
-
+    for (var sel in boxNotFound) {
+        pvc.log("Could'nt find box for selector: "+ sel);
+    }
+    
     this.generateBoxPlots();
 
     var whitespaceQuote = new RegExp ('[\\s\"\']+',"g");
     if(options.selectParam){
         var selPar = options.selectParam.replace(whitespaceQuote, '');
-        if (   (selPar != "undefined")
-            && (selPar.length > 0)
-            && (typeof window[selPar] != "undefined")) {
-            selPar = window[selPar]
+        if ((selPar != "undefined") && 
+            (selPar.length > 0) && 
+            (typeof window[selPar] != "undefined")) {
+            selPar = window[selPar];
             this.addDataPoint(selPar);
         }
     }
@@ -546,7 +580,7 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
 
     var options = this.chart.options;
     options.smValueFontsize = Math.round(0.6 * options.valueFontsize);
-    options.smValueFont = "" + options.smValueFontsize + "px sans-serif"
+    options.smValueFont = "" + options.smValueFontsize + "px sans-serif";
     options.valueFont = "" + options.valueFontsize + "px sans-serif";
 
     // used in the different closures
@@ -579,75 +613,79 @@ return pv.Label(x);
 
     // draw the connectors first (rest has to drawn over the top)
     var rules = this.rules;
-    for (var i = 0; i < rules.length; i++) {
+    var i;
+    
+    for (i = 0; i < rules.length; i++) {
+      /*jshint loopfunc:true */
       this.pvPanel.add(pv.Line)
         .data(rules[ i ])
-        .left(function(d) { return d.x})
-        .bottom(function(d) { return d.y})
+        .left(function(d) { return d.x;})
+        .bottom(function(d) { return d.y;})
         .lineWidth(1)
         .strokeStyle("black");
     }
+    
     // draw the data containers with decorations
     this.pvDataTree = this.pvPanel.add(pv.Bar)
       .data(myself.structArr)
-      .left(function(d) { return d.left})
-      .bottom(function(d) { return d.bottom})
-      .height(function(d) { return d.height})
-      .width(function(d) { return d.width})
+      .left(function(d) { return d.left;})
+      .bottom(function(d) { return d.bottom;})
+      .height(function(d) { return d.height;})
+      .width(function(d) { return d.width;})
       .fillStyle("green")
 //;  this.pvDataTree
     .add(pv.Bar)
 //      .data(function(d) {return d; })
-      .left(function(d) { return d.left + options.border})
-      .bottom(function(d) { return d.bottom + options.border})
-      .height(function(d) { return d.height - options.border - topMargin})
-      .width(function(d) { return d.width - 2 * options.border})
+      .left(function(d) { return d.left + options.border;})
+      .bottom(function(d) { return d.bottom + options.border;})
+      .height(function(d) { return d.height - options.border - topMargin;})
+      .width(function(d) { return d.width - 2 * options.border;})
       .fillStyle("white")
     .add(pv.Label)
-      .text(function(d) { return d.label})
+      .text(function(d) { return d.label;})
       .textAlign("center")
-      .left(function (d) {return  d.left + d.width/2})
-      .bottom(function(d) {return d.bottom + d.height 
-                - options.headerFontsize - 5 + options.headerFontsize/5
+      .left(function (d) {return  d.left + d.width/2;})
+      .bottom(function(d) {
+          return d.bottom + d.height - options.headerFontsize - 5 + options.headerFontsize/5;
 })
       .font("" + options.headerFontsize + "px sans-serif")
       .textStyle("white")
       .fillStyle("blue");
 
     // add the box-plots
-    for(var i=0; i<this.structArr.length; i++) {
+    for(i=0; i<this.structArr.length; i++) {
       var box = this.structArr[i];
       this.pvPanel.add(pv.Rule)
         .data(box.subplot.hRules)
-        .left(function(d) { return d.left})
-        .width( function(d) { return d.width})
-        .bottom( function(d) { return d.bottom})
+        .left(function(d) { return d.left;})
+        .width( function(d) { return d.width;})
+        .bottom( function(d) { return d.bottom;})
         .lineWidth( function(d) { return d.lWidth; })
         .strokeStyle(myself.chart.options.boxplotColor);
 
       this.pvPanel.add(pv.Rule)
         .data(box.subplot.vRules)
-        .left(function(d) { return d.left})
-        .height( function(d) { return d.height})
-        .bottom( function(d) { return d.bottom})
+        .left(function(d) { return d.left;})
+        .height( function(d) { return d.height;})
+        .bottom( function(d) { return d.bottom;})
         .lineWidth( function(d) { return d.lWidth; })
         .strokeStyle(myself.chart.options.boxplotColor);
 
       this.pvPanel.add(pv.Dot)
         .data(box.subplot.marks)
-        .left(function(d) { return d.left })
-        .bottom(function(d){ return d.bottom})
-        .fillStyle(function(d) {return d.color});
+        .left(function(d) { return d.left; })
+        .bottom(function(d){ return d.bottom;})
+        .fillStyle(function(d) {return d.color;});
 
 
       this.pvPanel.add(pv.Label)
         .data(box.subplot.labels)
-        .left(function(d) { return d.left })
-        .bottom(function(d){ return d.bottom})
-        .font(function(d) { return d.size})
-        .text(function(d) { return d.text})
+        .left(function(d) { return d.left; })
+        .bottom(function(d){ return d.bottom;})
+        .font(function(d) { return d.size;})
+        .text(function(d) { return d.text;})
         .textAlign("center")
-        .textStyle(function(d) {return d.color});
+        .textStyle(function(d) {return d.color;});
 
     }
 
@@ -655,15 +693,15 @@ return pv.Label(x);
     if (options.perpConnector) {
       this.pvPanel.add(pv.Rule)
         .data(myself.vRules)
-        .left(function(d) { return d.left})
-        .bottom(function(d) { return d.bottom})
-        .height(function(d) { return d.height})
+        .left(function(d) { return d.left;})
+        .bottom(function(d) { return d.bottom;})
+        .height(function(d) { return d.height;})
         .strokeStyle("black");
       this.pvPanel.add(pv.Rule)
         .data(myself.hRules)
-        .left(function(d) { return d.left})
-        .bottom(function(d) { return d.bottom})
-        .width(function(d) { return d.width})
+        .left(function(d) { return d.left;})
+        .bottom(function(d) { return d.bottom;})
+        .width(function(d) { return d.width;})
         .strokeStyle("black");
     }
 

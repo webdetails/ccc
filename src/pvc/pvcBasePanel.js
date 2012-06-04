@@ -128,6 +128,7 @@ pvc.BasePanel = pvc.Abstract.extend({
      */
     _addChild: function(child){
         // <Debug>
+        /*jshint expr:true */
         child.parent === this || def.assert("Child has a != parent.");
         // </Debug>
         
@@ -155,6 +156,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             this._layoutInfo = null;
             
             if(!availableSize) {
+                /*jshint expr:true */
                 this.isRoot || def.error.argumentRequired('availableSize');
                 (this.width >= 0 && this.height >= 0) || 
                     def.error.operationInvalid("Root panel layout without width or height set.");
@@ -232,6 +234,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 // These are layed out on the second phase
                 fillChildren.push(child);
             } else if(a) {
+                /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
                 child.layout(new pvc.Size(remSize), childKeyArgs);
@@ -684,6 +687,7 @@ pvc.BasePanel = pvc.Abstract.extend({
      * @virtual
      */
     _updateContext: function(context, mark, ev){
+        /*global visualContext_update:true */
         visualContext_update.call(context, mark, ev);
     },
     
@@ -1047,7 +1051,10 @@ pvc.BasePanel = pvc.Abstract.extend({
 
                     isSelecting = true;
                     
-                    toScreen || (toScreen = rubberPvParentPanel.toScreenTransform());
+                    if(!toScreen){
+                        toScreen = rubberPvParentPanel.toScreenTransform();
+                    }
+                    
                     myself.rubberBand = rb.clone().apply(toScreen);
                 }
 
@@ -1057,7 +1064,9 @@ pvc.BasePanel = pvc.Abstract.extend({
                 if(isSelecting){
                     var ev = arguments[arguments.length - 1];
                     
-                    toScreen || (toScreen = rubberPvParentPanel.toScreenTransform());
+                    if(!toScreen){
+                        toScreen = rubberPvParentPanel.toScreenTransform();
+                    }
                     
                     myself.rubberBand = this.selectionRect.clone().apply(toScreen);
                     

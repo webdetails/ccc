@@ -123,7 +123,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     var coordMapUpdate = function(i, val) {
       var cMap = pCoordMapping[i];
       var k = null; // define in outer scope.
-      if (cMap.categorical == false) {
+      if (!cMap.categorical) {
         var keyVal = val.toFixed(numDigit);   // force the number to be a string
         k = cMap.map[keyVal];
         if (k == null) {
@@ -149,36 +149,43 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
         if (pCoordMapping.hasOwnProperty(d) && 
             pCoordMapping[d] && 
             pCoordMapping[d].categorical) {
-            pCoordMapping[d].displayValue = pCoordMapping[d].map
+            pCoordMapping[d].displayValue = pCoordMapping[d].map;
         }
     }
     
+    var i, item, k;
+    
     // 4. apply the sorting of the dimension
-    if (   this.chart.options.sortCategorical
-        || this.chart.options.mapAllDimensions) {
+    if (this.chart.options.sortCategorical || 
+        this.chart.options.mapAllDimensions) {
       // prefill the coordMapping in order to get it in sorted order.
       // sorting is required if all dimensions are mapped!!
-      for (var i=0; i<pCoordMapping.length; i++) {
+      for (i=0; i<pCoordMapping.length; i++) {
          if (pCoordMapping[i]) {
            // add all data
-           for (var col=0; col<values[i].length; col++)
+           for (var col=0; col<values[i].length; col++) {
                coordMapUpdate(i, values[i][col]);
+           }
+           
            // create a sorted array
            var cMap = pCoordMapping[i].map;
            var sorted = [];
-           for(var item in cMap){
+           for(item in cMap){
                 if(cMap.hasOwnProperty(item)){
                     sorted.push(item);
                 }
            }
            sorted.sort();
            // and assign a new index to all items
-           if (pCoordMapping[i].categorical)
-             for(var k=0; k<sorted.length; k++)
+           if (pCoordMapping[i].categorical){
+             for(k=0; k<sorted.length; k++){
                cMap[sorted[k]] = k;
-           else
-             for(var k=0; k<sorted.length; k++)
+             }
+           } else {
+             for(k=0; k<sorted.length; k++) {
                cMap[sorted[k]].index = k;
+             }
+           }
          }      
       }
     }
@@ -192,37 +199,37 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     //   closure uses pCoordKeys and values
     var generateHashMap = function(col) {
       var record = {};
-      for(var i in pCoordIndex) {
-          if(pCoordIndex.hasOwnProperty(i)){
-                record[pCoordKeys[i]] = (pCoordMapping[i]) ?
-                    coordMapUpdate(i, values[i][col]) :
-                    values[i][col];
+      for(var j in pCoordIndex) {
+          if(pCoordIndex.hasOwnProperty(j)){
+                record[pCoordKeys[j]] = (pCoordMapping[j]) ?
+                    coordMapUpdate(j, values[j][col]) :
+                    values[j][col];
           }
       }
       return record;
     };
+    
     // 2. generate array with a hashmap per data-point
-    this.data = dataRowIndex.map(function(col) { return generateHashMap (col)});
+    this.data = dataRowIndex.map(function(col) { return generateHashMap (col);});
 
     
     /*************
     *  Generate an array of descriptors for the dimensions (in 3 steps).
     ******/
     // 1. find the dimensions
-    var descrVals = this.dimensions.map(function(cat)
-           {
-             var item = {};
-             // the part after "__" is assumed to be the units
-             var elements = cat.split("__");
-             item.id = cat;
-             item.name = elements[0];
-             item.unit = (elements.length >1)? elements[1] : "";
-             return item;
-           });
+    var descrVals = this.dimensions.map(function(cat){
+         var item2 = {};
+         // the part after "__" is assumed to be the units
+         var elements = cat.split("__");
+         item2.id = cat;
+         item2.name = elements[0];
+         item2.unit = (elements.length >1)? elements[1] : "";
+         return item2;
+       });
 
     // 2. compute the min, max and step(-size) per dimension)
-    for(var i=0; i<descrVals.length; i++) {
-      var item = descrVals[i];
+    for(i=0; i<descrVals.length; i++) {
+      item = descrVals[i];
       var index = pCoordIndex[i];
 	// orgRowIndex is the index in the original dataset
 	// some indices might be (non-existent/invisible)
@@ -231,14 +238,15 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       // determine min, max and estimate step-size
       var len = values[index].length;
       var theMin, theMax, theMin2, theMax2;
-
+      var v;
+      
       // two version of the same code (one with mapping and one without)
       if (pCoordMapping[index]) {
         theMin = theMax = theMin2 = theMax2 =
                pCoordMapping[index].displayValue[ values[index][0] ] ;
 
-        for(var k=1; k<len; k++) {
-          var v = pCoordMapping[index].displayValue[ values[index][k] ] ;
+        for(k=1; k<len; k++) {
+          v = pCoordMapping[index].displayValue[ values[index][k] ] ;
           if (v < theMin)
           {
             theMin2 = theMin;
@@ -252,10 +260,9 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       } else {  // no coordinate mapping applied
         theMin = theMax = theMin2 = theMax2 = values[index][0];
 
-        for(var k=1; k<len; k++) {
-          var v = values[index][k];
-          if (v < theMin)
-          {
+        for(k=1; k<len; k++) {
+          v = values[index][k];
+          if (v < theMin) {
             theMin2 = theMin;
             theMin = v;
           }
@@ -279,10 +286,10 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
         item.categorical = pCoordMapping[index].categorical; 
 
         // create the reverse-mapping from key to original value
-        if (item.categorical == false) {
+        if (!item.categorical) {
           item.orgValue = [];
           var theMap =  pCoordMapping[index].map;
-          for (key in theMap){
+          for (var key in theMap){
               if(theMap.hasOwnProperty(key)){
                 item.orgValue[ theMap[key] ] = 0.0+key;
               }
@@ -295,8 +302,9 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     //  (map from keys[i] to vals[i])
     var genKeyVal = function (keys, vals) {
        var record = {};
-      for (var i = 0; i<keys.length; i++)
+      for (var i = 0; i<keys.length; i++){
          record[keys[i]] = vals[i];
+      }
       return record;
     };
     this.dimensionDescr = genKeyVal(this.dimensions, descrVals);
@@ -313,17 +321,17 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 
     // used in the different closures
     var height = this.height,
-    numDigits = this.chart.options.numDigits,
-    topRuleOffs = this.chart.options.topRuleOffset,
-    botRuleOffs = this.chart.options.botRuleOffset,
-    leftRuleOffs = this.chart.options.leftRuleOffset,
-    rightRulePos = this.width - this.chart.options.rightRuleOffset,
-    topRulePos = this.height- topRuleOffs,
-    ruleHeight = topRulePos - botRuleOffs,
-    labelTopOffs = topRuleOffs - 12,
-      // use dims to get the elements of dimDescr in the appropriate order!!
-    dims = this.dimensions,
-    dimDescr = this.dimensionDescr;
+        numDigits = this.chart.options.numDigits,
+        topRuleOffs = this.chart.options.topRuleOffset,
+        botRuleOffs = this.chart.options.botRuleOffset,
+        leftRuleOffs = this.chart.options.leftRuleOffset,
+        rightRulePos = this.width - this.chart.options.rightRuleOffset,
+        topRulePos = this.height- topRuleOffs,
+        ruleHeight = topRulePos - botRuleOffs,
+        labelTopOffs = topRuleOffs - 12,
+          // use dims to get the elements of dimDescr in the appropriate order!!
+        dims = this.dimensions,
+        dimDescr = this.dimensionDescr;
 
     /*****
      *   Generate the scales x, y and color
@@ -345,18 +353,20 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
 	var scale = getDimSc(t, true)
               .range(botRuleOffs, topRulePos);
       var dd = dimDescr[t];
-      if (   dd.orgValue
-          && (dd.categorical == false)) {
+      if (dd.orgValue && !dd.categorical) {
         // map the value to the original value
-        var func = function(x) { var res = scale( dd.orgValue[x]);
-                      return res; };
+        var func = function(x) { 
+            var res = scale( dd.orgValue[x]);
+            return res; 
+        };
+        
         // wire domain() and invert() to the original scale
         func.domain = function() { return scale.domain(); };
         func.invert = function(d) { return scale.invert(d); };
         return func;
       }
-      else
-        return scale;
+      
+      return scale;
     }; 
     var getDimColorScale = function(t) {
 	var scale = getDimSc(t, false)
@@ -379,20 +389,22 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     var active = dims[0];   // choose the active dimension 
 
     var selectVisible = (this.chart.options.mapAllDimensions) ?
-      function(d) { return dims.every(  
-	    // all dimension are handled via a mapping.
+      function(d) { 
+        return dims.every(  
+        // all dimension are handled via a mapping.
             function(t) {
               var dd = dimDescr[t];
-              var val = (dd.orgValue && (dd.categorical == false)) ?
+              var val = (dd.orgValue && !dd.categorical) ?
                     dd.orgValue[d[t]] : d[t];
-	      return (val >= filter[t].min) && (val <= filter[t].max); }
-        )}
-    : function(d) { return dims.every(  
-            function(t) {
-		// TO DO: check whether this operates correctly for
-		// categorical dimensions  (when mapAllDimensions == false
-		return (d[t] >= filter[t].min) && (d[t] <= filter[t].max); }
-        )};
+              return (val >= filter[t].min) && (val <= filter[t].max); }
+        ); }
+    : function(d) { 
+        return dims.every(function(t) {
+                    // TO DO: check whether this operates correctly for
+                    // categorical dimensions  (when mapAllDimensions == false
+                    return (d[t] >= filter[t].min) && (d[t] <= filter[t].max); 
+                });
+    };
  
 
     /*****
@@ -404,60 +416,11 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
      *            {x1, y1, x2, y2, color}
      *  Two auxiliary fields are 
      *  Furthermore auxiliary functions are provided
-     *     - genAuxData: generate the auxiliary dataset (of clean is)
-     *     - drawLinePattern
-     *     - colorFuncBg
      *     - colorFuncFreq
      *     - colorFuncActive
      *******/
       var auxData = null;
-      var genAuxData = function() {
-	  if (auxData === null) {
-	      // generate a new (reusable) structure.
-	      auxData = [];
-	      var genNewArray = function (k, l) {
-		  // generated an array with null values
-		  var arr = []
-		  for (var a=0; a<k; a++) {
-		      var elem = []
-		      for (var b=0; b<l; b++) 
-			  elem.push(0);
-		      arr.push(0);
-		  }
-		  return arr;
-	      };
-	      for(var i =0; i<dims.length -1; i++) {
-		  var currDimLen = dimDescr[ dims[i] ].mapLength;
-		  var nextDimLen = dimDescr[ dims[i+1] ].mapLength;
-		  auxData.push( genNewArray(currDimLen, nextDimLen) )
-	      }
-	  } else {
-	  // re-use the existing data-structure if it exists already
-	      for (var a in auxData){
-                  if(auxData.hasOwnProperty(a)){
-                      for (var b in a){
-                          if(a.hasOwnProperty(b)){
-                              for (c=0; c<b.length; c++)
-                                  b[c] = 0;
-                          }
-                      }
-                  }
-              }
-	  }
-
-      };
-      var generateLinePattern = function (colFunc) {
-	  // find a filtered data-set
-	  var filterData = selectVisible(myself.data)
-
-      };
-      var drawLinePattern = function (panel, pattern) {
-      };
-      var colorFuncBg = function() {
-	  return "#ddd";
-      };
-
-
+      
     /*****
      *   Draw the chart and its annotations (except dynamic content)
      *******/
@@ -468,15 +431,17 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       .visible(selectVisible)
       .add(pv.Line)
       .data(dims)
-	  .left(function(t, d) { return x(t); } )
-      .bottom(function(t, d) { var res = y[t] (d[t]);
-			       return res; })
+      .left(function(t, d) { return x(t); } )
+      .bottom(function(t, d) { 
+          var res = y[t] (d[t]);
+          return res; 
+       })
       .strokeStyle("#ddd")
       .lineWidth(1)
       .antialias(false);
 
     // Rule per dimension.
-    rule = this.pvPanel.add(pv.Rule)
+    var rule = this.pvPanel.add(pv.Rule)
       .data(dims)
       .left(x)
       .top(topRuleOffs)
@@ -494,7 +459,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     var labels = [];
     var labelXoffs = 6,
     labelYoffs = 3;
-    for(d in dimDescr) {
+    for(var d in dimDescr) {
      if(dimDescr.hasOwnProperty(d)){
           var dim = dimDescr[d];
           if (dim.categorical) {
@@ -514,9 +479,9 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
     var dimLabels = this.pvPanel.add(pv.Panel)
       .data(labels)
       .add(pv.Label)
-      .left(function(d) {return d.x})
-      .bottom(function(d) { return d.y})
-      .text(function(d) { return d.label})
+      .left(function(d) {return d.x;})
+      .bottom(function(d) { return d.y;})
+      .text(function(d) { return d.label;})
       .textAlign("left");
     
       
@@ -535,7 +500,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       .bottom(function(t, d) { return y[t](d[t]); })
       .strokeStyle(function(t, d) { 
         var dd = dimDescr[active];
-        var val =  (   dd.orgValue && (dd.categorical == false)) ?
+        var val =  (dd.orgValue && !dd.categorical) ?
           dd.orgValue[ d[active] ] :
           d[active];
         return colors[active](val);})
@@ -586,9 +551,9 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       .top(function(d) {return d.y;})
       .width(10)
       .height(function(d) { return d.dy;})
-      .fillStyle(function(t) { return  (t.dim == active)
-        ? colors[t.dim]((filter[t.dim].max + filter[t.dim].min) / 2)
-        : "hsla(0,0,50%,.5)"})
+      .fillStyle(function(t) { return  (t.dim == active) ? 
+         colors[t.dim]((filter[t.dim].max + filter[t.dim].min) / 2) : 
+         "hsla(0,0,50%,.5)";})
       .strokeStyle("white")
       .cursor("move")
       .event("mousedown", pv.Behavior.drag())
@@ -606,7 +571,7 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
       .textBaseline("bottom")
       .text(function(d) {return (dimDescr[d.dim].categorical) ?
                   "" :
-                  filter[d.dim].max.toFixed(numDigits) + dimDescr[d.dim].unit});
+                  filter[d.dim].max.toFixed(numDigits) + dimDescr[d.dim].unit;});
 
 
     /*****

@@ -51,6 +51,7 @@ function data_disposeChildList(list, parentProp) {
  */
 function data_addColChild(parent, childrenProp, child, parentProp) {
     // <Debug>
+    /*jshint expr:true */
     (child && !child[parentProp]) || def.assert("Must not have a '" + parentProp + "'.");
     // </Debug>
     
@@ -74,6 +75,7 @@ function data_addColChild(parent, childrenProp, child, parentProp) {
  */
 function data_removeColChild(parent, childrenProp, child, parentProp) {
     // <Debug>
+    /*jshint expr:true */
     (child && (!child[parentProp] || child[parentProp] === parent)) || def.assert("Not a child");
     // </Debug>
     

@@ -71,9 +71,9 @@ function(dimTypeSpecs){
             var features = [];
             
             features.push(type.valueTypeName);
-            if(type.isComparable) features.push("comparable");
-            if(!type.isDiscrete)  features.push("continuous");
-            if(type.isHidden)     features.push("hidden");
+            if(type.isComparable) { features.push("comparable"); }
+            if(!type.isDiscrete)  { features.push("continuous"); }
+            if(type.isHidden)     { features.push("hidden"); }
 
             out.push("  " + type.name + " (" + features.join(', ') + ")");
         });
@@ -193,6 +193,7 @@ function(dimTypeSpecs){
      */
     addDimension: function(name, dimTypeSpec){
         // <Debug>
+        /*jshint expr:true */
         name || def.fail.argumentRequired('name');
         !def.hasOwn(this._dims, name) || def.fail.operationInvalid("A dimension type with name '{0}' is already defined.", [name]);
         // </Debug>

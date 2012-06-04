@@ -73,9 +73,9 @@ var datTreeTestData_01 = {
 
 var datTreeTestStructure_02 = {
   "resultset":[
-	       ["A1",  "Winst",   "winst", "sum", "B1 B2", 100, 70],
-	       [" B1",  "Bijdrage", "bijdrage", "sum", "", 300, 100],
-	       ["B2 ",  "Kosten", "kosten", "sum", "", 20, 200]
+    ["A1",  "Winst",   "winst", "sum", "B1 B2", 100, 70],
+    [" B1",  "Bijdrage", "bijdrage", "sum", "", 300, 100],
+    ["B2 ",  "Kosten", "kosten", "sum", "", 20, 200]
   ],
   "metadata":[{
     "colIndex":0,

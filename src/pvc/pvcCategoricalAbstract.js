@@ -266,7 +266,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             .text(label)
             .textStyle(o.textStyle)
             .visible(function(){
-                return this.index == 0;
+                return !this.index;
             });
     }
 }, {

@@ -28,6 +28,7 @@ def.scope(function(){
      * @type function 
      */
     function colorScales(keyArgs){
+        /*jshint expr:true */
         keyArgs || def.fail.argumentRequired('keyArgs');
         
         var type = keyArgs.type || def.fail.argumentRequired('keyArgs.type');
@@ -74,6 +75,7 @@ def.scope(function(){
      * @type function 
      */
     function colorScale(keyArgs){
+        /*jshint expr:true */
         keyArgs || def.fail.argumentRequired('keyArgs');
         
         var type = keyArgs.type || def.fail.argumentRequired('keyArgs.type');
@@ -273,6 +275,7 @@ def.scope(function(){
                }
                
                if(!domain) {
+                   /*jshint expr:true */
                    extent || (extent = this._getDataExtent(data));
                    if(extent){
                        var min = extent.min,

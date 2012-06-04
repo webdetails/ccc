@@ -49,8 +49,8 @@ def.type('pvc.visual.Sign')
             var onEvent,
                 offEvent;
 
-            switch(pvMark.type) {
-                default:
+//            switch(pvMark.type) {
+//                default:
 //                case 'dot':
 //                case 'line':
 //                case 'area':
@@ -58,7 +58,7 @@ def.type('pvc.visual.Sign')
                     onEvent  = 'point';
                     offEvent = 'unpoint';
                     panel._requirePointEvent();
-                    break;
+//                    break;
 
 //                default:
 //                    onEvent  = 'point';
@@ -67,7 +67,7 @@ def.type('pvc.visual.Sign')
 //                    onEvent = 'mouseover';
 //                    offEvent = 'mouseout';
 //                    break;
-            }
+//            }
 
             pvMark
                 .event(onEvent, function(scene){
@@ -107,6 +107,7 @@ def.type('pvc.visual.Sign')
          * which possibly invalidates per-render
          * cached data.
          */
+        /*global scene_renderId:true */
         scene_renderId.call(this.scene, this.pvMark.renderId());
 
         /* state per: sign & scene & render */

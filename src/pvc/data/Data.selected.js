@@ -52,12 +52,14 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise. 
      */
     clearSelected: function(){
+        /*global data_assertIsOwner:true */
         data_assertIsOwner.call(this);
         if(!this._selectedDatums.count) {
             return false;
         }
         
         this._selectedDatums.values().forEach(function(datum){
+            /*global datum_deselect:true */
             datum_deselect.call(datum);
         });
 
@@ -102,6 +104,7 @@ function data_onDatumVisibleChanged(datum, visible){
     if(def.hasOwn(this._datumsById, datum.id)) {
         
         // <Debug>
+        /*jshint expr:true */
         !datum.isNull || def.assert("Null datums do not notify visible changes");
         // </Debug>
         
@@ -115,6 +118,7 @@ function data_onDatumVisibleChanged(datum, visible){
 
         // Notify dimensions
         def.eachOwn(this._dimensions, function(dimension){
+            /*global dim_onDatumVisibleChanged:true */
             dim_onDatumVisibleChanged.call(dimension, datum, visible);
         });
         

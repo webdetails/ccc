@@ -175,6 +175,7 @@ def.type('pvc.data.GroupingSpec')
             return this;
         }
         
+        /*jshint expr:true */
         this._singleLevelGrouping || (this._singleLevelGrouping = {});
         
         var singleLevel = this._singleLevelGrouping[reverse];
@@ -303,7 +304,9 @@ def.type('pvc.data.GroupingDimensionSpec')
      * @param {pvc.data.ComplexType} type A complex type.
      */
     bind: function(type){
+        /*jshint expr:true */
         type || def.fail.argumentRequired('type');
+        
         this.type     = type.dimensions(this.name);
         this.comparer = this.type.atomComparer(this.reverse);
     },
@@ -421,6 +424,7 @@ var groupSpec_matchDimSpec = /^\s*(.+?)(?:\s+(asc|desc))?\s*$/i;
  * @static
  */
 function groupSpec_parseGroupingLevel(groupLevelText, type) {
+    /*jshint expr:true */
     def.isString(groupLevelText) || def.fail.argumentInvalid('groupLevelText', "Invalid grouping specification.");
     
     return def.query(groupLevelText.split(/\s*\|\s*/))

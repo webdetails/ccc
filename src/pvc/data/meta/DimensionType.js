@@ -360,6 +360,7 @@ function(complexType, name, keyArgs){
                      }); 
         }
         
+        /*global atom_idComparer:true, atom_idComparerReverse:true */
         return reverse ? atom_idComparerReverse : atom_idComparer;
     },
     
@@ -563,6 +564,7 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
  */
 function dimType_addVisualRole(visualRole) {
     this.playedVisualRoles.set(visualRole.name, visualRole);
+    /*global compType_dimensionRolesChanged:true */
     compType_dimensionRolesChanged.call(this.type, this);
 }
 

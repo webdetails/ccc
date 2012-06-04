@@ -275,7 +275,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
 
         var colNames;
         if(this.options.seriesInRows){
-            colNames = this.metadata.map(function(d){ return d.colName; }),
+            colNames = this.metadata.map(function(d){ return d.colName; });
 
             lines.unshift(colNames);
             pv.transpose(lines); // Transposes, in-place
@@ -493,7 +493,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                     colGroupLabels = colGroupCell.f.split(this._separator);
                     colGroupLabels.pop(); // measure label
                 }
-
+                
+                /*jshint loopfunc:true */
                 colGroupValues.forEach(function(value, index){
                     var label = colGroupLabels && colGroupLabels[index];
                     colGroupValues[index] = {v: value, f: label};
@@ -537,8 +538,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         });
 
         // Reassign measure group indexes
-        measuresInfoList.forEach(function(meaInfo, index){
-            meaInfo.groupIndex = index;
+        measuresInfoList.forEach(function(meaInfo2, index){
+            meaInfo2.groupIndex = index;
         });
 
         // Publish colgroups and colgroupIndexes, keeping only relevant information
@@ -549,13 +550,13 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             R = this.R
             ;
         
-        colGroups.map(function(colGroup, cg){
-            colGroupsValues[cg] = colGroup.values;
+        colGroups.map(function(colGroup2, cg){
+            colGroupsValues[cg] = colGroup2.values;
 
             // The index in source *line* where each of the M measures can be read
             var meaIndexes = colGroupsIndexes[cg] = new Array(M);
-            colGroup.measureNames.forEach(function(meaName, index){
-                meaIndexes[measuresInfo[meaName].groupIndex] = R + colGroup.index + index;
+            colGroup2.measureNames.forEach(function(meaName2, index){
+                meaIndexes[measuresInfo[meaName2].groupIndex] = R + colGroup2.index + index;
             });
         });
 
@@ -606,6 +607,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                     me._userDimsReaders.push(reader);
                     
                     // <Debug>
+                    /*jshint expr:true */
                     !def.hasOwn(me._userDimsReadersByDim, dimName) || def.assert("Dimension already being read.");
                     // </Debug>
                     
@@ -631,14 +633,14 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         }
 
         if(this._axis2SeriesKeySet){
-            var seriesReader = this._userDimsReadersByDim['series'];
+            var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 var calcAxis2SeriesKeySet = def.constant(this._axis2SeriesKeySet);
 
                 /* Create a reader that surely only returns 'series' atoms */
                 seriesReader = this._filterDimensionReader(seriesReader, 'series');
 
-                this._dataPartGet(calcAxis2SeriesKeySet, seriesReader)
+                this._dataPartGet(calcAxis2SeriesKeySet, seriesReader);
                 
                 this._userDimsReaders.push(
                     this._value1AndValue2Get(calcAxis2SeriesKeySet, seriesReader, index));

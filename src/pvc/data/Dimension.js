@@ -66,6 +66,7 @@ def.type('pvc.data.Dimension')
             this.root = data.parent.root;
         } else {
             // A root that is not topmost
+            /*jshint expr:true */
             data.linkParent || def.assert("Data must have a linkParent");
             
             source = data.linkParent.dimensions(this.name);
@@ -253,6 +254,7 @@ def.type('pvc.data.Dimension')
         if(this._lazyInit) { this._lazyInit(); }
         
         // <Debug>
+        /*jshint expr:true */
         def.hasOwn(this._atomsByKey, atom.key) || def.assert("Atom must exist in this dimension.");
         // </Debug>
         
@@ -288,6 +290,7 @@ def.type('pvc.data.Dimension')
         
         visible = !!visible;
         
+        /*jshint expr:true */
         this._visibleAtoms || (this._visibleAtoms = {});
         
         return this._visibleAtoms[visible] || 
@@ -315,6 +318,7 @@ def.type('pvc.data.Dimension')
         
         visible = !!visible;
         
+        /*jshint expr:true */
         this._visibleIndexes || (this._visibleIndexes = {});
         return this._visibleIndexes[visible] || 
                (this._visibleIndexes[visible] = dim_calcVisibleIndexes.call(this, visible));
@@ -492,13 +496,13 @@ def.type('pvc.data.Dimension')
         var sum = def.getOwn(this._sumCache, key);
         if(sum === undefined) {
             var dimName = this.name;
-            sum = this.data.datums(null, keyArgs).reduce(function(sum, datum){
+            sum = this.data.datums(null, keyArgs).reduce(function(sum2, datum){
                 var value = datum.atoms[dimName].value;
                 if(isAbs && value < 0){ // null < 0 is false
                     value = -value;
                 }
 
-                return sum != null ? (sum + value) : value; // null preservation
+                return sum2 != null ? (sum2 + value) : value; // null preservation
             },
             null);
             
@@ -606,6 +610,7 @@ def.type('pvc.data.Dimension')
      */
     intern: function(sourceValue){
         // <Debug>
+        /*jshint expr:true */
         (this.owner === this) || def.assert("Can only internalize on an owner dimension.");
         // </Debug>
         
@@ -694,14 +699,14 @@ def.type('pvc.data.Dimension')
      */
     dispose: function(){
         if(!this._disposed){
-            
+            /*global data_disposeChildList:true */
             data_disposeChildList(this._children,     'parent');
             data_disposeChildList(this._linkChildren, 'linkParent');
             
             // myself
             
-            this.parent     &&  dim_removeChild.call(this.parent, this);
-            this.linkParent &&  dim_removeLinkChild.call(this.linkParent, this);
+            if(this.parent)     { dim_removeChild.call(this.parent, this); }
+            if(this.linkParent) { dim_removeLinkChild.call(this.linkParent, this); }
             
             dim_clearVisiblesCache.call(this);
             
@@ -742,6 +747,7 @@ function dim_buildDatumsFilterKey(keyArgs){
  */
 function dim_createNullAtom(sourceValue){
     // <Debug>
+    /*jshint expr:true */
     (this.owner === this) || def.assert("Can only create atoms on an owner dimension.");
     // </Debug>
     
@@ -770,6 +776,7 @@ function dim_createNullAtom(sourceValue){
  */
 function dim_createVirtualNullAtom(){
     // <Debug>
+    /*jshint expr:true */
     (this.owner === this) || def.assert("Can only create atoms on an owner dimension.");
     // </Debug>
     
@@ -796,6 +803,7 @@ function dim_createVirtualNullAtom(){
  */
 function dim_unintern(atom){
     // <Debug>
+    /*jshint expr:true */
     (this.owner === this) || def.assert("Can only unintern atoms on an owner dimension.");
     (atom && atom.dimension === this) || def.assert("Not an interned atom");
     // </Debug>
@@ -858,6 +866,7 @@ function dim_onDatumsChanged(){
  * @private
  */
 function dim_addChild(child){
+    /*global data_addColChild:true */
     data_addColChild(this, '_children', child, 'parent');
     
     child.owner = this.owner;
@@ -873,6 +882,7 @@ function dim_addChild(child){
  * @private
  */
 function dim_removeChild(child){
+    /*global data_removeColChild:true */
     data_removeColChild(this, '_children', child, 'parent');
 }
 
@@ -921,6 +931,7 @@ function dim_onDatumVisibleChanged(datum, visible) {
             key = atom.key;
         
         // <Debug>
+        /*jshint expr:true */
         def.hasOwn(this._atomsByKey, key) || def.assert("Atom must exist in this dimension.");
         // </Debug>
         

@@ -174,7 +174,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         /* V1 fields xScale, yScale, secondScale */
         if(isSecondOrtho) {
             this.secondScale = scale;
-        } else if(axis.index == 0) {
+        } else if(!axis.index) {
             this[axis.orientation + 'Scale'] = scale;
         }
         

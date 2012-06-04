@@ -18,7 +18,7 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
             orthoAxis.option('FixedMax') != null ||
             baseAxis .option('FixedMin') != null ||
             baseAxis .option('FixedMax') != null){
-            this.pvPanel["overflow"]("hidden");
+            this.pvPanel.overflow("hidden");
         }
     },
 

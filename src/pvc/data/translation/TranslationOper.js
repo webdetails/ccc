@@ -66,6 +66,7 @@ def.type('pvc.data.TranslationOper')
      * @type undefined
      */
     defReader: function(dimReaderSpec){
+        /*jshint expr:true */
         dimReaderSpec || def.fail.argumentRequired('readerSpec');
 
         var dimNames =  dimReaderSpec.names;
@@ -152,6 +153,7 @@ def.type('pvc.data.TranslationOper')
     },
 
     _userDefDimension: function(name, userDimSpec){
+        /*jshint expr:true */
         name || def.fail.argumentInvalid('dimensions[i]', "Invalid dimension name.");
         !def.hasOwn(this._userDefDims, name) ||
             def.fail.argumentInvalid('dimensions[i]', "A dimension with name '{0}' is already defined.", [name]);
@@ -163,8 +165,8 @@ def.type('pvc.data.TranslationOper')
     _userUseIndex: function(index){
         index = +index; // to number
 
-        (index >= 0) ||
-            def.fail.argumentInvalid('index', "Invalid reader index: '{0}'.", [index]);
+        /*jshint expr:true */
+        (index >= 0) || def.fail.argumentInvalid('index', "Invalid reader index: '{0}'.", [index]);
 
         !def.hasOwn(this._userUsedIndexes, index) ||
             def.fail.argumentInvalid('index', "Virtual item index '{0}' is already assigned.", [index]);
@@ -218,8 +220,10 @@ def.type('pvc.data.TranslationOper')
             for(var i = L ; i < I ; i++, level++) {
                 dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
                 if(i > L){ // first name was already registered
+                    /*jshint expr:true */
                     !def.hasOwn(this._userUsedDims, dimName) ||
                         def.fail.argumentInvalid('readers[i].names', "Dimension name '{0}' of last dimension group name is already being read.", [dimName]);
+                    
                     this._userUsedDims[dimName] = true;
                     // propGet ensures dim exists
                 }
@@ -230,8 +234,8 @@ def.type('pvc.data.TranslationOper')
     },
 
     _userRead: function(reader, dimNames){
-        def.isFun(reader) ||
-            def.fail.argumentInvalid('reader', "Reader must be a function.");
+        /*jshint expr:true */
+        def.isFun(reader) || def.fail.argumentInvalid('reader', "Reader must be a function.");
         
         if(def.isArray(dimNames)){
             dimNames.forEach(function(name){
@@ -284,9 +288,9 @@ def.type('pvc.data.TranslationOper')
         function extractDimensionReader(item) {
             var atoms = reader(item);
             if(atoms instanceof Array) {
-                return def.query(seriesAtom)
-                    .first(function(atom){
-                        return atom.dimension.name === dimName;
+                return def.query(atoms)
+                    .first(function(atom){ 
+                        return atom.dimension.name === dimName; 
                     });
             }
             

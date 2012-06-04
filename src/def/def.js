@@ -1,6 +1,8 @@
 if(!Object.keys) {
     /** @ignore */
     Object.keys = function(o){
+        /* Object function not being used as a constructor */
+        /*jshint newcap:false */
         if (o !== Object(o)){
             throw new TypeError('Object.keys called on non-object');
         }
@@ -28,8 +30,9 @@ if (!Array.prototype.filter){
         for (var i = 0; i < len; i++){
             if (i in this){
                 var val = this[i]; // in case fun mutates this
-                if (fun.call(ctx, val, i, this))
+                if (fun.call(ctx, val, i, this)){
                     res.push(val);
+                }
             }
         }
 
@@ -41,14 +44,14 @@ if(!Object.create){
     /** @ignore */
     Object.create = (function(){
 
-        var klass = function(){},
-            proto = klass.prototype;
+        var Klass = function(){},
+            proto = Klass.prototype;
         
         /** @private */
         function create(baseProto){
-            klass.prototype = baseProto || {};
-            var instance = new klass();
-            klass.prototype = proto;
+            Klass.prototype = baseProto || {};
+            var instance = new Klass();
+            Klass.prototype = proto;
             
             return instance;
         }
@@ -66,16 +69,16 @@ if (!Function.prototype.bind) {
     
         var aArgs = Array.prototype.slice.call(arguments, 1),   
             fToBind = this,   
-            fNOP = function () {},  
+            NOP = function () {},  
             fBound = function () {  
-              return fToBind.apply(this instanceof fNOP  
-                                   ? this  
-                                   : oThis || window,  
-                                 aArgs.concat(Array.prototype.slice.call(arguments)));  
+              return fToBind.apply(this instanceof NOP ? 
+                                   this : 
+                                   oThis || window,  
+                                   aArgs.concat(Array.prototype.slice.call(arguments)));  
             };  
     
-        fNOP.prototype = this.prototype;  
-        fBound.prototype = new fNOP();  
+        NOP.prototype = this.prototype;  
+        fBound.prototype = new NOP();  
     
         return fBound;
     };
@@ -97,7 +100,7 @@ if(!this.JSON.stringify){
 
 // TODO: document all this
 
-this['def'] = (function(){
+this.def = (function(){
     
     // All or nothing.
     // Mount in local object.
@@ -421,7 +424,7 @@ this['def'] = (function(){
          * @field
          * @type function
          */
-        noop: (function noop(){ /* NOOP */ }),
+        noop: function noop(){ /* NOOP */ },
         
         // negate?
         
@@ -603,7 +606,9 @@ this['def'] = (function(){
             safe();
     
             var value;
-            return value = _channel, _channel = null, value;
+            value = _channel;
+            _channel = null;
+            return value;
         }
         
         opener.safe = create;
@@ -691,6 +696,7 @@ this['def'] = (function(){
     
     /** @private */
     function defineName(namespace, name, value){
+        /*jshint expr:true */
         !def.hasOwn(namespace, name) ||
             def.fail.operationInvalid("Name '{0}' is already defined in namespace.", [name]);
     
@@ -840,6 +846,8 @@ this['def'] = (function(){
         var typeProto = /** lends def.type# */{
             init: function(init){
                 var state = shared(this.safe);
+                
+                /*jshint expr:true */
                 !state.locked || def.fail(typeLocked());
     
                 state.init = init;
@@ -849,6 +857,8 @@ this['def'] = (function(){
     
             postInit: function(postInit){
                 var state = shared(this.safe);
+                
+                /*jshint expr:true */
                 !state.locked || def.fail(typeLocked());
     
                 state.post = postInit;
@@ -858,6 +868,8 @@ this['def'] = (function(){
             
             add: function(mixin){
                 var state = shared(this.safe);
+                
+                /*jshint expr:true */
                 !state.locked || def.fail(typeLocked());
     
                 var proto = this.prototype,
@@ -959,7 +971,7 @@ this['def'] = (function(){
                 }
                 
                 if(def.isFun(fun.as)) {
-                    return new Method(spec);
+                    return new Method(fun);
                 }
                 
                 if(fun.isAbstract) {
@@ -1018,7 +1030,7 @@ this['def'] = (function(){
          */
         function type(name, baseType, baseSpace){
             
-            var baseState = baseType && baseType.safe ? shared(baseType.safe) : rootState;
+            var baseState = baseType && baseType.safe ? shared(baseType.safe) : rootState,
                 state = Object.create(baseState),
                 constructor = createConstructor(state),
                 typeName  = new TypeName(name);
@@ -1051,8 +1063,8 @@ this['def'] = (function(){
             }
             
             if(!('override' in proto)) {
-                proto.override = function(name, method){
-                    this[name] = override(method, this[name]);
+                proto.override = function(name2, method){
+                    this[name2] = override(method, this[name2]);
                     return this;
                 };
             }

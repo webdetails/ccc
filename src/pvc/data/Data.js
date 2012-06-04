@@ -103,6 +103,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             atomsBase = linkParent.atoms;
             //atoms = null
             
+            /*global data_addLinkChild:true */
             data_addLinkChild.call(linkParent, this);
         } else {
             // Topmost root - an owner
@@ -117,6 +118,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
         }
     }
     
+    /*global data_syncDatumsState:true */
     data_syncDatumsState.call(this);
     
     // Must anticipate setting this (and not wait for the base constructor)
@@ -148,9 +150,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
     // The absolute key is relative to the root data (not the owner)
     this.absKey = this.key;
     if(parent){
+        /*global data_addChild:true */
         data_addChild.call(parent, this);
         
         if(parent.absLabel){
+            /*global complex_labelSep:true */
             this.absLabel = def.join(complex_labelSep, parent.absLabel, this.label);
         }
         
@@ -493,6 +497,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             }
             
             if(this.linkParent) {
+                /*global data_removeLinkChild:true */
                 data_removeLinkChild.call(this.linkParent, this);
             }
             
@@ -512,6 +517,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
  * @private
  */
 function data_disposeChildLists() {
+    /*global data_disposeChildList:true */
     data_disposeChildList(this._children,     'parent');
     data_disposeChildList(this._linkChildren, 'linkParent');
     
@@ -529,5 +535,6 @@ function data_disposeChildLists() {
  * @private
  */
 function data_assertIsOwner(){
+    /*jshint expr:true */
     this.isOwner() || def.fail("Can only be called on the owner data.");
 }

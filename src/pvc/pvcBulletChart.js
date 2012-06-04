@@ -203,7 +203,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
           titleLeftOffset = 0;
           align = 'left';
           titleTopOffset = -12;
-          titleSpace = parseInt(options.titleSize/2);
+          titleSpace = parseInt(options.titleSize/2, 10);
           break;
         case 'bottom':
           leftPos = this.chart.options.bulletMargin;
@@ -216,14 +216,14 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
           leftPos = 5;
           titleLeftOffset = size + 5;
           align = 'left';
-          titleTopOffset = parseInt(options.bulletSize/2);
+          titleTopOffset = parseInt(options.bulletSize/2, 10);
           titleSpace = 0;
           break;
         case 'left':
         default:
           leftPos = this.chart.options.bulletMargin;
           titleLeftOffset = 0;
-          titleTopOffset = parseInt(options.bulletSize/2);
+          titleTopOffset = parseInt(options.bulletSize/2, 10);
           align = 'right';
           titleSpace = 0;
       }

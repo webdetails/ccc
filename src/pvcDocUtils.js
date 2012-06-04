@@ -2,6 +2,7 @@
 pvc.debug = 3;
 var tryMe = function(e){ 
     try{
+        /*jshint evil:true */
         eval( $(e).prev("textarea").val());
     } catch(ex){
         alert("Error: " + ex);
@@ -66,14 +67,14 @@ def.scope(function(){
         
         // -----------------------
         
-        var chartClass = pvc[chartExample.className];
+        var ChartClass = pvc[chartExample.className];
         var options = def.create(false, chartExample.def, {
             width:  $tableChartDiv.width(),
             height: $tableRow.height(),
             canvas: $tableChartDiv[0]
         });
         
-        var chart = new chartClass(options);
+        var chart = new ChartClass(options);
         
         // ----------------------
      

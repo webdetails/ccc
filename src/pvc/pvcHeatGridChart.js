@@ -428,11 +428,11 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         }
         
         /* BORDER WIDTH & COLOR */
-        var notNullSelectedBorder = (this.selectedBorder == null || this.selectedBorder == 0) ? 
+        var notNullSelectedBorder = (this.selectedBorder == null || (+this.selectedBorder) === 0) ? 
                                      this.defaultBorder : 
                                      this.selectedBorder;
         
-        var nullSelectedBorder = (this.selectedBorder == null || this.selectedBorder == 0) ? 
+        var nullSelectedBorder = (this.selectedBorder == null || (+this.selectedBorder) === 0) ? 
                                   this.nullBorder : 
                                   this.selectedBorder;
         

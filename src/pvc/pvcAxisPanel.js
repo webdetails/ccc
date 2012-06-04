@@ -53,8 +53,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         if(this.title){
             titleSize = Math.ceil(
-                            pvc.text.getTextHeight(this.title, this.titleFont)
-                            *
+                            pvc.text.getTextHeight(this.title, this.titleFont) *
                             pvc.goldenRatio);
 
             if(this.titleSize > titleSize){
@@ -243,9 +242,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .strokeStyle('rgba(0,0,0,0)') // Transparent by default, but extensible
             ;
 
-        var align = this.isAnchorTopOrBottom() 
-                    ? "center"
-                    : (this.anchor == "left") ? "right" : "left";
+        var align = this.isAnchorTopOrBottom() ? 
+                    "center" : 
+                    (this.anchor == "left") ? "right" : "left";
         
         // All ordinal labels are relevant and must be visible
         this.pvLabel = this.pvTicks.anchor(this.anchor).add(pv.Label)
@@ -642,14 +641,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         layout.node.add(pv.Bar)
             .fillStyle('rgba(127,127,127,.001)')
             .strokeStyle(function(d){
-                if(d.maxDepth == 1 || d.maxDepth == 0) { // 0, 0.5, 1
+                if(d.maxDepth === 1 || !d.maxDepth) { // 0, 0.5, 1
                     return null;
                 }
 
                 return "rgba(127,127,127,0.3)"; //non-terminal items, so grouping is visible
             })
             .lineWidth( function(d){
-                if(d.maxDepth == 1 || d.maxDepth == 0) {
+                if(d.maxDepth === 1 || !d.maxDepth) {
                     return 0;
                 }
                 return 0.5; //non-terminal items, so grouping is visible
@@ -754,7 +753,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // tooltip
         this.pvLabel
             .title(function(d){
-                this.instance()['tooltip'] = d.label;
+                this.instance().tooltip = d.label;
                 return '';
             })
             .event("mouseover", pv.Behavior.tipsy({
@@ -833,10 +832,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 });
 
 pvc.AxisPanel.create = function(chart, parentPanel, cartAxis, options){
-    var panelClass = pvc[cartAxis.upperOrientedId + 'AxisPanel'] || 
+    var PanelClass = pvc[cartAxis.upperOrientedId + 'AxisPanel'] || 
         def.fail.argumentInvalid('cartAxis', "Unsupported cartesian axis");
     
-    return new panelClass(chart, parentPanel, cartAxis, options);
+    return new PanelClass(chart, parentPanel, cartAxis, options);
 };
 
 pvc.XAxisPanel = pvc.AxisPanel.extend({

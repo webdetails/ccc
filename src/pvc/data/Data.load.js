@@ -18,6 +18,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
      */
     load: function(atomz, keyArgs){
+        /*global data_assertIsOwner:true */
         data_assertIsOwner.call(this);
         
         // TODO: Not guarding against re-entry during load
@@ -25,6 +26,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         var isReload = !!this._datums;
         if(isReload) {
             // Dispose child and link child datas, and their dimensions...
+            /*global data_disposeChildLists:true */
             data_disposeChildLists.call(this);
             
             this._datums = data_reloadDatums.call(this, atomz, whereFun);
@@ -33,11 +35,13 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
             this._datums = data_loadDatums.call(this, atomz, whereFun);
         }
         
+        /*global data_syncDatumsState:true */
         data_syncDatumsState.call(this);
         
         // Allow dimensions to clear their caches
         if(isReload) {
             def.eachOwn(this._dimensions, function(dimension){
+                /*global dim_onDatumsChanged:true */
                 dim_onDatumsChanged.call(dimension);
             });
         }
@@ -108,6 +112,7 @@ function data_loadDatums(atomz, whereFun) {
                 });
             
             uninternAtoms.forEach(function(atom){
+                /*global dim_unintern:true */
                 dim_unintern.call(dimension, atom);
             });
         });
@@ -226,6 +231,7 @@ function data_addChild(child){
  * @private
  */
 function data_addLinkChild(linkChild){
+    /*global data_addColChild:true */
     data_addColChild(this, '_linkChildren', linkChild, 'linkParent');
 }
 
@@ -239,5 +245,6 @@ function data_addLinkChild(linkChild){
  * @private
  */
 function data_removeLinkChild(linkChild){
+    /*global data_removeColChild:true */
     data_removeColChild(this, '_linkChildren', linkChild, 'linkParent');
 }

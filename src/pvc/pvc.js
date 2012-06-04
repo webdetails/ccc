@@ -1,4 +1,5 @@
 
+/*global pvc:true */
 var pvc = {
     // 0 - off
     // 1 - errors 
@@ -143,7 +144,7 @@ pvc.arrayEquals = function(array1, array2, func){
  * and is returned when null or an empty array is specified.
  */
 pvc.createColorScheme = function(colors){
-    if (colors == null || colors.length == 0){
+    if (colors == null || !colors.length){
         return pv.Colors.category10;
     }
 	
@@ -351,7 +352,9 @@ pv.Dom.Node.prototype.insertAt = function(n, index) {
     if (r.previousSibling) {
         r.previousSibling.nextSibling = n;
     } else {
-        if (r == this.lastChild) this.lastChild = n;
+        if (r == this.lastChild) {
+            this.lastChild = n;
+        }
         this.firstChild = n;
     }
     this.childNodes.splice(index, 0, n);
@@ -365,10 +368,18 @@ pv.Dom.Node.prototype.removeAt = function(i) {
   var n = this.childNodes[i];
   if(n){
       this.childNodes.splice(i, 1);
-      if (n.previousSibling) n.previousSibling.nextSibling = n.nextSibling;
-      else this.firstChild = n.nextSibling;
-      if (n.nextSibling) n.nextSibling.previousSibling = n.previousSibling;
-      else this.lastChild = n.previousSibling;
+      if (n.previousSibling) { 
+          n.previousSibling.nextSibling = n.nextSibling; 
+      } else { 
+          this.firstChild = n.nextSibling; 
+      }
+      
+      if (n.nextSibling) {
+          n.nextSibling.previousSibling = n.previousSibling;
+      } else {
+          this.lastChild = n.previousSibling;
+      }
+      
       delete n.nextSibling;
       delete n.previousSibling;
       delete n.parentNode;
@@ -479,9 +490,9 @@ pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
                 tickCount = (domaSize / tickStep),
                 err = desiredTickCount / tickCount;
             
-            if      (err <= .15) tickStep *= 10;
-            else if (err <= .35) tickStep *= 5;
-            else if (err <= .75) tickStep *= 2;
+            if      (err <= 0.15) { tickStep *= 10; }
+            else if (err <= 0.35) { tickStep *= 5;  }
+            else if (err <= 0.75) { tickStep *= 2;  }
             
             // NOTE: this is the "BIG" change to
             //  PROTOVIS's implementation:
@@ -618,9 +629,9 @@ pv.dataIdentity = function(datum){
 /* ANCHORS */
 /**
  * name = left | right | top | bottom
- * */
+ */
 pv.Mark.prototype.addMargin = function(name, margin) {
-    if(margin != 0){
+    if(margin !== 0){
         var staticValue = def.nullyTo(this.getStaticPropertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
@@ -678,42 +689,44 @@ pv.Mark.prototype.forEachInstance = function(fun, ctx){
 
     // root scene exists if rendered at least once
     var rootScene = mark.scene;
-    if(rootScene){
-        var L = indexes.length;
+    if(!rootScene){
+        return;
+    }
+    
+    var L = indexes.length;
 
-        function collectRecursive(scene, level, toScreen){
-            var isLastLevel = level === L, 
-                childIndex;
-            
-            if(!isLastLevel) {
-                childIndex = indexes[level];
-            }
-            
-            for(var index = 0, D = scene.length; index < D ; index++){
-                var instance = scene[index];
-                if(level === L){
-                    fun.call(ctx, scene[index], toScreen);
-                } else if(instance.visible) {
-                    var childScene = instance.children[childIndex];
+    function collectRecursive(scene, level, toScreen){
+        var isLastLevel = level === L, 
+            childIndex;
+        
+        if(!isLastLevel) {
+            childIndex = indexes[level];
+        }
+        
+        for(var index = 0, D = scene.length; index < D ; index++){
+            var instance = scene[index];
+            if(level === L){
+                fun.call(ctx, scene[index], toScreen);
+            } else if(instance.visible) {
+                var childScene = instance.children[childIndex];
+                
+                // Some nodes might have not been rendered?
+                if(childScene){
+                    var childToScreen = toScreen
+                                            .times(instance.transform)
+                                            .translate(instance.left, instance.top);
                     
-                    // Some nodes might have not been rendered?
-                    if(childScene){
-                        var childToScreen = toScreen
-                                                .times(instance.transform)
-                                                .translate(instance.left, instance.top);
-                        
-                        collectRecursive(childScene, level + 1, childToScreen);
-                    }
+                    collectRecursive(childScene, level + 1, childToScreen);
                 }
             }
-            
-            if(D > 0) {
-                fun.call(ctx, breakInstance, null);
-            }
         }
-
-        collectRecursive(rootScene, 0, pv.Transform.identity);
+        
+        if(D > 0) {
+            fun.call(ctx, breakInstance, null);
+        }
     }
+
+    collectRecursive(rootScene, 0, pv.Transform.identity);
 };
 
 pv.Mark.prototype.forEachSignumInstance = function(fun, ctx){
@@ -995,7 +1008,7 @@ var Line = def.type('pvc.Line', Shape)
 })
 .add({
     clone: function(){
-        return new pvc.Line(this.x, this.y, this.x2, this,x2);
+        return new pvc.Line(this.x, this.y, this.x2, this.x2);
     },
 
     apply: function(t){
@@ -1064,7 +1077,7 @@ var Line = def.type('pvc.Line', Shape)
     }
 });
 
-})(); // End private scope
+}()); // End private scope
 
 
 /**
@@ -1101,7 +1114,10 @@ pv.Behavior.selector = function(autoRefresh, mark) {
 
   /** @private */
   function mousemove(e) {
-    if (!scene) return;
+    if (!scene) {
+        return;
+    }
+    
     scene.mark.context(scene, index, function() {
         // this === scene.mark
         var m2 = this.mouse(),
@@ -1124,7 +1140,7 @@ pv.Behavior.selector = function(autoRefresh, mark) {
 
   /** @private */
   function mouseup(e) {
-    if (!scene) return;
+    if (!scene) { return; }
     pv.Mark.dispatch("selectend", scene, index, e);
     scene.mark.selectionRect = null;
     scene = null;
@@ -1136,11 +1152,10 @@ pv.Behavior.selector = function(autoRefresh, mark) {
   return mousedown;
 };
 
-
 /**
  * Implements support for svg detection
  */
 (function($){
     $.support.svg = $.support.svg || 
         document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
-})(jQuery);
+}(jQuery));
