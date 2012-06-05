@@ -145,7 +145,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     this._children = this.childNodes; // pv.Dom.Node#childNodes
     
     // Build label and child key
-    this.absLabel = this.label = this.buildLabel();
+    this.absLabel = this.label = this.buildLabel(atoms);
 
     // The absolute key is relative to the root data (not the owner)
     this.absKey = this.key;

@@ -107,11 +107,15 @@ def
 })
 .add(/** @lends pvc.data.Complex# */{
 
-    buildLabel: function(){
-        return def.own(this.atoms)
-                .map(function(atom){ return atom.label; })
-                .filter(def.notEmpty)
-                .join(complex_labelSep);
+    buildLabel: function(atoms){
+    
+        if (atoms) 
+            return  atoms
+                    .map(function(atom){ return atom.label; })
+                    .filter(def.notEmpty)
+                    .join(complex_labelSep);
+        else
+            return "";
     },
 
     view: function(dimNames){

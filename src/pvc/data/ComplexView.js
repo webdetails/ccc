@@ -34,7 +34,7 @@ def.type('pvc.data.ComplexView', pvc.data.Complex)
     this.base(owner, atoms, owner.atoms);
     
     // Build label based on (really) own atoms
-    this.label = this.buildLabel();
+    this.label = this.buildLabel(atoms);
 })
 .add({
     values: function(){
