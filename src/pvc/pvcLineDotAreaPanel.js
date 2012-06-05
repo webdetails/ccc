@@ -83,6 +83,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 segmented:   !isDense
             })
             
+            .lock('visible', def.constant(true))
+            
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
             
@@ -104,11 +106,10 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 return color;
             })
             .override('fixAntialiasStrokeWidth', function(){
-                if((this.scene.isAlone && !isBaseDiscrete) || 
-                   (this.scene.isNull && (!this.scene.nextSibling || this.scene.nextSibling.isNull))) {
-                    // Hide a vertical line from 0 to the alone dot
-                    // Hide horizontal lines of nulls near zero
-                    return 0;
+                // Hide a vertical line from 0 to the alone dot
+                // Hide horizontal lines of nulls near zero
+                if(this.scene.isNull || this.scene.isAlone) {
+                     return 0;
                 }
 
                 return this.base();
@@ -153,11 +154,23 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 extensionId: 'line',
                 freePosition: true
             })
+            /* 
+             * Line.visible =
+             *  a) showLines
+             *     or
+             *  b) (!showLines and) showAreas
+             *      and
+             *  b.1) discrete base and stacked
+             *       and
+             *       b.1.1) not null or is an intermediate null
+             *  b.2) not null
+             */
             .lock('visible',
-                    showDotsOnly ? def.constant(false) : 
-                    (isStacked && isBaseDiscrete ? 
-                            function(){ return !(!this.scene.isIntermediate && this.scene.isNull); } :
-                            function(){ return !this.scene.isNull; })
+                    showDotsOnly ? 
+                    def.constant(false) : 
+                    (isBaseDiscrete && isStacked ? 
+                    function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
+                    function(){ return !this.scene.isNull; })
             )
             
             /* Color & Line */
@@ -224,7 +237,11 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                  * (ideally, a line would show as a dot when only one point?)
                  */
                 if(!showDots) {
-                    if(!this.scene.isActive && this.scene.isAlone) {
+                    var visible = this.scene.isActive ||
+                                  this.scene.isSingle ||
+                                  (this.scene.isAlone && showAloneDots);
+                    
+                    if(visible && !this.scene.isActive) {
                         // Obtain the line Width of the "sibling" line
                         var lineWidth = Math.max(myself.pvLine.lineWidth(), 0.2) / 2;
                         return lineWidth * lineWidth;
@@ -382,7 +399,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                     group = group._childrenByKey[seriesData1.key];
                 }
 
-                    /* If there's no group, provide, at least, a null datum */
+                /* If there's no group, provide, at least, a null datum */
                 var datum = group ? null : createNullDatum(seriesData1, categData1),
                     scene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
                 
@@ -407,7 +424,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         function completeSeriesScenes(seriesScene) {
             var seriesScenes2 = [],
                 seriesScenes = seriesScene.childNodes, 
-                fromScene;
+                fromScene,
+                notNullCount = 0,
+                firstAloneScene = null;
             
             /* As intermediate nodes are added, 
              * seriesScene.childNodes array is changed.
@@ -418,7 +437,10 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
              */
             for(var c = 0, /* category index */
                     toChildIndex = 0, 
-                    categCount = seriesScenes.length ; c < categCount ; c++, toChildIndex++) {
+                    categCount = seriesScenes.length ; 
+                c < categCount ;
+                c++, 
+                toChildIndex++) {
                 
                 var toScene = seriesScenes[toChildIndex],
                     c2 = c * 2; /* doubled category index, for seriesScenes2  */
@@ -432,6 +454,13 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                         /* belowScene */
                         belowSeriesScenes2 && belowSeriesScenes2[c2]);
                 
+                if(toScene.isAlone && !firstAloneScene){
+                    firstAloneScene = toScene;
+                }
+                
+                if(!toScene.isNull){
+                    notNullCount++;
+                }
                 
                 /* Possibly create intermediate scene 
                  * (between fromScene and toScene) 
@@ -454,6 +483,10 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 // --------
                 
                 fromScene = toScene;
+            }
+            
+            if(notNullCount === 1 && firstAloneScene){
+                firstAloneScene.isSingle = true;
             }
             
             if(isStacked){
@@ -483,17 +516,15 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             toScene.orthoLength   = orthoScale(toAccValue) - orthoZero;
             
             var isNullFrom = (!fromScene || fromScene.isNull),
-                isAlone    = !toScene.isNull && isNullFrom,
-                isSingle   = isAlone;
+                isAlone    = isNullFrom && !toScene.isNull;
             if(isAlone) {
-                // Look ahead
+                // Confirm looking ahead
                 var nextScene = toScene.nextSibling;
                 isAlone  = !nextScene || nextScene.isNull;
-                isSingle = isNullFrom && isAlone;
             }
             
             toScene.isAlone  = isAlone;
-            toScene.isSingle = isSingle;
+            toScene.isSingle = false;
         }
         
         function createIntermediateScene(
@@ -511,6 +542,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             var interValue, interAccValue, interBasePosition;
                 
             if(interIsNull) {
+                /* Value is 0 or the below value */
                 if(belowScene && isBaseDiscrete) {
                     var belowValueAct = belowScene.acts[this.valueRoleName];
                     interAccValue = belowValueAct.accValue;
@@ -574,12 +606,30 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             
             var seriesScenes = seriesScene.childNodes,
                 L = seriesScenes.length;
-            while(L && seriesScenes[0].isNull) {
+            
+            // from beginning
+            var scene, siblingScene;
+            while(L && (scene = seriesScenes[0]).isNull) {
+                
+                // Don't remove the intermediate dot before the 1st non-null dot
+                siblingScene = scene.nextSibling;
+                if(siblingScene && !siblingScene.isNull){
+                    break;
+                }
+                
                 seriesScene.removeAt(0);
                 L--;
             }
             
-            while(L && seriesScenes[L - 1].isNull) {
+            // from end
+            while(L && (scene = seriesScenes[L - 1]).isNull) {
+                
+                // Don't remove the intermediate dot after the last non-null dot
+                siblingScene = scene.previousSibling;
+                if(siblingScene && !siblingScene.isNull){
+                    break;
+                }
+                
                 seriesScene.removeAt(L - 1);
                 L--;
             }

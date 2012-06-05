@@ -243,6 +243,9 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         this.pvDot = dot.pvMark;
         
         // -- COLOR --
+        // When no lines are shown, dots are shown with transparency,
+        // which helps in distinguishing overlapped dots.
+        // With lines shown, it would look strange.
         if(!hasColorRole){
             if(!myself.showLines){
                 dot.override('baseColor', function(type){
@@ -486,7 +489,9 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                      return scene.atoms[colorDimName].value;
                  };
              } else {
-                 // TODO - collect grouping value...
+                 getColorRoleValue = function(scene) {
+                     return colorGrouping.view(scene.datum).value;
+                 };
              }
         }
         

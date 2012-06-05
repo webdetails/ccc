@@ -595,7 +595,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         var boundDimNames = {};
         def.each(this.options.visualRoles, function(roleSpec, name){
             var visualRole = this._visualRoles[name] ||
-                def.fail.argumentInvalid("Role '{0}' is not supported by the chart type.", [name]);
+                def.fail.operationInvalid("Role '{0}' is not supported by the chart type.", [name]);
 
             // !roleSpec results in a null grouping being preBound
             // A pre bound null grouping is later discarded in the post bind

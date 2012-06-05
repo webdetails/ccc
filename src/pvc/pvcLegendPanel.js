@@ -272,7 +272,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                     scene.acts.dataPart = dataPartAct;
                 }
 
-                var labelTextLen = pvc.text.getTextLength(legendItem.label, chart.font);
+                var labelTextLen = pvc.text.getTextLength(legendItem.label, this.font);
                 if(labelTextLen > maxLabelTextLen) {
                     maxLabelTextLen = labelTextLen;
                 }
