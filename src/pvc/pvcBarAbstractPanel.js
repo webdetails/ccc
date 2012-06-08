@@ -59,7 +59,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
 
         var orthoScale = chart.axes.ortho.scale,
             orthoZero  = orthoScale(0),
-            sceneOrthoScale = chart.axes.ortho.sceneScale(),
+            sceneOrthoScale = chart.axes.ortho.sceneScale({nullToZero: false}),
             
             bandWidth = chart.axes.base.scale.range().band,
             barStepWidth = chart.axes.base.scale.range().step,
@@ -99,7 +99,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                 .order(reverseSeries ? "reverse" : null)
                 .h(function(scene){
                     /* May be negative */
-                    return chart.animate(0, sceneOrthoScale(scene) - orthoZero);
+                    var h = sceneOrthoScale(scene);
+                    return h != null ? chart.animate(0, h - orthoZero) : null;
                 })
                 .w(barWidth)
                 .horizontalRatio(this.barSizeRatio)
@@ -327,7 +328,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                                 .dimensions(chart._valueDim.name) :
                             null;
 
-        var value = valueDim ? valueDim.sum({visible: true}) : null;
+        var value = valueDim ? valueDim.sum({visible: true, zeroIfNone: false}) : null;
 
         var valueAct = categScene.acts.value = {
             value:    value,

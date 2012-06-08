@@ -102,6 +102,7 @@ var baseExampleDef = {
         selectable:  true,
         hoverable: true,
         xAxisFullGrid: true,
+        yAxisFullGrid: true,
         yAxisSize: 30,
         yAxisDomainRoundMode: 'tick',
         axisOverlappedLabelsHide: true,
@@ -114,6 +115,8 @@ var baseExampleDef = {
         showValues: false,
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
+        
+        nullInterpolationMode: 'linear',
         
         /* Data format */
         crosstabMode: false,
@@ -185,7 +188,8 @@ pvc.examples.register(def.create(baseExampleDef, {
 	className: 'StackedLineChart',
 	def: {
 	    title:      "Stacked Timeseries Line Chart",
-	    timeSeries: true
+	    timeSeries: true,
+	    showDots:  true
 	 }
 }));
 

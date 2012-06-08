@@ -901,19 +901,21 @@ this.def = (function(){
         // TODO: improve this code with indexOf
         function TypeName(full){
             var parts;
-            if(full instanceof Array){
-                parts = full;
-                full  = parts.join('.');
-            } else {
-                parts = full.split('.');
+            if(full){
+                if(full instanceof Array){
+                    parts = full;
+                    full  = parts.join('.');
+                } else {
+                    parts = full.split('.');
+                }
             }
             
-            if(parts.length > 1){
+            if(parts && parts.length > 1){
                 this.name           = parts.pop();
                 this.namespace      = parts.join('.');
                 this.namespaceParts = parts;
             } else {
-                this.name = full;
+                this.name = full || null;
                 this.namespace = null;
                 this.namespaceParts = [];
             }
@@ -1023,7 +1025,10 @@ this.def = (function(){
         /**
          * Constructs a type with the specified name in the current namespace.
          * 
-         * @param {string} name The new type name, relative to the base argument.
+         * @param {string} [name] The new type name, relative to the base argument.
+         * When unspecified, an anonymous type is created.
+         * The type is not published in any namespace.
+         *  
          * @param {object} [baseType] The base type.
          * @param {object} [baseSpace] The base namespace.
          * The default namespace is the current namespace.
@@ -1075,9 +1080,11 @@ this.def = (function(){
             
             // ----
             
-            defineName(def.space(typeName.namespace, baseSpace), 
-                       typeName.name, 
-                       constructor);
+            if(typeName.name){
+                defineName(def.space(typeName.namespace, baseSpace), 
+                           typeName.name, 
+                           constructor);
+            }
             
             return constructor;
         }
@@ -1126,14 +1133,14 @@ this.def = (function(){
             return array;
         },
         
-        binarySearch: function(array, item, comparer){
+        binarySearch: function(array, item, comparer, key){
             if(!comparer) { comparer = def.compare; }
             
             var low  = 0, high = array.length - 1;
             while(low <= high) {
                 var mid = (low + high) >> 1; // <=>  Math.floor((l+h) / 2)
                 
-                var result = comparer(item, array[mid]);
+                var result = comparer(item, key ? key(array[mid]) : array[mid]);
                 if (result < 0) {
                     high = mid - 1;
                 } else if (result > 0) {
@@ -1611,6 +1618,41 @@ this.def = (function(){
         }
     });
     
+    def.type('RangeQuery', def.Query)
+    .init(function(start, count, step){
+        this.base();
+        this._index = start;
+        this._count = count;
+        this._step  = step == null ? 1 : step;
+    })
+    .add({
+        _next: function(nextIndex){
+            if(nextIndex < this._count){
+                this.item = this._index;
+                this._index += this._step;
+                return 1;
+            }
+        },
+        
+        /**
+         * Obtains the number of items of a query.
+         * This is a more efficient implementation.
+         * @type number
+         */
+        count: function(){
+            // Count counts remaining items
+            var remaining = this._count;
+            if(this.index >= 0){
+                remaining -= (this.index + 1);
+            }
+            
+            // Count consumes all remaining items
+            this._finish();
+            
+            return remaining;
+        }
+    });
+    
     def.type('WhereQuery', def.Query)
     .init(function(source, where, ctx){
         this.base();
@@ -1810,6 +1852,10 @@ this.def = (function(){
         }
     
         return new def.ArrayLikeQuery(q);
+    };
+    
+    def.range = function(start, count, step){
+        return new def.RangeQuery(start, count, step);
     };
     
     // Reset namespace to global, instead of 'def'

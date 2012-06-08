@@ -135,12 +135,17 @@ proportional to the values that they represent.
   <li>showValues (true|false)</li>
   <li>stacked (true|false)</li>
   <li>panelSizeRatio - Ratio of occupied vs total size of category band. Default: 0.9 (90%)</li>
-  <li>barSizeRatio - In multiple series, percentage of inner band
-occupied by bars. Default: 0.9 (90%)</li>
+  <li>barSizeRatio - In multiple series, percentage of inner band occupied by bars. Default: 0.9 (90%)</li>
   <li>maxBarSize - Maximum size of a bar in pixels.</li>
   <li>barStackedMargin - Margin that separates (stacked) bars, in pixels. Default: 0</li>
 </ul>
-
+<h4>Line properties</h4>
+<ul>
+  <li>showLines - Show or hide lines. Default: true</li>
+  <li>showDots - Show or hide dots. Default: false</li>
+  <li>showAreas - Show or hide areas. Default: false</li>
+  <li>nullInterpolationMode (none | linear) - Interpolation mode for lines. Default: 'none'</li>
+</ul>
 <h4>Axis properties</h4>
 <ul>
   <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
@@ -159,9 +164,9 @@ occupied by bars. Default: 0.9 (90%)</li>
   <li>{x,y,second}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
   <li>{x,y,second}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
   <li>{x,y,second}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
-  <li>secondAxisIdx - Array of indexes of the series that are shown on the second axis</li>
+  <li>secondAxisIdx - Array of indexes of the series that are shown as lines.</li>
   <li>secondAxisIndependentScale (true | false) - if the second axis has an independent scale</li>
-  <li>secondAxisOriginIsZero (true | false) - if the second axis should show the 0 value at the origin. Default: 0</li>
+  <li>secondAxisOriginIsZero (true | false) - if the second axis should show the 0 value at the origin. Default: true</li>
   <li>secondAxisColor - line and scale color. Default: blue</li>
 </ul>
 

@@ -12883,13 +12883,13 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
                 };
             }
 
-            var ih = this.$ih.apply(o, stack);
+            var ih = this.$ih.apply(o, stack); // may be null
             band.items[l] = {
                 y: (scene.yZero || 0),
                 x: 0,
                 w: this.$iw.apply(o, stack),
-                h: Math.abs(ih),
-                dir: ih < 0 ? -1 : 1
+                h: ih != null ? Math.abs(ih) : ih,
+                dir: ih < 0 ? -1 : 1 // null -> 1
             };
         }
         stack.shift();
@@ -12973,7 +12973,7 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
             items = bands[b].items;
 
             /* Sum across layers for this band */
-            var hSum = 0;
+            var hSum = null, nonNullCount = 0;
             for (var l = 0; l < L; l++) {
                 /* We get rid of negative heights
                  * because it is preferable to respect the layer's order
@@ -12982,19 +12982,31 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
                  */
                 var item = items[l];
                 item.dir = 1;
-                hSum += item.h;
+                var h = item.h;
+                if(h != null){
+                    nonNullCount++;
+                    hSum += h; // null + 1 = 0 + 1
+                }
             }
 
             /* Scale hs */
-            if (hSum) {
-                var hScale = bh / hSum;
-                for (var l = 0; l < L; l++) {
-                    items[l].h *= hScale;
-                }
-            } else {
-                var hAvg = bh / L;
-                for (var l = 0; l < L; l++) {
-                    items[l].h = hAvg;
+            if(nonNullCount){
+                if (hSum) {
+                    var hScale = bh / hSum;
+                    for (var l = 0; l < L; l++) {
+                        var h = items[l].h;
+                        if(h != null){
+                            items[l].h = h * hScale;
+                        }
+                    }
+                } else {
+                    var hAvg = bh / nonNullCount;
+                    for (var l = 0; l < L; l++) {
+                        var h = items[l].h;
+                        if(h != null){
+                            items[l].h = hAvg;
+                        }
+                    }
                 }
             }
         }
@@ -13048,7 +13060,7 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(dir, invertDir, items, ver
         var item = items[reverseLayers ? (L -l -1) : l];
 
         if(item.dir === dir){
-            var h = item.h;
+            var h = item.h || 0; // null -> 0
             if(efItemDir > 0){
                 item.y = yOffset + vertiMargin2;
                 yOffset += h;
@@ -13057,7 +13069,7 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(dir, invertDir, items, ver
                 yOffset -= h;
             }
             
-            item.h -= vertiMargin;
+            item.h -= vertiMargin; // may become < 0
             item.x = bx - item.w / 2;
         } else {
             existsOtherDir = true;
@@ -13067,7 +13079,7 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(dir, invertDir, items, ver
     return {
         existsOtherDir: existsOtherDir,
         yOffset: yOffset
-    }
+    };
 };
 
 pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, horizontal){
@@ -13098,7 +13110,7 @@ pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, hor
     itemProps[px] = function(b, l) {return bands[b].items[l].x;};
     itemProps[py] = function(b, l) {return bands[b].items[l].y;};
     itemProps[pw] = function(b, l) {return bands[b].items[l].w;};
-    itemProps[ph] = function(b, l) {return bands[b].items[l].h;};
+    itemProps[ph] = function(b, l) {return bands[b].items[l].h || 0;}; // null -> 0
 };
 /**
  * Constructs a new, empty treemap layout. Layouts are not typically

@@ -12,6 +12,15 @@ pvc.BarChart = pvc.BarAbstract.extend({
         pvc.mergeDefaults(this.options, pvc.BarChart.defaultOptions, options);
     },
     
+    _processOptionsCore: function(options){
+        
+        this.base(options);
+        
+        if(options.secondAxis && !options.showLines && !options.showDots && !options.showAreas){
+            options.showLines = true;
+        }
+    },
+    
     _hasDataPartRole: function(){
         return true;
     },
@@ -32,7 +41,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
         // The base axis represents categories of all data parts
         return null;
     },
-
+    
     _isDataCellStacked: function(role, dataPartValue){
         return !dataPartValue || (dataPartValue === '0') ? this.options.stacked : false;
     },
@@ -68,7 +77,8 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 showLines:      options.showLines,
                 showDots:       options.showDots,
                 showAreas:      options.showAreas,
-                orientation:    options.orientation
+                orientation:    options.orientation,
+                nullInterpolationMode: options.nullInterpolationMode
             });
 
             this._linePanel = linePanel;
@@ -82,6 +92,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
     defaultOptions: {
         showDots: true,
         showLines: true,
-        showAreas: false
+        showAreas: false,
+        nullInterpolationMode: 'none'
     }
 });

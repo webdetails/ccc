@@ -121,7 +121,8 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
                 valuesAnchor:   options.valuesAnchor,
                 showLines:      options.showLines,
                 showDots:       options.showDots,
-                showAreas:      options.showAreas
+                showAreas:      options.showAreas,
+                nullInterpolationMode: options.nullInterpolationMode
             });
 
             this._linePanel = linePanel;
@@ -138,6 +139,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         showDots:     false,
         showLines:    false,
         showAreas:    false,
+        nullInterpolationMode: 'none',
         showValues:   false,
         valuesAnchor: 'right'
     }

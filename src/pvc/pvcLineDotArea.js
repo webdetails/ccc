@@ -49,7 +49,8 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
             showLines:      options.showLines,
             showDots:       options.showDots,
             showAreas:      options.showAreas,
-            orientation:    options.orientation
+            orientation:    options.orientation,
+            nullInterpolationMode: options.nullInterpolationMode
         });
     }
 }, {
@@ -63,6 +64,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         baseAxisOffset:  0.01, // TODO: should depend on being discrete or continuous base
         valuesAnchor: "right",
         panelSizeRatio: 1,
+        nullInterpolationMode: 'none', // 'none', 'linear' 
         tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15 })
     }
 });

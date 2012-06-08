@@ -459,13 +459,29 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         // ----------
 
-        var loadFilter = this._getLoadFilter(),
-            loadKeyArgs = loadFilter ? {where: loadFilter} : null;
-
+        var loadKeyArgs = {
+            where:  this._getLoadFilter(),
+            isNull: this._getIsNullDatum()
+         };
+        
         data.load(translation.execute(data), loadKeyArgs);
     },
 
     _getLoadFilter: function(){
+        if(this.options.ignoreNulls) {
+            return function(datum){
+                var isNull = !datum.isNull;
+                
+                if(isNull && pvc.debug >= 4){
+                    pvc.log("Datum excluded.");
+                }
+                
+                return isNull;
+            };
+        }
+    },
+    
+    _getIsNullDatum: function(){
         var measureDimNames = this.measureDimensionsNames(),
             M = measureDimNames.length;
         if(M) {
@@ -474,15 +490,11 @@ pvc.BaseChart = pvc.Abstract.extend({
                 var atoms = datum.atoms;
                 for(var i = 0 ; i < M ; i++){
                     if(atoms[measureDimNames[i]].value != null){
-                        return true;
+                        return false;
                     }
                 }
 
-                if(pvc.debug >= 4){
-                    pvc.log("Datum excluded.");
-                }
-
-                return false;
+                return true;
             };
         }
     },
@@ -1381,6 +1393,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         dimensionGroups:   undefined,
         readers:           undefined,
         
+        ignoreNulls:       true, // whether to ignore or keep "null"-measure datums upon loading
         crosstabMode:      true,
         multiChartColumnIndexes: undefined,
         multiChartRowIndexes: undefined,

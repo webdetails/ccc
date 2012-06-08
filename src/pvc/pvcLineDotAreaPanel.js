@@ -1,4 +1,3 @@
-
 /*
  * LineDotArea panel.
  * Class that draws all line/dot/area combinations.
@@ -31,7 +30,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     
     valuesAnchor: "right",
     valueRoleName: null,
-
+    
+    nullInterpolationMode: 'linear',
+    
     /**
      * @override
      */
@@ -202,7 +203,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 freePosition: true
             })
             .intercept('visible', function(){
-                return (!this.scene.isNull && !this.scene.isIntermediate) && 
+                var scene = this.scene;
+                return (!scene.isNull && !scene.isIntermediate && !scene.isInterpolated) && 
                        this.delegate(true);
             })
             .override('color', function(type){
@@ -305,11 +307,13 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     },
   
     _buildScene: function(data, isBaseDiscrete){
-        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data}),
-            categDatas = data._children;
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data}),
+            categDatas = data._children,
+            interpolate = this.nullInterpolationMode === 'linear';
         
         var chart = this.chart,
             valueDim = data.owner.dimensions(chart.axes.ortho.role.firstDimensionName()),
+            firstCategDim = !isBaseDiscrete ? data.owner.dimensions(chart.axes.base.role.firstDimensionName()) : null,
             isStacked = this.stacked,
             visibleKeyArgs = {visible: true, zeroIfNone: false},
             /* TODO: BIG HACK */
@@ -331,84 +335,410 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             orthoZero = orthoScale(0),
             sceneBaseScale = chart.axes.base.sceneScale();
         
+        /* On each series, scenes for existing categories are interleaved with intermediate scenes.
+         * 
+         * Protovis Dots are only shown for main (non-intermediate) scenes.
+         * 
+         * The desired effect is that selecting a dot selects half of the
+         * line on the left and half of the line on the right.
+         *  
+         *  * main scene
+         *  + intermediate scene
+         *  - line that starts from the previous scene
+         *  
+         *  
+         *        * - + - * - + - *
+         *            [-------[
+         *                ^ line extent of a dot
+         *             
+         * Each segment of a Protovis segmented line starts from the initial point 
+         * till just before the next point.
+         * 
+         * So, selecting a dot must select the the line that starts on the 
+         * main dot, but also the line that starts on the previous intermediate dot.
+         * 
+         * If a main dot shares its datums (or group) with its preceding
+         * intermediate dot, the selection will work like so.
+         * 
+         * -------
+         * 
+         * Another influencing concern is interpolation.
+         * 
+         * The desired effect is that any two dots separated by a number of missing/null
+         * categories get connected by linearly interpolating the missing values.
+         * Moreover, the left half of the new line should be selected
+         * when the left dot is selected and the right half of the new line
+         * should be selected when the right dot is selected .
+         * 
+         * In the discrete-base case, the "half of the line" point always coincides
+         *  a) with the point of an existing category (when count of null categs is odd)
+         *  or 
+         *  b) with an intermediate point added afterwards (when count of null categs is even).
+         * 
+         *  a) Interpolate missing/null category in S1 (odd case)
+         *  mid point ----v
+         *  S1    * - + - 0 - + - * - + - * 
+         *  S2    * - + - * - + - * - + - *
+         *  Data  A   A   B   B   B   B   C
+         *  
+         *  a) Interpolate missing/null category in S1 (even case)
+         *    mid point ------v
+         *  S1    * - + - 0 - + - 0 - + - * - + - * 
+         *  S2    * - + - * - + - * - + - * - + - *
+         *  Data  A   A   A   B   B   B   B
+         *  
+         * In the continuous-base case, 
+         * the middle point between two non-null categories 
+         * separated by missing/null categories in between,
+         * does not, in general, coincide with the position of an existing category...
+         * 
+         * As such, interpolation may add new "main" points (to all the series),
+         * and interpolation of one series leads to the interpolation
+         * on a series that did not initially need interpolation... 
+         * 
+         * Interpolated dots to the left of the mid point are bound to 
+         * the left data and interpolated dots to the right and 
+         * including the mid point are bound to the right data. 
+         */
+        
+        var reversedSeriesScenes = createSeriesScenes.call(this),
+            seriesCount = reversedSeriesScenes.length;
+        
+        // 1st pass
+        // Create category infos array.
+        var categInfos = categDatas.map(createCategInfo, this);
+        
+        function createCategInfo(categData1, categIndex){
+            
+            var categKey = categData1.key;
+            var seriesInfos = []; // of this category
+            var categInfo = {
+                data: categData1,
+                value: categData1.value,
+                label: categData1.label,
+                isInterpolated: false,
+                seriesInfos: seriesInfos,
+                index: categIndex
+            };
+            
+            reversedSeriesScenes.forEach(function(seriesScene){
+                var group = data._childrenByKey[categKey];
+                var seriesData1 = seriesScene.acts.series.value == null ? null : seriesScene.group;
+                if(seriesData1){
+                    group = group._childrenByKey[seriesData1.key];
+                }
+                
+                var value = group ? group.dimensions(valueDim.name).sum(visibleKeyArgs) : null;
+                var seriesInfo = {
+                    data:   seriesData1,
+                    group:  group,
+                    value:  value,
+                    isNull: value == null,
+                    categ:  categInfo
+                };
+                
+                seriesInfos.push(seriesInfo);
+            }, this);
+            
+            return categInfo;
+        }
+        
+        // --------------
+        // 2nd pass
         // --------------
         
-        /** 
-         * Create starting scene tree 
-         */
-        if(chart._serRole && chart._serRole.grouping){
-            chart._serRole
-                .flatten(data)
-                .children()
-                .each(createSeriesScene, this);
-        } else {
-            createNullSeriesScene.call(this);
+        // ~ isBaseDiscrete, firstCategDim
+        var Interpolation = def
+        .type()
+        .init(function(categInfos){
+            this._categInfos = categInfos;
+            this._outCategInfos = [];
+            
+            this._seriesCount = categInfos.length > 0 ? categInfos[0].seriesInfos.length : 0;
+            
+            this._seriesStates = def
+                .range(0, this._seriesCount)
+                .select(function(seriesIndex){ 
+                    return new InterpolationSeriesState(this, seriesIndex); 
+                }, this)
+                .array();
+            
+            // Determine the sort order of the continuous base categories
+            // Categories assumed sorted.
+            if(!isBaseDiscrete && categInfos.length >= 2){
+                if((+categInfos[1].value) >= (+categInfos[0].value)){
+                    this._comparer = def.compare;
+                } else {
+                    this._comparer = function(b, a){ return def.compare(a, b); };
+                }
+            }
+        })
+        .add({
+            interpolate: function(){
+                var categInfo;
+                while((categInfo = this._categInfos.shift())){
+                    categInfo.seriesInfos.forEach(this._visitSeries, this);
+                    
+                    this._outCategInfos.push(categInfo);
+                }
+                
+                return this._outCategInfos;
+            },
+            
+            _visitSeries: function(seriesInfo, seriesIndex){
+                this._seriesStates[seriesIndex].visit(seriesInfo);                
+            },
+            
+            firstNonNullOfSeries: function(seriesIndex){
+                var categIndex = 0,
+                    categCount = this._categInfos.length;
+                
+                while(categIndex < categCount){
+                    var categInfo = this._categInfos[categIndex++];
+                    if(!categInfo.isInterpolated){
+                        var seriesInfo = categInfo.seriesInfos[seriesIndex];
+                        if(!seriesInfo.isNull){
+                            return seriesInfo;
+                        }
+                    }
+                }
+            },
+            
+            _setCategory: function(categValue){
+                /*jshint expr:true  */
+                !isBaseDiscrete || def.assert("Only for continuous base.");
+                
+                // Insert sort into this._categInfos
+                
+                function getCategValue(categInfo){ 
+                    return +categInfo.value; 
+                }
+                
+                // Check if and where to insert
+                var index = def.array.binarySearch(
+                                this._categInfos, 
+                                +categValue, 
+                                this._comparer, 
+                                getCategValue);
+                if(index < 0){
+                    // New category
+                    // Insert at the two's complement of index
+                    var categInfo = {
+                        value: firstCategDim.type.cast(categValue), // possibly creates a Date object
+                        isInterpolated: true
+                    };
+                    
+                    categInfo.label = firstCategDim.format(categInfo.value);
+                        
+                    categInfo.seriesInfos = def
+                        .range(0, this._seriesCount)
+                        .select(function(seriesScene, seriesIndex){
+                            return {
+                                value:  null,
+                                isNull: true,
+                                categ:  categInfo
+                            };
+                        })
+                        .array();
+                    
+                    this._categInfos.splice(~index, 0, categInfo);
+                }
+                
+                return index;
+            }
+        });
+        
+        // ~ isBaseDiscrete, isStacked
+        var InterpolationSeriesState = def
+        .type()
+        .init(function(interpolation, seriesIndex){
+            this.interpolation = interpolation;
+            this.index = seriesIndex;
+            
+            this._lastNonNull(null);
+        })
+        .add({
+            visit: function(seriesInfo){
+                if(seriesInfo.isNull){
+                    this._interpolate(seriesInfo);
+                } else {
+                    this._lastNonNull(seriesInfo);
+                }
+            },
+            
+            _lastNonNull: function(seriesInfo){
+                if(arguments.length){
+                    this.__lastNonNull = seriesInfo; // Last non-null
+                    this.__nextNonNull = undefined;
+                }
+                
+                return this.__lastNonNull;
+            },
+            
+            _nextNonNull: function(){
+                return this.__nextNonNull;
+            },
+            
+            _initInterpData: function(){
+                if(this.__nextNonNull !== undefined){
+                    return;
+                }
+                
+                var next = this.__nextNonNull = this.interpolation.firstNonNullOfSeries(this.index) || null;
+                var last = this.__lastNonNull;
+                if(next && last){
+                    var fromValue  = last.value;
+                    var toValue    = next.value;
+                    var deltaValue = toValue - fromValue;
+                    
+                    if(isBaseDiscrete){
+                        var stepCount = next.categ.index - last.categ.index;
+                        /*jshint expr:true */
+                        (stepCount >= 2) || def.assert("Must have at least one interpolation point.");
+                        
+                        this._stepValue   = deltaValue / stepCount;
+                        this._middleIndex = ~~(stepCount / 2); // Math.floor <=> ~~
+                        
+                        var dotCount = (stepCount - 1);
+                        this._isOdd  = (dotCount % 2) > 0;
+                    } else {
+                        var fromCateg  = +last.categ.data.value;
+                        var toCateg    = +next.categ.data.value;
+                        var deltaCateg = toCateg - fromCateg;
+                        
+                        this._steep = deltaValue / deltaCateg; // should not be infinite, cause categories are different
+                        
+                        this._middleCateg = (toCateg + fromCateg) / 2;
+                        
+                        // (Maybe) add a category
+                        this.interpolation._setCategory(this._middleCateg);
+                    }
+                }
+            },
+            
+            _interpolate: function(seriesInfo){
+                this._initInterpData();
+                
+                var next = this.__nextNonNull;
+                var last = this.__lastNonNull;
+                if(!next && !last){
+                    return;
+                }
+                
+                var value;
+                var group;
+                var isInterpolatedMiddle;
+                if(next && last){
+                    if(isBaseDiscrete){
+                        var groupIndex = (seriesInfo.categ.index - last.categ.index);
+                        value = last.value + groupIndex * this._stepValue;
+                        
+                        if(this._isOdd){
+                            group = groupIndex < this._middleIndex ? last.group : next.group;
+                            isInterpolatedMiddle = groupIndex === this._middleIndex;
+                        } else {
+                            group = groupIndex <= this._middleIndex ? last.group : next.group;
+                            isInterpolatedMiddle = false;
+                        }
+                        
+                    } else {
+                        var categ = +seriesInfo.categ.value;
+                        var lastCateg = +last.categ.data.value;
+                        
+                        value = last.value + this._steep * (categ - lastCateg);
+                        group = categ < this._middleCateg ? last.group : next.group;
+                        isInterpolatedMiddle = categ === this._middleCateg;
+                    }
+                } else {
+                    // Only "stretch" ends on stacked visualization
+                    if(!isStacked) {
+                        return;
+                    }
+                    
+                    var the = next || last;
+                    value = the.value;
+                    group = the.group;
+                    isInterpolatedMiddle = false;
+                }
+                
+                seriesInfo.group  = group;
+                seriesInfo.value  = value;
+                seriesInfo.isNull = false;
+                seriesInfo.isInterpolated = true;
+                seriesInfo.isInterpolatedMiddle = isInterpolatedMiddle;
+            }
+        });
+        
+        if(interpolate){
+            categInfos = new Interpolation(categInfos).interpolate();
         }
+        
+        /**
+         * Create child category scenes of each series scene.
+         */
+        reversedSeriesScenes.forEach(createSeriesSceneCategories, this);
         
         /** 
          * Update the scene tree to include intermediate leaf-scenes,
-         * to add in the creation of lines and areas. 
+         * to help in the creation of lines and areas. 
          */
         var belowSeriesScenes2; // used below, by completeSeriesScenes
-        rootScene
-            .children()
-            .reverse() // so that below == before wrt stacked offset calculation
-            .each(completeSeriesScenes, this);
+        reversedSeriesScenes.forEach(completeSeriesScenes, this);
         
         /** 
          * Trim leading and trailing null scenes.
          */
-        rootScene
-            .children()
-            .each(trimNullSeriesScenes, this);
+        reversedSeriesScenes.forEach(trimNullSeriesScenes, this);
         
         return rootScene;
-
+        
+        function createSeriesScenes(){
+            if(chart._serRole && chart._serRole.grouping){
+                chart._serRole
+                    .flatten(data)
+                    .children()
+                    .each(createSeriesScene, this);
+            } else {
+                createSeriesScene.call(this, null);
+            }
+            
+            // reversed so that "below == before" w.r.t. stacked offset calculation
+            return rootScene.children().reverse().array();
+        }
+        
         function createSeriesScene(seriesData1){
             /* Create series scene */
-            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1});
+            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1 || data});
 
             seriesScene.acts.series = {
-                value: seriesData1.value,
-                label: seriesData1.label
+                value: seriesData1 ? seriesData1.value : null,
+                label: seriesData1 ? seriesData1.label : ""
             };
-
-            createSeriesSceneCategories.call(this, seriesScene, seriesData1);
         }
 
-        function createNullSeriesScene(){
-            /* Create series scene */
-            var seriesScene = new pvc.visual.Scene(rootScene, {group: data});
-
-            seriesScene.acts.series = {
-                value: null,
-                label: ""
-            };
-
-            createSeriesSceneCategories.call(this, seriesScene);
-        }
-
-        function createSeriesSceneCategories(seriesScene, seriesData1){
-            categDatas.forEach(function(categData1){
-                /* Create leaf scene */
-                var categKey = categData1.key,
-                    group = data._childrenByKey[categKey]
-                    ;
-                    
-                if(seriesData1){
-                    group = group._childrenByKey[seriesData1.key];
-                }
-
+        function createSeriesSceneCategories(seriesScene, seriesIndex){
+            
+            categInfos.forEach(createCategScene, this);
+            
+            function createCategScene(categInfo){
+                var seriesInfo = categInfo.seriesInfos[seriesIndex];
+                var group = seriesInfo.group;
+                var value = seriesInfo.value;
+                
                 /* If there's no group, provide, at least, a null datum */
-                var datum = group ? null : createNullDatum(seriesData1, categData1),
-                    scene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
+                var datum = group ? 
+                            null : 
+                            createNullDatum(
+                                    seriesInfo.data || seriesScene.group, 
+                                    categInfo.data  );
                 
+                // ------------
+                
+                var scene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
                 scene.acts.category = {
-                    value: categData1.value,
-                    label: categData1.label
+                    value: categInfo.value,
+                    label: categInfo.label
                 };
-                
-                var value = group ? group.dimensions(valueDim.name).sum(visibleKeyArgs) : null;
                 scene.acts[this.valueRoleName] = {
                     /* accumulated value, for stacked */
                     accValue: value != null ? value : orthoNullValue,
@@ -416,11 +746,13 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                     label:    valueDim.format(value)
                 };
                 
-                scene.isNull = !group || value == null; // A virtual scene?
+                scene.isInterpolatedMiddle = seriesInfo.isInterpolatedMiddle;
+                scene.isInterpolated = seriesInfo.isInterpolated;
+                scene.isNull = seriesInfo.isNull;
                 scene.isIntermediate = false;
-            }, this);
+            }
         }
-        
+
         function completeSeriesScenes(seriesScene) {
             var seriesScenes2 = [],
                 seriesScenes = seriesScene.childNodes, 
@@ -518,7 +850,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             var isNullFrom = (!fromScene || fromScene.isNull),
                 isAlone    = isNullFrom && !toScene.isNull;
             if(isAlone) {
-                // Confirm looking ahead
+                // Confirm, looking ahead
                 var nextScene = toScene.nextSibling;
                 isAlone  = !nextScene || nextScene.isNull;
             }
@@ -580,7 +912,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             var interScene = new pvc.visual.Scene(seriesScene, {
                     /* insert immediately before toScene */
                     index: toChildIndex,
-                    group: toScene.group, 
+                    group: toScene.isInterpolatedMiddle ? fromScene.group: toScene.group, 
                     datum: toScene.group ? null : toScene.datum
                 });
             
@@ -637,11 +969,11 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         
         function createNullDatum(serData1, catData1) {
             // Create a null datum with col and row coordinate atoms
-            var atoms = serData1 ?
+            var atoms = serData1 && catData1 ?
                             def.array.append(
                                 def.own(serData1.atoms),
                                 def.own(catData1.atoms)) :
-                            catData1.atoms
+                            (serData1 ? def.own(serData1.atoms) :  def.own(catData1.atoms))
                             ;
             
             return new pvc.data.Datum(data, atoms, true);

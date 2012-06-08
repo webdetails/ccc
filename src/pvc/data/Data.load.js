@@ -15,6 +15,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * 
      * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
      * @param {object} [keyArgs] Keyword arguments.
+     * @param {function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
      * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
      */
     load: function(atomz, keyArgs){
@@ -23,16 +24,17 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         
         // TODO: Not guarding against re-entry during load
         var whereFun = def.get(keyArgs, 'where');
+        var isNullFun = def.get(keyArgs, 'isNull');
         var isReload = !!this._datums;
         if(isReload) {
             // Dispose child and link child datas, and their dimensions...
             /*global data_disposeChildLists:true */
             data_disposeChildLists.call(this);
             
-            this._datums = data_reloadDatums.call(this, atomz, whereFun);
+            this._datums = data_reloadDatums.call(this, atomz, whereFun, isNullFun);
             
         } else {
-            this._datums = data_loadDatums.call(this, atomz, whereFun);
+            this._datums = data_loadDatums.call(this, atomz, whereFun, isNullFun);
         }
         
         /*global data_syncDatumsState:true */
@@ -57,10 +59,11 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @function
  * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
  * @param {function} [whereFun] Filter function that approves or excludes each newly read datum.
+ * @param {function} [isNull] Predicate that indicates if a datum is considered null.
  * @returns {pvc.data.Datum[]} The loaded datums.
  * @private
  */
-function data_loadDatums(atomz, whereFun) {
+function data_loadDatums(atomz, whereFun, isNullFun) {
     
     // Atom garbage collection
     var dimNames = this.type.dimensionsNames(),
@@ -69,6 +72,10 @@ function data_loadDatums(atomz, whereFun) {
     
     function createDatum(atoms){
         var datum = new pvc.data.Datum(this, atoms);
+        if(isNullFun && isNullFun(datum)){
+            datum.isNull = true;
+        }
+        
         if(whereFun && !whereFun(datum)){
             needGC = true;
             return null;
@@ -132,10 +139,11 @@ function data_loadDatums(atomz, whereFun) {
  * @function
  * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
  * @param {function} [whereFun] Filter function that approves or excludes each newly read new datum.
+ * @param {function} [isNull] Predicate that indicates if a datum is considered null.
  * @returns {pvc.data.Datum[]} The loaded datums.
  * @private
  */
-function data_reloadDatums(atomz, whereFun) {
+function data_reloadDatums(atomz, whereFun, isNullFun) {
     
     // Index existing datums by (semantic) key
     var datumsByKey = def.query(this._datums)
@@ -149,6 +157,10 @@ function data_reloadDatums(atomz, whereFun) {
     
     function internDatum(atoms){
         var newDatum = new pvc.data.Datum(this, atoms);
+        if(isNullFun && isNullFun(datum)){
+            datum.isNull = true;
+        }
+        
         if(whereFun && !whereFun(newDatum)) {
             return null;
         }
