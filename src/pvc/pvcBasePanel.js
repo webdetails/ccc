@@ -157,21 +157,15 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             if(!availableSize) {
                 /*jshint expr:true */
-                this.isRoot || def.error.argumentRequired('availableSize');
+                //this.isRoot || def.fail.argumentRequired('availableSize');
                 (this.width >= 0 && this.height >= 0) || 
-                    def.error.operationInvalid("Root panel layout without width or height set.");
+                    def.error.operationInvalid("Panel layout without width or height set.");
                 
                 availableSize = new pvc.Size(this.width, this.height);
             }
             
             var layoutInfo = {};
             this._calcLayout(availableSize, layoutInfo);
-            // <Debug>
-            if(!(this.width  <= availableSize.width && 
-                 this.height <= availableSize.height)) {
-                throw def.error.operationInvalid("Layout invalid.");
-            }
-            // </Debug>
             
             this._layoutInfo = layoutInfo;
         }
@@ -194,39 +188,53 @@ pvc.BasePanel = pvc.Abstract.extend({
      */
     _calcLayout: function(availableSize, layoutInfo){
         
-        this.setSize(availableSize);
-        
         if(!this._children) {
+            this.setSize(availableSize);
             return;
         }
         
-        var margins = def.copy(this.margins);
+        var margins, remSize, fillChildren;
         
-        // An object we can mutate
-        var remSize = {
-            width:  Math.max(availableSize.width  - margins.left - margins.right,  0),
-            height: Math.max(availableSize.height - margins.top  - margins.bottom, 0)
-        };
+        function initLayout(){
+            
+            fillChildren = [];
+            
+            // Objects we can mutate
+            margins = def.copy(this.margins);
+            remSize = {
+                width:  Math.max(availableSize.width  - (margins.left + margins.right),  0),
+                height: Math.max(availableSize.height - (margins.top  + margins.bottom), 0)
+            };
+        }
         
         var aolMap = pvc.BasePanel.orthogonalLength,
             aoMap  = pvc.BasePanel.relativeAnchor;
         
-        // Decreases available size and increases margins
-        function updateSide(side, child) {
-            var sideol = aolMap[side],
-                olen   = child[sideol];
-            
-            margins[side]   += olen;
-            remSize[sideol] -= olen;
-        }
-        
-        function positionChild(side, child) {
-            var sideo = aoMap[side];
-            child.setPosition(def.set({}, side, margins[side], sideo, margins[sideo]));
-        }
-        
         var childKeyArgs = {force: true};
-        var fillChildren = [];
+        var needRelayout = false;
+        var allowGrow = true;
+        
+        initLayout.call(this);
+        
+        // Lays out non-fill child panels and collects fill children
+        this._children.forEach(layoutChildI);
+        
+        // Lays out collected fill-child panels
+        fillChildren.forEach(layoutChildII);
+        
+        // Set actually used size
+        this.setSize(availableSize);
+        
+        if(needRelayout){
+            allowGrow = false;
+            
+            initLayout.call(this);
+            
+            this._children.forEach(layoutChildI);
+            fillChildren.forEach(layoutChildII);
+        }
+        
+        // --------------------
         
         function layoutChildI(child) {
             var a = child.anchor;
@@ -239,6 +247,8 @@ pvc.BasePanel = pvc.Abstract.extend({
                 
                 child.layout(new pvc.Size(remSize), childKeyArgs);
                 
+                checkChildLayout.call(this, child);
+                
                 positionChild(a, child);
                 
                 updateSide(a, child);
@@ -248,12 +258,48 @@ pvc.BasePanel = pvc.Abstract.extend({
         function layoutChildII(child) {
             child.layout(new pvc.Size(remSize), childKeyArgs);
             
+            checkChildLayout(child);
+            
             positionChild('left', child);
         }
         
-        this._children.forEach(layoutChildI);
+        function checkChildLayout(child){
+            var addWidth = child.width - remSize.width;
+            if(addWidth > 0){
+                if(!allowGrow){
+                    throw def.error.operationInvalid("Layout invalid. Cannot grow");
+                }
+                
+                needRelayout = true;
+                remSize.width += addWidth;
+                availableSize.width += addWidth;
+            }
+            
+            var addHeight = child.height - remSize.height;
+            if(addHeight > 0){
+                if(!allowGrow){
+                    throw def.error.operationInvalid("Layout invalid. Cannot grow");
+                }
+                
+                needRelayout = true;
+                remSize.height += addHeight;
+                availableSize.height += addHeight;
+            }
+        }
         
-        fillChildren.forEach(layoutChildII);
+        // Decreases available size and increases margins
+        function updateSide(side, child) {
+            var sideol = aolMap[side];
+            var olen   = child[sideol];
+            
+            margins[side]   += olen;
+            remSize[sideol] -= olen;
+        }
+        
+        function positionChild(side, child) {
+            var sideo = aoMap[side];
+            child.setPosition(def.set({}, side, margins[side], sideo, margins[sideo]));
+        }
     },
     
     _invalidateLayout: function(){
@@ -278,7 +324,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             /* Protovis Panel */
             if(this.isTopRoot) {
                this.pvPanel = new pv.Panel()
-                                      .canvas(this.chart.options.canvas);
+                                    .canvas(this.chart.options.canvas);
             } else {
                 this.pvPanel = this.parent.pvPanel.add(this.type);
             }

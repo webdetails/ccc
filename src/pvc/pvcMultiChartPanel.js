@@ -10,11 +10,10 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      */
     _calcLayout: function(availableSize, layoutInfo){
         
-        this.setSize(availableSize);
-        var chart = this.chart,
-            data  = chart.visualRoles('multiChartColumn')
-                         .flatten(chart.data, {visible: true}),
-            options = chart.options;
+        var chart = this.chart;
+        var data  = chart.visualRoles('multiChartColumn')
+                         .flatten(chart.data, {visible: true});
+        var options = chart.options;
         
         // TODO: reuse/dispose sub-charts
         
@@ -24,11 +23,11 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             multiChartLimit = Infinity;
         }
         
-        var leafCount = data._children.length,
-            count     = Math.min(leafCount, multiChartLimit);
-        
+        var leafCount = data._children.length;
+        var count = Math.min(leafCount, multiChartLimit);
         if(count === 0) {
-            // TODO: show any message?
+            // Shows no message to the user.
+            // An empty chart, like when all series are hidden with the legend.
             return;
         }
         
@@ -38,17 +37,63 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             multiChartWrapColumn = 3;
         }
         
-        var colCount   = Math.min(count, multiChartWrapColumn),
-            rowCount   = Math.ceil(count / colCount),
-            ChildClass = chart.constructor,
-            margins    = this.margins,
-            left       = margins.left,
-            top        = margins.top,
-            availWidth = availableSize.width  - left - margins.right,
-            availHeight= availableSize.height - top  - margins.bottom,
-            width      = availWidth  / colCount,
-            height     = availHeight / rowCount;
+        var colCount = Math.min(count, multiChartWrapColumn);
+        var rowCount = Math.ceil(count / colCount);
         
+        // ----------------------
+        // Small Chart Size determination
+        
+        var margins    = this.margins;
+        var marginLeft = margins.left;
+        var marginTop  = margins.top;
+        
+        var availWidth  = availableSize.width  - marginLeft - margins.right;
+        var availHeight = availableSize.height - marginTop  - margins.bottom;
+        
+        // Evenly divide available width and height by all small charts 
+        var width  = availWidth  / colCount;
+        var height = availHeight / rowCount;
+        
+        // Determine min width and min height
+        var minWidth = Number(options.multiChartMinWidth);
+        if(isNaN(minWidth) || !isFinite(minWidth) || minWidth < 0) {
+            // Assume the available width is dimensioned to fit the specified number of columns
+            if(isFinite(multiChartWrapColumn)){
+                minWidth = width;
+            }
+        }
+        
+        var minHeight = Number(options.multiChartMinHeight);
+        if(isNaN(minHeight) || !isFinite(minHeight) || minHeight < 0) {
+            if(minWidth > 0){
+                minHeight = minWidth / pvc.goldenRatio;
+            } else {
+                minHeight = null;
+            }
+        }
+        
+        if(minWidth == null && minHeight > 0){
+            minWidth = pvc.goldenRatio * minHeight;
+        }
+        
+        // ----------------------
+        
+        if(minWidth > 0 && width < minWidth){
+            width = minWidth;
+            availableSize.width = availWidth = width * colCount;
+        }
+        
+        if(minHeight > 0 && height < minHeight){
+            height = minHeight;
+            availableSize.height = availHeight = height * rowCount;
+        }
+        
+        // Consume space
+        this.setSize(availableSize);
+        
+        // ----------------------
+        // Create and layout small charts
+        var ChildClass = chart.constructor;
         for(var index = 0 ; index < count ; index++) {
             var childData = data._children[index],
                 childOptions = def.create(options, {
@@ -58,8 +103,8 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                     data:       childData,
                     width:      width,
                     height:     height,
-                    left:       left + ((index % colCount) * width),
-                    top:        top  + (Math.floor(index / colCount) * height),
+                    left:       marginLeft + ((index % colCount) * width),
+                    top:        marginTop  + (Math.floor(index / colCount) * height),
                     margins:    {all: 5},
                     extensionPoints: {
                         // This lets the main bg color show through AND
