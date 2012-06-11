@@ -6325,7 +6325,73 @@ pv.SvgScene.lineIntersect = function(o1, d1, o2, d2) {
   return o1.plus(d1.times(o2.minus(o1).dot(d2.perp()) / d1.dot(d2.perp())));
 };
 
-pv.strokeMiterLimit = 1.1;
+/* 
+  MITER / BEVEL JOIN calculation
+
+  Normal line p1->p2 bounding box points  (a-b-c-d)
+
+                    ^ w12 
+  a-----------------|--------------b       ^
+  |                 |              |       |
+  p1           <----+p12           p2      | w1
+  |                                |       |
+  d--------------------------------c       v
+  
+  Points are added in the following order:
+  d -> a -> b -> c
+  
+  Depending on the position of p0 in relation to the segment p1-p2,
+  'a' may be the outer corner and 'd' the inner corner, 
+  or the opposite:
+  
+  Ex1:
+       outer side
+       
+         p1 ---- p2
+       /   
+     p0    inner side
+     
+     a is outer, d is inner
+     
+  Ex2:
+      
+     p0    inner side
+       \
+         p1 ---- p2
+         
+       outer side
+       
+     a is inner, d is outer
+     
+  =====================
+  
+    ^ v1
+     \
+      am
+       *--a------ ... ----b
+        \ |               |
+          p1              p2
+          |\              |
+          d-*---- ... ----c
+            dm\
+               \
+                v
+                v1
+
+
+  NOTE: 
+  As yy points down, and because of the way Vector.perp() is written,
+  perp() corresponds to rotating 90º clockwise.
+  
+  -----
+  
+  The miter (ratio) limit is
+  the limit on the ratio of the miter length to the line width.
+  
+  The miter length is the distance between the 
+  outer corner and the inner corner of the miter.
+*/
+pv.strokeMiterLimit = 4;
 
 /** @private Returns the miter join path for the specified points. */
 pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
@@ -6334,117 +6400,117 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
    * V is a vector that is perpendicular to the line segment, and has length lineWidth / 2. 
    * ABCD forms the initial bounding box of the line segment 
    * (i.e., the line segment if we were to do no joins).
-   * 
-   * The miter join moves points a1 and d1 to new locations, ma1 and md1.
-   * The bevel join moves points a1 and d1 to new locations, ba1 and md1.
-   * 
-   *       ^ w10
-   *       |
-   *       |         b0  bb0      ma1
-   *   ----*----*-----*--*--------*    ^
-   *       |   /      | /        /     |
-   * p0 ___|_d1_______p1________/a1    |   w0
-   *       | /        /        /       |
-   *       |/        /        /        |
-   *   ----*--------d0-------*         v
-   *    md1<---------------->
-   *               w1
-   *             .  
-   *            +----------> w21
-   *           .  
-   *   c1.... p2 ..... b1
    */
-  var w1   = s1.lineWidth / this.scale,
-  
-      p1  = pv.vector(s1.left, s1.top),
-      p2  = pv.vector(s2.left, s2.top),
-      p21 = p2.minus(p1),
-      
-      v21 = p21.perp().norm(),
-      w21 = v21.times(w1 / 2),
-      
-      bevel10,
-      a = p1.plus(w21),
-      b = p2.plus(w21),
-      bevel31,
-      c = p2.minus(w21),
-      d = p1.minus(w21);
-  
-  /*
-   * Start join. P0 is the previous line segment's start point. We define the
-   * cutting plane as the average of the vector perpendicular to P0-P1, and
-   * the vector perpendicular to P1-P2. This insures that the cross-section of
-   * the line on the cutting plane is equal if the line-width is unchanged.
-   * Note that we don't implement miter limits, so these can get wild.
-   */
-  if (s0 && s0.visible && s0.lineWidth > 0.0001) {
-    var p10 = p1.minus(s0.left, s0.top);
-    var v10 = p10.perp().norm();
-    var v1 = v10.plus(v21); // direction of p1 -> a1'
+    var pts = [];
+    var miterLimit, miterRatio, miterLength;
     
-    // Miter Join
-    d = this.lineIntersect(p1, v1, d, p21); // Inner Corner
-    a = this.lineIntersect(p1, v1, a, p21); // Outer tip
+    var w1 = s1.lineWidth / this.scale;
+    var p1 = pv.vector(s1.left, s1.top);
+    var p2 = pv.vector(s2.left, s2.top);
     
-    // Check Miter Limit
-    // Distance between the outer tip and the inner corner of the miter.
-    var miterLength = a.minus(d).length();
+    var p21 = p2.minus(p1);
+    var v21 = p21.perp().norm();
+    var w21 = v21.times(w1 / 2);
     
-    /* The miter limit is
-     * the limit on the ratio of the miterLength to the line width. 
-     */
-    var w0 = s0.lineWidth / this.scale;
-    var w10avg = (w1 + w0) / 2;
-    var miterRatio = miterLength / w10avg;
-    if(miterRatio > pv.strokeMiterLimit){
-      // Change to bevel join
-      var w10 = v10.times(w0 / 2);
-      var b0  = p1.plus(w10);
-      var bevelb0 = this.lineIntersect(p1, p21, b0, p10);
-      var bevela1 = this.lineIntersect(p1, p10, a, p21);
-      
-      // The bevel intermediate point
-      bevel10 = this.lineIntersect(p1, v1, bevelb0, bevela1.minus(bevelb0));
-      
-      a = bevela1;
+    var a = p1.plus (w21);
+    var d = p1.minus(w21);
+    
+    var b = p2.plus (w21);
+    var c = p2.minus(w21);
+    
+    // --------------------
+    
+    if(!s0 || !s0.visible){
+        // Starting point
+        pts.push(d, a);
+    } else {
+        var p0  = pv.vector(s0.left, s0.top);
+        var p10 = p1.minus(p0);
+        var v10 = p10.perp().norm(); // may point inwards or outwards
+        
+        // v1 points from p1 to the inner or outer corner.
+        var v1 = v10.plus(v21).norm();
+        
+        // Miter Join
+        // One is the outer corner, the other is the inner corner
+        var am = this.lineIntersect(p1, v1, a, p21);
+        var dm = this.lineIntersect(p1, v1, d, p21);
+        
+        // Check Miter Limit
+        // The line width is taken as the average of the widths
+        // of the p0-p1 segment and that of the p1-p2 segment.
+        miterLength = am.minus(dm).length();
+        var w0 = s0.lineWidth / this.scale;
+        var w10avg = (w1 + w0) / 2;
+        miterRatio = miterLength / w10avg;
+        miterLimit = s1.strokeMiterLimit || pv.strokeMiterLimit;
+        if(miterRatio <= miterLimit){
+            // Accept the miter join
+            pts.push(dm, am);
+        } else {
+            // Choose the bevel join
+            // v1Outer is parallel to v1, but always points outwards
+            var p12 = p21.times(-1);
+            var v1Outer = p10.norm().plus(p12.norm()).norm();
+            
+            // The bevel intermediate point
+            // Place it along v1Outer, at a distance w10avg/2 from p1.
+            // If it were a circumference, it would have that radius.
+            // The inner corner is am or dm.
+            // The other corner is the original d or a.
+            var bevel10 = p1.plus(v1Outer.times(w10avg / 2));
+            if(v1Outer.dot(v21) >= 0){
+                // a is outer, d is inner
+                pts.push(dm, bevel10, a);
+            } else {
+                // d is outer, a is inner
+                pts.push(d, bevel10, am);
+            }
+        }
     }
-  }
-  
-  /* Similarly, for end join. */
-  if (s3 && s3.visible && s3.lineWidth > 0.0001) {
-    var p32 = pv.vector(s3.left, s3.top).minus(p2);
-    var v32 = p32.perp().norm();
-    var v2  = v32.plus(v21);
     
-    c = this.lineIntersect(p2, v2, c, p21);
-    b = this.lineIntersect(p2, v2, b, p21);
+    // -------------------
     
-    miterLength = b.minus(c).length();
-    
-    var w3 = s3.lineWidth / this.scale;
-    var w31avg = (w3 + w1) / 2;
-    miterRatio = miterLength / w31avg;
-    if(miterRatio > pv.strokeMiterLimit){
-      var w32 = v32.times(w3 / 2);
-      var a3  = p2.plus(w32);
-      var bevelb1 = this.lineIntersect(p2, p32, b,  p21);
-      var bevela3 = this.lineIntersect(p2, p21, a3, p32);
-      
-      bevel31 = this.lineIntersect(p2, v2, bevelb1, bevela3.minus(bevelb1));
-      
-      b = bevelb1;
+    if(!s3 || !s3.visible){
+        // Starting point
+        pts.push(b, c);
+    } else {
+        var p3  = pv.vector(s3.left, s3.top);
+        var p32 = p3.minus(p2);
+        var v32 = p32.perp().norm();
+        var v2  = v32.plus(v21).norm();
+        
+        // Miter Join
+        var bm = this.lineIntersect(p2, v2, b, p21);
+        var cm = this.lineIntersect(p2, v2, c, p21);
+        
+        miterLength = bm.minus(cm).length();
+        var w3 = s3.lineWidth / this.scale;
+        var w31avg = (w3 + w1) / 2;
+        miterRatio = miterLength / w31avg;
+        miterLimit = s2.strokeMiterLimit || pv.strokeMiterLimit;
+        if(miterRatio <= miterLimit){
+            // Accept the miter join
+            pts.push(bm, cm);
+        } else {
+            // Choose a bevel join
+            var p23 = p32.times(-1);
+            var v2Outer = p21.norm().plus(p23.norm()).norm();
+            var bevel31 = p2.plus(v2Outer.times(w31avg / 2));
+            if(v2Outer.dot(v21) >= 0){
+                // b is outer, c is inner
+                pts.push(b, bevel31, cm);
+            } else {
+                // c is outer, b is inner
+                pts.push(bm, bevel31, c);
+            }
+        }
     }
-  }
-  
-  var pts = [];
-  if(bevel10){ pts.push(bevel10); }
-  pts.push(a, b);
-  if(bevel31){ pts.push(bevel31); }
-  pts.push(c, d);
-  
-  var pt = pts.shift();
-  return "M" + pt.x + "," + pt.y + 
-         "L" + pts.map(function(pt2){ return pt2.x + "," + pt2.y; })
+    
+    // Render pts to svg path
+    var pt = pts.shift();
+    return "M" + pt.x + "," + pt.y + 
+           "L" + pts.map(function(pt2){ return pt2.x + "," + pt2.y; })
                   .join(" ");
 };
 pv.SvgScene.panel = function(scenes) {
