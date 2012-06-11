@@ -540,9 +540,9 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          var depth = stateStack.length;
              
          // Any more atom paths to traverse, from the current data?
-         while(this._dimAtomsOrQuery.next()) {
-             
-             do {
+         do{
+             while(this._dimAtomsOrQuery.next()) {
+                 
                  var dimAtomOr = this._dimAtomsOrQuery.item,
                      childData = this._data._childrenByKey[dimAtomOr.globalKey()];
                  
@@ -567,23 +567,21 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
                          return 1; // has next
                      }
                  }
-                 
-             } while(this._dimAtomsOrQuery.next());
+             } // while(atomsOrQuery)
              
              // No more OR atoms in this _data
-             
-             // Pop parent data, if any
-             state = stateStack.pop();
-             if(!state) {
+             if(!depth){
                  return 0; // finished
              }
              
+             // Pop parent data
+             state = stateStack.pop();
              this._data = state.data;
              this._dimAtomsOrQuery = state.dimAtomsOrQuery;
              depth--;
-         } // Outer while(atomsOrQuery)
+         } while(true);
          
-         // This probably only ever executes if the initial data is empty
+         // Never executes
          return 0; // finished
      });
 }
