@@ -360,10 +360,19 @@ pvc.BasePanel = pvc.Abstract.extend({
                 .height(this.height - (margins.bottom + margins.top  ));
             
             // Set panel positions
-            
+            var hasPositions = {};
             def.eachOwn(this.position, function(v, side){
                 this.pvPanel[side](v + margins[side]);
+                hasPositions[this.anchorLength(side)] = true;
             }, this);
+            
+            if(!hasPositions.width && margins.left != null){
+                this.pvPanel.left(margins.left);
+            }
+            
+            if(!hasPositions.height && margins.top != null){
+                this.pvPanel.top(margins.top);
+            }
             
             /* Protovis marks that are pvcPanel specific,
              * and/or #_creates child panels.
