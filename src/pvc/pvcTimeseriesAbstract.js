@@ -53,8 +53,8 @@ pvc.AllTimeseriesPanel = pvc.BasePanel.extend({
     /**
      * @override
      */
-    _calcLayout: function(availableSize, layoutInfo){
-        this.setAnchoredSize(this.allTimeseriesSize, availableSize);
+    _calcLayout: function(clientSize, layoutInfo){
+        return this.createAnchoredSize(this.allTimeseriesSize, clientSize);
     },
     
     /**

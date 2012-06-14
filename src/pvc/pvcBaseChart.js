@@ -295,20 +295,15 @@ pvc.BaseChart = pvc.Abstract.extend({
         if (!$.support.svg || pv.renderer() === 'batik') {
             options.animate = false;
         }
-
-        var margins = options.margins;
-        if(margins){
-            options.margins = this._parseMargins(margins);
-        }
         
         // Sanitize some options
         if(options.showTooltips){
-            var tipsySettings = options.tipsySettings;
-            if(tipsySettings){
-                tipsySettings = options.tipsySettings = def.create(tipsySettings);
-                this.extend(tipsySettings, "tooltip_");
-                if(tipsySettings.exclusionGroup === undefined) {
-                    tipsySettings.exclusionGroup = 'chart';
+            var ts = options.tipsySettings;
+            if(ts){
+                ts = options.tipsySettings = def.create(ts);
+                this.extend(ts, "tooltip_");
+                if(ts.exclusionGroup === undefined) {
+                    ts.exclusionGroup = 'chart';
                 }
             }
         }
@@ -902,16 +897,14 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Creates and initializes the base panel.
      */
     _initBasePanel: function() {
-        var options = this.options,
-            margins = options.margins,
-            basePanelParent = this.parent && this.parent._multiChartPanel;
+        var options = this.options;
+        var basePanelParent = this.parent && this.parent._multiChartPanel;
         
-        this.basePanel = new pvc.BasePanel(this, basePanelParent);
+        this.basePanel = new pvc.BasePanel(this, basePanelParent, {
+            margins: options.margins
+        });
+        
         this.basePanel.setSize(options.width, options.height);
-        
-        if(margins){
-            this.basePanel.setMargins(margins);
-        }
     },
 
     /**
@@ -925,7 +918,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 title:      options.title,
                 anchor:     options.titlePosition,
                 titleSize:  options.titleSize,
-                titleAlign: options.titleAlign
+                titleAlign: options.titleAlign,
+                margins:    options.titleMargins
             });
         }
     },
@@ -1028,7 +1022,8 @@ pvc.BaseChart = pvc.Abstract.extend({
             shape:      options.legendShape,
             markerSize: options.legendMarkerSize,
             drawLine:   options.legendDrawLine,
-            drawMarker: options.legendDrawMarker
+            drawMarker: options.legendDrawMarker,
+            margins:    options.legendMargins
         });
     },
 
@@ -1311,55 +1306,6 @@ pvc.BaseChart = pvc.Abstract.extend({
     isOrientationHorizontal: function(orientation) {
         return (orientation || this.options.orientation) == "horizontal";
     },
-
-    /**
-     * Converts a css-like shorthand margin string
-     * to a margins object.
-     *
-     * <ol>
-     *   <li> "1" - {all: 1}</li>
-     *   <li> "1 2" - {top: 1, left: 2, right: 2, bottom: 1}</li>
-     *   <li> "1 2 3" - {top: 1, left: 2, right: 2, bottom: 3}</li>
-     *   <li> "1 2 3 4" - {top: 1, right: 2, bottom: 3, left: 4}</li>
-     * </ol>
-     */
-    _parseMargins: function(margins){
-        if(margins != null){
-            if(typeof margins === 'string'){
-
-                var comps = margins.split(/\s+/);
-                switch(comps.length){
-                    case 1:
-                        margins = {all: comps[0]};
-                        break;
-                    case 2:
-                        margins = {top: comps[0], left: comps[1], right: comps[1], bottom: comps[0]};
-                        break;
-                    case 3:
-                        margins = {top: comps[0], left: comps[1], right: comps[1], bottom: comps[2]};
-                        break;
-                    case 4:
-                        margins = {top: comps[0], right: comps[2], bottom: comps[3], left: comps[4]};
-                        break;
-
-                    default:
-                        if(pvc.debug) {
-                            pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
-                        }
-                        margins = null;
-                }
-            } else if (typeof margins === 'number') {
-                margins = {all: margins};
-            } else if (typeof margins !== 'object') {
-                if(pvc.debug) {
-                    pvc.log("Invalid 'margins' option value: " + JSON.stringify(margins));
-                }
-                margins = null;
-            }
-        }
-
-        return margins;
-    },
     
     /**
      * Disposes the chart, any of its panels and child charts.
@@ -1411,7 +1357,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
         titleSize:     undefined,
-
+        titleMargins:  undefined,
+        
         legend:           false,
         legendPosition:   "bottom",
         legendFont:       undefined,
@@ -1425,6 +1372,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         legendDrawLine:   undefined,
         legendDrawMarker: undefined,
         legendMarkerSize: undefined,
+        legendMargins: undefined,
         
         colors: null,
 

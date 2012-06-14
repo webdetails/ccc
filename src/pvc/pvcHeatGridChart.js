@@ -453,14 +453,6 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
                 return null; // no style
             }
             
-            // has width
-            
-            // This was in the previous HG version but did not work,
-            // So the behavior ended up being like it would be commented...
-//            if(this.parent.sizeValue() == null) {
-//                return this.fillStyle();
-//            }
-            
             var color = getFillColor.call(this.parent, false);
             return (data.owner.selectedCount() === 0 || this.selected()) ? 
                     color.darker() : 

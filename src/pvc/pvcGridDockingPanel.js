@@ -12,24 +12,18 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
      * 
      * @override
      */
-    _calcLayout: function(availableSize, layoutInfo){
-        
-        this.setSize(availableSize);
+    _calcLayout: function(clientSize, layoutInfo, referenceSize){
         
         if(!this._children) {
             return;
         }
         
-        var margins = def.copy(this.margins);
-        
-        // An object we can mutate
-        var remSize = {
-            width:  Math.max(availableSize.width  - margins.left - margins.right,  0),
-            height: Math.max(availableSize.height - margins.top  - margins.bottom, 0)
-        };
+        // Objects we can mutate
+        var margins = new pvc.Sides(0);
+        var remSize = def.copy(clientSize);
         
         var aolMap = pvc.BasePanel.orthogonalLength,
-            aoMap   = pvc.BasePanel.relativeAnchor;
+            aoMap  = pvc.BasePanel.relativeAnchor;
         
         // Decreases available size and increases margins
         function updateSide(side, child) {
@@ -57,7 +51,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                 /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
-                child.layout(new pvc.Size(remSize), childKeyArgs);
+                child.layout(new pvc.Size(remSize), clientSize, childKeyArgs);
                 
                 // Only set the *anchor* position
                 // The other orthogonal position is dependent on the size of the other non-fill children
@@ -70,7 +64,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         function layoutChildII(child) {
             var a = child.anchor;
             if(a === 'fill') {
-                child.layout(new pvc.Size(remSize), childKeyArgs);
+                child.layout(new pvc.Size(remSize), clientSize, childKeyArgs);
                 
                 positionChild('left', child);
             } else if(a) {
@@ -89,5 +83,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         this._children.forEach(layoutChildI );
         
         this._children.forEach(layoutChildII);
+        
+        return clientSize;
     }
 });

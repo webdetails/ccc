@@ -40,17 +40,14 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
     /*
     * @override
     */
-   _calcLayout: function(availableSize, layoutInfo){
-       this.base(availableSize, layoutInfo);
-       
-       // --------------------
+   _calcLayout: function(clientSize, layoutInfo){
        /* Adjust axis offset to avoid dots getting off the content area */
        
        var chart = this.chart;
        
        if(chart._dotSizeDim){
            /* Determine Max/Min Dot Size */
-           var length = Math.max((this.width + this.height) / 2, 2);
+           var length = Math.max((clientSize.width + clientSize.height) / 2, 2);
            var maxRadius = length / 8;
            if(this.dotShape === 'diamond'){
                // Protovis draws diamonds inscribed on
@@ -92,7 +89,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                // Dots still come out a little bit, and this compensates for it.
                var offsetRadius  = maxRadius + 6,
                    minAxisOffset = pvc.MetricXYAbstract.defaultOptions.axisOffset,
-                   axisOffset = offsetRadius / Math.max(this.width, 2);
+                   axisOffset = offsetRadius / Math.max(clientSize.width, 2);
 
                if(axisOffset > minAxisOffset){
                    if(pvc.debug >= 3){
@@ -102,7 +99,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                    chart.options.xAxisOffset = axisOffset;
                }
 
-               axisOffset = offsetRadius / Math.max(this.height, 2);
+               axisOffset = offsetRadius / Math.max(clientSize.height, 2);
                if(axisOffset > minAxisOffset){
                    if(pvc.debug >= 3){
                        pvc.log(def.format("Using Y axis offset of '{0}' to compensate for dot size.", [axisOffset]));
@@ -124,22 +121,22 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 var offsetLength;
 
                 if(adjustX && adjustY){
-                    offsetLength = Math.max(this.width, this.height) * xAxisOffset;
+                    offsetLength = Math.max(clientSize.width, clientSize.height) * xAxisOffset;
                 } else if(adjustX){
-                    offsetLength = this.height * yAxisOffset;
+                    offsetLength = clientSize.height * yAxisOffset;
                 } else /*if(adjustY) */{
-                    offsetLength = this.width * xAxisOffset;
+                    offsetLength = clientSize.width * xAxisOffset;
                 }
 
                 if(adjustX){
-                    this.chart.options.xAxisOffset = xAxisOffset = offsetLength / Math.max(this.width, 2);
+                    this.chart.options.xAxisOffset = xAxisOffset = offsetLength / Math.max(clientSize.width, 2);
                     if(pvc.debug >= 3){
                        pvc.log(def.format("Using X axis offset of '{0}' to balance with that of Y axis.", [xAxisOffset]));
                    }
                 }
 
                 if(adjustY){
-                    this.chart.options.yAxisOffset = yAxisOffset = offsetLength / Math.max(this.height, 2);
+                    this.chart.options.yAxisOffset = yAxisOffset = offsetLength / Math.max(clientSize.height, 2);
                     if(pvc.debug >= 3){
                        pvc.log(def.format("Using Y axis offset of '{0}' to balance with that of X axis.", [yAxisOffset]));
                    }

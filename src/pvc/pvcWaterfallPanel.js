@@ -109,9 +109,6 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                     //return chart.animate(orthoZero, orthoScale(scene.categ) - orthoZero);
                 })
                 ;
-
-    //        this.pvWaterfallGroupPanel.anchor('top').add(pv.Label)
-    //            .text(function(scene){ return scene.acts.category.label || "All"; });
         }
         
         this.pvBar
@@ -157,20 +154,6 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                 [anchor](function(scene){
                     return orthoZero + chart.animate(0, sceneOrthoScale(scene) - orthoZero);
                 })
-//                .localProperty('barDirection')
-//                .barDirection(function(scene){
-//                    if(isFalling && !this.index){
-//                        return 1;
-//                    }
-//
-//                    if(scene.acts.category.group._isFlattenGroup){
-//                        // Groups don't update the total
-//                        // Groups, always down, except the first falling...
-//                        return 0;
-//                    }
-//
-//                    return isFalling ? -1 : 1;
-//                })
                 .visible(function(scene){
                      if(scene.acts.category.group._isFlattenGroup){
                          return false;

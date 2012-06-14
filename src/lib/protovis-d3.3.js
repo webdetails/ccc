@@ -1,4 +1,4 @@
-// 27f7a95ef570506fafeeac3e61317c77eb7f2631
+// d6d1f6017690b89c2d6c93c455809a806990a21a
 /**
  * @class The built-in Array class.
  * @name Array
@@ -5969,7 +5969,7 @@ pv.SvgScene.bar = function(scenes) {
     var s = scenes[i];
 
     /* visible */
-    if (!s.visible) continue;
+    if (!s.visible || Math.abs(s.width) <= 1E-10 || Math.abs(s.height) <= 1E-10) continue;
     var fill = s.fillStyle, stroke = s.strokeStyle;
     if (!fill.opacity && !stroke.opacity) continue;
 

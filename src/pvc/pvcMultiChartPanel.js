@@ -8,14 +8,13 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * 
      * @override
      */
-    _calcLayout: function(availableSize, layoutInfo){
+    _calcLayout: function(clientSize, layoutInfo, referenceSize){
         
         var chart = this.chart;
         var data  = chart.visualRoles('multiChartColumn')
                          .flatten(chart.data, {visible: true});
-        var options = chart.options;
         
-        // TODO: reuse/dispose sub-charts
+        var options = chart.options;
         
         // multiChartLimit can be Infinity
         var multiChartLimit = Number(options.multiChartLimit);
@@ -43,16 +42,9 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         // ----------------------
         // Small Chart Size determination
         
-        var margins    = this.margins;
-        var marginLeft = margins.left;
-        var marginTop  = margins.top;
-        
-        var availWidth  = availableSize.width  - marginLeft - margins.right;
-        var availHeight = availableSize.height - marginTop  - margins.bottom;
-        
         // Evenly divide available width and height by all small charts 
-        var width  = availWidth  / colCount;
-        var height = availHeight / rowCount;
+        var width  = clientSize.width  / colCount;
+        var height = clientSize.height / rowCount;
         
         // Determine min width and min height
         var minWidth = Number(options.multiChartMinWidth);
@@ -80,32 +72,50 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         
         if(minWidth > 0 && width < minWidth){
             width = minWidth;
-            availableSize.width = availWidth = width * colCount;
+            clientSize.width = width * colCount;
         }
         
         if(minHeight > 0 && height < minHeight){
             height = minHeight;
-            availableSize.height = availHeight = height * rowCount;
+            clientSize.height = height * rowCount;
         }
         
-        // Consume space
-        this.setSize(availableSize);
+        def.set(
+           layoutInfo, 
+            'data',  data,
+            'count', count,
+            'width',  width,
+            'height', height,
+            'colCount',  colCount);
+        
+        return clientSize;
+    },
+    
+    _createCore: function(li){
+        if(!li.data){
+            // Empty
+            return;
+        }
+        
+        var chart = this.chart;
+        var options = chart.options;
         
         // ----------------------
         // Create and layout small charts
         var ChildClass = chart.constructor;
-        for(var index = 0 ; index < count ; index++) {
-            var childData = data._children[index],
-                childOptions = def.create(options, {
+        for(var index = 0 ; index < li.count ; index++) {
+            var childData = li.data._children[index];
+            
+            var childOptions = def.create(options, {
                     parent:     chart,
                     title:      childData.absLabel,
                     legend:     false,
                     data:       childData,
-                    width:      width,
-                    height:     height,
-                    left:       marginLeft + ((index % colCount) * width),
-                    top:        marginTop  + (Math.floor(index / colCount) * height),
-                    margins:    {all: 5},
+                    width:      li.width,
+                    height:     li.height,
+                    left:       (index % li.colCount) * li.width,
+                    top:        Math.floor(index / li.colCount) * li.height,
+                    margins:    {all: new pvc.PercentValue(0.02)},
                     extensionPoints: {
                         // This lets the main bg color show through AND
                         // allows charts to overflow to other charts without that being covered
@@ -118,7 +128,8 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             
             var childChart = new ChildClass(childOptions);
             childChart._preRender();
-            childChart.basePanel.layout();
         }
+        
+        this.base(li);
     }
 });

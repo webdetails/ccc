@@ -14,8 +14,8 @@
  * 
  */
 pvc.LegendPanel = pvc.BasePanel.extend({
-    pvRule: null,
-    pvDot: null,
+    pvRule:  null,
+    pvDot:   null,
     pvLabel: null,
     
     anchor:     "bottom",
@@ -23,120 +23,162 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     pvLegendPanel: null,
     legend:     null,
     legendSize: null,
-    minMarginX: 8,
-    minMarginY: 20,
-    textMargin: 6,
-    padding:    24,
-    shape:      null, //"square",
-    markerSize: 15,
+    
+    /** @deprecated */
+    minMarginX: 8,    // Minimum horizontal margin, in pixels. The space before the first and after the last items. Depending on 'align', may be split in half.
+    
+    /** @deprecated */
+    minMarginY: 20, 
+    
+    textMargin: 6,   // The space between the marker and the text, in pixels.
+    padding:    5,   // The space between legend items, in pixels (in all directions).
+    
+    shape:      null, // "square",
+    markerSize: 15,   // *diameter* of marker *zone* (the marker(s) itself is a little smaller)
     drawLine:   false,
     drawMarker: true,
+    
     font:       '10px sans-serif',
-
+    
     constructor: function(chart, parent, options){
-        this.base(chart, parent, options);
-
-        if(!this.shape && (!options || options.shape === undefined)){
-            var isV1Compat = (this.chart.options.compatVersion <= 1);
-            if(isV1Compat){
-                this.shape = 'square';
+        
+        var isV1Compat = chart.options.compatVersion <= 1;
+        var isVertical = options && (options.anchor !== "top" && options.anchor !== "bottom");
+        
+        // Default value of align depends on anchor
+        if(!options){
+            options = {};
+        }
+        
+        if(isVertical && options.align === undefined){
+            options.align = 'top';
+        }
+        
+        if(isV1Compat){
+            if(options.padding === undefined){
+                // Default value changed (and the meaning of the property also)
+                options.padding = 24;
+            }
+            
+            if(options.shape === undefined){
+                options.shape = 'square';
+            }
+            
+            var minMarginX = def.get(options, 'minMarginX',  8);
+            var minMarginY = def.get(options, 'minMarginY', 20);
+            options.margins = {
+                left: minMarginX,
+                // V1 only implemented minMarginY for vertical and  align = 'top'
+                top:  isVertical && (options.align !== 'middle' && options.align !== 'bottom') ? (minMarginY - 20) : null
+            };
+        } else {
+            // Set default margins
+            if(options.margins === undefined){
+                var anchor = options.anchor || this.anchor;
+                
+                options.margins = def.set({}, this.anchorOpposite(anchor), new pvc.PercentValue(0.03));
             }
         }
+        
+        this.base(chart, parent, options);
     },
 
     /**
      * @override
      */
-    _calcLayout: function(availableSize, layoutInfo){
-        var myself = this,
-            rootScene = this._buildScene(),
-            x,
-            y;
-        
+    _calcLayout: function(clientSize, layoutInfo, referenceSize){
+        var positionProps = {
+            left: null, 
+            top:  null
+        };
+        var requiredSize   = new pvc.Size(1,1);
+        var paddedCellSize = new pvc.Size(1,1);
+        var rootScene = this._buildScene();
         var leafCount = rootScene.childNodes.length;
-        
-        // Determine the size of the biggest cell
-        var maxLabelLen = rootScene.acts.legendItem.maxLabelTextLen;
-        
-        var cellSize = this.markerSize + this.textMargin + maxLabelLen; // ignoring textAdjust
-
-        if(!leafCount){
-            this.setWidth(1);
-            this.setHeight(1);
-        } else {
-            var realWidth, realHeight;
-
-            if (this.anchor === "top" || this.anchor === "bottom"){
-                this.setWidth(availableSize.width);
-
-                var maxPerLine = leafCount,
-                    paddedCellSize = cellSize + this.padding;
-
+        if(leafCount){
+            if(clientSize.width > 0 && clientSize.height > 0){
+                var isV1Compat = (this.chart.options.compatVersion <= 1);
+                
+                // The size of the biggest cell
+                var maxLabelLen = rootScene.acts.legendItem.maxLabelTextLen;
+                var cellWidth = this.markerSize + this.textMargin + maxLabelLen; // ignoring textAdjust
+                var cellHeight;
+                if(isV1Compat){
+                    // Previously, the cellHeight was the padding.
+                    // As we now add the padding below, we put 0 here.
+                    cellHeight = 0;
+                } else {
+                    cellHeight = Math.max(pvc.text.getTextHeight("M", this.font), this.markerSize);
+                }
+                
+                paddedCellSize.width  = cellWidth  + this.padding;
+                paddedCellSize.height = cellHeight + this.padding;
+                
+                // Names are for horizontal layout (anchor = top or bottom)
+                var isHorizontal = this.anchor === 'top' || this.anchor === 'bottom';
+                var a_top    = isHorizontal ? 'top' : 'left';
+                var a_bottom = this.anchorOpposite(a_top);    // top or bottom
+                var a_width  = this.anchorLength(a_top);      // width or height
+                var a_height = this.anchorOrthoLength(a_top); // height or width
+                var a_center = isHorizontal ? 'center' : 'middle';
+                var a_left   = isHorizontal ? 'left' : 'top';
+                var a_right  = this.anchorOpposite(a_left);   // left or right
+                
+                // Request all available width
+                requiredSize[a_width] = clientSize[a_width];
+                
+                // padding is added to clientWidth to account for the one extra padding.
+                // Note that padding should only be added between cells.
+                var maxCellsPerRow = ~~((clientSize[a_width] + this.padding) / paddedCellSize[a_width]); // ~~ <=> Math.floor
+                var cellsPerRow    = Math.min(leafCount, maxCellsPerRow);
+                var rowCount       = Math.ceil(leafCount / cellsPerRow);
+                var rowWidth       = cellsPerRow * paddedCellSize[a_width] - this.padding;
+                
                 // If the legend is bigger than the available size, multi-line and left align
-                var margin = this.minMarginX - this.padding;
-
-                realWidth = maxPerLine * paddedCellSize + margin;
-
-                if(realWidth > this.width){
-                    this.align = "left";
-                    maxPerLine = Math.floor((this.width - margin) / paddedCellSize);
-                    realWidth = maxPerLine * paddedCellSize + margin;
+                if(rowCount > 1){
+                    this.align = a_left; // Why??
                 }
-
-                realHeight = this.padding * Math.ceil(leafCount / maxPerLine);
-
-                if(this.height == null){ // ??
-                    this.setHeight(Math.min(availableSize.height, realHeight));
+                
+                var tableHeight = rowCount * paddedCellSize[a_height] - this.padding;
+                requiredSize[a_height] = Math.min(clientSize[a_height], tableHeight);
+                
+                // -----------------
+                
+                var leftOffset = 0;
+                switch(this.align){
+                    case a_right:
+                        leftOffset = requiredSize[a_width] - rowWidth;
+                        break;
+                        
+                    case a_center:
+                        leftOffset = (requiredSize[a_width] - rowWidth) / 2;
+                        break;
                 }
-
-                // Changing margins if the alignment is not "left"
-                if(this.align === "right"){
-                    this.minMarginX = this.width - realWidth;
-                } else if (this.align === "center"){
-                    this.minMarginX = (this.width - realWidth) / 2;
-                }
-
-                x = function(){
-                    return (this.index % maxPerLine) * paddedCellSize + myself.minMarginX;
+                
+                positionProps[a_left] = function(){
+                    var col = this.index % cellsPerRow;
+                    return leftOffset + col * paddedCellSize[a_width];
                 };
-
-                this.minMarginY = (this.height - realHeight) / 2;
-
-                y = function(){
-                    var n = Math.floor(this.index / maxPerLine);
-                    return myself.height  - n * myself.padding - myself.minMarginY - myself.padding / 2;
+                
+                // -----------------
+                
+                var topOffset = 0;
+                positionProps[a_top] = function(){
+                    var row = ~~(this.index / cellsPerRow);  // ~~ <=> Math.floor
+                    return topOffset + row * paddedCellSize[a_height];
                 };
-
-        } else {
-
-            this.setHeight(availableSize.height);
-
-            realWidth = cellSize + this.minMarginX;
-            realHeight = this.padding * leafCount;
-
-            if(this.width == null){ // ??
-                this.setWidth(Math.min(availableSize.width, realWidth));
             }
-
-            if(this.align === "middle"){
-                this.minMarginY = (this.height - realHeight + this.padding) / 2  ;
-            } else if (this.align === "bottom"){
-                this.minMarginY = this.height - realHeight;
-            }
-
-            x = this.minMarginX;
-            y = function(){
-                return myself.height - this.index * myself.padding - myself.minMarginY;
-            };
         }
-      }
-      
-      /** Other exports */
-      def.copy(layoutInfo, {
-          x: x,
-          y: y,
-          rootScene: rootScene
-      });
+        
+        /** Other exports */
+        def.copy(layoutInfo, {
+            rootScene: rootScene,
+            leftProp:  positionProps.left,
+            topProp:   positionProps.top,
+            cellSize:  paddedCellSize
+        });
+        
+        return requiredSize;
     },
     
     /**
@@ -154,9 +196,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           .localProperty('isOn', Boolean)
           .isOn(function(scene){ return scene.acts.legendItem.isOn(); })
           .def("hidden", "false")
-          .left(layoutInfo.x)
-          .bottom(layoutInfo.y)
-          .height(this.markerSize)
+          .left(layoutInfo.leftProp)
+          .top(layoutInfo.topProp)
+          .height(layoutInfo.cellSize.height)
           .cursor(function(scene){
               return scene.acts.legendItem.click ? "pointer" : null;
           })
@@ -191,7 +233,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
              .fillStyle(sceneColorProp)
              ;
 
-          pvLegendProto = this.pvDot;
+          pvLegendProto = this.pvRule; // Rule is wider, so text would be over the rule with text margin 0
           
       } else if(this.drawLine) {
       
@@ -222,7 +264,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     
       this.pvLabel = pvLegendProto.anchor("right").add(pv.Label)
           .text(function(scene){
-              // TODO: trim to width - the above algorithm does not update the cellSize...
+              // TODO: trim to width - the above algorithm does not update the cellWidth...
               return scene.acts.legendItem.label;
           })
           .font(this.font)

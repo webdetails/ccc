@@ -216,6 +216,161 @@ pv.Format.createFormatter = function(pvFormat) {
     return format;
 };
 
+/**
+ * Creates a margins/sides object.
+ * @constructor
+ * @param {string|number|object} sides May be a css-like shorthand margin string.
+ * 
+ * <ol>
+ *   <li> "1" - {all: '1'}</li>
+ *   <li> "1 2" - {top: '1', left: '2', right: '2', bottom: '1'}</li>
+ *   <li> "1 2 3" - {top: '1', left: '2', right: '2', bottom: '3'}</li>
+ *   <li> "1 2 3 4" - {top: '1', right: '2', bottom: '3', left: '4'}</li>
+ * </ol>
+ */
+pvc.Sides = function(sides){
+    if(sides != null){
+        this.setSides(sides);
+    }
+};
+
+pvc.Sides.names = 'left right top bottom'.split(' ');
+pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.constant(true));
+
+pvc.Sides.prototype.setSides = function(sides){
+    if(typeof sides === 'string'){
+        var comps = sides.split(/\s+/).map(function(comp){
+            return pvc.PercentValue.parse(comp);
+        });
+        
+        switch(comps.length){
+            case 1:
+                this.set('all', comps[0]);
+                return;
+                
+            case 2:
+                this.set('top',    comps[0]);
+                this.set('left',   comps[1]);
+                this.set('right',  comps[1]);
+                this.set('bottom', comps[0]);
+                return;
+                
+            case 3:
+                this.set('top',    comps[0]);
+                this.set('left',   comps[1]);
+                this.set('right',  comps[1]);
+                this.set('bottom', comps[2]);
+                return;
+                
+            case 4:
+                this.set('top',    comps[0]);
+                this.set('right',  comps[1]);
+                this.set('bottom', comps[2]);
+                this.set('left',   comps[3]);
+                return;
+                
+            case 0:
+                return;
+        }
+    } else if(typeof sides === 'number') {
+        this.set('all', sides);
+        return;
+    } else if (typeof sides === 'object') {
+        this.set('all', sides.all);
+        for(var p in sides){
+            if(p !== 'all'){
+                this.set(p, sides[p]);
+            }
+        }
+        return;
+    }
+    
+    if(pvc.debug) {
+        pvc.log("Invalid 'margins' option value: " + JSON.stringify(sides));
+    }
+};
+
+pvc.Sides.prototype.set = function(prop, value){
+    value = pvc.PercentValue.parse(value);
+    if(value != null){
+        if(prop === 'all'){
+            // expand
+            pvc.Sides.names.forEach(function(p){
+                this[p] = value;
+            }, this);
+            
+        } else if(def.hasOwn(pvc.Sides.namesSet, prop)){
+            this[prop] = value;
+        }
+    }
+};
+
+pvc.Sides.prototype.resolve = function(width, height){
+    if(typeof width === 'object'){
+        height = width.height;
+        width  = width.width;
+    }
+    
+    var margins = {};
+    
+    pvc.Sides.names.forEach(function(p){
+        var value  = 0;
+        var margin = this[p];
+        if(margin != null){
+            if(typeof(margin) === 'number'){
+                value = margin;
+            } else {
+                value = margin.resolve((p === 'left' || p === 'right') ? width : height);
+            }
+        }
+        
+        margins[p] = value;
+    }, this);
+    
+    return margins;
+};
+
+pvc.PercentValue = function(pct){
+    this.percent = pct;
+};
+
+pvc.PercentValue.prototype.resolve = function(total){
+    return this.percent * total;
+};
+
+pvc.PercentValue.parse = function(value){
+    if(value != null && value !== ''){
+        switch(typeof value){
+            case 'number': return value;
+            case 'string':
+                var match = value.match(/^(.+?)\s*(%)?$/);
+                if(match){
+                    var n = +match[1];
+                    if(!isNaN(n)){
+                        if(match[2]){
+                            if(n >= 0){
+                                return new pvc.PercentValue(n / 100);
+                            }
+                        } else {
+                            return n;
+                        }
+                    }
+                }
+                break;
+                
+            case 'object':
+                if(value instanceof pvc.PercentValue){
+                    return value;
+                }
+                break;
+        }
+        
+        if(pvc.debug){
+            pvc.log(def.format("Invalid margins component '{0}'", [''+value]));
+        }
+    }
+};
+
 /* Protovis Z-Order support */
 
 // Default values

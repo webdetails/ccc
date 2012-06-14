@@ -22,9 +22,9 @@ pvc.TitlePanel = pvc.BasePanel.extend({
     /**
      * @override
      */
-    _calcLayout: function(availableSize, layoutInfo){
+    _calcLayout: function(clientSize, layoutInfo, referenceSize){
         // Size will depend on positioning and font size mainly
-        this.setAnchoredSize(this.titleSize, availableSize);
+        return this.createAnchoredSize(this.titleSize, clientSize);
     },
     
     /**
@@ -47,22 +47,18 @@ pvc.TitlePanel = pvc.BasePanel.extend({
             .font(this.font)
             .textAlign("center")
             .textBaseline("middle")
-            .bottom(this.height / 2)
-            .left(this.width / 2)
+            .left  (function(){ return this.parent.width() / 2; })
+            .bottom(function(){ return this.parent.height() / 2; })
             .textAngle(rotationByAnchor[this.anchor]);
 
         // Cases:
-        if (this.titleAlign == "center") {
-            this.pvLabel.bottom(this.height / 2).left(this.width / 2);
-        } else {
+        if (this.titleAlign !== "center") {
             this.pvLabel.textAlign(this.titleAlign);
 
             if (this.isAnchorTopOrBottom()) {
                 this.pvLabel
-                    .bottom(null)
                     .left(null) // reset
-                    [this.titleAlign](0)
-                    .bottom(this.height / 2);
+                    [this.titleAlign](0);
 
             } else if (this.anchor == "right") {
                 if (this.titleAlign == "left") {
