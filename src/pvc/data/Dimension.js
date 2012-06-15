@@ -379,10 +379,11 @@ def.type('pvc.data.Dimension')
      */
     extent: function(keyArgs){
         // Assumes atoms are sorted (null, if existent is the first).
-        var atoms  = this.atoms(keyArgs),
-            L = atoms.length,
-            offset = this._nullAtom && atoms[0].value == null ? 1 : 0;
+        var atoms  = this.atoms(keyArgs);
+        var L = atoms.length;
+        if(!L){ return undefined; }
         
+        var offset = this._nullAtom && atoms[0].value == null ? 1 : 0;
         return (L > offset) ?
                {min: atoms[offset], max: atoms[L - 1]} :
                undefined;
@@ -418,10 +419,11 @@ def.type('pvc.data.Dimension')
      */
     min: function(keyArgs){
         // Assumes atoms are sorted.
-        var atoms = this.atoms(keyArgs),
-            L = atoms.length,
-            offset = this._nullAtom && atoms[0].value == null ? 1 : 0;
+        var atoms = this.atoms(keyArgs);
+        var L = atoms.length;
+        if(!L){ return undefined; }
         
+        var offset = this._nullAtom && atoms[0].value == null ? 1 : 0;
         return (L > offset) ? atoms[offset] : undefined;
     },
     
@@ -456,10 +458,10 @@ def.type('pvc.data.Dimension')
      */
     max: function(keyArgs){
         // Assumes atoms are sorted.
-        var atoms = this.atoms(keyArgs),
-            L = atoms.length;
+        var atoms = this.atoms(keyArgs);
+        var L = atoms.length;
         
-        return L > 0 && atoms[L - 1].value != null ? atoms[L - 1] : undefined;
+        return L && atoms[L - 1].value != null ? atoms[L - 1] : undefined;
     },
     
     /**

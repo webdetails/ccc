@@ -400,33 +400,35 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
     
     _getDotSizeRoleScale: function(){
         /* Per small chart scale */
-        
-        // TODO ~ copy paste from HeatGrid
-        var sizeValExtent = this.chart._dotSizeDim.extent({visible: true}),
-            sizeValMin    = sizeValExtent.min.value,
-            sizeValMax    = sizeValExtent.max.value,
-            sizeValSpan   = Math.abs(sizeValMax - sizeValMin); // may be zero
-        
-        if(isFinite(sizeValSpan) && sizeValSpan > 0.001) {
-            // Linear mapping
-            // TODO: a linear scale object ??
-            var sizeSlope = this.dotAreaSpan / sizeValSpan,
-                minArea   = this.minDotArea;
+        // TODO ~ copy paste from HeatGrid        
+
+        var sizeValExtent = this.chart._dotSizeDim.extent({visible: true});
+        if(sizeValExtent){
+            var sizeValMin    = sizeValExtent.min.value,
+                sizeValMax    = sizeValExtent.max.value,
+                sizeValSpan   = Math.abs(sizeValMax - sizeValMin); // may be zero
             
-            if(pvc.debug >= 3){
-                pvc.log("Dot Size Scale info: " + JSON.stringify({
-                    sizeValMin:  sizeValMin,
-                    sizeValMax:  sizeValMax,
-                    sizeValSpan: sizeValSpan,
-                    sizeSlope:   sizeSlope,
-                    minArea:     minArea,
-                    dotAreaSpan: this.dotAreaSpan
-                }));
+            if(isFinite(sizeValSpan) && sizeValSpan > 0.001) {
+                // Linear mapping
+                // TODO: a linear scale object ??
+                var sizeSlope = this.dotAreaSpan / sizeValSpan,
+                    minArea   = this.minDotArea;
+                
+                if(pvc.debug >= 3){
+                    pvc.log("Dot Size Scale info: " + JSON.stringify({
+                        sizeValMin:  sizeValMin,
+                        sizeValMax:  sizeValMax,
+                        sizeValSpan: sizeValSpan,
+                        sizeSlope:   sizeSlope,
+                        minArea:     minArea,
+                        dotAreaSpan: this.dotAreaSpan
+                    }));
+                }
+                
+                return function(sizeVal){
+                    return minArea + sizeSlope * (sizeVal == null ? 0 : (sizeVal - sizeValMin));
+                };
             }
-            
-            return function(sizeVal){
-                return minArea + sizeSlope * (sizeVal == null ? 0 : (sizeVal - sizeValMin));
-            };
         }
     },
     
