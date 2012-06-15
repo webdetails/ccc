@@ -168,8 +168,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             var margins = this.margins.resolve(referenceSize);
             var clientSize = new pvc.Size(
-                Math.max(availableSize.width  - (margins.left + margins.right),  0),
-                Math.max(availableSize.height - (margins.top  + margins.bottom), 0)
+                Math.max(availableSize.width  - margins.width,  0),
+                Math.max(availableSize.height - margins.height, 0)
             );
             
             var layoutInfo = {};
@@ -178,8 +178,8 @@ pvc.BasePanel = pvc.Abstract.extend({
                 this.setSize(availableSize); // request all available size
             } else {
                 this.setSize(new pvc.Size(
-                    reqClientSize.width  + (margins.left + margins.right ),
-                    reqClientSize.height + (margins.top  + margins.bottom)
+                    reqClientSize.width  + margins.width,
+                    reqClientSize.height + margins.height
                 ));
             }
             
@@ -345,19 +345,33 @@ pvc.BasePanel = pvc.Abstract.extend({
             /* Layout */
             this.layout();
             
+            var margins = this._resolvedMargins;
+            
             /* Protovis Panel */
             if(this.isTopRoot) {
-               this.pvPanel = new pv.Panel()
-                                    .canvas(this.chart.options.canvas);
+                this.pvRootPanel = 
+                this.pvPanel = new pv.Panel().canvas(this.chart.options.canvas);
+                
+                if(margins.width > 0 || margins.height > 0){
+                    this.pvPanel
+                        .width (this.width)
+                        .height(this.height);
+                    
+                    // As there is no parent panel,
+                    // the margins cannot be accomplished by positioning
+                    // on the parent panel and sizing.
+                    // We thus create another panel to be a child of pvPanel
+                   
+                    this.pvPanel = this.pvPanel.add(pv.Panel);
+                }
             } else {
                 this.pvPanel = this.parent.pvPanel.add(this.type);
             }
             
             // Set panel size
-            var margins = this._resolvedMargins;
             this.pvPanel
-                .width (this.width  - (margins.left   + margins.right))
-                .height(this.height - (margins.bottom + margins.top  ));
+                .width (this.width  - margins.width )
+                .height(this.height - margins.height);
             
             // Set panel positions
             var hasPositions = {};

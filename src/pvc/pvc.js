@@ -311,23 +311,26 @@ pvc.Sides.prototype.resolve = function(width, height){
         width  = width.width;
     }
     
-    var margins = {};
+    var sides = {};
     
-    pvc.Sides.names.forEach(function(p){
+    pvc.Sides.names.forEach(function(side){
         var value  = 0;
-        var margin = this[p];
-        if(margin != null){
-            if(typeof(margin) === 'number'){
-                value = margin;
+        var sideValue = this[side];
+        if(sideValue != null){
+            if(typeof(sideValue) === 'number'){
+                value = sideValue;
             } else {
-                value = margin.resolve((p === 'left' || p === 'right') ? width : height);
+                value = sideValue.resolve((side === 'left' || side === 'right') ? width : height);
             }
         }
         
-        margins[p] = value;
+        sides[side] = value;
     }, this);
     
-    return margins;
+    sides.width  = sides.left   + sides.right;
+    sides.height = sides.bottom + sides.top;
+    
+    return sides;
 };
 
 pvc.PercentValue = function(pct){
