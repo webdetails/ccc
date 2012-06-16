@@ -215,11 +215,13 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                  * Despite !showDots,
                  * show a dot anyway when:
                  * 1) it is active, or
-                 * 2) it is alone (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
+                 * 2) it is single  (the only dot in the dataset) (and in areas+discreteCateg+stacked case)
+                 * 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                  */
                 if(!showDots){
                     var visible = this.scene.isActive ||
-                                  (this.scene.isAlone && showAloneDots);
+                                  (!showAloneDots && this.scene.isSingle) ||
+                                  (showAloneDots && this.scene.isAlone);
                     if(!visible) {
                         return invisibleFill;
                     }
@@ -239,7 +241,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                  */
                 if(!showDots) {
                     var visible = this.scene.isActive ||
-                                  (this.scene.isAlone && showAloneDots);
+                                  (!showAloneDots && this.scene.isSingle) ||
+                                  (showAloneDots && this.scene.isAlone);
                     
                     if(visible && !this.scene.isActive) {
                         // Obtain the line Width of the "sibling" line
@@ -754,7 +757,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         function completeSeriesScenes(seriesScene) {
             var seriesScenes2 = [],
                 seriesScenes = seriesScene.childNodes, 
-                fromScene;
+                fromScene,
+                notNullCount = 0,
+                firstAloneScene = null;
             
             /* As intermediate nodes are added, 
              * seriesScene.childNodes array is changed.
@@ -782,6 +787,14 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                         /* belowScene */
                         belowSeriesScenes2 && belowSeriesScenes2[c2]);
                 
+                if(toScene.isAlone && !firstAloneScene){
+                    firstAloneScene = toScene;
+                }
+                
+                if(!toScene.isNull){
+                    notNullCount++;
+                }
+                
                 /* Possibly create intermediate scene 
                  * (between fromScene and toScene) 
                  */
@@ -804,7 +817,11 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
                 fromScene = toScene;
             }
-                        
+            
+            if(notNullCount === 1 && firstAloneScene){
+                firstAloneScene.isSingle = true;
+            }
+            
             if(isStacked){
                 belowSeriesScenes2 = seriesScenes2;
             } 
@@ -839,7 +856,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 isAlone  = !nextScene || nextScene.isNull;
             }
             
-            toScene.isAlone = isAlone;
+            toScene.isAlone  = isAlone;
+            toScene.isSingle = false;
         }
         
         function createIntermediateScene(
@@ -907,6 +925,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             };
             
             interScene.isIntermediate = true;
+            interScene.isSingle       = false;
             interScene.isNull         = interIsNull;
             interScene.isAlone        = interIsNull && toScene.isNull && fromScene.isNull;
             interScene.basePosition   = interBasePosition;

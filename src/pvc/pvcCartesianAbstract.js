@@ -228,7 +228,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         /* RANGE */
         this._setAxisScaleRange(scale, axis);
 
-        if(values.length > 0){
+        if(values.length > 0){ // Has domain? At least one point is required to split.
             var bandRatio = this.options.panelSizeRatio || 0.8;
             scale.splitBandedCenter(scale.min, scale.max, bandRatio);
         }

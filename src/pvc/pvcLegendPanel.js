@@ -41,14 +41,13 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     font:       '10px sans-serif',
     
     constructor: function(chart, parent, options){
-        
-        var isV1Compat = chart.options.compatVersion <= 1;
-        var isVertical = options && (options.anchor !== "top" && options.anchor !== "bottom");
-        
         // Default value of align depends on anchor
         if(!options){
             options = {};
         }
+        
+        var isV1Compat = chart.options.compatVersion <= 1;
+        var isVertical = options.anchor !== "top" && options.anchor !== "bottom";
         
         if(isVertical && options.align === undefined){
             options.align = 'top';
@@ -124,49 +123,51 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                 var a_left   = isHorizontal ? 'left' : 'top';
                 var a_right  = this.anchorOpposite(a_left);   // left or right
                 
-                // Request all available width
-                requiredSize[a_width] = clientSize[a_width];
-                
                 // padding is added to clientWidth to account for the one extra padding.
                 // Note that padding should only be added between cells.
                 var maxCellsPerRow = ~~((clientSize[a_width] + this.padding) / paddedCellSize[a_width]); // ~~ <=> Math.floor
-                var cellsPerRow    = Math.min(leafCount, maxCellsPerRow);
-                var rowCount       = Math.ceil(leafCount / cellsPerRow);
-                var rowWidth       = cellsPerRow * paddedCellSize[a_width] - this.padding;
-                
-                // If the legend is bigger than the available size, multi-line and left align
-                if(rowCount > 1){
-                    this.align = a_left; // Why??
+                if(maxCellsPerRow > 0){
+                    var cellsPerRow    = Math.min(leafCount, maxCellsPerRow);
+                    var rowCount       = Math.ceil(leafCount / cellsPerRow);
+                    var rowWidth       = cellsPerRow * paddedCellSize[a_width] - this.padding;
+                    
+                    // If the legend is bigger than the available size, multi-line and left align
+                    if(rowCount > 1){
+                        this.align = a_left; // Why??
+                    }
+                    
+                    // Request all available width
+                    requiredSize[a_width] = clientSize[a_width];
+                    
+                    var tableHeight = rowCount * paddedCellSize[a_height] - this.padding;
+                    requiredSize[a_height] = Math.min(clientSize[a_height], tableHeight);
+                    
+                    // -----------------
+                    
+                    var leftOffset = 0;
+                    switch(this.align){
+                        case a_right:
+                            leftOffset = requiredSize[a_width] - rowWidth;
+                            break;
+                            
+                        case a_center:
+                            leftOffset = (requiredSize[a_width] - rowWidth) / 2;
+                            break;
+                    }
+                    
+                    positionProps[a_left] = function(){
+                        var col = this.index % cellsPerRow;
+                        return leftOffset + col * paddedCellSize[a_width];
+                    };
+                    
+                    // -----------------
+                    
+                    var topOffset = 0;
+                    positionProps[a_top] = function(){
+                        var row = ~~(this.index / cellsPerRow);  // ~~ <=> Math.floor
+                        return topOffset + row * paddedCellSize[a_height];
+                    };
                 }
-                
-                var tableHeight = rowCount * paddedCellSize[a_height] - this.padding;
-                requiredSize[a_height] = Math.min(clientSize[a_height], tableHeight);
-                
-                // -----------------
-                
-                var leftOffset = 0;
-                switch(this.align){
-                    case a_right:
-                        leftOffset = requiredSize[a_width] - rowWidth;
-                        break;
-                        
-                    case a_center:
-                        leftOffset = (requiredSize[a_width] - rowWidth) / 2;
-                        break;
-                }
-                
-                positionProps[a_left] = function(){
-                    var col = this.index % cellsPerRow;
-                    return leftOffset + col * paddedCellSize[a_width];
-                };
-                
-                // -----------------
-                
-                var topOffset = 0;
-                positionProps[a_top] = function(){
-                    var row = ~~(this.index / cellsPerRow);  // ~~ <=> Math.floor
-                    return topOffset + row * paddedCellSize[a_height];
-                };
             }
         }
         

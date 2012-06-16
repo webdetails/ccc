@@ -1,4 +1,4 @@
-// d6d1f6017690b89c2d6c93c455809a806990a21a
+// ab0d5511b8676309b472e5d88c6b59c9010d8971
 /**
  * @class The built-in Array class.
  * @name Array
@@ -379,7 +379,7 @@ pv.listenForPageLoad = function(listener) {
             window.attachEvent( "onload", listener );
         }
     }
-}
+};
 
 /**
  * @public Returns the name of the renderer we're using -
@@ -390,7 +390,7 @@ pv.listenForPageLoad = function(listener) {
 pv.renderer = function() {
     return (typeof document.svgImplementation !== "undefined") ? document.svgImplementation:
      (typeof window.svgweb === "undefined") ? "nativesvg" : "svgweb";
-}
+};
 
 /** @private Returns a locally-unique positive id. */
 pv.id = function() {
@@ -1138,6 +1138,25 @@ pv.repeat = function(array, n) {
 };
 
 /**
+ * Creates an array of the specified length,
+ * and, optionally, initializes it with the specified default value.
+ * 
+ * @param {number} [len] the length of the array; defaults to 0.
+ * @param {number} [dv] the default value with which to initialize each position; defaults to undefined.
+ * @returns {array} an array as specified.
+ */
+pv.array = function(len, dv){
+    var a = len >= 0 ? new Array(len) : [];
+    if(dv !== undefined){
+        for(var i = 0 ; i < len ; i++){
+            a[i] = dv;
+        }
+    }
+    
+    return a;
+};
+
+/**
  * Given two arrays <tt>a</tt> and <tt>b</tt>, <style
  * type="text/css">sub{line-height:0}</style> returns an array of all possible
  * pairs of elements [a<sub>i</sub>, b<sub>j</sub>]. The outer loop is on array
@@ -1507,7 +1526,7 @@ pv.max.index = function(array, f) {
     }
   }
   return maxi;
-}
+};
 
 /**
  * Returns the minimum value of the specified array of numbers. If the specified
@@ -1549,7 +1568,7 @@ pv.min.index = function(array, f) {
     }
   }
   return mini;
-}
+};
 
 /**
  * Returns the arithmetic mean, or average, of the specified array. If the
@@ -3945,8 +3964,16 @@ pv.Scale.ordinal = function() {
    * @see #splitBanded
    */
   scale.split = function(min, max) {
-    var step = (max - min) / this.domain().length;
-    r = pv.range(min + step / 2, max, step);
+    var R = max - min;
+    var N = this.domain().length;
+    var step = 0;
+    if(R === 0){
+        r = pv.array(N, min);
+    } else if(N){
+        step = (max - min) / N;
+        r = pv.range(min + step / 2, max, step);
+    }
+    
     r.step = step;
     return this;
   };
@@ -4029,18 +4056,25 @@ pv.Scale.ordinal = function() {
         band = 1;
     }
 
-    // Requires N > 0
-
     var R = (max - min),
         N = this.domain().length,
-        B = (R * band) / N,
-        M = N > 1 ? ((R - N * B) / (N - 1)) : 0,
+        S = 0,
+        B = 0,
+        M = 0;
+    if(R === 0){
+        r = pv.array(N, min);
+    } else if(N){
+        B = (R * band) / N;
+        M = N > 1 ? ((R - N * B) / (N - 1)) : 0;
         S = M + B;
+        
+        r = pv.range(min + B / 2, max, S);
+    }
     
-    r = pv.range(min + B / 2, max, S);
     r.step   = S;
     r.band   = B;
     r.margin = M;
+    
     return this;
   };
 
@@ -4060,7 +4094,9 @@ pv.Scale.ordinal = function() {
    * @see #split
    */
   scale.splitFlush = function(min, max) {
-    var n = this.domain().length, step = (max - min) / (n - 1);
+    var n = this.domain().length, 
+        step = (max - min) / (n - 1);
+    
     r = (n == 1) ? [(min + max) / 2]
         : pv.range(min, max + step / 2, step);
     return this;
