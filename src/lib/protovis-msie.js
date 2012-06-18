@@ -551,7 +551,7 @@ pv.VmlScene = {
 // copy helper methods from SvgScene onto our new Scene
 pv.VmlScene.copy_functions( pv.SvgScene );
 pv.Scene = pv.VmlScene;
-pv.renderer = function() { return 'vml' };//changed renderer
+pv.renderer = function() { return 'vml'; };//changed renderer
 
 
 pv.VmlScene.expect = function (e, type, attr, style) {
@@ -573,22 +573,29 @@ pv.VmlScene.expect = function (e, type, attr, style) {
   if ( 'attr' in helper ) {
     helper.attr( attr, style, e );
   }
-
+  
   if ( attr.cursor in vml.cursorstyles ) {
     var curs = vml.cursorstyles[attr.cursor];
     style.cursor = ( curs === 1 ) ? attr.cursor : curs;
   }
-
-  for (var name in style) {
-    var value = style[name];
-    if (value == null) e.style.removeAttribute(name);   // cssText 
-    else e.style[name] = value;
-  }
+  
+  if(style) this.setStyle(e, style);
   
   return e;
 };
 
+pv.VmlScene.setAttributes = function(e, attributes){
+    // Not supported - exists for svg custom attributes
+};
 
+pv.VmlScene.setStyle = function(e, style){
+    for (var name in style) {
+        var value = style[name];
+        if (value == null) e.style.removeAttribute(name);   // cssText 
+        else e.style[name] = value;
+    }
+};
+  
 pv.VmlScene.append = function(e, scenes, index) {
   // FIXME: hooks the scene onto the element --- this is probably hemorrhaging memory in MSIE
   // it is only ever used by the envent displatcher so it should probably be stored in a cache
@@ -959,13 +966,13 @@ pv.VmlScene.label = function(scenes) {
       var r = (~~rotation % 360) * vml.d2r,
           ct = Math.cos(r),
           st = Math.sin(r);
-      e.style.filter = ['progid:DXImageTransform.Microsoft.Matrix(',
+      e.style.filter = ['progid:DXImageTransform.Microsoft.Chroma(color="white") progid:DXImageTransform.Microsoft.Matrix(',
                     'M11=',  ct.toFixed( 8 ), ',',
                     'M12=', -st.toFixed( 8 ), ',',
                     'M21=',  st.toFixed( 8 ), ',',
                     'M22=',  ct.toFixed( 8 ), ',sizingMethod=\'auto expand\')";'].join('');
-    }
-    else {
+      e.style.backgroundColor = "white";    
+    } else {
       e.style.filter = '';
     }
 
