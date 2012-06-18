@@ -14,9 +14,11 @@ pvc.BasePanel = pvc.Abstract.extend({
     height: null,
     width: null,
     anchor: "top",
-    pvPanel: null,
+    pvBorderPanel: null, // border box 
+    pvPanel: null, // padding box (within border box, separated by paddings)
     
     margins:   null,
+    paddings:  null,
     isRoot:    false,
     isTopRoot: false,
     root:      null, 
@@ -86,7 +88,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             */
         };
         
-        this.margins = new pvc.Sides(options && options.margins);
+        this.margins  = new pvc.Sides(options && options.margins);
+        this.paddings = new pvc.Sides(options && options.paddings);
         
         if(!parent) {
             this.parent    = null;
@@ -166,10 +169,14 @@ pvc.BasePanel = pvc.Abstract.extend({
                 referenceSize = new pvc.Size(availableSize);
             }
             
-            var margins = this.margins.resolve(referenceSize);
+            var margins  = this.margins.resolve(referenceSize);
+            var paddings = this.paddings.resolve(referenceSize);
+            var extraWidth  = margins.width + paddings.width;
+            var extraHeight = margins.height + paddings.height;
+            
             var clientSize = new pvc.Size(
-                Math.max(availableSize.width  - margins.width,  0),
-                Math.max(availableSize.height - margins.height, 0)
+                Math.max(availableSize.width  - extraWidth,  0),
+                Math.max(availableSize.height - extraHeight, 0)
             );
             
             var layoutInfo = {};
@@ -178,13 +185,14 @@ pvc.BasePanel = pvc.Abstract.extend({
                 this.setSize(availableSize); // request all available size
             } else {
                 this.setSize(new pvc.Size(
-                    reqClientSize.width  + margins.width,
-                    reqClientSize.height + margins.height
+                    reqClientSize.width  + extraWidth,
+                    reqClientSize.height + extraHeight
                 ));
             }
             
             this._layoutInfo = layoutInfo;
             this._resolvedMargins = margins;
+            this._resolvedPaddings = paddings;
         }
     },
     
@@ -345,7 +353,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             /* Layout */
             this.layout();
             
-            var margins = this._resolvedMargins;
+            var margins  = this._resolvedMargins;
+            var paddings = this._resolvedPaddings;
             
             /* Protovis Panel */
             if(this.isTopRoot) {
@@ -369,9 +378,11 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
             
             // Set panel size
+            var width  = this.width  - margins.width;
+            var height = this.height - margins.height;
             this.pvPanel
-                .width (this.width  - margins.width )
-                .height(this.height - margins.height);
+                .width (width)
+                .height(height);
             
             // Set panel positions
             var hasPositions = {};
@@ -387,6 +398,21 @@ pvc.BasePanel = pvc.Abstract.extend({
             if(!hasPositions.height && margins.top != null){
                 this.pvPanel.top(margins.top);
             }
+            
+            var pvBorderPanel = this.pvPanel;
+            
+            // Check padding
+            if(paddings.width >= 0 || paddings.height >= 0){
+                // We create separate border (outer) and inner (padding) panels
+                this.pvPanel = pvBorderPanel.add(pv.Panel)
+                                   .width(width - paddings.width)
+                                   .height(height - paddings.height)
+                                   .left(paddings.left)
+                                   .top(paddings.top);
+            }
+            
+            pvBorderPanel.paddingPanel = this.pvPanel;
+            this.pvPanel.borderPanel = pvBorderPanel;
             
             /* Protovis marks that are pvcPanel specific,
              * and/or #_creates child panels.
@@ -455,7 +481,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             options.renderCallback.call(chart);
         }
         
-        var pvPanel = this.pvPanel;
+        var pvPanel = this.pvRootPanel;
         
         this._isAnimating = options.animate && !def.get(keyArgs, 'bypassAnimation', false) ? 1 : 0;
         try {
@@ -710,9 +736,19 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
 
         if(!pvPanel){
-            pvPanel = this.parent.pvPanel.add(this.type)
-                            .extend(this.pvPanel);
-
+            var pvParentPanel = this.parent.pvPanel;
+            var pvBorderPanel = 
+                pvPanel = pvParentPanel.borderPanel.add(this.type)
+                              .extend(this.pvPanel.borderPanel);
+            
+            if(pvParentPanel !== pvParentPanel.borderPanel){
+                pvPanel = pvBorderPanel.add(pv.Panel)
+                                       .extend(this.pvPanel);
+            }
+            
+            pvBorderPanel.paddingPanel = pvPanel;
+            pvPanel.borderPanel = pvBorderPanel;
+            
             this.initLayerPanel(pvPanel, layer);
 
             this._layers[layer] = pvPanel;

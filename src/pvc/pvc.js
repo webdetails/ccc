@@ -286,7 +286,7 @@ pvc.Sides.prototype.setSides = function(sides){
     }
     
     if(pvc.debug) {
-        pvc.log("Invalid 'margins' option value: " + JSON.stringify(sides));
+        pvc.log("Invalid 'sides' option value: " + JSON.stringify(sides));
     }
 };
 
@@ -383,6 +383,11 @@ pv.Panel.prototype._hasZOrderChild = false;
 pv.Panel.prototype._needChildSort  = false;
 
 pv.Mark.prototype.zOrder = function(zOrder) {
+    var borderPanel = this.borderPanel;
+    if(borderPanel && borderPanel !== this){
+        return borderPanel.zOrder.apply(borderPanel, arguments);
+    }
+    
     if(!arguments.length){
         return this._zOrder;
     }

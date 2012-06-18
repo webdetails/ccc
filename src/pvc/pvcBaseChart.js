@@ -901,7 +901,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         var basePanelParent = this.parent && this.parent._multiChartPanel;
         
         this.basePanel = new pvc.BasePanel(this, basePanelParent, {
-            margins: options.margins
+            margins: options.margins,
+            paddings: options.paddings
         });
         
         this.basePanel.setSize(options.width, options.height);
@@ -919,7 +920,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 anchor:     options.titlePosition,
                 titleSize:  options.titleSize,
                 titleAlign: options.titleAlign,
-                margins:    options.titleMargins
+                margins:    options.titleMargins,
+                paddings:   options.titlePaddings
             });
         }
     },
@@ -1023,7 +1025,8 @@ pvc.BaseChart = pvc.Abstract.extend({
             markerSize: options.legendMarkerSize,
             drawLine:   options.legendDrawLine,
             drawMarker: options.legendDrawMarker,
-            margins:    options.legendMargins
+            margins:    options.legendMargins,
+            paddings:   options.legendPaddings
         });
     },
 
@@ -1164,6 +1167,10 @@ pvc.BaseChart = pvc.Abstract.extend({
             
             var points = this.options.extensionPoints;
             if(points){
+                if(mark.borderPanel){
+                    mark = mark.borderPanel;
+                }
+                
                 for (var p in points) {
                     // Starts with
                     if(p.indexOf(prefix) === 0){
@@ -1358,6 +1365,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         titleAlign:    "center", // left / right / center
         titleSize:     undefined,
         titleMargins:  undefined,
+        tittlePaddings:undefined,
         
         legend:           false,
         legendPosition:   "bottom",
@@ -1367,12 +1375,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         legendMinMarginX: undefined,
         legendMinMarginY: undefined,
         legendTextMargin: undefined,
-        legendPadding:    undefined,
+        legendPadding:    undefined, // ATTENTION: this is different from legendPaddings
         legendShape:      undefined,
         legendDrawLine:   undefined,
         legendDrawMarker: undefined,
         legendMarkerSize: undefined,
-        legendMargins: undefined,
+        legendMargins:    undefined,
+        legendPaddings:   undefined,
         
         colors: null,
 
@@ -1432,7 +1441,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         renderCallback: undefined,
 
-        margins: undefined,
+        margins:  undefined,
+        paddings: undefined,
         
         compatVersion: Infinity // numeric, 1 currently recognized
     }
