@@ -1,4 +1,3 @@
-src/def/def.js
 src/pvc/pvc.js
 src/pvc/pvc.text.js
 src/pvc/pvc.color.js

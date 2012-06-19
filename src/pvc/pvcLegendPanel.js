@@ -24,14 +24,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     legend:     null,
     legendSize: null,
     
-    /** @deprecated */
-    minMarginX: 8,    // Minimum horizontal margin, in pixels. The space before the first and after the last items. Depending on 'align', may be split in half.
-    
-    /** @deprecated */
-    minMarginY: 20, 
-    
     textMargin: 6,   // The space between the marker and the text, in pixels.
-    padding:    5,   // The space between legend items, in pixels (in all directions).
+    padding:    5,   // The space around a legend item in pixels (in all directions, half for each side).
     
     shape:      null, // "square",
     markerSize: 15,   // *diameter* of marker *zone* (the marker(s) itself is a little smaller)
@@ -123,23 +117,24 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                 var a_left   = isHorizontal ? 'left' : 'top';
                 var a_right  = this.anchorOpposite(a_left);   // left or right
                 
-                // padding is added to clientWidth to account for the one extra padding.
-                // Note that padding should only be added between cells.
-                var maxCellsPerRow = ~~((clientSize[a_width] + this.padding) / paddedCellSize[a_width]); // ~~ <=> Math.floor
+                var maxCellsPerRow = ~~(clientSize[a_width] / paddedCellSize[a_width]); // ~~ <=> Math.floor
                 if(maxCellsPerRow > 0){
                     var cellsPerRow    = Math.min(leafCount, maxCellsPerRow);
                     var rowCount       = Math.ceil(leafCount / cellsPerRow);
-                    var rowWidth       = cellsPerRow * paddedCellSize[a_width] - this.padding;
+                    var rowWidth       = cellsPerRow * paddedCellSize[a_width];
                     
                     // If the legend is bigger than the available size, multi-line and left align
                     if(rowCount > 1){
                         this.align = a_left; // Why??
                     }
                     
-                    // Request all available width
-                    requiredSize[a_width] = clientSize[a_width];
+                    // NOTE: V1 behavior requires keeping alignment code here
+                    // even if it is also being performed in the layout...
                     
-                    var tableHeight = rowCount * paddedCellSize[a_height] - this.padding;
+                    // Request used width / all available width (V1)
+                    requiredSize[a_width] = !isV1Compat ? rowWidth : clientSize[a_width];
+                    
+                    var tableHeight = rowCount * paddedCellSize[a_height];
                     requiredSize[a_height] = Math.min(clientSize[a_height], tableHeight);
                     
                     // -----------------

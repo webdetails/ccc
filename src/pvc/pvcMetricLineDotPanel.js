@@ -153,8 +153,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
          
         var myself = this,
             chart = this.chart,
-            options = chart.options,
-            invisibleFill = 'rgba(127,127,127,0.00001)';
+            options = chart.options;
 
         // ------------------
         // DATA
@@ -228,7 +227,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                     var visible = this.scene.isActive ||
                                   this.scene.isSingle;
                     if(!visible) {
-                        return invisibleFill;
+                        return pvc.invisibleFill;
                     }
                 }
                 

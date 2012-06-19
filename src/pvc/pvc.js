@@ -1,13 +1,15 @@
 
 /*global pvc:true */
-var pvc = {
+var pvc = def.globalSpace('pvc', {
     // 0 - off
     // 1 - errors 
     // 2 - errors, warnings
     // 3 - errors, warnings, info
     // 4 - verbose
+    // 5 - trash
+    // ...
     debug: 0
-};
+});
 
 // Begin private scope
 (function(){
@@ -15,6 +17,8 @@ var pvc = {
 // goldenRatio proportion
 // ~61.8% ~ 38.2%
 pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
+
+pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
 
 var arraySlice = pvc.arraySlice = Array.prototype.slice;
 
@@ -783,7 +787,7 @@ pv.Mark.prototype.isLocked = function(prop){
 
 /**
  * Function used to propagate a datum received, as a singleton list.
- * Use this to prevent re-evaluation of inherited data property functions!
+ * Used to prevent re-evaluation of inherited data property functions.
  */
 pv.dataIdentity = function(datum){
     return [datum];

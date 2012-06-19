@@ -242,10 +242,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         initLayout.call(this);
         
         // Lays out non-fill child panels and collects fill children
-        this._children.forEach(layoutChildI);
+        this._children.forEach(layoutChildI, this);
         
         // Lays out collected fill-child panels
-        fillChildren.forEach(layoutChildII);
+        fillChildren.forEach(layoutChildII, this);
         
         while(needRelayout){
             needRelayout = false;
@@ -254,8 +254,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             initLayout.call(this);
             
-            this._children.forEach(layoutChildI);
-            fillChildren.forEach(layoutChildII);
+            this._children.forEach(layoutChildI, this);
+            fillChildren.forEach(layoutChildII, this);
         }
         
         // Request required client size
@@ -268,7 +268,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             if(a === 'fill') {
                 // These are layed out on the second phase
                 fillChildren.push(child);
-            } else if(a) {
+            } else if(a) { // requires layout
                 /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
@@ -276,9 +276,11 @@ pvc.BasePanel = pvc.Abstract.extend({
                 
                 checkChildLayout.call(this, child);
                 
-                positionChild(a, child);
+                var align = this._parseAlign(a, child.align);
                 
-                updateSide(a, child);
+                positionChild.call(this, a, child, align);
+                
+                updateSide.call(this, a, child, align);
             }
         }
         
@@ -287,7 +289,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             checkChildLayout(child);
             
-            positionChild('left', child);
+            positionChild.call(this, 'fill', child);
         }
         
         function checkChildLayout(child){
@@ -319,6 +321,43 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
         }
         
+        function positionChild(side, child, align) {
+            var sidePos;
+            if(side === 'fill'){
+                side = 'left';
+                sidePos = margins.left + remSize.width / 2 - (child.width / 2);
+                align = 'middle';
+            } else {
+                sidePos = margins[side];
+            }
+            
+            var sideo, sideOPos;
+            switch(align){
+                case 'top':
+                case 'bottom':
+                case 'left':
+                case 'right':
+                    sideo = align;
+                    sideOPos = margins[sideo];
+                    break;
+                
+                case 'middle':
+                    sideo    = 'top';
+                    sideOPos = margins.top + (remSize.height / 2) - (child.height / 2);
+                    break;
+                    
+                case 'center':
+                    sideo    = 'left';
+                    sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
+                    break;
+            }
+            
+            child.setPosition(
+                    def.set({}, 
+                        side,  sidePos, 
+                        sideo, sideOPos));
+        }
+        
         // Decreases available size and increases margins
         function updateSide(side, child) {
             var sideol = aolMap[side];
@@ -327,11 +366,38 @@ pvc.BasePanel = pvc.Abstract.extend({
             margins[side]   += olen;
             remSize[sideol] -= olen;
         }
-        
-        function positionChild(side, child) {
-            var sideo = aoMap[side];
-            child.setPosition(def.set({}, side, margins[side], sideo, margins[sideo]));
+    },
+    
+    _parseAlign: function(side, align){
+        if(side === 'left' || side === 'right'){
+            switch(align){
+                case 'top':
+                case 'bottom':
+                case 'middle':
+                    break;
+                
+                default:
+                    if(align && pvc.debug >= 2){
+                        pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
+                    }
+                    align = 'top';
+            }
+        } else {
+            switch(align){
+                case 'left':
+                case 'right':
+                case 'center':
+                    break;
+                
+                default:
+                    if(align && pvc.debug >= 2){
+                        pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
+                    }
+                    align = 'left';
+            }
         }
+        
+        return align;
     },
     
     _invalidateLayout: function(){
@@ -1131,14 +1197,14 @@ pvc.BasePanel = pvc.Abstract.extend({
             .height(function() {return this.parent.selectionRect.dy; })
             .fillStyle(options.rubberBandFill)
             .strokeStyle(options.rubberBandLine);
-
+        
         // Rubber band selection behavior definition
-        if(!options.extensionPoints ||
-           !options.extensionPoints.base_fillStyle){
-
-            var invisibleFill = 'rgba(127,127,127,0.00001)';
-            rubberPvParentPanel.fillStyle(invisibleFill);
-        }
+        
+        // NOTE that as the paddingPanel does not receive extension points
+        // The foloowing code is no longer necessary
+        //if(!options.extensionPoints.base_fillStyle){
+         rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        //}
         
         // NOTE: Rubber band coordinates are always transformed to screen coordinates (see 'select' and 'selectend' events)
         var selectionEndedDate;

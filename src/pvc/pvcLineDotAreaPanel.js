@@ -48,8 +48,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             showDots  = this.showDots,
             showAreas = this.showAreas,
             showLines = this.showLines,
-            anchor = this.isOrientationVertical() ? "bottom" : "left",
-            invisibleFill = 'rgba(127,127,127,0.00001)';
+            anchor = this.isOrientationVertical() ? "bottom" : "left";
 
         // ------------------
         // DATA
@@ -223,7 +222,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                                   (!showAloneDots && this.scene.isSingle) ||
                                   (showAloneDots && this.scene.isAlone);
                     if(!visible) {
-                        return invisibleFill;
+                        return pvc.invisibleFill;
                     }
                 }
                 
