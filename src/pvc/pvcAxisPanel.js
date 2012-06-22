@@ -47,7 +47,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.isDiscrete = axis.role.grouping.isDiscrete();
     },
     
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
+    _calcLayout: function(layoutInfo){
         
         var titleSize = 0;
 
@@ -80,7 +80,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.axisSize = this.titleSize + 50;
         }
         
-        return this.createAnchoredSize(this.axisSize, clientSize);
+        return this.createAnchoredSize(this.axisSize, layoutInfo.clientSize);
     },
     
     _createCore: function() {

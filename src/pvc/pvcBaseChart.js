@@ -901,11 +901,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         var basePanelParent = this.parent && this.parent._multiChartPanel;
         
         this.basePanel = new pvc.BasePanel(this, basePanelParent, {
-            margins: options.margins,
-            paddings: options.paddings
+            margins:  options.margins,
+            paddings: options.paddings,
+            size:     {width: options.width, height: options.height}
         });
-        
-        this.basePanel.setSize(options.width, options.height);
     },
 
     /**
@@ -918,10 +917,10 @@ pvc.BaseChart = pvc.Abstract.extend({
             this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
                 title:      options.title,
                 anchor:     options.titlePosition,
-                titleSize:  options.titleSize,
-                titleAlign: options.titleAlign,
                 margins:    options.titleMargins,
-                paddings:   options.titlePaddings
+                paddings:   options.titlePaddings,
+                titleSize:  options.titleSize,
+                titleAlign: options.titleAlign
             });
         }
     },
@@ -1015,6 +1014,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
             anchor:     options.legendPosition,
             legendSize: options.legendSize,
+            legendSizeMax: options.legendSizeMax,
             font:       options.legendFont,
             align:      options.legendAlign,
             minMarginX: options.legendMinMarginX,
@@ -1371,6 +1371,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         legendPosition:   "bottom",
         legendFont:       undefined,
         legendSize:       undefined,
+        legendSizeMax:    undefined,
         legendAlign:      undefined,
         legendMinMarginX: undefined,
         legendMinMarginY: undefined,

@@ -22,9 +22,9 @@ pvc.TitlePanel = pvc.BasePanel.extend({
     /**
      * @override
      */
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
+    _calcLayout: function(layoutInfo){
         // Size will depend on positioning and font size mainly
-        return this.createAnchoredSize(this.titleSize, clientSize);
+        return this.createAnchoredSize(this.titleSize, layoutInfo.clientSize);
     },
     
     /**
@@ -80,7 +80,13 @@ pvc.TitlePanel = pvc.BasePanel.extend({
                 }
             }
         }
-
+    },
+    
+    /**
+     * @override
+     */
+    applyExtensions: function(){
+        
         // Extend title label
         this.extend(this.pvLabel, "titleLabel_");
     }

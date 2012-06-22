@@ -8,8 +8,8 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * 
      * @override
      */
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
-        
+    _calcLayout: function(layoutInfo){
+        var clientSize = def.copyOwn(layoutInfo.clientSize);
         var chart = this.chart;
         var data  = chart.visualRoles('multiChartColumn')
                          .flatten(chart.data, {visible: true});
@@ -58,7 +58,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         var minHeight = Number(options.multiChartMinHeight);
         if(isNaN(minHeight) || !isFinite(minHeight) || minHeight < 0) {
             if(minWidth > 0){
-                minHeight = minWidth / pvc.goldenRatio;
+                minHeight = this._calulateHeight(minWidth);
             } else {
                 minHeight = null;
             }
@@ -89,6 +89,59 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             'colCount',  colCount);
         
         return clientSize;
+    },
+    
+    _calulateHeight: function(totalWidth){
+        var chart = this.chart;
+        
+        if(chart instanceof pvc.PieChart){
+            // These are square bounded
+            return totalWidth;
+        }
+        
+        var options = chart.options;
+        var chromeHeight = 0;
+        var chromeWidth  = 0;
+        
+        // Try to estimate "chrome" of small chart
+        if(chart instanceof pvc.CartesianAbstract){
+            var isVertical = chart.isOrientationVertical();
+            var size;
+            if(options.showXScale){
+                size = parseFloat(options.xAxisSize || 
+                                  (isVertical ? options.baseAxisSize : options.orthoAxisSize) ||
+                                  options.axisSize);
+                if(isNaN(size)){
+                    size = totalWidth * 0.1;
+                }
+                
+                if(isVertical){
+                    chromeHeight += size;
+                } else {
+                    chromeWidth += size;
+                }
+            }
+            
+            if(options.showYScale){
+                size = parseFloat(options.yAxisSize || 
+                                  (isVertical ? options.orthoAxisSize : options.baseAxisSize) ||
+                                  options.axisSize);
+                if(isNaN(size)){
+                    size = totalWidth * 0.1;
+                }
+                
+                if(isVertical){
+                    chromeWidth += size;
+                } else {
+                    chromeHeight += size;
+                }
+            }
+        }
+        
+        var contentWidth  = Math.max(totalWidth - chromeWidth, 10);
+        var contentHeight = contentWidth / pvc.goldenRatio;
+        
+        return  chromeHeight + contentHeight;
     },
     
     _createCore: function(li){

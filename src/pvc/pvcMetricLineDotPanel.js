@@ -40,9 +40,10 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
     /*
     * @override
     */
-   _calcLayout: function(clientSize, layoutInfo){
+   _calcLayout: function(layoutInfo){
        /* Adjust axis offset to avoid dots getting off the content area */
        
+       var clientSize = layoutInfo.clientSize;
        var chart = this.chart;
        
        if(chart._dotSizeDim){

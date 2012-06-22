@@ -134,6 +134,28 @@ var def = /** @lends def */{
         return o && (v = o[p]) != null ? v : dv;
     },
     
+    getPath: function(o, path, create, dv){
+        if(o && path != null){
+            var parts = def.isArray(path) ? path : path.split('.');
+            var L = parts.length;
+            if(L){
+                var i = 0;
+                while(i < L){
+                    var part = parts[i++];
+                    var value = o[part];
+                    if(value == null){
+                        if(!create){ return dv; }
+                        
+                        value = o[part] = {};
+                    }
+                    o = value;
+                }
+            }
+        }
+        
+        return o;
+    },
+        
     /** 
      * Creates a property getter function,
      * for a specified property name.
@@ -476,7 +498,7 @@ var def = /** @lends def */{
     },
     
     isArray: function(v){
-        return v && (v instanceof Array);
+        return (v instanceof Array);
     },
     
     isString: function(v){

@@ -250,35 +250,35 @@ pvc.Sides.prototype.setSides = function(sides){
         switch(comps.length){
             case 1:
                 this.set('all', comps[0]);
-                return;
+                return this;
                 
             case 2:
                 this.set('top',    comps[0]);
                 this.set('left',   comps[1]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[0]);
-                return;
+                return this;
                 
             case 3:
                 this.set('top',    comps[0]);
                 this.set('left',   comps[1]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[2]);
-                return;
+                return this;
                 
             case 4:
                 this.set('top',    comps[0]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[2]);
                 this.set('left',   comps[3]);
-                return;
+                return this;
                 
             case 0:
-                return;
+                return this;
         }
     } else if(typeof sides === 'number') {
         this.set('all', sides);
-        return;
+        return this;
     } else if (typeof sides === 'object') {
         this.set('all', sides.all);
         for(var p in sides){
@@ -286,12 +286,14 @@ pvc.Sides.prototype.setSides = function(sides){
                 this.set(p, sides[p]);
             }
         }
-        return;
+        return this;
     }
     
     if(pvc.debug) {
-        pvc.log("Invalid 'sides' option value: " + JSON.stringify(sides));
+        pvc.log("Invalid 'sides' value: " + JSON.stringify(sides));
     }
+    
+    return this;
 };
 
 pvc.Sides.prototype.set = function(prop, value){
@@ -378,7 +380,7 @@ pvc.PercentValue.parse = function(value){
     }
 };
 
-/* Protovis Z-Order support */
+/* Protovis Z-Order support between sibling marks */
 
 // Default values
 pv.Mark.prototype._zOrder = 0;
@@ -998,15 +1000,74 @@ pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
 
 var Size = def.type('pvc.Size')
 .init(function(width, height){
-    if(width instanceof Object) {
-        this.width  = width.width  || 0;
-        this.height = width.height || 0;
+    if(arguments.length === 1){
+        if(width != null){
+            this.setSize(width);
+        }
     } else {
-        this.width  = width  || 0;
-        this.height = height || 0;
+        if(width != null){
+            this.width  = width;
+        }
+        
+        if(height != null){
+            this.height = height;
+        }
     }
 })
 .add({
+    setSize: function(size, keyArgs){
+        if(typeof size === 'string'){
+            var comps = size.split(/\s+/).map(function(comp){
+                return pvc.PercentValue.parse(comp);
+            });
+            
+            switch(comps.length){
+                case 1: 
+                    this.set(def.get(keyArgs, 'singleProp', 'all'), comps[0]);
+                    return this;
+                    
+                case 2:
+                    this.set('width',  comps[0]);
+                    this.set('height', comps[1]);
+                    return this;
+                    
+                case 0:
+                    return this;
+            }
+        } else if(typeof size === 'number') {
+            this.set(def.get(keyArgs, 'singleProp', 'all'), size);
+            return this;
+        } else if (typeof size === 'object') {
+            this.set('all', size.all);
+            for(var p in size){
+                if(p !== 'all'){
+                    this.set(p, size[p]);
+                }
+            }
+            return this;
+        }
+        
+        if(pvc.debug) {
+            pvc.log("Invalid 'size' value: " + JSON.stringify(size));
+        }
+        return this;
+    },
+    
+    set: function(prop, value){
+        value = pvc.PercentValue.parse(value);
+        if(value != null){
+            if(prop === 'all'){
+                // expand
+                pvc.Size.names.forEach(function(p){
+                    this[p] = value;
+                }, this);
+                
+            } else if(def.hasOwn(pvc.Size.namesSet, prop)){
+                this[prop] = value;
+            }
+        }
+    },
+    
     clone: function(){
         return new Size(this.width, this.height);
     },
@@ -1017,10 +1078,29 @@ var Size = def.type('pvc.Size')
                Math.min(this.height, size.height));
     },
     
-    setProp: function(prop, v){
-        this[prop] = v || 0;
+    resolve: function(refSize){
+        var size = {};
+        
+        pvc.Size.names.forEach(function(length){
+            var lengthValue = this[length];
+            if(lengthValue != null){
+                if(typeof(lengthValue) === 'number'){
+                    size[length] = lengthValue;
+                } else if(refSize){
+                    var refLength = refSize[length];
+                    if(refLength != null){
+                        size[length] = lengthValue.resolve(refLength);
+                    }
+                }
+            }
+        }, this);
+        
+        return size;
     }
 });
+
+pvc.Size.names = ['width', 'height'];
+pvc.Size.namesSet = pv.dict(pvc.Size.names, def.constant(true));
 
 // --------------------
 
