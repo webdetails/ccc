@@ -73,8 +73,8 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                 var ao  = aoMap[a];
                 var al  = alMap[a];
                 var aol = aolMap[a];
-                var length      = child[al];
-                var olength     = remSize[aol];
+                var length      = remSize[al];
+                var olength     = child[aol];
                 var childSizeII = new pvc.Size(def.set({}, al, length, aol, olength));
                 
                 child.layout(childSizeII, childReferenceSize, childKeyArgs);

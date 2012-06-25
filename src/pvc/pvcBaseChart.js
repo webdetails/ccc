@@ -1431,11 +1431,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         hoverable:  false,
         selectable: false,
+        
         selectionChangedAction: null,
         
-        // Selection
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
+        clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
+        
         // Selection - Rubber band
         rubberBandFill: 'rgba(203, 239, 163, 0.6)', // 'rgba(255, 127, 0, 0.15)',
         rubberBandLine: '#86fe00', //'rgb(255,127,0)',

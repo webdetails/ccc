@@ -100,6 +100,8 @@ def.scope(function(){
     }
    
     function renderAllChartExamples(){
+        $("#examples div").remove();
+        
         for(var id in chartExamples){ 
             $e.render(id);
         }
@@ -109,6 +111,11 @@ def.scope(function(){
 pv.listenForPageLoad(function() {
     // When everything is ready, click all tryMe buttons
     $("button.tryMe").click();
+    
+    pvc.examples.renderAll();
+});
+
+$(window).resize(function(){
     
     pvc.examples.renderAll();
 });

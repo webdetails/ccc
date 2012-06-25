@@ -908,14 +908,14 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         if(!tipsyEvent) {
             switch(mark.type) {
-                case 'dot':
-                case 'line':
-                case 'area':
-                    this._requirePointEvent();
-                    tipsyEvent = 'point';
-                    tipsySettings.usesPoint = true;
-                    break;
-                    
+//                case 'dot':
+//                case 'line':
+//                case 'area':
+//                    this._requirePointEvent();
+//                    tipsyEvent = 'point';
+//                    tipsySettings.usesPoint = true;
+//                    break;
+                
                 default:
                     tipsyEvent = 'mouseover';
             }
@@ -1199,7 +1199,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         var isSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvPanel,
+        var rubberPvParentPanel = this.pvPanel.borderPanel,
             toScreen;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
@@ -1212,33 +1212,15 @@ pvc.BasePanel = pvc.Abstract.extend({
             .strokeStyle(options.rubberBandLine);
         
         // Rubber band selection behavior definition
-        
-        // NOTE that as the paddingPanel does not receive extension points
-        // The following code is no longer necessary
-        //if(!options.extensionPoints.base_fillStyle){
-         rubberPvParentPanel.fillStyle(pvc.invisibleFill);
-        //}
+        if(!this._getExtension('base', 'fillStyle')){
+            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        }
         
         // NOTE: Rubber band coordinates are always transformed to screen coordinates (see 'select' and 'selectend' events)
+         
         var selectionEndedDate;
         rubberPvParentPanel
             .event('mousedown', pv.Behavior.selector(false))
-            
-            .event("click", function() {
-                // It happens sometimes that the click is fired 
-                //  after mouse up, ending up clearing a just made selection.
-                if(selectionEndedDate){
-                    var timeSpan = new Date() - selectionEndedDate;
-                    if(timeSpan < 300){
-                        selectionEndedDate = null;
-                        return;
-                    }
-                }
-                
-                if(data.owner.clearSelected()) {
-                    myself._onSelectionChanged();
-                }
-            })
             .event('select', function(){
                 if(!isSelecting && !myself.isAnimating()){
                     var rb = this.selectionRect;
@@ -1278,6 +1260,25 @@ pvc.BasePanel = pvc.Abstract.extend({
                     myself.rubberBand = null;
                 }
             });
+        
+        if(options.clearSelectionMode === 'emptySpaceClick'){
+            rubberPvParentPanel
+                .event("click", function() {
+                    // It happens sometimes that the click is fired 
+                    //  after mouse up, ending up clearing a just made selection.
+                    if(selectionEndedDate){
+                        var timeSpan = new Date() - selectionEndedDate;
+                        if(timeSpan < 300){
+                            selectionEndedDate = null;
+                            return;
+                        }
+                    }
+                    
+                    if(data.owner.clearSelected()) {
+                        myself._onSelectionChanged();
+                    }
+                });
+        }
     },
     
     _dispatchRubberBandSelectionTop: function(ev){

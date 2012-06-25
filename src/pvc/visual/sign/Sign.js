@@ -49,25 +49,22 @@ def.type('pvc.visual.Sign')
             var onEvent,
                 offEvent;
 
-//            switch(pvMark.type) {
+            switch(pvMark.type) {
 //                default:
 //                case 'dot':
 //                case 'line':
 //                case 'area':
 //                case 'rule':
-                    onEvent  = 'point';
-                    offEvent = 'unpoint';
-                    panel._requirePointEvent();
-//                    break;
-
-//                default:
 //                    onEvent  = 'point';
 //                    offEvent = 'unpoint';
 //                    panel._requirePointEvent();
-//                    onEvent = 'mouseover';
-//                    offEvent = 'mouseout';
 //                    break;
-//            }
+
+                default:
+                    onEvent = 'mouseover';
+                    offEvent = 'mouseout';
+                    break;
+            }
 
             pvMark
                 .event(onEvent, function(scene){

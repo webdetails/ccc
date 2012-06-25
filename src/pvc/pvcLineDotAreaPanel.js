@@ -214,7 +214,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                  * Despite !showDots,
                  * show a dot anyway when:
                  * 1) it is active, or
-                 * 2) it is single  (the only dot in the dataset) (and in areas+discreteCateg+stacked case)
+                 * 2) it is single  (the only dot in its series and there's only one category) (and in areas+discreteCateg+stacked case)
                  * 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                  */
                 if(!showDots){
@@ -817,7 +817,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 fromScene = toScene;
             }
             
-            if(notNullCount === 1 && firstAloneScene){
+            if(notNullCount === 1 && firstAloneScene && categCount === 1){
                 firstAloneScene.isSingle = true;
             }
             
