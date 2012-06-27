@@ -98,7 +98,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         } else {
             // Set default margins
             if(options.margins === undefined){
-                options.margins = def.set({}, this.anchorOpposite(anchor), new pvc.PercentValue(0.03));
+                options.margins = def.set({}, this.anchorOpposite(anchor), 10);
             }
         }
         

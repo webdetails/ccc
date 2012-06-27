@@ -1,4 +1,4 @@
-// 1f239de2b863e9fc03b2159620dba6173dae1d38
+// c8b3d080899e9b16b53df1024bbc93ee4263cc67
 /**
  * @class The built-in Array class.
  * @name Array
@@ -2765,6 +2765,18 @@ pv.Vector = function(x, y) {
  */
 pv.Vector.prototype.perp = function() {
   return new pv.Vector(-this.y, this.x);
+};
+
+/**
+ * Returns a vector which is the result of rotating this vector by the specified angle.
+ * 
+ * @returns {pv.Vector} a rotated vector.
+ */
+pv.Vector.prototype.rotate = function(angle) {
+    var c = Math.cos(angle);
+    var s = Math.sin(angle);
+    
+    return new pv.Vector(c*this.x -s*this.y, s*this.x + c*this.y);
 };
 
 /**

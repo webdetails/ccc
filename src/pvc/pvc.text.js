@@ -68,7 +68,13 @@ def.scope(function(){
         };
     }
 
-    function trimToWidth(len, text, font, trimTerminator){
+    function trimToWidthB(len, text, font, trimTerminator, before){
+        len += getTextLength(trimTerminator, font);
+        
+        return trimToWidth(len, text, font, trimTerminator, before);
+    }
+    
+    function trimToWidth(len, text, font, trimTerminator, before){
       if(text === '') {
           return text;
       }
@@ -79,15 +85,151 @@ def.scope(function(){
       }
 
       if(textLen > len * 1.5){ //cutoff for using other algorithm
-        return trimToWidthBin(len,text,font,trimTerminator);
+        return trimToWidthBin(len,text,font,trimTerminator, before);
       }
 
       while(textLen > len){
-        text = text.slice(0,text.length -1);
+        text = before ? text.slice(1) : text.slice(0,text.length -1);
         textLen = getTextLength(text, font);
       }
 
-      return text + trimTerminator;
+      return before ? (trimTerminator + text) : (text + trimTerminator);
+    }
+    
+    function justifyText(text, lineWidth, font){
+        var lines = [];
+        
+        if(lineWidth < getTextLength('a', font)){
+            // Not even one letter fits...
+            return lines;
+        } 
+        
+        var words = (text || '').split(/\s+/);
+        
+        var line = "";
+        while(words.length){
+            var word = words.shift();
+            if(word){
+                var nextLine = line ? (line + " " + word) : word;
+                if(pvc.text.getTextLength(nextLine, font) > lineWidth){
+                    // The word by itself may overflow the line width
+                    
+                    // Start new line
+                    if(line){
+                        lines.push(line);
+                    }
+                    
+                    line = word;
+                } else {
+                    line = nextLine; 
+                }
+            }
+        }
+        
+        if(line){
+            lines.push(line);
+        }
+        
+        return lines;
+    }
+    
+    function getLabelSize(textWidth, textHeight, align, baseline, angle, margin){
+        var width  = margin + Math.abs(textWidth * Math.cos(-angle));
+        var height = margin + Math.abs(textWidth * Math.sin(-angle));
+        return {
+            width:  width,
+            height: height
+        };
+    }
+    
+    /* Returns a label's BBox relative to its anchor point */
+    function getLabelBBox(textWidth, textHeight, align, baseline, angle, margin){
+        /* text-baseline, text-align */
+        
+        // From protovis' SvgLabel.js
+        
+        // In text line coordinates. y points downwards
+        var x, y;
+        
+        switch (baseline) {
+            case "middle":
+                y = textHeight / 2; // estimate middle (textHeight is not em, the height of capital M)
+                break;
+              
+            case "top":
+                y = margin + textHeight;
+                break;
+          
+            case "bottom":
+                y = -margin; 
+                break;
+        }
+        
+        switch (align) {
+            case "right": 
+                x = -margin -textWidth; 
+                break;
+          
+            case "center": 
+                x = -textWidth / 2;
+                break;
+          
+            case "left": 
+                x = margin;
+                break;
+        }
+        
+        var bottomLeft  = pv.vector(x, y);
+        var bottomRight = bottomLeft.plus(textWidth, 0);
+        var topRight    = bottomRight.plus(0, -textHeight);
+        var topLeft     = bottomLeft .plus(0, -textHeight);
+        
+        var min, max;
+        
+        var corners = [bottomLeft, bottomRight, topLeft, topRight];
+        
+        if(angle === 0){
+            min = topLeft;
+            max = bottomRight;
+        } else {
+            // Bounding box:
+            
+            corners.forEach(function(corner, index){
+                corner = corners[index] = corner.rotate(angle);
+                if(min == null){
+                    min = pv.vector(corner.x, corner.y);
+                } else {
+                    if(corner.x < min.x){
+                        min.x = corner.x;
+                    }
+                    
+                    if(corner.y < min.y){
+                        min.y = corner.y;
+                    }
+                }
+                
+                if(max == null){
+                    max = pv.vector(corner.x, corner.y);
+                } else {
+                    if(corner.x > max.x){
+                        max.x = corner.x;
+                    }
+                    
+                    if(corner.y > max.y){
+                        max.y = corner.y;
+                    }
+                }
+            });
+        }
+        
+        var bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        
+        bbox.sourceCorners   = corners;
+        bbox.sourceAngle     = angle;
+        bbox.sourceAlign     = align;
+        bbox.sourceTextWidth = textWidth;
+        
+        return bbox;
     }
     
     // --------------------------
@@ -180,9 +322,10 @@ def.scope(function(){
         return pv.Vml.text_dims(text, font).height;
     }
 
-    function trimToWidthBin(len, text, font, trimTerminator){
+    function trimToWidthBin(len, text, font, trimTerminator, before){
 
-        var high = text.length-2,
+        var ilen = text.length,
+            high = ilen - 2,
             low = 0,
             mid,
             textLen;
@@ -190,34 +333,31 @@ def.scope(function(){
         while(low <= high && high > 0){
 
             mid = Math.ceil((low + high)/2);
-            textLen = getTextLength(text.slice(0, mid), font);
+            
+            var textMid = before ? text.slice(ilen - mid) : text.slice(0, mid);
+            textLen = getTextLength(textMid, font);
             if(textLen > len){
                 high = mid - 1;
-            } else if( getTextLength(text.slice(0, mid + 1), font) < len ){
+            } else if( getTextLength(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font) < len ){
                 low = mid + 1;
             } else {
-                return text.slice(0, mid) + trimTerminator;
+                return before ? (trimTerminator + textMid) : (textMid + trimTerminator);
             }
         }
 
-        return text.slice(0,high) + trimTerminator;
+        return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
     }
-
-    /*
-    //TODO: use for IE if non-svg option kept
-    doesTextSizeFit: function(length, text, font){
-        var MARGIN = 4;//TODO: hcoded
-        var holder = this.getTextSizePlaceholder();
-        holder.text(text);
-        return holder.width() - MARGIN <= length;
-    }
-    */
-
+    
     pvc.text = {
         getTextLength: getTextLength,
         getFontSize:   getFontSize,
         getTextHeight: getTextHeight,
         getFitInfo:    getFitInfo,
-        trimToWidth:   trimToWidth
+        trimToWidth:   trimToWidth,
+        trimToWidthB:  trimToWidthB,
+        justify:       justifyText,
+        getLabelSize:  getLabelSize,
+        getLabelBBox:  getLabelBBox
+        
     };
 });

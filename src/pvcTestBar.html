@@ -65,6 +65,7 @@
         <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -113,7 +114,7 @@ proportional to the values that they represent.
 <h4>Title properties</h4>
 <ul>
   <li>title</li>
-  <li>titlePosition</li>
+  <li>titlePosition</li>
   <li>titleSize</li>
 </ul>
 <h4>Lifecycle</h4>
@@ -270,9 +271,7 @@ var bar2 = new pvc.BarChart({
     //originIsZero: false,
     //axisOffset: 0.04,
     yAxisPosition: "left",
-    yAxisSize: 70,
     xAxisPosition: "bottom",
-    xAxisSize: 20,
     xAxisFullGrid: true,
     yAxisFullGrid: true,
     xAxisEndLine:  true,
@@ -318,7 +317,6 @@ var bar2b = new pvc.BarChart({
     legend: true,
     legendPosition: "right",
     showValues: false,
-    baseAxisSize: 70,
     axisFullGrid: true,
     axisEndLine:  true,
     axisDomainRoundMode: 'tick',
@@ -356,7 +354,6 @@ var bar3 = new pvc.BarChart({
     clickable: true,
     selectable: true,
     hoverable: true,
-    xAxisSize: 60,
     yAxisDomainRoundMode:"tick",
     legend:true,
     legendPosition:"right",
@@ -391,7 +388,6 @@ var bar3b = new pvc.BarChart({
     legend: true,
     legendPosition: "right",
     showValues: false,
-    baseAxisSize: 70,
     axisFullGrid: true,
     axisEndLine:  true,
     axisZeroLine: true,
@@ -427,8 +423,7 @@ var bar4 = new pvc.BarChart({
     animate: false,
     legend:  true,
     legendPosition: "right",
-    xAxisDomainRoundMode:"tick",
-    yAxisSize: 70
+    xAxisDomainRoundMode:"tick"
 });
 
 bar4.setData(relational_01,{
@@ -463,7 +458,6 @@ var bar6 = new pvc.BarChart({
     legend: true,
     legendPosition: "right",
     showValues: false,
-    baseAxisSize: 70,
     axisFullGrid: true,
     axisEndLine:  true,
     axisZeroLine: true,
@@ -501,7 +495,6 @@ var bar5 = new pvc.BarChart({
     stacked:true,
     selectable:true,
     hoverable: true,
-    yAxisSize:50,
     yAxisDomainRoundMode:"tick",
     panelSizeRatio:0.8,
     barSizeRatio:0.9,

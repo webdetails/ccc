@@ -25,22 +25,25 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
             contentPanel = chart._mainContentPanel;
         if(contentPanel) {
             var axes = chart.axes;
-            if(axes.x.option('EndLine')) {
+            var xAxis = axes.x;
+            var yAxis = axes.y;
+            
+            if(xAxis.option('EndLine')) {
                 // Frame lines parallel to x axis
-                this.xFrameRule = this._createFrameRule(axes.x);
+                this.xFrameRule = this._createFrameRule(xAxis);
             }
 
-            if(axes.y.option('EndLine')) {
+            if(yAxis.option('EndLine')) {
                 // Frame lines parallel to y axis
-                this.yFrameRule = this._createFrameRule(axes.y);
+                this.yFrameRule = this._createFrameRule(yAxis);
             }
 
-            if(axes.x.option('ZeroLine')) {
-                this.xZeroLine = this._createZeroLine(axes.x);
+            if(xAxis.scaleType === 'Continuous' && xAxis.option('ZeroLine')) {
+                this.xZeroLine = this._createZeroLine(xAxis);
             }
 
-            if(axes.y.option('ZeroLine')) {
-                this.yZeroLine = this._createZeroLine(axes.y);
+            if(yAxis.scaleType === 'Continuous' && yAxis.option('ZeroLine')) {
+                this.yZeroLine = this._createZeroLine(yAxis);
             }
         }
     },
@@ -51,8 +54,10 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
 
         // Domain crosses zero?
         if(domain[0] * domain[1] <= 0){
-            var a = axis.orientation === 'x' ? 'bottom' : 'left',
-                ao = this.anchorOrtho(a),
+            var a   = axis.orientation === 'x' ? 'bottom' : 'left',
+                al  = this.anchorLength(a),
+                ao  = this.anchorOrtho(a),
+                aol = this.anchorOrthoLength(a),
                 orthoAxis = this._getOrthoAxis(axis.type),
                 orthoScale = orthoAxis.scale,
                 orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
@@ -63,7 +68,7 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                                 0 :
                                 orthoScale.offset),
 
-                length   = orthoFullGridCrossesMargin ?
+                olength   = orthoFullGridCrossesMargin ?
                                     orthoScale.size :
                                     orthoScale.offsetSize;
             
@@ -84,8 +89,8 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                 .zOrder(-9)
                 .strokeStyle("#808285")
                 [a](position)
-                [this.anchorOrthoLength(a)](length)
-                [this.anchorLength(a)](null)
+                [aol](olength)
+                [al](null)
                 [ao](zeroPosition)
                 //.svg(null)
                 ;

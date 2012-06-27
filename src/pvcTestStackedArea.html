@@ -65,6 +65,7 @@
         <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -245,8 +246,6 @@ var stackedArea2 = new pvc.StackedAreaChart({
         showDots: true,
         
         selectable: true,
-        yAxisSize: 30,
-        xAxisSize: 30,
         xAxisFullGrid: true,
         yAxisFullGrid: true,
         xAxisEndLine: true,
@@ -290,8 +289,6 @@ This is how a huge dataset looks like rendered with a stacked area chart:<br>
           timeSeries: true,
           timeSeriesFormat: "%Y-%m-%d",
 
-          yAxisSize: 30,
-          xAxisSize: 30,
           xAxisFullGrid: true,
           yAxisFullGrid: true,
           extensionPoints: {

@@ -65,6 +65,7 @@
         <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -247,10 +248,8 @@ var wf1 = new pvc.WaterfallChart({
     yAxisPosition: "left",
     xAxisPosition: "bottom",
 
-    orthoAxisSize: 40,
     orthoAxisDomainRoundMode: 'tick',
     orthoAxisDesiredTickCount: 10,
-    baseAxisSize:  120,
 
     extensionPoints: {
         //barWaterfallLine_strokeStyle: 'red',
@@ -323,10 +322,8 @@ var wf2 = new pvc.WaterfallChart({
     showXScale: true,
     showYScale: true,
     yAxisPosition: "left",
-    yAxisSize: 40,
     xAxisPosition: "bottom",
-    xAxisSize: 30,
-
+    
     extensionPoints: {
         titleLabel_font: "16px sans-serif",         
     }});
@@ -372,9 +369,7 @@ var wf3 = new pvc.WaterfallChart({
     showXScale: true,
     showYScale: true,
     yAxisPosition: "left",
-    yAxisSize: 40,
     xAxisPosition: "bottom",
-    xAxisSize: 30,
 
     extensionPoints: {
         titleLabel_font: "16px sans-serif",
@@ -420,9 +415,7 @@ var wf4 = new pvc.WaterfallChart({
     showXScale: true,
     showYScale: true,
     yAxisPosition: "left",
-    yAxisSize: 45,
     xAxisPosition: "bottom",
-    xAxisSize: 30,
     xAxisFullGrid: true,
     yAxisFullGrid: true,
     xAxisEndLine: true,

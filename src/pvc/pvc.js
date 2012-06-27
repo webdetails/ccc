@@ -220,6 +220,38 @@ pv.Format.createFormatter = function(pvFormat) {
     return format;
 };
 
+pvc.parseAlign = function(side, align){
+    if(side === 'left' || side === 'right'){
+        switch(align){
+            case 'top':
+            case 'bottom':
+            case 'middle':
+                break;
+            
+            default:
+                if(align && pvc.debug >= 2){
+                    pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
+                }
+                align = 'top';
+        }
+    } else {
+        switch(align){
+            case 'left':
+            case 'right':
+            case 'center':
+                break;
+            
+            default:
+                if(align && pvc.debug >= 2){
+                    pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
+                }
+                align = 'left';
+        }
+    }
+    
+    return align;
+};
+
 /**
  * Creates a margins/sides object.
  * @constructor
@@ -638,7 +670,7 @@ pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
             domaBeg = doma[0],
             domaEnd = doma[doma.length - 1],
             
-            // Is is an ascending or descending scale?
+            // Is it an ascending or descending scale?
             // Assuming the scale is monotonic...
             domaAsc = domaBeg < domaEnd,
             
@@ -1054,16 +1086,18 @@ var Size = def.type('pvc.Size')
     },
     
     set: function(prop, value){
-        value = pvc.PercentValue.parse(value);
-        if(value != null){
-            if(prop === 'all'){
-                // expand
-                pvc.Size.names.forEach(function(p){
-                    this[p] = value;
-                }, this);
-                
-            } else if(def.hasOwn(pvc.Size.namesSet, prop)){
-                this[prop] = value;
+        if(value != null && def.hasOwn(pvc.Size.namesSet, prop)){
+            value = pvc.PercentValue.parse(value);
+            if(value != null){
+                if(prop === 'all'){
+                    // expand
+                    pvc.Size.names.forEach(function(p){
+                        this[p] = value;
+                    }, this);
+                    
+                } else {
+                    this[prop] = value;
+                }
             }
         }
     },

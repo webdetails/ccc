@@ -66,6 +66,7 @@
         <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -102,7 +103,6 @@
                 hoverable: true,
                 margins: {all: 10},
                 xAxisFullGrid: true,
-                yAxisSize: 30,
                 yAxisDomainRoundMode: 'tick',
                 timeSeries: false,
                 //timeSeriesFormat: "%Y-%m-%d",
@@ -140,9 +140,7 @@
                 orientation: 'horizontal',
                 stacked:     true,
                 xAxisTitle:  "Quantity sold",
-                xAxisSize:   50,
                 yAxisTitle:  "Country",
-                yAxisSize:   90,
                 xAxisDomainRoundMode:"tick",
                 showValues:  false,
 
@@ -179,8 +177,6 @@
                 
                 /* Small charts */
                 //orientation: 'horizontal',
-                yAxisSize:   40,
-                xAxisSize:   90,
                 yAxisDesiredTickCount: 4,
                 showValues:  false,
                 showAreas:   true,
@@ -205,7 +201,7 @@
                     quarter:   {label: "Quarter", formatter: steelWheels01.yearAndQuarterFormatter },
                     territory: {label: "Territory", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
                     country:   {label: "Country", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
-                    line:      {label: "Product Line", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    line:      {label: "Product Line", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
                     sales:     {label: "Sales", valueType: Number}
                 },
                     
@@ -302,8 +298,6 @@
                 //orientation: 'horizontal',
                 originIsZero: false,
                 
-                yAxisSize:  60,
-                xAxisSize:  40,
                 showLines:  false,
                 showValues: false,
                 
@@ -373,9 +367,7 @@
                 orientation: 'horizontal',
                 stacked:     true,
                 //xAxisTitle:  "Sales",
-                xAxisSize:   50,
                 //yAxisTitle:  "Product Line",
-                yAxisSize:   90,
                 xAxisDomainRoundMode:"tick",
                 showValues:  false,
                 legendMinMarginX: 40,

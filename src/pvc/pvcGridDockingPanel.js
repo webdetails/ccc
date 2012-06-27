@@ -39,12 +39,45 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         }
         
         function positionChildI(side, child) {
-            child.setPosition(def.set({}, side, margins[side]));
+            var sidePos;
+            if(side === 'fill'){
+                side = 'left';
+                sidePos = margins.left + remSize.width / 2 - (child.width / 2);
+            } else {
+                sidePos = margins[side];
+            }
+            
+            child.setPosition(def.set({}, side, sidePos));
         }
         
-        function positionChild(side, child) {
-            var sideo = aoMap[side];
-            child.setPosition(def.set({}, side, margins[side], sideo, margins[sideo]));
+        function positionChildII(child, align) {
+            var sideo;
+            if(align === 'fill'){
+                align = 'middle';
+            }
+            
+            var sideOPos;
+            switch(align){
+                case 'top':
+                case 'bottom':
+                case 'left':
+                case 'right':
+                    sideo = align;
+                    sideOPos = margins[sideo];
+                    break;
+                
+                case 'middle':
+                    sideo    = 'bottom';
+                    sideOPos = margins.bottom + (remSize.height / 2) - (child.height / 2);
+                    break;
+                    
+                case 'center':
+                    sideo    = 'left';
+                    sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
+                    break;
+            }
+            
+            child.setPosition(def.set({}, sideo, sideOPos));
         }
         
         function layoutChildI(child) {
@@ -68,9 +101,9 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             if(a === 'fill') {
                 child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
                 
-                positionChild('left', child);
+                positionChildI (a, child);
+                positionChildII(child, a);
             } else if(a) {
-                var ao  = aoMap[a];
                 var al  = alMap[a];
                 var aol = aolMap[a];
                 var length      = remSize[al];
@@ -79,7 +112,9 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                 
                 child.layout(childSizeII, childReferenceSize, childKeyArgs);
                 
-                positionChildI(ao, child);
+                var align = pvc.parseAlign(a, child.align);
+                
+                positionChildII(child, align);
             }
         }
         

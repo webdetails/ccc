@@ -25,20 +25,34 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     ruleCrossesMargin: true,
     zeroLine: false, // continuous axis
     font: '9px sans-serif', // label font
-    titleFont: '12px sans-serif',
-    title: undefined,
-    titleSize: 0,
 
     // To be used in linear scales
     domainRoundMode: 'none',
     desiredTickCount: null,
     minorTicks:       true,
     
+    _isScaleSetup: false,
+    
     constructor: function(chart, parent, axis, options) {
         
         options = def.create(options, {
             anchor: axis.option('Position')
         });
+        
+        
+        
+        // sizeMax
+        if(options.sizeMax == null){
+            var sizeMax = options.axisSizeMax;
+            if(sizeMax != null){
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
+                var anchor = options.anchor || this.anchor;
+                
+                options.sizeMax = new pvc.Size()
+                                    .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
+            }
+        }
         
         this.base(chart, parent, options);
         
@@ -49,49 +63,204 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     _calcLayout: function(layoutInfo){
         
-        var titleSize = 0;
-
-        if(this.title){
-            titleSize = Math.ceil(
-                            pvc.text.getTextHeight(this.title, this.titleFont) *
-                            pvc.goldenRatio);
-
-            if(this.titleSize > titleSize){
-                titleSize = this.titleSize;
-            }
-
-            if(this.axisSize  != null &&
-               this.titleSize != null &&
-               titleSize > this.axisSize){
-               
-                if(pvc.debug >= 2) {
-                    pvc.log("WARNING: Inconsistent options '" +
-                                this.panelName + "TitleSize: " +  JSON.stringify(this.titleSize) +
-                                this.panelName + "Size: " +  JSON.stringify(this.axisSize));
-               }
-               
-               titleSize = this.axisSize;
-            }
+        var scale = this.axis.scale;
+        
+        if(!this._isScaleSetup){
+            this.pvScale = scale;
+            this.scale   = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
+            
+            this.extend(scale, this.panelName + "Scale_");
+            
+            this._isScaleSetup = true;
         }
-
-        this.titleSize = titleSize;
-
-        if(this.axisSize == null){
-            this.axisSize = this.titleSize + 50;
+        
+        var labelBBox;
+        
+        function labelLayout(){
+            var labelExtId = this.panelName + 'Label';
+            
+            var font = this.font;
+                
+            var align = this._getExtension(labelExtId, 'textAlign');
+            if(typeof align !== 'string'){
+                align = this.isAnchorTopOrBottom() ? 
+                        "center" : 
+                        (this.anchor == "left") ? "right" : "left";
+            }
+            
+            var baseline = this._getExtension(labelExtId, 'textBaseline');
+            if(typeof baseline !== 'string'){
+                switch (this.anchor) {
+                    case "right":
+                    case "left":
+                    case "center": 
+                        baseline = "middle";
+                        break;
+                        
+                    case "bottom": 
+                        baseline = "top";
+                        break;
+                      
+                    default:
+                    //case "top": 
+                        baseline = "bottom";
+                        //break;
+                }
+            } 
+            
+            var angle  = def.number(this._getExtension(labelExtId, 'textAngle'),  0);
+            var margin = def.number(this._getExtension(labelExtId, 'textMargin'), 3);
+            
+            var textHeight = pvc.text.getTextHeight("m", font);
+            
+            var textItems;
+            if(this.isDiscrete){
+                var data = this.chart.visualRoles(this.roleName)
+                               .flatten(this.chart.data, {visible: true});
+                
+                textItems = def.query(data._children)
+                               .select(function(child){ return child.absLabel; });
+            } else {
+                var ticks = pvc.scaleTicks(
+                                scale,
+                                this.domainRoundMode === 'tick',
+                                this.desiredTickCount);
+                
+                textItems = def.query(ticks)
+                                .select(function(tick){ return scale.tickFormat(tick); });
+            }
+            
+            var textWidth = textItems
+                                .select(function(text){ return 1.0 * pvc.text.getTextLength(text, font); })
+                                .max();
+            
+            labelBBox = pvc.text.getLabelBBox(textWidth, textHeight, align, baseline, angle, margin);
+            
+            // The length not over the plot area
+            var length;
+            switch(this.anchor){
+                case 'left':
+                    length = -labelBBox.x;
+                    break;
+                
+                case 'right':
+                    length = labelBBox.x2;
+                    break;
+                    
+                case 'top':
+                    length = -labelBBox.y;
+                    break;
+                
+                case 'bottom':
+                    length = labelBBox.y2;
+                    break;
+            }
+            
+            length = Math.max(length, 0);
+            
+            // --------------
+            
+            this.axisSize = 2 * this.tickLength + length; // Add equal margin on both sides
+        }
+        
+        layoutInfo.maxTextWidth = Infinity;
+        
+        if (this.isDiscrete && this.useCompositeAxis){
+            if(this.axisSize == null){
+                this.axisSize = 50;
+            }
+        } else {
+            if(this.axisSize == null){
+                labelLayout.call(this);
+            }
+            
+            var maxClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
+            if(this.axisSize > maxClientLength){
+                // Text may not fit. Calculate maxTextWidth.
+                if(!labelBBox){
+                    labelLayout.call(this);
+                }
+                
+                // Now move backwards, to the max text width...
+                var maxOrthoLength = maxClientLength - 2 * this.tickLength;
+                
+                // A point at the maximum orthogonal distance from the anchor
+                var mostOrthoDistantPoint;
+                var parallelDirection;
+                switch(this.anchor){
+                    case 'left':
+                        parallelDirection = pv.vector(0, 1);
+                        mostOrthoDistantPoint = pv.vector(-maxOrthoLength, 0);
+                        break;
+                    
+                    case 'right':
+                        parallelDirection = pv.vector(0, 1);
+                        mostOrthoDistantPoint = pv.vector(maxOrthoLength, 0);
+                        break;
+                        
+                    case 'top':
+                        parallelDirection = pv.vector(1, 0);
+                        mostOrthoDistantPoint = pv.vector(0, -maxOrthoLength);
+                        break;
+                    
+                    case 'bottom':
+                        parallelDirection = pv.vector(1, 0);
+                        mostOrthoDistantPoint = pv.vector(0, maxOrthoLength);
+                        break;
+                }
+                
+                // Intersect the line that passes through mostOrthoDistantPoint,
+                // and has the direction parallelDirection with 
+                // the top side and with the bottom side of the *original* label box.
+                var corners = labelBBox.sourceCorners;
+                var botL = corners[0];
+                var botR = corners[1];
+                var topL = corners[2];
+                var topR = corners[3];
+                
+                var topRLSideDir = topR.minus(topL);
+                var botRLSideDir = botR.minus(botL);
+                var intersect = pv.SvgScene.lineIntersect;
+                var botI = intersect(mostOrthoDistantPoint, parallelDirection, botL, botRLSideDir);
+                var topI = intersect(mostOrthoDistantPoint, parallelDirection, topL, topRLSideDir);
+                
+                // Two cases
+                // A) If the angle is between -90 and 90, the text does not get upside down
+                // In that case, we're always interested in topI -> topR and botI -> botR
+                // B) Otherwise the relevant new segments are topI -> topL and botI -> botL
+                
+                var maxTextWidth;
+                if(Math.cos(labelBBox.sourceAngle) >= 0){
+                    // A) [-90, 90]
+                    maxTextWidth = Math.min(
+                                        topR.minus(topI).length(), 
+                                        botR.minus(botI).length());
+                } else {
+                    maxTextWidth = Math.min(
+                            topL.minus(topI).length(), 
+                            botL.minus(botI).length());
+                }
+                
+                // One other detail.
+                // When align (anchor) is center,
+                // just cutting on one side of the label original box
+                // won't do, because when text is centered, the cut we make in length
+                // ends up distributed by both sides...
+                if(labelBBox.sourceAlign === 'center'){
+                    var cutWidth = labelBBox.sourceTextWidth - maxTextWidth;
+                    
+                    // Cut same width on the opposite side. 
+                    maxTextWidth -= cutWidth;
+                }
+                
+                layoutInfo.maxTextWidth = maxTextWidth; 
+            }
         }
         
         return this.createAnchoredSize(this.axisSize, layoutInfo.clientSize);
     },
     
     _createCore: function() {
-        // Update the scale from the cartesian axis
-        var scale = this.axis.scale; 
-        this.pvScale = scale;
-        this.scale   = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
-        
-        // TODO: danger?
-        this.extend(this.pvScale, this.panelName + "Scale_");
-        
         this.renderAxis();
     },
 
@@ -107,7 +276,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvTicks,      this.panelName + "Ticks_");
         this.extend(this.pvLabel,      this.panelName + "Label_");
         this.extend(this.pvRuleGrid,   this.panelName + "Grid_" );
-        this.extend(this.pvTitle,      this.panelName + "TitleLabel_");
         this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
         this.extend(this.pvZeroLine,   this.panelName + "ZeroLine_");
     },
@@ -140,33 +308,33 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         this._rSize = rSize;
         
-        if(this.title){
-           this.pvTitlePanel = this.pvPanel.add(pv.Panel)
-                [this.anchor             ](0)     // bottom (of the axis panel)
-                [this.anchorOrthoLength()](this.titleSize) // height
-                [this.anchorOrtho()      ](rMin)  // left
-                [this.anchorLength()     ](rSize) // width
-                ;
-
-            this.pvTitle = this.pvTitlePanel.anchor('center').add(pv.Label)
-                .lock('text', this.title)
-                .lock('font', this.titleFont)
-
-                // Rotate text over center point
-                .lock('textAngle',
-                    this.anchor === 'left'  ? -Math.PI/2 :
-                    this.anchor === 'right' ?  Math.PI/2 :
-                    null)
-                ;
-
-            // Create a container panel to draw the remaining axis components
-            ruleParentPanel = this.pvPanel.add(pv.Panel)
-                [this.anchorOpposite()   ](0) // top (of the axis panel)
-                [this.anchorOrthoLength()](this.axisSize - this.titleSize) // height
-                [this.anchorOrtho()      ](0)     // left
-                [this.anchorLength()     ](rSize) // width
-                ;
-        }
+//        if(this.title){
+//           this.pvTitlePanel = this.pvPanel.add(pv.Panel)
+//                [this.anchor             ](0)     // bottom (of the axis panel)
+//                [this.anchorOrthoLength()](this.titleSize) // height
+//                [this.anchorOrtho()      ](rMin)  // left
+//                [this.anchorLength()     ](rSize) // width
+//                ;
+//
+//            this.pvTitle = this.pvTitlePanel.anchor('center').add(pv.Label)
+//                .lock('text', this.title)
+//                .lock('font', this.titleFont)
+//
+//                // Rotate text over center point
+//                .lock('textAngle',
+//                    this.anchor === 'left'  ? -Math.PI/2 :
+//                    this.anchor === 'right' ?  Math.PI/2 :
+//                    null)
+//                ;
+//
+//            // Create a container panel to draw the remaining axis components
+//            ruleParentPanel = this.pvPanel.add(pv.Panel)
+//                [this.anchorOpposite()   ](0) // top (of the axis panel)
+//                [this.anchorOrthoLength()](this.axisSize - this.titleSize) // height
+//                [this.anchorOrtho()      ](0)     // left
+//                [this.anchorLength()     ](rSize) // width
+//                ;
+//        }
 
         this.pvRule = ruleParentPanel.add(pv.Rule)
             .zOrder(30) // see pvc.js
@@ -246,6 +414,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     "center" : 
                     (this.anchor == "left") ? "right" : "left";
         
+        var font = this.font;
+        
+        var maxTextWidth = this._layoutInfo.maxTextWidth;
+        if(!isFinite(maxTextWidth)){
+            maxTextWidth = 0;
+        }
+        
         // All ordinal labels are relevant and must be visible
         this.pvLabel = this.pvTicks.anchor(this.anchor).add(pv.Label)
             .intercept(
@@ -254,8 +429,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this._getExtension(this.panelName + "Label", 'visible'))
             .zOrder(40) // see pvc.js
             .textAlign(align)
-            .text(function(child){return child.absLabel;})
-            .font(this.font)
+            .text(function(child){
+                var text = child.absLabel;
+                if(maxTextWidth){
+                    text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
+                }
+                return text; 
+             })
+            .font(font)
             .localProperty('group')
             .group(function(child){ return child; })
             ;
@@ -426,9 +607,23 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var labelAnchor = this.pvTicks.anchor(this.anchor)
                                 .addMargin(this.anchorOpposite(), 2);
         
+        var scale = this.scale;
+        var font = this.font;
+        
+        var maxTextWidth = this._layoutInfo.maxTextWidth;
+        if(!isFinite(maxTextWidth)){
+            maxTextWidth = 0;
+        }
+        
         var label = this.pvLabel = labelAnchor.add(pv.Label)
             .zOrder(40)
-            .text(this.pvScale.tickFormat)
+            .text(function(d){
+                var text = scale.tickFormat(d);
+                if(maxTextWidth){
+                    text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
+                }
+                return text;
+             })
             .font(this.font)
             .textMargin(0.5) // Just enough for some labels not to be cut (vertical)
             .visible(true);
@@ -775,7 +970,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             maxDepth  = data.treeHeight,
             elements  = data.nodes(),
             
-            depthLength = this.axisSize - this.titleSize;
+            depthLength = this.axisSize;
         
         this._rootElement = elements[0]; // lasso
             
@@ -800,7 +995,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         var panel = this.pvRule
             .add(pv.Panel)
-                [orthoLength](depthLength)//.overflow('hidden')
+                [orthoLength](depthLength)
                 .strokeStyle(null)
                 .lineWidth(0) //cropping panel
             .add(pv.Panel)

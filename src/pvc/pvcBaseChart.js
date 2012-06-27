@@ -916,11 +916,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         if (!def.empty(options.title)) {
             this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
                 title:      options.title,
+                font:       options.titleFont,
                 anchor:     options.titlePosition,
+                align:      options.titleAlign,
                 margins:    options.titleMargins,
                 paddings:   options.titlePaddings,
                 titleSize:  options.titleSize,
-                titleAlign: options.titleAlign
+                titleSizeMax: options.titleSizeMax
             });
         }
     },
@@ -1364,8 +1366,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
         titleSize:     undefined,
+        titleSizeMax:  undefined,
         titleMargins:  undefined,
-        tittlePaddings:undefined,
+        titlePaddings: undefined,
+        titleFont:     undefined,
         
         legend:           false,
         legendPosition:   "bottom",

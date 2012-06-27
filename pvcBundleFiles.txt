@@ -46,7 +46,7 @@ src/pvc/pvcCartesianGridDockingPanel.js
 src/pvc/pvcCartesianAbstractPanel.js
 src/pvc/pvcCategoricalAbstract.js
 src/pvc/pvcAxisPanel.js
-
+src/pvc/pvcAxisTitlePanel.js
 src/pvc/pvcPieChart.js
 
 src/pvc/pvcBarAbstractPanel.js

@@ -74,17 +74,24 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this._createAxisPanel(baseAxis );
         this._createAxisPanel(orthoAxis);
         
+        /* Create scales without range yet */
+        this._createAxisScale(baseAxis );
+        this._createAxisScale(orthoAxis);
+        if(ortho2Axis){
+            this._createAxisScale(ortho2Axis);
+        }
+        
         /* Create main content panel */
         this._mainContentPanel = this._createMainContentPanel(this._gridDockPanel);
         
         /* Force layout */
         this.basePanel.layout();
         
-        /* Create scales, after layout */
-        this._createAxisScale(baseAxis );
-        this._createAxisScale(orthoAxis);
+        /* Set scale ranges, after layout */
+        this._setAxisScaleRange(baseAxis );
+        this._setAxisScaleRange(orthoAxis);
         if(ortho2Axis){
-            this._createAxisScale(ortho2Axis);
+            this._setAxisScaleRange(ortho2Axis);
         }
     },
     
@@ -116,12 +123,27 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      */
     _createAxisPanel: function(axis){
         if(axis.isVisible) {
+            var titlePanel;
+            var title = axis.option('Title');
+            if (!def.empty(title)) {
+                titlePanel = new pvc.AxisTitlePanel(this, this._gridDockPanel, {
+                    title:        title,
+                    font:         axis.option('TitleFont'),
+                    anchor:       axis.option('Position'),
+                    align:        axis.option('TitleAlign'),
+                    margins:      axis.option('TitleMargins'),
+                    paddings:     axis.option('TitlePaddings'),
+                    titleSize:    axis.option('TitleSize'),
+                    titleSizeMax: axis.option('TitleSizeMax')
+                });
+            }
+            
             var panel = pvc.AxisPanel.create(this, this._gridDockPanel, axis, {
                 useCompositeAxis:  axis.option('Composite'),
                 font:              axis.option('LabelFont'),
-                titleFont:         axis.option('TitleFont'),
                 anchor:            axis.option('Position'),
                 axisSize:          axis.option('Size'),
+                axisSizeMax:       axis.option('SizeMax'),
                 fullGrid:          axis.option('FullGrid'),
                 fullGridCrossesMargin: axis.option('FullGridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
@@ -129,11 +151,14 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:   axis.option('DomainRoundMode'),
                 desiredTickCount:  axis.option('DesiredTickCount'),
                 minorTicks:        axis.option('MinorTicks'),
-                title:             axis.option('Title'),
-                titleSize:         axis.option('TitleSize'),
                 clickAction:       axis.option('ClickAction'),
                 doubleClickAction: axis.option('DoubleClickAction')
             });
+            
+            if(titlePanel){
+                titlePanel.panelName = panel.panelName;
+                panel.titlePanel = titlePanel;
+            }
             
             this.axesPanels[axis.id] = panel;
             this.axesPanels[axis.orientedId] = panel;
@@ -194,7 +219,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         return createScaleMethod.call(this, axis, dataPartValues);
     },
-
+    
     _getAxisDataParts: function(axis){
         return null;
     },
@@ -224,15 +249,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             scale  = new pv.Scale.ordinal(values);
         
         scale.type = 'Discrete';
-        
-        /* RANGE */
-        this._setAxisScaleRange(scale, axis);
 
-        if(values.length > 0){ // Has domain? At least one point is required to split.
-            var bandRatio = this.options.panelSizeRatio || 0.8;
-            scale.splitBandedCenter(scale.min, scale.max, bandRatio);
-        }
-        
         return scale;
     },
     
@@ -275,11 +292,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // Domain rounding
         // TODO: pvc.scaleTicks(scale) does not like Dates...
         //pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
-        
-        /* RANGE */
-        this._setAxisScaleRange(scale, axis);
-        
-        scale.range(scale.min, scale.max);
         
         return scale;
     },
@@ -352,22 +364,16 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // Then, the scale range is updated but the ticks cache is not.
         // The result is we end up showing two zones, on each end, with no ticks.
         pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
-        
-        // ----------------------------
-        
-        /* RANGE */
-        this._setAxisScaleRange(scale, axis);
 
-        scale.range(scale.min, scale.max);
-        
         return scale;
     },
     
-    _setAxisScaleRange: function(scale, axis){
+    _setAxisScaleRange: function(axis){
         var size = (axis.orientation === 'x') ?
                         this._mainContentPanel.width :
                         this._mainContentPanel.height;
         
+        var scale = axis.scale;
         scale.min  = 0;
         scale.max  = size; 
         scale.size = size; // original size
@@ -383,7 +389,16 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             scale.offset = 0;
             scale.offsetSize = scale.size;
         }
-
+        
+        if(scale.type === 'Discrete'){ 
+            if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
+                var bandRatio = this.options.panelSizeRatio || 0.8;
+                scale.splitBandedCenter(scale.min, scale.max, bandRatio);
+            }
+        } else {
+            scale.range(scale.min, scale.max);
+        }
+        
         return scale;
     },
 

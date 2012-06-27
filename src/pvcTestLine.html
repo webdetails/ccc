@@ -65,6 +65,7 @@
         <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -220,7 +221,6 @@ The following is a line chart displaying three time series.<br>
 
           showValues: false,
           yAxisPosition: "right",
-          yAxisSize: 30,
           extensionPoints: {
             noDataMessage_text: "Example of a chart with missing data",
             xAxisScale_dateTickFormat: "%Y/%m/%d",
@@ -258,7 +258,6 @@ that connect the lines.<br>
           showValues: true,
           showDots:true,
           yAxisPosition: "left",
-          yAxisSize: 30,
           xAxisFullGrid: true,
           yAxisFullGrid: true,
           yAxisDomainRoundMode: 'tick',
@@ -310,11 +309,9 @@ var line3 = new pvc.DotChart({
   stacked:true,
   selectable:true,
   margins: {all: 20},
-  xAxisSize:100,
   //xAxisFullGrid:true,
   xAxisEndLine:true,
   xAxisDomainRoundMode:"tick",
-  yAxisSize:100,
   //yAxisFullGrid:true,
   yAxisEndLine:true,
   yAxisDomainRoundMode:"tick",

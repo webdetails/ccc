@@ -65,6 +65,7 @@
         <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -235,8 +236,6 @@ var Metrics1 = new pvc.MetricLineChart({
     originIsZero: true,
     showValues: false,
     showDots: true,
-    yAxisSize: 30,
-    xAxisSize: 30,
     xAxisFullGrid: true,
     yAxisFullGrid: true,
     yAxisDomainRoundMode: 'tick',
@@ -269,8 +268,6 @@ var Metrics2 = new pvc.MetricLineChart({
     originIsZero: true,
     showValues: false,
     showDots: true,
-    yAxisSize: 30,
-    xAxisSize: 30,
     xAxisFullGrid: true,
     yAxisFullGrid: true,
     yAxisDomainRoundMode: 'tick',
@@ -306,8 +303,6 @@ var Metrics3 = new pvc.MetricLineChart({
     showDots: true,
     clickable: true,
     clickAction: function(s,c,v){alert(s + " " + c + " " + v);},
-    yAxisSize: 30,
-    xAxisSize: 30,
     xAxisFullGrid: true,
     yAxisFullGrid: true,
     yAxisDomainRoundMode: 'tick',
@@ -340,8 +335,6 @@ var Metrics4 = new pvc.MetricDotChart({
     originIsZero: true,
     showValues: false,
     showDots: true,
-    yAxisSize: 30,
-    xAxisSize: 30,
     xAxisFullGrid: true,
     yAxisFullGrid: true,
     yAxisDomainRoundMode: 'tick',
@@ -349,7 +342,7 @@ var Metrics4 = new pvc.MetricDotChart({
     axisOverlappedLabelsHide: true,
     selectable:  true,
     hoverable: true,
-    compatVersion: 1
+    compatVersion: 1
 });
 Metrics4.setData(testLDot2,
                 {crosstabMode: true,
@@ -373,8 +366,6 @@ pv.listenForPageLoad(function() {
                     legend: false,
                     showValues: false,
                     showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
                     xAxisFullGrid: true,
                     yAxisFullGrid: true
                 });
@@ -393,8 +384,6 @@ pv.listenForPageLoad(function() {
                     originIsZero: true,
                     showValues: false,
                     showDots: true,
-                    yAxisSize: 30,
-                    xAxisSize: 30,
                     xAxisFullGrid: true,
                     yAxisFullGrid: true,
                     compatVersion: 1

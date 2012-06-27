@@ -354,7 +354,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 
                 checkChildLayout.call(this, child);
                 
-                var align = this._parseAlign(a, child.align);
+                var align = pvc.parseAlign(a, child.align);
                 
                 positionChild.call(this, a, child, align);
                 
@@ -419,14 +419,15 @@ pvc.BasePanel = pvc.Abstract.extend({
                     sideOPos = margins[sideo];
                     break;
                 
-                case 'middle':
-                    sideo    = 'top';
-                    sideOPos = margins.top + (remSize.height / 2) - (child.height / 2);
-                    break;
-                    
                 case 'center':
-                    sideo    = 'left';
-                    sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
+                case 'middle':
+                    if(side === 'left' || side === 'right'){
+                        sideo    = 'top';
+                        sideOPos = margins.top + (remSize.height / 2) - (child.height / 2);
+                    } else {
+                        sideo    = 'left';
+                        sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
+                    }
                     break;
             }
             
@@ -444,38 +445,6 @@ pvc.BasePanel = pvc.Abstract.extend({
             margins[side]   += olen;
             remSize[sideol] -= olen;
         }
-    },
-    
-    _parseAlign: function(side, align){
-        if(side === 'left' || side === 'right'){
-            switch(align){
-                case 'top':
-                case 'bottom':
-                case 'middle':
-                    break;
-                
-                default:
-                    if(align && pvc.debug >= 2){
-                        pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
-                    }
-                    align = 'top';
-            }
-        } else {
-            switch(align){
-                case 'left':
-                case 'right':
-                case 'center':
-                    break;
-                
-                default:
-                    if(align && pvc.debug >= 2){
-                        pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
-                    }
-                    align = 'left';
-            }
-        }
-        
-        return align;
     },
     
     /** 
@@ -1481,6 +1450,38 @@ pvc.BasePanel = pvc.Abstract.extend({
         bottom: "left",
         left: "bottom",
         right: "bottom"
+    },
+    
+    leftBottomAnchor: {
+        top:    "bottom",
+        bottom: "bottom",
+        left:   "left",
+        right:  "left"
+    },
+    
+    leftTopAnchor: {
+        top:    "top",
+        bottom: "top",
+        left:   "left",
+        right:  "left"
+    },
+    
+    horizontalAlign: {
+        top:    "right",
+        bottom: "left",
+        middle: "center",
+        right:  "right",
+        left:   "left",
+        center: "center"
+    },
+    
+    verticalAlign: {
+        top:    "top",
+        bottom: "bottom",
+        middle: "middle",
+        right:  "top",
+        left:   "bottom",
+        center: "middle"
     },
 
     relativeAnchorMirror: {
