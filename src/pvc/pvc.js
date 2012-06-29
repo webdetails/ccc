@@ -981,6 +981,12 @@ pv.Mark.prototype.getInstanceShape = function(instance){
             instance.height);
 };
 
+pv.Mark.prototype.getInstanceCenterPoint = function(instance){
+    return new Point(
+                instance.left + (instance.width  || 0) / 2,
+                instance.top +  (instance.height || 0) / 2);
+};
+
 pv.Label.prototype.getInstanceShape = function(instance){
     // TODO
     return new Rect(
@@ -990,13 +996,22 @@ pv.Label.prototype.getInstanceShape = function(instance){
             10);
 };
 
-pv.Wedge.prototype.getInstanceShape = function(instance){
+pv.Wedge.prototype.getInstanceCenterPoint = function(instance){
     var midAngle  = instance.startAngle + (instance.angle / 2);
     var midRadius = (instance.outerRadius + instance.innerRadius) / 2;
     var dotLeft   = instance.left + midRadius * Math.cos(midAngle);
     var dotTop    = instance.top  + midRadius * Math.sin(midAngle);
     
-    return new Circle(dotLeft, dotTop, 10);
+    return new Point(dotLeft, dotTop);
+};
+
+pv.Wedge.prototype.getInstanceShape = function(instance){
+    var center = this.getInstanceCenterPoint(instance);
+
+    // TODO: at a minimum, improve calculation of circle radius
+    // to match the biggest circle within the wedge at that point
+    
+    return new Circle(center.x, center.y, 10);
 };
 
 pv.Dot.prototype.getInstanceShape = function(instance){
@@ -1019,12 +1034,25 @@ pv.Dot.prototype.getInstanceShape = function(instance){
     }
 
     // 'circle' included
+    
+    // Select dots only when the center is included
     return new Circle(cx, cy, radius);
+};
+
+pv.Dot.prototype.getInstanceCenterPoint = function(instance){
+    return new Point(instance.left, instance.top);
 };
 
 pv.Area.prototype.getInstanceShape =
 pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
     return new Line(instance.left, instance.top, nextInstance.left, nextInstance.top);
+};
+
+pv.Area.prototype.getInstanceCenterPoint =
+pv.Line.prototype.getInstanceCenterPoint = function(instance, nextInstance){
+    return new Point(
+            (instance.left + nextInstance.left) / 2, 
+            (instance.top  + nextInstance.top ) / 2);
 };
 
 
@@ -1150,6 +1178,40 @@ var Shape = def.type('pvc.Shape')
 
 // --------------------
 
+var Point = def.type('pvc.Point', Shape)
+.init(function(x, y){
+    this.set(x, y);
+})
+.add({
+    set: function(x, y){
+        this.x  = x  || 0;
+        this.y  = y  || 0;
+    },
+
+    clone: function(){
+        return new Point(this.x, this.y);
+    },
+
+    apply: function(t){
+        this.x  = t.transformHPosition(this.x);
+        this.y  = t.transformVPosition(this.y);
+        return this;
+    },
+
+    intersectsRect: function(rect){
+        // Does rect contain the point
+        var minX = Math.min(rect.x, rect.x2),
+            maxX = Math.max(rect.x, rect.x2),
+            minY = Math.min(rect.y, rect.y2),
+            maxY = Math.max(rect.y, rect.y2);
+
+        return (this.x >= minX) && (this.x <= maxX) &&
+               (this.y >= minY) && (this.y <= maxY);
+    }
+});
+
+// --------------------
+
 var Rect = def.type('pvc.Rect', Shape)
 .init(function(x, y, dx, dy){
     this.set(x, y, dx, dy);
@@ -1196,13 +1258,10 @@ var Rect = def.type('pvc.Rect', Shape)
             minY = Math.min(rect.y, rect.y2),
             maxY = Math.max(rect.y, rect.y2);
 
-        return rect &&
-                // Some intersection on X
-                (this.x2 > minX) &&
-                (this.x  < maxX) &&
-                // Some intersection on Y
-                (this.y2 > minY ) &&
-                (this.y  < maxY);
+        return (this.x2 > minX ) &&  // Some intersection on X
+               (this.x  < maxX ) &&
+               (this.y2 > minY ) &&  // Some intersection on Y
+               (this.y  < maxY);
     },
 
     getSides: function(){

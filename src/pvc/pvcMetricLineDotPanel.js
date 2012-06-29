@@ -239,6 +239,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             
         this.pvDot = dot.pvMark;
         
+        this.pvDot.rubberBandSelectionMode = 'center';
+        
         // -- COLOR --
         // When no lines are shown, dots are shown with transparency,
         // which helps in distinguishing overlapped dots.

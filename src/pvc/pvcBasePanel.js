@@ -1361,6 +1361,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
         }
         
+        // center, partial and total (not implemented)
+        var selectionMode = def.get(mark, 'rubberBandSelectionMode', 'partial');
+        var shapeMethod = (selectionMode === 'center') ? 'getInstanceCenterPoint' : 'getInstanceShape';
+        
         if(mark.type === 'area' || mark.type === 'line'){
             var instancePrev;
             
@@ -1370,7 +1374,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     instancePrev = null;
                 } else {
                     if(instancePrev){
-                        var shape = mark.getInstanceShape(instancePrev, instance).apply(toScreen);
+                        var shape = mark[shapeMethod](instancePrev, instance).apply(toScreen);
                         processShape(shape, instancePrev);
                     }
     
@@ -1380,7 +1384,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         } else {
             mark.forEachSignumInstance(function(instance, toScreen){
                 if(!instance.isBreak && instance.visible) {
-                    var shape = mark.getInstanceShape(instance).apply(toScreen);
+                    var shape = mark[shapeMethod](instance).apply(toScreen);
                     processShape(shape, instance);
                 }
             }, this);
