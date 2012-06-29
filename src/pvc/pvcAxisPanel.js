@@ -39,8 +39,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             anchor: axis.option('Position')
         });
         
-        
-        
         // sizeMax
         if(options.sizeMax == null){
             var sizeMax = options.axisSizeMax;
@@ -160,7 +158,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             
             // --------------
             
-            this.axisSize = 2 * this.tickLength + length; // Add equal margin on both sides
+            this.axisSize = this.tickLength + length; 
+            
+            // Add equal margin on both sides?
+            if(!(angle === 0 && this.isAnchorTopOrBottom())){
+                // Text height already has some free space in that case
+                // so no need to add more.
+                this.axisSize += this.tickLength;
+            }
         }
         
         layoutInfo.maxTextWidth = Infinity;

@@ -1,10 +1,7 @@
 
-pvc.AxisTitlePanel = pvc.TitlePanel.extend({
+pvc.AxisTitlePanel = pvc.TitlePanelAbstract.extend({
     
     panelName: 'axis',
-    
-    titleSize: undefined,
-    font: "12px sans-serif",
     
     _getFontExtension: function(){
         return this._getExtension(this.panelName + 'TitleLabel', 'font');

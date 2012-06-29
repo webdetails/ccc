@@ -80,6 +80,11 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @internal
  */
 function data_onDatumSelectedChanged(datum, selected){
+    // <Debug>
+    /*jshint expr:true */
+    //!datum.isNull || def.assert("Null datums do not notify selected changes");
+    // </Debug>
+    
     if(selected){
         this._selectedDatums.set(datum.id, datum);
     } else {
@@ -105,7 +110,7 @@ function data_onDatumVisibleChanged(datum, visible){
         
         // <Debug>
         /*jshint expr:true */
-        !datum.isNull || def.assert("Null datums do not notify visible changes");
+        //!datum.isNull || def.assert("Null datums do not notify visible changes");
         // </Debug>
         
         if(visible){

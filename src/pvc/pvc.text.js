@@ -15,7 +15,7 @@ def.scope(function(){
                 // NOTE: the global function 'getTextLenCGG' must be
                 // defined by the CGG loading environment
                 /*global getTextLenCGG:true */
-                return getTextLenCGG(text, font.fontFamily, font.fontSize);
+                return getTextLenCGG(text, font.fontFamily, font.fontSize, font.fontStyle, font.fontWeight);
 
             //case 'svg':
         }
@@ -34,7 +34,7 @@ def.scope(function(){
                 // NOTE: the global function 'getTextHeightCGG' must be
                 // defined by the CGG loading environment
                 /*global getTextHeightCGG:true */
-                return getTextHeightCGG(text, font.fontFamily, font.fontSize);
+                return getTextHeightCGG(text, font.fontFamily, font.fontSize, font.fontStyle, font.fontWeight);
 
             //case 'svg':
         }
@@ -292,13 +292,31 @@ def.scope(function(){
         sty.setProperty('font',font);
 
         var result = {};
-        result.fontFamily = sty.getProperty('font-family');
-        if(!result.fontFamily){
+        
+        // Below, the use of: 
+        //   '' + sty.getProperty(...)
+        //  converts the results to real strings
+        //  and not String objects (this later caused bugs in Java code)
+        
+        var fontFamily = result.fontFamily = '' + sty.getProperty('font-family');
+        if(!fontFamily){
             result.fontFamily = 'sans-serif';
+        } else if(fontFamily.length > 2){
+            // Did not work at the server
+            //var reQuoted = /^(["']?)(.*?)(\1)$/;
+            //fontFamily = fontFamily.replace(reQuoted, "$2");
+            var quote = fontFamily.charAt(0);
+            if(quote === '"' || quote === "'"){
+                fontFamily = fontFamily.substr(1, fontFamily.length - 2);
+            }
+            
+            result.fontFamily = fontFamily;
         }
-        result.fontSize = sty.getProperty('font-size');
-        result.fontStyle = sty.getProperty('font-style');
-
+        
+        result.fontSize   = '' + sty.getProperty('font-size');
+        result.fontStyle  = '' + sty.getProperty('font-style');
+        result.fontWeight = '' + sty.getProperty('font-weight');
+        
         return result;
     }
 

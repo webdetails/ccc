@@ -112,7 +112,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                                   (isVertical ? options.baseAxisSize : options.orthoAxisSize) ||
                                   options.axisSize);
                 if(isNaN(size)){
-                    size = totalWidth * 0.1;
+                    size = totalWidth * 0.4;
                 }
                 
                 if(isVertical){
@@ -127,7 +127,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                                   (isVertical ? options.orthoAxisSize : options.baseAxisSize) ||
                                   options.axisSize);
                 if(isNaN(size)){
-                    size = totalWidth * 0.1;
+                    size = totalWidth * 0.4;
                 }
                 
                 if(isVertical){
@@ -139,7 +139,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         }
         
         var contentWidth  = Math.max(totalWidth - chromeWidth, 10);
-        var contentHeight = contentWidth / pvc.goldenRatio;
+        var contentHeight = contentWidth;/// pvc.goldenRatio;
         
         return  chromeHeight + contentHeight;
     },

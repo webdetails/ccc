@@ -57,6 +57,7 @@
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcTitlePanelAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
@@ -108,7 +109,6 @@
                 //timeSeriesFormat: "%Y-%m-%d",
                 axisOverlappedLabelsHide: true,
                 legendMinMarginX: 10,
-
                 extensionPoints: {
                     titleLabel_font: "bold 14px sans-serif"
                 },
@@ -133,7 +133,7 @@
                 /* Multi-chart */
                 //multiChartColumnIndexes: 1,
                 //multiChartWrapColumn: Infinity,
-                //multiChartLimit: 10,
+                multiChartLimit: 10,
 
 
                 /* Small charts */
@@ -168,12 +168,12 @@
             def: {
                 /* Top */
                 title:   "Multi-chart of line charts with area",
-                height:  100,
+                //height:  100,
                 
                 /* Multi-chart */
                 //multiChartColumnIndexes: 1,
                 //multiChartWrapColumn: Infinity,
-                multiChartLimit: 9,
+                multiChartLimit: 8,
                 
                 /* Small charts */
                 //orientation: 'horizontal',
@@ -281,7 +281,7 @@
             id: 'multi04',
 
             className: 'MetricDotChart',
-            dataVar:   'testHeatGrid4Measures',
+            dataVar:   'testHeatGrid4Measures',
             showProps: ['showLines', 'showDots'],
             def: {
                 /* Top */

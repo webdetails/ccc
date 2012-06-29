@@ -37,6 +37,7 @@ src/pvc/pvcAbstract.js
 src/pvc/pvcBaseChart.js
 src/pvc/pvcBasePanel.js
 src/pvc/pvcMultiChartPanel.js
+src/pvc/pvcTitlePanelAbstract.js
 src/pvc/pvcTitlePanel.js
 src/pvc/pvcLegendPanel.js
 src/pvc/pvcTimeseriesAbstract.js
