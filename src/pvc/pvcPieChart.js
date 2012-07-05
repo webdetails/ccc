@@ -24,7 +24,7 @@ pvc.PieChart = pvc.BaseChart.extend({
         this.base();
         
         this._addVisualRoles({
-            category: { isRequired: true, defaultDimensionName: 'category*' },
+            category: { isRequired: true, defaultDimensionName: 'category*', autoCreateDimension: true },
             
             /* value: required, continuous, numeric */
             value:  { 

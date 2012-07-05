@@ -332,8 +332,18 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           })
           .font(this.font)
           .textMargin(this.textMargin)
-          .textDecoration(function(){ return this.parent.isOn() ? ""      : "line-through"; })
-          .textStyle     (function(){ return this.parent.isOn() ? "black" : "#ccc";         });
+          .textDecoration(function(){ return this.parent.isOn() ? "" : "line-through"; })
+          .intercept(
+                'textStyle',
+                labelTextStyleInterceptor,
+                this._getExtension('legendLabel', 'textStyle'));
+          
+      function labelTextStyleInterceptor(getTextStyle, args) {
+          var baseTextStyle = getTextStyle ? getTextStyle.apply(this, args) : "black";
+          return this.parent.isOn() ? 
+                      baseTextStyle : 
+                      pvc.toGrayScale(baseTextStyle, null, undefined, 150);
+      }
     },
 
     applyExtensions: function(){

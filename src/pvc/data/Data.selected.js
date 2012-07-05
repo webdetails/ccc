@@ -82,7 +82,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 function data_onDatumSelectedChanged(datum, selected){
     // <Debug>
     /*jshint expr:true */
-    //!datum.isNull || def.assert("Null datums do not notify selected changes");
+    !datum.isNull || def.assert("Null datums do not notify selected changes");
     // </Debug>
     
     if(selected){
@@ -110,7 +110,7 @@ function data_onDatumVisibleChanged(datum, visible){
         
         // <Debug>
         /*jshint expr:true */
-        //!datum.isNull || def.assert("Null datums do not notify visible changes");
+        !datum.isNull || def.assert("Null datums do not notify visible changes");
         // </Debug>
         
         if(visible){
@@ -197,13 +197,15 @@ function data_addDatum(datum){
 function data_onReceiveDatum(datum){
     var id = datum.id;
     this._datumsById[id] = datum;
-
-    if(this._selectedDatums && datum.isSelected) {
-        this._selectedDatums.set(id, datum);
-    }
-
-    if(datum.isVisible) {
-        this._visibleDatums.set(id, datum);
+    
+    if(!datum.isNull){
+        if(this._selectedDatums && datum.isSelected) {
+            this._selectedDatums.set(id, datum);
+        }
+    
+        if(datum.isVisible) {
+            this._visibleDatums.set(id, datum);
+        }
     }
 }
 
@@ -239,15 +241,17 @@ pvc.data.Data.setSelected = function(datums, selected){
  * 
  * @param {def.Query} datums An enumerable of {@link pvc.data.Datum} to toggle.
  * 
+ * @returns {boolean} true if at least one datum changed its selected state.
  * @static
  */
 pvc.data.Data.toggleSelected = function(datums){
     if(!def.isArrayLike(datums)){
         datums = def.query(datums).array();
     }
-     
-    var allSelected = def.query(datums).all(function(datum){ return datum.isSelected; });
-    this.setSelected(datums, !allSelected);
+    
+    // Ensure null datums don't affect the result
+    var allSelected = def.query(datums).all(function(datum){ return datum.isNull || datum.isSelected; });
+    return this.setSelected(datums, !allSelected);
 };
 
 /**
@@ -282,10 +286,15 @@ pvc.data.Data.setVisible = function(datums, visible){
  * 
  * @param {def.Query} datums An enumerable of {@link pvc.data.Datum} to toggle.
  * 
+ * @returns {boolean} true if at least one datum changed its visible state.
  * @static
  */
 pvc.data.Data.toggleVisible = function(datums){
-    datums = def.query(datums).array(); 
+    if(!def.isArrayLike(datums)){
+        datums = def.query(datums).array();
+    }
+    
+    // Ensure null datums don't affect the result (null datums are always visible)
     var allVisible = def.query(datums).all(function(datum){ return datum.isVisible; });
-    pvc.data.Data.setVisible(datums, !allVisible);
+    return pvc.data.Data.setVisible(datums, !allVisible);
 };

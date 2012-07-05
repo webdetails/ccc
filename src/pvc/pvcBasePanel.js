@@ -68,6 +68,8 @@ pvc.BasePanel = pvc.Abstract.extend({
      */
     _isAnimating: 0,
     
+    _isRubberBandSelecting: false,
+    
     /**
      * Shared state between {@link _handleClick} and {@link #_handleDoubleClick}.
      */
@@ -867,6 +869,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         return this._context;
     },
     
+    _isTooltipEnabled: function(){
+        return !this.isRubberBandSelecting() && !this.isAnimating();
+    },
+    
     /* TOOLTIP */ 
     _addPropTooltip: function(mark, keyArgs){
         var myself = this,
@@ -875,8 +881,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             tipsySettings = Object.create(options.tipsySettings),  
             buildTooltip;
         
+        tipsySettings.isEnabled = this._isTooltipEnabled.bind(this);
+        
         if(!tipsyEvent) {
-            switch(mark.type) {
+//          switch(mark.type) {
 //                case 'dot':
 //                case 'line':
 //                case 'area':
@@ -885,9 +893,9 @@ pvc.BasePanel = pvc.Abstract.extend({
 //                    tipsySettings.usesPoint = true;
 //                    break;
                 
-                default:
+//                default:
                     tipsyEvent = 'mouseover';
-            }
+//            }
         }
         
         var tooltipFormat = options.tooltipFormat;
@@ -1134,8 +1142,11 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     /* SELECTION & RUBBER-BAND */
     _onSelect: function(context){
-        var datums = context.scene.datums(),
+        var datums = context.scene.datums().array(),
             chart  = this.chart;
+        
+        datums = this._onUserSelection(datums);
+        
         if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
             chart.data.owner.clearSelected();
             
@@ -1143,12 +1154,20 @@ pvc.BasePanel = pvc.Abstract.extend({
         } else {
             pvc.data.Data.toggleSelected(datums);
         }
-
+        
         this._onSelectionChanged();
+    },
+    
+    _onUserSelection: function(datums){
+        return this.chart._onUserSelection(datums);
     },
     
     _onSelectionChanged: function(){
         this.chart.updateSelections();
+    },
+    
+    isRubberBandSelecting: function(){
+        return this.topRoot._isRubberBandSelecting;
     },
     
     /**
@@ -1165,14 +1184,14 @@ pvc.BasePanel = pvc.Abstract.extend({
 
         var dMin = 10; // Minimum dx or dy for a rubber band selection to be relevant
 
-        var isSelecting = false;
+        this._isRubberBandSelecting = false;
 
         // Rubber band
         var rubberPvParentPanel = this.pvPanel.borderPanel,
             toScreen;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
-            .visible(function() { return isSelecting;} )
+            .visible(function() { return myself._isRubberBandSelecting; } )
             .left(function() { return this.parent.selectionRect.x; })
             .top(function() { return this.parent.selectionRect.y; })
             .width(function() { return this.parent.selectionRect.dx; })
@@ -1191,13 +1210,13 @@ pvc.BasePanel = pvc.Abstract.extend({
         rubberPvParentPanel
             .event('mousedown', pv.Behavior.selector(false))
             .event('select', function(){
-                if(!isSelecting && !myself.isAnimating()){
+                if(!myself._isRubberBandSelecting && !myself.isAnimating()){
                     var rb = this.selectionRect;
                     if(Math.sqrt(rb.dx * rb.dx + rb.dy * rb.dy) <= dMin){
                         return;
                     }
 
-                    isSelecting = true;
+                    myself._isRubberBandSelecting = true;
                     
                     if(!toScreen){
                         toScreen = rubberPvParentPanel.toScreenTransform();
@@ -1209,7 +1228,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 selectBar.render();
             })
             .event('selectend', function(){
-                if(isSelecting){
+                if(myself._isRubberBandSelecting){
                     var ev = arguments[arguments.length - 1];
                     
                     if(!toScreen){
@@ -1218,7 +1237,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     
                     myself.rubberBand = this.selectionRect.clone().apply(toScreen);
                     
-                    isSelecting = false;
+                    myself._isRubberBandSelecting = false;
                     selectBar.render(); // hide rubber band
                     
                     // Process selection
@@ -1278,6 +1297,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             keyArgs = {toggle: false};
         if(this._detectDatumsUnderRubberBand(datumsByKey, this.rubberBand, keyArgs)) {
             var selectedDatums = def.own(datumsByKey); 
+            
+            selectedDatums = this._onUserSelection(selectedDatums);
             
             var changed;
             if(keyArgs.toggle){

@@ -50,6 +50,9 @@ function(data, atoms, isNull){
      * @returns {boolean} true if the selected state changed, false otherwise.
      */
     setSelected: function(select){
+        // Null datums are always not selected
+        if(this.isNull){ return false; }
+        
         // Normalize 'select'
         select = (select == null) || !!select;
 
@@ -61,10 +64,9 @@ function(data, atoms, isNull){
                 this.isSelected = true;
             }
             
-            //if(!this.isNull){
-                /*global data_onDatumSelectedChanged:true */
-                data_onDatumSelectedChanged.call(this.owner, this, select);
-            //}
+            
+            /*global data_onDatumSelectedChanged:true */
+            data_onDatumSelectedChanged.call(this.owner, this, select);
         }
 
         return changed;
@@ -76,7 +78,7 @@ function(data, atoms, isNull){
      * @type {undefined}
      */
     toggleSelected: function(){
-        this.setSelected(!this.isSelected);
+        return this.setSelected(!this.isSelected);
     },
     
     /**
@@ -87,6 +89,9 @@ function(data, atoms, isNull){
      * @returns {boolean} true if the visible state changed, false otherwise.
      */
     setVisible: function(visible){
+        // Null datums are always visible
+        if(this.isNull){ return false; }
+        
         // Normalize 'visible'
         visible = (visible == null) || !!visible;
 
@@ -108,7 +113,7 @@ function(data, atoms, isNull){
      * @type {undefined}
      */
     toggleVisible: function(){
-        this.setVisible(!this.isVisible);
+        return this.setVisible(!this.isVisible);
     }
 });
 

@@ -70,7 +70,7 @@ def.type('pvc.visual.Role')
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
     }
-
+    
     if(def.get(keyArgs, 'autoCreateDimension', false)) {
         this.autoCreateDimension = true;
     }
@@ -135,6 +135,7 @@ def.type('pvc.visual.Role')
     flatteningMode: 'singleLevel',
     flattenRootLabel: '',
     autoCreateDimension: false,
+    isReversed: false,
     label: null,
 
     /** 
@@ -152,7 +153,15 @@ def.type('pvc.visual.Role')
     firstDimension: function(){
         return this.grouping && this.grouping.firstDimension.type;
     },
-
+    
+    setIsReversed: function(isReversed){
+        if(!isReversed){ // default value
+            delete this.isReversed;
+        } else {
+            this.isReversed = true;
+        }
+    },
+    
     setFlatteningMode: function(flatteningMode){
         if(!flatteningMode || flatteningMode === 'singleLevel'){ // default value
             delete this.flatteningMode;
@@ -299,6 +308,11 @@ def.type('pvc.visual.Role')
         this.grouping = groupingSpec;
         
         if(this.grouping) {
+            
+            if(this.isReversed){
+                this.grouping = this.grouping.reversed();
+            }
+            
             // register in current dimension types
             this.grouping.dimensions().each(function(dimSpec){
                 /*global dimType_addVisualRole:true */

@@ -736,13 +736,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
 
     _selectOrdinalElement: function(data, toggle){
+        var selectedDatums = data.datums().array();
+        
+        selectedDatums = this._onUserSelection(selectedDatums);
+        
         if(toggle){
             this.chart.data.owner.clearSelected();
         }
 
-        pvc.data.Data.toggleSelected(data.datums().array());
+        pvc.data.Data.toggleSelected(selectedDatums);
         
-        this.chart.updateSelections();
+        this._onSelectionChanged();
     },
     
     /**

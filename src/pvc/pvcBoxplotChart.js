@@ -51,28 +51,25 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
         this.base();
 
-        var rolesSpec = def.scope(function(){
+        var roleSpecBase = {
+                isMeasure: true,
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number
+            };
 
-            var roleSpecBase = {
-                    isMeasure: true,
-                    requireSingleDimension: true,
-                    requireIsDiscrete: false,
-                    valueType: Number
-                };
-
-            return def.query([
-                    {name: 'median',      label: 'Median',        defaultDimensionName: 'median', isRequired: true},
-                    {name: 'percentil25', label: '25% Percentil', defaultDimensionName: 'percentil25'},
-                    {name: 'percentil75', label: '75% Percentil', defaultDimensionName: 'percentil75'},
-                    {name: 'percentil5',  label: '5% Percentil',  defaultDimensionName: 'percentil5' },
-                    {name: 'percentil95', label: '95% Percentil', defaultDimensionName: 'percentil95'}
-                ])
-                .object({
-                    name:  function(info){ return info.name; },
-                    value: function(info){ return def.create(roleSpecBase, info); }
-                });
-        });
-
+        var rolesSpec = def.query([
+                {name: 'median',      label: 'Median',        defaultDimensionName: 'median', isRequired: true},
+                {name: 'percentil25', label: '25% Percentil', defaultDimensionName: 'percentil25'},
+                {name: 'percentil75', label: '75% Percentil', defaultDimensionName: 'percentil75'},
+                {name: 'percentil5',  label: '5% Percentil',  defaultDimensionName: 'percentil5' },
+                {name: 'percentil95', label: '95% Percentil', defaultDimensionName: 'percentil95'}
+            ])
+            .object({
+                name:  function(info){ return info.name; },
+                value: function(info){ return def.create(roleSpecBase, info); }
+            });
+        
         this._addVisualRoles(rolesSpec);
     },
     

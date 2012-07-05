@@ -166,25 +166,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      */
     datums: function(whereSpec, keyArgs){
         if(!whereSpec){
-            var q        = def.query(this._datums),
-                selected = def.get(keyArgs, 'selected'),
-                visible  = def.get(keyArgs, 'visible'),
-                where    = def.get(keyArgs, 'where')
-                ;
-            
-            if(visible != null){
-                q = q.where(function(datum){ return datum.isVisible === visible;  });
-            }
-            
-            if(selected != null){
-                q = q.where(function(datum){ return datum.isSelected === selected; });
-            }
-
-            if(where){
-                q = q.where(where);
-            }
-            
-            return q;
+            return data_whereState(def.query(this._datums), keyArgs);
         }
         
         whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
@@ -301,13 +283,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * 
  * @param {object} whereSpec A "where" specification to be normalized.
  * A structure with the following form:
- *  
- * @param {Object} [keyArgs] Keyword arguments object.
- * 
- * @param {boolean} [keyArgs.visible=null] 
- *      Only considers datums whose atoms of the <i>filtered</i> dimensions  
- *      have the specified visible state.
- * 
+ *
  * @return Array A <i>processed</i> "where" of the specification.
  * A structure with the following form:
  * <pre>
@@ -325,9 +301,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * 
  * @private
  */
-function data_processWhereSpec(whereSpec, keyArgs){
-    var whereProcSpec = [],
-        visible = def.get(keyArgs, 'visible');
+function data_processWhereSpec(whereSpec){
+    var whereProcSpec = [];
     
     whereSpec = def.array(whereSpec);
     if(whereSpec){
@@ -363,14 +338,48 @@ function data_processWhereSpec(whereSpec, keyArgs){
         var dimension = this.dimensions(dimName),
             atoms = def.query(values)
                        .select(function(value){ return dimension.atom(value); }) // null if it doesn't exist
-                       .where(visible == null ? 
-                              def.notNully : 
-                              function(atom){ return atom && dimension.isVisible(atom) === visible; })
+                       .where(def.notNully)
                        .distinct(function(atom){ return atom.key; })
                        .array();
         
         return atoms.length ? atoms : null;
     }
+}
+
+/**
+ * Filters a datum query according to a specified predicate, 
+ * datum selected and visible state.
+ * 
+ * @name pvc.data.Data#_whereState
+ * @function
+ * 
+ * @param {def.query} q A datum query.
+ * @param {object} [keyArgs] Keyword arguments object.
+ * See {@link #groupBy} for additional available keyword arguments.
+ * 
+ * @returns {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.
+ * @private
+ * @static
+ */
+function data_whereState(q, keyArgs){
+    var selected = def.get(keyArgs, 'selected'),
+        visible  = def.get(keyArgs, 'visible'),
+        where    = def.get(keyArgs, 'where')
+        ;
+
+    if(visible != null){
+        q = q.where(function(datum){ return datum.isVisible === visible; });
+    }
+    
+    if(selected != null){
+        q = q.where(function(datum){ return datum.isSelected === selected; });
+    }
+    
+    if(where){
+        q = q.where(where);
+    }
+    
+    return q;
 }
 
 // All the "Filter" and "Spec" words below should be read as if they were prepended by "Proc"

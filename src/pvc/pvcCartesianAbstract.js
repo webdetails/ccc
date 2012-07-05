@@ -190,7 +190,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var scale;
 
         if(isSecondOrtho && !this.options.secondAxisIndependentScale){
-            scale = this.axes.ortho.scale; // better already exist...
+            scale = this.axes.ortho.scale || 
+                    def.fail.operationInvalid("First ortho scale must be created first.");
         } else {
             scale = this._createScaleByAxis(axis);
         }
@@ -247,14 +248,14 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                             }),
             values = data.children().select(function(child){ return child.value; }).array(),
             scale  = new pv.Scale.ordinal(values);
-        
+
         scale.type = 'Discrete';
 
         return scale;
     },
     
     /**
-     * Creates a continuous timeseries scale for a given axis.
+     * Creates a continuous time-series scale for a given axis.
      * 
      * <p>
      * Uses the axis' option <tt>Offset</tt> to calculate excess domain margins at each end of the scale.
@@ -390,7 +391,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             scale.offsetSize = scale.size;
         }
         
-        if(scale.type === 'Discrete'){ 
+        if(scale.type === 'Discrete'){
             if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
                 var bandRatio = this.options.panelSizeRatio || 0.8;
                 scale.splitBandedCenter(scale.min, scale.max, bandRatio);

@@ -66,12 +66,12 @@ def.type('pvc.visual.CartesianAxis')
             }
         } else {
             if(!grouping.firstDimension.type.isComparable){
-                throw def.error.operationInvalid("Continuous roles on the same axis must have comparable groupings.");
+                throw def.error.operationInvalid("Continuous roles on the same axis must have 'comparable' groupings.");
             }
 
             for(i = 1; i < L ; i++){
                 if(this.scaleType !== groupingScaleType(this.roles[i].grouping)){
-                    throw def.error.operationInvalid("Continuous roles on the same axis must have equal scales of the same type.");
+                    throw def.error.operationInvalid("Continuous roles on the same axis must have scales of the same type.");
                 }
             }
         }

@@ -162,26 +162,38 @@ pvc.createColorScheme = function(colors){
 };
 
 // Convert to Grayscale using YCbCr luminance conv.
-pvc.toGrayScale = function(color, alpha, maxGrayLevel){
+pvc.toGrayScale = function(color, alpha, maxGrayLevel, minGrayLevel){
     color = pv.color(color);
     
-    var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+    var avg = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
     // Don't let the color get near white, or it becomes unperceptible in most monitors
     if(maxGrayLevel === undefined) {
         maxGrayLevel = 200;
+    } else if(maxGrayLevel == null){
+        maxGrayLevel = 255; // no effect
     }
     
-    if(maxGrayLevel != null && avg > maxGrayLevel) {
+    if(minGrayLevel === undefined){
+        minGrayLevel = 30;
+    } else if(minGrayLevel == null){
+        minGrayLevel = 0; // no effect
+    }
+    
+    var delta = (maxGrayLevel - minGrayLevel);
+    if(delta <= 0){
         avg = maxGrayLevel;
+    } else {
+        // Compress
+        avg = minGrayLevel + (avg / 255) * delta;
     }
     
     if(alpha == null){
         alpha = color.opacity;
-        //alpha = 0.6;
     }
     
-    //var avg = Math.round( (color.r + color.g + color.b)/3);
-    return pv.rgb(avg, avg, avg, alpha != null ? alpha : 0.6);//.brighter();
+    avg = Math.round(avg);
+    
+    return pv.rgb(avg, avg, avg, alpha);
 };
 
 pvc.removeTipsyLegends = function(){
@@ -1480,10 +1492,17 @@ pv.Behavior.selector = function(autoRefresh, mark) {
 
   /** @private */
   function mouseup(e) {
-    if (!scene) { return; }
-    pv.Mark.dispatch("selectend", scene, index, e);
-    scene.mark.selectionRect = null;
-    scene = null;
+    var lscene = scene;
+    if(lscene){
+        var lmark = lscene.mark;
+        if(lmark){
+            pv.Mark.dispatch("selectend", lscene, index, e);
+        
+            lmark.selectionRect = null;
+        }
+        
+        scene = null;
+    }
   }
 
   pv.listen(window, "mousemove", mousemove);

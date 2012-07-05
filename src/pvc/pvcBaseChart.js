@@ -598,16 +598,32 @@ pvc.BaseChart = pvc.Abstract.extend({
      * dimensions bound to roles, by taking them from the roles requirements.
      */
     _bindVisualRolesPre: function(){
+        
+        def.eachOwn(this._visualRoles, function(visualRole){
+            visualRole.setIsReversed(false);
+        });
+        
         /* Process user specified bindings */
         var boundDimNames = {};
         def.each(this.options.visualRoles, function(roleSpec, name){
             var visualRole = this._visualRoles[name] ||
                 def.fail.operationInvalid("Role '{0}' is not supported by the chart type.", [name]);
-
-            // !roleSpec results in a null grouping being preBound
+            
+            var groupingSpec;
+            if(roleSpec && typeof roleSpec === 'object'){
+                if(def.get(roleSpec, 'isReversed', false)){
+                    visualRole.setIsReversed(true);
+                }
+                
+                groupingSpec = roleSpec.dimensions;
+            } else {
+                groupingSpec = roleSpec;
+            }
+            
+            // !groupingSpec results in a null grouping being preBound
             // A pre bound null grouping is later discarded in the post bind
-            if(roleSpec !== undefined){
-                var grouping = pvc.data.GroupingSpec.parse(roleSpec);
+            if(groupingSpec !== undefined){
+                var grouping = pvc.data.GroupingSpec.parse(groupingSpec);
 
                 visualRole.preBind(grouping);
 
@@ -954,7 +970,43 @@ pvc.BaseChart = pvc.Abstract.extend({
     _initLegendGroups: function(){
         var partValues = this._partValues() || [null],
             me = this;
-
+        
+        var isOn, onClick;
+        
+        switch(this.options.legendClickMode){
+            case 'toggleSelected':
+                if(!this.options.selectable){
+                    isOn = def.constant(true);
+                } else {
+                    isOn = function(){
+                        return !this.group.owner.selectedCount() || 
+                               this.group.datums(null, {selected: true}).any();
+                    };
+                    
+                    onClick = function(){
+                        var on = this.group.datums(null, {selected: true}).any();
+                        if(pvc.data.Data.setSelected(this.group.datums(), !on)){
+                            me.updateSelections();
+                        }
+                    };
+                }
+                break;
+                
+            default: 
+           // 'toggleVisible'
+                isOn = function(){
+                    return this.group.datums(null, {visible: true}).any();
+                };
+                
+                onClick = function(){
+                    if(pvc.data.Data.toggleVisible(this.group.datums())){
+                        // Re-render chart
+                        me.render(true, true, false);
+                    }
+                };
+                break;
+        }
+        
         partValues.forEach(function(partValue){
             var partData = this._legendData(partValue);
             if(partData){
@@ -980,15 +1032,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                             color:    partColorScale(itemData.value),
                             useRule:  undefined,
                             shape:    partShape,
-                            isOn: function(){
-                                return this.group.datums(null, {visible: true}).any();
-                            },
-                            click: function(){
-                                pvc.data.Data.toggleVisible(this.group.datums());
-
-                                // Re-render chart
-                                me.render(true, true, false);
-                            }
+                            isOn:     isOn,
+                            click:    onClick
                         });
                     }, this);
 
@@ -1287,6 +1332,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 return;
             }
             
+            pvc.removeTipsyLegends();
+            
             // Reentry control
             this._inUpdateSelections = true;
             try {
@@ -1306,6 +1353,24 @@ pvc.BaseChart = pvc.Abstract.extend({
         } else {
             this.root.updateSelections();
         }
+    },
+    
+    _onUserSelection: function(datums){
+        if(!datums || !datums.length){
+            return datums;
+        }
+        
+        if(this === this.root) {
+            // Fire action
+            var action = this.options.userSelectionAction;
+            if(action){
+                return action.call(null, datums) || datums;
+            }
+            
+            return datums;
+        }
+        
+        return this.root._onUserSelection(datums);
     },
     
     isOrientationVertical: function(orientation) {
@@ -1388,6 +1453,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         legendMargins:    undefined,
         legendPaddings:   undefined,
         
+        legendClickMode:  'toggleVisible', // toggleVisible || toggleSelected
+        
         colors: null,
 
         secondAxis: false,
@@ -1407,11 +1474,12 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         tipsySettings: {
             gravity: "s",
-            delayIn:  400,
+            delayIn:  150,
             offset:   2,
-            opacity:  0.7,
+            opacity:  0.8,
             html:     true,
-            fade:     true
+            fade:     true,
+            followMouse: false
         },
         
         valueFormat: function(d) {
@@ -1437,7 +1505,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         selectable: false,
         
         selectionChangedAction: null,
-        
+        userSelectionAction: null, 
+            
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
         clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)

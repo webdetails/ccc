@@ -48,7 +48,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     this._selected   = def.get(keyArgs, 'selected', null);
 
     /* 'Where' predicate and its key */
-    var hasKey = true,
+    var hasKey = this._selected == null, // Selected state changes does not yet invalidate cache...
         whereKey = '';
     if(this._where){
         whereKey = def.get(keyArgs, 'whereKey');
@@ -84,7 +84,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     if(hasKey){
         this.key = ids.join('!!') +
                    "||visible:"  + this._visible +
-                   "||selected:" + this._selected +
+                   //"||selected:" + this._selected +
                    "||where:"    + whereKey;
     }
 }).
@@ -97,24 +97,15 @@ add(/** @lends pvc.data.GroupingOper */{
      */
     execute: function(){
         /* Setup a priori datum filters */
-        var datumsQuery = def.query(this._linkParent._datums),
-            visible = this._visible,
-            selected = this._selected,
-            where = this._where;
-
-        if(visible != null){
-            datumsQuery = datumsQuery.where(function(datum){return datum.isVisible === visible;});
-        }
-
-        if(selected != null){
-            datumsQuery = datumsQuery.where(function(datum){return datum.isSelected === selected;});
-        }
-
-        if(where){
-            datumsQuery = datumsQuery.where(where);
-        }
-
-        /* Group datums */
+        
+        /*global data_whereState: true */
+        var datumsQuery = data_whereState(def.query(this._linkParent._datums), {
+            visible:  this._visible,
+            selected: this._selected,
+            where:    this._where
+        });
+        
+                /* Group datums */
         var rootNode = this._group(datumsQuery);
 
         /* Render node into a data */

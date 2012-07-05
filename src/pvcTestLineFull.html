@@ -108,6 +108,7 @@ var baseExampleDef = {
         yAxisFullGrid: true,
         yAxisDomainRoundMode: 'tick',
         axisOverlappedLabelsHide: true,
+        
         extensionPoints: {
             xAxisScale_dateTickFormat:    "%Y/%m/%d",
             xAxisScale_dateTickPrecision: 798336000/1.5
@@ -278,7 +279,7 @@ pvc.examples.register(def.create(baseExampleDef, {
     className: 'DotChart',
     dataVar: 'testLDot2',
     def: {
-        title:     "Categorical Dot/Line Chart with Negative Values",
+        title:     "Numeric Category Dot/Line Chart with Negative Values",
         showAreas: false,
         showDots:  true,
         showLines:  true,
@@ -296,12 +297,12 @@ pvc.examples.register(def.create(baseExampleDef, {
     className: 'DotChart',
     dataVar: 'testLDot2',
     def: {
-        title:     "Categorical Dot Chart with Negative Values",
+        title:     "Numeric-discrete Category Dot Chart with Negative Values",
         crosstabMode: true,
         showLines:  false,
         dimensions: { 
             category: {
-                valueType: Number, rawFormat: undefined, format: undefined 
+                valueType: Number, rawFormat: undefined, format: undefined, isDiscrete: true
             }
         }
      }
