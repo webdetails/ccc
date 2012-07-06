@@ -319,10 +319,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             dMin = extent.min,
             dMax = extent.max;
 
-         if(pvc.debug >= 3){
-             pvc.log("Continuous scale extent: " + JSON.stringify(extent));
-         }
-
         /*
          * If both negative or both positive
          * the scale does not contain the number 0.
@@ -365,7 +361,13 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // Then, the scale range is updated but the ticks cache is not.
         // The result is we end up showing two zones, on each end, with no ticks.
         pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
-
+        
+        if(pvc.debug >= 3){
+            pvc.log("Continuous scale extent: " + JSON.stringify(extent) + 
+                    " create:"  + JSON.stringify({min: dMin, max: dMax}) + 
+                    " rounded:" + JSON.stringify(scale.domain()));
+        }
+        
         return scale;
     },
     
@@ -398,6 +400,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
         } else {
             scale.range(scale.min, scale.max);
+        }
+        
+        if(pvc.debug >= 4){
+            pvc.log("Scale: " + JSON.stringify(def.copyOwn(scale)));
         }
         
         return scale;

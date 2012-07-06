@@ -62,7 +62,7 @@ pvc.PieChart = pvc.BaseChart.extend({
         innerGap: 0.9,
         explodedSliceRadius: 0,
         explodedSliceIndex: null,
-        showValuePercentage: false
+        valuesMask: "{0}" // 0 for value, 1 for percentage (% sign is up to you) 
     }
 });
 
@@ -102,7 +102,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             valueDimName = chart.visualRoles('value').firstDimensionName(),
             valueDim = data.dimensions(valueDimName);
 
-        this.sum = valueDim.sum(visibleKeyArgs);
+        this.sum = data.dimensionsSumAbs(valueDimName, visibleKeyArgs);
         
         var colorProp = def.scope(function(){
          // Color "controller"
@@ -138,13 +138,13 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             .group(function(catGroup){ return catGroup; })
             .localProperty('value', Number)
             .value(function(catGroup){
-                return catGroup.dimensions(valueDimName).sum(visibleKeyArgs);
+                return catGroup.dimensions(valueDimName).sum(visibleKeyArgs); // May be negative
             })
             .localProperty('hasSelected')
             .hasSelected(function(catGroup){
                 return catGroup.selectedCount() > 0;                    
             })
-            .angle(function(){ return angleScale(this.value()); })
+            .angle(function(){ return angleScale(Math.abs(this.value())); })
             .localProperty('midAngle', Number)
             .midAngle(function(){
                 var instance = this.instance();
@@ -167,35 +167,95 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             this._addPropDoubleClick(this.pvPie);
         }
         
-        // Extend pie
+        if(this.showValues){
+            var formatValue = function(value, catGroup){
+                // Prefer to return the already formatted/provided label
+                var datums = catGroup._datums;
+                if(datums.length > 1){
+                    return valueDim.format(value);
+                }
+                
+                return datums[0].atoms[valueDimName].label;
+            };
+            
+            var formatPercent = function(value, catGroup){
+                var percent = catGroup.dimensions(valueDimName).percentOverParent(visibleKeyArgs);
+                return options.valueFormat.call(null, Math.round(percent  * 1000) / 10);
+            };
+            
+            var defaultValuesMask = options.valuesMask;
+            var valuesMaskFormatter = {};
+            var getFormatValuesMask = function(valuesMask){
+                if(valuesMask == null){
+                    if(valuesMask === null){
+                        return null;
+                    }
+                    // is undefined
+                    
+                    valuesMask = defaultValuesMask;
+                }
+                
+                var formatter = valuesMaskFormatter[valuesMask];
+                if(!formatter){
+                    switch(valuesMask){
+                        case '{0}': formatter = formatValue;   break;
+                        case '{1}': formatter = formatPercent; break;
+                        default:
+                            var showValue   = valuesMask.indexOf('{0}') >= 0;
+                            var showPercent = valuesMask.indexOf('{1}') >= 0;
+                            if(showValue || showPercent){
+                                formatter = function(value, catGroup){
+                                    return def.format(valuesMask, [
+                                                showValue   ? formatValue  (value, catGroup) : null, 
+                                                showPercent ? formatPercent(value, catGroup) : null
+                                           ]);
+                                };
+                            } else {
+                                formatter = def.fun.constant(valuesMask);
+                            }
+                            break;
+                    }
+                    
+                    valuesMaskFormatter[valuesMask] = formatter;
+                }
+                
+                return formatter;
+            };
+            
+            var valuesMaskInterceptor = function(getValuesMask, args) {
+                return getValuesMask ? getValuesMask.apply(this, args) : defaultValuesMask;
+            };
+            
+            this.pvPieLabel = this.pvPie.anchor("outer").add(pv.Label)
+                // .textAngle(0)
+                .localProperty('valuesMask')
+                .valuesMask(defaultValuesMask)
+                // Intercepting ensures it is evaluated before "text"
+                .intercept('valuesMask', valuesMaskInterceptor, this._getExtension('pieLabel', 'valuesMask'))
+                .text(function(catGroup) {
+                    // No text on 0-width slices... // TODO: ideally the whole slice would be visible=false; when scenes are added this is easily done
+                    var value = myself.pvPie.value();
+                    if(!value){
+                        return null;
+                    }
+                    
+                    var formatter = getFormatValuesMask(this.valuesMask());
+                    if(!formatter){
+                        return null;
+                    }
+                    
+                    return " " + formatter(value, catGroup);
+                 })
+                .textMargin(10);
+        }
+    },
+    
+    applyExtensions: function(){
         this.extend(this.pvPie, "pie_");
-
-        this.pvPieLabel = this.pvPie.anchor("outer").add(pv.Label)
-            .visible(this.showValues)
-            // .textAngle(0)
-            .text(function(catGroup) {
-                // No text on 0-width slices... // TODO: ideally the whole slice would be visible=false; when scenes are added this is easily done
-                var value = myself.pvPie.value();
-                if(!value){
-                    return null;
-                }
-                
-                if(options.showValuePercentage) {
-                    value = catGroup.dimensions(valueDimName).percentOverParent(visibleKeyArgs);
-                    return options.valueFormat.call(null, Math.round(value * 1000) / 10) + "%";
-                }
-                
-                return " " + valueDim.format(value);
-             })
-            .textMargin(10);
-
-        // Extend pieLabel
         this.extend(this.pvPieLabel, "pieLabel_");
-
-        // Extend body
         this.extend(this.pvPanel, "chart_");
     },
-
+    
     _explodeSlice: function(fun, mark) {
         var offset = 0;
         if (this.explodedSliceIndex == mark.index) {
