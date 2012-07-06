@@ -25,7 +25,7 @@ def.type('pvc.visual.Sign')
             return this.scene.datum; 
         });
         
-    pvMark.sign = def.constant(this);
+    pvMark.sign = def.fun.constant(this);
     
     /* Intercept the protovis mark's buildInstance */
     pvMark.buildInstance = this._buildInstance.bind(this, pvMark.buildInstance);

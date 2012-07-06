@@ -626,7 +626,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         if(this._axis2SeriesKeySet){
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
-                var calcAxis2SeriesKeySet = def.constant(this._axis2SeriesKeySet);
+                var calcAxis2SeriesKeySet = def.fun.constant(this._axis2SeriesKeySet);
 
                 /* Create a reader that surely only returns 'series' atoms */
                 seriesReader = this._filterDimensionReader(seriesReader, 'series');

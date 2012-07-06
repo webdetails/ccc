@@ -245,7 +245,7 @@ pvc.data.Data.setSelected = function(datums, selected){
  * @static
  */
 pvc.data.Data.toggleSelected = function(datums){
-    if(!def.isArrayLike(datums)){
+    if(!def.array.isLike(datums)){
         datums = def.query(datums).array();
     }
     
@@ -290,7 +290,7 @@ pvc.data.Data.setVisible = function(datums, visible){
  * @static
  */
 pvc.data.Data.toggleVisible = function(datums){
-    if(!def.isArrayLike(datums)){
+    if(!def.array.isLike(datums)){
         datums = def.query(datums).array();
     }
     

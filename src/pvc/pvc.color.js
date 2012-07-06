@@ -152,7 +152,7 @@ def.scope(function(){
                    var domain = this._getDomain(),
                        scale  = this._createScale(domain);
                    
-                   createCategoryScale = def.constant(scale);
+                   createCategoryScale = def.fun.constant(scale);
                }
                
                return this._createCategoryScalesMap(createCategoryScale); 

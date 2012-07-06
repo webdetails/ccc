@@ -49,7 +49,7 @@ def.type('pvc.visual.CartesianAxis')
     this.type  = type;
     this.index = index == null ? 0 : index;
 
-    this.roles = def.array(roles);
+    this.roles = def.array.as(roles);
     this.role  = this.roles[0];
     this.scaleType = groupingScaleType(this.role.grouping);
 

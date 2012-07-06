@@ -242,7 +242,7 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                     case 'stroke': return strokeColor;
                 }
             })
-            .override('defaultStrokeWidth', def.constant(1))
+            .override('defaultStrokeWidth', def.fun.constant(1))
             .pvMark
             ;
 
@@ -290,7 +290,7 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 return this.scene.acts.median.value != null && this.delegate(true);
             })
             .lock(a_bottom,  function(){ return this.scene.acts.median.position; }) // bottom
-            .override('defaultStrokeWidth', def.constant(2))
+            .override('defaultStrokeWidth', def.fun.constant(2))
             .pvMark
             ;
     },

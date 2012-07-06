@@ -69,8 +69,32 @@ pvc.cloneMatrix = function(m){
 
 pvc.mergeDefaults = function(to, defaults, from){
     def.eachOwn(defaults, function(dv, p){
-        var v;
-        to[p] = (from && (v = from[p]) !== undefined) ? v : dv;
+        var v, dvo;
+        
+        if(from){ 
+            v = from[p];
+        }
+        
+        if(v !== undefined){
+            var vo = def.object.asNative(v);
+            if(vo){
+                dvo = def.object.asNative(dv);
+                if(dvo){
+                    v = def.create(dvo, vo);
+                } // else, ignore dv
+            } // else, simple value (null included) ignores dv
+        }
+        
+        if(v === undefined){
+            // Inherit default native objects
+            dvo = def.object.asNative(dv);
+            if(dvo){
+                dv = Object.create(dvo);
+            }
+            v = dv;
+        }
+        
+        to[p] = v;
     });
     
     return to;
@@ -152,7 +176,7 @@ pvc.createColorScheme = function(colors){
         return pv.Colors.category10;
     }
 	
-    colors = def.array(colors);
+    colors = def.array.as(colors);
 	
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
@@ -283,7 +307,7 @@ pvc.Sides = function(sides){
 };
 
 pvc.Sides.names = 'left right top bottom'.split(' ');
-pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.constant(true));
+pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.retTrue);
 
 pvc.Sides.prototype.setSides = function(sides){
     if(typeof sides === 'string'){
@@ -1174,7 +1198,7 @@ var Size = def.type('pvc.Size')
 });
 
 pvc.Size.names = ['width', 'height'];
-pvc.Size.namesSet = pv.dict(pvc.Size.names, def.constant(true));
+pvc.Size.namesSet = pv.dict(pvc.Size.names, def.retTrue);
 
 // --------------------
 

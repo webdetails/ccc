@@ -104,7 +104,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @type pvc.visual.CartesianAxis
      */
     _createAxis: function(axisType, axisIndex){
-        var roles = def.array(this._axisRoleNameMap[axisType])
+        var roles = def.array.as(this._axisRoleNameMap[axisType])
                         .map(function(roleName){
                             return this.visualRoles(roleName);
                         }, this);

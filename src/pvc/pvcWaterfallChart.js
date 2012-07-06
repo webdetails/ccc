@@ -74,7 +74,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         this.base();
 
         var strokeStyle = this._getExtension("barWaterfallLine", "strokeStyle");
-        if(strokeStyle && !def.isFun(strokeStyle)){
+        if(strokeStyle && !def.fun.is(strokeStyle)){
             this._waterColor = pv.color(strokeStyle);
         }
 
@@ -86,7 +86,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
                 label: this.options.accumulatedLineLabel,
                 color: this._waterColor,
                 shape: 'bar',
-                isOn:  def.constant(true),
+                isOn:  def.retTrue,
                 click: null
             }]
         });

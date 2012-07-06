@@ -333,7 +333,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 // ------
                 .bottom(0)
                 .text(function(scene){ 
-                    return def.join(",", scene.acts.x.label, scene.acts.y.label);
+                    return def.string.join(",", scene.acts.x.label, scene.acts.y.label);
                 })
                 ;
         }

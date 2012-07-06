@@ -83,7 +83,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 segmented:   !isDense
             })
             
-            .lock('visible', def.constant(true))
+            .lock('visible', def.retTrue)
             
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
@@ -167,7 +167,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
              */
             .lock('visible',
                     showDotsOnly ? 
-                    def.constant(false) : 
+                    def.retFalse : 
                     (isBaseDiscrete && isStacked ? 
                     function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
                     function(){ return !this.scene.isNull; })

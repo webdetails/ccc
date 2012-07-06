@@ -178,7 +178,6 @@ pv.Behavior.tipsy = function(opts) {
         // backwards compatibility for special gravity, 'c', 
         // added to jquery.tipsy to avoid the style applying to the arrow, 
         // causing it to not show.
-        // If you want to hide the arrow, change the style (not per tooltip, though).
         if(gravity === 'c'){
             gravity = 'w';
         }
@@ -195,16 +194,14 @@ pv.Behavior.tipsy = function(opts) {
                 bestScore = chooseScores(bestScore, scoreGravity(_gravities[i]));
             }
             
-            if(pvc.debug >= 4 && gravity !== bestScore.gravity){
-                pvc.log("[TIPSY] Choosing gravity '" + bestScore.gravity + "' over '" + gravity + "'");
-            }
+//            if(gravity !== bestScore.gravity){
+//                console.log("[TIPSY] Choosing gravity '" + bestScore.gravity + "' over '" + gravity + "'");
+//            }
             
             gravity = bestScore.gravity;
         }
         
-        if(pvc.debug >= 4) {
-            pvc.log("[TIPSY] Gravity '" + gravity + "'");
-        }
+//        console.log("[TIPSY] Gravity '" + gravity + "'");
     
         return gravity;
         
@@ -282,11 +279,6 @@ pv.Behavior.tipsy = function(opts) {
             width:  bounds.width,
             height: bounds.height
         });
-        
-//        $fakeTipTarget[0].style.left = bounds.left + 'px';
-//        $fakeTipTarget[0].style.top = bounds.top + 'px';
-//        $fakeTipTarget[0].style.width = bounds.width  != null ? (bounds.width  + "px") : '';
-//        $fakeTipTarget[0].style.height = bounds.height != null ? (bounds.height + "px") : '';
     }
     
     function createTipsy(mark) {
@@ -319,11 +311,9 @@ pv.Behavior.tipsy = function(opts) {
             fakeStyle.display = 'block';
             
             // <Debug>
-            if(pvc.debug >= 10){
-                fakeStyle.borderColor = 'red';
-                fakeStyle.borderWidth = "1px";
-                fakeStyle.borderStyle = 'solid';
-            }
+//            fakeStyle.borderColor = 'red';
+//            fakeStyle.borderWidth = "1px";
+//            fakeStyle.borderStyle = 'solid';
             // </Debug>
         }
         
@@ -336,12 +326,13 @@ pv.Behavior.tipsy = function(opts) {
     function getMouseBounds(ev){
         if(!ev){ ev = pv.event; }
         
+        var delta = 5;
         var offset = $canvas.offset();
         return {
-            left:   ev.pageX - offset.left,
-            top:    ev.pageY - offset.top,
-            width:  10,
-            height: 10
+            left:   ev.pageX - offset.left - delta,
+            top:    ev.pageY - offset.top  - delta,
+            width:  10 + 2*delta,
+            height: 20
         };
     }
     
@@ -349,9 +340,7 @@ pv.Behavior.tipsy = function(opts) {
         
         if((!$targetElem && targetElem) || 
            ( $targetElem && $targetElem[0] !== targetElem)){
-            if(pvc.debug >= 4){
-                pvc.log("[TIPSY] Changing target element.");
-            }
+//            console.log("[TIPSY] Changing target element.");
             
             if($targetElem){
                 if(opts.followMouse){
@@ -387,9 +376,7 @@ pv.Behavior.tipsy = function(opts) {
     }
     
     function hideTipsy() {
-        if(pvc.debug >= 4){
-            pvc.log("[TIPSY] Hide");
-        }
+//        console.log("[TIPSY] Hide");
         
         // Release real target
         setTarget(null);
@@ -413,9 +400,7 @@ pv.Behavior.tipsy = function(opts) {
                  return;
             }
             
-            if(pvc.debug >= 4){
-                pvc.log("[TIPSY] Update");
-            }
+//            console.log("[TIPSY] Update");
             
             prevMouseX = ev.clientX; 
             prevMouseY = ev.clientY;
@@ -431,9 +416,7 @@ pv.Behavior.tipsy = function(opts) {
     function initBehavior(mark){
         // First time
         
-        if(pvc.debug >= 4){
-            pvc.log("[TIPSY] Creating");
-        }
+//        console.log("[TIPSY] Creating");
         
         createTipsy(mark);
         
@@ -458,9 +441,7 @@ pv.Behavior.tipsy = function(opts) {
     }
     
     function showTipsy(mark) {
-        if(pvc.debug >= 4){
-            pvc.log("[TIPSY] Show IN");
-        }
+//        console.log("[TIPSY] Show IN");
         
         if (!$canvas) {
             initBehavior(mark);
@@ -474,9 +455,7 @@ pv.Behavior.tipsy = function(opts) {
         
         $fakeTipTarget.tipsy("enter");
         
-        if(pvc.debug >= 4){
-            pvc.log("[TIPSY] Show OUT");
-        }
+//        console.log("[TIPSY] Show OUT");
     }
     
     // On point or mouseover

@@ -979,7 +979,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
         
         function addDim(escapedDimLabel, label){
-            tooltip.push('<b>' + escapedDimLabel + "</b>: " + (def.escapeHtml(label) || " - ") + '<br/>');
+            tooltip.push('<b>' + escapedDimLabel + "</b>: " + (def.html.escape(label) || " - ") + '<br/>');
         }
         
         function calcPercent(atom, dimName) {
@@ -1002,7 +1002,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                         valueLabel += " (" + calcPercent(atom, dimName) + ")";
                     }
                     
-                    addDim(def.escapeHtml(atom.dimension.type.label), valueLabel);
+                    addDim(def.html.escape(atom.dimension.type.label), valueLabel);
                 }
             }
         });
@@ -1014,7 +1014,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             group.freeDimensionNames().forEach(function(dimName){
                 var dim = group.dimensions(dimName);
                 if(!dim.type.isHidden){
-                    var dimLabel = def.escapeHtml(dim.type.label),
+                    var dimLabel = def.html.escape(dim.type.label),
                         valueLabel;
                     
                     if(dim.type.valueType === Number) {
@@ -1367,7 +1367,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             // pvc.log(datum.key + ": " + JSON.stringify(shape) + " intersects? " + shape.intersectsRect(this.rubberBand));
             if (shape.intersectsRect(rb)){
                 var group = instance.group;
-                var datums = group ? group._datums : def.array(instance.datum);
+                var datums = group ? group._datums : def.array.as(instance.datum);
                 if(datums) {
                     datums.forEach(function(datum){
                         if(!datum.isNull) {

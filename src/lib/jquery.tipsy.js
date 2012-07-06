@@ -58,14 +58,29 @@
                     $tip.remove().css({top: 0, left: 0, visibility: 'hidden', display: 'block'}).appendTo(document.body);
                 }
                 
-                var pos = $.extend({}, this.$element.offset(), {
-                    width: this.$element[0].offsetWidth,
-                    height: this.$element[0].offsetHeight
-                });
+                var pos = $.extend({}, this.$element.offset());
+                
+                // Adds SVG support.
+                // Modified from https://github.com/logical42/tipsy-svg--for-rails
+                if (this.$element[0].nearestViewportElement) {
+                    var rect = this.$element[0].getBoundingClientRect();
+                    pos.width  = rect.width;
+                    pos.height = rect.height;
+                } else {
+                    pos.width  = this.$element[0].offsetWidth  || 0;
+                    pos.height = this.$element[0].offsetHeight || 0;
+                }
                 
                 var tipOffset = this.options.offset,
+                    useCorners = this.options.corners,
+                    showArrow  = this.options.arrow,
                     actualWidth  = $tip[0].offsetWidth, 
                     actualHeight = $tip[0].offsetHeight;
+                
+                if(!showArrow){
+                    // More or less the padding reserved for the arrow
+                    tipOffset -= 4;
+                }
                 
                 function calcPosition(gravity){
                     var tp;
@@ -80,16 +95,19 @@
                             tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth - tipOffset};
                             break;
                         case 'w':
-                        case 'c':
                             tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width + tipOffset};
                             break;
                     }
                     
-                    if (gravity.length == 2) {
+                    if (gravity.length === 2) {
                         if (gravity.charAt(1) == 'w') {
-                            tp.left = pos.left + pos.width / 2 - 15;
+                            tp.left = useCorners ? 
+                                        pos.left + pos.width + tipOffset:
+                                        pos.left + pos.width / 2 - 15;
                         } else {
-                            tp.left = pos.left + pos.width / 2 - actualWidth + 15;
+                            tp.left = useCorners ? 
+                                        pos.left - actualWidth - tipOffset : 
+                                        pos.left + pos.width / 2 - actualWidth + 15;
                         }
                     }
                     
@@ -102,7 +120,14 @@
                 
                 var tp = calcPosition(gravity);
                 
-                $tip.css(tp).addClass('tipsy-' + gravity);
+                // Add a duplicate w/e char at the end when using corners
+                $tip.css(tp).addClass('tipsy-' + gravity + (useCorners && gravity.length > 1 ? gravity.charAt(1) : ''));
+                
+                if(showArrow){
+                    var hideArrow = useCorners && gravity.length === 2;
+                    // If corner, hide the arrow, cause arrow styles don't support corners nicely
+                    $tip.find('.tipsy-arrow')[hideArrow ? 'hide' : 'show']();
+                }
                 
                 if (this.options.fade && (!isUpdate || !this._prevGravity || (this._prevGravity !== gravity))) {
                     $tip.stop().css({opacity: 0, display: 'block', visibility: 'visible'}).animate({opacity: this.options.opacity});
@@ -137,7 +162,12 @@
         
         tip: function() {
             if (!this.$tip) {
-                this.$tip = $('<div class="tipsy"></div>').html('<div class="tipsy-arrow"></div><div class="tipsy-inner"/></div>');
+                this.$tip = $('<div class="tipsy"></div>');
+                if(this.options.arrow){
+                    this.$tip.html('<div class="tipsy-arrow"></div><div class="tipsy-inner"/></div>');
+                } else {
+                    this.$tip.html('<div class="tipsy-inner"/></div>');
+                }
             }
             return this.$tip;
         },
@@ -164,6 +194,9 @@
         }
         
         options = $.extend({}, $.fn.tipsy.defaults, options);
+        if(options.arrow == null){
+            options.arrow = !options.corners;
+        }
         
         function get(ele) {
             var tipsy = $.data(ele, 'tipsy');
@@ -207,7 +240,9 @@
         offset: 0,
         opacity: 0.8,
         title: 'title',
-        trigger: 'hover'
+        trigger: 'hover',
+        corners: false, // use corners in nw, ne and sw, se gravities
+        arrow:   null   // show or hide the arrow (default is !corners)
     };
     
     // Overwrite this method to provide options on a per-element basis.

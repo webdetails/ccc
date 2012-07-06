@@ -464,7 +464,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         /* SHAPE TYPE & SIZE */
         var getShapeType;
         if(!sizeDimName) {
-            getShapeType = def.constant(shapeType);
+            getShapeType = def.fun.constant(shapeType);
         } else {
             getShapeType = function(){
                 return this.parent.sizeValue() != null ? shapeType : nullShapeType;

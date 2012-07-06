@@ -155,11 +155,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
         
         if(parent.absLabel){
             /*global complex_labelSep:true */
-            this.absLabel = def.join(complex_labelSep, parent.absLabel, this.label);
+            this.absLabel = def.string.join(complex_labelSep, parent.absLabel, this.label);
         }
         
         if(parent.absKey){
-            this.absKey = def.join(",", parent.absKey, this.key);
+            this.absKey = def.string.join(",", parent.absKey, this.key);
         }
     }
 })

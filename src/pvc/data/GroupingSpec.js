@@ -359,9 +359,9 @@ pvc.data.GroupingSpec.parse = function(specText, type){
     }
     
     var levels;
-    if(def.isArray(specText)) {
+    if(def.array.is(specText)) {
         levels = specText;
-    } else if(def.isString(specText)) {
+    } else if(def.string.is(specText)) {
         levels = specText.split(/\s*,\s*/); 
     }
 
@@ -425,7 +425,7 @@ var groupSpec_matchDimSpec = /^\s*(.+?)(?:\s+(asc|desc))?\s*$/i;
  */
 function groupSpec_parseGroupingLevel(groupLevelText, type) {
     /*jshint expr:true */
-    def.isString(groupLevelText) || def.fail.argumentInvalid('groupLevelText', "Invalid grouping specification.");
+    def.string.is(groupLevelText) || def.fail.argumentInvalid('groupLevelText', "Invalid grouping specification.");
     
     return def.query(groupLevelText.split(/\s*\|\s*/))
        .where(def.truthy)

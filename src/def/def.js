@@ -40,6 +40,14 @@ if (!Array.prototype.filter){
     };
 }
 
+if (!Array.prototype.forEach){
+    Array.prototype.forEach = function(fun, ctx){
+        for(var i = 0, len = this.length; i < len; ++i) {  
+            fun.call(ctx, this[i], i, this);
+        }
+    };
+}
+
 if(!Object.create){
     /** @ignore */
     Object.create = (function(){
@@ -136,7 +144,7 @@ var def = /** @lends def */{
     
     getPath: function(o, path, create, dv){
         if(o && path != null){
-            var parts = def.isArray(path) ? path : path.split('.');
+            var parts = def.array.is(path) ? path : path.split('.');
             var L = parts.length;
             if(L){
                 var i = 0;
@@ -375,7 +383,7 @@ var def = /** @lends def */{
         return scopeFun.call(ctx);
     },
     
-    // Utility/Factory functions ----------------
+    // Special functions ----------------
     
     /**
      * The natural order comparator function.
@@ -391,10 +399,6 @@ var def = /** @lends def */{
          */
         return (a === b) ? 0 : ((a > b) ? 1 : -1);
         //return (a < b) ? -1 : ((a > b) ? 1 : 0);
-    },
-    
-    constant: function(v){
-        return function(){ return v; };
     },
     
     methodCaller: function(p, context){
@@ -417,21 +421,11 @@ var def = /** @lends def */{
      */
     identity: function(x){ return x; },
     
-    /**
-     * The truthy function.
-     * @field
-     * @type function
-     */
-    truthy: function(x){ return !!x; },
-    
-    /**
-     * The falsy function.
-     * @field
-     * @type function
-     */
-    falsy: function(x){ return !x; },
-    
     add: function(a, b){ return a + b; },
+
+    // negate?
+    
+    // Constant functions ----------------
     
     /**
      * The NO OPeration function.
@@ -440,28 +434,83 @@ var def = /** @lends def */{
      */
     noop: function noop(){ /* NOOP */ },
     
-    // negate?
+    retTrue:  function(){ return true;  },
+    retFalse: function(){ return false; },
     
-    // Type coercion ----------------
+    // Type namespaces ----------------
     
-    fun: function(v){
-        return def.isFun(v) ? v : def.constant(v);
+    number: {
+        as: function(d, dv){
+            var v = parseFloat(d);
+            return isNaN(v) ? (dv || 0) : v;
+        }
     },
     
-    number: function(d, dv){
-        var v = parseFloat(d);
-        return isNaN(v) ? (dv || 0) : v;
+    array: {
+
+        is: function(v){
+            return (v instanceof Array);
+        },
+        
+        isLike: function(v){
+            return v && (v.length != null) && (typeof v !== 'string');
+        },
+        
+        /**
+         * Converts something to an array if it is not one already,
+         * and if it is not nully.
+         * 
+         * @param thing A thing to convert to an array.
+         * @returns {Array} 
+         */
+        as: function(thing){
+            return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+        }
     },
     
-    /**
-     * Converts something to an array if it is not one already,
-     * and if it is not nully.
-     * 
-     * @param thing A thing to convert to an array.
-     * @returns {Array} 
-     */
-    array: function(thing){
-        return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+    object: {
+        as: function(v){
+            return v && typeof(v) === 'object' ? v : null;
+        },
+        
+        asNative: function(v){
+            return v && typeof(v) === 'object' && v.constructor === Object ?
+                    v :
+                    null;
+        }
+    },
+    
+    string: {
+        is: function(v){
+            return typeof v === 'string';
+        },
+        
+        join: function(sep){
+            var args = [],
+                a = arguments;
+            for(var i = 1, L = a.length ; i < L ; i++){
+                var v = a[i];
+                if(v != null && v !== ""){
+                    args.push("" + v);
+                }
+            }
+        
+            return args.join(sep);
+        }
+    },
+    
+    fun: {
+        is: function(v){
+            return typeof v === 'function';
+        },
+        
+        as: function(v){
+            return typeof v === 'function' ? v : def.fun.constant(v);
+        },
+        
+        constant: function(v){
+            return function(){ return v; };
+        }
     },
     
     // nully to 'dv'
@@ -480,6 +529,11 @@ var def = /** @lends def */{
         return v == null;
     },
     
+    // !== null && !== undefined
+    notNully: function(v){
+        return v != null;
+    },
+    
     empty: function(v){
         return v == null || v === '';
     },
@@ -488,47 +542,21 @@ var def = /** @lends def */{
         return v != null && v !== '';
     },
     
-    // !== null && !== undefined
-    notNully: function(v){
-        return v != null;
-    },
+    /**
+     * The truthy function.
+     * @field
+     * @type function
+     */
+    truthy: function(x){ return !!x; },
     
-    isArrayLike: function(v){
-        return v && (v.length != null) && (typeof v !== 'string');
-    },
+    /**
+     * The falsy function.
+     * @field
+     * @type function
+     */
+    falsy: function(x){ return !x; },
     
-    isArray: function(v){
-        return (v instanceof Array);
-    },
-    
-    isString: function(v){
-        return typeof v === 'string';
-    },
-    
-    isFun: function(v){
-        return typeof v === 'function';
-    },
-    
-    join: function(sep){
-        var args = [],
-            a = arguments;
-        for(var i = 1, L = a.length ; i < L ; i++){
-            var v = a[i];
-            if(v != null && v !== ""){
-                args.push("" + v);
-            }
-        }
-    
-        return args.join(sep);
-    },
-    
-    // TODO: lousy implementation!
-    escapeHtml: function(str){
-        return str.replace(/&/gm, "&amp;")
-                  .replace(/</gm, "&lt;")
-                  .replace(/>/gm, "&gt;")
-                  .replace(/"/gm, "&quot;");    
-    },
+    // -----------------
     
     /* Ensures the first letter is upper case */
     firstUpperCase: function(s){
@@ -575,6 +603,8 @@ var def = /** @lends def */{
         });
     },
     
+    // --------------
+    
     error: function(error){
         return (error instanceof Error) ? error : new Error(error);
     },
@@ -585,15 +615,6 @@ var def = /** @lends def */{
     
     assert: function(msg, scope){
         throw def.error.assertionFailed(msg, scope);
-    },
-    
-    /**
-     * The not implemented function.
-     * @field
-     * @type function
-     */
-    notImplemented: function(){
-        throw def.error.notImplemented();
     }
 };
 
@@ -632,7 +653,7 @@ def.shared = function(){
 
 var errors = {
     operationInvalid: function(msg, scope){
-        return def.error(def.join(" ", "Invalid operation.", def.format(msg, scope)));
+        return def.error(def.string.join(" ", "Invalid operation.", def.format(msg, scope)));
     },
 
     notImplemented: function(){
@@ -645,14 +666,14 @@ var errors = {
 
     argumentInvalid: function(name, msg, scope){
         return def.error(
-                   def.join(" ",
+                   def.string.join(" ",
                        def.format("Invalid argument '{0}'.", [name]), 
                        def.format(msg, scope)));
     },
 
     assertionFailed: function(msg, scope){
         return def.error(
-                   def.join(" ", 
+                   def.string.join(" ", 
                        "Assertion failed.", 
                        def.format(msg, scope)));
     }
@@ -720,7 +741,7 @@ function getNamespace(name, base){
  * @private 
  */
 function createSpace(name, base, definition){
-    if(def.isFun(base)){
+    if(def.fun.is(base)){
         definition = base;
         base = null;
     }
@@ -794,27 +815,15 @@ def.globalSpace = globalSpace;
 // -----------------------
 
 /** @private */
-function asNativeObject(v){
-    return v && typeof(v) === 'object' && v.constructor === Object ?
-            v :
-            undefined;
-}
-
-/** @private */
-function asObject(v){
-    return v && typeof(v) === 'object' ? v : undefined;
-}
-
-/** @private */
 function mixinRecursive(instance, mixin){
     for(var p in mixin){
         var vMixin = mixin[p];
         if(vMixin !== undefined){
             var oMixin,
-                oTo = asNativeObject(instance[p]);
+                oTo = def.object.asNative(instance[p]);
 
             if(oTo){
-                oMixin = asObject(vMixin);
+                oMixin = def.object.as(vMixin);
                 if(oMixin){
                     mixinRecursive(oTo, oMixin);
                 } else {
@@ -822,7 +831,7 @@ function mixinRecursive(instance, mixin){
                     instance[p] = vMixin;
                 }
             } else {
-                oMixin = asNativeObject(vMixin);
+                oMixin = def.object.asNative(vMixin);
                 if(oMixin){
                     vMixin = Object.create(oMixin);
                 }
@@ -837,7 +846,7 @@ def.mixin = function(instance/*mixin1, mixin2, ...*/){
     for(var i = 1, L = arguments.length ; i < L ; i++){
         var mixin = arguments[i];
         if(mixin){
-            mixin = asObject(mixin.prototype || mixin);
+            mixin = def.object.as(mixin.prototype || mixin);
             if(mixin){
                 mixinRecursive(instance, mixin);
             }
@@ -852,7 +861,7 @@ def.mixin = function(instance/*mixin1, mixin2, ...*/){
 /** @private */
 function createRecursive(instance){
     for(var p in instance){
-        var vObj = asNativeObject(instance[p]);
+        var vObj = def.object.asNative(instance[p]);
         if(vObj){
             createRecursive( (instance[p] = Object.create(vObj)) );
         }
@@ -1035,7 +1044,7 @@ def.scope(function(){
     /** @private */
     function asMethod(fun) {
         if(fun) {
-            if(def.isFun(fun)) {
+            if(def.fun.is(fun)) {
                 return new Method({as: fun});
             }
             
@@ -1043,12 +1052,12 @@ def.scope(function(){
                 return fun;
             }
             
-            if(def.isFun(fun.as)) {
+            if(def.fun.is(fun.as)) {
                 return new Method(fun);
             }
             
             if(fun.isAbstract) {
-                return new Method({isAbstract: true, as: def.notImplemented });
+                return new Method({isAbstract: true, as: def.fail.notImplemented });
             }
         }
         
@@ -1377,6 +1386,18 @@ def.type('Map')
 
 // --------------------
 
+def.html = {
+    // TODO: lousy multipass implementation!
+    escape: function(str){
+        return str.replace(/&/gm, "&amp;")
+                  .replace(/</gm, "&lt;")
+                  .replace(/>/gm, "&gt;")
+                  .replace(/"/gm, "&quot;");    
+    }
+};
+
+// --------------------
+
 def.type('Query')
 .init(function(){
     this.index = -1;
@@ -1695,7 +1716,7 @@ def.type('AdhocQuery', def.Query)
 def.type('ArrayLikeQuery', def.Query)
 .init(function(list){
     this.base();
-    this._list  = def.isArrayLike(list) ? list : [list];
+    this._list  = def.array.isLike(list) ? list : [list];
     this._count = this._list.length;
 })
 .add({
@@ -1955,7 +1976,7 @@ def.query = function(q){
         return q;
     }
     
-    if(def.isFun(q)){
+    if(def.fun.is(q)){
         return new def.AdhocQuery(q);
     }
 

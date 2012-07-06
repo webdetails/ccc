@@ -229,9 +229,10 @@ pvc.BaseChart = pvc.Abstract.extend({
     constructor: function(options) {
         var parent = this.parent = def.get(options, 'parent') || null;
         if(parent) {
+            // options != null
             this.root = parent.root;
             this.dataEngine =
-            this.data = def.get(options, 'data') ||
+            this.data = options.data ||
                         def.fail.argumentRequired('options.data');
             
             this.left = options.left;
@@ -253,7 +254,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._visualRoles = {};
             this._measureVisualRoles = [];
         }
-
+        
         this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
     },
     
@@ -300,11 +301,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(options.showTooltips){
             var ts = options.tipsySettings;
             if(ts){
-                ts = options.tipsySettings = def.create(ts);
                 this.extend(ts, "tooltip_");
-                if(ts.exclusionGroup === undefined) {
-                    ts.exclusionGroup = 'chart';
-                }
             }
         }
     },
@@ -681,7 +678,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         function bind(role, dimNames){
             role.bind(pvc.data.GroupingSpec.parse(dimNames, type));
-            def.array(dimNames).forEach(function(dimName){
+            def.array.as(dimNames).forEach(function(dimName){
                 boundDimTypes[dimName] = true;
             });
         }
@@ -976,7 +973,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         switch(this.options.legendClickMode){
             case 'toggleSelected':
                 if(!this.options.selectable){
-                    isOn = def.constant(true);
+                    isOn = def.retTrue;
                 } else {
                     isOn = function(){
                         return !this.group.owner.selectedCount() || 
@@ -1473,12 +1470,15 @@ pvc.BaseChart = pvc.Abstract.extend({
         },
         
         tipsySettings: {
+            exclusionGroup: 'chart',
             gravity: "s",
-            delayIn:  150,
+            delayIn:  200,
+            delayOut: 50,
             offset:   2,
             opacity:  0.8,
             html:     true,
             fade:     true,
+            corners:  false,
             followMouse: false
         },
         

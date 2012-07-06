@@ -304,7 +304,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 function data_processWhereSpec(whereSpec){
     var whereProcSpec = [];
     
-    whereSpec = def.array(whereSpec);
+    whereSpec = def.array.as(whereSpec);
     if(whereSpec){
         whereSpec.forEach(processDatumFilter, this);
     }
@@ -404,7 +404,7 @@ function data_whereState(q, keyArgs){
  */
 function data_where(whereSpec, keyArgs) {
     
-    var orderBys = def.array(def.get(keyArgs, 'orderBy')),
+    var orderBys = def.array.as(def.get(keyArgs, 'orderBy')),
         datumKeyArgs = def.create(keyArgs || {}, {
             orderBy: null
         });

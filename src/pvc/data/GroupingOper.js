@@ -65,7 +65,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
 
     // grouping spec ids is semantic keys, although the name is not 'key'
     var ids = [];
-    this._groupSpecs = def.array(groupingSpecs).map(function(groupSpec){
+    this._groupSpecs = def.array.as(groupingSpecs).map(function(groupSpec){
         if(groupSpec instanceof pvc.data.GroupingSpec) {
             if(groupSpec.type !== linkParent.type) {
                 throw def.error.argumentInvalid('groupingSpecText', "Invalid associated complex type.");

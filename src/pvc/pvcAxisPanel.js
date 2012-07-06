@@ -106,8 +106,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 }
             } 
             
-            var angle  = def.number(this._getExtension(labelExtId, 'textAngle'),  0);
-            var margin = def.number(this._getExtension(labelExtId, 'textMargin'), 3);
+            var angle  = def.number.as(this._getExtension(labelExtId, 'textAngle'),  0);
+            var margin = def.number.as(this._getExtension(labelExtId, 'textMargin'), 3);
             
             var textHeight = pvc.text.getTextHeight("m", font);
             

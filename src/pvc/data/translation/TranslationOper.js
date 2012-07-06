@@ -73,7 +73,7 @@ def.type('pvc.data.TranslationOper')
         if(typeof dimNames === 'string'){
             dimNames = dimNames.split(/\s*\,\s*/);
         } else {
-            dimNames =  def.array(dimNames);
+            dimNames =  def.array.as(dimNames);
         }
         
         var hasDims = !!(dimNames && dimNames.length);
@@ -91,7 +91,7 @@ def.type('pvc.data.TranslationOper')
         }
         
         // Consumed/Reserved virtual item indexes
-        var indexes = def.array(dimReaderSpec.indexes);
+        var indexes = def.array.as(dimReaderSpec.indexes);
         if(indexes) {
             indexes.forEach(this._userUseIndex, this);
         }
@@ -241,9 +241,9 @@ def.type('pvc.data.TranslationOper')
 
     _userRead: function(reader, dimNames){
         /*jshint expr:true */
-        def.isFun(reader) || def.fail.argumentInvalid('reader', "Reader must be a function.");
+        def.fun.is(reader) || def.fail.argumentInvalid('reader', "Reader must be a function.");
         
-        if(def.isArray(dimNames)){
+        if(def.array.is(dimNames)){
             dimNames.forEach(function(name){
                 this._userDimsReadersByDim[name] = reader;
             }, this);
