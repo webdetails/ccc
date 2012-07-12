@@ -144,6 +144,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 anchor:            axis.option('Position'),
                 axisSize:          axis.option('Size'),
                 axisSizeMax:       axis.option('SizeMax'),
+                labelSpacingMin:   axis.option('LabelSpacingMin'),
+                tickExponentMin:   axis.option('TickExponentMin'),
+                tickExponentMax:   axis.option('TickExponentMax'),
                 fullGrid:          axis.option('FullGrid'),
                 fullGridCrossesMargin: axis.option('FullGridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
@@ -240,17 +243,30 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         /* DOMAIN */
 
         // With composite axis, only 'singleLevel' flattening works well
-        var flatteningMode = null, //axis.option('Composite') ? 'singleLevel' : null,
-            baseData = this._getVisibleData(dataPartValues),
-            data = axis.role.flatten(baseData, {
+        var flatteningMode = null; //axis.option('Composite') ? 'singleLevel' : null,
+        var baseData = this._getVisibleData(dataPartValues);
+        var data = axis.role.flatten(baseData, {
                                 visible: true,
                                 flatteningMode: flatteningMode
-                            }),
-            values = data.children().select(function(child){ return child.value; }).array(),
-            scale  = new pv.Scale.ordinal(values);
-
+                            });
+        
+        var scale  = new pv.Scale.ordinal();
         scale.type = 'Discrete';
-
+        
+        if(!data.count()){
+            scale.isNull = true;
+            
+            if(pvc.debug >= 3){
+                pvc.log("Discrete scale - no data");
+            }
+        } else {
+            var values = data.children()
+                             .select(function(child){ return child.value; })
+                             .array();
+            
+            scale.domain(values);
+        }
+        
         return scale;
     },
     
@@ -273,26 +289,29 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      */
     _createTimeseriesScaleByAxis: function(axis, dataPartValues){
         /* DOMAIN */
-        var dExtent = this._getVisibleValueExtent(axis, dataPartValues), // null when no data...
-            dMin,
-            dMax;
+        var extent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data...
         
-        if(dExtent) {
-            dMin = dExtent.min;
-            dMax = dExtent.max;
+        var scale = new pv.Scale.linear();
+        scale.type = 'Timeseries';
+        
+        if(!extent){
+            scale.isNull = true;
+            
+            if(pvc.debug >= 3){
+                pvc.log("Timeseries scale - no data");
+            }
         } else {
-            dMin = dMax = new Date();
-        }
-        
-        if((dMax - dMin) === 0) {
-            dMax = new Date(dMax.getTime() + 3600000); // 1 h
-        }
-        
-        var scale = new pv.Scale.linear(dMin, dMax);
+            var dMin = extent.min;
+            var dMax = extent.max;
 
-        // Domain rounding
-        // TODO: pvc.scaleTicks(scale) does not like Dates...
-        //pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
+            if((dMax - dMin) === 0) {
+                dMax = new Date(dMax.getTime() + 3600000); // 1 h
+            }
+        
+            scale.domain(dMin, dMax);
+            
+            // TODO: Domain rounding
+        }
         
         return scale;
     },
@@ -315,57 +334,73 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      */
     _createContinuousScaleByAxis: function(axis, dataPartValues){
         /* DOMAIN */
-        var extent = this._getVisibleValueExtentConstrained(axis, dataPartValues),
-            dMin = extent.min,
-            dMax = extent.max;
-
-        /*
-         * If both negative or both positive
-         * the scale does not contain the number 0.
-         *
-         * Currently this option ignores locks. Is this all right?
-         */
-        var originIsZero = axis.option('OriginIsZero');
-        if(originIsZero && (dMin * dMax > 0)){
-            if(dMin > 0){
-                dMin = 0;
-                extent.minLocked = true;
-            } else {
-                dMax = 0;
-                extent.maxLocked = true;
+        var extent = this._getVisibleValueExtentConstrained(axis, dataPartValues);
+        
+        var scale = new pv.Scale.linear();
+        scale.type = 'Continuous';
+        
+        if(!extent){
+            scale.isNull = true;
+            
+            if(pvc.debug >= 3){
+                pvc.log("Continuous scale - no data");
             }
-        }
-
-        /*
-         * If the bounds (still) are the same, things break,
-         * so we add a wee bit of variation.
-         *
-         * This one must ignore locks.
-         */
-        if (dMin === dMax) {
-            dMin = dMin !== 0 ? dMin * 0.99 : originIsZero ? 0 : -0.1;
-            dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
-        } else if(dMin > dMax){
-            // What the heck...
-            // Is this ok or should throw?
-            var bound = dMin;
-            dMin = dMax;
-            dMax = bound;
-        }
-        
-        var scale = new pv.Scale.linear(dMin, dMax);
-        
-        // Domain rounding
-        // Must be done before applying offset
-        // because otherwise the offset gets amplified by the rounding
-        // Then, the scale range is updated but the ticks cache is not.
-        // The result is we end up showing two zones, on each end, with no ticks.
-        pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
-        
-        if(pvc.debug >= 3){
-            pvc.log("Continuous scale extent: " + JSON.stringify(extent) + 
-                    " create:"  + JSON.stringify({min: dMin, max: dMax}) + 
-                    " rounded:" + JSON.stringify(scale.domain()));
+        } else {
+            var dMin = extent.min;
+            var dMax = extent.max;
+    
+            /*
+             * If both negative or both positive
+             * the scale does not contain the number 0.
+             *
+             * Currently this option ignores locks. Is this all right?
+             */
+            var originIsZero = axis.option('OriginIsZero');
+            if(originIsZero && (dMin * dMax > 0)){
+                if(dMin > 0){
+                    dMin = 0;
+                    extent.minLocked = true;
+                } else {
+                    dMax = 0;
+                    extent.maxLocked = true;
+                }
+            }
+    
+            /*
+             * If the bounds (still) are the same, things break,
+             * so we add a wee bit of variation.
+             *
+             * This one must ignore locks.
+             */
+            if (dMin === dMax) {
+                dMin = dMin !== 0 ? dMin * 0.99 : originIsZero ? 0 : -0.1;
+                dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
+            } else if(dMin > dMax){
+                // What the heck...
+                // Is this ok or should throw?
+                var bound = dMin;
+                dMin = dMax;
+                dMax = bound;
+            }
+            
+            scale.domain(dMin, dMax);
+            
+            // Domain rounding
+            // Must be done before applying offset
+            // because otherwise the offset gets amplified by the rounding
+            // Then, the scale range is updated but the ticks cache is not.
+            // The result is we end up showing two zones, on each end, with no ticks.
+            var roundMode = axis.option('DomainRoundMode');
+            if(roundMode === 'nice'){
+                scale.nice();
+                // Ticks domain rounding is performed during AxisPanel layout
+            }
+            
+            if(pvc.debug >= 3){
+                pvc.log("Continuous scale extent: " + JSON.stringify(extent) + 
+                        " create:" + JSON.stringify({min: dMin, max: dMax}) + 
+                        " niced:"  + JSON.stringify(scale.domain()));
+            }
         }
         
         return scale;
@@ -399,6 +434,19 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 scale.splitBandedCenter(scale.min, scale.max, bandRatio);
             }
         } else {
+            if(scale.type === 'Continuous' && axis.option('DomainRoundMode') === 'tick'){
+                var axisPanel = this.axesPanels[axis.id];
+                if(axisPanel){
+                    // Domain rounding
+                    // Commit the scale's domain to the axis calculated ticks domain
+                    var ticks = axisPanel.getTicks();
+                    var tickCount = ticks && ticks.length;
+                    if(tickCount){
+                        scale.domain(ticks[0], ticks[tickCount - 1]);
+                    }
+                }
+            }
+            
             scale.range(scale.min, scale.max);
         }
         
@@ -557,16 +605,18 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
         }
         
-        var baseExtent;
         if(min == null || max == null) {
-            baseExtent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data
+            var baseExtent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data
+            if(!baseExtent){
+                return null;
+            }
             
             if(min == null){
-                min = baseExtent ? baseExtent.min : 0;
+                min = baseExtent.min;
             }
             
             if(max == null){
-                max = baseExtent ? baseExtent.max : 0;
+                max = baseExtent.max;
             }
         }
         

@@ -49,64 +49,83 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
     },
 
     _createZeroLine: function(axis){
-        var scale  = axis.scale,
-            domain = scale.domain();
-
-        // Domain crosses zero?
-        if(domain[0] * domain[1] <= 0){
-            var a   = axis.orientation === 'x' ? 'bottom' : 'left',
-                al  = this.anchorLength(a),
-                ao  = this.anchorOrtho(a),
-                aol = this.anchorOrthoLength(a),
-                orthoAxis = this._getOrthoAxis(axis.type),
-                orthoScale = orthoAxis.scale,
-                orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
-                contentPanel = this.chart._mainContentPanel,
-                zeroPosition = contentPanel.position[ao] + scale(0),
-                position = contentPanel.position[a] + 
-                            (orthoFullGridCrossesMargin ?
-                                0 :
-                                orthoScale.offset),
-
-                olength   = orthoFullGridCrossesMargin ?
-                                    orthoScale.size :
-                                    orthoScale.offsetSize;
-            
-            this.pvZeroLine = this.pvPanel.add(pv.Rule)
-                /* zOrder
-                 *
-                 * TOP
-                 * -------------------
-                 * Axis Rules:     0
-                 * Frame/EndLine: -5
-                 * Line/Dot/Area Content: -7
-                 * ZeroLine:      -9   <<------
-                 * Content:       -10 (default)
-                 * FullGrid:      -12
-                 * -------------------
-                 * BOT
-                 */
-                .zOrder(-9)
-                .strokeStyle("#808285")
-                [a](position)
-                [aol](olength)
-                [al](null)
-                [ao](zeroPosition)
-                //.svg(null)
-                ;
+        var scale = axis.scale;
+        if(!scale.isNull){
+            var domain = scale.domain();
+    
+            // Domain crosses zero?
+            if(domain[0] * domain[1] <= 0){
+                var a   = axis.orientation === 'x' ? 'bottom' : 'left',
+                    al  = this.anchorLength(a),
+                    ao  = this.anchorOrtho(a),
+                    aol = this.anchorOrthoLength(a),
+                    orthoAxis = this._getOrthoAxis(axis.type),
+                    orthoScale = orthoAxis.scale,
+                    orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
+                    contentPanel = this.chart._mainContentPanel,
+                    zeroPosition = contentPanel.position[ao] + scale(0),
+                    position = contentPanel.position[a] + 
+                                (orthoFullGridCrossesMargin ?
+                                    0 :
+                                    orthoScale.offset),
+    
+                    olength   = orthoFullGridCrossesMargin ?
+                                        orthoScale.size :
+                                        orthoScale.offsetSize;
+                
+                this.pvZeroLine = this.pvPanel.add(pv.Rule)
+                    /* zOrder
+                     *
+                     * TOP
+                     * -------------------
+                     * Axis Rules:     0
+                     * Frame/EndLine: -5
+                     * Line/Dot/Area Content: -7
+                     * ZeroLine:      -9   <<------
+                     * Content:       -10 (default)
+                     * FullGrid:      -12
+                     * -------------------
+                     * BOT
+                     */
+                    .zOrder(-9)
+                    .strokeStyle("#808285")
+                    [a](position)
+                    [aol](olength)
+                    [al](null)
+                    [ao](zeroPosition)
+                    //.svg(null)
+                    ;
+            }
         }
     },
 
     _createFrameRule: function(axis){
-        var a = axis.option('Position'),
-            scale = axis.scale,
-            orthoAxis = this._getOrthoAxis(axis.type),
-            orthoScale = orthoAxis.scale,
-            fullGridCrossesMargin = axis.option('FullGridCrossesMargin'),
-            orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin')
-            ;
+        var orthoAxis = this._getOrthoAxis(axis.type);
+        var orthoScale = orthoAxis.scale;
+        if(orthoScale.isNull){
+            // Can only hide if the second axis is null as well 
+            var orthoAxis2 = this.chart.axes[pvc.visual.CartesianAxis.getId(orthoAxis.type, 1)];
+            if(!orthoAxis2 || orthoAxis2.scale.isNull){
+                return;
+            }
+            
+            orthoScale = orthoAxis2;
+        }
         
+        var a = axis.option('Position');
+        var scale = axis.scale;
+        if(scale.isNull){
+            // Can only hide if the second axis is null as well 
+            var axis2 = this.chart.axes[pvc.visual.CartesianAxis.getId(axis.type, 1)];
+            if(!axis2 || axis2.scale.isNull){
+                return;
+            }
+        }
+        
+        var fullGridCrossesMargin = axis.option('FullGridCrossesMargin');
+        var orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin');
         var contentPanel = this.chart._mainContentPanel;
+        
         switch(a) {
             case 'right':
                 a = 'left';
@@ -146,7 +165,7 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
             [aol](null)
             .svg({ 'stroke-linecap': 'square' })
             ;
-
+    
         return frameRule;
     },
 

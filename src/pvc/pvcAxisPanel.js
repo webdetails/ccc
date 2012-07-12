@@ -25,10 +25,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     ruleCrossesMargin: true,
     zeroLine: false, // continuous axis
     font: '9px sans-serif', // label font
-
+    labelSpacingMin: 1,
     // To be used in linear scales
     domainRoundMode: 'none',
     desiredTickCount: null,
+    tickExponentMin:  null,
+    tickExponentMax:  null,
     minorTicks:       true,
     
     _isScaleSetup: false,
@@ -59,6 +61,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.isDiscrete = axis.role.grouping.isDiscrete();
     },
     
+    getTicks: function(){
+        return this._layoutInfo && this._layoutInfo.ticks;
+    },
+    
     _calcLayout: function(layoutInfo){
         
         var scale = this.axis.scale;
@@ -72,203 +78,470 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this._isScaleSetup = true;
         }
         
-        var labelBBox;
+        if(scale.isNull){
+            layoutInfo.axisSize = 0;
+        } else {
+            this._calcLayoutCore(layoutInfo);
+        }
         
-        function labelLayout(){
-            var labelExtId = this.panelName + 'Label';
+        return this.createAnchoredSize(layoutInfo.axisSize, layoutInfo.clientSize);
+    },
+    
+    _calcLayoutCore: function(layoutInfo){
+        //var layoutInfo = this._layoutInfo;
+        
+        // Fixed axis size?
+        layoutInfo.axisSize = this.axisSize;
+        
+        if (this.isDiscrete && this.useCompositeAxis){
+            if(layoutInfo.axisSize == null){
+                layoutInfo.axisSize = 50;
+            }
+        } else {
             
-            var font = this.font;
-                
-            var align = this._getExtension(labelExtId, 'textAlign');
-            if(typeof align !== 'string'){
-                align = this.isAnchorTopOrBottom() ? 
-                        "center" : 
-                        (this.anchor == "left") ? "right" : "left";
+            /* I  - Calculate ticks
+             * --> layoutInfo.{ ticks, ticksText, maxTextWidth } 
+             */
+            this._calcTicks();
+            
+            /* II - Calculate REQUIRED axisSize so that all labels fit */
+            if(layoutInfo.axisSize == null){
+                this._calcAxisSizeFromLabel(); // -> layoutInfo.axisSize and layoutInfo.labelBBox
             }
             
-            var baseline = this._getExtension(labelExtId, 'textBaseline');
-            if(typeof baseline !== 'string'){
-                switch (this.anchor) {
-                    case "right":
-                    case "left":
-                    case "center": 
-                        baseline = "middle";
-                        break;
-                        
-                    case "bottom": 
-                        baseline = "top";
-                        break;
-                      
-                    default:
-                    //case "top": 
-                        baseline = "bottom";
-                        //break;
-                }
-            } 
+            /* III - Calculate Trimming Length if FIXED/REQUIRED > AVAILABLE */
+            this._calcMaxTextLengthThatFits();
             
-            var angle  = def.number.as(this._getExtension(labelExtId, 'textAngle'),  0);
-            var margin = def.number.as(this._getExtension(labelExtId, 'textMargin'), 3);
+            // Release memory.
+            layoutInfo.labelBBox = null;
+        }
+    },
+    
+    _calcAxisSizeFromLabel: function(){
+        this._calcLabelBBox();
+        this._calcAxisSizeFromLabelBBox();
+    },
+
+    // --> layoutInfo.labelBBox
+    _calcLabelBBox: function(){
+        var layoutInfo = this._layoutInfo;
+        
+        var labelExtId = this.panelName + 'Label';
+        
+        var align = this._getExtension(labelExtId, 'textAlign');
+        if(typeof align !== 'string'){
+            align = this.isAnchorTopOrBottom() ? 
+                    "center" : 
+                    (this.anchor == "left") ? "right" : "left";
+        }
+        
+        var baseline = this._getExtension(labelExtId, 'textBaseline');
+        if(typeof baseline !== 'string'){
+            switch (this.anchor) {
+                case "right":
+                case "left":
+                case "center": 
+                    baseline = "middle";
+                    break;
+                    
+                case "bottom": 
+                    baseline = "top";
+                    break;
+                  
+                default:
+                //case "top": 
+                    baseline = "bottom";
+                    //break;
+            }
+        } 
+        
+        var angle  = def.number.as(this._getExtension(labelExtId, 'textAngle'),  0);
+        var margin = def.number.as(this._getExtension(labelExtId, 'textMargin'), 3);
+        
+        layoutInfo.labelBBox = pvc.text.getLabelBBox(
+                        layoutInfo.maxTextWidth, 
+                        layoutInfo.textHeight, 
+                        align, 
+                        baseline, 
+                        angle, 
+                        margin);
+    },
+    
+    _calcAxisSizeFromLabelBBox: function(){
+        var layoutInfo = this._layoutInfo;
+        var labelBBox = layoutInfo.labelBBox;
+        
+        // The length not over the plot area
+        var length;
+        switch(this.anchor){
+            case 'left':   length = -labelBBox.x; break;
+            case 'right':  length = labelBBox.x2; break;
+            case 'top':    length = -labelBBox.y; break;
+            case 'bottom': length = labelBBox.y2; break;
+        }
+        
+        length = Math.max(length, 0);
+        
+        // --------------
+        
+        layoutInfo.axisSize = this.tickLength + length; 
+        
+        // Add equal margin on both sides?
+        var angle = labelBBox.sourceAngle;
+        if(!(angle === 0 && this.isAnchorTopOrBottom())){
+            // Text height already has some free space in that case
+            // so no need to add more.
+            layoutInfo.axisSize += this.tickLength;
+        }
+    },
+    
+    _calcMaxTextLengthThatFits: function(){
+        var layoutInfo = this._layoutInfo;
+        var maxClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
+        if(layoutInfo.axisSize <= maxClientLength){
+            // Labels fit
+            // Clear to avoid unnecessary trimming
+            layoutInfo.maxTextWidth = null;
+        } else {
+            // Text may not fit. 
+            // Calculate maxTextWidth where text is to be trimmed.
             
-            var textHeight = pvc.text.getTextHeight("m", font);
-            
-            var textItems;
-            if(this.isDiscrete){
-                var data = this.chart.visualRoles(this.roleName)
-                               .flatten(this.chart.data, {visible: true});
-                
-                textItems = def.query(data._children)
-                               .select(function(child){ return child.absLabel; });
-            } else {
-                var ticks = pvc.scaleTicks(
-                                scale,
-                                this.domainRoundMode === 'tick',
-                                this.desiredTickCount);
-                
-                textItems = def.query(ticks)
-                                .select(function(tick){ return scale.tickFormat(tick); });
+            var labelBBox = layoutInfo.labelBBox;
+            if(!labelBBox){
+                // NOTE: requires previously calculated layoutInfo.maxTextWidth...
+                this._calcAxisSizeFromLabel();
             }
             
-            var textWidth = textItems
-                                .select(function(text){ return 1.0 * pvc.text.getTextLength(text, font); })
-                                .max();
+            // Now move backwards, to the max text width...
+            var maxOrthoLength = maxClientLength - 2 * this.tickLength;
             
-            labelBBox = pvc.text.getLabelBBox(textWidth, textHeight, align, baseline, angle, margin);
-            
-            // The length not over the plot area
-            var length;
+            // A point at the maximum orthogonal distance from the anchor
+            var mostOrthoDistantPoint;
+            var parallelDirection;
             switch(this.anchor){
                 case 'left':
-                    length = -labelBBox.x;
+                    parallelDirection = pv.vector(0, 1);
+                    mostOrthoDistantPoint = pv.vector(-maxOrthoLength, 0);
                     break;
                 
                 case 'right':
-                    length = labelBBox.x2;
+                    parallelDirection = pv.vector(0, 1);
+                    mostOrthoDistantPoint = pv.vector(maxOrthoLength, 0);
                     break;
                     
                 case 'top':
-                    length = -labelBBox.y;
+                    parallelDirection = pv.vector(1, 0);
+                    mostOrthoDistantPoint = pv.vector(0, -maxOrthoLength);
                     break;
                 
                 case 'bottom':
-                    length = labelBBox.y2;
+                    parallelDirection = pv.vector(1, 0);
+                    mostOrthoDistantPoint = pv.vector(0, maxOrthoLength);
                     break;
             }
             
-            length = Math.max(length, 0);
+            // Intersect the line that passes through mostOrthoDistantPoint,
+            // and has the direction parallelDirection with 
+            // the top side and with the bottom side of the *original* label box.
+            var corners = labelBBox.sourceCorners;
+            var botL = corners[0];
+            var botR = corners[1];
+            var topL = corners[2];
+            var topR = corners[3];
             
-            // --------------
+            var topRLSideDir = topR.minus(topL);
+            var botRLSideDir = botR.minus(botL);
+            var intersect = pv.SvgScene.lineIntersect;
+            var botI = intersect(mostOrthoDistantPoint, parallelDirection, botL, botRLSideDir);
+            var topI = intersect(mostOrthoDistantPoint, parallelDirection, topL, topRLSideDir);
             
-            this.axisSize = this.tickLength + length; 
+            // Two cases
+            // A) If the angle is between -90 and 90, the text does not get upside down
+            // In that case, we're always interested in topI -> topR and botI -> botR
+            // B) Otherwise the relevant new segments are topI -> topL and botI -> botL
             
-            // Add equal margin on both sides?
-            if(!(angle === 0 && this.isAnchorTopOrBottom())){
-                // Text height already has some free space in that case
-                // so no need to add more.
-                this.axisSize += this.tickLength;
+            var maxTextWidth;
+            if(Math.cos(labelBBox.sourceAngle) >= 0){
+                // A) [-90, 90]
+                maxTextWidth = Math.min(
+                                    topR.minus(topI).length(), 
+                                    botR.minus(botI).length());
+            } else {
+                maxTextWidth = Math.min(
+                        topL.minus(topI).length(), 
+                        botL.minus(botI).length());
             }
+            
+            // One other detail.
+            // When align (anchor) is center,
+            // just cutting on one side of the label original box
+            // won't do, because when text is centered, the cut we make in length
+            // ends up distributed by both sides...
+            if(labelBBox.sourceAlign === 'center'){
+                var cutWidth = labelBBox.sourceTextWidth - maxTextWidth;
+                
+                // Cut same width on the opposite side. 
+                maxTextWidth -= cutWidth;
+            }
+            
+            layoutInfo.maxTextWidth = maxTextWidth; 
+        }
+    },
+    
+    // ----------------
+    
+    _calcTicks: function(){
+        var layoutInfo = this._layoutInfo;
+        
+        layoutInfo.textHeight = pvc.text.getTextHeight("m", this.font);
+        layoutInfo.maxTextWidth = null;
+        
+        // update maxTextWidth, ticks and ticksText
+        switch(this.scale.type){
+            case 'Discrete'  : this._calcDiscreteTicks(); break;
+            case 'Timeseries': this._calcTimeseriesTicks(); break;
+            case 'Continuous': this._calcNumberTicks(); break;
+            default: throw def.error.operationInvalid("Undefined axis scale type"); 
         }
         
-        layoutInfo.maxTextWidth = Infinity;
-        
-        if (this.isDiscrete && this.useCompositeAxis){
-            if(this.axisSize == null){
-                this.axisSize = 50;
-            }
-        } else {
-            if(this.axisSize == null){
-                labelLayout.call(this);
+        if(layoutInfo.maxTextWidth == null){
+            layoutInfo.maxTextWidth = 
+                def.query(layoutInfo.ticksText)
+                    .select(function(text){ return pvc.text.getTextLength(text, this.font); }, this)
+                    .max();
+        }
+    },
+    
+    _calcDiscreteTicks: function(){
+        var layoutInfo = this._layoutInfo;
+        var data = this.chart.visualRoles(this.roleName)
+                        .flatten(this.chart.data, {visible: true});
+         
+        layoutInfo.data  = data;
+        layoutInfo.ticks = data._children;
+         
+        layoutInfo.ticksText = def.query(data._children)
+                            .select(function(child){ return child.absLabel; })
+                            .array();
+    },
+    
+    _calcTimeseriesTicks: function(){
+        this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
+    },
+    
+    _calcNumberTicks: function(){
+        var desiredTickCount = this.desiredTickCount;
+        if(desiredTickCount == null){
+            if(this.isAnchorTopOrBottom()){
+                this._calcNumberHTicks();
+                return;
             }
             
-            var maxClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
-            if(this.axisSize > maxClientLength){
-                // Text may not fit. Calculate maxTextWidth.
-                if(!labelBBox){
-                    labelLayout.call(this);
+            desiredTickCount = this._calcNumberVDesiredTickCount();
+        }
+        
+        this._calcContinuousTicks(this._layoutInfo, desiredTickCount);
+    },
+    
+    // --------------
+    
+    _calcContinuousTicks: function(ticksInfo, desiredTickCount){
+        this._calcContinuousTicksValue(ticksInfo, desiredTickCount);
+        this._calcContinuousTicksText(ticksInfo);
+    },
+    
+    _calcContinuousTicksValue: function(ticksInfo, desiredTickCount){
+        ticksInfo.ticks = this.scale.ticks(
+                                desiredTickCount, {
+                                    roundInside:       this.domainRoundMode !== 'tick',
+                                    numberExponentMin: this.tickExponentMin,
+                                    numberExponentMax: this.tickExponentMax
+                                });
+    },
+    
+    _calcContinuousTicksText: function(ticksInfo){
+        
+        ticksInfo.ticksText = def.query(ticksInfo.ticks)
+                               .select(function(tick){ return this.scale.tickFormat(tick); }, this)
+                               .array();
+    },
+    
+    // --------------
+    
+    _calcNumberVDesiredTickCount: function(){
+        var layoutInfo = this._layoutInfo;
+        
+        var lineHeight   = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
+        
+        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        
+        return Math.max(1, ~~(clientLength / lineHeight));
+    },
+    
+    _calcNumberHTicks: function(){
+        var layoutInfo = this._layoutInfo;
+        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        var spacing = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin/*em*/));
+        var desiredTickCount = this._calcNumberHDesiredTickCount(this, spacing);
+        
+        var doLog = (pvc.debug >= 5);
+        var dir, prevResultTickCount;
+        var ticksInfo, lastBelow, lastAbove;
+        do {
+            if(doLog){ pvc.log("calculateNumberHTicks TickCount IN desired = " + desiredTickCount); }
+            
+            ticksInfo = {};
+            
+            this._calcContinuousTicksValue(ticksInfo, desiredTickCount);
+            
+            var ticks = ticksInfo.ticks;
+            
+            var resultTickCount = ticks.length;
+            
+            if(ticks.exponentOverflow){
+                // TODO: Check if this part of the algorithm is working ok
+                
+                // Cannot go anymore in the current direction, if any
+                if(dir == null){
+                    if(ticks.exponent === this.exponentMin){
+                        lastBelow = ticksInfo;
+                        dir =  1;
+                    } else {
+                        lastAbove = ticksInfo;
+                        dir = -1;
+                    }
+                } else if(dir === 1){
+                    if(lastBelow){
+                        ticksInfo = lastBelow;
+                    }
+                    break;
+                } else { // dir === -1
+                    if(lastAbove){
+                        ticksInfo = lastAbove;
+                    }
+                    break;
                 }
                 
-                // Now move backwards, to the max text width...
-                var maxOrthoLength = maxClientLength - 2 * this.tickLength;
+            } else if(prevResultTickCount == null || resultTickCount !== prevResultTickCount){
                 
-                // A point at the maximum orthogonal distance from the anchor
-                var mostOrthoDistantPoint;
-                var parallelDirection;
-                switch(this.anchor){
-                    case 'left':
-                        parallelDirection = pv.vector(0, 1);
-                        mostOrthoDistantPoint = pv.vector(-maxOrthoLength, 0);
-                        break;
-                    
-                    case 'right':
-                        parallelDirection = pv.vector(0, 1);
-                        mostOrthoDistantPoint = pv.vector(maxOrthoLength, 0);
-                        break;
-                        
-                    case 'top':
-                        parallelDirection = pv.vector(1, 0);
-                        mostOrthoDistantPoint = pv.vector(0, -maxOrthoLength);
-                        break;
-                    
-                    case 'bottom':
-                        parallelDirection = pv.vector(1, 0);
-                        mostOrthoDistantPoint = pv.vector(0, maxOrthoLength);
-                        break;
+                if(doLog){ 
+                    pvc.log("calculateNumberHTicks TickCount desired/resulting = " + desiredTickCount + " -> " + resultTickCount); 
                 }
                 
-                // Intersect the line that passes through mostOrthoDistantPoint,
-                // and has the direction parallelDirection with 
-                // the top side and with the bottom side of the *original* label box.
-                var corners = labelBBox.sourceCorners;
-                var botL = corners[0];
-                var botR = corners[1];
-                var topL = corners[2];
-                var topR = corners[3];
+                prevResultTickCount = resultTickCount;
                 
-                var topRLSideDir = topR.minus(topL);
-                var botRLSideDir = botR.minus(botL);
-                var intersect = pv.SvgScene.lineIntersect;
-                var botI = intersect(mostOrthoDistantPoint, parallelDirection, botL, botRLSideDir);
-                var topI = intersect(mostOrthoDistantPoint, parallelDirection, topL, topRLSideDir);
+                this._calcContinuousTicksText(ticksInfo);
                 
-                // Two cases
-                // A) If the angle is between -90 and 90, the text does not get upside down
-                // In that case, we're always interested in topI -> topR and botI -> botR
-                // B) Otherwise the relevant new segments are topI -> topL and botI -> botL
+                var length = this._calcNumberHLength(ticksInfo, spacing);
+                var excessLength  = length - clientLength;
+                var pctError = ticksInfo.error = Math.abs(excessLength / clientLength);
                 
-                var maxTextWidth;
-                if(Math.cos(labelBBox.sourceAngle) >= 0){
-                    // A) [-90, 90]
-                    maxTextWidth = Math.min(
-                                        topR.minus(topI).length(), 
-                                        botR.minus(botI).length());
+                if(doLog){ 
+                    pvc.log("calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
+                }
+                
+                if(excessLength > 0){
+                    // More ticks than can fit
+                    if(desiredTickCount === 1){
+                        break;
+                    }
+                    
+                    if(lastBelow){
+                        // We were below max length and then overshot...
+                        // Choose the best conforming one
+                        if(pctError > 0.05 || pctError > lastBelow.error){
+                            ticksInfo = lastBelow;
+                        }
+                        break;
+                    }
+                    
+                    // Backup last *above* calculation
+                    lastAbove = ticksInfo;
+                    
+                    dir = -1;
                 } else {
-                    maxTextWidth = Math.min(
-                            topL.minus(topI).length(), 
-                            botL.minus(botI).length());
-                }
-                
-                // One other detail.
-                // When align (anchor) is center,
-                // just cutting on one side of the label original box
-                // won't do, because when text is centered, the cut we make in length
-                // ends up distributed by both sides...
-                if(labelBBox.sourceAlign === 'center'){
-                    var cutWidth = labelBBox.sourceTextWidth - maxTextWidth;
+                    // Less ticks than could fit
                     
-                    // Cut same width on the opposite side. 
-                    maxTextWidth -= cutWidth;
+                    if(pctError <= 0.05 || dir === -1){
+                        // Acceptable
+                        // or
+                        // Already had exceeded the length and had decided to go down
+                        
+                        if(lastAbove && pctError > lastAbove.error){
+                            ticksInfo = lastAbove;
+                        }
+                        break;
+                    }
+                    
+                    // Backup last *below* calculation
+                    lastBelow = ticksInfo;
+                                            
+                    dir = +1;
                 }
-                
-                layoutInfo.maxTextWidth = maxTextWidth; 
+            }
+            
+            desiredTickCount += dir;
+        } while(true);
+        
+        if(ticksInfo){
+            layoutInfo.ticks = ticksInfo.ticks;
+            layoutInfo.ticksText = ticksInfo.ticksText;
+            layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
+        }
+        
+        if(doLog){ pvc.log("calculateNumberHTicks END"); }
+    },
+    
+    _calcNumberHDesiredTickCount: function(spacing){
+        // The initial tick count is determined 
+        // from the formatted min and max values of the domain.
+        var layoutInfo = this._layoutInfo;
+        var domainTextLength = this.scale.domain().map(function(tick){
+                var text = this.scale.tickFormat(tick);
+                return pvc.text.getTextLength(text, this.font); 
+            }, this);
+        
+        var avgTextLength = Math.max((domainTextLength[1] + domainTextLength[0]) / 2, layoutInfo.textHeight);
+        
+        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        
+        return Math.max(1, ~~(clientLength / (avgTextLength + spacing)));
+    },
+    
+    _calcNumberHLength: function(ticksInfo, spacing){
+        // Measure full width, with spacing
+        var ticksText = ticksInfo.ticksText;
+        var tickCount = ticksText.length;
+        var length = 0;
+        var maxLength = -Infinity;
+        for(var t = 0 ; t < tickCount ; t++){
+            var textLength = pvc.text.getTextLength(ticksText[t], this.font);
+            if(textLength > maxLength){
+                maxLength = textLength;
+            }
+            
+            if(t){
+                length += spacing;
+            }
+            
+            if(!t ||  t === tickCount - 1) {
+                // Include half the text size only, as centered labels are the most common scenario
+                length += textLength / 2;
+            } else {
+                // Middle tick
+                length += textLength;
             }
         }
         
-        return this.createAnchoredSize(this.axisSize, layoutInfo.clientSize);
+        ticksInfo.maxTextWidth = maxLength;
+        
+        return length;
     },
     
     _createCore: function() {
         this.renderAxis();
     },
-
+    
     /**
      * @override
      */
@@ -296,6 +569,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
 
     renderAxis: function(){
+        if(this.scale.isNull){
+            return;
+        }
+        
         // Z-Order
         // ==============
         // -10 - grid lines   (on 'gridLines' background panel)
@@ -306,40 +583,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //  40 - labels       (on main foreground panel)
         
         // Range
-        var rMin  = this.ruleCrossesMargin ?  0 : this.pvScale.min,
-            rMax  = this.ruleCrossesMargin ?  this.pvScale.size : this.pvScale.max,
+        var rMin  = this.ruleCrossesMargin ?  0 : this.scale.min,
+            rMax  = this.ruleCrossesMargin ?  this.scale.size : this.scale.max,
             rSize = rMax - rMin,
             ruleParentPanel = this.pvPanel;
 
         this._rSize = rSize;
-        
-//        if(this.title){
-//           this.pvTitlePanel = this.pvPanel.add(pv.Panel)
-//                [this.anchor             ](0)     // bottom (of the axis panel)
-//                [this.anchorOrthoLength()](this.titleSize) // height
-//                [this.anchorOrtho()      ](rMin)  // left
-//                [this.anchorLength()     ](rSize) // width
-//                ;
-//
-//            this.pvTitle = this.pvTitlePanel.anchor('center').add(pv.Label)
-//                .lock('text', this.title)
-//                .lock('font', this.titleFont)
-//
-//                // Rotate text over center point
-//                .lock('textAngle',
-//                    this.anchor === 'left'  ? -Math.PI/2 :
-//                    this.anchor === 'right' ?  Math.PI/2 :
-//                    null)
-//                ;
-//
-//            // Create a container panel to draw the remaining axis components
-//            ruleParentPanel = this.pvPanel.add(pv.Panel)
-//                [this.anchorOpposite()   ](0) // top (of the axis panel)
-//                [this.anchorOrthoLength()](this.axisSize - this.titleSize) // height
-//                [this.anchorOrtho()      ](0)     // left
-//                [this.anchorLength()     ](rSize) // width
-//                ;
-//        }
 
         this.pvRule = ruleParentPanel.add(pv.Rule)
             .zOrder(30) // see pvc.js
@@ -374,14 +623,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     renderOrdinalAxis: function(){
         var myself = this,
-            scale = this.pvScale,
+            scale = this.scale,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
-            data              = this.chart.visualRoles(this.roleName)
-                                    .flatten(this.chart.data, {visible: true}),
-            itemCount         = data._children.length,
+            data              = this._layoutInfo.data,
+            itemCount         = this._layoutInfo.ticks.length,
             includeModulo;
         
         if(this.axis.option('OverlappedLabelsHide') && itemCount > 0 && this._rSize > 0) {
@@ -404,7 +652,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Ticks are drawn at the center of each band.
         this.pvTicks = this.pvRule.add(pv.Rule)
             .zOrder(20) // see pvc.js
-            .data(data._children)
+            .data(this._layoutInfo.ticks)
             .localProperty('group')
             .group(function(child){ return child; })
             //[anchorOpposite   ](0)
@@ -530,13 +778,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // NOTE: Includes time series, 
         // so "d" may be a number or a Date object...
         
-        var scale  = this.pvScale,
+        var scale  = this.scale,
             orthoAxis  = this._getOrthoAxis(),
             orthoScale = orthoAxis.scale,
-            ticks  = pvc.scaleTicks(
-                        scale, 
-                        this.domainRoundMode === 'tick',
-                        this.desiredTickCount),
+            ticks      = this._layoutInfo.ticks,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
@@ -580,7 +825,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             return visible && (getVisible ? getVisible.apply(this, args) : true);
         }
 
-        this.renderLinearAxisLabel(ticks);
+        this.renderLinearAxisLabel(ticks, this._layoutInfo.ticksText);
 
         // Now do the full grid lines
         if(this.fullGrid) {
@@ -600,7 +845,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
     },
     
-    renderLinearAxisLabel: function(ticks){
+    renderLinearAxisLabel: function(ticks, ticksText){
         // Labels are visible (only) on MAJOR ticks,
         // On first and last tick care is taken
         //  with their H/V alignment so that
@@ -623,7 +868,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var label = this.pvLabel = labelAnchor.add(pv.Label)
             .zOrder(40)
             .text(function(d){
-                var text = scale.tickFormat(d);
+                var text = ticksText[this.index]; // scale.tickFormat(d);
                 if(maxTextWidth){
                     text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
                 }
@@ -979,7 +1224,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             maxDepth  = data.treeHeight,
             elements  = data.nodes(),
             
-            depthLength = this.axisSize;
+            depthLength = this._layoutInfo.axisSize;
         
         this._rootElement = elements[0]; // lasso
             

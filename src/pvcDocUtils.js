@@ -1,5 +1,5 @@
 
-pvc.debug = 3;
+pvc.debug = 6;
 var tryMe = function(e){ 
     try{
         /*jshint evil:true */

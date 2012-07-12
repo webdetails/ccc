@@ -175,8 +175,6 @@ pvc.BasePanel = pvc.Abstract.extend({
     layout: function(availableSize, referenceSize, keyArgs){
         if(!this._layoutInfo || def.get(keyArgs, 'force', false)) {
             
-            this._layoutInfo = null;
-            
             if(!referenceSize && availableSize){
                 referenceSize = def.copyOwn(availableSize);
             }
@@ -228,7 +226,8 @@ pvc.BasePanel = pvc.Abstract.extend({
                 desiredClientSize.height = Math.max(desiredClientSize.height - spaceHeight, 0);
             }
             
-            var layoutInfo = {
+            var layoutInfo = 
+                this._layoutInfo = {
                 referenceSize:       referenceSize,
                 margins:             margins,
                 paddings:            paddings,
@@ -253,7 +252,6 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             this.width = size.width;
             this.height = size.height;
-            this._layoutInfo = layoutInfo;
         }
     },
     

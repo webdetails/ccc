@@ -29,10 +29,11 @@ pvc.NormalizedBarChart = pvc.BarAbstract.extend({
         if(axis.type === 'ortho') {
             /* 
              * Forces showing 0-100 in the axis.
-             * Note that the bars are streched automatically by the band layout,
+             * Note that the bars are stretched automatically by the band layout,
              * so this scale ends up being ignored by the bars.
              * Note also that each category would have a different scale,
-             * so it isn't possible to provide a single correct scale.
+             * so it isn't possible to provide a single correct scale,
+             * that would satisfy all the bars...
              */
             min = 0;
             max = 100;

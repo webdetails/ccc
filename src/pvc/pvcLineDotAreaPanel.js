@@ -80,7 +80,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
                 antialias:   showAreas && !showLines,
-                segmented:   !isDense
+                segmented:   !isDense,
+                noHoverable: false // While the area itself does not change appearance, the pvLine does due to activeSeries... 
             })
             
             .lock('visible', def.retTrue)

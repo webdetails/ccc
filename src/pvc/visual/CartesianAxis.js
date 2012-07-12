@@ -294,6 +294,8 @@ $VCA.createAllDefaultOptions = function(options){
             'EndLine',
             'DomainRoundMode',
             'DesiredTickCount',
+            'TickExponentMin',
+            'TickExponentMax',
             'MinorTicks',
             'ClickAction',
             'DoubleClickAction',
@@ -312,7 +314,8 @@ $VCA.createAllDefaultOptions = function(options){
             'OverlappedLabelsHide',
             'OverlappedLabelsMaxPct',
             'Composite',
-            'ZeroLine'
+            'ZeroLine',
+            'LabelSpacingMin'
        ],
        globalDefaults = {
            'OriginIsZero':      true,
@@ -328,7 +331,8 @@ $VCA.createAllDefaultOptions = function(options){
            'RuleCrossesMargin': true,
            'EndLine':           false,
            'DomainRoundMode':   'none',
-           'ZeroLine':          true
+           'ZeroLine':          true,
+           'LabelSpacingMin':      1
        };
 
     function addOption(optionId, value){
@@ -468,7 +472,10 @@ var axisOptionHandlers = {
     TitleSize: {cast: Number2 },
     FullGridCrossesMargin: {cast: Boolean },
     RuleCrossesMargin: {cast: Boolean },
-    ZeroLine: {cast: Boolean }
+    ZeroLine: {cast: Boolean },
+    LabelSpacingMin: {cast: Number2 },
+    TickExponentMin: {cast: Number2 },
+    TickExponentMax: {cast: Number2 }
 };
 
 /**

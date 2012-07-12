@@ -1,4 +1,4 @@
-// 252fcce076e632b5d3492cd50e75283bce1927ce
+// c84a76b5fc52ee0fdbd02ca5e82660a0fdab5da8
 /**
  * @class The built-in Array class.
  * @name Array
@@ -418,6 +418,23 @@ pv.id = function() {
 /** @private Returns a function wrapping the specified constant. */
 pv.functor = function(v) {
   return typeof v == "function" ? v : function() { return v; };
+};
+
+/**
+ * Gets the value of an existing, own or inherited, and not "nully", property of an object,
+ * or if unsatisfied, a specified default value.
+ * 
+ * @param {object} [o] The object whose property value is desired.
+ * @param {string} p The desired property name.
+ * If the value is not a string, 
+ * it is converted to one, as if String(p) were used.
+ * @param [dv=undefined] The default value.
+ * 
+ * @returns {any} The satisfying property value or the specified default value.
+ */
+pv.get = function(o, p, dv){
+    var v;
+    return o && (v = o[p]) != null ? v : dv;
 };
 /*
  * Parses the Protovis specifications on load, allowing the use of JavaScript
@@ -3283,9 +3300,13 @@ pv.Scale.quantitative = function() {
    * @function
    * @name pv.Scale.quantitative.prototype.ticks
    * @param {number} [m] optional number of desired ticks.
+   * @param {object} [options] optional keyword arguments object.
+   * @param {boolean} [options.roundInside=true] should the ticks be ensured to be strictly inside the scale domain, or to strictly outside the scale domain.
+   * @param {boolean} [options.numberExponentMin=-Inifinity] minimum value for the step exponent.
+   * @param {boolean} [options.numberExponentMax=+Inifinity] maximum value for the step exponent.
    * @returns {number[]} an array input domain values to use as ticks.
    */
-  scale.ticks = function(m) {
+  scale.ticks = function(m, options) {
     var start = d[0],
         end = d[d.length - 1],
         reverse = end < start,
@@ -3434,7 +3455,7 @@ pv.Scale.quantitative = function() {
 
 
       if(dateTickPrecision){
-        step=1;
+        step = 1;
         increment = function(d) { d.setSeconds(d.getSeconds() + step*dateTickPrecision/1000);};
       }
 
@@ -3447,19 +3468,59 @@ pv.Scale.quantitative = function() {
       return reverse ? dates.reverse() : dates;
     }
 
-    /* Normal case: numbers. */
-    if (!arguments.length) m = 10;
-    var step = pv.logFloor(span / m, 10),
-        err = m / (span / step);
-    if (err <= .15) step *= 10;
-    else if (err <= .35) step *= 5;
-    else if (err <= .75) step *= 2;
-    var start = Math.ceil(min / step) * step,
-        end = Math.floor(max / step) * step;
-    tickFormat = pv.Format.number()
-        .fractionDigits(Math.max(0, -Math.floor(pv.log(step, 10) + .01)));
+    /* Normal case: numbers */
+    if (m == null) {
+        m = 10;
+    }
+    
+    var roundInside = pv.get(options, 'roundInside', true);
+    var exponentMin = pv.get(options, 'numberExponentMin', -Infinity);
+    var exponentMax = pv.get(options, 'numberExponentMax', +Infinity);
+    
+    //var step = pv.logFloor(span / m, 10);
+    var exponent = Math.floor(pv.log(span / m, 10));
+    var overflow = false;
+    if(exponent > exponentMax){
+        exponent = exponentMax;
+        overflow = true;
+    } else if(exponent < exponentMin){
+        exponent = exponentMin;
+        overflow = true;
+    }
+    
+    var step = Math.pow(10, exponent);
+    var mObtained = (span / step);
+    
+    var err = m / mObtained;
+    if (err <= .15 && exponent < exponentMax - 1) { 
+        step *= 10;
+    } else if (err <= .35) {
+        step *= 5; 
+    } else if (err <= .75) {
+        step *= 2;
+    }
+    
+    // Account for floating point precision errors
+    exponent = Math.floor(pv.log(step, 10) + 1e-10);
+        
+    var start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step);
+    var end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
+    
+    tickFormat = pv.Format.number().fractionDigits(Math.max(0, -exponent));
+    
     var ticks = pv.range(start, end + step, step);
-    return reverse ? ticks.reverse() : ticks;
+    if(reverse){
+        ticks.reverse();
+    }
+    
+    ticks.roundInside = roundInside;
+    ticks.step        = step;
+    ticks.exponent    = exponent;
+    ticks.exponentOverflow = overflow;
+    ticks.exponentMin = exponentMin;
+    ticks.exponentMax = exponentMax;
+    
+    return ticks;
   };
 
 
@@ -6031,8 +6092,8 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
       var className = '__pv_gradient' + fill.id;
       
       // TODO: check this check exists method. It looks wrong...
-      
-      results = defs.querySelector('.' + className);
+      //1107[PVALE] - No ideia what this was supposed to do, but the method querySelector does not seem to exist
+      results = undefined; //defs.querySelector('.' + className);
       if (!results) {
         var instId = '__pv_gradient' + fill.id + '_inst_' + (++gradient_definition_id);
         
