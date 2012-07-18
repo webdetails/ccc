@@ -739,7 +739,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 [anchorOrthoLength](ruleLength)
                 [anchorLength     ](null)
                 [anchorOrtho      ](function(scene){
-                    var value = scale(scene.acts.value.value);
+                    var value = scale(scene.vars.tick.value);
                     if(this.index +  1 < count){
                         return value - halfStep;
                     }
@@ -757,18 +757,20 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         data.children()
             .each(function(childData){
                 var childScene = new pvc.visual.Scene(rootScene, {group: childData});
-                childScene.acts.value = {
-                    value: childData.value,
-                    label: childData.label,
-                    absLabel: childData.absLabel
-            };
+                var valueVar = 
+                    childScene.vars.tick = 
+                        new pvc.visual.ValueLabelVar(
+                                    childData.value,
+                                    childData.label);
+                
+                valueVar.absLabel = childData.absLabel;
         });
 
         /* Add a last scene, with the same data group */
         var lastScene  = rootScene.lastChild;
         if(lastScene){
             var endScene = new pvc.visual.Scene(rootScene, {group: lastScene.group});
-            endScene.acts.value = lastScene.acts.value;
+            endScene.vars.tick = lastScene.vars.tick;
         }
 
         return rootScene;
@@ -998,7 +1000,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
      * Prevents the axis panel from reacting directly to rubber band selections.
      * 
      * The panel participates in rubber band selection through 
-     * the mediator {@link pvc.CartesianAbstractPanel}.
+     * the mediator {@link pvc.CartesianAbstractPanel}, which calls
+     * each axes' {@link #_detectDatumsUnderRubberBand} directly.
      *   
      * @override
      */

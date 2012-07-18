@@ -44,11 +44,13 @@
         <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
         <script type="text/javascript" src="pvc/visual/Role.js"></script>
         <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="pvc/visual/Var.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/PieSlice.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
@@ -67,6 +69,7 @@
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcPiePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -173,16 +176,27 @@ Sample extension points:<br>
 <h3>A Simple Pie </h3>
 This is the simplest pie ever. Just provide the dimensions,
 a title and the data to be rendered.<br/>
-<textarea cols="55" rows="15" id="pvcPie1Code">
+<textarea cols="55" rows="18" id="pvcPie1Code">
 var pie = new pvc.PieChart({
     canvas: "pvcPie1",
-    width: 350,
-    height: 250,
+    width: 450,
+    height: 350,
     title: "Simple Pie",
     animate: false,
     selectable: true,
+    hoverable: true,
     showTooltips: true,
-    showValues: false,
+    
+    showValues: true,
+    valuesLabelStyle: 'inside',
+    valuesMask: "{category}",
+    
+    extensionPoints: {
+       titleLabel_font: "18px sans-serif",
+       pie_strokeStyle: 'white',
+       //pie_lineWidth:   0.6,
+       //base_fillStyle:  'blue' 
+    }
 });
 pie.setData($.extend(true, {},relational_03),
     {crosstabMode: false,
@@ -198,7 +212,7 @@ setting colors, fonts, and more.<br/>
 <textarea cols="55" rows="22" id="pvcPie2Code">
         var pie = new pvc.PieChart({
           canvas: "pvcPie2",
-          width: 400,
+          width: 600,
           height: 400,
           animate: false,
           title: "Sample Pie",
@@ -209,12 +223,13 @@ setting colors, fonts, and more.<br/>
           legendAlign: "right",
           legendDrawLine: true,
           legendDrawMarker: false,
-          showTooltips: true,
-          legendPadding: 20,
-          legendTextAdjust: 7,
-          innerGap: 0.8,
+          showTooltips: false,
+          legendPadding: 10,
+//          legendTextAdjust: 7,
+          contentPaddings: '5%',
           showValues: true,
           selectable: true,
+          hoverable: true,
           explodedSliceIndex: 4,
           explodedSliceRadius: 15,
           colors: ["#8ED300","#7CB021","#568000","#3A3A3A","#969696","#F5F4F2"],
@@ -236,7 +251,7 @@ setting colors, fonts, and more.<br/>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcPie2"></div>
     
-<h3>A Donut</h3>
+<h3>A Donut</h3>
 A pie can be converted into a donut by simple adding an extension point:
 <ul>
   <li>pie_innerRadius</li>
@@ -244,18 +259,17 @@ A pie can be converted into a donut by simple adding an extension point:
 <textarea cols="55" rows="23" id="pvcPie3Code">
         var pie = new pvc.PieChart({
           canvas: "pvcPie3",
-          width: 400,
+          width: 600,
           height: 400,
           title: "Sample Donut",
           titlePosition: "bottom",
           legend: false,
           showTooltips: true,
-          innerGap: 0.8,
+          explodedSliceRadius: 15,
           showValues: true,
           selectable: true,
-          extensionPoints: {
-            pie_innerRadius:90,
-            titleLabel_font: "18px sans-serif",
+          extensionPoints: {            pie_innerRadius: '60%', // 30,
+            titleLabel_font: "18px sans-serif"
           }
         });
 

@@ -170,10 +170,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         this.pvBoxPanel = this.pvPanel.add(pv.Panel)
             .data(rootScene.childNodes)
             [a_left ](function(scene){
-                var catAct = scene.acts.category;
-                return catAct.x - catAct.width / 2;
+                var catVar = scene.vars.category;
+                return catVar.x - catVar.width / 2;
             })
-            [a_width](function(scene){ return scene.acts.category.width; })
+            [a_width](function(scene){ return scene.vars.category.width; })
             ;
 
         /* V Rules */
@@ -197,10 +197,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 noHoverable:  false
             }))
             .intercept('visible', function(scene){
-                return scene.acts.category.showVRuleAbove && this.delegate(true);
+                return scene.vars.category.showVRuleAbove && this.delegate(true);
             })
-            .lock(a_bottom, function(scene){ return scene.acts.category.vRuleAboveBottom; })
-            .lock(a_height, function(scene){ return scene.acts.category.vRuleAboveHeight; })
+            .lock(a_bottom, function(scene){ return scene.vars.category.vRuleAboveBottom; })
+            .lock(a_height, function(scene){ return scene.vars.category.vRuleAboveHeight; })
             .pvMark
             ;
 
@@ -210,17 +210,17 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 noHoverable:  false
             }))
             .intercept('visible', function(scene){
-                return scene.acts.category.showVRuleBelow && this.delegate(true);
+                return scene.vars.category.showVRuleBelow && this.delegate(true);
             })
-            .lock(a_bottom, function(scene){ return scene.acts.category.vRuleBelowBottom; })
-            .lock(a_height, function(scene){ return scene.acts.category.vRuleBelowHeight; })
+            .lock(a_bottom, function(scene){ return scene.vars.category.vRuleBelowBottom; })
+            .lock(a_height, function(scene){ return scene.vars.category.vRuleBelowHeight; })
             .pvMark
             ;
 
         /* Box Bar */
         function setupHCateg(sign){
-            sign.lock(a_left,  function(scene){ return scene.acts.category.boxLeft;  })
-                .lock(a_width, function(scene){ return scene.acts.category.boxWidth; })
+            sign.lock(a_left,  function(scene){ return scene.vars.category.boxLeft;  })
+                .lock(a_width, function(scene){ return scene.vars.category.boxWidth; })
                 ;
             
             return sign;
@@ -232,10 +232,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 normalStroke: true
             }))
             .intercept('visible', function(scene){
-                return scene.acts.category.showBox && this.delegate(true);
+                return scene.vars.category.showBox && this.delegate(true);
             })
-            .lock(a_bottom, function(scene){ return scene.acts.category.boxBottom; })
-            .lock(a_height, function(scene){ return scene.acts.category.boxHeight; })
+            .lock(a_bottom, function(scene){ return scene.vars.category.boxBottom; })
+            .lock(a_height, function(scene){ return scene.vars.category.boxHeight; })
             .override('defaultColor', function(type){
                 switch(type){
                     case 'fill':   return boxFillColor;
@@ -263,9 +263,9 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 noHoverable:  false
             }))
             .intercept('visible', function(){
-                return this.scene.acts.percentil5.value != null && this.delegate(true);
+                return this.scene.vars.percentil5.value != null && this.delegate(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.acts.percentil5.position; }) // bottom
+            .lock(a_bottom,  function(){ return this.scene.vars.percentil5.position; }) // bottom
             .pvMark
             ;
 
@@ -275,9 +275,9 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 noHoverable:  false
             }))
             .intercept('visible', function(){
-                return this.scene.acts.percentil95.value != null && this.delegate(true);
+                return this.scene.vars.percentil95.value != null && this.delegate(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.acts.percentil95.position; }) // bottom
+            .lock(a_bottom,  function(){ return this.scene.vars.percentil95.position; }) // bottom
             .pvMark
             ;
 
@@ -287,9 +287,9 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 noHoverable:  false
             }))
             .intercept('visible', function(){
-                return this.scene.acts.median.value != null && this.delegate(true);
+                return this.scene.vars.median.value != null && this.delegate(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.acts.median.position; }) // bottom
+            .lock(a_bottom,  function(){ return this.scene.vars.median.position; }) // bottom
             .override('defaultStrokeWidth', def.fun.constant(2))
             .pvMark
             ;
@@ -354,110 +354,104 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         
         function createCategScene(categData){
             var categScene = new pvc.visual.Scene(rootScene, {group: categData}),
-                acts = categScene.acts;
+                vars = categScene.vars;
             
-            var catAct = acts.category = {
-                value:     categData.value,
-                label:     categData.label,
-                group:     categData,
-                x:         baseScale(categData.value),
-                width:     bandWidth,
-                boxWidth:  boxWidth
-            };
-
-            catAct.boxLeft = bandWidth / 2 - boxWidth / 2;
+            var catVar = vars.category = new pvc.visual.ValueLabelVar(
+                                    categData.value,
+                                    categData.label);
+            def.set(catVar,
+                'group',    categData,
+                'x',        baseScale(categData.value),
+                'width',    bandWidth,
+                'boxWidth', boxWidth,
+                'boxLeft',  bandWidth / 2 - boxWidth / 2);
             
             chart.measureVisualRoles().forEach(function(role){
                 var dimName = measureRolesDimNames[role.name],
-                    act;
+                    svar;
 
                 if(dimName){
                     var dim = categData.dimensions(dimName),
                         value = dim.sum(visibleKeyArgs);
-                    act = {
-                        value: value,
-                        label: dim.format(value),
-                        position: orthoScale(value)
-                    };
+                    
+                    svar = new pvc.visual.ValueLabelVar(value, dim.format(value));
+                    svar.position = orthoScale(value);
                 } else {
-                    act = {
-                        value: null,
-                        label: "",
-                        position: null
-                    };
+                    svar = new pvc.visual.ValueLabelVar(null, "");
+                    svar.position = null;
                 }
 
-                acts[role.name] = act;
+                vars[role.name] = svar;
             });
 
-            var has05 = acts.percentil5.value  != null,
-                has25 = acts.percentil25.value != null,
-                has50 = acts.median.value != null,
-                has75 = acts.percentil75.value != null,
+            var has05 = vars.percentil5.value  != null,
+                has25 = vars.percentil25.value != null,
+                has50 = vars.median.value != null,
+                has75 = vars.percentil75.value != null,
                 bottom,
                 top;
 
             var show = has25 || has75;
             if(show){
-                bottom = has25 ? acts.percentil25.position :
-                         has50 ? acts.median.position :
-                         acts.percentil75.position
+                bottom = has25 ? vars.percentil25.position :
+                         has50 ? vars.median.position :
+                         vars.percentil75.position
                          ;
 
-                top    = has75 ? acts.percentil75.position :
-                         has50 ? acts.median.position :
-                         acts.percentil25.position
+                top    = has75 ? vars.percentil75.position :
+                         has50 ? vars.median.position :
+                         vars.percentil25.position
                          ;
 
                 show = (top !== bottom);
                 if(show){
-                    catAct.boxBottom = bottom;
-                    catAct.boxHeight = top - bottom;
+                    catVar.boxBottom = bottom;
+                    catVar.boxHeight = top - bottom;
                 }
             }
             
-            catAct.showBox  = show;
+            catVar.showBox  = show;
             
             // vRules
-            show = acts.percentil95.value != null;
+            show = vars.percentil95.value != null;
             if(show){
-                bottom = has75 ? acts.percentil75.position :
-                         has50 ? acts.median.position :
-                         has25 ? acts.percentil25.position :
-                         has05 ? acts.percentil5.position  :
+                bottom = has75 ? vars.percentil75.position :
+                         has50 ? vars.median.position :
+                         has25 ? vars.percentil25.position :
+                         has05 ? vars.percentil5.position  :
                          null
                          ;
                 
                 show = bottom != null;
                 if(show){
-                    catAct.vRuleAboveBottom = bottom;
-                    catAct.vRuleAboveHeight = acts.percentil95.position - bottom;
+                    catVar.vRuleAboveBottom = bottom;
+                    catVar.vRuleAboveHeight = vars.percentil95.position - bottom;
                 }
             }
 
-            catAct.showVRuleAbove = show;
+            catVar.showVRuleAbove = show;
 
             // ----
 
             show = has05;
             if(show){
-                top = has25 ? acts.percentil25.position :
-                      has50 ? acts.median.position :
-                      has75 ? acts.percentil75.position :
+                top = has25 ? vars.percentil25.position :
+                      has50 ? vars.median.position :
+                      has75 ? vars.percentil75.position :
                       null
                       ;
 
                 show = top != null;
                 if(show){
-                    bottom = acts.percentil5.position;
-                    catAct.vRuleBelowHeight = top - bottom;
-                    catAct.vRuleBelowBottom = bottom;
+                    bottom = vars.percentil5.position;
+                    catVar.vRuleBelowHeight = top - bottom;
+                    catVar.vRuleBelowBottom = bottom;
                 }
             }
             
-            catAct.showVRuleBelow = show;
+            catVar.showVRuleBelow = show;
             
-            // has05 = acts.percentil5.value  != null,
+            // has05 = vars.percentil5.value  != null,
         }
     }
 });

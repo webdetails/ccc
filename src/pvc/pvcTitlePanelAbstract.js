@@ -94,10 +94,11 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
         // -------------
         
         var lineHeight = pvc.text.getTextHeight("m", this.font);
+        var realHeight = lines.length * lineHeight;
         
         var desiredHeight = layoutInfo.desiredClientSize[a_height];
         if(desiredHeight == null){
-            desiredHeight = lines.length * lineHeight;
+            desiredHeight = realHeight;
         }
         
         var availableHeight = layoutInfo.clientSize[a_height];
@@ -109,7 +110,7 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
                 
                 lines.length = maxLineCount;
                 
-                desiredHeight = maxLineCount * lineHeight;
+                realHeight = desiredHeight = maxLineCount * lineHeight;
                 
                 var lastLine = lines[maxLineCount - 1] + " " + firstCroppedLine;
                 
@@ -118,7 +119,7 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
         }
         
         layoutInfo.lines = lines;
-        
+        layoutInfo.topOffset = (desiredHeight - realHeight) / 2;
         layoutInfo.lineSize = {
            width:  desiredWidth,
            height: lineHeight
@@ -148,7 +149,7 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
         var linePanel = this.pvPanel.add(pv.Panel)
             .data(layoutInfo.lines)
             [pvc.BasePanel.leftTopAnchor[this.anchor]](function(){
-                return this.index * layoutInfo.lineSize.height;
+                return layoutInfo.topOffset + this.index * layoutInfo.lineSize.height;
             })
             [this.anchorOrtho(this.anchor)](0)
             [layoutInfo.a_height](layoutInfo.lineSize.height)

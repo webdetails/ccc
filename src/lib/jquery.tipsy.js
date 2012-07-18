@@ -43,9 +43,18 @@
             }
         },
         
-        update: function(){
-            this.show(true);
+        visible: function(){
+            return !!(this.$tip && this.$tip[0].parentNode);
         },
+        
+        update: function(){
+            if(this.visible()){
+                this.show(true);
+            } else {
+                this.enter();
+            }
+        },
+        
         show: function(isUpdate) {
             var title = this.getTitle();
             if (title && this.enabled) {
@@ -142,7 +151,7 @@
         hide: function() {
             if (this.options.fade) {
                 this.tip().stop().fadeOut(function() { $(this).remove(); });
-            } else {
+            } else if(this.$tip){
                 this.tip().remove();
             }
         },

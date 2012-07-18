@@ -51,14 +51,14 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.base.apply(this, arguments);
     },
 
-    _preRenderCore: function(){
+    _preRenderContent: function(contentOptions){
         var options = this.options;
         if(pvc.debug >= 3){
             pvc.log("Prerendering in CartesianAbstract");
         }
         
         /* Create the grid/docking panel */
-        this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel);
+        this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel, contentOptions);
         
         /* Create axes */
         var baseAxis   = this._createAxis('base',  0),

@@ -49,20 +49,28 @@ pv.Behavior.tipsy = function(opts) {
     
     var $fakeTipTarget, // target div
         $targetElem,
+        nextOperationId = 0,
         prevMouseX,
         prevMouseY,
+        delayOut = opts.delayOut,
         id = "tipsyPvBehavior" + (opts.id || new Date().getTime()),
         group     = opts.exclusionGroup,
         usesPoint = opts.usesPoint,
         $canvas,
         isEnabled = opts.isEnabled;
-
-    function getTooltipText(mark) {
-        var instance = mark.instance();
+    
+    opts.delayOut = 0; 
+        
+    function getTooltipText(mark, instance) {
+        if(!instance){
+            instance = mark.instance();
+        }
+        
         var title = (instance && instance.tooltip) ||
-                    (typeof mark.tooltip == 'function' && mark.tooltip()) ||
-                    mark.title() ||
-                    mark.text();
+                    // A mark method that is not a property?
+                    (!mark.properties.tooltip && typeof mark.tooltip == 'function' && mark.tooltip()) ||
+                    instance.title ||
+                    instance.text;
          
         // Allow deferred tooltip creation! 
         if(typeof title === 'function') {
@@ -91,18 +99,19 @@ pv.Behavior.tipsy = function(opts) {
             /* Compute the transform to offset the tooltip position. */
             var t = toScreenTransform(mark.parent);
             var instance = mark.instance();
+            var radius;
             if(mark.properties.outerRadius){
                 // Wedge
-                var angle  = instance.endAngle    - instance.angle / 2;
-                var radius = instance.outerRadius - (instance.outerRadius - instance.innerRadius) * 0.3;
+                var midAngle = instance.startAngle + instance.angle / 2;
+                radius = instance.outerRadius;// - (instance.outerRadius - instance.innerRadius) * 0.05;
                 
-                left = instance.left + Math.cos(angle) * radius + t.x;
-                top  = instance.top  + Math.sin(angle) * radius + t.y;
+                left = t.x + instance.left + radius * Math.cos(midAngle);
+                top  = t.y + instance.top  + radius * Math.sin(midAngle);
                 
             } else if(mark.properties.shapeRadius){
-                var radius = Math.max(2, instance.shapeRadius),
-                    cx = instance.left,
-                    cy = instance.top;
+                radius = Math.max(2, instance.shapeRadius);
+                var cx = instance.left;
+                var cy = instance.top;
     
                 switch(instance.shape){
                     case 'diamond':
@@ -375,20 +384,58 @@ pv.Behavior.tipsy = function(opts) {
         }
     }
     
-    function hideTipsy() {
-//        console.log("[TIPSY] Hide");
+    function getNewOperationId(){
+        return nextOperationId++;
+    }
+    
+    function checkCanOperate(opId){
+        return opId === nextOperationId - 1;
+    }
+    
+    function hideTipsy(ev) {
+        var opId = getNewOperationId();
         
+//        console.log("[TIPSY] Delayed Hide Begin opId=" + opId);
+        
+        if(delayOut > 0){
+            setTimeout(function(){
+                if(checkCanOperate(opId)){
+                    hideTipsyCore(opId);
+                } 
+//              else
+//              {
+//                  console.log("[TIPSY] Delayed Hide Cancelled opId=" + opId);
+//              }
+                
+            }, delayOut);
+            
+            return;
+        }
+        
+//        console.log("[TIPSY] Hiding Immediately opId=" + opId);
+        
+        hideTipsyCore(opId);
+    }
+    
+    function hideTipsyCore(opId) {
+//        console.log("[TIPSY] Hiding opId=" + opId);
+      
         // Release real target
         setTarget(null);
-        
+      
         if ($fakeTipTarget) {
             $fakeTipTarget.tipsy("leave");
         }
     }
+  
     
     function updateTipsy(ev){
+        
+        var opId = getNewOperationId();
+        
+        //console.log("[TIPSY] Updating opId=" + opId);
+        
         if($fakeTipTarget) {
-            
             /* Don't know why: 
              * the mouseover event is triggered at a fixed interval
              * as long as the mouse is over the element, 
@@ -406,6 +453,15 @@ pv.Behavior.tipsy = function(opts) {
             prevMouseY = ev.clientY;
             
             // -------------
+            
+            if(!$fakeTipTarget.tipsy('visible')){
+                // Text may have changed
+                var mark;
+                var scene = this.$scene;
+                if(scene && (mark = scene.scenes.mark)){
+                    $fakeTipTarget.attr('title', getTooltipText(mark));
+                }
+            }
             
             setFakeTipTargetBounds(getMouseBounds(ev));
             
@@ -441,11 +497,15 @@ pv.Behavior.tipsy = function(opts) {
     }
     
     function showTipsy(mark) {
-//        console.log("[TIPSY] Show IN");
+        var opId = getNewOperationId();
+        
+//console.log("[TIPSY] Show IN opId=" + opId);
         
         if (!$canvas) {
             initBehavior(mark);
         }
+        
+        var isHidden = !$targetElem;
         
         setTarget(pv.event.target);
         
@@ -453,7 +513,11 @@ pv.Behavior.tipsy = function(opts) {
         
         setFakeTipTargetBounds(opts.followMouse ? getMouseBounds() : getInstanceBounds(mark));
         
-        $fakeTipTarget.tipsy("enter");
+        if(isHidden){
+            $fakeTipTarget.tipsy("enter");
+        } else {
+            $fakeTipTarget.tipsy("update");
+        }
         
 //        console.log("[TIPSY] Show OUT");
     }

@@ -11,6 +11,10 @@
 def.global.NoDataException = function(){};
 
 
+pvc.data = {
+    visibleKeyArgs: {visible: true}
+};
+
 /**
  * Disposes a list of child objects.
  * 

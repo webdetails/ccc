@@ -44,11 +44,13 @@
         <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
         <script type="text/javascript" src="pvc/visual/Role.js"></script>
         <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="pvc/visual/Var.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/PieSlice.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
@@ -67,6 +69,7 @@
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcPiePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -237,11 +240,9 @@ var Metrics1 = new pvc.MetricLineChart({
     originIsZero: true,
     showValues: false,
     showDots: true,
-    xAxisFullGrid: true,
-    yAxisFullGrid: true,
-    yAxisDomainRoundMode: 'tick',
-    xAxisDomainRoundMode: 'tick',
-    axisOverlappedLabelsHide: true,
+    axisFullGrid: true,
+    axisDomainRoundMode: 'tick',
+    axisEndLine: true,
     selectable:  true,
     hoverable: true,
     compatVersion: 1
@@ -269,11 +270,9 @@ var Metrics2 = new pvc.MetricLineChart({
     originIsZero: true,
     showValues: false,
     showDots: true,
-    xAxisFullGrid: true,
-    yAxisFullGrid: true,
-    yAxisDomainRoundMode: 'tick',
-    xAxisDomainRoundMode: 'tick',
-    axisOverlappedLabelsHide: true,
+    axisFullGrid: true,
+    axisDomainRoundMode: 'tick',
+    axisEndLine: true,
     selectable:  true,
     hoverable: true,
     compatVersion: 1
@@ -304,11 +303,9 @@ var Metrics3 = new pvc.MetricLineChart({
     showDots: true,
     clickable: true,
     clickAction: function(s,c,v){alert(s + " " + c + " " + v);},
-    xAxisFullGrid: true,
-    yAxisFullGrid: true,
-    yAxisDomainRoundMode: 'tick',
-    xAxisDomainRoundMode: 'tick',
-    axisOverlappedLabelsHide: true,
+    axisFullGrid: true,
+    axisDomainRoundMode: 'tick',
+    axisEndLine: true,
     selectable:  true,
     hoverable: true,
     compatVersion: 1
@@ -336,11 +333,9 @@ var Metrics4 = new pvc.MetricDotChart({
     originIsZero: true,
     showValues: false,
     showDots: true,
-    xAxisFullGrid: true,
-    yAxisFullGrid: true,
-    yAxisDomainRoundMode: 'tick',
-    xAxisDomainRoundMode: 'tick',
-    axisOverlappedLabelsHide: true,
+    axisFullGrid: true,
+    axisDomainRoundMode: 'tick',
+    axisEndLine: true,
     selectable:  true,
     hoverable: true,
     compatVersion: 1
@@ -367,8 +362,9 @@ pv.listenForPageLoad(function() {
                     legend: false,
                     showValues: false,
                     showDots: true,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true
+                    axisFullGrid: true,
+                    axisDomainRoundMode: 'tick',
+                    axisEndLine: true
                 });
                 LineC.setData(testLDot , {crosstabMode: true, seriesInRows: false});
                 LineC.render();
@@ -385,8 +381,9 @@ pv.listenForPageLoad(function() {
                     originIsZero: true,
                     showValues: false,
                     showDots: true,
-                    xAxisFullGrid: true,
-                    yAxisFullGrid: true,
+                    axisFullGrid: true,
+                    axisDomainRoundMode: 'tick',
+                    axisEndLine: true,
                     compatVersion: 1
                 });                
                 LineL.setData(testLDot , {crosstabMode: true, seriesInRows: false});

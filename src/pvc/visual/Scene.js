@@ -95,8 +95,8 @@ def.type('pvc.visual.Scene')
     var source = (datum || group);
     this.atoms = source ? source.atoms : null;
     
-    /* ACTS */
-    this.acts = parent ? Object.create(parent.acts) : {};
+    /* VARS */
+    this.vars = parent ? Object.create(parent.vars) : {};
 })
 .add(pv.Dom.Node)
 
@@ -111,7 +111,45 @@ def.type('pvc.visual.Scene')
                     this.group.datums() :
                     (this.datum ? def.query(this.datum) : def.query());
     },
-
+    
+    /*
+     * {value} -> <=> this.vars.value.label
+     * {value.value} -> <=> this.vars.value.value
+     * {#sales} -> <=> this.atoms.sales.label
+     */
+    format: function(mask){
+        return def.format(mask, this._formatScope, this);
+    },
+    
+    _formatScope: function(prop){
+        if(prop.charAt(0) === '#'){
+            // An atom name
+            prop = prop.substr(1).split('.');
+            if(prop.length > 2){
+                throw def.error.operationInvalid("Scene format mask is invalid.");
+            }
+            
+            var atom = this.atoms[prop[0]];
+            if(atom){
+                if(prop.length > 1) {
+                    switch(prop[1]){
+                        case 'value': return atom.value;
+                        case 'label': break;
+                        default:      throw def.error.operationInvalid("Scene format mask is invalid.");
+                    }
+                }
+                
+                // atom.toString() ends up returning atom.label
+                return atom;
+            }
+            
+            return null; // Atom does not exist --> ""
+        }
+        
+        // A scene var name
+        return def.getPath(this.vars, prop); // Scene vars' toString may end up being called
+    },
+    
     isRoot: function(){
         return this.root === this;   
     },
@@ -123,7 +161,7 @@ def.type('pvc.visual.Scene')
 //    chart: function(){
 //        return this.root._panel.chart;
 //    },
-//  
+    
     /**
      * Obtains an enumerable of the child scenes.
      * 
@@ -165,7 +203,7 @@ def.type('pvc.visual.Scene')
     
     activeSeries: function(){
         var active = this.active();
-        return active && active.acts.series.value;
+        return active && active.vars.series.value;
     },
     
     isActiveSeries: function(){
@@ -175,7 +213,7 @@ def.type('pvc.visual.Scene')
         
         var activeSeries;
         return (activeSeries = this.activeSeries()) != null &&
-               (activeSeries === this.acts.series.value);
+               (activeSeries === this.vars.series.value);
     },
     
     /* SELECTION */

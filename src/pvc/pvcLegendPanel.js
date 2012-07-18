@@ -36,7 +36,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     font:       '10px sans-serif',
     
     constructor: function(chart, parent, options){
-        // Default value of align depends on anchor
         if(!options){
             options = {};
         }
@@ -46,6 +45,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         var isV1Compat = chart.options.compatVersion <= 1;
         var isVertical = anchor !== 'top' && anchor !== 'bottom';
         
+        // Default value of align depends on anchor
         if(isVertical && options.align === undefined){
             options.align = 'top';
         }
@@ -114,10 +114,11 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             top:  null
         };
         var clientSize     = layoutInfo.clientSize;
-        var requiredSize   = new pvc.Size(1,1);
-        var paddedCellSize = new pvc.Size(1,1);
-        var rootScene = this._buildScene();
-        var leafCount = rootScene.childNodes.length;
+        var requiredSize   = new pvc.Size(0,0);
+        var paddedCellSize = new pvc.Size(0,0);
+        var rootScene      = this._buildScene();
+        var leafCount      = rootScene.childNodes.length;
+        var maxLabelLen    = rootScene.vars.item.maxLabelTextLen;
         var overflowed = true;
         var clipPartialContent = false;
         
@@ -134,7 +135,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             return requiredSize;
         }
         
-        if(!leafCount){
+        // No data or just one color with no text -> hide
+        if(!leafCount || (leafCount === 1 && !maxLabelLen)){
             overflowed = false;
             return finish();
         }
@@ -146,7 +148,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         var isV1Compat = (this.chart.options.compatVersion <= 1);
         
         // The size of the biggest cell
-        var maxLabelLen = rootScene.acts.legendItem.maxLabelTextLen;
         var cellWidth = this.markerSize + this.textMargin + maxLabelLen; // ignoring textAdjust
         var cellHeight;
         if(isV1Compat){
@@ -248,22 +249,24 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       var myself = this,
           rootScene = layoutInfo.rootScene,
           sceneColorProp = function(scene){
-              return scene.acts.legendItem.color;
+              return scene.vars.item.color;
           };
       
       this.pvPanel.overflow("hidden");
           
       this.pvLegendPanel = this.pvPanel.add(pv.Panel)
           .data(rootScene.childNodes)
+          .localProperty('group', Object)
+          .group(function(scene){ return scene.group; }) // for rubber band selection support
           .localProperty('isOn', Boolean)
-          .isOn(function(scene){ return scene.acts.legendItem.isOn(); })
+          .isOn(function(scene){ return scene.vars.item.isOn(); })
           .def("hidden", "false")
           .left(layoutInfo.leftProp)
           .top(layoutInfo.topProp)
           .height(layoutInfo.cellSize.height)
           .width(layoutInfo.cellSize.width)
           .cursor(function(scene){
-              return scene.acts.legendItem.click ? "pointer" : null;
+              return scene.vars.item.click ? "pointer" : null;
           })
           .fillStyle(function(){
               return this.hidden() == "true" ? 
@@ -271,9 +274,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                      "rgba(200,200,200,0.0001)";
           })
           .event("click", function(scene){
-              var legendItem = scene.acts.legendItem;
-              if(legendItem.click){
-                  return legendItem.click();
+              var item = scene.vars.item;
+              if(item.click){
+                  return item.click();
               }
           });
       
@@ -290,7 +293,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           this.pvDot = this.pvRule.anchor("center").add(pv.Dot)
               .shapeSize(this.markerSize)
               .shape(function(scene){
-                  return myself.shape || scene.acts.legendItem.shape;
+                  return myself.shape || scene.vars.item.shape;
               })
              .lineWidth(0)
              .fillStyle(sceneColorProp)
@@ -314,7 +317,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
               .left(this.markerSize / 2)
               .shapeSize(this.markerSize)
               .shape(function(scene){
-                  return myself.shape || scene.acts.legendItem.shape;
+                  return myself.shape || scene.vars.item.shape;
               })
               .angle(Math.PI/2)
               .lineWidth(2)
@@ -328,7 +331,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       this.pvLabel = pvLegendProto.anchor("right").add(pv.Label)
           .text(function(scene){
               // TODO: trim to width - the above algorithm does not update the cellWidth...
-              return scene.acts.legendItem.label;
+              return scene.vars.item.label;
           })
           .font(this.font)
           .textMargin(this.textMargin)
@@ -354,6 +357,12 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         this.extend(this.pvLabel,      "legendLabel_");
     },
     
+    _getSignums: function(){
+        // Catches both the dot, the ruler and label...
+        // Also, if selection changes, render interactive refreshes all of these.
+        return [this.pvLegendPanel];
+    },
+    
     _buildScene: function(){
         var chart = this.chart,
             maxLabelTextLen = 0,
@@ -366,36 +375,36 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             },
             this);
 
-        rootScene.acts.legendItem = {
+        rootScene.vars.item = {
             maxLabelTextLen: maxLabelTextLen
         };
         
         return rootScene;
 
         function createLegendGroupScenes(legendGroup){
-            var dataPartAct = ('partValue' in legendGroup) ? {
-                                value: legendGroup.partValue,
-                                label: legendGroup.partLabel
-                              } :
-                              null;
+            
+            var dataPartVar = ('partValue' in legendGroup) ? 
+                             new pvc.visual.ValueLabelVar(
+                                     legendGroup.partValue,
+                                     legendGroup.partLabel) :
+                             null;
 
-            legendGroup.items.forEach(function(legendItem){
+            legendGroup.items.forEach(function(item){
                 /* Create leaf scene */
-                var scene = new pvc.visual.Scene(rootScene, {group: legendItem.group});
+                var scene = new pvc.visual.Scene(rootScene, {group: item.group});
 
-                if(dataPartAct){
-                    scene.acts.dataPart = dataPartAct;
+                if(dataPartVar){
+                    scene.vars.dataPart = dataPartVar;
                 }
 
-                var labelTextLen = pvc.text.getTextLength(legendItem.label, this.font);
+                var labelTextLen = pvc.text.getTextLength(item.label, this.font);
                 if(labelTextLen > maxLabelTextLen) {
                     maxLabelTextLen = labelTextLen;
                 }
 
-                legendItem.labelTextLength = labelTextLen;
+                item.labelTextLength = labelTextLen;
 
-                /* legendItem special role? */
-                scene.acts.legendItem = legendItem;
+                scene.vars.item = item; // TODO: Not A Var...
             }, this);
         }
     }

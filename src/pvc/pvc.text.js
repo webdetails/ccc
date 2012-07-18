@@ -4,18 +4,27 @@ def.scope(function(){
     
     // --------------------------
     // exported
+    function getTextSize(text, font){
+        switch(pv.renderer()){
+            case 'vml':   return getTextSizeVML(text, font);
+            case 'batik': return getTextSizeCGG(text, font);
+        }
+
+        return getTextSizeSVG(text, font);
+    }
+    
     function getTextLength(text, font){
         switch(pv.renderer()){
             case 'vml':
                 return getTextLenVML(text, font);
 
             case 'batik':
-                font = splitFontCGG(font);
+                var fontInfo = getFontInfoCGG(font);
 
                 // NOTE: the global function 'getTextLenCGG' must be
                 // defined by the CGG loading environment
                 /*global getTextLenCGG:true */
-                return getTextLenCGG(text, font.fontFamily, font.fontSize, font.fontStyle, font.fontWeight);
+                return getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight);
 
             //case 'svg':
         }
@@ -29,22 +38,24 @@ def.scope(function(){
                 return getTextHeightVML(text, font);
 
             case 'batik':
-                font = splitFontCGG(font);
+                var fontInfo = getFontInfoCGG(font);
 
                 // NOTE: the global function 'getTextHeightCGG' must be
                 // defined by the CGG loading environment
                 /*global getTextHeightCGG:true */
-                return getTextHeightCGG(text, font.fontFamily, font.fontSize, font.fontStyle, font.fontWeight);
+                return getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight);
 
             //case 'svg':
         }
 
         return getTextHeightSVG(text, font);
     }
-
-    //TODO: if not in px?..
+    
+    // -------------
+    
+    // TODO: if not in px?..
     function getFontSize(font){
-        if(pv.renderer() == 'batik'){
+        if(pv.renderer() === 'batik'){
             var sty = document.createElementNS('http://www.w3.org/2000/svg','text').style;
             sty.setProperty('font',font);
             return parseInt(sty.getProperty('font-size'), 10);
@@ -75,25 +86,25 @@ def.scope(function(){
     }
     
     function trimToWidth(len, text, font, trimTerminator, before){
-      if(text === '') {
-          return text;
-      }
-      
-      var textLen = getTextLength(text, font);
-      if(textLen <= len){
-        return text;
-      }
-
-      if(textLen > len * 1.5){ //cutoff for using other algorithm
-        return trimToWidthBin(len,text,font,trimTerminator, before);
-      }
-
-      while(textLen > len){
-        text = before ? text.slice(1) : text.slice(0,text.length -1);
-        textLen = getTextLength(text, font);
-      }
-
-      return before ? (trimTerminator + text) : (text + trimTerminator);
+        if(text === '') {
+            return text;
+        }
+  
+        var textLen = getTextLength(text, font);
+        if(textLen <= len){
+            return text;
+        }
+    
+        if(textLen > len * 1.5){ //cutoff for using other algorithm
+            return trimToWidthBin(len,text,font,trimTerminator, before);
+        }
+    
+        while(textLen > len){
+            text = before ? text.slice(1) : text.slice(0,text.length -1);
+            textLen = getTextLength(text, font);
+        }
+    
+        return before ? (trimTerminator + text) : (text + trimTerminator);
     }
     
     function justifyText(text, lineWidth, font){
@@ -133,19 +144,7 @@ def.scope(function(){
         return lines;
     }
     
-    function getLabelSize(textWidth, textHeight, align, baseline, angle, margin){
-        var width  = margin + Math.abs(textWidth * Math.cos(-angle));
-        var height = margin + Math.abs(textWidth * Math.sin(-angle));
-        return {
-            width:  width,
-            height: height
-        };
-    }
-    
-    /* Returns a label's BBox relative to its anchor point */
-    function getLabelBBox(textWidth, textHeight, align, baseline, angle, margin){
-        /* text-baseline, text-align */
-        
+    function getLabelPolygon(textWidth, textHeight, align, baseline, angle, margin){
         // From protovis' SvgLabel.js
         
         // In text line coordinates. y points downwards
@@ -179,50 +178,37 @@ def.scope(function(){
                 break;
         }
         
-        var bottomLeft  = pv.vector(x, y);
-        var bottomRight = bottomLeft.plus(textWidth, 0);
-        var topRight    = bottomRight.plus(0, -textHeight);
-        var topLeft     = bottomLeft .plus(0, -textHeight);
+        var bl = pv.vector(x, y);
+        var br = bl.plus(textWidth, 0);
+        var tr = br.plus(0, -textHeight);
+        var tl = bl.plus(0, -textHeight);
         
-        var min, max;
+        // Rotate
         
-        var corners = [bottomLeft, bottomRight, topLeft, topRight];
-        
-        if(angle === 0){
-            min = topLeft;
-            max = bottomRight;
-        } else {
-            // Bounding box:
-            
-            corners.forEach(function(corner, index){
-                corner = corners[index] = corner.rotate(angle);
-                if(min == null){
-                    min = pv.vector(corner.x, corner.y);
-                } else {
-                    if(corner.x < min.x){
-                        min.x = corner.x;
-                    }
-                    
-                    if(corner.y < min.y){
-                        min.y = corner.y;
-                    }
-                }
-                
-                if(max == null){
-                    max = pv.vector(corner.x, corner.y);
-                } else {
-                    if(corner.x > max.x){
-                        max.x = corner.x;
-                    }
-                    
-                    if(corner.y > max.y){
-                        max.y = corner.y;
-                    }
-                }
-            });
+        if(angle !== 0){
+            bl = bl.rotate(angle);
+            br = br.rotate(angle);
+            tl = tl.rotate(angle);
+            tr = tr.rotate(angle);
         }
         
-        var bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        return new pvc.Polygon([bl, br, tl, tr]);
+    }
+    
+    /* Returns a label's BBox relative to its anchor point */
+    function getLabelBBox(textWidth, textHeight, align, baseline, angle, margin){
+        
+        var polygon = getLabelPolygon(textWidth, textHeight, align, baseline, angle, margin);
+        var corners = polygon.corners();
+        var bbox;
+        if(angle === 0){
+            var min = corners[2]; // topLeft
+            var max = corners[1]; // bottomRight
+            
+            bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        } else {
+            bbox = polygon.bbox();
+        }
         
         bbox.sourceCorners   = corners;
         bbox.sourceAngle     = angle;
@@ -286,52 +272,95 @@ def.scope(function(){
         return $textSizePvLabel[0];
     }
 
-    function splitFontCGG(font){
-        var el = document.createElementNS('http://www.w3.org/2000/svg','text');
-        var sty = el.style;
-        sty.setProperty('font',font);
-
-        var result = {};
-        
-        // Below, the use of: 
-        //   '' + sty.getProperty(...)
-        //  converts the results to real strings
-        //  and not String objects (this later caused bugs in Java code)
-        
-        var fontFamily = result.fontFamily = '' + sty.getProperty('font-family');
-        if(!fontFamily){
-            result.fontFamily = 'sans-serif';
-        } else if(fontFamily.length > 2){
-            // Did not work at the server
-            //var reQuoted = /^(["']?)(.*?)(\1)$/;
-            //fontFamily = fontFamily.replace(reQuoted, "$2");
-            var quote = fontFamily.charAt(0);
-            if(quote === '"' || quote === "'"){
-                fontFamily = fontFamily.substr(1, fontFamily.length - 2);
+    var _cggFontCache;
+    var _cggFontTextElem;
+    
+    function getFontInfoCGG(font){
+        var fontInfo = _cggFontCache && _cggFontCache[font];
+        if(!fontInfo){
+            if(!_cggFontTextElem){
+                _cggFontTextElem = document.createElementNS('http://www.w3.org/2000/svg','text');
             }
             
-            result.fontFamily = fontFamily;
+            var sty = _cggFontTextElem.style;
+            sty.setProperty('font', font);
+
+            // Below, the use of: 
+            //   '' + sty.getProperty(...)
+            //  converts the results to real strings
+            //  and not String objects (this later caused bugs in Java code)
+        
+            var family = '' + sty.getProperty('font-family');
+            if(!family){
+                family = 'sans-serif';
+            } else if(family.length > 2){
+                // Did not work at the server
+                //var reQuoted = /^(["']?)(.*?)(\1)$/;
+                //family = family.replace(reQuoted, "$2");
+                var quote = family.charAt(0);
+                if(quote === '"' || quote === "'"){
+                    family = family.substr(1, family.length - 2);
+                }
+            }
+            
+            fontInfo = {
+                family: family,
+                size:   '' + sty.getProperty('font-size'),
+                style:  '' + sty.getProperty('font-style'),
+                weight: '' + sty.getProperty('font-weight')
+            };
         }
         
-        result.fontSize   = '' + sty.getProperty('font-size');
-        result.fontStyle  = '' + sty.getProperty('font-style');
-        result.fontWeight = '' + sty.getProperty('font-weight');
-        
-        return result;
+        return fontInfo;
     }
-
+    
+    // -------------
+    
+    function getTextSizeCGG(text, font){
+        var fontInfo = getFontInfoCGG(font);
+        
+        // TODO: Add cgg size method
+        return {
+            /*global getTextLenCGG:true */
+            width:  getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight),
+            /*global getTextHeightCGG:true */
+            height: getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight)
+        };
+    }
+    
+    // -------------
+    
+    function getTextSizeSVG(text, font){
+        if(!text) { return {width: 0, height: 0}; }
+        
+        var lbl = getTextSizePvLabel(text, font);
+        var box = lbl.getBBox();
+        return {width: box.width, height: box.height};
+    }
+    
     function getTextLenSVG(text, font){
+        if(!text) { return {width: 0, height: 0}; }
+        
         var lbl = getTextSizePvLabel(text, font);
         var box = lbl.getBBox();
         return box.width;
     }
 
     function getTextHeightSVG(text, font){
+        if(!text) { return {width: 0, height: 0}; }
+        
         var lbl = getTextSizePvLabel(text, font);
         var box = lbl.getBBox();
         return box.height;
     }
-
+    
+    // -------------
+    
+    function getTextSizeVML(text, font){
+        var box = pv.Vml.text_dims(text, font);
+        return {width: box.width, height: box.height};
+    }
+    
     function getTextLenVML(text, font){
         return pv.Vml.text_dims(text, font).width;
     }
@@ -339,7 +368,9 @@ def.scope(function(){
     function getTextHeightVML(text, font){
         return pv.Vml.text_dims(text, font).height;
     }
-
+    
+    // -------------
+    
     function trimToWidthBin(len, text, font, trimTerminator, before){
 
         var ilen = text.length,
@@ -367,15 +398,15 @@ def.scope(function(){
     }
     
     pvc.text = {
-        getTextLength: getTextLength,
-        getFontSize:   getFontSize,
-        getTextHeight: getTextHeight,
-        getFitInfo:    getFitInfo,
-        trimToWidth:   trimToWidth,
-        trimToWidthB:  trimToWidthB,
-        justify:       justifyText,
-        getLabelSize:  getLabelSize,
-        getLabelBBox:  getLabelBBox
-        
+        getTextSize:     getTextSize,
+        getTextLength:   getTextLength,
+        getFontSize:     getFontSize,
+        getTextHeight:   getTextHeight,
+        getFitInfo:      getFitInfo,
+        trimToWidth:     trimToWidth,
+        trimToWidthB:    trimToWidthB,
+        justify:         justifyText,
+        getLabelBBox:    getLabelBBox,
+        getLabelPolygon: getLabelPolygon
     };
 });

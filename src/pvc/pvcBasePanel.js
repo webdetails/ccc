@@ -13,17 +13,15 @@ pvc.BasePanel = pvc.Abstract.extend({
     type: pv.Panel, // default one
     
     /**
-     * Total height of the panel.
+     * Total height of the panel in pixels.
      * Includes vertical paddings and margins.
-     * Resolved.
      * @type number  
      */
     height: null,
     
     /**
-     * Total width of the panel.
+     * Total width of the panel in pixels.
      * Includes horizontal paddings and margins.
-     * Resolved.
      * @type number
      */
     width: null,
@@ -40,8 +38,9 @@ pvc.BasePanel = pvc.Abstract.extend({
     root:      null, 
     topRoot:   null,
     
-    _layoutInfo: null,
-
+    _coreInfo: null,   // once per create info (only for information that is: layout independent *and* required by layout)
+    _layoutInfo: null, // once per layout info
+    
     /**
      * The data that the panel uses to obtain "data".
      * @type pvc.data.Data
@@ -90,7 +89,14 @@ pvc.BasePanel = pvc.Abstract.extend({
         'value':    'value'
     },
     
+    _sceneExtensions: null,
+    
     constructor: function(chart, parent, options) {
+        
+        if(options && options.scenes){
+            this._sceneExtensions = options.scenes;
+            delete options.scenes;
+        }
         
         // TODO: Danger...
         $.extend(this, options);
@@ -240,6 +246,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             var size;
             if(!clientSize){
                 size = availableSize; // use all available size
+                clientSize = availableClientSize;
             } else {
                 layoutInfo.clientSize = clientSize;
                 size = {
@@ -248,9 +255,11 @@ pvc.BasePanel = pvc.Abstract.extend({
                 };
             }
             
+            this.isVisible = (clientSize.width > 0 && clientSize.height > 0);
+            
             delete layoutInfo.desiredClientSize;
             
-            this.width = size.width;
+            this.width  = size.width;
             this.height = size.height;
         }
     },
@@ -328,7 +337,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         while(needRelayout){
             needRelayout = false;
             relayoutCount++;
-            allowGrow = relayoutCount <= 1;
+            allowGrow = relayoutCount <= 2;
             
             initLayout.call(this);
             
@@ -352,22 +361,28 @@ pvc.BasePanel = pvc.Abstract.extend({
                 
                 child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
                 
-                checkChildLayout.call(this, child);
-                
-                var align = pvc.parseAlign(a, child.align);
-                
-                positionChild.call(this, a, child, align);
-                
-                updateSide.call(this, a, child, align);
+                if(child.isVisible){
+                    checkChildLayout.call(this, child);
+                    
+                    var align = pvc.parseAlign(a, child.align);
+                    
+                    if(!needRelayout){
+                        positionChild.call(this, a, child, align);
+                    }
+                    
+                    updateSide.call(this, a, child, align);
+                }
             }
         }
         
         function layoutChildII(child) {
             child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
-            
-            checkChildLayout(child);
-            
-            positionChild.call(this, 'fill', child);
+            if(child.isVisible){
+                checkChildLayout(child);
+                if(!needRelayout){
+                    positionChild.call(this, 'fill', child);
+                }
+            }
         }
         
         function checkChildLayout(child){
@@ -459,8 +474,14 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             this.pvPanel = null;
             
+            delete this._coreInfo;
+            
             /* Layout */
             this.layout();
+            
+            if(!this.isVisible){
+                return;
+            }
             
             var margins  = this._layoutInfo.margins;
             var paddings = this._layoutInfo.paddings;
@@ -520,8 +541,11 @@ pvc.BasePanel = pvc.Abstract.extend({
                                    .top (paddings.top );
             }
             
+            pvBorderPanel.borderPanel  = pvBorderPanel;
             pvBorderPanel.paddingPanel = this.pvPanel;
-            this.pvPanel.borderPanel = pvBorderPanel;
+            
+            this.pvPanel.paddingPanel  = this.pvPanel;
+            this.pvPanel.borderPanel   = pvBorderPanel;
             
             /* Protovis marks that are pvcPanel specific,
              * and/or #_creates child panels.
@@ -582,6 +606,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         this._create(def.get(keyArgs, 'recreate', false));
+        
+        if(!this.isVisible){
+            return;
+        }
         
         var chart = this.chart,
             options = chart.options;
@@ -725,6 +753,31 @@ pvc.BasePanel = pvc.Abstract.extend({
         this.chart.extend(mark, prefix);
     },
 
+    _extendScene: function(typeKey, sceneType, names){
+        var exts = this._sceneExtensions;
+        var typeExts;
+        if(exts && (typeExts = exts[typeKey])){
+            if(!names){
+                names = def.keys(typeExts);
+            }
+            
+            var hasAny = false;
+            var typeExts2 = {};
+            
+            names.forEach(function(name){
+                var ext = typeExts[name];
+                if(ext){
+                    hasAny = true;
+                    typeExts2[name] = def.fun.to(ext);
+                }
+            });
+            
+            if(hasAny){
+               sceneType.add(typeExts2);
+            }
+        }
+    },
+    
     /**
      * Obtains the specified extension point.
      * Arguments are concatenated with '_'.
@@ -988,7 +1041,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 pct = data.dimensions(dimName).percent(atom.value);
             }
             
-            return chart.options.valueFormat.call(null, Math.round(pct * 1000) / 10) + "%";
+            return chart.options.percentValueFormat.call(null, pct);
         }
         
         def.each(commonAtoms, function(atom, dimName){
@@ -1185,7 +1238,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         this._isRubberBandSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvPanel.borderPanel,
+        var rubberPvParentPanel = this.pvRootPanel || this.pvPanel.paddingPanel,
             toScreen;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
@@ -1202,7 +1255,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             rubberPvParentPanel.fillStyle(pvc.invisibleFill);
         }
         
-        // NOTE: Rubber band coordinates are always transformed to screen coordinates (see 'select' and 'selectend' events)
+        // NOTE: Rubber band coordinates are always transformed to canvas/client 
+        // coordinates (see 'select' and 'selectend' events)
          
         var selectionEndedDate;
         rubberPvParentPanel

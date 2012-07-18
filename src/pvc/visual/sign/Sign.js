@@ -120,7 +120,7 @@ def.type('pvc.visual.Sign')
     },
     
     /* Extensibility */
-    intercept: function(name, method){
+    intercept: function(name, method, noCast){
         if(typeof method !== 'function'){
             // Assume string with name of method
             // This allows instance-overriding methods,
@@ -142,7 +142,8 @@ def.type('pvc.visual.Sign')
                         me._extArgs = prevExtArgs;
                     }
                 },
-                this._getExtension(name));
+                this._getExtension(name),
+                noCast);
         
         return this;
     },
@@ -247,9 +248,9 @@ def.type('pvc.visual.Sign')
     },
 
     defaultColor: function(type){
-        var colorAct = this.scene.acts[this.chart.legendSource];
+        var colorVar = this.scene.vars[this.chart.legendSource];
         /* Legend color is a function of the chart's legendSource */
-        return this.legendColorScale()(colorAct && colorAct.value);
+        return this.legendColorScale()(colorVar && colorVar.value);
     },
 
     normalColor: function(type, color){

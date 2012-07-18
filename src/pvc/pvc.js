@@ -33,13 +33,20 @@ pvc.log = function(m){
     }
 };
 
-pvc.logError = function(m){
+pvc.logError = function(e){
+    if(e && typeof e === 'object' && e.message){
+        e = e.message;
+    }
+    
     if (typeof console != "undefined"){
-        console.log("[pvChart ERROR]: " + m);
+        console.log("[pvChart ERROR]: " + e);
     } else {
-        throw new Error("[pvChart ERROR]: " + m);
+        throw new Error("[pvChart ERROR]: " + e);
     }
 };
+
+// Redirect protovis error handler
+pv.error = pvc.logError;
 
 /**
  * Evaluates x if it's a function or returns the value otherwise
@@ -167,22 +174,104 @@ pvc.arrayEquals = function(array1, array2, func){
 };
 
 /**
- * Creates a color scheme based on the specified colors.
- * The default color scheme is "pv.Colors.category10", 
- * and is returned when null or an empty array is specified.
+ * The default color scheme used by charts.
+ * <p>
+ * Charts use the color scheme specified in the chart options 
+ * {@link pvc.BaseChart#options.colors}
+ * and 
+ * {@link pvc.BaseChart#options.secondAxisColors}, 
+ * for the main and second axis series, respectively, 
+ * or, when any is unspecified, 
+ * the default color scheme.
+ * </p>
+ * <p>
+ * When null, the color scheme {@link pv.Colors.category10} is implied. 
+ * To obtain the default color scheme call {@link pvc.createColorScheme}
+ * with no arguments. 
+ * </p>
+ * <p>
+ * To be generically useful, 
+ * a color scheme should contain at least 10 colors.
+ * </p>
+ * <p>
+ * A color scheme is a function that creates a {@link pv.Scale} color scale function
+ * each time it is called. 
+ * It sets as its domain the specified arguments and as range 
+ * the pre-spcecified colors of the color scheme.
+ * </p>
+ * 
+ * @readonly
+ * @type function
  */
-pvc.createColorScheme = function(colors){
-    if (colors == null || !colors.length){
-        return pv.Colors.category10;
+pvc.defaultColorScheme = null;
+
+/**
+ * Sets the colors of the default color scheme used by charts 
+ * to a specified color array.
+ * <p>
+ * If null is specified, the default color scheme is reset to its original value.
+ * </p>
+ * 
+ * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] Something convertible to a color scheme by {@link pvc.colorScheme}.
+ * @return {null|pv.Scale} A color scale function or null.
+ */
+pvc.setDefaultColorScheme = function(colors){
+    return pvc.defaultColorScheme = pvc.colorScheme(colors);
+};
+
+/**
+ * Creates a color scheme if the specified argument is not one already.
+ * 
+ * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] A value convertible to a color scheme: 
+ * a color string, 
+ * a color object, 
+ * an array of color strings or objects, 
+ * a color scale function, 
+ * or null.
+ * 
+ * @returns {null|function} A color scheme function or null.
+ */
+pvc.colorScheme = function(colors){
+    if(colors == null){
+        return null;
     }
-	
-    colors = def.array.as(colors);
-	
+    
+    if(typeof colors === 'function') {
+        if(!colors.hasOwnProperty('range')){
+            // Assume already a color scheme (a color scale factory)
+            return colors;
+        }
+        
+        // A protovis color scale
+        // Obtain its range colors array and discard the scale function.
+        colors = colors.range();
+    } else {
+        colors = def.array.as(colors);
+    }
+    
+    if(!colors.length){
+        return null;
+    }
+    
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
         scale.domain.apply(scale, arguments); // defines the domain of the color scale
         return scale;
     };
+},
+
+/**
+ * Creates a color scheme based on the specified colors.
+ * When no colors are specified, the default color scheme is returned.
+ * 
+ * @see pvc.defaultColorScheme 
+ * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] Something convertible to a color scheme by {@link pvc.colorScheme}.
+ * @type function
+ */
+pvc.createColorScheme = function(colors){
+    return pvc.colorScheme(colors) ||
+           pvc.defaultColorScheme  ||
+           pv.Colors.category10;
 };
 
 // Convert to Grayscale using YCbCr luminance conv.
@@ -257,35 +346,26 @@ pv.Format.createFormatter = function(pvFormat) {
 };
 
 pvc.parseAlign = function(side, align){
+    var align2, isInvalid;
     if(side === 'left' || side === 'right'){
-        switch(align){
-            case 'top':
-            case 'bottom':
-            case 'middle':
-                break;
-            
-            default:
-                if(align && pvc.debug >= 2){
-                    pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
-                }
-                align = 'top';
+        align2 = pvc.BasePanel.verticalAlign[align];
+        if(!align2){
+            align2 = 'top';
+            isInvalid = true;
         }
     } else {
-        switch(align){
-            case 'left':
-            case 'right':
-            case 'center':
-                break;
-            
-            default:
-                if(align && pvc.debug >= 2){
-                    pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
-                }
-                align = 'left';
+        align2 = pvc.BasePanel.horizontalAlign[align];
+        if(!align2){
+            align2 = 'left';
+            isInvalid = true;
         }
     }
     
-    return align;
+    if(isInvalid && pvc.debug >= 2){
+        pvc.log(def.format("Invalid alignment value '{0}'. Assuming '{1}'.", [align, align2]));
+    }
+    
+    return align2;
 };
 
 /**
@@ -446,6 +526,10 @@ pvc.PercentValue.parse = function(value){
             pvc.log(def.format("Invalid margins component '{0}'", [''+value]));
         }
     }
+};
+
+pvc.PercentValue.resolve = function(value, total){
+    return (value instanceof pvc.PercentValue) ? value.resolve(total) : value;
 };
 
 /* Protovis Z-Order support between sibling marks */
@@ -661,11 +745,13 @@ pv.Mark.prototype.getStaticPropertyValue = function(name) {
     //return undefined;
 };
 
-pv.Mark.prototype.intercept = function(prop, interceptor, extValue){
+pv.Mark.prototype.intercept = function(prop, interceptor, extValue, noCast){
     if(extValue !== undefined){
-        this[prop](extValue);
+        if(!noCast){
+            this[prop](extValue);
         
-        extValue = this.getStaticPropertyValue(prop);
+            extValue = this.getStaticPropertyValue(prop);
+        }
     } else if(!this._intercepted || !this._intercepted[prop]) { // Don't intercept any previous interceptor...
         extValue = this.getStaticPropertyValue(prop);
     }
@@ -673,7 +759,7 @@ pv.Mark.prototype.intercept = function(prop, interceptor, extValue){
     // Let undefined pass through as a sign of not-intercepted
     // A 'null' value is considered as an existing property value.
     if(extValue !== undefined){
-        extValue = pv.functor(extValue);
+        extValue = def.fun.to(extValue);
     }
     
     function interceptProp(){
@@ -870,18 +956,23 @@ pv.Mark.prototype.getInstanceShape = function(instance){
 };
 
 pv.Mark.prototype.getInstanceCenterPoint = function(instance){
-    return new Point(
+    return pv.vector(
                 instance.left + (instance.width  || 0) / 2,
                 instance.top +  (instance.height || 0) / 2);
 };
 
 pv.Label.prototype.getInstanceShape = function(instance){
-    // TODO
-    return new Rect(
-            instance.left,
-            instance.top,
-            10,
-            10);
+    var t = pvc.text;
+    var size = t.getTextSize(instance.text, instance.font);
+    
+    return t.getLabelPolygon(
+                size.width,
+                size.height,
+                instance.textAlign,
+                instance.textBaseline,
+                instance.textAngle,
+                instance.textMargin)
+            .apply(pv.Transform.identity.translate(instance.left, instance.top));
 };
 
 pv.Wedge.prototype.getInstanceCenterPoint = function(instance){
@@ -890,7 +981,7 @@ pv.Wedge.prototype.getInstanceCenterPoint = function(instance){
     var dotLeft   = instance.left + midRadius * Math.cos(midAngle);
     var dotTop    = instance.top  + midRadius * Math.sin(midAngle);
     
-    return new Point(dotLeft, dotTop);
+    return pv.vector(dotLeft, dotTop);
 };
 
 pv.Wedge.prototype.getInstanceShape = function(instance){
@@ -928,7 +1019,7 @@ pv.Dot.prototype.getInstanceShape = function(instance){
 };
 
 pv.Dot.prototype.getInstanceCenterPoint = function(instance){
-    return new Point(instance.left, instance.top);
+    return pv.vector(instance.left, instance.top);
 };
 
 pv.Area.prototype.getInstanceShape =
@@ -938,11 +1029,10 @@ pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
 
 pv.Area.prototype.getInstanceCenterPoint =
 pv.Line.prototype.getInstanceCenterPoint = function(instance, nextInstance){
-    return new Point(
+    return pv.vector(
             (instance.left + nextInstance.left) / 2, 
             (instance.top  + nextInstance.top ) / 2);
 };
-
 
 // --------------------
 
@@ -1066,20 +1156,16 @@ var Shape = def.type('pvc.Shape')
 
 // --------------------
 
-var Point = def.type('pvc.Point', Shape)
-.init(function(x, y){
-    this.set(x, y);
-})
-.add({
+def.mixin(pv.Vector.prototype, Shape.prototype, {
     set: function(x, y){
         this.x  = x  || 0;
         this.y  = y  || 0;
     },
-
+    
     clone: function(){
-        return new Point(this.x, this.y);
+        return new pv.Vector(this.x, this.y);
     },
-
+    
     apply: function(t){
         this.x  = t.transformHPosition(this.x);
         this.y  = t.transformVPosition(this.y);
@@ -1088,13 +1174,8 @@ var Point = def.type('pvc.Point', Shape)
 
     intersectsRect: function(rect){
         // Does rect contain the point
-        var minX = Math.min(rect.x, rect.x2),
-            maxX = Math.max(rect.x, rect.x2),
-            minY = Math.min(rect.y, rect.y2),
-            maxY = Math.max(rect.y, rect.y2);
-
-        return (this.x >= minX) && (this.x <= maxX) &&
-               (this.y >= minY) && (this.y <= maxY);
+        return (this.x >= rect.x) && (this.x <= rect.x2) &&
+               (this.y >= rect.y) && (this.y <= rect.y2);
     }
 });
 
@@ -1106,16 +1187,30 @@ var Rect = def.type('pvc.Rect', Shape)
 })
 .add({
     set: function(x, y, dx, dy){
-        this.x  = x  || 0;
-        this.y  = y  || 0;
+        this.x  =  x || 0;
+        this.y  =  y || 0;
         this.dx = dx || 0;
         this.dy = dy || 0;
+        
         this.calc();
     },
-
+    
     calc: function(){
+        // Ensure normalized
+        if(this.dx < 0){
+            this.dx = -this.dx;
+            this.x  = this.x - this.dx;
+        }
+        
+        if(this.dy < 0){
+            this.dy = -this.dy;
+            this.y = this.y - this.dy;
+        }
+        
         this.x2  = this.x + this.dx;
         this.y2  = this.y + this.dy;
+        
+        this._sides = null;
     },
 
     clone: function(){
@@ -1140,34 +1235,30 @@ var Rect = def.type('pvc.Rect', Shape)
 //        pvc.log("[" + [this.x, this.x2, this.y, this.y2] + "]~" +
 //                "[" + [rect.x, rect.x2, rect.y, rect.y2] + "]");
 
-        // rect is not trusted to be normalized...(line...)
-        var minX = Math.min(rect.x, rect.x2),
-            maxX = Math.max(rect.x, rect.x2),
-            minY = Math.min(rect.y, rect.y2),
-            maxY = Math.max(rect.y, rect.y2);
+        // rect is trusted to be normalized...
 
-        return (this.x2 > minX ) &&  // Some intersection on X
-               (this.x  < maxX ) &&
-               (this.y2 > minY ) &&  // Some intersection on Y
-               (this.y  < maxY);
+        return (this.x2 > rect.x ) &&  // Some intersection on X
+               (this.x  < rect.x2) &&
+               (this.y2 > rect.y ) &&  // Some intersection on Y
+               (this.y  < rect.y2);
     },
 
-    getSides: function(){
-        var x  = Math.min(this.x, this.x2),
-            y  = Math.min(this.y, this.y2),
-            x2 = Math.max(this.x, this.x2),
-            y2 = Math.max(this.y, this.y2);
-
-        /*
-         *    x,y    A
-         *     * ------- *
-         *  D  |         |  B
-         *     |         |
-         *     * --------*
-         *              x2,y2
-         *          C
-         */
+    sides: function(){
         if(!this._sides){
+            var x  = this.x,
+                y  = this.y,
+                x2 = this.x2,
+                y2 = this.y2;
+    
+            /*
+             *    x,y    A
+             *     * ------- *
+             *  D  |         |  B
+             *     |         |
+             *     * --------*
+             *              x2,y2
+             *          C
+             */
             this._sides = [
                 //x, y, x2, y2
                 new Line(x,  y,  x2, y),
@@ -1219,7 +1310,7 @@ var Circle = def.type('pvc.Circle', Shape)
         }
 
         var sqCornerDistance = Math.pow(circleDistX - dx2, 2) +
-                            Math.pow(circleDistY - dy2, 2);
+                               Math.pow(circleDistY - dy2, 2);
 
         return sqCornerDistance <= (this.radius * this.radius);
     }
@@ -1251,7 +1342,7 @@ var Line = def.type('pvc.Line', Shape)
         if(!rect) {
             return false;
         }
-        var sides = rect.getSides();
+        var sides = rect.sides();
         for(var i = 0 ; i < 4 ; i++){
             if(this.intersectsLine(sides[i])){
                 return true;
@@ -1302,6 +1393,117 @@ var Line = def.type('pvc.Line', Shape)
         }
 
         return true;
+    }
+});
+
+// ----------------
+
+var Polygon = def.type('pvc.Polygon', Shape)
+.init(function(corners){
+    this._corners = corners || [];
+})
+.add({
+    _sides: null,
+    _bbox:  null,
+    
+    corners: function(){
+        return this._corners;
+    },
+    
+    clone: function(){
+        return new Polygon(this.corners().slice());
+    },
+
+    apply: function(t){
+        delete this._sides;
+        delete this._bbox;
+        
+        var corners = this.corners();
+        for(var i = 0, L = corners.length; i < L ; i++){
+            corners[i].apply(t);
+        }
+        
+        return this;
+    },
+    
+    intersectsRect: function(rect){
+        // I - Any corner is inside the rect?
+        var i, L;
+        var corners = this.corners();
+        
+        L = corners.length;
+        for(i = 0 ; i < L ; i++){
+            if(corners[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        // II - Any side intersects the rect?
+        var sides = this.sides();
+        L = sides.length;
+        for(i = 0 ; i < L ; i++){
+            if(sides[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        return false;
+    },
+
+    sides: function(){
+        var sides = this._sides;
+        if(!sides){
+            sides = this._sides = [];
+            
+            var corners = this.corners();
+            var L = corners.length;
+            if(L){
+                var prevCorner = corners[0];
+                for(var i = 1 ; i < L ; i++){
+                    var corner = corners[i];
+                    sides.push(
+                        new Line(prevCorner.x, prevCorner.y,  corner.x, corner.y));
+                }
+            }
+        }
+
+        return sides;
+    },
+    
+    bbox: function(){
+        var bbox = this._bbox;
+        if(!bbox){
+            var min, max;
+            this.corners().forEach(function(corner, index){
+                if(min == null){
+                    min = pv.vector(corner.x, corner.y);
+                } else {
+                    if(corner.x < min.x){
+                        min.x = corner.x;
+                    }
+                    
+                    if(corner.y < min.y){
+                        min.y = corner.y;
+                    }
+                }
+                
+                if(max == null){
+                    max = pv.vector(corner.x, corner.y);
+                } else {
+                    if(corner.x > max.x){
+                        max.x = corner.x;
+                    }
+                    
+                    if(corner.y > max.y){
+                        max.y = corner.y;
+                    }
+                }
+            });
+            
+            bbox = this._bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        }
+        
+        return this._bbox;
     }
 });
 

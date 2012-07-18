@@ -41,7 +41,7 @@ pvc.DataTree = pvc.BaseChart.extend({
         }
     },
   
-    _preRenderCore: function(){
+    _preRenderContent: function(contentOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in data-tree");
         }
@@ -71,7 +71,7 @@ pvc.DataTree = pvc.BaseChart.extend({
 
         // ------------------
         
-        this.dataTreePanel = new pvc.DataTreePanel(this, this.basePanel, {
+        this.dataTreePanel = new pvc.DataTreePanel(this, this.basePanel, def.create(contentOptions, {
             topRuleOffset : this.options.topRuleOffset,
             botRuleOffset : this.options.botRuleOffset,
             leftRuleOffset : this.options.leftRuleOffset,
@@ -85,7 +85,7 @@ pvc.DataTree = pvc.BaseChart.extend({
             minVerticalSpace: this.options.minVerticalSpace,
             connectorSpace: this.options.connectorSpace,
             minAspectRatio: this.options.minAspectRatio
-        });
+        }));
     }
 }, {
     defaultOptions: {

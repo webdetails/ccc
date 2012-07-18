@@ -445,6 +445,11 @@ var def = /** @lends def */{
         as: function(d, dv){
             var v = parseFloat(d);
             return isNaN(v) ? (dv || 0) : v;
+        },
+        
+        to: function(d, dv){
+            var v = parseFloat(d);
+            return isNaN(v) ? (dv || 0) : v;
         }
     },
     
@@ -506,7 +511,12 @@ var def = /** @lends def */{
             return typeof v === 'function';
         },
         
+        // TODO: this is not an as...
         as: function(v){
+            return typeof v === 'function' ? v : def.fun.constant(v);
+        },
+        
+        to: function(v){
             return typeof v === 'function' ? v : def.fun.constant(v);
         },
         
@@ -579,7 +589,8 @@ var def = /** @lends def */{
      * of the specified scope argument.
      * 
      * @param {string} mask The string to format.
-     * @param {object} [scope] The scope object.
+     * @param {object|function} [scope] The scope object or function.
+     * @param {object} [ctx] The context object for a scope function.
      * 
      * @example
      * <pre>
@@ -595,13 +606,27 @@ var def = /** @lends def */{
      * 
      * @returns {string} The formatted string.
      */
-    format: function(mask, scope){
+    format: function(mask, scope, ctx){
         if(mask == null || mask === '') {
             return "";
         }
+        
+        var isScopeFun = scope && def.fun.is(scope);
+        
         return mask.replace(/(^|[^{])\{([^{}]+)\}/g, function($0, before, prop){
-            var value = scope ? scope[prop] : null;
-            return before + (value == null ? "" : value); 
+            var value;
+            if(scope){
+                if(isScopeFun){
+                    value = scope.call(ctx, prop);
+                } else {
+                    value = scope[prop];
+                }
+            } else {
+                value = null;
+            }
+            
+            // NOTE: calls .toString() of value as a side effect of the + operator
+            return before + (value == null ? "" : value);
         });
     },
     

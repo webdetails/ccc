@@ -46,11 +46,13 @@
         <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
         <script type="text/javascript" src="pvc/visual/Role.js"></script>
         <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="pvc/visual/Var.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/PieSlice.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
@@ -69,6 +71,7 @@
         <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcPiePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
@@ -134,7 +137,7 @@ pv.listenForPageLoad(function() {
         width:  820,
         height: 420,
         title:  "Demonstrating DataTree (with user-defined coordinates)",
-        selectParam: "globalSelect",
+        selectParam: "globalSelect",
         structDatasource: "ds3"
     });
 

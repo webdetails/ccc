@@ -259,7 +259,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             line.override('baseColor', function(type){
                 var color = this.delegate();
                 if(color === undefined){
-                    var colorValue = this.scene.acts.color.value;
+                    var colorValue = this.scene.vars.color.value;
                     color = colorValue == null ?
                                 options.nullColor :
                                 colorScale(colorValue);
@@ -271,7 +271,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             dot.override('baseColor', function(type){
                 var color = this.delegate();
                 if(color === undefined){
-                    var colorValue = this.scene.acts.color.value;
+                    var colorValue = this.scene.vars.color.value;
                     
                     color = colorValue == null ?
                                 options.nullColor :
@@ -321,7 +321,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         } else {
             /* Ignore any extension */
             dot.override('baseSize', function(){
-                return sizeValueToArea(this.scene.acts.dotSize.value);
+                return sizeValueToArea(this.scene.vars.dotSize.value);
             });
         }
         
@@ -333,7 +333,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 // ------
                 .bottom(0)
                 .text(function(scene){ 
-                    return def.string.join(",", scene.acts.x.label, scene.acts.y.label);
+                    return def.string.join(",", scene.vars.x.label, scene.vars.y.label);
                 })
                 ;
         }
@@ -476,8 +476,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
         
         var chart = this.chart,
-            sceneBaseScale  = chart.axes.base.sceneScale(),
-            sceneOrthoScale = chart.axes.ortho.sceneScale(),
+            sceneBaseScale  = chart.axes.base.sceneScale({sceneVarName: 'x'}),
+            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'}),
             getColorRoleValue,
             getDotSizeRoleValue;
             
@@ -531,40 +531,31 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             /* Create series scene */
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesGroup});
             
-            seriesScene.acts.series = {
-                value: seriesGroup.value,
-                label: seriesGroup.label
-            };
+            seriesScene.vars.series = new pvc.visual.ValueLabelVar(
+                                seriesGroup.value,
+                                seriesGroup.label);
             
             seriesGroup.datums().each(function(datum){
                 /* Create leaf scene */
                 var scene = new pvc.visual.Scene(seriesScene, {datum: datum});
                 
                 var atom = datum.atoms[chart._xDim.name];
-                scene.acts.x = {
-                    value: atom.value,
-                    label: atom.label
-                };
+                scene.vars.x = new pvc.visual.ValueLabelVar(atom.value, atom.label);
                 
                 atom = datum.atoms[chart._yDim.name];
-                scene.acts.y = {
-                    value: atom.value,
-                    label: atom.label
-                };
+                scene.vars.y = new pvc.visual.ValueLabelVar(atom.value, atom.label);
                 
                 if(getColorRoleValue){
-                    scene.acts.color = {
-                        value: getColorRoleValue(scene),
-                        label: null
-                    };
+                    scene.vars.color = new pvc.visual.ValueLabelVar(
+                                getColorRoleValue(scene),
+                                "");
                 }
                 
                 if(getDotSizeRoleValue){
                     var dotSizeValue = getDotSizeRoleValue(scene);
-                    scene.acts.dotSize = {
-                        value: dotSizeValue,
-                        label: chart._dotSizeDim.format(dotSizeValue)
-                    };
+                    scene.vars.dotSize = new pvc.visual.ValueLabelVar(
+                                            dotSizeValue,
+                                            chart._dotSizeDim.format(dotSizeValue));
                 }
                 
                 scene.isIntermediate = false;
@@ -620,8 +611,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                      toChildIndex){
             
             /* Code for single, continuous and numeric dimensions */
-            var interYValue = (toScene.acts.y.value + fromScene.acts.y.value) / 2;
-            var interXValue = (toScene.acts.x.value + fromScene.acts.x.value) / 2;
+            var interYValue = (toScene.vars.y.value + fromScene.vars.y.value) / 2;
+            var interXValue = (toScene.vars.x.value + fromScene.vars.x.value) / 2;
             
             //----------------
             
@@ -631,22 +622,20 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                     datum: toScene.datum
                 });
             
-            interScene.acts.x = {
-                value: interXValue,
-                label: chart._xDim.format(interXValue)
-            };
+            interScene.vars.x = new pvc.visual.ValueLabelVar(
+                                    interXValue,
+                                    chart._xDim.format(interXValue));
             
-            interScene.acts.y = {
-                value: interYValue,
-                label: chart._yDim.format(interYValue)
-            };
+            interScene.vars.y = new pvc.visual.ValueLabelVar(
+                                    interYValue,
+                                    chart._yDim.format(interYValue));
             
             if(getColorRoleValue){
-                interScene.acts.color = toScene.acts.color;
+                interScene.vars.color = toScene.vars.color;
             }
             
             if(getDotSizeRoleValue){
-                interScene.acts.dotSize = toScene.acts.dotSize;
+                interScene.vars.dotSize = toScene.vars.dotSize;
             }
             
             interScene.isIntermediate = true;

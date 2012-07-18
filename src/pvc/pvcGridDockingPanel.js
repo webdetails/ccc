@@ -87,12 +87,13 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
                 child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
-                
-                // Only set the *anchor* position
-                // The other orthogonal position is dependent on the size of the other non-fill children
-                positionChildI(a, child);
-                
-                updateSide(a, child);
+                if(child.isVisible){
+                    // Only set the *anchor* position
+                    // The other orthogonal position is dependent on the size of the other non-fill children
+                    positionChildI(a, child);
+                    
+                    updateSide(a, child);
+                }
             }
         }
         
@@ -100,21 +101,25 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             var a = child.anchor;
             if(a === 'fill') {
                 child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
-                
-                positionChildI (a, child);
-                positionChildII(child, a);
+                if(child.isVisible){
+                    positionChildI (a, child);
+                    positionChildII(child, a);
+                }
             } else if(a) {
-                var al  = alMap[a];
-                var aol = aolMap[a];
-                var length      = remSize[al];
-                var olength     = child[aol];
-                var childSizeII = new pvc.Size(def.set({}, al, length, aol, olength));
-                
-                child.layout(childSizeII, childReferenceSize, childKeyArgs);
-                
-                var align = pvc.parseAlign(a, child.align);
-                
-                positionChildII(child, align);
+                if(child.isVisible){
+                    var al  = alMap[a];
+                    var aol = aolMap[a];
+                    var length      = remSize[al];
+                    var olength     = child[aol];
+                    var childSizeII = new pvc.Size(def.set({}, al, length, aol, olength));
+                    
+                    child.layout(childSizeII, childReferenceSize, childKeyArgs);
+                    if(child.isVisible){
+                        var align = pvc.parseAlign(a, child.align);
+                        
+                        positionChildII(child, align);
+                    }
+                }
             }
         }
         

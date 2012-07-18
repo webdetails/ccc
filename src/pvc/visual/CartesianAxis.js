@@ -117,11 +117,12 @@ def.type('pvc.visual.CartesianAxis')
      * Obtains a scene-scale function to compute values of this axis' main role.
      * 
      * @param {object} [keyArgs] Keyword arguments object.
+     * @param {string} [keyArgs.sceneVarName] The local scene variable name by which this axis's role is known. Defaults to the role's name.
      * @param {boolean} [keyArgs.nullToZero=true] Indicates that null values should be converted to zero before applying the scale.
      * @type function
      */
     sceneScale: function(keyArgs){
-        var roleName = this.role.name,
+        var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,
             grouping = this.role.grouping;
 
         if(grouping.isSingleDimension && grouping.firstDimension.type.valueType === Number){
@@ -129,7 +130,7 @@ def.type('pvc.visual.CartesianAxis')
                 nullToZero = def.get(keyArgs, 'nullToZero', true);
             
             var by = function(scene){
-                var value = scene.acts[roleName].value;
+                var value = scene.vars[varName].value;
                 if(value == null){
                     if(!nullToZero){
                         return value;
@@ -144,7 +145,7 @@ def.type('pvc.visual.CartesianAxis')
         }
 
         return this.scale.by(function(scene){
-            return scene.acts[roleName].value;
+            return scene.vars[varName].value;
         });
     },
     

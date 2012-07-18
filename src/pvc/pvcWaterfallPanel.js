@@ -46,7 +46,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                 return 1;
             }
 
-            if(scene.acts.category.group._isFlattenGroup){
+            if(scene.vars.category.group._isFlattenGroup){
                 // Groups don't update the total
                 // Groups, always go down, except the first falling...
                 return -2;
@@ -69,8 +69,8 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             orthoScale = chart.axes.ortho.scale,
             orthoPanelMargin = 0.04 * (orthoScale.range()[1] - orthoScale.range()[0]),
             orthoZero = orthoScale(0),
-            sceneOrthoScale = chart.axes.ortho.sceneScale(),
-            sceneBaseScale  = chart.axes.base.sceneScale(),
+            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'value'}),
+            sceneBaseScale  = chart.axes.base.sceneScale({sceneVarName: 'category'}),
             baseScale = chart.axes.base.scale,
             barWidth2 = this.barWidth/2,
             barWidth = this.barWidth,
@@ -87,25 +87,25 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                 .data(waterGroupRootScene.childNodes)
                 .zOrder(-1)
                 .fillStyle(function(scene){
-                    return panelColors(0)/* panelColors(scene.acts.category.level - 1)*/.alpha(0.15);
+                    return panelColors(0)/* panelColors(scene.vars.category.level - 1)*/.alpha(0.15);
                 })
                 [ao](function(scene){
-                    var categAct = scene.acts.category;
-                    return baseScale(categAct.leftValue) - barStepWidth / 2;
+                    var categVar = scene.vars.category;
+                    return baseScale(categVar.leftValue) - barStepWidth / 2;
                 })
                 [this.anchorLength(anchor)](function(scene){
-                    var categAct = scene.acts.category,
-                        length = Math.abs(baseScale(categAct.rightValue) -
-                                baseScale(categAct.leftValue))
+                    var categVar = scene.vars.category,
+                        length = Math.abs(baseScale(categVar.rightValue) -
+                                baseScale(categVar.leftValue))
                         ;
 
                     return length + barStepWidth;
                 })
                 [anchor](function(scene){
-                    return orthoScale(scene.acts.value.bottomValue) - orthoPanelMargin/2;
+                    return orthoScale(scene.vars.value.bottomValue) - orthoPanelMargin/2;
                 })
                 [this.anchorOrthoLength(anchor)](function(scene){
-                    return orthoScale(scene.acts.value.heightValue) + orthoPanelMargin;
+                    return orthoScale(scene.vars.value.heightValue) + orthoPanelMargin;
                     //return chart.animate(orthoZero, orthoScale(scene.categ) - orthoZero);
                 })
                 ;
@@ -116,7 +116,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             .override('baseColor', function(type){
                 var color = this.base(type);
                 if(type === 'fill'){
-                    if(this.scene.acts.category.group._isFlattenGroup){
+                    if(this.scene.vars.category.group._isFlattenGroup){
                         return pv.color(color).alpha(0.75);
                     }
                 }
@@ -155,7 +155,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                     return orthoZero + chart.animate(0, sceneOrthoScale(scene) - orthoZero);
                 })
                 .visible(function(scene){
-                     if(scene.acts.category.group._isFlattenGroup){
+                     if(scene.vars.category.group._isFlattenGroup){
                          return false;
                      }
 
@@ -166,7 +166,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                 .textBaseline(isVertical ? 'bottom' : 'middle')
                 .textStyle(pv.Color.names.darkgray.darker(2))
                 .textMargin(5)
-                .text(function(scene){ return scene.acts.value.label; });
+                .text(function(scene){ return scene.vars.value.label; });
         }
     },
 
@@ -199,17 +199,18 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             var categData1 = ruleInfo.group,
                 categScene = new pvc.visual.Scene(rootScene, {group: categData1});
 
-            categScene.acts.category = {
-                value: categData1.value,
-                label: categData1.label,
-                group: categData1
-            };
-
+            var categVar = 
+                categScene.vars.category = 
+                    new pvc.visual.ValueLabelVar(
+                                categData1.value,
+                                categData1.label);
+            
+            categVar.group = categData1;
+            
             var value = ruleInfo.offset;
-            categScene.acts.value = {
-                value: value,
-                label: this.chart._valueDim.format(value)
-            };
+            categScene.vars.value = new pvc.visual.ValueLabelVar(
+                                value,
+                                this.chart._valueDim.format(value));
         }
     },
 
@@ -242,14 +243,16 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                 if(level){
                     var categScene = new pvc.visual.Scene(rootScene, {group: catData});
 
-                    var categAct = categScene.acts.category = {
-                        value: catData.value,
-                        label: catData.label,
-                        group: catData,
-                        level: level
-                    };
+                    var categVar = 
+                        categScene.vars.category = 
+                            new pvc.visual.ValueLabelVar(
+                                    catData.value,
+                                    catData.label);
+                    
+                    categVar.group = catData;
+                    categVar.level = level;
 
-                    var valueAct = categScene.acts.value = {};
+                    var valueVar = categScene.vars.value = {}; // TODO: Not A Var
                     var ruleInfo = ruleInfoByCategKey[catData.absKey];
                     var offset = ruleInfo.offset,
                         range = ruleInfo.range,
@@ -259,19 +262,19 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                     if(isFalling){
                         var lastChild = lastLeaf(catData);
                         var lastRuleInfo = ruleInfoByCategKey[lastChild.absKey];
-                        categAct.leftValue  = ruleInfo.group.value;
-                        categAct.rightValue = lastRuleInfo.group.value;
-                        valueAct.bottomValue = offset - range.max;
+                        categVar.leftValue  = ruleInfo.group.value;
+                        categVar.rightValue = lastRuleInfo.group.value;
+                        valueVar.bottomValue = offset - range.max;
 
                     } else {
                         var firstChild = firstLeaf(catData);
                         var firstRuleInfo = ruleInfoByCategKey[firstChild.absKey];
-                        categAct.leftValue = firstRuleInfo.group.value;
-                        categAct.rightValue = ruleInfo.group.value;
-                        valueAct.bottomValue = offset - range.max;
+                        categVar.leftValue = firstRuleInfo.group.value;
+                        categVar.rightValue = ruleInfo.group.value;
+                        valueVar.bottomValue = offset - range.max;
                     }
 
-                    valueAct.heightValue = height;
+                    valueVar.heightValue = height;
                 }
 
                 children.forEach(function(child){

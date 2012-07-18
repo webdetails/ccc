@@ -25,13 +25,13 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
       pvc.mergeDefaults(this.options, pvc.ParallelCoordinates.defaultOptions, options);
   },
 
-  _preRenderCore: function(){
+  _preRenderContent: function(contentOptions){
 
     if(pvc.debug >= 3){
       pvc.log("Prerendering in parallelCoordinates");
     }
 
-    this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, {
+    this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, def.create(contentOptions, {
       topRuleOffset : this.options.topRuleOffset,
       botRuleOffset : this.options.botRuleOffset,
       leftRuleOffset : this.options.leftRuleOffset,
@@ -39,7 +39,7 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
       sortCategorical : this.options.sortCategorical,
       mapAllDimensions : this.options.mapAllDimensions,
       numDigits : this.options.numDigits
-    });
+    }));
   }
 }, {
     defaultOptions: {

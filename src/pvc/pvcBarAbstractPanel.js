@@ -59,7 +59,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
 
         var orthoScale = chart.axes.ortho.scale,
             orthoZero  = orthoScale(0),
-            sceneOrthoScale = chart.axes.ortho.sceneScale({nullToZero: false}),
+            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'value', nullToZero: false}),
             
             bandWidth = chart.axes.base.scale.range().band,
             barStepWidth = chart.axes.base.scale.range().step,
@@ -90,7 +90,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             .verticalMode(this._barVerticalMode())
             .yZero(orthoZero)
             .band // categories
-                .x(chart.axes.base.sceneScale())
+                .x(chart.axes.base.sceneScale({sceneVarName: 'category'}))
                 .w(bandWidth)
                 .differentialControl(this._barDifferentialControl())
             .item
@@ -121,11 +121,11 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         if(this.showValues){
             this.pvBarLabel = this.pvBar.anchor(this.valuesAnchor || 'center')
                 .add(pv.Label)
-                .localProperty('_valueAct')
-                ._valueAct(function(scene){
+                .localProperty('_valueVar')
+                ._valueVar(function(scene){
                     return options.showValuePercentage ?
-                            scene.acts.value.percent :
-                            scene.acts.value;
+                            scene.vars.value.percent :
+                            scene.vars.value;
                 })
                 .visible(function() { //no space for text otherwise
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
@@ -133,7 +133,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                     return length >= 4;
                 })
                 .text(function(){
-                    return this._valueAct().label;
+                    return this._valueVar().label;
                 });
         }
     },
@@ -217,7 +217,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         
         return this.pvBar.anchor('center').add(pv.Dot)
             .visible(function(scene){
-                var value = scene.acts.value.value;
+                var value = scene.vars.value.value;
                 if(value == null){
                     return false;
                 }
@@ -308,19 +308,17 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     },
 
     _onNewSeriesScene: function(seriesScene, seriesData1){
-        seriesScene.acts.series = {
-            value: seriesData1.value,
-            label: seriesData1.label
-        };
+        seriesScene.vars.series = new pvc.visual.ValueLabelVar(
+            seriesData1.value,
+            seriesData1.label);
     },
 
     _onNewSeriesCategoryScene: function(categScene, categData1, seriesData1){
-        categScene.acts.category = {
-            value: categData1.value,
-            label: categData1.label,
-            group: categData1
-        };
-
+        var categVar = categScene.vars.category = new pvc.visual.ValueLabelVar(
+            categData1.value, categData1.label);
+        
+        categVar.group = categData1;
+        
         var chart = this.chart,
             valueDim = categScene.group ?
                             categScene
@@ -330,24 +328,21 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
 
         var value = valueDim ? valueDim.sum({visible: true, zeroIfNone: false}) : null;
 
-        var valueAct = categScene.acts.value = {
-            value:    value,
-            label:    chart._valueDim.format(value)
-        };
-
+        var valueVar = 
+            categScene.vars.value = new pvc.visual.ValueLabelVar(
+                                    value, 
+                                    chart._valueDim.format(value));
+        
         // TODO: Percent formatting?
         if(chart.options.showValuePercentage) {
             if(value == null){
-                valueAct.percent = {
-                    value: null,
-                    label: valueAct.label
-                };
+                valueVar.percent = new pvc.visual.ValueLabelVar(null, valueVar.label);
             } else {
                 var valuePct = valueDim.percentOverParent({visible: true});
-                valueAct.percent = {
-                    value: valuePct,
-                    label: chart.options.valueFormat.call(null, Math.round(valuePct * 100))
-                };
+                
+                valueVar.percent = new pvc.visual.ValueLabelVar(
+                                        valuePct,
+                                        chart.options.percentValueFormat.call(null, valuePct));
             }
         }
 

@@ -81,6 +81,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 extensionId: 'area',
                 antialias:   showAreas && !showLines,
                 segmented:   !isDense,
+                noTooltips:  false,
                 noHoverable: false // While the area itself does not change appearance, the pvLine does due to activeSeries... 
             })
             
@@ -263,7 +264,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 .add(pv.Label)
                 // ------
                 .bottom(0)
-                .text(function(scene){ return scene.acts[myself.valueRoleName].label; })
+                .text(function(scene){ return scene.vars.value.label; })
                 ;
         }
     },
@@ -334,7 +335,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 return 0;
             }),
             orthoZero = orthoScale(0),
-            sceneBaseScale = chart.axes.base.sceneScale();
+            sceneBaseScale = chart.axes.base.sceneScale({sceneVarName: 'category'});
         
         /* On each series, scenes for existing categories are interleaved with intermediate scenes.
          * 
@@ -424,7 +425,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             
             reversedSeriesScenes.forEach(function(seriesScene){
                 var group = data._childrenByKey[categKey];
-                var seriesData1 = seriesScene.acts.series.value == null ? null : seriesScene.group;
+                var seriesData1 = seriesScene.vars.series.value == null ? null : seriesScene.group;
                 if(seriesData1){
                     group = group._childrenByKey[seriesData1.key];
                 }
@@ -711,10 +712,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             /* Create series scene */
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1 || data});
 
-            seriesScene.acts.series = {
-                value: seriesData1 ? seriesData1.value : null,
-                label: seriesData1 ? seriesData1.label : ""
-            };
+            seriesScene.vars.series = new pvc.visual.ValueLabelVar(
+                        seriesData1 ? seriesData1.value : null,
+                        seriesData1 ? seriesData1.label : "");
         }
 
         function createSeriesSceneCategories(seriesScene, seriesIndex){
@@ -736,16 +736,16 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 // ------------
                 
                 var scene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
-                scene.acts.category = {
-                    value: categInfo.value,
-                    label: categInfo.label
-                };
-                scene.acts[this.valueRoleName] = {
-                    /* accumulated value, for stacked */
-                    accValue: value != null ? value : orthoNullValue,
-                    value:    value,
-                    label:    valueDim.format(value)
-                };
+                scene.vars.category = new pvc.visual.ValueLabelVar(categInfo.value, categInfo.label);
+                
+                var valueVar = new pvc.visual.ValueLabelVar(
+                                    value, 
+                                    valueDim.format(value));
+                
+                /* accumulated value, for stacked */
+                valueVar.accValue = value != null ? value : orthoNullValue;
+                
+                scene.vars.value = valueVar;
                 
                 scene.isInterpolatedMiddle = seriesInfo.isInterpolatedMiddle;
                 scene.isInterpolated = seriesInfo.isInterpolated;
@@ -832,16 +832,16 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                       toScene, 
                       belowScene){
             
-            var toAccValue = toScene.acts[this.valueRoleName].accValue;
+            var toAccValue = toScene.vars.value.accValue;
             
             if(belowScene) {
                 if(toScene.isNull && !isBaseDiscrete) {
                     toAccValue = orthoNullValue;
                 } else {
-                    toAccValue += belowScene.acts[this.valueRoleName].accValue;
+                    toAccValue += belowScene.vars.value.accValue;
                 }
                 
-                toScene.acts[this.valueRoleName].accValue = toAccValue;
+                toScene.vars.value.accValue = toAccValue;
             }
             
             toScene.basePosition  = sceneBaseScale(toScene);
@@ -877,9 +877,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             if(interIsNull) {
                 /* Value is 0 or the below value */
                 if(belowScene && isBaseDiscrete) {
-                    var belowValueAct = belowScene.acts[this.valueRoleName];
-                    interAccValue = belowValueAct.accValue;
-                    interValue = belowValueAct[this.valueRoleName];
+                    var belowValueVar = belowScene.vars.value;
+                    interAccValue = belowValueVar.accValue;
+                    interValue = belowValueVar[this.valueRoleName];
                 } else {
                     interValue = interAccValue = orthoNullValue;
                 }
@@ -898,13 +898,13 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
 //                        interBasePosition = (toScene.basePosition + fromScene.basePosition) / 2;
 //                    }
             } else {
-                var fromValueAct = fromScene.acts[this.valueRoleName],
-                    toValueAct   = toScene.acts[this.valueRoleName];
+                var fromValueVar = fromScene.vars.value,
+                    toValueVar   = toScene.vars.value;
                 
-                interValue = (toValueAct.value + fromValueAct.value) / 2;
+                interValue = (toValueVar.value + fromValueVar.value) / 2;
                 
                 // Average of the already offset values
-                interAccValue     = (toValueAct.accValue  + fromValueAct.accValue ) / 2;
+                interAccValue     = (toValueVar.accValue  + fromValueVar.accValue ) / 2;
                 interBasePosition = (toScene.basePosition + fromScene.basePosition) / 2;
             }
             
@@ -917,13 +917,16 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                     datum: toScene.group ? null : toScene.datum
                 });
             
-            interScene.acts.category = toScene.acts.category;
-            interScene.acts[this.valueRoleName] = {
-                accValue: interAccValue,
-                value:    interValue,
-                label:    valueDim.format(interValue)
-            };
+            interScene.vars.category = toScene.vars.category;
             
+            var interValueVar = new pvc.visual.ValueLabelVar(
+                                    interValue,
+                                    valueDim.format(interValue));
+            
+            interValueVar.accValue = interAccValue;
+            
+            interScene.vars.value = interValueVar;
+                
             interScene.isIntermediate = true;
             interScene.isSingle       = false;
             interScene.isNull         = interIsNull;

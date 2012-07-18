@@ -374,7 +374,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(!this.parent && this._isRoleAssigned('multiChartColumn')) {
             this._initMultiChartPanel();
         } else {
-            this._preRenderCore();
+            this._preRenderContent({
+                margins:  options.contentMargins,
+                paddings: options.contentPaddings
+            });
         }
 
         this.isPreRendered = true;
@@ -383,9 +386,14 @@ pvc.BaseChart = pvc.Abstract.extend({
     /**
      * Override to create chart specific content panels here.
      * No need to call base.
+     * 
+     * @param {object} contentOptions Object with content specific options. Can be modified.
+     * @param {pvc.Sides} [contentOptions.margins] The margins for the content panels. 
+     * @param {pvc.Sides} [contentOptions.paddings] The paddings for the content panels.
+     * 
      * @virtual
      */
-    _preRenderCore: function(){
+    _preRenderContent: function(contentOptions){
         /* NOOP */
     },
     
@@ -1008,7 +1016,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             var partData = this._legendData(partValue);
             if(partData){
                 var partColorScale = this._legendColorScale(partValue),
-                    partShape = (!partValue || partValue === '0' ? 'square' : 'bar'),
+                    partShape = (!partValue || partValue === '0' ? 'square' : 'bar'), // TODO: HACK...
                     legendGroup = {
                         id:        "part" + partValue,
                         type:      "discreteColorAndShape",
@@ -1023,14 +1031,14 @@ pvc.BaseChart = pvc.Abstract.extend({
                     .children()
                     .each(function(itemData){
                         legendItems.push({
-                            value:    itemData.value,
-                            label:    itemData.label,
-                            group:    itemData,
-                            color:    partColorScale(itemData.value),
-                            useRule:  undefined,
-                            shape:    partShape,
-                            isOn:     isOn,
-                            click:    onClick
+                            value:   itemData.value,
+                            label:   itemData.label,
+                            group:   itemData,
+                            color:   partColorScale(itemData.value),
+                            useRule: undefined,
+                            shape:   partShape,
+                            isOn:    isOn,
+                            click:   onClick
                         });
                     }, this);
 
@@ -1472,25 +1480,33 @@ pvc.BaseChart = pvc.Abstract.extend({
         tipsySettings: {
             exclusionGroup: 'chart',
             gravity: "s",
-            delayIn:  200,
-            delayOut: 50,
-            offset:   2,
-            opacity:  0.8,
-            html:     true,
-            fade:     true,
-            corners:  false,
+            delayIn:     200,
+            delayOut:    80, // smoother moving between marks with tooltips, possibly slightly separated
+            offset:      2,
+            opacity:     0.8,
+            html:        true,
+            fade:        false, // fade out
+            corners:     false,
             followMouse: false
         },
         
-        valueFormat: function(d) {
-            return pv.Format.number().fractionDigits(0, 2).format(d);
-            // pv.Format.number().fractionDigits(0, 10).parse(d));
-        },
+        valueFormat: def.scope(function(){
+            var pvFormat = pv.Format.number().fractionDigits(0, 2);
+            
+            return function(d) {
+                return pvFormat.format(d);
+                // pv.Format.number().fractionDigits(0, 10).parse(d));
+            };
+        }),
         
         /* For numeric values in percentage */
-        percentValueFormat: function(d){
-            return pv.Format.number().fractionDigits(0, 2).format(d) + "%";
-        },
+        percentValueFormat: def.scope(function(){
+            var pvFormat = pv.Format.number().fractionDigits(0, 1);
+            
+            return function(d){
+                return pvFormat.format(d * 100) + "%";
+            };
+        }),
         
         // Content/Plot area clicking
         clickable:  false,
@@ -1519,6 +1535,9 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         margins:  undefined,
         paddings: undefined,
+        
+        contentMargins:  undefined,
+        contentPaddings: undefined,
         
         compatVersion: Infinity // numeric, 1 currently recognized
     }
