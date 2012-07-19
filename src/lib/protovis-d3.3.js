@@ -7746,28 +7746,55 @@ pv.Mark.prototype.property = function(name, cast) {
  */
 pv.Mark.prototype.propertyMethod = function(name, def, cast) {
   if (!cast) cast = pv.Mark.cast[name];
+  
   this[name] = function(v) {
-
-      /* If this is a def, use it rather than property. */
+      /* When arguments are specified, set the property/def value. */
+      
+      /* DEF */
       if (def && this.scene) {
         var defs = this.scene.defs;
+        
         if (arguments.length) {
           defs[name] = {
-            id: (v == null) ? 0 : pv.id(),
+            id:    (v == null) ? 0 : pv.id(),
             value: ((v != null) && cast) ? cast(v) : v
           };
+          
           return this;
         }
+        
         return defs[name] ? defs[name].value : null;
       }
-
-      /* If arguments are specified, set the property value. */
+      
+      /* PROP */
+      
       if (arguments.length) {
-        var type = !def << 1 | (typeof v == "function");
-        this.propertyValue(name, (type & 1 && cast) ? function() {
-            var x = v.apply(this, arguments);
-            return (x != null) ? cast(x) : null;
-          } : (((v != null) && cast) ? cast(v) : v)).type = type;
+        /* bit 0: 0 = value, 1 = function
+         * bit 1: 0 = def,   1 = prop
+         * ------------------------------
+         * 00 - 0 - def  - value
+         * 01 - 1 - def  - function
+         * 10 - 2 - prop - value
+         * 11 - 3 - prop - function
+         * 
+         * x << 1 <=> floor(x) * 2
+         */
+        var type = !def << 1 | (typeof v === "function");
+        var vf;
+        // A function and cast?
+        if(type & 1 && cast){
+            vf = function() {
+                var x = v.apply(this, arguments);
+                return (x != null) ? cast(x) : null;
+            };
+        } else if(v != null && cast){
+            vf = cast(v);
+        } else {
+            vf = v;
+        }
+        
+        this.propertyValue(name, vf, type);
+        
         return this;
       }
 
@@ -7776,14 +7803,22 @@ pv.Mark.prototype.propertyMethod = function(name, def, cast) {
 };
 
 /** @private Sets the value of the property <i>name</i> to <i>v</i>. */
-pv.Mark.prototype.propertyValue = function(name, v) {
-  var properties = this.$properties, p = {name: name, id: pv.id(), value: v};
+pv.Mark.prototype.propertyValue = function(name, v, type) {
+  var properties = this.$properties;
+  var p = {
+      name:  name, 
+      id:    pv.id(), 
+      value: v,
+      type:  type
+  };
+  
   for (var i = 0; i < properties.length; i++) {
-    if (properties[i].name == name) {
+    if (properties[i].name === name) {
       properties.splice(i, 1);
       break;
     }
   }
+  
   properties.push(p);
   return p;
 };
@@ -8424,31 +8459,109 @@ pv.Mark.stack = [];
  * do not need to be queried during build.
  */
 pv.Mark.prototype.bind = function() {
-  var seen = {}, types = [[], [], [], []], data, required = [],
+  var seen = {}, 
+      data,
+      
+      /* Required props (no defs) */
+      required = [],    
+      
+      /* 
+       * Optional props/defs by type
+       * 0 - def/value, 
+       * 1 - def/fun, 
+       * 2 - prop/value, 
+       * 3 - prop/fun 
+       */
+      types = [[], [], [], []], 
+      
       // DATUM - an object counterpart for each value of data.
       // Ensure that required properties are evaluated in
       // the order: id, datum, visible
+      // The reason is that the visible property function should 
+      // have access to id and datum to decide.
       requiredPositions = {id: 0, datum: 1, visible: 3};
-
-  /** Scans the proto chain for the specified mark. */
+  
+  /*
+   * **Evaluation** order (not precedence order for choosing props/defs)
+   * 0) DEF and PROP _values_ are always already "evaluated".
+   *    * Defined PROPs for which a value/fun was not specified
+   *      get the value null.
+   * 
+   * 1) DEF _functions_
+   *    * once per parent instance
+   *    * with parent instance's stack
+   *    
+   *    1.1) Defaulted
+   *        * from farthest proto mark to closest
+   *            * on each level the first defined is the first evaluated
+   *    
+   *    1.2) Explicit
+   *        * idem
+   *    
+   * 2) Data PROP _value_ or _function_
+   *    * once per all child instances
+   *    * with parent instance's stack
+   * 
+   * ONCE PER INSTANCE
+   * 
+   * 3) Required kind PROP _functions_ (id, datum, visible)
+   *    2.1) Defaulted
+   *        * idem
+   *    2.2) Explicit
+   *        * idem
+   *
+   * 3) Optional kind PROP _functions_ (when instance.visible=true)
+   *    3.1) Defaulted
+   *        * idem
+   *    3.2) Explicit
+   *        * idem
+   *
+   * 4) Implied PROPs (when instance.visible=true)
+   */
+  /** 
+   * Scans the proto chain for the specified mark.
+   */
   function bind(mark) {
     do {
       var properties = mark.$properties;
+      /*
+       * On each mark properties are traversed in reverse
+       * so that, below, when reverse() is called
+       * function props/defs recover their original defining order.
+       * 
+       * M1 -> P1_0, P1_1, P1_2, P1_3
+       * ^
+       * |
+       * M2 -> P2_0, P2_1
+       * ^
+       * |
+       * M3 -> P3_0, P3_1
+       * 
+       * List     -> P3_1, P3_0, P2_1, P2_0, P1_3, P1_2, P1_1, P1_0
+       * 
+       * Reversed -> P1_0, P1_1, P1_2, P1_3, P2_0, P2_1, P3_0, P3_1
+       */
+      
       for (var i = properties.length - 1; i >= 0 ; i--) {
         var p = properties[i];
         if (!(p.name in seen)) {
           seen[p.name] = p;
+          
           switch (p.name) {
-            case "data": data = p; break;
+            case "data": 
+              data = p; 
+              break;
 
             // DATUM - an object counterpart for each value of data.
             case "datum":
             case "visible":
             case "id":
-                required.push(p);
-                break;
+              required.push(p);
+              break;
 
-            default: types[p.type].push(p); break;
+            default: 
+              types[p.type].push(p); 
+              break;
           }
         }
       }
@@ -8458,7 +8571,7 @@ pv.Mark.prototype.bind = function() {
   /* Scan the proto chain for all defined properties. */
   bind(this);
   bind(this.defaults);
-
+  
   /*
    * DATUM - an object counterpart for each value of data.
    * Sort required properties.
@@ -8474,9 +8587,11 @@ pv.Mark.prototype.bind = function() {
 
   /* Any undefined properties are null. */
   var mark = this;
-  do for (var name in mark.properties) {
-    if (!(name in seen)) {
-      types[2].push(seen[name] = {name: name, type: 2, value: null});
+  do {
+    for (var name in mark.properties) {
+        if (!(name in seen)) {
+          types[2].push(seen[name] = {name: name, type: 2, value: null});
+        }
     }
   } while (mark = mark.proto);
 
@@ -8489,10 +8604,16 @@ pv.Mark.prototype.bind = function() {
   /* Setup binds to evaluate constants before functions. */
   this.binds = {
     properties: seen,
-    data: data,
-    defs: defs,
-    required: required,
-    optional: pv.blend(types)
+    data:       data,
+    defs:       defs,
+    required:   required,
+    
+    // NOTE: although defs are included in the optional properties
+    // they are evaluated once per parent instance, before other non-def properties.
+    // Yet, for each instance, the already evaluated's def values
+    // are copied to the instance scene - all instances share the same value...
+    // Only to satisfy this copy operation they go in the instance-props array.
+    optional:   pv.blend(types)
   };
 };
 
@@ -8591,12 +8712,21 @@ pv.Mark.prototype.build = function() {
  */
 pv.Mark.prototype.buildProperties = function(s, properties) {
   for (var i = 0, n = properties.length; i < n; i++) {
-    var p = properties[i], v = p.value; // assume case 2 (constant)
+    var p = properties[i];
+    var v = p.value; // assume case 2 (constant)
+    
     switch (p.type) {
+      // copy already evaluated def value to each instance's scene
       case 0:
-      case 1: v = this.scene.defs[p.name].value; break;
-      case 3: v = v.apply(this, pv.Mark.stack); break;
+      case 1: 
+        v = this.scene.defs[p.name].value; 
+        break;
+          
+      case 3: 
+        v = v.apply(this, pv.Mark.stack); 
+        break;
     }
+    
     s[p.name] = v;
   }
 };

@@ -5,7 +5,7 @@ var tryMe = function(e){
         /*jshint evil:true */
         eval( $(e).prev("textarea").val());
     } catch(ex){
-        alert("Error: " + ex);
+        alert("Try me error: " + ex);
     }
 };
 

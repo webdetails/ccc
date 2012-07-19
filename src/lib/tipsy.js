@@ -1,27 +1,13 @@
 (function(){
-var behaviorByGroup = {}; 
 
-function addBehavior(behavior, group) {
-    var behaviors = behaviorByGroup[group] || (behaviorByGroup[group] = []);
-    
-    behaviors.push(behavior);
-}
-
-function hideGroup(group, senderBehavior) {
-    var behaviors = behaviorByGroup[group];
-    if(behaviors && behaviors.length) {
-        behaviors.forEach(function(behavior){
-            if(behavior !== senderBehavior){
-                behavior.hide();
-            }
-        });
-    }
-}
+var _nextTipsyId = 0;
 
 pv.Behavior.tipsy = function(opts) {
+    var _tipsyId = _nextTipsyId++;
+    
     /**
      * One tip is reused per behavior instance.
-     * Tipically there is one behavior instance per mark,
+     * Typically there is one behavior instance per mark,
      * and this is reused across all its mark instances.
      */
     
@@ -33,10 +19,10 @@ pv.Behavior.tipsy = function(opts) {
     
     /**
      * Trigger must be manual because the mouse entering/leaving
-     * the fake target is not always adequate.
-     * When followMouse, the fakeTarget is always moving,
-     * and is not usable.
-     * What matters is the real SVG target.
+     * the **fake target** is not always adequate.
+     * 
+     * When followMouse=true, the fake target is always moving, and is not usable
+     * for bounds control. What matters is the real SVG target.
      */
     opts.trigger = 'manual';
     
@@ -53,8 +39,7 @@ pv.Behavior.tipsy = function(opts) {
         prevMouseX,
         prevMouseY,
         delayOut = opts.delayOut,
-        id = "tipsyPvBehavior" + (opts.id || new Date().getTime()),
-        group     = opts.exclusionGroup,
+        id,
         usesPoint = opts.usesPoint,
         $canvas,
         isEnabled = opts.isEnabled;
@@ -203,15 +188,17 @@ pv.Behavior.tipsy = function(opts) {
                 bestScore = chooseScores(bestScore, scoreGravity(_gravities[i]));
             }
             
-//            if(gravity !== bestScore.gravity){
-//                console.log("[TIPSY] Choosing gravity '" + bestScore.gravity + "' over '" + gravity + "'");
-//            }
+            if(_tip.debug >= 6 && gravity !== bestScore.gravity){
+                _tip.log("[TIPSY] #" + _tipsyId + " Choosing gravity '" + bestScore.gravity + "' over '" + gravity + "'");
+            }
             
             gravity = bestScore.gravity;
         }
         
-//        console.log("[TIPSY] Gravity '" + gravity + "'");
-    
+        if(_tip.debug >= 6){
+            _tip.log("[TIPSY] #" + _tipsyId + " Gravity '" + gravity + "'");
+        }
+        
         return gravity;
         
         function scoreGravity(gravity){
@@ -298,6 +285,19 @@ pv.Behavior.tipsy = function(opts) {
         c.style.position = "relative";
         $canvas.mouseleave(hideTipsy);
         
+        /* Share one div per canvas
+         * as a way to mutually exclude visibility of tooltips 
+         * on different marks. 
+         */
+        if(!id){
+            id = c.__tipsyBehaviorId || c.id;
+            if(!id){
+                id = c.__tipsyBehaviorId = '' + new Date().getTime();
+            }
+            
+            id = "tipsyPvBehavior" + id;
+        }
+        
         /* Reuse the specified div id */
         var fakeTipTarget = document.getElementById(id);
         if(fakeTipTarget) {
@@ -315,14 +315,16 @@ pv.Behavior.tipsy = function(opts) {
             var fakeStyle = fakeTipTarget.style;
             fakeStyle.padding = '0px';
             fakeStyle.margin  = '0px';
-            fakeStyle.position = "absolute";
-            fakeStyle.pointerEvents = "none"; // ignore mouse events
+            fakeStyle.position = 'absolute';
+            fakeStyle.pointerEvents = 'none'; // ignore mouse events
             fakeStyle.display = 'block';
             
             // <Debug>
-//            fakeStyle.borderColor = 'red';
-//            fakeStyle.borderWidth = "1px";
-//            fakeStyle.borderStyle = 'solid';
+            if(_tip.debug >= 5){
+                fakeStyle.borderColor = 'red';
+                fakeStyle.borderWidth = '1px';
+                fakeStyle.borderStyle = 'solid';
+            }
             // </Debug>
         }
         
@@ -349,12 +351,10 @@ pv.Behavior.tipsy = function(opts) {
         
         if((!$targetElem && targetElem) || 
            ( $targetElem && $targetElem[0] !== targetElem)){
-//            console.log("[TIPSY] Changing target element.");
+            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Changing target element."); }
             
             if($targetElem){
-                if(opts.followMouse){
-                    $targetElem.unbind('mousemove', updateTipsy);
-                }
+                $targetElem.unbind('mousemove', updateTipsy);
                 
                 if(!usesPoint) {
                     $targetElem.unbind('mouseleave', hideTipsy);
@@ -365,20 +365,15 @@ pv.Behavior.tipsy = function(opts) {
             
             $targetElem = targetElem ? $(targetElem) : null;
             
+            prevMouseX = prevMouseY = null;
+            
             // ---------
             
             if($targetElem){
-                if(opts.followMouse){
-                    prevMouseX = prevMouseY = null;
-                    $targetElem.mousemove(updateTipsy);
-                }
+                $targetElem.mousemove(updateTipsy);
                 
                 if(!usesPoint) {
                     $targetElem.mouseleave(hideTipsy);
-                }
-                
-                if(group) {
-                    hideGroup(group, tipsyBehavior);
                 }
             }
         }
@@ -395,31 +390,27 @@ pv.Behavior.tipsy = function(opts) {
     function hideTipsy(ev) {
         var opId = getNewOperationId();
         
-//        console.log("[TIPSY] Delayed Hide Begin opId=" + opId);
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId); }
         
         if(delayOut > 0){
             setTimeout(function(){
                 if(checkCanOperate(opId)){
+                    if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding opId=" + opId + " nextOperationId=" + nextOperationId); }
                     hideTipsyCore(opId);
-                } 
-//              else
-//              {
-//                  console.log("[TIPSY] Delayed Hide Cancelled opId=" + opId);
-//              }
-                
+                } else {
+                    if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Cancelled opId=" + opId); }
+                }
             }, delayOut);
             
             return;
         }
         
-//        console.log("[TIPSY] Hiding Immediately opId=" + opId);
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId); }
         
         hideTipsyCore(opId);
     }
     
     function hideTipsyCore(opId) {
-//        console.log("[TIPSY] Hiding opId=" + opId);
-      
         // Release real target
         setTarget(null);
       
@@ -427,58 +418,77 @@ pv.Behavior.tipsy = function(opts) {
             $fakeTipTarget.tipsy("leave");
         }
     }
-  
     
     function updateTipsy(ev){
+        if(!$fakeTipTarget) {
+            return;
+        }
+        
+        /* Don't know why: 
+         * the mouseover event is triggered at a fixed interval
+         * as long as the mouse is over the element, 
+         * even if the mouse position does not change... 
+         */
+        if(prevMouseX != null && 
+           prevMouseX === ev.clientX && 
+           prevMouseY === ev.clientY){ 
+             return;
+        }
+        
+        var t = this.$scene;
+        var mark, scene;
+        if(!t || !(scene = t.scenes) || !(mark = scene.mark)){
+            return;
+        }
         
         var opId = getNewOperationId();
+                
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Updating opId=" + opId); }
         
-        //console.log("[TIPSY] Updating opId=" + opId);
+        prevMouseX = ev.clientX;
+        prevMouseY = ev.clientY;
         
-        if($fakeTipTarget) {
-            /* Don't know why: 
-             * the mouseover event is triggered at a fixed interval
-             * as long as the mouse is over the element, 
-             * even if the mouse position does not change... 
-             */
-            if(prevMouseX != null && 
-               prevMouseX === ev.clientX && 
-               prevMouseY === ev.clientY){ 
-                 return;
+        // -------------
+        
+        var bounds;
+        if($fakeTipTarget.tipsy('visible')){
+            if(!opts.followMouse){
+                // No need to update text.
+                // Position is updated because, 
+                // otherwise, animations that re-render
+                // the hovering mark and slightly move it,
+                // in a way that the mouse is still kept inside it,
+                // we have to update the position of the tooltip as well.
+                mark.context(scene, t.index, function(){
+                    bounds = getInstanceBounds(mark);
+                });
+            } else {
+                bounds = getMouseBounds(ev);
             }
-            
-//            console.log("[TIPSY] Update");
-            
-            prevMouseX = ev.clientX; 
-            prevMouseY = ev.clientY;
-            
-            // -------------
-            
-            if(!$fakeTipTarget.tipsy('visible')){
-                // Text may have changed
-                var mark;
-                var scene = this.$scene;
-                if(scene && (mark = scene.scenes.mark)){
-                    $fakeTipTarget.attr('title', getTooltipText(mark));
-                }
-            }
-            
-            setFakeTipTargetBounds(getMouseBounds(ev));
-            
-            $fakeTipTarget.tipsy("update");
+        } else {
+            // Text may have changed
+            mark.context(scene, t.index, function(){
+                var text = getTooltipText(mark);
+                
+                if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Update text. Was hidden. Text: " + text); }
+                
+                $fakeTipTarget.attr('title', text);
+                
+                bounds = opts.followMouse ? getMouseBounds(ev) : getInstanceBounds(mark);
+            });
         }
+        
+        setFakeTipTargetBounds(bounds);
+        
+        $fakeTipTarget.tipsy("update");
     }
     
     function initBehavior(mark){
         // First time
         
-//        console.log("[TIPSY] Creating");
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Creating"); }
         
         createTipsy(mark);
-        
-        if(group) {
-            addBehavior(tipsyBehavior, group);
-        }
         
         /*
          * Cleanup the tooltip span on mouseout.
@@ -499,7 +509,7 @@ pv.Behavior.tipsy = function(opts) {
     function showTipsy(mark) {
         var opId = getNewOperationId();
         
-//console.log("[TIPSY] Show IN opId=" + opId);
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Show IN opId=" + opId); }
         
         if (!$canvas) {
             initBehavior(mark);
@@ -519,7 +529,7 @@ pv.Behavior.tipsy = function(opts) {
             $fakeTipTarget.tipsy("update");
         }
         
-//        console.log("[TIPSY] Show OUT");
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Show OUT"); }
     }
     
     // On point or mouseover
@@ -534,6 +544,14 @@ pv.Behavior.tipsy = function(opts) {
     tipsyBehavior.hide = hideTipsy;
 
     return tipsyBehavior;
+}; // END pv.Behavior.tipsy
+
+var _tip = pv.Behavior.tipsy;
+_tip.debug = 0;
+_tip.log = function(m){
+    if(typeof console !== "undefined"){
+        console.log('' + m);
+    }
 };
 
 function toParentTransform(parentPanel){

@@ -48,23 +48,40 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * <p>
      * Can only be called on an owner data.
      * </p>
-     * 
+     * @param {pvc.data.Datum} [funFilter] Allows excluding atoms from the clear operation.
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise. 
      */
-    clearSelected: function(){
+    clearSelected: function(funFilter){
         /*global data_assertIsOwner:true */
+        /*global datum_deselect:true */
+        
         data_assertIsOwner.call(this);
         if(!this._selectedDatums.count) {
             return false;
         }
         
-        this._selectedDatums.values().forEach(function(datum){
-            /*global datum_deselect:true */
-            datum_deselect.call(datum);
-        });
-
-        this._selectedDatums.clear();
-        return true;
+        var changed;
+        if(funFilter){
+            changed = false;
+            this._selectedDatums
+                .values()
+                .filter(funFilter)
+                .forEach(function(datum){
+                    changed = true;
+                    datum_deselect.call(datum);
+                    this._selectedDatums.rem(datum.id);
+                }, this);
+        } else {
+            changed = true;
+            this._selectedDatums.values().forEach(function(datum){
+                /*global datum_deselect:true */
+                datum_deselect.call(datum);
+            });
+    
+            this._selectedDatums.clear();
+        }
+        
+        return changed;
     }
 });
 

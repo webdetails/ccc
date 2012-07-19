@@ -22,12 +22,20 @@ pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
 
 var arraySlice = pvc.arraySlice = Array.prototype.slice;
 
+pvc.setDebug = function(level){
+    level = +level;
+    pvc.debug = isNaN(level) ? 0 : level;
+    
+    syncTipsyLog();
+    
+    return pvc.debug;
+};
+
 /**
  *  Utility function for logging messages to the console
  */
 pvc.log = function(m){
-
-    if (pvc.debug && typeof console != "undefined"){
+    if (pvc.debug && typeof console !== "undefined"){
         console.log("[pvChart]: " + 
           (typeof m === 'string' ? m : JSON.stringify(m)));
     }
@@ -47,6 +55,14 @@ pvc.logError = function(e){
 
 // Redirect protovis error handler
 pv.error = pvc.logError;
+
+function syncTipsyLog(){
+    var tip = pv.Behavior.tipsy;
+    if(tip){
+        tip.debug = pvc.debug;
+        tip.log   = pvc.log;
+    }
+}
 
 /**
  * Evaluates x if it's a function or returns the value otherwise

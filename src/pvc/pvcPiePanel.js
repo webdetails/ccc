@@ -73,7 +73,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
      *      
      */
     
-    labelFont: 'default',
+    labelFont: '10px sans-serif',
     
     linkedLabel: {
         /**

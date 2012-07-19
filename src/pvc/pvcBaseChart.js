@@ -989,9 +989,14 @@ pvc.BaseChart = pvc.Abstract.extend({
                     };
                     
                     onClick = function(){
-                        var on = this.group.datums(null, {selected: true}).any();
-                        if(pvc.data.Data.setSelected(this.group.datums(), !on)){
-                            me.updateSelections();
+                        var datums = this.group.datums().array();
+                        
+                        datums = me._onUserSelection(datums);
+                        if(datums){
+                            var on = def.query(datums).any(function(datum){ return datum.isSelected; });
+                            if(pvc.data.Data.setSelected(datums, !on)){
+                                me.updateSelections();
+                            }
                         }
                     };
                 }
@@ -1478,7 +1483,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         },
         
         tipsySettings: {
-            exclusionGroup: 'chart',
             gravity: "s",
             delayIn:     200,
             delayOut:    80, // smoother moving between marks with tooltips, possibly slightly separated

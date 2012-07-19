@@ -1197,16 +1197,28 @@ pvc.BasePanel = pvc.Abstract.extend({
             chart  = this.chart;
         
         datums = this._onUserSelection(datums);
-        
-        if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
-            chart.data.owner.clearSelected();
+        if(datums && datums.length){
+            var changed;
+            if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
+                // Clear all but the ones we'll be selecting.
+                // This way we can have a correct changed flag.
+                var alreadySelectedById = def.query(datums)
+                                        .where(function(datum){ return datum.isSelected; })
+                                        .object({ name: function(datum){ return datum.id; } });
+                
+                changed = chart.data.owner.clearSelected(function(datum){
+                    return !def.hasOwn(alreadySelectedById, datum.id); 
+                });
+                
+                changed |= pvc.data.Data.setSelected(datums, true);
+            } else {
+                changed = pvc.data.Data.toggleSelected(datums);
+            }
             
-            pvc.data.Data.setSelected(datums, true);
-        } else {
-            pvc.data.Data.toggleSelected(datums);
+            if(changed){
+                this._onSelectionChanged();
+            }
         }
-        
-        this._onSelectionChanged();
     },
     
     _onUserSelection: function(datums){

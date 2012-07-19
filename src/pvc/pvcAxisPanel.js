@@ -1209,7 +1209,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return '';
             })
             .event("mouseover", pv.Behavior.tipsy({
-                exclusionGroup: 'chart',
                 gravity: tipsyGravity,
                 fade: true,
                 offset: diagMargin * 2,

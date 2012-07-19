@@ -127,5 +127,5 @@ function(data, atoms, isNull){
  * @see pvc.data.Data#clearSelected
  */
 function datum_deselect(){
-    this.isSelected = false;
+    delete this.isSelected;
 }
