@@ -33,6 +33,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             showValues: true,
             axisOffset: 0,
             
+            showPlotFrame: false,
+            
             orientation: "vertical",
             
             colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
@@ -417,7 +419,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
                         sizeValMax  = sizeValExtent.max.value,
                         sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
                     
-                    if(isFinite(sizeValSpan) && sizeValSpan > 0.00001) {
+                    if(isFinite(sizeValSpan) && sizeValSpan > 1e-12) {
                         // Linear mapping
                         // TODO: a linear scale object??
                         var sizeSlope = areaSpan / sizeValSpan;

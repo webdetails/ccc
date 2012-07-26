@@ -34,7 +34,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.axesPanels = {};
         
         this.base(options);
-
+        
         pvc.mergeDefaults(this.options, pvc.CartesianAbstract.defaultOptions, options);
     },
     
@@ -74,7 +74,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this._createAxisPanel(baseAxis );
         this._createAxisPanel(orthoAxis);
         
-        /* Create scales without range yet */
+        /* Create scales, with domain applied, but no range yet,
+         * and give them to corresponding axes.
+         */
         this._createAxisScale(baseAxis );
         this._createAxisScale(orthoAxis);
         if(ortho2Axis){
@@ -197,7 +199,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                     def.fail.operationInvalid("First ortho scale must be created first.");
         } else {
             scale = this._createScaleByAxis(axis);
+            
+            if(scale.isNull && pvc.debug >= 3){
+                pvc.log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
+            }
         }
+        
         axis.setScale(scale);
         
         /* V1 fields xScale, yScale, secondScale */
@@ -244,21 +251,15 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
 
         // With composite axis, only 'singleLevel' flattening works well
         var flatteningMode = null; //axis.option('Composite') ? 'singleLevel' : null,
-        var baseData = this._getVisibleData(dataPartValues);
+        var baseData = this._getVisibleData(dataPartValues, {ignoreNulls: false});
         var data = axis.role.flatten(baseData, {
                                 visible: true,
                                 flatteningMode: flatteningMode
                             });
         
         var scale  = new pv.Scale.ordinal();
-        scale.type = 'Discrete';
-        
         if(!data.count()){
             scale.isNull = true;
-            
-            if(pvc.debug >= 3){
-                pvc.log("Discrete scale - no data");
-            }
         } else {
             var values = data.children()
                              .select(function(child){ return child.value; })
@@ -292,14 +293,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var extent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data...
         
         var scale = new pv.Scale.linear();
-        scale.type = 'Timeseries';
-        
         if(!extent){
             scale.isNull = true;
-            
-            if(pvc.debug >= 3){
-                pvc.log("Timeseries scale - no data");
-            }
         } else {
             var dMin = extent.min;
             var dMax = extent.max;
@@ -309,8 +304,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
         
             scale.domain(dMin, dMax);
-            
-            // TODO: Domain rounding
         }
         
         return scale;
@@ -337,14 +330,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var extent = this._getVisibleValueExtentConstrained(axis, dataPartValues);
         
         var scale = new pv.Scale.linear();
-        scale.type = 'Continuous';
-        
         if(!extent){
             scale.isNull = true;
-            
-            if(pvc.debug >= 3){
-                pvc.log("Continuous scale - no data");
-            }
         } else {
             var dMin = extent.min;
             var dMax = extent.max;
@@ -384,49 +371,23 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
             
             scale.domain(dMin, dMax);
-            
-            // Domain rounding
-            // Must be done before applying offset
-            // because otherwise the offset gets amplified by the rounding
-            // Then, the scale range is updated but the ticks cache is not.
-            // The result is we end up showing two zones, on each end, with no ticks.
-            var roundMode = axis.option('DomainRoundMode');
-            if(roundMode === 'nice'){
-                scale.nice();
-                // Ticks domain rounding is performed during AxisPanel layout
-            }
-            
-            if(pvc.debug >= 3){
-                pvc.log("Continuous scale extent: " + JSON.stringify(extent) + 
-                        " create:" + JSON.stringify({min: dMin, max: dMax}) + 
-                        " niced:"  + JSON.stringify(scale.domain()));
-            }
         }
         
         return scale;
     },
     
     _setAxisScaleRange: function(axis){
+        var info = this._mainContentPanel._layoutInfo;
         var size = (axis.orientation === 'x') ?
-                        this._mainContentPanel.width :
-                        this._mainContentPanel.height;
+                   info.clientSize.width :
+                   info.clientSize.height;
         
         var scale = axis.scale;
         scale.min  = 0;
-        scale.max  = size; 
-        scale.size = size; // original size
+        scale.max  = size;
+        scale.size = size; // original size // TODO: remove this...
         
-        var axisOffset = axis.option('Offset');
-        if(axisOffset > 0){
-            var rOffset = size * axisOffset;
-            scale.min += rOffset;
-            scale.max -= rOffset;
-            scale.offset = rOffset;
-            scale.offsetSize = scale.max - scale.min;
-        } else {
-            scale.offset = 0;
-            scale.offsetSize = scale.size;
-        }
+        // -------------
         
         if(scale.type === 'Discrete'){
             if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
@@ -434,19 +395,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 scale.splitBandedCenter(scale.min, scale.max, bandRatio);
             }
         } else {
-            if(scale.type === 'Continuous' && axis.option('DomainRoundMode') === 'tick'){
-                var axisPanel = this.axesPanels[axis.id];
-                if(axisPanel){
-                    // Domain rounding
-                    // Commit the scale's domain to the axis calculated ticks domain
-                    var ticks = axisPanel.getTicks();
-                    var tickCount = ticks && ticks.length;
-                    if(tickCount){
-                        scale.domain(ticks[0], ticks[tickCount - 1]);
-                    }
-                }
-            }
-            
             scale.range(scale.min, scale.max);
         }
         
@@ -456,20 +404,63 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         return scale;
     },
-
+    
+    _getAxesRoundingPaddings: function(){
+        var axesPaddings = {};
+        
+        var axes  = this.axes;
+        processAxis(axes.x);
+        processAxis(axes.secondX);
+        processAxis(axes.y);
+        processAxis(axes.secondY);
+        
+        return axesPaddings;
+        
+        function setSide(side, pct){
+            var value = axesPaddings[side];
+            if(value == null || pct > value){
+                axesPaddings[side] = pct;
+            }
+        }
+        
+        function processAxis(axis){
+            if(axis){
+                // {begin: , end: }
+                var roundingPaddings = axis.getScaleRoundingPaddings();
+                if(roundingPaddings){
+                    if(axis.orientation === 'x'){
+                        setSide('left',  roundingPaddings.begin);
+                        setSide('right', roundingPaddings.end);
+                    } else {
+                        setSide('bottom', roundingPaddings.begin);
+                        setSide('top',    roundingPaddings.end);
+                    }
+                }
+            }
+        }
+    },
+    
     /*
      * Obtains the chart's visible data
      * grouped according to the charts "main grouping".
      * 
      * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
+     * @param {object} [keyArgs=null] Optional keyword arguments object.
+     * @param {boolean} [keyArgs.ignoreNulls=true] Indicates that null datums should be ignored.
      * 
      * @type pvc.data.Data
      */
-    _getVisibleData: function(dataPartValues){
-        var key = '' + (dataPartValues || ''), // relying on Array.toString
+    _getVisibleData: function(dataPartValues, keyArgs){
+        var ignoreNulls = def.get(keyArgs, 'ignoreNulls', true);
+        if(ignoreNulls){
+            // If already globally ignoring nulls, there's no need to do it explicitly anywhere
+            ignoreNulls = !this.options.ignoreNulls;
+        }
+        
+        var key = ignoreNulls + '|' + (dataPartValues || ''), // relying on Array.toString
             data = def.getOwn(this._visibleDataCache, key);
         if(!data) {
-            data = this._createVisibleData(dataPartValues);
+            data = this._createVisibleData(dataPartValues, ignoreNulls);
             
             (this._visibleDataCache || (this._visibleDataCache = {}))
                 [key] = data;
@@ -492,10 +483,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @protected
      * @virtual
      */
-    _createVisibleData: function(dataPartValues){
+    _createVisibleData: function(dataPartValues, ignoreNulls){
         var partData = this._partData(dataPartValues);
         return this._serRole && this._serRole.grouping ?
-                   this._serRole.flatten(partData, {visible: true}) :
+                   this._serRole.flatten(partData, {visible: true, isNull: ignoreNulls ? false : null}) :
                    partData;
     },
     
@@ -642,7 +633,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         orthoFixedMax: undefined,
 
         useCompositeAxis: false,
-
+        
+        // Show a frame around the plot area
+        showPlotFrame: undefined,
+        
         /* Non-standard axes options and defaults */
         showXScale: true,
         showYScale: true,

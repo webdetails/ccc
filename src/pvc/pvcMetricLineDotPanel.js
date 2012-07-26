@@ -31,125 +31,274 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
     
     dotShape: "circle",
     
+    // Ratio of the biggest bubble diameter to 
+    // the length of plot area dimension according to option 'dotSizeRatioTo'
+    dotSizeRatio: 1/5,
+    
+    dotSizeRatioTo: 'minWidthHeight', // 'height', 'width', 
+    
+    autoDotSizePadding: true,
+    
     _v1DimRoleName: {
         'series':   'series',
         'category': 'x',
         'value':    'y'
     },
     
+    constructor: function(chart, parent, options) {
+        
+        this.base(chart, parent, options);
+        
+        if(!this.offsetPaddings){
+            this.offsetPaddings = new pvc.Sides(0.01);
+        }
+    },
+    
+    _getRootScene: function(){
+        var rootScene = this._rootScene;
+        if(!rootScene){
+            // First time stuff
+            var chart = this.chart;
+            // Shared "series" grouped data
+            var data = this._getVisibleData();
+            var hasColorRole = !!chart._colorRole.grouping;
+            var hasDotSizeRole = this.showDots && !!chart._dotSizeDim;
+            
+            var sizeValRange;
+            if(hasDotSizeRole){
+                var sizeValExtent = chart._dotSizeDim.extent({visible: true});
+                if(sizeValExtent){
+                    var sizeValMin  = sizeValExtent.min.value,
+                        sizeValMax  = sizeValExtent.max.value,
+                        sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
+                    
+                    hasDotSizeRole = isFinite(sizeValSpan) && sizeValSpan > 1e-12;
+                    if(hasDotSizeRole){
+                        sizeValRange = {min: sizeValMin, max: sizeValMax};
+                    }
+                }
+            }
+            
+            rootScene = this._buildScene(data, hasColorRole, hasDotSizeRole);
+            
+            rootScene.sizeValRange = sizeValRange; // TODO: not pretty?
+            
+            this._rootScene = rootScene;
+        }
+        
+        return rootScene;
+    },
+    
     /*
     * @override
     */
-   _calcLayout: function(layoutInfo){
-       /* Adjust axis offset to avoid dots getting off the content area */
-       
-       var clientSize = layoutInfo.clientSize;
-       var chart = this.chart;
-       
-       if(chart._dotSizeDim){
-           /* Determine Max/Min Dot Size */
-           var length = Math.max((clientSize.width + clientSize.height) / 2, 2);
-           var maxRadius = length / 8;
-           if(this.dotShape === 'diamond'){
-               // Protovis draws diamonds inscribed on
-               // a square with half-side radius*Math.SQRT2
-               // (so that diamonds just look like a rotated square)
-               // For the height of the dimanod not to exceed the cell size
-               // we compensate that factor here.
-               maxRadius /= Math.SQRT2;
-           }
+    _calcLayout: function(layoutInfo){
+        var chart = this.chart;
+        var rootScene = this._getRootScene();
+        var clientSize = layoutInfo.clientSize;
+        
+        /* Adjust axis offset to avoid dots getting off the content area */
+        
+        if(rootScene.hasDotSizeRole){
+            /* Determine Max/Min Dot Size */
+            
+            var radiusRange = this._calcDotRadiusRange(layoutInfo);
+            
+            // Diamond Adjustment
+            if(this.dotShape === 'diamond'){
+                // Protovis draws diamonds inscribed on
+                // a square with half-side radius*Math.SQRT2
+                // (so that diamonds just look like a rotated square)
+                // For the height/width of the dimanod not to exceed the cell size
+                // we compensate that factor here.
+                radiusRange.max /= Math.SQRT2;
+                radiusRange.min /= Math.SQRT2;
+            }
            
-           // Small margin
-           maxRadius -= 2;
+            var maxArea   = radiusRange.max * radiusRange.max,
+                minArea   = radiusRange.min * radiusRange.min,
+                areaSpan = maxArea - minArea;
            
-           var maxArea  = maxRadius * maxRadius,
-               minArea  = 12,
-               areaSpan = maxArea - minArea;
-           
-           if(areaSpan <= 1){
-               // Very little space
-               // Rescue Mode - show *something*
-               maxArea = Math.max(maxArea, 2);
-               minArea = 1;
-               areaSpan = maxArea - minArea;
-               maxRadius = Math.sqrt(maxArea);
+            if(areaSpan <= 1){
+                // Very little space
+                // Rescue Mode - show *something*
+                maxArea  = Math.max(maxArea, 2);
+                minArea  = 1;
+                areaSpan = maxArea - minArea;
                
-               if(pvc.debug >= 3){
-                   pvc.log("Using rescue mode dot area calculation due to insufficient space.");
-               }
-           }
-           
-           this.maxDotRadius = maxRadius;
-           this.maxDotArea   = maxArea;
-           this.minDotArea   = minArea;
-           this.dotAreaSpan  = areaSpan;
-           
-           if(!chart.root._explicitAxisOffset){
-               /* Half a circle must fit at any edge of the main content area */
-               // TODO: Something should be wrong with the calculations?
-               // Dots still come out a little bit, and this compensates for it.
-               var offsetRadius  = maxRadius + 6,
-                   minAxisOffset = pvc.MetricXYAbstract.defaultOptions.axisOffset,
-                   axisOffset = offsetRadius / Math.max(clientSize.width, 2);
-
-               if(axisOffset > minAxisOffset){
-                   if(pvc.debug >= 3){
-                       pvc.log(def.format("Using X axis offset of '{0}' to compensate for dot size.", [axisOffset]));
-                   }
-                   
-                   chart.options.xAxisOffset = axisOffset;
-               }
-
-               axisOffset = offsetRadius / Math.max(clientSize.height, 2);
-               if(axisOffset > minAxisOffset){
-                   if(pvc.debug >= 3){
-                       pvc.log(def.format("Using Y axis offset of '{0}' to compensate for dot size.", [axisOffset]));
-                   }
-
-                   chart.options.yAxisOffset = axisOffset;
-               }
-           }
-        } else {
-            /* Make X and Y axis offsets take the same abs width */
-            /* TODO: should be able to test if any offset, X, or Y is the default value... */
-            var defaultAxisOffset = pvc.MetricXYAbstract.defaultOptions.axisOffset,
-                xAxisOffset = chart.axes.x.option('Offset'),
-                yAxisOffset = chart.axes.y.option('Offset'),
-                adjustX = (xAxisOffset === defaultAxisOffset),
-                adjustY = (yAxisOffset === defaultAxisOffset);
-
-            if(adjustX || adjustY){
-                var offsetLength;
-
-                if(adjustX && adjustY){
-                    offsetLength = Math.max(clientSize.width, clientSize.height) * xAxisOffset;
-                } else if(adjustX){
-                    offsetLength = clientSize.height * yAxisOffset;
-                } else /*if(adjustY) */{
-                    offsetLength = clientSize.width * xAxisOffset;
-                }
-
-                if(adjustX){
-                    this.chart.options.xAxisOffset = xAxisOffset = offsetLength / Math.max(clientSize.width, 2);
-                    if(pvc.debug >= 3){
-                       pvc.log(def.format("Using X axis offset of '{0}' to balance with that of Y axis.", [xAxisOffset]));
-                   }
-                }
-
-                if(adjustY){
-                    this.chart.options.yAxisOffset = yAxisOffset = offsetLength / Math.max(clientSize.height, 2);
-                    if(pvc.debug >= 3){
-                       pvc.log(def.format("Using Y axis offset of '{0}' to balance with that of X axis.", [yAxisOffset]));
-                   }
+                radiusRange = {
+                    min: Math.sqrt(minArea),
+                    max: Math.sqrt(maxArea)
+                };
+               
+                if(pvc.debug >= 3){
+                    pvc.log("Using rescue mode dot area calculation due to insufficient space.");
                 }
             }
+           
+            this.maxDotRadius = radiusRange.max;
+           
+            this.maxDotArea  = maxArea;
+            this.minDotArea  = minArea;
+            this.dotAreaSpan = areaSpan;
+           
+            this.dotSizeScale = this._getDotSizeRoleScale(rootScene.sizeValRange);
         }
+        
+        this._calcAxesPadding(layoutInfo, rootScene);
+    },
+  
+   _getDotDiameterRefLength: function(layoutInfo){
+       // Use the border box to always have the same size for != axis offsets (paddings)
+       
+       var clientSize = layoutInfo.clientSize;
+       var paddings   = layoutInfo.paddings;
+       
+       switch(this.dotSizeRatioTo){
+           case 'minWidthHeight': 
+               return Math.min(
+                       clientSize.width  + paddings.width, 
+                       clientSize.height + paddings.height);
+           
+           case 'width':  return clientSize.width  + paddings.width ;
+           case 'height': return clientSize.height + paddings.height;
+       }
+       
+       if(pvc.debug >= 2){
+           pvc.log(
+              def.format(
+                  "Invalid option 'dotSizeRatioTo' value. Assuming 'minWidthHeight'.", 
+                  [this.dotSizeRatioTo]));
+       }
+       
+       this.dotSizeRatioTo = 'minWidthHeight';
+       
+       return this._getDotDiameterRefLength(layoutInfo);
    },
-    
+   
+   _calcDotRadiusRange: function(layoutInfo){
+       var refLength = this._getDotDiameterRefLength(layoutInfo);
+       
+       // Diameter is 1/5 of ref length
+       var max = (this.dotSizeRatio / 2) * refLength;
+       
+       // Minimum SIZE (not radius) is 12
+       var min = Math.sqrt(12); 
+       
+       return {min: min, max: max};
+   },
+   
+   _calcAxesPadding: function(layoutInfo, rootScene){
+       
+       // If we were not to take axes rounding padding effect
+       // into account, it could be as simple as:
+       // var offsetRadius = radiusRange.max + 6;
+       // requestPaddings = new pvc.Sides(offsetRadius);
+       
+       var requestPaddings;
+       
+       if(!this.autoDotSizePadding){
+           requestPaddings = this._calcRequestPaddings(layoutInfo);
+       } else {
+           var chart = this.chart;
+           var axes  = chart.axes;
+           var clientSize = layoutInfo.clientSize;
+           var paddings   = layoutInfo.paddings;
+           
+           requestPaddings = {};
+           
+           /* The Worst case implementation would be like:
+            *   Use more padding than is required in many cases,
+            *   but ensures that no dot ever leaves the "stage".
+            * 
+            *   Half a circle must fit in the client area
+            *   at any edge of the effective plot area 
+            *   (the client area minus axis offsets).
+            */
+           
+           // X and Y axis orientations
+           axes.x.scale.range(0, clientSize.width );
+           axes.y.scale.range(0, clientSize.height);
+           
+           // X and Y visual roles
+           var sceneXScale = chart.axes.base.sceneScale({sceneVarName:  'x'});
+           var sceneYScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'});
+           
+           var hasDotSizeRole = rootScene.hasDotSizeRole;
+           var sizeScale = this.dotSizeScale;
+           if(!hasDotSizeRole){
+               // Use the dot default size
+               var defaultSize = def.number.as(this._getExtension('dot', 'shapeRadius'), 0);
+               if(!(defaultSize > 0)){
+                   defaultSize = def.number.as(this._getExtension('dot', 'shapeSize'), 0);
+                   if(!(defaultSize) > 0){
+                       defaultSize = 12;
+                   }
+               } else {
+                   // Radius -> Size
+                   defaultSize = defaultSize * defaultSize;
+               }
+               
+               sizeScale = def.fun.constant(defaultSize);
+           }
+           
+           // TODO: these padding requests do not take the resulting new scale into account
+           // and as such do not work exactly...
+           //var xMinPct = xScale(xDomain.min) /  clientSize.width;
+           //var overflowLeft = (offsetRadius - xMinPct * (paddings.left + clientSize.width)) / (1 - xMinPct);
+           
+           requestPaddings = {};
+           
+           // Resolve (not of PercentValue so cannot use pvc.Sides#resolve)
+           var op;
+           if(this.offsetPaddings){
+               op = {};
+               pvc.Sides.names.forEach(function(side){
+                   var len_a = pvc.BasePanel.orthogonalLength[side];
+                   op[side] = (this.offsetPaddings[side] || 0) * (clientSize[len_a] + paddings[len_a]);
+               }, this);
+           }
+           
+           var setSide = function(side, padding){
+               if(op){
+                   padding += (op[side] || 0);
+               }
+               
+               if(padding < 0){
+                   padding = 0;
+               }
+               
+               var value = requestPaddings[side];
+               if(value == null || padding > value){
+                   requestPaddings[side] = padding;
+               }
+           };
+           
+           var processScene = function(scene){
+               var x = sceneXScale(scene);
+               var y = sceneYScale(scene);
+               var r = Math.sqrt(sizeScale(hasDotSizeRole ? scene.vars.dotSize.value : 0));
+               
+               // How much overflow on each side?
+               setSide('left',   r - x);
+               setSide('bottom', r - y);
+               setSide('right',  x + r - clientSize.width );
+               setSide('top',    y + r - clientSize.height);
+           };
+           
+           rootScene
+               .children()
+               .selectMany(function(seriesScene){ return seriesScene.childNodes; })
+               .each(processScene);
+       }
+       
+       layoutInfo.requestPaddings = requestPaddings;
+   },
+   
     /**
      * @override
      */
-    _createCore: function(){
+    _createCore: function(layoutInfo){
         this.base();
          
         var myself = this,
@@ -158,20 +307,12 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
 
         // ------------------
         // DATA
-        var data            = this._getVisibleData(), // shared "series" grouped data
-            isDense         = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
-            hasColorRole    = !!chart._colorRole.grouping,
-            hasDotSizeRole  = this.showDots && !!chart._dotSizeDim,
-            sizeValueToArea; 
+        var rootScene = this._getRootScene(),
+            data      = rootScene.group,
+            // data._leafs.length is currently an approximation of datum count due to datum filtering in the scenes only...
+            isDense   = !(this.width > 0) || (data._leafs.length / this.width > 0.5); //  > 100 pts / 200 pxs 
         
-        if(hasDotSizeRole){
-            sizeValueToArea = this._getDotSizeRoleScale();
-            if(!sizeValueToArea){
-                hasDotSizeRole = false;
-            }
-        }
-                    
-        var rootScene = this._buildScene(data, hasColorRole, hasDotSizeRole);
+        this._finalizeScene(rootScene);
 
         // Disable selection?
         if(isDense && (options.selectable || options.hoverable)) {
@@ -184,6 +325,9 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
        
         // ---------------
         // BUILD
+        
+        // this.pvPanel.strokeStyle('red');
+        
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
             .lock('data', rootScene.childNodes)
             ;
@@ -245,11 +389,11 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         // When no lines are shown, dots are shown with transparency,
         // which helps in distinguishing overlapped dots.
         // With lines shown, it would look strange.
-        if(!hasColorRole){
+        if(!rootScene.hasColorRole){
             if(!myself.showLines){
                 dot.override('baseColor', function(type){
                     var color = this.base(type);
-                    color.opacity = 0.8;
+                    color.opacity = 0.85;
                     return color;
                 });
             }
@@ -282,7 +426,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                     }
                     
                     if(!myself.showLines){
-                        color.opacity = 0.8;
+                        color = color.alpha(color.opacity * 0.85);
                     }
                 }
                 
@@ -300,7 +444,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         }
         
         // -- DOT SIZE --
-        if(!hasDotSizeRole){
+        if(!rootScene.hasDotSizeRole){
             dot.override('baseSize', function(){
                 /* When not showing dots, 
                  * but a datum is alone and 
@@ -319,10 +463,27 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 return this.base();
             });
         } else {
+            var sizeValueToArea = this._getDotSizeRoleScale(rootScene.sizeValRange);
+
             /* Ignore any extension */
-            dot.override('baseSize', function(){
-                return sizeValueToArea(this.scene.vars.dotSize.value);
-            });
+            dot .override('baseSize', function(){
+                    return sizeValueToArea(this.scene.vars.dotSize.value);
+                })
+                .override('interactiveSize', function(size){
+                    if(this.scene.isActive){
+                        var radius = Math.sqrt(size) * 1.1;
+                        return radius * radius;
+                    }
+                    
+                    return size;
+                })
+                ;
+            
+            // Default is to hide overflow dots, 
+            // for a case where the provided offset, or calculated one is not enough 
+            // (dotSizeRatioTo='width' or 'height' don't guarantee no overflow)
+            // Padding area is used by the bubbles.
+            this.pvPanel.borderPanel.overflow("hidden");
         }
         
         // -- LABEL --
@@ -400,38 +561,22 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             }));
     },
     
-    _getDotSizeRoleScale: function(){
+    _getDotSizeRoleScale: function(sizeValRange){
         /* Per small chart scale */
         // TODO ~ copy paste from HeatGrid        
 
-        var sizeValExtent = this.chart._dotSizeDim.extent({visible: true});
-        if(sizeValExtent){
-            var sizeValMin    = sizeValExtent.min.value,
-                sizeValMax    = sizeValExtent.max.value,
-                sizeValSpan   = Math.abs(sizeValMax - sizeValMin); // may be zero
-            
-            if(isFinite(sizeValSpan) && sizeValSpan > 0.001) {
-                // Linear mapping
-                // TODO: a linear scale object ??
-                var sizeSlope = this.dotAreaSpan / sizeValSpan,
-                    minArea   = this.minDotArea;
-                
-                if(pvc.debug >= 3){
-                    pvc.log("Dot Size Scale info: " + JSON.stringify({
-                        sizeValMin:  sizeValMin,
-                        sizeValMax:  sizeValMax,
-                        sizeValSpan: sizeValSpan,
-                        sizeSlope:   sizeSlope,
-                        minArea:     minArea,
-                        dotAreaSpan: this.dotAreaSpan
-                    }));
-                }
-                
-                return function(sizeVal){
-                    return minArea + sizeSlope * (sizeVal == null ? 0 : (sizeVal - sizeValMin));
-                };
-            }
-        }
+        var sizeValMin  = sizeValRange.min,
+            sizeValMax  = sizeValRange.max,
+            sizeValSpan = sizeValMax - sizeValMin; // > 0
+        
+        // Linear mapping
+        // TODO: a linear scale object ??
+        var sizeSlope = this.dotAreaSpan / sizeValSpan,
+            minArea   = this.minDotArea;
+        
+        return function(sizeVal){
+            return minArea + sizeSlope * (sizeVal == null ? 0 : (sizeVal - sizeValMin));
+        };
     },
     
     /**
@@ -472,15 +617,31 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         return marks;
     },
     
-    _buildScene: function(data, hasColorRole){
-        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
-        
+    _finalizeScene: function(rootScene){
         var chart = this.chart,
             sceneBaseScale  = chart.axes.base.sceneScale({sceneVarName: 'x'}),
-            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'}),
+            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'});
+        
+        rootScene
+            .children()
+            .selectMany(function(seriesScene){ return seriesScene.childNodes; })
+            .each(function(leafScene){
+                leafScene.basePosition  = sceneBaseScale(leafScene);
+                leafScene.orthoPosition = sceneOrthoScale(leafScene);
+            }, this);
+    
+        return rootScene;
+    },
+    
+    _buildScene: function(data, hasColorRole, hasDotSizeRole){
+        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
+        rootScene.hasColorRole = hasColorRole;
+        rootScene.hasDotSizeRole = hasDotSizeRole;
+        
+        var chart = this.chart,
             getColorRoleValue,
             getDotSizeRoleValue;
-            
+        
         if(hasColorRole){
              var colorGrouping = chart._colorRole.grouping;//.singleLevelGrouping();
              if(colorGrouping.isSingleDimension){ // TODO
@@ -522,11 +683,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         
         return rootScene;
         
-        function applyScales(scene){
-            scene.basePosition  = sceneBaseScale(scene);
-            scene.orthoPosition = sceneOrthoScale(scene);
-        }
-        
         function createSeriesScene(seriesGroup){
             /* Create series scene */
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesGroup});
@@ -536,14 +692,21 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                                 seriesGroup.label);
             
             seriesGroup.datums().each(function(datum){
+                var xAtom = datum.atoms[chart._xDim.name];
+                if(xAtom.value == null){
+                    return;
+                }
+                
+                var yAtom = datum.atoms[chart._yDim.name];
+                if(yAtom.value == null){
+                    return;
+                }
+                
                 /* Create leaf scene */
                 var scene = new pvc.visual.Scene(seriesScene, {datum: datum});
                 
-                var atom = datum.atoms[chart._xDim.name];
-                scene.vars.x = new pvc.visual.ValueLabelVar(atom.value, atom.label);
-                
-                atom = datum.atoms[chart._yDim.name];
-                scene.vars.y = new pvc.visual.ValueLabelVar(atom.value, atom.label);
+                scene.vars.x = new pvc.visual.ValueLabelVar(xAtom.value, xAtom.label);
+                scene.vars.y = new pvc.visual.ValueLabelVar(yAtom.value, yAtom.label);
                 
                 if(getColorRoleValue){
                     scene.vars.color = new pvc.visual.ValueLabelVar(
@@ -559,8 +722,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 }
                 
                 scene.isIntermediate = false;
-                
-                applyScales(scene);
             });
         }
         
@@ -640,8 +801,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             
             interScene.isIntermediate = true;
             interScene.isSingle = false;
-            
-            applyScales(interScene);
             
             return interScene;
         }

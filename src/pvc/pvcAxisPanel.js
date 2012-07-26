@@ -98,18 +98,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 layoutInfo.axisSize = 50;
             }
         } else {
-            
             /* I  - Calculate ticks
              * --> layoutInfo.{ ticks, ticksText, maxTextWidth } 
              */
             this._calcTicks();
             
-            /* II - Calculate REQUIRED axisSize so that all labels fit */
+            /* II - Calculate NEEDED axisSize so that all tick's labels fit */
             if(layoutInfo.axisSize == null){
                 this._calcAxisSizeFromLabel(); // -> layoutInfo.axisSize and layoutInfo.labelBBox
             }
             
-            /* III - Calculate Trimming Length if FIXED/REQUIRED > AVAILABLE */
+            /* III - Calculate Trimming Length if FIXED/NEEDED > AVAILABLE */
             this._calcMaxTextLengthThatFits();
             
             // Release memory.
@@ -197,8 +196,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     _calcMaxTextLengthThatFits: function(){
         var layoutInfo = this._layoutInfo;
-        var maxClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
-        if(layoutInfo.axisSize <= maxClientLength){
+        var availableClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
+        if(layoutInfo.axisSize <= availableClientLength){
             // Labels fit
             // Clear to avoid unnecessary trimming
             layoutInfo.maxTextWidth = null;
@@ -213,7 +212,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }
             
             // Now move backwards, to the max text width...
-            var maxOrthoLength = maxClientLength - 2 * this.tickLength;
+            var maxOrthoLength = availableClientLength - 2 * this.tickLength;
             
             // A point at the maximum orthogonal distance from the anchor
             var mostOrthoDistantPoint;
@@ -296,13 +295,18 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         layoutInfo.textHeight = pvc.text.getTextHeight("m", this.font);
         layoutInfo.maxTextWidth = null;
         
+        // Reset scale to original unrounded domain
+        this.axis.setTicks(null);
+        
         // update maxTextWidth, ticks and ticksText
         switch(this.scale.type){
-            case 'Discrete'  : this._calcDiscreteTicks(); break;
+            case 'Discrete'  : this._calcDiscreteTicks();   break;
             case 'Timeseries': this._calcTimeseriesTicks(); break;
-            case 'Continuous': this._calcNumberTicks(); break;
+            case 'Continuous': this._calcNumberTicks(layoutInfo); break;
             default: throw def.error.operationInvalid("Undefined axis scale type"); 
         }
+        
+        this.axis.setTicks(layoutInfo.ticks);
         
         if(layoutInfo.maxTextWidth == null){
             layoutInfo.maxTextWidth = 
@@ -329,8 +333,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
     },
     
-    _calcNumberTicks: function(){
-        var desiredTickCount = this.desiredTickCount;
+    _calcNumberTicks: function(layoutInfo){
+        var desiredTickCount;
+        
+        var previousLayout;
+        if(!layoutInfo.canChange && (previousLayout = layoutInfo.previous)){
+            desiredTickCount = previousLayout.ticks.length;
+        } else {
+            desiredTickCount = this.desiredTickCount;
+        }
+         
         if(desiredTickCount == null){
             if(this.isAnchorTopOrBottom()){
                 this._calcNumberHTicks();
@@ -370,9 +382,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     _calcNumberVDesiredTickCount: function(){
         var layoutInfo = this._layoutInfo;
-        
-        var lineHeight   = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
-        
+        var lineHeight = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
         var clientLength = layoutInfo.clientSize[this.anchorLength()];
         
         return Math.max(1, ~~(clientLength / lineHeight));
@@ -384,7 +394,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var spacing = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin/*em*/));
         var desiredTickCount = this._calcNumberHDesiredTickCount(this, spacing);
         
-        var doLog = (pvc.debug >= 5);
+        var doLog = (pvc.debug >= 7);
         var dir, prevResultTickCount;
         var ticksInfo, lastBelow, lastAbove;
         do {
@@ -436,7 +446,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 var excessLength  = length - clientLength;
                 var pctError = ticksInfo.error = Math.abs(excessLength / clientLength);
                 
-                if(doLog){ 
+                if(doLog){
+                    pvc.log("calculateNumberHTicks error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + resultTickCount + " step=" + ticks.step);
                     pvc.log("calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
                 }
                 
@@ -449,7 +460,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     if(lastBelow){
                         // We were below max length and then overshot...
                         // Choose the best conforming one
-                        if(pctError > 0.05 || pctError > lastBelow.error){
+                        if(pctError > lastBelow.error){
                             ticksInfo = lastBelow;
                         }
                         break;
@@ -487,6 +498,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             layoutInfo.ticks = ticksInfo.ticks;
             layoutInfo.ticksText = ticksInfo.ticksText;
             layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
+            
+            if(pvc.debug >= 5){
+                pvc.log("calculateNumberHTicks RESULT error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
+            }
         }
         
         if(doLog){ pvc.log("calculateNumberHTicks END"); }
@@ -553,19 +568,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvRule,       this.panelName + "Rule_" );
         this.extend(this.pvTicks,      this.panelName + "Ticks_");
         this.extend(this.pvLabel,      this.panelName + "Label_");
-        this.extend(this.pvRuleGrid,   this.panelName + "Grid_" );
         this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
         this.extend(this.pvZeroLine,   this.panelName + "ZeroLine_");
-    },
-
-    /**
-     * Initializes a new layer panel.
-     * @override
-     */
-    initLayerPanel: function(pvPanel, layer){
-        if(layer === 'gridLines'){
-            pvPanel.zOrder(-12);
-        }
     },
 
     renderAxis: function(){
@@ -573,31 +577,32 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             return;
         }
         
-        // Z-Order
-        // ==============
-        // -10 - grid lines   (on 'gridLines' background panel)
-        //   0 - content (specific chart types should render content on this zOrder)
-        //  10 - end line     (on main foreground panel)
-        //  20 - ticks        (on main foreground panel)
-        //  30 - ruler (begin line) (on main foreground panel)
-        //  40 - labels       (on main foreground panel)
+        //this.pvPanel.strokeStyle('orange');
         
         // Range
-        var rMin  = this.ruleCrossesMargin ?  0 : this.scale.min,
-            rMax  = this.ruleCrossesMargin ?  this.scale.size : this.scale.max,
-            rSize = rMax - rMin,
-            ruleParentPanel = this.pvPanel;
+        var clientSize = this._layoutInfo.clientSize;
+        var paddings   = this._layoutInfo.paddings;
+        
+        var begin_a = this.anchorOrtho();
+        var end_a   = this.anchorOpposite(begin_a);
+        var size_a  = this.anchorOrthoLength(begin_a);
+        
+        var rMin = this.ruleCrossesMargin ? -paddings[begin_a] : 0;
+        var rMax = clientSize[size_a] + (this.ruleCrossesMargin ? paddings[end_a] : 0);
+        var rSize = rMax - rMin;
+        
+        var ruleParentPanel = this.pvPanel;
 
         this._rSize = rSize;
 
         this.pvRule = ruleParentPanel.add(pv.Rule)
-            .zOrder(30) // see pvc.js
+            .zOrder(30)
             .strokeStyle('black')
             // ex: anchor = bottom
-            [this.anchorOpposite()](0)     // top    (of the axis panel)
-            [this.anchorLength()  ](rSize) // width  
-            [this.anchorOrtho()   ](rMin)  // left
-            .svg({ 'stroke-linecap': 'square' })
+            [this.anchorOpposite()](0) // top (of the axis panel)
+            [size_a ](rSize) // width
+            [begin_a](rMin)  // left
+            .svg({ 'stroke-linecap': 'square' }) // So that begin/end ticks better join with the rule 
             ;
 
         if (this.isDiscrete){
@@ -718,62 +723,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     myself._handleDoubleClick(child, ev);
                 });
         }
-        
-        if(this.fullGrid){
-            var fullGridRootScene = this._buildDiscreteFullGridScene(data),
-                orthoAxis  = this._getOrthoAxis(),
-                orthoScale = orthoAxis.scale,
-                orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
-                ruleLength = orthoFullGridCrossesMargin ?
-                                    orthoScale.size :
-                                    (orthoScale.max - orthoScale.min),
-                             // this.parent[anchorOrthoLength] - this[anchorOrthoLength],
-                halfStep = scale.range().step / 2,
-                count = fullGridRootScene.childNodes.length;
-            
-            this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
-                .extend(this.pvRule)
-                .data(fullGridRootScene.childNodes)
-                .strokeStyle("#f0f0f0")
-                [anchorOpposite   ](orthoFullGridCrossesMargin ? -ruleLength : -orthoScale.max)
-                [anchorOrthoLength](ruleLength)
-                [anchorLength     ](null)
-                [anchorOrtho      ](function(scene){
-                    var value = scale(scene.vars.tick.value);
-                    if(this.index +  1 < count){
-                        return value - halfStep;
-                    }
-
-                    // end line
-                    return value + halfStep;
-                })
-                ;
-        }
-    },
-
-    _buildDiscreteFullGridScene: function(data){
-        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
-        
-        data.children()
-            .each(function(childData){
-                var childScene = new pvc.visual.Scene(rootScene, {group: childData});
-                var valueVar = 
-                    childScene.vars.tick = 
-                        new pvc.visual.ValueLabelVar(
-                                    childData.value,
-                                    childData.label);
-                
-                valueVar.absLabel = childData.absLabel;
-        });
-
-        /* Add a last scene, with the same data group */
-        var lastScene  = rootScene.lastChild;
-        if(lastScene){
-            var endScene = new pvc.visual.Scene(rootScene, {group: lastScene.group});
-            endScene.vars.tick = lastScene.vars.tick;
-        }
-
-        return rootScene;
     },
 
     renderLinearAxis: function(){
@@ -783,14 +732,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var scale  = this.scale,
             orthoAxis  = this._getOrthoAxis(),
             orthoScale = orthoAxis.scale,
-            ticks      = this._layoutInfo.ticks,
+            layoutInfo = this._layoutInfo,
+            ticks      = layoutInfo.ticks,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
             
             tickStep = Math.abs(ticks[1] - ticks[0]); // ticks.length >= 2
-                
+        
         // (MAJOR) ticks
         var pvTicks = this.pvTicks = this.pvRule.add(pv.Rule)
             .zOrder(20)
@@ -827,24 +777,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             return visible && (getVisible ? getVisible.apply(this, args) : true);
         }
 
-        this.renderLinearAxisLabel(ticks, this._layoutInfo.ticksText);
-
-        // Now do the full grid lines
-        if(this.fullGrid) {
-            var orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
-                ruleLength = orthoFullGridCrossesMargin ? orthoScale.size : orthoScale.offsetSize;
-
-            // Grid rules are visible (only) on MAJOR ticks.
-            this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
-                    .extend(this.pvRule)
-                    .data(ticks)
-                    .strokeStyle("#f0f0f0")
-                    [anchorOpposite   ](orthoFullGridCrossesMargin ? -ruleLength : -orthoScale.max)
-                    [anchorOrthoLength](ruleLength)
-                    [anchorLength     ](null)
-                    [anchorOrtho      ](scale)
-                    ;
-        }
+        this.renderLinearAxisLabel(ticks, layoutInfo.ticksText);
     },
     
     renderLinearAxisLabel: function(ticks, ticksText){
@@ -950,8 +883,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this._handleClickCore(data, ev);
         } else {
             // Delay click evaluation so that
-            // it may be canceled if double click meanwhile
-            // fires.
+            // it may be canceled if double click meanwhile fires.
             var myself  = this,
                 options = this.chart.options;
             window.setTimeout(

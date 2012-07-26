@@ -27,11 +27,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
             }
         }
 
-        if(options && options.axisOffset != null){
-            // See pvc.MetricLineDotPanel#_calcLayout
-            this._explicitAxisOffset = true;
-        }
-
         this.base(options);
 
         // Apply options
@@ -91,7 +86,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
     }
 }, {
     defaultOptions: {
-        axisOffset: 0.04,
         valuesAnchor: "right",
         panelSizeRatio: 1
     }

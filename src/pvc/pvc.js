@@ -58,9 +58,9 @@ pv.error = pvc.logError;
 
 function syncTipsyLog(){
     var tip = pv.Behavior.tipsy;
-    if(tip){
-        tip.debug = pvc.debug;
-        tip.log   = pvc.log;
+    if(tip && tip.setDebug){
+        tip.setDebug(pvc.debug);
+        tip.log = pvc.log;
     }
 }
 
@@ -364,16 +364,16 @@ pv.Format.createFormatter = function(pvFormat) {
 pvc.parseAlign = function(side, align){
     var align2, isInvalid;
     if(side === 'left' || side === 'right'){
-        align2 = pvc.BasePanel.verticalAlign[align];
+        align2 = align && pvc.BasePanel.verticalAlign[align];
         if(!align2){
-            align2 = 'top';
-            isInvalid = true;
+            align2 = 'middle';
+            isInvalid = !!align;
         }
     } else {
-        align2 = pvc.BasePanel.horizontalAlign[align];
+        align2 = align && pvc.BasePanel.horizontalAlign[align];
         if(!align2){
-            align2 = 'left';
-            isInvalid = true;
+            align2 = 'center';
+            isInvalid = !!align;
         }
     }
     
@@ -402,6 +402,8 @@ pvc.Sides = function(sides){
     }
 };
 
+pvc.Sides.hnames = 'left right'.split(' ');
+pvc.Sides.vnames = 'top bottom'.split(' ');
 pvc.Sides.names = 'left right top bottom'.split(' ');
 pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.retTrue);
 
@@ -444,12 +446,17 @@ pvc.Sides.prototype.setSides = function(sides){
         this.set('all', sides);
         return this;
     } else if (typeof sides === 'object') {
-        this.set('all', sides.all);
-        for(var p in sides){
-            if(p !== 'all'){
-                this.set(p, sides[p]);
+        if(sides instanceof pvc.PercentValue){
+            this.set('all', sides);
+        } else {
+            this.set('all', sides.all);
+            for(var p in sides){
+                if(p !== 'all' && sides.hasOwnProperty(p)){
+                    this.set(p, sides[p]);
+                }
             }
         }
+        
         return this;
     }
     
@@ -502,6 +509,18 @@ pvc.Sides.prototype.resolve = function(width, height){
     
     return sides;
 };
+
+pvc.Sides.resolvedMax = function(a, b){
+    var sides = {};
+    
+    pvc.Sides.names.forEach(function(side){
+        sides[side] = Math.max(a[side] || 0, b[side] || 0);
+    });
+    
+    return sides;
+};
+
+// -------------
 
 pvc.PercentValue = function(pct){
     this.percent = pct;

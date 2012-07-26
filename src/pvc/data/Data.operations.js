@@ -39,10 +39,6 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {Object} [keyArgs] Keyword arguments object.
      * See additional keyword arguments in {@link pvc.data.GroupingOper}
      * 
-     * @param {boolean} [keyArgs.visible=null]
-     *      Only considers datums whose atoms of the grouping dimensions 
-     *      have the specified visible state.
-     *
      * @see #where
      * @see pvc.data.GroupingLevelSpec
      *
@@ -133,12 +129,15 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      *  
      * @param {object} [keyArgs] Keyword arguments object.
      * 
+     * @param {boolean} [keyArgs.isNull=null]
+     *      Only considers datums with the specified isNull attribute.
+     * 
      * @param {boolean} [keyArgs.visible=null]
      *      Only considers datums that have the specified visible state.
      * 
      * @param {boolean} [keyArgs.selected=null]
      *      Only considers datums that have the specified selected state.
-     *
+     * 
      * @param {function} [keyArgs.where] A arbitrary datum predicate.
      *
      * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each 
@@ -372,11 +371,16 @@ function data_processWhereSpec(whereSpec){
 function data_whereState(q, keyArgs){
     var selected = def.get(keyArgs, 'selected'),
         visible  = def.get(keyArgs, 'visible'),
-        where    = def.get(keyArgs, 'where')
+        where    = def.get(keyArgs, 'where'),
+        isNull   = def.get(keyArgs, 'isNull')
         ;
 
     if(visible != null){
         q = q.where(function(datum){ return datum.isVisible === visible; });
+    }
+    
+    if(isNull != null){
+        q = q.where(function(datum){ return datum.isNull === isNull; });
     }
     
     if(selected != null){

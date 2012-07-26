@@ -51,7 +51,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             options = chart.options,
             isStacked = !!this.stacked,
             isVertical = this.isOrientationVertical();
-
+        
         var data = this._getVisibleData(), // shared "categ then series" grouped data
             seriesData = chart._serRole.flatten(data),
             rootScene = this._buildScene(data, seriesData)
@@ -197,55 +197,55 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
          * and as such markers will be children of bar's parent,
          * yet have bar's anchor as a prototype.
          */
-
-        var myself = this,
-            isVertical = this.isOrientationVertical(),
-            orthoProp = isVertical ? "bottom" : "left",
-            lengthProp = myself.anchorOrthoLength(orthoProp),
-            orthoLengthProp = myself.anchorLength(orthoProp),
-            rOrthoBound = isMin ?
-                        (orthoScale.min - orthoScale.offset) :
-                        (orthoScale.max + orthoScale.offset),
-        
-            angle;
-
-        if(!isMin){
-            angle = isVertical ? Math.PI: -Math.PI/2;
-        } else {
-            angle = isVertical ? 0: Math.PI/2;
-        }
-        
-        return this.pvBar.anchor('center').add(pv.Dot)
-            .visible(function(scene){
-                var value = scene.vars.value.value;
-                if(value == null){
-                    return false;
-                }
-
-                var targetInstance = this.scene.target[this.index];
-                // Where is the position of the max of the bar??
-                var orthoMaxPos = targetInstance[orthoProp] +
-                                  (value > 0 ? targetInstance[lengthProp] : 0);
-                return isMin ?
-                        (orthoMaxPos < rOrthoBound) :
-                        (orthoMaxPos > rOrthoBound);
-            })
-            .shape("triangle")
-            .lock('shapeSize')
-            .shapeRadius(function(){
-                return Math.min(
-                        Math.sqrt(10),
-                        this.scene.target[this.index][orthoLengthProp] / 2);
-            })
-            .shapeAngle(angle)
-            .lineWidth(1.5)
-            .strokeStyle("red")
-            .fillStyle("white")
-            [orthoProp](function(){
-                return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
-            })
-            [this.anchorOpposite(orthoProp)](null)
-            ;
+        // TODO - restore overflow markers asap
+//        var myself = this,
+//            isVertical = this.isOrientationVertical(),
+//            orthoProp = isVertical ? "bottom" : "left",
+//            lengthProp = myself.anchorOrthoLength(orthoProp),
+//            orthoLengthProp = myself.anchorLength(orthoProp),
+//            rOrthoBound = isMin ?
+//                        (orthoScale.min - orthoScale.offsetMin) :
+//                        (orthoScale.max + orthoScale.offsetMax),
+//        
+//            angle;
+//
+//        if(!isMin){
+//            angle = isVertical ? Math.PI: -Math.PI/2;
+//        } else {
+//            angle = isVertical ? 0: Math.PI/2;
+//        }
+//        
+//        return this.pvBar.anchor('center').add(pv.Dot)
+//            .visible(function(scene){
+//                var value = scene.vars.value.value;
+//                if(value == null){
+//                    return false;
+//                }
+//
+//                var targetInstance = this.scene.target[this.index];
+//                // Where is the position of the max of the bar??
+//                var orthoMaxPos = targetInstance[orthoProp] +
+//                                  (value > 0 ? targetInstance[lengthProp] : 0);
+//                return isMin ?
+//                        (orthoMaxPos < rOrthoBound) :
+//                        (orthoMaxPos > rOrthoBound);
+//            })
+//            .shape("triangle")
+//            .lock('shapeSize')
+//            .shapeRadius(function(){
+//                return Math.min(
+//                        Math.sqrt(10),
+//                        this.scene.target[this.index][orthoLengthProp] / 2);
+//            })
+//            .shapeAngle(angle)
+//            .lineWidth(1.5)
+//            .strokeStyle("red")
+//            .fillStyle("white")
+//            [orthoProp](function(){
+//                return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
+//            })
+//            [this.anchorOpposite(orthoProp)](null)
+//            ;
     },
 
     /**

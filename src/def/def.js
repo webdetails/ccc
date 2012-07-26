@@ -365,6 +365,26 @@ var def = /** @lends def */{
         return to;
     },
     
+    copyProps: function(a, b, props){
+        var to, from;
+        if(arguments.length >= 3) {
+            to = a || {};
+            from = b;
+        } else {
+            to    = {};
+            from  = a;
+            props = b;
+        }
+        
+        if(from && props) {
+            props.forEach(function(p){
+                to[p] = from[p];
+            });
+        }
+        
+        return to;
+    },
+    
     ownKeys: Object.keys,
     
     keys: function(o){

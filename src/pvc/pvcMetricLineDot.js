@@ -97,11 +97,14 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         var options = this.options;
         
         return new pvc.MetricLineDotPanel(this, parentPanel, {
-            showValues:   options.showValues,
-            valuesAnchor: options.valuesAnchor,
-            showLines:    options.showLines,
-            showDots:     options.showDots,
-            orientation:  options.orientation
+            showValues:    options.showValues,
+            valuesAnchor:   options.valuesAnchor,
+            showLines:      options.showLines,
+            showDots:       options.showDots,
+            orientation:    options.orientation,
+            dotSizeRatio:   options.dotSizeRatio,
+            dotSizeRatioTo: options.dotSizeRatioTo,
+            autoDotSizePadding: options.autoDotSizePadding
         });
     }
 }, {
@@ -118,7 +121,12 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         colorRangeInterval:  undefined,
         minColor:  undefined, //"white",
         maxColor:  undefined, //"darkgreen",
-        nullColor: "#efc5ad"  // white with a shade of orange
+        nullColor: "#efc5ad",  // white with a shade of orange
+        
+        /* Dot Size Role */
+        dotSizeRatio:   undefined,
+        dotSizeRatioTo: undefined,
+        autoDotSizePadding: undefined
     }
 });
 

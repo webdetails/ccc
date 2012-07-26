@@ -69,10 +69,16 @@ def.scope(function(){
         
         var ChartClass = pvc[chartExample.className];
         var options = def.create(false, chartExample.def, {
-            width:  $tableChartDiv.width(),
-            height: $tableRow.height(),
             canvas: $tableChartDiv[0]
         });
+        
+        if(options.width == null){
+            options.width = $tableChartDiv.width();
+        }
+        
+        if(options.height == null){
+            options.height = $tableRow.height();
+        }
         
         var chart = new ChartClass(options);
         

@@ -318,20 +318,30 @@ pv.Behavior.tipsy = function(opts) {
             fakeStyle.position = 'absolute';
             fakeStyle.pointerEvents = 'none'; // ignore mouse events
             fakeStyle.display = 'block';
-            
-            // <Debug>
-            if(_tip.debug >= 5){
-                fakeStyle.borderColor = 'red';
-                fakeStyle.borderWidth = '1px';
-                fakeStyle.borderStyle = 'solid';
-            }
-            // </Debug>
         }
         
         $fakeTipTarget = $(fakeTipTarget);
         
+        updateTipDebug();
+        
         // Create the tipsy instance
         $fakeTipTarget.tipsy(opts);
+    }
+    
+    function updateTipDebug(){
+        if($fakeTipTarget){
+            if(_tip.debug >= 5){
+                $fakeTipTarget.css({
+                    borderColor: 'red',
+                    borderWidth: '1px',
+                    borderStyle: 'solid'
+                });
+            } else {
+                $fakeTipTarget.css({
+                    borderWidth: '0px'
+                });
+            }
+        }
     }
     
     function getMouseBounds(ev){
@@ -548,6 +558,10 @@ pv.Behavior.tipsy = function(opts) {
 
 var _tip = pv.Behavior.tipsy;
 _tip.debug = 0;
+_tip.setDebug = function(level){
+    _tip.debug = level;
+};
+
 _tip.log = function(m){
     if(typeof console !== "undefined"){
         console.log('' + m);

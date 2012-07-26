@@ -30,7 +30,7 @@ def.scope(function(){
  * @property {string} orientatedId The id of the axis with respect to the orientation and the index of the axis ("").
  * @property {pvc.visual.Role} role The associated visual role.
  * @property {pv.Scale} scale The associated scale.
- *  
+ * 
  * @constructor
  * @param {pvc.CartesianAbstract} chart The associated cartesian chart.
  * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
@@ -100,7 +100,31 @@ def.type('pvc.visual.CartesianAxis')
 .add(/** @lends pvc.visual.CartesianAxis# */{
     
     setScale: function(scale){
+        
+        if(this.scale){
+            // If any
+            delete this.domain;
+            delete this.ticks;
+            delete this._roundingPaddings;
+        }
+        
         this.scale = scale;
+        
+        if(scale){
+            scale.type = this.scaleType;
+            
+            if(!scale.isNull && this.scaleType !== 'Discrete'){
+                // Original data domain, before nice or tick rounding
+                this.domain = scale.domain();
+                
+                if(this.scaleType === 'Continuous'){
+                    var roundMode = this.option('DomainRoundMode');
+                    if(roundMode === 'nice'){
+                        scale.nice();
+                    }
+                }
+            }
+        }
     },
     
     /**
@@ -170,6 +194,65 @@ def.type('pvc.visual.CartesianAxis')
         }
         
         return value;
+    },
+ 
+    setTicks: function(ticks){
+        var scale = this.scale;
+        
+        /*jshint expr:true */
+        (scale && !scale.isNull) || def.fail.operationInvalid("Scale must be set and non-null.");
+        
+        this.ticks = ticks;
+        
+        if(scale.type === 'Continuous' && this.option('DomainRoundMode') === 'tick'){
+            
+            delete this._roundingPaddings;
+            
+            // Commit calculated ticks to scale's domain
+            var tickCount = ticks && ticks.length;
+            if(tickCount){
+                this.scale.domain(ticks[0], ticks[tickCount - 1]);
+            } else {
+                // Reset scale domain
+                this.scale.domain(this.domain[0], this.domain[1]);
+            }
+        }
+    },
+    
+    getScaleRoundingPaddings: function(){
+        var roundingPaddings = this._roundingPaddings;
+        if(!roundingPaddings){
+            roundingPaddings = {begin: 0, end: 0};
+            
+            var scale = this.scale;
+            var roundMode;
+            
+            while(scale && !scale.isNull && scale.type === 'Continuous' && 
+                  (roundMode = this.option('DomainRoundMode')) !== 'none'){
+                
+                var currDomain = scale.domain();
+                var origDomain = this.domain || def.assert("Must be set");
+                
+                var currLength = currDomain[1] - currDomain[0];
+                if(currLength){
+                    var dif = origDomain[0] - currDomain[0];
+                    if(dif > 0){
+                        roundingPaddings.begin = dif / currLength;
+                    }
+
+                    dif = currDomain[1] - origDomain[1];
+                    if(dif > 0){
+                        roundingPaddings.end = dif / currLength;
+                    }
+                }
+                
+                break;
+            }
+            
+            this._roundingPaddings = roundingPaddings;
+        }
+        
+        return roundingPaddings;
     }
 });
 
@@ -330,7 +413,6 @@ $VCA.createAllDefaultOptions = function(options){
            'FullGrid':          false,
            'FullGridCrossesMargin': true,
            'RuleCrossesMargin': true,
-           'EndLine':           false,
            'DomainRoundMode':   'none',
            'ZeroLine':          true,
            'LabelSpacingMin':      1

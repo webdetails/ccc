@@ -15,6 +15,9 @@
  * 
  * @param {object} [keyArgs] Keyword arguments.
  * See {@link pvc.data.DataOper} for any additional arguments.
+ * 
+ * @param {boolean} [keyArgs.isNull=null]
+ *      Only considers datums with the specified isNull attribute.
  * @param {boolean} [keyArgs.visible=null]
  *      Only considers datums that have the specified visible state.
  * @param {boolean} [keyArgs.selected=null]
@@ -46,7 +49,8 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     this._where      = def.get(keyArgs, 'where');
     this._visible    = def.get(keyArgs, 'visible',  null);
     this._selected   = def.get(keyArgs, 'selected', null);
-
+    this._isNull     = def.get(keyArgs, 'isNull',   null);
+        
     /* 'Where' predicate and its key */
     var hasKey = this._selected == null, // Selected state changes does not yet invalidate cache...
         whereKey = '';
@@ -84,6 +88,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     if(hasKey){
         this.key = ids.join('!!') +
                    "||visible:"  + this._visible +
+                   "||isNull:"   + this._isNull  +
                    //"||selected:" + this._selected +
                    "||where:"    + whereKey;
     }
@@ -102,6 +107,7 @@ add(/** @lends pvc.data.GroupingOper */{
         var datumsQuery = data_whereState(def.query(this._linkParent._datums), {
             visible:  this._visible,
             selected: this._selected,
+            isNull:   this._isNull,
             where:    this._where
         });
         

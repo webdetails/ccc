@@ -225,9 +225,45 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     colors: null,
     secondAxisColor: null,
-
+    
+    /**
+     * Contains the number of pages that a multi-chart contains
+     * when rendered with the previous render options.
+     * <p>
+     * This property is updated after a render of a chart
+     * where the visual role "multiChart" is assigned and
+     * the option "multiChartPageIndex" has been specified. 
+     * </p>
+     * 
+     * @type number|null
+     */
+    multiChartPageCount: null,
+    
+    /**
+     * Contains the currently rendered multi-chart page index, 
+     * relative to the previous render options.
+     * <p>
+     * This property is updated after a render of a chart
+     * where the visual role "multiChart" is assigned and
+     * the <i>option</i> "multiChartPageIndex" has been specified. 
+     * </p>
+     * 
+     * @type number|null
+     */
+    multiChartPageIndex: null,
+    
     constructor: function(options) {
         var parent = this.parent = def.get(options, 'parent') || null;
+        
+        /* DEBUG options */
+        if(pvc.debug >= 3 && !parent && options){
+            try {
+                pvc.log("INITIAL OPTIONS:\n" + JSON.stringify(options));
+            } catch(ex) {
+                /* SWALLOW usually a circular JSON structure */
+            }
+        }
+        
         if(parent) {
             // options != null
             this.root = parent.root;
@@ -271,9 +307,9 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._processOptionsCore(options);
         
         /* DEBUG options */
-        if(pvc.debug >= 3 && options){
+        if(pvc.debug >= 3 && options && !this.parent){
             try {
-                pvc.log("OPTIONS:\n" + JSON.stringify(options));
+                pvc.log("CURRENT OPTIONS:\n" + JSON.stringify(options));
             }catch(ex) {
                 /* SWALLOW usually a circular JSON structure */
             }
@@ -371,7 +407,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._initTitlePanel();
         this._initLegend();
         
-        if(!this.parent && this._isRoleAssigned('multiChartColumn')) {
+        if(!this.parent && this._isRoleAssigned('multiChart')) {
             this._initMultiChartPanel();
         } else {
             this._preRenderContent({
@@ -545,8 +581,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 
             measuresIndexes:   options.measuresIndexes, // relational multi-valued
 
-            multiChartColumnIndexes: options.multiChartColumnIndexes,
-            multiChartRowIndexes: options.multiChartRowIndexes,
+            multiChartIndexes: options.multiChartIndexes,
 
             // crosstab
             separator:         dataOptions.separator,
@@ -569,8 +604,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     _initVisualRoles: function(){
         this._addVisualRoles({
-            multiChartColumn: {defaultDimensionName: 'multiChartColumn*'},
-            multiChartRow:    {defaultDimensionName: 'multiChartRow*'}
+            multiChart: {defaultDimensionName: 'multiChart*'}
         });
 
         if(this._hasDataPartRole()){
@@ -1411,8 +1445,11 @@ pvc.BaseChart = pvc.Abstract.extend({
         width:  400,
         height: 300,
         
-        multiChartLimit: null,
-        multiChartWrapColumn: 3,
+        multiChartMax: undefined,
+        multiChartMaxColumns: undefined,
+        multiChartWidth: undefined,
+        multiChartAspectRatio: undefined,
+        multiChartSingleRowFillsHeight: undefined,
         
         orientation: 'vertical',
         
@@ -1425,8 +1462,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         ignoreNulls:       true, // whether to ignore or keep "null"-measure datums upon loading
         crosstabMode:      true,
-        multiChartColumnIndexes: undefined,
-        multiChartRowIndexes: undefined,
+        multiChartIndexes: undefined,
         isMultiValued:     false,
         seriesInRows:      false,
         measuresIndexes:   undefined,

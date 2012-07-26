@@ -144,6 +144,9 @@ pvc.BasePanel = pvc.Abstract.extend({
         /* Root panels do not need layout */
         if(this.isRoot) {
             this.anchor = null;
+            this.align  = null;
+        } else {
+            this.align = pvc.parseAlign(this.anchor, this.align);
         }
     },
     
@@ -170,17 +173,22 @@ pvc.BasePanel = pvc.Abstract.extend({
      * On root panels this argument is not specified,
      * and the panels' current {@link #width} and {@link #height} are used as default. 
      * </p>
-     * @param {pvc.Size} [referenceSize] The size that should be used for 
+     * @param {object}  [keyArgs] Keyword arguments.
+     * @param {boolean} [keyArgs.force=false] Indicates that the layout should be
+     * performed even if it has already been done.
+     * @param {pvc.Size} [keyArgs.referenceSize] The size that should be used for 
      * percentage size calculation. 
      * This will typically be the <i>client</i> size of the parent.
-     * 
-     * @param {object}  [keyArgs] Keyword arguments.
-     * @param {boolean} [keyArgs.force=false] Indicates that the layout should be 
-     * performed even if it has already been done. 
+     * @param {pvc.Sides} [keyArgs.paddings] The paddings that should be used for 
+     * the layout. Default to the panel's paddings {@link #paddings}.
+     * @param {pvc.Sides} [keyArgs.margins] The margins that should be used for 
+     * the layout. Default to the panel's margins {@link #margins}.
+     * @param {boolean} [keyArgs.canChange=true] Whether this is a last time layout. 
      */
-    layout: function(availableSize, referenceSize, keyArgs){
+    layout: function(availableSize, keyArgs){
         if(!this._layoutInfo || def.get(keyArgs, 'force', false)) {
             
+            var referenceSize = def.get(keyArgs, 'referenceSize');
             if(!referenceSize && availableSize){
                 referenceSize = def.copyOwn(availableSize);
             }
@@ -213,15 +221,16 @@ pvc.BasePanel = pvc.Abstract.extend({
                 availableSize.height = sizeMax.height;
             }
             
-            var margins  = this.margins .resolve(referenceSize);
-            var paddings = this.paddings.resolve(referenceSize);
+            var margins  = (def.get(keyArgs, 'margins' ) || this.margins ).resolve(referenceSize);
+            var paddings = (def.get(keyArgs, 'paddings') || this.paddings).resolve(referenceSize);
+            
             var spaceWidth  = margins.width  + paddings.width;
             var spaceHeight = margins.height + paddings.height;
             
             var availableClientSize = new pvc.Size(
-                        Math.max(availableSize.width  - spaceWidth,  0),
-                        Math.max(availableSize.height - spaceHeight, 0)
-                    );
+                    Math.max(availableSize.width  - spaceWidth,  0),
+                    Math.max(availableSize.height - spaceHeight, 0)
+                );
             
             var desiredClientSize = def.copyOwn(desiredSize);
             if(desiredClientSize.width != null){
@@ -232,14 +241,24 @@ pvc.BasePanel = pvc.Abstract.extend({
                 desiredClientSize.height = Math.max(desiredClientSize.height - spaceHeight, 0);
             }
             
+            var prevLayoutInfo = this._layoutInfo || null;
+            if(prevLayoutInfo){
+                // Free old memory
+                delete prevLayoutInfo.previous;
+            }
+            
+            var canChange = def.get(keyArgs, 'canChange', true);
+            
             var layoutInfo = 
                 this._layoutInfo = {
-                referenceSize:       referenceSize,
-                margins:             margins,
-                paddings:            paddings,
-                desiredClientSize:   desiredClientSize,
-                clientSize:          availableClientSize
-            };
+                    canChange:         canChange,
+                    referenceSize:     referenceSize,
+                    margins:           margins,
+                    paddings:          paddings,
+                    desiredClientSize: desiredClientSize,
+                    clientSize:        availableClientSize,
+                    previous:          prevLayoutInfo
+                };
             
             var clientSize = this._calcLayout(layoutInfo);
             
@@ -261,6 +280,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             this.width  = size.width;
             this.height = size.height;
+            
+            if(!canChange && prevLayoutInfo){
+                delete layoutInfo.previous;
+            }
         }
     },
     
@@ -320,8 +343,11 @@ pvc.BasePanel = pvc.Abstract.extend({
         var aolMap = pvc.BasePanel.orthogonalLength,
             aoMap  = pvc.BasePanel.relativeAnchor;
         
-        var childKeyArgs = {force: true};
-        var childReferenceSize = clientSize;
+        var childKeyArgs = {
+                force: true,
+                referenceSize: clientSize
+            };
+        
         var needRelayout = false;
         var relayoutCount = 0;
         var allowGrow = true;
@@ -359,7 +385,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
-                child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
+                child.layout(new pvc.Size(remSize), childKeyArgs);
                 
                 if(child.isVisible){
                     checkChildLayout.call(this, child);
@@ -376,7 +402,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         function layoutChildII(child) {
-            child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
+            child.layout(new pvc.Size(remSize), childKeyArgs);
             if(child.isVisible){
                 checkChildLayout(child);
                 if(!needRelayout){
@@ -674,17 +700,19 @@ pvc.BasePanel = pvc.Abstract.extend({
      * @virtual
      */
     _renderInteractive: function(){
-        var marks = this._getSignums();
-        if(marks && marks.length){
-            marks.forEach(function(mark){ mark.render(); });
-        } else if(!this._children) {
-            this.pvPanel.render();
-        }
-        
-        if(this._children){
-            this._children.forEach(function(child){
-                child._renderInteractive();
-            });
+        if(this.isVisible){
+            var marks = this._getSignums();
+            if(marks && marks.length){
+                marks.forEach(function(mark){ mark.render(); });
+            } else if(!this._children) {
+                this.pvPanel.render();
+            }
+            
+            if(this._children){
+                this._children.forEach(function(child){
+                    child._renderInteractive();
+                });
+            }
         }
     },
 
@@ -816,15 +844,16 @@ pvc.BasePanel = pvc.Abstract.extend({
      * the protovis panel for the specified layer name.
      */
     getPvPanel: function(layer) {
+        var mainPvPanel = this.pvPanel;
         if(!layer){
-            return this.pvPanel;
+            return mainPvPanel;
         }
 
         if(!this.parent){
             throw def.error.operationInvalid("Layers are not possible in a root panel.");
         }
 
-        if(!this.pvPanel){
+        if(!mainPvPanel){
             throw def.error.operationInvalid(
                "Cannot access layer panels without having created the main panel.");
         }
@@ -840,15 +869,18 @@ pvc.BasePanel = pvc.Abstract.extend({
             var pvParentPanel = this.parent.pvPanel;
             var pvBorderPanel = 
                 pvPanel = pvParentPanel.borderPanel.add(this.type)
-                              .extend(this.pvPanel.borderPanel);
+                              .extend(mainPvPanel.borderPanel);
             
-            if(pvParentPanel !== pvParentPanel.borderPanel){
+            if(mainPvPanel !== mainPvPanel.borderPanel){
                 pvPanel = pvBorderPanel.add(pv.Panel)
-                                       .extend(this.pvPanel);
+                                       .extend(mainPvPanel);
             }
             
+            pvBorderPanel.borderPanel  = pvBorderPanel;
             pvBorderPanel.paddingPanel = pvPanel;
-            pvPanel.borderPanel = pvBorderPanel;
+            
+            pvPanel.paddingPanel  = pvPanel;
+            pvPanel.borderPanel   = pvBorderPanel;
             
             this.initLayerPanel(pvPanel, layer);
 
@@ -1407,16 +1439,18 @@ pvc.BasePanel = pvc.Abstract.extend({
      * @virtual
      */
     _detectDatumsUnderRubberBand: function(datumsByKey, rb, keyArgs){
-        var any = false,
-            selectableMarks = this._getSignums();
+        var any = false;
+        if(this.isVisible){
+            var selectableMarks = this._getSignums();
         
-        if(selectableMarks){
-            selectableMarks.forEach(function(mark){
-                this._forEachMarkDatumUnderRubberBand(mark, function(datum){
-                    datumsByKey[datum.key] = datum;
-                    any = true;
-                }, this, rb);
-            }, this);
+            if(selectableMarks){
+                selectableMarks.forEach(function(mark){
+                    this._forEachMarkDatumUnderRubberBand(mark, function(datum){
+                        datumsByKey[datum.key] = datum;
+                        any = true;
+                    }, this, rb);
+                }, this);
+            }
         }
         
         return any;

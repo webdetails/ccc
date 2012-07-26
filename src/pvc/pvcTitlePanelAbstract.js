@@ -3,7 +3,7 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
 
     pvLabel: null,
     anchor: 'top',
-    align:  'center',
+
     title: null,
     titleSize: undefined,
     font: "12px sans-serif",
@@ -17,12 +17,6 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
         }
         
         var anchor = options.anchor || this.anchor;
-        var isVertical = anchor === 'top' || anchor === 'bottom';
-        
-        // Default value of align depends on anchor
-        if(options.align === undefined){
-            options.align = isVertical ? 'center' : 'middle';
-        }
         
         // titleSize
         if(options.size == null){

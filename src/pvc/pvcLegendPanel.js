@@ -18,8 +18,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     pvDot:   null,
     pvLabel: null,
     
-    anchor:     "bottom",
-    align:      "left",
+    anchor:  'bottom',
+    
     pvLegendPanel: null,
     legend:     null,
     legendSize: null,
@@ -33,7 +33,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     drawLine:   false,
     drawMarker: true,
     
-    font:       '10px sans-serif',
+    font: '10px sans-serif',
     
     constructor: function(chart, parent, options){
         if(!options){
@@ -46,8 +46,12 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         var isVertical = anchor !== 'top' && anchor !== 'bottom';
         
         // Default value of align depends on anchor
-        if(isVertical && options.align === undefined){
-            options.align = 'top';
+        if(options.align == null){
+            if(isVertical){
+                options.align = 'top';
+            } else if(isV1Compat) { // centered is better
+                options.align = 'left';
+            }
         }
         
         // legendSize

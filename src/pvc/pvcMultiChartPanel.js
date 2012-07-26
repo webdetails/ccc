@@ -3,82 +3,193 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
     anchor: 'fill',
     
     /**
-     * Implements multi-chart layout.
-     * Currently, it's essentially a flow-layout
+     * <p>
+     * Implements small multiples chart layout.
+     * Currently, it's essentially a flow-layout, 
+     * from left to right and then top to bottom.
+     * </p>
+     * 
+     * <p>
+     * One small multiple chart is generated per unique combination 
+     * of the values of the 'multiChart' visual role.
+     * </p>
+     * 
+     * <p>
+     * The option "multiChartMax" is the maximum number of small charts 
+     * that can be layed out.
+     * 
+     * This can be useful if the chart's size cannot grow or 
+     * if it cannot grow too much.
+     * 
+     * Pagination can be implemented with the use of this and 
+     * the option 'multiChartPageIndex', to allow for effective printing of 
+     * small multiple charts.
+     * </p>
+     * 
+     * <p>
+     * The option "multiChartPageIndex" is the desired page index.
+     * This option requires that "multiChartMax" is also specified with
+     * a finite and >= 1 value.
+     * 
+     * After a render is performed, 
+     * the chart properties
+     * {@link pvc.BaseChart#multiChartPageCount} and 
+     * {@link pvc.BaseChart#multiChartPageIndex} will have been updated. 
+     * </p>
+     * 
+     * <p>
+     * The option 'multiChartMaxColumns' is the
+     * maximum number of charts that can be layed  out in a row.
+     * The default value is 3.
+     * 
+     * The value +Infinity can be specified, 
+     * in which case there is no direct limit on the number of columns.
+     * 
+     * If the width of small charts does not fit in the available width 
+     * then the chart's width is increased. 
+     * </p>
+     * <p>
+     * The option 'multiChartWidth' can be specified to fix the width, 
+     * of each small chart, in pixels or, in string "1%" format, 
+     * as a percentage of the available width.
+     * 
+     * When not specified, but the option "multiChartMaxColumns" is specified and finite,
+     * the width of the small charts is the available width divided
+     * by the maximum number of charts in a row that <i>actually</i> occur
+     * (so that if there are less small charts than 
+     *  the maximum that can be placed on a row, 
+     *  these, nevertheless, take up the whole width).
+     * 
+     * When both the options "multiChartWidth" and "multiChartMaxColumns" 
+     * are unspecified, then the behavior is the same as if
+     * the value "33%" had been specified for "multiChartWidth":
+     * 3 charts will fit in the chart's initially specified width,
+     * yet the chart's width can grow to accommodate for further small charts.
+     * </p>
+     * <p>
+     * The option "multiChartSingleRowFillsHeight" affects the 
+     * determination of the small charts height for the case where a single
+     * row exists.
+     * When the option is true, or unspecified, and a single row exists,
+     * the height of the small charts will be all the available height,
+     * looking similar to a non-multi-chart version of the same chart.
+     *  When the option is false, 
+     *  the determination of the small charts height does not depend
+     *  on the number of rows, and proceeds as follows.
+     * </p>
+     * <p>
+     * If the layout results in more than one row or 
+     * when "multiChartSingleRowFillsHeight" is false,
+     * the height of the small charts is determined using the option
+     * 'multiChartAspectRatio', which is, by definition, width / height.
+     * A typical aspect ratio value would be 5/4, 4/3 or the golden ratio (~1.62).
+     * 
+     * When the option is unspecified, 
+     * a suitable value is determined,
+     * using internal heuristic methods 
+     * that generally depend on the concrete chart type
+     * and specified options.
+     * 
+     * No effort is made to fill all the available height. 
+     * The layout can result in two rows that occupy only half of the 
+     * available height.
+     * If the layout is such that the available height is exceeded, 
+     * then the chart's height is increased.
+     * </p>
+     * <p>
+     * The option 'multiChartMargins' can be specified to control the 
+     * spacing between small charts.
+     * The default value is "2%".
+     * Margins are only applied between small charts: 
+     * the outer margins of border charts are always 0.  
+     * </p>
+     * 
+     * ** Orthogonal scroll bar on height/width overflow??
+     * ** Legend vertical center on page height ?? Dynamic?
      * 
      * @override
      */
     _calcLayout: function(layoutInfo){
-        var clientSize = def.copyOwn(layoutInfo.clientSize);
         var chart = this.chart;
-        var data  = chart.visualRoles('multiChartColumn')
-                         .flatten(chart.data, {visible: true});
         
-        var options = chart.options;
-        
-        // multiChartLimit can be Infinity
-        var multiChartLimit = Number(options.multiChartLimit);
-        if(isNaN(multiChartLimit) || multiChartLimit < 1) {
-            multiChartLimit = Infinity;
-        }
-        
-        var leafCount = data._children.length;
-        var count = Math.min(leafCount, multiChartLimit);
-        if(count === 0) {
-            // Shows no message to the user.
-            // An empty chart, like when all series are hidden with the legend.
+        var multiChartRole = chart.visualRoles('multiChart');
+        if(!multiChartRole.grouping){
+            // Not assigned
             return;
         }
         
-        // multiChartWrapColumn can be Infinity
-        var multiChartWrapColumn = Number(options.multiChartWrapColumn);
-        if(isNaN(multiChartWrapColumn) || multiChartLimit < 1) {
-            multiChartWrapColumn = 3;
+        var clientSize = layoutInfo.clientSize;
+        var options = chart.options;
+        
+        // multiChartMax can be Infinity
+        var multiChartMax = Number(options.multiChartMax);
+        if(isNaN(multiChartMax) || multiChartMax < 1) {
+            multiChartMax = Infinity;
         }
         
-        var colCount = Math.min(count, multiChartWrapColumn);
+        // TODO - multi-chart pagination
+//        var multiChartPageIndex;
+//        if(isFinite(multiChartMax)) {
+//            multiChartPageIndex = chart.multiChartPageIndex;
+//            if(isNaN(multiChartPageIndex)){
+//                multiChartPageIndex = null;
+//            } else {
+//                // The next page number
+//                // Initially, the chart property must have -1 to start iterating.
+//                multiChartPageIndex++;
+//            }
+//        }
+        
+        var data  = multiChartRole.flatten(chart.data, {visible: true});
+        var leafCount = data._children.length;
+        var count = Math.min(leafCount, multiChartMax);
+        if(count === 0) {
+            // Shows no message to the user.
+            // An empty chart, like when all series were hidden through the legend.
+            return;
+        }
+        
+        // multiChartMaxColumns can be Infinity
+        var multiChartMaxColumns = +options.multiChartMaxColumns; // to number
+        if(isNaN(multiChartMaxColumns) || multiChartMax < 1) {
+            multiChartMaxColumns = 3;
+        }
+        
+        var colCount = Math.min(count, multiChartMaxColumns);
+        // <Debug>
+        /*jshint expr:true */
+        colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
+        // </Debug>
+        
         var rowCount = Math.ceil(count / colCount);
+        // <Debug>
+        /*jshint expr:true */
+        rowCount >= 1 || def.assert("Must be at least 1");
+        // </Debug>
         
-        // ----------------------
-        // Small Chart Size determination
+        var width = pvc.PercentValue.parse(options.multiChartWidth);
+        if(width == null){
+            var colsInAvailableWidth = isFinite(multiChartMaxColumns) ? colCount : 3;
+            width = new pvc.PercentValue(1 / colsInAvailableWidth);
+        }
         
-        // Evenly divide available width and height by all small charts 
-        var width  = clientSize.width  / colCount;
-        var height = clientSize.height / rowCount;
-        
-        // Determine min width and min height
-        var minWidth = Number(options.multiChartMinWidth);
-        if(isNaN(minWidth) || !isFinite(minWidth) || minWidth < 0) {
-            // Assume the available width is dimensioned to fit the specified number of columns
-            if(isFinite(multiChartWrapColumn)){
-                minWidth = width;
+        width = pvc.PercentValue.resolve(width, clientSize.width);
+
+        var height;
+        if(rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)){
+            height = clientSize.height;
+        } else {
+            // ar ::= width / height
+            var ar = +options.multiChartAspectRatio; // + is to number
+            if(isNaN(ar) || ar <= 0){
+                 // Determine a suitable aspect ratio
+                ar = this._calulateDefaultAspectRatio(width);
             }
+            
+            height = width / ar;
         }
-        
-        var minHeight = Number(options.multiChartMinHeight);
-        if(isNaN(minHeight) || !isFinite(minHeight) || minHeight < 0) {
-            if(minWidth > 0){
-                minHeight = this._calulateHeight(minWidth);
-            } else {
-                minHeight = null;
-            }
-        }
-        
-        if(minWidth == null && minHeight > 0){
-            minWidth = pvc.goldenRatio * minHeight;
-        }
-        
+
         // ----------------------
-        
-        if(minWidth > 0 && width < minWidth){
-            width = minWidth;
-            clientSize.width = width * colCount;
-        }
-        
-        if(minHeight > 0 && height < minHeight){
-            height = minHeight;
-            clientSize.height = height * rowCount;
-        }
         
         def.set(
            layoutInfo, 
@@ -86,63 +197,76 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             'count', count,
             'width',  width,
             'height', height,
-            'colCount',  colCount);
+            'colCount', colCount,
+            'rowCount', rowCount);
         
-        return clientSize;
+        return {
+            width:  width  * colCount,
+            height: Math.max(clientSize.height, height * rowCount) // vertical align center: pass only: height * rowCount
+        };
     },
     
-    _calulateHeight: function(totalWidth){
-        var chart = this.chart;
-        
-        if(chart instanceof pvc.PieChart){
-            // These are square bounded
-            return totalWidth;
+    _calulateDefaultAspectRatio: function(totalWidth){
+        if(this.chart instanceof pvc.PieChart){
+            // 5/4 <=> 10/8 < 10/7 
+            return 10/7;
         }
         
-        var options = chart.options;
-        var chromeHeight = 0;
-        var chromeWidth  = 0;
+        // Cartesian, ...
+        return 5/4;
         
-        // Try to estimate "chrome" of small chart
-        if(chart instanceof pvc.CartesianAbstract){
-            var isVertical = chart.isOrientationVertical();
-            var size;
-            if(options.showXScale){
-                size = parseFloat(options.xAxisSize || 
-                                  (isVertical ? options.baseAxisSize : options.orthoAxisSize) ||
-                                  options.axisSize);
-                if(isNaN(size)){
-                    size = totalWidth * 0.4;
-                }
-                
-                if(isVertical){
-                    chromeHeight += size;
-                } else {
-                    chromeWidth += size;
-                }
-            }
-            
-            if(options.showYScale){
-                size = parseFloat(options.yAxisSize || 
-                                  (isVertical ? options.orthoAxisSize : options.baseAxisSize) ||
-                                  options.axisSize);
-                if(isNaN(size)){
-                    size = totalWidth * 0.4;
-                }
-                
-                if(isVertical){
-                    chromeWidth += size;
-                } else {
-                    chromeHeight += size;
-                }
-            }
-        }
-        
-        var contentWidth  = Math.max(totalWidth - chromeWidth, 10);
-        var contentHeight = contentWidth;/// pvc.goldenRatio;
-        
-        return  chromeHeight + contentHeight;
+        // TODO: this is not working well horizontal bar charts, for example
+//        var chart = this.chart;
+//        var options = chart.options;
+//        var chromeHeight = 0;
+//        var chromeWidth  = 0;
+//        var defaultBaseSize  = 0.4;
+//        var defaultOrthoSize = 0.2;
+//        
+//        // Try to estimate "chrome" of small chart
+//        if(chart instanceof pvc.CartesianAbstract){
+//            var isVertical = chart.isOrientationVertical();
+//            var size;
+//            if(options.showXScale){
+//                size = parseFloat(options.xAxisSize || 
+//                                  (isVertical ? options.baseAxisSize : options.orthoAxisSize) ||
+//                                  options.axisSize);
+//                if(isNaN(size)){
+//                    size = totalWidth * (isVertical ? defaultBaseSize : defaultOrthoSize);
+//                }
+//                
+//                chromeHeight += size;
+//            }
+//            
+//            if(options.showYScale){
+//                size = parseFloat(options.yAxisSize || 
+//                                  (isVertical ? options.orthoAxisSize : options.baseAxisSize) ||
+//                                  options.axisSize);
+//                if(isNaN(size)){
+//                    size = totalWidth * (isVertical ? defaultOrthoSize : defaultBaseSize);
+//                }
+//                
+//                chromeWidth += size;
+//            }
+//        }
+//        
+//        var contentWidth  = Math.max(totalWidth - chromeWidth, 10);
+//        var contentHeight = contentWidth / this._getDefaultContentAspectRatio();
+//        
+//        var totalHeight = chromeHeight + contentHeight;
+//        
+//        return totalWidth / totalHeight;
     },
+    
+//    _getDefaultContentAspectRatio: function(){
+//        if(this.chart instanceof pvc.PieChart){
+//            // 5/4 <=> 10/8 < 10/7 
+//            return 10/7;
+//        }
+//        
+//        // Cartesian
+//        return 5/2;
+//    },
     
     _createCore: function(li){
         if(!li.data){
@@ -152,12 +276,35 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         
         var chart = this.chart;
         var options = chart.options;
+        var smallChartMargins = options.multiChartMargins || 
+                                new pvc.Sides(new pvc.PercentValue(0.02));
         
         // ----------------------
         // Create and layout small charts
         var ChildClass = chart.constructor;
+        
+        var lastColIndex = li.colCount - 1;
+        var lastRowIndex = li.rowCount - 1;
+        
         for(var index = 0 ; index < li.count ; index++) {
             var childData = li.data._children[index];
+            
+            var colIndex = (index % li.colCount);
+            var rowIndex = Math.floor(index / li.colCount);
+            
+            var margins   = {};
+            if(colIndex > 0){
+                margins.left = smallChartMargins.left;
+            }
+            if(colIndex < lastColIndex){
+                margins.right = smallChartMargins.right;
+            }
+            if(rowIndex > 0){
+                margins.top = smallChartMargins.top;
+            }
+            if(rowIndex < lastRowIndex){
+                margins.bottom = smallChartMargins.bottom;
+            }
             
             var childOptions = def.create(options, {
                     parent:     chart,
@@ -166,9 +313,9 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                     data:       childData,
                     width:      li.width,
                     height:     li.height,
-                    left:       (index % li.colCount) * li.width,
-                    top:        Math.floor(index / li.colCount) * li.height,
-                    margins:    {all: new pvc.PercentValue(0.02)},
+                    left:       colIndex * li.width,
+                    top:        rowIndex * li.height,
+                    margins:    margins,
                     extensionPoints: {
                         // This lets the main bg color show through AND
                         // allows charts to overflow to other charts without that being covered
