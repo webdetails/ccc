@@ -24,7 +24,7 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
         
         function processAxis(axis){
             var offset = axis && axis.option('Offset');
-            if(offset > 0) {
+            if(offset != null && offset >= 0) {
                 if(axis.orientation === 'x'){
                     setSide('left',  offset);
                     setSide('right', offset);

@@ -33,11 +33,15 @@
 
 def.type('pvc.data.Dimension')
 .init(function(data, type){
+    /* NOTE: this function is a hot spot and as such is performance critical */
     this.data  = data;
     this.type  = type;
     this.root  = this;
     this.owner = this;
-    this.name  = type.name;
+    
+    var name = type.name;
+    
+    this.name = name;
     
     // Cache
     // -------
@@ -56,41 +60,46 @@ def.type('pvc.data.Dimension')
         
     } else {
         // Not an owner
+        var parentData = data.parent;
         
         var source; // Effective parent / atoms source
-        if(data.parent){
+        if(parentData){
             // Not a root
-            source = data.parent.dimensions(this.name);
+            source = parentData._dimensions[name];
             dim_addChild.call(source, this);
             
             this.root = data.parent.root;
         } else {
+            parentData = data.linkParent;
             // A root that is not topmost
             /*jshint expr:true */
-            data.linkParent || def.assert("Data must have a linkParent");
+            parentData || def.assert("Data must have a linkParent");
             
-            source = data.linkParent.dimensions(this.name);
+            source = parentData._dimensions[name];
             dim_addLinkChild.call(source, this);
         }
         
         // Not in _atomsKey
         this._nullAtom = this.owner._nullAtom; // may be null
         
-        this._lazyInit = function(){ /* captures 'source' variable */
+        this._lazyInit = function(){ /* captures 'source' and 'name' variable */
             this._lazyInit = null;
             
             // Collect distinct atoms in data._datums
-            this.data._datums.forEach(function(datum){
+            var datums = this.data._datums;
+            var L = datums.length;
+            var atomsByKey = this._atomsByKey;
+            for(var i = 0 ; i < L ; i++){
                 // NOTE: Not checking if atom is already added,
                 // but it has no adverse side-effect.
-                var atom = datum.atoms[this.name];
-                this._atomsByKey[atom.key] = atom;
-            }, this);
+                var atom = datums[i].atoms[name];
+                atomsByKey[atom.key] = atom;
+            }
             
             // Filter parentEf dimension's atoms; keeps order.
             this._atoms = source.atoms().filter(function(atom){
-                return def.hasOwn(this._atomsByKey, atom.key);
-            }, this);
+                return def.hasOwnProp.call(atomsByKey, atom.key);
+            });
         };
     }
 })

@@ -14,6 +14,17 @@ var pvc = def.globalSpace('pvc', {
 // Begin private scope
 (function(){
 
+// Check URL debug and debugLevel
+(function(){
+    if((typeof window.location) !== 'undefined'){
+        var url = window.location.href;
+        if(url && (/\bdebug=true\b/).test(url)){
+            var m = /\bdebugLevel=(\d+)/.exec(url);
+            pvc.debug = m ? (+m[1]) : 1;
+        }
+    }
+}());
+
 // goldenRatio proportion
 // ~61.8% ~ 38.2%
 pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
@@ -63,6 +74,8 @@ function syncTipsyLog(){
         tip.log = pvc.log;
     }
 }
+
+syncTipsyLog();
 
 /**
  * Evaluates x if it's a function or returns the value otherwise
@@ -318,6 +331,8 @@ pvc.toGrayScale = function(color, alpha, maxGrayLevel, minGrayLevel){
     
     if(alpha == null){
         alpha = color.opacity;
+    } else if(alpha < 0){
+        alpha = (-alpha) * color.opacity;
     }
     
     avg = Math.round(avg);
@@ -598,7 +613,7 @@ pv.Mark.prototype.zOrder = function(zOrder) {
 };
 
 // Copy original methods
-var markRender = pv.Mark.prototype.render,
+var markRenderCore = pv.Mark.prototype.renderCore,
     panelAdd   = pv.Panel.prototype.add;
 
 // @replace
@@ -614,33 +629,23 @@ pv.Panel.prototype.add = function(){
 };
 
 // @replace
-pv.Mark.prototype.render = function(){
-    /* For the first render, take it from the top. */
-    if (this.parent && !this.root.scene) {
-        this.root.render();
-        return;
-    }
-    
+pv.Mark.prototype.renderCore = function(){
     /* Ensure zOrder is up to date */
     sortChildren.call(this);
     
     /* Assign a new render id to the root mark */
-    var rootId = this.root._rootId;
-    if(rootId == null){
-        rootId = this.root._rootId = def.nextId('rootMarks');
-    }
+    var root = this.root;
+    root._renderId = (root._renderId || 0) + 1;
     
-    this.root._renderId = def.nextId("render" + rootId);
-    
-    if(pvc.debug >= 4){
-        pvc.log("BEGIN RENDER " + this.root._renderId);
+    if(pvc.debug >= 10){
+        pvc.log("BEGIN RENDER " + root._renderId);
     }
     
     /* Render */
-    markRender.apply(this, arguments);
+    markRenderCore.apply(this, arguments);
     
-    if(pvc.debug >= 4){
-        pvc.log("END RENDER " + this.root._renderId);
+    if(pvc.debug >= 10){
+        pvc.log("END RENDER " + root._renderId);
     }
 };
 
@@ -1556,6 +1561,8 @@ var Polygon = def.type('pvc.Polygon', Shape)
 pv.Behavior.selector = function(autoRefresh, mark) {
   var scene, // scene context
       index, // scene context
+      mprev,
+      inited,
       m1, // initial mouse position
       redrawThis = (arguments.length > 0)?
                     autoRefresh : true; //redraw mark - default: same as pv.Behavior.select
@@ -1570,56 +1577,79 @@ pv.Behavior.selector = function(autoRefresh, mark) {
         scene = mark.scene;
     }
     
+    if(!inited){
+        inited = true;
+        
+        // Staying close to canvas allows cancelling bubbling of the event in time 
+        // for other ascendant handlers
+        var root = this.root.scene.$g;
+        pv.listen(root, "mousemove", mousemove);
+        pv.listen(root, "mouseup",   mouseup  );
+        
+        // But when the mouse leaves the canvas we still need to
+        // receive events...
+        pv.listen(document, "mousemove", mousemove);
+        pv.listen(document, "mouseup",   mouseup  );
+    }
+    
     m1 = this.mouse();
-
-    scene.mark.selectionRect = new pvc.Rect(m1.x, m1.y);
+    mprev = m1;
+    this.selectionRect = new pvc.Rect(m1.x, m1.y);
     
     pv.Mark.dispatch("selectstart", scene, index, e);
   }
-
+  
   /** @private */
   function mousemove(e) {
     if (!scene) {
         return;
     }
     
+    e.stopPropagation();
+    
     scene.mark.context(scene, index, function() {
         // this === scene.mark
-        var m2 = this.mouse(),
-            x = Math.max(0, Math.min(m1.x, m2.x)),
-            y = Math.max(0, Math.min(m1.y, m2.y));
+        var m2 = this.mouse();
+        if(mprev){
+            var dx = m2.x - mprev.x;
+            var dy = m2.y - mprev.y;
+            var len = dx*dx + dy*dy;
+            if(len <= 2){
+                return;
+            }
+            mprev = m2;
+        }
             
-        scene.mark.selectionRect.set(
-            x,
-            y,
-            Math.min(this.width(),  Math.max(m2.x, m1.x)) - x,
-            Math.min(this.height(), Math.max(m2.y, m1.y)) - y);
-
+        var x = m1.x;
+        var y = m1.y;
+            
+        this.selectionRect.set(x, y, m2.x - x, m2.y - y);
+        
         if(redrawThis){
             this.render();
         }
-      });
-
-    pv.Mark.dispatch("select", scene, index, e);
+        
+        pv.Mark.dispatch("select", scene, index, e);
+    });
   }
 
   /** @private */
   function mouseup(e) {
     var lscene = scene;
     if(lscene){
+        
+        e.stopPropagation();
+        
         var lmark = lscene.mark;
         if(lmark){
             pv.Mark.dispatch("selectend", lscene, index, e);
         
             lmark.selectionRect = null;
         }
-        
+        mprev = null;
         scene = null;
     }
   }
-
-  pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup", mouseup);
 
   return mousedown;
 };

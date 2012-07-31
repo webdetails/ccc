@@ -262,14 +262,15 @@ def.type('pvc.data.GroupingLevelSpec')
     },
     
     key: function(datum){
-        var keys  = [],
-            atoms = [];
+        var keys  = [];
+        var atoms = [];
+        var datoms = datum.atoms;
+        var dims  = this.dimensions;
         
         for(var i = 0, D = this.depth  ; i < D ; i++) {
-            var dimName = this.dimensions[i].name,
-                atom = datum.atoms[dimName];
+            var atom = datoms[dims[i].name];
             atoms.push(atom);
-            keys.push(atom.globalKey());
+            keys.push(atom.globalKey);
         }
         
         return {

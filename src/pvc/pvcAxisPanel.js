@@ -59,6 +59,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.axis = axis;
         this.roleName = axis.role.name;
         this.isDiscrete = axis.role.grouping.isDiscrete();
+        
+        if(options.font === undefined){
+            var extensionFont = this._getExtension(this.panelName + 'Label', 'font');
+            if(typeof extensionFont === 'string'){
+                this.font = extensionFont;
+            }
+        }
     },
     
     getTicks: function(){
@@ -108,8 +115,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this._calcAxisSizeFromLabel(); // -> layoutInfo.axisSize and layoutInfo.labelBBox
             }
             
-            /* III - Calculate Trimming Length if FIXED/NEEDED > AVAILABLE */
+            /* III - Calculate Trimming Length if: FIXED/NEEDED > AVAILABLE */
             this._calcMaxTextLengthThatFits();
+            
+            
+            /* IV - Calculate overflow paddings */
+            this._calcOverflowPaddings();
             
             // Release memory.
             layoutInfo.labelBBox = null;
@@ -139,7 +150,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             switch (this.anchor) {
                 case "right":
                 case "left":
-                case "center": 
+                case "center":
                     baseline = "middle";
                     break;
                     
@@ -171,16 +182,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var labelBBox = layoutInfo.labelBBox;
         
         // The length not over the plot area
-        var length;
-        switch(this.anchor){
-            case 'left':   length = -labelBBox.x; break;
-            case 'right':  length = labelBBox.x2; break;
-            case 'top':    length = -labelBBox.y; break;
-            case 'bottom': length = labelBBox.y2; break;
-        }
-        
-        length = Math.max(length, 0);
-        
+        var length = this._getLabelBBoxQuadrantLength(labelBBox, this.anchor);
+
         // --------------
         
         layoutInfo.axisSize = this.tickLength + length; 
@@ -192,6 +195,98 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // so no need to add more.
             layoutInfo.axisSize += this.tickLength;
         }
+    },
+    
+    _getLabelBBoxQuadrantLength: function(labelBBox, quadrantSide){
+        // labelBBox coordinates are relative to the anchor point
+        // x points to the right, y points downwards
+        //        T
+        //        ^
+        //        |
+        // L  <---0--->  R
+        //        |
+        //        v
+        //        B
+        //
+        //  +--> xx
+        //  |
+        //  v yy
+        //
+        //  x1 <= x2
+        //  y1 <= y2
+        // 
+        //  p1 +-------+
+        //     |       |
+        //     +-------+ p2
+        
+        var length;
+        switch(quadrantSide){
+            case 'left':   length = -labelBBox.x;  break;
+            case 'right':  length =  labelBBox.x2; break;
+            case 'top':    length = -labelBBox.y;  break;
+            case 'bottom': length =  labelBBox.y2; break;
+        }
+        
+        return Math.max(length, 0);
+    },
+    
+    _calcOverflowPaddings: function(){
+        if(!this._layoutInfo.labelBBox){
+            this._calcLabelBBox();
+        }
+        
+        this._calcOverflowPaddingsFromLabelBBox();
+    },
+    
+    _calcOverflowPaddingsFromLabelBBox: function(){
+        var layoutInfo = this._layoutInfo;
+        var paddings   = layoutInfo.paddings;
+        var labelBBox  = layoutInfo.labelBBox;
+        var orthoSides = this.isAnchorTopOrBottom() ? ['left', 'right'] : ['top', 'bottom'];
+        
+        var isDiscrete = this.scale.type === 'Discrete';
+        var halfBand;
+        if(isDiscrete){
+            this.axis.setScaleRange(layoutInfo.clientSize[this.anchorLength()]);
+            halfBand = this.scale.range().band / 2;
+        }
+
+        var overflowPaddings = null;
+        orthoSides.forEach(function(side){
+            var overflowPadding  = this._getLabelBBoxQuadrantLength(labelBBox, side);
+            if(overflowPadding > 0){
+                // Discount real paddings that this panel already has
+                // cause they're, in principle, empty space that can be occupied.
+                overflowPadding -= (paddings[side] || 0);
+                if(overflowPadding > 0){
+                    // On discrete axes, half of the band width is not yet overflow.
+                    if(isDiscrete){
+                        overflowPadding -= halfBand;
+                    }
+                    
+                    if(overflowPadding > 1){ // small delta to avoid frequent relayouts... (the reported font height often causes this kind of "error" in BBox calculation)
+                        if(isDiscrete){
+                            // reduction of space causes reduction of band width
+                            // which in turn usually causes the overflowPadding to increase,
+                            // as the size of the text usually does not change.
+                            // Ask a little bit more to hit the target faster.
+                            overflowPadding *= 1.05;
+                        }
+                        
+                        if(!overflowPaddings){ 
+                            overflowPaddings= {}; 
+                        }
+                        overflowPaddings[side] = overflowPadding;
+                    }
+                }
+            }
+        }, this);
+        
+        if(pvc.debug >= 6 && overflowPaddings){
+            pvc.log("[OverflowPaddings] " +  this.panelName + " " + JSON.stringify(overflowPaddings));
+        }
+        
+        layoutInfo.overflowPaddings = overflowPaddings;
     },
     
     _calcMaxTextLengthThatFits: function(){
@@ -945,7 +1040,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
      * @override
      */
     _detectDatumsUnderRubberBand: function(datumsByKey, rb){
-        if(!this.isDiscrete) {
+        if(!this.isDiscrete || !this.isVisible) {
             return false;
         }
         

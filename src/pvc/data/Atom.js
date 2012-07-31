@@ -43,6 +43,7 @@
  *           <p>
  *           Only the null atom has a key equal to "".
  *           </p>
+ * @property {string} globalKey A semantic key that is unique across atoms of every dimensions.
  * 
  * @constructor
  * @private
@@ -61,6 +62,7 @@ function(dimension, value, label, rawValue, key) {
     this.label = label;
     this.rawValue = rawValue;
     this.key = key;
+    this.globalKey = dimension.name + ":" + key;
 })
 .add( /** @lends pvc.data.Atom */{
     /**
@@ -68,13 +70,6 @@ function(dimension, value, label, rawValue, key) {
      */
     toString: function(){
         return this.label;
-    },
-
-    /**
-     * A semantic key that is unique across atoms of every dimensions.
-     */
-    globalKey: function(){
-        return this.dimension.name + ":" + this.key;
     }
 });
 

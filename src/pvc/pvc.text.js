@@ -1,57 +1,41 @@
 
 // Text measurement utility
 def.scope(function(){
+    var _currentFontSizeCache;
     
-    // --------------------------
-    // exported
-    function getTextSize(text, font){
-        switch(pv.renderer()){
-            case 'vml':   return getTextSizeVML(text, font);
-            case 'batik': return getTextSizeCGG(text, font);
+    function createCache(){
+        return new pvc.text.FontSizeCache();
+    }
+    
+    function useCache(cache, fun, ctx){
+        (cache instanceof pvc.text.FontSizeCache) || def.fail.operationInvalid("Not a valid text cache.");
+        
+        var prevCache = _currentFontSizeCache;
+        _currentFontSizeCache = cache;
+        try{
+            return fun.call(ctx);
+        } finally {
+            _currentFontSizeCache = prevCache;
         }
-
-        return getTextSizeSVG(text, font);
+    }
+    
+    function getTextSize(text, font){
+        var bbox = _currentFontSizeCache && _currentFontSizeCache.get(font, text);
+        if(!bbox){
+            bbox = getTextSizeCore(text, font);
+            _currentFontSizeCache && _currentFontSizeCache.put(font, text, bbox);
+        }
+        
+        return bbox;
     }
     
     function getTextLength(text, font){
-        switch(pv.renderer()){
-            case 'vml':
-                return getTextLenVML(text, font);
-
-            case 'batik':
-                var fontInfo = getFontInfoCGG(font);
-
-                // NOTE: the global function 'getTextLenCGG' must be
-                // defined by the CGG loading environment
-                /*global getTextLenCGG:true */
-                return getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight);
-
-            //case 'svg':
-        }
-
-        return getTextLenSVG(text, font);
+        return getTextSize(text, font).width;
     }
 
     function getTextHeight(text, font){
-        switch(pv.renderer()){
-            case 'vml':
-                return getTextHeightVML(text, font);
-
-            case 'batik':
-                var fontInfo = getFontInfoCGG(font);
-
-                // NOTE: the global function 'getTextHeightCGG' must be
-                // defined by the CGG loading environment
-                /*global getTextHeightCGG:true */
-                return getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight);
-
-            //case 'svg':
-        }
-
-        return getTextHeightSVG(text, font);
+        return getTextSize(text, font).height;
     }
-    
-    // -------------
     
     // TODO: if not in px?..
     function getFontSize(font){
@@ -147,7 +131,9 @@ def.scope(function(){
     function getLabelPolygon(textWidth, textHeight, align, baseline, angle, margin){
         // From protovis' SvgLabel.js
         
-        // In text line coordinates. y points downwards
+        // x, y are the position of the left-bottom corner
+        // of the text relative to its anchor point (at x=0,y=0)
+        // x points right, y points down
         var x, y;
         
         switch (baseline) {
@@ -221,10 +207,60 @@ def.scope(function(){
     // --------------------------
     // private
     var $textSizePlaceholder = null,
-        $textSizePvLabel = null,
-        textSizePvLabelFont = null,
+        _svgText = null,
+        _svgTextFont = null,
         textSizePlaceholderId = 'cccTextSizeTest_' + new Date().getTime();
+    
+    function getTextSizeCore(text, font){
+        switch(pv.renderer()){
+            case 'vml':   return getTextSizeVML(text, font);
+            case 'batik': return getTextSizeCGG(text, font);
+        }
 
+        return getTextSizeSVG(text, font);
+    }
+    
+    function getTextSizeSVG(text, font){
+        if(text === "") {
+            return {width: 0, height: 0}; 
+        }
+        
+        if(!_svgText){
+            var holder  = getTextSizePlaceholder();
+            var svgElem = pv.SvgScene.create('svg');
+            svgElem.setAttribute('font-size', '10px');
+            svgElem.setAttribute('font-family', 'sans-serif');
+            
+            _svgText = pv.SvgScene.create('text');
+            svgElem.appendChild(_svgText);
+            holder[0].appendChild(svgElem);
+        }
+        
+        if(!font){
+            font = null;
+        }
+        
+        if(_svgTextFont !== font){
+            _svgTextFont = font;
+            pv.SvgScene.setStyle(_svgText, { 'font': font });
+        }
+        
+        var textNode = _svgText.firstChild;
+        if(textNode) {
+            textNode.nodeValue = ''+text;
+        } else {
+            if (pv.renderer() === "svgweb") { 
+                // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
+                _svgText.appendChild(document.createTextNode(''+text, true));
+            } else {
+                _svgText.appendChild(document.createTextNode(''+text));
+            }
+        }
+
+        var box = _svgText.getBBox();
+        return {width: box.width, height: box.height};
+    }
+    
     function getTextSizePlaceholder(){
         if(!$textSizePlaceholder || !$textSizePlaceholder.parent().length){
             
@@ -235,7 +271,7 @@ def.scope(function(){
                     .attr('id', textSizePlaceholderId)
                     .css('position', 'absolute')
                     .css('visibility', 'hidden')
-                    .css('width', 'auto')
+                    .css('width',  'auto')
                     .css('height', 'auto');
 
                 $('body').append($textSizePlaceholder);
@@ -244,36 +280,24 @@ def.scope(function(){
 
         return $textSizePlaceholder;
     }
+    
+    // ---------------
+    
+    function getTextSizeCGG(text, font){
+        var fontInfo = getFontInfoCGG(font);
 
-    // TODO: the following method fails on empty text...
-    function getTextSizePvLabel(text, font){
-        if(text === ""){
-            text = "m";
-        }
-
-        if(!$textSizePvLabel || textSizePvLabelFont != font){
-            var holder   = getTextSizePlaceholder();
-            var holderId = holder.attr('id');
-
-            var panel = new pv.Panel();
-            panel.canvas(holderId);
-            var lbl = panel.add(pv.Label).text(text);
-            if(font){
-                lbl.font(font);
-            }
-            panel.render();
-
-            $textSizePvLabel   = $('#' + holderId + ' text');
-            textSizePvLabelFont = font;
-        } else {
-            $textSizePvLabel.text(text);
-        }
-
-        return $textSizePvLabel[0];
+        // TODO: Add cgg size method
+        // NOTE: the global functions 'getTextLenCGG' and 'getTextHeightCGG' must be
+        // defined by the CGG loading environment
+        return {
+            /*global getTextLenCGG:true */
+            width:  getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight),
+            /*global getTextHeightCGG:true */
+            height: getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight)
+        };
     }
-
-    var _cggFontCache;
-    var _cggFontTextElem;
+    
+    var _cggFontCache, _cggFontTextElem;
     
     function getFontInfoCGG(font){
         var fontInfo = _cggFontCache && _cggFontCache[font];
@@ -316,57 +340,9 @@ def.scope(function(){
     
     // -------------
     
-    function getTextSizeCGG(text, font){
-        var fontInfo = getFontInfoCGG(font);
-        
-        // TODO: Add cgg size method
-        return {
-            /*global getTextLenCGG:true */
-            width:  getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight),
-            /*global getTextHeightCGG:true */
-            height: getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight)
-        };
-    }
-    
-    // -------------
-    
-    function getTextSizeSVG(text, font){
-        if(!text) { return {width: 0, height: 0}; }
-        
-        var lbl = getTextSizePvLabel(text, font);
-        var box = lbl.getBBox();
-        return {width: box.width, height: box.height};
-    }
-    
-    function getTextLenSVG(text, font){
-        if(!text) { return {width: 0, height: 0}; }
-        
-        var lbl = getTextSizePvLabel(text, font);
-        var box = lbl.getBBox();
-        return box.width;
-    }
-
-    function getTextHeightSVG(text, font){
-        if(!text) { return {width: 0, height: 0}; }
-        
-        var lbl = getTextSizePvLabel(text, font);
-        var box = lbl.getBBox();
-        return box.height;
-    }
-    
-    // -------------
-    
     function getTextSizeVML(text, font){
         var box = pv.Vml.text_dims(text, font);
         return {width: box.width, height: box.height};
-    }
-    
-    function getTextLenVML(text, font){
-        return pv.Vml.text_dims(text, font).width;
-    }
-
-    function getTextHeightVML(text, font){
-        return pv.Vml.text_dims(text, font).height;
     }
     
     // -------------
@@ -396,8 +372,33 @@ def.scope(function(){
 
         return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
     }
+
+    // ----------------
     
-    pvc.text = {
+    def
+    .type('pvc.text.FontSizeCache')
+    .init(function(){
+        this._fontsCache = {};
+    })
+    .add({
+        _getFont: function(font){
+            return def.getOwn(this._fontsCache, font||'') || (this._fontsCache[font||''] = {});
+        },
+        
+        get: function(font, text){
+            return def.getOwn(this._getFont(font), text||'');
+        },
+        
+        put: function(font, text, size){
+            return this._getFont(font)[text||''] = size;
+        }
+    });
+    
+    // ----------------
+    
+    def.copyOwn(pvc.text, {
+        createCache:     createCache,
+        useCache:        useCache,
         getTextSize:     getTextSize,
         getTextLength:   getTextLength,
         getFontSize:     getFontSize,
@@ -408,5 +409,5 @@ def.scope(function(){
         justify:         justifyText,
         getLabelBBox:    getLabelBBox,
         getLabelPolygon: getLabelPolygon
-    };
+    });
 });

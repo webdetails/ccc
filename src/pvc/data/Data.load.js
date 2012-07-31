@@ -82,7 +82,9 @@ function data_loadDatums(atomz, whereFun, isNullFun) {
         }
         
         // Mark Really Used Atoms (includes null atoms)
-        def.each(datum.atoms, function(atom){
+        var datoms = datum.atoms;
+        for(var dimName in datoms){
+            var atom = datoms[dimName];
             if(atom){
                 var dim = atom.dimension;
                 if(dim._virtualNullAtom === atom){
@@ -96,9 +98,9 @@ function data_loadDatums(atomz, whereFun, isNullFun) {
                     dim.intern(null);
                 }
                 
-                visitedAtomsKeySetByDimension[atom.dimension.name][atom.key] = true;
+                visitedAtomsKeySetByDimension[dimName][atom.key] = true;
             }
-        });
+        }
         
         return datum;
     }

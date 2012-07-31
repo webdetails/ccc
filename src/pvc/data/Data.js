@@ -65,36 +65,41 @@
  */
 def.type('pvc.data.Data', pvc.data.Complex)
 .init(function(keyArgs){
+    /* NOTE: this function is a hot spot and as such is performance critical */
+    
+    /*jshint expr:true*/
+    keyArgs || def.fail.argumentRequired('keyArgs');
+    
     this._dimensions = {};
     this._visibleDatums = new def.Map();
     
     var owner,
         atoms,
         atomsBase,
-        parent = this.parent = def.get(keyArgs, 'parent') || null;
+        parent = this.parent = keyArgs.parent || null;
     if(parent){
         // Not a root
         this.root    = parent.root;
         this.depth   = parent.depth + 1;
         this.type    = parent.type;
-        this._datums = def.get(keyArgs, 'datums') || def.fail.argumentRequired('datums');
+        this._datums = keyArgs.datums || def.fail.argumentRequired('datums');
         
         owner = parent.owner;
-        atoms = def.get(keyArgs, 'atoms') || def.fail.argumentRequired('atoms');
+        atoms = keyArgs.atoms || def.fail.argumentRequired('atoms');
         atomsBase = parent.atoms;
     } else {
         // Root (topmost or not)
         this.root = this;
         // depth = 0
         
-        var linkParent = def.get(keyArgs, 'linkParent') || null;
+        var linkParent = keyArgs.linkParent || null;
         if(linkParent){
             // A root that is not topmost - owned, linked
             owner = linkParent.owner;
             //atoms = pv.values(linkParent.atoms); // is atomsBase, below
             
             this.type    = owner.type;
-            this._datums = def.get(keyArgs, 'datums') || linkParent._datums.slice();
+            this._datums = keyArgs.datums || linkParent._datums.slice();
             this._leafs  = [];
             
             /* 
@@ -111,7 +116,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             //atoms = null
             atomsBase = {};
 
-            this.type = def.get(keyArgs, 'type') || def.fail.argumentRequired('type');
+            this.type = keyArgs.type || def.fail.argumentRequired('type');
             
             // Only owner datas cache selected datums
             this._selectedDatums = new def.Map();
@@ -128,12 +133,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /* Need this because of null interning/uninterning and atoms chaining */
     this._atomsBase = atomsBase;
     
-    this.type.dimensionsList().forEach(function(dimType){
-        var name = dimType.name,
-            dimension = new pvc.data.Dimension(this, dimType);
-        
-        this._dimensions[name] = dimension;
-    }, this);
+    this.type.dimensionsList().forEach(this._initDimension, this);
     
     // Call base constructors
     this.base(owner, atoms, atomsBase);
@@ -284,7 +284,12 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type boolean
      */
     _isFlattenGroup: false,
-
+    
+    _initDimension: function(dimType){
+        this._dimensions[dimType.name] = 
+                new pvc.data.Dimension(this, dimType);
+    },
+    
     /**
      * Obtains a dimension given its name.
      * 

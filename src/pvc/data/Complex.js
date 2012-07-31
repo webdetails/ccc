@@ -2,6 +2,7 @@
  * The separator used between labels of dimensions of a complex.
  */
 var complex_labelSep = " ~ ";
+var complex_nextId = 1;
 
 /**
  * Initializes a complex instance.
@@ -45,64 +46,82 @@ var complex_labelSep = " ~ ";
 def
 .type('pvc.data.Complex')
 .init(function(owner, atoms, atomsBase) {
-    // <Debug>
     /*jshint expr:true */
-    (owner && owner.isOwner()) || def.fail.argumentInvalid('owner', "Must be an owner data.");
+    
+    /* NOTE: this function is a hot spot and as such is performance critical */
+    
+    // <Debug>
+    var asserts = pvc.debug >= 6;
+    if(asserts){
+        (owner && owner.isOwner()) || def.fail.argumentInvalid('owner', "Must be an owner data.");
+    }
     // </Debug>
     
-    this.id    = def.nextId();
+    this.id    = complex_nextId++;
     this.owner = owner;
-    
     this.atoms = atomsBase ? Object.create(atomsBase) : {};
 	
     if (!atoms) {
         this.value = null;
         this.key   = '';
     } else {
-        var atomsMap = this.atoms,
-            count    = 0,
-            singleValue;
-        
-        atoms.forEach(function(atom) {
-            atom || def.fail.argumentRequired('atom');
-            
+        var atomsMap = this.atoms;
+        var count = 0;
+        var singleAtom;
+        var i;
+        var L = atoms.length;
+        for(i = 0 ; i < L ; i++){
+            var atom  = atoms[i] || def.fail.argumentRequired('atom');
             var value = atom.value; 
-            if(value != null){ // already in proto object
-                var atomDim  = atom.dimension, 
-                    name     = atomDim.name,
+            if(value != null){ // nulls are already in base proto object
+                var name     = atom.dimension.name,
                     atomBase = atomsBase && atomsBase[name];
 
-                if(!atomBase || atom !== atomBase) { 
+                if(!atomBase || atom !== atomBase) { // don't add atoms already in base proto object
                     // <Debug>
-                    if(atomDim !== owner.dimensions(name)){
-                        throw def.error.operationInvalid("Invalid atom dimension '{0}'.", [name]);
-                    }
-
-                    if(def.hasOwn(atomsMap, name)) {
-                        throw def.error.operationInvalid("An atom of the same dimension has already been added '{0}'.", [name]);
+                    if(asserts){
+                        if(atom.dimension !== owner.dimensions(name)){
+                            throw def.error.operationInvalid("Invalid atom dimension '{0}'.", [name]);
+                        }
+    
+                        if(def.hasOwnProp.call(atomsMap, name)) {
+                            throw def.error.operationInvalid("An atom of the same dimension has already been added '{0}'.", [name]);
+                        }
                     }
                     // </Debug>
                     
                     count++;
                     atomsMap[name] = atom;
                     if(count === 1){
-                        singleValue = atom.value;
+                        singleAtom = atom;
                     }
                 }
             }
-        }, this);
-		
-        var keys = [];
-        owner.type
-            .dimensionsNames()
-            .forEach(function(dimName){
-                if(def.hasOwn(atomsMap, dimName)) {
-                    keys.push(atomsMap[dimName].globalKey());
+        }
+        
+        if(count === 1){
+            this.value = singleAtom.value;     // typed
+            this.key   = singleAtom.globalKey; // string
+        } else {
+            // For small number of strings, it's actually faster to 
+            // just concatenate strings comparing to the array.join method 
+            var dimNames = owner.type._dimsNames;
+            var key;
+            L = dimNames.length;
+            for(i = 0 ; i < L ; i++){
+                var dimName = dimNames[i];
+                if(def.hasOwnProp.call(atomsMap, dimName)){
+                    var akey = atomsMap[dimName].globalKey;
+                    if(i === 0){
+                        key = akey;
+                    } else {
+                        key += ',' + akey;
+                    }
                 }
-            });
-
-        this.key   = keys.join(',');
-        this.value = count === 1 ? singleValue : this.key;
+            }
+        
+            this.value = this.key = key;
+        }
 	}
 })
 .add(/** @lends pvc.data.Complex# */{
@@ -110,7 +129,7 @@ def
     buildLabel: function(atoms){
     
         if(atoms){
-            return  atoms
+            return atoms
                     .map(function(atom){ return atom.label; })
                     .filter(def.notEmpty)
                     .join(complex_labelSep);

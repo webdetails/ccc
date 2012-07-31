@@ -98,16 +98,12 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
         } else if(scene.anySelected() && !scene.isSelected()) {
             switch(type) {
                 case 'fill':
-                case 'stroke':
+                //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
                     return this.dimColor(type, color);
             }
         }
 
         return this.base(type, color);
-    },
-    
-    dimColor: function(type, color){
-        return pvc.toGrayScale(color, 0.6);
     },
     
     /* Offset */

@@ -130,7 +130,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             if (!def.empty(title)) {
                 titlePanel = new pvc.AxisTitlePanel(this, this._gridDockPanel, {
                     title:        title,
-                    font:         axis.option('TitleFont'),
+                    font:         axis.option('TitleFont') || axis.option('Font'),
                     anchor:       axis.option('Position'),
                     align:        axis.option('TitleAlign'),
                     margins:      axis.option('TitleMargins'),
@@ -142,7 +142,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             
             var panel = pvc.AxisPanel.create(this, this._gridDockPanel, axis, {
                 useCompositeAxis:  axis.option('Composite'),
-                font:              axis.option('LabelFont'),
+                font:              axis.option('Font'),
                 anchor:            axis.option('Position'),
                 axisSize:          axis.option('Size'),
                 axisSizeMax:       axis.option('SizeMax'),
@@ -378,31 +378,14 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     
     _setAxisScaleRange: function(axis){
         var info = this._mainContentPanel._layoutInfo;
+        
         var size = (axis.orientation === 'x') ?
                    info.clientSize.width :
                    info.clientSize.height;
         
-        var scale = axis.scale;
-        scale.min  = 0;
-        scale.max  = size;
-        scale.size = size; // original size // TODO: remove this...
-        
-        // -------------
-        
-        if(scale.type === 'Discrete'){
-            if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
-                var bandRatio = this.options.panelSizeRatio || 0.8;
-                scale.splitBandedCenter(scale.min, scale.max, bandRatio);
-            }
-        } else {
-            scale.range(scale.min, scale.max);
-        }
-        
-        if(pvc.debug >= 4){
-            pvc.log("Scale: " + JSON.stringify(def.copyOwn(scale)));
-        }
-        
-        return scale;
+        axis.setScaleRange(size);
+
+        return axis.scale;
     },
     
     _getAxesRoundingPaddings: function(){

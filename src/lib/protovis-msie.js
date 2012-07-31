@@ -322,7 +322,7 @@ var vml = {
   },
   
   stroke: function ( elm, attr, scenes, i  ) {
-    var stroke = elm.getElementsByTagName( 'stroke' )[0];
+    var stroke = elm.getElementsByTagName('stroke')[0];
     if ( !stroke ) {
       stroke = elm.appendChild( vml.createElement( 'vml:stroke' ) );
     }
@@ -365,8 +365,7 @@ var vml = {
       vml.styles.styleSheet.addRule( '.msvml_block', 'position:absolute;top:0;left:0;' );
       try {
         if ( !document.namespaces.pvml ) { document.namespaces.add( 'pvml', 'urn:schemas-microsoft-com:vml'); }
-      }
-      catch (e) {
+      } catch (e) {
         vml.pre  = '<';
         vml.post = ' class="msvml" xmlns="urn:schemas-microsoft.com:vml">';
       }
@@ -631,10 +630,13 @@ pv.VmlScene.setAttributes = function(e, attributes){
 };
 
 pv.VmlScene.setStyle = function(e, style){
+    var eStyle = e.style;
     for (var name in style) {
         var value = style[name];
-        if (value == null) e.style.removeAttribute(name);   // cssText 
-        else e.style[name] = value;
+        if (value == null) 
+            eStyle.removeAttribute(name);   // cssText 
+        else 
+            eStyle[name] = value;
     }
 };
 
@@ -666,25 +668,39 @@ pv.VmlScene.panel = function(scenes) {
 
     /* svg */
     if (!scenes.parent) {
-      s.canvas.style.display = "inline-block";
-      s.canvas.style.zoom = 1;
-      if (g && (g.parentNode != s.canvas)) {
-        g = s.canvas.firstChild;
+      var canvas = s.canvas;
+      canvas.style.display = "inline-block";
+      canvas.style.zoom = 1;
+      
+      if (g && (g.parentNode !== canvas)) {
+        g = canvas.firstChild;
         e = g && g.firstChild;
       }
-      if ( !g ) {
-        vml.init(); // turn VML on if it isn't allready
-        g = s.canvas.appendChild( vml.createElement( "svg" ) );
-        for (var j = 0; j < this.events.length; j++) {
+      
+      if(!g) {
+        vml.init(); // turn VML on if it isn't already
+        
+        g = canvas.appendChild( vml.createElement( "svg" ) );
+        
+        // [DCL] Prevent selecting VML elements when dragging 
+        g.onselectstart = function(){ return false; };
+        
+        var events = this.events;
+        var dispatch = this.dispatch;
+        for (var j = 0, L = events.length; j < L; j++) {
           g.addEventListener
-              ? g.addEventListener(this.events[j], this.dispatch, false)
-              : g.attachEvent("on" + this.events[j], this.dispatch);
+              ? g.addEventListener(events[j], dispatch, false)
+              : g.attachEvent("on" + events[j], dispatch);
         }
+        
         e = g.firstChild;
       }
+      
       scenes.$g = g;
+      
       var w = (s.width + s.left + s.right),
           h = (s.height + s.top + s.bottom);
+      
       g.style.width  = w + 'px';
       g.style.height = h + 'px';
       g.style.clip = "rect(0px " + w + "px " + h + "px 0px)";
@@ -701,18 +717,24 @@ pv.VmlScene.panel = function(scenes) {
     this.scale *= t.k;
 
     /* children */
-    for (var j = 0; j < s.children.length; j++) {
-      s.children[j].$g = e = this.expect(e, "g", scenes, i, {
+    var children = s.children;
+    for (var j = 0, C = children.length ; j < C; j++) {
+      var child = children[j];
+      
+      child.$g = e = this.expect(e, "g", scenes, i, {
           "transform": "translate(" + x + "," + y + ")" + (t.k != 1 ? " scale(" + t.k + ")" : "")
-        });
-      this.updateAll(s.children[j]);
-      if ( !e.parentNode || e.parentNode.nodeType === 11 ) {
+      });
+      
+      this.updateAll(child);
+      var parentNode = e.parentNode;
+      if (!parentNode || parentNode.nodeType === 11 ) {
         g.appendChild(e);
         var helper = vml.elm_defaults[ e.svgtype ];
         if ( helper && typeof helper.onappend === 'function' ) {
           helper.onappend( e, scenes[i] );
         }
       }
+      
       e = e.nextSibling;
     }
 
@@ -741,7 +763,8 @@ pv.VmlScene.panel = function(scenes) {
                       "newValue","offsetX","offsetY","pageX","pageY","prevValue",
                       "relatedNode","relatedTarget","screenX","screenY",
                       "shiftKey","srcElement","target","toElement","view","wheelDelta","which"];
-
+  var _evPropCount = _event_props.length;
+  
   function IEvent ( src ) {
     if ( src && src.type ) {
       this.originalEvent = src;
@@ -750,40 +773,47 @@ pv.VmlScene.panel = function(scenes) {
       if (src.defaultPrevented || src.returnValue === false || src.getPreventDefault && src.getPreventDefault()) {
         this.isDefaultPrevented = returnTrue;
       }
-    }
-    else {
+      this.timeStamp = src.timeStamp || Date.now();
+    } else {
       this.type = src;
+      this.timeStamp = Date.now();
     }
-    this.timeStamp = Date.now();
   }
+  
   IEvent.prototype = {
     preventDefault: function() {
       this.isDefaultPrevented = returnTrue;
       var e = this.originalEvent;
-      if ( !e ) { return; }
+      if (!e) { 
+          return; 
+      }
+      
       // if preventDefault exists run it on the original event
-      if ( e.preventDefault ) {
+      if (e.preventDefault){
         e.preventDefault();
         // otherwise set the returnValue property of the original event to false (IE)
-      }
-      else {
+      } else {
         e.returnValue = false;
       }
     },
+    
     stopPropagation: function() {
       this.isPropagationStopped = returnTrue;
 
       var e = this.originalEvent;
-      if ( !e ) {
+      if (!e) {
         return;
       }
+      
       // if stopPropagation exists run it on the original event
-      if ( e.stopPropagation ) {
+      if(e.stopPropagation) {
         e.stopPropagation();
       }
+      
       // otherwise set the cancelBubble property of the original event to true (IE)
       e.cancelBubble = true;
     },
+    
     stopImmediatePropagation: function() {
       this.isImmediatePropagationStopped = returnTrue;
       this.stopPropagation();
@@ -792,59 +822,78 @@ pv.VmlScene.panel = function(scenes) {
     isPropagationStopped: returnFalse,
     isImmediatePropagationStopped: returnFalse
   };
-
-  vml.fixEvent = function ( ev ) {
-
+  
+  var SCROLL_NODE = (document.compatMode && document.compatMode != "BackCompat") ? 'documentElement' : 'body';
+  
+  vml.fixEvent = function(ev){
     // store a copy of the original event object
     // and "clone" to set read-only properties
     var originalEvent = ev;
-    ev = new IEvent( originalEvent );
-
-    for (var i=0,l=_event_props.length; i<l; i++) {
-      var prop = _event_props[i];
-      ev[ prop ] = originalEvent[ prop ];
+    
+    ev = new IEvent(originalEvent);
+    
+    var type = ev.type;
+    var isKey = type === 'keypress';
+    
+    for (var i = _evPropCount ; i ; ) {
+      var prop = _event_props[--i];
+      ev[prop] = originalEvent[prop];
     }
-
+    
     // Fix target property, if necessary
-    if ( !ev.target ) {
-      ev.target = ev.srcElement || document;
+    var target = ev.target;
+    if (!target) {
+        target = ev.srcElement || document;
+        
+        // Target should not be a text node (#504, Safari)
+        if (target.nodeType === 3) {
+            target = target.parentNode;
+        }
+        
+        ev.target = target; 
     }
 
     // Add relatedTarget, if necessary
-    if ( !ev.relatedTarget && ev.fromElement ) {
-      ev.relatedTarget = (ev.fromElement === ev.target)
-                ? ev.toElement
-                : ev.fromElement;
+    var fromElem;
+    if (!ev.relatedTarget && (fromElem = ev.fromElement)) {
+      ev.relatedTarget = (fromElem === target) ? ev.toElement : fromElem;
     }
-
+    
     // Calculate pageX/Y if missing and clientX/Y available
-    if ( ev.pageX == null && ev.clientX != null ) {
-      var doc = document.documentElement,
-         body = document.body;
-      ev.pageX = ev.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc && doc.clientLeft || body && body.clientLeft || 0);
-      ev.pageY = ev.clientY + (doc && doc.scrollTop  || body && body.scrollTop  || 0) - (doc && doc.clientTop  || body && body.clientTop  || 0);
+    if(!isKey){
+        var clientX;
+        if (ev.pageX == null && (clientX = ev.clientX) != null) {
+          var scrollNode = document[SCROLL_NODE];
+          
+          ev.pageX =    clientX + (scrollNode.scrollLeft || 0) - (scrollNode.clientLeft || 0);
+          ev.pageY = ev.clientY + (scrollNode.scrollTop  || 0) - (scrollNode.clientTop  || 0);
+        }
+    }
+    
+    if (ev.which == null) {
+        var charCode, keyCode, btn;
+        if(!isKey){
+            // Add which for mouse events
+            if((btn = ev.button) !== null){
+                // Add which for click: 1 === left; 2 === middle; 3 === right
+                // Note: button is not normalized, so don't use it
+                ev.which = (btn & 1 ? 1 : (btn & 2 ? 3 : (btn & 4 ? 2 : 0 ) ));
+            }
+        } else {
+            // Add which for key events
+            if((charCode = ev.charCode) != null){
+                ev.which = charCode;
+            } else if((keyCode = ev.keyCode) != null){
+                ev.which = keyCode;
+            }  
+        }
     }
 
-    // Add which for key events
-    if ( ev.which == null && (ev.charCode != null || ev.keyCode != null) ) {
-      ev.which = ev.charCode != null
-              ? ev.charCode
-              : ev.keyCode;
-    }
-
-    // Add metaKey to non-Mac browsers (use ctrl for PC's and Meta for Macs)
-    if ( !ev.metaKey && ev.ctrlKey ) {
-      ev.metaKey = ev.ctrlKey;
-    }
-
-    // Add which for click: 1 === left; 2 === middle; 3 === right
-    // Note: button is not normalized, so don't use it
-    if ( !ev.which && ev.button !== undefined ) {
-      ev.which = (ev.button & 1 ? 1 : ( ev.button & 2 ? 3 : ( ev.button & 4 ? 2 : 0 ) ));
-    }
+    // For mouse/key events, metaKey==false if it's undefined
+    ev.metaKey = !!ev.metaKey;
 
     // Mousewheel delta
-    if ( ev.type === "mousewheel" ) {
+    if (type === "mousewheel") {
       ev.wheel = ev.wheelDelta;
     }
 
@@ -877,11 +926,10 @@ pv.listen = function(target, type, listener) {
       : target.attachEvent("on" + type, listener);
 };
 
-
-pv.VmlScene.dispatch = pv.listener(function(e) {
+pv.VmlScene.dispatch = pv.listener(function(e){
   var t = e.target.$scene;
-  if ( t && pv.Mark.dispatch(e.type, t.scenes, t.index, e) ) {
-    e.preventDefault();
+  if (t && pv.Mark.dispatch(e.type, t.scenes, t.index, e)){
+      e.preventDefault();
   }
 });
 

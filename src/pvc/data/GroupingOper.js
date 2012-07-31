@@ -266,7 +266,7 @@ add(/** @lends pvc.data.GroupingOper */{
                     /* A key that does not include null atoms */
                     key = def.query(child.atoms)
                              .where (function(atom){ return atom.value != null; })
-                             .select(function(atom){ return atom.globalKey();   })
+                             .select(function(atom){ return atom.globalKey;   })
                              .array()
                              .join(',')
                              ;

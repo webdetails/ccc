@@ -24,11 +24,14 @@ def.type('pvc.visual.Sign')
         .lock('datum', function(){ 
             return this.scene.datum; 
         });
-        
-    pvMark.sign = def.fun.constant(this);
+    
+    pvMark.sign = this;
     
     /* Intercept the protovis mark's buildInstance */
-    pvMark.buildInstance = this._buildInstance.bind(this, pvMark.buildInstance);
+    
+    // Avoid doing a function bind, cause buildInstance is a very hot path
+    pvMark._buildInstance = pvMark.buildInstance;
+    pvMark.buildInstance  = this._dispatchBuildInstance;
 })
 .postInit(function(panel, pvMark, keyArgs){
     this._addInteractive(keyArgs);
@@ -94,10 +97,17 @@ def.type('pvc.visual.Sign')
     },
     
     /* SCENE MAINTENANCE */
-    _buildInstance: function(baseBuildInstance, instance){
+    _dispatchBuildInstance: function(instance){
+        // this: the mark
+        this.sign._buildInstance(this, instance);
+    },
+    
+    _buildInstance: function(mark, instance){
         /* Reset scene/instance state */
         this.pvInstance = instance; // pv Scene
-        this.scene = instance.data;
+        
+        var scene  = instance.data;
+        this.scene = scene;
         
         /* 
          * Update the scene's render id, 
@@ -105,18 +115,12 @@ def.type('pvc.visual.Sign')
          * cached data.
          */
         /*global scene_renderId:true */
-        scene_renderId.call(this.scene, this.pvMark.renderId());
+        scene_renderId.call(scene, mark.renderId());
 
         /* state per: sign & scene & render */
         this.state = {};
 
-        this._initScene();
-        
-        baseBuildInstance.call(this.pvMark, instance);
-    },
-    
-    _initScene: function(){
-        /* NOOP */
+        mark._buildInstance.call(mark, instance);
     },
     
     /* Extensibility */
@@ -262,6 +266,6 @@ def.type('pvc.visual.Sign')
     },
 
     dimColor: function(type, color){
-        return pvc.toGrayScale(color);
+        return pvc.toGrayScale(color, -0.3, null, null); // ANALYZER requirements, so until there's no way to configure it...
     }
 });

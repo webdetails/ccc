@@ -53,7 +53,7 @@ var testHeatGridMegaOptions = {
     "labelFontFamily":"Default",
     "lineWidth":2,
     "showLegend":true,
-    "axisLabelFont":"12px sans-serif",
+    "axisFont":"12px sans-serif",
     "legendAlign":"middle",
     "extensionPoints":{
         "xAxisLabel_textStyle":"#000000",

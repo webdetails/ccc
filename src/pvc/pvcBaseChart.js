@@ -506,13 +506,13 @@ pvc.BaseChart = pvc.Abstract.extend({
     _getLoadFilter: function(){
         if(this.options.ignoreNulls) {
             return function(datum){
-                var isNull = !datum.isNull;
+                var isNull = datum.isNull;
                 
                 if(isNull && pvc.debug >= 4){
                     pvc.log("Datum excluded.");
                 }
                 
-                return isNull;
+                return !isNull;
             };
         }
     },
@@ -1128,41 +1128,50 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._multiChartPanel = new pvc.MultiChartPanel(this, this.basePanel);
     },
     
+    useTextMeasureCache: function(fun, ctx){
+        var root = this.root;
+        var textMeasureCache = root._textMeasureCache || (root._textMeasureCache = pvc.text.createCache());
+        
+        return pvc.text.useCache(textMeasureCache, fun, ctx || this);
+    },
+    
     /**
      * Render the visualization.
      * If not pre-rendered, do it now.
      */
-    render: function(bypassAnimation, recreate, reloadData) {
-        try{
-            if (!this.isPreRendered || recreate) {
-                this._preRender({reloadData: reloadData});
-            } else if(!this.parent && this.isPreRendered) {
-                pvc.removeTipsyLegends();
-            }
-
-            this.basePanel.render({
-                bypassAnimation: bypassAnimation, 
-                recreate: recreate
-             });
-            
-        } catch (e) {
-            var isNoData = (e instanceof NoDataException);
-            if (isNoData) {
-                if(pvc.debug > 1){
-                    pvc.log("No data found.");
+    render: function(bypassAnimation, recreate, reloadData){
+        this.useTextMeasureCache(function(){
+            try{
+                if (!this.isPreRendered || recreate) {
+                    this._preRender({reloadData: reloadData});
+                } else if(!this.parent && this.isPreRendered) {
+                    pvc.removeTipsyLegends();
                 }
-
-                this._addErrorPanelMessage("No data found", true);
-            } else {
-                // We don't know how to handle this
-                pvc.logError(e.message);
+    
+                this.basePanel.render({
+                    bypassAnimation: bypassAnimation, 
+                    recreate: recreate
+                 });
                 
-                if(pvc.debug > 0){
-                    this._addErrorPanelMessage("Error: " + e.message, false);
+            } catch (e) {
+                var isNoData = (e instanceof NoDataException);
+                if (isNoData) {
+                    if(pvc.debug > 1){
+                        pvc.log("No data found.");
+                    }
+    
+                    this._addErrorPanelMessage("No data found", true);
+                } else {
+                    // We don't know how to handle this
+                    pvc.logError(e.message);
+                    
+                    if(pvc.debug > 0){
+                        this._addErrorPanelMessage("Error: " + e.message, false);
+                    }
+                    //throw e;
                 }
-                //throw e;
             }
-        }
+        });
     },
 
     _addErrorPanelMessage: function(text, isNoData){
@@ -1300,8 +1309,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 if(logOut){
                     if(logOut.length){
                         pvc.log("Applying Extension Points for: '" + prefix + "'\n\t* " + logOut.join("\n\t* "));
-                    } else if(pvc.debug >= 4) {
-                        pvc.log("Applying Extension Points for: '" + prefix + "' (none)");
+                    } else if(pvc.debug >= 5) {
+                        pvc.log("No Extension Points for: '" + prefix + "'");
                     }
                 }
             }

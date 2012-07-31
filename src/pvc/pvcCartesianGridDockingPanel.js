@@ -135,8 +135,8 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
      * TOP
      * -------------------
      * Axis Rules:     0
-     * Frame/EndLine: -5
      * Line/Dot/Area Content: -7
+     * Frame/EndLine: -8
      * ZeroLine:      -9   <<------
      * Content:       -10 (default)
      * FullGrid:      -12
@@ -162,7 +162,7 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
         // and
         // yScale(yScale.domain()[0]) -> yScale(yScale.domain()[1])
         var pvFrame = this.pvPanel.add(pv.Bar)
-                        .zOrder(-5)
+                        .zOrder(-8)
                         .left(left)
                         .right(right)
                         .top (top)

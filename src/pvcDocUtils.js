@@ -1,5 +1,13 @@
 
-pvc.debug = 3;
+(function(){
+var url;
+if(typeof (url = window.location.href) !== 'undefined'){
+    if(!((/\bdebug=true\b/).test(url) && /\bdebugLevel=(\d+)/.test(url))){
+        pvc.debug = 3;
+    }
+}
+}());
+
 var tryMe = function(e){ 
     try{
         /*jshint evil:true */
@@ -106,9 +114,13 @@ def.scope(function(){
     }
    
     function renderAllChartExamples(){
-        $("#examples div").remove();
-        
-        for(var id in chartExamples){ 
+        var first = true;
+        for(var id in chartExamples){
+            if(first){
+                first = false;
+                $("#examples div").remove();
+            }
+            
             $e.render(id);
         }
     }

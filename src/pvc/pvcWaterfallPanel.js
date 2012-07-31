@@ -112,7 +112,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         }
         
         this.pvBar
-            .sign()
+            .sign
             .override('baseColor', function(type){
                 var color = this.base(type);
                 if(type === 'fill'){

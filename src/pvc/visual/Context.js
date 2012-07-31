@@ -63,7 +63,7 @@ def.type('pvc.visual.Context')
  */
 function visualContext_update(mark, event){
 
-    this.sign   = mark.sign ? mark.sign() : null;
+    this.sign   = mark.sign || null;
     this.event  = event || null;
     this.index  = mark.index; // !scene => index = null
     this.pvMark = mark;

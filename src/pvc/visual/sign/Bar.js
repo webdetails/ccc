@@ -74,10 +74,6 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
         return this.base(type, color);
     },
 
-    dimColor: function(type, color){
-        return pvc.toGrayScale(color, 0.6);
-    },
-
     /* STROKE WIDTH */
     strokeWidth: function(){
         var strokeWidth = this.baseStrokeWidth();

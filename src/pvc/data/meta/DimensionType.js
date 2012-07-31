@@ -343,25 +343,45 @@ function(complexType, name, keyArgs){
      * @type function
      */
     atomComparer: function(reverse){
-        var me = this;
-        if(this.isComparable) {
-            if(reverse){
-                return this._reverseAtomComparer || 
-                       (this._reverseAtomComparer = function(a, b){
-                           if(a === b) { return 0; } // Same atom
-                           return me.compare(b.value, a.value); 
-                       }); 
-            }
-            
-            return this._directAtomComparer || 
-                    (this._directAtomComparer = function(a, b){
-                        if(a === b) { return 0; } // Same atom
-                        return me.compare(a.value, b.value); 
-                     }); 
+        if(reverse){
+            return this._reverseAtomComparer || 
+                   (this._reverseAtomComparer = this._createReverseAtomComparer()); 
         }
         
-        /*global atom_idComparer:true, atom_idComparerReverse:true */
-        return reverse ? atom_idComparerReverse : atom_idComparer;
+        return this._directAtomComparer ||
+                (this._directAtomComparer = this._createDirectAtomComparer());
+    },
+    
+    _createReverseAtomComparer: function(){
+        if(!this.isComparable){
+            /*global atom_idComparerReverse:true */
+            return atom_idComparerReverse;
+        }
+        
+        var me = this;
+        
+        function reverseAtomComparer(a, b){
+            if(a === b) { return 0; } // Same atom
+            return me.compare(b.value, a.value); 
+        }
+        
+        return reverseAtomComparer;
+    },
+    
+    _createDirectAtomComparer: function(){
+        if(!this.isComparable){
+            /*global atom_idComparer:true */
+            return atom_idComparer;
+        }
+        
+        var me = this;
+        
+        function directAtomComparer(a, b){
+            if(a === b) { return 0; } // Same atom
+            return me.compare(a.value, b.value);
+        }
+        
+        return directAtomComparer;
     },
     
     /**

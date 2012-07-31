@@ -217,12 +217,15 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             */
            
            // X and Y axis orientations
-           axes.x.scale.range(0, clientSize.width );
-           axes.y.scale.range(0, clientSize.height);
+           axes.x.setScaleRange(clientSize.width );
+           axes.y.setScaleRange(clientSize.height);
            
            // X and Y visual roles
            var sceneXScale = chart.axes.base.sceneScale({sceneVarName:  'x'});
            var sceneYScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'});
+           
+           var xLength = chart.axes.base.scale.max;
+           var yLength = chart.axes.ortho.scale.max;
            
            var hasDotSizeRole = rootScene.hasDotSizeRole;
            var sizeScale = this.dotSizeScale;
@@ -282,8 +285,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                // How much overflow on each side?
                setSide('left',   r - x);
                setSide('bottom', r - y);
-               setSide('right',  x + r - clientSize.width );
-               setSide('top',    y + r - clientSize.height);
+               setSide('right',  x + r - xLength );
+               setSide('top',    y + r - yLength);
            };
            
            rootScene
@@ -327,6 +330,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         // BUILD
         
         // this.pvPanel.strokeStyle('red');
+        
+        this.pvPanel.zOrder(1); // Above axes
         
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
             .lock('data', rootScene.childNodes)
@@ -390,13 +395,14 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         // which helps in distinguishing overlapped dots.
         // With lines shown, it would look strange.
         if(!rootScene.hasColorRole){
-            if(!myself.showLines){
-                dot.override('baseColor', function(type){
-                    var color = this.base(type);
-                    color.opacity = 0.85;
-                    return color;
-                });
-            }
+            // ANALYZER requirements, so until there's no way to configure it...
+//            if(!myself.showLines){
+//                dot.override('baseColor', function(type){
+//                    var color = this.base(type);
+//                    color.opacity = 0.85;
+//                    return color;
+//                });
+//            }
         } else {
             var colorScale = this._getColorRoleScale(data);
             
@@ -425,9 +431,10 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                         color = color.darker();
                     }
                     
-                    if(!myself.showLines){
-                        color = color.alpha(color.opacity * 0.85);
-                    }
+                 // ANALYZER requirements, so until there's no way to configure it...
+//                    if(!myself.showLines){
+//                        color = color.alpha(color.opacity * 0.85);
+//                    }
                 }
                 
                 return color;

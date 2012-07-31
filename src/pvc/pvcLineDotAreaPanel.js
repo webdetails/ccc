@@ -68,8 +68,14 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
        
         // ---------------
         // BUILD
-        this.pvPanel.zOrder(-7);
-
+        if(showAreas){
+            // Areas don't look good above the axes
+            this.pvPanel.zOrder(-7);
+        } else {
+            // // Above axes
+            this.pvPanel.zOrder(1);
+        }
+        
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
             .lock('data', rootScene.childNodes)
             ;

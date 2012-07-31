@@ -219,6 +219,30 @@ def.type('pvc.visual.CartesianAxis')
         }
     },
     
+    setScaleRange: function(size){
+        var scale = this.scale;
+        scale.min  = 0;
+        scale.max  = size;
+        scale.size = size; // original size // TODO: remove this...
+        
+        // -------------
+        
+        if(scale.type === 'Discrete'){
+            if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
+                var bandRatio = this.chart.options.panelSizeRatio || 0.8;
+                scale.splitBandedCenter(scale.min, scale.max, bandRatio);
+            }
+        } else {
+            scale.range(scale.min, scale.max);
+        }
+        
+        if(pvc.debug >= 4){
+            pvc.log("Scale: " + JSON.stringify(def.copyOwn(scale)));
+        }
+        
+        return scale;
+    },
+    
     getScaleRoundingPaddings: function(){
         var roundingPaddings = this._roundingPaddings;
         if(!roundingPaddings){
@@ -390,7 +414,7 @@ $VCA.createAllDefaultOptions = function(options){
             'TitleMargins',
             'TitlePaddings',
             'TitleAlign',
-            'LabelFont',
+            'Font',
             'OriginIsZero',
             'Offset',
             'FixedMin',
@@ -403,12 +427,9 @@ $VCA.createAllDefaultOptions = function(options){
        ],
        globalDefaults = {
            'OriginIsZero':      true,
-           'Offset':            0,
            'Composite':         false,
            'OverlappedLabelsHide': false,
            'OverlappedLabelsMaxPct': 0.2,
-           'LabelFont':         '9px sans-serif',
-           'TitleFont':         '12px sans-serif', // 'bold '
            'MinorTicks':        true,
            'FullGrid':          false,
            'FullGridCrossesMargin': true,
@@ -629,7 +650,7 @@ function bareIdOptions(name){
 /**
  * Obtains the value of an option that is common 
  * to all axis types, orientations and indexes
- * (ex. <tt>axisLabelFont</tt>).
+ * (ex. <tt>axisFont</tt>).
  * 
  * @name pvc.visual.CartesianAxis#_commonOptions
  * @function

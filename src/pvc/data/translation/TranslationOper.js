@@ -408,7 +408,7 @@ def.type('pvc.data.TranslationOper')
         // or array helpers, avoiding function calls, closures, etc.
         
         if(pvc.debug >= 4) {
-            pvc.log('readItem: ' + JSON.stringify(item));
+            pvc.log('virtual item: ' + JSON.stringify(item));
         }
         
         var r = 0, 
@@ -445,7 +445,7 @@ def.type('pvc.data.TranslationOper')
                 }
             });
             
-            pvc.log('\t-> atoms: ' + JSON.stringify(atomsMap));
+            pvc.log('  -> atoms: ' + JSON.stringify(atomsMap));
         }
         
         return atoms;

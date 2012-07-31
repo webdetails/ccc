@@ -58,11 +58,17 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         }
 
         if(!data) {
+            if(pvc.debug >= 7){
+                pvc.log("[GroupBy] " + (cacheKey ? ("Cache key not found: '" + cacheKey + "'") : "No Cache key"));
+            }
+            
             data = groupOper.execute();
 
             if(cacheKey){
                 (groupByCache || (this._groupByCache = {}))[cacheKey] = data;
             }
+        } else if(pvc.debug >= 7){
+            pvc.log("[GroupBy] Cache key hit '" + cacheKey + "'");
         }
         
         return data;
@@ -565,7 +571,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
              while(this._dimAtomsOrQuery.next()) {
                  
                  var dimAtomOr = this._dimAtomsOrQuery.item,
-                     childData = this._data._childrenByKey[dimAtomOr.globalKey()];
+                     childData = this._data._childrenByKey[dimAtomOr.globalKey];
                  
                  // Also, advance the test of a leaf child data with no datums, to avoid backtracking
                  if(childData && (depth < H - 1 || childData._datums.length)) {

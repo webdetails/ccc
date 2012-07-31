@@ -14,6 +14,25 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
      * Left and right paddings are shared by the top, center and bottom panels.
      * Top and bottom paddings are shared by the left, center and right panels.
      * </p>
+     * <p>
+     * Child panel's can inform of existing overflowPaddings - 
+     * resulting of things that are ok to overflow, 
+     * as long as they don't leave the parent panel's space, 
+     * and that the parent panel itself tries to reserve space for it or 
+     * ensure it is in a free area.
+     * </p>
+     * <p>
+     * The empty corner cells of the grid layout can absorb some of the overflow 
+     * content from non-fill child panels. 
+     * If, for example, a child panel is placed at the 'left' cell and it
+     * overflows in 'top', that overflow can be partly absorbed by 
+     * the top-left corner cell, as long as there's a panel in the top cell that
+     * imposes that much height. 
+     * </p>
+     * <p>
+     * If the corner space is not enough to absorb the overflow paddings
+     * 
+     * </p>
      * 
      * @override
      */
@@ -27,7 +46,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         var margins  = new pvc.Sides(0);
         var paddings = new pvc.Sides(0);
         var remSize = def.copyOwn(layoutInfo.clientSize);
-        
+        var overFlowPaddings;
         var aolMap = pvc.BasePanel.orthogonalLength;
         var aoMap  = pvc.BasePanel.relativeAnchor;
         var alMap  = pvc.BasePanel.parallelLength;
@@ -43,6 +62,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         // loop detection
         var paddingHistory = {}; 
         var loopSignal = {};
+        var overflowPaddingsSignal = {};
         var isDisasterRecovery = false;
         
         
@@ -94,14 +114,15 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             }
             
             var index, count;
-            var canChange = !isDisasterRecovery && (remTimes > 0);
+            var canChange = layoutInfo.canChange !== false && !isDisasterRecovery && (remTimes > 0);
             var paddingsChanged;
+            var ownPaddingsChanged = false;
             
             index = 0;
             count = sideChildren.length;
             while(index < count){
                 if(pvc.debug >= 5){
-                    pvc.log("[GridDockingPanel] SIDE Child " + index);
+                    pvc.log("[GridDockingPanel] SIDE Child i=" + index);
                 }
                 
                 paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
@@ -113,23 +134,39 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                         return false; // stop;
                     }
                     
-                    if(remTimes > 0){
-                        if(pvc.debug >= 5){
-                            pvc.log("[GridDockingPanel] SIDE Child " + index + " increased paddings (remTimes=" + remTimes + ")");
+                    if(paddingsChanged === overflowPaddingsSignal){
+                        // Don't stop right away cause there might be other overflow paddings requests
+                        // of other side childs
+                        if(!ownPaddingsChanged){
+                            ownPaddingsChanged = true;
+                            layoutInfo.requestPaddings = layoutInfo.paddings; 
                         }
-                        return true; // repeat
-                    } else if(pvc.debug >= 2){
-                        pvc.log("[Warning] [GridDockingPanel] SIDE Child " + index + " increased paddings but no more iterations possible.");
+                    } else {
+                        if(remTimes > 0){
+                            if(pvc.debug >= 5){
+                                pvc.log("[GridDockingPanel] SIDE Child i=" + index + " increased paddings");
+                            }
+                            return true; // repeat
+                        } else if(pvc.debug >= 2){
+                            pvc.log("[Warning] [GridDockingPanel] SIDE Child i=" + index + " increased paddings but no more iterations possible.");
+                        }
                     }
                 }
                 index++;
+            }
+            
+            if(ownPaddingsChanged){
+                if(pvc.debug >= 5){
+                    pvc.log("[GridDockingPanel] Restarting due to overflowPaddings change");
+                }
+                return false; // stop;
             }
             
             index = 0;
             count = fillChildren.length;
             while(index < count){
                 if(pvc.debug >= 5){
-                    pvc.log("[GridDockingPanel] FILL Child " + index);
+                    pvc.log("[GridDockingPanel] FILL Child i=" + index);
                 }
                 
                 paddingsChanged = layoutChildFill(fillChildren[index], canChange);
@@ -143,11 +180,11 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                     
                     if(remTimes > 0){
                         if(pvc.debug >= 5){
-                            pvc.log("[GridDockingPanel] FILL Child " + index + " increased paddings (remTimes=" + remTimes + ")");
+                            pvc.log("[GridDockingPanel] FILL Child i=" + index + " increased paddings");
                         }
                         return true; // repeat
                     } else if(pvc.debug >= 2){
-                        pvc.log("[Warning] [GridDockingPanel] FILL Child " + index + " increased paddings but no more iterations possible.");
+                        pvc.log("[Warning] [GridDockingPanel] FILL Child i=" + index + " increased paddings but no more iterations possible.");
                     }
                 }
                 index++;
@@ -250,9 +287,11 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                 if(child.isVisible){
                     paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange);
                     
-                    var align = pvc.parseAlign(a, child.align);
-                    
-                    positionChildOrtho(child, align);
+                    if(checkOverflowPaddingsChanged(a, layoutInfo.paddings, child, canChange)){
+                        return overflowPaddingsSignal;
+                    }
+                        
+                    positionChildOrtho(child, child.align);
                 }
             }
             
@@ -325,14 +364,14 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             
             var changed = false;
             if(newPaddings){
-                if(pvc.debug >= 5){
+                if(pvc.debug >= 10){
                     pvc.log("[GridDockingPanel] => clientSize=" + JSON.stringify(child._layoutInfo.clientSize));
                     pvc.log("[GridDockingPanel] <= requestPaddings=" + JSON.stringify(newPaddings));
                 }
                 
                 getAnchorPaddingsNames(a).forEach(function(side){
                     if(newPaddings.hasOwnProperty(side)){
-                        var value    = paddings    [side] || 0;
+                        var value    = paddings[side] || 0;
                         var newValue = Math.floor(10000 * (newPaddings[side] || 0)) / 10000;
                         var increase = newValue - value;
                         
@@ -347,7 +386,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                                 paddings[side] = newValue;
                                 
                                 if(pvc.debug >= 5){
-                                    pvc.log("[Warning] [GridDockingPanel] changed padding " + side + " <- " + newValue);
+                                    pvc.log("[Warning] [GridDockingPanel]   changed padding " + side + " <- " + newValue);
                                 }
                             }
                         }
@@ -372,6 +411,50 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                     
                     paddings.width  = paddings.left + paddings.right ;
                     paddings.height = paddings.top  + paddings.bottom;
+                }
+            }
+            
+            return changed;
+        }
+        
+        function checkOverflowPaddingsChanged(a, ownPaddings, child, canChange){
+            var overflowPaddings = child._layoutInfo.overflowPaddings;
+            
+            var changed = false;
+            if(overflowPaddings){
+                if(pvc.debug >= 10){
+                    pvc.log("[GridDockingPanel] <= overflowPaddings=" + JSON.stringify(overflowPaddings));
+                }
+                
+                getAnchorPaddingsNames(a).forEach(function(side){
+                    if(overflowPaddings.hasOwnProperty(side)){
+                        var value    = ownPaddings[side] || 0;
+                        var newValue = Math.floor(10000 * (overflowPaddings[side] || 0)) / 10000;
+                        newValue -= margins[side]; // corners absorb some of it
+                        
+                        var increase = newValue - value;
+                        
+                        // STABILITY & SPEED requirement
+                        if(increase > Math.abs(0.05 * value)){
+                            if(!canChange){
+                                if(pvc.debug >= 2){
+                                    pvc.log("[Warning] [GridDockingPanel] CANNOT change overflow  padding but child wanted to: " + side + "=" + newValue);
+                                }
+                            } else {
+                                changed = true;
+                                ownPaddings[side] = newValue;
+                                
+                                if(pvc.debug >= 5){
+                                    pvc.log("[GridDockingPanel]   changed overflow padding " + side + " <- " + newValue);
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                if(changed){
+                    ownPaddings.width  = ownPaddings.left + ownPaddings.right ;
+                    ownPaddings.height = ownPaddings.top  + ownPaddings.bottom;
                 }
             }
             

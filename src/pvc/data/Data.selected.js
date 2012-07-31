@@ -216,8 +216,9 @@ function data_onReceiveDatum(datum){
     this._datumsById[id] = datum;
     
     if(!datum.isNull){
-        if(this._selectedDatums && datum.isSelected) {
-            this._selectedDatums.set(id, datum);
+        var selectedDatums;
+        if(datum.isSelected && (selectedDatums = this._selectedDatums)) {
+            selectedDatums.set(id, datum);
         }
     
         if(datum.isVisible) {

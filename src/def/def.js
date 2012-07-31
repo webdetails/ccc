@@ -1,3 +1,6 @@
+/** @private */
+var arraySlice = Array.prototype.slice;
+
 if(!Object.keys) {
     /** @ignore */
     Object.keys = function(o){
@@ -71,26 +74,13 @@ if(!Object.create){
 }
 
 if (!Function.prototype.bind) {  
-    Function.prototype.bind = function (oThis) {  
-        if (typeof this !== "function") {  
-            // closest thing possible to the ECMAScript 5 internal IsCallable function  
-            throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");  
-        }  
-    
-        var aArgs = Array.prototype.slice.call(arguments, 1),   
-            fToBind = this,   
-            NOP = function () {},  
-            fBound = function () {  
-              return fToBind.apply(this instanceof NOP ? 
-                                   this : 
-                                   oThis || window,  
-                                   aArgs.concat(Array.prototype.slice.call(arguments)));  
-            };  
-    
-        NOP.prototype = this.prototype;  
-        fBound.prototype = new NOP();  
-    
-        return fBound;
+    Function.prototype.bind = function (ctx) {
+        var staticArgs = arraySlice.call(arguments, 1);   
+        var fToBind = this;
+        
+        return function (){
+            return fToBind.apply(ctx, staticArgs.concat(arraySlice.call(arguments)));
+        };
     };
 }
 
@@ -231,6 +221,8 @@ var def = /** @lends def */{
     hasOwn: function(o, p){
         return !!o && objectHasOwn.call(o, p);
     },
+    
+    hasOwnProp: objectHasOwn,
     
     set: function(o){
         if(!o) {
@@ -501,7 +493,8 @@ var def = /** @lends def */{
         },
         
         asNative: function(v){
-            return v && typeof(v) === 'object' && v.constructor === Object ?
+            // Sightly faster, but may cause boxing?
+            return v && /*typeof(v) === 'object' &&*/ v.constructor === Object ?
                     v :
                     null;
         }
@@ -513,10 +506,38 @@ var def = /** @lends def */{
         },
         
         join: function(sep){
-            var args = [],
-                a = arguments;
-            for(var i = 1, L = a.length ; i < L ; i++){
-                var v = a[i];
+            var a = arguments;
+            var L = a.length;
+            var v, v2;
+            
+            switch(L){
+                case 3:
+                    v  = a[1];
+                    v2 = a[2];
+                    if(v != null && v !== ""){
+                        if(v2 != null && v2 !== "") {
+                            return (""+v) + sep + (""+v2);
+                        }
+                        return (""+v);
+                    } else if(v2 != null && v2 !== "") {
+                        return (""+v2);
+                    }
+                    
+                    return "";
+                
+                case 2:
+                    v = a[1];
+                    return v != null ? (""+v) : "";
+                
+                case 1:
+                case 0: return "";
+            }
+            
+            // general case
+            
+            var args = [];
+            for(var i = 1 ; i < L ; i++){
+                v = a[i];
                 if(v != null && v !== ""){
                     args.push("" + v);
                 }
@@ -1173,13 +1194,66 @@ def.scope(function(){
     
     /** @private */
     function createConstructor(state){
-         
+        
+//        function constructor(){
+//            /*jshint expr:true */
+//            var method;
+//            if(state.initOrPost){
+//                (method = state.init) && method.apply(this, arguments);
+//                (method = state.post) && method.apply(this, arguments);
+//            }
+//        }
+        
+        // Slightly faster version
+//        var init, post;
+//        var start = function(){
+//            start = null;
+//            if(state.initOrPost){
+//                init = state.init;
+//                post = state.post;
+//            }
+//        };
+//        
+//        function constructor(){
+//            /*jshint expr:true */
+//            start && start();
+//            
+//            init && init.apply(this, arguments);
+//            post && post.apply(this, arguments);
+//        }
+        
+        // Even faster, still
+        var S = 1;
+        var steps = [
+            // Start up class step
+            function(){
+                S = 0;
+                if(state.initOrPost){
+                    steps.length = 0;
+                    if(state.init){ 
+                        steps.push(state.init);
+                        S++;
+                    }
+                    
+                    if(state.post){ 
+                        steps.push(state.post);
+                        S++;
+                    }
+                    
+                    // Call constructor revursively
+                    constructor.apply(this, arguments);
+                } else {
+                    steps = null;
+                }
+            }
+        ];
+        
         function constructor(){
-            /*jshint expr:true */
-            var method;
-            if(state.initOrPost){
-                (method = state.init) && method.apply(this, arguments);
-                (method = state.post) && method.apply(this, arguments);
+            if(S){
+                var i = 0;
+                do{
+                    steps[i].apply(this, arguments);
+                } while(++i < S);
             }
         }
         
@@ -1452,19 +1526,20 @@ def.type('Query')
 })
 .add({
     next: function(){
+        var index = this.index;
         // already was finished
-        if(this.index === -2){
+        if(index === -2){
             return false;
         }
         
-        var nextIndex = this.index + 1;
-        if(!this._next(nextIndex)){
+        index++;
+        if(!this._next(index)){
             this.index = -2;
-            this.item = undefined;
+            this.item  = undefined;
             return false;
         }
         
-        this.index = nextIndex;
+        this.index = index;
         return true;
     },
     
@@ -1838,9 +1913,10 @@ def.type('WhereQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        while(this._source.next()){
-            var nextItem = this._source.item;
-            if(this._where.call(this._ctx, nextItem, this._source.index)){
+        var source = this._source;
+        while(source.next()){
+            var nextItem = source.item;
+            if(this._where.call(this._ctx, nextItem, source.index)){
                 this.item = nextItem;
                 return 1;
             }

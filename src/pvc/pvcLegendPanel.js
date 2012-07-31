@@ -152,7 +152,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         var isV1Compat = (this.chart.options.compatVersion <= 1);
         
         // The size of the biggest cell
-        var cellWidth = this.markerSize + this.textMargin + maxLabelLen; // ignoring textAdjust
+        var cellWidth = this.markerSize + this.textMargin + maxLabelLen; // ignoring v1 textAdjust
         var cellHeight;
         if(isV1Compat){
             // Previously, the cellHeight was the padding.
