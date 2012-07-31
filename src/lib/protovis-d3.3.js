@@ -1,4 +1,4 @@
-// 09485740f1bee7036d42d3ebc02acdc5ec129c32
+// 272a27c45c16f2c688bde5c4b86b5f9613dab167
 /**
  * @class The built-in Array class.
  * @name Array
@@ -5250,6 +5250,7 @@ pv.Color.names = {
 /* Initialized named colors. */
 (function() {
   var names = pv.Color.names;
+  names.none = names.transparent;
   for (var name in names) names[name] = pv.color(names[name]);
 })();
 /**
@@ -5701,7 +5702,11 @@ pv.Colors.category19 = function() {
     FillStyle.prototype = new pv.Color('none', 1);
     
     FillStyle.prototype.rgb = function(){
-        return pv.color(this.color).alpha(this.opacity);
+        var color = pv.color(this.color);
+        if(this.opacity !== color.opacity){
+            color = color.alpha(this.opacity);
+        }
+        return color;
     };
     
     /**
