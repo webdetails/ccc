@@ -27,7 +27,7 @@
  * <i>pieLabel_</i> - for the main pie label
  * <i>pieLinkLine_</i> - for the link lines, for when labelStyle = 'linked'
  * 
- * Example Category Scene extension:
+ * Example Pie Category Scene extension:
  * pie: {
  *     scenes: {
  *         category: {
@@ -386,7 +386,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                                                 pieSlice.left + outerRadius * Math.cos(midAngle),
                                                 pieSlice.top  + outerRadius * Math.sin(midAngle));
                                             
-                                            return def.array.append([dot], scene.vars.link.dots);
+                                            return [dot].concat(scene.vars.link.dots);
                                         })
                                         .lock('visible')
                                         .top (function(dot){ return dot.y; })
@@ -503,8 +503,8 @@ def
     var rootScene = this;
     var sumAbs = 0;
     
-    /* Create category scene subclass */
-    var CategSceneClass = def.type(null, pvc.visual.PieCategoryScene)
+    /* Create category scene sub-class */
+    var CategSceneClass = def.type(pvc.visual.PieCategoryScene)
         .init(function(categData, value){
             
             // Adds to parent scene...
@@ -522,7 +522,7 @@ def
         });
     
     /* Extend with any user extensions */
-    panel._extendScene('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
+    panel._extendSceneType('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
     
     /* Create child category scenes */
     data.children().each(function(categData){

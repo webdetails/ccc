@@ -377,7 +377,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }
 
             /* secondAxisSeriesIndexes only implemented for single-series */
-            if(this.C === 1) {
+            if(this.C === 1 && !this._userUsedDims.dataPart) {
                 // The null test is required because secondAxisSeriesIndexes can be a number, a string...
                 var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;
                 if(axis2SeriesIndexes != null){
@@ -631,10 +631,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 /* Create a reader that surely only returns 'series' atoms */
                 seriesReader = this._filterDimensionReader(seriesReader, 'series');
 
-                this._dataPartGet(calcAxis2SeriesKeySet, seriesReader);
-                
                 this._userDimsReaders.push(
-                    this._value1AndValue2Get(calcAxis2SeriesKeySet, seriesReader, index));
+                        this._dataPartGet(calcAxis2SeriesKeySet, seriesReader));
             }
         }
     }

@@ -16,25 +16,22 @@ def.type('pvc.data.ComplexView', pvc.data.Complex)
 .init(function(source, ownDimNames){
 
     this.source = source;
+    
     var viewDimNames = this.viewDimNames = [];
     
+    /* Collect desired source atoms */
     var sourceAtoms = source.atoms,
-        atoms = [];
+        ownSourceAtoms = [];
 
     ownDimNames.forEach(function(dimName){
-        var atom = def.getOwn(sourceAtoms, dimName);
-        if(atom){
-            atoms.push(atom);
+        if(def.hasOwnProp.call(sourceAtoms, dimName)){
+            ownSourceAtoms.push(sourceAtoms[dimName]);
             viewDimNames.push(dimName);
         }
     });
 
     // Call base constructor
-    var owner = source.owner;
-    this.base(owner, atoms, owner.atoms);
-    
-    // Build label based on (really) own atoms
-    this.label = this.buildLabel(atoms);
+    this.base(source, ownSourceAtoms, source.owner.atoms, /* wantLabel */ true);
 })
 .add({
     values: function(){

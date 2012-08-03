@@ -30,8 +30,8 @@ var complex_nextId = 1;
  *           A index of {@link pvc.data.Atom} by the name of their dimension type.
  * 
  * @constructor
- * @param {pvc.data.Data} owner
- *        An owner data instance.
+ * @param {pvc.data.Complex} [source] 
+ *        A complex that provides for an owner and default base atoms.
  * 
  * @param {pvc.data.Atom[]} [atoms]
  *        An array of atoms of distinct dimensions.
@@ -40,32 +40,48 @@ var complex_nextId = 1;
  *        An object to serve as prototype to the {@link #atoms} object.
  *        <p>
  *        Atoms already present in this object are not set locally.
- *        The key of the complex is thus affected.
- *        </p>  
+ *        The key and default label of a complex only contain information 
+ *        from its own atoms.
+ *        </p>
+ *        <p>
+ *        The default value is the {@link #atoms} of the argument {@link source},
+ *        when specified.
+ *        </p>
  */
 def
 .type('pvc.data.Complex')
-.init(function(owner, atoms, atomsBase) {
+.init(function(source, atoms, atomsBase, wantLabel) {
     /*jshint expr:true */
     
     /* NOTE: this function is a hot spot and as such is performance critical */
     
-    // <Debug>
-    var asserts = pvc.debug >= 6;
-    if(asserts){
-        (owner && owner.isOwner()) || def.fail.argumentInvalid('owner', "Must be an owner data.");
-    }
-    // </Debug>
+    this.id = complex_nextId++;
     
-    this.id    = complex_nextId++;
-    this.owner = owner;
+    var owner;
+    if(source){
+        owner = source.owner;
+        if(!atomsBase){
+            atomsBase = source.atoms;
+        }
+    }
+    
+    this.owner = owner || this;
     this.atoms = atomsBase ? Object.create(atomsBase) : {};
 	
     if (!atoms) {
         this.value = null;
         this.key   = '';
+        if(wantLabel){
+            this.label = "";
+        }
     } else {
+        // <Debug>
+        var asserts = pvc.debug >= 6;
+        // </Debug>
+        
+        /* Fill the atoms map */
         var atomsMap = this.atoms;
+        
         var count = 0;
         var singleAtom;
         var i;
@@ -74,10 +90,8 @@ def
             var atom  = atoms[i] || def.fail.argumentRequired('atom');
             var value = atom.value; 
             if(value != null){ // nulls are already in base proto object
-                var name     = atom.dimension.name,
-                    atomBase = atomsBase && atomsBase[name];
-
-                if(!atomBase || atom !== atomBase) { // don't add atoms already in base proto object
+                var name = atom.dimension.name;
+                if(!atomsBase || atom !== atomsBase[name]) { // don't add atoms already in base proto object
                     // <Debug>
                     if(asserts){
                         if(atom.dimension !== owner.dimensions(name)){
@@ -99,43 +113,71 @@ def
             }
         }
         
+        /* Build Key and Label in the order of type.dimensions */
         if(count === 1){
             this.value = singleAtom.value;     // typed
             this.key   = singleAtom.globalKey; // string
+            if(wantLabel){
+                this.label = singleAtom.label;
+            }
         } else {
-            // For small number of strings, it's actually faster to 
+            // For a small number, of small strings, it's actually faster to 
             // just concatenate strings comparing to the array.join method 
             var dimNames = owner.type._dimsNames;
-            var key;
+            var key, label, aLabel;
             L = dimNames.length;
             for(i = 0 ; i < L ; i++){
                 var dimName = dimNames[i];
                 if(def.hasOwnProp.call(atomsMap, dimName)){
-                    var akey = atomsMap[dimName].globalKey;
-                    if(i === 0){
-                        key = akey;
+                    var atom = atomsMap[dimName];
+                    if(i){
+                        key += ',' + atom.globalKey;
                     } else {
-                        key += ',' + akey;
+                        key = atom.globalKey;
+                    }
+                    
+                    if(wantLabel){
+                        // Assuming labels are non-empty
+                        // Non-null atoms => non-empty labels
+                        if(label){
+                            label += complex_labelSep + atom.label;
+                        } else {
+                            label = atom.label;
+                        }
                     }
                 }
             }
         
             this.value = this.key = key;
+            if(wantLabel){
+                this.label = label;
+            }
         }
 	}
 })
 .add(/** @lends pvc.data.Complex# */{
-
-    buildLabel: function(atoms){
     
-        if(atoms){
-            return atoms
-                    .map(function(atom){ return atom.label; })
-                    .filter(def.notEmpty)
-                    .join(complex_labelSep);
+    label: null,
+    
+    ensureLabel: function(){
+        var label = this.label;
+        if(label != null){
+            label = "";
+            def.eachOwn(this.atoms, function(atom){
+                var alabel = atom.label;
+                if(alabel){
+                    if(label){
+                        label += complex_labelSep + alabel;
+                    } else {
+                        label = alabel;
+                    }
+                }
+            });
+            
+            this.label = label;
         }
         
-        return "";
+        return label;
     },
 
     view: function(dimNames){

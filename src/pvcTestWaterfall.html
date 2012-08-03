@@ -54,6 +54,11 @@
         <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneVisibility.js"></script>
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
@@ -376,7 +381,7 @@ var wf3 = new pvc.WaterfallChart({
 
     extensionPoints: {
         titleLabel_font: "16px sans-serif",
-        barWaterfallLine_strokeStyle:"red"
+        barWaterfallLine_strokeStyle:"red"
     }});
 
 wf3.setData(testWaterfall_02,{

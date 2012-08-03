@@ -67,12 +67,12 @@ pvc.BaseChart = pvc.Abstract.extend({
     isPreRendered: false,
 
     /**
-     * The version value of the current/last pre-render phase.
+     * The version value of the current/last creation.
      * 
      * <p>
      * This value is changed on each pre-render of the chart.
      * It can be useful to invalidate cached information that 
-     * is only valid for each pre-render.
+     * is only valid for each creation.
      * </p>
      * <p>
      * Version values can be compared using the identity operator <tt>===</tt>.
@@ -80,7 +80,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      * 
      * @type any
      */
-    _preRenderVersion: 0,
+    _createVersion: 0,
     
     /**
      * A callback function that is called 
@@ -294,6 +294,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
     },
     
+    compatVersion: function(){
+        return this.options.compatVersion;
+    },
+    
     /**
      * Processes options after user options and defaults have been merged.
      * Applies restrictions,
@@ -353,7 +357,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         var options = this.options;
         
         /* Increment pre-render version to allow for cache invalidation  */
-        this._preRenderVersion++;
+        this._createVersion++;
         
         this.isPreRendered = false;
 
@@ -379,7 +383,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._processOptions();
         
         /* Initialize root chart roles */
-        if(!this.parent && this._preRenderVersion === 1) {
+        if(!this.parent && this._createVersion === 1) {
             this._initVisualRoles();
             this._bindVisualRolesPre();
         }
@@ -553,10 +557,6 @@ pvc.BaseChart = pvc.Abstract.extend({
             secondAxisSeriesIndexes = options.secondAxisSeriesIndexes;
             if(secondAxisSeriesIndexes === undefined){
                 secondAxisSeriesIndexes = options.secondAxisIdx;
-            }
-
-            if(secondAxisSeriesIndexes == null){
-                options.secondAxis = false;
             }
         }
 
@@ -889,7 +889,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(dataPartValues.length === 1){
             // Faster this way...
             // TODO: should, at least, call some static method of Atom to build a global key
-            return this.__partData._childrenByKey[dataPartDimName + ':' + dataPartValues[0]];
+            return this.__partData._childrenByKey[dataPartDimName + ':' + dataPartValues[0]] || 
+                   new pvc.data.Data({linkParent: this.__partData, datums: []}); // don't blow code ahead...
         }
 
         return this.__partData.where([
@@ -981,7 +982,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             });
         }
     },
-
+    
     /**
      * Initializes the legend,
      * if the legend is active.
@@ -991,15 +992,16 @@ pvc.BaseChart = pvc.Abstract.extend({
             this.legendGroupsList = [];
             this.legendGroups     = {};
 
-            this._initLegendGroups();
             this._initLegendPanel();
+            
+            this._initLegendGroups();
         }
     },
 
     /**
-     * Initializes the legend groups of a chart.
+     * Creates the legend groups of a chart.
      *
-     * The default implementation registers
+     * The default implementation creates
      * one legend group for each existing data part value
      * for the dimension in {@link #legendSource}.
      *
@@ -1007,85 +1009,48 @@ pvc.BaseChart = pvc.Abstract.extend({
      * followed by the corresponding part value.
      */
     _initLegendGroups: function(){
-        var partValues = this._partValues() || [null],
-            me = this;
         
-        var isOn, onClick;
+        var legendPanel = this.legendPanel;
+        var partValues = this._partValues() || [null];
         
-        switch(this.options.legendClickMode){
-            case 'toggleSelected':
-                if(!this.options.selectable){
-                    isOn = def.retTrue;
-                } else {
-                    isOn = function(){
-                        return !this.group.owner.selectedCount() || 
-                               this.group.datums(null, {selected: true}).any();
-                    };
-                    
-                    onClick = function(){
-                        var datums = this.group.datums().array();
-                        
-                        datums = me._onUserSelection(datums);
-                        if(datums){
-                            var on = def.query(datums).any(function(datum){ return datum.isSelected; });
-                            if(pvc.data.Data.setSelected(datums, !on)){
-                                me.updateSelections();
-                            }
-                        }
-                    };
-                }
-                break;
-                
-            default: 
-           // 'toggleVisible'
-                isOn = function(){
-                    return this.group.datums(null, {visible: true}).any();
-                };
-                
-                onClick = function(){
-                    if(pvc.data.Data.toggleVisible(this.group.datums())){
-                        // Re-render chart
-                        me.render(true, true, false);
-                    }
-                };
-                break;
-        }
+        var bulletRootScene, BulletGroupType, BulletItemType;
         
         partValues.forEach(function(partValue){
             var partData = this._legendData(partValue);
             if(partData){
+                if(!bulletRootScene){
+                    bulletRootScene = legendPanel._getBulletRootScene();
+                }
+                
+                if(!BulletGroupType){
+                    BulletGroupType = legendPanel._getBulletGroupSceneType();
+                }
+                
+                var bulletGroupScene = new BulletGroupType(bulletRootScene, {group: partData});
+                def.set(bulletGroupScene,
+                        'partValue', partValue,
+                        'partLabel', partData.label);
+                
                 var partColorScale = this._legendColorScale(partValue),
-                    partShape = (!partValue || partValue === '0' ? 'square' : 'bar'), // TODO: HACK...
-                    legendGroup = {
-                        id:        "part" + partValue,
-                        type:      "discreteColorAndShape",
-                        partValue: partValue,
-                        partLabel: partData.label,
-                        group:     partData,
-                        items:     []
-                    },
-                    legendItems = legendGroup.items;
-            
+                    partShape = (!partValue || partValue === '0' ? 'square' : 'bar'); // TODO: HACK...
+                
                 partData
                     .children()
                     .each(function(itemData){
-                        legendItems.push({
-                            value:   itemData.value,
-                            label:   itemData.label,
-                            group:   itemData,
-                            color:   partColorScale(itemData.value),
-                            useRule: undefined,
-                            shape:   partShape,
-                            isOn:    isOn,
-                            click:   onClick
-                        });
+                        
+                        if(!BulletItemType){
+                            BulletItemType = legendPanel._getBulletItemSceneType();
+                        }
+                        
+                        var bulletItemScene = new BulletItemType(bulletGroupScene, {group: itemData});
+                        def.set(bulletItemScene,
+                            'color', partColorScale(itemData.value),
+                            'shape', partShape);
                     }, this);
-
-                this._addLegendGroup(legendGroup);
             }
         }, this);
     },
-
+    
     _addLegendGroup: function(legendGroup){
         var id = legendGroup.id;
         /*jshint expr:true */
@@ -1104,20 +1069,24 @@ pvc.BaseChart = pvc.Abstract.extend({
         var options = this.options;
         this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
             anchor:     options.legendPosition,
-            legendSize: options.legendSize,
-            legendSizeMax: options.legendSizeMax,
-            font:       options.legendFont,
             align:      options.legendAlign,
-            minMarginX: options.legendMinMarginX,
-            minMarginY: options.legendMinMarginY,
+            size:       options.legendSize,
+            sizeMax:    options.legendSizeMax,
+            margins:    options.legendMargins,
+            paddings:   options.legendPaddings,
+            font:       options.legendFont,
+            scenes:     def.getPath(options, 'legend.scenes'),
+            
+            // Bullet legend
+            minMarginX: options.legendMinMarginX, // V1 -> paddings
+            minMarginY: options.legendMinMarginY, // V1 -> paddings
             textMargin: options.legendTextMargin,
             padding:    options.legendPadding,
             shape:      options.legendShape,
             markerSize: options.legendMarkerSize,
             drawLine:   options.legendDrawLine,
             drawMarker: options.legendDrawMarker,
-            margins:    options.legendMargins,
-            paddings:   options.legendPaddings
+            clickMode:  options.legendClickMode
         });
     },
 
@@ -1507,8 +1476,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         legendMarkerSize: undefined,
         legendMargins:    undefined,
         legendPaddings:   undefined,
-        
-        legendClickMode:  'toggleVisible', // toggleVisible || toggleSelected
+        legendClickMode:  undefined,
         
         colors: null,
 

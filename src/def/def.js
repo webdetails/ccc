@@ -368,10 +368,12 @@ var def = /** @lends def */{
             props = b;
         }
         
-        if(from && props) {
-            props.forEach(function(p){
-                to[p] = from[p];
-            });
+        if(props) {
+            if(from){
+                props.forEach(function(p){ to[p] = from[p];   });
+            } else {
+                props.forEach(function(p){ to[p] = undefined; });
+            }
         }
         
         return to;
@@ -454,6 +456,10 @@ var def = /** @lends def */{
     // Type namespaces ----------------
     
     number: {
+        is: function(v){
+            return typeof v === 'number';
+        },
+        
         as: function(d, dv){
             var v = parseFloat(d);
             return isNaN(v) ? (dv || 0) : v;
@@ -488,6 +494,15 @@ var def = /** @lends def */{
     },
     
     object: {
+        is: function(v){
+            return v && typeof(v) === 'object'; // Is (v instanceof Object) faster?
+        },
+        
+        isNative: function(v){
+            // Sightly faster, but may cause boxing?
+            return (!!v) && /*typeof(v) === 'object' &&*/ v.constructor === Object;
+        },
+        
         as: function(v){
             return v && typeof(v) === 'object' ? v : null;
         },
@@ -669,6 +684,46 @@ var def = /** @lends def */{
             // NOTE: calls .toString() of value as a side effect of the + operator
             return before + (value == null ? "" : value);
         });
+    },
+    
+    // --------------
+    
+    /**
+     * Binds a list of types with the specified values, by position.
+     * <p>
+     * A null value is bound to any type.
+     * <p>
+     * <p>
+     * When a value is of a different type than the type desired at a given position
+     * the position is bound to <c>undefined</c> and 
+     * the unbound value is passed to the next position.  
+     * </p>
+     * 
+     * @returns {any[]} An array representing the binding, with the values bound to each type.
+     */
+    destructuringTypeBind: function(types, values){
+        var T = types.length;
+        var result = new Array(T);
+        if(T && values){
+            var V = values.length;
+            if(V){
+                var v = 0;
+                var t = 0;
+                do{
+                    var value = values[v];
+                    
+                    // any type matches null
+                    if(value == null || typeof value === types[t]){
+                        // bind value to type
+                        result[t] = value;
+                        v++;
+                    }
+                    t++;
+                }while(t < T && v < V);
+            }
+        }
+        
+        return result;
     },
     
     // --------------
@@ -1026,7 +1081,26 @@ def.scope(function(){
             var proto = this.prototype;
             var baseState = state.base;
 
-            def.eachOwn(mixin.prototype || mixin, function(value, p){
+            def.each(mixin.prototype || mixin, function(value, p){
+                // filter props/methods
+                switch(p){
+                    case 'base':
+                    case 'constructor': // don't let overwrite 'constructor' of prototype
+                        return;
+                    
+                    case 'toString':
+                        if(value === toStringMethod){
+                            return;
+                        }
+                        break;
+                    
+                    case 'override':
+                        if(value === overrideMethod){
+                            return;
+                        }
+                        break;
+                }
+                
                 if(value){
                     // Try to convert to method
                     var method = asMethod(value);
@@ -1078,7 +1152,7 @@ def.scope(function(){
     }
     
     TypeName.prototype.toString = function(){
-        return this.namespace + '.' + this.name; 
+        return def.string.join('.', this.namespace + '.' + this.name); 
     };
     
     function Method(spec) {
@@ -1178,6 +1252,10 @@ def.scope(function(){
         return this;
     }
     
+    function toStringMethod(){
+        return ''+this.constructor;
+    }
+    
     // -----------------
     
     /** @private */
@@ -1230,7 +1308,7 @@ def.scope(function(){
                 S = 0;
                 if(state.initOrPost){
                     steps.length = 0;
-                    if(state.init){ 
+                    if(state.init){
                         steps.push(state.init);
                         S++;
                     }
@@ -1240,8 +1318,10 @@ def.scope(function(){
                         S++;
                     }
                     
-                    // Call constructor revursively
+                    // Call constructor recursively
                     constructor.apply(this, arguments);
+                    
+                    return false; // stop initial constructor from running postInit again...
                 } else {
                     steps = null;
                 }
@@ -1251,14 +1331,15 @@ def.scope(function(){
         function constructor(){
             if(S){
                 var i = 0;
-                do{
-                    steps[i].apply(this, arguments);
-                } while(++i < S);
+                while(steps[i].apply(this, arguments) !== false && ++i < S);
             }
         }
         
         return constructor;
     }
+    
+    /** @private The type of the arguments of the {@link def.type} function. */
+    var _typeFunArgTypes = ['string', 'function', 'object'];
     
     /**
      * Constructs a type with the specified name in the current namespace.
@@ -1271,8 +1352,14 @@ def.scope(function(){
      * @param {object} [space] The namespace where to define a named type.
      * The default namespace is the current namespace.
      */
-    function type(name, baseType, space){
+    function type(/* name[, baseType[, space]] | baseType[, space] | space */){
         
+        var args = def.destructuringTypeBind(_typeFunArgTypes, arguments);
+        
+        return typeCore.apply(this, args);
+    }
+    
+    function typeCore(name, baseType, space){
         var typeName = new TypeName(name);
         
         // ---------------
@@ -1303,6 +1390,7 @@ def.scope(function(){
         constructor.name     = typeName.name;
         constructor.typeName = typeName;
         constructor.safe     = shared.safe(state);
+        constructor.toString = function(){ return (''+this.typeName) || "Anonymous type"; };
         
         var proto = inherits(constructor, baseType);
         
@@ -1312,10 +1400,7 @@ def.scope(function(){
         // Default methods (can be overwritten with Type#add)
         
         proto.override = overrideMethod;
-        
-        proto.toString = function(){
-            return "[" + typeName + "]";
-        };
+        proto.toString = toStringMethod;
         
         // ---------------
         

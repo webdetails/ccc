@@ -2,20 +2,19 @@
 <html>
   <head>
     <title>CCC playground</title>
-    <meta name="svg.render.forceflash" content="true">
     
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script type="text/javascript" src="cdf/Base.js"></script>
     <script type="text/javascript" src="cdf/jquery.js"></script>
-    <script type="text/javascript" src="cdf/jquery.tooltip.js"></script>
-    <script type="text/javascript" src="data/q01-01.js"></script>
     <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
     <script type="text/javascript" src="lib/protovis-msie.js"></script>
     <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
     <script type="text/javascript" src="lib/tipsy.js"></script>
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
-        <script type="text/javascript" src="def/def.js"></script>
-
+    
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    
+    <script type="text/javascript" src="def/def.js"></script>
 
     <!-- @SCRIPTSBEG@ -->
         <script type="text/javascript" src="pvc/pvc.js"></script>
@@ -53,6 +52,11 @@
         <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneVisibility.js"></script>
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
@@ -141,15 +145,12 @@
     <div id="pvcPie2"></div>
     <div id="pvcPie3"></div>
 
-
-
     <script type="text/javascript">
 
       // enable debug
-      pvc.debug = true;
+      pvc.debug = 1;
 
       pv.listenForPageLoad(function() {
-
 
         var dot1 = new pvc.DotChart({
           // legendPosition: "left",
@@ -681,62 +682,29 @@
         stackedArea3.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
         stackedArea3.render();
 
-
-
-
+        // -----------------
+     
         var bar1 = new pvc.BarChart({
           canvas: "pvcBar1",
-          width: 400,
+          width:  400,
           height: 300,
-          title: "Bar chart",
-          titlePosition: "left",
-          titleSize: 40,
+          title:  "Bar chart",
           legend: true,
-          legendPosition: "bottom",
-          legendSize: null,
-
           orientation: 'vertical',
-          stacked: false,
+          stacked:    true,
           selectable: true,
-          maxBarSize: 100,
-
-          panelSizeRatio:0.75,
-          barSizeRatio: 1,
-
-          showValues: true,
-          showXScale: true,
-          showYScale: true,
-          yAxisPosition: "left",
-          yAxisSize: 30,
-          xAxisPosition: "bottom",
-          xAxisSize: 30,
-          xAxisFullGrid: true,
-          yAxisFullGrid: true,
-        
-          /*
-        showAllTimeseries: true,
-        allTimeseriesPosition: "bottom",
-        allTimeseriesSize: 50,
-           */
+          showValues: false,
           extensionPoints: {
-            title_fillStyle: "yellow",
-            titleLabel_font: "16px sans-serif",
-            legend_fillStyle: "green",
-            allTimeseries_fillStyle: "blue",
-            xAxis_fillStyle: "#eee",
-            yAxis_fillStyle: "#bbb",
-
-            yAxisRule_strokeStyle:"blue",
-
-            xAxisLabel_textAngle: -1,
-            xAxisLabel_textAlign: "center",
-            xAxisLabel_textBaseline: "top"
-          }
-
+              xAxisLabel_textAngle: -1,
+              xAxisLabel_textAlign: "center",
+              xAxisLabel_textBaseline: "top"
+           }
         });
 
         bar1.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         bar1.render();
+        
+        // -----------------
         
         var bar2 = new pvc.BarChart({
           canvas: "pvcBar2",

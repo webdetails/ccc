@@ -20,6 +20,12 @@ def.scope(function(){
     }
     
     function getTextSize(text, font){
+        if(text == null){
+            text = "";
+        } else {
+            text = "" + text;
+        }
+        
         var bbox = _currentFontSizeCache && _currentFontSizeCache.get(font, text);
         if(!bbox){
             bbox = getTextSizeCore(text, font);
@@ -212,6 +218,10 @@ def.scope(function(){
         textSizePlaceholderId = 'cccTextSizeTest_' + new Date().getTime();
     
     function getTextSizeCore(text, font){
+        if(!text){
+            return {width: 0, height: 0};
+        }
+        
         switch(pv.renderer()){
             case 'vml':   return getTextSizeVML(text, font);
             case 'batik': return getTextSizeCGG(text, font);
@@ -221,10 +231,6 @@ def.scope(function(){
     }
     
     function getTextSizeSVG(text, font){
-        if(text === "") {
-            return {width: 0, height: 0}; 
-        }
-        
         if(!_svgText){
             var holder  = getTextSizePlaceholder();
             var svgElem = pv.SvgScene.create('svg');

@@ -1230,17 +1230,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
 
         // tooltip
+        var tipSySettings = def.set(Object.create(this.chart.options.tipsySettings),
+                'gravity', tipsyGravity,
+                'offset',  diagMargin * 2);
+        
         this.pvLabel
             .title(function(d){
                 this.instance().tooltip = d.label;
                 return '';
             })
-            .event("mouseover", pv.Behavior.tipsy({
-                gravity: tipsyGravity,
-                fade: true,
-                offset: diagMargin * 2,
-                opacity:1
-            }));
+            .event("mouseover", pv.Behavior.tipsy(tipSySettings));
     },
     
     getLayoutSingleCluster: function(){

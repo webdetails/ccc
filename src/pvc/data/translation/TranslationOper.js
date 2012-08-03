@@ -252,10 +252,12 @@ def.type('pvc.data.TranslationOper')
     //  TODO: docs
     _wrapReader: function(reader, dimNames){
         var me = this,
-            dimensions;
+            dimensions,
+            data;
         
         function createDimensions() {
-            dimensions = dimNames.map(function(dimName){ return me.data.dimensions(dimName); });
+            data = me.data;
+            dimensions = dimNames.map(function(dimName){ return data.dimensions(dimName); });
             dimensions.unshift(null); // item argument
             return dimensions;
         }
@@ -263,7 +265,7 @@ def.type('pvc.data.TranslationOper')
         function read(item) {
             (dimensions || createDimensions())[0] = item;
             
-            return reader.apply(null, dimensions);
+            return reader.apply(data, dimensions);
         }
         
         return read;
@@ -413,11 +415,12 @@ def.type('pvc.data.TranslationOper')
         
         var r = 0, 
             R = dimsReaders.length, 
-            a = 0;
+            a = 0,
+            data = this.data;
         
         while(r < R) {
             
-            var result = dimsReaders[r++](item);
+            var result = dimsReaders[r++].call(data, item);
             if(result != null){
                 if(result instanceof Array) {
                     var j = 0, J = result.length;

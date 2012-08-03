@@ -48,19 +48,18 @@ pvc.PieChart = pvc.BaseChart.extend({
         }
         
         var options = this.options;
-        var pieOptions = options.pie;
         
         this.pieChartPanel = new pvc.PieChartPanel(this, this.basePanel, def.create(contentOptions, {
             innerGap: options.innerGap,
             explodedOffsetRadius: options.explodedSliceRadius,
             explodedSliceIndex: options.explodedSliceIndex,
-            activeOffsetRadius:  options.activeSliceRadius,
-            showValues: options.showValues,
-            valuesMask: options.valuesMask,
-            labelStyle: options.valuesLabelStyle,
+            activeOffsetRadius: options.activeSliceRadius,
+            showValues:  options.showValues,
+            valuesMask:  options.valuesMask,
+            labelStyle:  options.valuesLabelStyle,
             linkedLabel: options.linkedLabel,
-            labelFont:  options.valuesLabelFont,
-            scenes: pieOptions && pieOptions.scenes
+            labelFont:   options.valuesLabelFont,
+            scenes:      def.getPath(options, 'pie.scenes')
         }));
     }
 },

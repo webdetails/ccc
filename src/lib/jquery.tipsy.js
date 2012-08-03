@@ -44,9 +44,12 @@
         },
         
         visible: function(){
+            var parent;
             return this.hoverState === 'in' || // almost visible
                    (this.hoverState !== 'out' &&  
-                   !!(this.$tip && this.$tip[0].parentNode));
+                   !!(this.$tip && 
+                      (parent = this.$tip[0].parentNode) && 
+                      (parent.nodeType !== 11))); // Document fragment
         },
         
         update: function(){
@@ -68,7 +71,8 @@
                     $tip.remove();
                 }
                 
-                if(!$tip[0].parentNode){
+                var parent = $tip[0].parentNode;
+                if(!parent || (parent.nodeType === 11)){ // Document fragment
                     $tip.css({top: 0, left: 0, visibility: 'hidden', display: 'block'})
                         .appendTo(document.body);
                 }
@@ -194,13 +198,15 @@
                 
                 // Remove it from document fragment parent
                 // So that visible tests do not fail
+                // Does not work on IE
                 this.$tip.remove();
             }
             return this.$tip;
         },
         
         validate: function() {
-            if (!this.$element[0].parentNode) {
+            var parent = this.$element[0].parentNode;
+            if (!parent || (parent.nodeType === 11)){
                 this.hide();
                 this.$element = null;
                 this.options = null;

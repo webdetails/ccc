@@ -136,6 +136,47 @@ pvc.mergeDefaults = function(to, defaults, from){
     return to;
 };
 
+/**
+ * Extends a type created with {@link def.type}
+ * with the properties in {@link exts}, 
+ * possibly constrained to the properties of specified names.
+ * <p>
+ * The properties whose values are not functions
+ * are converted to constant functions that return the original value.
+ * </p>
+ * @param {function} type
+ *      The type to extend.
+ * @param {object} [exts] 
+ *      The extension object whose properties will extend the type.
+ * @param {string[]} [names]
+ *      The allowed property names. 
+ */
+pvc.extendType = function(type, exts, names){
+    if(exts){
+        var exts2;
+        var addExtension = function(ext, name){
+            if(ext !== undefined){
+                if(!exts2){
+                    exts2 = {};
+                }
+                exts2[name] = def.fun.to(ext);
+            }
+        };
+        
+        if(names){
+            names.forEach(function(name){
+                addExtension(exts[name], name);
+            });
+        } else {
+            def.each(addExtension);
+        }
+        
+        if(exts2){
+           type.add(exts2);
+        }
+    }
+};
+
 // Adapted from pv.range
 pvc.Range = function(start, stop, step){
     if (arguments.length == 1) {
@@ -1563,6 +1604,7 @@ pv.Behavior.selector = function(autoRefresh, mark) {
       index, // scene context
       mprev,
       inited,
+      events,
       m1, // initial mouse position
       redrawThis = (arguments.length > 0)?
                     autoRefresh : true; //redraw mark - default: same as pv.Behavior.select
@@ -1577,19 +1619,20 @@ pv.Behavior.selector = function(autoRefresh, mark) {
         scene = mark.scene;
     }
     
-    if(!inited){
-        inited = true;
-        
+    if(!events){
         // Staying close to canvas allows cancelling bubbling of the event in time 
         // for other ascendant handlers
         var root = this.root.scene.$g;
-        pv.listen(root, "mousemove", mousemove);
-        pv.listen(root, "mouseup",   mouseup  );
         
-        // But when the mouse leaves the canvas we still need to
-        // receive events...
-        pv.listen(document, "mousemove", mousemove);
-        pv.listen(document, "mouseup",   mouseup  );
+        events = [
+            [root,     "mousemove", pv.listen(root, "mousemove", mousemove)],
+            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )],
+            
+            // But when the mouse leaves the canvas we still need to
+            // receive events...
+            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
+            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
+        ];
     }
     
     m1 = this.mouse();
@@ -1637,6 +1680,12 @@ pv.Behavior.selector = function(autoRefresh, mark) {
   function mouseup(e) {
     var lscene = scene;
     if(lscene){
+        if(events){
+            events.forEach(function(registration){
+                pv.unlisten.apply(pv, registration);
+            });
+            events = null;
+        }
         
         e.stopPropagation();
         

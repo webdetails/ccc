@@ -158,9 +158,13 @@ def.type('pvc.visual.Scene')
         return this.root._panel;
     },
     
-//    chart: function(){
-//        return this.root._panel.chart;
-//    },
+    chart: function(){
+        return this.root._panel.chart;
+    },
+    
+    compatVersion: function(){
+        return this.root._panel.compatVersion();
+    },
     
     /**
      * Obtains an enumerable of the child scenes.

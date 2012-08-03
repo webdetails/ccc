@@ -89,12 +89,12 @@ pvc.BasePanel = pvc.Abstract.extend({
         'value':    'value'
     },
     
-    _sceneExtensions: null,
+    _sceneTypeExtensions: null,
     
     constructor: function(chart, parent, options) {
         
         if(options && options.scenes){
-            this._sceneExtensions = options.scenes;
+            this._sceneTypeExtensions = options.scenes;
             delete options.scenes;
         }
         
@@ -148,6 +148,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         } else {
             this.align = pvc.parseAlign(this.anchor, this.align);
         }
+    },
+    
+    compatVersion: function(){
+        return this.chart.compatVersion();
     },
     
     /**
@@ -852,45 +856,25 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
 
     /**
-     * This is the method to be used for the extension points
-     * for the specific contents of the chart. already ge a pie
-     * chart! Goes through the list of options and, if it
-     * matches the prefix, execute that method on the mark.
-     * WARNING: It's the user's responsibility to make sure that
-     * unexisting methods don't blow this.
+     * Extends a protovis mark with extension points 
+     * having a given prefix.
      */
     extend: function(mark, prefix) {
         this.chart.extend(mark, prefix);
     },
-
-    _extendScene: function(typeKey, sceneType, names){
-        var exts = this._sceneExtensions;
-        var typeExts;
-        if(exts && (typeExts = exts[typeKey])){
-            if(!names){
-                names = def.keys(typeExts);
-            }
-            
-            var hasAny = false;
-            var typeExts2 = {};
-            
-            names.forEach(function(name){
-                var ext = typeExts[name];
-                if(ext){
-                    hasAny = true;
-                    typeExts2[name] = def.fun.to(ext);
-                }
-            });
-            
-            if(hasAny){
-               sceneType.add(typeExts2);
-            }
+    
+    _extendSceneType: function(typeKey, type, names){
+        var typeExts = def.get(this._sceneTypeExtensions, typeKey);
+        if(typeExts){
+            pvc.extendType(type, typeExts, names);
         }
     },
     
     /**
-     * Obtains the specified extension point.
-     * Arguments are concatenated with '_'.
+     * Obtains an extension point given its identifier or identifier parts.
+     * <p>
+     * Multiple identifiers are concatenated with '_' to form the full identifier.
+     * </p>
      */
     _getExtension: function(extPoint) {
         return this.chart._getExtension.apply(this.chart, arguments);

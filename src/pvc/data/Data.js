@@ -136,7 +136,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     this.type.dimensionsList().forEach(this._initDimension, this);
     
     // Call base constructors
-    this.base(owner, atoms, atomsBase);
+    this.base(owner, atoms, atomsBase, /* wantLabel */ true);
     
     pv.Dom.Node.call(this, /* nodeValue */null); // TODO: remove this when possible
     
@@ -144,11 +144,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
     
     this._children = this.childNodes; // pv.Dom.Node#childNodes
     
-    // Build label and child key
-    this.absLabel = this.label = this.buildLabel(atoms);
-
-    // The absolute key is relative to the root data (not the owner)
-    this.absKey = this.key;
+    // Build absolute label and key
+    // The absolute key is relative to the root data (not the owner - the topmost root)
     if(parent){
         /*global data_addChild:true */
         data_addChild.call(parent, this);
@@ -156,11 +153,18 @@ def.type('pvc.data.Data', pvc.data.Complex)
         if(parent.absLabel){
             /*global complex_labelSep:true */
             this.absLabel = def.string.join(complex_labelSep, parent.absLabel, this.label);
+        } else {
+            this.absLabel = this.label;
         }
         
         if(parent.absKey){
             this.absKey = def.string.join(",", parent.absKey, this.key);
+        } else {
+            this.absKey = this.key;
         }
+    } else {
+        this.absLabel = this.label;
+        this.absKey   = this.key;
     }
 })
 

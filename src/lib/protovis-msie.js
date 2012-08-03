@@ -921,9 +921,12 @@ pv.listen = function(target, type, listener) {
   if ( target === window ) {
     target = document.documentElement;
   }
-  return target.addEventListener
+  
+  target.addEventListener
       ? target.addEventListener(type, listener, false)
       : target.attachEvent("on" + type, listener);
+      
+  return listener; 
 };
 
 pv.VmlScene.dispatch = pv.listener(function(e){

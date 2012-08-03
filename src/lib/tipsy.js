@@ -42,7 +42,8 @@ pv.Behavior.tipsy = function(opts) {
         id,
         usesPoint = opts.usesPoint,
         $canvas,
-        isEnabled = opts.isEnabled;
+        isEnabled = opts.isEnabled,
+        sharedTipsyInfo;
     
     opts.delayOut = 0; 
         
@@ -285,47 +286,66 @@ pv.Behavior.tipsy = function(opts) {
         c.style.position = "relative";
         $canvas.mouseleave(hideTipsy);
         
-        /* Share one div per canvas
-         * as a way to mutually exclude visibility of tooltips 
-         * on different marks. 
-         */
+        // ------------
+        
+        initTipsyCanvasSharedInfo();
+        
+        // ------------
+        
+        /* Use the specified div id or create a hopefully unique one */
         if(!id){
-            id = c.__tipsyBehaviorId || c.id;
-            if(!id){
-                id = c.__tipsyBehaviorId = '' + new Date().getTime();
-            }
-            
-            id = "tipsyPvBehavior" + id;
+            id = "tipsyPvBehavior_" + new Date().getTime();
         }
         
-        /* Reuse the specified div id */
         var fakeTipTarget = document.getElementById(id);
-        if(fakeTipTarget) {
-            var tipsy = $.data(fakeTipTarget, 'tipsy');
-            if(tipsy) {
-                tipsy.hide();
-                $.data(fakeTipTarget, 'tipsy', null);
-                tipsy = null;
-            }
-        } else {
+        if(!fakeTipTarget) {
             fakeTipTarget = document.createElement("div");
             fakeTipTarget.id = id;
             c.appendChild(fakeTipTarget);
-            
-            var fakeStyle = fakeTipTarget.style;
-            fakeStyle.padding = '0px';
-            fakeStyle.margin  = '0px';
-            fakeStyle.position = 'absolute';
-            fakeStyle.pointerEvents = 'none'; // ignore mouse events
-            fakeStyle.display = 'block';
         }
+        
+        var fakeStyle = fakeTipTarget.style;
+        fakeStyle.padding = '0px';
+        fakeStyle.margin  = '0px';
+        fakeStyle.position = 'absolute';
+        fakeStyle.pointerEvents = 'none'; // ignore mouse events (does not work on IE)
+        fakeStyle.display = 'block';
+        fakeStyle.zIndex = -10;
         
         $fakeTipTarget = $(fakeTipTarget);
         
         updateTipDebug();
         
         // Create the tipsy instance
+        $fakeTipTarget.data('tipsy', null); // Otherwise a new tipsy is not created, if there's one there already
         $fakeTipTarget.tipsy(opts);
+    }
+    
+    function initTipsyCanvasSharedInfo(){
+        sharedTipsyInfo = $canvas.data('tipsy-pv-shared-info');
+        if(sharedTipsyInfo){
+            var createId = ($canvas[0].$pvCreateId || 0);
+            
+            if(sharedTipsyInfo.createId === createId){
+                sharedTipsyInfo.behaviors.push(hideTipsyOther);
+                return;
+            }
+            
+            // Protovis has recreated the whole structure
+            // So all existing tipsies (but this one) are invalid...
+            // Hide them and let GC do the rest
+            sharedTipsyInfo.behaviors.forEach(function(aHideTipsy){
+                aHideTipsy();
+            });
+        }
+        
+        
+        sharedTipsyInfo = {
+            createId:  ($canvas[0].$pvCreateId || 0),
+            behaviors: [hideTipsyOther]
+        };
+        
+        $canvas.data('tipsy-pv-shared-info', sharedTipsyInfo);
     }
     
     function updateTipDebug(){
@@ -397,7 +417,7 @@ pv.Behavior.tipsy = function(opts) {
         return opId === nextOperationId - 1;
     }
     
-    function hideTipsy(ev) {
+    function hideTipsy() {
         var opId = getNewOperationId();
         
         if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId); }
@@ -416,7 +436,12 @@ pv.Behavior.tipsy = function(opts) {
         }
         
         if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId); }
-        
+        hideTipsyCore(opId);
+    }
+    
+    function hideTipsyOther() {
+        var opId = getNewOperationId();
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding as Other opId=" + opId); }
         hideTipsyCore(opId);
     }
     
@@ -426,6 +451,17 @@ pv.Behavior.tipsy = function(opts) {
       
         if ($fakeTipTarget) {
             $fakeTipTarget.tipsy("leave");
+        }
+    }
+    
+    function hideOtherTipsies(){
+        var hideTipsies = sharedTipsyInfo && sharedTipsyInfo.behaviors;
+        if(hideTipsies && hideTipsies.length > 1){
+            hideTipsies.forEach(function(aHideTipsy){
+                if(aHideTipsy !== hideTipsyOther){
+                    aHideTipsy();
+                }
+            });
         }
     }
     
@@ -490,6 +526,8 @@ pv.Behavior.tipsy = function(opts) {
         
         setFakeTipTargetBounds(bounds);
         
+        hideOtherTipsies();
+        
         $fakeTipTarget.tipsy("update");
     }
     
@@ -533,6 +571,8 @@ pv.Behavior.tipsy = function(opts) {
         
         setFakeTipTargetBounds(opts.followMouse ? getMouseBounds() : getInstanceBounds(mark));
         
+        hideOtherTipsies();
+        
         if(isHidden){
             $fakeTipTarget.tipsy("enter");
         } else {
@@ -550,8 +590,6 @@ pv.Behavior.tipsy = function(opts) {
             showTipsy(mark);
         }
     }
-    
-    tipsyBehavior.hide = hideTipsy;
 
     return tipsyBehavior;
 }; // END pv.Behavior.tipsy

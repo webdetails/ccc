@@ -1,4 +1,4 @@
-// 272a27c45c16f2c688bde5c4b86b5f9613dab167
+// ed2eef592fff07cd727ce0473b8a4bc98e1a52b2
 /**
  * @class The built-in Array class.
  * @name Array
@@ -316,9 +316,29 @@ pv.listen = function(target, type, listener) {
       return pv.listenForPageLoad (pv.listener(listener));
 
   listener = pv.listener(listener);
-  return target.addEventListener
+  target.addEventListener
       ? target.addEventListener(type, listener, false)
       : target.attachEvent("on" + type, listener);
+  
+   return listener;
+};
+
+/**
+ * @private Unregisters the specified listener for events of the specified type on
+ * the specified target.
+ * 
+ * @param target a DOM element.
+ * @param {string} type the type of event, such as "click".
+ * @param {function} the event handler callback or the result of {@link pv.listen}.
+ */
+pv.unlisten = function(target, type, listener){
+    if(listener.$listener){
+        listener = listener.$listener;
+    }
+    
+    target.removeEventListener
+        ? target.removeEventListener(type, listener, false)
+        : target.detachEvent("on" + type, listener);
 };
 
 /**
@@ -7529,7 +7549,8 @@ pv.SvgScene.rule = function(scenes) {
         "y2": s.top + s.height,
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity,
-        "stroke-width": s.lineWidth / this.scale
+        "stroke-width": s.lineWidth / this.scale,
+        "stroke-dasharray": s.strokeDasharray || 'none'
       });
     
     if(s.svg) this.setAttributes(e, s.svg);
@@ -10182,7 +10203,8 @@ pv.Rule.prototype = pv.extend(pv.Mark)
     .property("width", Number)
     .property("height", Number)
     .property("lineWidth", Number)
-    .property("strokeStyle", pv.fillStyle);
+    .property("strokeStyle", pv.fillStyle)
+    .property("strokeDasharray", String);
 
 pv.Rule.prototype.type = "rule";
 
@@ -10231,7 +10253,8 @@ pv.Rule.prototype.defaults = new pv.Rule()
     .extend(pv.Mark.prototype.defaults)
     .lineWidth(1)
     .strokeStyle("black")
-    .antialias(false);
+    .antialias(false)
+    .strokeDasharray("");
 
 /**
  * Constructs a new rule anchor with default properties. Rules support five
@@ -10518,6 +10541,7 @@ pv.Panel.prototype.buildImplied = function(s) {
     if (pv.renderer() === "batik") {
       if (c) {
         if (c.$panel != this) {
+          pv.Panel.updateCreateId(c);
           c.$panel = this;
           while (c.lastChild) c.removeChild(c.lastChild);
         }
@@ -10527,6 +10551,7 @@ pv.Panel.prototype.buildImplied = function(s) {
     } else if (c) {
       /* Clear the container if it's not associated with this panel. */
       if (c.$panel != this) {
+        pv.Panel.updateCreateId(c);
         c.$panel = this;
         while (c.lastChild) c.removeChild(c.lastChild);
       }
@@ -10559,6 +10584,10 @@ pv.Panel.prototype.buildImplied = function(s) {
   }
   if (!s.transform) s.transform = pv.Transform.identity;
   pv.Mark.prototype.buildImplied.call(this, s);
+};
+
+pv.Panel.updateCreateId = function(c){
+    c.$pvCreateId = (c.$pvCreateId || 0) + 1;
 };
 /**
  * Constructs a new image with default properties. Images are not typically

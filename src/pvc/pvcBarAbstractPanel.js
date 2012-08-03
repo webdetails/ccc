@@ -114,6 +114,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             })
             .lockDimensions()
             .pvMark
+            .antialias(false);
             ;
 
         this._addOverflowMarkers();
