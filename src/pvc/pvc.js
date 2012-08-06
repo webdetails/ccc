@@ -103,37 +103,40 @@ pvc.cloneMatrix = function(m){
     });
 };
 
-pvc.mergeDefaults = function(to, defaults, from){
-    def.eachOwn(defaults, function(dv, p){
-        var v, dvo;
-        
-        if(from){ 
-            v = from[p];
-        }
-        
-        if(v !== undefined){
-            var vo = def.object.asNative(v);
-            if(vo){
-                dvo = def.object.asNative(dv);
-                if(dvo){
-                    v = def.create(dvo, vo);
-                } // else, ignore dv
-            } // else, simple value (null included) ignores dv
-        }
-        
-        if(v === undefined){
-            // Inherit default native objects
-            dvo = def.object.asNative(dv);
-            if(dvo){
-                dv = Object.create(dvo);
-            }
-            v = dv;
-        }
-        
-        to[p] = v;
-    });
-    
-    return to;
+//pvc.mergeDefaults = function(to, defaults, from){
+//    var asNative = def.object.asNative;
+//    
+//    def.eachOwn(defaults, function(dv, p){
+//        var v, dvo;
+//        
+//        if(from && ((v = from[p]) !== undefined)){
+//            var vo = asNative(v);
+//            if(vo){
+//                dvo = asNative(dv);
+//                if(dvo){
+//                    v = def.create(dvo, vo);
+//                } // else, ignore dv
+//            } // else, simple value (null included) ignores dv
+//        }
+//        
+//        if(v === undefined){
+//            // Inherit default native objects
+//            dvo = asNative(dv);
+//            if(dvo){
+//                dv = Object.create(dvo);
+//            }
+//            v = dv;
+//        }
+//        
+//        to[p] = v;
+//    });
+//    
+//    return to;
+//};
+
+pvc.orientation = {
+    vertical:   'vertical',
+    horizontal: 'horizontal'
 };
 
 /**

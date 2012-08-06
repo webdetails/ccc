@@ -22,6 +22,7 @@
         <script type="text/javascript" src="pvc/pvc.js"></script>
         <script type="text/javascript" src="pvc/pvc.text.js"></script>
         <script type="text/javascript" src="pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="pvc/pvc.options.js"></script>
         <script type="text/javascript" src="pvc/data/_data.js"></script>
         <script type="text/javascript" src="pvc/data/meta/DimensionType.js"></script>
         <script type="text/javascript" src="pvc/data/meta/ComplexType.js"></script>
@@ -53,12 +54,16 @@
         <script type="text/javascript" src="pvc/visual/sign/PieSlice.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="pvc/visual/Axis.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/legend.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletItemScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneSelection.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
         <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
@@ -113,7 +118,7 @@ Bullet Charts are a replacement for so-called gauge and -meter charts
 They compare a given quantitative measure (such as profit or revenue) against 
 qualitative ranges (e.g., poor, satisfactory, good) and related markers 
 (e.g. the same measure a year ago), as typically found in a gauge-type chart 
-into a much smaller space with a much higher data density.<br>
+into a much smaller space with a much higher data density.<br>
 <h2>Chart Options</h2>
 <h4>Dimensions</h4>
 <ul>
@@ -188,7 +193,7 @@ var bullet1 = new pvc.BulletChart({
 
     // Specific values
     bulletTitle: "My Test",
-    bulletSubtitle: "description",
+    bulletSubtitle: "description",
     bulletTitlePosition: "left",
     bulletMeasures: [50],
     bulletMarkers: [90],
@@ -264,7 +269,7 @@ bullet2.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcBullet2"></div>
-
+
 <h4>Bullet chart based on a datasource with two columns: Title and value</h4>
 <textarea cols="55" rows="20" id="pvcBullet3Code">
 var bullet3 = new pvc.BulletChart({

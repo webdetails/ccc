@@ -1230,7 +1230,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
 
         // tooltip
-        var tipSySettings = def.set(Object.create(this.chart.options.tipsySettings),
+        var tipsySettings = def.set(Object.create(this.chart.options.tipsySettings),
                 'gravity', tipsyGravity,
                 'offset',  diagMargin * 2);
         
@@ -1239,7 +1239,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this.instance().tooltip = d.label;
                 return '';
             })
-            .event("mouseover", pv.Behavior.tipsy(tipSySettings));
+            .event("mouseover", pv.Behavior.tipsy(tipsySettings));
     },
     
     getLayoutSingleCluster: function(){
@@ -1309,7 +1309,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 });
 
 pvc.AxisPanel.create = function(chart, parentPanel, cartAxis, options){
-    var PanelClass = pvc[cartAxis.upperOrientedId + 'AxisPanel'] || 
+    var PanelClass = pvc[def.firstUpperCase(cartAxis.orientedId) + 'AxisPanel'] || 
         def.fail.argumentInvalid('cartAxis', "Unsupported cartesian axis");
     
     return new PanelClass(chart, parentPanel, cartAxis, options);

@@ -1,5 +1,6 @@
 def.scope(function(){
 
+    var $VA = pvc.visual.Axis;
 /**
  * Initializes a cartesian axis.
  * 
@@ -22,6 +23,8 @@ def.scope(function(){
  * (axis orientation)
  * </pre>
  * 
+ * @extends pvc.visual.Axis
+ * 
  * @property {pvc.CartesianAbstract} chart The associated cartesian chart.
  * @property {string} type The type of the axis. One of the values: 'base' or 'ortho'.
  * @property {number} index The index of the axis within its type (0, 1, 2...).
@@ -40,59 +43,22 @@ def.scope(function(){
  * @param {object} [keyArgs] Keyword arguments.
  * @param {pv.Scale} scale The associated scale.
  */
-def.type('pvc.visual.CartesianAxis')
+def
+.type('pvc.visual.CartesianAxis', $VA)
 .init(function(chart, type, index, roles, keyArgs){
-    /*jshint expr:true */
-    roles || def.fail.argumentRequired('roles');
     
-    this.chart = chart;
-    this.type  = type;
-    this.index = index == null ? 0 : index;
-
-    this.roles = def.array.as(roles);
-    this.role  = this.roles[0];
-    this.scaleType = groupingScaleType(this.role.grouping);
-
-    // Role compatibility checks
-    var L = this.roles.length;
-    if(L > 1){
-        var grouping = this.role.grouping, 
-            i;
-        if(this.scaleType === 'Discrete'){
-            for(i = 1; i < L ; i++){
-                if(grouping.id !== this.roles[i].grouping.id){
-                    throw def.error.operationInvalid("Discrete roles on the same axis must have equal groupings.");
-                }
-            }
-        } else {
-            if(!grouping.firstDimension.type.isComparable){
-                throw def.error.operationInvalid("Continuous roles on the same axis must have 'comparable' groupings.");
-            }
-
-            for(i = 1; i < L ; i++){
-                if(this.scaleType !== groupingScaleType(this.roles[i].grouping)){
-                    throw def.error.operationInvalid("Continuous roles on the same axis must have scales of the same type.");
-                }
-            }
-        }
-    }
-
-    this.scale = def.get(keyArgs, 'scale');
+    this.base(chart, type, index, roles, keyArgs);
     
     // ------------
     
     var options = chart.options;
     
-    this.id = $VCA.getId(this.type, this.index);
-    
     this.orientation = $VCA.getOrientation(this.type, options.orientation);
     this.orientedId  = $VCA.getOrientedId(this.orientation, this.index);
-    this.optionsId   = $VCA.getOptionsId(this.orientation, this.index);
-    
-    this.upperOrientedId = def.firstUpperCase(this.orientedId);
-    
+    this.v1OptionId  = $VCA.getV1OptionId(this.orientation, this.index);
+
     if(this.index !== 1) {
-        this.isVisible = options['show' + this.upperOrientedId + 'Scale'];
+        this.isVisible = options['show' + def.firstUpperCase(this.orientedId) + 'Scale'];
     } else {
         this.isVisible = !!options.secondAxisIndependentScale; // options.secondAxis is already true or wouldn't be here
     }
@@ -108,11 +74,9 @@ def.type('pvc.visual.CartesianAxis')
             delete this._roundingPaddings;
         }
         
-        this.scale = scale;
+        this.base(scale);
         
         if(scale){
-            scale.type = this.scaleType;
-            
             if(!scale.isNull && this.scaleType !== 'Discrete'){
                 // Original data domain, before nice or tick rounding
                 this.domain = scale.domain();
@@ -125,77 +89,10 @@ def.type('pvc.visual.CartesianAxis')
                 }
             }
         }
-    },
-    
-    /**
-     * Determines the type of scale required by the cartesian axis.
-     * The scale types are 'Discrete', 'Timeseries' and 'Continuous'.
-     * 
-     * @type string
-     */
-    scaleType: function(){
-        return groupingScaleType(this.role.grouping);
-    },
-    
-    /**
-     * Obtains a scene-scale function to compute values of this axis' main role.
-     * 
-     * @param {object} [keyArgs] Keyword arguments object.
-     * @param {string} [keyArgs.sceneVarName] The local scene variable name by which this axis's role is known. Defaults to the role's name.
-     * @param {boolean} [keyArgs.nullToZero=true] Indicates that null values should be converted to zero before applying the scale.
-     * @type function
-     */
-    sceneScale: function(keyArgs){
-        var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,
-            grouping = this.role.grouping;
-
-        if(grouping.isSingleDimension && grouping.firstDimension.type.valueType === Number){
-            var scale = this.scale,
-                nullToZero = def.get(keyArgs, 'nullToZero', true);
-            
-            var by = function(scene){
-                var value = scene.vars[varName].value;
-                if(value == null){
-                    if(!nullToZero){
-                        return value;
-                    }
-                    value = 0;
-                }
-                return scale(value);
-            };
-            def.copy(by, scale);
-            
-            return by;
-        }
-
-        return this.scale.by(function(scene){
-            return scene.vars[varName].value;
-        });
-    },
-    
-    /**
-     * Obtains the value of an axis option, given its name.
-     * <p>
-     * Always tries to obtain the option value using the "Bare Id" option name format.
-     * If it is not specified using such a name, 
-     * then logic that depends on each option is applied to obtain the option's value.
-     * </p>
-     * 
-     * @param {string} name The option name.
-     * @type string
-     */
-    option: function(name){
-        /* Custom option handler */
-        var handler = axisOptionHandlers[name];
         
-        var value = coreOptions.call(this, handler, name);
-        if(value != null && handler && handler.cast) {
-            value = handler.cast.call(this, value);
-        }
-        
-        return value;
+        return this;
     },
- 
+    
     setTicks: function(ticks){
         var scale = this.scale;
         
@@ -277,47 +174,14 @@ def.type('pvc.visual.CartesianAxis')
         }
         
         return roundingPaddings;
+    },
+    
+    _getOptionsDefinition: function(){
+        return cartAxis_optionsDef;
     }
 });
 
 var $VCA = pvc.visual.CartesianAxis;
-
-function coreOptions(handler, name) {
-    var value;
-    
-    /* Custom option handler */
-    if(handler && handler.resolve) {
-        value = handler.resolve.call(this, name);
-        if(value !== undefined) {
-            return value;
-        }
-    }
- 
-    /* By Id  (baseAxis, orthoAxis, base2Axis, ortho2Axis, ...) */
-    value = idOptions.call(this, name);
-    if(value !== undefined) {
-        return value;
-    }
-    
-    /* By Options Id (xAxis, yAxis, secondAxis) */
-    value = v1OptionIdOptions.call(this, name);
-    if(value !== undefined) {
-        return value;
-    }
-    
-    /* Custom option post handler */
-    if(handler && handler.resolvePost) {
-        value = handler.resolvePost.call(this, name);
-        if(value !== undefined) {
-            return value;
-        }
-    }
-
-    /* Common (axis) */
-    value = commonOptions.call(this, name);
-
-    return value;
-}
 
 /**
  * Obtains the type of the axis given an axis orientation and a chart orientation.
@@ -359,255 +223,331 @@ $VCA.getOrientedId = function(orientation, index){
 };
 
 /**
- * Calculates the oriented id of an axis given its orientation and index.
- * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
- * @param {number} index The index of the axis within its type. 
- * @type string
- */
-$VCA.getId = function(type, index){
-    if(index === 0) {
-        return type; // base, ortho
-    }
-    
-    return type + "" + (index + 1); // base2, ortho3,...
-};
-
-/**
- * Calculates the options id of an axis given its orientation and index.
+ * Calculates the V1 options id of an axis given its orientation and index.
  * 
  * @param {string} orientation The orientation of the axis.
  * @param {number} index The index of the axis within its type. 
  * @type string
  */
-$VCA.getOptionsId = function(orientation, index){
+$VCA.getV1OptionId = function(orientation, index){
     switch(index) {
         case 0: return orientation; // x, y
-        case 1: return "second"; // second
+        case 1: return "second";    // second
     }
     
     return orientation + "" + (index + 1); // y3, x4,...
 };
 
-$VCA.createAllDefaultOptions = function(options){
-    var types   = ['base', 'ortho'],
-        indexes = [0, 1],
-        orientations = ['x', 'y'],
-        optionNames = [
-            'Position',
-            'Size',
-            'SizeMax',
-            'FullGrid',
-            'FullGridCrossesMargin',
-            'RuleCrossesMargin',
-            'EndLine',
-            'DomainRoundMode',
-            'DesiredTickCount',
-            'TickExponentMin',
-            'TickExponentMax',
-            'MinorTicks',
-            'ClickAction',
-            'DoubleClickAction',
-            'Title',
-            'TitleSize',
-            'TitleSizeMax',
-            'TitleFont',
-            'TitleMargins',
-            'TitlePaddings',
-            'TitleAlign',
-            'Font',
-            'OriginIsZero',
-            'Offset',
-            'FixedMin',
-            'FixedMax',
-            'OverlappedLabelsHide',
-            'OverlappedLabelsMaxPct',
-            'Composite',
-            'ZeroLine',
-            'LabelSpacingMin'
-       ],
-       globalDefaults = {
-           'OriginIsZero':      true,
-           'Composite':         false,
-           'OverlappedLabelsHide': false,
-           'OverlappedLabelsMaxPct': 0.2,
-           'MinorTicks':        true,
-           'FullGrid':          false,
-           'FullGridCrossesMargin': true,
-           'RuleCrossesMargin': true,
-           'DomainRoundMode':   'none',
-           'ZeroLine':          true,
-           'LabelSpacingMin':      1
-       };
-
-    function addOption(optionId, value){
-        if(!(optionId in options)){
-            options[optionId] = value;
-        }
-    }
-    
-    optionNames.forEach(function(name){
-        indexes.forEach(function(index){
-            /* id options */
-            types.forEach(function(type){
-                addOption($VCA.getId(type, index) + "Axis" + name);
-            });
-
-            /* by optionsId */
-            orientations.forEach(function(orientation){
-                addOption($VCA.getOptionsId(orientation, index) + 'Axis' + name);
-            });
-        });
-
-        /* common options */
-        addOption('axis' + name, globalDefaults[name]);
-    });
-
-    return options;
-};
+//$VCA.createAllOptions = function(options){
+//    var types   = ['base', 'ortho'],
+//        indexes = [0, 1],
+//        orientations = ['x', 'y'],
+//        optionNames = def.keys(cartAxis_optionsDef);
+//    
+//    function addOption(optionId, value){
+//        if(!(optionId in options)){
+//            options[optionId] = value;
+//        }
+//    }
+//    
+//    optionNames.forEach(function(name){
+//        indexes.forEach(function(index){
+//            /* by id */
+//            types.forEach(function(type){
+//                addOption($VA.getId(type, index) + "Axis" + name);
+//            });
+//
+//            /* by v1OptionId */
+//            orientations.forEach(function(orientation){
+//                addOption($VCA.getV1OptionId(orientation, index) + 'Axis' + name);
+//            });
+//        });
+//
+//        /* by common id */
+//        var optionDef = cartAxis_optionsDef[name];
+//        addOption('axis' + name);
+//    });
+//
+//    return options;
+//};
 
 /* PRIVATE STUFF */
-var axisOptionHandlers = {
+
+/**
+ * Obtains the value of an option using a specified final name.
+ * 
+ * @name pvc.visual.CartesianAxis#_chartOption
+ * @function
+ * @param {string} name The chart option name.
+ * @private
+ * @type string
+ */
+function chartOption(name) {
+    return this.chart.options[name];
+}
+
+// Creates a resolve method, 
+// suitable for an option manager option specification, 
+// that combines a list of resolvers. 
+// The resolve stops when the first resolver returns the value <c>true</c>,
+// returning <c>true</c> as well.
+function resolvers(list){
+    return function(axis){
+        for(var i = 0, L = list.length ; i < L ; i++){
+            if(list[i].call(this, axis) === true){
+                return true;
+            }
+        }
+    };
+}
+
+function axisSpecify(getAxisPropValue){
+    return axisResolve(getAxisPropValue, 'specify');
+}
+
+function axisDefault(getAxisPropValue){
+    return axisResolve(getAxisPropValue, 'defaultValue');
+}
+
+function axisResolve(getAxisPropValue, operation){
+    return function(axis){ 
+        var value = getAxisPropValue.call(axis, this.name, this);
+        if(value !== undefined){
+            this[operation || 'specify'](value);
+            return true;
+        }
+    };
+}
+
+// baseAxisOffset, orthoAxisOffset, 
+axisSpecify.byId = axisSpecify(function(name){
+    return chartOption.call(this, this.id + "Axis" + name);
+});
+
+// xAxisOffset, yAxisOffset, secondAxisOffset
+axisSpecify.byV1OptionId = axisSpecify(function(name){
+    return chartOption.call(this, this.v1OptionId + 'Axis' + name); 
+});
+
+// axisOffset
+axisSpecify.byCommonId = axisSpecify(function(name){
+    return chartOption.call(this, 'axis' + name);
+});
+
+var resolveNormal = resolvers([
+   axisSpecify.byId,
+   axisSpecify.byV1OptionId,
+   axisSpecify.byCommonId
+]);
+
+var specNormal = { resolve: resolveNormal };
+
+/* orthoFixedMin, orthoFixedMax */
+var fixedMinMaxSpec = {
+    resolve: resolvers([
+        axisSpecify.byId,
+        axisSpecify.byV1OptionId,
+        axisSpecify(function(name){
+            if(!this.index && this.type === 'ortho'){
+                // Bare Id (no "Axis")
+                return chartOption.call(this, this.id + name);
+            }
+        }),
+        axisSpecify.byCommonId
+    ]),
+    cast: Number2
+};
+
+var cartAxis_optionsDef = def.create(axis_optionsDef, {
     /*
      * 1     <- useCompositeAxis
      * >= 2  <- false
      */
     Composite: {
-        resolve: function(){
-            /* Only first axis can be composite? */
-            if(this.index > 0) {
-                return false;
-            }
-            
-            return finalOptions.call(this, 'useCompositeAxis');
-        },
-        cast: Boolean
+        resolve: resolvers([
+            axisSpecify(function(name){
+                // Only first axis can be composite?
+                if(this.index > 0) {
+                    return false;
+                }
+                
+                return chartOption.call(this, 'useCompositeAxis');
+            }),
+            resolveNormal
+        ]),
+        cast:  Boolean,
+        value: false
     },
     
     /* xAxisSize,
      * secondAxisSize || xAxisSize 
      */
     Size: {
-        resolve:  function(name){
-            var value = v1OptionIdOptions.call(this, name);
-            if(!value && this.index > 0) {
-                // Default to the size of the first axis of same orientation
-                value = firstOptions.call(this, name);
-            }
-            
-            return value;
-        },
-        cast: Number2
+        resolve: resolveNormal,
+        cast:    Number2
     },
+    
+    SizeMax: specNormal,
     
     /* xAxisPosition,
      * secondAxisPosition <- opposite(xAxisPosition) 
      */
     Position: {
-        resolve: function(name){
-            if(this.index > 0) {
-                // Use the position opposite to that of the first axis of same orientation
-                var firstPosition = firstOptions.call(this, name);
-                return pvc.BasePanel.oppositeAnchor[firstPosition || 'left'];
-            }
+        resolve: resolvers([
+            resolveNormal,
             
-            return v1OptionIdOptions.call(this, name);
-        }
+            // Dynamic default value
+            axisDefault(function(name){
+                if(this.index > 0) {
+                    // Use the position opposite to that of the first axis 
+                    // of same orientation
+                    var optionId0 = $VCA.getV1OptionId(this.orientation, 0);
+                    
+                    var position0 = chartOption.call(this, optionId0 + 'Axis' + name) ||
+                                    'left';
+                    
+                    return pvc.BasePanel.oppositeAnchor[position0];
+                }
+            })
+        ])
     },
     
     /* orthoFixedMin, orthoFixedMax */
-    FixedMin: {
-        resolvePost: function(name){
-            if(!this.index && this.type === 'ortho') {
-                return bareIdOptions.call(this, name);
-            }
-        },
-        cast: Number2
-    },
-    FixedMax: {
-        resolvePost: function(name){
-            if(!this.index && this.type === 'ortho') {
-                return bareIdOptions.call(this, name);
-            }
-        },
-        cast: Number2
-    },
+    FixedMin: fixedMinMaxSpec,
+    FixedMax: fixedMinMaxSpec,
     
     /* 1 <- originIsZero
      * 2 <- secondAxisOriginIsZero
      */
-    OriginIsZero:  {
-        resolvePost: function(name){
-            switch(this.index) {
-                case 0: return finalOptions.call(this, 'originIsZero');
-                case 1: return finalOptions.call(this, 'secondAxisOriginIsZero');
-            }
-        },
-        cast: Boolean
+    OriginIsZero: {
+        resolve: resolvers([
+            resolveNormal,
+            axisSpecify(function(name){
+                switch(this.index){
+                    case 0: return chartOption.call(this, 'originIsZero');
+                    case 1: return chartOption.call(this, 'secondAxisOriginIsZero');
+                }
+            })
+        ]),
+        cast:  Boolean,
+        value: true 
     }, 
     
     /* 1 <- axisOffset, 
      * 2 <- secondAxisOffset, 
      */
     Offset:  {
-        resolvePost: function(name){
-            switch(this.index) {
-                case 0: return finalOptions.call(this, 'axisOffset');
-                case 1: return finalOptions.call(this, 'secondAxisOffset');
-            }
-        },
-        
+        resolve: resolvers([
+            axisSpecify.byId,
+            axisSpecify.byV1OptionId,
+            // axisOffset only applies to index 0!
+            axisSpecify(function(name){
+                switch(this.index) {
+                    case 0: return chartOption.call(this, 'axisOffset');
+                    case 1: return chartOption.call(this, 'secondAxisOffset');
+                }
+            })
+        ]),
         cast: Number2
     },
     
-    OverlappedLabelsHide: {cast: Boolean },
-    OverlappedLabelsMaxPct: {cast: Number2 },
-    FullGrid: {
-        resolve: function(name){
-            // TODO: is this too restrictive?
-            if(this.index !== 0){
-                return false;
-            }
-        },
-        cast: Boolean
+    LabelSpacingMin: {
+        resolve: resolveNormal,
+        cast:    Number2,
+        value:   1 // em
     },
-    EndLine:  {cast: Boolean },
-    DesiredTickCount: {cast: Number2 },
-    MinorTicks: {cast: Number2 },
-    TitleSize: {cast: Number2 },
-    FullGridCrossesMargin: {cast: Boolean },
-    RuleCrossesMargin: {cast: Boolean },
-    ZeroLine: {cast: Boolean },
-    LabelSpacingMin: {cast: Number2 },
-    TickExponentMin: {cast: Number2 },
-    TickExponentMax: {cast: Number2 }
-};
-
-/**
- * Obtains the value of an option using a specified final name.
- * 
- * @name pvc.visual.CartesianAxis#_finalOptions
- * @function
- * @param {string} name The option name.
- * @private
- * @type string
- */
-function finalOptions(name) {
-    return this.chart.options[name];
-}
-
-/**
- * Obtains the value of an option using the V1 options id. format.
- * using {@link #_buildOptionsIdName}.
- * 
- * @name pvc.visual.CartesianAxis#_v1OptionIdOptions
- * @function
- * @param {string} name The option name.
- * @private
- * @type string
- */
-function v1OptionIdOptions(name){
-    return finalOptions.call(this, buildOptionsIdName.call(this, name)); 
-}
+    
+    OverlappedLabelsHide: {
+        resolve: resolveNormal,
+        cast:    Boolean,
+        value:   false 
+    },
+    
+    OverlappedLabelsMaxPct: {
+        resolve: resolveNormal,
+        cast:    Number2,
+        value:   0.2
+    },
+    
+    /* RULES */
+    FullGrid: {
+        resolve: resolveNormal,
+        cast:    Boolean,
+        value:   false
+    },
+    FullGridCrossesMargin: {
+        resolve: resolveNormal,
+        cast:    Boolean,
+        value:   true
+    },
+    EndLine:  {
+        resolve: resolveNormal,
+        cast:    Boolean
+    },
+    ZeroLine: {
+        resolve: resolveNormal,
+        cast:    Boolean,
+        value:   true 
+    },
+    RuleCrossesMargin: {
+        resolve: resolveNormal,
+        cast:    Boolean,
+        value:   true
+    },
+    
+    /* TICKS */
+    DesiredTickCount: {
+        resolve: resolveNormal,
+        cast: Number2
+    },
+    MinorTicks: {
+        resolve: resolveNormal,
+        cast:    Boolean,
+        value:   true 
+    },
+    DomainRoundMode: {
+        resolve: resolveNormal,
+        cast:    String,
+        value:   'none'
+    },
+    TickExponentMin: {
+        resolve: resolveNormal,
+        cast:    Number2 
+    },
+    TickExponentMax: {
+        resolve: resolveNormal,
+        cast:    Number2
+    },
+    
+    /* TITLE */
+    Title: {
+        resolve: resolveNormal,
+        cast:    String  
+    },
+    TitleSize: {
+        resolve: resolveNormal,
+        cast:    Number2 
+    }, // It's a pvc.Size, actually
+    TitleSizeMax: specNormal, 
+    TitleFont: {
+        resolve: resolveNormal,
+        cast:    String 
+    },
+    TitleMargins:  specNormal,
+    TitlePaddings: specNormal,
+    TitleAlign: {
+        resolve: resolveNormal,
+        cast:    String 
+    },
+    
+    Font: {
+        resolve: resolveNormal,
+        cast:    String 
+    },
+    
+    ClickAction: specNormal,
+    DoubleClickAction: specNormal
+});
 
 function Number2(value) {
     if(value != null) {
@@ -616,89 +556,8 @@ function Number2(value) {
             value = null;
         }
     }
+    
     return value;
-}
-
-/**
- * Obtains the value of an option that uses the axis id followed by "Axis" as a prefix
- * (ex. <tt>orthoAxisFixedMax</tt>, <tt>baseAxisFixedMin</tt>, <tt>ortho2AxisFixedMin</tt>).
- * 
- * @name pvc.visual.CartesianAxis#_idOptions
- * @function
- * @param {string} name The option name.
- * @private
- * @type string
- */
-function idOptions(name){
-    return finalOptions.call(this, this.id + "Axis" + name);
-}
-
-/**
- * Obtains the value of an option that uses only the axis id as a prefix
- * (ex. <tt>orthoFixedMax</tt>, <tt>orthoFixedMin</tt>).
- *
- * @name pvc.visual.CartesianAxis#_bareIdOptions
- * @function
- * @param {string} name The option name.
- * @private
- * @type string
- */
-function bareIdOptions(name){
-    return finalOptions.call(this, this.id + name);
-}
-
-/**
- * Obtains the value of an option that is common 
- * to all axis types, orientations and indexes
- * (ex. <tt>axisFont</tt>).
- * 
- * @name pvc.visual.CartesianAxis#_commonOptions
- * @function
- * @param {string} name The option name.
- * @private
- * @type string
- */
-function commonOptions(name){
-    return finalOptions.call(this, 'axis' + name);
-}
-
-/**
- * Obtains the value of an option of the first axis, of the same orientation.
- * @name pvc.visual.CartesianAxis#_firstOptions
- * @function
- * @param {string} name The option name.
- * @private
- * @type string
- */
-function firstOptions(name) {
-    var firstOptionId = $VCA.getOptionsId(this.orientation, 0);
-    
-    name = buildOptionsIdName.call({optionsId: firstOptionId}, name);
-    
-    return finalOptions.call(this, name);
-}
-
-/** 
- * Builds the name of an option that uses the options id as a prefix 
- * (ex: <tt>xAxisEndLine</tt>, <tt>secondAxisEndLine</tt>).
- * 
- * @name pvc.visual.CartesianAxis#_buildOptionsIdName
- * @function
- * @param {string} name The option name.
- * @private
- * @type string
- */
-function buildOptionsIdName(name) {
-    return this.optionsId + 'Axis' + name;
-}
-
-
-function groupingScaleType(grouping){
-    return grouping.isDiscrete() ?
-                'Discrete' :
-                (grouping.firstDimension.type.valueType === Date ?
-                'Timeseries' :
-                'Continuous');
 }
 
 });

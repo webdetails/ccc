@@ -5,14 +5,6 @@
  */
 pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
 
-    constructor: function(options){
-
-        this.base(options);
-
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.LineDotAreaAbstract.defaultOptions, options);
-    },
-    
     /**
      * Initializes each chart's specific roles.
      * @override
@@ -52,9 +44,9 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
             orientation:    options.orientation,
             nullInterpolationMode: options.nullInterpolationMode
         });
-    }
-}, {
-    defaultOptions: {
+    },
+    
+    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
         showDots: false,
         showLines: false,
         showAreas: false,
@@ -65,8 +57,8 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         valuesAnchor: "right",
         panelSizeRatio: 1,
         nullInterpolationMode: 'none', // 'none', 'linear' 
-        tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15 })
-    }
+        tipsySettings: { offset: 15 }
+    })
 });
 
 /**

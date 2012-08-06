@@ -4,7 +4,7 @@
  * 
  * @name pvc.visual.legend.BulletItemScene
  * 
- * @extends pvc.visual.Scene
+ * @extends pvc.visual.legend.Scene
  * 
  * @constructor
  * @param {pvc.visual.legend.BulletGroupScene} bulletGroup The parent legend bullet group scene.
@@ -17,10 +17,21 @@ def
     
     this.base(bulletGroup, keyArgs);
     
-    var source = this.group || this.datum;
-    if(source){
-        this.vars.value = new pvc.visual.ValueLabelVar(source.value, source.ensureLabel());
+    var value, label;
+    if(keyArgs){
+        value = keyArgs.value;
+        label = keyArgs.label;
     }
+    
+    if(value === undefined){
+        var source = this.group || this.datum;
+        if(source){
+            value = source.value;
+            label = source.ensureLabel();
+        }
+    }
+    
+    this.vars.value = new pvc.visual.ValueLabelVar(value || null, label || "");
 })
 .add(/** @lends pvc.visual.legend.BulletItemScene# */{
     /**

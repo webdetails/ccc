@@ -29,9 +29,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
 
         this.base(options);
 
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.MetricXYAbstract.defaultOptions, options);
-
         this._axisRoleNameMap = {
             'base':  'x',
             'ortho': 'y'
@@ -83,10 +80,10 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
         // Cached
         this._xDim = this.data.dimensions(this._xRole.firstDimensionName());
         this._yDim = this.data.dimensions(this._yRole.firstDimensionName());
-    }
-}, {
-    defaultOptions: {
+    },
+    
+    defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
         valuesAnchor: "right",
         panelSizeRatio: 1
-    }
+    })
 });

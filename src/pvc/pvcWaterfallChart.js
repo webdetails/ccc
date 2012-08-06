@@ -28,9 +28,6 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
 
         this.base(options);
         
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.WaterfallChart.defaultOptions, options);
-
         var parent = this.parent;
         if(parent) {
             this._isFalling = parent._isFalling;
@@ -195,14 +192,14 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
             showValues:   options.showValues,
             orientation:  options.orientation
         });
-    }
-}, {
-    defaultOptions: {
+    },
+    
+    defaults: def.create(pvc.BarAbstract.prototype.defaults, {
         // down or up
         waterDirection: 'down',
-        showWaterValues: undefined, // defaults to showValues
+//        showWaterValues: undefined, // defaults to showValues
         showWaterGroupAreas: true,
         allCategoryLabel: "All",
         accumulatedLineLabel: "Accumulated"
-    }
+    })
 });

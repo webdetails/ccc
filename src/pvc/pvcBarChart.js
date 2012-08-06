@@ -4,14 +4,6 @@
  */
 pvc.BarChart = pvc.BarAbstract.extend({
 
-    constructor: function(options){
-
-        this.base(options);
-
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.BarChart.defaultOptions, options);
-    },
-    
     _processOptionsCore: function(options){
         
         this.base(options);
@@ -87,12 +79,12 @@ pvc.BarChart = pvc.BarAbstract.extend({
         }
         
         return barPanel;
-    }
-}, {
-    defaultOptions: {
+    },
+    
+    defaults: def.create(pvc.BarAbstract.prototype.defaults, {
         showDots: true,
         showLines: true,
         showAreas: false,
         nullInterpolationMode: 'none'
-    }
+    })
 });

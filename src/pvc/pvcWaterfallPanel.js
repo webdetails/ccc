@@ -224,7 +224,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                                   }),
             isFalling = chart._isFalling,
             rootCatData = chart._catRole.select(
-                            chart._partData(this.dataPartValue),
+                            chart.partData(this.dataPartValue),
                             {visible: true}),
             rootScene  = new pvc.visual.Scene(null, {panel: this, group: rootCatData});
 

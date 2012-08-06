@@ -35,9 +35,6 @@ pvc.BulletChart = pvc.BaseChart.extend({
         //}
 
         this.base(options);
-
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.BulletChart.defaultOptions, options);
     },
 
     /**
@@ -127,9 +124,9 @@ pvc.BulletChart = pvc.BaseChart.extend({
         showTooltips: this.options.showTooltips,
         orientation:  this.options.orientation
     }));
-  }
-}, {
-  defaultOptions: {
+  },
+  
+  defaults: def.create(pvc.BaseChart.prototype.defaults, {
       showValues: true,
       orientation: "horizontal",
       legend: false,
@@ -139,21 +136,19 @@ pvc.BulletChart = pvc.BaseChart.extend({
       bulletMargin:  100,  // Left margin
 
       // Defaults
-      bulletMarkers:  null,     // Array of markers to appear
-      bulletMeasures: null,     // Array of measures
-      bulletRanges:   null,     // Ranges
+//      bulletMarkers:  null,     // Array of markers to appear
+//      bulletMeasures: null,     // Array of measures
+//      bulletRanges:   null,     // Ranges
       bulletTitle:    "Bullet", // Title
       bulletSubtitle: "",       // Subtitle
       bulletTitlePosition: "left", // Position of bullet title relative to bullet
 
-      axisDoubleClickAction: null,
+//      axisDoubleClickAction: null,
 
       crosstabMode: false,
       seriesInRows: false
-    }
+  })
 });
-
-
 
 /*
  * Bullet chart panel. Generates a bar chart. Specific options are:

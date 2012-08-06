@@ -189,9 +189,8 @@ def.type('pvc.visual.Role')
      * @type pvc.data.Data
      */
     flatten: function(data, keyArgs){
-        var grouping = this.flattenedGrouping(keyArgs);
-        if(grouping){
-            return data.groupBy(grouping, keyArgs);
+        if(this.grouping){
+            return data.flattenBy(this, keyArgs);
         }
     },
 
@@ -234,7 +233,11 @@ def.type('pvc.visual.Role')
     isPreBound: function(){
         return !!this.__grouping;
     },
-
+    
+    isBound: function(){
+        return !!this.grouping;
+    },
+    
     /**
      * Finalizes a binding initiated with {@link #preBind}.
      *

@@ -6,14 +6,6 @@ pvc.TimeseriesAbstract = pvc.BaseChart.extend({
 
     allTimeseriesPanel : null,
 
-    constructor: function(options){
-
-        this.base(options);
-
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.TimeseriesAbstract.defaultOptions, options);
-    },
-
     _preRenderContent: function(contentOptions){
 
         // Do we have the timeseries panel? add it
@@ -23,13 +15,13 @@ pvc.TimeseriesAbstract = pvc.BaseChart.extend({
                 allTimeseriesSize: this.options.allTimeseriesSize
             });
         }
-    }
-}, {
-    defaultOptions: {
+    },
+    
+    defaults: def.create(pvc.BaseChart.prototype.defaults, {
         showAllTimeseries: true,
         allTimeseriesPosition: "bottom",
         allTimeseriesSize: 50
-    }
+    })
 });
 
 

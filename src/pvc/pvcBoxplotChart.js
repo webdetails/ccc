@@ -16,9 +16,6 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
         this.base(options);
 
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.BoxplotChart.defaultOptions, options);
-
         this._axisRoleNameMap.ortho = pvc.BoxplotChart.measureRolesNames;
     },
 
@@ -126,10 +123,9 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         }
 
         return boxPanel;
-    }
-}, {
-    measureRolesNames: ['median', 'percentil25', 'percentil75', 'percentil5', 'percentil95'],
-    defaultOptions: {
+    },
+    
+    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
         boxplotColor: 'darkgreen',
         boxSizeRatio: 1/3,
         maxBoxSize:   Infinity,
@@ -139,7 +135,9 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         nullInterpolationMode: 'none',
         showValues:   false,
         valuesAnchor: 'right'
-    }
+    })
+}, {
+    measureRolesNames: ['median', 'percentil25', 'percentil75', 'percentil5', 'percentil95']
 });
 
 /*

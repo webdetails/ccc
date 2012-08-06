@@ -24,36 +24,6 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         
         this.base(options);
 
-        var defaultOptions = {
-            colorValIdx: 0,
-            sizeValIdx:  1,
-            measuresIndexes: [2],
-
-            //multi-dimensional clickable label
-            showValues: true,
-            axisOffset: 0,
-            
-            showPlotFrame: false,
-            
-            orientation: "vertical",
-            
-            colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
-            
-            normPerBaseCategory: true,
-            numSD: 2,                 // width (only for normal distribution)
-            nullShape: undefined,
-            shape: undefined,
-            useShapes: false,
-            colorRange: ['red', 'yellow','green'],
-            colorRangeInterval:  undefined,
-            minColor: undefined, //"white",
-            maxColor: undefined, //"darkgreen",
-            nullColor:  "#efc5ad"  // white with a shade of orange
-        };
-        
-        // Apply options
-        pvc.mergeDefaults(this.options, defaultOptions, options);
-
         var parent = this.parent;
         if(parent) {
             this._colorRole   = parent._colorRole;
@@ -135,7 +105,34 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             showValues:  options.showValues,
             orientation: options.orientation
         });
-    }
+    },
+    
+    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
+        colorValIdx: 0,
+        sizeValIdx:  1,
+        measuresIndexes: [2],
+
+        //multi-dimensional clickable label
+        showValues: true,
+        axisOffset: 0,
+        
+        showPlotFrame: false,
+        
+        orientation: "vertical",
+        
+        colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
+        
+        normPerBaseCategory: true,
+        numSD: 2,                 // width (only for normal distribution)
+//        nullShape: undefined,
+//        shape: undefined,
+        useShapes: false,
+        colorRange: ['red', 'yellow','green'],
+//        colorRangeInterval:  undefined,
+//        minColor: undefined, //"white",
+//        maxColor: undefined, //"darkgreen",
+        nullColor:  "#efc5ad"  // white with a shade of orange
+    })
 });
 
 /*

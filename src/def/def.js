@@ -1538,6 +1538,50 @@ def.nextId = function(scope){
 
 // --------------------
 
+def.type('Set')
+.init(function(source){
+    this.source = source || {};
+    this.count  = source ? def.ownKeys(source).length : 0;
+})
+.add({
+    has: function(p){
+        return objectHasOwn.call(this.source, p);
+    },
+    
+    add: function(p){
+        var source = this.source;
+        if(!objectHasOwn.call(source, p)) {
+            this.count++;
+            source[p] = true;
+        }
+        
+        return this;
+    },
+    
+    rem: function(p){
+        if(objectHasOwn.call(this.source, p)) {
+            delete this.source[p];
+            this.count--;
+        }
+        
+        return this;
+    },
+    
+    clear: function(){
+        if(this.count) {
+            this.source = {}; 
+            this.count  = 0;
+        }
+        return this;
+    },
+    
+    members: function(){
+        return def.ownKeys(this.source);
+    }
+});
+
+// ---------------
+
 def.type('Map')
 .init(function(source){
     this.source = source || {};

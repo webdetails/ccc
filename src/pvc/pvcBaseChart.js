@@ -106,8 +106,23 @@ pvc.BaseChart = pvc.Abstract.extend({
     dataEngine: null,
     data: null,
     
-    __partData: null,
+    /**
+     * The resulting data of 
+     * grouping {@link #data} by the data part role, 
+     * when bound.
+     * 
+     * @type pvc.data.Data
+     */
+    _partData: null,
 
+    /**
+     * The set of legend keys that are already registered
+     * for this chart's {@link #data}.
+     * 
+     * @type def.Set  
+     */
+    _legendKeysSet: null,
+    
     /**
      * The data source of the chart.
      * <p>
@@ -291,7 +306,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._measureVisualRoles = [];
         }
         
-        this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
+        this.options = def.mixin({}, this.defaults, options);
     },
     
     compatVersion: function(){
@@ -454,13 +469,9 @@ pvc.BaseChart = pvc.Abstract.extend({
             }
         }
 
-        if(this._legendColorScales){
-            delete this._legendColorScales;
-        }
-        
-        if(this.__partData){
-            delete this.__partData;
-        }
+        delete this._legendColorScales;
+        delete this._partData;
+        delete this._legendKeysSet;
         
         if(pvc.debug >= 3){
             pvc.log(this.data.getInfo());
@@ -562,7 +573,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         var valueFormat = options.valueFormat,
             valueFormatter;
-        if(valueFormat && valueFormat !== pvc.BaseChart.defaultOptions.valueFormat){
+        if(valueFormat && valueFormat !== this.defaults.valueFormat){
             valueFormatter = function(v) {
                 return v != null ? valueFormat(v) : "";
             };
@@ -865,20 +876,20 @@ pvc.BaseChart = pvc.Abstract.extend({
     _isRoleAssigned: function(roleName){
         return !!this._visualRoles[roleName].grouping;
     },
-
-    _partData: function(dataPartValues){
-        if(!this.__partData){
+    
+    partData: function(dataPartValues){
+        if(!this._partData){
             if(!this._dataPartRole || !this._dataPartRole.grouping){
                 /* Undefined or unbound */
-                this.__partData = this.data;
+                this._partData = this.data;
             } else {
                 // Visible and not
-                this.__partData = this._dataPartRole.flatten(this.data);
+                this._partData = this._dataPartRole.flatten(this.data);
             }
         }
         
         if(!dataPartValues){
-            return this.__partData;
+            return this._partData;
         }
 
         dataPartValues = def.query(dataPartValues).distinct().array();
@@ -887,13 +898,12 @@ pvc.BaseChart = pvc.Abstract.extend({
         var dataPartDimName = this._dataPartRole.firstDimensionName();
 
         if(dataPartValues.length === 1){
-            // Faster this way...
             // TODO: should, at least, call some static method of Atom to build a global key
-            return this.__partData._childrenByKey[dataPartDimName + ':' + dataPartValues[0]] || 
-                   new pvc.data.Data({linkParent: this.__partData, datums: []}); // don't blow code ahead...
+            return this._partData._childrenByKey[dataPartDimName + ':' + dataPartValues[0]] || 
+                   new pvc.data.Data({linkParent: this._partData, datums: []}); // don't blow code ahead...
         }
 
-        return this.__partData.where([
+        return this._partData.where([
                     def.set({}, dataPartDimName, dataPartValues)
                 ]);
     },
@@ -904,15 +914,27 @@ pvc.BaseChart = pvc.Abstract.extend({
             return null;
         }
         
-        return this._partData()
+        return this.partData()
                    .children()
                    .select(function(child){ return child.value; })
                    .array();
     },
-
+    
+    _tryRegisterLegend: function(legendKey){
+        var set = this._legendKeysSet;
+        if(!set){
+            set = this._legendKeysSet = {};
+        } else if(set.has(legendKey)){
+            return false;
+        }
+        
+        set.add(legendKey);
+        return true;
+    },
+    
     _legendData: function(dataPartValues){
         var role = this.visualRoles(this.legendSource, {assertExists: false});
-        return role ? role.flatten(this._partData(dataPartValues)) : null;
+        return role ? role.flatten(this.partData(dataPartValues)) : null;
     },
 
     _legendColorScale: function(dataPartValues){
@@ -1015,6 +1037,12 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         var bulletRootScene, BulletGroupType, BulletItemType;
         
+        /*
+         shape, drawLine, drawMarker,
+         if(isV1Compat && options.shape === undefined){
+             options.shape = 'square';
+         }
+         */
         partValues.forEach(function(partValue){
             var partData = this._legendData(partValue);
             if(partData){
@@ -1396,11 +1424,11 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
     
     isOrientationVertical: function(orientation) {
-        return (orientation || this.options.orientation) === "vertical";
+        return (orientation || this.options.orientation) === pvc.orientation.vertical;
     },
 
     isOrientationHorizontal: function(orientation) {
-        return (orientation || this.options.orientation) == "horizontal";
+        return (orientation || this.options.orientation) === pvc.orientation.horizontal;
     },
     
     /**
@@ -1413,82 +1441,80 @@ pvc.BaseChart = pvc.Abstract.extend({
             
             this._disposed = true;
         }
-    }
-}, {
-    // NOTE: undefined values are not considered by $.extend
-    // and thus BasePanel does not receive null properties...
-    defaultOptions: {
-        canvas: null,
+    },
+    
+    defaults: {
+//        canvas: null,
 
         width:  400,
         height: 300,
         
-        multiChartMax: undefined,
-        multiChartMaxColumns: undefined,
-        multiChartWidth: undefined,
-        multiChartAspectRatio: undefined,
-        multiChartSingleRowFillsHeight: undefined,
+//        multiChartMax: undefined,
+//        multiChartMaxColumns: undefined,
+//        multiChartWidth: undefined,
+//        multiChartAspectRatio: undefined,
+//        multiChartSingleRowFillsHeight: undefined,
         
         orientation: 'vertical',
         
-        extensionPoints:   undefined,
-        
-        visualRoles:       undefined,
-        dimensions:        undefined,
-        dimensionGroups:   undefined,
-        readers:           undefined,
+//        extensionPoints:   undefined,
+//        
+//        visualRoles:       undefined,
+//        dimensions:        undefined,
+//        dimensionGroups:   undefined,
+//        readers:           undefined,
         
         ignoreNulls:       true, // whether to ignore or keep "null"-measure datums upon loading
         crosstabMode:      true,
-        multiChartIndexes: undefined,
+//        multiChartIndexes: undefined,
         isMultiValued:     false,
         seriesInRows:      false,
-        measuresIndexes:   undefined,
-        dataOptions:       undefined,
-        
-        timeSeries:        undefined,
-        timeSeriesFormat:  undefined,
+//        measuresIndexes:   undefined,
+//        dataOptions:       undefined,
+//        
+//        timeSeries:        undefined,
+//        timeSeriesFormat:  undefined,
 
         animate: true,
 
-        title:         null,
+//        title:         null,
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
-        titleSize:     undefined,
-        titleSizeMax:  undefined,
-        titleMargins:  undefined,
-        titlePaddings: undefined,
-        titleFont:     undefined,
+//        titleSize:     undefined,
+//        titleSizeMax:  undefined,
+//        titleMargins:  undefined,
+//        titlePaddings: undefined,
+//        titleFont:     undefined,
         
         legend:           false,
         legendPosition:   "bottom",
-        legendFont:       undefined,
-        legendSize:       undefined,
-        legendSizeMax:    undefined,
-        legendAlign:      undefined,
-        legendMinMarginX: undefined,
-        legendMinMarginY: undefined,
-        legendTextMargin: undefined,
-        legendPadding:    undefined, // ATTENTION: this is different from legendPaddings
-        legendShape:      undefined,
-        legendDrawLine:   undefined,
-        legendDrawMarker: undefined,
-        legendMarkerSize: undefined,
-        legendMargins:    undefined,
-        legendPaddings:   undefined,
-        legendClickMode:  undefined,
+//        legendFont:       undefined,
+//        legendSize:       undefined,
+//        legendSizeMax:    undefined,
+//        legendAlign:      undefined,
+//        legendMinMarginX: undefined,
+//        legendMinMarginY: undefined,
+//        legendTextMargin: undefined,
+//        legendPadding:    undefined, // ATTENTION: this is different from legendPaddings
+//        legendShape:      undefined,
+//        legendDrawLine:   undefined,
+//        legendDrawMarker: undefined,
+//        legendMarkerSize: undefined,
+//        legendMargins:    undefined,
+//        legendPaddings:   undefined,
+//        legendClickMode:  undefined,
         
-        colors: null,
+//        colors: null,
 
         secondAxis: false,
         secondAxisIdx: -1,
-        secondAxisSeriesIndexes: undefined,
-        secondAxisColor: undefined,
-        secondAxisOwnColors: undefined, // false
+//        secondAxisSeriesIndexes: undefined,
+//        secondAxisColor: undefined,
+//        secondAxisOwnColors: undefined, // false
 
         showTooltips: true,
         
-        tooltipFormat: undefined,
+//        tooltipFormat: undefined,
         
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
@@ -1527,8 +1553,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         // Content/Plot area clicking
         clickable:  false,
-        clickAction: null,
-        doubleClickAction: null,
+//        clickAction: null,
+//        doubleClickAction: null,
         doubleClickMaxDelay: 300, //ms
 //      clickAction: function(s, c, v) {
 //          pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
@@ -1537,8 +1563,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         hoverable:  false,
         selectable: false,
         
-        selectionChangedAction: null,
-        userSelectionAction: null, 
+//        selectionChangedAction: null,
+//        userSelectionAction: null, 
             
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
@@ -1548,13 +1574,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         rubberBandFill: 'rgba(203, 239, 163, 0.6)', // 'rgba(255, 127, 0, 0.15)',
         rubberBandLine: '#86fe00', //'rgb(255,127,0)',
         
-        renderCallback: undefined,
-
-        margins:  undefined,
-        paddings: undefined,
-        
-        contentMargins:  undefined,
-        contentPaddings: undefined,
+//        renderCallback: undefined,
+//
+//        margins:  undefined,
+//        paddings: undefined,
+//        
+//        contentMargins:  undefined,
+//        contentPaddings: undefined,
         
         compatVersion: Infinity // numeric, 1 currently recognized
     }

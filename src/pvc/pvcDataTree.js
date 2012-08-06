@@ -24,9 +24,6 @@ pvc.DataTree = pvc.BaseChart.extend({
         }
         
         this.base(options);
-
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.DataTree.defaultOptions, options);
     },
 
     setStructData: function(data){
@@ -86,10 +83,10 @@ pvc.DataTree = pvc.BaseChart.extend({
             connectorSpace: this.options.connectorSpace,
             minAspectRatio: this.options.minAspectRatio
         }));
-    }
-}, {
-    defaultOptions: {
-        // margins around the full tree
+    },
+    
+    defaults: def.create(pvc.BaseChart.prototype.defaults, {
+     // margins around the full tree
         topRuleOffset: 30,
         botRuleOffset: 30,
         leftRuleOffset: 60,
@@ -108,12 +105,11 @@ pvc.DataTree = pvc.BaseChart.extend({
         // the vertical space between gridcells is at least 5%
         minVerticalSpace: 0.05,
         // aspect ratio = width/height  (used to limit AR of the boxes)
-        minAspectRatio: 2.0,
+        minAspectRatio: 2.0
 
-        selectParam: undefined
-    }
+        //selectParam: undefined
+    })
 });
-
 
 /*
  * DataTree chart panel. 

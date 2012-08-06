@@ -74,6 +74,13 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         return data;
     },
 
+    flattenBy: function(role, keyArgs){
+        var grouping = role.flattenedGrouping(keyArgs) || 
+                       def.fail.operationInvalid("Role is unbound.");
+        
+        return this.groupBy(grouping, keyArgs);
+    },
+    
     /**
      * Creates a linked data with the result of filtering
      * the datums of this data.

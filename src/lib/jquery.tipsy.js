@@ -27,7 +27,12 @@
             if (options.delayIn == 0) {
                 tipsy.show();
             } else {
-                setTimeout(function() { if (tipsy.hoverState === 'in') tipsy.show(); }, options.delayIn);
+                setTimeout(function() {
+                    if (tipsy.hoverState === 'in') {
+                        tipsy.hoverState = null;
+                        tipsy.show();
+                    }
+                }, options.delayIn);
             }
         },
         
@@ -61,6 +66,11 @@
         },
         
         show: function(isUpdate) {
+            // Don't override delay in
+            if (this.hoverState === 'in') {
+                return;
+            }
+            
             var title = this.getTitle();
             if (title && this.enabled) {
                 var $tip = this.tip();

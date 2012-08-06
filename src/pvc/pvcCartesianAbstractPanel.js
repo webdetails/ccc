@@ -115,12 +115,12 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
 
     /* @override */
     isOrientationVertical: function(){
-        return this.orientation == "vertical";
+        return this.orientation === pvc.orientation.vertical;
     },
 
     /* @override */
     isOrientationHorizontal: function(){
-        return this.orientation == "horizontal";
+        return this.orientation === pvc.orientation.horizontal;
     },
 
     /*

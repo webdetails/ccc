@@ -23,10 +23,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     
     textMargin: 6,    // The space *between* the marker and the text, in pixels.
     padding:    2.5,    // Half the space *between* legend items, in pixels.
-    shape:      null, // "square",
     markerSize: 15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
-    drawLine:   false,
-    drawMarker: true,
     clickMode:  'toggleVisible', // toggleVisible || toggleSelected
     font:       '10px sans-serif',
     
@@ -72,10 +69,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                 options.padding = 4;
             }
             
-            if(options.shape === undefined){
-                options.shape = 'square';
-            }
-            
             // V1 minMarginX/Y were included in the size of the legend,
             // so these correspond to padding
             var minMarginX = Math.max(def.get(options, 'minMarginX', 8), 0);
@@ -97,10 +90,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         }
         
         this.base(chart, parent, options);
-        
-        if(!this.drawLine && !this.drawMarker){
-            this.drawMarker = true;
-        }
     },
 
     /**
@@ -230,71 +219,21 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       }
       
       /* RULE/MARKER */
-      var pvLabelAnchor;
-      var drawLine = this.drawLine;
-      if(drawLine){
-          // Center the rule in the panel
-          this.pvRule = pvLegendMarkerPanel.add(pv.Rule)
-              
-              .left (0)
-              .top  (function(){ return this.parent.height() / 2; })
-              .width(function(){ return this.parent.width();      })
-              .lineWidth(1)
-              .strokeStyle(sceneColorProp)
-              ;
+      rootScene.childNodes.forEach(function(groupScene){
+          var pvGroupPanel = pvLegendMarkerPanel.add(pv.Panel)
+                  .visible(function(itemScene){ 
+                      return itemScene.parent === groupScene; 
+                  });
           
-          pvLabelAnchor = this.pvRule;
-          
-          if(this.drawMarker){
-              // Center the dot marker on the rule 
-              this.pvDot = this.pvRule.anchor("center").add(pv.Dot);
-          }
-      } else if(this.drawMarker){
-          
-          // Center the dot marker in the panel
-          this.pvDot = pvLegendMarkerPanel.add(pv.Dot)
-          
-              .left(function(){ return this.parent.width () / 2; })
-              .top (function(){ return this.parent.height() / 2; })
-              .angle(Math.PI/2) // So that 'bar' gets drawn vertically
-              .strokeStyle(sceneColorProp)
-              ;
-          
-          pvLabelAnchor = this.pvDot;
-      } else {
-          pvLabelAnchor = pvLegendMarkerPanel;
-      }
-      
-      if(this.pvDot){
-          this.pvDot
-              // This is an old bug that persists because... it ain't that bad.
-              // This results to setting the shape's radius to sqrt(width),
-              //  which is always smaller that the available width.
-              // For the usual markerSizes, it doesn't look bad...
-              .shapeSize(function(){ return this.parent.width(); }) // width <= height
-              .shape(function(scene){ return myself.shape || scene.shape; }) // TODO: shape
-              .lineWidth(function(){ return drawLine && this.shape() !== 'cross' ? 0 : 2; })
-              .antialias( function(){
-                  var cos = Math.abs(Math.cos(this.angle()));
-                  if(cos !== 0 && cos !== 1){
-                      switch(this.shape()){
-                          case 'square':
-                          case 'bar':
-                              return false;
-                      }
-                  }
-                  
-                  return true;
-               })
-              .fillStyle(sceneColorProp)
-              ;
-      }
-      
+          var renderInfo = groupScene.renderer.create(this, pvGroupPanel);
+          groupScene.renderInfo = renderInfo;
+      }, this);
+
       /* LABEL */
-      this.pvLabel = pvLabelAnchor.anchor("right").add(pv.Label)
+      this.pvLabel = pvLegendMarkerPanel.anchor("right").add(pv.Label)
           .textAlign('left') // panel type anchors don't adjust textAlign this way 
           .text(function(itemScene){ return itemScene.vars.value.label; })
-          .lock('textMargin', function(itemScene){ return itemScene.vars.textMargin; })
+          .lock('textMargin', function(itemScene){ return itemScene.vars.textMargin - 4; }) // -3 is to compensate for now the label being anchored to the panel instead of the rule or the dot...
           .font(function(itemScene){ return itemScene.vars.font; }) // TODO: lock?
           .textDecoration(function(itemScene){ return itemScene.isOn() ? "" : "line-through"; })
           .intercept(
@@ -312,11 +251,14 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     },
 
     applyExtensions: function(){
-        this.extend(this.pvPanel,      "legendArea_");
+        this.extend(this.pvPanel, "legendArea_");
         this.extend(this.pvLegendPanel,"legendPanel_");
-        this.extend(this.pvRule,       "legendRule_");
-        this.extend(this.pvDot,        "legendDot_");
-        this.extend(this.pvLabel,      "legendLabel_");
+        
+        this._getBulletRootScene().childNodes.forEach(function(groupScene){
+            groupScene.renderer.extendMarks(this, groupScene.renderInfo, groupScene.extensionPrefix);
+        }, this);
+        
+        this.extend(this.pvLabel, "legendLabel_");
     },
     
     _getSignums: function(){

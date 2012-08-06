@@ -8,8 +8,6 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
 
         this.base(options);
 
-        pvc.mergeDefaults(this.options, pvc.MetricLineDotAbstract.defaultOptions, options);
-
         var parent = this.parent;
         if(parent) {
             this._colorRole = parent._colorRole;
@@ -106,28 +104,29 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
             dotSizeRatioTo: options.dotSizeRatioTo,
             autoDotSizePadding: options.autoDotSizePadding
         });
-    }
-}, {
-    defaultOptions: {
+    },
+    
+    defaults: def.create(pvc.MetricXYAbstract.prototype.defaults, {
         showDots:   false,
         showLines:  false,
         showValues: false,
         originIsZero: false,
-        tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15 }),
+        
+        tipsySettings: { offset: 15 },
         
         /* Dot Color Role */
         colorScaleType: "linear", // "discrete", "normal" (distribution) or "linear"
         colorRange: ['red', 'yellow','green'],
-        colorRangeInterval:  undefined,
-        minColor:  undefined, //"white",
-        maxColor:  undefined, //"darkgreen",
-        nullColor: "#efc5ad",  // white with a shade of orange
+//        colorRangeInterval:  undefined,
+//        minColor:  undefined, //"white",
+//        maxColor:  undefined, //"darkgreen",
+        nullColor: "#efc5ad"  // white with a shade of orange
         
         /* Dot Size Role */
-        dotSizeRatio:   undefined,
-        dotSizeRatioTo: undefined,
-        autoDotSizePadding: undefined
-    }
+//        dotSizeRatio:   undefined,
+//        dotSizeRatioTo: undefined,
+//        autoDotSizePadding: undefined
+    })
 });
 
 /**

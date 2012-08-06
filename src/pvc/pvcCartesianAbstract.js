@@ -13,7 +13,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     secondXAxisPanel: null,
     secondYAxisPanel: null,
     
-    _mainContentPanel: null, // This will act as a holder for the specific panel
+    _mainContentPanel: null,
 
     yScale: null,
     xScale: null,
@@ -34,8 +34,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.axesPanels = {};
         
         this.base(options);
-        
-        pvc.mergeDefaults(this.options, pvc.CartesianAbstract.defaultOptions, options);
     },
     
     _getSeriesRoleSpec: function(){
@@ -467,7 +465,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @virtual
      */
     _createVisibleData: function(dataPartValues, ignoreNulls){
-        var partData = this._partData(dataPartValues);
+        var partData = this.partData(dataPartValues);
         return this._serRole && this._serRole.grouping ?
                    this._serRole.flatten(partData, {visible: true, isNull: ignoreNulls ? false : null}) :
                    partData;
@@ -598,11 +596,11 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         extent.max = max;
         
         return extent;
-    }
-}, {
-    defaultOptions: pvc.visual.CartesianAxis.createAllDefaultOptions({
+    },
+    
+    defaults: def.create(pvc.TimeseriesAbstract.prototype.defaults, {
         showAllTimeseries: false,
-
+    
         /* Percentage of occupied space over total space in a discrete axis band */
         panelSizeRatio: 0.9,
 
@@ -610,15 +608,15 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
         
-        originIsZero:  undefined,
-        
-        orthoFixedMin: undefined,
-        orthoFixedMax: undefined,
+//        originIsZero:  undefined,
+//        
+//        orthoFixedMin: undefined,
+//        orthoFixedMax: undefined,
 
         useCompositeAxis: false,
         
         // Show a frame around the plot area
-        showPlotFrame: undefined,
+//        showPlotFrame: undefined,
         
         /* Non-standard axes options and defaults */
         showXScale: true,

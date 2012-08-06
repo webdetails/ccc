@@ -1,6 +1,7 @@
 src/pvc/pvc.js
 src/pvc/pvc.text.js
 src/pvc/pvc.color.js
+src/pvc/pvc.options.js
 
 src/pvc/data/_data.js
 src/pvc/data/meta/DimensionType.js
@@ -33,12 +34,16 @@ src/pvc/visual/sign/Bar.js
 src/pvc/visual/sign/PieSlice.js
 src/pvc/visual/sign/Rule.js
 src/pvc/visual/Context.js
+src/pvc/visual/Axis.js
 src/pvc/visual/CartesianAxis.js
+src/pvc/visual/legend/legend.js
 src/pvc/visual/legend/BulletRootScene.js
 src/pvc/visual/legend/BulletGroupScene.js
 src/pvc/visual/legend/BulletItemScene.js
 src/pvc/visual/legend/BulletItemSceneSelection.js
 src/pvc/visual/legend/BulletItemSceneVisibility.js
+src/pvc/visual/legend/BulletItemRenderer.js
+src/pvc/visual/legend/BulletItemDefaultRenderer.js
 
 src/pvc/pvcAbstract.js
 src/pvc/pvcBaseChart.js

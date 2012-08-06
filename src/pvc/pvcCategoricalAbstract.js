@@ -8,8 +8,6 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         
         this.base(options);
 
-        pvc.mergeDefaults(this.options, pvc.CategoricalAbstract.defaultOptions, options);
-        
         def.set(this._axisRoleNameMap,
             'base', 'category',
             'ortho', this.options.orthoAxisOrdinal ? 'series' : 'value'
@@ -44,7 +42,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     _createVisibleData: function(dataPartValues, ignoreNulls){
         var serGrouping = this._serRole && this._serRole.flattenedGrouping(),
             catGrouping = this._catRole.flattenedGrouping(),
-            partData    = this._partData(dataPartValues),
+            partData    = this.partData(dataPartValues),
             
             // Allow for more caching when isNull is null
             keyArgs = { visible: true, isNull: ignoreNulls ? false : null};
@@ -271,12 +269,12 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             .visible(function(){
                 return !this.index;
             });
-    }
-}, {
-    defaultOptions: {
-        // Ortho <- value role
+    },
+    
+    defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
+     // Ortho <- value role
         orthoAxisOrdinal: false, // when true => _axisRoleNameMap['ortho'] = 'series' (instead of value)
         
         stacked: false
-    }
+    })
 });

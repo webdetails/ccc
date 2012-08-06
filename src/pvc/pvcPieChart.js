@@ -6,15 +6,7 @@ pvc.PieChart = pvc.BaseChart.extend({
 
     pieChartPanel: null,
     legendSource: 'category',
-    
-    constructor: function(options) {
 
-        this.base(options);
-
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.PieChart.defaultOptions, options);
-    },
-    
     /**
      * Initializes each chart's specific roles.
      * @override
@@ -61,25 +53,24 @@ pvc.PieChart = pvc.BaseChart.extend({
             labelFont:   options.valuesLabelFont,
             scenes:      def.getPath(options, 'pie.scenes')
         }));
-    }
-},
-{
-    defaultOptions: {
-        showValues: undefined,
-        innerGap: undefined,
-        
-        explodedSliceRadius: undefined,
-        explodedSliceIndex: undefined,
-        activeSliceRadius: undefined,
-        
-        valuesMask: undefined, // example: "{value} ({value.percent})"
-        pie: undefined, // pie options object
-        
-        valuesLabelFont:  undefined,
-        valuesLabelStyle: undefined,
-        
-        linkedLabel: undefined
-        
-        // tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15, gravity: 'se' })
-    }
+    },
+    
+    defaults: def.create(pvc.BaseChart.prototype.defaults, {
+//      showValues: undefined,
+//      innerGap: undefined,
+//      
+//      explodedSliceRadius: undefined,
+//      explodedSliceIndex: undefined,
+//      activeSliceRadius: undefined,
+//      
+//      valuesMask: undefined, // example: "{value} ({value.percent})"
+//      pie: undefined, // pie options object
+//      
+//      valuesLabelFont:  undefined,
+//      valuesLabelStyle: undefined,
+//      
+//      linkedLabel: undefined
+//      
+//      // tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15, gravity: 'se' })
+    })
 });

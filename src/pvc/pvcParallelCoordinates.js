@@ -20,9 +20,6 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
       }
       
       this.base(options);
-    
-      // Apply options
-      pvc.mergeDefaults(this.options, pvc.ParallelCoordinates.defaultOptions, options);
   },
 
   _preRenderContent: function(contentOptions){
@@ -40,21 +37,21 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
       mapAllDimensions : this.options.mapAllDimensions,
       numDigits : this.options.numDigits
     }));
-  }
-}, {
-    defaultOptions: {
+  },
+  
+  defaults: def.create(pvc.BaseChart.prototype.defaults, {
       topRuleOffset: 30,
       botRuleOffset: 30,
       leftRuleOffset: 60,
       rightRuleOffset: 60,
-	// sort the categorical (non-numerical dimensions)
+      // sort the categorical (non-numerical dimensions)
       sortCategorical: true,
-	// map numerical dimension too (uniform (possible non-linear)
-	// distribution of the observed values)
+      // map numerical dimension too (uniform (possible non-linear)
+      // distribution of the observed values)
       mapAllDimensions: true,
-	// number of digits after decimal point.
+      // number of digits after decimal point.
       numDigits: 0
-    }
+  })
 });
 
 
