@@ -237,11 +237,6 @@ def.type('pvc.visual.Sign')
         return color;
     },
     
-    legendColorScale: function(){
-        return this._legendColorScale ||
-                (this._legendColorScale = this.chart._legendColorScale(this.panel.dataPartValue));
-    },
-    
     baseColor: function(type){
         var color = this.delegate();
         if(color === undefined){
@@ -250,11 +245,23 @@ def.type('pvc.visual.Sign')
         
         return color;
     },
-
+    
+    _initDefaultColorSceneScale: function(){
+        var colorAxis = this.panel.defaultColorAxis();
+        if(colorAxis){
+            return colorAxis.sceneScale({nullToZero: false});
+        } 
+        
+        return def.fun.constant(pvc.defaultColor);
+    },
+    
+    defaultColorSceneScale: function(){
+        return this._defaultColorSceneScale || 
+               (defaultColorSceneScale = this._initDefaultColorSceneScale());
+    },
+    
     defaultColor: function(type){
-        var colorVar = this.scene.vars[this.chart.legendSource];
-        /* Legend color is a function of the chart's legendSource */
-        return this.legendColorScale()(colorVar && colorVar.value);
+        return this.defaultColorSceneScale()(this.scene);
     },
 
     normalColor: function(type, color){

@@ -27,27 +27,24 @@ def.scope(function(){
  * 
  * @property {pvc.CartesianAbstract} chart The associated cartesian chart.
  * @property {string} type The type of the axis. One of the values: 'base' or 'ortho'.
- * @property {number} index The index of the axis within its type (0, 1, 2...).
  * @property {string} orientation The orientation of the axis. 
  * One of the values: 'x' or 'y', for horizontal and vertical axis orientations, respectively.
- * @property {string} orientatedId The id of the axis with respect to the orientation and the index of the axis ("").
- * @property {pvc.visual.Role} role The associated visual role.
- * @property {pv.Scale} scale The associated scale.
+ * @property {string} orientedId The id of the axis with respect to the orientation and the index of the axis ("").
  * 
  * @constructor
  * @param {pvc.CartesianAbstract} chart The associated cartesian chart.
  * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
  * @param {number} [index=0] The index of the axis within its type.
- * @param {pvc.visual.Role || pvc.visual.Role[]} roles The associated visual role or roles.
+ * @param {object|object[]} dataCells The associated data cells (role + data parts).
  * 
  * @param {object} [keyArgs] Keyword arguments.
- * @param {pv.Scale} scale The associated scale.
+ * See {@link pvc.visual.Axis} for supported keyword arguments. 
  */
 def
 .type('pvc.visual.CartesianAxis', $VA)
-.init(function(chart, type, index, roles, keyArgs){
+.init(function(chart, type, index, dataCells, keyArgs){
     
-    this.base(chart, type, index, roles, keyArgs);
+    this.base(chart, type, index, dataCells, keyArgs);
     
     // ------------
     
@@ -237,39 +234,6 @@ $VCA.getV1OptionId = function(orientation, index){
     
     return orientation + "" + (index + 1); // y3, x4,...
 };
-
-//$VCA.createAllOptions = function(options){
-//    var types   = ['base', 'ortho'],
-//        indexes = [0, 1],
-//        orientations = ['x', 'y'],
-//        optionNames = def.keys(cartAxis_optionsDef);
-//    
-//    function addOption(optionId, value){
-//        if(!(optionId in options)){
-//            options[optionId] = value;
-//        }
-//    }
-//    
-//    optionNames.forEach(function(name){
-//        indexes.forEach(function(index){
-//            /* by id */
-//            types.forEach(function(type){
-//                addOption($VA.getId(type, index) + "Axis" + name);
-//            });
-//
-//            /* by v1OptionId */
-//            orientations.forEach(function(orientation){
-//                addOption($VCA.getV1OptionId(orientation, index) + 'Axis' + name);
-//            });
-//        });
-//
-//        /* by common id */
-//        var optionDef = cartAxis_optionsDef[name];
-//        addOption('axis' + name);
-//    });
-//
-//    return options;
-//};
 
 /* PRIVATE STUFF */
 
@@ -542,7 +506,7 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
     
     Font: {
         resolve: resolveNormal,
-        cast:    String 
+        cast:    String
     },
     
     ClickAction: specNormal,

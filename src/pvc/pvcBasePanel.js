@@ -48,7 +48,9 @@ pvc.BasePanel = pvc.Abstract.extend({
     data: null,
 
     dataPartValue: null,
-
+    
+    _colorAxis: null,
+    
     /**
      * Indicates if the top root panel is rendering with animation
      * and, if so, the current phase of animation.
@@ -93,9 +95,16 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     constructor: function(chart, parent, options) {
         
-        if(options && options.scenes){
-            this._sceneTypeExtensions = options.scenes;
-            delete options.scenes;
+        if(options){
+            if(options.scenes){
+                this._sceneTypeExtensions = options.scenes;
+                delete options.scenes;
+            }
+            
+            if(options.colorAxis){
+                this._colorAxis = options.colorAxis;
+                delete options.colorAxis;
+            }
         }
         
         // TODO: Danger...
@@ -152,6 +161,19 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     compatVersion: function(){
         return this.chart.compatVersion();
+    },
+    
+    defaultColorAxis: function(){
+        return this._colorAxis || this.chart.axes.color;
+    },
+    
+    defaultVisibleBulletGroupScene: function(){
+        // Register legend prototype marks
+        var colorAxis = this.defaultColorAxis();
+        if(colorAxis && colorAxis.isVisible){
+            return colorAxis.legendBulletGroupScene;
+        }
+        return null;
     },
     
     /**
@@ -595,6 +617,10 @@ pvc.BasePanel = pvc.Abstract.extend({
                 return;
             }
             
+            if(this.isRoot) {
+                this._creating();
+            }
+            
             var margins  = this._layoutInfo.margins;
             var paddings = this._layoutInfo.paddings;
             
@@ -671,6 +697,14 @@ pvc.BasePanel = pvc.Abstract.extend({
 
             /* Extensions */
             this.applyExtensions();
+        }
+    },
+    
+    _creating: function(){
+        if(this._children) {
+            this._children.forEach(function(child){
+                child._creating();
+            });
         }
     },
     
@@ -859,8 +893,8 @@ pvc.BasePanel = pvc.Abstract.extend({
      * Extends a protovis mark with extension points 
      * having a given prefix.
      */
-    extend: function(mark, prefix) {
-        this.chart.extend(mark, prefix);
+    extend: function(mark, prefix, keyArgs) {
+        this.chart.extend(mark, prefix, keyArgs);
     },
     
     _extendSceneType: function(typeKey, type, names){
@@ -880,6 +914,13 @@ pvc.BasePanel = pvc.Abstract.extend({
         return this.chart._getExtension.apply(this.chart, arguments);
     },
 
+    _getConstantExtension: function(extPoint) {
+        var value = this.chart._getExtension.apply(this.chart, arguments);
+        if(!def.fun.is(value)){
+            return value;
+        }
+    },
+    
     /* SIZE & POSITION */
     setPosition: function(position){
         for(var side in position){
@@ -1677,8 +1718,8 @@ pvc.BasePanel = pvc.Abstract.extend({
         top:    "top",
         bottom: "bottom",
         middle: "middle",
-        right:  "top",
-        left:   "bottom",
+        right:  "bottom",
+        left:   "top",
         center: "middle"
     },
 

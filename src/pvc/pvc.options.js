@@ -276,7 +276,7 @@ def.scope(function(){
             if(value != null){
                 if(this.cast){
                     // not a method
-                    value = this.cast.call(null, value);
+                    value = this.cast(value, this._context);
                 }
             }
             

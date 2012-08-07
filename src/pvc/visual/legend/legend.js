@@ -1,9 +1,9 @@
 def.space('pvc.visual.legend', function(legend){
     
-    legend.buildKey = function(legendType, visualRole, dataPartValues){
+    legend.buildKey = function(legendType, dataCell){
         // If dataPartValues is an array, it is converted to a comma-separated string
         return legendType + '|' + 
-               visualRole + '|' + 
-               (dataPartValues ? dataPartValues : ''); 
+               dataCell.role.name + '|' + 
+               (dataCell.dataPartValues != null ? dataCell.dataPartValues : ''); 
     };
 });

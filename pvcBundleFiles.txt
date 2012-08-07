@@ -36,6 +36,7 @@ src/pvc/visual/sign/Rule.js
 src/pvc/visual/Context.js
 src/pvc/visual/Axis.js
 src/pvc/visual/CartesianAxis.js
+src/pvc/visual/ColorAxis.js
 src/pvc/visual/legend/legend.js
 src/pvc/visual/legend/BulletRootScene.js
 src/pvc/visual/legend/BulletGroupScene.js

@@ -8,7 +8,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         
         this.base(options);
 
-        def.set(this._axisRoleNameMap,
+        def.set(this._axisType2RoleNamesMap,
             'base', 'category',
             'ortho', this.options.orthoAxisOrdinal ? 'series' : 'value'
         );
@@ -73,16 +73,17 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      * </p>
      *
      * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
-     * @param {pvc.visual.Role} valueRole The role.
-     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
+     * @param {pvc.visual.Role} valueDataCell The data cell.
      * @type object
      *
      * @override
      */
-    _getVisibleRoleValueExtent: function(valueAxis, valueRole, dataPartValues){
-        if(!dataPartValues){
+    _getVisibleRoleValueExtent: function(valueAxis, valueDataCell){
+        var valueRole = valueDataCell.role;
+        var dataPartValues = valueDataCell.dataPartValues;
+        if(dataPartValues == null){
             // Most common case is faster
-            return this._getVisibleCellValueExtent(valueAxis, valueRole, dataPartValues);
+            return this._getVisibleCellValueExtent(valueAxis, valueRole, null);
         }
 
         return def.query(dataPartValues)
@@ -109,7 +110,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                  * Continuous baseScale's, like timeSeries go this way.
                  */
                 return pvc.CartesianAbstract.prototype._getVisibleRoleValueExtent.call(
-                                this, valueAxis, valueRole, dataPartValue);
+                                this, valueAxis, {role: valueRole, dataPartValues: dataPartValue });
         }
         
         this._assertSingleContinuousValueRole(valueRole);
@@ -273,7 +274,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     
     defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
      // Ortho <- value role
-        orthoAxisOrdinal: false, // when true => _axisRoleNameMap['ortho'] = 'series' (instead of value)
+        orthoAxisOrdinal: false, // when true => _axisType2RoleNamesMap['ortho'] = 'series' (instead of value)
         
         stacked: false
     })

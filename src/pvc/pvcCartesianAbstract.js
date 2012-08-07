@@ -5,11 +5,10 @@
 pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     _gridDockPanel: null,
     
-    axes: null,
     axesPanels: null, 
     
-    yAxisPanel : null,
-    xAxisPanel : null,
+    yAxisPanel: null,
+    xAxisPanel: null,
     secondXAxisPanel: null,
     secondYAxisPanel: null,
     
@@ -17,20 +16,11 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
 
     yScale: null,
     xScale: null,
-    
-    _axisRoleNameMap: null, 
-    // example
-//    {
-//        'base':   'category',
-//        'ortho':  'value'
-//    },
-    
+   
     _visibleDataCache: null,
     
     constructor: function(options){
         
-        this._axisRoleNameMap = {};
-        this.axes = {};
         this.axesPanels = {};
         
         this.base(options);
@@ -48,20 +38,35 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         this.base.apply(this, arguments);
     },
-
+    
+    _initAxes: function(hasMultiRole){
+        
+        this.base(hasMultiRole);
+        
+        if(!hasMultiRole || this.parent){
+            /* Create axes */
+            this._createAxis('base', 0);
+            this._createAxis('ortho', 0);
+            if(this.options.secondAxis){
+                this._createAxis('ortho', 1);
+            }
+        }
+    },
+    
     _preRenderContent: function(contentOptions){
-        var options = this.options;
         if(pvc.debug >= 3){
             pvc.log("Prerendering in CartesianAbstract");
         }
         
+        var options = this.options;
+        var axes = this.axes;
+        
+        var baseAxis = axes.base;
+        var orthoAxis = axes.ortho;
+        var ortho2Axis = axes.ortho2;
+        
         /* Create the grid/docking panel */
         this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel, contentOptions);
-        
-        /* Create axes */
-        var baseAxis   = this._createAxis('base',  0),
-            orthoAxis  = this._createAxis('ortho', 0),
-            ortho2Axis = options.secondAxis ? this._createAxis('ortho', 1) : null;
         
         /* Create child axis panels
          * The order is relevant because of docking order. 
@@ -71,15 +76,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         }
         this._createAxisPanel(baseAxis );
         this._createAxisPanel(orthoAxis);
-        
-        /* Create scales, with domain applied, but no range yet,
-         * and give them to corresponding axes.
-         */
-        this._createAxisScale(baseAxis );
-        this._createAxisScale(orthoAxis);
-        if(ortho2Axis){
-            this._createAxisScale(ortho2Axis);
-        }
         
         /* Create main content panel */
         this._mainContentPanel = this._createMainContentPanel(this._gridDockPanel);
@@ -97,23 +93,18 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     
     /**
      * Creates a cartesian axis.
-     * 
-     * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
-     * @param {number} index The index of the axis within its type (0, 1, 2...).
-     *
-     * @type pvc.visual.CartesianAxis
      */
-    _createAxis: function(axisType, axisIndex){
-        var roles = def.array.as(this._axisRoleNameMap[axisType])
-                        .map(function(roleName){
-                            return this.visualRoles(roleName);
-                        }, this);
-        var axis = new pvc.visual.CartesianAxis(this, axisType, axisIndex, roles);
+    _createAxisCore: function(axisType, axisIndex, dataCells){
+        switch(axisType){
+            case 'base':
+            case 'ortho':
+                var axis = new pvc.visual.CartesianAxis(this, axisType, axisIndex, dataCells);
+                this.axes[axis.orientedId] = axis;
+                this._createAxisScale(axis);
+                return axis;
+        }
         
-        this.axes[axis.id] = axis;
-        this.axes[axis.orientedId] = axis;
-        
-        return axis;
+        return this.base(axisType, axisIndex, dataCells);
     },
     
     /**
@@ -181,8 +172,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     },
     
     /**
-     * Creates a scale for a given axis, assigns it to the axis
-     * and assigns the scale to special v1 chart instance fields.
+     * Creates a scale for a given axis, with domain applied, but no range yet,
+     * assigns it to the axis and assigns the scale to special v1 chart instance fields.
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
      * @type pv.Scale
@@ -222,15 +213,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @type pv.Scale
      */
     _createScaleByAxis: function(axis){
-        var createScaleMethod = this['_create' + axis.scaleType + 'ScaleByAxis'];
+        var createScale = this['_create' + axis.scaleType + 'ScaleByAxis'];
         
-        var dataPartValues = this._getAxisDataParts(axis);
-        
-        return createScaleMethod.call(this, axis, dataPartValues);
-    },
-    
-    _getAxisDataParts: function(axis){
-        return null;
+        return createScale.call(this, axis);
     },
 
     /**
@@ -240,16 +225,15 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @virtual
      * @type pv.Scale
      */
-    _createDiscreteScaleByAxis: function(axis, dataPartValues){
+    _createDiscreteScaleByAxis: function(axis){
         /* DOMAIN */
 
         // With composite axis, only 'singleLevel' flattening works well
         var flatteningMode = null; //axis.option('Composite') ? 'singleLevel' : null,
-        var baseData = this._getVisibleData(dataPartValues, {ignoreNulls: false});
+        var baseData = this._getVisibleData(axis.dataCell.dataPartValues, {ignoreNulls: false});
         var data = axis.role.flatten(baseData, {
                                 visible: true,
                                 flatteningMode: flatteningMode
@@ -281,14 +265,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      * 
      * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @param {pvc.visual.Role} role The role.
-     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @virtual
      * @type pv.Scale
      */
-    _createTimeseriesScaleByAxis: function(axis, dataPartValues){
+    _createTimeseriesScaleByAxis: function(axis){
         /* DOMAIN */
-        var extent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data...
+        var extent = this._getVisibleValueExtent(axis); // null when no data...
         
         var scale = new pv.Scale.linear();
         if(!extent){
@@ -319,13 +301,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * </p>
      *
      * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @virtual
      * @type pv.Scale
      */
-    _createContinuousScaleByAxis: function(axis, dataPartValues){
+    _createContinuousScaleByAxis: function(axis){
         /* DOMAIN */
-        var extent = this._getVisibleValueExtentConstrained(axis, dataPartValues);
+        var extent = this._getVisibleValueExtentConstrained(axis);
         
         var scale = new pv.Scale.linear();
         if(!extent){
@@ -486,22 +467,21 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * over all datums of the visible data.
      * 
      * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
-     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
      * @type object
      *
      * @protected
      * @virtual
      */
-    _getVisibleValueExtent: function(valueAxis, dataPartValues){
-        var roles = valueAxis.roles;
-        if(roles.length === 1){
+    _getVisibleValueExtent: function(valueAxis){
+        var dataCells = valueAxis.dataCells;
+        if(dataCells.length === 1){
             // Most common case is faster
-            return this._getVisibleRoleValueExtent(valueAxis, roles[0], dataPartValues);
+            return this._getVisibleRoleValueExtent(valueAxis, dataCells[0]);
         }
 
-        return def.query(roles)
-                .select(function(role){
-                    return this._getVisibleRoleValueExtent(valueAxis, role, dataPartValues);
+        return def.query(dataCells)
+                .select(function(dataCell){
+                    return this._getVisibleRoleValueExtent(valueAxis, dataCell);
                 }, this)
                 .reduce(this._unionReduceExtent, null);
     },
@@ -534,14 +514,16 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * over all datums of the visible data.
      *
      * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
-     * @param {pvc.visual.Role} valueRole The role.
-     * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
+     * @param {pvc.visual.Role} valueDataCell The data cell.
      * @type object
      *
      * @protected
      * @virtual
      */
-    _getVisibleRoleValueExtent: function(valueAxis, valueRole, dataPartValues){
+    _getVisibleRoleValueExtent: function(valueAxis, valueDataCell){
+        var valueRole = valueDataCell.role;
+        var dataPartValues = valueDataCell.dataPartValues;
+        
         this._assertSingleContinuousValueRole(valueRole);
 
         if(valueRole.name === 'series') {
@@ -557,7 +539,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     /**
      * @virtual
      */
-    _getVisibleValueExtentConstrained: function(axis, dataPartValues, min, max){
+    _getVisibleValueExtentConstrained: function(axis, min, max){
         var extent = {
                 minLocked: false,
                 maxLocked: false
@@ -578,7 +560,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         }
         
         if(min == null || max == null) {
-            var baseExtent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data
+            var baseExtent = this._getVisibleValueExtent(axis); // null when no data
             if(!baseExtent){
                 return null;
             }

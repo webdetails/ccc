@@ -292,6 +292,8 @@ pvc.setDefaultColorScheme = function(colors){
     return pvc.defaultColorScheme = pvc.colorScheme(colors);
 };
 
+pvc.defaultColor = pv.Colors.category10()('?');
+
 /**
  * Creates a color scheme if the specified argument is not one already.
  * 
@@ -420,6 +422,60 @@ pv.Format.createFormatter = function(pvFormat) {
     return format;
 };
 
+pvc.buildIndexedId = function(prefix, index){
+    if(index === 0) {
+        return prefix; // base, ortho, legend
+    }
+    
+    return prefix + "" + (index + 1); // base2, ortho3,..., legend2
+};
+
+pvc.parseLegendClickMode = function(clickMode){
+    if(!clickMode){
+        clickMode = 'none';
+    }
+    
+    switch(clickMode){
+        case 'toggleSelected':
+        case 'toggleVisible':
+        case 'none':
+            break;
+            
+        default:
+            if(pvc.debug >= 2){
+                pvc.log("[Warning] Invalid 'legendClickMode' option value: '" + clickMode + "'. Assuming 'none'.");
+            }
+        
+            clickMode = 'none';
+            break;
+    }
+    
+    return clickMode;
+};
+
+pvc.parseShape = function(shape){
+    if(shape){
+        switch(shape){
+            case 'square':
+            case 'circle':
+            case 'diamond':
+            case 'triangle':
+            case 'cross':
+            case 'bar':
+                break;
+            default:
+                if(pvc.debug >= 2){
+                    pvc.log("[Warning] Invalid 'shape' option value: '" + shape + "'.");
+                }
+            
+                shape = null;
+                break;
+        }
+    }
+    
+    return shape;
+};
+
 pvc.parseAlign = function(side, align){
     var align2, isInvalid;
     if(side === 'left' || side === 'right'){
@@ -466,6 +522,30 @@ pvc.Sides.vnames = 'top bottom'.split(' ');
 pvc.Sides.names = 'left right top bottom'.split(' ');
 pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.retTrue);
 
+pvc.parsePosition = function(side, defaultSide){
+    if(side && !def.hasOwn(pvc.Sides.namesSet, side)){
+        if(!defaultSide){
+            defaultSide = 'left';
+        }
+        
+        if(pvc.debug >= 2){
+            pvc.log(def.format("Invalid position value '{0}. Assuming '{1}'.", [side, defaultSide]));
+        }
+        
+        side = defaultSide;
+    }
+    
+    return side;
+};
+
+pvc.Sides.as = function(v){
+    if(v != null && !(v instanceof pvc.Sides)){
+        v = new pvc.Sides().setSides(v);
+    }
+    
+    return v;
+};
+
 pvc.Sides.prototype.setSides = function(sides){
     if(typeof sides === 'string'){
         var comps = sides.split(/\s+/).map(function(comp){
@@ -510,7 +590,7 @@ pvc.Sides.prototype.setSides = function(sides){
         } else {
             this.set('all', sides.all);
             for(var p in sides){
-                if(p !== 'all' && sides.hasOwnProperty(p)){
+                if(p !== 'all' && pvc.Sides.namesSet.hasOwnProperty(p)){
                     this.set(p, sides[p]);
                 }
             }
@@ -1225,6 +1305,14 @@ var Size = def.type('pvc.Size')
 
 pvc.Size.names = ['width', 'height'];
 pvc.Size.namesSet = pv.dict(pvc.Size.names, def.retTrue);
+
+pvc.Size.as = function(v){
+    if(v != null && !(v instanceof Size)){
+        v = new Size().setSize(v);
+    }
+    
+    return v;
+};
 
 // --------------------
 

@@ -29,10 +29,9 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
 
         this.base(options);
 
-        this._axisRoleNameMap = {
-            'base':  'x',
-            'ortho': 'y'
-        };
+        def.set(this._axisType2RoleNamesMap,
+            'base',  'x',
+            'ortho', 'y');
 
         var parent = this.parent;
         if(parent) {

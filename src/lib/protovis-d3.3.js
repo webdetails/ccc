@@ -1,4 +1,4 @@
-// ed2eef592fff07cd727ce0473b8a4bc98e1a52b2
+// 7c422994655e9b619d473137f37f49ef6467d24e
 /**
  * @class The built-in Array class.
  * @name Array
@@ -7709,6 +7709,7 @@ pv.Mark = function() {
    * in order of evaluation!
    */
   this.$properties = [];
+  this.$propertiesMap = {};
   this.$handlers = {};
 };
 
@@ -7790,6 +7791,12 @@ pv.Mark.prototype.property = function(name, cast) {
 };
 
 /**
+ * @type object
+ */
+pv.propertiesDepsOf = null;
+pv.propertyEval   = null;
+
+/**
  * @private Defines a setter-getter for the specified property.
  *
  * <p>If a cast function has been assigned to the specified property name, the
@@ -7840,7 +7847,7 @@ pv.Mark.prototype.propertyMethod = function(name, def, cast) {
         var vf;
         // A function and cast?
         if(type & 1 && cast){
-            vf = function() {
+            vf = function(){
                 var x = v.apply(this, arguments);
                 return (x != null) ? cast(x) : null;
             };
@@ -7854,26 +7861,60 @@ pv.Mark.prototype.propertyMethod = function(name, def, cast) {
         
         return this;
       }
-
+      
+      // Listening to function property dependencies?
+      var propEval = pv.propertyEval;
+      if(propEval) {
+          var binds = this.binds;
+          var propRead = binds.properties[name];
+          if(propRead){
+              var net = binds.net;
+              var readNetIndex = net[name];
+              if(readNetIndex == null){
+                  readNetIndex = net[name] = 0;
+              }
+              
+              (propRead.dependents || (propRead.dependents = {}))
+                  [propEval.name] = true;
+              
+              (pv.propertyEvalDependencies || (pv.propertyEvalDependencies = {}))
+                  [name] = true;
+              
+              // evalNetIndex must be at least one higher than readNetIndex
+              if(readNetIndex >= pv.propertyEvalNetIndex){
+                  pv.propertyEvalNetIndex = readNetIndex + 1;
+              }
+          }
+      }
+      
       return this.instance()[name];
     };
 };
 
 /** @private Sets the value of the property <i>name</i> to <i>v</i>. */
 pv.Mark.prototype.propertyValue = function(name, v, type) {
-  var properties = this.$properties;
-  var p = {
-      name:  name, 
-      id:    pv.id(), 
-      value: v,
-      type:  type
+    var propertiesMap = this.$propertiesMap;
+    var properties = this.$properties;
+    
+    var p = {
+      name:     name, 
+      id:       pv.id(), 
+      value:    v,
+      type:     type
   };
   
-  for (var i = 0; i < properties.length; i++) {
-    if (properties[i].name === name) {
-      properties.splice(i, 1);
-      break;
-    }
+  var specified = propertiesMap[name];
+  
+  propertiesMap[name] = p;
+  
+  if(specified){
+      // Find it and remove it
+      for (var i = 0; i < properties.length; i++) {
+        if (properties[i] === specified) {
+          properties.splice(i, 1);
+          break;
+        }
+      }
   }
   
   properties.push(p);
@@ -8516,12 +8557,16 @@ pv.Mark.prototype.renderCore = function() {
 /** @private Stores the current data stack. */
 pv.Mark.stack = [];
 
+
+/** @private */ 
+pv.Mark._requiredPropsPosition = {id: 0, datum: 1, visible: 3};
+
 /**
  * @private In the bind phase, inherited property definitions are cached so they
  * do not need to be queried during build.
  */
 pv.Mark.prototype.bind = function() {
-  var seen = {}, 
+  var seen = {},
       data,
       
       /* Required props (no defs) */
@@ -8541,7 +8586,7 @@ pv.Mark.prototype.bind = function() {
       // the order: id, datum, visible
       // The reason is that the visible property function should 
       // have access to id and datum to decide.
-      requiredPositions = {id: 0, datum: 1, visible: 3};
+      requiredPositions = pv.Mark._requiredPropsPosition;
   
   /*
    * **Evaluation** order (not precedence order for choosing props/defs)
@@ -8666,6 +8711,7 @@ pv.Mark.prototype.bind = function() {
   /* Setup binds to evaluate constants before functions. */
   this.binds = {
     properties: seen,
+    net:        {}, // name -> net index // null = 0 is default position
     data:       data,
     defs:       defs,
     required:   required,
@@ -8677,6 +8723,32 @@ pv.Mark.prototype.bind = function() {
     // Only to satisfy this copy operation they go in the instance-props array.
     optional:   pv.blend(types)
   };
+};
+
+pv.Mark.prototype.updateNet = function(pDependent, netIndex){
+    var binds = this.binds;
+    var props = binds.properties;
+    var net   = binds.net;
+    
+    propagateRecursive(pDependent, netIndex);
+    
+    function propagateRecursive(p, minNetIndex){
+        if(minNetIndex > (net[p.name] || 0)){
+            net[p.name] = minNetIndex;
+            var deps = p.dependents;
+            if(deps){
+                minNetIndex++;
+                for(var depName in deps){
+                    if(deps.hasOwnProperty(depName)){
+                        var pDep = props[depName];
+                        if(pDep){
+                            propagateRecursive(pDep, minNetIndex);
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 
 /**
@@ -8802,6 +8874,78 @@ pv.Mark.prototype.buildProperties = function(s, properties) {
   }
 };
 
+pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
+    // Current bindings
+    var net = this.binds.net;
+    var netIndex, newNetIndex, netDirtyProps, prevNetDirtyProps;
+    var stack = pv.Mark.stack;
+    
+    var n = properties.length;
+    try{
+        while(true){
+            netDirtyProps = null;
+            
+            for (var i = 0 ; i < n; i++) {
+                var p = properties[i];
+                var name = p.name;
+                // Only re-evaluate properties marked dirty on the previous iteration
+                if(!prevNetDirtyProps || prevNetDirtyProps[name]){
+                    var v = p.value; // assume case 2 (constant)
+                    
+                    switch (p.type) {
+                        // copy already evaluated def value to each instance's scene
+                        case 0:
+                        case 1:
+                            v = this.scene.defs[name].value;
+                            break;
+                            
+                        case 3:
+                            pv.propertyEval = p;
+                            pv.propertyEvalNetIndex = netIndex = (net[name] || 0);
+                            pv.propertyEvalDependencies = null;
+                            
+                            v = v.apply(this, stack);
+                            
+                            newNetIndex = pv.propertyEvalNetIndex;
+                            if(newNetIndex > netIndex){
+                                if(!netDirtyProps){
+                                    netDirtyProps = pv.propertyEvalDependencies;
+                                } else {
+                                    var evalDeps = pv.propertyEvalDependencies;
+                                    for(var depName in evalDeps){
+                                        if(evalDeps.hasOwnProperty(depName)){
+                                            netDirtyProps[depName] = true;
+                                        }
+                                    }
+                                }
+                                
+                                this.updateNet(p, newNetIndex);
+                            }
+                            break;
+                    }
+                     
+                    s[name] = v;
+                }
+            }
+            
+            if(!netDirtyProps){
+                break;
+            }
+            
+            prevNetDirtyProps = netDirtyProps;
+            
+            // Sort properties on net index and repeat...
+            properties.sort(function(pa, pb){
+                return pv.naturalOrder(net[pa.name] || 0, net[pb.name] || 0);
+            });
+        }
+    } finally {
+        pv.propertyEval = null;
+        pv.propertyEvalNetIndex = null;
+        pv.propertyEvalDependencies = null;
+    }
+};
+  
 /**
  * @private Evaluates all of the properties for this mark for the specified
  * instance <tt>s</tt> in the scene graph. The set of properties to evaluate is
@@ -8819,7 +8963,12 @@ pv.Mark.prototype.buildProperties = function(s, properties) {
 pv.Mark.prototype.buildInstance = function(s) {
   this.buildProperties(s, this.binds.required);
   if (s.visible) {
-    this.buildProperties(s, this.binds.optional);
+    if(this.index === 0){
+        this.buildPropertiesWithDepTracking(s, this.binds.optional);
+    } else {
+        this.buildProperties(s, this.binds.optional);
+    }
+    
     this.buildImplied(s);
   }
 };

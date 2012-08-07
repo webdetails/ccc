@@ -19,26 +19,21 @@
 def
 .type('pvc.visual.legend.BulletItemDefaultRenderer')
 .init(function(keyArgs){
-    if(!!def.get(keyArgs, 'drawRule', false)){
-        this.drawRule = true;
-        var rulePvProto = def.get(keyArgs, 'rulePvProto');
-        if(rulePvProto){
-            this.rulePvProto = rulePvProto;
-        }
+    this.drawRule = def.get(keyArgs, 'drawRule', false);
+    if(this.drawRule){
+        this.rulePvProto = def.get(keyArgs, 'rulePvProto');
     }
     
-    if(!this.drawRule || !!def.get(keyArgs, 'drawMarker', true)){
-        this.drawMarker = true;
-        var markerPvProto = def.get(keyArgs, 'markerPvProto');
-        if(markerPvProto){
-            this.markerPvProto = markerPvProto;
-        }
+    this.drawMarker = !this.drawRule || def.get(keyArgs, 'drawMarker', true);
+    if(this.drawMarker){
+        this.markerShape = def.get(keyArgs, 'markerShape', 'square');
+        this.markerPvProto = def.get(keyArgs, 'markerPvProto');
     }
 })
 .add(/** @lends pvc.visual.legend.BulletItemDefaultRenderer# */{
     drawRule: false,
-    drawMarker: false,
-    
+    drawMarker: true,
+    markerShape: null,
     rulePvProto: null,
     markerPvProto: null,
     
@@ -70,11 +65,11 @@ def
                 .top (function(){ return this.parent.height() / 2; })
                 // If order of properties is changed, by extension, 
                 // dependent properties will not work...
-                .shape('square')
                 .shapeSize(function(){ return this.parent.width(); }) // width <= height
-                .lineWidth(function(){ return drawRule && this.shape() !== 'cross' ? 0 : 2; })
+                .lineWidth(2)
                 .fillStyle(sceneColorProp)
-                .strokeStyle(drawRule ? null : sceneColorProp)
+                .strokeStyle(sceneColorProp)
+                .shape(this.markerShape)
                 .angle(drawRule ? 0 : Math.PI/2) // So that 'bar' gets drawn vertically
                 .antialias( function(){
                     var cos = Math.abs(Math.cos(this.angle()));

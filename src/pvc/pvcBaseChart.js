@@ -1,4 +1,3 @@
-
 /**
  * The main chart component
  */
@@ -32,6 +31,25 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @type pvc.BaseChart
      */
     root: null,
+    
+    /**
+     * A map of {@link pvc.visual.Axis} by axis id.
+     */
+    axes: null,
+    
+    /**
+     * A map from axis type to role name or names.
+     * This should be overridden in specific chart classes.
+     * 
+     * @example
+     * <pre>
+     * {
+     *   'base':   'category',
+     *   'ortho':  ['value', 'value2']
+     * }
+     * </pre>
+     */
+    _axisType2RoleNamesMap: null,
     
     /**
      * A map of {@link pvc.visual.Role} by name.
@@ -116,14 +134,6 @@ pvc.BaseChart = pvc.Abstract.extend({
     _partData: null,
 
     /**
-     * The set of legend keys that are already registered
-     * for this chart's {@link #data}.
-     * 
-     * @type def.Set  
-     */
-    _legendKeysSet: null,
-    
-    /**
      * The data source of the chart.
      * <p>
      * The {@link #data} of a root chart 
@@ -194,16 +204,6 @@ pvc.BaseChart = pvc.Abstract.extend({
      * @type pvc.MultiChartPanel
      */
     _multiChartPanel: null,
-    
-    /**
-     * List of legend groups.
-     */
-    legendGroupsList: null,
-
-    /**
-     * Map of legend groups by id.
-     */
-    legendGroups: null,
 
     /**
      * The name of the visual role that
@@ -306,6 +306,9 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._measureVisualRoles = [];
         }
         
+        this._axisType2RoleNamesMap = {};
+        this.axes = {};
+        
         this.options = def.mixin({}, this.defaults, options);
     },
     
@@ -380,64 +383,158 @@ pvc.BaseChart = pvc.Abstract.extend({
             pvc.log("Prerendering in pvc");
         }
         
+        /* Any data exists or throws */
+        this._checkNoData();
+        
         if (!this.parent) {
-            // If we don't have data, we just need to set a "no data" message
-            // and go on with life.
-            // Child charts are created to consume *existing* data
-            if(!this.allowNoData && this.resultset.length === 0) {
-                /*global NoDataException:true */
-                throw new NoDataException();
-            }
-            
             // Now's as good a time as any to completely clear out all
             //  tipsy tooltips
             pvc.removeTipsyLegends();
         }
-
+        
         /* Options may be changed between renders */
         this._processOptions();
         
-        /* Initialize root chart roles */
+        /* Initialize root visual roles */
         if(!this.parent && this._createVersion === 1) {
             this._initVisualRoles();
             this._bindVisualRolesPre();
         }
-
-        /* Initialize the data engine */
+        
+        /* Initialize the data */
         this._initData(keyArgs);
 
-        /* Create color schemes */
-        this.colors = pvc.createColorScheme(options.colors);
-
-        if(options.secondAxis){
-            var ownColors = options.secondAxisOwnColors;
-            if(ownColors == null){
-                ownColors = options.compatVersion <= 1;
-            }
-            
-            if(ownColors){
-                /* if secondAxisColor is unspecified, assumes default color scheme. */
-                this.secondAxisColor = pvc.createColorScheme(options.secondAxisColor);
-            }
-        }
+        var hasMultiRole = this._isRoleAssigned('multiChart');
+        
+        /* Initialize axes */
+        this._initAxes(hasMultiRole);
         
         /* Initialize chart panels */
-        this._initBasePanel();
-        this._initTitlePanel();
-        this._initLegend();
+        this._initChartPanels(hasMultiRole);
         
-        if(!this.parent && this._isRoleAssigned('multiChart')) {
+        this.isPreRendered = true;
+    },
+    
+    _checkNoData: function(){
+        // Child charts are created to consume *existing* data
+        if (!this.parent) {
+            
+            // If we don't have data, we just need to set a "no data" message
+            // and go on with life.
+            if(!this.allowNoData && this.resultset.length === 0) {
+                /*global NoDataException:true */
+                throw new NoDataException();
+            }
+        }
+    },
+    
+    _initAxes: function(isMulti){
+        if(!this.parent){
+            var colorRoleNames = this._axisType2RoleNamesMap.color;
+            if(!colorRoleNames && this.legendSource){
+                colorRoleNames = this.legendSource;
+                this._axisType2RoleNamesMap.color = colorRoleNames;
+            }
+            
+            if(colorRoleNames){
+                // Create the color (legend) axis at the root chart
+                this._createAxis('color', 0);
+                
+                if(this.options.secondAxis){
+                    this._createAxis('color', 1);
+                }
+            }
+        } else {
+            // Copy
+            var root = this.root;
+            
+            var colorAxis = root.axes.color;
+            if(colorAxis){
+                this.axes.color = colorAxis;
+                this.colors = root.colors;
+            }
+            
+            colorAxis = root.axes.color2;
+            if(colorAxis){
+                this.axes.color2 = colorAxis;
+                this.secondAxisColor = root.secondAxisColor;
+            }
+        }
+    },
+    
+    /**
+     * Creates an axis of a given type and index.
+     * 
+     * @param {string} type The type of the axis.
+     * @param {number} index The index of the axis within its type (0, 1, 2...).
+     *
+     * @type pvc.visual.Axis
+     */
+    _createAxis: function(axisType, axisIndex){
+        // Collect visual roles
+        var dataCells = this._getAxisDataCells(axisType, axisIndex);
+        
+        var axis = this._createAxisCore(axisType, axisIndex, dataCells);
+        
+        this.axes[axis.id] = axis;
+        
+        return axis;
+    },
+    
+    _getAxisDataCells: function(axisType, axisIndex){
+        // Collect visual roles
+        return this._buildAxisDataCells(axisType, axisIndex, null);
+    },
+    
+    _buildAxisDataCells: function(axisType, axisIndex, dataPartValues){
+        // Collect visual roles
+        return def.array.as(this._axisType2RoleNamesMap[axisType])
+               .map(function(roleName){
+                   return {
+                       role: this.visualRoles(roleName), 
+                       dataPartValues: dataPartValues
+                   };
+               }, this);
+    },
+    
+    _createAxisCore: function(axisType, axisIndex, dataCells){
+        switch(axisType){
+            case 'color': 
+                var colorAxis = new pvc.visual.ColorAxis(this, axisType, axisIndex, dataCells);
+                switch(axisIndex){
+                    case 0:
+                        this.colors = colorAxis.colorsFactory;
+                        break;
+                        
+                    case 1:
+                        if(this.options.secondAxisOwnColors){
+                            this.secondAxisColor = colorAxis.colorsFactory;
+                        }
+                        break;
+                }
+                
+                return colorAxis;
+        }
+        
+        throw def.error.operationInvalid("Invalid axis type '{0}'", [axisType]);
+    },
+    
+    _initChartPanels: function(hasMultiRole){
+        /* Initialize chart panels */
+        this._initBasePanel  ();
+        this._initTitlePanel ();
+        this._initLegendPanel();
+        
+        if(!this.parent && hasMultiRole) {
             this._initMultiChartPanel();
         } else {
             this._preRenderContent({
-                margins:  options.contentMargins,
-                paddings: options.contentPaddings
+                margins:  this.options.contentMargins,
+                paddings: this.options.contentPaddings
             });
         }
-
-        this.isPreRendered = true;
     },
-
+    
     /**
      * Override to create chart specific content panels here.
      * No need to call base.
@@ -469,9 +566,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             }
         }
 
-        delete this._legendColorScales;
         delete this._partData;
-        delete this._legendKeysSet;
         
         if(pvc.debug >= 3){
             pvc.log(this.data.getInfo());
@@ -908,69 +1003,6 @@ pvc.BaseChart = pvc.Abstract.extend({
                 ]);
     },
 
-    _partValues: function(){
-        if(!this._dataPartRole || !this._dataPartRole.grouping){
-            /* Undefined or unbound */
-            return null;
-        }
-        
-        return this.partData()
-                   .children()
-                   .select(function(child){ return child.value; })
-                   .array();
-    },
-    
-    _tryRegisterLegend: function(legendKey){
-        var set = this._legendKeysSet;
-        if(!set){
-            set = this._legendKeysSet = {};
-        } else if(set.has(legendKey)){
-            return false;
-        }
-        
-        set.add(legendKey);
-        return true;
-    },
-    
-    _legendData: function(dataPartValues){
-        var role = this.visualRoles(this.legendSource, {assertExists: false});
-        return role ? role.flatten(this.partData(dataPartValues)) : null;
-    },
-
-    _legendColorScale: function(dataPartValues){
-        if(this.parent){
-            return this.root._legendColorScale(dataPartValues);
-        }
-
-        if(!dataPartValues || !this.secondAxisColor){
-            dataPartValues = '';
-        }
-
-        var key = '' + (dataPartValues ? dataPartValues : ''), // relying on Array.toString;
-            scale = def.getOwn(this._legendColorScales, key);
-
-        if(!scale){
-            var legendData = this._legendData(dataPartValues),
-                colorsFactory = (!key || key === '0') ? this.colors : this.secondAxisColor
-                ;
-            if(legendData){
-                var legendValues = legendData.children()
-                                            .select(function(leaf){ return leaf.value; })
-                                            .array();
-
-                
-
-                scale = colorsFactory(legendValues);
-            } else {
-                scale = colorsFactory();
-            }
-            
-            (this._legendColorScales || (this._legendColorScales = {}))[key] = scale;
-        }
-
-        return scale;
-    },
-
     /**
      * Creates and initializes the base panel.
      */
@@ -1006,22 +1038,54 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
     
     /**
-     * Initializes the legend,
+     * Creates and initializes the legend panel,
      * if the legend is active.
      */
-    _initLegend: function(){
-        if (this.options.legend) {
-            this.legendGroupsList = [];
-            this.legendGroups     = {};
-
-            this._initLegendPanel();
+    _initLegendPanel: function(){
+        var options = this.options;
+        if (options.legend) {
+            // Only one legend panel, so only "Panel" options
+            // of the first 'color' axis are taken into account
+            var colorAxis = this.axes.color; 
             
-            this._initLegendGroups();
+            this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
+                anchor:     colorAxis.option('Position'),
+                align:      colorAxis.option('Align'),
+                size:       colorAxis.option('Size'),
+                sizeMax:    colorAxis.option('SizeMax'),
+                margins:    colorAxis.option('Margins'),
+                paddings:   colorAxis.option('Paddings'),
+                font:       colorAxis.option('Font'),
+                scenes:     def.getPath(options, 'legend.scenes'),
+                
+                // Bullet legend
+                clickMode:  colorAxis.option('ClickMode'),
+                
+                minMarginX: options.legendMinMarginX, // V1 -> paddings
+                minMarginY: options.legendMinMarginY, // V1 -> paddings
+                textMargin: options.legendTextMargin,
+                padding:    options.legendPadding,
+                shape:      options.legendShape,
+                markerSize: options.legendMarkerSize,
+                drawLine:   options.legendDrawLine,
+                drawMarker: options.legendDrawMarker
+            });
+            
+            this._initLegendScenes(this.legendPanel);
         }
     },
-
+    
+    /* 
+    TODO: I'm lost! Where do I belong?
+    
+    shape, drawLine, drawMarker,
+    if(isV1Compat && options.shape === undefined){
+        options.shape = 'square';
+    }
+    */
+    
     /**
-     * Creates the legend groups of a chart.
+     * Creates the legend group scenes of a chart.
      *
      * The default implementation creates
      * one legend group for each existing data part value
@@ -1030,92 +1094,48 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Legend groups are registered with the id prefix "part"
      * followed by the corresponding part value.
      */
-    _initLegendGroups: function(){
+    _initLegendScenes: function(legendPanel){
         
-        var legendPanel = this.legendPanel;
-        var partValues = this._partValues() || [null];
+        var rootScene;
         
-        var bulletRootScene, BulletGroupType, BulletItemType;
+        addAxis.call(this, this.axes.color );
+        addAxis.call(this, this.axes.color2);
         
-        /*
-         shape, drawLine, drawMarker,
-         if(isV1Compat && options.shape === undefined){
-             options.shape = 'square';
-         }
-         */
-        partValues.forEach(function(partValue){
-            var partData = this._legendData(partValue);
-            if(partData){
-                if(!bulletRootScene){
-                    bulletRootScene = legendPanel._getBulletRootScene();
-                }
-                
-                if(!BulletGroupType){
-                    BulletGroupType = legendPanel._getBulletGroupSceneType();
-                }
-                
-                var bulletGroupScene = new BulletGroupType(bulletRootScene, {group: partData});
-                def.set(bulletGroupScene,
-                        'partValue', partValue,
-                        'partLabel', partData.label);
-                
-                var partColorScale = this._legendColorScale(partValue),
-                    partShape = (!partValue || partValue === '0' ? 'square' : 'bar'); // TODO: HACK...
-                
-                partData
-                    .children()
-                    .each(function(itemData){
-                        
-                        if(!BulletItemType){
-                            BulletItemType = legendPanel._getBulletItemSceneType();
-                        }
-                        
-                        var bulletItemScene = new BulletItemType(bulletGroupScene, {group: itemData});
-                        def.set(bulletItemScene,
-                            'color', partColorScale(itemData.value),
-                            'shape', partShape);
-                    }, this);
+        // ------------
+        
+        function addAxis(colorAxis){
+            if(colorAxis && colorAxis.domainData){
+                processAxis.call(this, colorAxis);
             }
-        }, this);
-    },
-    
-    _addLegendGroup: function(legendGroup){
-        var id = legendGroup.id;
-        /*jshint expr:true */
-        !def.hasOwn(this.legendGroups, id) || 
-            def.fail.argumentInvalid('legendGroup', "Duplicate legend group id.");
+        }
         
-        legendGroup.index = this.legendGroupsList.length;
-        this.legendGroups[id] = legendGroup;
-        this.legendGroupsList.push(legendGroup);
-    },
-
-    /**
-     * Creates and initializes the legend panel.
-     */
-    _initLegendPanel: function(){
-        var options = this.options;
-        this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
-            anchor:     options.legendPosition,
-            align:      options.legendAlign,
-            size:       options.legendSize,
-            sizeMax:    options.legendSizeMax,
-            margins:    options.legendMargins,
-            paddings:   options.legendPaddings,
-            font:       options.legendFont,
-            scenes:     def.getPath(options, 'legend.scenes'),
+        function processAxis(colorAxis){
+            var domainData = colorAxis.domainData;
             
-            // Bullet legend
-            minMarginX: options.legendMinMarginX, // V1 -> paddings
-            minMarginY: options.legendMinMarginY, // V1 -> paddings
-            textMargin: options.legendTextMargin,
-            padding:    options.legendPadding,
-            shape:      options.legendShape,
-            markerSize: options.legendMarkerSize,
-            drawLine:   options.legendDrawLine,
-            drawMarker: options.legendDrawMarker,
-            clickMode:  options.legendClickMode
-        });
+            if(!rootScene){
+                rootScene = legendPanel._getBulletRootScene();
+            }
+            
+            var groupScene = rootScene.createGroup({
+                group:     domainData,
+                colorAxis: colorAxis
+             });
+            
+            // For latter binding an appropriate bullet renderer
+            colorAxis.legendBulletGroupScene = groupScene;
+            
+            var partColorScale = colorAxis.scale;
+            //partShape = (!partValue || partValue === '0' ? 'square' : 'bar'); // TODO: HACK...
+            
+            domainData
+                .children()
+                .each(function(itemData){
+                    var itemScene = groupScene.createItem({group: itemData});
+                    def.set(itemScene,
+                        'color', partColorScale(itemData.value),
+                        'shape', 'square');
+                });
+        }
     },
 
     /**
@@ -1123,11 +1143,16 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     _initMultiChartPanel: function(){
         this._multiChartPanel = new pvc.MultiChartPanel(this, this.basePanel);
+        
+        // BIG HACK: force legend to be rendered after the small charts, 
+        // to allow them to register legend renderers.
+        this.basePanel._children.unshift(this.basePanel._children.pop());
     },
     
     useTextMeasureCache: function(fun, ctx){
         var root = this.root;
-        var textMeasureCache = root._textMeasureCache || (root._textMeasureCache = pvc.text.createCache());
+        var textMeasureCache = root._textMeasureCache || 
+                               (root._textMeasureCache = pvc.text.createCache());
         
         return pvc.text.useCache(textMeasureCache, fun, ctx || this);
     },
@@ -1151,8 +1176,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                  });
                 
             } catch (e) {
-                var isNoData = (e instanceof NoDataException);
-                if (isNoData) {
+                if (e instanceof NoDataException) {
                     if(pvc.debug > 1){
                         pvc.log("No data found.");
                     }
@@ -1261,7 +1285,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         // if mark is null or undefined, skip
         if (mark) {
             var logOut = pvc.debug >= 3 ? [] : null;
-            
+            var constOnly = def.get(keyArgs, 'constOnly', false); 
             var points = this.options.extensionPoints;
             if(points){
                 if(mark.borderPanel){
@@ -1286,10 +1310,17 @@ pvc.BaseChart = pvc.Abstract.extend({
                             if(logOut) {logOut.push(m + ": " + JSON.stringify(v)); }
 
                             // Extend object css and svg properties
-                            if(v && (m === 'svg' || m === 'css') && typeof v === 'object'){
-                                var v2 = mark.getStaticPropertyValue(m);
-                                if(v2){
-                                    v = def.copy(v2, v);
+                            if(v != null){
+                                var type = typeof v;
+                                if(type === 'object'){
+                                    if(m === 'svg' || m === 'css'){
+                                        var v2 = mark.getStaticPropertyValue(m);
+                                        if(v2){
+                                            v = def.copy(v2, v);
+                                        }
+                                    }
+                                } else if(constOnly && type === 'function'){
+                                    continue;
                                 }
                             }
                             
@@ -1486,7 +1517,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        titlePaddings: undefined,
 //        titleFont:     undefined,
         
-        legend:           false,
+        legend:           false, // Show Legends
         legendPosition:   "bottom",
 //        legendFont:       undefined,
 //        legendSize:       undefined,
@@ -1585,3 +1616,4 @@ pvc.BaseChart = pvc.Abstract.extend({
         compatVersion: Infinity // numeric, 1 currently recognized
     }
 });
+

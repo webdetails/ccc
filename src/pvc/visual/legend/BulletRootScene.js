@@ -18,8 +18,8 @@ def
     this.base(parent, keyArgs);
     
     var markerDiam = def.get(keyArgs, 'markerSize', 15);
-    var padding = new pvc.Sides(def.get(keyArgs, 'padding', 5))
-                    .resolve(markerDiam, markerDiam);
+    var padding    = new pvc.Sides(def.get(keyArgs, 'padding', 5))
+                        .resolve(markerDiam, markerDiam);
     def.set(this.vars,
         'horizontal', def.get(keyArgs, 'horizontal', false),
         'font',       def.get(keyArgs, 'font'),
@@ -148,6 +148,25 @@ def
                 row = new pvc.visual.legend.BulletItemSceneRow(rows.length);
             }
         }
+    },
+    
+    defaultGroupSceneType: function(){
+        var GroupType = this._bulletGroupType;
+        if(!GroupType){
+            GroupType = def.type(pvc.visual.legend.BulletGroupScene);
+            
+            // Apply legend group scene extensions
+            //this.panel()._extendSceneType('group', GroupType, ['...']);
+            
+            this._bulletGroupType = GroupType;
+        }
+        
+        return GroupType;
+    },
+    
+    createGroup: function(keyArgs){
+        var GroupType = this.defaultGroupSceneType();
+        return new GroupType(this, keyArgs);
     }
 });
 

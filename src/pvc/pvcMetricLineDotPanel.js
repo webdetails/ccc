@@ -54,6 +54,38 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         }
     },
     
+    _creating: function(){
+        // Register BULLET legend prototype marks
+        var groupScene = this.defaultVisibleBulletGroupScene();
+        if(groupScene && !groupScene.hasRenderer()){
+            var colorAxis = groupScene.colorAxis;
+            var drawMarker = def.nullyTo(colorAxis.option('DrawMarker', true), this.showDots);
+            var drawRule   = def.nullyTo(colorAxis.option('DrawLine',   true), this.showLines);
+            if(drawMarker || drawRule){
+                var keyArgs = {};
+                if((keyArgs.drawMarker = drawMarker)){
+                    keyArgs.markerShape = colorAxis.option('Shape', true) 
+                                          || 'circle'; // Dot's default shape
+                    keyArgs.markerPvProto = new pv.Dot()
+                            .lineWidth(1.5)
+                            .shapeSize(12);
+                    
+                    this.extend(keyArgs.markerPvProto, 'dot_', {constOnly: true});
+                }
+                
+                if((keyArgs.drawRule = drawRule)){
+                    keyArgs.rulePvProto = new pv.Line()
+                            .lineWidth(1.5);
+                    
+                    this.extend(keyArgs.rulePvProto, 'line_', {constOnly: true});
+                }
+                
+                groupScene.renderer(
+                    new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+            }
+        }
+    },
+    
     _getRootScene: function(){
         var rootScene = this._rootScene;
         if(!rootScene){
@@ -67,7 +99,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             var sizeValRange;
             if(hasDotSizeRole){
                 var sizeValExtent = chart._dotSizeDim.extent({visible: true});
-                if(sizeValExtent){
+                hasDotSizeRole = !!sizeValExtent;
+                if(hasDotSizeRole){
                     var sizeValMin  = sizeValExtent.min.value,
                         sizeValMax  = sizeValExtent.max.value,
                         sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero

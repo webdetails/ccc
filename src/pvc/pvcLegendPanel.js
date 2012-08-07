@@ -22,45 +22,21 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     pvLegendPanel: null,
     
     textMargin: 6,    // The space *between* the marker and the text, in pixels.
-    padding:    2.5,    // Half the space *between* legend items, in pixels.
+    padding:    2.5,  // Half the space *between* legend items, in pixels.
     markerSize: 15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
     clickMode:  'toggleVisible', // toggleVisible || toggleSelected
-    font:       '10px sans-serif',
+    font:  '10px sans-serif',
     
     constructor: function(chart, parent, options){
         if(!options){
             options = {};
         }
         
-        var anchor = options.anchor || this.anchor;
-        
         var isV1Compat = chart.compatVersion() <= 1;
-        var isVertical = anchor !== 'top' && anchor !== 'bottom';
-        
-        // Default value of align depends on anchor
-        if(options.align == null){
-            if(isVertical){
-                options.align = 'top';
-            } else if(isV1Compat) { // centered is better
-                options.align = 'left';
-            }
-        }
-        
-        // Single size or sizeMax (a number or a string)
-        // should be interpreted as meaning the orthogonal length.
-        var size = options.size; 
-        if(size != null && !def.object.is(size)){
-            options.size = new pvc.Size()
-                                  .setSize(size, {singleProp: this.anchorOrthoLength(anchor)});
-        }
-        
-        var sizeMax = options.sizeMax;
-        if(sizeMax != null && !def.object.is(sizeMax)){
-            options.sizeMax = new pvc.Size()
-                                .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
-        }
-        
         if(isV1Compat){
+            var anchor = options.anchor || this.anchor;
+            var isVertical = anchor !== 'top' && anchor !== 'bottom';
+            
             // Previously, an item had a height = to the item padding.
             // So, the item padding included padding + inner height...
             if(options.padding !== undefined){
@@ -82,11 +58,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             }
             
             options.paddings = { left: minMarginX, top: minMarginY };
-        } else {
-            // Set default margins
-            if(options.margins === undefined){
-                options.margins = def.set({}, this.anchorOpposite(anchor), 10);
-            }
         }
         
         this.base(chart, parent, options);
@@ -225,7 +196,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                       return itemScene.parent === groupScene; 
                   });
           
-          var renderInfo = groupScene.renderer.create(this, pvGroupPanel);
+          var renderInfo = groupScene.renderer().create(this, pvGroupPanel);
           groupScene.renderInfo = renderInfo;
       }, this);
 
@@ -255,7 +226,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         this.extend(this.pvLegendPanel,"legendPanel_");
         
         this._getBulletRootScene().childNodes.forEach(function(groupScene){
-            groupScene.renderer.extendMarks(this, groupScene.renderInfo, groupScene.extensionPrefix);
+            groupScene.renderer().extendMarks(this, groupScene.renderInfo, groupScene.extensionPrefix);
         }, this);
         
         this.extend(this.pvLabel, "legendLabel_");
@@ -285,51 +256,5 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         }
         
         return rootScene;
-    },
-    
-    _getBulletItemSceneType: function(){
-        var ItemType = this._bulletItemType;
-        if(!ItemType){
-            ItemType = def.type(pvc.visual.legend.BulletItemScene);
-            
-            // Mixin behavior depending on click mode
-            var clickMode = this.clickMode || 'toggleVisible';
-            switch(clickMode){
-                case 'toggleSelected':
-                    ItemType.add(pvc.visual.legend.BulletItemSceneSelection);
-                    break;
-                
-                case 'none':
-                    break;
-                
-                default: // 'toggleVisible'
-                    if(pvc.debug >= 2 && clickMode !== 'toggleVisible'){
-                        pvc.log("[Warning] Invalid 'legendClickMode' option value: '" + clickMode + "'. Assuming 'toggleVisible'.");
-                    }
-                
-                    ItemType.add(pvc.visual.legend.BulletItemSceneVisibility);
-                    break;
-            }
-            
-            // Apply legend item scene extensions
-            this._extendSceneType('item', ItemType, ['isOn', 'isClickable', 'click']);
-            
-            this._bulletItemType = ItemType;
-        }
-        return ItemType;
-    },
-    
-    _getBulletGroupSceneType: function(){
-        var GroupType = this._bulletGroupType;
-        if(!GroupType){
-            GroupType = def.type(pvc.visual.legend.BulletGroupScene);
-            
-            // Apply legend group scene extensions
-            //this._extendSceneType('group', GroupType, ['...']);
-            
-            this._bulletGroupType = GroupType;
-        }
-        
-        return GroupType;
     }
 });

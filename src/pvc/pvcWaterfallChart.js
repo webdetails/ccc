@@ -66,7 +66,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         this._catRole.setFlattenRootLabel(this.options.allCategoryLabel);
     },
 
-    _initLegendGroups: function(){
+    _initLegendScenes: function(){
         
         this.base();
 

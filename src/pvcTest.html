@@ -54,6 +54,7 @@
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
         <script type="text/javascript" src="pvc/visual/Axis.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/ColorAxis.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/legend.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
@@ -169,7 +170,7 @@
           titleSize: 20,
           legend: true,
           legendPosition: "left",
-          legendAlign: "right",
+          
           //legendSize: 30,
           yAxisSize: 30,
           xAxisSize: 30,
@@ -199,7 +200,7 @@
           titleSize: 30,
           legend: true,
           legendPosition: "left",
-          legendAlign: "right",
+          
           showTooltips: false,
           //legendSize: 20,
 
@@ -228,7 +229,6 @@
           titleSize: 40,
           legend: true,
           legendPosition: "right",
-          legendAlign: "right",
           legendSize: 100,
           
           orientation: 'vertical',
@@ -242,7 +242,7 @@
             titleLabel_font: "13px serif",
             xAxisLabel_textAngle: 0.4,
             xAxisLabel_textAlign: "center",
-            xAxisLabel_textBaseline: "top",
+            xAxisLabel_textBaseline: "top",
             xAxisLabel_textStyle: "black",
             xAxisLabel_text: function(d){
                 return pv.Format.date('%m-%d').format(d);
@@ -829,15 +829,9 @@
           legendPosition: "right", //top, bottom, left, right
           legendAlign: "right", //left, center, right || top, middle, bottom
           // legendSize: null,
-          legendDrawLine: true,
+          legendDrawLine:   true,
           legendDrawMarker: false,
           showTooltips: true,
-          //legendMinMarginX: 8,
-          //legendMinMarginY: 8,
-          //legendTextMargin: 6,
-          legendPadding: 20,
-          legendTextAdjust: 7,
-          //legendShape: "square",
           //legendMarkerSize: 15,
 
           innerGap: 0.9,

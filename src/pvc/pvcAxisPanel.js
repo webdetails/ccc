@@ -61,9 +61,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.isDiscrete = axis.role.grouping.isDiscrete();
         
         if(options.font === undefined){
-            var extensionFont = this._getExtension(this.panelName + 'Label', 'font');
-            if(typeof extensionFont === 'string'){
-                this.font = extensionFont;
+            var extFont = this._getConstantExtension(this.panelName + 'Label', 'font');
+            if(extFont){
+                this.font = extFont;
             }
         }
     },

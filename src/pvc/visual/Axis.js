@@ -11,50 +11,34 @@ def.scope(function(){
  * @name pvc.visual.Axis
  * 
  * @class Represents an axis for a role in a chart.
- * <p>
- * The main properties of an axis: {@link #type}, {@link #orientation} and relevant chart's properties 
- * are related as follows:
- * </p>
- * <pre>
- * axisType={base, ortho} = f(axisOrientation={x,y})
  * 
- *          Vertical   Horizontal   (chart orientation)
- *         +---------+-----------+
- *       x | base    |   ortho   |
- *         +---------+-----------+
- *       y | ortho   |   base    |
- *         +---------+-----------+
- * (axis orientation)
- * </pre>
- * 
- * @property {pvc.CartesianAbstract} chart The associated cartesian chart.
- * @property {string} type The type of the axis. One of the values: 'base' or 'ortho'.
+ * @property {pvc.BaseChart} chart The associated chart.
+ * @property {string} type The type of the axis.
  * @property {number} index The index of the axis within its type (0, 1, 2...).
- * @property {string} orientation The orientation of the axis. 
- * One of the values: 'x' or 'y', for horizontal and vertical axis orientations, respectively.
- * @property {string} orientatedId The id of the axis with respect to the orientation and the index of the axis ("").
  * @property {pvc.visual.Role} role The associated visual role.
  * @property {pv.Scale} scale The associated scale.
  * 
  * @constructor
- * @param {pvc.CartesianAbstract} chart The associated cartesian chart.
- * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
+ * @param {pvc.BaseChart} chart The associated cartesian chart.
+ * @param {string} type The type of the axis.
  * @param {number} [index=0] The index of the axis within its type.
- * @param {pvc.visual.Role || pvc.visual.Role[]} roles The associated visual role or roles.
+ * @param {object|object[]} dataCells The associated data cells (role + data parts).
  * 
  * @param {object} [keyArgs] Keyword arguments.
  * @param {pv.Scale} scale The associated scale.
  */
 def.type('pvc.visual.Axis')
-.init(function(chart, type, index, roles, keyArgs){
+.init(function(chart, type, index, dataCells, keyArgs){
     /*jshint expr:true */
-    roles || def.fail.argumentRequired('roles');
+    dataCells || def.fail.argumentRequired('dataCells');
     
     this.chart = chart;
     this.type  = type;
     this.index = index == null ? 0 : index;
-    this.roles = def.array.as(roles);
-    this.role  = this.roles[0];
+    this.dataCells = def.array.as(dataCells);
+    this.dataCell  = this.dataCells[0];
+    this.role = this.dataCell && this.dataCell.role;
+    
     this.scaleType = groupingScaleType(this.role.grouping);
     this.id = pvc.visual.Axis.getId(this.type, this.index);
     
@@ -128,13 +112,13 @@ def.type('pvc.visual.Axis')
     },
     
     _checkRoleCompatibility: function(){
-        var L = this.roles.length;
+        var L = this.dataCells.length;
         if(L > 1){
             var grouping = this.role.grouping, 
                 i;
             if(this.scaleType === 'Discrete'){
                 for(i = 1; i < L ; i++){
-                    if(grouping.id !== this.roles[i].grouping.id){
+                    if(grouping.id !== this.dataCells[i].role.grouping.id){
                         throw def.error.operationInvalid("Discrete roles on the same axis must have equal groupings.");
                     }
                 }
@@ -144,7 +128,7 @@ def.type('pvc.visual.Axis')
                 }
 
                 for(i = 1; i < L ; i++){
-                    if(this.scaleType !== groupingScaleType(this.roles[i].grouping)){
+                    if(this.scaleType !== groupingScaleType(this.dataCells[i].role.grouping)){
                         throw def.error.operationInvalid("Continuous roles on the same axis must have scales of the same type.");
                     }
                 }

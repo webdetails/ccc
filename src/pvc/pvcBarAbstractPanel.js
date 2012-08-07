@@ -40,7 +40,28 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         options = this.chart.options;
         this.stacked = options.stacked;
     },
-
+    
+    _creating: function(){
+        // Register BULLET legend prototype marks
+        var groupScene = this.defaultVisibleBulletGroupScene();
+        if(groupScene && !groupScene.hasRenderer()){
+            var colorAxis = groupScene.colorAxis;
+            if(colorAxis.option('DrawMarker')){
+                var keyArgs = {
+                    drawMarker:    true,
+                    markerShape:   colorAxis.option('Shape'),
+                    drawRule:      colorAxis.option('DrawLine'),
+                    markerPvProto: new pv.Mark()
+                };
+                
+                this.extend(keyArgs.markerPvProto, 'bar_', {constOnly: true});
+                
+                groupScene.renderer(
+                    new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+            }
+        }
+    },
+    
     /**
      * @override
      */

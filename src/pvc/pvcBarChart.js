@@ -16,26 +16,35 @@ pvc.BarChart = pvc.BarAbstract.extend({
     _hasDataPartRole: function(){
         return true;
     },
-
-    _getAxisDataParts: function(axis){
-        if(this.options.secondAxis && axis.type === 'ortho'){
-            if(this.options.secondAxisIndependentScale){
-                // Separate scales =>
-                // axis ortho 0 represents data 0
-                // axis ortho 1 represents data 1
-                return (''+axis.index);
+    
+    _getAxisDataCells: function(axisType, axisIndex){
+        if(this.options.secondAxis){
+            var dataPartValues;
+            
+            if(axisType === 'ortho'){
+                // Collect visual roles
+                dataPartValues = this.options.secondAxisIndependentScale ?
+                    // Separate scales =>
+                    // axis ortho 0 represents data 0
+                    // axis ortho 1 represents data 1
+                    (''+axisIndex) :
+                    // Common scale => axis ortho 0 represents both data parts
+                    ['0', '1']
+                    ;
+            } else if(axisType === 'color'){
+                dataPartValues = (''+axisIndex);
             }
-
-            // Common scale => axis ortho 0 represents both data parts
-            return ['0', '1'];
+            
+            if(dataPartValues != null){
+                return this._buildAxisDataCells(axisType, axisIndex, dataPartValues);
+            }
         }
-
-        // The base axis represents categories of all data parts
-        return null;
+        
+        return this.base(axisType, axisIndex);
     },
     
     _isDataCellStacked: function(role, dataPartValue){
-        return !dataPartValue || (dataPartValue === '0') ? this.options.stacked : false;
+        return (!dataPartValue || (dataPartValue === '0')) && this.options.stacked;
     },
 
     /**
@@ -48,6 +57,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
         
         var options = this.options;
         var barPanel = new pvc.BarPanel(this, parentPanel, {
+            colorAxis:      this.axes.color,
             dataPartValue:  options.secondAxis ? '0' : null,
             barSizeRatio: options.barSizeRatio,
             maxBarSize:   options.maxBarSize,
@@ -62,6 +72,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
             }
             
             var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, {
+                colorAxis:      this.axes.color2,
                 dataPartValue:  '1',
                 stacked:        false,
                 showValues:     !(options.compatVersion <= 1) && options.showValues,

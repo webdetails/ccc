@@ -12,11 +12,16 @@
  * please contact CvK at cde@vinzi.nl
  */
 pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
+    
+    legendSource: null,
+    
     constructor: function(options){
-
+        
+        options.legend = false;
+        
         this.base(options);
 
-        this._axisRoleNameMap.ortho = pvc.BoxplotChart.measureRolesNames;
+        this._axisType2RoleNamesMap.ortho = pvc.BoxplotChart.measureRolesNames;
     },
 
      _processOptionsCore: function(options){
@@ -77,10 +82,6 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
                         this.resultset,
                         this.metadata,
                         translOptions);
-    },
-
-    _getAxisDataParts: function(/*axis*/){
-        return null;
     },
 
     _isDataCellStacked: function(/*role, dataPartValue*/){

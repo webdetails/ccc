@@ -33,6 +33,48 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     
     nullInterpolationMode: 'linear',
     
+    _creating: function(){
+        // Register BULLET legend prototype marks
+        var groupScene = this.defaultVisibleBulletGroupScene();
+        if(groupScene && !groupScene.hasRenderer()){
+            var colorAxis = groupScene.colorAxis;
+            var drawMarker = def.nullyTo(colorAxis.option('DrawMarker', true), this.showDots  || this.showAreas);
+            var drawRule   = def.nullyTo(colorAxis.option('DrawLine',   true), this.showLines && !this.showAreas);
+            if(drawMarker || drawRule){
+                var keyArgs = {};
+                if((keyArgs.drawMarker = drawMarker)){
+                    var markerShape = colorAxis.option('Shape', true);
+                    
+                    if(this.showDots){
+                        if(!markerShape){ 
+                            markerShape = 'circle'; // Dot's default shape
+                        }
+                        
+                        keyArgs.markerPvProto = new pv.Dot()
+                                .lineWidth(1.5)
+                                .shapeSize(12);
+                    } else {
+                        keyArgs.markerPvProto = new pv.Mark();
+                    }
+                    
+                    keyArgs.markerShape = markerShape;
+                    
+                    this.extend(keyArgs.markerPvProto, 'dot_', {constOnly: true});
+                }
+                
+                if((keyArgs.drawRule = drawRule)){
+                    keyArgs.rulePvProto = new pv.Line()
+                            .lineWidth(1.5);
+                    
+                    this.extend(keyArgs.rulePvProto, 'line_', {constOnly: true});
+                }
+                
+                groupScene.renderer(
+                    new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+            }
+        }
+    },
+    
     /**
      * @override
      */
