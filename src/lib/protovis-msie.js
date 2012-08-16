@@ -95,7 +95,8 @@ var vml = {
     o.translate_x = 0;
     o.translate_y = 0;
     if ( attr.transform ) {
-      var t = /translate\((-?\d+(?:\.\d+)?)(?:,(-?\d+(?:\.\d+)?))?\)/.exec( attr.transform );//support negative translations
+      var t = /translate\((-?\d+(?:\.\d+)?(?:e-?\d+)?)(?:,(-?\d+(?:\.\d+)?(?:e-?\d+)?))?\)/.exec( attr.transform ); //support exp
+      /translate\((-?\d+(?:\.\d+)?)(?:,(-?\d+(?:\.\d+)?))?\)/.exec( attr.transform );//support negative translations
       //var t = /translate\((\d+(?:\.\d+)?)(?:,(\d+(?:\.\d+)?))?\)/.exec( attr.transform );
       if ( t && t[1] ) { o.translate_x = parseFloat( t[1] ); }
       if ( t && t[2] ) { o.translate_y = parseFloat( t[2] ); }
