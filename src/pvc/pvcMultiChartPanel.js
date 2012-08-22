@@ -186,7 +186,10 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                 ar = this._calulateDefaultAspectRatio(width);
             }
             
-            height = width / ar;
+            //If a multiChartMaxHeight is specified, the height of each chart can never be bigger
+            var desirableHeight = width / ar;
+            height = Math.min(desirableHeight, def.get(options, 'multiChartMaxHeight', desirableHeight));
+
         }
 
         // ----------------------
