@@ -101,9 +101,25 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 var sizeValExtent = chart._dotSizeDim.extent({visible: true});
                 hasDotSizeRole = !!sizeValExtent;
                 if(hasDotSizeRole){
-                    var sizeValMin  = sizeValExtent.min.value,
-                        sizeValMax  = sizeValExtent.max.value,
-                        sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
+                   var sizeValMin  = sizeValExtent.min.value,
+                        sizeValMax  = sizeValExtent.max.value;
+
+                    //Need to calculate manually the abs - probably there's a better way to do this
+                    if (this.dotSizeAbs) {
+                        var atoms = chart._dotSizeDim.atoms({visible:true});
+                        
+                        for (var i=0; i < atoms.length; i++) {
+                            if (i == 0)
+                                sizeValMin = sizeValMax = Math.abs(atoms[0].value);
+                            else {
+                                var newValue = Math.abs(atoms[i].value);
+                                if (newValue > sizeValMax) sizeValMax = newValue;
+                                if (newValue < sizeValMin) sizeValMin = newValue;
+                            }                            
+                        }                    
+                    }
+                                
+                    var sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
                     
                     hasDotSizeRole = isFinite(sizeValSpan) && sizeValSpan > 1e-12;
                     if(hasDotSizeRole){
@@ -505,9 +521,20 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         } else {
             var sizeValueToArea = this._getDotSizeRoleScale(rootScene.sizeValRange);
 
+            var dotSizeAbs = this.dotSizeAbs;
+            if (this.dotSizeAbs) {
+                dot.override('strokeColor', function () {
+                    return this.scene.vars.dotSize.value < 0 ? "#000000" : null;
+                });
+            }
+
+
             /* Ignore any extension */
             dot .override('baseSize', function(){
-                    return sizeValueToArea(this.scene.vars.dotSize.value);
+                     var value = this.scene.vars.dotSize.value;
+                    if (dotSizeAbs)
+                        value = Math.abs(value);
+                    return sizeValueToArea(value);
                 })
                 .override('interactiveSize', function(size){
                     if(this.scene.isActive){

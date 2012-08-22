@@ -102,7 +102,8 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
             orientation:    options.orientation,
             dotSizeRatio:   options.dotSizeRatio,
             dotSizeRatioTo: options.dotSizeRatioTo,
-            autoDotSizePadding: options.autoDotSizePadding
+            autoDotSizePadding: options.autoDotSizePadding,
+            dotSizeAbs: options.dotSizeAbs
         });
     },
     
@@ -120,8 +121,8 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
 //        colorRangeInterval:  undefined,
 //        minColor:  undefined, //"white",
 //        maxColor:  undefined, //"darkgreen",
-        nullColor: "#efc5ad"  // white with a shade of orange
-        
+        nullColor: "#efc5ad",  // white with a shade of orange
+         dotSizeAbs: false
         /* Dot Size Role */
 //        dotSizeRatio:   undefined,
 //        dotSizeRatioTo: undefined,
