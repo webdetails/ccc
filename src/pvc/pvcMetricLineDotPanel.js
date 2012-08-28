@@ -102,7 +102,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 hasDotSizeRole = !!sizeValExtent;
                 if(hasDotSizeRole){
                    var sizeValMin  = sizeValExtent.min.value,
-                        sizeValMax  = sizeValExtent.max.value;
+                       sizeValMax  = sizeValExtent.max.value;
 
                     //Need to calculate manually the abs - probably there's a better way to do this
                     if (this.dotSizeAbs) {
@@ -531,7 +531,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
 
             /* Ignore any extension */
             dot .override('baseSize', function(){
-                     var value = this.scene.vars.dotSize.value;
+                    var value = this.scene.vars.dotSize.value;
                     if (dotSizeAbs)
                         value = Math.abs(value);
                     return sizeValueToArea(value);

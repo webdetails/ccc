@@ -122,8 +122,10 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
 //        minColor:  undefined, //"white",
 //        maxColor:  undefined, //"darkgreen",
         nullColor: "#efc5ad",  // white with a shade of orange
-         dotSizeAbs: false
+         
         /* Dot Size Role */
+        dotSizeAbs: false
+        
 //        dotSizeRatio:   undefined,
 //        dotSizeRatioTo: undefined,
 //        autoDotSizePadding: undefined

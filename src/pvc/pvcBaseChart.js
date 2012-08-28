@@ -1117,15 +1117,15 @@ pvc.BaseChart = pvc.Abstract.extend({
             }
             
             var groupScene = rootScene.createGroup({
-                group:     domainData,
-                colorAxis: colorAxis
+                group:           domainData,
+                colorAxis:       colorAxis,
+                extensionPrefix: pvc.visual.Axis.getId('legend', rootScene.childNodes.length)
              });
             
             // For latter binding an appropriate bullet renderer
             colorAxis.legendBulletGroupScene = groupScene;
             
             var partColorScale = colorAxis.scale;
-            //partShape = (!partValue || partValue === '0' ? 'square' : 'bar'); // TODO: HACK...
             
             domainData
                 .children()
@@ -1485,6 +1485,8 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        multiChartWidth: undefined,
 //        multiChartAspectRatio: undefined,
 //        multiChartSingleRowFillsHeight: undefined,
+//        multiChartSingleColFillsHeight: undefined,
+//        multiChartMaxHeight: undefined,
         
         orientation: 'vertical',
         

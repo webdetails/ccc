@@ -1686,12 +1686,12 @@ pv.Behavior.selector = function(autoRefresh, mark) {
         
         events = [
             [root,     "mousemove", pv.listen(root, "mousemove", mousemove)],
-            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )],
+            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )]//,
             
             // But when the mouse leaves the canvas we still need to
             // receive events...
-            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
-            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
+//            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
+//            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
         ];
     }
     

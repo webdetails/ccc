@@ -176,8 +176,15 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         width = pvc.PercentValue.resolve(width, clientSize.width);
 
         var height;
-        if(rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)){
-            height = clientSize.height;
+        if((rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
+           (colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
+            // Use the initial client height
+            var prevLayoutInfo = layoutInfo.previous;
+            if(!prevLayoutInfo){
+                height = clientSize.height;
+            } else {
+                height = prevLayoutInfo.height;
+            }
         } else {
             // ar ::= width / height
             var ar = +options.multiChartAspectRatio; // + is to number
@@ -186,10 +193,13 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                 ar = this._calulateDefaultAspectRatio(width);
             }
             
-            //If a multiChartMaxHeight is specified, the height of each chart can never be bigger
-            var desirableHeight = width / ar;
-            height = Math.min(desirableHeight, def.get(options, 'multiChartMaxHeight', desirableHeight));
-
+            // If  multiChartMaxHeight is specified, the height of each chart cannot be bigger
+            height = width / ar;
+            
+            var maxHeight = +def.get(options, 'multiChartMaxHeight'); // null -> 0
+            if(!isNaN(maxHeight) && maxHeight > 0){
+                height = Math.min(height, maxHeight);
+            }
         }
 
         // ----------------------
