@@ -115,7 +115,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
             owner = this;
             //atoms = null
             atomsBase = {};
-
+            
+            if(keyArgs.labelSep){
+                this.labelSep = keyArgs.labelSep;
+            }
+            
             this.type = keyArgs.type || def.fail.argumentRequired('type');
             
             // Only owner datas cache selected datums
@@ -151,8 +155,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
         data_addChild.call(parent, this);
         
         if(parent.absLabel){
-            /*global complex_labelSep:true */
-            this.absLabel = def.string.join(complex_labelSep, parent.absLabel, this.label);
+            this.absLabel = def.string.join(owner.labelSep, parent.absLabel, this.label);
         } else {
             this.absLabel = this.label;
         }

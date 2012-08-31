@@ -600,7 +600,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(!data) {
             data =
                 this.dataEngine =
-                this.data = new pvc.data.Data({type: complexType});
+                this.data = new pvc.data.Data({
+                    type:     complexType,
+                    labelSep: this.options.groupedLabelSep
+                });
         } // else TODO: assert complexType has not changed...
         
         // ----------
@@ -1029,6 +1032,9 @@ pvc.BaseChart = pvc.Abstract.extend({
                 font:       options.titleFont,
                 anchor:     options.titlePosition,
                 align:      options.titleAlign,
+                alignTo:    options.titleAlignTo,
+                offset:     options.titleOffset,
+                inBounds:   options.titleInBounds,
                 margins:    options.titleMargins,
                 paddings:   options.titlePaddings,
                 titleSize:  options.titleSize,
@@ -1051,6 +1057,9 @@ pvc.BaseChart = pvc.Abstract.extend({
             this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
                 anchor:     colorAxis.option('Position'),
                 align:      colorAxis.option('Align'),
+                alignTo:    options.legendAlignTo,
+                offset:     options.legendOffset,
+                inBounds:   options.legendInBounds,
                 size:       colorAxis.option('Size'),
                 sizeMax:    colorAxis.option('SizeMax'),
                 margins:    colorAxis.option('Margins'),
@@ -1059,8 +1068,6 @@ pvc.BaseChart = pvc.Abstract.extend({
                 scenes:     def.getPath(options, 'legend.scenes'),
                 
                 // Bullet legend
-                clickMode:  colorAxis.option('ClickMode'),
-                
                 minMarginX: options.legendMinMarginX, // V1 -> paddings
                 minMarginY: options.legendMinMarginY, // V1 -> paddings
                 textMargin: options.legendTextMargin,
@@ -1502,6 +1509,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        multiChartIndexes: undefined,
         isMultiValued:     false,
         seriesInRows:      false,
+        groupedLabelSep:   undefined,
 //        measuresIndexes:   undefined,
 //        dataOptions:       undefined,
 //        
@@ -1513,6 +1521,9 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        title:         null,
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
+//        titleAlignTo:  undefined,
+//        titleOffset:   undefined,
+//        titleInBounds: undefined,
 //        titleSize:     undefined,
 //        titleSizeMax:  undefined,
 //        titleMargins:  undefined,
@@ -1525,6 +1536,9 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        legendSize:       undefined,
 //        legendSizeMax:    undefined,
 //        legendAlign:      undefined,
+//        legendAlignTo:    undefined,
+//        legendOffset:     undefined,
+//        legendInBounds:   undefined,
 //        legendMinMarginX: undefined,
 //        legendMinMarginY: undefined,
 //        legendTextMargin: undefined,

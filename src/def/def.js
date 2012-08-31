@@ -134,6 +134,10 @@ var def = /** @lends def */{
         return o && (v = o[p]) != null ? v : dv;
     },
     
+    gets: function(o, props){
+        return props.map(function(p){ return o[p]; });
+    },
+    
     getPath: function(o, path, create, dv){
         if(o && path != null){
             var parts = def.array.is(path) ? path : path.split('.');
@@ -1926,6 +1930,11 @@ def.type('Query')
     selectMany: function(fun, ctx){
         return new def.SelectManyQuery(this, fun, ctx);
     },
+    
+    union: function(/*others*/){
+        var queries = def.array.append([this], arguments);
+        return new def.SelectManyQuery(new def.ArrayLikeQuery(queries));
+    },
 
     // deferred filter
     where: function(fun, ctx){
@@ -2119,7 +2128,9 @@ def.type('SelectManyQuery', def.Query)
 
 function query_nextMany(){
     while(this._source.next()){
-        var manySource = this._selectMany.call(this._ctx, this._source.item, this._source.index);
+        var manySource = this._selectMany ?
+                            this._selectMany.call(this._ctx, this._source.item, this._source.index) :
+                            this._source.item;
         if(manySource != null){
             this._manySource = def.query(manySource);
             return 1;

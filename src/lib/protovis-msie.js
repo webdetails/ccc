@@ -45,8 +45,7 @@ if ( typeof Date.now !== 'function' ) {
 
 var vml = {
 
-  round: function(n){ return Math.round( n * 21.6 ); },
-
+  round: function(n){ return Math.round( (n || 0) * 21.6 ); },
   styles: null,
 
   pre: '<pvml:',
@@ -110,10 +109,10 @@ var vml = {
     o.x = parseFloat( attr.x||0 );
     o.y = parseFloat( attr.y||0 );
     if ( 'width' in attr ) {
-      o.width = parseInt( attr.width, 10 );
+      o.width = parseFloat( attr.width);
     }
     if ( 'height' in attr ) { 
-      o.height = parseInt( attr.height, 10 );
+      o.height = parseFloat( attr.height);
     }
     return o;
   },
@@ -158,10 +157,10 @@ var vml = {
             y = r(d.translate_y + d.y),
             w = r(d.width),
             h = r(d.height);
-        p.v = 'M ' + x + ' ' + y + 
-             ' L ' + (x + w) + ' ' + y + 
+        p.v = 'M ' + x       + ' ' + y       + 
+             ' L ' + (x + w) + ' ' + y       + 
              ' L ' + (x + w) + ' ' + (y + h) + 
-             ' L ' + x + ' ' + (y + h) + 
+             ' L ' + x       + ' ' + (y + h) + 
              ' x';
         vml.stroke( elm, attr, scenes, i );
         vml.fill( elm, attr, scenes, i );
@@ -221,7 +220,25 @@ var vml = {
     },
 
     "text": {
-      rewrite: 'span'
+      rewrite: 'shape',
+      attr: function ( attr, style, elm, scenes, i ) {
+        var d = vml.get_dim( attr ),
+            es = elm.style;
+//        es.left = (d.translate_x + d.x) + "px";
+//        es.top = (d.translate_y + d.y) + "px";
+        elm.coordorigin = "0,0";
+        elm.coordsize = "21600,21600";
+        vml.stroke(elm, attr, scenes, i);
+        vml.textpath(elm);
+        vml.path(elm);
+        vml.skew(elm);
+        var oldSceneFillStyle = scenes[i].fillStyle;
+        scenes[i].fillStyle = {type: 'solid'};
+        vml.fill( elm, attr, scenes, i );
+        scenes[i].fillStyle = oldSceneFillStyle;
+      },
+      css: "position:absolute; filter: ;top:0px;left:0px;width:1px;height:1px"
+
     },
 
     "svg": {
@@ -232,7 +249,9 @@ var vml = {
     // this allows reuse of the createElement function for actual VML
     "vml:path": { rewrite: 'path' },
     "vml:stroke": { rewrite: 'stroke' },
-    "vml:fill": { rewrite: 'fill' }
+    "vml:fill": { rewrite: 'fill' },
+    "vml:textpath": { rewrite: 'textpath' },
+    "vml:skew": { rewrite: 'skew' }
 
   },
 
@@ -332,11 +351,29 @@ var vml = {
       stroke.weight = '0';
     }
     else {
-      stroke.on = 'true';
-      stroke.weight = parseFloat( attr['stroke-width'] || '1' ) / 1.25;
-      stroke.color = vml.color( attr.stroke ) || 'black';
-      stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
-      stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
+        var strokeWidth = attr['stroke-width'];
+        if(strokeWidth == null || strokeWidth === ''){
+            strokeWidth = 1;
+        } else {
+            strokeWidth = +strokeWidth;
+        }
+        
+        if(strokeWidth < 1e-10){
+            strokeWidth = 0;
+        } else if (strokeWidth < 1){
+            strokeWidth = 1;
+        }
+        
+        if(!strokeWidth){
+            stroke.on = 'false';
+            stroke.weight = '0';
+        } else {
+            stroke.on = 'true';
+            stroke.weight = strokeWidth;
+            stroke.color = vml.color( attr.stroke ) || 'black';
+            stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
+            stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
+        }
     }
   },
 
@@ -349,6 +386,28 @@ var vml = {
       p.v = vml.rewritePath( svgpath );
     }
     return p;
+  },
+
+  
+  skew: function (elm) {
+    var sk = elm.getElementsByTagName('skew')[0];
+    if (!sk) 
+        sk = elm.appendChild(vml.createElement('vml:skew'));
+    sk.on = "false";  
+//    sk.offset="0f,0f";
+    return sk;  
+  },
+  
+  textpath: function (elm) {
+    var tp = elm.getElementsByTagName( 'textpath') [0];
+    if (!tp) {
+        tp = elm.appendChild(vml.createElement('vml:textpath'));
+    }
+    
+    tp.style['v-text-align']='center';
+    tp.style['v-text-kern']='true';
+    tp.on = "true";
+    return tp;
   },
 
   init: function () {
@@ -582,6 +641,15 @@ pv.VmlScene = {
 pv.VmlScene.copy_functions( pv.SvgScene );
 pv.Scene = pv.VmlScene;
 pv.renderer = function() { return 'vml'; };//changed renderer
+
+(function(is64bit){
+    // experimental minimum visible, with perceptible color, values
+    
+    pv.VmlScene.minRuleLineWidth = is64bit ? 1.2 : 1.1;
+    pv.VmlScene.minBarWidth      = is64bit ? 2.2 : 1.8;
+    pv.VmlScene.minBarHeight     = is64bit ? 2.2 : 1.8;
+    pv.VmlScene.minBarLineWidth  = is64bit ? 1.2 : 1.0;
+}(window.navigator.cpuClass === 'x64'));
 
 pv.VmlScene.expect = function (e, type, scenes, i, attr, style) {
   style = style || {};
@@ -1023,6 +1091,69 @@ pv.VmlScene.label = function(scenes) {
       dx += s.textMargin; 
     }
 
+
+    attr.fill = vml.color(fill.color) || "black";
+    attr['fill-opacity'] = 0.7;
+        
+    attr.x = s.left;
+    attr.x = s.top;
+    
+    e = this.expect(e, "text", scenes, i, attr, {    
+      'display': 'block',
+      'lineHeight': 1,
+      'whiteSpace': 'nowrap',
+      'zoom': 1,
+      'position': 'absolute',
+      'cursor': 'default'        
+    });
+    
+    e.getElementsByTagName('path')[0].textpathok = 'True';
+
+    var left = s.left;
+    var top = s.top;
+    
+    e.style.top = top + 'px';
+    e.style.left = left + 'px';
+    
+    e.path = " m0,0 l1,0 e";    
+    
+    
+
+    var rotation = 180 * s.textAngle / Math.PI;
+
+
+    if ( rotation ) {
+        var r =  - (~~rotation % 360) * vml.d2r,
+          ct = Math.cos(r).toFixed( 8 ),
+          st = Math.sin(r).toFixed( 8 );
+    
+        
+        var skew = e.getElementsByTagName('skew')[0];
+        //Need so set the rotation matrix
+        skew.on = 'true';
+        skew.matrix= "" + ct + "," + st + "," + -st + "," + ct + ",0,0";
+    }
+    
+    
+    var textPath = e.getElementsByTagName('textpath')[0];
+    textPath.string = txt;
+    textPath.style['v-text-align'] = s.textAlign;    
+    
+    
+    //textpath needs font name in double quotes (?)
+    var splittedFont = s.font.split('px ');
+    var finalFont = s.font;
+    if (splittedFont.length > 1) {
+        finalFont = splittedFont[0] + "px \"" + splittedFont[1] + "\"";
+    }    
+    textPath.style.font = finalFont;
+
+  
+
+
+
+
+/*
     e = this.expect(e, "text", scenes, i, attr, {
       "font": s.font,
       // "text-shadow": s.textShadow,
@@ -1038,7 +1169,10 @@ pv.VmlScene.label = function(scenes) {
       'color': vml.color( fill.color ) || 'black'
     });
     e.innerText = txt;
+*/
 
+
+/*
     // Rotation is broken in serveral different ways:
     // 1. it looks REALLY ugly
     // 2. it is incredibly slow
@@ -1058,7 +1192,7 @@ pv.VmlScene.label = function(scenes) {
     } else {
       e.style.filter = '';
     }
-
+*/
     e = this.append(e, scenes, i);
   }
   return e;

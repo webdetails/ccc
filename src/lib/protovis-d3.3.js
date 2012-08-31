@@ -1,4 +1,4 @@
-// 7c422994655e9b619d473137f37f49ef6467d24e
+// 
 /**
  * @class The built-in Array class.
  * @name Array
@@ -6749,6 +6749,10 @@ pv.SvgScene.areaSegment = function(scenes) {
   }
   return e;
 };
+pv.SvgScene.minBarWidth = 1;
+pv.SvgScene.minBarHeight = 1;
+pv.SvgScene.minBarLineWidth = 1;
+
 pv.SvgScene.bar = function(scenes) {
   var e = scenes.$g.firstChild;
 
@@ -6759,6 +6763,14 @@ pv.SvgScene.bar = function(scenes) {
 
     /* visible */
     if (!s.visible || Math.abs(s.width) <= 1E-10 || Math.abs(s.height) <= 1E-10) continue;
+    if(s.width < this.minBarWidth){
+        s.width = this.minBarWidth;
+    }
+    
+    if(s.height < this.minBarHeight){
+        s.height = this.minBarHeight;
+    }
+    
     var fill = s.fillStyle, stroke = s.strokeStyle;
     if (!fill.opacity && !stroke.opacity) continue;
 
@@ -6769,7 +6781,19 @@ pv.SvgScene.bar = function(scenes) {
     if (stroke.type && stroke.type != 'solid') {
         this.addFillStyleDefinition(scenes,stroke);
     }
-
+    
+    var lineWidth;
+    if(stroke.opacity){
+        lineWidth = s.lineWidth;
+        if(lineWidth < 1e-10){
+            lineWidth = 0;
+        } else {
+            lineWidth = Math.max(this.minBarLineWidth, lineWidth / this.scale);
+        }
+    } else {
+        lineWidth = null;
+    }
+    
     e = this.expect(e, "rect", scenes, i, {
         "shape-rendering": s.antialias ? null : "crispEdges",
         "pointer-events": s.events,
@@ -6782,7 +6806,7 @@ pv.SvgScene.bar = function(scenes) {
         "fill-opacity": fill.opacity || null,
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity || null,
-        "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
+        "stroke-width": lineWidth
       });
 
     if(s.svg) this.setAttributes(e, s.svg);
@@ -7529,6 +7553,8 @@ pv.SvgScene.stroke = function(e, scenes, i) {
   }
   return e;
 };
+pv.SvgScene.minRuleLineWidth = 1;
+
 pv.SvgScene.rule = function(scenes) {
   var e = scenes.$g.firstChild;
   for (var i = 0; i < scenes.length; i++) {
@@ -7539,6 +7565,13 @@ pv.SvgScene.rule = function(scenes) {
     var stroke = s.strokeStyle;
     if (!stroke.opacity) continue;
 
+    var lineWidth = s.lineWidth;
+    if(lineWidth < 1e-10){
+        lineWidth = 0;
+    } else {
+        lineWidth = Math.max(this.minRuleLineWidth, lineWidth / this.scale);
+    }
+    
     e = this.expect(e, "line", scenes, i, {
         "shape-rendering": s.antialias ? null : "crispEdges",
         "pointer-events": s.events,
@@ -7549,7 +7582,7 @@ pv.SvgScene.rule = function(scenes) {
         "y2": s.top + s.height,
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity,
-        "stroke-width": s.lineWidth / this.scale,
+        "stroke-width": lineWidth,
         "stroke-dasharray": s.strokeDasharray || 'none'
       });
     

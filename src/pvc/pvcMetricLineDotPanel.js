@@ -523,11 +523,16 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
 
             var dotSizeAbs = this.dotSizeAbs;
             if (this.dotSizeAbs) {
-                dot.override('strokeColor', function () {
-                    return this.scene.vars.dotSize.value < 0 ? "#000000" : null;
+                dot.override('strokeColor', function (scene) {
+                    return scene.vars.dotSize.value < 0 ? "#000000" : this.base();
                 });
+                dot.optional('strokeDasharray', function (scene){
+                    return scene.vars.dotSize.value < 0 ? '1.5 3' : null; // .  .  .
+                });
+//                dot.optional('lineWidth', function (scene){
+//                    return scene.vars.dotSize.value < 0 ? 1 : 1.5;
+//                });
             }
-
 
             /* Ignore any extension */
             dot .override('baseSize', function(){

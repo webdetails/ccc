@@ -1285,6 +1285,115 @@ pvc.Size.as = function(v){
 
 // --------------------
 
+var Offset = def.type('pvc.Offset')
+.init(function(x, y){
+    if(arguments.length === 1){
+        if(x != null){
+            this.setOffset(x);
+        }
+    } else {
+        if(x != null){
+            this.x = x;
+        }
+        
+        if(y != null){
+            this.y = y;
+        }
+    }
+})
+.add({
+    setOffset: function(offset, keyArgs){
+        if(typeof offset === 'string'){
+            var comps = offset.split(/\s+/).map(function(comp){
+                return pvc.PercentValue.parse(comp);
+            });
+            
+            switch(comps.length){
+                case 1: 
+                    this.set(def.get(keyArgs, 'singleProp', 'all'), comps[0]);
+                    return this;
+                    
+                case 2:
+                    this.set('x', comps[0]);
+                    this.set('y', comps[1]);
+                    return this;
+                    
+                case 0:
+                    return this;
+            }
+        } else if(typeof offset === 'number') {
+            this.set(def.get(keyArgs, 'singleProp', 'all'), offset);
+            return this;
+        } else if (typeof offset === 'object') {
+            this.set('all', offset.all);
+            for(var p in offset){
+                if(p !== 'all'){
+                    this.set(p, offset[p]);
+                }
+            }
+            return this;
+        }
+        
+        if(pvc.debug) {
+            pvc.log("Invalid 'offset' value: " + JSON.stringify(offset));
+        }
+        return this;
+    },
+    
+    set: function(prop, value){
+        if(value != null && def.hasOwn(pvc.Offset.namesSet, prop)){
+            value = pvc.PercentValue.parse(value);
+            if(value != null){
+                if(prop === 'all'){
+                    // expand
+                    pvc.Offset.names.forEach(function(p){
+                        this[p] = value;
+                    }, this);
+                    
+                } else {
+                    this[prop] = value;
+                }
+            }
+        }
+    },
+    
+    resolve: function(refSize){
+        var offset = {};
+        
+        pvc.Size.names.forEach(function(length){
+            var offsetProp  = pvc.Offset.namesSizeToOffset[length];
+            var offsetValue = this[offsetProp];
+            if(offsetValue != null){
+                if(typeof(offsetValue) === 'number'){
+                    offset[offsetProp] = offsetValue;
+                } else if(refSize){
+                    var refLength = refSize[length];
+                    if(refLength != null){
+                        offset[offsetProp] = offsetValue.resolve(refLength);
+                    }
+                }
+            }
+        }, this);
+        
+        return offset;
+    }
+});
+
+pvc.Offset.names = ['x', 'y'];
+pvc.Offset.namesSet = pv.dict(pvc.Offset.names, def.retTrue);
+pvc.Offset.namesSizeToOffset = {width: 'x', height: 'y'};
+pvc.Offset.namesSidesToOffset = {left: 'x', right: 'x', top: 'y', bottom: 'y'};
+
+pvc.Offset.as = function(v){
+    if(v != null && !(v instanceof Offset)){
+        v = new Offset().setOffset(v);
+    }
+    
+    return v;
+};
+
+// --------------------
+
 var Shape = def.type('pvc.Shape')
 .add({
     transform: function(t){

@@ -302,7 +302,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @function
  * 
  * @param {object} whereSpec A "where" specification to be normalized.
- * A structure with the following form:
+ * TODO: A structure with the following form: ... 
  *
  * @return Array A <i>processed</i> "where" of the specification.
  * A structure with the following form:

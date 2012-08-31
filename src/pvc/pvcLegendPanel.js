@@ -24,7 +24,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     textMargin: 6,    // The space *between* the marker and the text, in pixels.
     padding:    2.5,  // Half the space *between* legend items, in pixels.
     markerSize: 15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
-    clickMode:  'toggleVisible', // toggleVisible || toggleSelected
     font:  '10px sans-serif',
     
     constructor: function(chart, parent, options){

@@ -152,10 +152,33 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         /* Root panels do not need layout */
         if(this.isRoot) {
-            this.anchor = null;
-            this.align  = null;
+            this.anchor  = null;
+            this.align   = null;
+            this.alignTo = null;
+            this.offset  = null;
         } else {
             this.align = pvc.parseAlign(this.anchor, this.align);
+            
+            // * a string with a named alignTo value
+            // * a number
+            // * a PercentValue object
+            var alignTo = this.alignTo;
+            var side = this.anchor;
+            if(alignTo != null && alignTo !== '' && (side === 'left' || side === 'right')){
+                if(alignTo !== 'page-middle'){
+                    if(!isNaN(+alignTo.charAt(0))){
+                        alignTo = pvc.PercentValue.parse(alignTo); // percent or number
+                    } else {
+                        alignTo = pvc.parseAlign(side, alignTo);
+                    }
+                }
+            } else {
+                alignTo = this.align;
+            }
+            
+            this.alignTo = alignTo;
+            
+            this.offset = new pvc.Offset(this.offset);
         }
     },
     
@@ -268,11 +291,6 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
             
             var prevLayoutInfo = this._layoutInfo || null;
-            if(prevLayoutInfo){
-                // Free old memory
-                delete prevLayoutInfo.previous;
-            }
-            
             var canChange = def.get(keyArgs, 'canChange', true);
             
             var layoutInfo = 
@@ -283,8 +301,15 @@ pvc.BasePanel = pvc.Abstract.extend({
                     paddings:          paddings,
                     desiredClientSize: desiredClientSize,
                     clientSize:        availableClientSize,
+                    pageClientSize:    prevLayoutInfo ? prevLayoutInfo.pageClientSize : availableClientSize.clone(),
                     previous:          prevLayoutInfo
                 };
+            
+            if(prevLayoutInfo){
+                // Free old memory
+                delete prevLayoutInfo.previous;
+                delete prevLayoutInfo.pageClientSize;
+            }
             
             var clientSize = this._calcLayout(layoutInfo);
             
@@ -355,6 +380,8 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         var aolMap = pvc.BasePanel.orthogonalLength;
         var aoMap  = pvc.BasePanel.relativeAnchor;
+        var altMap = pvc.BasePanel.leftTopAnchor;
+        var aofMap = pvc.Offset.namesSidesToOffset;
         
         // Classify children
         
@@ -548,40 +575,87 @@ pvc.BasePanel = pvc.Abstract.extend({
         function positionChild(child) {
             var side  = child.anchor;
             var align = child.align;
+            var alignTo = child.alignTo;
             var sidePos;
             if(side === 'fill'){
                 side = 'left';
                 sidePos = margins.left + remSize.width / 2 - (child.width / 2);
-                align = 'middle';
+                align = alignTo = 'middle';
             } else {
                 sidePos = margins[side];
             }
             
-            var sideo, sideOPos;
+            var sideo, sideOPosChildOffset;
             switch(align){
                 case 'top':
                 case 'bottom':
                 case 'left':
                 case 'right':
                     sideo = align;
-                    sideOPos = margins[sideo];
+                    sideOPosChildOffset = 0;
                     break;
                 
                 case 'center':
                 case 'middle':
-                    if(side === 'left' || side === 'right'){
-                        sideo    = 'top';
-                        sideOPos = margins.top + (remSize.height / 2) - (child.height / 2);
-                    } else {
-                        sideo    = 'left';
-                        sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
-                    }
+                    // 'left', 'right' -> 'top'
+                    // else -> 'left'
+                    sideo = altMap[aoMap[side]];
+                    
+                    // left -> width; top -> height
+                    sideOPosChildOffset = - child[aolMap[sideo]] / 2;
                     break;
+            }
+            
+            
+            var sideOPosParentOffset;
+            var sideOTo;
+            switch(alignTo){
+                case 'top':
+                case 'bottom':
+                case 'left':
+                case 'right':
+                    sideOTo = alignTo;
+                    sideOPosParentOffset = (sideOTo !== sideo) ? remSize[aolMap[sideo]] : 0;
+                    break;
+
+                case 'center':
+                case 'middle':
+                    sideOTo = altMap[aoMap[side]];
+                    
+                    sideOPosParentOffset = remSize[aolMap[sideo]] / 2;
+                    break;
+                        
+                case 'page-center':
+                case 'page-middle':
+                    sideOTo = altMap[aoMap[side]];
+                    
+                    var lenProp = aolMap[sideo];
+                    var pageLen = Math.min(remSize[lenProp], layoutInfo.pageClientSize[lenProp]);
+                    sideOPosParentOffset = pageLen / 2;
+                    break;
+            }
+            
+            var sideOPos = margins[sideOTo] + sideOPosParentOffset + sideOPosChildOffset;
+            
+            var resolvedOffset = child.offset.resolve(remSize);
+            if(resolvedOffset){
+                sidePos  += resolvedOffset[aofMap[side ]] || 0;
+                sideOPos += resolvedOffset[aofMap[sideo]] || 0;
+            }
+            
+            if(child.inBounds){
+                if(sidePos < 0){
+                    sidePos = 0;
+                }
+                
+                if(sideOPos < 0){
+                    sideOPos = 0;
+                }
             }
             
             child.setPosition(
                     def.set({}, 
-                        side,  sidePos, 
+                        side,  sidePos,
                         sideo, sideOPos));
         }
         

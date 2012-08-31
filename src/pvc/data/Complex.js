@@ -1,7 +1,3 @@
-/**
- * The separator used between labels of dimensions of a complex.
- */
-var complex_labelSep = " ~ ";
 var complex_nextId = 1;
 
 /**
@@ -125,6 +121,8 @@ def
             // just concatenate strings comparing to the array.join method 
             var dimNames = owner.type._dimsNames;
             var key, label, aLabel;
+            var labelSep = owner.labelSep;
+            
             L = dimNames.length;
             for(i = 0 ; i < L ; i++){
                 var dimName = dimNames[i];
@@ -140,7 +138,7 @@ def
                         // Assuming labels are non-empty
                         // Non-null atoms => non-empty labels
                         if(label){
-                            label += complex_labelSep + atom.label;
+                            label += labelSep + atom.label;
                         } else {
                             label = atom.label;
                         }
@@ -157,17 +155,24 @@ def
 })
 .add(/** @lends pvc.data.Complex# */{
     
+    /**
+     * The separator used between labels of dimensions of a complex.
+     * Generally, it is the owner's labelSep that is used.
+     */
+    labelSep: " ~ ",
+    
     label: null,
     
     ensureLabel: function(){
         var label = this.label;
         if(label != null){
             label = "";
+            var labelSep = this.owner.labelSep;
             def.eachOwn(this.atoms, function(atom){
                 var alabel = atom.label;
                 if(alabel){
                     if(label){
-                        label += complex_labelSep + alabel;
+                        label += labelSep + alabel;
                     } else {
                         label = alabel;
                     }
