@@ -786,27 +786,26 @@ pv.VmlScene.panel = function(scenes) {
     this.scale *= t.k;
 
     /* children */
-    var children = s.children;
-    for (var j = 0, C = children.length ; j < C; j++) {
-      var child = children[j];
-      
-      child.$g = e = this.expect(e, "g", scenes, i, {
-          "transform": "translate(" + x + "," + y + ")" + (t.k != 1 ? " scale(" + t.k + ")" : "")
-      });
-      
-      this.updateAll(child);
-      var parentNode = e.parentNode;
-      if (!parentNode || parentNode.nodeType === 11 ) {
-        g.appendChild(e);
-        var helper = vml.elm_defaults[ e.svgtype ];
-        if ( helper && typeof helper.onappend === 'function' ) {
-          helper.onappend( e, scenes[i] );
+    this.eachChild(scenes, i, function(child){
+        child.$g = e = this.expect(e, "g", scenes, i, {
+            "transform": "translate(" + x + "," + y + ")" + 
+                         (t.k != 1 ? " scale(" + t.k + ")" : "")
+        });
+        
+        this.updateAll(child);
+        
+        var parentNode = e.parentNode;
+        if (!parentNode || parentNode.nodeType === 11 ) {
+          g.appendChild(e);
+          var helper = vml.elm_defaults[ e.svgtype ];
+          if ( helper && typeof helper.onappend === 'function' ) {
+            helper.onappend( e, scenes[i] );
+          }
         }
-      }
-      
-      e = e.nextSibling;
-    }
-
+        
+        e = e.nextSibling;  
+    });
+    
     /* transform (pop) */
     this.scale = k;
 
@@ -1173,7 +1172,7 @@ pv.VmlScene.label = function(scenes) {
 
 
 /*
-    // Rotation is broken in serveral different ways:
+    // Rotation is broken in several different ways:
     // 1. it looks REALLY ugly
     // 2. it is incredibly slow
     // 3. rotated text is offset completely wrong and it takes a ton of math to correct it
