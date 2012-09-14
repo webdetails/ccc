@@ -336,7 +336,9 @@ pvc.BaseChart = pvc.Abstract.extend({
                 /* SWALLOW usually a circular JSON structure */
             }
         }
-
+        
+        this._processExtensionPoints();
+        
         return options;
     },
 
@@ -359,7 +361,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(options.showTooltips){
             var ts = options.tipsySettings;
             if(ts){
-                this.extend(ts, "tooltip_");
+                this.extend(ts, "tooltip");
             }
         }
     },
@@ -528,9 +530,12 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(!this.parent && hasMultiRole) {
             this._initMultiChartPanel();
         } else {
+            var options = this.options;
             this._preRenderContent({
-                margins:  this.options.contentMargins,
-                paddings: this.options.contentPaddings
+                margins:            options.contentMargins,
+                paddings:           options.contentPaddings,
+                clickAction:        options.clickAction,
+                doubleClickAction:  options.doubleClickAction
             });
         }
     },
@@ -1212,7 +1217,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                         .text(text);
 
         if(isNoData){
-            this.extend(pvMsg, "noDataMessage_");
+            this.extend(pvMsg, "noDataMessage");
         }
         
         pvPanel.render();
@@ -1280,6 +1285,29 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
     
+    _processExtensionPoints: function(){
+        var points = this.options.extensionPoints;
+        var components = {};
+        if(points){
+            for(var p in points) {
+                var id, prop;
+                var splitIndex = p.indexOf("_");
+                if(splitIndex > 0){
+                    id   = p.substring(0, splitIndex);
+                    prop = p.substr(splitIndex + 1);
+                    if(id && prop){
+                        var component = def.getOwn(components, id) ||
+                                        (components[id] = new def.OrderedMap());
+                        
+                        component.add(prop, points[p]);
+                    }
+                }
+            }
+        }
+        
+        this._components = components;
+    },
+    
     /**
      * This is the method to be used for the extension points
      * for the specific contents of the chart. already ge a pie
@@ -1288,84 +1316,86 @@ pvc.BaseChart = pvc.Abstract.extend({
      * WARNING: It's the user's responsibility to make sure that
      * unexisting methods don't blow this.
      */
-    extend: function(mark, prefix, keyArgs) {
+    extend: function(mark, id, keyArgs) {
         // if mark is null or undefined, skip
         if (mark) {
-            var logOut = pvc.debug >= 3 ? [] : null;
-            var constOnly = def.get(keyArgs, 'constOnly', false); 
-            var points = this.options.extensionPoints;
-            if(points){
+            var component = def.getOwn(this._components, id);
+            if(component){
                 if(mark.borderPanel){
                     mark = mark.borderPanel;
                 }
                 
-                for (var p in points) {
-                    // Starts with
-                    if(p.indexOf(prefix) === 0){
-                        var m = p.substring(prefix.length);
+                var logOut    = pvc.debug >= 3 ? [] : null;
+                var constOnly = def.get(keyArgs, 'constOnly', false); 
+                var wrap      = mark.wrap;
+                var keyArgs   = {tag: pvc.extensionTag};
+                
+                component.forEach(function(v, m){
+                    // Not everything that is passed to 'mark' argument
+                    //  is actually a mark...(ex: scales)
+                    // Not locked and
+                    // Not intercepted and
+                    if(mark.isLocked && mark.isLocked(m)){
+                        if(logOut) {logOut.push(m + ": locked extension point!");}
+                    } else if(mark.isIntercepted && mark.isIntercepted(m)) {
+                        if(logOut) {logOut.push(m + ":" + JSON.stringify(v) + " (controlled)");}
+                    } else {
+                        if(logOut) {logOut.push(m + ": " + JSON.stringify(v)); }
 
-                        // Not everything that is passed to 'mark' argument
-                        //  is actually a mark...(ex: scales)
-                        // Not locked and
-                        // Not intercepted and
-                        var v = points[p];
-                        if(mark.isLocked && mark.isLocked(m)){
-                            if(logOut) {logOut.push(m + ": locked extension point!");}
-                        } else if(mark.isIntercepted && mark.isIntercepted(m)) {
-                            if(logOut) {logOut.push(m + ":" + JSON.stringify(v) + " (controlled)");}
-                        } else {
-                            if(logOut) {logOut.push(m + ": " + JSON.stringify(v)); }
-
-                            // Extend object css and svg properties
-                            if(v != null){
-                                var type = typeof v;
-                                if(type === 'object'){
-                                    if(m === 'svg' || m === 'css'){
-                                        var v2 = mark.getStaticPropertyValue(m);
-                                        if(v2){
-                                            v = def.copy(v2, v);
-                                        }
+                        // Extend object css and svg properties
+                        if(v != null){
+                            var type = typeof v;
+                            if(type === 'object'){
+                                if(m === 'svg' || m === 'css'){
+                                    var v2 = mark.propertyValue(m);
+                                    if(v2){
+                                        v = def.copy(v2, v);
                                     }
-                                } else if(constOnly && type === 'function'){
-                                    continue;
                                 }
-                            }
-                            
-                            // Distinguish between mark methods and properties
-                            if (typeof mark[m] === "function") {
-                                mark[m](v);
-                            } else {
-                                mark[m] = v;
+                            } else if((wrap || constOnly) && type === 'function'){
+                                if(constOnly){
+                                    return;
+                                }
+                                
+                                v = wrap.call(mark, v, m);
                             }
                         }
+                        
+                        // Distinguish between mark methods and properties
+                        if (typeof mark[m] === "function") {
+                            if(mark.intercept){
+                                mark.intercept(m, v, keyArgs);
+                            } else {
+                                // Not really a mark
+                                mark[m](v);
+                            }
+                        } else {
+                            mark[m] = v;
+                        }
                     }
-                }
+                });
 
                 if(logOut){
                     if(logOut.length){
-                        pvc.log("Applying Extension Points for: '" + prefix + "'\n\t* " + logOut.join("\n\t* "));
+                        pvc.log("Applying Extension Points for: '" + id + "'\n\t* " + logOut.join("\n\t* "));
                     } else if(pvc.debug >= 5) {
-                        pvc.log("No Extension Points for: '" + prefix + "'");
+                        pvc.log("No Extension Points for: '" + id + "'");
                     }
                 }
             }
         } else if(pvc.debug >= 4){
-            pvc.log("Applying Extension Points for: '" + prefix + "' (target mark does not exist)");
+            pvc.log("Applying Extension Points for: '" + id + "' (target mark does not exist)");
         }
     },
 
     /**
      * Obtains the specified extension point.
-     * Arguments are concatenated with '_'.
      */
-    _getExtension: function(extPoint) {
-        var points = this.options.extensionPoints;
-        if(!points){
-            return undefined; // ~warning
+    _getExtension: function(id, prop) {
+        var component = def.getOwn(this._components, id);
+        if(component){
+            return component.get(prop);
         }
-
-        extPoint = pvc.arraySlice.call(arguments).join('_');
-        return points[extPoint];
     },
     
     /** 

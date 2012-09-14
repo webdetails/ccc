@@ -37,14 +37,15 @@ if ( !Array.prototype.indexOf ) {
 }
 
 // only run if we need to
-if ( !pv.have_SVG && pv.have_VML ){(function(){
+if (!pv.have_SVG && pv.have_VML){(function(){
 
-if ( typeof Date.now !== 'function' ) {
+if (typeof Date.now !== 'function') {
   Date.now = function () { return new Date() * 1; };
 }
 
 var vml = {
-
+  is64Bit: window.navigator.cpuClass === 'x64',
+  
   round: function(n){ return Math.round( (n || 0) * 21.6 ); },
   styles: null,
 
@@ -54,8 +55,9 @@ var vml = {
   block: { 'group':1, 'shape':1, 'shapetype':1, 'line':1,
            'polyline':1, 'curve':1, 'rect':1, 'roundrect':1,
            'oval':1, 'arc':1, 'image':1 },
-  ends: { 'butt':'flat','round':'round','square':'square','flat':'flat'},
-  joins: { 'bevel':'bevel','round':'round','miter':'miter'},
+  caps:  { 'butt':  'flat',  'round': 'round', 'square': 'square' },
+  joins: { 'bevel': 'bevel', 'round': 'round', 'miter':  'miter'  },
+  
   cursorstyles: {
     'hand': 'pointer',
     'crosshair': 1, 'pointer': 1, 'move': 1, 'text': 1,
@@ -66,24 +68,76 @@ var vml = {
 
   text_shim: null,
   _textcache: {},
-  text_dims: function ( text, font ) {
+  text_dims: function (text, font) {
     
-    if ( !vml.text_shim ) { vml.init();}
+    var shim = vml.text_shim || (vml.init(), vml.text_shim);
     
-    if ( !(font in vml._textcache) ) {
-      vml._textcache[ font ] = {};
+    font = vml.processFont(font);
+    
+    var fontTextCache = vml._textcache[font] || (vml._textcache[font] = {});
+    var info = fontTextCache[text];
+    if (!info) {
+        shim.style.font = font;
+   
+        shim.innerText = text;
+        fontTextCache[text] = info = {
+            fontsize: parseInt(shim.style.fontSize, 10),
+            height:   shim.offsetHeight,
+            width:    shim.offsetWidth
+        };
     }
-    if ( text in vml._textcache[ font ] ) {
-      return vml._textcache[ font ][ text ];
-    }
-    var shim = vml.text_shim;
-    shim.style.font = font;
-    shim.innerText = text;
-    return (vml._textcache[ font ][ text ] = {
-      fontsize: parseInt( shim.style.fontSize, 10 ),
-      height: shim.offsetHeight,
-      width: shim.offsetWidth
-    });
+    
+    return info;
+  },
+  
+  _fontCache: {},
+  
+  _fontSubst: { // Pass with substitution fonts
+      'default':     'Arial',
+      // Java Logical Fonts
+      'sans-serif':  'Arial', //'Microsoft Sans Serif',
+      'sansserif':   'Arial', // alias
+      'sans':        'Arial', // alias
+      'serif':       'Times New Roman',
+      'dialog':      'Arial',
+      'monospaced':  'Courier New',
+      'dialoginput': 'Courier New'
+  },
+  
+  // IE 64 bit does not do proper fall-back of unknown fonts,
+  // so we decided to allow only a known subset of them.
+  _fontWhiteListIE64Bit: { // Allowed IE 64 bit font families
+      'agency fb': 1, 'aharoni': 1, 'algerian': 1, 'andalus': 1, 'angsana new': 1, 'angsanaupc': 1, 'aparajita': 1, 'arabic typesetting': 1, 'arial': 1, 'arial black': 1, 'arial narrow': 1, 'arial rounded mt bold': 1, 'arial unicode ms': 1, 'baskerville old face': 1, 'batang': 1, 'batangche': 1, 'bauhaus 93': 1, 'bell mt': 1, 'berlin sans fb': 1, 'berlin sans fb demi': 1, 'bernard mt condensed': 1, 'blackadder itc': 1, 'bodoni mt': 1, 'bodoni mt black': 1, 'bodoni mt condensed': 1, 'bodoni mt poster compressed': 1, 'book antiqua': 1, 'bookman old style': 1, 'bookshelf symbol 7': 1, 'bradley hand itc': 1, 'britannic bold': 1, 'broadway': 1, 'browallia new': 1, 'browalliaupc': 1, 'brush script mt': 1, 'calibri': 1, 'californian fb': 1, 'calisto mt': 1, 'cambria': 1, 'cambria math': 1, 'candara': 1, 'castellar': 1, 'centaur': 1, 'century': 1, 'century gothic': 1, 'century schoolbook': 1, 'chiller': 1, 'colonna mt': 1, 'comic sans ms': 1, 'consolas': 1, 'constantia': 1, 'cooper black': 1, 'copperplate gothic bold': 1, 'copperplate gothic light': 1, 'corbel': 1, 'cordia new': 1, 'cordiaupc': 1, 'courier new': 1, 'curlz mt': 1, 'daunpenh': 1, 'david': 1, 'dfkai-sb': 1, 'dilleniaupc': 1, 'dokchampa': 1, 'dotum': 1, 'dotumche': 1, 'ebrima': 1, 'edwardian script itc': 1, 'elephant': 1, 'engravers mt': 1, 'eras bold itc': 1, 'eras demi itc': 1, 'eras light itc': 1, 'eras medium itc': 1, 'estrangelo edessa': 1, 'eucrosiaupc': 1, 'euphemia': 1, 'fangsong': 1, 'felix titling': 1, 'footlight mt light': 1, 'forte': 1, 'franklin gothic book': 1, 'franklin gothic demi': 1, 'franklin gothic demi cond': 1, 'franklin gothic heavy': 1, 'franklin gothic medium': 1, 'franklin gothic medium cond': 1, 'frankruehl': 1, 'freesiaupc': 1, 'freestyle script': 1, 'french script mt': 1, 'gabriola': 1, 'garamond': 1, 'gautami': 1, 'georgia': 1, 'gigi': 1, 'gill sans mt': 1, 'gill sans mt condensed': 1, 'gill sans mt ext condensed bold': 1, 'gill sans ultra bold': 1, 'gill sans ultra bold condensed': 1, 'gisha': 1, 'gloucester mt extra condensed': 1, 'goudy old style': 1, 'goudy stout': 1, 'gulim': 1, 'gulimche': 1, 'gungsuh': 1, 'gungsuhche': 1, 'guttman adii': 1, 'guttman adii-light': 1, 'guttman aharoni': 1, 'guttman calligraphic': 1, 'guttman david': 1, 'guttman drogolin': 1, 'guttman frank': 1, 'guttman frnew': 1, 'guttman haim': 1, 'guttman haim-condensed': 1, 'guttman hatzvi': 1, 'guttman hodes': 1, 'guttman kav': 1, 'guttman kav-light': 1, 'guttman keren': 1, 'guttman logo1': 1, 'guttman mantova': 1, 'guttman mantova-decor': 1, 'guttman miryam': 1, 'guttman myamfix': 1, 'guttman rashi': 1, 'guttman stam': 1, 'guttman stam1': 1, 'guttman vilna': 1, 'guttman yad': 1, 'guttman yad-brush': 1, 'guttman yad-light': 1, 'guttman-aharoni': 1, 'guttman-aram': 1, 'guttman-courmir': 1, 'guttman-soncino': 1, 'guttman-toledo': 1, 'haettenschweiler': 1, 'harlow solid italic': 1, 'harrington': 1, 'high tower text': 1, 'impact': 1, 'imprint mt shadow': 1, 'informal roman': 1, 'irisupc': 1, 'iskoola pota': 1, 'jasmineupc': 1, 'jokerman': 1, 'juice itc': 1, 'kaiti': 1, 'kalinga': 1, 'kartika': 1, 'khmer ui': 1, 'kodchiangupc': 1, 'kokila': 1, 'kristen itc': 1, 'kunstler script': 1, 'lao ui': 1, 'latha': 1, 'leelawadee': 1, 'levenim mt': 1, 'lilyupc': 1, 'lucida bright': 1, 'lucida calligraphy': 1, 'lucida console': 1, 'lucida fax': 1, 'lucida handwriting': 1, 'lucida sans': 1, 'lucida sans typewriter': 1, 'lucida sans unicode': 1, 'magneto': 1, 'maiandra gd': 1, 'malgun gothic': 1, 'mangal': 1, 'marlett': 1, 'matura mt script capitals': 1, 'meiryo': 1, 'meiryo ui': 1, 'microsoft himalaya': 1, 'microsoft jhenghei': 1, 'microsoft new tai lue': 1, 'microsoft phagspa': 1, 'microsoft sans serif': 1, 'microsoft tai le': 1, 'microsoft uighur': 1, 'microsoft yahei': 1, 'microsoft yi baiti': 1, 'mingliu': 1, 'mingliu-extb': 1, 'mingliu_hkscs': 1, 'mingliu_hkscs-extb': 1, 'miriam': 1, 'miriam fixed': 1, 'mistral': 1, 'modern no. 20': 1, 'mongolian baiti': 1, 'monotype corsiva': 1, 'monotype hadassah': 1, 'moolboran': 1, 'ms gothic': 1, 'ms mincho': 1, 'ms outlook': 1, 'ms pgothic': 1, 'ms pmincho': 1, 'ms reference sans serif': 1, 'ms reference specialty': 1, 'ms ui gothic': 1, 'mt extra': 1, 'mv boli': 1, 'narkisim': 1, 'niagara engraved': 1, 'niagara solid': 1, 'nsimsun': 1, 'nyala': 1, 'ocr a extended': 1, 'old english text mt': 1, 'onyx': 1, 'palace script mt': 1, 'palatino linotype': 1, 'papyrus': 1, 'parchment': 1, 'perpetua': 1, 'perpetua titling mt': 1, 'plantagenet cherokee': 1, 'playbill': 1, 'pmingliu': 1, 'pmingliu-extb': 1, 'poor richard': 1, 'pristina': 1, 'raavi': 1, 'rage italic': 1, 'ravie': 1, 'rockwell': 1, 'rockwell condensed': 1, 'rockwell extra bold': 1, 'rod': 1, 'sakkal majalla': 1, 'script mt bold': 1, 'segoe print': 1, 'segoe script': 1, 'segoe ui': 1, 'segoe ui light': 1, 'segoe ui semibold': 1, 'segoe ui symbol': 1, 'shonar bangla': 1, 'showcard gothic': 1, 'shruti': 1, 'simhei': 1, 'simplified arabic': 1, 'simplified arabic fixed': 1, 'simsun': 1, 'simsun-extb': 1, 'snap itc': 1, 'stencil': 1, 'sylfaen': 1, 'symbol': 1, 'tahoma': 1, 'tempus sans itc': 1, 'times new roman': 1, 'toptype soncino': 1, 'traditional arabic': 1, 'trebuchet ms': 1, 'tunga': 1, 'tw cen mt': 1, 'tw cen mt condensed': 1, 'tw cen mt condensed extra bold': 1, 'utsaah': 1, 'vani': 1, 'verdana': 1, 'vijaya': 1, 'viner hand itc': 1, 'vivaldi': 1, 'vladimir script': 1, 'vrinda': 1, 'webdings': 1, 'wide latin': 1, 'wingdings': 1, 'wingdings 2': 1, 'wingdings 3': 1
+  },
+  
+  _defaultFontIE64Bit: 'Arial',
+  
+  processFont: function(font){
+      var processedFont = vml._fontCache[font];
+      if (!processedFont) {
+          var shim  = vml.text_shim || (vml.init(), vml.text_shim);
+          var style = shim.style;
+          style.font = font;
+          
+          var fontFamily = style.fontFamily;
+          if(fontFamily.charAt(0) === '"'){
+              fontFamily = fontFamily.substr(1, fontFamily.length - 1);
+          }
+          
+          var ffKey = fontFamily.toLowerCase();
+          var substFF = vml._fontSubst[ffKey];
+          if(substFF){
+              fontFamily = substFF;
+          } else if(vml.is64Bit && !vml._fontWhiteListIE64Bit[ffKey]) {
+              fontFamily = vml._defaultFontIE64Bit;
+          }
+          
+          style.fontFamily = '"' + fontFamily + '"';
+          
+          vml._fontCache[font] = processedFont = style.font;
+      }
+      
+      return processedFont;
   },
 
   d2r: Math.PI * 2 / 360,  // is this used more than once?
@@ -116,7 +170,10 @@ var vml = {
     }
     return o;
   },
-
+  
+  // constant
+  solidFillStyle: {type: 'solid'},
+  
   elm_defaults: {
 
     "g": {
@@ -222,23 +279,63 @@ var vml = {
     "text": {
       rewrite: 'shape',
       attr: function ( attr, style, elm, scenes, i ) {
-        var d = vml.get_dim( attr ),
-            es = elm.style;
+        var d  = vml.get_dim( attr );
+        var es = elm.style;
+        
 //        es.left = (d.translate_x + d.x) + "px";
 //        es.top = (d.translate_y + d.y) + "px";
-        elm.coordorigin = "0,0";
-        elm.coordsize = "21600,21600";
-        vml.stroke(elm, attr, scenes, i);
-        vml.textpath(elm);
-        vml.path(elm);
-        vml.skew(elm);
-        var oldSceneFillStyle = scenes[i].fillStyle;
-        scenes[i].fillStyle = {type: 'solid'};
-        vml.fill( elm, attr, scenes, i );
-        scenes[i].fillStyle = oldSceneFillStyle;
+        
+//        elm.coordorigin = "0,0";
+//        elm.coordsize   = "21600,21600";
+        
+        // Set stroke off,
+        elm.stroked = "False";
+        //vml.stroke(elm, attr, scenes, i);
+        
+        elm.path = "m0,0 l1,0 e";
+        
+        var tp = vml.textpath(elm);
+        tp.string = attr.string;
+        //tp.trim = "True";
+        var tpStyle = tp.style;
+        tpStyle['v-text-align'] = attr.textAlign;
+        //tpStyle['v-text-kern' ] = 'True';
+        tpStyle.font = attr.font;
+        
+        if(attr.textDecoration){
+            tpStyle.textDecoration = attr.textDecoration;
+        }
+        
+        //tpStyle.fontWeight = "normal";
+        //tpStyle.fontStyle  = "normal";
+        //tpStyle.xscale = "true";
+        
+        vml.path(elm)
+           .textpathok = 'True';
+        
+        // Need to set the rotation matrix
+        var r = attr.rotation;
+        if (r){
+            r = 180 * r / Math.PI;
+            r = - (~~r % 360) * vml.d2r;
+            
+            if (r) {
+                var ct = Math.cos(r).toFixed(8),
+                    st = Math.sin(r).toFixed(8);
+                
+                var skew = vml.skew(elm);
+                skew.on = 'true';
+                skew.matrix= ct + "," + st + "," + -st + "," + ct + ",0,0";
+                //elm.rotation = ~~(r / vml.d2r); // does not work
+            }
+        }
+        
+        var s = scenes[i];
+        s.fillStyle = vml.solidFillStyle;
+        vml.fill(elm, attr, scenes, i);
+        s.fillStyle = null;
       },
-      css: "position:absolute; filter: ;top:0px;left:0px;width:1px;height:1px"
-
+      css: "position:absolute;top:0px;left:0px;width:1px;height:1px;"
     },
 
     "svg": {
@@ -247,11 +344,11 @@ var vml = {
     },
 
     // this allows reuse of the createElement function for actual VML
-    "vml:path": { rewrite: 'path' },
-    "vml:stroke": { rewrite: 'stroke' },
-    "vml:fill": { rewrite: 'fill' },
+    "vml:path":     { rewrite: 'path'     },
+    "vml:stroke":   { rewrite: 'stroke'   },
+    "vml:fill":     { rewrite: 'fill'     },
     "vml:textpath": { rewrite: 'textpath' },
-    "vml:skew": { rewrite: 'skew' }
+    "vml:skew":     { rewrite: 'skew'     }
 
   },
 
@@ -283,12 +380,17 @@ var vml = {
   // hex values lookup table
   _hex: pv.range(0,256).map(function(i){ return pv.Format.pad("0",2,i.toString(16)); }),
   _colorcache: {},
-  color: function ( value, rgb ) {
+  color: function (value) {
     // TODO: deal with opacity here ?
-    if ( !(value in vml._colorcache) && (rgb = /^rgb\((\d+),(\d+),(\d+)\)$/i.exec( value )) ) {
-      vml._colorcache[value] = '#' + vml._hex[rgb[1]] + vml._hex[rgb[2]] + vml._hex[rgb[3]];
+    var result = vml._colorcache[value]; 
+    var rgb;
+    if(!result && (rgb = /^rgb\((\d+),(\d+),(\d+)\)$/i.exec(value))) {
+      vml._colorcache[value] = 
+          result = 
+          '#' + vml._hex[rgb[1]] + vml._hex[rgb[2]] + vml._hex[rgb[3]];
     }
-    return vml._colorcache[ value ] || value;
+    
+    return result || value;
   },
 
   fill: function ( elm, attr, scenes, i ) {
@@ -299,7 +401,7 @@ var vml = {
     
     var fillStyle = scenes[i].fillStyle;
     if (!attr.fill || !fillStyle || (fillStyle.type === 'solid' && attr.fill === 'none')) {
-      fill.on = false;
+      fill.on = 'false';
     } else {
       fill.on = 'true';
       if(fillStyle.type === 'solid'){
@@ -315,7 +417,7 @@ var vml = {
               var stopsText = [];
               for (var i = 0 ; i < S ; i++) {
                   var stop = stops[i];
-                  stopsText.push(stop.offset + '% ' + vml.color(stop.color.color)); // color.opacity being ignored
+                  stopsText.push(stop.offset + '% ' + vml.color(stop.color.color)); // TODO: color.opacity being ignored
               }
               
               fill.color  = vml.color(stops[0].color.color);
@@ -327,7 +429,7 @@ var vml = {
               // Clockwise, Top = 0, Degrees
               fill.type = 'gradient';
               var angle = (-pv.degrees(fillStyle.angle)) % 360;
-              fill.angle = angle < 0 ? (angle + 360) : angle; 
+              fill.angle = angle < 0 ? (angle + 360) : angle;
           } else {
               fill.type  = 'gradientTitle';
               fill.focus = '100%';
@@ -348,9 +450,8 @@ var vml = {
     }
     if ( !attr.stroke || attr.stroke === 'none' ) {
       stroke.on = 'false';
-      stroke.weight = '0';
-    }
-    else {
+      stroke.weight = 0;
+    } else {
         var strokeWidth = attr['stroke-width'];
         if(strokeWidth == null || strokeWidth === ''){
             strokeWidth = 1;
@@ -366,13 +467,21 @@ var vml = {
         
         if(!strokeWidth){
             stroke.on = 'false';
-            stroke.weight = '0';
+            stroke.weight = 0;
         } else {
-            stroke.on = 'true';
-            stroke.weight = strokeWidth;
-            stroke.color = vml.color( attr.stroke ) || 'black';
-            stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
-            stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
+            stroke.on         = 'true';
+            stroke.weight     = strokeWidth;
+            stroke.color      = vml.color( attr.stroke ) || 'black';
+            stroke.opacity    = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
+            stroke.joinstyle  = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
+            stroke.miterlimit = attr['stroke-miterlimit'] || 8;
+            stroke.endcap     = vml.caps [attr['stroke-linecap' ]] || 'flat';
+            
+            var dashArray = attr["stroke-dasharray"];
+            if(!dashArray || dashArray === 'none'){
+                dashArray = 'Solid';
+            }
+            stroke.dashstyle  = dashArray;
         }
     }
   },
@@ -393,8 +502,7 @@ var vml = {
     var sk = elm.getElementsByTagName('skew')[0];
     if (!sk) 
         sk = elm.appendChild(vml.createElement('vml:skew'));
-    sk.on = "false";  
-//    sk.offset="0f,0f";
+    sk.on = "false";
     return sk;  
   },
   
@@ -404,8 +512,8 @@ var vml = {
         tp = elm.appendChild(vml.createElement('vml:textpath'));
     }
     
-    tp.style['v-text-align']='center';
-    tp.style['v-text-kern']='true';
+    tp.style['v-text-align'] = 'center';
+    tp.style['v-text-kern' ] = 'true';
     tp.on = "true";
     return tp;
   },
@@ -640,7 +748,7 @@ pv.VmlScene = {
 // copy helper methods from SvgScene onto our new Scene
 pv.VmlScene.copy_functions( pv.SvgScene );
 pv.Scene = pv.VmlScene;
-pv.renderer = function() { return 'vml'; };//changed renderer
+pv.renderer = function() { return 'vml'; };
 
 (function(is64bit){
     // experimental minimum visible, with perceptible color, values
@@ -649,7 +757,7 @@ pv.renderer = function() { return 'vml'; };//changed renderer
     pv.VmlScene.minBarWidth      = is64bit ? 2.2 : 1.8;
     pv.VmlScene.minBarHeight     = is64bit ? 2.2 : 1.8;
     pv.VmlScene.minBarLineWidth  = is64bit ? 1.2 : 1.0;
-}(window.navigator.cpuClass === 'x64'));
+}(vml.is64Bit));
 
 pv.VmlScene.expect = function (e, type, scenes, i, attr, style) {
   style = style || {};
@@ -729,6 +837,7 @@ pv.VmlScene.title = function(e, s) {
 // mostly the same code as pv.SvgScene.panel, but with less MSIE crashing...
 pv.VmlScene.panel = function(scenes) {
   var g = scenes.$g, e = g && g.firstChild;
+  var inited = false;
   for (var i = 0; i < scenes.length; i++) {
     var s = scenes[i];
 
@@ -747,11 +856,13 @@ pv.VmlScene.panel = function(scenes) {
       }
       
       if(!g) {
+        inited = true;
         vml.init(); // turn VML on if it isn't already
         
         g = canvas.appendChild( vml.createElement( "svg" ) );
         
-        // [DCL] Prevent selecting VML elements when dragging 
+        // Prevent selecting VML elements when dragging
+        g.unselectable = 'on';
         g.onselectstart = function(){ return false; };
         
         var events = this.events;
@@ -813,7 +924,47 @@ pv.VmlScene.panel = function(scenes) {
     e = this.stroke( e, scenes, i );
 
   }
+  
+  if(inited){
+    this.removeSiblings(e);
+    
+    // IE doesn't immediately render the last VML element???
+    // Only a re-render forces it to show (like when dragging with the rubber band) 
+    // Adding a dummy last element in the VML DOM solves the issue.
+    e = g.appendChild( vml.createElement( "oval" ) );
+  }
   return e;
+};
+
+pv.VmlScene.parseDasharray = function(s){
+    var dashArray = s.strokeDasharray;
+    
+    if(dashArray && dashArray !== 'none'){
+        var standardDashArray = this.translateDashStyleAlias(dashArray);
+        if(this.isStandardDashStyle(standardDashArray)){
+            dashArray = standardDashArray;
+        } else {
+            // Dashes with numbers work very badly on IE,
+            //  many times disrespecting the user request.
+            // My guess is that it is trying to approximate
+            //  the requested pattern to one of the standard patterns...
+            
+            // IE already receives line width relative measures
+            dashArray = 
+                dashArray
+                    .split(/[\s,]+/)
+                    .map(function(num){ return (+num) / this.scale; }, this);
+            
+            if(dashArray.length % 2){
+                dashArray = dashArray.concat(dashArray);
+            }
+            dashArray = dashArray.join(' ');
+        }
+    } else {
+        dashArray = null;
+    }
+    
+    return dashArray;
 };
 
 // Much of the event rewriting code is copyed and watered down
@@ -1048,111 +1199,77 @@ pv.VmlScene.label = function(scenes) {
 
     // visible
     if (!s.visible) continue;
+    
     var fill = s.textStyle;
     if (!fill.opacity || !s.text) continue;
 
-    var attr = {};
-    if ( s.cursor ) { attr.cursor = s.cursor; }
-
     // measure text
-    var txt = s.text.replace( /\s+/g, '\xA0' );
-    var label = vml.text_dims( txt, s.font );
+    var txt   = s.text.replace(/\s+/g, '\xA0');
+    var font  = vml.processFont(s.font);
+    var label = vml.text_dims(txt, font);
 
     var dx = 0, dy = 0;
-
-    if ( s.textBaseline === 'middle' ) {
+    if (s.textBaseline === 'middle'){
       if(s.textAngle != 0){
-        dy += Math.sin(s.textAngle) * label.width /2;
-      }
-      else {
+        dy += Math.sin(s.textAngle) * label.width/2;
+      } else {
         dy -= label.fontsize / 2;
       }
-    }
-    else if ( s.textBaseline === 'top' ) {
+    } else if (s.textBaseline === 'top') {
       dy += s.textMargin;
-    }
-    else if ( s.textBaseline === 'bottom' ) {
+    } else if (s.textBaseline === 'bottom') {
       dy -= s.textMargin + label.fontsize;
     }
 
-    if ( s.textAlign === 'center' ) {
+    if (s.textAlign === 'center') {
      if(s.textAngle != 0){
         dx -= Math.cos(s.textAngle) * label.width / 2 ;
+      } else {
+        dx -= label.width / 2; 
       }
-     else {
-      dx -= label.width / 2; 
-     }
-    }
-    else if ( s.textAlign === 'right' ) {
+    } else if (s.textAlign === 'right') {
       dx -= label.width + s.textMargin; 
-    }
-    else if ( s.textAlign === 'left' ) {
-      dx += s.textMargin; 
+    } else if (s.textAlign === 'left') {
+      dx += s.textMargin;
     }
 
-
+    var left = s.left; // + dx;
+    var top  = s.top;// Math.round(s.top + dy);
+    
+    // ---------------
+    
+    var attr = {};
+    if(s.cursor) { 
+        attr.cursor = s.cursor; 
+    }
+    
     attr.fill = vml.color(fill.color) || "black";
-    attr['fill-opacity'] = 0.7;
-        
-    attr.x = s.left;
-    attr.x = s.top;
+    
+    if(vml.is64Bit){
+        // The text is overly black/bold
+        attr['fill-opacity'] = 0.7;
+    }
+    
+    attr.x = left;
+    attr.y = top;
+    attr.rotation = s.textAngle;
+    attr.string = txt;
+    attr.textAlign = s.textAlign;
+    attr.font = font;
+    attr.textDecoration = s.textDecoration;
     
     e = this.expect(e, "text", scenes, i, attr, {    
-      'display': 'block',
+      'display':    'block',
       'lineHeight': 1,
       'whiteSpace': 'nowrap',
-      'zoom': 1,
-      'position': 'absolute',
-      'cursor': 'default'        
+      'zoom':       1,
+      'position':   'absolute',
+      'cursor':     'default',
+      'top':        top  + 'px',
+      'left':       left + 'px'
     });
-    
-    e.getElementsByTagName('path')[0].textpathok = 'True';
 
-    var left = s.left;
-    var top = s.top;
-    
-    e.style.top = top + 'px';
-    e.style.left = left + 'px';
-    
-    e.path = " m0,0 l1,0 e";    
-    
-    
-
-    var rotation = 180 * s.textAngle / Math.PI;
-
-
-    if ( rotation ) {
-        var r =  - (~~rotation % 360) * vml.d2r,
-          ct = Math.cos(r).toFixed( 8 ),
-          st = Math.sin(r).toFixed( 8 );
-    
-        
-        var skew = e.getElementsByTagName('skew')[0];
-        //Need so set the rotation matrix
-        skew.on = 'true';
-        skew.matrix= "" + ct + "," + st + "," + -st + "," + ct + ",0,0";
-    }
-    
-    
-    var textPath = e.getElementsByTagName('textpath')[0];
-    textPath.string = txt;
-    textPath.style['v-text-align'] = s.textAlign;    
-    
-    
-    //textpath needs font name in double quotes (?)
-    var splittedFont = s.font.split('px ');
-    var finalFont = s.font;
-    if (splittedFont.length > 1) {
-        finalFont = splittedFont[0] + "px \"" + splittedFont[1] + "\"";
-    }    
-    textPath.style.font = finalFont;
-
-  
-
-
-
-
-/*
+    /*
     e = this.expect(e, "text", scenes, i, attr, {
       "font": s.font,
       // "text-shadow": s.textShadow,
@@ -1168,7 +1285,7 @@ pv.VmlScene.label = function(scenes) {
       'color': vml.color( fill.color ) || 'black'
     });
     e.innerText = txt;
-*/
+    */
 
 
 /*
@@ -1196,6 +1313,7 @@ pv.VmlScene.label = function(scenes) {
   }
   return e;
 };
+
 pv.VmlScene.wedge = function(scenes) {
   var e = scenes.$g.firstChild,
       round = vml.round;
@@ -1218,7 +1336,11 @@ pv.VmlScene.wedge = function(scenes) {
       "fill-opacity": fill.opacity || null,
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
-      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
+      "stroke-width":   stroke.opacity ? s.lineWidth / this.scale : null,
+      "stroke-linecap":    s.lineCap,
+      "stroke-linejoin":   s.lineJoin,
+      "stroke-miterlimit": s.strokeMiterLimit,
+      "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
     });
     
     // add path

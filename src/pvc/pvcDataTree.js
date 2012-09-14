@@ -704,15 +704,14 @@ return pv.Label(x);
     /*****
      *   draw the data-tree
      *******/
-
-    /*****
-     *  add the extension points
-     *******/
-
-    // Extend the dataTree
-    this.extend(this.pvDataTree,"dataTree_");
-
-    // Extend body
-    this.extend(this.pvPanel,"chart_");
-  }
+   },
+  
+   applyExtensions: function(){
+      // Extend the dataTree
+      this.extend(this.pvDataTree,"dataTree");
+   },
+   
+   _getExtensionId: function(){
+       return 'chart';
+   }
 });

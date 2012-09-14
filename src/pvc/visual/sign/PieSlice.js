@@ -27,14 +27,14 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     this._center = def.get(keyArgs, 'center');
     
     this/* Colors */
-        .intercept('fillStyle',     'fillColor'  )
-        .intercept('strokeStyle',   'strokeColor')
-        .optionalValue('lineWidth',  0.6)
-        .intercept('angle', 'angle')
-        .lock('bottom', 'y')
-        .lock('left',   'x')
-        .lockValue('top',   null)
-        .lockValue('right', null)
+        .optional('lineWidth',  0.6)
+        ._interceptDynamic('fillStyle',   'fillColor'  )
+        ._interceptDynamic('strokeStyle', 'strokeColor')
+        ._interceptDynamic('angle', 'angle')
+        ._lockDynamic('bottom', 'y')
+        ._lockDynamic('left',   'x')
+        .lock('top',   null)
+        .lock('right', null)
         ;
 })
 .add({
@@ -51,6 +51,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
         return this._center.y - this._offsetSlice('sin'); 
     },
     
+    // ~ midAngle -> (endAngle + startAngle) / 2
     _offsetSlice: function(fun) {
         var offset = this._getOffsetRadius();
         if(offset !== 0){
@@ -60,6 +61,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
         return offset;
     },
     
+    // Get and cache offsetRadius 
     _getOffsetRadius: function(){
         var offset = this.state.offsetRadius;
         if(offset == null){
@@ -109,7 +111,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     /* Offset */
     offsetRadius: function(){
         var offsetRadius = this.baseOffsetRadius();
-        if(this.scene.anyInteraction()) {
+        if(this.showsInteraction() && this.scene.anyInteraction()) {
             offsetRadius = this.interactiveOffsetRadius(offsetRadius);
         } else {
             offsetRadius = this.normalOffsetRadius(offsetRadius);

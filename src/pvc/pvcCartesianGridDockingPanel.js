@@ -4,23 +4,28 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
      * @override
      */
     applyExtensions: function(){
+        
         this.base();
 
         // Extend body
-        this.extend(this.pvPanel,    "content_");
-        this.extend(this.xGridRule,  "xAxisGrid_");
-        this.extend(this.yGridRule,  "yAxisGrid_");
-        this.extend(this.pvFrameBar, "plotFrame_");
+ 
+        this.extend(this.xGridRule,  "xAxisGrid");
+        this.extend(this.yGridRule,  "yAxisGrid");
+        this.extend(this.pvFrameBar, "plotFrame");
         
         if(this.chart.options.compatVersion <= 1){
-            this.extend(this.pvFrameBar, "xAxisEndLine_");
-            this.extend(this.pvFrameBar, "yAxisEndLine_");
+            this.extend(this.pvFrameBar, "xAxisEndLine");
+            this.extend(this.pvFrameBar, "yAxisEndLine");
         }
         
-        this.extend(this.xZeroLine,  "xAxisZeroLine_");
-        this.extend(this.yZeroLine,  "yAxisZeroLine_");
+        this.extend(this.xZeroLine,  "xAxisZeroLine");
+        this.extend(this.yZeroLine,  "yAxisZeroLine");
     },
-
+    
+    _getExtensionId: function(){
+        return 'content';
+    },
+    
     /**
      * @override
      */

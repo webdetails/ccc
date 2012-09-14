@@ -178,20 +178,20 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel){
+    _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in WaterfallChart");
         }
         
         var options = this.options;
         
-        return new pvc.WaterfallPanel(this, parentPanel, {
-            waterfall:    options.waterfall,
-            barSizeRatio: options.barSizeRatio,
-            maxBarSize:   options.maxBarSize,
-            showValues:   options.showValues,
-            orientation:  options.orientation
-        });
+        return new pvc.WaterfallPanel(this, parentPanel, def.create(baseOptions, {
+            waterfall:          options.waterfall,
+            barSizeRatio:       options.barSizeRatio,
+            maxBarSize:         options.maxBarSize,
+            showValues:         options.showValues,
+            orientation:        options.orientation
+        }));
     },
     
     defaults: def.create(pvc.BarAbstract.prototype.defaults, {

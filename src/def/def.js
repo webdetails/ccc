@@ -590,7 +590,7 @@ var def = /** @lends def */{
         return v != null ? v : dv;
     },
     
-    within: function(v, min, max){
+    between: function(v, min, max){
         return Math.max(min, Math.min(v, max));
     },
     
@@ -1635,6 +1635,85 @@ def.type('Map')
     
     keys: function(){
         return def.ownKeys(this.source);
+    }
+});
+
+// --------------------
+
+//---------------
+
+def.type('OrderedMap')
+.init(function(){
+    this._list = [];
+    this._map  = {};
+})
+.add({
+    has: function(key){
+        return objectHasOwn.call(this._map, key);
+    },
+    
+    count: function(){
+        return this._list.length;
+    },
+    
+    get: function(key){
+        var bucket = def.getOwn(this._map, key);
+        if(bucket) { 
+            return bucket.value;
+        }
+    },
+    
+    at: function(index){
+        var bucket = this._list[index];
+        if(bucket){
+            return bucket.value;
+        }
+    },
+    
+    add: function(key, v){
+        var map = this._map;
+        var bucket = def.getOwn(map, key);
+        if(!bucket){
+            this._list.push((map[key] = {
+               key:   key,
+               value: v
+            }));
+        } else if(bucket.value !== v){
+            bucket.value = v;
+        }
+        
+        return this;
+    },
+    
+    rem: function(key){
+        var bucket = def.getOwn(this._map, key);
+        if(bucket){
+            // Find it
+            var index = this._list.indexOf(bucket);
+            this._list.splice(index, 1);
+            delete this._map[key];
+        }
+        
+        return this;
+    },
+    
+    clear: function(){
+        if(this._list.length) {
+            this._map = {}; 
+            this._list.length = 0;
+        }
+        
+        return this;
+    },
+    
+    keys: function(){
+        return def.ownKeys(this._map);
+    },
+    
+    forEach: function(fun, ctx){
+        return this._list.forEach(function(bucket){
+            fun.call(ctx, bucket.value, bucket.key);
+        });
     }
 });
 

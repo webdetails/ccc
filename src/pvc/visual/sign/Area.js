@@ -10,8 +10,8 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
         segmented = def.get(keyArgs, 'segmented', true);
     
     this
-        .lockValue('segmented', segmented) // fixed, not inherited
-        .lockValue('antialias', antialias)
+        .lock('segmented', segmented) // fixed, not inherited
+        .lock('antialias', antialias)
         ;
 
     if(!def.get(keyArgs, 'freePosition', false)){
@@ -21,15 +21,15 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
         
         /* Positions */
         this
-            .lock(basePosProp,  'x')  // ex: left
-            .lock(orthoPosProp, 'y')  // ex: bottom
-            .lock(orthoLenProp, 'dy') // ex: height
+            ._lockDynamic(basePosProp,  'x')  // ex: left
+            ._lockDynamic(orthoPosProp, 'y')  // ex: bottom
+            ._lockDynamic(orthoLenProp, 'dy') // ex: height
             ;
     }
     
     /* Colors */
     // NOTE: must be registered before fixAntialiasStrokeColor
-    this.intercept('fillStyle', 'fillColor');
+    this._interceptDynamic('fillStyle', 'fillColor');
     
     /* Using antialias causes the vertical separation
      * of *segmented* areas to be noticed.
@@ -43,22 +43,21 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
         // Try to hide the vertical lines noticeable between areas,
         // due to antialias
         this
-            .lock('strokeStyle', 'fixAntialiasStrokeColor')
+            ._lockDynamic('strokeStyle', 'fixAntialiasStrokeColor')
             // NOTE: must be registered after fixAntialiasStrokeColor
-            .lock('lineWidth', 'fixAntialiasStrokeWidth')
+            ._lockDynamic('lineWidth', 'fixAntialiasStrokeWidth')
             ;
     } else {
         // These really have no real meaning in the area and should not be used.
         // If lines are desired, they should be created with showLines of LineChart
-        this.lockValue('strokeStyle', null)
-            .lockValue('lineWidth',   0)
+        this.lock('strokeStyle', null)
+            .lock('lineWidth',   0)
             ;
     }
 })
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs, 
-                        'noHoverable', true,
                         'noTooltips',  true);
 
         this.base(keyArgs);

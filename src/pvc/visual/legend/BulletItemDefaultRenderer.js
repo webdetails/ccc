@@ -17,7 +17,7 @@
  * @param {pv.Mark} [keyArgs.rulePvProto  ] The rule's protovis prototype mark.
  */
 def
-.type('pvc.visual.legend.BulletItemDefaultRenderer')
+.type('pvc.visual.legend.BulletItemDefaultRenderer', pvc.visual.legend.BulletItemRenderer)
 .init(function(keyArgs){
     this.drawRule = def.get(keyArgs, 'drawRule', false);
     if(this.drawRule){
@@ -37,7 +37,7 @@ def
     rulePvProto: null,
     markerPvProto: null,
     
-    create: function(legendPanel, pvBulletPanel){
+    create: function(legendPanel, pvBulletPanel, extensionPrefix, wrapper){
         var renderInfo = {};
         var drawRule = this.drawRule;
         var sceneColorProp = function(scene){ return scene.color; };
@@ -47,30 +47,41 @@ def
                 .left (0)
                 .top  (function(){ return this.parent.height() / 2; })
                 .width(function(){ return this.parent.width();      })
-                .lineWidth(1)
-                .strokeStyle(sceneColorProp)
+                .lineWidth(1, pvc.extensionTag) // act as if it were a user extension
+                .strokeStyle(sceneColorProp, pvc.extensionTag) // idem
                 ;
             
             if(this.rulePvProto){
                 rulePvBaseProto = this.rulePvProto.extend(rulePvBaseProto);
             }
             
-            renderInfo.pvRule = pvBulletPanel.add(pv.Rule).extend(rulePvBaseProto);
+            renderInfo.pvRule = new pvc.visual.Rule(legendPanel, pvBulletPanel, {
+                        proto: rulePvBaseProto,
+                        noSelect:    false,
+                        noHover:     false,
+                        extensionId: extensionPrefix + "Rule",
+                        wrapper:     wrapper
+                    })
+                    .pvMark;
         }
         
         if(this.drawMarker){
             var markerPvBaseProto = new pv.Mark()
                 // Center the marker in the panel
-                .left(function(){ return this.parent.width () / 2; })
-                .top (function(){ return this.parent.height() / 2; })
+                .left(function(){ 
+                    return this.parent.width () / 2; 
+                })
+                .top (function(){ 
+                    return this.parent.height() / 2; 
+                })
                 // If order of properties is changed, by extension, 
                 // dependent properties will not work...
-                .shapeSize(function(){ return this.parent.width(); }) // width <= height
-                .lineWidth(2)
-                .fillStyle(sceneColorProp)
-                .strokeStyle(sceneColorProp)
-                .shape(this.markerShape)
-                .angle(drawRule ? 0 : Math.PI/2) // So that 'bar' gets drawn vertically
+                .shapeSize(function(){ return this.parent.width(); }, pvc.extensionTag) // width <= height
+                .lineWidth(2, pvc.extensionTag)
+                .fillStyle(sceneColorProp, pvc.extensionTag)
+                .strokeStyle(sceneColorProp, pvc.extensionTag)
+                .shape(this.markerShape, pvc.extensionTag)
+                .angle(drawRule ? 0 : Math.PI/2, pvc.extensionTag) // So that 'bar' gets drawn vertically
                 .antialias( function(){
                     var cos = Math.abs(Math.cos(this.angle()));
                     if(cos !== 0 && cos !== 1){
@@ -82,25 +93,24 @@ def
                     }
                     
                     return true;
-                })
+                }, pvc.extensionTag)
                 ;
             
             if(this.markerPvProto){
                 markerPvBaseProto = this.markerPvProto.extend(markerPvBaseProto);
             }
             
-            renderInfo.pvDot = pvBulletPanel.add(pv.Dot).extend(markerPvBaseProto);
+            renderInfo.pvDot = new pvc.visual.Dot(legendPanel, pvBulletPanel, {
+                    proto:        markerPvBaseProto,
+                    freePosition: true,
+                    activeSeriesAware: false, // no guarantee that series exist in the scene
+                    noTooltips:   true,
+                    extensionId:  extensionPrefix + "Dot",
+                    wrapper:      wrapper
+                })
+                .pvMark;
         }
         
         return renderInfo;
-    },
-
-    extendMarks: function(legendPanel, renderInfo, extensionPrefix){
-        if(renderInfo.pvRule){
-            legendPanel.extend(renderInfo.pvRule, extensionPrefix + "Rule_");
-        }
-        if(renderInfo.pvDot){
-            legendPanel.extend(renderInfo.pvDot, extensionPrefix + "Dot_");
-        }
     }
 });

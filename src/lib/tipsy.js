@@ -83,7 +83,7 @@ pv.Behavior.tipsy = function(opts) {
             
         } else {
             /* Compute the transform to offset the tooltip position. */
-            var t = toScreenTransform(mark.parent);
+            var t = mark.toScreenTransform();
             var instance = mark.instance();
             var radius;
             if(mark.properties.outerRadius){
@@ -350,7 +350,7 @@ pv.Behavior.tipsy = function(opts) {
     
     function updateTipDebug(){
         if($fakeTipTarget){
-            if(_tip.debug >= 5){
+            if(_tip.debug >= 16){
                 $fakeTipTarget.css({
                     borderColor: 'red',
                     borderWidth: '1px',
@@ -518,7 +518,7 @@ pv.Behavior.tipsy = function(opts) {
                 
                 if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Update text. Was hidden. Text: " + text); }
                 
-                $fakeTipTarget.attr('title', text);
+                $fakeTipTarget.tipsy('setTitle', text);
                 
                 bounds = opts.followMouse ? getMouseBounds(ev) : getInstanceBounds(mark);
             });
@@ -567,16 +567,20 @@ pv.Behavior.tipsy = function(opts) {
         
         setTarget(pv.event.target);
         
-        $fakeTipTarget.attr('title', getTooltipText(mark));
+        var text = getTooltipText(mark);
+        
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Text: " + text); }
+        
+        $fakeTipTarget.tipsy('setTitle', text);
         
         setFakeTipTargetBounds(opts.followMouse ? getMouseBounds() : getInstanceBounds(mark));
         
         hideOtherTipsies();
         
         if(isHidden){
-            $fakeTipTarget.tipsy("enter");
+            $fakeTipTarget.tipsy('enter');
         } else {
-            $fakeTipTarget.tipsy("update");
+            $fakeTipTarget.tipsy('update');
         }
         
         if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Show OUT"); }
@@ -612,16 +616,6 @@ function toParentTransform(parentPanel){
                 times(parentPanel.transform());
 }
 
-function toScreenTransform(parent){
-    var t = pv.Transform.identity;
-    do {
-        t = t.translate(parent.left(), parent.top())
-             .times(parent.transform());
-    } while ((parent = parent.parent));
-
-    return t;
-}
-
 function getVisibleScreenBounds(mark){
 
     var instance = mark.instance(),
@@ -645,13 +639,13 @@ function getVisibleScreenBounds(mark){
             height += top;
             top = 0;
         }
-
-        right  = mark.right();
+        
+        right  = instance.right;
         if(right < 0){
             width += right;
         }
 
-        bottom = mark.bottom();
+        bottom = instance.bottom;
         if(bottom < 0){
             height += bottom;
         }
@@ -666,6 +660,7 @@ function getVisibleScreenBounds(mark){
         height = s * height;
 
         mark = parent;
+        instance = mark.instance();
     }
 
     return {

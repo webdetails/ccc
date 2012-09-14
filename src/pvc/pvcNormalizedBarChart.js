@@ -43,18 +43,18 @@ pvc.NormalizedBarChart = pvc.BarAbstract.extend({
     },
 
     /* @override */
-    _createMainContentPanel: function(parentPanel){
+    _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in NormalizedBarChart");
         }
         
         var options = this.options;
-        return new pvc.NormalizedBarPanel(this, parentPanel, {
-            barSizeRatio: options.barSizeRatio,
-            maxBarSize:   options.maxBarSize,
-            showValues:   options.showValues,
-            valuesAnchor: options.valuesAnchor,
-            orientation:  options.orientation
-        });
+        return new pvc.NormalizedBarPanel(this, parentPanel, def.create(baseOptions, {
+            barSizeRatio:       options.barSizeRatio,
+            maxBarSize:         options.maxBarSize,
+            showValues:         options.showValues,
+            valuesAnchor:       options.valuesAnchor,
+            orientation:        options.orientation
+        }));
     }
 });

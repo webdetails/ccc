@@ -17,13 +17,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     anchor: "bottom",
     axisSize: undefined,
     tickLength: 6,
-    tickColor: "#aaa",
+    
     panelName: "axis", // override
     scale: null,
-    fullGrid: false,
-    fullGridCrossesMargin: true,
     ruleCrossesMargin: true,
-    zeroLine: false, // continuous axis
     font: '9px sans-serif', // label font
     labelSpacingMin: 1,
     // To be used in linear scales
@@ -61,7 +58,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.isDiscrete = axis.role.grouping.isDiscrete();
         
         if(options.font === undefined){
-            var extFont = this._getConstantExtension(this.panelName + 'Label', 'font');
+            var extFont = this._getConstantExtension('label', 'font');
             if(extFont){
                 this.font = extFont;
             }
@@ -80,7 +77,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.pvScale = scale;
             this.scale   = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
             
-            this.extend(scale, this.panelName + "Scale_");
+            this.extend(scale, "scale"); // TODO - review extension interface
             
             this._isScaleSetup = true;
         }
@@ -136,16 +133,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     _calcLabelBBox: function(){
         var layoutInfo = this._layoutInfo;
         
-        var labelExtId = this.panelName + 'Label';
-        
-        var align = this._getExtension(labelExtId, 'textAlign');
+        var align = this._getExtension('label', 'textAlign');
         if(typeof align !== 'string'){
             align = this.isAnchorTopOrBottom() ? 
                     "center" : 
                     (this.anchor == "left") ? "right" : "left";
         }
         
-        var baseline = this._getExtension(labelExtId, 'textBaseline');
+        var baseline = this._getExtension('label', 'textBaseline');
         if(typeof baseline !== 'string'){
             switch (this.anchor) {
                 case "right":
@@ -165,8 +160,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }
         } 
         
-        var angle  = def.number.as(this._getExtension(labelExtId, 'textAngle'),  0);
-        var margin = def.number.as(this._getExtension(labelExtId, 'textMargin'), 3);
+        var angle  = def.number.as(this._getExtension('label', 'textAngle'),  0);
+        var margin = def.number.as(this._getExtension('label', 'textMargin'), 3);
         
         layoutInfo.labelBBox = pvc.text.getLabelBBox(
                         layoutInfo.maxTextWidth, 
@@ -239,51 +234,64 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     _calcOverflowPaddingsFromLabelBBox: function(){
-        var layoutInfo = this._layoutInfo;
-        var paddings   = layoutInfo.paddings;
-        var labelBBox  = layoutInfo.labelBBox;
-        var orthoSides = this.isAnchorTopOrBottom() ? ['left', 'right'] : ['top', 'bottom'];
-        
-        var isDiscrete = this.scale.type === 'Discrete';
-        var halfBand;
-        if(isDiscrete){
-            this.axis.setScaleRange(layoutInfo.clientSize[this.anchorLength()]);
-            halfBand = this.scale.range().band / 2;
-        }
-
         var overflowPaddings = null;
-        orthoSides.forEach(function(side){
-            var overflowPadding  = this._getLabelBBoxQuadrantLength(labelBBox, side);
-            if(overflowPadding > 0){
-                // Discount real paddings that this panel already has
-                // cause they're, in principle, empty space that can be occupied.
-                overflowPadding -= (paddings[side] || 0);
+        
+        var layoutInfo = this._layoutInfo;
+        var ticks = layoutInfo.ticks;
+        var tickCount = ticks.length;
+        if(tickCount){
+            var paddings   = layoutInfo.paddings;
+            var labelBBox  = layoutInfo.labelBBox;
+            var isTopOrBottom = this.isAnchorTopOrBottom();
+            var begSide    = isTopOrBottom ? 'left'  : 'top'   ;
+            var endSide    = isTopOrBottom ? 'right' : 'bottom';
+            var isDiscrete = this.scale.type === 'Discrete';
+            
+            var clientLength = layoutInfo.clientSize[this.anchorLength()];
+            this.axis.setScaleRange(clientLength);
+            
+            var sideTickOffset;
+            if(isDiscrete){
+                var halfBand = this.scale.range().band / 2;
+                sideTickOffset = def.set({}, 
+                        begSide, halfBand,
+                        endSide, halfBand);
+            } else {
+                sideTickOffset = def.set({}, 
+                        begSide, this.scale(ticks[0]),
+                        endSide, clientLength - this.scale(ticks[tickCount - 1]));
+            }
+            
+            [begSide, endSide].forEach(function(side){
+                var overflowPadding  = this._getLabelBBoxQuadrantLength(labelBBox, side);
                 if(overflowPadding > 0){
-                    // On discrete axes, half of the band width is not yet overflow.
-                    if(isDiscrete){
-                        overflowPadding -= halfBand;
-                    }
-                    
-                    if(overflowPadding > 1){ // small delta to avoid frequent relayouts... (the reported font height often causes this kind of "error" in BBox calculation)
-                        if(isDiscrete){
-                            // reduction of space causes reduction of band width
-                            // which in turn usually causes the overflowPadding to increase,
-                            // as the size of the text usually does not change.
-                            // Ask a little bit more to hit the target faster.
-                            overflowPadding *= 1.05;
+                    // Discount real paddings that this panel already has
+                    // cause they're, in principle, empty space that can be occupied.
+                    overflowPadding -= (paddings[side] || 0);
+                    if(overflowPadding > 0){
+                        // On discrete axes, half of the band width is not yet overflow.
+                        overflowPadding -= sideTickOffset[side];
+                        if(overflowPadding > 1){ // small delta to avoid frequent relayouts... (the reported font height often causes this kind of "error" in BBox calculation)
+                            if(isDiscrete){
+                                // reduction of space causes reduction of band width
+                                // which in turn usually causes the overflowPadding to increase,
+                                // as the size of the text usually does not change.
+                                // Ask a little bit more to hit the target faster.
+                                overflowPadding *= 1.05;
+                            }
+                            
+                            if(!overflowPaddings){ 
+                                overflowPaddings= {}; 
+                            }
+                            overflowPaddings[side] = overflowPadding;
                         }
-                        
-                        if(!overflowPaddings){ 
-                            overflowPaddings= {}; 
-                        }
-                        overflowPaddings[side] = overflowPadding;
                     }
                 }
+            }, this);
+            
+            if(pvc.debug >= 6 && overflowPaddings){
+                pvc.log("[OverflowPaddings] " +  this.panelName + " " + JSON.stringify(overflowPaddings));
             }
-        }, this);
-        
-        if(pvc.debug >= 6 && overflowPaddings){
-            pvc.log("[OverflowPaddings] " +  this.panelName + " " + JSON.stringify(overflowPaddings));
         }
         
         layoutInfo.overflowPaddings = overflowPaddings;
@@ -649,25 +657,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     _createCore: function() {
-        this.renderAxis();
-    },
-    
-    /**
-     * @override
-     */
-    applyExtensions: function(){
-        
-        this.base();
-
-        this.extend(this.pvPanel,      this.panelName + "_"     );
-        this.extend(this.pvRule,       this.panelName + "Rule_" );
-        this.extend(this.pvTicks,      this.panelName + "Ticks_");
-        this.extend(this.pvLabel,      this.panelName + "Label_");
-        this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
-        this.extend(this.pvZeroLine,   this.panelName + "ZeroLine_");
-    },
-
-    renderAxis: function(){
         if(this.scale.isNull){
             return;
         }
@@ -689,15 +678,22 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var ruleParentPanel = this.pvPanel;
 
         this._rSize = rSize;
-
-        this.pvRule = ruleParentPanel.add(pv.Rule)
-            .zOrder(30)
-            .strokeStyle('black')
+        
+        var rootScene = this._getRootScene();
+        
+        this.pvRule = new pvc.visual.Rule(this, this.pvPanel, {
+                extensionId: 'rule'
+            })
+            .lock('data', [rootScene])
+            .override('defaultColor', def.fun.constant(pv.Color.names.black))
             // ex: anchor = bottom
-            [this.anchorOpposite()](0) // top (of the axis panel)
-            [size_a ](rSize) // width
-            [begin_a](rMin)  // left
-            .svg({ 'stroke-linecap': 'square' }) // So that begin/end ticks better join with the rule 
+            .lock(this.anchorOpposite(), 0) // top (of the axis panel)
+            .lock(begin_a, rMin )  // left
+            .lock(size_a,  rSize) // width
+            .pvMark
+            .zOrder(30)
+            .strokeDasharray(null) // don't inherit from parent panel
+            .lineCap('square')     // So that begin/end ticks better join with the rule 
             ;
 
         if (this.isDiscrete){
@@ -710,7 +706,103 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.renderLinearAxis();
         }
     },
-
+  
+    _getExtensionId: function(){
+        return ''; // NOTE: this is different from specifying null
+    },
+    
+    _getExtensionPrefix: function(){
+        return this.panelName;
+    },
+    
+    _getRootScene: function(){
+        if(!this._rootScene){
+            var rootScene = 
+                this._rootScene = 
+                new pvc.visual.CartesianAxisRootScene(null, {
+                    panel: this, 
+                    group: this._getRootData()
+                });
+            
+            var layoutInfo = this._layoutInfo;
+            if (this.isDiscrete){
+                if(this.useCompositeAxis){
+                    this._buildCompositeScene(rootScene);
+                } else {
+                    layoutInfo.ticks.forEach(function(tickData){
+                        new pvc.visual.CartesianAxisTickScene(rootScene, {
+                            group:     tickData,
+                            tick:      tickData.value,
+                            tickRaw:   tickData.rawValue,
+                            tickLabel: tickData.absLabel
+                        });
+                    });
+                }
+            } else {
+                var ticksText = layoutInfo.ticksText;
+                layoutInfo.ticks.forEach(function(majorTick, index){
+                    new pvc.visual.CartesianAxisTickScene(rootScene, {
+                        tick:      majorTick,
+                        tickRaw:   majorTick,
+                        tickLabel: ticksText[index]
+                    });
+                }, this);
+            }
+        }
+        
+        return this._rootScene;
+    },
+    
+    _buildCompositeScene: function(rootScene){
+        
+        var isV1Compat = this.compatVersion() <= 1;
+         
+        // Need this for code below not to throw when drawing the root
+        rootScene.vars.tick = new pvc.visual.ValueLabelVar('', "");
+        
+        recursive(rootScene);
+        
+        function recursive(scene){
+            var data = scene.group;
+            if(isV1Compat){
+                // depending on the specific version the
+                // properties nodeLabel and label existed as well
+                var tickVar = scene.vars.tick;
+                scene.nodeValue = scene.value = tickVar.rawValue;
+                scene.nodeLabel = scene.label = tickVar.label;
+            }
+            
+            if(data.childCount()){
+                data
+                    .children()
+                    .each(function(childData){
+                        var childScene = new pvc.visual.CartesianAxisTickScene(scene, {
+                            group:     childData,
+                            tick:      childData.value,
+                            tickRaw:   childData.rawValue,
+                            tickLabel: childData.label
+                        });
+                        
+                        recursive(childScene);
+                    });
+            }
+        }
+    },
+    
+    _getRootData: function(){
+        var chart = this.chart;
+        var data  = chart.data;
+        
+        if (this.isDiscrete && this.useCompositeAxis){
+            var orientation = this.anchor;
+            var reverse     = orientation == 'bottom' || orientation == 'left';
+            data  = chart.visualRoles(this.roleName)
+                         .select(data, {visible: true, reverse: reverse});
+        }
+        
+        return data;
+    },
+    
     _getOrthoScale: function(){
         var orthoType = this.axis.type === 'base' ? 'ortho' : 'base';
         return this.chart.axes[orthoType].scale; // index 0
@@ -728,12 +820,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
-            data              = this._layoutInfo.data,
-            itemCount         = this._layoutInfo.ticks.length,
+            layoutInfo        = this._layoutInfo,
+            ticks             = layoutInfo.ticks,
+            data              = layoutInfo.data,
+            itemCount         = layoutInfo.ticks.length,
+            rootScene         = this._getRootScene(),
             includeModulo;
         
         if(this.axis.option('OverlappedLabelsHide') && itemCount > 0 && this._rSize > 0) {
-            var overlapFactor = def.within(this.axis.option('OverlappedLabelsMaxPct'), 0, 0.9);
+            var overlapFactor = def.between(this.axis.option('OverlappedLabelsMaxPct'), 0, 0.9);
             var textHeight    = pvc.text.getTextHeight("m", this.font) * (1 - overlapFactor);
             includeModulo = Math.max(1, Math.ceil((itemCount * textHeight) / this._rSize));
 
@@ -748,21 +843,36 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             includeModulo = 1;
         }
         
+        var wrapper;
+        if(this.compatVersion() <= 1){
+            wrapper = function(v1f){
+                return function(tickScene){
+                    return v1f.call(this, tickScene.vars.tick.rawValue);
+                };
+            };
+        }
+        
         // Ticks correspond to each data in datas.
         // Ticks are drawn at the center of each band.
-        this.pvTicks = this.pvRule.add(pv.Rule)
-            .zOrder(20) // see pvc.js
-            .data(this._layoutInfo.ticks)
-            .localProperty('group')
-            .group(function(child){ return child; })
-            //[anchorOpposite   ](0)
-            [anchorLength     ](null)
-            [anchorOrtho      ](function(child){ return scale(child.value); })
+        var pvTicks = this.pvTicks = new pvc.visual.Rule(this, this.pvRule, {
+                extensionId: 'ticks',
+                wrapper:  wrapper
+            })
+            .lock('data', rootScene.childNodes)
+            .lock(anchorOpposite, 0) // top (of the axis panel)
+            .lock(anchorLength,   null)
+            .lockMark(anchorOrtho, function(tickScene){
+                return scale(tickScene.vars.tick.value);
+            })
+            // Transparent by default, but changeable with extension point)
+            .override('defaultColor', function(type){
+                return pv.Color.names.transparent;
+            })
+            .pvMark
+            .zOrder(20)
             [anchorOrthoLength](this.tickLength)
-            //.strokeStyle('black')
-            .strokeStyle('rgba(0,0,0,0)') // Transparent by default, but extensible
             ;
-
+        
         var align = this.isAnchorTopOrBottom() ? 
                     "center" : 
                     (this.anchor == "left") ? "right" : "left";
@@ -775,107 +885,132 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
         
         // All ordinal labels are relevant and must be visible
-        this.pvLabel = this.pvTicks.anchor(this.anchor).add(pv.Label)
-            .intercept(
-                'visible',
-                labelVisibleInterceptor,
-                this._getExtension(this.panelName + "Label", 'visible'))
-            .zOrder(40) // see pvc.js
+        var pvLabelAnchor = this.pvTicks.anchor(this.anchor);
+        
+        this.pvLabel = new pvc.visual.Label(this, pvLabelAnchor, {
+                extensionId: 'label',
+                noClick:       false,
+                noDoubleClick: false,
+                noSelect:      false,
+                noTooltips:    false,
+                noHover:       false, // TODO: to work, scenes would need a common root
+                wrapper:       wrapper,
+                tooltipArgs:   {
+                    // TODO: should be an option whether a data tooltip is desired
+                    buildTooltip: function(context){ return context.scene.vars.tick.label; },
+                    isLazy: false,
+                    
+                    tipsySettings: {
+                        gravity: this._calcTipsyGravity()
+                    }
+                }
+            })
+            .intercept('visible', function(){
+                var index  = this.index;
+                return ((index % includeModulo) === 0) && 
+                       (!pvTicks.scene || pvTicks.scene[index].visible) &&
+                       this.delegateExtension(true)
+                       ;
+            })
+            .pvMark
+            .zOrder(40)
             .textAlign(align)
-            .text(function(child){
-                var text = child.absLabel;
+            .text(function(tickScene){
+                var text = tickScene.vars.tick.label;
                 if(maxTextWidth){
                     text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
                 }
-                return text; 
+                return text;
              })
             .font(font)
-            .localProperty('group')
-            .group(function(child){ return child; })
             ;
-        
-        function labelVisibleInterceptor(getVisible, args) {
-            var visible = getVisible ? getVisible.apply(this, args) : true;
-            return visible && ((this.index % includeModulo) === 0);
-        }
-        
-        if(this._shouldHandleClick()){
-            this.pvLabel
-                .cursor("pointer")
-                .events('all') //labels don't have events by default
-                .event('click', function(child){
-                    var ev = arguments[arguments.length - 1];
-                    return myself._handleClick(child, ev);
-                });
-        }
-
-        if(this.doubleClickAction){
-            this.pvLabel
-                .cursor("pointer")
-                .events('all') //labels don't have events by default
-                .event("dblclick", function(child){
-                    var ev = arguments[arguments.length - 1];
-                    myself._handleDoubleClick(child, ev);
-                });
-        }
     },
 
     renderLinearAxis: function(){
         // NOTE: Includes time series, 
-        // so "d" may be a number or a Date object...
+        // so "tickScene.vars.tick.value" may be a number or a Date object...
         
         var scale  = this.scale,
             orthoAxis  = this._getOrthoAxis(),
             orthoScale = orthoAxis.scale,
             layoutInfo = this._layoutInfo,
             ticks      = layoutInfo.ticks,
+            tickCount  = ticks.length,
+            tickStep   = tickCount > 1 ? Math.abs(ticks[1] - ticks[0]) : 0,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
-            
-            tickStep = Math.abs(ticks[1] - ticks[0]); // ticks.length >= 2
+            rootScene         = this._getRootScene();
+        
+        var wrapper;
+        if(this.compatVersion() <= 1){
+            wrapper = function(v1f){
+                return function(tickScene){
+                    return v1f.call(this, tickScene.vars.tick.value);
+                };
+            };
+        }
         
         // (MAJOR) ticks
-        var pvTicks = this.pvTicks = this.pvRule.add(pv.Rule)
+        var pvTicks = this.pvTicks = new pvc.visual.Rule(this, this.pvRule, {
+                extensionId: 'ticks',
+                wrapper: wrapper
+            })
+            .lock('data', rootScene.childNodes)
+            .override('defaultColor', function(scene){
+                // Inherit axis color
+                // Control visibility through color or through .visible
+                // NOTE: the rule only has one scene/instance
+                return this.pvMark.proto.instance(0).strokeStyle;
+            })
+            .lock(anchorOpposite, 0) // top (of the axis panel)
+            .lock(anchorLength, null)
+            .lockMark(anchorOrtho, function(tickScene){
+                return scale(tickScene.vars.tick.value);
+            })
+            .pvMark
+            [anchorOrthoLength](this.tickLength)
             .zOrder(20)
-            .data(ticks)
-            // [anchorOpposite ](0) // Inherited from pvRule
-            [anchorLength     ](null)
-            [anchorOrtho      ](scale)
-            [anchorOrthoLength](this.tickLength);
-            // Inherit axis color
-            //.strokeStyle('black'); // control visibility through color or through .visible
+            ;
         
         // MINOR ticks are between major scale ticks
         if(this.minorTicks){
-            this.pvMinorTicks = this.pvTicks.add(pv.Rule)
-                .zOrder(20) // not inherited
-                //.data(ticks)  // ~ inherited
-                //[anchorOpposite   ](0)   // Inherited from pvRule
-                //[anchorLength     ](null)  // Inherited from pvTicks
-                [anchorOrtho      ](function(d){ 
-                    return scale((+d) + (tickStep / 2)); // NOTE: (+d) converts Dates to numbers, just like d.getTime()
+            this.pvMinorTicks = new pvc.visual.Rule(this, this.pvTicks, {
+                    extensionId: 'minorTicks',
+                    wrapper: wrapper
                 })
-                [anchorOrthoLength](this.tickLength / 2)
-                .intercept(
-                    'visible',
-                    minorTicksVisibleInterceptor,
-                    this._getExtension(this.panelName + "MinorTicks", 'visible'))
+                .override('defaultColor', function(scene){
+                    // Inherit ticks color
+                    // Control visibility through color or through .visible
+                    return pvTicks.scene ? 
+                                pvTicks.scene[this.pvMark.index].strokeStyle : 
+                                pv.Color.names.black;
+                })
+                .lock('data')              // Inherited
+                .lock(anchorOpposite, 0)   // top (of the axis panel)
+                .lock(anchorLength, null)
+                .lockMark(anchorOrtho, function(tickScene){
+                    var value = +tickScene.vars.tick.value; // NOTE: +value converts Dates to numbers, just like tickScene.vars.tick.value.getTime()
+                    return scale(value + tickStep/2); 
+                })
+                .lock(anchorOrthoLength, this.tickLength/2)
+                .intercept('visible', function(){
+                    var index = this.pvMark.index;
+                    var visible = (!pvTicks.scene || pvTicks.scene[index].visible) &&
+                                  (index < tickCount - 1);
+                    
+                    return visible && this.delegateExtension(true);
+                })
+                .pvMark
+                .zOrder(20)
                 ;
         }
 
-        function minorTicksVisibleInterceptor(getVisible, args){
-            var visible = (!pvTicks.scene || pvTicks.scene[this.index].visible) &&
-                          (this.index < ticks.length - 1);
-
-            return visible && (getVisible ? getVisible.apply(this, args) : true);
-        }
-
-        this.renderLinearAxisLabel(ticks, layoutInfo.ticksText);
+        this.renderLinearAxisLabel(wrapper);
     },
     
-    renderLinearAxisLabel: function(ticks, ticksText){
+    renderLinearAxisLabel: function(wrapper){
         // Labels are visible (only) on MAJOR ticks,
         // On first and last tick care is taken
         //  with their H/V alignment so that
@@ -883,22 +1018,32 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         // Use this margin instead of textMargin, 
         // which affects all margins (left, right, top and bottom).
-        // Exception is the small 0.5 textMargin set below....
-        var labelAnchor = this.pvTicks.anchor(this.anchor)
-                                .addMargin(this.anchorOpposite(), 2);
+        // Exception is the small 0.5 textMargin set below...
+        var pvTicks = this.pvTicks;
+        var pvLabelAnchor = pvTicks.anchor(this.anchor)
+                                 .addMargin(this.anchorOpposite(), 2);
         
         var scale = this.scale;
-        var font = this.font;
+        var font  = this.font;
         
         var maxTextWidth = this._layoutInfo.maxTextWidth;
         if(!isFinite(maxTextWidth)){
             maxTextWidth = 0;
         }
         
-        var label = this.pvLabel = labelAnchor.add(pv.Label)
+        var label = this.pvLabel = new pvc.visual.Label(this, pvLabelAnchor, {
+                extensionId: 'label',
+                wrapper: wrapper
+            })
+            .intercept('visible', function(){
+                var index  = this.pvMark.index;
+                var visible = !pvTicks.scene || pvTicks.scene[index].visible;
+                return visible && this.delegateExtension(true);
+            })
+            .pvMark
             .zOrder(40)
-            .text(function(d){
-                var text = ticksText[this.index]; // scale.tickFormat(d);
+            .text(function(tickScene){
+                var text = tickScene.vars.tick.label;
                 if(maxTextWidth){
                     text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
                 }
@@ -906,35 +1051,36 @@ pvc.AxisPanel = pvc.BasePanel.extend({
              })
             .font(this.font)
             .textMargin(0.5) // Just enough for some labels not to be cut (vertical)
-            .visible(true);
+            ;
         
         // Label alignment
         var rootPanel = this.pvPanel.root;
         if(this.isAnchorTopOrBottom()){
-            label.textAlign(function(){
+            label.textAlign(function(tickScene){
                 var absLeft;
                 if(this.index === 0){
                     absLeft = label.toScreenTransform().transformHPosition(label.left());
                     if(absLeft <= 0){
                         return 'left'; // the "left" of the text is anchored to the tick's anchor
                     }
-                } else if(this.index === ticks.length - 1) { 
+                } else if(this.index === tickScene.parent.childNodes.length - 1) { 
                     absLeft = label.toScreenTransform().transformHPosition(label.left());
                     if(absLeft >= rootPanel.width()){
                         return 'right'; // the "right" of the text is anchored to the tick's anchor
                     }
                 }
+                
                 return 'center';
             });
         } else {
-            label.textBaseline(function(){
+            label.textBaseline(function(tickScene){
                 var absTop;
                 if(this.index === 0){
                     absTop = label.toScreenTransform().transformVPosition(label.top());
                     if(absTop >= rootPanel.height()){
                         return 'bottom'; // the "bottom" of the text is anchored to the tick's anchor
                     }
-                } else if(this.index === ticks.length - 1) { 
+                } else if(this.index === tickScene.parent.childNodes.length - 1) { 
                     absTop = label.toScreenTransform().transformVPosition(label.top());
                     if(absTop <= 0){
                         return 'top'; // the "top" of the text is anchored to the tick's anchor
@@ -948,79 +1094,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     // ----------------------------
     // Click / Double-click
-    // TODO: unify this with base panel's code
-    _handleDoubleClick: function(d, ev){
-        if(!d){
-            return;
-        }
-        
-        var action = this.doubleClickAction;
-        if(action){
-            this._ignoreClicks = 2;
-
-            action.call(null, d, ev);
+    _onV1Click: function(context, handler){
+        if(this.isDiscrete && this.useCompositeAxis){
+            handler.call(context.pvMark, context.scene, context.event);
         }
     },
-
-    _shouldHandleClick: function(){
-        var options = this.chart.options;
-        return options.selectable || (options.clickable && this.clickAction);
-    },
-
-    _handleClick: function(data, ev){
-        if(!data || !this._shouldHandleClick()){
-            return;
+    
+    _onV1DoubleClick: function(context, handler){
+        if(this.isDiscrete && this.useCompositeAxis){
+            handler.call(context.pvMark, context.scene, context.event);
         }
-
-        // Selection
-        
-        if(!this.doubleClickAction){
-            this._handleClickCore(data, ev);
-        } else {
-            // Delay click evaluation so that
-            // it may be canceled if double click meanwhile fires.
-            var myself  = this,
-                options = this.chart.options;
-            window.setTimeout(
-                function(){
-                    myself._handleClickCore.call(myself, data, ev);
-                },
-                options.doubleClickMaxDelay || 300);
-        }
-    },
-
-    _handleClickCore: function(data, ev){
-        if(this._ignoreClicks) {
-            this._ignoreClicks--;
-            return;
-        }
-
-        // Classic clickAction
-        var action = this.clickAction;
-        if(action){
-            action.call(null, data, ev);
-        }
-
-        // TODO: should this be cancellable by the click action?
-        var options = this.chart.options;
-        if(options.selectable && this.isDiscrete){
-            var toggle = options.ctrlSelectMode && !ev.ctrlKey;
-            this._selectOrdinalElement(data, toggle);
-        }
-    },
-
-    _selectOrdinalElement: function(data, toggle){
-        var selectedDatums = data.datums().array();
-        
-        selectedDatums = this._onUserSelection(selectedDatums);
-        
-        if(toggle){
-            this.chart.data.owner.clearSelected();
-        }
-
-        pvc.data.Data.toggleSelected(selectedDatums);
-        
-        this._onSelectionChanged();
     },
     
     /**
@@ -1036,129 +1119,116 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         /* NOOP */
     },
     
-    /**
-     * @override
-     */
-    _detectDatumsUnderRubberBand: function(datumsByKey, rb){
-        if(!this.isDiscrete || !this.isVisible) {
-            return false;
+    /** @override */
+    _getSelectableMarks: function(){
+        if(this.isDiscrete && this.isVisible && this.pvLabel){
+            return [this.pvLabel];
         }
-        
-        var any = false;
-        
-        function addData(data) {
-            data.datums().each(function(datum){
-                datumsByKey[datum.key] = datum;
-                any = true;
-            });
-        }
-        
-        if(!this.useCompositeAxis){
-            var mark = this.pvLabel;
-            
-            mark.forEachInstance(function(instance, t){
-                if(!instance.isBreak) { 
-                    var data = instance.group;
-                    if(data) {
-                        var shape = mark.getInstanceShape(instance).apply(t);
-                        if (shape.intersectsRect(rb)){
-                            addData(data);
-                        }
-                    }
-                }
-            }, this);
-            
-        } else {
-            var t = this._pvLayout.toScreenTransform();
-            this._rootElement.visitBefore(function(data, i){
-                if(i > 0){
-                    var centerX = t.transformHPosition(data.x + data.dx /2),
-                        centerY = t.transformVPosition(data.y + data.dy /2);
-                    if(rb.containsPoint(centerX, centerY)){
-                       addData(data);
-                    }
-                }
-            });
-        }
-        
-        return any;
     },
-    
+
     /////////////////////////////////////////////////
     //begin: composite axis
     renderCompositeOrdinalAxis: function(){
         var myself = this,
             isTopOrBottom = this.isAnchorTopOrBottom(),
             axisDirection = isTopOrBottom ? 'h' : 'v',
-            tipsyGravity  = this._calcTipsyGravity(),
             diagDepthCutoff = 2, // depth in [-1/(n+1), 1]
-            vertDepthCutoff = 2;
+            vertDepthCutoff = 2,
+            font = this.font;
+        
+        var diagMargin = pvc.text.getFontSize(font) / 2;
         
         var layout = this._pvLayout = this.getLayoutSingleCluster();
 
         // See what will fit so we get consistent rotation
         layout.node
             .def("fitInfo", null)
-            .height(function(d, e, f){
+            .height(function(tickScene, e, f){
                 // Just iterate and get cutoff
-                var fitInfo = pvc.text.getFitInfo(d.dx, d.dy, d.label, myself.font, diagMargin);
+                var fitInfo = pvc.text.getFitInfo(tickScene.dx, tickScene.dy, tickScene.vars.tick.label, font, diagMargin);
                 if(!fitInfo.h){
-                    if(axisDirection == 'v' && fitInfo.v){ // prefer vertical
-                        vertDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                    if(axisDirection === 'v' && fitInfo.v){ // prefer vertical
+                        vertDepthCutoff = Math.min(diagDepthCutoff, tickScene.depth);
                     } else {
-                        diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                        diagDepthCutoff = Math.min(diagDepthCutoff, tickScene.depth);
                     }
                 }
 
                 this.fitInfo(fitInfo);
 
-                return d.dy;
+                return tickScene.dy;
             });
 
         // label space (left transparent)
         // var lblBar =
         layout.node.add(pv.Bar)
             .fillStyle('rgba(127,127,127,.001)')
-            .strokeStyle(function(d){
-                if(d.maxDepth === 1 || !d.maxDepth) { // 0, 0.5, 1
+            .strokeStyle(function(tickScene){
+                if(tickScene.maxDepth === 1 || !tickScene.maxDepth) { // 0, 0.5, 1
                     return null;
                 }
 
                 return "rgba(127,127,127,0.3)"; //non-terminal items, so grouping is visible
             })
-            .lineWidth( function(d){
-                if(d.maxDepth === 1 || !d.maxDepth) {
+            .lineWidth( function(tickScene){
+                if(tickScene.maxDepth === 1 || !tickScene.maxDepth) {
                     return 0;
                 }
                 return 0.5; //non-terminal items, so grouping is visible
             })
-            .text(function(d){
-                return d.label;
+            .text(function(tickScene){
+                return tickScene.vars.tick.label;
             });
 
         //cutoffs -> snap to vertical/horizontal
         var H_CUTOFF_ANG = 0.30,
             V_CUTOFF_ANG = 1.27;
         
-        var diagMargin = pvc.text.getFontSize(this.font) / 2;
-
         var align = isTopOrBottom ?
                     "center" :
                     (this.anchor == "left") ? "right" : "left";
-
-        //draw labels and make them fit
-        this.pvLabel = layout.label.add(pv.Label)
+        
+        var wrapper;
+        if(this.compatVersion() <= 1){
+            wrapper = function(v1f){
+                return function(tickScene){
+                    return v1f.call(this, tickScene);
+                };
+            };
+        }
+        
+        // draw labels and make them fit
+        this.pvLabel = new pvc.visual.Label(this, layout.label, {
+                extensionId: 'label',
+                noClick:       false,
+                noDoubleClick: false,
+                noSelect:      false,
+                noTooltips:    false,
+                noHover:       false, // TODO: to work, scenes would need a common root
+                wrapper:       wrapper,
+                tooltipArgs:   {
+                    // TODO: should be an option whether a data tooltip is desired
+                    isLazy: false,
+                    buildTooltip: function(context){ return context.scene.vars.tick.label; },
+                    
+                    tipsySettings: {
+                        gravity: this._calcTipsyGravity(),
+                        offset:  diagMargin * 2
+                    }
+                }
+            })
+            .pvMark
             .def('lblDirection','h')
-            .textAngle(function(d){
-                if(d.depth >= vertDepthCutoff && d.depth < diagDepthCutoff){
+            .textAngle(function(tickScene){
+                if(tickScene.depth >= vertDepthCutoff && tickScene.depth < diagDepthCutoff){
                     this.lblDirection('v');
                     return -Math.PI/2;
                 }
 
-                if(d.depth >= diagDepthCutoff){
-                    var tan = d.dy/d.dx;
+                if(tickScene.depth >= diagDepthCutoff){
+                    var tan = tickScene.dy/tickScene.dx;
                     var angle = Math.atan(tan);
-                    //var hip = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
+                    //var hip = Math.sqrt(tickScene.dy*tickScene.dy + tickScene.dx*tickScene.dx);
 
                     if(angle > V_CUTOFF_ANG){
                         this.lblDirection('v');
@@ -1176,91 +1246,54 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             .textMargin(1)
             //override central alignment for horizontal text in vertical axis
-            .textAlign(function(d){
-                return (axisDirection != 'v' || d.depth >= vertDepthCutoff || d.depth >= diagDepthCutoff)? 'center' : align;
+            .textAlign(function(tickScene){
+                return (axisDirection != 'v' || tickScene.depth >= vertDepthCutoff || tickScene.depth >= diagDepthCutoff)? 'center' : align;
             })
-            .left(function(d) {
-                return (axisDirection != 'v' || d.depth >= vertDepthCutoff || d.depth >= diagDepthCutoff)?
-                     d.x + d.dx/2 :
-                     ((align == 'right')? d.x + d.dx : d.x);
+            .left(function(tickScene) {
+                return (axisDirection != 'v' || tickScene.depth >= vertDepthCutoff || tickScene.depth >= diagDepthCutoff)?
+                     tickScene.x + tickScene.dx/2 :
+                     ((align == 'right')? tickScene.x + tickScene.dx : tickScene.x);
             })
-            .font(this.font)
-            .text(function(d){
+            .font(font)
+            .text(function(tickScene){
                 var fitInfo = this.fitInfo();
+                var label = tickScene.vars.tick.label;
                 switch(this.lblDirection()){
                     case 'h':
                         if(!fitInfo.h){//TODO: fallback option for no svg
-                            return pvc.text.trimToWidth(d.dx, d.label, myself.font, '..');
+                            return pvc.text.trimToWidth(tickScene.dx, label, font, '..');
                         }
                         break;
                     case 'v':
                         if(!fitInfo.v){
-                            return pvc.text.trimToWidth(d.dy, d.label, myself.font, '..');
+                            return pvc.text.trimToWidth(tickScene.dy, label, font, '..');
                         }
                         break;
                     case 'd':
                        if(!fitInfo.d){
-                          //var ang = Math.atan(d.dy/d.dx);
-                          var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx) ;
-                          return pvc.text.trimToWidth(diagonalLength - diagMargin, d.label, myself.font,'..');
+                          //var ang = Math.atan(tickScene.dy/tickScene.dx);
+                          var diagonalLength = Math.sqrt(tickScene.dy*tickScene.dy + tickScene.dx*tickScene.dx) ;
+                          return pvc.text.trimToWidth(diagonalLength - diagMargin, label, font,'..');
                         }
                         break;
                 }
-                return d.label;
+                
+                return label;
             })
-            .cursor('default')
-            .events('all'); //labels don't have events by default
-
-        if(this._shouldHandleClick()){
-            this.pvLabel
-                .cursor("pointer")
-                .event('click', function(data){
-                    var ev = arguments[arguments.length - 1];
-                    return myself._handleClick(data, ev);
-                });
-        }
-
-        if(this.doubleClickAction){
-            this.pvLabel
-                .cursor("pointer")
-                .event("dblclick", function(data){
-                    var ev = arguments[arguments.length - 1];
-                    myself._handleDoubleClick(data, ev);
-                });
-        }
-
-        // tooltip
-        var tipsySettings = def.set(Object.create(this.chart.options.tipsySettings),
-                'gravity', tipsyGravity,
-                'offset',  diagMargin * 2);
-        
-        this.pvLabel
-            .title(function(d){
-                this.instance().tooltip = d.label;
-                return '';
-            })
-            .event("mouseover", pv.Behavior.tipsy(tipsySettings));
+            ;
     },
     
     getLayoutSingleCluster: function(){
-        // TODO: extend this to work with chart.orientation?
-        var orientation = this.anchor,
-            reverse   = orientation == 'bottom' || orientation == 'left',
-            data      = this.chart.visualRoles(this.roleName)
-                            .select(this.chart.data, {visible: true, reverse: reverse}),
-            
-            maxDepth  = data.treeHeight,
-            elements  = data.nodes(),
-            
+        var rootScene   = this._buildCompositeScene(),
+            orientation = this.anchor,
+            maxDepth    = rootScene.group.treeHeight,
             depthLength = this._layoutInfo.axisSize;
         
-        this._rootElement = elements[0]; // lasso
-            
         // displace to take out bogus-root
         maxDepth++;
         
         var baseDisplacement = depthLength / maxDepth,
-            margin = maxDepth > 2 ? ((1/12) * depthLength) : 0;//heuristic compensation
+            margin = maxDepth > 2 ? ((1/12) * depthLength) : 0; // heuristic compensation
         
         baseDisplacement -= margin;
         
@@ -1291,7 +1324,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // pv.Hierarchy must always have exactly one root and
         //  at least one element besides the root
         return panel.add(pv.Layout.Cluster.Fill)
-                    .nodes(elements)
+                    .nodes(rootScene.nodes())
                     .orient(orientation);
     },
     

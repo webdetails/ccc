@@ -79,7 +79,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             waterColor = chart._waterColor
             ;
 
-        if(chart.options.showWaterGroupAreas){
+        if(options.showWaterGroupAreas){
             var panelColors = pv.Colors.category10();
             var waterGroupRootScene = this._buildWaterGroupScene();
             
@@ -126,11 +126,14 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             ;
         
         this.pvWaterfallLine = new pvc.visual.Rule(this, this.pvPanel, {
-                extensionId: 'barWaterfallLine',
-                noTooltips:  false,
-                noHoverable: false
+                extensionId:  'barWaterfallLine',
+                noTooltips:    false,
+                noHover:       false,
+                noSelect:      false,
+                noClick:       false,
+                noDoubleClick: false
             })
-            .lockValue('data', ruleRootScene.childNodes)
+            .lock('data', ruleRootScene.childNodes)
             .optional('visible', function(){
                 return ( isFalling && !!this.scene.previousSibling) ||
                        (!isFalling && !!this.scene.nextSibling);
@@ -138,14 +141,14 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             .optional(anchor, function(){ 
                 return orthoZero + chart.animate(0, sceneOrthoScale(this.scene) - orthoZero);
             })
-            .optionalValue(this.anchorLength(anchor), barStepWidth + barWidth)
+            .optional(this.anchorLength(anchor), barStepWidth + barWidth)
             .optional(ao,
                 isFalling ?
                     function(){ return sceneBaseScale(this.scene) - barStepWidth - barWidth2; } :
                     function(){ return sceneBaseScale(this.scene) - barWidth2; })
-            .override('baseColor', function(){ return this.delegate(waterColor); })
+            .override('baseColor', function(){ return this.delegateExtension(waterColor); })
             .pvMark
-            .svg({ 'stroke-linecap': 'round' })
+            .lineCap('round')
             ;
 
         if(chart.options.showWaterValues){
@@ -175,13 +178,12 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
      */
     applyExtensions: function(){
 
+        this.extend(this.pvWaterfallLabel,      "barWaterfallLabel");
+        this.extend(this.pvWaterfallGroupPanel, "barWaterfallGroup");
+        
         this.base();
-
-        this.extend(this.pvWaterfallLine,       "barWaterfallLine_");
-        this.extend(this.pvWaterfallLabel,      "barWaterfallLabel_");
-        this.extend(this.pvWaterfallGroupPanel, "barWaterfallGroup_");
     },
-
+    
     _buildRuleScene: function(){
         var rootScene  = new pvc.visual.Scene(null, {panel: this, group: this._getVisibleData()});
         

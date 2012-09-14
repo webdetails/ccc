@@ -5,95 +5,122 @@ def.type('pvc.visual.Sign')
     this.panel  = panel;
     this.pvMark = pvMark;
     
-    this.extensionId = def.get(keyArgs, 'extensionId');
-    this.isActiveSeriesAware = !!this.chart.visualRoles('series', {assertExists: false}) &&
-                               def.get(keyArgs, 'activeSeriesAware', true);
-            
+    this.bits = 0;
+    
+    var extensionId = def.get(keyArgs, 'extensionId');
+    if(extensionId != null){
+        this.extensionAbsId = panel._makeExtensionAbsId(extensionId);
+    }
+    
+    this.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true) && 
+                               !!this.chart.visualRoles('series', {assertExists: false});
+    
     /* Extend the pv mark */
     pvMark
         .localProperty('_scene', Object)
         .localProperty('group',  Object);
     
-    this.lock('_scene', function(){ 
-            return this.scene; 
-        })
+    var wrapper = def.get(keyArgs, 'wrapper');
+    if(!wrapper){
+        wrapper = function(f){
+            return function(scene){
+                return f.call(panel._getContext(pvMark), scene);
+            };
+        };
+    }
+    pvMark.wrapper(wrapper);
+    
+    this.lockMark('_scene', function(scene){ return scene; })
         /* TODO: remove these when possible and favor access through scene */
-        .lock('group', function(){ 
-            return this.scene.group; 
-        })
-        .lock('datum', function(){ 
-            return this.scene.datum; 
-        });
+        .lockMark('group',  function(scene){ return scene && scene.group; })
+        .lockMark('datum',  function(scene){ return scene && scene.datum; })
+        ;
     
     pvMark.sign = this;
     
     /* Intercept the protovis mark's buildInstance */
     
     // Avoid doing a function bind, cause buildInstance is a very hot path
-    pvMark._buildInstance = pvMark.buildInstance;
-    pvMark.buildInstance  = this._dispatchBuildInstance;
+    pvMark.__buildInstance = pvMark.buildInstance;
+    pvMark.buildInstance   = this._dispatchBuildInstance;
 })
 .postInit(function(panel, pvMark, keyArgs){
+    
+    panel._addSign(this);
+    
     this._addInteractive(keyArgs);
 })
 .add({
+    _bitShowsInteraction:  4,
+    _bitShowsTooltips:     8,
+    _bitSelectable:       16,
+    _bitHoverable:        32,
+    _bitClickable:        64,
+    _bitDoubleClickable: 128,
+    
+    showsInteraction:  function(){ return true; /*(this.bits & this._bitShowsInteraction ) !== 0;*/ },
+    showsTooltips:     function(){ return (this.bits & this._bitShowsTooltips  ) !== 0; },
+    isSelectable:      function(){ return (this.bits & this._bitSelectable     ) !== 0; },
+    isHoverable:       function(){ return (this.bits & this._bitHoverable      ) !== 0; },
+    isClickable:       function(){ return (this.bits & this._bitClickable      ) !== 0; },
+    isDoubleClickable: function(){ return (this.bits & this._bitDoubleClickable) !== 0; },
+    
+    extensionAbsId: null,
+    
     _addInteractive: function(keyArgs){
         var panel   = this.panel,
             pvMark  = this.pvMark,
             options = this.chart.options;
-
-        if(!def.get(keyArgs, 'noTooltips', false) && options.showTooltips){
-            this.panel._addPropTooltip(pvMark);
+        
+        var bits = this.bits;
+        
+        if(options.showTooltips && !def.get(keyArgs, 'noTooltips')){
+            bits |= this._bitShowsTooltips;
+            
+            this.panel._addPropTooltip(pvMark, def.get(keyArgs, 'tooltipArgs'));
         }
-
-        if(!def.get(keyArgs, 'noHoverable', false) && options.hoverable) {
-            // Add hover-active behavior
-            // May still require the point behavior on some ascendant panel
-            var onEvent,
-                offEvent;
-
-//            switch(pvMark.type) {
-//                default:
-//                case 'dot':
-//                case 'line':
-//                case 'area':
-//                case 'rule':
-//                    onEvent  = 'point';
-//                    offEvent = 'unpoint';
-//                   panel._requirePointEvent();
-//                    break;
-
-//                default:
-                    onEvent = 'mouseover';
-                    offEvent = 'mouseout';
-//                    break;
-//            }
-
-            pvMark
-                .event(onEvent, function(scene){
-                    scene.setActive(true);
-
-                    if(!panel.topRoot.rubberBand || panel.isAnimating()) {
-                        panel._renderInteractive();
-                    }
-                })
-                .event(offEvent, function(scene){
-                    if(scene.clearActive()) {
-                        /* Something was active */
-                        if(!panel.topRoot.rubberBand || panel.isAnimating()) {
-                            panel._renderInteractive();
-                        }
-                    }
-                });
+        
+        var selectable = false;
+        var clickable  = false;
+        
+        if(options.selectable || options.hoverable){
+            if(options.selectable && !def.get(keyArgs, 'noSelect')){
+                bits |= (this._bitShowsInteraction | this._bitSelectable);
+                selectable = true;
+            }
+            
+            if(options.hoverable && !def.get(keyArgs, 'noHover')){
+                bits |= (this._bitShowsInteraction | this._bitHoverable);
+                
+                panel._addPropHoverable(pvMark);
+            }
+            
+            var showsInteraction = def.get(keyArgs, 'showsInteraction');
+            if(showsInteraction != null){
+                if(showsInteraction){
+                    bits |=  this._bitShowsInteraction;
+                } else {
+                    bits &= ~this._bitShowsInteraction;
+                }
+            }
         }
-
-        if(!def.get(keyArgs, 'noClick', false) && panel._shouldHandleClick()){
+        
+        if(!def.get(keyArgs, 'noClick') && panel._isClickable()){
+            bits |= this._bitClickable;
+            clickable = true;
+        }
+        
+        if(selectable || clickable){
             panel._addPropClick(pvMark);
         }
-
-        if(!def.get(keyArgs, 'noDoubleClick', false) && options.doubleClickAction) {
+        
+        if(!def.get(keyArgs, 'noDoubleClick') && panel._isDoubleClickable()){
+            bits |= this._bitDoubleClickable;
+            
             panel._addPropDoubleClick(pvMark);
         }
+        
+        this.bits = bits;
     },
     
     /* SCENE MAINTENANCE */
@@ -109,6 +136,9 @@ def.type('pvc.visual.Sign')
         var scene  = instance.data;
         this.scene = scene;
         
+        var index = scene ? scene.childIndex() : 0;
+        this.index = index < 0 ? 0 : index;
+        
         /* 
          * Update the scene's render id, 
          * which possibly invalidates per-render
@@ -120,57 +150,72 @@ def.type('pvc.visual.Sign')
         /* state per: sign & scene & render */
         this.state = {};
 
-        mark._buildInstance.call(mark, instance);
+        mark.__buildInstance.call(mark, instance);
     },
     
     /* Extensibility */
-    intercept: function(name, method, noCast){
-        if(typeof method !== 'function'){
-            // Assume string with name of method
-            // This allows instance-overriding methods,
-            //  because the method's value is lazily captured.
-            method = def.methodCaller('' + method);
+    /**
+     * Any protovis properties that have been specified 
+     * before the call to this method
+     * are either locked or are defaults.
+     * 
+     * This method applies user extensions to the protovis mark.
+     * Default properties are replaced.
+     * Locked properties are respected.
+     * 
+     * Any function properties that are specified 
+     * after the call to this method
+     * will have access to the user extension by 
+     * calling {@link pv.Mark#delegate}.
+     */
+    applyExtensions: function(){
+        if(!this._extended){
+            this._extended = true;
+            
+            var extensionAbsId = this.extensionAbsId;
+            if(extensionAbsId){
+                this.panel.extendAbs(this.pvMark, extensionAbsId);
+            }
         }
-        
-        var me = this;
-        this.pvMark.intercept(
-                name,
-                function(fun, args){
-                    var prevExtFun = me._extFun, prevExtArgs = me._extArgs;
-                    me._extFun = fun;
-                    me._extArgs = args;
-                    try {
-                        return method.apply(me, args);
-                    } finally{
-                        me._extFun = prevExtFun;
-                        me._extArgs = prevExtArgs;
-                    }
-                },
-                this._getExtension(name),
-                noCast);
         
         return this;
     },
     
-    delegate: function(dv){
-        // TODO wrapping context
-        var result;
-        if(this._extFun) {
-            result = this._extFun.apply(this, this._extArgs);
-            if(result === undefined) {
-                result = dv;
-            }
-        } else {
-            result = dv;
-        }
-        
-        return result;
+    // -------------
+    
+    localProperty: function(name, type){
+        this.pvMark.localProperty(name, type);
+        return this;
     },
     
-    hasDelegate: function(){
-        return !!this._extFun;
+    // -------------
+    
+    intercept: function(name, fun){
+        return this._intercept(name, fun.bind(this));
     },
-
+    
+    lock: function(name, value){
+        return this.lockMark(name, this._bindWhenFun(value));
+    },
+    
+    optional: function(name, value){
+        return this.optionalMark(name, this._bindWhenFun(value));
+    },
+    
+    // -------------
+    
+    lockMark: function(name, value){
+        this.pvMark.lock(name, value);
+        return this;
+    },
+    
+    optionalMark: function(name, value){
+        this.pvMark[name](value);
+        return this;
+    },
+    
+    // -------------
+    
     lockDimensions: function(){
         this.pvMark
             .lock('left')
@@ -182,43 +227,62 @@ def.type('pvc.visual.Sign')
         
         return this;
     },
-
-    lock: function(name, method){
-        if(typeof method !== 'function'){
-            method = def.methodCaller('' + method, this);
-        } else {
-            method = method.bind(this);
-        }
-        
-        return this.lockValue(name, method);
+    
+    // -------------
+    
+    _interceptDynamic: function(name, method){
+        // Extensions must have been applied or interception does not work.
+        return this._intercept(name, def.methodCaller('' + method, this));
     },
     
-    lockValue: function(name, value){
-        this.pvMark.lock(name, value);
+    _intercept: function(name, fun){
+        var extensionAbsId = this.extensionAbsId;
+        if(extensionAbsId){
+            var extValue = this.panel._getExtensionAbs(extensionAbsId, name);
+            if(extValue !== undefined){
+                // Gets set on the mark; We intercept it afterwards
+                this.pvMark.intercept(name, extValue);
+            }
+        }
+        
+        var mark = this.pvMark;
+        
+        (mark._intercepted || (mark._intercepted = {}))[name] = true;
+        mark.intercept(name, fun); // override
+        
         return this;
     },
     
-    optional: function(name, method){
-        if(typeof method !== 'function'){
-            method = def.methodCaller('' + method, this);
-        } else {
-            method = method.bind(this);
+    _lockDynamic: function(name, method){
+        return this.lockMark(name, def.methodCaller('' + method, this));
+    },
+    
+    // -------------
+    
+    delegate: function(dv, tag){
+        return this.pvMark.delegate(dv, tag);
+    },
+    
+    delegateExtension: function(dv){
+        return this.pvMark.delegate(dv, pvc.extensionTag);
+    },
+    
+    hasDelegate: function(tag){
+        return this.pvMark.hasDelegate(tag);
+    },
+    
+    hasExtension: function(){
+        return this.pvMark.hasDelegate(pvc.extensionTag);
+    },
+    
+    // -------------
+    
+    _bindWhenFun: function(value){
+        if(typeof value === 'function'){
+            return value.bind(this);
         }
         
-        return this.optionalValue(name, method);
-    },
-    
-    optionalValue: function(name, value){
-        this.pvMark[name](value);
-        return this;
-    },
-    
-    _getExtension: function(name){
-        return this.panel._getExtension(this.extensionId, name);
-    },
-    
-    _versionedExtFun: function(prop, extPointFun, version){
-        return extPointFun;
+        return value;
     },
     
     /* COLOR */
@@ -228,7 +292,7 @@ def.type('pvc.visual.Sign')
             return null;
         }
 
-        if(this.scene.anyInteraction()) {
+        if(this.showsInteraction() && this.scene.anyInteraction()) {
             color = this.interactiveColor(type, color);
         } else {
             color = this.normalColor(type, color);
@@ -238,7 +302,7 @@ def.type('pvc.visual.Sign')
     },
     
     baseColor: function(type){
-        var color = this.delegate();
+        var color = this.delegateExtension();
         if(color === undefined){
             color = this.defaultColor(type);
         }

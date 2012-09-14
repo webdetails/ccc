@@ -28,13 +28,13 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
     },
 
     /* @override */
-    _createMainContentPanel: function(parentPanel){
+    _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in LineDotAreaAbstract");
         }
         
         var options = this.options;
-        return new pvc.LineDotAreaPanel(this, parentPanel, {
+        return new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
             stacked:        options.stacked,
             showValues:     options.showValues,
             valuesAnchor:   options.valuesAnchor,
@@ -43,7 +43,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
             showAreas:      options.showAreas,
             orientation:    options.orientation,
             nullInterpolationMode: options.nullInterpolationMode
-        });
+        }));
     },
     
     defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {

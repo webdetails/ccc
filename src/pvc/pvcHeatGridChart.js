@@ -95,16 +95,16 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel){
+    _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in heatGridChart");
         }
         
         var options = this.options;
-        return new pvc.HeatGridChartPanel(this, parentPanel, {
-            showValues:  options.showValues,
-            orientation: options.orientation
-        });
+        return new pvc.HeatGridChartPanel(this, parentPanel, def.create(baseOptions, {
+            showValues:         options.showValues,
+            orientation:        options.orientation
+        }));
     },
     
     defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
@@ -342,7 +342,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
             this._addPropClick(this.shapes);
         }
 
-        if(options.doubleClickAction){ // TODO: should have valueDimName -> value argument
+        if(this.doubleClickAction){ // TODO: should have valueDimName -> value argument
             this._addPropDoubleClick(this.shapes);
         }
         
@@ -359,12 +359,12 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         this.base();
 
         if(this.pvHeatGridLabel){
-            this.extend(this.pvHeatGridLabel, "heatGridLabel_");
+            this.extend(this.pvHeatGridLabel, "heatGridLabel");
         }
 
         // Extend heatGrid and heatGridPanel
-        this.extend(this.pvHeatGrid,"heatGridPanel_");
-        this.extend(this.pvHeatGrid,"heatGrid_");
+        this.extend(this.pvHeatGrid,"heatGridPanel");
+        this.extend(this.pvHeatGrid,"heatGrid");
     },
 
     createHeatMap: function(w, h, getFillColor){
@@ -509,7 +509,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
      * Returns an array of marks whose instances are associated to a datum, or null.
      * @override
      */
-    _getSignums: function(){
+    _getSelectableMarks: function(){
         return [this.shapes];
     },
     

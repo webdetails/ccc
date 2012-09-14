@@ -576,10 +576,10 @@ pvc.ParCoordPanel = pvc.BasePanel.extend({
      *******/
 
     // Extend ParallelCoordinates
-    this.extend(this.pvParCoord,"parCoord_");
+    this.extend(this.pvParCoord,"parCoord");
     // the parCoord panel is the base-panel (not the colored dynamic overlay)
 
     // Extend body
-    this.extend(this.pvPanel,"chart_");
+    this.extend(this.pvPanel,"chart");
   }
 });

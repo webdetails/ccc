@@ -89,36 +89,36 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
     },
 
     /* @override */
-    _createMainContentPanel: function(parentPanel){
+    _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in boxplotChart");
         }
         
         var options = this.options;
         
-        var boxPanel = new pvc.BoxplotChartPanel(this, parentPanel, {
-            orientation:   options.orientation,
+        var boxPanel = new pvc.BoxplotChartPanel(this, parentPanel, def.create(baseOptions, {
+            orientation:        options.orientation,
             // boxplot specific options
-            boxSizeRatio:  options.boxSizeRatio,
-            maxBoxSize:    options.maxBoxSize,
-            boxplotColor:  options.boxplotColor
-        });
+            boxSizeRatio:       options.boxSizeRatio,
+            maxBoxSize:         options.maxBoxSize,
+            boxplotColor:       options.boxplotColor
+        }));
 
         if(options.secondAxis){
             if(pvc.debug >= 3){
                 pvc.log("Creating LineDotArea panel.");
             }
 
-            var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, {
-                orientation:    options.orientation,
-                stacked:        false,
-                showValues:     !(options.compatVersion <= 1) && options.showValues,
-                valuesAnchor:   options.valuesAnchor,
-                showLines:      options.showLines,
-                showDots:       options.showDots,
-                showAreas:      options.showAreas,
+            var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
+                orientation:        options.orientation,
+                stacked:            false,
+                showValues:         !(options.compatVersion <= 1) && options.showValues,
+                valuesAnchor:       options.valuesAnchor,
+                showLines:          options.showLines,
+                showDots:           options.showDots,
+                showAreas:          options.showAreas,
                 nullInterpolationMode: options.nullInterpolationMode
-            });
+            }));
 
             this._linePanel = linePanel;
         }
@@ -191,12 +191,15 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         }
 
         this.pvVRuleTop = setupVRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:  'boxVRule',
-                freePosition: true,
-                noHoverable:  false
+                extensionId:   'boxVRule',
+                freePosition:  true,
+                noHover:       false,
+                noSelect:      false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(scene){
-                return scene.vars.category.showVRuleAbove && this.delegate(true);
+                return scene.vars.category.showVRuleAbove && this.delegateExtension(true);
             })
             .lock(a_bottom, function(scene){ return scene.vars.category.vRuleAboveBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.vRuleAboveHeight; })
@@ -204,12 +207,15 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
             ;
 
         this.pvVRuleBot = setupVRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:  'boxVRule',
-                freePosition: true,
-                noHoverable:  false
+                extensionId:   'boxVRule',
+                freePosition:  true,
+                noHover:       false,
+                noSelect:      false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(scene){
-                return scene.vars.category.showVRuleBelow && this.delegate(true);
+                return scene.vars.category.showVRuleBelow && this.delegateExtension(true);
             })
             .lock(a_bottom, function(scene){ return scene.vars.category.vRuleBelowBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.vRuleBelowHeight; })
@@ -226,12 +232,12 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         }
 
         this.pvBar = setupHCateg(new pvc.visual.Bar(this, this.pvBoxPanel, {
-                extensionId: 'boxBar',
-                freePosition: true,
-                normalStroke: true
+                extensionId:   'boxBar',
+                freePosition:  true,
+                normalStroke:  true
             }))
             .intercept('visible', function(scene){
-                return scene.vars.category.showBox && this.delegate(true);
+                return scene.vars.category.showBox && this.delegateExtension(true);
             })
             .lock(a_bottom, function(scene){ return scene.vars.category.boxBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.boxHeight; })
@@ -257,36 +263,45 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         }
         
         this.pvHRule5 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:  'boxHRule5',
-                freePosition: true,
-                noHoverable:  false
+                extensionId:   'boxHRule5',
+                freePosition:  true,
+                noHover:       false,
+                noSelect:      false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(){
-                return this.scene.vars.percentil5.value != null && this.delegate(true);
+                return this.scene.vars.percentil5.value != null && this.delegateExtension(true);
             })
             .lock(a_bottom,  function(){ return this.scene.vars.percentil5.position; }) // bottom
             .pvMark
             ;
 
         this.pvHRule95 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:  'boxHRule95',
-                freePosition: true,
-                noHoverable:  false
+                extensionId:   'boxHRule95',
+                freePosition:  true,
+                noHover:       false,
+                noSelect:      false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(){
-                return this.scene.vars.percentil95.value != null && this.delegate(true);
+                return this.scene.vars.percentil95.value != null && this.delegateExtension(true);
             })
             .lock(a_bottom,  function(){ return this.scene.vars.percentil95.position; }) // bottom
             .pvMark
             ;
 
         this.pvHRule50 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:  'boxHRule50',
-                freePosition: true,
-                noHoverable:  false
+                extensionId:   'boxHRule50',
+                freePosition:  true,
+                noHover:       false,
+                noSelect:      false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(){
-                return this.scene.vars.median.value != null && this.delegate(true);
+                return this.scene.vars.median.value != null && this.delegateExtension(true);
             })
             .lock(a_bottom,  function(){ return this.scene.vars.median.position; }) // bottom
             .override('defaultStrokeWidth', def.fun.constant(2))
@@ -298,18 +313,12 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
      * @override
      */
     applyExtensions: function(){
-
-        this.base();
-
+        
         // Extend bar and barPanel
-        this.extend(this.pvBoxPanel, "boxPanel_");
-        this.extend(this.pvBoxPanel, "box_");
-        this.extend(this.pvBar,      "boxBar_");
-        this.extend(this.hRule50,    "boxHRule50_");
-        this.extend(this.hRule5,     "boxHRule5_");
-        this.extend(this.hRule95,    "boxHRule95_");
-        this.extend(this.pvVRuleTop, "boxVRule_");
-        this.extend(this.pvVRuleBot, "boxVRule_");
+        this.extend(this.pvBoxPanel, "boxPanel");
+        this.extend(this.pvBoxPanel, "box");
+        
+        this.base();
     },
 
     /**
@@ -324,7 +333,7 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
      * Returns an array of marks whose instances are associated to a datum or group, or null.
      * @override
      */
-    _getSignums: function(){
+    _getSelectableMarks: function(){
         return [this.pvBar];
     },
 

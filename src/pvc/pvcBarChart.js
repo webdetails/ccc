@@ -50,28 +50,28 @@ pvc.BarChart = pvc.BarAbstract.extend({
     /**
      * @override 
      */
-    _createMainContentPanel: function(parentPanel){
+    _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in barChart");
         }
         
         var options = this.options;
-        var barPanel = new pvc.BarPanel(this, parentPanel, {
+        var barPanel = new pvc.BarPanel(this, parentPanel, def.create(baseOptions, {
             colorAxis:      this.axes.color,
-            dataPartValue:  options.secondAxis ? '0' : null,
-            barSizeRatio: options.barSizeRatio,
-            maxBarSize:   options.maxBarSize,
-            showValues:   options.showValues,
-            valuesAnchor: options.valuesAnchor,
-            orientation:  options.orientation
-        });
+            dataPartValue:      options.secondAxis ? '0' : null,
+            barSizeRatio:       options.barSizeRatio,
+            maxBarSize:         options.maxBarSize,
+            showValues:         options.showValues,
+            valuesAnchor:       options.valuesAnchor,
+            orientation:        options.orientation
+        }));
 
         if(options.secondAxis){
             if(pvc.debug >= 3){
                 pvc.log("Creating LineDotArea panel.");
             }
             
-            var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, {
+            var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
                 colorAxis:      this.axes.color2,
                 dataPartValue:  '1',
                 stacked:        false,
@@ -82,7 +82,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 showAreas:      options.showAreas,
                 orientation:    options.orientation,
                 nullInterpolationMode: options.nullInterpolationMode
-            });
+            }));
 
             this._linePanel = linePanel;
             

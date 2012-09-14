@@ -11,11 +11,18 @@
  * @constructor
  * @param {any} value The value of the variable.
  * @param {any} label The label of the variable.
+ * @param {any} [rawValue] The raw value of the variable.
  */
-pvc.visual.ValueLabelVar = function(value, label){
+pvc.visual.ValueLabelVar = function(value, label, rawValue){
     this.value = value;
     this.label = label;
+    
+    if(rawValue !== undefined){
+        this.rawValue = rawValue;
+    }
 };
+
+pvc.visual.ValueLabelVar.prototype.rawValue = undefined;
 
 pvc.visual.ValueLabelVar.prototype.toString = function(){
     var label = this.label || this.value;

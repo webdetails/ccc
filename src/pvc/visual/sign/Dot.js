@@ -4,6 +4,11 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     
     var pvMark = protoMark.add(pv.Dot);
     
+    protoMark = def.get(keyArgs, 'proto');
+    if(protoMark){
+        pvMark.extend(protoMark);
+    }
+    
     this.base(panel, pvMark, keyArgs);
     
     if(!def.get(keyArgs, 'freePosition', false)){
@@ -11,21 +16,21 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             orthoPosProp = panel.anchorOrtho(basePosProp);
         
         this/* Positions */
-            .lock(orthoPosProp, 'y')
-            .lock(basePosProp,  'x');
+            ._lockDynamic(orthoPosProp, 'y')
+            ._lockDynamic(basePosProp,  'x');
     }
        
     this/* Shape & Size */
-        .intercept('shape',       'shape' )
-        .intercept('shapeRadius', 'radius')
-        .intercept('shapeSize',   'size'  )
+        ._interceptDynamic('shape',       'shape' )
+        ._interceptDynamic('shapeRadius', 'radius')
+        ._interceptDynamic('shapeSize',   'size'  )
         
         /* Colors & Line */
-        .optionalValue('strokeDasharray', null) // Break inheritance
-        .optionalValue('lineWidth',       1.5)  // idem
+        .optional('strokeDasharray', null) // Break inheritance
+        .optional('lineWidth',       1.5)  // idem
         
-        .intercept('fillStyle',   'fillColor'  )
-        .intercept('strokeStyle', 'strokeColor')
+        ._interceptDynamic('fillStyle',   'fillColor'  )
+        ._interceptDynamic('strokeStyle', 'strokeColor')
         ;
 })
 .add({
@@ -46,19 +51,19 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     x: function(){ return 0; },
     
     shape: function(){ 
-        return this.delegate(); 
+        return this.delegateExtension(); 
     },
     
     radius: function(){
         // Store extended value, if any
         // See #sizeCore
-        this.state.radius = this.delegate();
+        this.state.radius = this.delegateExtension();
     },
     
     /* SIZE */
     size: function(){
         var size = this.baseSize();
-        if(this.scene.anyInteraction()) {
+        if(this.showsInteraction() && this.scene.anyInteraction()) {
             size = this.interactiveSize(size);
         } else {
             size = this.normalSize(size);
@@ -75,7 +80,7 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
         }
         
         /* Delegate to possible Size extension or default to 12 */
-        return this.delegate(12);
+        return this.delegateExtension(12);
     },
 
     normalSize: function(size){

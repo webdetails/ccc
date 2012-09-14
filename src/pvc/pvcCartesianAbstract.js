@@ -58,15 +58,16 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             pvc.log("Prerendering in CartesianAbstract");
         }
         
-        var options = this.options;
         var axes = this.axes;
-        
         var baseAxis = axes.base;
         var orthoAxis = axes.ortho;
         var ortho2Axis = axes.ortho2;
         
         /* Create the grid/docking panel */
-        this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel, contentOptions);
+        this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel, {
+            margins:  contentOptions.margins,
+            paddings: contentOptions.paddings
+        });
         
         /* Create child axis panels
          * The order is relevant because of docking order. 
@@ -78,7 +79,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this._createAxisPanel(orthoAxis);
         
         /* Create main content panel */
-        this._mainContentPanel = this._createMainContentPanel(this._gridDockPanel);
+        this._mainContentPanel = this._createMainContentPanel(this._gridDockPanel, {
+            clickAction:        contentOptions.clickAction,
+            doubleClickAction:  contentOptions.doubleClickAction
+        });
         
         /* Force layout */
         this.basePanel.layout();
@@ -117,7 +121,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             var titlePanel;
             var title = axis.option('Title');
             if (!def.empty(title)) {
-                titlePanel = new pvc.AxisTitlePanel(this, this._gridDockPanel, {
+                titlePanel = new pvc.AxisTitlePanel(this, this._gridDockPanel, axis, {
                     title:        title,
                     font:         axis.option('TitleFont') || axis.option('Font'),
                     anchor:       axis.option('Position'),
@@ -167,7 +171,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
     },
 
     /* @abstract */
-    _createMainContentPanel: function(parentPanel){
+    _createMainContentPanel: function(parentPanel, baseOptions){
         throw def.error.notImplemented();
     },
     

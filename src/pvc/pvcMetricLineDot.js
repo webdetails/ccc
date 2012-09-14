@@ -87,24 +87,24 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
      /**
       * @override 
       */
-    _createMainContentPanel: function(parentPanel){
+    _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in MetricLineDot");
         }
         
         var options = this.options;
         
-        return new pvc.MetricLineDotPanel(this, parentPanel, {
-            showValues:    options.showValues,
-            valuesAnchor:   options.valuesAnchor,
-            showLines:      options.showLines,
-            showDots:       options.showDots,
-            orientation:    options.orientation,
-            dotSizeRatio:   options.dotSizeRatio,
-            dotSizeRatioTo: options.dotSizeRatioTo,
+        return new pvc.MetricLineDotPanel(this, parentPanel, def.create(baseOptions, {
+            showValues:         options.showValues,
+            valuesAnchor:       options.valuesAnchor,
+            showLines:          options.showLines,
+            showDots:           options.showDots,
+            orientation:        options.orientation,
+            dotSizeRatio:       options.dotSizeRatio,
+            dotSizeRatioTo:     options.dotSizeRatioTo,
             autoDotSizePadding: options.autoDotSizePadding,
-            dotSizeAbs: options.dotSizeAbs
-        });
+            dotSizeAbs:         options.dotSizeAbs
+        }));
     },
     
     defaults: def.create(pvc.MetricXYAbstract.prototype.defaults, {

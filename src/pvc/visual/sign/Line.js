@@ -6,8 +6,8 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     
     this.base(panel, pvMark, keyArgs);
     
-    this.lockValue('segmented', true) // fixed
-        .lockValue('antialias', true)
+    this.lock('segmented', true) // fixed
+        .lock('antialias', true)
         ;
 
     if(!def.get(keyArgs, 'freePosition', false)){
@@ -15,22 +15,21 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
             orthoPosProp = panel.anchorOrtho(basePosProp);
 
         this/* Positions */
-            .lock(orthoPosProp, 'y')
-            .lock(basePosProp,  'x');
+            ._lockDynamic(orthoPosProp, 'y')
+            ._lockDynamic(basePosProp,  'x');
     }
 
     this/* Colors & Line */
-        .intercept('strokeStyle', 'strokeColor')
-        .intercept('lineWidth',   'strokeWidth')
+        ._interceptDynamic('strokeStyle', 'strokeColor')
+        ._interceptDynamic('lineWidth',   'strokeWidth')
         ;
 
     // Segmented lines use fill color instead of stroke...so this doesn't work.
-    //this.pvMark.svg({ 'stroke-linecap': 'square' });
+    //this.pvMark.lineCap('square');
 })
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs, 
-                        'noHoverable', true,
                         'noTooltips',  true);
         
         this.base(keyArgs);
@@ -55,7 +54,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     /* STROKE WIDTH */
     strokeWidth: function(){
         var strokeWidth = this.baseStrokeWidth();
-        if(this.scene.anyInteraction()) {
+        if(this.showsInteraction() && this.scene.anyInteraction()) {
             strokeWidth = this.interactiveStrokeWidth(strokeWidth);
         } else {
             strokeWidth = this.normalStrokeWidth(strokeWidth);
@@ -66,7 +65,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     
     baseStrokeWidth: function(){
         /* Delegate to possible lineWidth extension or default to 1.5 */
-        return this.delegate(1.5);
+        return this.delegateExtension(1.5);
     },
 
     normalStrokeWidth: function(strokeWidth){

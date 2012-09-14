@@ -9,9 +9,9 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     this.normalStroke = def.get(keyArgs, 'normalStroke', false);
 
     this/* Colors */
-        .intercept('fillStyle',   'fillColor'  )
-        .intercept('strokeStyle', 'strokeColor')
-        .intercept('lineWidth',   'strokeWidth')
+        ._interceptDynamic('fillStyle',   'fillColor'  )
+        ._interceptDynamic('strokeStyle', 'strokeColor')
+        ._interceptDynamic('lineWidth',   'strokeWidth')
         ;
 })
 .add({
@@ -77,7 +77,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     /* STROKE WIDTH */
     strokeWidth: function(){
         var strokeWidth = this.baseStrokeWidth();
-        if(this.scene.anyInteraction()) {
+        if(this.showsInteraction() && this.scene.anyInteraction()) {
             strokeWidth = this.interactiveStrokeWidth(strokeWidth);
         } else {
             strokeWidth = this.normalStrokeWidth(strokeWidth);
@@ -87,7 +87,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     },
 
     baseStrokeWidth: function(){
-        var value = this.delegate();
+        var value = this.delegateExtension();
         if(value === undefined){
             value = this.defaultStrokeWidth();
         }

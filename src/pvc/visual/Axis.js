@@ -102,7 +102,7 @@ def.type('pvc.visual.Axis')
             return by;
         }
 
-        return this.scale.by(function(scene){
+        return this.scale.by1(function(scene){
             return scene.vars[varName].value;
         });
     },

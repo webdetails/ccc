@@ -3,15 +3,32 @@ pvc.AxisTitlePanel = pvc.TitlePanelAbstract.extend({
     
     panelName: 'axis',
     
-    _getFontExtension: function(){
-        return this._getExtension(this.panelName + 'TitleLabel', 'font');
+    constructor: function(chart, parent, axis, options) {
+        
+        this.axis = axis;
+        
+        this.base(chart, parent, options);
     },
     
-    /**
-     * @override
-     */
-    applyExtensions: function(){
-        this.extend(this.pvPanel, this.panelName + 'Title_');
-        this.extend(this.pvLabel, this.panelName + 'TitleLabel_');
+    _calcLayout: function(layoutInfo){
+        var scale = this.axis.scale;
+        if(!scale || scale.isNull){
+            return new pvc.Size(0, 0);
+        }
+        
+        return this.base(layoutInfo);
+    },
+    
+    _createCore: function(layoutInfo){
+        var scale = this.axis.scale;
+        if(!scale || scale.isNull){
+            return;
+        }
+        
+        return this.base(layoutInfo);
+    },
+    
+    _getExtensionPrefix: function(){
+        return this.panelName + def.firstUpperCase(this.base());
     }
 });

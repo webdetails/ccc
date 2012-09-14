@@ -27,6 +27,8 @@ src/pvc/visual/Role.js
 src/pvc/visual/Scene.js
 src/pvc/visual/Var.js
 src/pvc/visual/sign/Sign.js
+src/pvc/visual/sign/Panel.js
+src/pvc/visual/sign/Label.js
 src/pvc/visual/sign/Dot.js
 src/pvc/visual/sign/Line.js
 src/pvc/visual/sign/Area.js
@@ -36,8 +38,9 @@ src/pvc/visual/sign/Rule.js
 src/pvc/visual/Context.js
 src/pvc/visual/Axis.js
 src/pvc/visual/CartesianAxis.js
+src/pvc/visual/CartesianAxisRootScene.js
+src/pvc/visual/CartesianAxisTickScene.js
 src/pvc/visual/ColorAxis.js
-src/pvc/visual/legend/legend.js
 src/pvc/visual/legend/BulletRootScene.js
 src/pvc/visual/legend/BulletGroupScene.js
 src/pvc/visual/legend/BulletItemScene.js

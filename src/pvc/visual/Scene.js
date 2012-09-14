@@ -265,6 +265,11 @@ function scene_renderId(renderId){
 }
 
 function rootScene_setActive(scene){
+    var ownerScene;
+    if(scene && (ownerScene = scene.ownerScene)){
+        scene = ownerScene;
+    }
+    
     if(this._active !== scene){
         if(this._active){
             scene_setActive.call(this._active, false);

@@ -13,11 +13,11 @@
  * 
  */
 pvc.LegendPanel = pvc.BasePanel.extend({
-    pvRule:  null,
-    pvDot:   null,
+    pvRule: null,
+    pvDot: null,
     pvLabel: null,
     
-    anchor:  'bottom',
+    anchor: 'bottom',
     
     pvLegendPanel: null,
     
@@ -121,26 +121,32 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           [a_height](function(row){ return row.size.height; })
           ;
       
+      var wrapper;
+      if(this.compatVersion() <= 1){
+          wrapper = function(v1f){
+              return function(itemScene){
+                  return v1f.call(this, itemScene.vars.value.rawValue);
+              };
+          };
+      }
+      
       // ROW > ITEM - A pvLegendPanel instance per bullet item in a row
-      this.pvLegendPanel = pvLegendRowPanel.add(pv.Panel)
-          .data(function(row){ return row.items; }) // each row has a list of bullet item scenes
-          .def("hidden", "false")
-          
-          .localProperty('group', Object)
-          .group(function(itemScene){ return itemScene.group; }) // for rubber band selection support
-          
+      this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendRowPanel, {
+              extensionId: 'panel',
+              wrapper:     wrapper
+          })
+          .lockMark('data', function(row){ return row.items; }) // each row has a list of bullet item scenes
           .lock(a_right,  null)
           .lock(a_bottom, null)
-          .lock(a_left, function(clientScene){
-              var padding = clientScene.vars.padding;
+          .lockMark(a_left, function(clientScene){
+              var padding  = clientScene.vars.padding;
               var prevItem = this.sibling();
               return prevItem ? 
                       (prevItem[a_left] + prevItem[a_width] + padding[a_width]) : 
                       0;
           })
-          .lock('height', function(itemScene){ return itemScene.vars.clientSize.height; })
-          
-          .lock(a_top,
+          .lockMark('height', function(itemScene){ return itemScene.vars.clientSize.height; })
+          .lockMark(a_top,
                   isHorizontal ?
                   // Center items in row's height, that may be higher
                   function(itemScene){
@@ -149,17 +155,15 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                   } :
                   // Left align items of a same column
                   0)
-          
-          .lock('width',  
+          .lockMark('width',  
                   isHorizontal ?
                   function(itemScene){ return itemScene.vars.clientSize.width; } :
                   
                    // The biggest child width of the column
-                  function(itemScene){
-                      return this.parent.width();
-                  })
-          
-          .fillStyle(function(){
+                  function(itemScene){ return this.parent.width(); })
+          .pvMark
+          .def("hidden", "false")
+          .fillStyle(function(){ // TODO: ??
               return this.hidden() == "true" ? 
                      "rgba(200,200,200,1)" : 
                      "rgba(200,200,200,0.0001)";
@@ -175,10 +179,11 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           ;
       
       // ROW > ITEM > MARKER
-      var pvLegendMarkerPanel = this.pvLegendPanel.add(pv.Panel)
-          .left  (0)
-          .top   (0)
-          .right(null)
+      var pvLegendMarkerPanel = new pvc.visual.Panel(this, this.pvLegendPanel)
+          .pvMark
+          .left(0)
+          .top (0)
+          .right (null)
           .bottom(null)
           .width (function(itemScene){ return itemScene.vars.markerSize; })
           .height(function(itemScene){ return itemScene.vars.clientSize.height; })
@@ -192,48 +197,45 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       
       /* RULE/MARKER */
       rootScene.childNodes.forEach(function(groupScene){
-          var pvGroupPanel = pvLegendMarkerPanel.add(pv.Panel)
-                  .visible(function(itemScene){ 
+          var pvGroupPanel = new pvc.visual.Panel(this, pvLegendMarkerPanel)
+                  .pvMark
+                  .visible(function(itemScene){
                       return itemScene.parent === groupScene; 
                   });
           
-          var renderInfo = groupScene.renderer().create(this, pvGroupPanel);
-          groupScene.renderInfo = renderInfo;
+          groupScene.renderer().create(this, pvGroupPanel, groupScene.extensionPrefix, wrapper);
       }, this);
 
       /* LABEL */
-      this.pvLabel = pvLegendMarkerPanel.anchor("right").add(pv.Label)
-          .textAlign('left') // panel type anchors don't adjust textAlign this way 
+      this.pvLabel = new pvc.visual.Label(this, pvLegendMarkerPanel.anchor("right"), {
+              extensionId: 'label',
+              wrapper: wrapper
+          })
+          .intercept('textStyle', function(itemScene) {
+              var baseTextStyle = this.delegateExtension() || "black";
+              return itemScene.isOn() ? 
+                          baseTextStyle : 
+                          pvc.toGrayScale(baseTextStyle, null, undefined, 150);
+          })
+          .pvMark
+          .textAlign('left') // panel type anchors don't adjust textAlign this way
           .text(function(itemScene){ return itemScene.vars.value.label; })
-          .lock('textMargin', function(itemScene){ return itemScene.vars.textMargin - 4; }) // -3 is to compensate for now the label being anchored to the panel instead of the rule or the dot...
+          // -4 is to compensate for now the label being anchored to the panel instead of the rule or the dot...
+          .lock('textMargin', function(itemScene){ return itemScene.vars.textMargin - 4; })
           .font(function(itemScene){ return itemScene.vars.font; }) // TODO: lock?
           .textDecoration(function(itemScene){ return itemScene.isOn() ? "" : "line-through"; })
-          .intercept(
-                'textStyle',
-                labelTextStyleInterceptor,
-                this._getExtension('legendLabel', 'textStyle'));
-      
-      function labelTextStyleInterceptor(getTextStyle, args) {
-          var baseTextStyle = getTextStyle ? getTextStyle.apply(this, args) : "black";
-          var itemScene = args[0];
-          return itemScene.isOn() ? 
-                      baseTextStyle : 
-                      pvc.toGrayScale(baseTextStyle, null, undefined, 150);
-      }
+          ;
     },
 
-    applyExtensions: function(){
-        this.extend(this.pvPanel, "legendArea_");
-        this.extend(this.pvLegendPanel,"legendPanel_");
-        
-        this._getBulletRootScene().childNodes.forEach(function(groupScene){
-            groupScene.renderer().extendMarks(this, groupScene.renderInfo, groupScene.extensionPrefix);
-        }, this);
-        
-        this.extend(this.pvLabel, "legendLabel_");
+    _getExtensionId: function(){
+        return 'area'; 
     },
     
-    _getSignums: function(){
+    _getExtensionPrefix: function(){
+        return 'legend'; 
+    },
+    
+    _getSelectableMarks: function(){
         // Catches both the marker and the label.
         // Also, if selection changes, renderInteractive re-renders these.
         return [this.pvLegendPanel];

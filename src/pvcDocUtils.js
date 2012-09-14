@@ -132,8 +132,8 @@ pv.listenForPageLoad(function() {
     
     pvc.examples.renderAll();
 });
-
-$(window).resize(function(){
-    
-    pvc.examples.renderAll();
-});
+//
+//$(window).resize(function(){
+//    
+//    pvc.examples.renderAll();
+//});

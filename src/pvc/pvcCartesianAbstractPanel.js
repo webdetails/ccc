@@ -95,7 +95,8 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
             orthoAxis.option('FixedMax') != null ||
             baseAxis .option('FixedMin') != null ||
             baseAxis .option('FixedMax') != null){
-            this.pvPanel.overflow("hidden");
+            // Padding area is used by bubbles and other vizs without problem
+            this.pvPanel.borderPanel.overflow("hidden");
         }
     },
 
@@ -103,16 +104,10 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
         return this.chart._getVisibleData(dataPartValues || this.dataPartValue, keyArgs);
     },
 
-    /**
-     * @override
-     */
-    applyExtensions: function(){
-        this.base();
-
-        // Extend body
-        this.extend(this.pvPanel, "chart_");
+    _getExtensionId: function(){
+        return 'chart';
     },
-
+        
     /* @override */
     isOrientationVertical: function(){
         return this.orientation === pvc.orientation.vertical;
@@ -171,7 +166,7 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
            def.copy(datumsByKey, yDatumsByKey);
            any = true;
        } else {
-           // Ask the base implementation for signums
+           // Ask the base implementation for datums
            any = this.base(datumsByKey, rb, keyArgs);
        }
 

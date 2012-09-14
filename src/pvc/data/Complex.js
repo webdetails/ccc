@@ -111,8 +111,10 @@ def
         
         /* Build Key and Label in the order of type.dimensions */
         if(count === 1){
-            this.value = singleAtom.value;     // typed
-            this.key   = singleAtom.globalKey; // string
+            this.value    = singleAtom.value;     // typed
+            this.rawValue = singleAtom.rawValue;  // original
+            this.key      = singleAtom.globalKey; // string
+            
             if(wantLabel){
                 this.label = singleAtom.label;
             }
@@ -146,7 +148,7 @@ def
                 }
             }
         
-            this.value = this.key = key;
+            this.value = this.rawValue = this.key = key;
             if(wantLabel){
                 this.label = label;
             }

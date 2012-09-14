@@ -27,7 +27,7 @@ var pvc = def.globalSpace('pvc', {
 
 // goldenRatio proportion
 // ~61.8% ~ 38.2%
-pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
+//pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
 
 pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
 
@@ -77,26 +77,6 @@ function syncTipsyLog(){
 
 syncTipsyLog();
 
-/**
- * Evaluates x if it's a function or returns the value otherwise
- */
-pvc.ev = function(x){
-    return typeof x == "function" ? x(): x;
-};
-
-/**
- * Sums two numbers.
- * 
- * If v1 is null or undefined, v2 is returned.
- * If v2 is null or undefined, v1 is returned.
- * Else the sum of the two is returned.
- */
-pvc.sum = function(v1, v2){
-    return v1 == null ? 
-            v2 :
-            (v1 == null ? v1 : (v1 + v2));
-};
-
 pvc.cloneMatrix = function(m){
     return m.map(function(d){
         return d.slice();
@@ -107,6 +87,13 @@ pvc.orientation = {
     vertical:   'vertical',
     horizontal: 'horizontal'
 };
+
+/** 
+ * To tag pv properties set by extension points
+ * @type string 
+ * @see pvc.BaseChart#extend
+ */
+pvc.extensionTag = 'extension';
 
 /**
  * Extends a type created with {@link def.type}
@@ -149,6 +136,7 @@ pvc.extendType = function(type, exts, names){
     }
 };
 
+// TODO: adapt to use def.Query.range
 // Adapted from pv.range
 pvc.Range = function(start, stop, step){
     if (arguments.length == 1) {
@@ -190,29 +178,6 @@ pvc.Range.prototype.map = function(fun, ctx){
     });
     
     return result;
-};
-
-/**
- * Equals for two arrays
- * func - needed if not flat array of comparables
- **/
-pvc.arrayEquals = function(array1, array2, func){
-  if(array1 == null){return array2 == null;}
-  
-  var useFunc = typeof(func) == 'function';
-  
-  for(var i=0;i<array1.length;i++)
-  {
-    if(useFunc){
-        if(!func(array1[i],array2[i])){
-            return false;
-        }
-    }
-    else if(array1[i]!=array2[i]){
-        return false;   
-    }
-  }
-  return true;
 };
 
 /**
@@ -677,34 +642,34 @@ pvc.PercentValue.resolve = function(value, total){
 
 /* Z-Order */
 
-//Copy original methods
+// Backup original methods
 var markRenderCore = pv.Mark.prototype.renderCore,
-    panelAdd   = pv.Panel.prototype.add,
     markZOrder = pv.Mark.prototype.zOrder;
 
 pv.Mark.prototype.zOrder = function(zOrder) {
     var borderPanel = this.borderPanel;
     if(borderPanel && borderPanel !== this){
-        return markZOrder.apply(borderPanel, arguments);
+        return markZOrder.call(borderPanel, zOrder);
     }
     
-    return markZOrder.apply(this, arguments);
+    return markZOrder.call(this, zOrder);
 };
 
 /* Render id */
 pv.Mark.prototype.renderCore = function(){
     /* Assign a new render id to the root mark */
     var root = this.root;
+    
     root._renderId = (root._renderId || 0) + 1;
     
-    if(pvc.debug >= 10){
+    if(pvc.debug >= 25){
         pvc.log("BEGIN RENDER " + root._renderId);
     }
     
     /* Render */
     markRenderCore.apply(this, arguments);
     
-    if(pvc.debug >= 10){
+    if(pvc.debug >= 25){
         pvc.log("END RENDER " + root._renderId);
     }
 };
@@ -713,138 +678,21 @@ pv.Mark.prototype.renderId = function(){
     return this.root._renderId;
 };
 
-/* DOM */
-/**
- * Inserts the specified child <i>n</i> at the given index. 
- * Any child from the given index onwards will be moved one position to the end. 
- * If <i>index</i> is null, this method is equivalent to
- * {@link #appendChild}. 
- * If <i>n</i> is already part of the DOM, it is first
- * removed before being inserted.
- *
- * @throws Error if <i>index</i> is non-null and greater than the current number of children.
- * @returns {pv.Dom.Node} the inserted child.
- */
-pv.Dom.Node.prototype.insertAt = function(n, index) {
-    var L;
-    if (index == null || index === (L = this.childNodes.length)){     
-        return this.appendChild(n);
-    }
-    
-    if(index > L){
-        throw new Error("Index out of range.");
-    }
-    
-    if (n.parentNode) {
-        n.parentNode.removeChild(n);
-    }
-    
-    var r = this.childNodes[index];
-    n.parentNode = this;
-    n.nextSibling = r;
-    n.previousSibling = r.previousSibling;
-    if (r.previousSibling) {
-        r.previousSibling.nextSibling = n;
-    } else {
-        if (r == this.lastChild) {
-            this.lastChild = n;
-        }
-        this.firstChild = n;
-    }
-    this.childNodes.splice(index, 0, n);
-    return n;
-};
-
-/**
- * Removes the child node at the specified index from this node.
- */
-pv.Dom.Node.prototype.removeAt = function(i) {
-  var n = this.childNodes[i];
-  if(n){
-      this.childNodes.splice(i, 1);
-      if (n.previousSibling) { 
-          n.previousSibling.nextSibling = n.nextSibling; 
-      } else { 
-          this.firstChild = n.nextSibling; 
-      }
-      
-      if (n.nextSibling) {
-          n.nextSibling.previousSibling = n.previousSibling;
-      } else {
-          this.lastChild = n.previousSibling;
-      }
-      
-      delete n.nextSibling;
-      delete n.previousSibling;
-      delete n.parentNode;
-  }
-  return n;
-};
-
-
-/* Local Properties */
-/**
- * Adapted from pv.Layout#property.
- * Defines a local property with the specified name and cast.
- * Note that although the property method is only defined locally,
- * the cast function is global,
- * which is necessary since properties are inherited!
- *
- * @param {string} name the property name.
- * @param {function} [cast] the cast function for this property.
- */
-pv.Mark.prototype.localProperty = function(name, cast) {
-  if (!this.hasOwnProperty("properties")) {
-    this.properties = pv.extend(this.properties);
-  }
-  this.properties[name] = true;
-  this.propertyMethod(name, false, pv.Mark.cast[name] = cast);
-  return this;
-};
-
 /* PROPERTIES */
-/**
- * Returns the value of a property as specified upon definition,
- * and, thus, without evaluation.
- */
-pv.Mark.prototype.getStaticPropertyValue = function(name) {
-    var properties = this.$properties;
-    for (var i = 0, L = properties.length; i < L; i++) {
-        var property = properties[i];
-        if (property.name == name) {
-            return property.value;
-        }
-    }
-    //return undefined;
+pv.Mark.prototype.wrapper = function(wrapper){
+    this._wrapper = wrapper;
+    
+    return this;
 };
 
-pv.Mark.prototype.intercept = function(prop, interceptor, extValue, noCast){
-    if(extValue !== undefined){
-        if(!noCast){
-            this[prop](extValue);
+pv.Mark.prototype.wrap = function(f, m){
+    if(f && this._wrapper && !f._cccWrapped){
+        f = this._wrapper(f, m);
         
-            extValue = this.getStaticPropertyValue(prop);
-        }
-    } else if(!this._intercepted || !this._intercepted[prop]) { // Don't intercept any previous interceptor...
-        extValue = this.getStaticPropertyValue(prop);
-    }
-        
-    // Let undefined pass through as a sign of not-intercepted
-    // A 'null' value is considered as an existing property value.
-    if(extValue !== undefined){
-        extValue = def.fun.to(extValue);
+        f._cccWrapped = true;
     }
     
-    function interceptProp(){
-        var args  = arraySlice.call(arguments);
-        return interceptor.call(this, extValue, args);
-    }
-
-    this[prop](interceptProp);
-
-    (this._intercepted || (this._intercepted = {}))[prop] = true;
-
-    return this;
+    return f;
 };
 
 pv.Mark.prototype.lock = function(prop, value){
@@ -857,7 +705,6 @@ pv.Mark.prototype.lock = function(prop, value){
     return this;
 };
 
-
 pv.Mark.prototype.isIntercepted = function(prop){
     return this._intercepted && this._intercepted[prop];
 };
@@ -866,21 +713,13 @@ pv.Mark.prototype.isLocked = function(prop){
     return this._locked && this._locked[prop];
 };
 
-/**
- * Function used to propagate a datum received, as a singleton list.
- * Used to prevent re-evaluation of inherited data property functions.
- */
-pv.dataIdentity = function(datum){
-    return [datum];
-};
-
 /* ANCHORS */
 /**
  * name = left | right | top | bottom
  */
 pv.Mark.prototype.addMargin = function(name, margin) {
     if(margin !== 0){
-        var staticValue = def.nullyTo(this.getStaticPropertyValue(name), 0),
+        var staticValue = def.nullyTo(this.propertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
         this[name](function(){
@@ -912,73 +751,8 @@ pv.Mark.prototype.addMargins = function(margins) {
 };
 
 /* SCENE */
-/**
- * Iterates through all instances that
- * this mark has rendered.
- */
-pv.Mark.prototype.forEachInstance = function(fun, ctx){
-    var mark = this,
-        indexes = [],
-        breakInstance = {
-            isBreak: true,
-            visible: false,
-            datum: {}
-        };
-
-    /* Go up to the root and register our way back.
-     * The root mark never "looses" its scene.
-     */
-    while(mark.parent){
-        indexes.unshift(mark.childIndex);
-        mark = mark.parent;
-    }
-
-    // mark != null
-
-    // root scene exists if rendered at least once
-    var rootScene = mark.scene;
-    if(!rootScene){
-        return;
-    }
-    
-    var L = indexes.length;
-
-    function collectRecursive(scene, level, toScreen){
-        var isLastLevel = level === L, 
-            childIndex;
-        
-        if(!isLastLevel) {
-            childIndex = indexes[level];
-        }
-        
-        for(var index = 0, D = scene.length; index < D ; index++){
-            var instance = scene[index];
-            if(level === L){
-                fun.call(ctx, scene[index], toScreen);
-            } else if(instance.visible) {
-                var childScene = instance.children[childIndex];
-                
-                // Some nodes might have not been rendered?
-                if(childScene){
-                    var childToScreen = toScreen
-                                            .times(instance.transform)
-                                            .translate(instance.left, instance.top);
-                    
-                    collectRecursive(childScene, level + 1, childToScreen);
-                }
-            }
-        }
-        
-        if(D > 0) {
-            fun.call(ctx, breakInstance, null);
-        }
-    }
-
-    collectRecursive(rootScene, 0, pv.Transform.identity);
-};
-
-pv.Mark.prototype.forEachSignumInstance = function(fun, ctx){
-    this.forEachInstance(function(instance, t){
+pv.Mark.prototype.eachInstanceWithData = function(fun, ctx){
+    this.eachInstance(function(instance, t){
         if(instance.datum || instance.group){
             fun.call(ctx, instance, t);
         }
@@ -986,25 +760,6 @@ pv.Mark.prototype.forEachSignumInstance = function(fun, ctx){
 };
 
 /* BOUNDS */
-pv.Mark.prototype.toScreenTransform = function(){
-    var t = pv.Transform.identity;
-    
-    if(this instanceof pv.Panel) {
-        t = t.translate(this.left(), this.top())
-             .times(this.transform());
-    }
-
-    var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
-    if(parent){
-        do {
-            t = t.translate(parent.left(), parent.top())
-                 .times(parent.transform());
-        } while ((parent = parent.parent));
-    }
-    
-    return t;
-};
-
 pv.Transform.prototype.transformHPosition = function(left){
     return this.x + (this.k * left);
 };
@@ -1735,12 +1490,11 @@ pv.Behavior.selector = function(autoRefresh, mark) {
         
         events = [
             [root,     "mousemove", pv.listen(root, "mousemove", mousemove)],
-            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )]//,
+            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )],
             
-            // But when the mouse leaves the canvas we still need to
-            // receive events...
-//            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
-//            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
+            // But when the mouse leaves the canvas we still need to receive events...
+            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
+            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
         ];
     }
     

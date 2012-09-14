@@ -41,6 +41,8 @@ pvc.BasePanel = pvc.Abstract.extend({
     _coreInfo: null,   // once per create info (only for information that is: layout independent *and* required by layout)
     _layoutInfo: null, // once per layout info
     
+    _signs: null,
+    
     /**
      * The data that the panel uses to obtain "data".
      * @type pvc.data.Data
@@ -92,6 +94,9 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     _sceneTypeExtensions: null,
+    
+    clickAction:       null,
+    doubleClickAction: null,
     
     constructor: function(chart, parent, options) {
         
@@ -209,6 +214,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         // </Debug>
         
         (this._children || (this._children = [])).push(child);
+    },
+    
+    _addSign: function(sign){
+        (this._signs || (this._signs = [])).push(sign); 
     },
     
     /* LAYOUT PHASE */
@@ -682,6 +691,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             this.pvPanel = null;
             
+            delete this._signs;
             delete this._coreInfo;
             
             /* Layout */
@@ -759,8 +769,29 @@ pvc.BasePanel = pvc.Abstract.extend({
             this.pvPanel.paddingPanel  = this.pvPanel;
             this.pvPanel.borderPanel   = pvBorderPanel;
             
-            /* Protovis marks that are pvcPanel specific,
-             * and/or #_creates child panels.
+            if(pvc.debug >= 15){
+                this.pvPanel // inner
+                    .strokeStyle('lightgreen')
+                    .lineWidth(1)
+                    .strokeDasharray('- ');
+                
+                pvBorderPanel // outer
+                    .strokeStyle('lightblue')
+                    .lineWidth(1)
+                    .strokeDasharray(null); 
+            }
+            
+            var extensionId = this._getExtensionId();
+            if(extensionId != null){ // '' is allowed cause this relative to #_getExtensionPrefix
+                // Wrap the panel that is extended with a Panel sign
+                new pvc.visual.Panel(this, null, {
+                    panel:       pvBorderPanel,
+                    extensionId: extensionId
+                });
+            }
+            
+            /* Protovis marks that are pvc Panel specific,
+             * and/or create child panels.
              */
             this._createCore(this._layoutInfo);
             
@@ -773,7 +804,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             this.applyExtensions();
         }
     },
-    
+
     _creating: function(){
         if(this._children) {
             this._children.forEach(function(child){
@@ -885,7 +916,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     /**
      * The default implementation renders
-     * the marks returned by #_getSignums, 
+     * the marks returned by #_getSelectableMarks, 
      * or this.pvPanel if none is returned (and it has no children)
      * which is generally in excess of what actually requires
      * to be re-rendered.
@@ -895,9 +926,9 @@ pvc.BasePanel = pvc.Abstract.extend({
      */
     _renderInteractive: function(){
         if(this.isVisible){
-            var marks = this._getSignums();
-            if(marks && marks.length){
-                marks.forEach(function(mark){ mark.render(); });
+            var pvMarks = this._getSelectableMarks();
+            if(pvMarks && pvMarks.length){
+                pvMarks.forEach(function(pvMark){ pvMark.render(); });
             } else if(!this._children) {
                 this.pvPanel.render();
             }
@@ -914,7 +945,7 @@ pvc.BasePanel = pvc.Abstract.extend({
      * Returns an array of marks whose instances are associated to a datum, or null.
      * @virtual
      */
-    _getSignums: function(){
+    _getSelectableMarks: function(){
         return null;
     },
     
@@ -950,51 +981,6 @@ pvc.BasePanel = pvc.Abstract.extend({
         return (this.topRoot._isAnimating > 0);
     },
     
-    
-    /* EXTENSION */
-    
-    /**
-     * Override to apply specific extensions points.
-     * @virtual
-     */
-    applyExtensions: function(){
-        if (this.isRoot) {
-            this.extend(this.pvPanel, "base_");
-        }
-    },
-
-    /**
-     * Extends a protovis mark with extension points 
-     * having a given prefix.
-     */
-    extend: function(mark, prefix, keyArgs) {
-        this.chart.extend(mark, prefix, keyArgs);
-    },
-    
-    _extendSceneType: function(typeKey, type, names){
-        var typeExts = def.get(this._sceneTypeExtensions, typeKey);
-        if(typeExts){
-            pvc.extendType(type, typeExts, names);
-        }
-    },
-    
-    /**
-     * Obtains an extension point given its identifier or identifier parts.
-     * <p>
-     * Multiple identifiers are concatenated with '_' to form the full identifier.
-     * </p>
-     */
-    _getExtension: function(extPoint) {
-        return this.chart._getExtension.apply(this.chart, arguments);
-    },
-
-    _getConstantExtension: function(extPoint) {
-        var value = this.chart._getExtension.apply(this.chart, arguments);
-        if(!def.fun.is(value)){
-            return value;
-        }
-    },
-    
     /* SIZE & POSITION */
     setPosition: function(position){
         for(var side in position){
@@ -1018,7 +1004,85 @@ pvc.BasePanel = pvc.Abstract.extend({
         } 
         return new pvc.Size(Math.min(size.width, anchorLength), size.height);
     },
+    
+    /* EXTENSION */
+    
+    /**
+     * Override to apply specific extensions points.
+     * @virtual
+     */
+    applyExtensions: function(){
+        if (this._signs) {
+            this._signs.forEach(function(sign){
+                sign.applyExtensions();
+            });
+        }
+    },
 
+    /**
+     * Extends a protovis mark with extension points 
+     * having a given panel-relative component id.
+     */
+    extend: function(mark, id, keyArgs) {
+        this.chart.extend(mark, this._makeExtensionAbsId(id), keyArgs);
+    },
+    
+    /**
+     * Extends a protovis mark with extension points 
+     * having a given absolute component id.
+     */
+    extendAbs: function(mark, absId, keyArgs) {
+        this.chart.extend(mark, absId, keyArgs);
+    },
+    
+    _extendSceneType: function(typeKey, type, names){
+        var typeExts = def.get(this._sceneTypeExtensions, typeKey);
+        if(typeExts){
+            pvc.extendType(type, typeExts, names);
+        }
+    },
+    
+    _getExtensionId: function(){
+        if (this.isRoot) {
+            return 'base';
+        }
+    },
+    
+    _getExtensionPrefix: function(){
+        return '';
+    },
+    
+    _makeExtensionAbsId: function(id){
+        var prefix = this._getExtensionPrefix();
+        if(!prefix){
+            return id;
+        }
+        
+        return id ?
+               (prefix + def.firstUpperCase(id)) :
+               prefix;
+    },
+    
+    /**
+     * Obtains an extension point given its identifier and property.
+     */
+    _getExtension: function(id, prop) {
+        return this.chart._getExtension(this._makeExtensionAbsId(id), prop);
+    },
+    
+    _getExtensionAbs: function(absId, prop) {
+        return this.chart._getExtension(absId, prop);
+    },
+
+    _getConstantExtension: function(id, prop) {
+        var value = this.chart._getExtension(this._makeExtensionAbsId(id), prop);
+        if(!def.fun.is(value)){
+            return value;
+        }
+    },
+    
+    // -----------------------------
+    
     /**
      * Returns the underlying protovis Panel.
      * If 'layer' is specified returns
@@ -1107,27 +1171,27 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     /**
-     * Updates the visualization context of the panel.
+     * Obtains the visualization context of the panel,
+     * prepared for a specified mark and event.
+     *  
+     * Creates a new context when necessary.
+     * 
      * <p>
      * Override to perform specific updates. 
      * </p>
      * 
-     * @param {pvc.visual.Context} context The panel's visualization context.
      * @param {pv.Mark} mark The protovis mark being rendered or targeted by an event.
      * @param {object} [event] An event object.
      * @type pvc.visual.Context
      * @virtual
      */
-    _updateContext: function(context, mark, ev){
-        /*global visualContext_update:true */
-        visualContext_update.call(context, mark, ev);
-    },
-    
     _getContext: function(mark, ev){
-        if(!this._context) {
+        var context = this._context;
+        if(!context || context.isPinned){
             this._context = this._createContext(mark, ev);
         } else {
-            this._updateContext(this._context, mark, ev);
+            /*global visualContext_update:true */
+            visualContext_update.call(context, mark, ev);
         }
         
         return this._context;
@@ -1137,18 +1201,82 @@ pvc.BasePanel = pvc.Abstract.extend({
         return !this.isRubberBandSelecting() && !this.isAnimating();
     },
     
+    _ensurePropEvents: function(pvMark){
+        // labels and other marks don't receive events by default
+        var events = pvMark.propertyValue('events', /*inherit*/ true);
+        if(!events || events === 'none'){
+            pvMark.events('all');
+        }
+    },
+    
+    /* HOVERABLE */
+    _addPropHoverable: function(pvMark){
+        var panel  = this;
+        
+        var onEvent;
+        var offEvent;
+//        switch(pvMark.type) {
+//            default:
+//            case 'dot':
+//            case 'line':
+//            case 'area':
+//            case 'rule':
+//                onEvent  = 'point';
+//                offEvent = 'unpoint';
+//               panel._requirePointEvent();
+//                break;
+
+//            default:
+                onEvent = 'mouseover';
+                offEvent = 'mouseout';
+//                break;
+//        }
+        
+        pvMark
+            .event(onEvent, function(scene){
+                scene.setActive(true);
+
+                if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                    panel._renderInteractive();
+                }
+            })
+            .event(offEvent, function(scene){
+                if(scene.clearActive()) {
+                    /* Something was active */
+                    if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                        panel._renderInteractive();
+                    }
+                }
+            });
+        
+        this._ensurePropEvents(pvMark);
+    },
+    
     /* TOOLTIP */ 
-    _addPropTooltip: function(mark, keyArgs){
-        var myself = this,
-            tipsyEvent = def.get(keyArgs, 'tipsyEvent'), 
-            options = this.chart.options,
-            tipsySettings = Object.create(options.tipsySettings),  
-            buildTooltip;
+    _addPropTooltip: function(pvMark, keyArgs){
+        var buildTooltip = def.get(keyArgs, 'buildTooltip') ||
+                           this._getTooltipBuilder();
+        if(!buildTooltip){
+            return;
+        }
+        
+        var myself = this;
+        var options = this.chart.options;
+        var isV1Compat = this.compatVersion() <= 1;
+        
+        var tipsySettings;
+        var nowTipsySettings = def.get(keyArgs, 'tipsySettings');
+        if(nowTipsySettings){
+            tipsySettings = def.create(options.tipsySettings, nowTipsySettings);
+        } else {
+            tipsySettings = Object.create(options.tipsySettings);
+        }
         
         tipsySettings.isEnabled = this._isTooltipEnabled.bind(this);
         
+        var tipsyEvent = def.get(keyArgs, 'tipsyEvent');
         if(!tipsyEvent) {
-//          switch(mark.type) {
+//          switch(pvMark.type) {
 //                case 'dot':
 //                case 'line':
 //                case 'area':
@@ -1162,12 +1290,35 @@ pvc.BasePanel = pvc.Abstract.extend({
 //            }
         }
         
+        var isLazy = def.get(keyArgs, 'isLazy', true);
+        
+        pvMark.localProperty("tooltip"/*, Function | String*/) 
+              .tooltip(this._createTooltipProp(pvMark, buildTooltip, isLazy))
+              .title(function(){ return '';} ) // Prevent browser tooltip
+              .event(tipsyEvent, pv.Behavior.tipsy(tipsySettings || options.tipsySettings));
+        
+        this._ensurePropEvents(pvMark);
+    },
+    
+    _getTooltipBuilder: function(){
+        var options = this.chart.options;
+        var isV1Compat = this.compatVersion() <= 1;
+        
         var tooltipFormat = options.tooltipFormat;
         if(!tooltipFormat) {
-            buildTooltip = this._buildTooltip;
-        } else {
-            buildTooltip = function(context){
-                return tooltipFormat.call(context, 
+            if(!isV1Compat){
+                return this._buildDataTooltip;
+            }
+            
+            tooltipFormat = options.v1StyleTooltipFormat;
+            if(!tooltipFormat){
+                return;
+            }
+        }
+        
+        if(isV1Compat){
+            return function(context){
+                return tooltipFormat.call(context.panel, 
                                 context.getV1Series(),
                                 context.getV1Category(),
                                 context.getV1Value() || '',
@@ -1175,33 +1326,38 @@ pvc.BasePanel = pvc.Abstract.extend({
             };
         }
         
-        mark.localProperty("tooltip")
-            /* Lazy tooltip creation, when requested */
-            .tooltip(function(){
-                var tooltip,
-                    // Capture current context
-                    context = myself._createContext(mark, null);
-                
-                // No group or datum?
-                if(!context.scene.atoms) {
-                    return "";
-                }
-                
-                return function() {
-                    if(tooltip == null) {
-                        tooltip = buildTooltip.call(myself, context);
-                        context = null; // release context;
-                    } 
-                    return tooltip; 
-                };
-            })
-            /* Prevent browser tooltip */
-            .title(function(){
-                return '';
-            })
-            .event(tipsyEvent, pv.Behavior.tipsy(tipsySettings || options.tipsySettings));
+        return function(context){
+            return tooltipFormat.call(context, context.scene);
+        };
     },
-
+    
+    _createTooltipProp: function(pvMark, buildTooltip, isLazy){
+        var myself = this;
+        if(!isLazy){
+            return function(){
+                // Capture current context
+                var context = myself._getContext(pvMark, null);
+                return buildTooltip.call(myself, context);
+            };
+        }
+        
+        return function(){
+            // Capture current context
+            var context = myself._getContext(pvMark, null);
+            context.pin();
+            
+            var tooltip;
+            return function() {
+                if(tooltip == null) {
+                    tooltip = buildTooltip.call(myself, context);
+                    context = null; // release pinned context;
+                } 
+                
+                return tooltip; 
+            };
+        };
+    },
+    
     _requirePointEvent: function(radius){
         if(!this.isTopRoot) {
             return this.topRoot._requirePointEvent(radius);
@@ -1217,30 +1373,38 @@ pvc.BasePanel = pvc.Abstract.extend({
             this._attachedPointEvent = true;
         }
     },
+    
+    _buildDataTooltip: function(context){
 
-    _buildTooltip: function(context){
-
-        var chart = this.chart,
-            data = chart.data,
-            visibleKeyArgs = {visible: true},
-            scene = context.scene,
-            group = scene.group,
-            isMultiDatumGroup = group && group._datums.length > 1;
+        var scene = context.scene;
+        
+        // No group and no datum?
+        if(!scene.atoms) {
+            return "";
+        }
+        
+        var group = scene.group;
+        var isMultiDatumGroup = group && group._datums.length > 1;
         
         // Single null datum?
         if(!isMultiDatumGroup && scene.datum.isNull) {
             return "";
         }
         
-        var tooltip = [],
+        var chart = this.chart;
+        var data = chart.data;
+        var visibleKeyArgs = {visible: true};
+        
+        var tooltip = [];
             /*
              * TODO: Big HACK to prevent percentages from
              * showing up in the Lines of BarLine
              */
-            playingPercentMap = context.panel.stacked === false ? 
+        var playingPercentMap = context.panel.stacked === false ? 
                                 null :
-                                data.type.getPlayingPercentVisualRoleDimensionMap(),
-            commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
+                                data.type.getPlayingPercentVisualRoleDimensionMap();
+        
+        var commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
         
         function addDim(escapedDimLabel, label){
             tooltip.push('<b>' + escapedDimLabel + "</b>: " + (def.html.escape(label) || " - ") + '<br/>');
@@ -1302,7 +1466,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     /* CLICK & DOUBLE-CLICK */
-    _addPropClick: function(mark){
+    _addPropClick: function(pvMark){
         var myself = this;
         
         function onClick(){
@@ -1310,11 +1474,13 @@ pvc.BasePanel = pvc.Abstract.extend({
             return myself._handleClick(this, ev);
         }
         
-        mark.cursor("pointer")
-            .event("click", onClick);
+        pvMark.cursor("pointer")
+              .event("click", onClick);
+        
+        this._ensurePropEvents(pvMark);
     },
 
-    _addPropDoubleClick: function(mark){
+    _addPropDoubleClick: function(pvMark){
         var myself = this;
         
         function onDoubleClick(){
@@ -1322,23 +1488,44 @@ pvc.BasePanel = pvc.Abstract.extend({
             return myself._handleDoubleClick(this, ev);
         }
         
-        mark.cursor("pointer")
-            .event("dblclick", onDoubleClick);
+        pvMark.cursor("pointer")
+              .event("dblclick", onDoubleClick);
+        
+        this._ensurePropEvents(pvMark);
     },
     
-    _handleDoubleClick: function(mark, ev){
-        var handler = this.chart.options.doubleClickAction;
-        if(handler){
-            this._ignoreClicks = 2;
-            
-            var context = this._getContext(mark, ev);
+    _isDoubleClickable: function(keyArgs){
+        var options = keyArgs || this.chart.options;
+        return options.clickable && !!this.doubleClickAction;
+    },
+    
+    _handleDoubleClick: function(pvMark, ev){
+        if(!this._isDoubleClickable()){
+            return;
+        }
+        
+        this._ignoreClicks = 2;
+        
+        var sign = pvMark.sign;
+        if(!sign || sign.isDoubleClickable()){
+            var context = this._getContext(pvMark, ev);
             this._onDoubleClick(context);
         }
     },
     
     _onDoubleClick: function(context){
-        var handler = this.chart.options.doubleClickAction;
-        handler.call(context, 
+        var handler = this.doubleClickAction;
+        if(handler){
+            if(this.compatVersion() <= 1){
+                this._onV1DoubleClick(context, handler);
+            } else {
+                handler.call(context, context.scene);
+            }
+        }
+    },
+    
+    _onV1DoubleClick: function(context, handler){
+        handler.call(context.pvMark, 
                 /* V1 ARGS */
                 context.getV1Series(),
                 context.getV1Category(),
@@ -1346,12 +1533,17 @@ pvc.BasePanel = pvc.Abstract.extend({
                 context.event);
     },
     
-    _shouldHandleClick: function(keyArgs){
+    _isClickable: function(keyArgs){
         var options = keyArgs || this.chart.options;
-        return options.selectable || (options.clickable && options.clickAction);
+        return options.clickable && !!this.clickAction;
     },
     
-    _handleClick: function(mark, ev){
+    _shouldHandleClick: function(keyArgs){
+        var options = keyArgs || this.chart.options;
+        return options.selectable || this._isClickable(options);
+    },
+    
+    _handleClick: function(pvMark, ev){
         if(!this._shouldHandleClick()){
             return;
         }
@@ -1359,9 +1551,9 @@ pvc.BasePanel = pvc.Abstract.extend({
         var options = this.chart.options,
             context;
         
-        if(!options.doubleClickAction){
+        if(!this.doubleClickAction){
             // Use shared context
-            context = this._getContext(mark, ev);
+            context = this._getContext(pvMark, ev);
             this._handleClickCore(context);
         } else {
             // Delay click evaluation so that
@@ -1370,7 +1562,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             var myself = this;
             
             // Capture current context
-            context = this._createContext(mark, ev);
+            context = this._createContext(pvMark, ev);
             window.setTimeout(
                 function(){
                     myself._handleClickCore.call(myself, context);
@@ -1384,52 +1576,66 @@ pvc.BasePanel = pvc.Abstract.extend({
         if(this._ignoreClicks) {
             this._ignoreClicks--;
         } else {
-            this._onClick(context);
+            var sign = context.sign;
+            if(!sign || sign.isClickable()){
+                this._onClick(context);
+            }
             
-            if(this.chart.options.selectable && context.scene.datum){
+            if((sign  && sign.isSelectable()) || 
+               (!sign && this.chart.options.selectable && context.scene.datum)){
                 this._onSelect(context);
             }
         }
     },
     
     _onClick: function(context){
-        var handler = this.chart.options.clickAction;
+        var handler = this.clickAction;
         if(handler){
-            handler.call(context, 
-                    /* V1 ARGS */
-                    context.getV1Series(),
-                    context.getV1Category(),
-                    context.getV1Value(),
-                    context.event);
+            if(this.compatVersion() <= 1){
+                this._onV1Click(context, handler);
+            } else {
+                handler.call(context, context.scene);
+            }
         }
+    },
+    
+    _onV1Click: function(context, handler){
+        handler.call(context.pvMark, 
+                /* V1 ARGS */
+                context.getV1Series(),
+                context.getV1Category(),
+                context.getV1Value(),
+                context.event);
     },
     
     /* SELECTION & RUBBER-BAND */
     _onSelect: function(context){
-        var datums = context.scene.datums().array(),
-            chart  = this.chart;
-        
-        datums = this._onUserSelection(datums);
-        if(datums && datums.length){
-            var changed;
-            if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
-                // Clear all but the ones we'll be selecting.
-                // This way we can have a correct changed flag.
-                var alreadySelectedById = def.query(datums)
-                                        .where(function(datum){ return datum.isSelected; })
-                                        .object({ name: function(datum){ return datum.id; } });
-                
-                changed = chart.data.owner.clearSelected(function(datum){
-                    return !def.hasOwn(alreadySelectedById, datum.id); 
-                });
-                
-                changed |= pvc.data.Data.setSelected(datums, true);
-            } else {
-                changed = pvc.data.Data.toggleSelected(datums);
-            }
+        var datums = context.scene.datums().array();
+        if(datums.length){
+            var chart  = this.chart;
             
-            if(changed){
-                this._onSelectionChanged();
+            datums = this._onUserSelection(datums);
+            if(datums && datums.length){
+                var changed;
+                if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
+                    // Clear all but the ones we'll be selecting.
+                    // This way we can have a correct changed flag.
+                    var alreadySelectedById = def.query(datums)
+                                            .where(function(datum){ return datum.isSelected; })
+                                            .object({ name: function(datum){ return datum.id; } });
+                    
+                    changed = chart.data.owner.clearSelected(function(datum){
+                        return !def.hasOwn(alreadySelectedById, datum.id); 
+                    });
+                    
+                    changed |= pvc.data.Data.setSelected(datums, true);
+                } else {
+                    changed = pvc.data.Data.toggleSelected(datums);
+                }
+                
+                if(changed){
+                    this._onSelectionChanged();
+                }
             }
         }
     },
@@ -1477,7 +1683,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             .strokeStyle(options.rubberBandLine);
         
         // Rubber band selection behavior definition
-        if(!this._getExtension('base', 'fillStyle')){
+        if(!this._getExtensionAbs('base', 'fillStyle')){
             rubberPvParentPanel.fillStyle(pvc.invisibleFill);
         }
         
@@ -1578,7 +1784,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     // Callback to handle end of rubber band selection
     _dispatchRubberBandSelection: function(ev){
-        // Ask the panel for signum selections
+        // Ask the panel for selectable marks
         var datumsByKey = {},
             keyArgs = {toggle: false};
         if(this._detectDatumsUnderRubberBand(datumsByKey, this.rubberBand, keyArgs)) {
@@ -1612,7 +1818,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     /**
      * The default implementation obtains
      * datums associated with the instances of 
-     * marks returned by #_getSignums.
+     * marks returned by #_getSelectableMarks.
      * 
      * <p>
      * Override to provide a specific
@@ -1631,11 +1837,10 @@ pvc.BasePanel = pvc.Abstract.extend({
     _detectDatumsUnderRubberBand: function(datumsByKey, rb, keyArgs){
         var any = false;
         if(this.isVisible){
-            var selectableMarks = this._getSignums();
-        
-            if(selectableMarks){
-                selectableMarks.forEach(function(mark){
-                    this._forEachMarkDatumUnderRubberBand(mark, function(datum){
+            var pvMarks = this._getSelectableMarks();
+            if(pvMarks && pvMarks.length){
+                pvMarks.forEach(function(pvMark){
+                    this._forEachMarkDatumUnderRubberBand(pvMark, function(datum){
                         datumsByKey[datum.key] = datum;
                         any = true;
                     }, this, rb);
@@ -1646,7 +1851,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         return any;
     },
     
-    _forEachMarkDatumUnderRubberBand: function(mark, fun, ctx, rb){
+    _forEachMarkDatumUnderRubberBand: function(pvMark, fun, ctx, rb){
         if(!rb) {
             rb = this.rubberBand;
         }
@@ -1660,7 +1865,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
                             if(pvc.debug >= 10) {
-                                pvc.log(datum.key + ": " + JSON.stringify(shape) + " mark type: " + mark.type);
+                                pvc.log(datum.key + ": " + JSON.stringify(shape) + " mark type: " + pvMark.type);
                             }
                     
                             fun.call(ctx, datum);
@@ -1671,19 +1876,19 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         // center, partial and total (not implemented)
-        var selectionMode = def.get(mark, 'rubberBandSelectionMode', 'partial');
+        var selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
         var shapeMethod = (selectionMode === 'center') ? 'getInstanceCenterPoint' : 'getInstanceShape';
         
-        if(mark.type === 'area' || mark.type === 'line'){
+        if(pvMark.type === 'area' || pvMark.type === 'line'){
             var instancePrev;
             
-            mark.forEachSignumInstance(function(instance, toScreen){
+            pvMark.eachInstanceWithData(function(instance, toScreen){
                 if(!instance.visible || instance.isBreak || (instance.datum && instance.datum.isNull)) {
                     // Break the line
                     instancePrev = null;
                 } else {
                     if(instancePrev){
-                        var shape = mark[shapeMethod](instancePrev, instance).apply(toScreen);
+                        var shape = pvMark[shapeMethod](instancePrev, instance).apply(toScreen);
                         processShape(shape, instancePrev);
                     }
     
@@ -1691,9 +1896,9 @@ pvc.BasePanel = pvc.Abstract.extend({
                 }
             }, this);
         } else {
-            mark.forEachSignumInstance(function(instance, toScreen){
+            pvMark.eachInstanceWithData(function(instance, toScreen){
                 if(!instance.isBreak && instance.visible) {
-                    var shape = mark[shapeMethod](instance).apply(toScreen);
+                    var shape = pvMark[shapeMethod](instance).apply(toScreen);
                     processShape(shape, instance);
                 }
             }, this);

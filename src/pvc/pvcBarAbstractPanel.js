@@ -54,7 +54,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                     markerPvProto: new pv.Mark()
                 };
                 
-                this.extend(keyArgs.markerPvProto, 'bar_', {constOnly: true});
+                this.extend(keyArgs.markerPvProto, 'bar', {constOnly: true});
                 
                 groupScene.renderer(
                     new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
@@ -189,20 +189,19 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         this.base();
 
         // Extend bar and barPanel
-        this.extend(this.pvBarPanel, "barPanel_");
-        this.extend(this.pvBar, "bar_");
+        this.extend(this.pvBarPanel, "barPanel");
 
-        this.extend(this.pvUnderflowMarker, "barUnderflowMarker_");
-        this.extend(this.pvOverflowMarker,  "barOverflowMarker_");
+        this.extend(this.pvUnderflowMarker, "barUnderflowMarker");
+        this.extend(this.pvOverflowMarker,  "barOverflowMarker");
 
-        this.extend(this.pvBarLabel, "barLabel_");
+        this.extend(this.pvBarLabel, "barLabel");
         
         if(this._linePanel){
-            this.extend(this._linePanel.pvLine, "barSecondLine_");
-            this.extend(this._linePanel.pvDot,  "barSecondDot_" );
+            this.extend(this._linePanel.pvLine, "barSecondLine");
+            this.extend(this._linePanel.pvDot,  "barSecondDot" );
         }
     },
-
+    
     _addOverflowMarkers: function(){
         var orthoAxis = this.chart.axes.ortho;
         if(orthoAxis.option('FixedMax') != null){
@@ -282,7 +281,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
      * Returns an array of marks whose instances are associated to a datum, or null.
      * @override
      */
-    _getSignums: function(){
+    _getSelectableMarks: function(){
         return [this.pvBar];
     },
 

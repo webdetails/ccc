@@ -3,19 +3,27 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
 .init(function(panel, protoMark, keyArgs){
 
     var pvMark = protoMark.add(pv.Rule);
-
+    
+    protoMark = def.get(keyArgs, 'proto');
+    if(protoMark){
+        pvMark.extend(protoMark);
+    }
+    
     this.base(panel, pvMark, keyArgs);
 
     this/* Colors & Line */
-        .intercept('strokeStyle', 'strokeColor')
-        .intercept('lineWidth',   'strokeWidth')
+        ._interceptDynamic('strokeStyle', 'strokeColor')
+        ._interceptDynamic('lineWidth',   'strokeWidth')
         ;
 })
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs,
-                        'noHoverable', true,
-                        'noTooltips',  true);
+                        'noHover',       true,
+                        'noSelect',      true,
+                        'noTooltips',    true,
+                        'noClick',       true,
+                        'noDoubleClick', true);
 
         this.base(keyArgs);
     },
@@ -23,7 +31,7 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     /* STROKE WIDTH */
     strokeWidth: function(){
         var strokeWidth = this.baseStrokeWidth();
-        if(this.scene.anyInteraction()) {
+        if(this.showsInteraction() && this.scene.anyInteraction()) {
             strokeWidth = this.interactiveStrokeWidth(strokeWidth);
         } else {
             strokeWidth = this.normalStrokeWidth(strokeWidth);
@@ -33,7 +41,7 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     baseStrokeWidth: function(){
-        var value = this.delegate();
+        var value = this.delegateExtension();
         if(value === undefined){
             value = this.defaultStrokeWidth();
         }
@@ -68,7 +76,7 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     interactiveColor: function(type, color){
         var scene = this.scene;
         
-        if(!scene.isActive && scene.anySelected() && !scene.isSelected()) {
+        if(!scene.isActive && scene.anySelected() && scene.datum && !scene.isSelected()) {
             return this.dimColor(type, color);
         }
         

@@ -31,6 +31,12 @@ def.type('pvc.visual.Context')
     visualContext_update.call(this, mark, event);
 })
 .add(/** @lends pvc.visual.Context */{
+    isPinned: false,
+    
+    pin: function(){
+        this.isPinned = true;
+        return this;
+    },
     
     /* V1 DIMENSION ACCESSORS */
     getV1Series: function(){
@@ -48,6 +54,14 @@ def.type('pvc.visual.Context')
         return this.scene.atoms && (v = this.scene.atoms[this.panel._getV1DimName('value')]) && v.value;
     }
 });
+
+if(Object.defineProperty){
+    Object.defineProperty(pvc.visual.Context.prototype, 'parent', {
+        get: function(){
+            throw def.error.operationInvalid("The 'this.parent.index' idiom has no equivalent in this version. Please try 'this.pvMark.parent.index'.");
+        }
+    });
+}
 
 /**
  * Used internally to update a visual context.
@@ -69,7 +83,7 @@ function visualContext_update(mark, event){
     this.pvMark = mark;
 
     var instance = mark.instance(),
-        scene = instance.scene;
+        scene = instance._scene;
     
     if(!scene){
         var group = instance.group,

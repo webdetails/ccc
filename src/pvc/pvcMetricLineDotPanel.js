@@ -67,17 +67,17 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                     keyArgs.markerShape = colorAxis.option('Shape', true) 
                                           || 'circle'; // Dot's default shape
                     keyArgs.markerPvProto = new pv.Dot()
-                            .lineWidth(1.5)
-                            .shapeSize(12);
+                            .lineWidth(1.5, pvc.extensionTag) // act as if it were a user extension
+                            .shapeSize(12, pvc.extensionTag); // idem
                     
-                    this.extend(keyArgs.markerPvProto, 'dot_', {constOnly: true});
+                    this.extend(keyArgs.markerPvProto, 'dot', {constOnly: true});
                 }
                 
                 if((keyArgs.drawRule = drawRule)){
                     keyArgs.rulePvProto = new pv.Line()
-                            .lineWidth(1.5);
+                            .lineWidth(1.5, pvc.extensionTag);
                     
-                    this.extend(keyArgs.rulePvProto, 'line_', {constOnly: true});
+                    this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
                 }
                 
                 groupScene.renderer(
@@ -388,12 +388,13 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         
         // -- LINE --
         var line = new pvc.visual.Line(this, this.pvScatterPanel, {
-                extensionId: 'line'
+                extensionId: 'line',
+                noHover:      true // TODO: SIGN check if not broken
             })
             /* Data */
             .lock('data', function(seriesScene){ return seriesScene.childNodes; }) // TODO    
             
-            .lockValue('visible', this.showLines)
+            .lock('visible', this.showLines)
             
             /* Position & size */
             .override('x', function(){ return this.scene.basePosition;  })
@@ -408,9 +409,9 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 activeSeriesAware: this.showLines
             })
             .intercept('visible', function(){
-                return !this.scene.isIntermediate && this.delegate(true);
+                return !this.scene.isIntermediate && this.delegateExtension(true);
             })
-            .lockValue('shape', this.dotShape)
+            .lock('shape', this.dotShape)
             .override('x',  function(){ return this.scene.basePosition;  })
             .override('y',  function(){ return this.scene.orthoPosition; })
             .override('color', function(type){
@@ -440,50 +441,46 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         this.pvDot.rubberBandSelectionMode = 'center';
         
         // -- COLOR --
-        // When no lines are shown, dots are shown with transparency,
-        // which helps in distinguishing overlapped dots.
-        // With lines shown, it would look strange.
-        if(!rootScene.hasColorRole){
-            // ANALYZER requirements, so until there's no way to configure it...
-//            if(!myself.showLines){
-//                dot.override('baseColor', function(type){
-//                    var color = this.base(type);
-//                    color.opacity = 0.85;
-//                    return color;
-//                });
-//            }
-        } else {
-            var colorScale = this._getColorRoleScale(data);
-            
-            line.override('baseColor', function(type){
-                var color = this.delegate();
-                if(color === undefined){
+        dot.override('baseColor', function(type){
+            var color = this.delegateExtension();
+            if(color === undefined){
+                var color;
+                if(!rootScene.hasColorRole){
+                    color = this.defaultColor(type);
+                } else {
                     var colorValue = this.scene.vars.color.value;
+                    
                     color = colorValue == null ?
                                 options.nullColor :
                                 colorScale(colorValue);
                 }
                 
-                return color;
-            });
+                if(type === 'stroke'){
+                    color = color.darker();
+                }
+                
+             // When no lines are shown, dots are shown with transparency,
+             // which helps in distinguishing overlapped dots.
+             // With lines shown, it would look strange.
+             // ANALYZER requirements, so until there's no way to configure it...
+//                if(!myself.showLines){
+//                    color = color.alpha(color.opacity * 0.85);
+//                }
+            }
             
-            dot.override('baseColor', function(type){
-                var color = this.delegate();
+            return color;
+        });
+        
+        if(rootScene.hasColorRole){
+            var colorScale = this._getColorRoleScale(data);
+            
+            line.override('baseColor', function(type){
+                var color = this.delegateExtension();
                 if(color === undefined){
                     var colorValue = this.scene.vars.color.value;
-                    
                     color = colorValue == null ?
                                 options.nullColor :
                                 colorScale(colorValue);
-                    
-                    if(type === 'stroke'){
-                        color = color.darker();
-                    }
-                    
-                 // ANALYZER requirements, so until there's no way to configure it...
-//                    if(!myself.showLines){
-//                        color = color.alpha(color.opacity * 0.85);
-//                    }
                 }
                 
                 return color;
@@ -523,15 +520,18 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
 
             var dotSizeAbs = this.dotSizeAbs;
             if (this.dotSizeAbs) {
-                dot.override('strokeColor', function (scene) {
+                dot
+                .override('strokeColor', function (scene) {
                     return scene.vars.dotSize.value < 0 ? "#000000" : this.base();
-                });
-                dot.optional('strokeDasharray', function (scene){
-                    return scene.vars.dotSize.value < 0 ? '1.5 3' : null; // .  .  .
-                });
-//                dot.optional('lineWidth', function (scene){
-//                    return scene.vars.dotSize.value < 0 ? 1 : 1.5;
-//                });
+                })
+                .optional('lineCap', 'round') // only used by strokeDashArray
+                .optionalMark('strokeDasharray', function (scene){
+                    return scene.vars.dotSize.value < 0 ? 'dot' : null; // .  .  .
+                })
+                .optionalMark('lineWidth', function (scene){
+                    return scene.vars.dotSize.value < 0 ? 1.8 : 1.5;
+                })
+                ;
             }
 
             /* Ignore any extension */
@@ -655,14 +655,13 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
      * @override
      */
     applyExtensions: function(){
+      
+        this.extend(this.pvLabel, "lineLabel");
+        this.extend(this.pvScatterPanel, "scatterPanel");
 
+        this.extend(this.pvLabel, "label");
+        
         this.base();
-
-        this.extend(this.pvLabel, "lineLabel_");
-        this.extend(this.pvScatterPanel, "scatterPanel_");
-        this.extend(this.pvLine,  "line_");
-        this.extend(this.pvDot,   "dot_");
-        this.extend(this.pvLabel, "label_");
     },
 
     /**
@@ -677,7 +676,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
      * Returns an array of marks whose instances are associated to a datum or group, or null.
      * @override
      */
-    _getSignums: function(){
+    _getSelectableMarks: function(){
         var marks = [];
         
         marks.push(this.pvDot);
@@ -871,6 +870,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 interScene.vars.dotSize = toScene.vars.dotSize;
             }
             
+            interScene.ownerScene = toScene;
             interScene.isIntermediate = true;
             interScene.isSingle = false;
             

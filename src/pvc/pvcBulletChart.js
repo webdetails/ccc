@@ -120,9 +120,9 @@ pvc.BulletChart = pvc.BaseChart.extend({
     }
     
     this.bulletChartPanel = new pvc.BulletChartPanel(this, this.basePanel, def.create(contentOptions, {
-        showValues:   this.options.showValues,
-        showTooltips: this.options.showTooltips,
-        orientation:  this.options.orientation
+        showValues:         this.options.showValues,
+        showTooltips:       this.options.showTooltips,
+        orientation:        this.options.orientation
     }));
   },
   
@@ -294,15 +294,17 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     });
     
     
-    if (options.clickable){
+    if (options.clickable && this.clickAction){
+      var me = this;
+      
       this.pvBullet
-      .cursor("pointer")
-      .event("click",function(d){
-        var s = d.title;
-        var c = d.subtitle;
-        var ev = pv.event;
-        return options.clickAction(s,c, d.measures, ev);
-      });
+          .cursor("pointer")
+          .event("click",function(d){
+                var s = d.title;
+                var c = d.subtitle;
+                var ev = pv.event;
+                return me.clickAction(s,c, d.measures, ev);
+          });
     }
     
     this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
@@ -399,22 +401,27 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
                 });
 
     }
-
-    // Extension points
-    this.extend(this.pvBullets,"bulletsPanel_");
-    this.extend(this.pvBullet,"bulletPanel_");
-    this.extend(this.pvBulletRange,"bulletRange_");
-    this.extend(this.pvBulletMeasure,"bulletMeasure_");
-    this.extend(this.pvBulletMarker,"bulletMarker_");
-    this.extend(this.pvBulletRule,"bulletRule_");
-    this.extend(this.pvBulletRuleLabel,"bulletRuleLabel_");
-    this.extend(this.pvBulletTitle,"bulletTitle_");
-    this.extend(this.pvBulletSubtitle,"bulletSubtitle_");
-
-    // Extend body
-    this.extend(this.pvPanel,"chart_");
   },
-
+   
+  applyExtensions: function(){
+      
+      this.base();
+      
+      this.extend(this.pvBullets,"bulletsPanel");
+      this.extend(this.pvBullet,"bulletPanel");
+      this.extend(this.pvBulletRange,"bulletRange");
+      this.extend(this.pvBulletMeasure,"bulletMeasure");
+      this.extend(this.pvBulletMarker,"bulletMarker");
+      this.extend(this.pvBulletRule,"bulletRule");
+      this.extend(this.pvBulletRuleLabel,"bulletRuleLabel");
+      this.extend(this.pvBulletTitle,"bulletTitle");
+      this.extend(this.pvBulletSubtitle,"bulletSubtitle");
+  },
+  
+  _getExtensionId: function(){
+      return 'chart';
+  },
+  
     /*
      * Data array to back up bullet charts.
      */

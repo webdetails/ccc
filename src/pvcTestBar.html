@@ -50,6 +50,8 @@
         <script type="text/javascript" src="pvc/visual/Scene.js"></script>
         <script type="text/javascript" src="pvc/visual/Var.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Label.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
         <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
@@ -59,6 +61,8 @@
         <script type="text/javascript" src="pvc/visual/Context.js"></script>
         <script type="text/javascript" src="pvc/visual/Axis.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/CartesianAxisTickScene.js"></script>
         <script type="text/javascript" src="pvc/visual/ColorAxis.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/legend.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
@@ -106,8 +110,8 @@
         <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
     <!-- @SCRIPTSEND@ -->
     
-    <link type="text/css" rel="stylesheet" href="cdf/jquery.tooltip.css"/>
-    <link type="text/css" rel="stylesheet" href="pvcComponent.css"/>
+    
+    
         
     <script type="text/javascript" src="pvcDocUtils.js"></script>
   </head>
@@ -395,19 +399,30 @@ bar3.render();
         <div id="pvcBar3"></div>
 
         <h3>A stacked bar chart with negative values</h3>
-<textarea cols="55" rows="15" id="pvcBar3bCode">
+<textarea cols="55" rows="18" id="pvcBar3bCode">
 var bar3b = new pvc.BarChart({
     canvas: "pvcBar3b",
-    width:  400,
+    width:  400,
     height: 300,
+    
     title: "Stacked bar chart with negative values",
+    titleFont:     'bold italic 14px sans-serif',
+    titlePosition: 'top',
+    titleAlign:    'center',
+    titleSize:     {width: '80%', height: '35%'},
+    //titleSizeMax:  {width: '60%'},
+    titleMargins:  10,
+    titlePaddings: {all: '12%', top: 10, bottom: 10},
+    
     stacked: true,
     animate: true,
     clickable: true,
     selectable: true,
     hoverable: true,
+    
     legend: true,
     legendPosition: "right",
+    
     showValues: false,
     axisFullGrid: true,
     axisEndLine:  true,
@@ -417,8 +432,10 @@ var bar3b = new pvc.BarChart({
     orthoAxisOffset: 0.04,
     extensionPoints: {
     	xAxisLabel_textAngle: -1,
-    	xAxisLabel_textAlign: "right",
-    	xAxisLabel_textBaseline: "top"
+    	xAxisLabel_textAlign: 'right',
+    	xAxisLabel_textBaseline: 'top',
+    	title_fillStyle:   'rgba(0, 255, 0, 0.2)',
+        title_strokeStyle: 'green'
     }
 });
 

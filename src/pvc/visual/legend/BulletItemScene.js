@@ -17,21 +17,23 @@ def
     
     this.base(bulletGroup, keyArgs);
     
-    var value, label;
+    var value, rawValue, label;
     if(keyArgs){
-        value = keyArgs.value;
-        label = keyArgs.label;
+        value    = keyArgs.value;
+        rawValue = keyArgs.rawValue;
+        label    = keyArgs.label;
     }
     
     if(value === undefined){
         var source = this.group || this.datum;
         if(source){
-            value = source.value;
-            label = source.ensureLabel();
+            value    = source.value;
+            rawValue = source.rawValue;
+            label    = source.ensureLabel();
         }
     }
     
-    this.vars.value = new pvc.visual.ValueLabelVar(value || null, label || "");
+    this.vars.value = new pvc.visual.ValueLabelVar(value || null, label || "", rawValue);
 })
 .add(/** @lends pvc.visual.legend.BulletItemScene# */{
     /**
