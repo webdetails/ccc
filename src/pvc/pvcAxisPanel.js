@@ -1284,7 +1284,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     getLayoutSingleCluster: function(){
-        var rootScene   = this._buildCompositeScene(),
+        var rootScene   = this._getRootScene(),
             orientation = this.anchor,
             maxDepth    = rootScene.group.treeHeight,
             depthLength = this._layoutInfo.axisSize;
