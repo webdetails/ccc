@@ -40,6 +40,14 @@ function(dimTypeSpecs){
     this._dimsNames = [];
     
     /**
+     * An object with the dimension indexes by dimension name.
+     * 
+     * @type object
+     * @private
+     */
+    this._dimsIndexByName = {};
+    
+    /**
      * An index of the dimension types by group name.
      * 
      * @type object
@@ -200,6 +208,7 @@ function(dimTypeSpecs){
         
         var dimension = new pvc.data.DimensionType(this, name, dimTypeSpec);
         this._dims[name] = dimension;
+        this._dimsIndexByName[name] = this._dimsList.length;
         this._dimsList.push(dimension);
         this._dimsNames.push(name);
         
@@ -245,6 +254,27 @@ function(dimTypeSpecs){
         }
         
         return map;
+    },
+    
+    /**
+     * Sorts a specified dimension array in place, 
+     * according to the definition order.
+     * 
+     * @param {any[]} dims Array of dimension names.
+     * @param {function} [nameKey] Allows extracting the dimension name from
+     * each of the elements of the specified array.
+     * 
+     * @type undefined
+     */
+    sortDimensionNames: function(dims, nameKey){
+        var dimsIndexByName = this._dimsIndexByName;
+        
+        dims.sort(function(da, db){
+            return def.compare(
+                    dimsIndexByName[nameKey ? nameKey(da) : da],
+                    dimsIndexByName[nameKey ? nameKey(db) : db]);
+                    
+        });
     }
 });
 

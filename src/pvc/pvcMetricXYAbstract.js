@@ -29,10 +29,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
 
         this.base(options);
 
-        def.set(this._axisType2RoleNamesMap,
-            'base',  'x',
-            'ortho', 'y');
-
         var parent = this.parent;
         if(parent) {
             this._xRole = parent._xRole;
@@ -79,6 +75,25 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
         // Cached
         this._xDim = this.data.dimensions(this._xRole.firstDimensionName());
         this._yDim = this.data.dimensions(this._yRole.firstDimensionName());
+    },
+    
+    _bindAxes: function(hasMultiRole){
+        
+        this.base(hasMultiRole);
+        
+        if(!hasMultiRole || this.parent){
+            var axes = this.axes;
+            
+            var axis = axes.base;
+            if(!axis.isBound()){
+                axis.bind({role: this._xRole});
+            }
+            
+            axis = axes.ortho;
+            if(!axis.isBound()){
+                axis.bind({role: this._yRole});
+            }
+        }
     },
     
     defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {

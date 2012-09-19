@@ -27,6 +27,23 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         });
     },
 
+    _bindAxes: function(hasMultiRole){
+        
+        if(!hasMultiRole || this.parent){
+            
+            var options = this.options;
+
+            this.axes.ortho
+            .bind({
+                role: this.visualRoles('value'),
+                isStacked: !!options.stacked,
+                nullInterpolationMode: options.nullInterpolationMode
+            });
+        }
+        
+        this.base(hasMultiRole);
+    },
+    
     /* @override */
     _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
@@ -41,8 +58,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
             showLines:      options.showLines,
             showDots:       options.showDots,
             showAreas:      options.showAreas,
-            orientation:    options.orientation,
-            nullInterpolationMode: options.nullInterpolationMode
+            orientation:    options.orientation
         }));
     },
     
@@ -55,8 +71,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         orthoAxisOffset: 0.04,
         baseAxisOffset:  0.01, // TODO: should depend on being discrete or continuous base
         valuesAnchor: "right",
-        panelSizeRatio: 1,
-        nullInterpolationMode: 'none', // 'none', 'linear' 
+        panelSizeRatio: 1, 
         tipsySettings: { offset: 15 }
     })
 });

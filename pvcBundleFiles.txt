@@ -16,11 +16,14 @@ src/pvc/data/ComplexView.js
 src/pvc/data/Datum.js
 src/pvc/data/Dimension.js
 src/pvc/data/Data.js
-src/pvc/data/Data.load.js
 src/pvc/data/Data.selected.js
 src/pvc/data/GroupingSpec.js
 src/pvc/data/DataOper.js
 src/pvc/data/GroupingOper.js
+src/pvc/data/LinearInterpolationOper.js
+src/pvc/data/LinearInterpolationOperSeriesState.js
+src/pvc/data/ZeroInterpolationOper.js
+src/pvc/data/ZeroInterpolationOperSeriesState.js
 src/pvc/data/Data.operations.js
 src/pvc/data/Data.compat.js
 src/pvc/visual/Role.js

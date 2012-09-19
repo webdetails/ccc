@@ -99,9 +99,9 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
             this.pvPanel.borderPanel.overflow("hidden");
         }
     },
-
-    _getVisibleData: function(dataPartValues, keyArgs){
-        return this.chart._getVisibleData(dataPartValues || this.dataPartValue, keyArgs);
+    
+    _getVisibleData: function(){
+        return this.chart._getVisibleData(this.dataPartValue);
     },
 
     _getExtensionId: function(){

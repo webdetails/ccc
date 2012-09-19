@@ -8,11 +8,6 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         
         this.base(options);
 
-        def.set(this._axisType2RoleNamesMap,
-            'base', 'category',
-            'ortho', this.options.orthoAxisOrdinal ? 'series' : 'value'
-        );
-
         var parent = this.parent;
         if(parent) {
             this._catRole = parent._catRole;
@@ -35,22 +30,81 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         // Cached
         this._catRole = this.visualRoles('category');
     },
-
+    
+    _bindAxes: function(hasMultiRole){
+        
+        this.base(hasMultiRole);
+        
+        if(!hasMultiRole || this.parent){
+            var axes = this.axes;
+            
+            var axis = axes.base;
+            if(!axis.isBound()){
+                axis.bind(this._buildRolesDataCells('category'));
+            }
+            
+            var orthoDataCells;
+            
+            ['ortho', 'ortho2'].forEach(function(id){
+                axis = axes[id];
+                if(axis && !axis.isBound()){
+                    if(!orthoDataCells){
+                        var orthoRoleName = this.options.orthoAxisOrdinal ? 'series' : 'value';
+                        orthoDataCells = this._buildRolesDataCells(orthoRoleName, {
+                            isStacked: !!this.options.stacked
+                        });
+                    }
+                    
+                    axis.bind(orthoDataCells);
+                }
+            }, this);
+        }
+    },
+    
+    _interpolateDataCell: function(dataCell){
+        var nullInterpMode = dataCell.nullInterpolationMode;
+        if(nullInterpMode){
+            var InterpType;
+            switch(dataCell.nullInterpolationMode){
+                case 'linear': InterpType = pvc.data.LinearInterpolationOper; break;
+                case 'zero':   InterpType = pvc.data.ZeroInterpolationOper;   break;
+                case 'none':   break;
+                default: throw def.error.argumentInvalid('nullInterpolationMode', '' + nullInterpMode);
+            }
+        
+            if(InterpType){
+                this._assertSingleContinuousValueRole(dataCell.role);
+                
+                var visibleData = this._getVisibleData(dataCell.dataPartValue);
+                
+                new InterpType(
+                     visibleData, 
+                     this._catRole,
+                     this._serRole,
+                     dataCell.role,
+                     dataCell.isStacked)
+                .interpolate();
+            }
+        }
+    },
+    
     /**
      * @override
      */
-    _createVisibleData: function(dataPartValues, ignoreNulls){
-        var serGrouping = this._serRole && this._serRole.flattenedGrouping(),
-            catGrouping = this._catRole.flattenedGrouping(),
-            partData    = this.partData(dataPartValues),
-            
-            // Allow for more caching when isNull is null
-            keyArgs = { visible: true, isNull: ignoreNulls ? false : null};
+    _createVisibleData: function(dataPartValue, keyArgs){
+        var serGrouping = this._serRole && this._serRole.flattenedGrouping();
+        var catGrouping = this._catRole.flattenedGrouping();
+        var partData    = this.partData(dataPartValue);
+        
+        var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
+        
+        // Allow for more caching when isNull is null
+        var groupKeyArgs = { visible: true, isNull: ignoreNulls ? false : null};
         
         return serGrouping ?
-                // <=> One multi-dimensional, two-levels data grouping
-                partData.groupBy([catGrouping, serGrouping], keyArgs) :
-                partData.groupBy(catGrouping, keyArgs);
+               // <=> One multi-dimensional, two-levels data grouping
+               partData.groupBy([catGrouping, serGrouping], groupKeyArgs) :
+               partData.groupBy(catGrouping, groupKeyArgs);
     },
     
     /**
@@ -78,27 +132,9 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      *
      * @override
      */
-    _getVisibleRoleValueExtent: function(valueAxis, valueDataCell){
+    _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell){
         var valueRole = valueDataCell.role;
-        var dataPartValues = valueDataCell.dataPartValues;
-        if(dataPartValues == null){
-            // Most common case is faster
-            return this._getVisibleCellValueExtent(valueAxis, valueRole, null);
-        }
-
-        return def.query(dataPartValues)
-                    .select(function(dataPartValue){
-                        return this._getVisibleCellValueExtent(valueAxis, valueRole, dataPartValue);
-                    }, this)
-                    .reduce(this._unionReduceExtent, null)
-                    ;
-    },
-
-    _isDataCellStacked: function(valueRole, dataPartValue){
-        return this.options.stacked;
-    },
-
-    _getVisibleCellValueExtent: function(valueAxis, valueRole, dataPartValue){
+        
         switch(valueRole.name){
             case 'series':// (series throws in base)
             case 'category':
@@ -109,16 +145,16 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                  *
                  * Continuous baseScale's, like timeSeries go this way.
                  */
-                return pvc.CartesianAbstract.prototype._getVisibleRoleValueExtent.call(
-                                this, valueAxis, {role: valueRole, dataPartValues: dataPartValue });
+                return this.base(valueAxis, valueDataCell);
         }
         
         this._assertSingleContinuousValueRole(valueRole);
+        
+        var dataPartValue = valueDataCell.dataPartValue;
+        var valueDimName = valueRole.firstDimensionName();
+        var data = this._getVisibleData(dataPartValue);
 
-        var valueDimName = valueRole.firstDimensionName(),
-            data = this._getVisibleData(dataPartValue);
-
-        if(valueAxis.type !== 'ortho' || !this._isDataCellStacked(valueRole, dataPartValue)){
+        if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked){
             return data.leafs()
                        .select(function(serGroup){
                            return serGroup.dimensions(valueDimName).sum();
@@ -155,12 +191,12 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
 //
 //        return max != null ? {min: 0, max: max} : null;
     },
-    
+
     /**
      * Obtains the extent of a value dimension in a given category group.
      * The default implementation determines the extent by separately
      * summing negative and positive values.
-     * Supports {@link #_getVisibleValueExtent}.
+     * Supports {@link #_getContinuousVisibleExtent}.
      */
     _getStackedCategoryValueExtent: function(catGroup, valueDimName){
         var posSum = null,
@@ -196,7 +232,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      *
      * The default implementation performs a range "union" operation.
      *
-     * Supports {@link #_getVisibleValueExtent}.
+     * Supports {@link #_getContinuousVisibleExtent}.
      */
     _reduceStackedCategoryValueExtent: function(result, catRange, catGroup){
         return this._unionReduceExtent(result, catRange);
@@ -274,7 +310,9 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     
     defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
      // Ortho <- value role
-        orthoAxisOrdinal: false, // when true => _axisType2RoleNamesMap['ortho'] = 'series' (instead of value)
+        orthoAxisOrdinal: false, // when true => ortho axis gets the series role (instead of the value role)
+        
+        nullInterpolationMode: 'none',
         
         stacked: false
     })

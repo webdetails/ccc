@@ -22,36 +22,48 @@ def.scope(function(){
  * @param {pvc.BaseChart} chart The associated cartesian chart.
  * @param {string} type The type of the axis.
  * @param {number} [index=0] The index of the axis within its type.
- * @param {object|object[]} dataCells The associated data cells (role + data parts).
- * 
  * @param {object} [keyArgs] Keyword arguments.
- * @param {pv.Scale} scale The associated scale.
  */
-def.type('pvc.visual.Axis')
-.init(function(chart, type, index, dataCells, keyArgs){
-    /*jshint expr:true */
-    dataCells || def.fail.argumentRequired('dataCells');
-    
+def
+.type('pvc.visual.Axis')
+.init(function(chart, type, index, keyArgs){
     this.chart = chart;
     this.type  = type;
     this.index = index == null ? 0 : index;
-    this.dataCells = def.array.as(dataCells);
-    this.dataCell  = this.dataCells[0];
-    this.role = this.dataCell && this.dataCell.role;
-    
-    this.scaleType = groupingScaleType(this.role.grouping);
-    this.id = pvc.visual.Axis.getId(this.type, this.index);
-    
+    this.id = pvc.visual.Axis.getId(type, this.index);
     this.option = pvc.options(this._getOptionsDefinition(), this);
-    
-    this._checkRoleCompatibility();
-    
-    this.setScale(def.get(keyArgs, 'scale', null));
 })
 .add(/** @lends pvc.visual.Axis# */{
     isVisible: true,
-   
+    
+    /**
+     * Binds the axis to a set of data cells.
+     * @param {object|object[]} dataCells The associated data cells.
+     * @type pvc.visual.Axis
+     */
+    bind: function(dataCells){
+        /*jshint expr:true */
+        dataCells || def.fail.argumentRequired('dataCells');
+        !this.dataCells || def.fail.operationInvalid('Axis is already bound.');
+        
+        this.dataCells = def.array.to(dataCells);
+        this.dataCell  = this.dataCells[0];
+        this.role = this.dataCell && this.dataCell.role;
+        this.scaleType = groupingScaleType(this.role.grouping);
+        
+        this._checkRoleCompatibility();
+        
+        return this;
+    },
+    
+    isBound: function(){
+        return !!this.role;
+    },
+    
     setScale: function(scale){
+        /*jshint expr:true */
+        this.role || def.fail.operationInvalid('Axis is unbound.');
+        
         this.scale = scale;
         
         if(scale){
@@ -59,16 +71,6 @@ def.type('pvc.visual.Axis')
         }
         
         return this;
-    },
-    
-    /**
-     * Determines the type of scale required by the axis.
-     * The scale types are 'Discrete', 'Timeseries' and 'Continuous'.
-     * 
-     * @type string
-     */
-    scaleType: function(){
-        return groupingScaleType(this.role.grouping);
     },
     
     /**

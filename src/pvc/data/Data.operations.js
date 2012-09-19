@@ -1,10 +1,132 @@
 pvc.data.Data.add(/** @lends pvc.data.Data# */{
+    
     /**
-     * Obtains the number of contained datums.
-     * @type number
+     * Loads or reloads the data with the specified enumerable of atoms.
+     * 
+     * <p>
+     * Can only be called on an owner data. 
+     * Child datas are instead "loaded" on construction, 
+     * with a subset of its parent's datums.
+     * </p>
+     * 
+     * <p>
+     * This method was designed to be fed with the output
+     * of {@link pvc.data.TranslationOper#execute}.
+     * </p>
+     * 
+     * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
+     * @param {object} [keyArgs] Keyword arguments.
+     * @param {function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
+     * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
      */
-    count: function(){
-        return this._datums.length;
+    load: function(atomz, keyArgs){
+        /*global data_assertIsOwner:true */
+        data_assertIsOwner.call(this);
+        
+        var whereFun  = def.get(keyArgs, 'where');
+        var isNullFun = def.get(keyArgs, 'isNull');
+        var datums = 
+            def
+            .query(atomz)
+            .select(function(atoms){
+                var datum = new pvc.data.Datum(this, atoms);
+                
+                if(isNullFun && isNullFun(datum)){
+                    datum.isNull = true;
+                }
+                
+                if(whereFun && !whereFun(datum)) {
+                    return null;
+                }
+                
+                return datum;
+            }, this)
+            ;
+        
+        data_setDatums.call(this, datums, { doAtomGC: true });
+    },
+    
+    clearInterpolations: function(){
+        // Recursively clears all interpolated datums and atoms
+        var datums = this._datums;
+        if(datums){
+            this._sumAbsCache = null;
+            
+            var visibleDatums  = this._visibleDatums;
+            var selectedDatums = this._selectedDatums;
+            
+            var i = 0;
+            var L = datums.length;
+            var removed;
+            while(i < L){
+                var datum = datums[i];
+                if(datum.isInterpolated){
+                    var id = datum.id;
+                    if(selectedDatums && datum.isSelected) {
+                        selectedDatums.rem(id);
+                    }
+                    
+                    if(datum.isVisible) {
+                        visibleDatums.rem(id);
+                    }
+                    
+                    datums.splice(i, 1);
+                    L--;
+                    removed = true;
+                } else {
+                    i++;
+                }
+            }
+            
+            if(removed){
+                if(!datums.length && this.parent){
+                    // "Me is a group"
+                    this.dispose();
+                    return;
+                }
+
+                var children = this._children;
+                if(children){
+                    i = 0;
+                    L = children.length;
+                    while(i < L){
+                        var childData = children[i];
+                        childData.clearInterpolations();
+                        if(!childData.parent){
+                            // Child group was empty and removed itself
+                            L--;
+                        } else {
+                            i++;
+                        }
+                    }
+                }
+                
+                if(this._linkChildren){
+                    this._linkChildren.forEach(function(linkChildData){
+                        linkChildData.clearInterpolations();
+                    });
+                }
+            }
+        }
+        
+        def.eachOwn(this._dimensions, function(dim){
+            dim_uninternInterpolatedAtoms.call(dim);
+        });
+    },
+    
+    /**
+     * Adds new datums to the owner data.
+     * @param {pvc.data.Datum[]|def.Query} datums The datums to add. 
+     */
+    add: function(datums){
+        /*global data_assertIsOwner:true */
+        data_assertIsOwner.call(this);
+        
+        /*global data_setDatums:true */
+        data_setDatums.call(this, datums, {
+            isAdditive: true,
+            doAtomGC:   true 
+        });
     },
     
     /**
@@ -98,7 +220,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @returns {pvc.data.Data} A linked data containing the filtered datums.
      */
     where: function(whereSpec, keyArgs){
-        var datums = this.datums(whereSpec, keyArgs).array();
+        var datums = this.datums(whereSpec, keyArgs);
         return new pvc.data.Data({linkParent: this, datums: datums});
     },
 
@@ -283,6 +405,309 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         return sum;
     }
 });
+
+
+/**
+ * Called to add or replace the contained {@link pvc.data.Datum} instances. 
+ * 
+ * When replacing, all child datas and linked child datas are disposed.
+ * 
+ * When adding, the specified datums will be added recursively 
+ * to this data's parent or linked parent, and its parent, until the owner data is reached.
+ * When crossing a linked parent, 
+ * the other linked children of that parent
+ * are given a chance to receive a new datum, 
+ * and it will be added if it satisfies its inclusion criteria.
+ * 
+ * The datums' atoms must be consistent with the base atoms of this data.
+ * If this data inherits a non-null atom in a given dimension and:
+ * <ul>
+ * <li>a datum has another non-null atom, an error is thrown.</li>
+ * <li>a datum has a null atom, an error is thrown.
+ * </ul>
+ * 
+ * @name pvc.data.Data#_setDatums
+ * @function
+ * @param {pvc.data.Datum[]|def.Query} newDatums An array or enumerable of datums.
+ * When an array, and in replace mode, 
+ * it is used directly to keep the stored datums and may be modified if necessary.
+ * 
+ * @param {object} [keyArgs] Keyword arguments.
+ * 
+ * @param {boolean} [keyArgs.isAdditive=false] Indicates that the specified datums are to be added, 
+ * instead of replace existing datums.
+ * 
+ * @param {boolean} [keyArgs.doAtomGC=true] Indicates that atom garbage collection should be performed.
+ * 
+ * @type undefined
+ * @private
+ */
+function data_setDatums(newDatums, keyArgs){
+    // But may be an empty list
+    newDatums || def.fail.argumentRequired('newDatums');
+    
+    var doAtomGC   = def.get(keyArgs, 'doAtomGC',   false);
+    var isAdditive = def.get(keyArgs, 'isAdditive', false);
+    
+    var visibleDatums  = this._visibleDatums;
+    var selectedDatums = this._selectedDatums;
+    
+    var newDatumsByKey = {};
+    var prevDatumsByKey;
+    var prevDatums = this._datums;
+    if(prevDatums){
+        // Visit atoms of existing datums
+        // We cannot simply mark all atoms of every dimension
+        // cause now, the dimensions may already contain new atoms
+        // used (or not) by the new datums
+        var processPrevAtoms = isAdditive && doAtomGC;
+        
+        // Index existing datums by (semantic) key
+        // So that old datums may be preserved
+        prevDatumsByKey = 
+            def
+            .query(prevDatums)
+            .uniqueIndex(function(datum){
+                
+                if(processPrevAtoms){ // isAdditive && doAtomGC
+                    data_processDatumAtoms.call(
+                            this, 
+                            datum, 
+                            /* intern */      false, 
+                            /* markVisited */ true);
+                }
+                
+                return datum.key;
+            }, this);
+        
+        // Clear caches and/or children
+        if(isAdditive){
+            this._sumAbsCache = null;
+        } else {
+            data_disposeChildLists.call(this);
+            if(selectedDatums) { selectedDatums.clear(); }
+            visibleDatums.clear();
+        }
+    } else {
+        isAdditive = false;
+    }
+    
+    var datumsById;
+    if(isAdditive){
+        datumsById = this._datumsById;
+    } else {
+        datumsById = this._datumsById = {};
+    }
+    
+    if(def.array.is(newDatums)){
+        var i = 0;
+        var L = newDatums.length;
+        while(i < L){
+            var inDatum  = newDatums[i];
+            var outDatum = setDatum.call(this, inDatum);
+            if(!outDatum){
+                newDatums.splice(i, 1);
+                L--;
+            } else {
+                if(outDatum !== inDatum){
+                    newDatums[i] = outDatum;
+                }
+                i++;
+            }
+        }
+    } else if(newDatums instanceof def.Query){
+        newDatums = 
+            newDatums
+            .select(setDatum, this)
+            .where(def.notNully)
+            .array();
+    } else {
+        throw def.error.argumentInvalid('newDatums', "Argument is of invalid type.");
+    }
+    
+    if(doAtomGC){
+        // Atom garbage collection
+        // Unintern unused atoms
+        def.eachOwn(this._dimensions, function(dimension){
+            dim_uninternUnvisitedAtoms.call(dimension);
+        });
+    }
+    
+    if(isAdditive){
+        // newDatums contains really new datums (excluding duplicates)
+        // These can be further filtered in the grouping operation
+        
+        def.array.append(prevDatums, newDatums);
+        
+        // II - Distribute added datums by linked children
+        if(this._linkChildren){
+            this._linkChildren.forEach(function(linkChildData){
+                data_addDatumsSimple.call(linkChildData, newDatums);
+            });
+        }
+    } else {
+        this._datums = newDatums;
+    }
+    
+    function setDatum(newDatum){
+        if(!newDatum){
+            // Ignore
+            return;
+        }
+        
+        /* Use already existing same-key datum, if any */
+        var key = newDatum.key;
+        
+        if(def.hasOwnProp.call(newDatumsByKey, key)){
+            // Duplicate in input datums, ignore
+            return;
+        }
+        
+        if(prevDatumsByKey){
+            var prevDatum = def.getOwn(prevDatumsByKey, key);
+            if(prevDatum){
+                // Duplicate with previous datums
+                if(isAdditive){
+                    // Ignore
+                    return;
+                }
+                
+                // Prefer to *re-add* the old datum and ignore the new one
+                // Not new
+                newDatum = prevDatum;
+                
+                // The old datum is going to be kept.
+                // In the end, it will only contain the datums that were "removed"
+                //delete prevDatumsByKey[key];
+            }
+            // else newDatum is really new
+        }
+        
+        newDatumsByKey[key] = newDatum;
+        
+        var id = newDatum.id;
+        datumsById[id] = newDatum;
+        
+        data_processDatumAtoms.call(
+                this,
+                newDatum,
+                /* intern      */ !!this._dimensions, // When creating a linked data, datums are set when dimensions aren't yet created. 
+                /* markVisited */ doAtomGC);
+        
+        // TODO: make this lazy?
+        if(!newDatum.isNull){
+            if(selectedDatums && newDatum.isSelected) {
+                selectedDatums.set(id, newDatum);
+            }
+        
+            if(newDatum.isVisible) {
+                visibleDatums.set(id, newDatum);
+            }
+        }
+        
+        return newDatum;
+    }
+}
+
+/**
+ * Processes the atoms of this datum.
+ * If a virtual null atom is found then the null atom of that dimension
+ * is interned.
+ * If desired the processed atoms are marked as visited.
+ * 
+ * @name pvc.data.Datum._processAtoms
+ * @function
+ * @param {boolean} [intern=false] If virtual nulls should be detected.
+ * @param {boolean} [markVisited=false] If the atoms should be marked as visited. 
+ * @type undefined
+ * @internal
+ */
+function data_processDatumAtoms(datum, intern, markVisited){
+    
+    var dims = this._dimensions;
+    if(!dims){
+        // data is still initializing and dimensions are not yet created
+        intern = false;
+    }
+    
+    def.each(datum.atoms, function(atom){
+        if(intern){
+            // Ensure that the atom exists in the local dimension
+            
+            var localDim = def.getOwn(dims, atom.dimension.name) ||
+                           def.fail.argumentInvalid("Datum has atoms of foreign dimension.");
+            
+            /*global dim_internAtom:true */
+            dim_internAtom.call(localDim, atom);
+        }
+        
+        if(markVisited){
+            // Mark atom as visited
+            atom.visited = true;
+        }
+    });
+}
+
+function data_addDatumsSimple(newDatums){
+    // But may be an empty list
+    newDatums || def.fail.argumentRequired('newDatums');
+    
+    var groupOper = this._groupOper;
+    if(groupOper){
+        // This data gets its datums, 
+        //  possibly filtered (groupOper calls data_addDatumsLocal).
+        // Children get their new datums.
+        // Linked children of children get their new datums.
+        newDatums = groupOper.executeAdd(this, newDatums);
+    } else {
+        data_addDatumsLocal.call(this, newDatums);
+    }
+    
+    // Distribute added datums by linked children
+    if(this._linkChildren){
+        this._linkChildren.forEach(function(linkChildData){
+            data_addDatumsSimple.call(linkChildData, newDatums);
+        });
+    }
+}
+
+function data_addDatumsLocal(newDatums){
+    var visibleDatums  = this._visibleDatums;
+    var selectedDatums = this._selectedDatums;
+    
+    // Clear caches
+    this._sumAbsCache = null;
+    
+    var datumsById = this._datumsById;
+    var datums = this._datums;
+    
+    newDatums.forEach(addDatum, this);
+    
+    function addDatum(newDatum){
+        var id = newDatum.id;
+        
+        datumsById[id] = newDatum;
+        
+        data_processDatumAtoms.call(
+                this,
+                newDatum,
+                /* intern      */ true, 
+                /* markVisited */ false);
+        
+        // TODO: make this lazy?
+        if(!newDatum.isNull){
+            if(selectedDatums && newDatum.isSelected) {
+                selectedDatums.set(id, newDatum);
+            }
+        
+            if(newDatum.isVisible) {
+                visibleDatums.set(id, newDatum);
+            }
+        }
+        
+        datums.push(newDatum);
+    }
+}
 
 /**
  * Processes a given "where" specification.
@@ -515,9 +940,9 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
                 return;
             }
             
-            var dimName = parentData._childrenKeyDimName;
+            var dimName = parentData._groupLevelSpec.dimensions[0].name;
             datumFilter[dimName].forEach(function(atom){
-                var childData = parentData._childrenByKey[atom.key];
+                var childData = parentData._childrenByKey[atom.globalKey];
                 if(childData) {
                     recursive(childData, h + 1);
                 }
@@ -538,7 +963,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
          // No current data means starting
          if(!this._data) {
              this._data = rootData;
-             this._dimAtomsOrQuery = def.query(datumFilter[rootData._childrenKeyDimName]);
+             this._dimAtomsOrQuery = def.query(datumFilter[rootData._groupLevelSpec.dimensions[0].name]);
              
          // Are there still any datums of the current data to enumerate?
          } else if(this._datumsQuery) { 
@@ -589,7 +1014,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
                      
                      if(depth < H - 1) {
                          // Keep going up, until a leaf datum is found. Then we stop.
-                         this._dimAtomsOrQuery = def.query(datumFilter[childData._childrenKeyDimName]);
+                         this._dimAtomsOrQuery = def.query(datumFilter[childData._groupLevelSpec.dimensions[0].name]);
                          depth++;
                      } else {
                          // Leaf data!

@@ -610,23 +610,24 @@ def.type('pvc.data.Dimension')
      * obtain atoms of a dimension for raw values of source items.
      * </p>
      * <p>
-     * This method can only be called on an owner dimension.
+     * If this method is not called on an owner dimension,
+     * and if the requested values isn't locally present,
+     * the call is recursively forwarded to the dimension's
+     * parent or link parent until the atom is found.
+     * Ultimately, if the atom does not yet exist, 
+     * it is created in the owner dimension. 
      * </p>
      * <p>
      * An empty string value is considered equal to a null value. 
      * </P>
      * @param {any} sourceValue The source value.
-     *
+     * @param {boolean} [isInterpolated=false] Indicates that 
+     * the (necessarily non-null) atom is the result of interpolation.
+     * 
      * @type pvc.data.Atom
      */
-    intern: function(sourceValue){
-        // <Debug>
-        /*jshint expr:true */
-        (this.owner === this) || def.assert("Can only internalize on an owner dimension.");
-        // </Debug>
-        
-        // NOTE:
-        // This function is performance critical!
+    intern: function(sourceValue, isInterpolated){
+        // NOTE: This function is performance critical!
       
         // The null path and the existing atom path 
         // are as fast and direct as possible
@@ -636,29 +637,35 @@ def.type('pvc.data.Dimension')
             return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
         }
         
+        var key, atom, value, label;
         var type = this.type;
         
         // - CONVERT - 
-        var value, label;
-        if(type._converter){
-            value = type._converter.call(null, sourceValue);
-        } else if(typeof sourceValue === 'object' && ('v' in sourceValue)){
-            // Assume google table style cell {v: , f: }
-            value = sourceValue.v;
-            label = sourceValue.f;
+        if(!isInterpolated){
+            var converter = type._converter;
+            if(converter){
+                value = converter(sourceValue);
+            } else if(typeof sourceValue === 'object' && ('v' in sourceValue)){
+                // Assume google table style cell {v: , f: }
+                value = sourceValue.v;
+                label = sourceValue.f;
+            } else {
+                value = sourceValue;
+            }
+            
+            if(value == null || value === '') {
+                // Null after all
+                return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
+            }
         } else {
             value = sourceValue;
         }
         
-        if(value == null || value === '') {
-            // Null after all
-            return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
-        }
-        
         // - CAST -
         // Any cast function?
-        if(type.cast) {
-            value = type.cast.call(null, value);
+        var cast = type.cast;
+        if(cast) {
+            value = cast(value);
             if(value == null || value === ''){
                 // Null after all (normally a cast failure)
                 return this._nullAtom || dim_createNullAtom.call(this);
@@ -666,43 +673,29 @@ def.type('pvc.data.Dimension')
         }
         
         // - KEY -
-        var key = '' + (type._key ? type._key.call(null, value) : value);
+        var keyFun = type._key;
+        key = '' + (keyFun ? keyFun(value) : value);
         // <Debug>
         key || def.fail.operationInvalid("Only a null value can have an empty key.");
         // </Debug>
         
         // - ATOM -
         var atom = this._atomsByKey[key];
-        if(atom) {
+        if(atom){
+            if(!isInterpolated && atom.isInterpolated){
+                delete atom.isInterpolated;
+            }
             return atom;
         }
         
-        // - LABEL -
-        if(label == null){
-            if(type._formatter){
-                label = type._formatter.call(null, value, sourceValue);
-            } else {
-                label = value;
-            }
-        }
-
-        label = "" + label; // J.I.C.
-        
-        if(!label && pvc.debug >= 2){
-            pvc.log("Only the null value should have an empty label.");
-        }
-        
-        // - ATOM! -
-        atom = new pvc.data.Atom(this, value, label, sourceValue, key);
-        
-        // Insert atom in order (or at the end when !_atomComparer)
-        def.array.insert(this._atoms, atom, this._atomComparer);
-        
-        dim_clearVisiblesCache.call(this);
-        
-        this._atomsByKey[key] = atom;
-        
-        return atom;
+        return dim_createAtom.call(
+                   this,
+                   type,
+                   sourceValue,
+                   key,
+                   value,
+                   label,
+                   isInterpolated);
     },
     
     /**
@@ -733,6 +726,144 @@ def.type('pvc.data.Dimension')
 });
 
 /**
+ * Creates an atom, 
+ * in the present dimension if it is the owner dimension,
+ * or delegates the creation to its parent, or linked parent dimension.
+ * 
+ * The atom must not exist in the present dimension.
+ * 
+ * @name pvc.data.Dimension#_createAtom
+ * @function
+ * @param {pvc.data.DimensionType} type The dimension type of this dimension.
+ * @param {any} sourceValue The source value.
+ * @param {string} key The key of the value.
+ * @param {any} value The typed value.
+ * @param {string} [label] The label, if it is present directly
+ * in {@link sourceValue}, in Google format.
+ * @type pvc.data.Atom
+ */
+function dim_createAtom(type, sourceValue, key, value, label, isInterpolated){
+    var atom;
+    if(this.owner === this){
+        // Create the atom
+        
+        // - LABEL -
+        if(label == null){
+            var formatter = type._formatter;
+            if(formatter){
+                label = formatter(value, sourceValue);
+            } else {
+                label = value;
+            }
+        }
+
+        label = "" + label; // J.I.C.
+        
+        if(!label && pvc.debug >= 2){
+            pvc.log("Only the null value should have an empty label.");
+        }
+        
+        // - ATOM! -
+        atom = new pvc.data.Atom(this, value, label, sourceValue, key);
+        if(isInterpolated){
+            atom.isInterpolated = true;
+        }
+    } else {
+        var source = this.parent || this.linkParent;
+        atom = source._atomsByKey[key] ||
+               dim_createAtom.call(
+                    source, 
+                    type, 
+                    sourceValue, 
+                    key, 
+                    value, 
+                    label,
+                    isInterpolated);
+    }
+        
+    // Insert atom in order (or at the end when !_atomComparer)
+    def.array.insert(this._atoms, atom, this._atomComparer);
+    
+    dim_clearVisiblesCache.call(this);
+    
+    this._atomsByKey[key] = atom;
+    
+    return atom;
+}
+
+/**
+ * Ensures that the specified atom exists in this dimension.
+ * The atom must have been created in a dimension of this dimension tree.
+ * 
+ * If the virtual null atom is found it is replaced by the null atom,
+ * meaning that, after all, the null is really present in the data.
+ * 
+ * @param {pvc.data.Atom} atom the atom to intern.
+ * 
+ * @name pvc.data.Dimension#_internAtom
+ * @function
+ * @type pvc.data.Atom
+ */
+function dim_internAtom(atom){
+    var key = atom.key;
+    
+    // Root load will fall in this case
+    if(atom.dimension === this){
+        (this.owner === this) || def.assert("Should be an owner dimension");
+        
+        if(!key && atom === this._virtualNullAtom){
+            /* This indicates that there is a dimension for which 
+             * there was no configured reader, 
+             * so nulls weren't read.
+             * 
+             * We will register the real null, 
+             * and the virtual null atom will not show up again,
+             * because it appears through the prototype chain
+             * as a default value.
+             */
+            atom = this.intern(null);
+        }
+        
+        return atom;
+    }
+    
+    if(!this._lazyInit){
+        // Else, not yet initialized, so there's no need to add the atom now
+        var localAtom = this._atomsByKey[key];
+        if(localAtom){
+            if(localAtom !== atom){
+                throw def.error.operationInvalid("Atom is from a different root data.");
+            }
+            
+            return atom;
+        }
+        
+        if(this.owner === this) {
+            // Should have been created in a dimension along the way.
+            throw def.error.operationInvalid("Atom is from a different root data.");
+        }
+    }
+    
+    dim_internAtom.call(this.parent || this.linkParent, atom);
+    
+    if(!this._lazyInit){
+        // Insert atom in order (or at the end when !_atomComparer)
+        this._atomsByKey[key] = atom;
+        
+        if(!key){
+            this._nullAtom = atom;
+            this._atoms.unshift(atom);
+        } else {
+            def.array.insert(this._atoms, atom, this._atomComparer);
+        }
+        
+        dim_clearVisiblesCache.call(this);
+    }
+    
+    return atom;
+}
+
+/**
  * Builds a key string suitable for identifying a call to {@link pvc.data.Data#datums}
  * with no where specification.
  *
@@ -757,24 +888,28 @@ function dim_buildDatumsFilterKey(keyArgs){
  * @private
  */
 function dim_createNullAtom(sourceValue){
-    // <Debug>
-    /*jshint expr:true */
-    (this.owner === this) || def.assert("Can only create atoms on an owner dimension.");
-    // </Debug>
-    
-    if(!this._nullAtom){
-        var label = "" + (this.type._formatter ? this.type._formatter.call(null, null, sourceValue) : "");
+    var nullAtom = this._nullAtom;
+    if(!nullAtom){
+        if(this.owner === this){
+            var typeFormatter = this.type._formatter;
+            var label = "" + (typeFormatter ? typeFormatter.call(null, null, sourceValue) : "");
+            
+            nullAtom = new pvc.data.Atom(this, null, label, null, '');
+            
+            this.data._atomsBase[this.name] = nullAtom; 
+        } else {
+            // Recursively set the null atom, up the parent/linkParent chain
+            // until reaching the owner (root) dimension.
+            nullAtom = dim_createNullAtom.call(this.parent || this.linkParent, sourceValue);
+        }
         
-        this._nullAtom = new pvc.data.Atom(this, null, label, null, '');
+        this._atomsByKey[''] = this._nullAtom = nullAtom;
         
-        this._atomsByKey[''] = this._nullAtom;
-        
-        this._atoms.unshift(this._nullAtom);
-        
-        this.data._atomsBase[this.name] = this._nullAtom; 
+        // The null atom is always in the first position
+        this._atoms.unshift(nullAtom);
     }
     
-    return this._nullAtom;
+    return nullAtom;
 }
 
 /**
@@ -836,6 +971,68 @@ function dim_unintern(atom){
     }
     
     dim_clearVisiblesCache.call(this);
+}
+
+function dim_uninternUnvisitedAtoms(){
+    // <Debug>
+    /*jshint expr:true */
+    (this.owner === this) || def.assert("Can only unintern atoms of an owner dimension.");
+    // </Debug>
+    
+    var atoms = this._atoms;
+    if(atoms){
+        var atomsByKey = this._atomsByKey;
+        var i = 0;
+        var L = atoms.length;
+        while(i < L){ 
+            var atom = atoms[i];
+            if(atom.visited){
+                delete atom.visited;
+                i++;
+            } else if(atom !== this._virtualNullAtom) {
+                // Remove the atom
+                atoms.splice(i, 1);
+                L--;
+                
+                var key = atom.key;
+                delete atomsByKey[key];
+                if(!key){
+                    delete this._nullAtom;
+                    this.data._atomsBase[this.name] = this._virtualNullAtom;
+                }
+            }
+        }
+        
+        dim_clearVisiblesCache.call(this);
+    }
+}
+
+function dim_uninternInterpolatedAtoms(){
+    // This assumes that this same function has been called on child/link child dimensions
+    var atoms = this._atoms;
+    if(atoms){
+        var atomsByKey = this._atomsByKey;
+        var i = 0;
+        var L = atoms.length;
+        var removed;
+        while(i < L){ 
+            var atom = atoms[i];
+            if(!atom.isInterpolated){
+                i++;
+            } else {
+                // Remove the atom
+                atoms.splice(i, 1);
+                L--;
+                removed = true;
+                var key = atom.key || def.assert("Cannot be the null or virtual null atom.");
+                delete atomsByKey[key];
+            }
+        }
+        
+        if(removed){
+            dim_clearVisiblesCache.call(this);
+        }
+    }
 }
 
 /**

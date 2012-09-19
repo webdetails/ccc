@@ -1387,7 +1387,8 @@ pvc.BasePanel = pvc.Abstract.extend({
         var isMultiDatumGroup = group && group._datums.length > 1;
         
         // Single null datum?
-        if(!isMultiDatumGroup && scene.datum.isNull) {
+        var firstDatum = scene.datum;
+        if(!isMultiDatumGroup && (!firstDatum || firstDatum.isNull)) {
             return "";
         }
         
@@ -1396,10 +1397,14 @@ pvc.BasePanel = pvc.Abstract.extend({
         var visibleKeyArgs = {visible: true};
         
         var tooltip = [];
-            /*
-             * TODO: Big HACK to prevent percentages from
-             * showing up in the Lines of BarLine
-             */
+        
+        if(firstDatum.isInterpolated){
+            tooltip.push('<i>Interpolation</i>: ' + def.html.escape(firstDatum.interpolation) + '<br/>');
+        }
+        
+        /* TODO: Big HACK to prevent percentages from
+         * showing up in the Lines of BarLine
+         */
         var playingPercentMap = context.panel.stacked === false ? 
                                 null :
                                 data.type.getPlayingPercentVisualRoleDimensionMap();

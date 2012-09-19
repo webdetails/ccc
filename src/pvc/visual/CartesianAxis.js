@@ -35,16 +35,14 @@ def.scope(function(){
  * @param {pvc.CartesianAbstract} chart The associated cartesian chart.
  * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
  * @param {number} [index=0] The index of the axis within its type.
- * @param {object|object[]} dataCells The associated data cells (role + data parts).
- * 
  * @param {object} [keyArgs] Keyword arguments.
  * See {@link pvc.visual.Axis} for supported keyword arguments. 
  */
 def
 .type('pvc.visual.CartesianAxis', $VA)
-.init(function(chart, type, index, dataCells, keyArgs){
+.init(function(chart, type, index, keyArgs){
     
-    this.base(chart, type, index, dataCells, keyArgs);
+    this.base(chart, type, index, keyArgs);
     
     // ------------
     
@@ -63,15 +61,16 @@ def
 .add(/** @lends pvc.visual.CartesianAxis# */{
     
     setScale: function(scale){
+        var oldScale = this.scale;
         
-        if(this.scale){
+        this.base(scale);
+        
+        if(oldScale){
             // If any
             delete this.domain;
             delete this.ticks;
             delete this._roundingPaddings;
         }
-        
-        this.base(scale);
         
         if(scale){
             if(!scale.isNull && this.scaleType !== 'Discrete'){

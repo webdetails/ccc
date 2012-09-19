@@ -17,11 +17,9 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
     
     constructor: function(options){
         
-        options.legend = false;
+        options.legend = false; // TODO: is this needed here?
         
         this.base(options);
-
-        this._axisType2RoleNamesMap.ortho = pvc.BoxplotChart.measureRolesNames;
     },
 
      _processOptionsCore: function(options){
@@ -84,10 +82,23 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
                         translOptions);
     },
 
-    _isDataCellStacked: function(/*role, dataPartValue*/){
-        return false;
+    _bindAxes: function(hasMultiRole){
+        
+        if(!hasMultiRole || this.parent){
+            var axis = this.axes.ortho;
+            if(!axis.isBound()){
+                axis.bind(this._buildRolesDataCells(pvc.BoxplotChart.measureRolesNames));
+            }
+            
+            axis = this.axes.ortho2;
+            if(axis && !axis.isBound()){
+                axis.bind(this._buildRolesDataCells(pvc.BoxplotChart.measureRolesNames[0]));
+            }
+        }
+        
+        this.base(hasMultiRole);
     },
-
+    
     /* @override */
     _createMainContentPanel: function(parentPanel, baseOptions){
         if(pvc.debug >= 3){
@@ -116,8 +127,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
                 valuesAnchor:       options.valuesAnchor,
                 showLines:          options.showLines,
                 showDots:           options.showDots,
-                showAreas:          options.showAreas,
-                nullInterpolationMode: options.nullInterpolationMode
+                showAreas:          options.showAreas
             }));
 
             this._linePanel = linePanel;
@@ -133,7 +143,6 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         showDots:     false,
         showLines:    false,
         showAreas:    false,
-        nullInterpolationMode: 'none',
         showValues:   false,
         valuesAnchor: 'right'
     })

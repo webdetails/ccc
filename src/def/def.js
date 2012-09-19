@@ -149,10 +149,25 @@ var def = /** @lends def */{
                     var value = o[part];
                     if(value == null){
                         if(!create){ return dv; }
-                        
-                        value = o[part] = {};
+                        value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
                     }
+                    
                     o = value;
+                }
+            }
+        }
+        
+        return o;
+    },
+    
+    setPath: function(o, path, v){
+        if(o && path != null){
+            var parts = def.array.is(path) ? path : path.split('.');
+            if(parts.length){
+                var pLast = parts.pop();
+                var o = def.getPath(o, parts, true, pLast);
+                if(o != null){
+                    o[pLast] = v;
                 }
             }
         }
@@ -383,8 +398,6 @@ var def = /** @lends def */{
         return to;
     },
     
-    ownKeys: Object.keys,
-    
     keys: function(o){
         var keys = [];
         for(var p in o) {
@@ -393,6 +406,17 @@ var def = /** @lends def */{
         
         return keys;
     },
+    
+    values: function(o){
+        var values = [];
+        for(var p in o) {
+            values.push(o[p]);
+        }
+        
+        return values;
+    },
+    
+    ownKeys: Object.keys,
     
     own: function(o){
         return Object.keys(o)
@@ -419,6 +443,10 @@ var def = /** @lends def */{
          */
         return (a === b) ? 0 : ((a > b) ? 1 : -1);
         //return (a < b) ? -1 : ((a > b) ? 1 : 0);
+    },
+    
+    compareReverse: function(a, b){
+        return (a === b) ? 0 : ((a > b) ? -1 : 1);
     },
     
     methodCaller: function(p, context){
@@ -485,6 +513,7 @@ var def = /** @lends def */{
             return v && (v.length != null) && (typeof v !== 'string');
         },
         
+        // TODO: this should work as other 'as' methods...
         /**
          * Converts something to an array if it is not one already,
          * and if it is not nully.
@@ -493,6 +522,10 @@ var def = /** @lends def */{
          * @returns {Array} 
          */
         as: function(thing){
+            return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+        },
+        
+        to: function(thing){
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
         }
     },

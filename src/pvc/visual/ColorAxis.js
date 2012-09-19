@@ -13,9 +13,9 @@ var $VA = pvc.visual.Axis;
  */
 def
 .type('pvc.visual.ColorAxis', $VA)
-.init(function(chart, type, index, dataCells, keyArgs){
+.init(function(chart, type, index, keyArgs){
     
-    this.base(chart, type, index, dataCells, keyArgs);
+    this.base(chart, type, index, keyArgs);
     
     this.optionId = pvc.buildIndexedId('legend', this.index);
     
@@ -45,44 +45,50 @@ def
     this.hasOwnColors = !!colorsFactory;
     if(!colorsFactory){
         var color0Axis = chart.axes.color;
+        // TODO: Should throw when null? Bind, below, will fail...
         colorsFactory = color0Axis ? color0Axis.colorsFactory : null;
     }
     
     this.colorsFactory = colorsFactory;
-    
-    // -----------------
-    
-    if(this.role.isBound()){
-        var dataCell   = this.dataCell;
-        var domainData = chart.partData(dataCell.dataPartValues)
-                              .flattenBy(dataCell.role);
-        
-        var scale;
-        if(!this.hasOwnColors){
-            var color0Axis = chart.axes.color;
-            scale = color0Axis ? color0Axis.scale : null;
-        }
-        
-        if(!scale){
-            this.hasOwnColors = true;
-            
-            var domainValues = domainData
-                                  .children()
-                                  .select(function(child){ return child.value; })
-                                  .array();
-            scale = colorsFactory(domainValues);
-        }
-        
-        this.setScale(scale);
-        
-        this.domainData = domainData;
-    }
     
     this.isVisible = this.option('Visible');
 })
 .add(/** @lends pvc.visual.ColorAxis# */{
     
     legendBulletGroupScene: null,
+    
+    calculateScale: function(){
+        /*jshint expr:true */
+        this.role || def.fail.operationInvalid('Axis is unbound.');
+        
+        if(this.role.isBound()){
+            var dataCell   = this.dataCell;
+            var domainData = this.chart.partData(dataCell.dataPartValue)
+                                  .flattenBy(dataCell.role);
+            
+            var scale;
+            if(!this.hasOwnColors){
+                var color0Axis = this.chart.axes.color;
+                scale = color0Axis ? color0Axis.scale : null;
+            }
+            
+            if(!scale){
+                this.hasOwnColors = true;
+                
+                var domainValues = domainData
+                                      .children()
+                                      .select(function(child){ return child.value; })
+                                      .array();
+                scale = this.colorsFactory.call(null, domainValues);
+            }
+            
+            this.setScale(scale);
+            
+            this.domainData = domainData;
+        }
+        
+        return this;
+    },
     
     _getOptionsDefinition: function(){
         return colorAxis_optionsDef;

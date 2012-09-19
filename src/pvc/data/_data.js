@@ -49,11 +49,12 @@ function data_disposeChildList(list, parentProp) {
  * @param {string} childrenProp A parent's children array property.
  * @param {object} child The child to add.
  * @param {string} parentProp The child's parent property to set.
+ * @param {number} [index=null] The index at which to insert the child.
  * 
  * @static
  * @private
  */
-function data_addColChild(parent, childrenProp, child, parentProp) {
+function data_addColChild(parent, childrenProp, child, parentProp, index) {
     // <Debug>
     /*jshint expr:true */
     (child && !child[parentProp]) || def.assert("Must not have a '" + parentProp + "'.");
@@ -61,7 +62,12 @@ function data_addColChild(parent, childrenProp, child, parentProp) {
     
     child[parentProp] = parent;
     
-    (parent[childrenProp] || (parent[childrenProp] = [])).push(child);
+    var col = (parent[childrenProp] || (parent[childrenProp] = []));
+    if(index == null || index >= col.length){
+        col.push(child);
+    } else {
+        col.splice(index, 0, child);
+    }
 }
 
 /**

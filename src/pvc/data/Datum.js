@@ -30,7 +30,7 @@ def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
 function(data, atoms, isNull){
     
-    this.base(data.owner, atoms, data.atoms);
+    this.base(data, atoms);
     
     if(isNull) {
         this.isNull = true;
@@ -40,7 +40,10 @@ function(data, atoms, isNull){
     
     isSelected: false,
     isVisible:  true,
-    isNull: false,
+    isNull:     false,
+    isInterpolated: false,
+    //isInterpolatedMiddle: false,
+    interpolation: null,
     
     /**
      * Sets the selected state of the datum to a specified value.

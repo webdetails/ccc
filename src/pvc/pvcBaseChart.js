@@ -38,20 +38,6 @@ pvc.BaseChart = pvc.Abstract.extend({
     axes: null,
     
     /**
-     * A map from axis type to role name or names.
-     * This should be overridden in specific chart classes.
-     * 
-     * @example
-     * <pre>
-     * {
-     *   'base':   'category',
-     *   'ortho':  ['value', 'value2']
-     * }
-     * </pre>
-     */
-    _axisType2RoleNamesMap: null,
-    
-    /**
      * A map of {@link pvc.visual.Role} by name.
      * 
      * @type object
@@ -306,7 +292,6 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._measureVisualRoles = [];
         }
         
-        this._axisType2RoleNamesMap = {};
         this.axes = {};
         
         this.options = def.mixin({}, this.defaults, options);
@@ -403,13 +388,20 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._bindVisualRolesPre();
         }
         
-        /* Initialize the data */
+        /* Initialize the data (and _bindVisualRoles) */
         this._initData(keyArgs);
 
         var hasMultiRole = this._isRoleAssigned('multiChart');
         
         /* Initialize axes */
         this._initAxes(hasMultiRole);
+        this._bindAxes(hasMultiRole);
+        
+        /* Interpolate */
+        this._interpolate(hasMultiRole);
+        
+        /* Set axes scales */
+        this._setAxesScales(hasMultiRole);
         
         /* Initialize chart panels */
         this._initChartPanels(hasMultiRole);
@@ -430,27 +422,31 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
     
+    // --------------
+    
     _initAxes: function(isMulti){
+        var colorAxis;
         if(!this.parent){
-            var colorRoleNames = this._axisType2RoleNamesMap.color;
-            if(!colorRoleNames && this.legendSource){
-                colorRoleNames = this.legendSource;
-                this._axisType2RoleNamesMap.color = colorRoleNames;
-            }
-            
-            if(colorRoleNames){
+            var colorRoleName = this.legendSource;
+            if(colorRoleName){
                 // Create the color (legend) axis at the root chart
-                this._createAxis('color', 0);
+                
+                colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 0));
+                this.colors = colorAxis.colorsFactory;
                 
                 if(this.options.secondAxis){
-                    this._createAxis('color', 1);
+                    colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 1));
+                    
+                    if(this.options.secondAxisOwnColors){
+                        this.secondAxisColor = colorAxis.colorsFactory;
+                    }
                 }
             }
         } else {
             // Copy
             var root = this.root;
             
-            var colorAxis = root.axes.color;
+            colorAxis = root.axes.color;
             if(colorAxis){
                 this.axes.color = colorAxis;
                 this.colors = root.colors;
@@ -464,62 +460,78 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
     
+    _bindAxes: function(isMulti){
+        if(!this.parent){
+            var colorRoleName = this.legendSource;
+            if(colorRoleName){
+                var colorDataCells;
+                
+                ['color', 'color2'].forEach(function(axisId){
+                    var colorAxis = this.axes[axisId];
+                    if(colorAxis && !colorAxis.isBound()){
+                        if(!colorDataCells){
+                            colorDataCells = this._buildRolesDataCells(colorRoleName);
+                        }
+                        
+                        colorAxis.bind(colorDataCells);
+                    }
+                }, this);
+            }
+        }
+    },
+    
+    _interpolate: function(){
+        def
+        .query(def.own(this.axes))
+        .selectMany(function(axis){ return axis.dataCells; })
+        .where(function(dataCell){
+            var nim = dataCell.nullInterpolationMode;
+            return !!nim && nim !== 'none'; 
+         })
+         .distinct(function(dataCell){
+             return dataCell.role.name  + '|' +
+                   (dataCell.dataPartValue || '');
+         })
+         .each(this._interpolateDataCell, this);
+    },
+    
+    _interpolateDataCell: function(dataCell){
+    },
+    
+    _setAxesScales: function(isMulti){
+        if(!this.parent){
+            ['color', 'color2'].forEach(function(axisId){
+                var colorAxis = this.axes[axisId];
+                if(colorAxis && colorAxis.isBound()){
+                    colorAxis.calculateScale();
+                }
+            }, this);
+        }
+    },
+    
     /**
-     * Creates an axis of a given type and index.
+     * Adds an axis to the chart.
      * 
-     * @param {string} type The type of the axis.
-     * @param {number} index The index of the axis within its type (0, 1, 2...).
+     * @param {pvc.visual.Axis} axis The axis.
      *
      * @type pvc.visual.Axis
      */
-    _createAxis: function(axisType, axisIndex){
-        // Collect visual roles
-        var dataCells = this._getAxisDataCells(axisType, axisIndex);
-        
-        var axis = this._createAxisCore(axisType, axisIndex, dataCells);
-        
-        this.axes[axis.id] = axis;
-        
-        return axis;
+    _addAxis: function(axis){
+        return this.axes[axis.id] = axis;
     },
     
-    _getAxisDataCells: function(axisType, axisIndex){
-        // Collect visual roles
-        return this._buildAxisDataCells(axisType, axisIndex, null);
+    _buildRolesDataCells: function(roleNames, dataCellBase){
+        return def
+            .query(roleNames)
+            .select(function(roleName){
+                var dataCell = dataCellBase ? Object.create(dataCellBase) : {};
+                dataCell.role = this.visualRoles(roleName);
+                return dataCell;
+            }, this)
+            .array();
     },
     
-    _buildAxisDataCells: function(axisType, axisIndex, dataPartValues){
-        // Collect visual roles
-        return def.array.as(this._axisType2RoleNamesMap[axisType])
-               .map(function(roleName){
-                   return {
-                       role: this.visualRoles(roleName), 
-                       dataPartValues: dataPartValues
-                   };
-               }, this);
-    },
-    
-    _createAxisCore: function(axisType, axisIndex, dataCells){
-        switch(axisType){
-            case 'color': 
-                var colorAxis = new pvc.visual.ColorAxis(this, axisType, axisIndex, dataCells);
-                switch(axisIndex){
-                    case 0:
-                        this.colors = colorAxis.colorsFactory;
-                        break;
-                        
-                    case 1:
-                        if(this.options.secondAxisOwnColors){
-                            this.secondAxisColor = colorAxis.colorsFactory;
-                        }
-                        break;
-                }
-                
-                return colorAxis;
-        }
-        
-        throw def.error.operationInvalid("Invalid axis type '{0}'", [axisType]);
-    },
+    // ---------------
     
     _initChartPanels: function(hasMultiRole){
         /* Initialize chart panels */
@@ -532,10 +544,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         } else {
             var options = this.options;
             this._preRenderContent({
-                margins:            options.contentMargins,
-                paddings:           options.contentPaddings,
-                clickAction:        options.clickAction,
-                doubleClickAction:  options.doubleClickAction
+                margins:           options.contentMargins,
+                paddings:          options.contentPaddings,
+                clickAction:       options.clickAction,
+                doubleClickAction: options.doubleClickAction
             });
         }
     },
@@ -563,11 +575,8 @@ pvc.BaseChart = pvc.Abstract.extend({
             if(!data || def.get(keyArgs, 'reloadData', true)) {
                this._onLoadData();
             } else {
-                // TODO: Do this in a cleaner way. Give control to Data
-                // We must at least dispose children and cache...
-                /*global data_disposeChildLists:true, data_syncDatumsState:true */
-                data_disposeChildLists.call(data);
-                data_syncDatumsState.call(data);
+                data.clearInterpolations();
+                data.disposeChildren();
             }
         }
 
@@ -594,6 +603,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         // Roles are bound before actually loading data,
         // in order to be able to filter datums
         // whose "every dimension in a measure role is null".
+        // TODO: check why PRE is done only on createVersion 1 and this one 
+        // is done on every create version
         this._bindVisualRoles(complexType);
 
         if(pvc.debug >= 3){
@@ -980,7 +991,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         return !!this._visualRoles[roleName].grouping;
     },
     
-    partData: function(dataPartValues){
+    partData: function(dataPartValue){
         if(!this._partData){
             if(!this._dataPartRole || !this._dataPartRole.grouping){
                 /* Undefined or unbound */
@@ -991,24 +1002,15 @@ pvc.BaseChart = pvc.Abstract.extend({
             }
         }
         
-        if(!dataPartValues){
+        if(!dataPartValue){
             return this._partData;
         }
 
-        dataPartValues = def.query(dataPartValues).distinct().array();
-        dataPartValues.sort();
-
         var dataPartDimName = this._dataPartRole.firstDimensionName();
 
-        if(dataPartValues.length === 1){
-            // TODO: should, at least, call some static method of Atom to build a global key
-            return this._partData._childrenByKey[dataPartDimName + ':' + dataPartValues[0]] || 
-                   new pvc.data.Data({linkParent: this._partData, datums: []}); // don't blow code ahead...
-        }
-
-        return this._partData.where([
-                    def.set({}, dataPartDimName, dataPartValues)
-                ]);
+        // TODO: should, at least, call some static method of Atom to build a global key
+        return this._partData._childrenByKey[dataPartDimName + ':' + dataPartValue] || 
+               new pvc.data.Data({linkParent: this._partData, datums: []}); // don't blow code ahead...
     },
 
     /**

@@ -36,11 +36,14 @@
         <script type="text/javascript" src="pvc/data/Datum.js"></script>
         <script type="text/javascript" src="pvc/data/Dimension.js"></script>
         <script type="text/javascript" src="pvc/data/Data.js"></script>
-        <script type="text/javascript" src="pvc/data/Data.load.js"></script>
         <script type="text/javascript" src="pvc/data/Data.selected.js"></script>
         <script type="text/javascript" src="pvc/data/GroupingSpec.js"></script>
         <script type="text/javascript" src="pvc/data/DataOper.js"></script>
         <script type="text/javascript" src="pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/ZeroInterpolationOperSeriesState.js"></script>
         <script type="text/javascript" src="pvc/data/Data.operations.js"></script>
         <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
         <script type="text/javascript" src="pvc/visual/Role.js"></script>
@@ -61,7 +64,6 @@
         <script type="text/javascript" src="pvc/visual/CartesianAxisRootScene.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxisTickScene.js"></script>
         <script type="text/javascript" src="pvc/visual/ColorAxis.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/legend.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletItemScene.js"></script>
@@ -112,7 +114,7 @@
     <script type="text/javascript" src="pvcDocUtils.js"></script>
     <script type="text/javascript">
 
-var lineExamplesShowProps = ['stacked', 'timeSeries', 'showAreas', 'showLines', 'showDots'];
+var lineExamplesShowProps = ['stacked', 'timeSeries', 'showAreas', 'showLines', 'showDots', 'nullInterpolationMode'];
 var baseExampleDef = {
     dataVar: 'relational_01',
     def: {
@@ -140,7 +142,7 @@ var baseExampleDef = {
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
         
-        //nullInterpolationMode: 'linear',
+        nullInterpolationMode: 'linear', //'zero', 'linear'
         
         /* Data format */
         crosstabMode: false,

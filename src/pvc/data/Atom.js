@@ -57,7 +57,7 @@ def.type('pvc.data.Atom')
 .init(
 function(dimension, value, label, rawValue, key) {
     this.dimension = dimension;
-    this.id = value == null ? 0 : def.nextId(); // Ensure null sorts first, when sorted by id
+    this.id = (value == null ? -def.nextId() : def.nextId()); // Ensure null sorts first, when sorted by id
     this.value = value;
     this.label = label;
     this.rawValue = rawValue;
@@ -65,6 +65,8 @@ function(dimension, value, label, rawValue, key) {
     this.globalKey = dimension.name + ":" + key;
 })
 .add( /** @lends pvc.data.Atom */{
+    isInterpolated: false,
+    
     /**
      * Obtains the label of the atom.
      */

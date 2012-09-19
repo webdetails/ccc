@@ -76,8 +76,8 @@ def.type('pvc.data.GroupingSpec')
      */
     bind: function(type){
         this.type = type || def.fail.argumentRequired('type');
-        this.dimensions().each(function(dimSpec){
-            dimSpec.bind(type);
+        this.levels.forEach(function(levelSpec){
+            levelSpec.bind(type);
         });
     },
 
@@ -187,7 +187,7 @@ def.type('pvc.data.GroupingSpec')
                                     dimSpec;
                             });
                             
-            var levelSpec = new pvc.data.GroupingLevelSpec(dimSpecs);
+            var levelSpec = new pvc.data.GroupingLevelSpec(dimSpecs, this.type);
             
             singleLevel = new pvc.data.GroupingSpec([levelSpec], this.type, {flatteningMode: this.flatteningMode});
             
@@ -213,7 +213,7 @@ def.type('pvc.data.GroupingSpec')
                                     return new pvc.data.GroupingDimensionSpec(dimSpec.name, !dimSpec.reverse, dimSpec.type.complexType);
                                 });
                         
-                        return new pvc.data.GroupingLevelSpec(dimSpecs);
+                        return new pvc.data.GroupingLevelSpec(dimSpecs, this.type);
                     });
 
             reverseGrouping = new pvc.data.GroupingSpec(levelSpecs, this.type, {flatteningMode: this.flatteningMode});
@@ -233,7 +233,7 @@ def.type('pvc.data.GroupingSpec')
 });
 
 def.type('pvc.data.GroupingLevelSpec')
-.init(function(dimSpecs){
+.init(function(dimSpecs, type){
     var ids = [];
     
     this.dimensions = def.query(dimSpecs)
@@ -243,6 +243,11 @@ def.type('pvc.data.GroupingLevelSpec')
        })
        .array();
     
+    this.dimensionsInDefOrder = this.dimensions.slice(0);
+    if(type){
+        this._sortDimensions(type);
+    }
+    
     this.id = ids.join(',');
     this.depth = this.dimensions.length;
     
@@ -250,6 +255,18 @@ def.type('pvc.data.GroupingLevelSpec')
     this.comparer = function(a, b){ return me.compare(a, b); };
 })
 .add( /** @lends pvc.data.GroupingLevelSpec */{
+    _sortDimensions: function(type){
+        type.sortDimensionNames(
+            this.dimensionsInDefOrder,
+            function(d){ return d.name; });
+    },
+    
+    bind: function(type){
+        this._sortDimensions(type);
+        
+        this.dimensions.forEach(function(dimSpec){ dimSpec.bind(type); });
+    },
+    
     compare: function(a, b){
         for(var i = 0, D = this.depth ; i < D ; i++) {  
             var result = this.dimensions[i].compareDatums(a, b);
@@ -265,12 +282,17 @@ def.type('pvc.data.GroupingLevelSpec')
         var keys  = [];
         var atoms = [];
         var datoms = datum.atoms;
-        var dims  = this.dimensions;
+        var dims  = this.dimensionsInDefOrder;
         
-        for(var i = 0, D = this.depth  ; i < D ; i++) {
+        // This builds a key compatible with that of pvc.data.Complex#key
+        //  as long as only the atoms of the dimensions here used become
+        //  the only own atoms of the complex.
+        for(var i = 0, D = this.depth ; i < D ; i++) {
             var atom = datoms[dims[i].name];
             atoms.push(atom);
-            keys.push(atom.globalKey);
+            if(atom.value != null){
+                keys.push(atom.globalKey);
+            }
         }
         
         return {
@@ -369,7 +391,7 @@ pvc.data.GroupingSpec.parse = function(specText, type){
     var levelSpecs = def.query(levels)
                .select(function(levelText){
                    var dimSpecs = groupSpec_parseGroupingLevel(levelText, type);
-                   return new pvc.data.GroupingLevelSpec(dimSpecs);
+                   return new pvc.data.GroupingLevelSpec(dimSpecs, type);
                });
     
     return new pvc.data.GroupingSpec(levelSpecs, type);
@@ -410,7 +432,7 @@ pvc.data.GroupingSpec.multiple = function(groupings, keyArgs){
                        return new pvc.data.GroupingDimensionSpec(dimSpec.name, !asc, dimSpec.type.complexType);
                    });
                
-               return new pvc.data.GroupingLevelSpec(dimSpecs);
+               return new pvc.data.GroupingLevelSpec(dimSpecs, type);
            })
            .array();
     

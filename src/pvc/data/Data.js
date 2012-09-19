@@ -50,18 +50,19 @@
  *           a composition of all keys up to the root data.
  * 
  * @constructor
- * @param {object} [keyArgs] Keyword arguments
- * 
- * @param {pvc.data.Data}    [keyArgs.parent]     The parent data.
- * @param {pvc.data.Data}    [keyArgs.linkParent] The link parent data.
- * @param {pvc.data.Atom[]}  [keyArgs.atoms]      The atoms shared by contained datums.
- * @param {pvc.data.Datum[]} [keyArgs.datums]     The contained datums.
- * @param {pvc.data.Data}    [keyArgs.owner]      The owner data.
+ * @param {object} keyArgs Keyword arguments
+ * @param {pvc.data.Data}   [keyArgs.parent]     The parent data.
+ * @param {pvc.data.Data}   [keyArgs.linkParent] The link parent data.
+ * @param {pvc.data.Atom[]} [keyArgs.atoms]      The atoms shared by contained datums.
+ * @param {pvc.data.Datum[]|def.Query} [keyArgs.datums] The contained datums array or enumerable.
+ * @param {pvc.data.Data}    [keyArgs.owner] The owner data.
  * The topmost root data is its own owner.
  * An intermediate root data must specify its owner data.
  * 
  * @param {pvc.data.ComplexType} [keyArgs.type] The complex type.
  * Required when no parent or owner are specified.
+ * 
+ * @param {number} [index=null] The index at which to insert the child in its parent or linked parent.
  */
 def.type('pvc.data.Data', pvc.data.Complex)
 .init(function(keyArgs){
@@ -70,19 +71,20 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /*jshint expr:true*/
     keyArgs || def.fail.argumentRequired('keyArgs');
     
-    this._dimensions = {};
     this._visibleDatums = new def.Map();
     
     var owner,
         atoms,
         atomsBase,
+        datums,
+        index,
         parent = this.parent = keyArgs.parent || null;
     if(parent){
         // Not a root
-        this.root    = parent.root;
-        this.depth   = parent.depth + 1;
-        this.type    = parent.type;
-        this._datums = keyArgs.datums || def.fail.argumentRequired('datums');
+        this.root  = parent.root;
+        this.depth = parent.depth + 1;
+        this.type  = parent.type;
+        datums     = keyArgs.datums || def.fail.argumentRequired('datums');
         
         owner = parent.owner;
         atoms = keyArgs.atoms || def.fail.argumentRequired('atoms');
@@ -98,9 +100,9 @@ def.type('pvc.data.Data', pvc.data.Complex)
             owner = linkParent.owner;
             //atoms = pv.values(linkParent.atoms); // is atomsBase, below
             
-            this.type    = owner.type;
-            this._datums = keyArgs.datums || linkParent._datums.slice();
-            this._leafs  = [];
+            this.type   = owner.type;
+            datums      = keyArgs.datums || def.fail.argumentRequired('datums');//linkParent._datums.slice();
+            this._leafs = [];
             
             /* 
              * Inherit link parent atoms.
@@ -108,8 +110,9 @@ def.type('pvc.data.Data', pvc.data.Complex)
             atomsBase = linkParent.atoms;
             //atoms = null
             
-            /*global data_addLinkChild:true */
-            data_addLinkChild.call(linkParent, this);
+            index = def.get(keyArgs, 'index', null);
+            
+            data_addLinkChild.call(linkParent, this, index);
         } else {
             // Topmost root - an owner
             owner = this;
@@ -127,8 +130,10 @@ def.type('pvc.data.Data', pvc.data.Complex)
         }
     }
     
-    /*global data_syncDatumsState:true */
-    data_syncDatumsState.call(this);
+    /*global data_setDatums:true */
+    if(datums){
+        data_setDatums.call(this, datums);
+    }
     
     // Must anticipate setting this (and not wait for the base constructor)
     // because otherwise new Dimension( ... ) fails.
@@ -137,22 +142,22 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /* Need this because of null interning/uninterning and atoms chaining */
     this._atomsBase = atomsBase;
     
+    this._dimensions = {};
     this.type.dimensionsList().forEach(this._initDimension, this);
     
     // Call base constructors
     this.base(owner, atoms, atomsBase, /* wantLabel */ true);
     
     pv.Dom.Node.call(this, /* nodeValue */null); // TODO: remove this when possible
-    
     delete this.nodeValue;
-    
     this._children = this.childNodes; // pv.Dom.Node#childNodes
     
     // Build absolute label and key
     // The absolute key is relative to the root data (not the owner - the topmost root)
     if(parent){
-        /*global data_addChild:true */
-        data_addChild.call(parent, this);
+        index = def.get(keyArgs, 'index', null);
+        
+        data_addChild.call(parent, this, index);
         
         if(parent.absLabel){
             this.absLabel = def.string.join(owner.labelSep, parent.absLabel, this.label);
@@ -220,14 +225,6 @@ def.type('pvc.data.Data', pvc.data.Complex)
      */
     _childrenByKey: null,
     
-    /** 
-     * The name of the dimension that children have as child key.
-     * 
-     * @type string
-     * @internal
-     */
-    _childrenKeyDimName: null,
-    
     /**
      * A map of visible datums indexed by id.
      * @type def.Map
@@ -260,6 +257,31 @@ def.type('pvc.data.Data', pvc.data.Complex)
      */
     treeHeight: null,
     
+    /**
+     * The grouping operation object used to create this data. 
+     * Only defined in root datas.
+     * @type pvc.data.GroupingOper
+     */
+    _groupOper: null,
+    
+    /**
+     * A grouping specification object used to create this data, 
+     * along with {@link #groupLevel}. 
+     * Only defined in datas that have children.
+     * 
+     * @type pvc.data.GroupingSpec
+     */
+    _groupSpec: null,
+    
+    /**
+     * A grouping level specification object used to create this data, 
+     * along with {@link #groupSpec}. 
+     * Only defined in datas that have children.
+     * 
+     * @type pvc.data.GroupingLevelSpec
+     */
+    _groupLevel: null,
+    
     /** 
      * The datums of this data.
      * @type pvc.data.Datum[]
@@ -286,7 +308,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
     _disposed: false,
     
     /**
-     * Indicates the data was a parent group in the flattening group operation.
+     * Indicates that the data was a parent group 
+     * in the flattening group operation.
      * 
      * @type boolean
      */
@@ -369,26 +392,25 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * Obtains an enumerable of the child data instances of this data.
      * 
-     * @param {object} [keyArgs] Keyword arguments.
-     * @param {string} [keyArgs.key=null} The key of the desired child.
-     * @param {string} [keyArgs.assertExists=true} Indicates that a missing child should be signaled as an error.
-     * 
      * @type pvc.data.Data | def.Query
      */
-    children: function(keyArgs){
+    children: function(){
         if(!this._children) {
             return def.query();
         }
-        
-        var key = def.get(keyArgs, 'key');
-        if(key != null) {
-            var child = def.getOwn(this._childrenByKey, key);
-            if(!child && def.get(keyArgs, 'assertExists', true)) {
-               throw def.error.argumentInvalid("Undefined child data with key '{0}'.", [key]); 
-            }
-            
-            return child;
-        }
+
+//        @param {object} [keyArgs] Keyword arguments. 
+//        @param {string} [keyArgs.key=null} The key of the desired child.
+//        @param {string} [keyArgs.assertExists=true} Indicates that a missing child should be signaled as an error.
+//        var key = def.get(keyArgs, 'key');
+//        if(key != null) {
+//            var child = def.getOwn(this._childrenByKey, key);
+//            if(!child && def.get(keyArgs, 'assertExists', true)) {
+//               throw def.error.argumentInvalid("Undefined child data with key '{0}'.", [key]); 
+//            }
+//            
+//            return child;
+//        }
         
         return def.query(this._children);
     },
@@ -410,13 +432,24 @@ def.type('pvc.data.Data', pvc.data.Complex)
     leafs: function(){
         return def.query(this._leafs);
     },
-
+    
+    /**
+     * Obtains the number of contained datums.
+     * @type number
+     */
+    count: function(){
+        return this._datums.length;
+    },
+    
     /**
      * Disposes the child datas, the link child datas and the dimensions.
+     * @type undefined
      */
     dispose: function(){
         if(!this._disposed){
             data_disposeChildLists.call(this);
+            if(this._selectedDatums) { this._selectedDatums.clear(); }
+            this._visibleDatums.clear();
             
             def.eachOwn(this._dimensions, function(dimension){ dimension.dispose(); });
             
@@ -434,10 +467,65 @@ def.type('pvc.data.Data', pvc.data.Complex)
             
             this._disposed = true;
         }
+    },
+    
+    /**
+     * Disposes the child datas and the link child datas.
+     * @type undefined
+     */
+    disposeChildren: function(){
+        /*global data_disposeChildLists:true */
+        data_disposeChildLists.call(this);
     }
 });
 
+/**
+ * Adds a child data.
+ * 
+ * @name pvc.data.Data#_addChild
+ * @function
+ * @param {pvc.data.Data} child The child data to add.
+ * @param {number} [index=null] The index at which to insert the child.
+ * @type undefined
+ * @private
+ */
+function data_addChild(child, index){
+    // this   -> ((pv.Dom.Node#)child).parentNode
+    // child  -> ((pv.Dom.Node#)this).childNodes
+    // ...
+    this.insertAt(child, index);
+    
+    (this._childrenByKey || (this._childrenByKey = {}))[child.key] = child;
+}
 
+/**
+ * Adds a link child data.
+ * 
+ * @name pvc.data.Data#_addLinkChild
+ * @function
+ * @param {pvc.data.Data} child The link child data to add.
+ * @param {number} [index=null] The index at which to insert the child.
+ * @type undefined
+ * @private
+ */
+function data_addLinkChild(linkChild, index){
+    /*global data_addColChild:true */
+    data_addColChild(this, '_linkChildren', linkChild, 'linkParent', index);
+}
+
+/**
+ * Removes a link child data.
+ *
+ * @name pvc.data.Data#_removeLinkChild
+ * @function
+ * @param {pvc.data.Data} child The link child data to remove.
+ * @type undefined
+ * @private
+ */
+function data_removeLinkChild(linkChild){
+    /*global data_removeColChild:true */
+    data_removeColChild(this, '_linkChildren', linkChild, 'linkParent');
+}
 
 /**
  * Disposes the child datas and the link child datas.
@@ -449,15 +537,14 @@ def.type('pvc.data.Data', pvc.data.Complex)
  */
 function data_disposeChildLists() {
     /*global data_disposeChildList:true */
-    data_disposeChildList(this._children,     'parent');
-    data_disposeChildList(this._linkChildren, 'linkParent');
-    
+    data_disposeChildList(this._children, 'parent');
     this._childrenByKey = null;
-    this._groupByCache  = null;
     
-    if(this._selectedDatums) {
-        this._selectedDatums.clear();
-    }
+    data_disposeChildList(this._linkChildren, 'linkParent');
+    this._groupByCache = null;  
+    
+    // ~ datums.{isSelected, isVisible, isNull}, children
+    this._sumAbsCache = null;
 }
 
 /**

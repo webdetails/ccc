@@ -118,7 +118,26 @@ add(/** @lends pvc.data.GroupingOper */{
         var rootNode = this._group(datumsQuery);
 
         /* Render node into a data */
-        return this._generateData(rootNode, this._linkParent);
+        return this._generateData(rootNode, null, this._linkParent);
+    },
+    
+    executeAdd: function(rootData, datums){
+        
+        /*global data_whereState: true */
+        var datumsQuery = data_whereState(def.query(datums), {
+            visible:  this._visible,
+            selected: this._selected,
+            isNull:   this._isNull,
+            where:    this._where
+        });
+        
+        /* Group new datums */
+        var rootNode = this._group(datumsQuery);
+
+        /* Render node into specified root data */
+        this._generateData(rootNode, null, this._linkParent, rootData);
+        
+        return rootNode.datums;
     },
 
     _group: function(datumsQuery){
@@ -217,6 +236,9 @@ add(/** @lends pvc.data.GroupingOper */{
             if(!doFlatten){
                 groupParent.children = [];
 
+                groupParent.groupSpec = groupSpec;
+                groupParent.groupLevelSpec = levelSpec;
+                
                 // TODO: Really ugly....
                 // This is to support single-dimension grouping specifications used
                 // internally by the "where" operation. See #data_whereDatumFilter
@@ -225,26 +247,27 @@ add(/** @lends pvc.data.GroupingOper */{
             
             // Group, and possibly filter, received datums on level's key
             def.query(datums).each(function(datum){
+                /* Datum passes to children, but may still be filtered downstream */
+                
                 var groupInfo = levelSpec.key(datum);
-                if(groupInfo != null){ // null means skip the datum
-                    /* Datum passes to children, but may still be filtered downstream */
-                    var key = groupInfo.key,
-                        keyDatums = datumsByKey[key];
+                var key = groupInfo.key;
+                var keyDatums = datumsByKey[key];
+                if(keyDatums){
+                    keyDatums.push(datum);
+                } else {
+                    // First datum with key -> new group
+                    keyDatums = datumsByKey[key] = [datum];
 
-                    if(keyDatums){
-                        keyDatums.push(datum);
-                    } else {
-                        // First datum with key -> new group
-                        keyDatums = datumsByKey[key] = [datum];
-
-                        groupInfo.datums = keyDatums;
-
-                        var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
-                        def.array.insertAt(groupInfos, ~datumIndex, groupInfo);
-                    }
+                    groupInfo.datums = keyDatums;
+                    
+                    var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
+                    def.array.insertAt(groupInfos, ~datumIndex, groupInfo);
                 }
-            }, this);
-
+            });
+            
+            // Auxiliar to correctly sort groupInfos
+            firstDatums = null;
+            
             // Create 1 child node per created groupInfo, in same order as these.
             // Further group each child node, on next grouping level, recursively.
             var isLastSpecLevel = specDepth === D - 1;
@@ -311,7 +334,7 @@ add(/** @lends pvc.data.GroupingOper */{
 
             datums = willRecurseParent ? [] : groupParent.datums;
 
-            // Add datums of chidren to groupParent.
+            // Add datums of children to groupParent.
             // This accounts for possibly excluded datums,
             // in any of the below levels (due to null atoms).
             // TODO: This method changes the order of preserved datums to
@@ -329,26 +352,53 @@ add(/** @lends pvc.data.GroupingOper */{
         }
     },
 
-    _generateData: function(node, parentData){
-        var data;
+    _generateData: function(node, parentNode, parentData, rootData){
+        var data, isNew;
         if(node.isRoot){
             // Root node
-            // Create a *linked* root data
-            data = new pvc.data.Data({
-                linkParent: parentData,
-                datums:     node.datums
-            });
-            
-            data.treeHeight = node.treeHeight;
+            if(rootData){
+                data = rootData;
+                data_addDatumsLocal.call(data, node.datums);
+            } else {
+                isNew = true;
+                
+                // Create a *linked* root data
+                data = new pvc.data.Data({
+                    linkParent: parentData,
+                    datums:     node.datums
+                });
+                data.treeHeight = node.treeHeight;
+                data._groupOper = this;
+            }
         } else {
-            data = new pvc.data.Data({
-                parent: parentData,
-                atoms:  node.atoms,
-                datums: node.datums
-            });
+            if(rootData){
+                data = def.get(parentData._childrenByKey, node.key);
+                if(data){
+                    // Add the datums to the data, and its atoms to its dimensions
+                    // Should also update linkedChildren (not children).
+                    data_addDatumsSimple.call(data, node.datums);
+                }
+            }
+            
+            if(!data){
+                isNew = true;
+                var index, siblings;
+                if(rootData && (siblings = parentData._children)){
+                    // Insert the new sibling in correct order
+                    // node.datums[0] is representative of the new Data's position
+                    index = ~def.array.binarySearch(siblings, node.datums[0], parentNode.groupLevelSpec.comparer);
+                }
+                
+                data = new pvc.data.Data({
+                    parent: parentData,
+                    atoms:  node.atoms,
+                    datums: node.datums,
+                    index:  index
+                });
+            }
         }
 
-        if(node.isFlattenGroup){
+        if(isNew && node.isFlattenGroup){
             data._isFlattenGroup = true;
             var label = node.label;
             if(label){
@@ -359,14 +409,16 @@ add(/** @lends pvc.data.GroupingOper */{
 
         var childNodes = node.children;
         if(childNodes && childNodes.length){
-            // TODO: ...
-            data._childrenKeyDimName = node.childrenKeyDimName;
+            if(isNew){
+                data._groupSpec      = node.groupSpec;
+                data._groupLevelSpec = node.groupLevelSpec;
+            }
             
             childNodes.forEach(function(childNode){
-                this._generateData(childNode, data);
+                this._generateData(childNode, node, data, rootData);
             }, this);
 
-        } else if(!node.isRoot){
+        } else if(isNew && !node.isRoot){
             // A leaf node
             var leafs = data.root._leafs;
             data.leafIndex = leafs.length;

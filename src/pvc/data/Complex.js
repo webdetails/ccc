@@ -130,7 +130,7 @@ def
                 var dimName = dimNames[i];
                 if(def.hasOwnProp.call(atomsMap, dimName)){
                     var atom = atomsMap[dimName];
-                    if(i){
+                    if(key){
                         key += ',' + atom.globalKey;
                     } else {
                         key = atom.globalKey;

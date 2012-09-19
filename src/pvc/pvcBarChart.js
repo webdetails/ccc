@@ -3,7 +3,7 @@
  * BarChart is the main class for generating... bar charts (another surprise!).
  */
 pvc.BarChart = pvc.BarAbstract.extend({
-
+    
     _processOptionsCore: function(options){
         
         this.base(options);
@@ -17,36 +17,87 @@ pvc.BarChart = pvc.BarAbstract.extend({
         return true;
     },
     
-    _getAxisDataCells: function(axisType, axisIndex){
-        if(this.options.secondAxis){
-            var dataPartValues;
+    _bindAxes: function(hasMultiRole){
+        
+        if(!hasMultiRole || this.parent){
             
-            if(axisType === 'ortho'){
-                // Collect visual roles
-                dataPartValues = this.options.secondAxisIndependentScale ?
+            var options = this.options;
+            
+            if(options.secondAxis){
+                var axes = this.axes;
+                var isStacked = !!options.stacked;
+                var nullInterpolationMode = options.nullInterpolationMode;
+                var valueRole = this.visualRoles('value');
+                
+                if(options.secondAxisIndependentScale){
                     // Separate scales =>
-                    // axis ortho 0 represents data 0
-                    // axis ortho 1 represents data 1
-                    (''+axisIndex) :
-                    // Common scale => axis ortho 0 represents both data parts
-                    ['0', '1']
-                    ;
-            } else if(axisType === 'color'){
-                dataPartValues = (''+axisIndex);
-            }
-            
-            if(dataPartValues != null){
-                return this._buildAxisDataCells(axisType, axisIndex, dataPartValues);
+                    // axis ortho 0 represents data part 0
+                    // axis ortho 1 represents data part 1
+                    axes.ortho 
+                        .bind({
+                            role: valueRole,
+                            dataPartValue: '0',
+                            isStacked: isStacked
+                        });
+                    
+                    axes.ortho2
+                        .bind({
+                            role: valueRole,
+                            dataPartValue: '1',
+                            nullInterpolationMode: nullInterpolationMode
+                        });
+                } else {
+                    // Common scale => 
+                    // axis ortho 0 represents both data parts
+                    var orthoDataCells = [
+                          {
+                              role: valueRole,
+                              dataPartValue: '0',
+                              isStacked: isStacked
+                          },
+                          {
+                              role: valueRole,
+                              dataPartValue: '1',
+                              nullInterpolationMode: nullInterpolationMode
+                          }
+                      ];
+                    
+                    axes.ortho.bind(orthoDataCells);
+                    
+                    // TODO: Is it really needed to setScale on ortho2???
+                    // We set this here also so that we can set a scale later.
+                    // This is not used though, cause the scale
+                    // will be that calculated by 'ortho'...
+                    axes.ortho2.bind(orthoDataCells);
+                }
+                
+                // ------
+                
+                // TODO: should not this be the default color axes binding of BaseChart??
+                var colorRoleName = this.legendSource;
+                if(colorRoleName){
+                    var colorRole;
+                    
+                    ['color', 'color2'].forEach(function(axisId){
+                        var colorAxis = this.axes[axisId];
+                        if(colorAxis){
+                            if(!colorRole){
+                                colorRole = this.visualRoles(colorRoleName);
+                            }
+                            
+                            colorAxis.bind({
+                                role: colorRole,
+                                dataPartValue: '' + colorAxis.index
+                            });
+                        }
+                    }, this);
+                }
             }
         }
         
-        return this.base(axisType, axisIndex);
+        this.base(hasMultiRole);
     },
     
-    _isDataCellStacked: function(role, dataPartValue){
-        return (!dataPartValue || (dataPartValue === '0')) && this.options.stacked;
-    },
-
     /**
      * @override 
      */
@@ -95,7 +146,6 @@ pvc.BarChart = pvc.BarAbstract.extend({
     defaults: def.create(pvc.BarAbstract.prototype.defaults, {
         showDots: true,
         showLines: true,
-        showAreas: false,
-        nullInterpolationMode: 'none'
+        showAreas: false
     })
 });

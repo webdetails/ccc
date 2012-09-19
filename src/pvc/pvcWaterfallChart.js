@@ -97,7 +97,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
      * Also creates the array of rule information {@link #_ruleInfos}
      * used by the waterfall panel to draw the rules.
      *
-     * Supports {@link #_getVisibleValueExtent}.
+     * Supports {@link #_getContinuousVisibleExtent}.
      */
     _reduceStackedCategoryValueExtent: function(result, catRange, catGroup){
         /*
