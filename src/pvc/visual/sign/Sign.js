@@ -198,8 +198,8 @@ def.type('pvc.visual.Sign')
         return this.lockMark(name, this._bindWhenFun(value));
     },
     
-    optional: function(name, value){
-        return this.optionalMark(name, this._bindWhenFun(value));
+    optional: function(name, value, tag){
+        return this.optionalMark(name, this._bindWhenFun(value), tag);
     },
     
     // -------------
@@ -209,8 +209,8 @@ def.type('pvc.visual.Sign')
         return this;
     },
     
-    optionalMark: function(name, value){
-        this.pvMark[name](value);
+    optionalMark: function(name, value, tag){
+        this.pvMark[name](value, tag);
         return this;
     },
     
@@ -235,17 +235,19 @@ def.type('pvc.visual.Sign')
         return this._intercept(name, def.methodCaller('' + method, this));
     },
     
+    _extensionKeyArgs: {tag: pvc.extensionTag},
+    
     _intercept: function(name, fun){
+        var mark = this.pvMark;
+        
         var extensionAbsId = this.extensionAbsId;
         if(extensionAbsId){
             var extValue = this.panel._getExtensionAbs(extensionAbsId, name);
             if(extValue !== undefined){
                 // Gets set on the mark; We intercept it afterwards
-                this.pvMark.intercept(name, extValue);
+                mark.intercept(name, extValue, this._extensionKeyArgs);
             }
         }
-        
-        var mark = this.pvMark;
         
         (mark._intercepted || (mark._intercepted = {}))[name] = true;
         mark.intercept(name, fun); // override

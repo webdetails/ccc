@@ -187,7 +187,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         
         function lineAndDotNormalColor(type){
             var color = this.base(type);
-            if(color && darkerLineAndDotColor && !this.hasExtension()){
+            if(darkerLineAndDotColor && color && !this.hasExtension()){
                 color = color.darker(0.6);
             }
             
@@ -276,11 +276,21 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
                 // TODO: review interpolated style/visibility
                 if(this.scene.isInterpolated && type === 'fill'){
-                    return this.base(type).alpha(0.3);
+                    return this.base(type).alpha(0.5);
                 }
                 
                 // Follow normal logic
                 return this.base(type);
+            })
+            .optionalMark('lineCap', 'round')
+            .intercept('strokeDasharray', function(){
+                var dashArray = this.delegateExtension();
+                if(dashArray === undefined){
+                    // TODO: review interpolated style/visibility
+                    dashArray = this.scene.isInterpolated ? '.' : null; 
+                }
+                
+                return dashArray;
             })
             .override('baseColor', lineAndDotNormalColor)
             .override('baseSize', function(){
@@ -301,6 +311,11 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                         var lineWidth = Math.max(myself.pvLine.lineWidth(), 0.2) / 2;
                         return lineWidth * lineWidth;
                     }
+                }
+                
+                // TODO: review interpolated style/visibility
+                if(this.scene.isInterpolated){
+                    return 0.8 * this.base();
                 }
                 
                 return this.base();

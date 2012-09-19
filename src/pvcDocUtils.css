@@ -5,7 +5,7 @@ body {
 
 #examples {
     display:table;
-    width:80%;
+    width:1200;
 }
 
 #examples>div {
@@ -18,7 +18,7 @@ body {
 }
 
 #examples>div>div:nth-child(2) {
-    width: 200px;
+    width: 100px;
     vertical-align: top;
     padding-left: 10px;
 }
@@ -45,7 +45,7 @@ div.props>div>div {
     border:1px solid silver;
 }
 div.props>div>div:first-child {
-    width: 100px;
+    width: 50px;
     font-weight: bold;
     text-transform:capitalize;
 }

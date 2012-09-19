@@ -26,8 +26,8 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
         ._interceptDynamic('shapeSize',   'size'  )
         
         /* Colors & Line */
-        .optional('strokeDasharray', null) // Break inheritance
-        .optional('lineWidth',       1.5)  // idem
+        .optional('strokeDasharray', undefined) // Break inheritance
+        .optional('lineWidth',       1.5)       // Idem
         
         ._interceptDynamic('fillStyle',   'fillColor'  )
         ._interceptDynamic('strokeStyle', 'strokeColor')
