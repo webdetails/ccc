@@ -10,11 +10,13 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     }
     
     this.base(panel, pvMark, keyArgs);
-
-    this/* Colors & Line */
-        ._interceptDynamic('strokeStyle', 'strokeColor')
-        ._interceptDynamic('lineWidth',   'strokeWidth')
-        ;
+    
+    if(!def.get(keyArgs, 'freeStyle')){
+        this/* Colors & Line */
+            ._interceptDynamic('strokeStyle', 'strokeColor')
+            ._interceptDynamic('lineWidth',   'strokeWidth')
+            ;
+    }
 })
 .add({
     _addInteractive: function(keyArgs){

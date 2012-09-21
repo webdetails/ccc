@@ -244,6 +244,8 @@ def.type('pvc.visual.Sign')
         if(extensionAbsId){
             var extValue = this.panel._getExtensionAbs(extensionAbsId, name);
             if(extValue !== undefined){
+                extValue = mark.wrap(extValue, name);
+                
                 // Gets set on the mark; We intercept it afterwards
                 mark.intercept(name, extValue, this._extensionKeyArgs);
             }

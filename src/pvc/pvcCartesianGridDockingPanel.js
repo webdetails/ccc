@@ -7,19 +7,10 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
         
         this.base();
 
-        // Extend body
- 
-        this.extend(this.xGridRule,  "xAxisGrid");
-        this.extend(this.yGridRule,  "yAxisGrid");
-        this.extend(this.pvFrameBar, "plotFrame");
-        
         if(this.chart.options.compatVersion <= 1){
             this.extend(this.pvFrameBar, "xAxisEndLine");
             this.extend(this.pvFrameBar, "yAxisEndLine");
         }
-        
-        this.extend(this.xZeroLine,  "xAxisZeroLine");
-        this.extend(this.yZeroLine,  "yAxisZeroLine");
     },
     
     _getExtensionId: function(){
@@ -73,66 +64,99 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
     
     _createGridRule: function(axis){
         var scale = axis.scale;
-        var ticks;
+        if(scale.isNull){
+            return;
+        } 
         
         // Composite axis don't fill ticks
-        if(!scale.isNull && (ticks = axis.ticks)){
-            var margins  = this._layoutInfo.gridMargins;
-            var paddings = this._layoutInfo.gridPaddings;
-            
-            var tick_a = axis.orientation === 'x' ? 'left' : 'bottom';
-            var len_a  = this.anchorLength(tick_a);
-            var obeg_a = this.anchorOrtho(tick_a);
-            var oend_a = this.anchorOpposite(obeg_a);
-            
-            var tick_offset = margins[tick_a] + paddings[tick_a];
-            
-            var obeg = margins[obeg_a];
-            var oend = margins[oend_a];
-            
-    //      TODO: Implement FullGridCrossesMargin ...
-    //        var orthoAxis = this._getOrthoAxis(axis.type);
-    //        if(!orthoAxis.option('FullGridCrossesMargin')){
-    //            obeg += paddings[obeg_a];
-    //            oend += paddings[oend_a];
-    //        }
-            
+        var isDiscrete   = axis.role.grouping.isDiscrete();
+        var useComposite = axis.option('Composite');
+        if(isDiscrete && useComposite){
+            return;
+        }
+        
+        var axisPanel = this.chart.axesPanels[axis.id];
+        var rootScene = axisPanel._getRootScene();
+        if(!rootScene){
+            return;
+        }
+        
+        var margins   = this._layoutInfo.gridMargins;
+        var paddings  = this._layoutInfo.gridPaddings;
+        
+        var tick_a = axis.orientation === 'x' ? 'left' : 'bottom';
+        var len_a  = this.anchorLength(tick_a);
+        var obeg_a = this.anchorOrtho(tick_a);
+        var oend_a = this.anchorOpposite(obeg_a);
+        
+        var tick_offset = margins[tick_a] + paddings[tick_a];
+        
+        var obeg = margins[obeg_a];
+        var oend = margins[oend_a];
+        
+//      TODO: Implement FullGridCrossesMargin ...
+//        var orthoAxis = this._getOrthoAxis(axis.type);
+//        if(!orthoAxis.option('FullGridCrossesMargin')){
+//            obeg += paddings[obeg_a];
+//            oend += paddings[oend_a];
+//        }
+        
+        var tickScenes = rootScene.leafs().array();
+        var tickCount = tickScenes.length;
+        if(isDiscrete && tickCount){
             // Grid rules are generated for MAJOR ticks only.
             // For discrete axes, each category
             // has a grid line at the beginning of the band,
             // and an extra end line in the last band
-            var isDiscrete = axis.scaleType === 'Discrete';
-            if(isDiscrete){
-                ticks = ticks.concat(ticks[ticks.length - 1]);
-            }
-            
-            var pvGridRule = this.pvPanel.add(pv.Rule)
-                            .data(ticks)
-                            .zOrder(-12)
-                            .strokeStyle("#f0f0f0")
-                            [obeg_a](obeg)
-                            [oend_a](oend)
-                            [len_a](null)
-                            ;
-            
-            if(!isDiscrete){
-                pvGridRule
-                    [tick_a](function(tick){
-                        return tick_offset + scale(tick);
-                    });
-            } else {
-                var halfStep = scale.range().step / 2;
-                var lastTick = ticks.length - 1;
-                
-                pvGridRule
-                    [tick_a](function(childData){
-                        var position = tick_offset + scale(childData.value);
-                        return position + (this.index < lastTick ? -halfStep : halfStep);
-                    });
-            }
-            
-            return pvGridRule;
+            tickScenes.push(tickScenes[tickCount - 1]);
         }
+        
+        var wrapper;
+        if(this.compatVersion() <= 1){
+            wrapper = function(v1f){
+                return function(tickScene){
+                    return v1f.call(this, tickScene.vars.tick.rawValue);
+                };
+            };
+        }
+        
+        var pvGridRule = new pvc.visual.Rule(this, this.pvPanel, {
+                extensionId: axis.orientation + 'AxisGrid',
+                wrapper:     wrapper
+            })
+            .lock('data', tickScenes)
+            .lock(len_a, null)
+            .override('defaultColor', function(){
+                return pv.color("#f0f0f0");
+            })
+            .pvMark
+            .lineWidth(1)
+            .antialias(true)
+            [obeg_a](obeg)
+            [oend_a](oend)
+            .zOrder(-12)
+            ;
+        
+        if(isDiscrete){
+            var halfStep = scale.range().step / 2;
+            pvGridRule
+                .lock(tick_a, function(tickScene){
+                    var tickPosition = tick_offset + scale(tickScene.vars.tick.value);
+                    
+                    // Use **pvMark** index, cause the last two scenes report the same index.
+                    var isLastLine = this.index === tickCount;
+                    
+                    return tickPosition + (isLastLine ? halfStep : -halfStep);
+                })
+                ;
+        } else {
+            pvGridRule
+                .lock(tick_a, function(tickScene){
+                    return tick_offset + scale(tickScene.vars.tick.value);
+                });
+        }
+        
+        return pvGridRule;
     },
     
     /* zOrder
@@ -162,20 +186,24 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
         var bottom = margins.bottom;
         
         // TODO: Implement FullGridCrossesMargin ...
-        // Need to use to find the correct bounding box.
+        // Need to find the correct bounding box.
         // xScale(xScale.domain()[0]) -> xScale(xScale.domain()[1])
         // and
         // yScale(yScale.domain()[0]) -> yScale(yScale.domain()[1])
-        var pvFrame = this.pvPanel.add(pv.Bar)
-                        .zOrder(-8)
-                        .left(left)
-                        .right(right)
-                        .top (top)
-                        .bottom(bottom)
-                        .strokeStyle("#808285")
-                        .lineWidth(0.5)
-                        .lock('fillStyle', null);
-        return pvFrame;
+        return new pvc.visual.Panel(this, this.pvPanel, {
+                extensionId: 'plotFrame'
+            })
+            .pvMark
+            .lock('left',   left)
+            .lock('right',  right)
+            .lock('top',    top)
+            .lock('bottom', bottom)
+            .lock('fillStyle', null)
+            .strokeStyle("#808285")
+            .lineWidth(1)
+            .antialias(false)
+            .zOrder(-8)
+            ;
     },
     
     _createZeroLine: function(axis, layoutInfo){
@@ -200,13 +228,25 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                 var obeg = margins[obeg_a];
                 var oend = margins[oend_a];
                 
-                this.pvZeroLine = this.pvPanel.add(pv.Rule)
+                var rootScene = new pvc.visual.Scene(null, {
+                        panel: this 
+                    });
+                
+                return new pvc.visual.Rule(this, this.pvPanel, {
+                        extensionId: axis.orientation + 'AxisZeroLine'
+                    })
+                    .lock('data', [rootScene])
+                    .lock(len_a,  null)
+                    .lock(obeg_a, obeg)
+                    .lock(oend_a, oend)
+                    .lock(a,      zeroPosition)
+                    .override('defaultColor', function(){
+                        return pv.color("#808285");
+                    })
+                    .pvMark
+                    .lineWidth(1)
+                    .antialias(true)
                     .zOrder(-9)
-                    .strokeStyle("#808285")
-                    [obeg_a](obeg)
-                    [oend_a](oend)
-                    [a](zeroPosition)
-                    [len_a](null)
                     ;
             }
         }
@@ -216,29 +256,4 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
         var orthoType = type === 'base' ? 'ortho' : 'base';
         return this.chart.axes[orthoType];
     }
-    
-//    _buildDiscreteFullGridScene: function(data){
-//        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
-//        
-//        data.children()
-//            .each(function(childData){
-//                var childScene = new pvc.visual.Scene(rootScene, {group: childData});
-//                var valueVar = 
-//                    childScene.vars.tick = 
-//                        new pvc.visual.ValueLabelVar(
-//                                    childData.value,
-//                                    childData.label);
-//                
-//                valueVar.absLabel = childData.absLabel;
-//        });
-//
-//        /* Add a last scene, with the same data group */
-//        var lastScene  = rootScene.lastChild;
-//        if(lastScene){
-//            var endScene = new pvc.visual.Scene(rootScene, {group: lastScene.group});
-//            endScene.vars.tick = lastScene.vars.tick;
-//        }
-//
-//        return rootScene;
-//    }
 });

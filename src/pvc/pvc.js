@@ -686,7 +686,7 @@ pv.Mark.prototype.wrapper = function(wrapper){
 };
 
 pv.Mark.prototype.wrap = function(f, m){
-    if(f && this._wrapper && !f._cccWrapped){
+    if(f && def.fun.is(f) && this._wrapper && !f._cccWrapped){
         f = this._wrapper(f, m);
         
         f._cccWrapped = true;

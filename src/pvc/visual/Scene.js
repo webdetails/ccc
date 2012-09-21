@@ -179,6 +179,45 @@ def.type('pvc.visual.Scene')
         return def.query(this.childNodes);
     },
     
+    leafs: function(){
+        function getFirstLeafFrom(leaf){
+            // Find first leaf from current
+            while(leaf.childNodes.length){
+                leaf = leaf.childNodes[0];
+            }
+            
+            return leaf;
+        }
+        
+        var root = this;
+        return def.query(function(nextIndex){
+            if(!nextIndex){
+                // Initialize
+                this.item = getFirstLeafFrom(root);
+                return 1; // has next
+            }
+            
+            // Has a next sibling?
+            var next = this.item.nextSibling;
+            if(next){
+                this.item = next;
+                return 1; // has next
+            }
+            
+            // Go to closest ancestor that has a sibling
+            var current = this.item;
+            while((current !== root) && (current = current.parentNode)){
+                if((next = current.nextSibling)){
+                    // Take the first leaf from there
+                    this.item = getFirstLeafFrom(next);
+                    return 1;
+                }
+            }
+            
+            return 0;
+        });
+    },
+    
     /* INTERACTION */
     anyInteraction: function(){
         return (!!this.root._active || this.anySelected());

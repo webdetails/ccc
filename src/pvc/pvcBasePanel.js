@@ -126,7 +126,14 @@ pvc.BasePanel = pvc.Abstract.extend({
             */
         };
         
-        this.margins  = new pvc.Sides(options && options.margins );
+        var margins = options && options.margins;
+        if(!parent && margins === undefined){
+            // Give a default 2 px margin on the root panel
+            //  because otherwise borders of panels may be clipped..
+            margins = 3;
+        }
+        
+        this.margins  = new pvc.Sides(margins);
         this.paddings = new pvc.Sides(options && options.paddings);
         this.size     = new pvc.Size (options && options.size    );
         this.sizeMax  = new pvc.Size (options && options.sizeMax );
