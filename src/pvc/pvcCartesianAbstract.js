@@ -560,12 +560,19 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             /* not supported/implemented? */
             throw def.error.notImplemented();
         }
-
+        
+        var useAbs = valueAxis.scaleUsesAbs();
+        var value;
         var extent = this._getVisibleData(valueDataCell.dataPartValue)
             .dimensions(valueRole.firstDimensionName())
-            .extent({ abs: valueAxis.scaleUsesAbs() });
+            .extent({ abs: useAbs });
         
-        return extent ? {min: extent.min.value, max: extent.max.value} : undefined;
+        return extent ? 
+            {
+                min: ((value = extent.min.value), useAbs ? Math.abs(value) : value), 
+                max: ((value = extent.max.value), useAbs ? Math.abs(value) : value) 
+            } :
+            undefined;
     },
     
     /**

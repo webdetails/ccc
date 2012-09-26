@@ -410,7 +410,7 @@ def.type('pvc.data.Dimension')
                         max = min;
                         min = tmp;
                     }
-                } else if(countWithoutNull > 1){
+                } else if(countWithoutNull > 2){
                     // There's a third atom in between
                     // min is <= 0
                     // max is >= 0
@@ -420,20 +420,29 @@ def.type('pvc.data.Dimension')
                     var max = max.value >= (-min.value) ?  max : min;
                     
                     // The smallest atom is the one in atoms that is closest to 0, possibly 0 itself
-                    var zeroIndex = def.array.insert(atoms, 0, this.type.comparer(), function(a){ return a.value; });
+                    var zeroIndex = def.array.binarySearch(atoms, 0, this.type.comparer(), function(a){ return a.value; });
                     if(zeroIndex < 0){
                         zeroIndex = ~zeroIndex;
                         // Not found directly. 
-                        // atoms[~zeroIndex    ] > 0
-                        // atoms[~zeroIndex - 1] < 0
-                        min = Math.min(
-                                Math.abs(atoms[zeroIndex - 1].value), 
-                                Math.abs(atoms[zeroIndex].value));
+                        var negAtom = atoms[zeroIndex - 1];
+                        var posAtom = atoms[zeroIndex];
+                        if(-negAtom.value < posAtom){
+                            min = negAtom;
+                        } else {
+                            min = posAtom;
+                        }
                     } else {
                         // Zero was found
                         // It is the minimum
                         min = atoms[zeroIndex];
                     }
+                } else if(max.value < (-min.value)){
+                    // min is <= 0
+                    // max is >= 0
+                    // and, of course, min !== max
+                    var tmp = max;
+                    max = min;
+                    min = tmp;
                 }
             }
             
