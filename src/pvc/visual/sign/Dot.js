@@ -9,6 +9,8 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
         pvMark.extend(protoMark);
     }
     
+    keyArgs = def.setDefaults(keyArgs, 'freeColor', false);
+    
     this.base(panel, pvMark, keyArgs);
     
     if(!def.get(keyArgs, 'freePosition', false)){
@@ -28,9 +30,6 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
         /* Colors & Line */
         .optional('strokeDasharray', undefined) // Break inheritance
         .optional('lineWidth',       1.5)       // Idem
-        
-        ._interceptDynamic('fillStyle',   'fillColor'  )
-        ._interceptDynamic('strokeStyle', 'strokeColor')
         ;
 })
 .add({
@@ -96,14 +95,6 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     },
     
     /* COLOR */
-    
-    fillColor: function(){ 
-        return this.color('fill');
-    },
-    
-    strokeColor: function(){ 
-        return this.color('stroke');
-    },
     
     /**
      * @override

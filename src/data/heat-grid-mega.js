@@ -46,7 +46,7 @@ var testHeatGridMegaOptions = {
     "shape":"square",
     "isMultiValued":true,
     "useCompositeAxis":true,
-    visualRoles: {dotSize: null},
+    visualRoles: {size: null},
     "tipsySettings":{"html":true,"gravity":"c","fade":false,"followMouse":true,"opacity":1},
     "reverseColors":false,
     "colorRange":["#FF0000","#FFBF3F","#FFFF00","#BFDF3F","#008000"],

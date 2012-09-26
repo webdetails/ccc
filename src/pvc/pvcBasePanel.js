@@ -203,12 +203,15 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     defaultVisibleBulletGroupScene: function(){
-        // Register legend prototype marks
         var colorAxis = this.defaultColorAxis();
         if(colorAxis && colorAxis.isVisible){
             return colorAxis.legendBulletGroupScene;
         }
         return null;
+    },
+    
+    _getLegendBulletRootScene: function(){
+        return this.chart._getLegendBulletRootScene();
     },
     
     /**
@@ -789,7 +792,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
             
             var extensionId = this._getExtensionId();
-            if(extensionId != null){ // '' is allowed cause this relative to #_getExtensionPrefix
+            if(extensionId != null){ // '' is allowed cause this is relative to #_getExtensionPrefix
                 // Wrap the panel that is extended with a Panel sign
                 new pvc.visual.Panel(this, null, {
                     panel:       pvBorderPanel,
@@ -1082,10 +1085,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
 
     _getConstantExtension: function(id, prop) {
-        var value = this.chart._getExtension(this._makeExtensionAbsId(id), prop);
-        if(!def.fun.is(value)){
-            return value;
-        }
+        return this.chart._getConstantExtension(this._makeExtensionAbsId(id), prop);
     },
     
     // -----------------------------
@@ -1160,6 +1160,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         return dimName;
+    },
+    
+    _getV1Datum: function(scene){
+        return scene.datum;
     },
     
     /**
@@ -1329,7 +1333,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                                 context.getV1Series(),
                                 context.getV1Category(),
                                 context.getV1Value() || '',
-                                context.scene.datum);
+                                context.getV1Datum());
             };
         }
         
@@ -1542,7 +1546,8 @@ pvc.BasePanel = pvc.Abstract.extend({
                 context.getV1Series(),
                 context.getV1Category(),
                 context.getV1Value(),
-                context.event);
+                context.event,
+                context.getV1Datum());
     },
     
     _isClickable: function(keyArgs){
@@ -1617,7 +1622,8 @@ pvc.BasePanel = pvc.Abstract.extend({
                 context.getV1Series(),
                 context.getV1Category(),
                 context.getV1Value(),
-                context.event);
+                context.event,
+                context.getV1Datum());
     },
     
     /* SELECTION & RUBBER-BAND */

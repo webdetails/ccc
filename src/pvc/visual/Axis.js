@@ -36,6 +36,16 @@ def
 .add(/** @lends pvc.visual.Axis# */{
     isVisible: true,
     
+    // should null values be converted to zero or to the minimum value in what scale is concerned?
+    // 'null', 'zero', 'min'
+    scaleTreatsNullAs: function(){
+        return 'null';
+    },
+    
+    scaleUsesAbs: function(){
+        return false;
+    },
+    
     /**
      * Binds the axis to a set of data cells.
      * @param {object|object[]} dataCells The associated data cells.
@@ -64,13 +74,42 @@ def
         /*jshint expr:true */
         this.role || def.fail.operationInvalid('Axis is unbound.');
         
-        this.scale = scale;
+        this.scale = scale ? this._wrapScale(scale) : null;
+
+        return this;
+    },
+    
+    _wrapScale: function(scale){
+        scale.type = this.scaleType;
         
-        if(scale){
-            scale.type = this.scaleType;
+        if(scale.type !== 'Discrete'){
+            var by;
+            var useAbs = this.scaleUsesAbs();
+            var nullAs = this.scaleTreatsNullAs(); 
+            if(nullAs && nullAs !== 'null'){
+                var nullValue = nullAs === 'min' ? scale.domain()[0] : 0;
+                
+                if(useAbs){
+                    by = function(v){
+                        return scale(v == null ? nullValue : (v < 0 ? -v : v));
+                    };
+                } else {
+                    by = function(v){
+                        return scale(v == null ? nullValue : v);
+                    };
+                }
+            } else if(useAbs){
+                by = function(v){
+                    return v == null ? null : scale(v < 0 ? -v : v);
+                };
+            }
+            
+            if(by){
+                return def.copy(by, scale);
+            }
         }
         
-        return this;
+        return scale;
     },
     
     /**

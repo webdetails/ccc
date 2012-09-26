@@ -51,7 +51,8 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         }
         
         var options = this.options;
-        return new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
+        
+        return (this.scatterChartPanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
             stacked:        options.stacked,
             showValues:     options.showValues,
             valuesAnchor:   options.valuesAnchor,
@@ -59,7 +60,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
             showDots:       options.showDots,
             showAreas:      options.showAreas,
             orientation:    options.orientation
-        }));
+        })));
     },
     
     defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {

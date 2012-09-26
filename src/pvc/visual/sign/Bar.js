@@ -4,26 +4,16 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
 
     var pvMark = protoMark.add(pv.Bar);
     
+    keyArgs = def.setDefaults(keyArgs, 'freeColor', false);
+    
     this.base(panel, pvMark, keyArgs);
 
     this.normalStroke = def.get(keyArgs, 'normalStroke', false);
 
-    this/* Colors */
-        ._interceptDynamic('fillStyle',   'fillColor'  )
-        ._interceptDynamic('strokeStyle', 'strokeColor')
-        ._interceptDynamic('lineWidth',   'strokeWidth')
-        ;
+    this._interceptDynamic('lineWidth',  'strokeWidth');
 })
 .add({
     /* COLOR */
-    fillColor: function(){ 
-        return this.color('fill');
-    },
-    
-    strokeColor: function(){
-        return this.color('stroke');
-    },
-
     /**
      * @override
      */

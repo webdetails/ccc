@@ -639,6 +639,11 @@ var def = /** @lends def */{
         return v != null;
     },
     
+    // !== undefined
+    notUndef: function(v){
+        return v !== undefined;
+    },
+    
     empty: function(v){
         return v == null || v === '';
     },

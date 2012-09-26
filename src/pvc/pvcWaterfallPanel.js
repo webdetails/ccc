@@ -55,7 +55,28 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             return isFalling ? -1 : 1;
         };
     },
-
+    
+    _creating: function(){
+        // Register BULLET legend prototype marks
+        var waterfallGroupScene = this._getLegendBulletRootScene()
+                                      .firstChild;
+        
+        if(waterfallGroupScene && !waterfallGroupScene.hasRenderer()){
+            var keyArgs = {
+                    drawRule:      true,
+                    drawMarker:    false,
+                    noSelect:      true,
+                    noHover:       true,
+                    rulePvProto:   new pv.Mark()
+                };
+            
+            this.extend(keyArgs.rulePvProto, 'barWaterfallLine', {constOnly: true});
+            
+            waterfallGroupScene.renderer(
+                    new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+        }
+    },
+    
     _createCore: function(){
 
         this.base();
@@ -83,8 +104,11 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             var panelColors = pv.Colors.category10();
             var waterGroupRootScene = this._buildWaterGroupScene();
             
-            this.pvWaterfallGroupPanel = this.pvPanel.add(pv.Panel)
-                .data(waterGroupRootScene.childNodes)
+            this.pvWaterfallGroupPanel = new pvc.visual.Panel(this, this.pvPanel, {
+                    extensionId: 'barWaterfallGroup'
+                })
+                .lock('data', waterGroupRootScene.childNodes)
+                .pvMark
                 .zOrder(-1)
                 .fillStyle(function(scene){
                     return panelColors(0)/* panelColors(scene.vars.category.level - 1)*/.alpha(0.15);
@@ -116,9 +140,12 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             .override('baseColor', function(type){
                 var color = this.base(type);
                 if(type === 'fill'){
-                    if(this.scene.vars.category.group._isFlattenGroup){
-                        return pv.color(color).alpha(0.75);
-                    }
+                    if(!this.scene.vars.category.group._isFlattenGroup){
+                        return pv.color(color).alpha(0.5);
+                    } 
+//                    else {
+//                        return pv.color(color).darker();
+//                    }
                 }
                 
                 return color;
@@ -148,44 +175,51 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                     function(){ return sceneBaseScale(this.scene) - barWidth2; })
             .override('baseColor', function(){ return this.delegateExtension(waterColor); })
             .pvMark
-            .lineCap('round')
+            .antialias(true)
+            .lineCap('butt')
             ;
 
         if(chart.options.showWaterValues){
-            this.pvWaterfallLabel = this.pvWaterfallLine
-                .add(pv.Label)
+            this.pvWaterfallLabel = new pvc.visual.Label(
+                this, 
+                this.pvWaterfallLine, 
+                {
+                    extensionId: 'barWaterfallLabel'
+                })
+                .intercept('visible', function(scene){
+                    if(scene.vars.category.group._isFlattenGroup){
+                        return false;
+                    }
+    
+                    return isFalling || !!scene.nextSibling;
+                })
+                .pvMark
                 [anchor](function(scene){
                     return orthoZero + chart.animate(0, sceneOrthoScale(scene) - orthoZero);
                 })
-                .visible(function(scene){
-                     if(scene.vars.category.group._isFlattenGroup){
-                         return false;
-                     }
-
-                     return isFalling || !!scene.nextSibling;
-                 })
                 [this.anchorOrtho(anchor)](sceneBaseScale)
                 .textAlign(isVertical ? 'center' : 'left')
-                .textBaseline(isVertical ? 'bottom' : 'middle')
+                .textBaseline(function(categScene){
+                    if(!isVertical){
+                        return 'middle';
+                    }
+                    
+                    var direction = categScene.vars.direction;
+                    if(direction == null){
+                        return 'bottom';
+                    }
+                    
+                    return  ((!isFalling) === (direction === 'up') ? 'bottom' : 'top');
+                })
                 .textStyle(pv.Color.names.darkgray.darker(2))
                 .textMargin(5)
                 .text(function(scene){ return scene.vars.value.label; });
         }
     },
 
-    /**
-     * @override
-     */
-    applyExtensions: function(){
-
-        this.extend(this.pvWaterfallLabel,      "barWaterfallLabel");
-        this.extend(this.pvWaterfallGroupPanel, "barWaterfallGroup");
-        
-        this.base();
-    },
-    
     _buildRuleScene: function(){
         var rootScene  = new pvc.visual.Scene(null, {panel: this, group: this._getVisibleData()});
+        var prevValue;
         
         /**
          * Create starting scene tree
@@ -198,9 +232,10 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         return rootScene;
 
         function createCategScene(ruleInfo){
-            var categData1 = ruleInfo.group,
-                categScene = new pvc.visual.Scene(rootScene, {group: categData1});
-
+            var categData1 = ruleInfo.group;
+            
+            var categScene = new pvc.visual.Scene(rootScene, {group: categData1});
+            
             var categVar = 
                 categScene.vars.category = 
                     new pvc.visual.ValueLabelVar(
@@ -210,9 +245,15 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             categVar.group = categData1;
             
             var value = ruleInfo.offset;
+            
             categScene.vars.value = new pvc.visual.ValueLabelVar(
                                 value,
                                 this.chart._valueDim.format(value));
+            
+            categScene.vars.direction = 
+                (prevValue == null || prevValue === value) ? null : (prevValue < value ? 'up' : 'down');
+            
+            prevValue = value;
         }
     },
 

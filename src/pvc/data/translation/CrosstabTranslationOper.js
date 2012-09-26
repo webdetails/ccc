@@ -410,15 +410,17 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
     },
 
     _splitEncodedColGroupCell: function(colGroup){
-        var values = colGroup.v,
-            labels = colGroup.f;
-
+        var values = colGroup.v;
+        var labels;
+        
         if(values == null){
             values = [];
-            labels = undefined;
         } else {
             values = values.split(this._separator);
-            labels = labels && labels.split(this._separator);
+            labels = colGroup.f;
+            if(labels){
+                labels = labels.split(this._separator);
+            }
         }
 
         return values.map(function(value, index){
@@ -465,11 +467,13 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             ;
 
         for(var i = 0 ; i < L ; i++){
-            var colGroupCell = encodedColGroups[i],
-                encColGroupValues = colGroupCell.v,
-                sepIndex = colGroupCell.v.lastIndexOf(this._separator),
-                meaName,
-                colGroupValues;
+            var colGroupCell = encodedColGroups[i];
+            
+            var encColGroupValues = colGroupCell.v;
+            var encColGroupLabels = colGroupCell.f;
+            var sepIndex = encColGroupValues.lastIndexOf(this._separator);
+            
+            var meaName, colGroupValues, colGroupLabels;
             
             // MeasureName has precedence,
             // so we may end up with no column group value (and C = 0).
@@ -483,9 +487,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 encColGroupValues = encColGroupValues.substring(0, sepIndex);
                 colGroupValues = encColGroupValues.split(this._separator);
 
-                var colGroupLabels;
-                if(colGroupCell.f != null){
-                    colGroupLabels = colGroupCell.f.split(this._separator);
+                if(encColGroupLabels != null){
+                    colGroupLabels = encColGroupLabels.split(this._separator);
                     colGroupLabels.pop(); // measure label
                 }
                 

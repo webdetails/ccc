@@ -44,6 +44,7 @@ src/pvc/visual/CartesianAxis.js
 src/pvc/visual/CartesianAxisRootScene.js
 src/pvc/visual/CartesianAxisTickScene.js
 src/pvc/visual/ColorAxis.js
+src/pvc/visual/SizeAxis.js
 src/pvc/visual/legend/BulletRootScene.js
 src/pvc/visual/legend/BulletGroupScene.js
 src/pvc/visual/legend/BulletItemScene.js
@@ -76,11 +77,14 @@ src/pvc/pvcBarPanel.js
 src/pvc/pvcBarChart.js
 src/pvc/pvcNormalizedBarPanel.js
 src/pvc/pvcNormalizedBarChart.js
+
+src/pvc/visual/legend/WaterfallBulletGroupScene.js
 src/pvc/pvcWaterfallPanel.js
 src/pvc/pvcWaterfallChart.js
 
 src/pvc/pvcLineDotAreaPanel.js
 src/pvc/pvcLineDotArea.js
+src/pvc/pvcHeatGridPanel.js
 src/pvc/pvcHeatGridChart.js
 src/pvc/pvcMetricXYAbstract.js
 src/pvc/pvcMetricLineDotPanel.js
@@ -88,5 +92,7 @@ src/pvc/pvcMetricLineDot.js
 src/pvc/pvcBulletChart.js
 src/pvc/pvcParallelCoordinates.js
 src/pvc/pvcDataTree.js
+
 src/pvc/data/translation/BoxplotChartTranslationOper.js
+src/pvc/pvcBoxplotPanel.js
 src/pvc/pvcBoxplotChart.js

@@ -442,6 +442,17 @@ def.type('pvc.data.Data', pvc.data.Complex)
     },
     
     /**
+     * Obtains the single datum of this data, 
+     * or null, when the data no datums or has more than one.
+     * 
+     * @type pvc.data.Datum
+     */
+    singleDatum: function(){
+        var datums = this._datums;
+        return datums.length === 1 ? datums[0] : null;
+    },
+    
+    /**
      * Disposes the child datas, the link child datas and the dimensions.
      * @type undefined
      */

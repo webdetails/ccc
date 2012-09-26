@@ -175,6 +175,18 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         this.base(chart, parent, options);
     },
     
+    _getV1Datum: function(scene){
+        // Ensure V1 tooltip function compatibility 
+        var datum = scene.datum;
+        if(datum){
+            var datumEx = Object.create(datum);
+            datumEx.percent = scene.vars.value.percent;
+            datum = datumEx;
+        }
+        
+        return datum;
+    },
+    
     /* Layout independent and required by layout stuff only! */
     _getCoreInfo: function(){
         if(!this._coreInfo){
@@ -308,10 +320,20 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         
         // ------------
         
+        var wrapper;
+        if(this.compatVersion() <= 1){
+            wrapper = function(v1f){
+                return function(pieCatScene){
+                    return v1f.call(this, pieCatScene.vars.value.value);
+                };
+            };
+        }
+        
         this.pvPie = new pvc.visual.PieSlice(this, this.pvPanel, {
                 extensionId: 'pie',
                 center: center,
-                activeOffsetRadius: layoutInfo.activeOffsetRadius
+                activeOffsetRadius: layoutInfo.activeOffsetRadius,
+                wrapper: wrapper
             })
             
             .lock('data', rootScene.childNodes)
@@ -358,7 +380,8 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                         noClick:       false,
                         noDoubleClick: false,
                         noSelect:      false,
-                        noHover:       false
+                        noHover:       false,
+                        wrapper:       wrapper
                     })
                     .intercept('visible', function(scene){
                         var angle = scene.vars.value.angle;
@@ -385,28 +408,52 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                      })
                     ;
                 
-                this.pvLinkLine = this.pvLinkPanel.add(pv.Line)
-                    .data(function(scene){
+                this.pvLinkLine = new pvc.visual.Line(
+                    this, 
+                    this.pvLinkPanel, 
+                    {
+                        extensionId:  'pieLinkLine',
+                        freePosition:  true,
+                        noClick:       true,
+                        noDoubleClick: true,
+                        noSelect:      true,
+                        noTooltips:    true,
+                        noHover:       true 
+                    })
+                    .lockMark('data', function(scene){
                         // Calculate the dynamic dot at the 
                         // slice's middle angle and outer radius...
                         var pieSlice = this.parent.pieSlice();
                         var midAngle = pieSlice.startAngle + pieSlice.angle / 2;
                         var outerRadius = pieSlice.outerRadius - linkLayout.insetRadius;
+                        var x = pieSlice.left + outerRadius * Math.cos(midAngle);
+                        var y = pieSlice.top  + outerRadius * Math.sin(midAngle);
                         
-                        var dot = pv.vector(
-                            pieSlice.left + outerRadius * Math.cos(midAngle),
-                            pieSlice.top  + outerRadius * Math.sin(midAngle));
+                        var firstDotScene = scene.childNodes[0];
+                        if(!firstDotScene || !firstDotScene._isFirstDynamicScene){
+                            firstDotScene = new pvc.visual.PieLinkLineScene(
+                                scene, x, y, /* index */ 0);
+                            
+                            firstDotScene._isFirstDynamicScene = true;
+                        } else {
+                            firstDotScene.x = x;
+                            firstDotScene.y = y;
+                        }
                         
-                        return [dot].concat(scene.vars.link.dots);
+                        return scene.childNodes;
                     })
+                    .pvMark
                     .lock('visible')
-                    .top (function(dot){ return dot.y; })
-                    .left(function(dot){ return dot.x; })
+                    .lock('top',  function(dot){ return dot.y; })
+                    .lock('left', function(dot){ return dot.x; })
                     .strokeStyle('black')
                     .lineWidth(0.5)
                     ;
                 
-                this.pvPieLabel = new pvc.visual.Label(this, this.pvLinkPanel, {
+                this.pvPieLabel = new pvc.visual.Label(
+                    this, 
+                    this.pvLinkPanel, 
+                    {
                         extensionId:   'pieLabel',
                         noClick:       false,
                         noDoubleClick: false,
@@ -417,13 +464,13 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                         // Repeat the scene, once for each line
                         return scene.lineScenes; 
                     })
-                    .lock('visible')
                     .pvMark
+                    .lock('visible')
                     .left     (function(scene){ return scene.vars.link.labelX; })
-                    .top      (function(scene){ return scene.vars.link.labelY + ((this.index + 1) * linkLayout.lineHeight); })
+                    .top      (function(scene){ return scene.vars.link.labelY + ((this.index + 1) * linkLayout.lineHeight); }) // must be mark.index because of repeating scene...
                     .textAlign(function(scene){ return scene.vars.link.labelAnchor; })
-                    .textBaseline('bottom')
                     .textMargin(linkLayout.textMargin)
+                    .textBaseline('bottom')
                     .text     (function(scene){ return scene.vars.link.labelLines[this.index]; })
                     .fillStyle('red')
                     ;
@@ -454,12 +501,6 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             this.pvPieLabel
                 .font(layoutInfo.labelFont);
         }
-    },
-    
-    applyExtensions: function(){
-        this.base();
-        
-        this.extend(this.pvLinkLine, "pieLinkLine");
     },
     
     _getExtensionId: function(){
@@ -783,10 +824,8 @@ def
         var anchorX = center.x + dir * elbowRadius;
         var targetX = anchorX + dir * linkLayout.linkMargin;
         
-        linkVar.dots = [
-            pv.vector(elbowX,  elbowY),
-            pv.vector(anchorX, elbowY)
-        ];
+        new pvc.visual.PieLinkLineScene(this, elbowX,  elbowY);
+        new pvc.visual.PieLinkLineScene(this, anchorX, elbowY);
         
         linkVar.elbowY  = elbowY;
         linkVar.targetY = elbowY + 0;
@@ -801,15 +840,26 @@ def
         
         var targetY = linkVar.targetY;
         var targetX = linkVar.targetX;
-        var dots = linkVar.dots;
+        
         var handleWidth = layoutInfo.link.handleWidth;
         if(handleWidth > 0){
-            dots.push(pv.vector(targetX - linkVar.dir * handleWidth, targetY));
+            new pvc.visual.PieLinkLineScene(this, targetX - linkVar.dir * handleWidth, targetY);
         }
         
-        dots.push(pv.vector(targetX, targetY));
-        
+        new pvc.visual.PieLinkLineScene(this, targetX, targetY);
+                
         linkVar.labelX = targetX;
         linkVar.labelY = targetY - linkVar.labelHeight/2;
     }
 });
+
+def
+.type('pvc.visual.PieLinkLineScene', pvc.visual.Scene)
+.init(function(catScene, x, y, index){
+    this.base(catScene, { group: catScene.group, index: index });
+    
+    this.x = x;
+    this.y = y;
+})
+.add(pv.Vector)
+;

@@ -62,6 +62,7 @@
         <script type="text/javascript" src="pvc/visual/CartesianAxisRootScene.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxisTickScene.js"></script>
         <script type="text/javascript" src="pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/SizeAxis.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletItemScene.js"></script>
@@ -92,10 +93,12 @@
         <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
         <script type="text/javascript" src="pvc/pvcNormalizedBarPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
         <script type="text/javascript" src="pvc/pvcWaterfallPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
         <script type="text/javascript" src="pvc/pvcLineDotAreaPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLineDotArea.js"></script>
+        <script type="text/javascript" src="pvc/pvcHeatGridPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
         <script type="text/javascript" src="pvc/pvcMetricXYAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcMetricLineDotPanel.js"></script>
@@ -104,6 +107,7 @@
         <script type="text/javascript" src="pvc/pvcParallelCoordinates.js"></script>
         <script type="text/javascript" src="pvc/pvcDataTree.js"></script>
         <script type="text/javascript" src="pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/pvcBoxplotPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
         <!-- @SCRIPTSEND@ -->
         
@@ -224,32 +228,32 @@ In this chart we have normalized over the full matrix (normPerBaseCategory = fal
 <br>
 <textarea cols="55" rows="18" id="pvcHG2Code">
 var heatGrid2 = new pvc.HeatGridChart({
-                    canvas: "pvcHG2",
-                    width: 400,
-                    height: 300,
-                    animate: false,
-                    clickable: false,
-                    selectable: true,
-                    panelSizeRatio: 0.8,
-                    orientation: "vertical",
-                    showValues: true,
-                    valuesAnchor: "right",
-                    showXScale: true,
-                    xAxisPosition: "bottom",
-                    showYScale: true,
-                    yAxisPosition: "left",
-                    axisOffset: 0,
-                    normPerBaseCategory: false,
+    canvas: "pvcHG2",
+    width: 400,
+    height: 300,
+    animate: false,
+    clickable: false,
+    selectable: true,
+    panelSizeRatio: 0.8,
+    orientation: "vertical",
+    showValues: true,
+    valuesAnchor: "right",
+    showXScale: true,
+    xAxisPosition: "bottom",
+    showYScale: true,
+    yAxisPosition: "left",
+    axisOffset: 0,
+    normPerBaseCategory: false,
 
-                    extensionPoints: {
-                      xAxisLabel_textAngle:-0.3,
-                      xAxisLabel_textAlign:"right"
-                      }
-                });
-                heatGrid2.setData(testHeatGrid,
-                           {crosstabMode: true,
-                            seriesInRows: false });
-                heatGrid2.render();
+    extensionPoints: {
+      xAxisLabel_textAngle:-0.3,
+      xAxisLabel_textAlign:"right"
+    }
+});
+heatGrid2.setData(testHeatGrid,
+           {crosstabMode: true,
+            seriesInRows: false });
+heatGrid2.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcHG2"></div>
@@ -266,26 +270,26 @@ Again the data is normalized by product (by Row).
 <br>
 <textarea cols="55" rows="18" id="pvcHG3Code">
 var heatGrid3 = new pvc.HeatGridChart({
-                    canvas: "pvcHG3",
-                    width: 400,
-                    height: 300,
-                    animate: false,
-                    clickable: false,
-                    selectable: true,
-                    orientation: "horizontal",
-                    showValues: false,
-                    showXScale: true,
-                    xAxisPosition: "bottom",
-                    showYScale: true,
-                    panelSizeRatio: 0.8,
-                    yAxisPosition: "left",
-                    minColor: "#FEDFE1",
-                    maxColor: "#F11929"
-                });
-                heatGrid3.setData(testHeatGrid,
-                                 {crosstabMode: true,
-                                  seriesInRows: false });
-                heatGrid3.render();
+    canvas: "pvcHG3",
+    width: 400,
+    height: 300,
+    animate: false,
+    clickable: false,
+    selectable: true,
+    orientation: "horizontal",
+    showValues: false,
+    showXScale: true,
+    xAxisPosition: "bottom",
+    showYScale: true,
+    panelSizeRatio: 0.8,
+    yAxisPosition: "left",
+    minColor: "#FEDFE1",
+    maxColor: "#F11929"
+});
+heatGrid3.setData(testHeatGrid,
+                 {crosstabMode: true,
+                  seriesInRows: false });
+heatGrid3.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcHG3"></div>
@@ -295,27 +299,30 @@ Same chart as the previous, but clickable.
 <br>
 <textarea cols="55" rows="18" id="pvcHG4Code">
 var heatGrid4 = new pvc.HeatGridChart({
-                    canvas: "pvcHG4",
-                    width: 400,
-                    height: 300,
-                    animate: false,
-                    clickable: true,
-                    selectable: true,
-                    clickAction: function(series,category,dataValue){
-                        alert('series "' + series + '", category "' + category + '", value = ' + dataValue);
-                    },
-                    orientation: "horizontal",
-                    showValues: false,
-                    showXScale: true,
-                    xAxisPosition: "bottom",
-                    showYScale: true,
-                    panelSizeRatio: 0.8,
-                    yAxisPosition: "left"
-                });
-                heatGrid4.setData(testHeatGrid,
-                                 {crosstabMode: true,
-                                  seriesInRows: false });
-                heatGrid4.render();
+    canvas: "pvcHG4",
+    width: 400,
+    height: 300,
+    animate: false,
+    clickable: true,
+    selectable: true,
+    clickAction: function(scene){
+        alert(
+        'series = "'     + scene.vars.series.value + 
+        '", category = ' + scene.vars.category.value + 
+        '", color = '    + scene.vars.color.value);
+    },
+    orientation: "horizontal",
+    showValues: false,
+    showXScale: true,
+    xAxisPosition: "bottom",
+    showYScale: true,
+    panelSizeRatio: 0.8,
+    yAxisPosition: "left"
+});
+heatGrid4.setData(testHeatGrid,
+                 {crosstabMode: true,
+                  seriesInRows: false });
+heatGrid4.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcHG4"></div>
@@ -334,7 +341,7 @@ var heatGrid5 = new pvc.HeatGridChart({
     showValues: false,
     valuesAnchor: "right",
     normPerBaseCategory: false,
-    visualRoles: {color: 'value2', dotSize: 'value'},
+    visualRoles: {color: 'value2', size: 'value'},
     useShapes: true,
     nullColor:'blue',
     nullShape:null,

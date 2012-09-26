@@ -4,6 +4,10 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     
     var pvMark = protoMark.add(pv.Area);
     
+    if(!keyArgs) { keyArgs = {}; }
+    
+    keyArgs.freeColor = true;
+    
     this.base(panel, pvMark, keyArgs);
     
     var antialias = def.get(keyArgs, 'antialias', true),
@@ -84,10 +88,6 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     fixAntialiasStrokeColor: function(){ 
         /* Copy fill color */
         return this.pvMark.fillStyle();
-    },
-    
-    fillColor: function(){ 
-        return this.color('fill');
     },
     
     /**

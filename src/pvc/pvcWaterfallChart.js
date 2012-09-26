@@ -22,7 +22,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
 
     _isFalling: true,
     _ruleInfos: null,
-    _waterColor: pv.Color.names.darkblue,//darkblue,darkslateblue,royalblue,seagreen, //pv.color("#808285").darker(),
+    _waterColor: pv.color("#1f77b4").darker(),// pv.Color.names.darkslateblue,//royalblue,seagreen, //pv.color("#808285").darker(),
 
     constructor: function(options){
 
@@ -65,28 +65,23 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         this._catRole.setFlatteningMode(this._isFalling ? 'tree-pre' : 'tree-post');
         this._catRole.setFlattenRootLabel(this.options.allCategoryLabel);
     },
-
-    _initLegendScenes: function(){
+    
+    _initLegendScenes: function(legendPanel){
         
-        this.base();
-
-        var strokeStyle = this._getExtension("barWaterfallLine", "strokeStyle");
-        if(strokeStyle && !def.fun.is(strokeStyle)){
+        var strokeStyle = this._getConstantExtension("barWaterfallLine", "strokeStyle");
+        if(strokeStyle){
             this._waterColor = pv.color(strokeStyle);
         }
-
-        this._addLegendGroup({
-            id:        "waterfallTotalLine",
-            type:      "discreteColorAndShape",
-            items:     [{
-                value: null,
-                label: this.options.accumulatedLineLabel,
-                color: this._waterColor,
-                shape: 'bar',
-                isOn:  def.retTrue,
-                click: null
-            }]
+        
+        var rootScene = legendPanel._getBulletRootScene();
+        
+        new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, {
+            extensionPrefix: pvc.visual.Axis.getId('legend', 1), // legend2_
+            label: this.options.accumulatedLineLabel,
+            color: this._waterColor
         });
+        
+        this.base(legendPanel);
     },
     
     /**
@@ -115,24 +110,22 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
          * it does contribute to the offset, and positively.
          * The offset property accumulates the values.
          */
-        var offset, negOffset;
+        var offset;
         if(!result){
             if(catRange){
-                offset    = catRange.max;
-                negOffset = catRange.min;
+                offset = catRange.min + catRange.max;
+                
                 this._ruleInfos = [{
                     offset: offset,
-                    negOffset: negOffset,
                     group:  catGroup,
                     range:  catRange
                 }];
 
                 // Copy the range object
                 return {
-                    min: catRange.min,
-                    max: catRange.max,
-                    offset: offset,
-                    negOffset: negOffset
+                    min:    catRange.min,
+                    max:    catRange.max,
+                    offset: offset
                 };
             }
 
@@ -140,11 +133,9 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         }
 
         offset = result.offset;
-        negOffset = result.negOffset;
         if(this._isFalling){
             this._ruleInfos.push({
                 offset: offset,
-                negOffset: negOffset,
                 group:  catGroup,
                 range:  catRange
             });
@@ -153,22 +144,20 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         if(!catGroup._isFlattenGroup){
             var dir = this._isFalling ? -1 : 1;
 
-            offset    = result.offset    = offset    + dir * catRange.max;
-            negOffset = result.negOffset = negOffset - dir * catRange.min;
-
-            if(negOffset < result.min){
-                result.min = negOffset;
-            }
+            offset = result.offset = offset + dir * (catRange.min + catRange.max);
 
             if(offset > result.max){
                 result.max = offset;
+            }
+            
+            if(offset < result.min){
+                result.min = offset;
             }
         }
 
         if(!this._isFalling){
             this._ruleInfos.push({
                 offset: offset,
-                negOffset: negOffset,
                 group:  catGroup,
                 range:  catRange
             });
@@ -185,13 +174,13 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         
         var options = this.options;
         
-        return new pvc.WaterfallPanel(this, parentPanel, def.create(baseOptions, {
+        return (this.wfChartPanel = new pvc.WaterfallPanel(this, parentPanel, def.create(baseOptions, {
             waterfall:          options.waterfall,
             barSizeRatio:       options.barSizeRatio,
             maxBarSize:         options.maxBarSize,
             showValues:         options.showValues,
             orientation:        options.orientation
-        }));
+        })));
     },
     
     defaults: def.create(pvc.BarAbstract.prototype.defaults, {

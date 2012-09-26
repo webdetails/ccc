@@ -20,6 +20,9 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
 
     var pvMark = protoMark.add(pv.PieSlice);
     
+    keyArgs = def.setDefaults(keyArgs, 'freeColor', false);
+    this.base(panel, pvMark, keyArgs);
+    
     this.base(panel, pvMark, keyArgs);
     
     //this._normalRadius         = def.get(keyArgs, 'normalRadius',  10);
@@ -28,8 +31,6 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     
     this/* Colors */
         .optional('lineWidth',  0.6)
-        ._interceptDynamic('fillStyle',   'fillColor'  )
-        ._interceptDynamic('strokeStyle', 'strokeColor')
         ._interceptDynamic('angle', 'angle')
         ._lockDynamic('bottom', 'y')
         ._lockDynamic('left',   'x')
@@ -72,8 +73,6 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     },
     
     /* COLOR */
-    fillColor:   function(){ return this.color('fill');   },
-    strokeColor: function(){ return this.color('stroke'); },
     
     /**
      * @override

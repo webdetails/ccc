@@ -1,17 +1,5 @@
 
 pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
-    /**
-     * @override
-     */
-    applyExtensions: function(){
-        
-        this.base();
-
-        if(this.chart.options.compatVersion <= 1){
-            this.extend(this.pvFrameBar, "xAxisEndLine");
-            this.extend(this.pvFrameBar, "yAxisEndLine");
-        }
-    },
     
     _getExtensionId: function(){
         return 'content';
@@ -190,8 +178,16 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
         // xScale(xScale.domain()[0]) -> xScale(xScale.domain()[1])
         // and
         // yScale(yScale.domain()[0]) -> yScale(yScale.domain()[1])
+        var extensionIds = [];
+        if(this.compatVersion() <= 1){
+            extensionIds.push('xAxisEndLine');
+            extensionIds.push('yAxisEndLine');
+        }
+        
+        extensionIds.push('plotFrame');
+        
         return new pvc.visual.Panel(this, this.pvPanel, {
-                extensionId: 'plotFrame'
+                extensionId: extensionIds
             })
             .pvMark
             .lock('left',   left)

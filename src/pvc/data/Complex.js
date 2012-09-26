@@ -122,7 +122,7 @@ def
             // For a small number, of small strings, it's actually faster to 
             // just concatenate strings comparing to the array.join method 
             var dimNames = owner.type._dimsNames;
-            var key, label, aLabel;
+            var key = '', label = '';
             var labelSep = owner.labelSep;
             
             L = dimNames.length;

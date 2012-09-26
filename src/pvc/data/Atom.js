@@ -60,18 +60,28 @@ function(dimension, value, label, rawValue, key) {
     this.id = (value == null ? -def.nextId() : def.nextId()); // Ensure null sorts first, when sorted by id
     this.value = value;
     this.label = label;
-    this.rawValue = rawValue;
+    if(rawValue !== undefined){
+        this.rawValue = rawValue;
+    }
     this.key = key;
     this.globalKey = dimension.name + ":" + key;
 })
 .add( /** @lends pvc.data.Atom */{
     isInterpolated: false,
     
+    rawValue: undefined,
+
     /**
      * Obtains the label of the atom.
      */
     toString: function(){
-        return this.label;
+        var label = this.label;
+        if(label != null){
+            return label;
+        }
+        
+        label = this.value;
+        return label != null ? ("" + label) : "";
     }
 });
 

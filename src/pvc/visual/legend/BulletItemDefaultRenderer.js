@@ -19,6 +19,9 @@
 def
 .type('pvc.visual.legend.BulletItemDefaultRenderer', pvc.visual.legend.BulletItemRenderer)
 .init(function(keyArgs){
+    this.noSelect = def.get(keyArgs, 'noSelect', false);
+    this.noHover  = def.get(keyArgs, 'noHover',  false);
+    
     this.drawRule = def.get(keyArgs, 'drawRule', false);
     if(this.drawRule){
         this.rulePvProto = def.get(keyArgs, 'rulePvProto');
@@ -57,8 +60,9 @@ def
             
             renderInfo.pvRule = new pvc.visual.Rule(legendPanel, pvBulletPanel, {
                         proto: rulePvBaseProto,
-                        noSelect:    false,
-                        noHover:     false,
+                        noSelect:    this.noSelect,
+                        noHover:     this.noHover,
+                        activeSeriesAware: false,// no guarantee that series exist in the scene
                         extensionId: extensionPrefix + "Rule",
                         wrapper:     wrapper
                     })
@@ -105,6 +109,8 @@ def
                     freePosition: true,
                     activeSeriesAware: false, // no guarantee that series exist in the scene
                     noTooltips:   true,
+                    noSelect:     this.noSelect,
+                    noHover:      this.noHover,
                     extensionId:  extensionPrefix + "Dot",
                     wrapper:      wrapper
                 })

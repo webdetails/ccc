@@ -114,9 +114,13 @@ pvc.BarChart = pvc.BarAbstract.extend({
             maxBarSize:         options.maxBarSize,
             showValues:         options.showValues,
             valuesAnchor:       options.valuesAnchor,
-            orientation:        options.orientation
+            orientation:        options.orientation,
+            showOverflowMarkers: options.showOverflowMarkers
         }));
 
+        // legacy field
+        this.barChartPanel = barPanel;
+        
         if(options.secondAxis){
             if(pvc.debug >= 3){
                 pvc.log("Creating LineDotArea panel.");
@@ -137,6 +141,10 @@ pvc.BarChart = pvc.BarAbstract.extend({
 
             this._linePanel = linePanel;
             
+            // Legacy fields
+            barPanel.pvSecondLine = linePanel.pvLine;
+            barPanel.pvSecondDot  = linePanel.pvDot ;
+            
             barPanel._linePanel = linePanel;
         }
         
@@ -144,7 +152,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
     },
     
     defaults: def.create(pvc.BarAbstract.prototype.defaults, {
-        showDots: true,
+        showDots:  true,
         showLines: true,
         showAreas: false
     })

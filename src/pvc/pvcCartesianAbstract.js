@@ -82,7 +82,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @type pv.Scale
      */
     _createAxisScale: function(axis){
-        var isSecondOrtho = axis.index === 1 && axis.type === 'ortho';
+        var isOrtho = axis.type === 'ortho';
+        var isCart  = isOrtho || axis.type === 'base';
+        var isSecondOrtho = isOrtho && axis.index === 1;
         
         var scale;
 
@@ -97,13 +99,18 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
         }
         
-        axis.setScale(scale);
+        scale = axis
+            .setScale(scale)
+            .scale
+            ;
         
-        /* V1 fields xScale, yScale, secondScale */
-        if(isSecondOrtho) {
-            this.secondScale = scale;
-        } else if(!axis.index) {
-            this[axis.orientation + 'Scale'] = scale;
+        if(isCart){
+            /* V1 fields xScale, yScale, secondScale */
+            if(isSecondOrtho) {
+                this.secondScale = scale;
+            } else if(!axis.index) {
+                this[axis.orientation + 'Scale'] = scale;
+            }
         }
         
         return scale;
@@ -156,10 +163,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.basePanel.layout();
         
         /* Set scale ranges, after layout */
-        this._setAxisScaleRange(baseAxis );
-        this._setAxisScaleRange(orthoAxis);
+        this._setCartAxisScaleRange(baseAxis );
+        this._setCartAxisScaleRange(orthoAxis);
         if(ortho2Axis){
-            this._setAxisScaleRange(ortho2Axis);
+            this._setCartAxisScaleRange(ortho2Axis);
         }
     },
     
@@ -334,29 +341,26 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             if(originIsZero && (dMin * dMax > 0)){
                 if(dMin > 0){
                     dMin = 0;
-                    extent.minLocked = true;
                 } else {
                     dMax = 0;
-                    extent.maxLocked = true;
                 }
             }
     
             /*
              * If the bounds (still) are the same, things break,
              * so we add a wee bit of variation.
-             *
-             * This one must ignore locks.
+             * Ignoring locks.
              */
-            if (dMin === dMax) {
+            if(dMin > dMax){
+                var tmp = dMin;
+                dMin = dMax;
+                dMax = tmp;
+            }
+            
+            if (dMax - dMin <= 1e-12) {
                 dMin = dMin !== 0 ? dMin * 0.99 : originIsZero ? 0 : -0.1;
                 dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
-            } else if(dMin > dMax){
-                // What the heck...
-                // Is this ok or should throw?
-                var bound = dMin;
-                dMin = dMax;
-                dMax = bound;
-            }
+            } 
             
             scale.domain(dMin, dMax);
         }
@@ -364,12 +368,11 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         return scale;
     },
     
-    _setAxisScaleRange: function(axis){
+    _setCartAxisScaleRange: function(axis){
         var info = this._mainContentPanel._layoutInfo;
-        
         var size = (axis.orientation === 'x') ?
-                   info.clientSize.width :
-                   info.clientSize.height;
+           info.clientSize.width :
+           info.clientSize.height;
         
         axis.setScaleRange(size);
 
@@ -480,23 +483,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @virtual
      */
     _getContinuousVisibleExtentConstrained: function(axis, min, max){
-        var extent = {
-                minLocked: false,
-                maxLocked: false
-            };
-        
         if(min == null) {
             min = axis.option('FixedMin');
-            if(min != null){
-                extent.minLocked = true;
-            }
         }
         
         if(max == null) {
             max = axis.option('FixedMax');
-            if(max != null){
-                extent.maxLocked = true;
-            }
         }
         
         if(min == null || max == null) {
@@ -514,10 +506,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
         }
         
-        extent.min = min;
-        extent.max = max;
-        
-        return extent;
+        return {min: min, max: max};
     },
     
     /**
@@ -574,7 +563,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
 
         var extent = this._getVisibleData(valueDataCell.dataPartValue)
             .dimensions(valueRole.firstDimensionName())
-            .extent();
+            .extent({ abs: valueAxis.scaleUsesAbs() });
         
         return extent ? {min: extent.min.value, max: extent.max.value} : undefined;
     },

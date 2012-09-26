@@ -49,12 +49,12 @@ pvc.NormalizedBarChart = pvc.BarAbstract.extend({
         }
         
         var options = this.options;
-        return new pvc.NormalizedBarPanel(this, parentPanel, def.create(baseOptions, {
+        return (this.barChartPanel = new pvc.NormalizedBarPanel(this, parentPanel, def.create(baseOptions, {
             barSizeRatio:       options.barSizeRatio,
             maxBarSize:         options.maxBarSize,
             showValues:         options.showValues,
             valuesAnchor:       options.valuesAnchor,
             orientation:        options.orientation
-        }));
+        })));
     }
 });

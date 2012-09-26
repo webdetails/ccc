@@ -46,12 +46,14 @@ pvc.BarAbstract = pvc.CategoricalAbstract.extend({
         // Cached
         this._valueDim = data.dimensions(this._valueRole.firstDimensionName());
     },
+    
     defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
         showValues:   true,
         barSizeRatio: 0.9,   // for grouped bars
         maxBarSize:   2000,
         barStackedMargin: 0, // for stacked bars
         valuesAnchor: "center",
-        showValuePercentage: false
+        showValuePercentage: false,
+        showOverflowMarkers: true
     })
 });

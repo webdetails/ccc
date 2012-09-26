@@ -881,6 +881,33 @@ var testWaterfall_02 = {
   ]
 };
 
+var testWaterfallBalance = {
+        "resultset":[
+    ["Income", "Sales",       100,  600],
+    ["Income", "Financial",   400,  300],
+    ["Income", "Tax Return",  300,  300],
+    ["Cost",   null,    -100, -200]
+    ],
+    "metadata":[{
+      "colIndex":0,
+      "colType":"String",
+      "colName":"Account Type"
+    },{
+      "colIndex":1,
+      "colType":"String",
+      "colName":"Account Source"
+    },{
+      "colIndex":2,
+      "colType":"Numeric",
+      "colName":"Product A"
+    },{
+      "colIndex":3,
+      "colType":"Numeric",
+      "colName":"Product B"
+    }
+    ]
+  };
+
 var testWaterfall1 = {
   "metadata":[{
     "colIndex":0,

@@ -525,7 +525,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             .query(roleNames)
             .select(function(roleName){
                 var dataCell = dataCellBase ? Object.create(dataCellBase) : {};
-                dataCell.role = this.visualRoles(roleName);
+                dataCell.role = def.string.is(roleName) ? this.visualRoles(roleName) : roleName;
                 return dataCell;
             }, this)
             .array();
@@ -1089,15 +1089,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
     
-    /* 
-    TODO: I'm lost! Where do I belong?
-    
-    shape, drawLine, drawMarker,
-    if(isV1Compat && options.shape === undefined){
-        options.shape = 'square';
-    }
-    */
-    
     /**
      * Creates the legend group scenes of a chart.
      *
@@ -1111,6 +1102,7 @@ pvc.BaseChart = pvc.Abstract.extend({
     _initLegendScenes: function(legendPanel){
         
         var rootScene;
+        var legendIndex = 0; // always start from 0
         
         addAxis.call(this, this.axes.color );
         addAxis.call(this, this.axes.color2);
@@ -1133,7 +1125,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             var groupScene = rootScene.createGroup({
                 group:           domainData,
                 colorAxis:       colorAxis,
-                extensionPrefix: pvc.visual.Axis.getId('legend', rootScene.childNodes.length)
+                extensionPrefix: pvc.visual.Axis.getId('legend', legendIndex++)
              });
             
             // For latter binding an appropriate bullet renderer
@@ -1145,13 +1137,16 @@ pvc.BaseChart = pvc.Abstract.extend({
                 .children()
                 .each(function(itemData){
                     var itemScene = groupScene.createItem({group: itemData});
-                    def.set(itemScene,
-                        'color', partColorScale(itemData.value),
-                        'shape', 'square');
+                    
+                    itemScene.color = partColorScale(itemData.value);
                 });
         }
     },
-
+    
+    _getLegendBulletRootScene: function(){
+        return this.legendPanel && this.legendPanel._getBulletRootScene();
+    },
+    
     /**
      * Creates and initializes the multi-chart panel.
      */
@@ -1397,6 +1392,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         var component = def.getOwn(this._components, id);
         if(component){
             return component.get(prop);
+        }
+    },
+    
+    _getConstantExtension: function(id, prop) {
+        var value = this._getExtension(id, prop);
+        if(!def.fun.is(value)){
+            return value;
         }
     },
     

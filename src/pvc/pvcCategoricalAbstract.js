@@ -153,11 +153,13 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         var dataPartValue = valueDataCell.dataPartValue;
         var valueDimName = valueRole.firstDimensionName();
         var data = this._getVisibleData(dataPartValue);
-
+        var useAbs = valueAxis.scaleUsesAbs();
+        
         if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked){
             return data.leafs()
                        .select(function(serGroup){
-                           return serGroup.dimensions(valueDimName).sum();
+                           var value = serGroup.dimensions(valueDimName).sum();
+                           return useAbs && value < 0 ? -value : value;
                         })
                        .range();
         }
@@ -169,7 +171,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         return data.children()
             /* Obtain the value extent of each category */
             .select(function(catGroup){
-                var range = this._getStackedCategoryValueExtent(catGroup, valueDimName);
+                var range = this._getStackedCategoryValueExtent(catGroup, valueDimName, useAbs);
                 if(range){
                     return {range: range, group: catGroup};
                 }
@@ -198,7 +200,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      * summing negative and positive values.
      * Supports {@link #_getContinuousVisibleExtent}.
      */
-    _getStackedCategoryValueExtent: function(catGroup, valueDimName){
+    _getStackedCategoryValueExtent: function(catGroup, valueDimName, useAbs){
         var posSum = null,
             negSum = null;
 
@@ -206,7 +208,8 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             .children()
             /* Sum all datum's values on the same leaf */
             .select(function(serGroup){
-                return serGroup.dimensions(valueDimName).sum();
+                var value = serGroup.dimensions(valueDimName).sum();
+                return useAbs && value < 0 ? -value : value;
             })
             /* Add to positive or negative totals */
             .each(function(value){

@@ -116,18 +116,45 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             this.pvPanel.zOrder(1);
         }
         
-        this.pvScatterPanel = this.pvPanel.add(pv.Panel)
+        this.pvScatterPanel = new pvc.visual.Panel(this, this.pvPanel, {
+                extensionId: 'scatterPanel'
+            })
             .lock('data', rootScene.childNodes)
+            .pvMark
             ;
         
         // -- AREA --
         var areaFillColorAlpha = showAreas && showLines && !isStacked ? 0.5 : null;
         
+
+        var wrapper;
+        if(this.compatVersion() <= 1){
+            if(isStacked){
+                wrapper = function(v1f){
+                    return function(dotScene){
+                        return v1f.call(this, dotScene.vars.value.rawValue);
+                    };
+                };
+            } else {
+                wrapper = function(v1f){
+                    return function(dotScene){
+                        var d = {
+                                category: dotScene.vars.category.rawValue,
+                                value:    dotScene.vars.value.rawValue
+                            };
+                        
+                        return v1f.call(this, d);
+                    };
+                };
+            }
+        }
+        
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
                 antialias:   showAreas && !showLines,
                 segmented:   !isDense,
-                noTooltips:  false 
+                noTooltips:  false,
+                wrapper:     wrapper
             })
             
             .lock('visible', def.retTrue)
@@ -199,7 +226,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
             {
                 extensionId: 'line',
-                freePosition: true
+                freePosition: true,
+                wrapper:     wrapper
                 //noHover:      true // TODO: SIGN check if not broken
             })
             /* 
@@ -248,7 +276,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         
         this.pvDot = new pvc.visual.Dot(this, this.pvLine, {
                 extensionId: 'dot',
-                freePosition: true
+                freePosition: true,
+                wrapper:     wrapper
             })
             .intercept('visible', function(){
                 var scene = this.scene;
@@ -325,27 +354,17 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         
         // -- LABEL --
         if(this.showValues){
-            this.pvLabel = this.pvDot
-                .anchor(this.valuesAnchor)
-                .add(pv.Label)
-                // ------
-                .bottom(0)
+            this.pvLabel = new pvc.visual.Label(
+                this, 
+                this.pvDot.anchor(this.valuesAnchor), 
+                {
+                    extensionId: ['lineLabel', 'label'],
+                    wrapper:     wrapper
+                })
+                .pvMark
                 .text(function(scene){ return scene.vars.value.label; })
                 ;
         }
-    },
-
-    /**
-     * @override
-     */
-    applyExtensions: function(){
-
-        this.extend(this.pvScatterPanel, "scatterPanel");
-
-        this.extend(this.pvLabel, "label");
-        this.extend(this.pvLabel, "lineLabel");
-        
-        this.base();
     },
 
     /**
@@ -485,7 +504,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
 
             seriesScene.vars.series = new pvc.visual.ValueLabelVar(
                         seriesData1 ? seriesData1.value : null,
-                        seriesData1 ? seriesData1.label : "");
+                        seriesData1 ? seriesData1.label : "",
+                        seriesData1 ? seriesData1.rawValue : null);
             
             
             /* Create series-categ scene */
@@ -512,13 +532,14 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 // -------------
                 
                 serCatScene.vars.category = 
-                    new pvc.visual.ValueLabelVar(categData.value, categData.label);
+                    new pvc.visual.ValueLabelVar(categData.value, categData.label, categData.rawValue);
                 
                 // -------------
                 
                 var valueVar = new pvc.visual.ValueLabelVar(
                                     value,
-                                    valueDim.format(value));
+                                    valueDim.format(value),
+                                    value);
                 
                 /* accumulated value, for stacked */
                 // NOTE: the null value can only happen if interpolation is 'none'
@@ -740,7 +761,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             
             var interValueVar = new pvc.visual.ValueLabelVar(
                                     interValue,
-                                    valueDim.format(interValue));
+                                    valueDim.format(interValue),
+                                    interValue);
             
             interValueVar.accValue = interAccValue;
             

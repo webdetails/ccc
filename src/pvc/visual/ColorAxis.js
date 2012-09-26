@@ -26,23 +26,25 @@ def
     // All this, currently only works well for discrete colors...
     // pvc.createColorScheme creates discrete color scale factories
     var options = chart.options;
-    var colorsFactory;
-    
-    if(this.index === 1){
-        var useOwnColors = options.secondAxisOwnColors;
-        if(useOwnColors == null){
-            useOwnColors = chart.compatVersion() <= 1;
+    var colorsFactory = def.get(keyArgs, 'colorScheme');
+    if(!colorsFactory){
+        if(this.index === 1){
+            var useOwnColors = options.secondAxisOwnColors;
+            if(useOwnColors == null){
+                useOwnColors = chart.compatVersion() <= 1;
+            }
+            
+            if(useOwnColors){
+                /* if secondAxisColor is unspecified, assumes default color scheme. */
+                colorsFactory = pvc.createColorScheme(options.secondAxisColor);
+            }
+        } else {
+            colorsFactory = pvc.createColorScheme(options.colors);
         }
-        
-        if(useOwnColors){
-            /* if secondAxisColor is unspecified, assumes default color scheme. */
-            colorsFactory = pvc.createColorScheme(options.secondAxisColor);
-        }
-    } else {
-        colorsFactory = pvc.createColorScheme(options.colors);
     }
     
     this.hasOwnColors = !!colorsFactory;
+    
     if(!colorsFactory){
         var color0Axis = chart.axes.color;
         // TODO: Should throw when null? Bind, below, will fail...

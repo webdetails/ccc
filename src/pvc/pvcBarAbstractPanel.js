@@ -32,7 +32,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     barWidth: null,
     barStepWidth: null,
     _linePanel: null,
-
+    showOverflowMarkers: true,
+    
     constructor: function(chart, parent, options){
         this.base(chart, parent, options);
 
@@ -103,13 +104,26 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         this.barWidth  = barWidth;
         this.barStepWidth = barStepWidth;
         
-        this.pvBarPanel = this.pvPanel.add(pv.Layout.Band)
-            .layers(rootScene.childNodes) // series -> categories
-            .values(function(seriesScene){ return seriesScene.childNodes; })
-            .orient(isVertical ? 'bottom-left' : 'left-bottom')
-            .layout(isStacked  ? 'stacked' : 'grouped')
-            .verticalMode(this._barVerticalMode())
-            .yZero(orthoZero)
+        var wrapper;
+        if(this.compatVersion() <= 1){
+            wrapper = function(v1f){
+                return function(scene){
+                    return v1f.call(this, scene.vars.value.rawValue);
+                };
+            };
+        }
+        
+        this.pvBarPanel = new pvc.visual.Panel(this, this.pvPanel, {
+                panelType:   pv.Layout.Band,
+                extensionId: 'barPanel'
+            })
+            .lock('layers', rootScene.childNodes) // series -> categories
+            .lockMark('values', function(seriesScene){ return seriesScene.childNodes; })
+            .lockMark('orient', isVertical ? 'bottom-left' : 'left-bottom')
+            .lockMark('layout', isStacked  ? 'stacked' : 'grouped')
+            .lockMark('verticalMode', this._barVerticalMode())
+            .lockMark('yZero',  orthoZero)
+            .pvMark
             .band // categories
                 .x(chart.axes.base.sceneScale({sceneVarName: 'category'}))
                 .w(bandWidth)
@@ -128,38 +142,48 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                 .verticalMargin(options.barStackedMargin || 0)
             .end
             ;
-
+        
         this.pvBar = new pvc.visual.Bar(this, this.pvBarPanel.item, {
                 extensionId: 'bar',
-                freePosition: true
+                freePosition: true,
+                wrapper:      wrapper
             })
             .lockDimensions()
             .pvMark
-            .antialias(false);
+            .antialias(false)
             ;
 
-        this._addOverflowMarkers();
+        if(this.showOverflowMarkers){
+            this._addOverflowMarkers(wrapper);
+        }
         
         if(this.showValues){
-            this.pvBarLabel = this.pvBar.anchor(this.valuesAnchor || 'center')
-                .add(pv.Label)
-                .localProperty('_valueVar')
-                ._valueVar(function(scene){
-                    return options.showValuePercentage ?
-                            scene.vars.value.percent :
-                            scene.vars.value;
+            this.pvBarLabel = new pvc.visual.Label(
+                this, 
+                this.pvBar.anchor(this.valuesAnchor || 'center'), 
+                {
+                    extensionId: ['barLabel', 'label'],
+                    wrapper:     wrapper
                 })
+                .pvMark
                 .visible(function() { //no space for text otherwise
+                    // this === pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
+                    
                     // Too small a bar to show any value?
                     return length >= 4;
                 })
-                .text(function(){
-                    return this._valueVar().label;
-                });
+                .text(function(scene){
+                    var valueVar = options.showValuePercentage ?
+                                   scene.vars.value.percent :
+                                   scene.vars.value;
+                    
+                    return valueVar.label; 
+                })
+                ;
         }
     },
-
+    
     /**
      * Called to obtain the bar verticalMode property value.
      * If it returns a function,
@@ -169,7 +193,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     _barVerticalMode: function(){
         return null;
     },
-
+    
     /**
      * Called to obtain the bar differentialControl property value.
      * If it returns a function,
@@ -181,20 +205,24 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         return null;
     },
     
+    _getV1Datum: function(scene){
+        // Ensure V1 tooltip function compatibility 
+        var datum = scene.datum;
+        if(datum){
+            var datumEx = Object.create(datum);
+            datumEx.percent = scene.vars.value.percent;
+            datum = datumEx;
+        }
+        
+        return datum;
+    },
+    
     /**
      * @override
      */
     applyExtensions: function(){
 
         this.base();
-
-        // Extend bar and barPanel
-        this.extend(this.pvBarPanel, "barPanel");
-
-        this.extend(this.pvUnderflowMarker, "barUnderflowMarker");
-        this.extend(this.pvOverflowMarker,  "barOverflowMarker");
-
-        this.extend(this.pvBarLabel, "barLabel");
         
         if(this._linePanel){
             this.extend(this._linePanel.pvLine, "barSecondLine");
@@ -202,71 +230,91 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         }
     },
     
-    _addOverflowMarkers: function(){
+    _addOverflowMarkers: function(wrapper){
         var orthoAxis = this.chart.axes.ortho;
         if(orthoAxis.option('FixedMax') != null){
-            this.pvOverflowMarker = this._addOverflowMarker(false, orthoAxis.scale);
+            this.pvOverflowMarker = this._addOverflowMarker(false, orthoAxis.scale, wrapper);
         }
 
         if(orthoAxis.option('FixedMin') != null){
-            this.pvUnderflowMarker = this._addOverflowMarker(true, orthoAxis.scale);
+            this.pvUnderflowMarker = this._addOverflowMarker(true, orthoAxis.scale, wrapper);
         }
     },
 
-    _addOverflowMarker: function(isMin, orthoScale){
+    _addOverflowMarker: function(isMin, orthoScale, wrapper){
         /* NOTE: pv.Bar is not a panel,
          * and as such markers will be children of bar's parent,
          * yet have bar's anchor as a prototype.
          */
-        // TODO - restore overflow markers asap
-//        var myself = this,
-//            isVertical = this.isOrientationVertical(),
-//            orthoProp = isVertical ? "bottom" : "left",
-//            lengthProp = myself.anchorOrthoLength(orthoProp),
-//            orthoLengthProp = myself.anchorLength(orthoProp),
-//            rOrthoBound = isMin ?
-//                        (orthoScale.min - orthoScale.offsetMin) :
-//                        (orthoScale.max + orthoScale.offsetMax),
-//        
-//            angle;
-//
-//        if(!isMin){
-//            angle = isVertical ? Math.PI: -Math.PI/2;
-//        } else {
-//            angle = isVertical ? 0: Math.PI/2;
-//        }
-//        
-//        return this.pvBar.anchor('center').add(pv.Dot)
-//            .visible(function(scene){
-//                var value = scene.vars.value.value;
-//                if(value == null){
-//                    return false;
-//                }
-//
-//                var targetInstance = this.scene.target[this.index];
-//                // Where is the position of the max of the bar??
-//                var orthoMaxPos = targetInstance[orthoProp] +
-//                                  (value > 0 ? targetInstance[lengthProp] : 0);
-//                return isMin ?
-//                        (orthoMaxPos < rOrthoBound) :
-//                        (orthoMaxPos > rOrthoBound);
-//            })
-//            .shape("triangle")
-//            .lock('shapeSize')
-//            .shapeRadius(function(){
-//                return Math.min(
-//                        Math.sqrt(10),
-//                        this.scene.target[this.index][orthoLengthProp] / 2);
-//            })
-//            .shapeAngle(angle)
-//            .lineWidth(1.5)
-//            .strokeStyle("red")
-//            .fillStyle("white")
-//            [orthoProp](function(){
-//                return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
-//            })
-//            [this.anchorOpposite(orthoProp)](null)
-//            ;
+        
+        var myself = this,
+            isVertical = this.isOrientationVertical(),
+            a_bottom = isVertical ? "bottom" : "left",
+            a_top    = this.anchorOpposite(a_bottom),
+            a_height = this.anchorOrthoLength(a_bottom),
+            a_width  = this.anchorLength(a_bottom),
+            paddings = this._layoutInfo.paddings,
+            rOrthoBound = isMin ? 
+                          (orthoScale.min - paddings[a_bottom]) : 
+                          (orthoScale.max + paddings[a_top]),
+            angle;
+
+        if(!isMin){
+            angle = isVertical ? Math.PI: -Math.PI/2;
+        } else {
+            angle = isVertical ? 0: Math.PI/2;
+        }
+        
+        return new pvc.visual.Dot(
+            this,
+            this.pvBar.anchor('center'), 
+            {
+                noSelect:      true,
+                noHover:       true,
+                noClick:       true,
+                noDoubleClick: true,
+                noTooltips:    true,
+                freePosition:  true,
+                extensionId:   isMin ? 'barUnderflowMarker' : 'barOverflowMarker',
+                wrapper:       wrapper
+            })
+            .intercept('visible', function(scene){
+                var visible = this.delegateExtension();
+                if(visible !== undefined && !visible){
+                    return false;
+                }
+                
+                var value = scene.vars.value.value;
+                if(value == null){
+                    return false;
+                }
+
+                var targetInstance = this.pvMark.scene.target[this.index];
+                
+                // Where is the position of the max of the bar?
+                var orthoMaxPos = targetInstance[a_bottom] +
+                                  (value > 0 ? targetInstance[a_height] : 0);
+                return isMin ?
+                        (orthoMaxPos < rOrthoBound) :
+                        (orthoMaxPos > rOrthoBound);
+            })
+            .lock(a_top, null)
+            .lock('shapeSize')
+            .pvMark
+            .shape("triangle")
+            .shapeRadius(function(){
+                return Math.min(
+                        Math.sqrt(10),
+                        this.scene.target[this.index][a_width] / 2);
+            })
+            .shapeAngle(angle)
+            .lineWidth(1.5)
+            .strokeStyle("red")
+            .fillStyle("white")
+            [a_bottom](function(){
+                return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
+            })
+            ;
     },
 
     /**
@@ -331,12 +379,13 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     _onNewSeriesScene: function(seriesScene, seriesData1){
         seriesScene.vars.series = new pvc.visual.ValueLabelVar(
             seriesData1.value,
-            seriesData1.label);
+            seriesData1.label,
+            seriesData1.rawValue);
     },
 
     _onNewSeriesCategoryScene: function(categScene, categData1, seriesData1){
         var categVar = categScene.vars.category = new pvc.visual.ValueLabelVar(
-            categData1.value, categData1.label);
+            categData1.value, categData1.label, categData1.rawValue);
         
         categVar.group = categData1;
         
@@ -352,7 +401,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         var valueVar = 
             categScene.vars.value = new pvc.visual.ValueLabelVar(
                                     value, 
-                                    chart._valueDim.format(value));
+                                    chart._valueDim.format(value),
+                                    value);
         
         // TODO: Percent formatting?
         if(chart.options.showValuePercentage) {

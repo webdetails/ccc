@@ -11,7 +11,7 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         var parent = this.parent;
         if(parent) {
             this._colorRole = parent._colorRole;
-            this._dotSizeRole = parent._dotSizeRole;
+            this._sizeRole = parent._sizeRole;
         }
     },
 
@@ -44,7 +44,7 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
                 //valueType: Number,
                 defaultDimensionName: isV1Compat ? 'value2' : 'value3'
             },
-            dotSize: { 
+            size: { 
                 isMeasure: true, 
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
@@ -53,17 +53,17 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
             }
         });
 
-        this._colorRole   = this.visualRoles('color');
-        this._dotSizeRole = this.visualRoles('dotSize');
+        this._colorRole = this.visualRoles('color');
+        this._sizeRole = this.visualRoles('size' );
     },
 
     _initData: function(keyArgs){
         this.base(keyArgs);
 
         // Cached
-        var dotSizeGrouping = this._dotSizeRole.grouping;
-        if(dotSizeGrouping){
-            this._dotSizeDim = this.data.dimensions(dotSizeGrouping.firstDimension.name);
+        var sizeGrouping = this._sizeRole.grouping;
+        if(sizeGrouping){
+            this._sizeDim = this.data.dimensions(sizeGrouping.firstDimension.name);
         }
 
         /* Change the legend source role */
@@ -84,6 +84,47 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         }
     },
     
+    _initAxes: function(hasMultiRole){
+        
+        this.base(hasMultiRole);
+        
+        if(!hasMultiRole || this.parent){
+            /* Create size and color axes */
+            
+            if(this.options.showDots){
+                this._addAxis(new pvc.visual.SizeAxis(this, 'size', 0));
+            }
+        }
+    },
+    
+    _bindAxes: function(hasMultiRole){
+        
+        this.base(hasMultiRole);
+        
+        if(!hasMultiRole || this.parent){
+            
+            var sizeAxis = this.axes.size;
+            if(sizeAxis && !sizeAxis.isBound() && this._sizeRole.isBound()){
+                sizeAxis.bind(this._buildRolesDataCells(this._sizeRole));
+            }
+            
+            
+        }
+    },
+    
+    _setAxesScales: function(hasMultiRole){
+        
+        this.base(hasMultiRole);
+        
+        if(!hasMultiRole || this.parent){
+            
+            var sizeAxis = this.axes.size;
+            if(sizeAxis && sizeAxis.isBound()){
+                this._createAxisScale(sizeAxis);
+            }
+        }
+    },
+    
      /**
       * @override 
       */
@@ -94,17 +135,18 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         
         var options = this.options;
         
-        return new pvc.MetricLineDotPanel(this, parentPanel, def.create(baseOptions, {
+        return (this.scatterChartPanel = new pvc.MetricLineDotPanel(this, parentPanel, def.create(baseOptions, {
             showValues:         options.showValues,
             valuesAnchor:       options.valuesAnchor,
             showLines:          options.showLines,
             showDots:           options.showDots,
             orientation:        options.orientation,
-            dotSizeRatio:       options.dotSizeRatio,
-            dotSizeRatioTo:     options.dotSizeRatioTo,
-            autoDotSizePadding: options.autoDotSizePadding,
-            dotSizeAbs:         options.dotSizeAbs
-        }));
+            
+            // Size axis
+            sizeAxisRatio:       options.sizeAxisRatio,
+            sizeAxisRatioTo:     options.sizeAxisRatioTo,
+            autoDotSizePadding: options.autoDotSizePadding
+        })));
     },
     
     defaults: def.create(pvc.MetricXYAbstract.prototype.defaults, {
@@ -115,20 +157,23 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         
         tipsySettings: { offset: 15 },
         
-        /* Dot Color Role */
+        /* Color Role */
         colorScaleType: "linear", // "discrete", "normal" (distribution) or "linear"
         colorRange: ['red', 'yellow','green'],
 //        colorRangeInterval:  undefined,
 //        minColor:  undefined, //"white",
 //        maxColor:  undefined, //"darkgreen",
-        nullColor: "#efc5ad",  // white with a shade of orange
+        nullColor: "#efc5ad"   // white with a shade of orange
          
-        /* Dot Size Role */
-        dotSizeAbs: false
-        
-//        dotSizeRatio:   undefined,
-//        dotSizeRatioTo: undefined,
-//        autoDotSizePadding: undefined
+        /* Size Role */
+//      sizeAxisUseAbs: true,
+//      sizeAxisFixedMin: undefined,
+//      sizeAxisFixedMax: undefined,
+//      sizeAxisOriginIsZero: false,
+
+//      sizeAxisRatio:   undefined,
+//      sizeAxisRatioTo: undefined,
+//      autoDotSizePadding: undefined
     })
 });
 

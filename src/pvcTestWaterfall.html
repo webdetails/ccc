@@ -64,6 +64,7 @@
         <script type="text/javascript" src="pvc/visual/CartesianAxisRootScene.js"></script>
         <script type="text/javascript" src="pvc/visual/CartesianAxisTickScene.js"></script>
         <script type="text/javascript" src="pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/SizeAxis.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
         <script type="text/javascript" src="pvc/visual/legend/BulletItemScene.js"></script>
@@ -94,10 +95,12 @@
         <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
         <script type="text/javascript" src="pvc/pvcNormalizedBarPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
         <script type="text/javascript" src="pvc/pvcWaterfallPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
         <script type="text/javascript" src="pvc/pvcLineDotAreaPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLineDotArea.js"></script>
+        <script type="text/javascript" src="pvc/pvcHeatGridPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
         <script type="text/javascript" src="pvc/pvcMetricXYAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcMetricLineDotPanel.js"></script>
@@ -106,6 +109,7 @@
         <script type="text/javascript" src="pvc/pvcParallelCoordinates.js"></script>
         <script type="text/javascript" src="pvc/pvcDataTree.js"></script>
         <script type="text/javascript" src="pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/pvcBoxplotPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
         <!-- @SCRIPTSEND@ -->
 
@@ -267,12 +271,12 @@ var wf1 = new pvc.WaterfallChart({
     showYScale: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
-
+    
     orthoAxisDomainRoundMode: 'tick',
     orthoAxisDesiredTickCount: 10,
 
     extensionPoints: {
-        //barWaterfallLine_strokeStyle: 'red',
+        barWaterfallLine_lineWidth: 2,
         xAxisLabel_textAngle:    -Math.PI/3,
         xAxisLabel_textAlign:    "right",
         xAxisLabel_textBaseline: "top",
@@ -343,7 +347,7 @@ var wf2 = new pvc.WaterfallChart({
     showYScale: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
-    
+    orthoAxisDomainRoundMode: 'tick',
     extensionPoints: {
         titleLabel_font: "16px sans-serif",         
     }});
@@ -390,10 +394,10 @@ var wf3 = new pvc.WaterfallChart({
     showYScale: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
-
+    orthoAxisDomainRoundMode: 'tick',
     extensionPoints: {
         titleLabel_font: "16px sans-serif",
-        barWaterfallLine_strokeStyle:"red"
+        barWaterfallLine_strokeStyle:"red"
     }});
 
 wf3.setData(testWaterfall_02,{
@@ -440,13 +444,14 @@ var wf4 = new pvc.WaterfallChart({
     yAxisFullGrid: true,
     xAxisEndLine: true,
     yAxisEndLine: true,
-
+    orthoAxisDomainRoundMode: 'tick',
+    
     extensionPoints: {
         titleLabel_font: "16px sans-serif",          
         barWaterfallLine_strokeStyle:"red"
     }});
 
-wf4.setData(testWaterfall_02,{
+wf4.setData(testWaterfall_02, {
     crosstabMode: true,
     seriesInRows: false
 });
@@ -455,5 +460,72 @@ wf4.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcWf4"></div>
+        
+        
+<h3>A Balance Analysis Waterfall</h3>
+This chart shows an example of how sums can be represented by a waterfall chart.<br>
+<textarea cols="55" rows="25" id="pvcWf5Code">
+var wf5 = new pvc.WaterfallChart({
+    canvas: "pvcWf5",
+    width:  500,
+    height: 400,
+    title: "Balance Analysis",
+    legend:  true,
+    legendPosition: 'right',
+    animate: false,
+    clickable:  true,
+    selectable: true,
+    hoverable:  true,
+    showValues: true,
+    orthoAxisDomainRoundMode: 'tick',
+    
+    waterDirection: 'up',
+    showWaterGroupAreas: true,
+    showWaterValues: true,
+    allCategoryLabel: "Profit",
+    //accumulatedLineLabel: "Accumulated",
+    
+    /* Visual Role mapping */
+    visualRoles: {
+        //multiChart: "territory",
+        series:           "productType",
+        category:         "accountType, accountSource",
+        value:            "value"
+    },
+
+    /* Data definition */
+    dimensions: {
+       productType:   {label: "Product Type"   },
+       accountType:   {label: "Account Type"   },
+       accountSource: {label: "Account Source" },
+       value:         {label: "Value" }
+    },
+
+    /* Data mapping */
+    readers: [
+        {names: 'productType, accountType, accountSource, value'}
+    ],
+
+    crosstabMode: true,
+    seriesInRows: false,
+    dataOptions: {categoriesCount: 2},
+    
+    extensionPoints: {
+        xAxisLabel_textAngle:    -Math.PI/3,
+        xAxisLabel_textAlign:    "right",
+        xAxisLabel_textBaseline: "top",
+        titleLabel_font: "16px sans-serif",
+        barWaterfallLine_lineWidth: 2
+    }});
+
+wf5.setData(testWaterfallBalance, {
+    crosstabMode: true,
+    seriesInRows: false
+});
+
+wf5.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcWf5"></div>
   </body>
 </html>

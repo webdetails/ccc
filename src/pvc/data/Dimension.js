@@ -373,8 +373,9 @@ def.type('pvc.data.Dimension')
      * </p>
      * 
      * @param {object} [keyArgs] Keyword arguments.
-     * See {@link #atoms} for a list of available filtering keyword arguments. 
-     *
+     * See {@link #atoms} for additional keyword arguments. 
+     * @param {boolean} [keyArgs.abs=false] Determines if the extent should consider the absolute value.
+     * 
      * @returns {object} 
      * An extent object with 'min' and 'max' properties, 
      * holding the minimum and the maximum atom, respectively,
@@ -393,9 +394,55 @@ def.type('pvc.data.Dimension')
         if(!L){ return undefined; }
         
         var offset = this._nullAtom && atoms[0].value == null ? 1 : 0;
-        return (L > offset) ?
-               {min: atoms[offset], max: atoms[L - 1]} :
-               undefined;
+        var countWithoutNull = L - offset;
+        if(countWithoutNull > 0){
+            var min = atoms[offset];
+            var max = atoms[L - 1];
+            
+            // ------------------
+            
+            if(min !== max && def.get(keyArgs, 'abs', false)){
+                var minSign = min.value < 0 ? -1 : 1;
+                var maxSign = max.value < 0 ? -1 : 1;
+                if(minSign === maxSign){
+                    if(maxSign < 0){
+                        var tmp = max;
+                        max = min;
+                        min = tmp;
+                    }
+                } else if(countWithoutNull > 1){
+                    // There's a third atom in between
+                    // min is <= 0
+                    // max is >= 0
+                    // and, of course, min !== max
+                    
+                    // One of min or max has the biggest abs value
+                    var max = max.value >= (-min.value) ?  max : min;
+                    
+                    // The smallest atom is the one in atoms that is closest to 0, possibly 0 itself
+                    var zeroIndex = def.array.insert(atoms, 0, this.type.comparer(), function(a){ return a.value; });
+                    if(zeroIndex < 0){
+                        zeroIndex = ~zeroIndex;
+                        // Not found directly. 
+                        // atoms[~zeroIndex    ] > 0
+                        // atoms[~zeroIndex - 1] < 0
+                        min = Math.min(
+                                Math.abs(atoms[zeroIndex - 1].value), 
+                                Math.abs(atoms[zeroIndex].value));
+                    } else {
+                        // Zero was found
+                        // It is the minimum
+                        min = atoms[zeroIndex];
+                    }
+                }
+            }
+            
+            // -----------------
+            
+            return {min: min, max: max};
+        }
+        
+        return undefined;
     },
     
     /**
@@ -643,16 +690,16 @@ def.type('pvc.data.Dimension')
         // - CONVERT - 
         if(!isInterpolated){
             var converter = type._converter;
-            if(converter){
-                value = converter(sourceValue);
-            } else if(typeof sourceValue === 'object' && ('v' in sourceValue)){
-                // Assume google table style cell {v: , f: }
-                value = sourceValue.v;
+            
+            // Is google table style cell {v: , f: } ?
+            if(typeof sourceValue === 'object' && ('v' in sourceValue)){
+                // Get info and get rid of the cell
                 label = sourceValue.f;
-            } else {
-                value = sourceValue;
+                sourceValue = sourceValue.v;
             }
             
+            var converter = type._converter;
+            value = converter ? converter(sourceValue) : sourceValue;
             if(value == null || value === '') {
                 // Null after all
                 return this._nullAtom || dim_createNullAtom.call(this, sourceValue);

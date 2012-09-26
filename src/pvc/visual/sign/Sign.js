@@ -7,9 +7,11 @@ def.type('pvc.visual.Sign')
     
     this.bits = 0;
     
-    var extensionId = def.get(keyArgs, 'extensionId');
-    if(extensionId != null){
-        this.extensionAbsId = panel._makeExtensionAbsId(extensionId);
+    var extensionIds = def.get(keyArgs, 'extensionId');
+    if(extensionIds != null){
+        this.extensionAbsIds = def.array.to(extensionIds).map(function(extId){
+            return panel._makeExtensionAbsId(extId);
+        });
     }
     
     this.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true) && 
@@ -43,6 +45,12 @@ def.type('pvc.visual.Sign')
     // Avoid doing a function bind, cause buildInstance is a very hot path
     pvMark.__buildInstance = pvMark.buildInstance;
     pvMark.buildInstance   = this._dispatchBuildInstance;
+    
+    if(!def.get(keyArgs, 'freeColor', true)){
+        this._interceptDynamic('fillStyle',   'fillColor'  )
+            ._interceptDynamic('strokeStyle', 'strokeColor')
+            ;
+    }
 })
 .postInit(function(panel, pvMark, keyArgs){
     
@@ -65,7 +73,7 @@ def.type('pvc.visual.Sign')
     isClickable:       function(){ return (this.bits & this._bitClickable      ) !== 0; },
     isDoubleClickable: function(){ return (this.bits & this._bitDoubleClickable) !== 0; },
     
-    extensionAbsId: null,
+    extensionAbsIds: null,
     
     _addInteractive: function(keyArgs){
         var panel   = this.panel,
@@ -172,9 +180,11 @@ def.type('pvc.visual.Sign')
         if(!this._extended){
             this._extended = true;
             
-            var extensionAbsId = this.extensionAbsId;
-            if(extensionAbsId){
-                this.panel.extendAbs(this.pvMark, extensionAbsId);
+            var extensionAbsIds = this.extensionAbsIds;
+            if(extensionAbsIds){
+                extensionAbsIds.forEach(function(extensionAbsId){
+                    this.panel.extendAbs(this.pvMark, extensionAbsId);
+                }, this);
             }
         }
         
@@ -240,15 +250,20 @@ def.type('pvc.visual.Sign')
     _intercept: function(name, fun){
         var mark = this.pvMark;
         
-        var extensionAbsId = this.extensionAbsId;
-        if(extensionAbsId){
-            var extValue = this.panel._getExtensionAbs(extensionAbsId, name);
-            if(extValue !== undefined){
+        var extensionAbsIds = this.extensionAbsIds;
+        if(extensionAbsIds){
+            def
+            .query(extensionAbsIds)
+            .select(function(extensionAbsId){ 
+                return this.panel._getExtensionAbs(extensionAbsId, name);
+             }, this)
+            .where(def.notUndef)
+            .each(function(extValue){
                 extValue = mark.wrap(extValue, name);
                 
                 // Gets set on the mark; We intercept it afterwards
                 mark.intercept(name, extValue, this._extensionKeyArgs);
-            }
+            }, this);
         }
         
         (mark._intercepted || (mark._intercepted = {}))[name] = true;
@@ -290,6 +305,14 @@ def.type('pvc.visual.Sign')
     },
     
     /* COLOR */
+    fillColor: function(){ 
+        return this.color('fill');
+    },
+    
+    strokeColor: function(){ 
+        return this.color('stroke');
+    },
+    
     color: function(type){
         var color = this.baseColor(type);
         if(color === null){
