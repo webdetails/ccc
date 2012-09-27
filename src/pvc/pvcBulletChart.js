@@ -6,7 +6,8 @@ pvc.BulletChart = pvc.BaseChart.extend({
 
     bulletChartPanel : null,
     allowNoData: true,
-
+    legendSource: null, // not supported 
+    
     constructor: function(options){
         options = options || {};
 

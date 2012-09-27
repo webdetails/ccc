@@ -190,7 +190,7 @@ def
     view: function(dimNames){
         return new pvc.data.ComplexView(this, dimNames);
     },
-
+    
     toString : function() {
        var s = [ '' + this.constructor.typeName ];
        
@@ -205,3 +205,10 @@ def
        return s.join(" ");
    }
 });
+
+pvc.data.Complex.values = function(complex, dimNames){
+    var atoms = complex.atoms;
+    return dimNames.map(function(dimName){
+        return atoms[dimName].value;
+    });
+};

@@ -77,11 +77,19 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
         if(radius != null) {
             return radius * radius;
         }
+      
+        var size = this.delegateExtension();
+        if(size === undefined){
+            size = this.defaultSize();
+        }
         
-        /* Delegate to possible Size extension or default to 12 */
-        return this.delegateExtension(12);
+        return size;
     },
 
+    defaultSize: function(){
+        return 12;
+    },
+    
     normalSize: function(size){
         return size;
     },

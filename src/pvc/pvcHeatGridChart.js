@@ -46,13 +46,13 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             switch(this.options.colorValIdx){
                 case 0:  colorDimName = 'value';  break;
                 case 1:  colorDimName = 'value2'; break;
-                default: colorDimName = undefined;
+                default: colorDimName = 'value';
             }
 
             switch(this.options.sizeValIdx){
-                case 0:  sizeDimName = 'value';  break;
+                case 0:  sizeDimName = 'value' ; break;
                 case 1:  sizeDimName = 'value2'; break;
-                default: sizeDimName = undefined;
+                default: sizeDimName = 'value' ;
             }
         }
 
@@ -158,6 +158,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         
         showPlotFrame: false,
 
+        //customTooltip: undefined, // V1 & useShapes only
+        
 //      nullShape: undefined,
 //      shape: undefined,
         useShapes: false,

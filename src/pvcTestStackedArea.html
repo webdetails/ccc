@@ -264,7 +264,9 @@ var stackedArea2 = new pvc.StackedAreaChart({
         orientation: 'vertical',
         timeSeries: true,
         timeSeriesFormat: "%Y-%m-%d",
-
+        
+        nullInterpolationMode: 'linear', // 'zero', 'none'
+        
         showValues: false,
         showLines: true,
         showDots: true,

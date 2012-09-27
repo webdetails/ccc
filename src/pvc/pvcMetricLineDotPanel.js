@@ -459,6 +459,15 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             return color;
         });
         
+        dot.override('interactiveColor', function(type, color){
+            if(type === 'stroke' && this.scene.isActive) {
+                // Don't make border brighter on active
+                return color;
+            }
+            
+            return this.base(type, color);
+        });
+        
         if(rootScene.hasColorRole){
             var colorScale = this._getColorRoleScale(data);
             
@@ -472,15 +481,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 }
                 
                 return color;
-            });
-            
-            dot.override('interactiveColor', function(type, color){
-                if(this.scene.isActive) {
-                    // Don't make border lighter on active
-                    return color;
-                }
-                
-                return this.base(type, color);
             });
         }
         

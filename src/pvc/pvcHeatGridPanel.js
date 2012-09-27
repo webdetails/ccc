@@ -182,8 +182,9 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
             keyArgs.noHover = 
             keyArgs.noClick = 
             keyArgs.noDoubleClick = 
-            keyArgs.noTooltips = 
             keyArgs.freeColor = false;
+            
+            keyArgs.noTooltips = !!wrapper; // V1 had no tooltips
         }
         
         var pvHeatGrid = this.pvHeatGrid = new pvc.visual.Panel(this, pvRowPanel, keyArgs)
@@ -224,6 +225,10 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
                 })
                 .override('interactiveColor', function(type, color){
                     var scene = this.scene;
+                    if(scene.isActive) {
+                        return color.alpha(0.6);
+                    }
+                    
                     if(scene.anySelected() && !scene.isSelected()) {
                         return this.dimColor(type, color);
                     }
@@ -234,6 +239,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
                     return pvc.toGrayScale(color, 0.6);
                 })
                 .pvMark
+                .lineWidth(1.5)
                 ;
         }
         
@@ -297,7 +303,8 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
     
     createHeatMap: function(w, h, getFillColor, wrapper){
         var myself = this,
-            data = this.chart.data,
+            chart = this.chart,
+            data = chart.data,
             sizeDimName  = this.sizeDimName,
             colorDimName = this.colorDimName,
             nullShapeType = this.nullShape,
@@ -308,7 +315,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
         var maxArea = areaRange.max;
         
         var sizeScale;
-        var sizeAxis = this.chart.axes.size;
+        var sizeAxis = chart.axes.size;
         if(sizeAxis && sizeAxis.isBound()){
             sizeScale = sizeAxis
                 .setScaleRange(areaRange)
@@ -351,15 +358,64 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
             };
         }
         
-        // Panel
-        return new pvc.visual.Dot(this, this.pvHeatGrid, {
-                freePosition: true,
-                wrapper:      wrapper,
-                noHover:      true,
-            })
+        // Dot
+        var keyArgs = {
+            freePosition: true,
+            activeSeriesAware: false,
+            noHover:      false,
+            wrapper:      wrapper
+        };
         
-            .override('size', function(){
+        var options = chart.options;
+        if(wrapper && options.showTooltips){
+            var customTooltip = options.customTooltip;
+            if(!customTooltip){
+                customTooltip = function(s,c,d){ 
+                    if(d != null && d[0] !== undefined){
+                        return d.join(', ');
+                    }
+                    return d;
+                };
+            }
+            
+            keyArgs.tooltipArgs = {
+                buildTooltip: 
+                    options.isMultiValued ?
+                    function(context){
+                        var group = context.scene.group;
+                        var s = pvc.data.Complex.values(group, chart._serRole.grouping.dimensionNames());
+                        var c = pvc.data.Complex.values(group, chart._catRole.grouping.dimensionNames());
+                        
+                        var d = [];
+                        if(sizeDimName){
+                            d[options.sizeValIdx  || 0] = context.scene.vars.size.value;
+                        }
+                        if(colorDimName){
+                            d[options.colorValIdx || 0] = context.scene.vars.color.value;
+                        }
+                        
+                        return customTooltip.call(options, s, c, d);
+                    } : 
+                    function(context){
+                        var s = context.scene.vars.series.rawValue;
+                        var c = context.scene.vars.category.rawValue;
+                        var valueVar = context.scene.vars[colorDimName ? 'color' : 'size'];
+                        var d = valueVar ? valueVar.value : null;
+                        return customTooltip.call(options, s, c, d);
+                    }
+            };
+        }
+        
+        return new pvc.visual.Dot(this, this.pvHeatGrid, keyArgs)
+            .override('defaultSize', function(){
                 return getShapeSize.call(this.pvMark, this.scene);
+            })
+            .override('interactiveSize', function(size){
+                if(this.scene.isActive){
+                    return Math.max(size, 5) * 1.5;
+                }
+                
+                return size;
             })
             .override('baseColor', function(type){
                 return getFillColor.call(this.pvMark.parent, this.scene);
@@ -373,8 +429,17 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
             })
             .override('interactiveColor', function(type, color){
                 var scene = this.scene;
+                
                 if(type === 'stroke'){
-                    return scene.isSelected() ? color.darker() : color;
+                    if(scene.anySelected() && !scene.isSelected()){
+                        return color;
+                    }
+                    
+                    return color.darker();
+                }
+                
+                if(scene.isActive){
+                    return color.alpha(0.6);
                 }
                 
                 return this.base(type, color);

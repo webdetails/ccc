@@ -417,7 +417,9 @@ def.type('pvc.data.Dimension')
                     // and, of course, min !== max
                     
                     // One of min or max has the biggest abs value
-                    var max = max.value >= (-min.value) ?  max : min;
+                    if(max.value < -min.value){
+                        max = min;
+                    }
                     
                     // The smallest atom is the one in atoms that is closest to 0, possibly 0 itself
                     var zeroIndex = def.array.binarySearch(atoms, 0, this.type.comparer(), function(a){ return a.value; });
@@ -426,7 +428,7 @@ def.type('pvc.data.Dimension')
                         // Not found directly. 
                         var negAtom = atoms[zeroIndex - 1];
                         var posAtom = atoms[zeroIndex];
-                        if(-negAtom.value < posAtom){
+                        if(-negAtom.value < posAtom.value){
                             min = negAtom;
                         } else {
                             min = posAtom;
@@ -436,7 +438,7 @@ def.type('pvc.data.Dimension')
                         // It is the minimum
                         min = atoms[zeroIndex];
                     }
-                } else if(max.value < (-min.value)){
+                } else if(max.value < -min.value){
                     // min is <= 0
                     // max is >= 0
                     // and, of course, min !== max

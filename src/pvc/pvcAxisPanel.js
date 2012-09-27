@@ -693,7 +693,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .pvMark
             .zOrder(30)
             .strokeDasharray(null) // don't inherit from parent panel
-            .lineCap('square')     // So that begin/end ticks better join with the rule 
+            .lineCap('square')     // So that begin/end ticks better join with the rule
             ;
 
         if (this.isDiscrete){

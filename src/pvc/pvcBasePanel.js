@@ -1273,8 +1273,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         var myself = this;
         var options = this.chart.options;
-        var isV1Compat = this.compatVersion() <= 1;
-        
+
         var tipsySettings;
         var nowTipsySettings = def.get(keyArgs, 'tipsySettings');
         if(nowTipsySettings){
@@ -1437,10 +1436,14 @@ pvc.BasePanel = pvc.Abstract.extend({
             return chart.options.percentValueFormat.call(null, pct);
         }
         
+        var anyCommonAtom = false;
+        
         def.each(commonAtoms, function(atom, dimName){
             var dimType = atom.dimension.type;
             if(!dimType.isHidden){
                 if(!isMultiDatumGroup || atom.value != null) {
+                    anyCommonAtom = true;
+                    
                     var valueLabel = atom.label;
                     if(playingPercentMap && playingPercentMap.has(dimName)) {
                         valueLabel += " (" + calcPercent(atom, dimName) + ")";
@@ -1452,7 +1455,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         });
         
         if(isMultiDatumGroup) {
-            tooltip.push('<hr />');
+            if(anyCommonAtom){
+                tooltip.push('<hr />');
+            }
+            
             tooltip.push("<b>#</b>: " + group._datums.length + '<br/>');
             
             group.freeDimensionNames().forEach(function(dimName){

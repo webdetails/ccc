@@ -333,7 +333,20 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                 extensionId: 'pie',
                 center: center,
                 activeOffsetRadius: layoutInfo.activeOffsetRadius,
-                wrapper: wrapper
+                wrapper: wrapper,
+                tooltipArgs:   {
+                    tipsySettings: {
+                        corners: true,
+                        gravity: function(){
+                            var isRightPlane = Math.cos(this.midAngle()) >= 0;
+                            var isTopPlane   = Math.sin(this.midAngle()) >= 0;
+                            return  isRightPlane ?
+                                    (isTopPlane ? 'nw' : 'sw') :
+                                    (isTopPlane ? 'ne' : 'se')
+                                    ;
+                        }
+                    }
+                }
             })
             
             .lock('data', rootScene.childNodes)
@@ -376,12 +389,8 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             if(this.labelStyle === 'inside'){
                 
                 this.pvPieLabel = new pvc.visual.Label(this, this.pvPie.anchor("outer"), {
-                        extensionId:   'pieLabel',
-                        noClick:       false,
-                        noDoubleClick: false,
-                        noSelect:      false,
-                        noHover:       false,
-                        wrapper:       wrapper
+                        extensionId: 'pieLabel',
+                        wrapper:     wrapper
                     })
                     .intercept('visible', function(scene){
                         var angle = scene.vars.value.angle;

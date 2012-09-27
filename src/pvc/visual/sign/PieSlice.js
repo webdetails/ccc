@@ -21,7 +21,6 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     var pvMark = protoMark.add(pv.PieSlice);
     
     keyArgs = def.setDefaults(keyArgs, 'freeColor', false);
-    this.base(panel, pvMark, keyArgs);
     
     this.base(panel, pvMark, keyArgs);
     
