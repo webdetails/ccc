@@ -1697,19 +1697,46 @@ pvc.BasePanel = pvc.Abstract.extend({
             toScreen,
             rb;
         
-        var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
-            .visible(function() { return !!rb; } )
-            .left(function() { return rb.x; })
-            .top(function() { return rb.y; })
-            .width(function() { return rb.dx; })
-            .height(function() { return rb.dy; })
-            .fillStyle(options.rubberBandFill)
-            .strokeStyle(options.rubberBandLine);
+        var selectBar = 
+            this.selectBar = 
+            new pvc.visual.Bar(this, rubberPvParentPanel, {
+                extensionId:   'rubberBand',
+                noHover:       true,
+                noSelect:      true,
+                noClick:       true,
+                noDoubleClick: true,
+                noTooltips:    true
+            })
+            .override('strokeWidth', function(){
+                return this.delegateExtension(1.5);
+            })
+            .override('color', function(type){
+                var color = this.delegateExtension();
+                if(color === undefined){
+                    return options[type === 'stroke' ? 'rubberBandLine' : 'rubberBandFill']; 
+                }
+                return color;
+            })
+            //.override('defaultStrokeWidth', def.fun.constant(1.5))
+            .pvMark
+            .lock('data', [new pvc.visual.Scene(null, {panel: this})])
+            .lock('visible', function() { return !!rb;  })
+            .lock('left',    function() { return rb.x;  })
+            .lock('right')
+            .lock('top',     function() { return rb.y;  })
+            .lock('bottom')
+            .lock('width',   function() { return rb.dx; })
+            .lock('height',  function() { return rb.dy; })
+            .lock('cursor')
+            .lock('events', 'none')
+            ;
         
         // Rubber band selection behavior definition
-        if(!this._getExtensionAbs('base', 'fillStyle')){
-            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
-        }
+//        if(!this._getExtensionAbs('base', 'fillStyle')){
+//            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+//        }
+        // Require all events, wether it's painted or not
+        rubberPvParentPanel.events('all');
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
