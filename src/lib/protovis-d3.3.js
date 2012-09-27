@@ -15029,7 +15029,8 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, invertDir, items
                 yOffset -= h;
             }
             
-            item.h -= vertiMargin; // may become < 0
+            var h2 = item.h - vertiMargin;
+            item.h = h2 > 0 ? h2 : 0;
             item.x = bx - item.w / 2;
         } else {
             existsOtherDir = true;

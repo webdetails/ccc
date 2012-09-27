@@ -376,8 +376,8 @@ To draw a stacked bar just set the stacked property to true. To a better underst
 <textarea cols="55" rows="15" id="pvcBar3Code">
 var bar3 = new pvc.BarChart({
     canvas: "pvcBar3",
-    width: 400,
-    height: 250,
+    width:  600,
+    height: 300,
     title: "Stacked Bar Chart",
     orientation: 'vertical',
     stacked: true,
@@ -389,10 +389,14 @@ var bar3 = new pvc.BarChart({
     legend:true,
     legendPosition:"right",
     orthoAxisFixedMax: 130,
+    barStackedMargin:  3,
     extensionPoints: {
-    	xAxisLabel_textAngle: -1,
-    	xAxisLabel_textAlign: "right",
-    	xAxisLabel_textBaseline: "top"
+        xAxisLabel_textAngle: -1,
+        xAxisLabel_textAlign: "right",
+        xAxisLabel_textBaseline: "top",
+        rubberBand_strokeStyle: 'rgb(0,0,240)',
+        rubberBand_fillStyle: 'rgba(0,0,255, 0.5)',
+        rubberBand_lineWidth: 2.5
     }
 });
 
