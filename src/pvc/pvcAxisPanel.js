@@ -22,7 +22,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     scale: null,
     ruleCrossesMargin: true,
     font: '9px sans-serif', // label font
-    labelSpacingMin: 1,
+    labelSpacingMin: null,
     // To be used in linear scales
     domainRoundMode: 'none',
     desiredTickCount: null,
@@ -57,6 +57,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.roleName = axis.role.name;
         this.isDiscrete = axis.role.grouping.isDiscrete();
         
+        if(this.labelSpacingMin == null){ 
+            // The user tolerance for "missing" stuff is much smaller with discrete stuff
+            this.labelSpacingMin = this.isDiscrete ? 0 : 1.5; // em
+        }
+
         if(options.font === undefined){
             var extFont = this._getConstantExtension('label', 'font');
             if(extFont){
@@ -102,10 +107,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 layoutInfo.axisSize = 50;
             }
         } else {
+            layoutInfo.textAngle  = def.number.as(this._getExtension('label', 'textAngle'),  0);
+            layoutInfo.textMargin = def.number.as(this._getExtension('label', 'textMargin'), 3);
+            
             /* I  - Calculate ticks
              * --> layoutInfo.{ ticks, ticksText, maxTextWidth } 
              */
             this._calcTicks();
+            
+            if(this.scale.type === 'Discrete'){
+                this._calcDiscreteTicksHidden();
+            }
             
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
             if(layoutInfo.axisSize == null){
@@ -160,16 +172,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }
         } 
         
-        var angle  = def.number.as(this._getExtension('label', 'textAngle'),  0);
-        var margin = def.number.as(this._getExtension('label', 'textMargin'), 3);
-        
         layoutInfo.labelBBox = pvc.text.getLabelBBox(
                         layoutInfo.maxTextWidth, 
                         layoutInfo.textHeight, 
                         align, 
                         baseline, 
-                        angle, 
-                        margin);
+                        layoutInfo.textAngle, 
+                        layoutInfo.textMargin);
     },
     
     _calcAxisSizeFromLabelBBox: function(){
@@ -411,6 +420,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         this.axis.setTicks(layoutInfo.ticks);
         
+        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        this.axis.setScaleRange(clientLength);
+        
         if(layoutInfo.maxTextWidth == null){
             layoutInfo.maxTextWidth = 
                 def.query(layoutInfo.ticksText)
@@ -483,6 +495,102 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     // --------------
     
+    _calcDiscreteTicksHidden: function(){
+        return this._tickIncludeModulo = this._calcDiscreteTicksHiddenCore();
+    },
+    
+    _calcDiscreteTicksHiddenCore: function(){
+        var mode = this.axis.option('OverlappedLabelsMode');
+        if(!mode){
+            mode = this.compatVersion() <= 1 ? 'leave' : 'hide';
+        }
+        
+        if(mode !== 'hide'){
+            return 1;
+        }
+        
+        var layoutInfo = this._layoutInfo;
+        var ticks = layoutInfo.ticks;
+        var tickCount = ticks.length;
+        if(tickCount <= 1) {
+            return 1;
+        }
+        
+        // Calculate includeModulo depending on labelSpacingMin
+            
+        // scale is already setup
+        
+        // How much label anchors are separated from each other
+        // (in the direction of the axis)
+        var b = this.scale.range().band;
+        
+        // Height of label box
+        var h = layoutInfo.textHeight;
+        
+        // Width of label box
+        var w = layoutInfo.maxTextWidth;  // Should use the average value?
+        
+        if(!(w > 0 && h > 0 && b > 0)){
+            return 1;
+        }
+        
+        // Diagonal length of the text box
+        var d = Math.sqrt(w*w + h*h);
+        if(b >= d){
+            // In the text direction line 
+            //  there's no intersection of the projections
+            //  of both bounding boxes,
+            //  so distance between bounding box edges doesn't matter so much 
+            // Also, for any text angle, label boxes never intersect.
+            return 1;
+        }
+        
+        // Minimum space that the user wants separating 
+        // the closest edges of the bounding boxes of two consecutive labels, 
+        // measured perpendicularly to the label text direction.
+        var sMin = h * this.labelSpacingMin /* parameter in em */;
+        
+        // The angle that the text makes to the x axis (clockwise,y points downwards) 
+        var a = layoutInfo.textAngle;
+        
+        var sinOrCos = this.isAnchorTopOrBottom() ? 'sin' : 'cos';
+        
+        var tickIncludeModulo = 1;
+        do{
+            // Effective distance between anchors,
+            // that results from showing only 
+            // one in every 'tickIncludeModulo' ticks.
+            var bEf = tickIncludeModulo * b;
+            
+            // Same applies here (see explanation above)
+            if(bEf >= d){ // repeated test on first time...
+                break;
+            }
+            
+            // The space that separates
+            // the closest edges of the bounding boxes of two 
+            // consecutive (not skipped) labels. 
+            var s = bEf * Math.abs(Math[sinOrCos](a)) - h;
+            // When s < 0, there is superposition
+            if(s >= sMin){
+                break;
+            }
+            
+            // Hide one more tick
+            tickIncludeModulo++;
+            
+            // Are there still at least two ticks left?
+        } while(Math.ceil(tickCount / tickIncludeModulo) > 1);
+        
+        if(tickIncludeModulo > 1 && pvc.debug >= 3){
+            pvc.log("Showing only one in every " + tickIncludeModulo + " tick labels in axis " + this.panelName);
+        }
+        
+        return tickIncludeModulo;
+    },
+    
+    // --------------
+    
     _calcNumberVDesiredTickCount: function(){
         var layoutInfo = this._layoutInfo;
         var lineHeight = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
@@ -494,7 +602,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     _calcNumberHTicks: function(){
         var layoutInfo = this._layoutInfo;
         var clientLength = layoutInfo.clientSize[this.anchorLength()];
-        var spacing = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin/*em*/));
+        var spacing = layoutInfo.textHeight * Math.max(0, this.labelSpacingMin/*em*/);
         var desiredTickCount = this._calcNumberHDesiredTickCount(this, spacing);
         
         var doLog = (pvc.debug >= 7);
@@ -642,11 +750,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 length += spacing;
             }
             
+            // Begin and end ticks
             if(!t ||  t === tickCount - 1) {
                 // Include half the text size only, as centered labels are the most common scenario
                 length += textLength / 2;
             } else {
-                // Middle tick
+                // Middle ticks
                 length += textLength;
             }
         }
@@ -825,23 +934,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             data              = layoutInfo.data,
             itemCount         = layoutInfo.ticks.length,
             rootScene         = this._getRootScene(),
-            includeModulo;
-        
-        if(this.axis.option('OverlappedLabelsHide') && itemCount > 0 && this._rSize > 0) {
-            var overlapFactor = def.between(this.axis.option('OverlappedLabelsMaxPct'), 0, 0.9);
-            var textHeight    = pvc.text.getTextHeight("m", this.font) * (1 - overlapFactor);
-            includeModulo = Math.max(1, Math.ceil((itemCount * textHeight) / this._rSize));
+            includeModulo     = this._tickIncludeModulo;
 
-            if(pvc.debug >= 4){
-                pvc.log({overlapFactor: overlapFactor, itemCount: itemCount, textHeight: textHeight, Size: this._rSize, modulo: (itemCount * textHeight) / this._rSize, itemSpan: itemCount * textHeight, itemAvailSpace: this._rSize / itemCount});
-            }
-            
-            if(pvc.debug >= 3 && includeModulo > 1) {
-                pvc.log("Hiding every " + includeModulo + " labels in axis " + this.panelName);
-            }
-        } else {
-            includeModulo = 1;
-        }
+        rootScene.vars.tickIncludeModulo = includeModulo;
         
         var wrapper;
         if(this.compatVersion() <= 1){

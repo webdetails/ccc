@@ -410,6 +410,26 @@ pvc.parseShape = function(shape){
     return shape;
 };
 
+pvc.parseOverlappedLabelsMode = function(mode){
+    if(mode){
+        switch(mode){
+            case 'leave':
+            case 'hide':
+                break;
+            
+            default:
+                if(pvc.debug >= 2){
+                    pvc.log("[Warning] Invalid 'OverlappedLabelsMode' option value: '" + mode + "'.");
+                }
+            
+                mode = null;
+                break;
+        }
+    }
+    
+    return mode;
+};
+
 pvc.parseAlign = function(side, align){
     var align2, isInvalid;
     if(side === 'left' || side === 'right'){

@@ -414,22 +414,16 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
         cast: Number2
     },
     
+    // em
     LabelSpacingMin: {
         resolve: resolveNormal,
-        cast:    Number2,
-        value:   1 // em
+        cast:    Number2
     },
     
-    OverlappedLabelsHide: {
+    // For discrete axis
+    OverlappedLabelsMode: {
         resolve: resolveNormal,
-        cast:    Boolean,
-        value:   false 
-    },
-    
-    OverlappedLabelsMaxPct: {
-        resolve: resolveNormal,
-        cast:    Number2,
-        value:   0.2
+        cast:    pvc.parseOverlappedLabelsMode
     },
     
     /* RULES */

@@ -250,7 +250,7 @@ For drawing a very simple bar chart, just provide the data and set the orientati
 var bar1 = new pvc.BarChart({
     canvas: "pvcBar1",
     width: 400,
-    height: 250,
+    height: 300,
     title: "Sample Bar chart",
     orientation: 'horizontal',
     animate:false,
@@ -259,9 +259,9 @@ var bar1 = new pvc.BarChart({
     orthoAxisFixedMax: 60,
     //yAxisFullGrid: true,
     extensionPoints: {
+        bar_fillStyle: 'linear-gradient(90deg, red, yellow 20%, green, blue)'
     //  yAxisTicks_strokeStyle: "black"
     //  bar_fillStyle: 'linear-gradient(red, rgb(0,0,255))'
-    //  bar_fillStyle: 'linear-gradient(90deg, red, yellow 20%, green, blue)'
     //  bar_fillStyle: 'linear-gradient(to bottom left, red, yellow 20%, green, blue)'
     //  bar_fillStyle: 'radial-gradient(red, yellow 20%, green, blue)'
     }
@@ -391,9 +391,10 @@ var bar3 = new pvc.BarChart({
     orthoAxisFixedMax: 130,
     barStackedMargin:  3,
     extensionPoints: {
-        xAxisLabel_textAngle: -1,
-        xAxisLabel_textAlign: "right",
-        xAxisLabel_textBaseline: "top",
+        xAxisLabel_textAngle: 0,
+        xAxisLabel_textAlign: 'center',
+        xAxisLabel_textBaseline: 'top',
+        xAxisTicks_strokeStyle: 'gray',
         rubberBand_strokeStyle: 'rgb(0,0,240)',
         rubberBand_fillStyle: 'rgba(0,0,255, 0.5)',
         rubberBand_lineWidth: 2.5
