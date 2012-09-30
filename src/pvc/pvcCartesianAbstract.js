@@ -207,7 +207,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 zeroLine:          axis.option('ZeroLine'),
                 domainRoundMode:   axis.option('DomainRoundMode'),
                 desiredTickCount:  axis.option('DesiredTickCount'),
-                minorTicks:        axis.option('MinorTicks'),
+                showTicks:         axis.option('Ticks'),
+                showMinorTicks:    axis.option('MinorTicks'),
                 clickAction:       axis.option('ClickAction'),
                 doubleClickAction: axis.option('DoubleClickAction')
             });

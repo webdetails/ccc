@@ -184,7 +184,7 @@ def.scope(function(){
             tr = tr.rotate(angle);
         }
         
-        return new pvc.Polygon([bl, br, tl, tr]);
+        return new pvc.Polygon([bl, br, tr, tl]);
     }
     
     /* Returns a label's BBox relative to its anchor point */
@@ -194,7 +194,7 @@ def.scope(function(){
         var corners = polygon.corners();
         var bbox;
         if(angle === 0){
-            var min = corners[2]; // topLeft
+            var min = corners[3]; // topLeft
             var max = corners[1]; // bottomRight
             
             bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
@@ -202,6 +202,7 @@ def.scope(function(){
             bbox = polygon.bbox();
         }
         
+        bbox.sourcePolygon   = polygon;
         bbox.sourceCorners   = corners;
         bbox.sourceAngle     = angle;
         bbox.sourceAlign     = align;

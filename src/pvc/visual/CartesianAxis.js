@@ -453,6 +453,10 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
     },
     
     /* TICKS */
+    Ticks: {
+        resolve: resolveNormal,
+        cast:    Boolean2
+    },
     DesiredTickCount: {
         resolve: resolveNormal,
         cast: Number2
@@ -512,6 +516,14 @@ function Number2(value) {
         if(isNaN(value)) {
             value = null;
         }
+    }
+    
+    return value;
+}
+
+function Boolean2(value) {
+    if(value != null) {
+        value = !!value;
     }
     
     return value;

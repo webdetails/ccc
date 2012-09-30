@@ -28,7 +28,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     desiredTickCount: null,
     tickExponentMin:  null,
     tickExponentMax:  null,
-    minorTicks:       true,
+    showMinorTicks:   true,
+    showTicks:        null,
+    
+    // bullet:       "\u2022"
+    // middle-point: "\u00B7"
+    // this.isAnchorTopOrBottom() ? ".." : ":"
+    hiddenLabelText: "\u00B7",
     
     _isScaleSetup: false,
     
@@ -38,14 +44,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             anchor: axis.option('Position')
         });
         
+        var anchor = options.anchor || this.anchor;
+        
         // sizeMax
         if(options.sizeMax == null){
             var sizeMax = options.axisSizeMax;
             if(sizeMax != null){
                 // Single size (a number or a string with only one number)
                 // should be interpreted as meaning the orthogonal length.
-                var anchor = options.anchor || this.anchor;
-                
                 options.sizeMax = new pvc.Size()
                                     .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
             }
@@ -57,15 +63,27 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.roleName = axis.role.name;
         this.isDiscrete = axis.role.grouping.isDiscrete();
         
-        if(this.labelSpacingMin == null){ 
+        if(this.labelSpacingMin == null){
             // The user tolerance for "missing" stuff is much smaller with discrete stuff
             this.labelSpacingMin = this.isDiscrete ? 0 : 1.5; // em
+        }
+        
+        if(this.showTicks == null){
+            this.showTicks = !this.isDiscrete;
         }
 
         if(options.font === undefined){
             var extFont = this._getConstantExtension('label', 'font');
             if(extFont){
                 this.font = extFont;
+            }
+        }
+        
+        if(options.tickLength === undefined){
+            // height or width
+            var tickLength = +this._getConstantExtension('ticks', this.anchorOrthoLength(anchor)); 
+            if(!isNaN(tickLength) && isFinite(tickLength)){
+                this.tickLength = tickLength;
             }
         }
     },
@@ -132,7 +150,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this._calcOverflowPaddings();
             
             // Release memory.
-            layoutInfo.labelBBox = null;
+            if(pvc.debug < 25){
+                layoutInfo.labelBBox = null;
+            } // else keep this to draw the debug paths around the labels
         }
     },
     
@@ -357,8 +377,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var corners = labelBBox.sourceCorners;
             var botL = corners[0];
             var botR = corners[1];
-            var topL = corners[2];
-            var topR = corners[3];
+            var topR = corners[2];
+            var topL = corners[3];
             
             var topRLSideDir = topR.minus(topL);
             var botRLSideDir = botR.minus(botL);
@@ -534,17 +554,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             return 1;
         }
         
-        // Diagonal length of the text box
-        var d = Math.sqrt(w*w + h*h);
-        if(b >= d){
-            // In the text direction line 
-            //  there's no intersection of the projections
-            //  of both bounding boxes,
-            //  so distance between bounding box edges doesn't matter so much 
-            // Also, for any text angle, label boxes never intersect.
-            return 1;
-        }
-        
         // Minimum space that the user wants separating 
         // the closest edges of the bounding boxes of two consecutive labels, 
         // measured perpendicularly to the label text direction.
@@ -553,7 +562,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // The angle that the text makes to the x axis (clockwise,y points downwards) 
         var a = layoutInfo.textAngle;
         
-        var sinOrCos = this.isAnchorTopOrBottom() ? 'sin' : 'cos';
+        var isTopOrBottom = this.isAnchorTopOrBottom();
+        var sinOrCos =  isTopOrBottom ? 'sin' : 'cos';
+        var cosOrSin = !isTopOrBottom ? 'sin' : 'cos';
         
         var tickIncludeModulo = 1;
         do{
@@ -562,17 +573,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // one in every 'tickIncludeModulo' ticks.
             var bEf = tickIncludeModulo * b;
             
-            // Same applies here (see explanation above)
-            if(bEf >= d){ // repeated test on first time...
-                break;
-            }
+            // The space that separates the closest edges, 
+            // that are parallel to the text direction,
+            // of the bounding boxes of 
+            // two consecutive (not skipped) labels. 
+            var sBase  = bEf * Math.abs(Math[sinOrCos](a)) - h;
             
-            // The space that separates
-            // the closest edges of the bounding boxes of two 
-            // consecutive (not skipped) labels. 
-            var s = bEf * Math.abs(Math[sinOrCos](a)) - h;
-            // When s < 0, there is superposition
-            if(s >= sMin){
+            // The same, for the edges orthogonal to the text direction
+            var sOrtho = bEf * Math.abs(Math[cosOrSin](a)) - w;
+            
+            // At least one of this distances must respect sMin
+            if(sBase >= sMin || sOrtho >= sMin){
                 break;
             }
             
@@ -770,8 +781,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             return;
         }
         
-        //this.pvPanel.strokeStyle('orange');
-        
         // Range
         var clientSize = this._layoutInfo.clientSize;
         var paddings   = this._layoutInfo.paddings;
@@ -925,11 +934,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderOrdinalAxis: function(){
         var myself = this,
             scale = this.scale,
+            hiddenLabelText   = this.hiddenLabelText,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
             layoutInfo        = this._layoutInfo,
+            pvRule            = this.pvRule,
             ticks             = layoutInfo.ticks,
             data              = layoutInfo.data,
             itemCount         = layoutInfo.ticks.length,
@@ -937,40 +948,102 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             includeModulo     = this._tickIncludeModulo;
 
         rootScene.vars.tickIncludeModulo = includeModulo;
+        rootScene.vars.hiddenLabelText   = hiddenLabelText;
         
         var wrapper;
         if(this.compatVersion() <= 1){
+            // For use in child marks of pvTicksPanel
             wrapper = function(v1f){
                 return function(tickScene){
-                    return v1f.call(this, tickScene.vars.tick.rawValue);
+                    // Fix index due to the introduction of 
+                    // pvTicksPanel panel.
+                    var markWrapped = Object.create(this);
+                    markWrapped.index = this.parent.index;
+                    
+                    return v1f.call(markWrapped, tickScene.vars.tick.rawValue);
                 };
             };
         }
         
         // Ticks correspond to each data in datas.
         // Ticks are drawn at the center of each band.
-        var pvTicks = this.pvTicks = new pvc.visual.Rule(this, this.pvRule, {
-                extensionId: 'ticks',
-                wrapper:  wrapper
+        
+        var pvTicksPanel = new pvc.visual.Panel(this, this.pvPanel, {
+                extensionId: 'ticksPanel'
             })
             .lock('data', rootScene.childNodes)
+            // This non-extendable property stores
+            //  if the tick would be hidden by
+            //  virtue of the includeModulo effect.
+            .localProperty('hidden')
+            .lockMark('hidden', function(){ // for use by
+                return !!(this.index % includeModulo);
+            })
             .lock(anchorOpposite, 0) // top (of the axis panel)
-            .lock(anchorLength,   null)
             .lockMark(anchorOrtho, function(tickScene){
                 return scale(tickScene.vars.tick.value);
             })
-            // Transparent by default, but changeable with extension point)
-            .override('defaultColor', function(type){
-                return pv.Color.names.transparent;
-            })
+            .lock('strokeDasharray', null)
+            .lock('strokeStyle', null)
+            .lock('fillStyle',   null)
+            .lock('lineWidth',   0)
             .pvMark
-            .zOrder(20)
-            [anchorOrthoLength](this.tickLength)
+            .zOrder(20) // below axis rule
             ;
         
-        var align = this.isAnchorTopOrBottom() ? 
-                    "center" : 
-                    (this.anchor == "left") ? "right" : "left";
+        if(this.showTicks){
+            var pvTicks = this.pvTicks = new pvc.visual.Rule(this, pvTicksPanel, {
+                    extensionId: 'ticks',
+                    wrapper:  wrapper
+                })
+                .lock('data')            // Inherited    
+                // By default is visible unless the includeModulo hides it
+                .intercept('visible', function(){
+                    var visible = this.delegateExtension();
+                    if(visible === undefined){
+                        visible = !this.pvMark.parent.hidden();
+                    }
+                    return visible;
+                })
+                .optional('lineWidth', 1)
+                .lock(anchorOpposite,  0) // top
+                .lock(anchorOrtho,     0) // left
+                .lock(anchorLength,    null)
+                .optional(anchorOrthoLength, this.tickLength * 2/3) // slightly smaller than continuous ticks
+                .override('defaultColor', function(type){
+                    // Inherit ticks color
+                    // Control visibility through .visible or lineWidth
+                    return pvRule.scene ? 
+                           pvRule.scene[0].strokeStyle : 
+                           pv.Color.names.black;
+                })
+                .pvMark
+                ;
+        }
+        
+        // Determine anchored text properties
+        var baseline;
+        var align;
+        switch(this.anchor){
+            case 'top':
+                align = 'center';
+                baseline = 'bottom';
+                break;
+                
+            case 'bottom':
+                align = 'center';
+                baseline = 'top';
+                break;
+                
+            case 'left': 
+                align = 'right';
+                baseline = 'middle';
+                break;
+            case 'right': 
+                align = 'left';
+                baseline = 'middle';
+                break;
+        }
         
         var font = this.font;
         
@@ -979,10 +1052,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             maxTextWidth = 0;
         }
         
-        // All ordinal labels are relevant and must be visible
-        var pvLabelAnchor = this.pvTicks.anchor(this.anchor);
-        
-        this.pvLabel = new pvc.visual.Label(this, pvLabelAnchor, {
+        // An pv anchor on pvTick is not used, on purpose,
+        // cause if it were, hidding the tick with .visible,
+        // would mess the positioning of the label...
+        this.pvLabel = new pvc.visual.Label(
+            this,
+            pvTicksPanel,
+            {
                 extensionId: 'label',
                 noClick:       false,
                 noDoubleClick: false,
@@ -1000,27 +1076,69 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     }
                 }
             })
-            .intercept('visible', function(){
-                var index  = this.index;
-                return ((index % includeModulo) === 0) && 
-                       (!pvTicks.scene || pvTicks.scene[index].visible) &&
-                       this.delegateExtension(true)
-                       ;
-            })
             .pvMark
-            .zOrder(40)
+            .zOrder(40) // above axis rule
+            
+            .lock(anchorOpposite, this.tickLength)
+            .lock(anchorOrtho,    0)
+            
+            .font(font)
+            
             .textAlign(align)
+            .textBaseline(baseline)
+            
             .text(function(tickScene){
-                var text = tickScene.vars.tick.label;
-                if(maxTextWidth){
-                    text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
+                var text;
+                if(this.parent.hidden()){
+                    text = tickScene.vars.hiddenLabelText;
+                } else {
+                    text = tickScene.vars.tick.label;
+                    if(maxTextWidth){
+                        text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", true);
+                    }
                 }
+                
                 return text;
              })
-            .font(font)
             ;
+        
+        this._debugTicksPanel(pvTicksPanel);
     },
-
+    
+    _debugTicksPanel: function(pvTicksPanel){
+        if(pvc.debug >= 16){ // one more than general debug box model
+            var corners = this._layoutInfo.labelBBox.sourceCorners;
+            // Close the path
+            if(corners.length > 1){
+                // not changing corners on purpose
+                corners = corners.concat(corners[0]);
+            }
+            
+            pvTicksPanel
+                // Single-point panel (w=h=0)
+                .add(pv.Panel)
+                    [this.anchorOpposite()](this.tickLength)
+                    [this.anchorOrtho()](0)
+                    [this.anchorLength()](0)
+                    [this.anchorOrthoLength()](0)
+                    .fillStyle(null)
+                    .strokeStyle(null)
+                    .lineWidth(0)
+                 .add(pv.Line)
+                    .visible(function(){
+                        var gp = this.parent.parent;
+                        return !gp.hidden || !gp.hidden(); 
+                     })
+                    .data(corners)
+                    .left(function(p){ return p.x; })
+                    .top (function(p){ return p.y; })
+                    .strokeStyle('red')
+                    .lineWidth(0.5)
+                    .strokeDasharray('-')
+                    ;
+        }
+    },
+    
     renderLinearAxis: function(){
         // NOTE: Includes time series, 
         // so "tickScene.vars.tick.value" may be a number or a Date object...
@@ -1028,10 +1146,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var scale  = this.scale,
             orthoAxis  = this._getOrthoAxis(),
             orthoScale = orthoAxis.scale,
-            layoutInfo = this._layoutInfo,
-            ticks      = layoutInfo.ticks,
-            tickCount  = ticks.length,
-            tickStep   = tickCount > 1 ? Math.abs(ticks[1] - ticks[0]) : 0,
+            pvRule     = this.pvRule,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
@@ -1042,70 +1157,98 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         if(this.compatVersion() <= 1){
             wrapper = function(v1f){
                 return function(tickScene){
-                    return v1f.call(this, tickScene.vars.tick.value);
+                    // Fix index due to the introduction of 
+                    // pvTicksPanel panel.
+                    var markWrapped = Object.create(this);
+                    markWrapped.index = this.parent.index;
+                    
+                    return v1f.call(markWrapped, tickScene.vars.tick.rawValue);
                 };
             };
         }
         
-        // (MAJOR) ticks
-        var pvTicks = this.pvTicks = new pvc.visual.Rule(this, this.pvRule, {
-                extensionId: 'ticks',
-                wrapper: wrapper
+        var pvTicksPanel = new pvc.visual.Panel(this, this.pvPanel, {
+                extensionId: 'ticksPanel'
             })
             .lock('data', rootScene.childNodes)
-            .override('defaultColor', function(scene){
-                // Inherit axis color
-                // Control visibility through color or through .visible
-                // NOTE: the rule only has one scene/instance
-                return this.pvMark.proto.instance(0).strokeStyle;
-            })
             .lock(anchorOpposite, 0) // top (of the axis panel)
-            .lock(anchorLength, null)
             .lockMark(anchorOrtho, function(tickScene){
                 return scale(tickScene.vars.tick.value);
             })
+            .lock('strokeStyle', null)
+            .lock('fillStyle',   null)
+            .lock('lineWidth',   0)
             .pvMark
-            [anchorOrthoLength](this.tickLength)
-            .zOrder(20)
+            .zOrder(20) // below axis rule
             ;
         
-        // MINOR ticks are between major scale ticks
-        if(this.minorTicks){
-            this.pvMinorTicks = new pvc.visual.Rule(this, this.pvTicks, {
-                    extensionId: 'minorTicks',
+        if(this.showTicks){
+            // (MAJOR) ticks
+            var pvTicks = this.pvTicks = new pvc.visual.Rule(this, pvTicksPanel, {
+                    extensionId: 'ticks',
                     wrapper: wrapper
                 })
+                .lock('data') // Inherited
                 .override('defaultColor', function(scene){
-                    // Inherit ticks color
+                    // Inherit axis color
                     // Control visibility through color or through .visible
-                    return pvTicks.scene ? 
-                                pvTicks.scene[this.pvMark.index].strokeStyle : 
-                                pv.Color.names.black;
+                    // NOTE: the rule only has one scene/instance
+                    return pvRule.scene ? 
+                           pvRule.scene[0].strokeStyle :
+                           pv.Color.names.black;
                 })
-                .lock('data')              // Inherited
-                .lock(anchorOpposite, 0)   // top (of the axis panel)
-                .lock(anchorLength, null)
-                .lockMark(anchorOrtho, function(tickScene){
-                    var value = +tickScene.vars.tick.value; // NOTE: +value converts Dates to numbers, just like tickScene.vars.tick.value.getTime()
-                    return scale(value + tickStep/2); 
-                })
-                .lock(anchorOrthoLength, this.tickLength/2)
-                .intercept('visible', function(){
-                    var index = this.pvMark.index;
-                    var visible = (!pvTicks.scene || pvTicks.scene[index].visible) &&
-                                  (index < tickCount - 1);
-                    
-                    return visible && this.delegateExtension(true);
-                })
+                .lock(anchorOpposite, 0) // top
+                .lock(anchorOrtho,    0) // left
+                .lock(anchorLength,   null)
+                .optional(anchorOrthoLength, this.tickLength)
                 .pvMark
-                .zOrder(20)
                 ;
+            
+            // MINOR ticks are between major scale ticks
+            if(this.showMinorTicks){
+                var layoutInfo = this._layoutInfo;
+                var ticks      = layoutInfo.ticks;
+                var tickCount  = ticks.length;
+                // Assume a linear scale
+                var minorTickOffset = tickCount > 1 ? 
+                        Math.abs(scale(ticks[1]) - scale(ticks[0])) / 2 : 
+                        0;
+                        
+                this.pvMinorTicks = new pvc.visual.Rule(this, this.pvTicks, {
+                        extensionId: 'minorTicks',
+                        wrapper: wrapper
+                    })
+                    .lock('data') // Inherited
+                    .intercept('visible', function(){
+                        // The last minor tick isn't visible - only show between major ticks.
+                        // Hide if the previous major tick is hidden.
+                        var visible = (this.index < tickCount - 1) && 
+                                      (!pvTicks.scene || pvTicks.scene[0].visible);
+                        
+                        return visible && this.delegateExtension(true);
+                    })    
+                    .override('defaultColor', function(scene){
+                        // Inherit ticks color
+                        // Control visibility through color or through .visible
+                        return pvTicks.scene ? 
+                               pvTicks.scene[0].strokeStyle : 
+                               pv.Color.names.black;
+                    })
+                    .lock(anchorOpposite, 0) // top
+                    .lock(anchorLength,   null)
+                    .optional(anchorOrthoLength, this.tickLength / 2)
+                    .lockMark(anchorOrtho, minorTickOffset)
+                    .pvMark
+                    ;
+            }
         }
-
-        this.renderLinearAxisLabel(wrapper);
+        
+        this.renderLinearAxisLabel(pvTicksPanel, wrapper);
+        
+        this._debugTicksPanel(pvTicksPanel);
     },
     
-    renderLinearAxisLabel: function(wrapper){
+    renderLinearAxisLabel: function(pvTicksPanel, wrapper){
         // Labels are visible (only) on MAJOR ticks,
         // On first and last tick care is taken
         //  with their H/V alignment so that
@@ -1115,8 +1258,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // which affects all margins (left, right, top and bottom).
         // Exception is the small 0.5 textMargin set below...
         var pvTicks = this.pvTicks;
-        var pvLabelAnchor = pvTicks.anchor(this.anchor)
-                                 .addMargin(this.anchorOpposite(), 2);
+        var anchorOpposite = this.anchorOpposite();
+        var anchorOrtho    = this.anchorOrtho();
+        
+//        var pvLabelAnchor = pvTicks
+//            .anchor(this.anchor)
+//            .addMargin(this.anchorOpposite(), 2);
         
         var scale = this.scale;
         var font  = this.font;
@@ -1126,17 +1273,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             maxTextWidth = 0;
         }
         
-        var label = this.pvLabel = new pvc.visual.Label(this, pvLabelAnchor, {
+        var label = this.pvLabel = new pvc.visual.Label(this, pvTicksPanel, {
                 extensionId: 'label',
                 wrapper: wrapper
             })
-            .intercept('visible', function(){
-                var index  = this.pvMark.index;
-                var visible = !pvTicks.scene || pvTicks.scene[index].visible;
-                return visible && this.delegateExtension(true);
-            })
+            .lock('data') // inherited
             .pvMark
-            .zOrder(40)
+
+            .lock(anchorOpposite, this.tickLength)
+            .lock(anchorOrtho,    0)
+            .zOrder(40) // above axis rule
             .text(function(tickScene){
                 var text = tickScene.vars.tick.label;
                 if(maxTextWidth){
@@ -1145,45 +1291,49 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return text;
              })
             .font(this.font)
-            .textMargin(0.5) // Just enough for some labels not to be cut (vertical)
+            //.textMargin(0.5) // Just enough for some labels not to be cut (vertical)
             ;
         
         // Label alignment
         var rootPanel = this.pvPanel.root;
         if(this.isAnchorTopOrBottom()){
-            label.textAlign(function(tickScene){
-                var absLeft;
-                if(this.index === 0){
-                    absLeft = label.toScreenTransform().transformHPosition(label.left());
-                    if(absLeft <= 0){
-                        return 'left'; // the "left" of the text is anchored to the tick's anchor
+            label
+                .textBaseline(anchorOpposite)
+                .textAlign(function(tickScene){
+                    var absLeft;
+                    if(this.index === 0){
+                        absLeft = label.toScreenTransform().transformHPosition(label.left());
+                        if(absLeft <= 0){
+                            return 'left'; // the "left" of the text is anchored to the tick's anchor
+                        }
+                    } else if(this.index === tickScene.parent.childNodes.length - 1) { 
+                        absLeft = label.toScreenTransform().transformHPosition(label.left());
+                        if(absLeft >= rootPanel.width()){
+                            return 'right'; // the "right" of the text is anchored to the tick's anchor
+                        }
                     }
-                } else if(this.index === tickScene.parent.childNodes.length - 1) { 
-                    absLeft = label.toScreenTransform().transformHPosition(label.left());
-                    if(absLeft >= rootPanel.width()){
-                        return 'right'; // the "right" of the text is anchored to the tick's anchor
-                    }
-                }
-                
-                return 'center';
-            });
+                    
+                    return 'center';
+                });
         } else {
-            label.textBaseline(function(tickScene){
-                var absTop;
-                if(this.index === 0){
-                    absTop = label.toScreenTransform().transformVPosition(label.top());
-                    if(absTop >= rootPanel.height()){
-                        return 'bottom'; // the "bottom" of the text is anchored to the tick's anchor
+            label
+                .textAlign(anchorOpposite)
+                .textBaseline(function(tickScene){
+                    var absTop;
+                    if(this.index === 0){
+                        absTop = label.toScreenTransform().transformVPosition(label.top());
+                        if(absTop >= rootPanel.height()){
+                            return 'bottom'; // the "bottom" of the text is anchored to the tick's anchor
+                        }
+                    } else if(this.index === tickScene.parent.childNodes.length - 1) { 
+                        absTop = label.toScreenTransform().transformVPosition(label.top());
+                        if(absTop <= 0){
+                            return 'top'; // the "top" of the text is anchored to the tick's anchor
+                        }
                     }
-                } else if(this.index === tickScene.parent.childNodes.length - 1) { 
-                    absTop = label.toScreenTransform().transformVPosition(label.top());
-                    if(absTop <= 0){
-                        return 'top'; // the "top" of the text is anchored to the tick's anchor
-                    }
-                }
-                
-                return 'middle';
-            });
+                    
+                    return 'middle';
+                });
         }
     },
 
