@@ -60,11 +60,11 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
             };
 
         var rolesSpec = def.query([
-                {name: 'median',      label: 'Median',        defaultDimensionName: 'median', isRequired: true},
-                {name: 'percentil25', label: '25% Percentil', defaultDimensionName: 'percentil25'},
-                {name: 'percentil75', label: '75% Percentil', defaultDimensionName: 'percentil75'},
-                {name: 'percentil5',  label: '5% Percentil',  defaultDimensionName: 'percentil5' },
-                {name: 'percentil95', label: '95% Percentil', defaultDimensionName: 'percentil95'}
+                {name: 'median',       label: 'Median',  defaultDimensionName: 'median', isRequired: true},
+                {name: 'lowerQuartil', label: 'Lower Quartil', defaultDimensionName: 'lowerQuartil'},
+                {name: 'upperQuartil', label: 'Upper Quartil', defaultDimensionName: 'upperQuartil'},
+                {name: 'minimum',      label: 'Minimum', defaultDimensionName: 'minimum' },
+                {name: 'maximum',      label: 'Maximum', defaultDimensionName: 'maximum'}
             ])
             .object({
                 name:  function(info){ return info.name; },
@@ -158,5 +158,5 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         valuesAnchor: 'right'
     })
 }, {
-    measureRolesNames: ['median', 'percentil25', 'percentil75', 'percentil5', 'percentil95']
+    measureRolesNames: ['median', 'lowerQuartil', 'upperQuartil', 'minimum', 'maximum']
 });

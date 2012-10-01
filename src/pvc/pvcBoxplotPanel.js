@@ -39,7 +39,7 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
             ;
         
         /* V Rules */
-        function setupVRule(rule){
+        function setupRuleWhisker(rule){
             rule.lock(a_left, function(){ 
                     return this.pvMark.parent[a_width]() / 2;
                 })
@@ -53,8 +53,8 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
             return rule;
         }
 
-        this.pvVRuleTop = setupVRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:   'boxVRule',
+        this.pvRuleWhiskerUpper = setupRuleWhisker(new pvc.visual.Rule(this, this.pvBoxPanel, {
+                extensionId:   'boxRuleWhisker',
                 freePosition:  true,
                 noHover:       false,
                 noSelect:      false,
@@ -62,15 +62,15 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
                 noDoubleClick: false
             }))
             .intercept('visible', function(scene){
-                return scene.vars.category.showVRuleAbove && this.delegateExtension(true);
+                return scene.vars.category.showRuleWhiskerUpper && this.delegateExtension(true);
             })
-            .lock(a_bottom, function(scene){ return scene.vars.category.vRuleAboveBottom; })
-            .lock(a_height, function(scene){ return scene.vars.category.vRuleAboveHeight; })
+            .lock(a_bottom, function(scene){ return scene.vars.category.ruleWhiskerUpperBottom; })
+            .lock(a_height, function(scene){ return scene.vars.category.ruleWhiskerUpperHeight; })
             .pvMark
             ;
 
-        this.pvVRuleBot = setupVRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:   'boxVRule',
+        this.pvRuleWhiskerLower = setupRuleWhisker(new pvc.visual.Rule(this, this.pvBoxPanel, {
+                extensionId:   'boxRuleWhisker',
                 freePosition:  true,
                 noHover:       false,
                 noSelect:      false,
@@ -78,10 +78,10 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
                 noDoubleClick: false
             }))
             .intercept('visible', function(scene){
-                return scene.vars.category.showVRuleBelow && this.delegateExtension(true);
+                return scene.vars.category.showRuleWhiskerBelow && this.delegateExtension(true);
             })
-            .lock(a_bottom, function(scene){ return scene.vars.category.vRuleBelowBottom; })
-            .lock(a_height, function(scene){ return scene.vars.category.vRuleBelowHeight; })
+            .lock(a_bottom, function(scene){ return scene.vars.category.ruleWhiskerLowerBottom; })
+            .lock(a_height, function(scene){ return scene.vars.category.ruleWhiskerLowerHeight; })
             .pvMark
             ;
 
@@ -125,8 +125,8 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
             return rule;
         }
         
-        this.pvHRule5 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:   'boxHRule5',
+        this.pvRuleMin = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
+                extensionId:   'boxRuleMin',
                 freePosition:  true,
                 noHover:       false,
                 noSelect:      false,
@@ -134,14 +134,14 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
                 noDoubleClick: false
             }))
             .intercept('visible', function(){
-                return this.scene.vars.percentil5.value != null && this.delegateExtension(true);
+                return this.scene.vars.minimum.value != null && this.delegateExtension(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.vars.percentil5.position; }) // bottom
+            .lock(a_bottom,  function(){ return this.scene.vars.minimum.position; }) // bottom
             .pvMark
             ;
 
-        this.pvHRule95 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:   'boxHRule95',
+        this.pvRuleMax = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
+                extensionId:   'boxRuleMax',
                 freePosition:  true,
                 noHover:       false,
                 noSelect:      false,
@@ -149,14 +149,14 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
                 noDoubleClick: false
             }))
             .intercept('visible', function(){
-                return this.scene.vars.percentil95.value != null && this.delegateExtension(true);
+                return this.scene.vars.maximum.value != null && this.delegateExtension(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.vars.percentil95.position; }) // bottom
+            .lock(a_bottom,  function(){ return this.scene.vars.maximum.position; }) // bottom
             .pvMark
             ;
 
-        this.pvHRule50 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
-                extensionId:   'boxHRule50',
+        this.pvRuleMedian = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
+                extensionId:   'boxRuleMedian',
                 freePosition:  true,
                 noHover:       false,
                 noSelect:      false,
@@ -243,23 +243,23 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
                 vars[role.name] = svar;
             });
 
-            var has05 = vars.percentil5.value  != null,
-                has25 = vars.percentil25.value != null,
-                has50 = vars.median.value != null,
-                has75 = vars.percentil75.value != null,
+            var hasMin    = vars.minimum.value  != null,
+                hasLower  = vars.lowerQuartil.value != null,
+                hasMedian = vars.median.value != null,
+                hasUpper  = vars.upperQuartil.value != null,
                 bottom,
                 top;
 
-            var show = has25 || has75;
+            var show = hasLower || hasUpper;
             if(show){
-                bottom = has25 ? vars.percentil25.position :
-                         has50 ? vars.median.position :
-                         vars.percentil75.position
+                bottom = hasLower  ? vars.lowerQuartil.position :
+                         hasMedian ? vars.median.position :
+                         vars.upperQuartil.position
                          ;
 
-                top    = has75 ? vars.percentil75.position :
-                         has50 ? vars.median.position :
-                         vars.percentil25.position
+                top    = hasUpper  ? vars.upperQuartil.position :
+                         hasMedian ? vars.median.position :
+                         vars.lowerQuartil.position
                          ;
 
                 show = (top !== bottom);
@@ -272,45 +272,45 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
             catVar.showBox  = show;
             
             // vRules
-            show = vars.percentil95.value != null;
+            show = vars.maximum.value != null;
             if(show){
-                bottom = has75 ? vars.percentil75.position :
-                         has50 ? vars.median.position :
-                         has25 ? vars.percentil25.position :
-                         has05 ? vars.percentil5.position  :
+                bottom = hasUpper  ? vars.upperQuartil.position :
+                         hasMedian ? vars.median.position :
+                         hasLower  ? vars.lowerQuartil.position :
+                         hasMin    ? vars.minimum.position  :
                          null
                          ;
                 
                 show = bottom != null;
                 if(show){
-                    catVar.vRuleAboveBottom = bottom;
-                    catVar.vRuleAboveHeight = vars.percentil95.position - bottom;
+                    catVar.ruleWhiskerUpperBottom = bottom;
+                    catVar.ruleWhiskerUpperHeight = vars.maximum.position - bottom;
                 }
             }
 
-            catVar.showVRuleAbove = show;
+            catVar.showRuleWhiskerUpper = show;
 
             // ----
 
-            show = has05;
+            show = hasMin;
             if(show){
-                top = has25 ? vars.percentil25.position :
-                      has50 ? vars.median.position :
-                      has75 ? vars.percentil75.position :
+                top = hasLower  ? vars.lowerQuartil.position :
+                      hasMedian ? vars.median.position :
+                      hasUpper  ? vars.upperQuartil.position :
                       null
                       ;
 
                 show = top != null;
                 if(show){
-                    bottom = vars.percentil5.position;
-                    catVar.vRuleBelowHeight = top - bottom;
-                    catVar.vRuleBelowBottom = bottom;
+                    bottom = vars.minimum.position;
+                    catVar.ruleWhiskerLowerHeight = top - bottom;
+                    catVar.ruleWhiskerLowerBottom = bottom;
                 }
             }
             
-            catVar.showVRuleBelow = show;
+            catVar.showRuleWhiskerBelow = show;
             
-            // has05 = vars.percentil5.value  != null,
+            // hasMin = vars.minimum.value  != null,
         }
     }
 });

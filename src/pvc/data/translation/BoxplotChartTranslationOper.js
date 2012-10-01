@@ -8,13 +8,13 @@
  * The default box plot format is:
  * </p>
  * <pre>
- * +----------+----------+-------------+-------------+------------+-------------+
- * | 0        | 1        | 2           | 3           | 4          | 5           |
- * +----------+----------+-------------+-------------+------------+-------------+
- * | category | median   | percentil25 | percentil75 | percentil5 | percentil95 |
- * +----------+----------+-------------+-------------+------------+-------------+
- * | any      | number   | number      | number      | number     | number      |
- * +----------+----------+-------------+-------------+------------+-------------+
+ * +----------+----------+--------------+--------------+------------+-------------+
+ * | 0        | 1        | 2            | 3            | 4          | 5           |
+ * +----------+----------+--------------+--------------+------------+-------------+
+ * | category | median   | lowerQuartil | upperQuartil | minimum    | maximum     |
+ * +----------+----------+--------------+--------------+------------+-------------+
+ * | any      | number   | number       | number       | number     | number      |
+ * +----------+----------+--------------+--------------+------------+-------------+
  * </pre>
  * 
  * @extends pvc.data.MatrixTranslationOper
@@ -80,16 +80,18 @@ def.type('pvc.data.BoxplotChartTranslationOper', pvc.data.MatrixTranslationOper)
 
     defDimensionType: function(dimName, dimSpec){
         var dimGroup = pvc.data.DimensionType.dimensionGroupName(dimName);
+        
+        var label;
         switch(dimGroup){
-            case 'median':
-                dimSpec = def.setUDefaults(dimSpec, 'valueType', Number);
-                break;
-                
-            case 'percentil':
-                dimSpec = def.setUDefaults(dimSpec, 
-                                'valueType', Number,
-                                'label',    "{0}% Percentil"); // replaced by dim group level + 1);
-                break;
+            case 'median':       label = "Median"; break;
+            case 'lowerQuartil': label = "Lower Quartil"; break;
+            case 'upperQuartil': label = "Upper Quartil"; break;
+            case 'minimum':      label = "Minimum"; break;
+            case 'maximum':      label = "Maximum"; break;
+        }
+        
+        if(label){
+            dimSpec = def.setUDefaults(dimSpec, 'valueType', Number, 'label', label);
         }
         
         return this.base(dimName, dimSpec);

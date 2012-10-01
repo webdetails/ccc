@@ -218,10 +218,10 @@ for&nbsp;Boxplot extension points:
   <li>boxPanel_</li>
   <li>box_</li>
   <li>boxBar_</li>
-  <li>boxHRule50_</li>
-  <li>boxHRule5_</li>
-  <li>boxHRule95_</li>
-  <li>boxVRule_</li>
+  <li>boxRuleMedian_</li>
+  <li>boxRuleMin_</li>
+  <li>boxRuleMax_</li>
+  <li>boxRuleWhisker_</li>
   <li>chart_</li>
 </ul>
 
@@ -229,7 +229,7 @@ Sample extension points:<br>
 <ul>
   <li>boxBar_fillStyle: for setting the bars fill colors.</li>
   <li>boxBar_strokeStyle and boxBar_lineWidth: for setting the stroke color&nbsp;and thickness.</li>
-  <li>boxHRule50_strokeStyle and boxHRule50_lineWidth: for setting the stroke color&nbsp;and thickness of the median line.</li>
+  <li>boxRuleMedian_strokeStyle and boxRuleMedian_lineWidth: for setting the stroke color&nbsp;and thickness of the median line.</li>
   <li>titleLabel_font</li>
   <li>yAxisRule_strokeStyle</li>
   <li>xAxisScale_dateTickPrecision</li>
@@ -278,10 +278,10 @@ var box2 = new pvc.BoxplotChart({
     extensionPoints: {
         box_fillStyle:    'bisque',
         boxBar_fillStyle: 'orange',
-        boxHRule50_lineWidth: 3,
-        boxHRule5_strokeStyle: 'blue',
-        boxHRule95_strokeStyle: 'red',
-        boxVRule_strokeDasharray: '- ',
+        boxRuleMedian_lineWidth: 3,
+        boxRuleMin_strokeStyle: 'blue',
+        boxRuleMax_strokeStyle: 'red',
+        boxRuleWhisker_strokeDasharray: '- '
     }
 });
 
@@ -311,7 +311,7 @@ var box3 = new pvc.BoxplotChart({
     selectable: true,
     hoverable: true,
     extensionPoints: {
-        boxVRule_strokeDasharray: '- ',
+        boxRuleWhisker_strokeDasharray: '- ',
         line_shape: 'triangle'
     }
 });
@@ -344,7 +344,7 @@ var box4 = new pvc.BoxplotChart({
     hoverable: true,
     axisOffset: 0.01,
     extensionPoints: {
-        boxVRule_strokeDasharray: '- ',
+        boxRuleWhisker_strokeDasharray: '- ',
         line_shape: 'triangle'
     }
 });
