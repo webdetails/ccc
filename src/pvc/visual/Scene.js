@@ -193,7 +193,12 @@ def.type('pvc.visual.Scene')
         return def.query(function(nextIndex){
             if(!nextIndex){
                 // Initialize
-                this.item = getFirstLeafFrom(root);
+                var item = getFirstLeafFrom(root);
+                if(item === root){
+                    return 0;
+                }
+                
+                this.item = item;
                 return 1; // has next
             }
             

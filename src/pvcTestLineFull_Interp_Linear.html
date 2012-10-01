@@ -336,6 +336,23 @@ pvc.examples.register(def.create(baseExampleDef, {
      }
 }));
 
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line16',
+    className: 'LineChart',
+    dataVar: 'relational_04',
+    def: {
+        title:      "Line chart with second axis",
+        showAreas:  true,
+        showDots:   false,
+        secondAxis: true,
+        secondAxisIndependentScale: true,
+        secondAxisOwnColors: true,
+        secondAxisColor: ['purple'],
+        showValues: false,
+        dimensions: { category: {valueType: null, isDiscrete: true } }
+     }
+}));
+
     </script>
 
   </head>
