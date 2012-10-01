@@ -31,6 +31,15 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     valuesAnchor: "right",
     valueRoleName: null,
     
+    constructor: function(chart, parent, options){
+        
+        this.base(chart, parent, options);
+
+        // Cache
+        options = this.chart.options;
+        this.stacked = options.stacked;
+    },
+    
     _creating: function(){
         // Register BULLET legend prototype marks
         var groupScene = this.defaultVisibleBulletGroupScene();
@@ -126,7 +135,6 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         // -- AREA --
         var areaFillColorAlpha = showAreas && showLines && !isStacked ? 0.5 : null;
         
-
         var wrapper;
         if(this.compatVersion() <= 1){
             if(isStacked){

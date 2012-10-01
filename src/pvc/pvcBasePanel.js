@@ -12,6 +12,8 @@ pvc.BasePanel = pvc.Abstract.extend({
     _children: null,
     type: pv.Panel, // default one
     
+    _extensionPrefix: '',
+    
     /**
      * Total height of the panel in pixels.
      * Includes vertical paddings and margins.
@@ -109,6 +111,11 @@ pvc.BasePanel = pvc.Abstract.extend({
             if(options.colorAxis){
                 this._colorAxis = options.colorAxis;
                 delete options.colorAxis;
+            }
+            
+            if(options.extensionPrefix){
+                this._extensionPrefix = options.extensionPrefix;
+                delete options.extensionPrefix;
             }
         }
         
@@ -1059,7 +1066,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     _getExtensionPrefix: function(){
-        return '';
+        return this._extensionPrefix;
     },
     
     _makeExtensionAbsId: function(id){

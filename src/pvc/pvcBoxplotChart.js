@@ -125,9 +125,10 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
             }
 
             var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
+                extensionPrefix: 'second',
                 orientation:  options.orientation,
                 stacked:      false,
-                showValues:   !(this.compatVersion() <= 1) && options.showValues,
+                showValues:   options.showValues,
                 valuesAnchor: options.valuesAnchor,
                 showLines:    options.showLines,
                 showDots:     options.showDots,

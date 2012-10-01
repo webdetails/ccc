@@ -127,6 +127,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
             }
             
             var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
+                extensionPrefix: 'second',
                 colorAxis:      this.axes.color2,
                 dataPartValue:  '1',
                 stacked:        false,
@@ -135,8 +136,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 showLines:      options.showLines,
                 showDots:       options.showDots,
                 showAreas:      options.showAreas,
-                orientation:    options.orientation,
-                nullInterpolationMode: options.nullInterpolationMode
+                orientation:    options.orientation
             }));
 
             this._linePanel = linePanel;

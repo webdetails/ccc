@@ -468,9 +468,9 @@ var relational_04 = {
         ["Red","Honda",90],
         ["Red","Audi",53],
         //
-        ["Blue","Fiat",60],
-        ["Blue","Peugeut",40],
-        ["Blue","Honda",15],
+        ["Blue","Fiat",6],
+        ["Blue","Peugeut",4],
+        ["Blue","Honda",1],
         ["Blue","Audi",3]
         ],
         "metadata":[{

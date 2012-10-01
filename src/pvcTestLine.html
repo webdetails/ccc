@@ -308,10 +308,10 @@ that connect the lines.<br>
         
 
 <h3>A Categorical Line chart</h3>
-<textarea cols="55" rows="15" id="pvcLine3Code">
+<textarea cols="55" rows="30" id="pvcLine3Code">
 var line3 = new pvc.DotChart({
   canvas: "pvcLine3",
-  width: 1430,
+  width: 1000,
   height:515,
   title:"A Categorical Line chart",
   extensionPoints:{
@@ -356,6 +356,37 @@ line3.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine3"></div>
+
+<h3>A Line chart with a second axis</h3>
+The following is a line chart displaying a second Y axis with an
+independent scale.<br>
+<textarea cols="55" rows="15" id="pvcLine4Code">
+var line4 = new pvc.LineChart({
+  canvas: "pvcLine4",
+  width:  500,
+  height: 300,
+  orientation: 'vertical',
+  title: "Line chart with second axis",
+  secondAxis: true,
+  secondAxisIndependentScale: true,
+  secondAxisOwnColors: true,
+  secondAxisColor: ['purple'],
+  legend: true,
+  legendPosition: "right",
+  selectable: true,
+  hoverable:  true,
+  animate:    false,
+  showAreas:  true,
+  showDots:   false,
+  showValues: false,
+  crosstabMode: false,
+  seriesInRows: false
+});
+line4.setData(relational_04);
+line4.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine4"></div>
 
   </body>
 </html>
