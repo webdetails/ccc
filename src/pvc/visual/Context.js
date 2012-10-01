@@ -65,11 +65,15 @@ def.type('pvc.visual.Context')
 });
 
 if(Object.defineProperty){
-    Object.defineProperty(pvc.visual.Context.prototype, 'parent', {
-        get: function(){
-            throw def.error.operationInvalid("The 'this.parent.index' idiom has no equivalent in this version. Please try 'this.pvMark.parent.index'.");
-        }
-    });
+    try{
+        Object.defineProperty(pvc.visual.Context.prototype, 'parent', {
+            get: function(){
+                throw def.error.operationInvalid("The 'this.parent.index' idiom has no equivalent in this version. Please try 'this.pvMark.parent.index'.");
+            }
+        });
+    } catch(ex) {
+        /* IE THROWS */
+    }
 }
 
 /**

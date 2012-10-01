@@ -1731,10 +1731,11 @@ pvc.BasePanel = pvc.Abstract.extend({
             .lock('events', 'none')
             ;
         
-        // Rubber band selection behavior definition
-//        if(!this._getExtensionAbs('base', 'fillStyle')){
-//            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
-//        }
+        // IE must have a fill style to fire events
+        if(!this._getExtensionAbs('base', 'fillStyle')){
+            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        }
+        
         // Require all events, wether it's painted or not
         rubberPvParentPanel.events('all');
         

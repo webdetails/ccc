@@ -1208,33 +1208,56 @@ pv.VmlScene.label = function(scenes) {
     var font  = vml.processFont(s.font);
     var label = vml.text_dims(txt, font);
 
-    var dx = 0, dy = 0;
-    if (s.textBaseline === 'middle'){
-      if(s.textAngle != 0){
-        dy += Math.sin(s.textAngle) * label.width/2;
-      } else {
-        dy -= label.fontsize / 2;
-      }
-    } else if (s.textBaseline === 'top') {
-      dy += s.textMargin;
-    } else if (s.textBaseline === 'bottom') {
-      dy -= s.textMargin + label.fontsize;
+    // dx, dy are the coordinates of the middle-left point
+    // of the label's bounding-box.
+    //
+    // +--> xx
+    // |
+    // v yy
+    
+    var dx = 0;
+    var dy = 0;
+    switch(s.textBaseline){
+        case 'middle':
+            dy  = (.1 * label.fontsize); // slight middle baseline correction
+            break;
+            
+        case 'top':
+            dy  = s.textMargin + .5 * label.fontsize;
+            break;
+            
+        case 'bottom':
+            dy  = -(s.textMargin + .5 * label.fontsize);
+            break;
     }
 
-    if (s.textAlign === 'center') {
-     if(s.textAngle != 0){
-        dx -= Math.cos(s.textAngle) * label.width / 2 ;
-      } else {
-        dx -= label.width / 2; 
-      }
-    } else if (s.textAlign === 'right') {
-      dx -= label.width + s.textMargin; 
-    } else if (s.textAlign === 'left') {
-      dx += s.textMargin;
+    // Text alignment is already handled by VML's textPath "v-text-align" style attribute
+    // So, only the text margin must be explicitly handled.
+    switch(s.textAlign){
+        case 'left':
+            dx  = s.textMargin;
+            break;
+            
+        case 'right':
+            dx  = -s.textMargin;
+            break;
+    }
+ 
+    // VML already handles rotation relative to the elements position.
+    // Only need to rotate the position.
+    var a = s.textAngle;
+    if(a){
+        var ct = Math.cos(a);
+        var st = Math.sin(a);
+
+        var dx2 = dx*ct - dy*st;
+        var dy2 = dx*st + dy*ct;
+        dx = dx2;
+        dy = dy2;
     }
 
-    var left = s.left; // + dx;
-    var top  = s.top;// Math.round(s.top + dy);
+    var left = s.left + dx;
+    var top  = s.top  + dy;
     
     // ---------------
     

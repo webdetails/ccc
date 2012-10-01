@@ -150,7 +150,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this._calcOverflowPaddings();
             
             // Release memory.
-            if(pvc.debug < 25){
+            if(pvc.debug > 16){
                 layoutInfo.labelBBox = null;
             } // else keep this to draw the debug paths around the labels
         }
