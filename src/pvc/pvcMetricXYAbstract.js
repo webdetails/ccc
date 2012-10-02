@@ -8,7 +8,7 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
 
     constructor: function(options){
 
-        var isV1Compat = (options && options.compatVersion <= 1);
+        var isV1Compat = this.compatVersion(options) <= 1;
         if(isV1Compat){
             /**
              * If the 'x' role isn't explicitly defined (in any way),

@@ -38,6 +38,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
             if(scene.isActive){
                return color.brighter(1.3).alpha(0.7);
             }
+            
             if(!this.normalStroke){
                 return null;
             }
@@ -48,6 +49,8 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                 }
 
                 return this.dimColor(color, type);
+            } else if(this.isActiveSeriesAware && scene.isActiveSeries()){
+                return color.brighter(1).alpha(0.7);
             }
 
         } else if(type === 'fill'){
@@ -61,6 +64,8 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                 }
 
                 return this.dimColor(color, type);
+            } else if(this.isActiveSeriesAware && scene.isActiveSeries()){
+                return color.brighter(0.2).alpha(0.8);
             }
         }
 

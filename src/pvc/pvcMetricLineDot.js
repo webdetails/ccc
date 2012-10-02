@@ -34,7 +34,7 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         
         this.base();
         
-        var isV1Compat = (this.options.compatVersion <= 1);
+        var isV1Compat = (this.compatVersion() <= 1);
         
         this._addVisualRoles({
             color:  { 

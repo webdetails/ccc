@@ -122,7 +122,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             options = {};
         }
         
-        var isV1Compat = chart.options.compatVersion <= 1;
+        var isV1Compat = chart.compatVersion() <= 1;
         if(isV1Compat){
             if(options.labelStyle == null){
                 options.labelStyle = 'inside';

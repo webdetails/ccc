@@ -11,7 +11,7 @@ pvc.TitlePanel = pvc.TitlePanelAbstract.extend({
             options = {};
         }
         
-        var isV1Compat = chart.options.compatVersion <= 1;
+        var isV1Compat = chart.compatVersion() <= 1;
         if(isV1Compat){
             var size = options.titleSize;
             if(size == null){

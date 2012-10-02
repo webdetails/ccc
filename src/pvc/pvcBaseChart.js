@@ -297,8 +297,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         this.options = def.mixin({}, this.defaults, options);
     },
     
-    compatVersion: function(){
-        return this.options.compatVersion;
+    compatVersion: function(options){
+        return (options || this.options).compatVersion;
     },
     
     /**
@@ -694,7 +694,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
 
         return {
-            compatVersion:     options.compatVersion,
+            compatVersion:     this.compatVersion(),
             secondAxisSeriesIndexes: secondAxisSeriesIndexes,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,

@@ -29,7 +29,7 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
         if(contentPanel) {
             var showPlotFrame = chart.options.showPlotFrame;
             if(showPlotFrame == null){
-                if(chart.options.compatVersion <= 1){
+                if(chart.compatVersion <= 1){
                     showPlotFrame = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
                 } else {
                     showPlotFrame = true;

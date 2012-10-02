@@ -201,8 +201,8 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
     },
     
-    compatVersion: function(){
-        return this.chart.compatVersion();
+    compatVersion: function(options){
+        return this.chart.compatVersion(options);
     },
     
     defaultColorAxis: function(){

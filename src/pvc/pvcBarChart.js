@@ -131,7 +131,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 colorAxis:      this.axes.color2,
                 dataPartValue:  '1',
                 stacked:        false,
-                showValues:     !(options.compatVersion <= 1) && options.showValues,
+                showValues:     !(this.compatVersion() <= 1) && options.showValues,
                 valuesAnchor:   options.valuesAnchor != 'center' ? options.valuesAnchor : 'right',
                 showLines:      options.showLines,
                 showDots:       options.showDots,
