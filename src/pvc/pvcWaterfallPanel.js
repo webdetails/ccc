@@ -173,7 +173,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                 isFalling ?
                     function(){ return sceneBaseScale(this.scene) - barStepWidth - barWidth2; } :
                     function(){ return sceneBaseScale(this.scene) - barWidth2; })
-            .override('baseColor', function(){ return this.delegateExtension(waterColor); })
+            .override('defaultColor', function(){ return waterColor; })
             .pvMark
             .antialias(true)
             .lineCap('butt')

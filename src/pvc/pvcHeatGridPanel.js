@@ -223,19 +223,19 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
                     
                     return getFillColor.call(this.pvMark, this.scene);
                 })
-                .override('interactiveColor', function(type, color){
+                .override('interactiveColor', function(color, type){
                     var scene = this.scene;
                     if(scene.isActive) {
                         return color.alpha(0.6);
                     }
                     
                     if(scene.anySelected() && !scene.isSelected()) {
-                        return this.dimColor(type, color);
+                        return this.dimColor(color, type);
                     }
                     
-                    return this.base(type, color);
+                    return this.base(color, type);
                 })
-                .override('dimColor', function(type, color){
+                .override('dimColor', function(color, type){
                     return pvc.toGrayScale(color, 0.6);
                 })
                 .pvMark
@@ -420,14 +420,14 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
             .override('baseColor', function(type){
                 return getFillColor.call(this.pvMark.parent, this.scene);
             })
-            .override('normalColor', function(type, color){
+            .override('normalColor', function(color, type){
                 if(type === 'stroke'){
                     return color.darker();
                 }
                 
-                return this.base(type, color);
+                return this.base(color, type);
             })
-            .override('interactiveColor', function(type, color){
+            .override('interactiveColor', function(color, type){
                 var scene = this.scene;
                 
                 if(type === 'stroke'){
@@ -442,9 +442,9 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
                     return color.alpha(0.6);
                 }
                 
-                return this.base(type, color);
+                return this.base(color, type);
             })
-            .override('dimColor', function(type, color){
+            .override('dimColor', function(color, type){
                 return pvc.toGrayScale(color, 0.6);
             })
             .pvMark

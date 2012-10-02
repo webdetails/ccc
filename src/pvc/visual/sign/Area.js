@@ -33,7 +33,7 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     
     /* Colors */
     // NOTE: must be registered before fixAntialiasStrokeColor
-    this._interceptDynamic('fillStyle', 'fillColor');
+    this._bindProperty('fillStyle', 'fillColor', 'color');
     
     /* Using antialias causes the vertical separation
      * of *segmented* areas to be noticed.
@@ -93,14 +93,14 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(type, color){
+    interactiveColor: function(color, type){
         if(type === 'fill'){
             if(this.scene.anySelected() && !this.scene.isSelected()) {
-                return this.dimColor(type, color);
+                return this.dimColor(color, type);
             }
         }
 
-        return this.base(type, color);
+        return this.base(color, type);
     },
     
     /* STROKE */

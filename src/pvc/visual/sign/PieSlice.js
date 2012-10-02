@@ -24,19 +24,21 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     
     this.base(panel, pvMark, keyArgs);
     
-    //this._normalRadius         = def.get(keyArgs, 'normalRadius',  10);
     this._activeOffsetRadius = def.get(keyArgs, 'activeOffsetRadius', 0);
     this._center = def.get(keyArgs, 'center');
     
     this/* Colors */
         .optional('lineWidth',  0.6)
-        ._interceptDynamic('angle', 'angle')
+        ._bindProperty('angle', 'angle')
         ._lockDynamic('bottom', 'y')
         ._lockDynamic('left',   'x')
         .lock('top',   null)
         .lock('right', null)
         ;
 })
+.prototype
+.property('offsetRadius')
+.constructor
 .add({
     // Ensures that it is evaluated before x and y
     angle: function(){
@@ -87,7 +89,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(type, color){
+    interactiveColor: function(color, type){
         var scene = this.scene;
         if(scene.isActive) {
             switch(type) {
@@ -99,33 +101,19 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
             switch(type) {
                 case 'fill':
                 //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
-                    return this.dimColor(type, color);
+                    return this.dimColor(color, type);
             }
         }
 
-        return this.base(type, color);
+        return this.base(color, type);
     },
     
     /* Offset */
-    offsetRadius: function(){
-        var offsetRadius = this.baseOffsetRadius();
-        if(this.showsInteraction() && this.scene.anyInteraction()) {
-            offsetRadius = this.interactiveOffsetRadius(offsetRadius);
-        } else {
-            offsetRadius = this.normalOffsetRadius(offsetRadius);
-        }
-        
-        return offsetRadius;
-    },
-    
     baseOffsetRadius: function(){
+        // There's no extension point for this
         return 0;
     },
 
-    normalOffsetRadius: function(offsetRadius){
-        return offsetRadius;
-    },
-    
     interactiveOffsetRadius: function(offsetRadius){
         if(this.scene.isActive){
             return offsetRadius + this._activeOffsetRadius;

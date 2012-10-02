@@ -1708,23 +1708,22 @@ pvc.BasePanel = pvc.Abstract.extend({
             this.selectBar = 
             new pvc.visual.Bar(this, rubberPvParentPanel, {
                 extensionId:   'rubberBand',
+                normalStroke:  true,
                 noHover:       true,
                 noSelect:      true,
                 noClick:       true,
                 noDoubleClick: true,
                 noTooltips:    true
             })
-            .override('strokeWidth', function(){
-                return this.delegateExtension(1.5);
+            .override('defaultStrokeWidth', function(){
+                return 1.5;
             })
-            .override('color', function(type){
-                var color = this.delegateExtension();
-                if(color === undefined){
-                    return options[type === 'stroke' ? 'rubberBandLine' : 'rubberBandFill']; 
-                }
+            .override('defaultColor', function(type){
+                return options[type === 'stroke' ? 'rubberBandLine' : 'rubberBandFill'];
+            })
+            .override('interactiveColor', function(color){
                 return color;
             })
-            //.override('defaultStrokeWidth', def.fun.constant(1.5))
             .pvMark
             .lock('data', [new pvc.visual.Scene(null, {panel: this})])
             .lock('visible', function() { return !!rb;  })

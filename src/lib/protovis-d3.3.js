@@ -5935,7 +5935,7 @@ pv.Colors.category19 = function() {
     };
 
     Solid.prototype.darker = function(k){
-        return new Solid(this.color.darker(k));
+        return new Solid(this.rgb().darker(k));
     };
     
     pv.FillStyle.transparent = new Solid(pv.Color.transparent);

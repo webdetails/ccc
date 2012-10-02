@@ -1,12 +1,13 @@
 
 def.type('pvc.visual.Dot', pvc.visual.Sign)
-.init(function(panel, protoMark, keyArgs){
+.init(function(panel, parentMark, keyArgs){
     
-    var pvMark = protoMark.add(pv.Dot);
+    var pvMark = parentMark.add(pv.Dot);
     
-    protoMark = def.get(keyArgs, 'proto');
+    var protoMark = def.get(keyArgs, 'proto');
     if(protoMark){
         pvMark.extend(protoMark);
+        //pvMark.duckExtension(protoMark, pvc.extensionTag);
     }
     
     keyArgs = def.setDefaults(keyArgs, 'freeColor', false);
@@ -23,15 +24,18 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     }
        
     this/* Shape & Size */
-        ._interceptDynamic('shape',       'shape' )
-        ._interceptDynamic('shapeRadius', 'radius')
-        ._interceptDynamic('shapeSize',   'size'  )
+        ._bindProperty('shape',       'shape' )
+        ._bindProperty('shapeRadius', 'radius')
+        ._bindProperty('shapeSize',   'size'  )
         
         /* Colors & Line */
         .optional('strokeDasharray', undefined) // Break inheritance
         .optional('lineWidth',       1.5)       // Idem
         ;
 })
+.prototype
+.property('size')
+.constructor
 .add({
     /* Sign Spatial Coordinate System
      *  -> Cartesian coordinates
@@ -60,17 +64,6 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     },
     
     /* SIZE */
-    size: function(){
-        var size = this.baseSize();
-        if(this.showsInteraction() && this.scene.anyInteraction()) {
-            size = this.interactiveSize(size);
-        } else {
-            size = this.normalSize(size);
-        }
-        
-        return size;
-    },
-    
     baseSize: function(){
         /* Radius was specified? */
         var radius = this.state.radius;
@@ -78,22 +71,13 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             return radius * radius;
         }
       
-        var size = this.delegateExtension();
-        if(size === undefined){
-            size = this.defaultSize();
-        }
-        
-        return size;
+        return this.base();
     },
 
     defaultSize: function(){
         return 12;
     },
     
-    normalSize: function(size){
-        return size;
-    },
-
     interactiveSize: function(size){
         if(this.scene.isActive){
             return Math.max(size, 5) * 2.5;
@@ -107,7 +91,7 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(type, color){
+    interactiveColor: function(color, type){
         var scene = this.scene;
         if(scene.isActive) {
             if(type === 'stroke') {
@@ -123,10 +107,10 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             switch(type) {
                 case 'fill':
                 case 'stroke':
-                    return this.dimColor(type, color);
+                    return this.dimColor(color, type);
             }
         }
 
-        return this.base(type, color);
+        return this.base(color, type);
     }
 });

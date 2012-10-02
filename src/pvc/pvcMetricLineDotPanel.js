@@ -459,13 +459,13 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             return color;
         });
         
-        dot.override('interactiveColor', function(type, color){
+        dot.override('interactiveColor', function(color, type){
             if(type === 'stroke' && this.scene.isActive) {
                 // Don't make border brighter on active
                 return color;
             }
             
-            return this.base(type, color);
+            return this.base(color, type);
         });
         
         if(rootScene.hasColorRole){
@@ -507,8 +507,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             var sizeAxis = chart.axes.size;
             if (sizeAxis.scaleUsesAbs()) {
                 dot
-                .override('strokeColor', function (scene) {
-                    return scene.vars.size.value < 0 ? "#000000" : this.base();
+                .override('strokeColor', function () {
+                    return this.scene.vars.size.value < 0 ? "#000000" : this.base();
                 })
                 .optional('lineCap', 'round') // only used by strokeDashArray
                 .optionalMark('strokeDasharray', function (scene){

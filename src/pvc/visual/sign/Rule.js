@@ -1,23 +1,27 @@
 
 def.type('pvc.visual.Rule', pvc.visual.Sign)
-.init(function(panel, protoMark, keyArgs){
+.init(function(panel, parentMark, keyArgs){
 
-    var pvMark = protoMark.add(pv.Rule);
+    var pvMark = parentMark.add(pv.Rule);
     
-    protoMark = def.get(keyArgs, 'proto');
+    var protoMark = def.get(keyArgs, 'proto');
     if(protoMark){
         pvMark.extend(protoMark);
+        //pvMark.duckExtension(protoMark, pvc.extensionTag);
     }
     
     this.base(panel, pvMark, keyArgs);
     
     if(!def.get(keyArgs, 'freeStyle')){
         this/* Colors & Line */
-            ._interceptDynamic('strokeStyle', 'strokeColor')
-            ._interceptDynamic('lineWidth',   'strokeWidth')
+            ._bindProperty('strokeStyle', 'strokeColor', 'color')
+            ._bindProperty('lineWidth',   'strokeWidth')
             ;
     }
 })
+.prototype
+.property('strokeWidth')
+.constructor
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs,
@@ -31,32 +35,8 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     /* STROKE WIDTH */
-    strokeWidth: function(){
-        var strokeWidth = this.baseStrokeWidth();
-        if(this.showsInteraction() && this.scene.anyInteraction()) {
-            strokeWidth = this.interactiveStrokeWidth(strokeWidth);
-        } else {
-            strokeWidth = this.normalStrokeWidth(strokeWidth);
-        }
-
-        return strokeWidth;
-    },
-
-    baseStrokeWidth: function(){
-        var value = this.delegateExtension();
-        if(value === undefined){
-            value = this.defaultStrokeWidth();
-        }
-
-        return value;
-    },
-
     defaultStrokeWidth: function(){
         return 1;
-    },
-    
-    normalStrokeWidth: function(strokeWidth){
-        return strokeWidth;
     },
 
     interactiveStrokeWidth: function(strokeWidth){
@@ -68,20 +48,13 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     /* STROKE COLOR */
-    strokeColor: function(){
-        return this.color('stroke');
-    },
-
-    /**
-     * @override
-     */
-    interactiveColor: function(type, color){
+    interactiveColor: function(color, type){
         var scene = this.scene;
         
         if(!scene.isActive && scene.anySelected() && scene.datum && !scene.isSelected()) {
-            return this.dimColor(type, color);
+            return this.dimColor(color, type);
         }
         
-        return this.base(type, color);
+        return this.base(color, type);
     }
 });

@@ -20,13 +20,16 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     }
 
     this/* Colors & Line */
-        ._interceptDynamic('strokeStyle', 'strokeColor')
-        ._interceptDynamic('lineWidth',   'strokeWidth')
+        ._bindProperty('strokeStyle', 'strokeColor', 'color')
+        ._bindProperty('lineWidth',   'strokeWidth')
         ;
 
     // Segmented lines use fill color instead of stroke...so this doesn't work.
     //this.pvMark.lineCap('square');
 })
+.prototype
+.property('strokeWidth')
+.constructor
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs, 
@@ -52,24 +55,8 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     x: function(){ return 0; },
 
     /* STROKE WIDTH */
-    strokeWidth: function(){
-        var strokeWidth = this.baseStrokeWidth();
-        if(this.showsInteraction() && this.scene.anyInteraction()) {
-            strokeWidth = this.interactiveStrokeWidth(strokeWidth);
-        } else {
-            strokeWidth = this.normalStrokeWidth(strokeWidth);
-        }
-        
-        return strokeWidth;
-    },
-    
-    baseStrokeWidth: function(){
-        /* Delegate to possible lineWidth extension or default to 1.5 */
-        return this.delegateExtension(1.5);
-    },
-
-    normalStrokeWidth: function(strokeWidth){
-        return strokeWidth;
+    defaultStrokeWidth: function(){
+        return 1.5;
     },
 
     interactiveStrokeWidth: function(strokeWidth){
@@ -84,14 +71,10 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     },
     
     /* STROKE COLOR */
-    strokeColor: function(){ 
-        return this.color('stroke');
-    },
-    
     /**
      * @override
      */
-    interactiveColor: function(type, color){
+    interactiveColor: function(color, type){
         var scene = this.scene;
         if(scene.anySelected() && !scene.isSelected()) {
             
@@ -101,10 +84,10 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
             }
             
             if(type === 'stroke'){
-                return this.dimColor(type, color);
+                return this.dimColor(color, type);
             }
         }
 
-        return this.base(type, color);
+        return this.base(color, type);
     }
 });

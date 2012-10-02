@@ -1189,7 +1189,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     wrapper: wrapper
                 })
                 .lock('data') // Inherited
-                .override('defaultColor', function(scene){
+                .override('defaultColor', function(){
                     // Inherit axis color
                     // Control visibility through color or through .visible
                     // NOTE: the rule only has one scene/instance
@@ -1227,7 +1227,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                         
                         return visible && this.delegateExtension(true);
                     })    
-                    .override('defaultColor', function(scene){
+                    .override('defaultColor', function(){
                         // Inherit ticks color
                         // Control visibility through color or through .visible
                         return pvTicks.scene ? 

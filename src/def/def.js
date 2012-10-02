@@ -1147,14 +1147,24 @@ def.scope(function(){
                     // Try to convert to method
                     var method = asMethod(value);
                     if(method) {
-                        state.methods[p] = method;
+                        var baseMethod;
                         
                         // Check if it is an override
-                        var baseMethod;
-                        if(baseState && (baseMethod = baseState.methods[p]) &&
-                           // Exclude inherited stuff from Object.prototype
-                           (baseMethod instanceof Method)){
-                            
+                        
+                        // Exclude inherited stuff from Object.prototype
+                        var bm = state.methods[p];
+                        if(bm && (bm instanceof Method)){
+                            baseMethod = bm;
+                        } else if(baseState) {
+                            bm = baseState.methods[p];
+                            if(bm && (bm instanceof Method)){
+                                baseMethod = bm;
+                            }
+                        }
+                        
+                        state.methods[p] = method;
+                        
+                        if(baseMethod){
                             // Replace value with an override function 
                             // that intercepts the call and sets the correct
                             // 'base' property before calling the original value function

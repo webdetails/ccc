@@ -351,7 +351,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             
             .lock('data', rootScene.childNodes)
             
-            .override('angle', function(scene){ return scene.vars.value.angle;  })
+            .override('angle', function(){ return this.scene.vars.value.angle;  })
             
             .override('baseOffsetRadius', function(){
                 var explodeIndex = myself.explodedSliceIndex;

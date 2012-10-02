@@ -10,14 +10,17 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
 
     this.normalStroke = def.get(keyArgs, 'normalStroke', false);
 
-    this._interceptDynamic('lineWidth',  'strokeWidth');
+    this._bindProperty('lineWidth',  'strokeWidth');
 })
+.prototype
+.property('strokeWidth')
+.constructor
 .add({
     /* COLOR */
     /**
      * @override
      */
-    normalColor: function(type, color){
+    normalColor: function(color, type){
         if(type === 'stroke' && !this.normalStroke){
             return null;
         }
@@ -28,7 +31,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(type, color){
+    interactiveColor: function(color, type){
         var scene = this.scene;
         
         if(type === 'stroke'){
@@ -44,7 +47,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                     return pv.Color.names.darkgray.darker().darker();
                 }
 
-                return this.dimColor(type, color);
+                return this.dimColor(color, type);
             }
 
         } else if(type === 'fill'){
@@ -57,40 +60,16 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                     return pv.Color.names.darkgray.darker(2).alpha(0.8);
                 }
 
-                return this.dimColor(type, color);
+                return this.dimColor(color, type);
             }
         }
 
-        return this.base(type, color);
+        return this.base(color, type);
     },
 
-    /* STROKE WIDTH */
-    strokeWidth: function(){
-        var strokeWidth = this.baseStrokeWidth();
-        if(this.showsInteraction() && this.scene.anyInteraction()) {
-            strokeWidth = this.interactiveStrokeWidth(strokeWidth);
-        } else {
-            strokeWidth = this.normalStrokeWidth(strokeWidth);
-        }
-
-        return strokeWidth;
-    },
-
-    baseStrokeWidth: function(){
-        var value = this.delegateExtension();
-        if(value === undefined){
-            value = this.defaultStrokeWidth();
-        }
-
-        return value;
-    },
-
+    /* STROKE WIDTH */    
     defaultStrokeWidth: function(){
         return 0.5;
-    },
-
-    normalStrokeWidth: function(strokeWidth){
-        return strokeWidth;
     },
 
     interactiveStrokeWidth: function(strokeWidth){

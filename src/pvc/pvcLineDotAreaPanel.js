@@ -181,7 +181,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             })
             .override('baseColor', function(type){
                 var color = this.base(type);
-                if(color && !this.hasExtension() && areaFillColorAlpha != null){
+                if(!this._final && color && areaFillColorAlpha != null){
                     color = color.alpha(areaFillColorAlpha);
                 }
                 
@@ -220,15 +220,6 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
              */
             darkerLineAndDotColor = isStacked && showAreas;
         
-        function lineAndDotNormalColor(type){
-            var color = this.base(type);
-            if(darkerLineAndDotColor && color && !this.hasExtension()){
-                color = color.darker(0.6);
-            }
-            
-            return color;
-        }
-        
         this.pvLine = new pvc.visual.Line(
             this, 
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
@@ -266,7 +257,14 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
                 return this.base(type);
             })
-            .override('baseColor', lineAndDotNormalColor)
+            .override('defaultColor', function(type){
+                var color = this.base(type);
+                
+                if(!this._final && darkerLineAndDotColor && color){
+                    color = color.darker(0.6);
+                }
+                return color;
+            })
             .override('baseStrokeWidth', function(){
                 var strokeWidth;
                 if(showLines){
@@ -313,7 +311,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
                 // TODO: review interpolated style/visibility
                 if(this.scene.isInterpolated && type === 'fill'){
-                    return this.base(type).alpha(0.5);
+                    var color = this.base(type);
+                    return color && pv.color(this.base(type)).alpha(0.5);
                 }
                 
                 // Follow normal logic
@@ -329,7 +328,14 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
                 return dashArray;
             })
-            .override('baseColor', lineAndDotNormalColor)
+            .override('defaultColor', function(type){
+                var color = this.base(type);
+                
+                if(!this._final && darkerLineAndDotColor && color){
+                    color = color.darker(0.6);
+                }
+                return color;
+            })
             .override('baseSize', function(){
                 /* When not showing dots, 
                  * but a datum is alone and 
