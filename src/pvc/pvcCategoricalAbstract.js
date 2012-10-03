@@ -21,14 +21,23 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     _initVisualRoles: function(){
         
         this.base();
+      
+        var catRoleSpec = this._getCategoryRoleSpec() || 
+                          def.fail.operationInvalid("Must define the category role.");
         
-        this._addVisualRoles({
-            category: { isRequired: true, defaultDimensionName: 'category*', autoCreateDimension: true }
-        });
+        this._addVisualRoles({category: catRoleSpec});
 
         // ---------
         // Cached
         this._catRole = this.visualRoles('category');
+    },
+    
+    _getCategoryRoleSpec: function(){
+        return { 
+            isRequired: true, 
+            defaultDimensionName: 'category*', 
+            autoCreateDimension: true 
+        };
     },
     
     _bindAxes: function(hasMultiRole){
@@ -255,16 +264,17 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     // TODO: chart orientation?
     markEvent: function(dateString, label, options){
 
-        if(!this.options.timeSeries){
+        var baseScale = this.axes.base.scale;
+        
+        if(baseScale.type !== 'Timeseries'){
             pvc.log("Attempting to mark an event on a non timeSeries chart");
             return;
         }
 
         var o = $.extend({}, this.markEventDefaults, options);
         
-        var baseScale = this.axes.base.scale;
-            //{ bypassAxisOffset: true }); // TODO: why bypassAxisOffset ?
-
+        // TODO: format this using dimension formatter...
+        
         // Are we outside the allowed scale?
         var d = pv.Format.date(this.options.timeSeriesFormat).parse(dateString);
         var dpos = baseScale(d),

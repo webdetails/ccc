@@ -520,10 +520,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     _calcDiscreteTicksHiddenCore: function(){
-        var mode = this.axis.option('OverlappedLabelsMode');
-        if(!mode){
-            mode = this.compatVersion() <= 1 ? 'leave' : 'hide';
-        }
+        var mode = this.axis.option('OverlappedLabelsMode') || 'hide';
+//        if(!mode){
+//            mode = this.compatVersion() <= 1 ? 'leave' : 'hide';
+//        }
         
         if(mode !== 'hide'){
             return 1;

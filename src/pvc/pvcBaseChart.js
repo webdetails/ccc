@@ -631,6 +631,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         data.load(translation.execute(data), loadKeyArgs);
     },
+//    
+//    _onNewDimensionType: function(dimName, dimSpec){
+//        return dimSpec;
+//    },
 
     _getLoadFilter: function(){
         if(this.options.ignoreNulls) {
@@ -694,6 +698,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
 
         return {
+            //onNewDimensionType: this._onNewDimensionType.bind(this),
             compatVersion:     this.compatVersion(),
             secondAxisSeriesIndexes: secondAxisSeriesIndexes,
             seriesInRows:      options.seriesInRows,
@@ -758,7 +763,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Binds visual roles to grouping specifications
      * that have not yet been bound to and validated against a complex type.
      *
-     * This allows infering proper defaults to
+     * This allows inferring proper defaults to
      * dimensions bound to roles, by taking them from the roles requirements.
      */
     _bindVisualRolesPre: function(){

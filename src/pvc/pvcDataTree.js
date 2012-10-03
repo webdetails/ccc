@@ -86,6 +86,8 @@ pvc.DataTree = pvc.BaseChart.extend({
     },
     
     defaults: def.create(pvc.BaseChart.prototype.defaults, {
+        compatVersion: 1,
+        
      // margins around the full tree
         topRuleOffset: 30,
         botRuleOffset: 30,

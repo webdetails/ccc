@@ -40,6 +40,8 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
   },
   
   defaults: def.create(pvc.BaseChart.prototype.defaults, {
+      compatVersion: 1,
+      
       topRuleOffset: 30,
       botRuleOffset: 30,
       leftRuleOffset: 60,

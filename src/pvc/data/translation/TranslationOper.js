@@ -538,6 +538,12 @@ def.type('pvc.data.TranslationOper')
     defDimensionType: function(dimName, dimSpec){
         /** Passing options: isCategoryTimeSeries, timeSeriesFormat and dimensionGroups */
         dimSpec = pvc.data.DimensionType.extendSpec(dimName, dimSpec, this.options);
+        
+        var callback = this.options.onNewDimensionType;
+        if(callback){
+            dimSpec = callback(dimName, dimSpec) || dimSpec;
+        }
+        
         return this.complexType.addDimension(dimName, dimSpec);
     }
 });

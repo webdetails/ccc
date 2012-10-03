@@ -1499,6 +1499,18 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
     
+    prepend: function(target, source, start){
+        if(start == null){
+            start = 0;
+        }
+
+        for(var i = 0, L = source.length ; i < L ; i++){
+            target.unshift(source[start + i]);
+        }
+
+        return target;
+    },
+    
     removeAt: function(array, index){
         return array.splice(index, 1)[0];
     },
@@ -2138,7 +2150,7 @@ def.type('RangeQuery', def.Query)
 .init(function(start, count, step){
     this.base();
     this._index = start;
-    this._count = count;
+    this._count = count; // may be infinte
     this._step  = step == null ? 1 : step;
 })
 .add({
@@ -2318,12 +2330,10 @@ def.type('TakeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        while(this._source.next()){
-            if(this._take > 0){
-                this._take--;
-                this.item = this._source.item;
-                return 1;
-            }
+        if(this._take > 0 && this._source.next()){
+            this._take--;
+            this.item = this._source.item;
+            return 1;
         }
     }
 });

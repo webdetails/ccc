@@ -32,7 +32,7 @@
  * </p>
  * <p>
  * If only two metadata columns are provided, 
- * then a dummy 'series' column with the constant null value is added automatically. 
+ * then a dummy 'series' column, with the constant null value, is added automatically. 
  * </p>
  * 
  * @extends pvc.data.MatrixTranslationOper
@@ -107,62 +107,51 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
             }
 
             if(unmappedColCount > 0){
-                /* Build the dimensions that can be read automatically */
-                var dimName,
-                    autoColDims = !this.options.seriesInRows ?
-                                  ['value', 'category', 'series'  ] :
-                                  ['value', 'series',   'category']
-                                  ;
-
-                /*
-                 * Leave only those not already mapped by the user,
-                 * giving priority to those on the left.
-                 */
-                autoColDims = autoColDims.filter(function(dimName2){
-                                return !this._userUsedDims[dimName2];
-                              }, this)
-                              .slice(0, unmappedColCount);
-
-                unmappedColCount -= autoColDims.length;
-                if(unmappedColCount > 0){
-                    var desiredCatCount = def.get(this.options, 'categoriesCount', 1);
-                    if(desiredCatCount > 1){
-                        var catIndex = autoColDims.indexOf('category');
-                        if(catIndex < 0){
-                            if(this.options.seriesInRows){
-                                catIndex = autoColDims.length;
-                            } else {
-                                catIndex = autoColDims.indexOf('value') + 1;
-                            }
-                        } else {
-                            // Insert after the 1st category
-                            catIndex++;
-                        }
-
-                        var catLevel = 1;
-                        while(catLevel < desiredCatCount){
-                            dimName = pvc.data.DimensionType.dimensionGroupLevelName('category', catLevel++);
-                            if(!this._userUsedDims[dimName]){
-                                def.array.insertAt(
-                                    autoColDims,
-                                    catIndex++,
-                                    dimName);
-                            }
-                        }
-                    }
+                /* Find the dimensions that are to be read automatically */
+                
+                var seriesInRows = this.options.seriesInRows;
+                
+                var autoColDimGroups = [];
+                
+                if(valuesColIndexes == null){
+                    autoColDimGroups
+                        .push({name: 'value', count: 1, float: false});
                 }
-
-                /* Assign virtual item indexes to remaining auto dims */
+                
+                if(seriesInRows){
+                    autoColDimGroups
+                        .push({name: 'series', count: 1});
+                }
+                
+                var desiredCatCount = Math.max(1, def.get(this.options, 'categoriesCount', 1));
+                autoColDimGroups
+                    .push({name: 'category', count: desiredCatCount});
+                
+                if(!seriesInRows){
+                    autoColDimGroups
+                        .push({name: 'series', count: 1, float: false});
+                }
+                
+                // -----
+                
+                var autoColDims = this._createDimsMap(autoColDimGroups, unmappedColCount);
+                
+                /* Assign virtual item indexes to auto dims */
                 var index = 0;
-                while(autoColDims.length && (dimName = autoColDims.pop())) {
+                var autoIndex = 0;
+                while(autoIndex < autoColDims.length) {
+                    var dimName = autoColDims[autoIndex];
                     index = this._nextAvailableItemIndex(index);
-
+                    
+                    (index < 0) && def.assert("Index must exist");
+                    
                     // mark the index as mapped
                     this._userItem[index] = true;
 
                     add(this._propGet(dimName, index), dimName);
 
-                    index++;
+                    index++; // consume index
+                    autoIndex++;
                 }
             }
         }
@@ -176,6 +165,60 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 add(relTransl_dataPartGet.call(this, axis2SeriesIndexes, seriesReader));
             }
         }
+    },
+    
+    /*
+     * Example orderedDimsMap =
+     * [
+     *    {name: 'value',    count: 1},
+     *    {name: 'category', count: 3},
+     *    {name: 'series',   count: 1}
+     *    ...
+     * ]
+     * 
+     * if count = 3, the result will be:
+     * ['category', 'category2', 'value']
+     */
+    _createDimsMap: function(orderedDimsMap, count){
+        var dimNames = [];
+        var i = 0;
+        var L = orderedDimsMap.length;
+        var DT = pvc.data.DimensionType;
+        while(i < L && count > 0){
+            var dimGroup = orderedDimsMap[i];
+            var groupName = dimGroup.name;
+            
+            var groupDimNames; 
+            if(dimGroup.float){
+                // The group's N first free dimension levels
+                groupDimNames = def.range(0, Infinity)
+                    .select(function(level){
+                        return DT.dimensionGroupLevelName(groupName, level);
+                    })
+                    .where(function(dimName){ 
+                        return !def.hasOwn(this._userUsedDims, dimName); 
+                    }, this)
+                    .take(Math.min(dimGroup.count, count)) // only as much as there are free indexes
+                    .array();
+            } else {
+                // The group's N first dimension levels, or skip when not free
+                groupDimNames = def.range(0, dimGroup.count)
+                    .select(function(level){
+                        return DT.dimensionGroupLevelName(groupName, level);
+                    })
+                    .where(function(dimName){ 
+                        return !def.hasOwn(this._userUsedDims, dimName); 
+                    }, this)
+                    .take(count) // only as much as there are free indexes
+                    .array();
+            }
+            
+            def.array.prepend(dimNames, groupDimNames);
+            count -= groupDimNames.length;
+            i++;
+        }
+        
+        return dimNames;
     }
 });
 

@@ -128,6 +128,8 @@ pvc.BulletChart = pvc.BaseChart.extend({
   },
   
   defaults: def.create(pvc.BaseChart.prototype.defaults, {
+      compatVersion: 1,
+      
       showValues: true,
       orientation: "horizontal",
       legend: false,

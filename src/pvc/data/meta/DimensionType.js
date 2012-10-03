@@ -272,7 +272,21 @@ function(complexType, name, keyArgs){
                 break;
                 
             case Date:
-                var format = def.get(keyArgs, 'format') || "%Y/%m/%d";
+                var format = def.get(keyArgs, 'format'); 
+                if(!format){
+                    // Try to create one from raw format
+                    // slightly modifying it to look like 
+                    // protovis' continuous date scale dynamic formats
+                    format = def.get(keyArgs, 'rawFormat');
+                    if(format){
+                        format = format.replace(/-/g, "/");
+                    }
+                }
+                
+                if(!format){
+                    format = "%Y/%m/%d";
+                }
+                
                 this._formatter = pv.Format.createFormatter(pv.Format.date(format));
                 break;
         }
@@ -350,6 +364,11 @@ function(complexType, name, keyArgs){
         
         return this._directAtomComparer ||
                 (this._directAtomComparer = this._createDirectAtomComparer());
+    },
+    
+    // Coercion to discrete upon the role binding (irreversible...)
+    _toDiscrete: function(){
+        this.isDiscrete = true;
     },
     
     _createReverseAtomComparer: function(){
