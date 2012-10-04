@@ -20,7 +20,7 @@ var pvc = def.globalSpace('pvc', {
         var url = window.location.href;
         if(url && (/\bdebug=true\b/).test(url)){
             var m = /\bdebugLevel=(\d+)/.exec(url);
-            pvc.debug = m ? (+m[1]) : 1;
+            pvc.debug = m ? (+m[1]) : 3;
         }
     }
 }());

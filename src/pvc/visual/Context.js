@@ -42,6 +42,10 @@ def.type('pvc.visual.Context')
         return this.sign.final(v);
     },
     
+    delegate: function(dv){
+        return this.sign.delegate(dv);
+    },
+    
     /* V1 DIMENSION ACCESSORS */
     getV1Series: function(){
         var s;

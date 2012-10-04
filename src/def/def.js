@@ -100,8 +100,6 @@ if(!this.JSON.stringify){
 
 /** @private */
 var objectHasOwn = Object.prototype.hasOwnProperty;
-/** @private */
-var arraySlice = Array.prototype.slice;
 
 /**
  * @name def
@@ -171,7 +169,7 @@ var def = /** @lends def */{
             var parts = def.array.is(path) ? path : path.split('.');
             if(parts.length){
                 var pLast = parts.pop();
-                var o = def.getPath(o, parts, pLast, true);
+                o = def.getPath(o, parts, pLast, true);
                 if(o != null){
                     o[pLast] = v;
                 }
