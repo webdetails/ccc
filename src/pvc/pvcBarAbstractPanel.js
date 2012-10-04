@@ -321,7 +321,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
      * Renders this.pvPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
-    _renderInteractive: function(){
+    renderInteractive: function(){
         this.pvPanel.render();
     },
 

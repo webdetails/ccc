@@ -94,24 +94,38 @@ if(Object.defineProperty){
  */
 function visualContext_update(mark, event){
 
-    this.sign   = mark.sign || null;
     this.event  = event || null;
-    this.index  = mark.index; // !scene => index = null
     this.pvMark = mark;
-
-    var instance = mark.instance(),
-        scene = instance._scene;
     
-    if(!scene){
-        var group = instance.group,
-            datum = group ? null : instance.datum;
+    var scene;
+    if(mark){
+        this.sign  = mark.sign || null;
+        
+        var instance = mark.instance();
+        scene = instance._scene;
+        if(!scene){
+            this.index = null;
+            
+            var group = instance.group,
+                datum = group ? null : instance.datum;
+            
+            scene = new pvc.visual.Scene(null, {
+                panel: this.panel,
+                group: group,
+                datum: datum
+            });
+        } else {
+            this.index = scene.childIndex();
+        }
+    } else {
+        this.sign  = null;
+        this.index = null;
         
         scene = new pvc.visual.Scene(null, {
             panel: this.panel,
-            group: group,
-            datum: datum
+            group: this.chart.root.data
         });
     }
-
+    
     this.scene = scene;
 }

@@ -251,7 +251,8 @@ def.type('pvc.visual.Scene')
     
     activeSeries: function(){
         var active = this.active();
-        return active && active.vars.series.value;
+        var seriesVar;
+        return active && (seriesVar = active.vars.series) && seriesVar.value;
     },
     
     isActiveSeries: function(){

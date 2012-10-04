@@ -253,8 +253,16 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     multiChartPageIndex: null,
     
+    /**
+     * The options object specified by the user,
+     * before any processing.
+     */
+    _initialOptions: null,
+    
     constructor: function(options) {
         var parent = this.parent = def.get(options, 'parent') || null;
+        
+        this._initialOptions = options;
         
         /* DEBUG options */
         if(pvc.debug >= 3 && !parent && options){
@@ -342,7 +350,6 @@ pvc.BaseChart = pvc.Abstract.extend({
             options.animate = false;
         }
         
-        // Sanitize some options
         if(options.showTooltips){
             var ts = options.tipsySettings;
             if(ts){
@@ -1327,10 +1334,11 @@ pvc.BaseChart = pvc.Abstract.extend({
                     mark = mark.borderPanel;
                 }
                 
-                var logOut    = pvc.debug >= 3 ? [] : null;
-                var constOnly = def.get(keyArgs, 'constOnly', false); 
-                var wrap      = mark.wrap;
-                var keyArgs   = {tag: pvc.extensionTag};
+                var logOut     = pvc.debug >= 3 ? [] : null;
+                var constOnly  = def.get(keyArgs, 'constOnly', false); 
+                var wrap       = mark.wrap;
+                var keyArgs    = {tag: pvc.extensionTag};
+                var isRealMark = mark instanceof pv.Mark;
                 
                 component.forEach(function(v, m){
                     // Not everything that is passed to 'mark' argument
@@ -1354,12 +1362,14 @@ pvc.BaseChart = pvc.Abstract.extend({
                                         v = def.copy(v2, v);
                                     }
                                 }
-                            } else if((wrap || constOnly) && type === 'function'){
+                            } else if(isRealMark && (wrap || constOnly) && type === 'function'){
                                 if(constOnly){
                                     return;
                                 }
                                 
-                                v = wrap.call(mark, v, m);
+                                if(m !== 'add'){ // TODO: "add" extension idiom - any other exclusions?
+                                    v = wrap.call(mark, v, m);
+                                }
                             }
                         }
                         
@@ -1472,7 +1482,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                 }
                 
                 /** Rendering afterwards allows the action to change the selection in between */
-                this.basePanel._renderInteractive();
+                this.basePanel.renderInteractive();
             } finally {
                 this._inUpdateSelections   = false;
                 this._selectionNeedsUpdate = false;
@@ -1608,7 +1618,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         },
         
         tipsySettings: {
-            gravity: "s",
+            gravity:    "s",
             delayIn:     200,
             delayOut:    80, // smoother moving between marks with tooltips, possibly slightly separated
             offset:      2,

@@ -480,7 +480,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
      * Renders the heat grid panel.
      * @override
      */
-    _renderInteractive: function(){
+    renderInteractive: function(){
         this.pvPanel.render();
     },
     

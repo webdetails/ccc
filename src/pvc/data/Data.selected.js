@@ -42,20 +42,46 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     visibleCount: function(){
         return this._visibleDatums.count;
     },
-
+    
+    /**
+     * Replaces currently selected datums with the specified datums.
+     *
+     * @param {pvc.data.Datum[]|def.query<pvc.data.Datum>} [datums] The new datums to be selected.
+     * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise. 
+     */
+    replaceSelected: function(datums){
+        /*global datum_deselect:true */
+        
+        // Clear all but the ones we'll be selecting.
+        // This way we can have a correct changed flag.
+        var alreadySelectedById = 
+            def
+            .query(datums)
+            .where(function(datum){ return datum.isSelected; })
+            .object({ name: function(datum){ return datum.id; } });
+        
+        var changed = this.owner.clearSelected(function(datum){
+                return !def.hasOwn(alreadySelectedById, datum.id); 
+            });
+        
+        changed |= pvc.data.Data.setSelected(datums, true);
+        
+        return changed;
+    },
+    
     /**
      * Clears the selected state of any selected datum.
-     * <p>
-     * Can only be called on an owner data.
-     * </p>
+     *
      * @param {pvc.data.Datum} [funFilter] Allows excluding atoms from the clear operation.
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise. 
      */
     clearSelected: function(funFilter){
-        /*global data_assertIsOwner:true */
         /*global datum_deselect:true */
         
-        data_assertIsOwner.call(this);
+        if(this.owner !== this){
+             return this.owner.clearSelected(funFilter);
+        }
+        
         if(!this._selectedDatums.count) {
             return false;
         }

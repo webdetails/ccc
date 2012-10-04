@@ -138,8 +138,12 @@ var def = /** @lends def */{
         return props.map(function(p){ return o[p]; });
     },
     
-    getPath: function(o, path, create, dv){
-        if(o && path != null){
+    getPath: function(o, path, dv, create){
+        if(!o) { 
+            return dv;
+        }
+        
+        if(path != null){
             var parts = def.array.is(path) ? path : path.split('.');
             var L = parts.length;
             if(L){
@@ -148,7 +152,9 @@ var def = /** @lends def */{
                     var part = parts[i++];
                     var value = o[part];
                     if(value == null){
-                        if(!create){ return dv; }
+                        if(!create){ 
+                            return dv; 
+                        }
                         value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
                     }
                     
@@ -165,7 +171,7 @@ var def = /** @lends def */{
             var parts = def.array.is(path) ? path : path.split('.');
             if(parts.length){
                 var pLast = parts.pop();
-                var o = def.getPath(o, parts, true, pLast);
+                var o = def.getPath(o, parts, pLast, true);
                 if(o != null){
                     o[pLast] = v;
                 }
@@ -557,6 +563,10 @@ var def = /** @lends def */{
             return typeof v === 'string';
         },
         
+        to: function(v, ds){
+            return v != null ? ('' + v) : (ds || '');
+        },
+        
         join: function(sep){
             var a = arguments;
             var L = a.length;
@@ -604,9 +614,8 @@ var def = /** @lends def */{
             return typeof v === 'function';
         },
         
-        // TODO: this is not an as...
         as: function(v){
-            return typeof v === 'function' ? v : def.fun.constant(v);
+            return typeof v === 'function' ? v : null;
         },
         
         to: function(v){
@@ -1782,10 +1791,12 @@ def.type('OrderedMap')
 def.html = {
     // TODO: lousy multipass implementation!
     escape: function(str){
-        return str.replace(/&/gm, "&amp;")
-                  .replace(/</gm, "&lt;")
-                  .replace(/>/gm, "&gt;")
-                  .replace(/"/gm, "&quot;");    
+        return def
+            .string.to(str)
+            .replace(/&/gm, "&amp;")
+            .replace(/</gm, "&lt;")
+            .replace(/>/gm, "&gt;")
+            .replace(/"/gm, "&quot;");    
     }
 };
 

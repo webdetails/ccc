@@ -883,7 +883,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             options = chart.options;
         
         if (options.renderCallback) {
-            options.renderCallback.call(chart);
+            options.renderCallback.call(this._getContext());
         }
         
         var pvPanel = this.pvRootPanel;
@@ -941,7 +941,7 @@ pvc.BasePanel = pvc.Abstract.extend({
      * 
      * @virtual
      */
-    _renderInteractive: function(){
+    renderInteractive: function(){
         if(this.isVisible){
             var pvMarks = this._getSelectableMarks();
             if(pvMarks && pvMarks.length){
@@ -952,7 +952,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             if(this._children){
                 this._children.forEach(function(child){
-                    child._renderInteractive();
+                    child.renderInteractive();
                 });
             }
         }
@@ -1255,14 +1255,14 @@ pvc.BasePanel = pvc.Abstract.extend({
                 scene.setActive(true);
 
                 if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
-                    panel._renderInteractive();
+                    panel.renderInteractive();
                 }
             })
             .event(offEvent, function(scene){
                 if(scene.clearActive()) {
                     /* Something was active */
                     if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
-                        panel._renderInteractive();
+                        panel.renderInteractive();
                     }
                 }
             });
@@ -1272,21 +1272,20 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     /* TOOLTIP */ 
     _addPropTooltip: function(pvMark, keyArgs){
-        var buildTooltip = def.get(keyArgs, 'buildTooltip') ||
-                           this._getTooltipBuilder();
-        if(!buildTooltip){
-            return;
-        }
-        
-        var myself = this;
         var options = this.chart.options;
-
+        
         var tipsySettings;
         var nowTipsySettings = def.get(keyArgs, 'tipsySettings');
         if(nowTipsySettings){
             tipsySettings = def.create(options.tipsySettings, nowTipsySettings);
         } else {
             tipsySettings = Object.create(options.tipsySettings);
+        }
+        
+        var buildTooltip = def.get(keyArgs, 'buildTooltip') ||
+                           this._getTooltipBuilder(tipsySettings);
+        if(!buildTooltip){
+            return;
         }
         
         tipsySettings.isEnabled = this._isTooltipEnabled.bind(this);
@@ -1317,7 +1316,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         this._ensurePropEvents(pvMark);
     },
     
-    _getTooltipBuilder: function(){
+    _getTooltipBuilder: function(tipsySettings){
         var options = this.chart.options;
         var isV1Compat = this.compatVersion() <= 1;
         
@@ -1334,12 +1333,24 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         if(isV1Compat){
+            var isSourceHtml = def.getPath(
+                    this.chart._initialOptions, 
+                    'tipsySettings.html', 
+                    false);
+            var isTargetHtml = tipsySettings.html;
+            var doEscape = isTargetHtml && !isSourceHtml;
+            
             return function(context){
-                return tooltipFormat.call(context.panel, 
-                                context.getV1Series(),
-                                context.getV1Category(),
-                                context.getV1Value() || '',
-                                context.getV1Datum());
+                var tooltipText = tooltipFormat.call(
+                        context.panel, 
+                        context.getV1Series(),
+                        context.getV1Category(),
+                        context.getV1Value() || '',
+                        context.getV1Datum());
+                
+                return doEscape ? 
+                       def.html.escape(tooltipText) : 
+                       tooltipText;
             };
         }
         
@@ -1643,23 +1654,13 @@ pvc.BasePanel = pvc.Abstract.extend({
     _onSelect: function(context){
         var datums = context.scene.datums().array();
         if(datums.length){
-            var chart  = this.chart;
-            
             datums = this._onUserSelection(datums);
             if(datums && datums.length){
+                var chart = this.chart;
+                
                 var changed;
                 if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
-                    // Clear all but the ones we'll be selecting.
-                    // This way we can have a correct changed flag.
-                    var alreadySelectedById = def.query(datums)
-                                            .where(function(datum){ return datum.isSelected; })
-                                            .object({ name: function(datum){ return datum.id; } });
-                    
-                    changed = chart.data.owner.clearSelected(function(datum){
-                        return !def.hasOwn(alreadySelectedById, datum.id); 
-                    });
-                    
-                    changed |= pvc.data.Data.setSelected(datums, true);
+                    changed = chart.data.replaceSelected(datums);
                 } else {
                     changed = pvc.data.Data.toggleSelected(datums);
                 }

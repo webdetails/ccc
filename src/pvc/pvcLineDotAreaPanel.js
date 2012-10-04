@@ -385,7 +385,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
      * Renders this.pvScatterPanel - the parent of the marks that are affected by interaction changes.
      * @override
      */
-    _renderInteractive: function(){
+    renderInteractive: function(){
         this.pvScatterPanel.render();
     },
 

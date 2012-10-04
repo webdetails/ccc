@@ -82,6 +82,11 @@ def
                     if(roundMode === 'nice'){
                         scale.nice();
                     }
+                    
+                    var tickFormatter = this.option('TickFormatter');
+                    if(tickFormatter){
+                        scale.tickFormatter(tickFormatter);
+                    }
                 }
             }
         }
@@ -465,6 +470,10 @@ var cartAxis_optionsDef = def.create(axis_optionsDef, {
         resolve: resolveNormal,
         cast:    Boolean,
         value:   true 
+    },
+    TickFormatter: {
+        resolve: resolveNormal,
+        cast:    def.fun.as
     },
     DomainRoundMode: {
         resolve: resolveNormal,

@@ -520,7 +520,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
      * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
-    _renderInteractive: function(){
+    renderInteractive: function(){
         this.pvPanel.render();
     },
 
