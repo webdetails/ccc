@@ -110,6 +110,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         }
         
         def.eachOwn(this._dimensions, function(dim){
+            /*global dim_uninternInterpolatedAtoms:true*/
             dim_uninternInterpolatedAtoms.call(dim);
         });
     },
@@ -444,6 +445,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  */
 function data_setDatums(newDatums, keyArgs){
     // But may be an empty list
+    /*jshint expr:true */
     newDatums || def.fail.argumentRequired('newDatums');
     
     var doAtomGC   = def.get(keyArgs, 'doAtomGC',   false);
@@ -484,6 +486,7 @@ function data_setDatums(newDatums, keyArgs){
         if(isAdditive){
             this._sumAbsCache = null;
         } else {
+            /*global data_disposeChildLists:true*/
             data_disposeChildLists.call(this);
             if(selectedDatums) { selectedDatums.clear(); }
             visibleDatums.clear();
@@ -529,6 +532,7 @@ function data_setDatums(newDatums, keyArgs){
         // Atom garbage collection
         // Unintern unused atoms
         def.eachOwn(this._dimensions, function(dimension){
+            /*global dim_uninternUnvisitedAtoms:true*/
             dim_uninternUnvisitedAtoms.call(dimension);
         });
     }
@@ -650,6 +654,7 @@ function data_processDatumAtoms(datum, intern, markVisited){
 
 function data_addDatumsSimple(newDatums){
     // But may be an empty list
+    /*jshint expr:true */
     newDatums || def.fail.argumentRequired('newDatums');
     
     var groupOper = this._groupOper;

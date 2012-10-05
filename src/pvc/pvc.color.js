@@ -96,201 +96,203 @@ def.scope(function(){
      * @class Represents one creation/build of a set of scale functions.
      * @abstract
      */
-    def.type('pvc.color.ScalesBuild')
-       .init(function(keyArgs){
-           this.keyArgs        = keyArgs;
-           this.data           = keyArgs.data || def.fail.argumentRequired('keyArgs.data');
-           this.domainDimName  = keyArgs.colorDimension || def.fail.argumentRequired('keyArgs.colorDimension');
-           this.domainDim      = this.data.dimensions(this.domainDimName);
+    def
+    .type('pvc.color.ScalesBuild')
+    .init(function(keyArgs){
+        this.keyArgs        = keyArgs;
+        this.data           = keyArgs.data || def.fail.argumentRequired('keyArgs.data');
+        this.domainDimName  = keyArgs.colorDimension || def.fail.argumentRequired('keyArgs.colorDimension');
+        this.domainDim      = this.data.dimensions(this.domainDimName);
+       
+        var dimType = this.domainDim.type;
+        if(!dimType.isComparable) {
+            this.domainComparer = null;
+            pvc.log("Color value dimension should be comparable. Generated color scale may be invalid.");
+        } else {
+            this.domainComparer = function(a, b){ return dimType.compare(a, b); };
+        }
+       
+        this.nullRangeValue = keyArgs.nullColor ? pv.color(keyArgs.nullColor) : pv.Color.transparent;
+       
+        this.domainRangeCountDif = 0;
+    })
+    .add(/** @lends pvc.color.ScalesBuild# */{
+       /**
+        * Builds one scale function.
+        * 
+        * @type pv.Scale
+        */
+        build: function(){
+            this.range = this._getRange();
+            this.desiredDomainCount = this.range.length + this.domainRangeCountDif;
            
-           var dimType = this.domainDim.type;
-           if(!dimType.isComparable) {
-               this.domainComparer = null;
-               pvc.log("Color value dimension should be comparable. Generated color scale may be invalid.");
-           } else {
-               this.domainComparer = function(a, b){ return dimType.compare(a, b); };
-           }
-           
-           this.nullRangeValue = keyArgs.nullColor ? pv.color(keyArgs.nullColor) : pv.Color.transparent;
-           
-           this.domainRangeCountDif = 0;
-       }).add(/** @lends pvc.color.ScalesBuild# */{
-           /**
-            * Builds one scale function.
-            * 
-            * @type pv.Scale
-            */
-           build: function(){
-               this.range = this._getRange();
-               this.desiredDomainCount = this.range.length + this.domainRangeCountDif;
+            var domain = this._getDomain();
+            return this._createScale(domain);
+        },
+       
+        /**
+         * Builds a map from category keys to scale functions.
+         * 
+         * @type object
+         */
+        buildMap: function(){
+            this.range = this._getRange();
+            this.desiredDomainCount = this.range.length + this.domainRangeCountDif;
+            
+            var createCategoryScale;
+            
+            /* Compute a scale-function per data category? */
+            if(this.keyArgs.normPerBaseCategory){
+                /* Ignore args' domain and calculate from data of each category */
+                createCategoryScale = function(leafData){
+                    // Create a domain from leafData
+                    var domain = this._ensureDomain(null, false, leafData);
+                    return this._createScale(domain);
+                };
+            } else {
+                var domain = this._getDomain(),
+                    scale  = this._createScale(domain);
                
-               var domain = this._getDomain();
-               return this._createScale(domain);
-           },
+                createCategoryScale = def.fun.constant(scale);
+            }
            
-           /**
-            * Builds a map from category keys to scale functions.
-            * 
-            * @type object
-            */
-           buildMap: function(){
-               this.range = this._getRange();
-               this.desiredDomainCount = this.range.length + this.domainRangeCountDif;
+            return this._createCategoryScalesMap(createCategoryScale); 
+        },
+       
+        _createScale: def.method({isAbstract: true}),
+       
+        _createCategoryScalesMap: function(createCategoryScale){
+            return this.data.leafs()
+                .object({
+                    name:    function(leafData){ return leafData.absKey; },
+                    value:   createCategoryScale,
+                    context: this
+                });
+        },
+       
+        _getRange: function(){
+            var keyArgs = this.keyArgs,
+                range = keyArgs.colorRange || ['red', 'yellow','green'];
+       
+            if(keyArgs.minColor != null && keyArgs.maxColor != null){
                
-               var createCategoryScale;
+                range = [keyArgs.minColor, keyArgs.maxColor];
                
-               /* Compute a scale-function per data category? */
-               if(this.keyArgs.normPerBaseCategory){
-                   /* Ignore args' domain and calculate from data of each category */
-                   createCategoryScale = function(leafData){
-                       // Create a domain from leafData
-                       var domain = this._ensureDomain(null, false, leafData);
-                       return this._createScale(domain);
-                   };
-                   
-               } else {
-                   var domain = this._getDomain(),
-                       scale  = this._createScale(domain);
-                   
-                   createCategoryScale = def.fun.constant(scale);
-               }
+            } else if (keyArgs.minColor != null){
                
-               return this._createCategoryScalesMap(createCategoryScale); 
-           },
-           
-           _createScale: def.method({isAbstract: true}),
-           
-           _createCategoryScalesMap: function(createCategoryScale){
-               return this.data.leafs()
-                   .object({
-                       name:    function(leafData){ return leafData.absKey; },
-                       value:   createCategoryScale,
-                       context: this
-                   });
-           },
-           
-           _getRange: function(){
-               var keyArgs = this.keyArgs,
-                   range = keyArgs.colorRange || ['red', 'yellow','green'];
-           
-               if(keyArgs.minColor != null && keyArgs.maxColor != null){
-                   
-                   range = [keyArgs.minColor, keyArgs.maxColor];
-                   
-               } else if (keyArgs.minColor != null){
-                   
-                   range.unshift(keyArgs.minColor);
-                   
-               } else if (keyArgs.maxColor != null){
-                   
-                   range.push(keyArgs.maxColor);
-               }
-           
-               return range.map(function(c) { return pv.color(c); });
-           },
-           
-           _getDataExtent: function(data){
+                range.unshift(keyArgs.minColor);
                
-               var extent = data.dimensions(this.domainDimName).extent({visible: true});
-               if(!extent) { // No atoms...
-                   return null;
-               }
+            } else if (keyArgs.maxColor != null){
                
-               var min = extent.min.value,
-                   max = extent.max.value;
-                
-               if(max == min){
-                   if(max >= 1){
-                       min = max - 1;
-                   } else {
-                       max = min + 1;
-                   }
-               }
-               
-               return {min: min, max: max};
-           },
+                range.push(keyArgs.maxColor);
+            }
+       
+            return range.map(function(c) { return pv.color(c); });
+        },
+       
+        _getDataExtent: function(data){
            
-           _getDomain: function() {
-               var domain = this.keyArgs.colorRangeInterval;
-               if(domain != null){
-                   if(this.domainComparer) {
-                       domain.sort(this.domainComparer);
-                   }
-                   
-                   if(domain.length > this.desiredDomainCount){ 
-                       // More domain points than needed for supplied range
-                       domain = domain.slice(0, this.desiredDomainCount);
-                   }
-               } else {
-                   // This ends up being padded...in ensureDomain
-                   domain = [];
-               }
-               
-               return this._ensureDomain(domain, true, this.data);
-           },
+            var extent = data.dimensions(this.domainDimName).extent({visible: true});
+            if(!extent) { // No atoms...
+                return null;
+            }
            
-           _ensureDomain: function(domain, doDomainPadding, data) {
-               var extent;
+            var min = extent.min.value,
+                max = extent.max.value;
+            
+            if(max == min){
+                if(max >= 1){
+                    min = max - 1;
+                } else {
+                    max = min + 1;
+                }
+            }
+           
+            return {min: min, max: max};
+        },
+       
+        _getDomain: function() {
+            var domain = this.keyArgs.colorRangeInterval;
+            if(domain != null){
+                if(this.domainComparer) {
+                    domain.sort(this.domainComparer);
+                }
                
-               if(domain && doDomainPadding){
-                   /* 
-                    * If domain does not have as many values as there are colors (taking domainRangeCountDif into account),
-                    * it is *completed* with the extent calculated from data.
-                    * (NOTE: getArgsDomain already truncates the domain to number of colors)
-                    */
-                   var domainPointsMissing = this.desiredDomainCount - domain.length;
-                   if(domainPointsMissing > 0){ 
-                       extent = this._getDataExtent(data);
-                       if(extent){
-                            // Assume domain is sorted
-                            switch(domainPointsMissing){  // + 1 in discrete ?????
-                                case 1:
-                                    if(this.domainComparer) {
-                                        def.array.insert(domain, extent.max, this.domainComparer);
-                                    } else {
-                                        domain.push(extent.max);
-                                    }
-                                    break;
+                if(domain.length > this.desiredDomainCount){ 
+                    // More domain points than needed for supplied range
+                    domain = domain.slice(0, this.desiredDomainCount);
+                }
+            } else {
+                // This ends up being padded...in ensureDomain
+                domain = [];
+            }
+           
+            return this._ensureDomain(domain, true, this.data);
+        },
+       
+        _ensureDomain: function(domain, doDomainPadding, data) {
+            var extent;
+           
+            if(domain && doDomainPadding){
+                /* 
+                 * If domain does not have as many values as there are colors (taking domainRangeCountDif into account),
+                 * it is *completed* with the extent calculated from data.
+                 * (NOTE: getArgsDomain already truncates the domain to number of colors)
+                 */
+                var domainPointsMissing = this.desiredDomainCount - domain.length;
+                if(domainPointsMissing > 0){ 
+                    extent = this._getDataExtent(data);
+                    if(extent){
+                        // Assume domain is sorted
+                        switch(domainPointsMissing){  // + 1 in discrete ?????
+                            case 1:
+                                if(this.domainComparer) {
+                                    def.array.insert(domain, extent.max, this.domainComparer);
+                                } else {
+                                    domain.push(extent.max);
+                                }
+                                break;
 
-                                case 2:
-                                    if(this.domainComparer) {
-                                        def.array.insert(domain, extent.min, this.domainComparer);
-                                        def.array.insert(domain, extent.max, this.domainComparer);
-                                    } else {
-                                        domain.unshift(extent.min);
-                                        domain.push(extent.max);
-                                    }
-                                    break;
+                            case 2:
+                                if(this.domainComparer) {
+                                    def.array.insert(domain, extent.min, this.domainComparer);
+                                    def.array.insert(domain, extent.max, this.domainComparer);
+                                } else {
+                                    domain.unshift(extent.min);
+                                    domain.push(extent.max);
+                                }
+                                break;
 
-                                default:
-                                    /* Ignore args domain altogether */
-                                    if(pvc.debug >= 2){
-                                            pvc.log("Ignoring option 'colorRangeInterval' due to unsupported length." +
-                                                    def.format(" Should have '{0}', but instead has '{1}'.", [this.desiredDomainCount, domain.length]));
-                                    }
-                                    domain = null;
-                            }
+                            default:
+                                /* Ignore args domain altogether */
+                                if(pvc.debug >= 2){
+                                        pvc.log("Ignoring option 'colorRangeInterval' due to unsupported length." +
+                                                def.format(" Should have '{0}', but instead has '{1}'.", [this.desiredDomainCount, domain.length]));
+                                }
+                                domain = null;
                         }
-                   }
+                    }
                }
-               
-               if(!domain) {
-                   /*jshint expr:true */
-                   extent || (extent = this._getDataExtent(data));
-                   if(extent){
-                       var min = extent.min,
-                           max = extent.max;
-                       var step = (max - min) / (this.desiredDomainCount - 1);
-                       domain = pv.range(min, max + step, step);
-                   }
-               }
-               
-               return domain;
            }
-       });
+           
+           if(!domain) {
+               /*jshint expr:true */
+               extent || (extent = this._getDataExtent(data));
+               if(extent){
+                   var min = extent.min,
+                       max = extent.max;
+                   var step = (max - min) / (this.desiredDomainCount - 1);
+                   domain = pv.range(min, max + step, step);
+               }
+           }
+           
+           return domain;
+       }
+   });
         
     
-    def.type('pvc.color.LinearScalesBuild', pvc.color.ScalesBuild)
+    def
+    .type('pvc.color.LinearScalesBuild', pvc.color.ScalesBuild)
     .add(/** @lends pvc.color.LinearScalesBuild# */{
         
         _createScale: function(domain){
@@ -306,7 +308,8 @@ def.scope(function(){
         }
     });
     
-    def.type('pvc.color.DiscreteScalesBuild', pvc.color.ScalesBuild)
+    def
+    .type('pvc.color.DiscreteScalesBuild', pvc.color.ScalesBuild)
     .init(function(keyArgs){
         this.base(keyArgs);
         

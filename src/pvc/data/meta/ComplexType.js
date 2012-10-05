@@ -245,12 +245,11 @@ function(dimTypeSpecs){
         var map = this._isPctRoleDimTypeMap;
         if(!map) {
             map = this._isPctRoleDimTypeMap = new def.Map(
-                        def.query(def.own(this._dims))
-                            .where(function(dimType){ return dimType.playingPercentVisualRole(); })
-                            .object({
-                                name:  function(dimType){ return dimType.name; } 
-                            })
-                    );
+                def.query(def.own(this._dims))
+                    .where(function(dimType){ return dimType.playingPercentVisualRole(); })
+                    .object({
+                        name: function(dimType) { return dimType.name; } 
+                    }));
         }
         
         return map;

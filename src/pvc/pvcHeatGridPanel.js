@@ -141,9 +141,9 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
                                 value: function(leafScene){
                                     var colorVar = leafScene.vars.color;
                                     return colorVar ? ('' + colorVar.value) : null;
-                                 },
+                                }
                             });
-                    },
+                    }
                 });
                 
             wrapper = function(v1f){
@@ -169,7 +169,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
         }
         
         /* Cell panel */
-        var keyArgs = {
+        keyArgs = { // reuse var
             extensionId: ['heatGridPanel', 'heatGrid'],
             wrapper:     wrapper
         };

@@ -59,14 +59,14 @@ def
             }
             
             renderInfo.pvRule = new pvc.visual.Rule(legendPanel, pvBulletPanel, {
-                        proto: rulePvBaseProto,
-                        noSelect:    this.noSelect,
-                        noHover:     this.noHover,
-                        activeSeriesAware: false,// no guarantee that series exist in the scene
-                        extensionId: extensionPrefix + "Rule",
-                        wrapper:     wrapper
-                    })
-                    .pvMark;
+                    proto: rulePvBaseProto,
+                    noSelect:    this.noSelect,
+                    noHover:     this.noHover,
+                    activeSeriesAware: false,// no guarantee that series exist in the scene
+                    extensionId: extensionPrefix + "Rule",
+                    wrapper:     wrapper
+                })
+                .pvMark;
         }
         
         if(this.drawMarker){

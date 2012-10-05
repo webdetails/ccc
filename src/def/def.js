@@ -1390,7 +1390,7 @@ def.scope(function(){
         function constructor(){
             if(S){
                 var i = 0;
-                while(steps[i].apply(this, arguments) !== false && ++i < S);
+                while(steps[i].apply(this, arguments) !== false && ++i < S){}
             }
         }
         

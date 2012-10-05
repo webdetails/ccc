@@ -49,18 +49,17 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 } else {
                     // Common scale => 
                     // axis ortho 0 represents both data parts
-                    var orthoDataCells = [
-                          {
-                              role: valueRole,
-                              dataPartValue: '0',
-                              isStacked: isStacked
-                          },
-                          {
-                              role: valueRole,
-                              dataPartValue: '1',
-                              nullInterpolationMode: nullInterpolationMode
-                          }
-                      ];
+                    var orthoDataCells = [{
+                            role: valueRole,
+                            dataPartValue: '0',
+                            isStacked: isStacked
+                        },
+                        {
+                            role: valueRole,
+                            dataPartValue: '1',
+                            nullInterpolationMode: nullInterpolationMode
+                        }
+                    ];
                     
                     axes.ortho.bind(orthoDataCells);
                     
@@ -131,7 +130,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 colorAxis:      this.axes.color2,
                 dataPartValue:  '1',
                 stacked:        false,
-                showValues:     !(this.compatVersion() <= 1) && options.showValues,
+                showValues:     (this.compatVersion() > 1) && options.showValues,
                 valuesAnchor:   options.valuesAnchor != 'center' ? options.valuesAnchor : 'right',
                 showLines:      options.showLines,
                 showDots:       options.showDots,

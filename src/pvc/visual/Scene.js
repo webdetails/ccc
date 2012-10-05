@@ -232,7 +232,8 @@ def.type('pvc.visual.Scene')
     isActive: false,
     
     setActive: function(isActive){
-        if(this.isActive !== (!!isActive)){
+        isActive = !!isActive; // normalize
+        if(this.isActive !== isActive){
             rootScene_setActive.call(this.root, this.isActive ? null : this);
         }
     },
@@ -331,7 +332,8 @@ function rootScene_setActive(scene){
 }
 
 function scene_setActive(isActive){
-    if(this.isActive !== (!!isActive)){
+    isActive = !!isActive; // normalize
+    if(this.isActive !== isActive){
         if(!isActive){
             delete this.isActive;
         } else {

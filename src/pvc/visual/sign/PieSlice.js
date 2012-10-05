@@ -98,10 +98,9 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
                 case 'stroke': return color.brighter(1.3).alpha(0.7);
             }
         } else if(scene.anySelected() && !scene.isSelected()) {
-            switch(type) {
-                case 'fill':
-                //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
-                    return this.dimColor(color, type);
+            //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
+            if(type === 'fill') {
+                return this.dimColor(color, type);
             }
         }
 

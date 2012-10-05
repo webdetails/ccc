@@ -977,7 +977,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             //  virtue of the includeModulo effect.
             .localProperty('hidden')
             .lockMark('hidden', function(){ // for use by
-                return !!(this.index % includeModulo);
+                return (this.index % includeModulo) !== 0;
             })
             .lock(anchorOpposite, 0) // top (of the axis panel)
             .lockMark(anchorOrtho, function(tickScene){

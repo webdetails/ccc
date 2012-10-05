@@ -77,13 +77,13 @@ def
         
         /* Fill the atoms map */
         var atomsMap = this.atoms;
-        
+        var atom;
         var count = 0;
         var singleAtom;
         var i;
         var L = atoms.length;
         for(i = 0 ; i < L ; i++){
-            var atom  = atoms[i] || def.fail.argumentRequired('atom');
+            atom  = atoms[i] || def.fail.argumentRequired('atom');
             var value = atom.value; 
             if(value != null){ // nulls are already in base proto object
                 var name = atom.dimension.name;
@@ -129,7 +129,7 @@ def
             for(i = 0 ; i < L ; i++){
                 var dimName = dimNames[i];
                 if(def.hasOwnProp.call(atomsMap, dimName)){
-                    var atom = atomsMap[dimName];
+                    atom = atomsMap[dimName];
                     if(key){
                         key += ',' + atom.globalKey;
                     } else {
@@ -153,7 +153,7 @@ def
                 this.label = label;
             }
         }
-	}
+    }
 })
 .add(/** @lends pvc.data.Complex# */{
     

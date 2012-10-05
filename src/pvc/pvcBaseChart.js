@@ -1337,7 +1337,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                 var logOut     = pvc.debug >= 3 ? [] : null;
                 var constOnly  = def.get(keyArgs, 'constOnly', false); 
                 var wrap       = mark.wrap;
-                var keyArgs    = {tag: pvc.extensionTag};
+                var keyArgs2   = {tag: pvc.extensionTag};
                 var isRealMark = mark instanceof pv.Mark;
                 
                 component.forEach(function(v, m){
@@ -1376,7 +1376,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                         // Distinguish between mark methods and properties
                         if (typeof mark[m] === "function") {
                             if(mark.intercept){
-                                mark.intercept(m, v, keyArgs);
+                                mark.intercept(m, v, keyArgs2);
                             } else {
                                 // Not really a mark
                                 mark[m](v);
@@ -1652,10 +1652,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        clickAction: null,
 //        doubleClickAction: null,
         doubleClickMaxDelay: 300, //ms
-//      clickAction: function(s, c, v) {
-//          pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
-//      },
-        
+//      
         hoverable:  false,
         selectable: false,
         

@@ -1,11 +1,12 @@
 
 (function(){
-var url;
-if(typeof (url = window.location.href) !== 'undefined'){
-    if(!((/\bdebug=true\b/).test(url) && /\bdebugLevel=(\d+)/.test(url))){
-        pvc.debug = 3;
+    var url;
+    /*global window:true */
+    if(typeof (url = window.location.href) !== 'undefined'){
+        if(!((/\bdebug=true\b/).test(url) && /\bdebugLevel=(\d+)/.test(url))){
+            pvc.debug = 3;
+        }
     }
-}
 }());
 
 var tryMe = function(e){ 
@@ -13,6 +14,7 @@ var tryMe = function(e){
         /*jshint evil:true */
         eval( $(e).prev("textarea").val());
     } catch(ex){
+        /*global alert:true */
         alert("Try me error: " + ex);
     }
 };

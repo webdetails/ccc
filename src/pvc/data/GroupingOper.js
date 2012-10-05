@@ -145,13 +145,17 @@ add(/** @lends pvc.data.GroupingOper */{
         // Create the root node
         var root = {
             isRoot:     true,
-            treeHeight: def.query(this._groupSpecs)
-                           .select(function(spec){
-                               var levelCount = spec.levels.length;
-                               if(!levelCount) { return 0; }
-                               return !!spec.flatteningMode ? 1 : levelCount;
-                           })
-                           .reduce(def.add, 0),
+            treeHeight: def
+                .query(this._groupSpecs)
+                .select(function(spec){
+                    var levelCount = spec.levels.length;
+                    if(!levelCount) { 
+                        return 0; 
+                    }
+                    return !!spec.flatteningMode ? 1 : levelCount;
+                })
+                .reduce(def.add, 0),
+                
             datums:   []
             // children
             // atoms       // not on root
@@ -171,7 +175,7 @@ add(/** @lends pvc.data.GroupingOper */{
             levelSpecs = groupSpec.levels,
             D = levelSpecs.length,
             nextSpecIndex = specIndex + 1,
-            isLastSpec  = !(nextSpecIndex < this._groupSpecs.length),
+            isLastSpec  = (nextSpecIndex >= this._groupSpecs.length),
             doFlatten   = !!groupSpec.flatteningMode,
             isPostOrder = doFlatten && (groupSpec.flatteningMode === 'tree-post'),
             specGroupParent;
@@ -358,6 +362,7 @@ add(/** @lends pvc.data.GroupingOper */{
             // Root node
             if(rootData){
                 data = rootData;
+                /*global data_addDatumsLocal:true*/
                 data_addDatumsLocal.call(data, node.datums);
             } else {
                 isNew = true;
@@ -376,6 +381,7 @@ add(/** @lends pvc.data.GroupingOper */{
                 if(data){
                     // Add the datums to the data, and its atoms to its dimensions
                     // Should also update linkedChildren (not children).
+                    /*global data_addDatumsSimple:true*/
                     data_addDatumsSimple.call(data, node.datums);
                 }
             }

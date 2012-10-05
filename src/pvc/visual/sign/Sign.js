@@ -73,9 +73,10 @@ def.type('pvc.visual.Sign')
         methods[name] = function(arg){
             delete this._final;
             
+            var value;
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
             try{
-                var value = this[baseName](arg);
+                value = this[baseName](arg);
                 if(value == null){ // undefined included
                     return null;
                 }

@@ -1,6 +1,8 @@
 
 // Text measurement utility
 def.scope(function(){
+    /*global document:true */
+    
     var _currentFontSizeCache;
     
     function createCache(){
@@ -8,6 +10,7 @@ def.scope(function(){
     }
     
     function useCache(cache, fun, ctx){
+        /*jshint expr:true */
         (cache instanceof pvc.text.FontSizeCache) || def.fail.operationInvalid("Not a valid text cache.");
         
         var prevCache = _currentFontSizeCache;
@@ -29,7 +32,9 @@ def.scope(function(){
         var bbox = _currentFontSizeCache && _currentFontSizeCache.get(font, text);
         if(!bbox){
             bbox = getTextSizeCore(text, font);
-            _currentFontSizeCache && _currentFontSizeCache.put(font, text, bbox);
+            if(_currentFontSizeCache){
+                _currentFontSizeCache.put(font, text, bbox);
+            }
         }
         
         return bbox;

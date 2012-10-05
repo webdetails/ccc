@@ -209,7 +209,8 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                         return 'bottom';
                     }
                     
-                    return  ((!isFalling) === (direction === 'up') ? 'bottom' : 'top');
+                    var isRising = !isFalling;
+                    return  (isRising === (direction === 'up') ? 'bottom' : 'top');
                 })
                 .textStyle(pv.Color.names.darkgray.darker(2))
                 .textMargin(5)

@@ -560,8 +560,9 @@ pvc.DataTreePanel = pvc.BasePanel.extend({
     var whitespaceQuote = new RegExp ('[\\s\"\']+',"g");
     if(options.selectParam){
         var selPar = options.selectParam.replace(whitespaceQuote, '');
+        /*global window:true*/
         if ((selPar != "undefined") && 
-            (selPar.length > 0) && 
+            (selPar.length > 0) &&
             (typeof window[selPar] != "undefined")) {
             selPar = window[selPar];
             this.addDataPoint(selPar);

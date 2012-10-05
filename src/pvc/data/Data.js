@@ -358,9 +358,9 @@ def.type('pvc.data.Data', pvc.data.Complex)
         var dim = def.getOwn(this._dimensions, name);
         if(!dim && def.get(keyArgs, 'assertExists', true)) {
             throw def.error.argumentInvalid('name', "Undefined dimension '{0}'.", [name]); 
-         }
+        }
          
-         return dim;
+        return dim;
     },
     
     /**

@@ -232,19 +232,19 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         function expandLine(line/*, i*/){
             updateVItemCrossGroup('R', line);
             
-            return def.query(this._colGroups).select(function(colGroup, cg){
+            return def.query(this._colGroups)
+                .select(function(colGroup, cg){
+                    // Update ITEM
+                    updateVItemCrossGroup('C', colGroup);
+                    updateVItemMeasure(line, cg);
                   
-                  // Update ITEM
-                  updateVItemCrossGroup('C', colGroup);
-                  updateVItemMeasure(line, cg);
-                  
-                  // Naive approach...
-                  // Call all readers every time
-                  // Dimensions that consume rows and/or columns may be evaluated many times.
-                  // So, it's very important that pvc.data.Dimension#intern is as fast as possible
-                  //  detecting already interned values.
-                  return this._readItem(null, item, dimsReaders);
-               }, this);
+                    // Naive approach...
+                    // Call all readers every time
+                    // Dimensions that consume rows and/or columns may be evaluated many times.
+                    // So, it's very important that pvc.data.Dimension#intern is as fast as possible
+                    //  detecting already interned values.
+                    return this._readItem(null, item, dimsReaders);
+                }, this);
         }
         
         return def.query(this._lines)

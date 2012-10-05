@@ -1126,10 +1126,12 @@ pvc.BasePanel = pvc.Abstract.extend({
 
         if(!pvPanel){
             var pvParentPanel = this.parent.pvPanel;
-            var pvBorderPanel = 
-                pvPanel = pvParentPanel.borderPanel.add(this.type)
-                              .extend(mainPvPanel.borderPanel);
             
+            pvPanel = pvParentPanel.borderPanel.add(this.type)
+                .extend(mainPvPanel.borderPanel);
+            
+            var pvBorderPanel = pvPanel;
+
             if(mainPvPanel !== mainPvPanel.borderPanel){
                 pvPanel = pvBorderPanel.add(pv.Panel)
                                        .extend(mainPvPanel);
@@ -1604,6 +1606,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             // Capture current context
             context = this._createContext(pvMark, ev);
+            /*global window:true*/
             window.setTimeout(
                 function(){
                     myself._handleClickCore.call(myself, context);

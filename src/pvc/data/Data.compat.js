@@ -47,10 +47,10 @@ pvc.data.Data
          *  . |   .           .
          * CJ | V1J | ... | VNJ |
          */
-         return pv.range(0, this.getCategoriesSize())
-                  .map(function(categIndex){
-                      return this._getValuesForCategoryIndex(categIndex);
-                  }, this);
+        return pv.range(0, this.getCategoriesSize())
+            .map(function(categIndex){
+                return this._getValuesForCategoryIndex(categIndex);
+            }, this);
     },
     
     /**

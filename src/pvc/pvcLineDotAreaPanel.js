@@ -103,7 +103,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         // DATA
         var isBaseDiscrete = chart._catRole.grouping.isDiscrete(),
             data = this._getVisibleData(), // shared "categ then series" grouped data
-            isDense = !(this.width > 0) || (data._children.length / this.width > 0.5), //  > 100 categs / 200 pxs
+            isDense   = (this.width <= 0) || (data._children.length / this.width > 0.5), //  > 100 categs / 200 pxs
             rootScene = this._buildScene(data, isBaseDiscrete);
 
         // Disable selection?

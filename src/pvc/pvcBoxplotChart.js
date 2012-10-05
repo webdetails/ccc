@@ -22,16 +22,16 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         this.base(options);
     },
 
-     _processOptionsCore: function(options){
-         this.base.apply(this, arguments);
+    _processOptionsCore: function(options){
+        this.base.apply(this, arguments);
 
-         options.secondAxis = options.showLines || options.showDots || options.showAreas;
+        options.secondAxis = options.showLines || options.showDots || options.showAreas;
          
-         // Not supported
-         options.secondAxisIndependentScale = false;
-         options.stacked = false;
-         options.legend  = false;
-     },
+        // Not supported
+        options.secondAxisIndependentScale = false;
+        options.stacked = false;
+        options.legend  = false;
+    },
 
     /**
      * Prevents creation of the series role by the cartesian charts base class.
@@ -138,7 +138,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
             this._linePanel = linePanel;
             
             // HACK:
-            this._linePanel._v1DimRoleName['value'] = 'median';
+            this._linePanel._v1DimRoleName.value = 'median';
             
             // Legacy fields
             boxPanel.pvSecondLine = linePanel.pvLine;

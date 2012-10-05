@@ -400,13 +400,13 @@ def.type('pvc.data.Dimension')
             var max = atoms[L - 1];
             
             // ------------------
-            
+            var tmp;
             if(min !== max && def.get(keyArgs, 'abs', false)){
                 var minSign = min.value < 0 ? -1 : 1;
                 var maxSign = max.value < 0 ? -1 : 1;
                 if(minSign === maxSign){
                     if(maxSign < 0){
-                        var tmp = max;
+                        tmp = max;
                         max = min;
                         min = tmp;
                     }
@@ -442,7 +442,7 @@ def.type('pvc.data.Dimension')
                     // min is <= 0
                     // max is >= 0
                     // and, of course, min !== max
-                    var tmp = max;
+                    tmp = max;
                     max = min;
                     min = tmp;
                 }
@@ -695,13 +695,11 @@ def.type('pvc.data.Dimension')
             return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
         }
         
-        var key, atom, value, label;
+        var value, label;
         var type = this.type;
         
         // - CONVERT - 
         if(!isInterpolated){
-            var converter = type._converter;
-            
             // Is google table style cell {v: , f: } ?
             if(typeof sourceValue === 'object' && ('v' in sourceValue)){
                 // Get info and get rid of the cell
@@ -732,8 +730,9 @@ def.type('pvc.data.Dimension')
         
         // - KEY -
         var keyFun = type._key;
-        key = '' + (keyFun ? keyFun(value) : value);
+        var key = '' + (keyFun ? keyFun(value) : value);
         // <Debug>
+        /*jshint expr:true */
         key || def.fail.operationInvalid("Only a null value can have an empty key.");
         // </Debug>
         
@@ -867,6 +866,7 @@ function dim_internAtom(atom){
     
     // Root load will fall in this case
     if(atom.dimension === this){
+        /*jshint expr:true */
         (this.owner === this) || def.assert("Should be an owner dimension");
         
         if(!key && atom === this._virtualNullAtom){

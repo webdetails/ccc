@@ -53,6 +53,7 @@ def.scope(function(){
      * @type function
      */
     function options(specs, context){
+        /*jshint expr:true */
         specs || def.fail.argumentRequired('specs');
         
         var _infos = {};

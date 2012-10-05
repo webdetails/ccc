@@ -30,24 +30,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
             }
         });
     },
-    
-    _bindAxes: function(hasMultiRole){
-        
-        if(!hasMultiRole || this.parent){
-            
-            var options = this.options;
 
-            this.axes.ortho
-            .bind({
-                role: this.visualRoles('value'),
-                isStacked: !!options.stacked,
-                nullInterpolationMode: options.nullInterpolationMode
-            });
-        }
-        
-        this.base(hasMultiRole);
-    },
-    
     _bindAxes: function(hasMultiRole){
         
         if(!hasMultiRole || this.parent){
@@ -88,20 +71,18 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
                 } else {
                     // Common scale => 
                     // axis ortho 0 represents both data parts
-                    var orthoDataCells = [
-                          {
-                              role: valueRole,
-                              dataPartValue: '0',
-                              isStacked: isStacked,
-                              nullInterpolationMode: nullInterpolationMode
-                          },
-                          {
-                              role: valueRole,
-                              dataPartValue: '1',
-                              isStacked: isStacked,
-                              nullInterpolationMode: nullInterpolationMode
-                          }
-                      ];
+                    var orthoDataCells = [{
+                            role: valueRole,
+                            dataPartValue: '0',
+                            isStacked: isStacked,
+                            nullInterpolationMode: nullInterpolationMode
+                        }, {
+                            role: valueRole,
+                            dataPartValue: '1',
+                            isStacked: isStacked,
+                            nullInterpolationMode: nullInterpolationMode
+                        }
+                    ];
                     
                     axes.ortho.bind(orthoDataCells);
                     

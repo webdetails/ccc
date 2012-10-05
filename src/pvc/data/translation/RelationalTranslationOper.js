@@ -143,6 +143,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                     var dimName = autoColDims[autoIndex];
                     index = this._nextAvailableItemIndex(index);
                     
+                    /*jshint expr:true */
                     (index < 0) && def.assert("Index must exist");
                     
                     // mark the index as mapped
@@ -184,31 +185,35 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         var i = 0;
         var L = orderedDimsMap.length;
         var DT = pvc.data.DimensionType;
+        
+        function isDimensionNotUsed(dimName){ 
+            return !def.hasOwn(this._userUsedDims, dimName); 
+        }
+        
         while(i < L && count > 0){
             var dimGroup = orderedDimsMap[i];
             var groupName = dimGroup.name;
             
+            // There's no problem here cause each function instance is 
+            // called before leaving each iteration.
+            /*jshint loopfunc:true*/
+            var buildLevelDimName = function(level){
+                    return DT.dimensionGroupLevelName(groupName, level);
+                };
+                
             var groupDimNames; 
             if(dimGroup.float){
                 // The group's N first free dimension levels
                 groupDimNames = def.range(0, Infinity)
-                    .select(function(level){
-                        return DT.dimensionGroupLevelName(groupName, level);
-                    })
-                    .where(function(dimName){ 
-                        return !def.hasOwn(this._userUsedDims, dimName); 
-                    }, this)
+                    .select(buildLevelDimName)
+                    .where(isDimensionNotUsed, this)
                     .take(Math.min(dimGroup.count, count)) // only as much as there are free indexes
                     .array();
             } else {
                 // The group's N first dimension levels, or skip when not free
                 groupDimNames = def.range(0, dimGroup.count)
-                    .select(function(level){
-                        return DT.dimensionGroupLevelName(groupName, level);
-                    })
-                    .where(function(dimName){ 
-                        return !def.hasOwn(this._userUsedDims, dimName); 
-                    }, this)
+                    .select(buildLevelDimName)
+                    .where(isDimensionNotUsed, this)
                     .take(count) // only as much as there are free indexes
                     .array();
             }

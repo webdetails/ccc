@@ -180,6 +180,11 @@ def.type('pvc.data.TranslationOper')
     _userCreateReaders: function(dimNames, indexes){
         if(!indexes){
             indexes = [];
+        } else {
+            // Convert indexes to number
+            indexes.forEach(function(index, j){
+                indexes[j] = +index;
+            });
         }
 
         // Distribute indexes to names, from left to right
