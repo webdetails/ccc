@@ -4,110 +4,110 @@
     <title>CCC playground</title>
     
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <script type="text/javascript" src="cdf/Base.js"></script>
-    <script type="text/javascript" src="cdf/jquery.js"></script>
-    <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
-    <script type="text/javascript" src="lib/protovis-msie.js"></script>
-    <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
-    <script type="text/javascript" src="lib/tipsy.js"></script>
+    <script type="text/javascript" src="../src/cdf/Base.js"></script>
+    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
     <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
     
-    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="../src/data/q01-01.js"></script>
     
-    <script type="text/javascript" src="def/def.js"></script>
+    <script type="text/javascript" src="../src/def/def.js"></script>
 
     <!-- @SCRIPTSBEG@ -->
-        <script type="text/javascript" src="pvc/pvc.js"></script>
-        <script type="text/javascript" src="pvc/pvc.text.js"></script>
-        <script type="text/javascript" src="pvc/pvc.color.js"></script>
-        <script type="text/javascript" src="pvc/pvc.options.js"></script>
-        <script type="text/javascript" src="pvc/data/_data.js"></script>
-        <script type="text/javascript" src="pvc/data/meta/DimensionType.js"></script>
-        <script type="text/javascript" src="pvc/data/meta/ComplexType.js"></script>
-        <script type="text/javascript" src="pvc/data/translation/TranslationOper.js"></script>
-        <script type="text/javascript" src="pvc/data/translation/MatrixTranslationOper.js"></script>
-        <script type="text/javascript" src="pvc/data/translation/CrosstabTranslationOper.js"></script>
-        <script type="text/javascript" src="pvc/data/translation/RelationalTranslationOper.js"></script>
-        <script type="text/javascript" src="pvc/data/Atom.js"></script>
-        <script type="text/javascript" src="pvc/data/Complex.js"></script>
-        <script type="text/javascript" src="pvc/data/ComplexView.js"></script>
-        <script type="text/javascript" src="pvc/data/Datum.js"></script>
-        <script type="text/javascript" src="pvc/data/Dimension.js"></script>
-        <script type="text/javascript" src="pvc/data/Data.js"></script>
-        <script type="text/javascript" src="pvc/data/Data.selected.js"></script>
-        <script type="text/javascript" src="pvc/data/GroupingSpec.js"></script>
-        <script type="text/javascript" src="pvc/data/DataOper.js"></script>
-        <script type="text/javascript" src="pvc/data/GroupingOper.js"></script>
-        <script type="text/javascript" src="pvc/data/LinearInterpolationOper.js"></script>
-        <script type="text/javascript" src="pvc/data/LinearInterpolationOperSeriesState.js"></script>
-        <script type="text/javascript" src="pvc/data/ZeroInterpolationOper.js"></script>
-        <script type="text/javascript" src="pvc/data/ZeroInterpolationOperSeriesState.js"></script>
-        <script type="text/javascript" src="pvc/data/Data.operations.js"></script>
-        <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
-        <script type="text/javascript" src="pvc/visual/Role.js"></script>
-        <script type="text/javascript" src="pvc/visual/Scene.js"></script>
-        <script type="text/javascript" src="pvc/visual/Var.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/Panel.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/Label.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/Bar.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/PieSlice.js"></script>
-        <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
-        <script type="text/javascript" src="pvc/visual/Context.js"></script>
-        <script type="text/javascript" src="pvc/visual/Axis.js"></script>
-        <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
-        <script type="text/javascript" src="pvc/visual/CartesianAxisRootScene.js"></script>
-        <script type="text/javascript" src="pvc/visual/CartesianAxisTickScene.js"></script>
-        <script type="text/javascript" src="pvc/visual/ColorAxis.js"></script>
-        <script type="text/javascript" src="pvc/visual/SizeAxis.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/BulletItemScene.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneSelection.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneVisibility.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/BulletItemRenderer.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
-        <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcMultiChartPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcTitlePanelAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcCartesianAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcCartesianGridDockingPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcPiePanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcBarPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcNormalizedBarPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcNormalizedBarChart.js"></script>
-        <script type="text/javascript" src="pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
-        <script type="text/javascript" src="pvc/pvcWaterfallPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcLineDotAreaPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcLineDotArea.js"></script>
-        <script type="text/javascript" src="pvc/pvcHeatGridPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcMetricXYAbstract.js"></script>
-        <script type="text/javascript" src="pvc/pvcMetricLineDotPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcMetricLineDot.js"></script>
-        <script type="text/javascript" src="pvc/pvcBulletChart.js"></script>
-        <script type="text/javascript" src="pvc/pvcParallelCoordinates.js"></script>
-        <script type="text/javascript" src="pvc/pvcDataTree.js"></script>
-        <script type="text/javascript" src="pvc/data/translation/BoxplotChartTranslationOper.js"></script>
-        <script type="text/javascript" src="pvc/pvcBoxplotPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLineDotAreaPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLineDotArea.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricLineDotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricLineDot.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
     <!-- @SCRIPTSEND@ -->
     
     
@@ -154,7 +154,8 @@
     <div id="pvcBar2"></div>
     <div id="pvcBar3"></div>
     <div id="pvcBar5"></div>
-
+
+
     <h1>Pie</h1>
     <div id="pvcPie1"></div>
     <div id="pvcPie2"></div>
@@ -251,7 +252,8 @@
             titleLabel_font: "13px serif",
             xAxisLabel_textAngle: 0.4,
             xAxisLabel_textAlign: "center",
-            xAxisLabel_textBaseline: "top",
+            xAxisLabel_textBaseline: "top",
+
             xAxisLabel_textStyle: "black",
             xAxisLabel_text: function(d){
                 return pv.Format.date('%m-%d').format(d.vars.tick.value);
@@ -262,7 +264,8 @@
             dot_shapeRadius: 4
           }
 
-        });
+        });
+
 
         dot3.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         dot3.render();
@@ -293,7 +296,8 @@
           yAxisPosition: "right",
           yAxisSize: 30,
           //xAxisPosition: "bottom",
-          xAxisSize: 30,
+          xAxisSize: 30,
+
           //xAxisFullGrid: true,
           //yAxisFullGrid: true,
           extensionPoints: {
@@ -394,7 +398,8 @@
 
                     orientation: 'vertical',
                     
-                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+                    dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
+
                     
                     showValues: false,
                     originIsZero: false,
@@ -477,7 +482,8 @@
                     
                     dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y-%m-%d" } },
                     
-                    showValues: false,
+                    showValues: false,
+
                     showDots: true,
                     yAxisSize: 30,
                     xAxisSize: 30,
@@ -528,13 +534,15 @@
           xAxisSize: 30
           //xAxisFullGrid: true,
           //yAxisFullGrid: true,
-
+
+
         });
 
         stackedLine.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         stackedLine.render();
 
-        var stackedLine2 = new pvc.StackedLineChart({
+        var stackedLine2 = new pvc.StackedLineChart({
+
           // legendPosition: "left",
           canvas: "pvcStackedLine2",
           width: 300,
@@ -599,7 +607,9 @@
             dot_shape: "square",
             dot_lineWidth: 2,
             dot_shapeRadius: 4,
-            line_lineWidth: 0.5
+            line_lineWidth: 0.5
+
+
           }
 
         });
@@ -702,7 +712,8 @@
           canvas: "pvcBar1",
           width:  400,
           height: 300,
-          title:  "Bar chart",
+          title:  "Bar chart",
+
           legend: true,
           orientation: 'vertical',
           stacked:    true,
@@ -750,7 +761,8 @@
           panelSizeRatio: 0.9,
           barSizeRatio: 0.8,
 
-          secondAxis: true,
+          secondAxis: true,
+
           secondAxisIndependentScale: true,
           secondAxisIdx: -1, // default
           secondAxisOriginIsZero: true,
@@ -786,7 +798,8 @@
           showValues: true,
           showXScale: true,
           showYScale: true,
-          yAxisPosition: "left",
+          yAxisPosition: "left",
+
           yAxisSize: 80,
           xAxisPosition: "bottom",
           xAxisSize: 20,
@@ -818,8 +831,10 @@
                 xAxisLabel_textAlign: "center",
                 xAxisLabel_textBaseline: "top"
             }
-        });
-
+        });
+
+
+
         bar5.setData(relational_01,
             {crosstabMode: false,
             seriesInRows: false});

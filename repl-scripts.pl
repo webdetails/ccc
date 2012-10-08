@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-my $format = "        <script type=\"text/javascript\" src=\"#value#\"></script>";
+my $format = "        <script type=\"text/javascript\" src=\"../#value#\"></script>";
 my $placeholderBeg = "<!-- \@SCRIPTSBEG\@ -->";
 my $placeholderEnd = "<!-- \@SCRIPTSEND\@ -->";
 
@@ -18,7 +18,6 @@ my $contents = "";
 while(<ITEMLIST>) {
   my $item = $_;
   $item =~ s/^\s*|\s*$//g;
-  $item =~ s/^src\///g;
   if ($item ne "") {
     my $row = $format;
     $row =~ s/#value#/$item/g;
