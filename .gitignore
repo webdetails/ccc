@@ -6,3 +6,14 @@ pvc-*.js
 .project
 .settings
 /.externalToolBuilders
+/doc/jsdoc
+/build/pen
+/build/built-jar.properties
+/build/classes
+/build/empty
+/examples/lib/codemirror/codemirror-2.34
+/doc/model/pvc.options.out.xml
+/Workflow-Analyzer.txt
+/copy-ccc-to-plugins.bat
+/generatePenBundle.sh
+/publish_analyzer.bat

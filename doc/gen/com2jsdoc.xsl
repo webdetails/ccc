@@ -8,7 +8,7 @@
     <xsl:output method="text" />
     
     <!-- New Line character -->
-    <xsl:variable name='nl'><xsl:text>&#xa;</xsl:text></xsl:variable>
+    <xsl:variable name='nl'><xsl:text>&#xd;&#xa;</xsl:text></xsl:variable>
     
 	<xsl:template match="/com:model">
 		<xsl:apply-templates select="com:complexType" />
