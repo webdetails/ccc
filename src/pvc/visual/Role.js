@@ -148,7 +148,7 @@ def.type('pvc.visual.Role')
     
     /** 
      * Obtains the first dimension that is bound to the role.
-     * @type pvc.data.Dimension
+     * @type pvc.data.DimensionType
      */
     firstDimension: function(){
         return this.grouping && this.grouping.firstDimension.type;

@@ -667,9 +667,12 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         rootScene.hasColorRole = hasColorRole;
         rootScene.hasSizeRole  = hasSizeRole;
         
-        var chart = this.chart,
-            getColorRoleValue,
-            getSizeRoleValue;
+        var chart = this.chart;
+        var xDimType = chart._xRole.firstDimension();
+        var yDimType = chart._yRole.firstDimension();
+        
+        var getColorRoleValue;
+        var getSizeRoleValue;
         
         if(hasColorRole){
              var colorGrouping = chart._colorRole.grouping;//.singleLevelGrouping();
@@ -803,9 +806,12 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                      toScene, 
                      toChildIndex){
             
-            /* Code for single, continuous and numeric dimensions */
-            var interYValue = (toScene.vars.y.value + fromScene.vars.y.value) / 2;
-            var interXValue = (toScene.vars.x.value + fromScene.vars.x.value) / 2;
+            /* Code for single, continuous and date/numeric dimensions
+             * Calls corresponding dimension's cast to ensure we have a date object,
+             * when that's the dimension value type.
+             */
+            var interYValue = yDimType.cast.call(null, (+toScene.vars.y.value + +fromScene.vars.y.value) / 2);
+            var interXValue = xDimType.cast.call(null, (+toScene.vars.x.value + +fromScene.vars.x.value) / 2);
             
             //----------------
             

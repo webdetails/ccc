@@ -9,7 +9,8 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
     constructor: function(options){
 
         var isV1Compat = this.compatVersion(options) <= 1;
-        if(isV1Compat){
+        
+        if(isV1Compat && (!options || !options.timeSeries)){
             /**
              * If the 'x' role isn't explicitly defined (in any way),
              * help with defaults and keep backward compatibility by
@@ -61,7 +62,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                valueType: Number,
                 defaultDimensionName: isV1Compat ? 'category' : 'value'
             },
             y: {
@@ -69,7 +69,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                valueType: Number,
                 defaultDimensionName: isV1Compat ? 'value' : 'value2'
             }
         });

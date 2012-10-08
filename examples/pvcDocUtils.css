@@ -90,11 +90,13 @@ div.props>div>div:first-child {
 /* Makes the editor extend to all the initial text height */
 .CodeMirror-scroll {
 	height: 100%;
+	max-height: 800px;
 }
 
 /* chart cell */
 .tryItTable>div>div:nth-child(2) {
-	vertical-align: middle;
+	vertical-align: top;
+	padding-top: 10px;
 	text-align: center;
 }
 
