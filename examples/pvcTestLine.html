@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC Samples - Line Chart</title>
+
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="cdf/Base.js"></script>
+    <script type="text/javascript" src="cdf/jquery.js"></script>
+    
+    <script type="text/javascript" src="data/q01-01.js"></script>
+    <script type="text/javascript" src="lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="lib/tipsy.js"></script>
+    <link type="text/css" href="lib/tipsy.css" rel="stylesheet"/>
+        <script type="text/javascript" src="def/def.js"></script>
+
+    
+    <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="pvc/pvc.js"></script>
+        <script type="text/javascript" src="pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="pvc/data/_data.js"></script>
+        <script type="text/javascript" src="pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcLineDotAreaPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcLineDotArea.js"></script>
+        <script type="text/javascript" src="pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="pvc/pvcMetricLineDotPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcMetricLineDot.js"></script>
+        <script type="text/javascript" src="pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="pvc/pvcBoxplotChart.js"></script>
+    <!-- @SCRIPTSEND@ -->
+    
+    
+    
+        
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
+  <body>
+
+    <h1>
+      Line Chart
+    </h1>
+Line charts are often used to visualize time series data.
+
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Lifecycle</h4>
+<ul>
+  <li>renderCallback - executed immediatly before render is called</li>
+</ul>
+<h4>Legend properties</h4>
+<ul>
+  <li>legend (true|false)</li>
+  <li>legendPosition (right, top, bottom, left)</li>
+  <li>legendAlign (right, left, center, top, middle, bottom)</li>
+  <li>legendSize</li>
+
+  <li>legendDrawLine (true|false)</li>
+  <li>legendDrawMarker (true|false)</li>
+  <li>showTooltips (true|false)</li>
+</ul>
+<h4>Data properties</h4>
+<ul>
+  <li>timeSeries (true| false)</li>
+  <li>timeSeriesFormat. For example: "%Y-%m-%d"</li>
+</ul>
+<h4>Line chart properties</h4>
+<ul>
+  <li>orientation - horizontal or vertical. Default: vertical</li>
+  <li>showDots - Show or hide dots. Default: false</li>
+  <li>showAreas - Show or hide areas. Default: false</li>
+  <li>showValues - Show or hide line value. Default: false</li>
+  <li>stacked - Stacked? Default: false</li>
+</ul>
+<h4>Axis properties</h4>
+<ul>
+  <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
+  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
+  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
+  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
+  <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
+  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
+  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
+</ul>
+
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for&nbsp;Line chart extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>  
+  <li>legendArea_</li>
+  <li>legendPanel_</li>
+  <li>legendRule_</li>
+  <li>legendDot_</li>
+  <li>legendLabel_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisRule_</li>
+  <li>{x,y}AxisGrid_</li>
+  <li>{x,y}AxisScale_</li>
+  <li>{x,y}AxisTicks_</li>
+  <li>{x,y}AxisMinorTicks_</li>
+  <li>{x,y}AxisLabel_</li>
+  <li>{x,y}AxisTitleLabel_</li>
+  <li>tooltip_</li>
+  <li>chart_ - for the main chart Panel</li>
+  <li>line_ - for the actual line</li>
+  <li>linePanel_ - for the panel where the lines are</li>
+  <li>lineDot_ - the dots on the line</li>
+  <li>lineLabel_ - for the main line label</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>line_lineWidth</li>
+</ul>
+
+
+<h2>Examples</h2>
+<h3>A Simple Line chart</h3>
+The following is a line chart displaying three time series.<br>
+<textarea cols="55" rows="15" id="pvcLine1Code">
+        var line1 = new pvc.LineChart({
+          canvas: "pvcLine1",
+          width: 800,
+          height: 220,
+          animate:false,
+          title: "Simple Line chart",
+          legend: true,
+          legendPosition: "top",
+          legendAlign: "right",
+          selectable: true,
+          orientation: 'vertical',
+          showAreas: true,
+          showDots: false,
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          showValues: false,
+          yAxisPosition: "right",
+          extensionPoints: {
+            noDataMessage_text: "Example of a chart with missing data",
+            xAxisScale_dateTickFormat: "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5
+                      //set in miliseconds
+          }
+        });
+        line1.setData(relational_01, 
+             {crosstabMode: false,
+              seriesInRows: false});
+        line1.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine1"></div>
+
+<h3>A Decorated Line chart</h3>
+A simple line chart can be enhanced as for example adding a background grid, or drawing the dots 
+that connect the lines.<br>
+<textarea cols="55" rows="15" id="pvcLine2Code">
+        var line2 = new pvc.LineChart({
+          canvas: "pvcLine2",
+          width: 600,
+          height: 220,
+          animate:false,
+          selectable: true,
+          title: "A Dot Line chart",
+          legend: true,
+          legendPosition: "bottom",
+          legendAlign: "left",
+          
+          orientation: 'vertical',
+          timeSeries: true,
+          timeSeriesFormat: "%Y-%m-%d",
+
+          showValues: true,
+          showDots:true,
+          yAxisPosition: "left",
+          xAxisFullGrid: true,
+          yAxisFullGrid: true,
+          yAxisDomainRoundMode: 'tick',
+          axisOffset: 0.05,
+          extensionPoints: {
+            title_fillStyle: "lightYellow",
+            dot_shapeRadius: 2,
+            dot_shape:"diamond",
+            line_lineWidth: 1,
+            xAxisScale_dateTickFormat: "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5
+                      //set in miliseconds
+          }
+        });
+        line2.setData(relational_01, 
+             {crosstabMode: false,
+              seriesInRows: false});
+        line2.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine2"></div>
+        
+
+<h3>A Categorical Line chart</h3>
+<textarea cols="55" rows="30" id="pvcLine3Code">
+var line3 = new pvc.DotChart({
+  canvas: "pvcLine3",
+  width: 1000,
+  height:515,
+  title:"A Categorical Line chart",
+  extensionPoints:{
+	"xAxisLabel_textAngle":-0.5235987755982988,
+	"xAxisLabel_textAlign":"right",
+	"xAxisLabel_textBaseline":"top",
+	"yAxisTicks_strokeStyle":"#A0A0A0",
+	"yAxisRule_strokeStyle":"#A0A0A0",
+	"plotFrame_strokeStyle":"#A0A0A0",
+	"yAxisGrid_strokeWidth":"2px",
+	"yAxisGrid_strokeStyle":"#A0A0A0",
+	"xAxisRule_strokeStyle":"#A0A0A0",
+	"xAxisGrid_strokeWidth":"2px",
+	"xAxisGrid_strokeStyle":"#A0A0A0"
+  },
+  animate:false,
+  legend:true,
+  legendPosition:"right",
+  legendAlign:"top",
+  stacked:true,
+  selectable:true,
+  margins: {all: 20},
+  //xAxisFullGrid:true,
+  xAxisEndLine:true,
+  xAxisDomainRoundMode:"tick",
+  //yAxisFullGrid:true,
+  yAxisEndLine:true,
+  yAxisDomainRoundMode:"tick",
+  showTooltips:true,
+  showDots:true,
+  showLines:true,
+  showAreas:true,
+  showValues:false,
+  crosstabMode: false,
+  dimensionGroups: {
+    series:   {formatter: function(value){ return relationalCountrySalesYearLabels[value];    }},
+    category: {formatter: function(value){ return relationalCountrySalesCountryLabels[value]; }}
+  }
+});
+line3.setData(relationalCountrySales);
+line3.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine3"></div>
+
+<h3>A Line chart with a second axis</h3>
+The following is a line chart displaying a second Y axis with an
+independent scale.<br>
+<textarea cols="55" rows="15" id="pvcLine4Code">
+var line4 = new pvc.LineChart({
+  canvas: "pvcLine4",
+  width:  500,
+  height: 300,
+  orientation: 'vertical',
+  title: "Line chart with second axis",
+  secondAxis: true,
+  secondAxisIndependentScale: true,
+  secondAxisOwnColors: true,
+  secondAxisColor: ['purple'],
+  legend: true,
+  legendPosition: "right",
+  selectable: true,
+  hoverable:  true,
+  animate:    false,
+  showAreas:  true,
+  showDots:   false,
+  showValues: false,
+  crosstabMode: false,
+  seriesInRows: false
+});
+line4.setData(relational_04);
+line4.render();
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcLine4"></div>
+
+  </body>
+</html>
