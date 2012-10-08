@@ -42,7 +42,7 @@ var tryMe = function(e){
                     textArea._codeMirror = 
                     CodeMirror.fromTextArea(textArea, {
                         mode:          'javascript',
-                        lineWrapping:  true,
+                        //lineWrapping:  true,
                         lineNumbers:   false,
                         indentUnit:    4,
                         autofocus:     false,
@@ -70,10 +70,21 @@ var tryMe = function(e){
                 }
                 
                 if(height && width){
-                    var $scrollBox = $textArea.find('.CodeMirror-scroll');
+                    var $scrollBox = $textArea.parent().find('.CodeMirror-scroll');
+                    var $codeBox   = $textArea.parent().find('.CodeMirror');
                     
                     var maxWidth  = 0.95 * $e.parent().next().width();
                     var maxHeight = 0.95 * ($scrollBox.length ? $scrollBox : $e.parent().next()).height();
+                    
+                    $codeBox.css({
+                        'max-width': $e.parent().width() + 'px'
+                    });
+                    
+                    // Don't allow growing beyond the initial height,
+                    // which is all the height required to fit the initial code, limited by 800px.
+                    $scrollBox.css({
+                        'max-height': $scrollBox.height() + 'px'
+                    });
                     
                     var ar = width / height;
                     if(ar >= 1){

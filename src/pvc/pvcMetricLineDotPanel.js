@@ -810,8 +810,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
              * Calls corresponding dimension's cast to ensure we have a date object,
              * when that's the dimension value type.
              */
-            var interYValue = yDimType.cast.call(null, (+toScene.vars.y.value + +fromScene.vars.y.value) / 2);
-            var interXValue = xDimType.cast.call(null, (+toScene.vars.x.value + +fromScene.vars.x.value) / 2);
+            var interYValue = yDimType.cast.call(null, ((+toScene.vars.y.value) + (+fromScene.vars.y.value)) / 2);
+            var interXValue = xDimType.cast.call(null, ((+toScene.vars.x.value) + (+fromScene.vars.x.value)) / 2);
             
             //----------------
             
