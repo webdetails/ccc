@@ -319,6 +319,8 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             .visible(function(){
                 return !this.index;
             });
+        
+        return this;
     },
     
     defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {

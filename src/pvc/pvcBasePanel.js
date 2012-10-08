@@ -879,13 +879,9 @@ pvc.BasePanel = pvc.Abstract.extend({
             return;
         }
         
-        var chart = this.chart,
-            options = chart.options;
+        this._onRender();
         
-        if (options.renderCallback) {
-            options.renderCallback.call(this._getContext());
-        }
-        
+        var options = this.chart.options;
         var pvPanel = this.pvRootPanel;
         
         this._isAnimating = options.animate && !def.get(keyArgs, 'bypassAnimation', false) ? 1 : 0;
@@ -911,6 +907,17 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
         } finally {
             this._isAnimating = 0;
+        }
+    },
+    
+    _onRender: function(){
+        var renderCallback = this.chart.options.renderCallback;
+        if (renderCallback) {
+            var context = this.compatVersion() <= 1 ? 
+                            this.chart : 
+                            this._getContext();
+            
+            renderCallback.call(context);
         }
     },
     
@@ -1723,7 +1730,10 @@ pvc.BasePanel = pvc.Abstract.extend({
                 return 1.5;
             })
             .override('defaultColor', function(type){
-                return options[type === 'stroke' ? 'rubberBandLine' : 'rubberBandFill'];
+                return type === 'stroke' ? 
+                       '#86fe00' :                 /* 'rgb(255,127,0)' */ 
+                       'rgba(203, 239, 163, 0.6)'  /* 'rgba(255, 127, 0, 0.15)' */
+                       ;
             })
             .override('interactiveColor', function(color){
                 return color;

@@ -2,7 +2,7 @@
 /**
  * CartesianAbstract is the base class for all 2D cartesian space charts.
  */
-pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
+pvc.CartesianAbstract = pvc.BaseChart.extend({
     _gridDockPanel: null,
     
     axesPanels: null, 
@@ -600,9 +600,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         return result;
     },
     
-    defaults: def.create(pvc.TimeseriesAbstract.prototype.defaults, {
-        showAllTimeseries: false,
-    
+    defaults: def.create(pvc.BaseChart.prototype.defaults, {
         /* Percentage of occupied space over total space in a discrete axis band */
         panelSizeRatio: 0.9,
 

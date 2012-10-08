@@ -77,7 +77,6 @@
         <script type="text/javascript" src="pvc/pvcTitlePanelAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcCartesianAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCartesianGridDockingPanel.js"></script>
@@ -148,8 +147,6 @@ The intensity or the color of each cell depends on the value that it represents.
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
   <li>showValues - Show or hide heatGrid value. Default: false</li>
-  <li>panelSizeRatio - Ratio of the band occupied by the panel.
-Default: 0.5 (50%)</li>
   <li>normPerBaseCategory - Normalize by column? true or false</li>
   <li>minColor - Default: "white"</li>
   <li>maxColor - Default: "darkgreen"</li>
@@ -203,10 +200,7 @@ var heatGrid1 = new pvc.HeatGridChart({
     width: 400,
     height: 300,
     title:"Heat grid - Normalized by Product",
-    animate: false,
-    clickable: false,
-    panelSizeRatio: 0.8,
-    orientation: "vertical",
+    animate:   false,
     showValues: true,
     valuesAnchor: "right",
     normPerBaseCategory: true
@@ -235,8 +229,6 @@ var heatGrid2 = new pvc.HeatGridChart({
     clickable:  false,
     selectable: true,
     hoverable:  true,
-    panelSizeRatio: 0.8,
-    orientation: "vertical",
     showValues: true,
     valuesAnchor: "right",
     showXScale: true,
@@ -282,7 +274,6 @@ var heatGrid3 = new pvc.HeatGridChart({
     showXScale: true,
     xAxisPosition: "bottom",
     showYScale: true,
-    panelSizeRatio: 0.8,
     yAxisPosition: "left",
     minColor: "#FEDFE1",
     maxColor: "#F11929"
@@ -317,7 +308,6 @@ var heatGrid4 = new pvc.HeatGridChart({
     showXScale: true,
     xAxisPosition: "bottom",
     showYScale: true,
-    panelSizeRatio: 0.8,
     yAxisPosition: "left"
 });
 heatGrid4.setData(testHeatGrid,

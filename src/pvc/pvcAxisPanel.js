@@ -3,8 +3,6 @@
  * AxisPanel panel.
  */
 pvc.AxisPanel = pvc.BasePanel.extend({
-    showAllTimeseries: false, // TODO: ??
-    
     pvRule:     null,
     pvTicks:    null,
     pvLabel:    null,
@@ -281,7 +279,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             
             var sideTickOffset;
             if(isDiscrete){
-                var halfBand = this.scale.range().band / 2;
+                var halfBand = this.scale.range().step / 2; // don't use .band, cause it does not include margins... 
                 sideTickOffset = def.set({}, 
                         begSide, halfBand,
                         endSide, halfBand);
@@ -542,7 +540,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         // How much label anchors are separated from each other
         // (in the direction of the axis)
-        var b = this.scale.range().band;
+        var b = this.scale.range().step; // don't use .band, cause it does not include margins...
         
         // Height of label box
         var h = layoutInfo.textHeight;

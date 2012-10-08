@@ -14,20 +14,28 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 
     constructor: function(options){
 
-        options = def.set(options, 
-                'orthoAxisOrdinal', true,
-                'legend', false);
-  
-        if(options.scalingType && !options.colorScaleType){
-            options.colorScaleType = options.scalingType;
-        }
-        
         this.base(options);
 
         var parent = this.parent;
         if(parent) {
             this._colorRole   = parent._colorRole;
             this._sizeRole = parent._sizeRole;
+        }
+    },
+    
+    _processOptionsCore: function(options){
+        
+        this.base(options);
+        
+        def.set(options, 
+            'orthoAxisOrdinal', true,
+            'legend', false,
+                
+            // Has no meaning in the current implementation
+            'panelSizeRatio', 1);
+  
+        if(options.scalingType && !options.colorScaleType){
+            options.colorScaleType = options.scalingType;
         }
     },
     

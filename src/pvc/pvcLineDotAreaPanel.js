@@ -740,7 +740,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 
                 if(isStacked && isBaseDiscrete) {
                     // The intermediate point is at the start of the "to" band
-                    interBasePosition = toScene.basePosition - (sceneBaseScale.range().band / 2);
+                    // don't use .band, cause it does not include margins...
+                    interBasePosition = toScene.basePosition - (sceneBaseScale.range().step / 2); 
                 } else if(fromScene.isNull) { // Come from NULL
                     // Align directly below the (possibly) non-null dot
                     interBasePosition = toScene.basePosition;

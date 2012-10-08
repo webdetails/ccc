@@ -35,6 +35,15 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
             this._yRole = parent._yRole;
         }
     },
+    
+    _processOptionsCore: function(options){
+        
+        this.base(options);
+        
+        // Has no meaning in this chart type
+        // Only used by discrete scales
+        options.panelSizeRatio = 1;
+    },
 
     /**
      * Initializes each chart's specific roles.
@@ -97,7 +106,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
     },
     
     defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
-        valuesAnchor: "right",
-        panelSizeRatio: 1
+        valuesAnchor: "right"
     })
 });

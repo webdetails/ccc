@@ -49,3 +49,60 @@ div.props>div>div:first-child {
     font-weight: bold;
     text-transform:capitalize;
 }
+
+
+/* table */
+.tryItTable {
+    display:table;
+    width:100%;
+    border:1px solid red;
+    margin-top: 10px;
+    margin-bottom: 40px;
+}
+
+/* row */
+.tryItTable>div {
+    display: table-row;
+}
+
+/* cell */
+.tryItTable>div>div {
+    display: table-cell;
+}
+
+/* textarea cell */
+.tryItTable>div>div:first-child {
+	vertical-align: top;
+    width: 45%;
+    text-align: right;
+}
+
+.CodeMirror {
+    text-align: left;
+    border: 1px solid green;
+}
+
+.CodeMirror pre {
+	font-size: 12px;
+    line-height: 1.5em;
+}
+
+/* Makes the editor extend to all the initial text height */
+.CodeMirror-scroll {
+	height: 100%;
+}
+
+/* chart cell */
+.tryItTable>div>div:nth-child(2) {
+	vertical-align: middle;
+	text-align: center;
+}
+
+/* chart div  */
+.tryItTable>div>div:nth-child(2)>div {
+    border:1px dashed blue;
+}
+
+.tryItTable textarea {
+    width: 90%;
+}

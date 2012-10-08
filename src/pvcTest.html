@@ -77,7 +77,6 @@
         <script type="text/javascript" src="pvc/pvcTitlePanelAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcTitlePanel.js"></script>
         <script type="text/javascript" src="pvc/pvcLegendPanel.js"></script>
-        <script type="text/javascript" src="pvc/pvcTimeseriesAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcCartesianAbstract.js"></script>
         <script type="text/javascript" src="pvc/pvcGridDockingPanel.js"></script>
         <script type="text/javascript" src="pvc/pvcCartesianGridDockingPanel.js"></script>
@@ -871,18 +870,18 @@
         pie.render();
 
 
-        var crosstab01 = new pvc.TimeseriesAbstract({});
+        var crosstab01 = new pvc.BaseChart({});
         crosstab01.setData(crosstab_01, {crosstabMode: true, seriesInRows: false});
         crosstab01.render();
 
 
         // Testing some other datasets:
-        var relational = new pvc.TimeseriesAbstract({});
+        var relational = new pvc.BaseChart({});
         relational.setData(relational_01, {crosstabMode: false, seriesInRows: false});
         relational.render();
 
 
-        var relational2 = new pvc.TimeseriesAbstract({});
+        var relational2 = new pvc.BaseChart({});
         relational2.setData(relational_02, {crosstabMode: false, seriesInRows: false});
         relational2.render();
 

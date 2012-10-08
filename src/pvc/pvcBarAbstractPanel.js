@@ -82,9 +82,9 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         var orthoScale = chart.axes.ortho.scale,
             orthoZero  = orthoScale(0),
             sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'value', nullToZero: false}),
-            
-            bandWidth = chart.axes.base.scale.range().band,
-            barStepWidth = chart.axes.base.scale.range().step,
+            baseRange = chart.axes.base.scale.range(),
+            bandWidth = baseRange.band,
+            barStepWidth = baseRange.step,
             barWidth,
 
             reverseSeries = isVertical === isStacked // (V && S) || (!V && !S)

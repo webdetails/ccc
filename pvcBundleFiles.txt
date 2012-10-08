@@ -60,7 +60,6 @@ src/pvc/pvcMultiChartPanel.js
 src/pvc/pvcTitlePanelAbstract.js
 src/pvc/pvcTitlePanel.js
 src/pvc/pvcLegendPanel.js
-src/pvc/pvcTimeseriesAbstract.js
 src/pvc/pvcCartesianAbstract.js
 src/pvc/pvcGridDockingPanel.js
 src/pvc/pvcCartesianGridDockingPanel.js

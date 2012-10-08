@@ -5,6 +5,14 @@
  */
 pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
 
+    _processOptionsCore: function(options){
+        
+        this.base(options);
+        
+        // Has no meaning in this chart type
+        options.panelSizeRatio = 1;
+    },
+    
     _hasDataPartRole: function(){
         return true;
     },
@@ -166,7 +174,6 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         orthoAxisOffset: 0.04,
         baseAxisOffset:  0.01, // TODO: should depend on being discrete or continuous base
         valuesAnchor: "right",
-        panelSizeRatio: 1, 
         tipsySettings: { offset: 15 }
     })
 });

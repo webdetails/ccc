@@ -1214,6 +1214,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 }
             }
         });
+        
+        return this;
     },
 
     _addErrorPanelMessage: function(text, isNoData){
@@ -1265,6 +1267,8 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         // TODO: Danger!
         $.extend(this.options, options);
+        
+        return this;
     },
     
     /**
@@ -1278,6 +1282,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         if (!resultset.length) {
             pvc.log("Warning: Resultset is empty");
         }
+        
+        return this;
     },
 
     /**
@@ -1292,6 +1298,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         if (!metadata.length) {
             pvc.log("Warning: Metadata is empty");
         }
+        
+        return this;
     },
     
     _processExtensionPoints: function(){
@@ -1428,6 +1436,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(this.data.owner.clearSelected()) {
             this.updateSelections();
         }
+        
+        return this;
     },
     
     _suspendSelectionUpdate: function(){
@@ -1461,12 +1471,12 @@ pvc.BaseChart = pvc.Abstract.extend({
     updateSelections: function(){
         if(this === this.root) {
             if(this._inUpdateSelections) {
-                return;
+                return this;
             }
             
             if(this._updateSelectionSuspendCount) {
                 this._selectionNeedsUpdate = true;
-                return;
+                return this;
             }
             
             pvc.removeTipsyLegends();
@@ -1478,7 +1488,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                 var action = this.options.selectionChangedAction;
                 if(action){
                     var selections = this.data.selectedDatums();
-                    action.call(null, selections);
+                    action.call(this.basePanel._getContext(), selections);
                 }
                 
                 /** Rendering afterwards allows the action to change the selection in between */
@@ -1490,6 +1500,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         } else {
             this.root.updateSelections();
         }
+        
+        return this;
     },
     
     _onUserSelection: function(datums){
@@ -1662,10 +1674,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
         clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
-        
-        // Selection - Rubber band
-        rubberBandFill: 'rgba(203, 239, 163, 0.6)', // 'rgba(255, 127, 0, 0.15)',
-        rubberBandLine: '#86fe00', //'rgb(255,127,0)',
         
 //        renderCallback: undefined,
 //

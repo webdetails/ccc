@@ -9,11 +9,107 @@
     }
 }());
 
-var tryMe = function(e){ 
+var tryMe = function(e){
+    /*global CodeMirror:true */
+    
     try{
-        /*jshint evil:true */
-        eval( $(e).prev("textarea").val());
-    } catch(ex){
+        var $e = $(e);
+        var $textArea = $e.prevAll("textarea");
+        var textArea = $textArea[0];
+        var codeMirror = textArea._codeMirror;
+        if(codeMirror){
+            codeMirror.save();
+        }
+        
+        var code = $textArea.val();
+        if(code){
+            // In IE document mode 8 the editor doesn't work well
+            // In other IE variants the css also doesn't work very well
+            var betterNot = !pv.have_SVG && pv.have_VML;
+            if(!betterNot && /^\s*new\s/.test(code)){
+                if(!codeMirror){
+                    if(!CodeMirror.keyMap.ccc){
+                        CodeMirror.keyMap.ccc = {
+                            'Tab':       false,
+                            'Shift-Tab': false,
+                            'PageUp':    false,
+                            'PageDown':  false,
+                            fallthrough: 'default'
+                        };
+                    }
+                    
+                    codeMirror = 
+                    textArea._codeMirror = 
+                    CodeMirror.fromTextArea(textArea, {
+                        mode:          'javascript',
+                        lineWrapping:  true,
+                        lineNumbers:   false,
+                        indentUnit:    4,
+                        autofocus:     false,
+                        matchBrackets: true,
+                        keyMap:        'ccc'
+                    });
+                }
+                
+                var reWidth  = /\b(width\s*:\s*)(.*?)(\s*[,}])/;
+                var reHeight = /\b(height\s*:\s*)(.*?)(\s*[,}])/;
+                var m;
+                
+                // V2-style example
+                // Fix width and height
+                var width;
+                m = reWidth.exec(code);
+                if(m){
+                    width = +m[2];
+                }
+                
+                var height;
+                m = reHeight.exec(code);
+                if(m){
+                    height = +m[2];
+                }
+                
+                if(height && width){
+                    var $scrollBox = $textArea.find('.CodeMirror-scroll');
+                    
+                    var maxWidth  = 0.95 * $e.parent().next().width();
+                    var maxHeight = 0.95 * ($scrollBox.length ? $scrollBox : $e.parent().next()).height();
+                    
+                    var ar = width / height;
+                    if(ar >= 1){
+                        // bigger width
+                        width  = maxWidth;
+                        height = width / ar;
+                        if(height > maxHeight){
+                            height = maxHeight;
+                            width  = height * ar;
+                        }
+                    } else {
+                        height = maxHeight;
+                        width  = height * ar;
+                        
+                        if(width > maxWidth){
+                            width  = maxWidth;
+                            height = width / ar;
+                        }
+                    }
+                    
+                    // Replace
+                    code = code
+                        .replace(reWidth, function($0, $1, $2, $3){
+                            return $1 + width + $3;
+                        })
+                        .replace(reHeight, function($0, $1, $2, $3){
+                            return $1 + height + $3;
+                        });
+                }
+            }
+            
+            /*jshint evil:true */
+            eval(code);
+        }
+        
+    } catch(ex) {
         /*global alert:true */
         alert("Try me error: " + ex);
     }
