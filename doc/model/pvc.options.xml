@@ -5,12 +5,51 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
 
+    <!-- COMPLEX TYPES -->
     <c:complexType name="BaseChartOptions" space="pvc.options" abstract="true">
     
         <c:documentation>
             The chart options <i>applicable</i>
             to all charts.
         </c:documentation>
+        
+        
+        <!-- Layout -->
+        <!--
+        margins:  undefined,
+        paddings: undefined,
+        contentMargins:  undefined,
+        contentPaddings: undefined, 
+         -->
+        
+        <!-- Style -->
+        
+        <!-- MultiChart -->
+        <!--
+        multiChartMax: undefined,
+        multiChartMaxColumns: undefined,
+        multiChartWidth: undefined,
+        multiChartAspectRatio: undefined,
+        multiChartSingleRowFillsHeight: undefined,
+        multiChartSingleColFillsHeight: undefined,
+        multiChartMaxHeight: undefined,
+        -->
+        
+        <!-- Panels -->
+        <!--
+            legend ...
+            title  ...
+          -->
+         
+        <!-- Extension points -->
+        <!-- extensionPoints: undefined -->
+        
+        <!-- Roles -->
+        <!-- visualRoles: undefined -->
+        
+        <!-- Data -->
+        <!-- dataOptions: undefined -->
+        
         
         <c:property name="canvas" type="string object" category="General">
             <c:documentation>
@@ -49,7 +88,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="orientation" type="string" default="vertical" category="Layout">
+        <c:property name="orientation" type="string" default="'vertical'" category="Layout">
             <c:documentation>
                 The chart orientation indicates if 
                 its main direction should be laid out
@@ -58,34 +97,8 @@
             </c:documentation>
         </c:property>
         
-        <!--
-        margins:  undefined,
-        paddings: undefined,
-        contentMargins:  undefined,
-        contentPaddings: undefined, 
-         -->
-        
-        <!-- Style -->
-        
-        <!-- MultiChart -->
-        <!-- 
-        multiChartMax: undefined,
-        multiChartMaxColumns: undefined,
-        multiChartWidth: undefined,
-        multiChartAspectRatio: undefined,
-        multiChartSingleRowFillsHeight: undefined,
-        multiChartSingleColFillsHeight: undefined,
-        multiChartMaxHeight: undefined,
-         -->
-        
-        <!-- Panels -->
-        <!--
-            legend ...
-            title ... 
-         -->
-         
-        <!-- Interactivity -->
-        <c:property name="animate" type="boolean" default="true" category="Interactivity">
+        <!-- Interaction -->
+        <c:property name="animate" type="boolean" default="true" category="Interaction">
             <c:documentation>
                 Indicates if a chart should show an entry animation, 
                 every time it is rendered.
@@ -94,20 +107,20 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="clickable" type="boolean" default="false" category="Interactivity">
+        <c:property name="clickable" type="boolean" default="false" category="Interaction">
             <c:documentation>
                 Indicates if the chart is clickable by the user.
                 
                 If this option is <tt>false</tt>, 
                 any click-related actions will not be executed 
                 (ex: 
-                <c:link href="#clickAction" />,
-                <c:link href="#doubleClickAction" />, or
-                <c:link href="pvc.options.DiscreteAxisOptions#clickAction" />).
+                <c:link to="#clickAction" />,
+                <c:link to="#doubleClickAction" />, or
+                <c:link to="pvc.options.DiscreteAxisOptions#clickAction" />).
             </c:documentation>
         </c:property>
         
-        <c:property name="hoverable" type="boolean" default="false" category="Interactivity">
+        <c:property name="hoverable" type="boolean" default="false" category="Interaction">
             <c:documentation>
                 Indicates if the chart's visual elements
                 are automatically highlighted 
@@ -115,7 +128,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="selectable" type="boolean" default="false" category="Interactivity">
+        <c:property name="selectable" type="boolean" default="false" category="Interaction">
             <c:documentation>
                 Indicates if the chart's visual elements
                 can be selected by the user, 
@@ -124,14 +137,14 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="showTooltips" type="boolean" default="true" category="Interactivity">
+        <c:property name="showTooltips" type="boolean" default="true" category="Interaction">
             <c:documentation>
                 Indicates if tooltips are shown
                 when the user hovers over visual elements with the mouse.
             </c:documentation>
         </c:property>
         
-        <c:property name="ctrlSelectMode" type="boolean" default="true" category="Interactivity">
+        <c:property name="ctrlSelectMode" type="boolean" default="true" category="Interaction">
             <c:documentation>
                 When <tt>true</tt>, 
                 indicates that a selection made by the user 
@@ -148,16 +161,16 @@
         </c:property>
         
         <c:property name="clearSelectionMode" 
-                    type="ClearSelectionMode" 
-                    default="emptySpaceClick" 
-                    category="Interactivity">
+                    type="pvc.options.ClearSelectionMode" 
+                    default="'emptySpaceClick'" 
+                    category="Interaction">
             <c:documentation>
             
                 Controls if and how the selection can be cleared by the user.
             </c:documentation>
         </c:property>
         
-        <c:property name="doubleClickMaxDelay" type="number" default="300" category="Interactivity">
+        <c:property name="doubleClickMaxDelay" type="number" default="300" category="Interaction">
             <c:documentation>
                 The maximum number of milliseconds,
                 between two consecutive clicks,
@@ -165,24 +178,24 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="tooltipFormat" type="function" category="Interactivity">
+        <c:property name="tooltipFormat" type="pvc.options.TooltipFormatter" category="Interaction">
             <c:documentation>
                 A callback function that is called,
                 to build the tooltip of a visual element.
                 
-                The function signature is:
-                <tt>string function(pvc.visual.Context this, pvc.visual.Scene scene)</tt>.
+                Whether the tooltip format is HTML or plain text must 
+                be known by the formatter.
             </c:documentation>
         </c:property>
         
-        <c:property name="tipsySettings" type="TooltipOptions" category="Interactivity">
+        <c:property name="tipsySettings" type="TooltipOptions" category="Interaction">
             <c:documentation>
                 Contains tooltip presentation options.
             </c:documentation>
         </c:property>
         
         <!-- Actions -->
-        <c:property name="renderCallback" type="function" category="Actions">
+        <c:property name="renderCallback" type="pvc.options.StandardAction" category="Actions">
             <c:documentation>
                 A callback function that is called
                 before the chart is rendered,
@@ -190,70 +203,43 @@
                 
                 You can use this action to:
                 <ul>
-                    <li>use the _mark events_ API on time-series categorical charts</li>
+                    <li>use the <i>mark events</i> API on time-series categorical charts</li>
                     <li>extend in special ways the already created protovis marks.</li>
                 </ul>
-                
-                The function signature is:
-                <tt>undefined function(pvc.visual.Context this)</tt>.
             </c:documentation>
         </c:property>
         
-        <c:property name="clickAction" type="function" category="Actions">
+        <c:property name="clickAction" type="pvc.options.StandardAction" category="Actions">
             <c:documentation>
                 A callback function that is called,
                 when the user clicks on a visual element.
-                
-                The function signature is:
-                <tt>undefined function(pvc.visual.Context this, pvc.visual.Scene scene)</tt>.
             </c:documentation>
         </c:property>
         
-        <c:property name="doubleClickAction" type="function" category="Actions">
+        <c:property name="doubleClickAction" type="pvc.options.StandardAction" category="Actions">
             <c:documentation>
                 A callback function that is called,
                 when the user double-clicks on a visual element.
-                
-                The function signature is:
-                <tt>undefined function(pvc.visual.Context this, pvc.visual.Scene scene)</tt>.
             </c:documentation>
         </c:property>
         
-        <c:property name="selectionChangedAction" type="function" category="Actions">
+        <c:property name="selectionChangedAction" type="pvc.options.SelectionChangedAction" category="Actions">
             <c:documentation>
                 A callback function that is called
                 when, after selection has changed,
                 the chart is updated to reflect the change.
-                
-                The function signature is:
-                <tt>undefined function(pvc.visual.Context this, pvc.data.Datum[] selectedDatums)</tt>.
-                The argument <tt>selectedDatums</tt>
-                is an array with the resulting selected datums.
             </c:documentation>
         </c:property>
         
-        <c:property name="userSelectionAction" type="function" category="Actions">
+        <c:property name="userSelectionAction" type="pvc.options.UserSelectionAction" category="Actions">
             <c:documentation>
                 A callback function that is called
                 when the user performs a selection,
                 but before the corresponding datums' selected state are actually changed.
                 
                 This function is usefull to restrict, amplify, or normalize the selection.
-                
-                The function signature is:
-                <tt>pvc.data.Datum[] function(pvc.visual.Context this, pvc.data.Datum[] selectingDatums)</tt>.
-                
-                The argument <tt>selectingDatums</tt>
-                is an array with the datums that will be selected by the current operation.
-                The function should return the datums that should be actually selected.
             </c:documentation>
         </c:property>
-        
-        <!-- Extension points -->
-        <!-- extensionPoints: undefined, -->
-        
-        <!-- Roles -->
-        <!-- visualRoles: undefined -->
         
         <!-- Data -->
         <c:property name="ignoreNulls" type="boolean" default="true" category="Data">
@@ -290,7 +276,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="timeSeriesFormat" type="string" default="%Y-%m-%d" category="Data">
+        <c:property name="timeSeriesFormat" type="string" default="'%Y-%m-%d'" category="Data">
             <c:documentation>
                 The format string used by default to <i>parse</i>
                 dimensions of the <tt>Date</tt> value type.
@@ -299,21 +285,89 @@
                 <i>protovis</i>' date formats.
                 
                 This property changes the default of the 
-                <c:link href="pvc.options.DimensionOptions#rawFormat" />
+                <c:link to="pvc.options.DimensionTypeOptions#rawFormat" />
                 
                  property,
                 for dimensions with a <tt>Date</tt> value type.  
             </c:documentation>
         </c:property>
         
-        <!-- 
-             dimensions:        undefined,
-             dimensionGroups:   undefined,
-             
-             groupedLabelSep:   ' ~ ' 
-             valueFormat:
-             percentValueFormat:
-        -->
+        <c:property name="groupedLabelSep" type="string" default="' ~ '" category="Data">
+            <c:documentation>
+                The separator used to join the labels of the values of 
+                a multi-dimensional visual role.
+                
+                For example, if a visual role, 
+                has the dimensions "Territory" and "ProductType",
+                a compound value could be shown as "EMEA ~ Classic Cars". 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valueFormat" type="pvc.options.NumberFormatter" category="Data">
+            <c:documentation>
+                A function that formats the
+                non-null <i>numeric</i> values
+                of the dimensions named <tt>value</tt>, <tt>value2</tt>, etc.
+                
+                This property is used to default the property 
+                <c:link to="pvc.options.DimensionTypeOptions#formatter" />
+                of the mentioned dimensions.
+                
+                The default value of this option is a function that 
+                formats numbers with two decimal places.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="percentValueFormat" type="pvc.options.NumberFormatter" category="Data">
+            <c:documentation>
+                A function used to format non-null numeric values
+                as percentages.
+                
+                The numeric value has still to be multiplied by 100.
+                
+                This function is used whenever a chart needs to 
+                show percentages of a numeric dimension, 
+                like is the case for the tooltips of a stacked chart or
+                the percentages shown in a Pie chart.
+                
+                The default value of this option is a function that 
+                formats percentages with one decimal place and 
+                a "%" character suffix.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dimensions" type="map(string : pvc.options.DimensionTypeOptions)" category="Data">
+            <c:documentation>
+                A map whose keys are 
+                the dimension type names and whose values are 
+                the dimension type options. 
+                
+                You don't need to define dimensions 
+                unless you want to change their name or properties.
+                Charts automatically define default dimensions
+                to satisfy their visual roles' requirements.
+                
+                Dimension options can be partial, 
+                so that it is possible to override only certain options.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dimensionGroups" type="map(string : pvc.options.DimensionTypeOptions)" category="Data">
+            <c:documentation>
+                A map whose keys are 
+                the dimension type group names and whose values are 
+                the default dimension type group options.
+                
+                A dimension type group is 
+                a group of dimension types
+                that have a common non-numeric prefix in its name.
+                
+                This property does not define any dimension types, per si,
+                but allows specifying default values
+                for dimension types of a group, 
+                that apply in case they are effectively used.
+            </c:documentation>
+        </c:property>
         
         <!-- Data Translation -->
         <c:property name="crosstabMode" type="boolean" default="true" category="Data Translation">
@@ -383,10 +437,14 @@
             </c:documentation>
         </c:property>
         
-        <!--
-        dataOptions: undefined,
-        readers
-        -->
+        <c:property name="readers" type="list(pvc.options.DimensionsReaderOptions)" category="Data Translation">
+            <c:documentation>
+                An array of dimensions readers.
+                 
+                Can be specified to customize the 
+                translation process of the data source. 
+            </c:documentation>
+        </c:property>
     </c:complexType>
 
     <c:complexType name="CartesianChartOptions" 
@@ -440,12 +498,584 @@
         </c:documentation>
     </c:complexType>
     
+    <c:complexType name="DimensionTypeOptions" space="pvc.options">
+        <c:documentation>
+            Options to define a data dimension type.
+        </c:documentation>
+        <c:property name="label" type="string" category="Presentation">
+            <c:documentation>
+                The name of the dimension type as it is shown to the user.
+                
+                The label <i>should</i> be unique.
+
+                The default value is built from the dimension name,
+                by converting the first character to upper case.
+            </c:documentation>
+        </c:property>
+        <c:property name="valueType" type="pvc.options.DimensionValueType" default="null" category="Data">
+            <c:documentation>
+                The type of value that dimensions of this type will hold.
+            </c:documentation>
+        </c:property>
+        <c:property name="isDiscrete" type="boolean" category="Data">
+            <c:documentation>
+                Indicates if a dimension type should be considered discrete
+                or continuous.
+                
+                Only dimension types whose <c:link to="#valueType" /> 
+                is one of 
+                <c:link to="pvc.options.DimensionValueType#Number" /> or
+                <c:link to="pvc.options.DimensionValueType#Date" />
+                can be continuous.
+                
+                Some chart types support binding 
+                a continuous or a discrete dimension to a visual role,
+                yielding different visual results.
+                An example is the "color" visual role of the Metric Line/Dot charts.
+                Another example is the Line/Dot/Area chart that supports
+                both a continuous or a discrete dimension in its "category" visual role.  
+                
+                The default value dependends on the value of <c:link to="#valueType" />.
+                If it can be continuous, then the default value is <tt>false</tt>.
+                If it cannot, the default value is <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="converter" type="pvc.options.DimensionConverter" category="Data">
+            <c:documentation>
+                Converts a non-null raw value, 
+                as read from the data source,
+                into a value of the dimension's <c:link to="#valueType" />.
+                
+                The returned value 
+                need not have the type of the dimension's value type.
+                But it t must be such that the 
+                specific value type cast function
+                is able to convert it to the dimension's value type.
+                In this way, 
+                only "non-standard" conversions
+                need to be handled with a converter function.
+                
+                Values that are not convertible by the dimension's value type 
+                cast function become null.
+                
+                Also, note that the only value type that 
+                does not have a cast function is the  
+                <c:link to="pvc.options.DimensionValueType#Any" />.
+                
+                When unspecified and 
+                the value type is <c:link to="pvc.options.DimensionValueType#Date" />,
+                and the option <c:link to="#rawFormat" /> is specified
+                a default converter is created for it. 
+            </c:documentation>
+        </c:property>
+        <c:property name="rawFormat" type="string" category="Data">
+            <c:documentation>
+                A protovis format string that is to parse the raw value.
+                
+                Currently, this option is ignored unless the 
+                option <c:link to="#converter" /> is unspecified
+                and the value type is 
+                <c:link to="pvc.options.DimensionValueType#Date" />.
+                
+                When the chart option 
+                <c:link to="pvc.options.BaseChartOptions#timeSeriesFormat" />,
+                is specified,
+                and the value type is 
+                <c:link to="pvc.options.DimensionValueType#Date" />,
+                it is taken as the <i>default value</i> of this option.
+                
+                A converter function is created to parse
+                raw values with the specified format string.
+            </c:documentation>
+        </c:property>
+        <c:property name="key" type="pvc.options.DimensionKey" category="Data">
+            <c:documentation>
+                A function that converts a non-null value of the dimension's 
+	            <c:link to="pvc.options.DimensionTypeOptions#valueType" />
+	            into a string that (uniquely) identifies
+	            the value in the dimension.
+	            
+	            The default key function is 
+	            the standard JavaScript <tt>String</tt> function,
+	            and is suitable for most value types.
+	            
+	            If the dimension's value type is one of 
+	            <c:link to="pvc.options.DimensionValueType#Any" /> or
+	            <c:link to="pvc.options.DimensionValueType#Object" />
+	            the <tt>String</tt> function may not be suitable to 
+	            identify the values.
+	            
+	            If more than one value has a given key,
+	            only the first one will be stored in the dimension.
+            </c:documentation>
+        </c:property>
+        <c:property name="comparer" type="pvc.options.DimensionComparer" category="Data">
+            <c:documentation>
+                A function that compares two different and non-null values of the dimension's 
+                <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+                
+                When unspecified, 
+                and the dimension type is not <c:link to="#isDiscrete" />,
+                a default natural order comparer function
+                is applied to the continuous value types:
+                <c:link to="pvc.options.DimensionValueType#Number" /> and
+                <c:link to="pvc.options.DimensionValueType#Date" />.
+                
+                Dimension types that do not have a comparer 
+                function "compare" their values by "input order" 
+                - order of first appearence, in the data source.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="formatter" type="pvc.options.DimensionFormatter" category="Presentation">
+            <c:documentation>
+                A function that formats a value, 
+                possibly null, 
+                of the dimension's 
+                <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+                
+                Note that, the chart option 
+                <c:link to="pvc.options.BaseChartOptions#valueFormat" />,
+                is used to build a default formatter function 
+                for numeric dimensions of the "value" dimension group.
+                
+                When unspecified and 
+                the value type is <c:link to="pvc.options.DimensionValueType#Number" />,
+                a default formatter is created that formats numbers with two decimal places.
+                
+                When unspecified and 
+                the value type is <c:link to="pvc.options.DimensionValueType#Date" />,
+                and the option <c:link to="#format" /> is specified (or implied)
+                a default formatter is created for it.
+                
+                Otherwise a value is formatted by calling 
+                the standard JavaScript <tt>String</tt> function on it.
+            </c:documentation>
+        </c:property>
+        <c:property name="format" type="string" category="Presentation">
+            <c:documentation>
+                A protovis format string that is to format a value of 
+                the dimension's 
+                <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+                
+                Currently, this option is ignored unless the 
+                option <c:link to="#formatter" /> is unspecified
+                and the value type is 
+                <c:link to="pvc.options.DimensionValueType#Date" />.
+                
+                When unspecified, 
+                but the option <c:link to="#rawFormat" /> is specified,
+                a format string is created from the later 
+                (simply by replacing "-" with "/").
+                
+                A formatter function is created to format
+                values with the specified or implied format string.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="isHidden" type="boolean" default="false" category="Presentation">
+            <c:documentation>
+                Indicates if values of this dimension type 
+                should be hidden from the user.
+                
+                This option is useful to hide auxiliar dimensions that are used to:
+                <ul> 
+                    <li>hold extra data, required for drill-down purposes</li>
+                    <li>
+                        complete the minimal working information a chart needs to work, 
+                        like, for example, 
+                        a "series" dimension created automatically by a chart if 
+                        its required "series" visual role was not unbound
+                    </li>
+                </ul>
+                
+                The only place where the values of a dimension that is not bound to a visual role
+                are shown to the user is the tooltip, as it is formatted by default.
+                To prevent this, 
+                set the dimension type's <tt>isHidden</tt> option to <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+    <c:complexType name="DimensionsReaderOptions" space="pvc.options">
+        <c:documentation>
+            The options that configure a dimensions reader.
+            
+            A dimensions reader is executed for each row of a 
+            data source to convert values of one or more columns
+            into one or more atoms of certain dimensions.
+            
+            Together, a set of dimensions readers, 
+            are executed to fully convert 
+            each data source row into atoms of the defined dimension types. 
+            The atoms of each row are used to construct a datum.
+            
+            The mentioned data source row is called the "virtual item".
+            Depending on the data source format the actual rows 
+            carry different informaton. 
+            The virtual item is a normalized view of each row of the data source,
+            independent of its format.
+            
+            A dimensions reader can be configured in the following ways:
+            <dl>
+                <dt>specify <tt>names</tt> but not <tt>reader</tt></dt>
+                <dd>
+                    names are paired with any specified indexes, from left to right;
+                    excess indexes feed dimensions whose name starts with the last specified name (a dimension group);
+                    excess names are fed with the <i>non reserved</i>indexes 
+                    that follow the last specified index (or 0, if none);
+                    indexes explicitly specified in dimensions readers are all
+                    reserved beforehand
+                </dd>
+                <dt>specify <tt>indexes</tt> but not <tt>names</tt> and <tt>reader</tt></dt>
+                <dd>
+                    the specified indexes become reserved but are not read,
+                    and so are effectively ignored 
+                </dd>
+                <dt>specify both <tt>reader</tt> and <tt>names</tt></dt>
+                <dd>
+                    any specified indexes are reserved, 
+                    and no pairing is performed between these and the specified names;
+                    the reader function may 
+                    read any cell from the virtual item and 
+                    return atoms from any of the dimensions specified in <tt>names</tt>;
+                    atoms of stated dimensions, that are not returned, 
+                    result in a <i>null</i> value 
+                </dd>
+            </dl>
+        </c:documentation>
+        
+        <c:property name="names" type="string list(string)" category="General">
+            <c:documentation>
+                The name or names of the dimensions that the reader reads
+                from each virtual item.
+                
+                When the argument is a string, it can be a list of names, 
+                separated by the character ",".
+                
+                Only one dimensions reader can read a given dimension.
+            </c:documentation> 
+        </c:property>
+        
+        <c:property name="indexes" type="number string list(number string)" category="General">
+            <c:documentation>
+	            The index or indexes, of each virtual item, 
+	            that are to be read.
+	            
+	            Only one dimensions reader can state that it reads a given index
+	            (although a dimensions reader function may read any cells,
+	             stated or not).
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="reader" type="pvc.options.DimensionsReader" category="General">
+            <c:documentation>
+                A dimensions reader function, 
+                reads atoms from a virtual item row.
+                
+                When unspecified, one is created that performs a simple 
+                mapping between the specified names and indexes.
+                 
+	            A dimensions reader function can be specified 
+	            to perform non-simple operations over the read cells, 
+	            like the following:
+	            <ul>
+	                <li>
+	                    combine values from two or more cells into a single dimension,
+	                </li>
+	                <li>
+                        split the value of one cell into more than one dimension,
+                    </li>
+	                <li>
+	                   feed a dimension with correlated data read from an external data source.
+	                </li>
+	            </ul>
+	            
+	            Dimensions reader functions need not be specifed to perform
+	            conversion or formatting operations of a single cell.
+	            For those cases, the dimension type's 
+	            <c:link to="pvc.options.DimensionTypeOptions#converter" />
+	            and 
+	            <c:link to="pvc.options.DimensionTypeOptions#formatter" />
+	            should be used instead.
+	            
+	            The function may read cells whose indexes were not
+	            "reserved" in <tt>indexes</tt>. 
+	            Those cells might be read by other readers,
+	            possibly default ones created by the translator.
+            </c:documentation> 
+        </c:property>
+    </c:complexType>
+    
+    <!-- FUNCTION TYPES -->
+    
+    <c:functionType name="TooltipFormatter" space="pvc.options">
+        <c:documentation>
+            The function type of a tooltip formatter.
+            
+            Whether the tooltip format is HTML or plain text must 
+            be known by the formatter.
+        </c:documentation>
+        <c:argument name="this" type="pvc.visual.Context" required="true">
+            <c:documentation>
+                The CCC visual context object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="scene" type="pvc.visual.Scene" required="true">
+            <c:documentation>
+                The scene whose tooltip is to be built.
+                
+                Use the data contained in the scene object to 
+                build the tooltip.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="string">
+            <c:documentation>
+                The tooltip text.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+    
+    <c:functionType name="StandardAction" space="pvc.options">
+        <c:documentation>
+            A standard action function that is called 
+            when a certain event happens on a visual element.
+        </c:documentation>
+        <c:argument name="this" type="pvc.visual.Context" required="true">
+            <c:documentation>
+                The CCC visual context object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="scene" type="pvc.visual.Scene" required="true">
+            <c:documentation>
+                The scene associated with the visual item.
+            </c:documentation>
+        </c:argument>
+    </c:functionType> 
+    
+    <c:functionType name="SelectionChangedAction" space="pvc.options">
+        <c:documentation>
+            A callback function that is called
+            when, after selection has changed,
+            the chart is updated to reflect the change.
+        </c:documentation>
+        <c:argument name="this" type="pvc.visual.Context" required="true">
+            <c:documentation>
+                The CCC visual context object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="selectedDatums" type="list(pvc.data.Datum)" required="true">
+            <c:documentation>
+                An array with the resulting selected datums.
+            </c:documentation>
+        </c:argument>
+    </c:functionType> 
+    
+    <c:functionType name="UserSelectionAction" space="pvc.options">
+        <c:documentation>
+            A callback function that is called
+            when the user performs a selection,
+            but before the corresponding datums' selected state is actually changed.
+        </c:documentation>
+        <c:argument name="this" type="pvc.visual.Context" required="true">
+            <c:documentation>
+                The CCC visual context object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="selectingDatums" type="list(pvc.data.Datum)" required="true">
+            <c:documentation>
+                An array with the datums that will be selected by the current operation.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="list(pvc.data.Datum)">
+            <c:documentation>
+                The datums that should be actually selected.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+    
+    <c:functionType name="DimensionsReader" space="pvc.options">
+        <c:documentation>
+            A function reads atoms from a virtual item array.
+        </c:documentation>
+        <c:argument name="this" type="pvc.data.Data" required="true">
+            <c:documentation>
+                The data instance into which atoms will be read.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="virtualItem" type="list(any)" required="true">
+            <c:documentation>
+                The virtual item array.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="dimension..." type="pvc.data.Dimension" required="true">
+            <c:documentation>
+                The data dimensions,
+                corresponding to the dimension names specified in the 
+                dimensions reader options, 
+                in which read values are to be interned.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="pvc.data.Atom list(pvc.data.Atom)">
+            <c:documentation>
+                An atom or array of atoms read from the virtual item, 
+                or <tt>null</tt> or <tt>undefined</tt>, 
+                if nothing was read. 
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+    
+    <c:functionType name="NumberFormatter" space="pvc.options">
+        <c:documentation>
+            A function that formats a non-null <i>numeric</i> value
+            according to some predefined format.
+        </c:documentation>
+        <c:argument name="this" type="null" required="true">
+            <c:documentation>
+                The global JavaScript object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="value" type="number!" required="true">
+            <c:documentation>
+                The non-null number to format.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="string!">
+            <c:documentation>
+                The number formatted as a non-empty string.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+    
+    <c:functionType name="DimensionConverter" space="pvc.options">
+        <c:documentation>
+            A function that converts a non-null raw value
+            into a value of the dimension's 
+            <c:link to="pvc.options.DimensionTypeOptions#valueType" />
+            or some value that 
+            its cast function can convert from.
+        </c:documentation>
+        <c:argument name="this" type="null" required="true">
+            <c:documentation>
+                The global JavaScript object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="sourceValue" type="any" required="true">
+            <c:documentation>
+                The non-null source value to convert.
+                
+                In the case where the raw value to convert is 
+                a Google-table-like cell, 
+                it is the value of its <tt>v</tt>
+                property that is passed to this argument.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="any">
+            <c:documentation>
+                The converted value.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+    
+    <c:functionType name="DimensionKey" space="pvc.options">
+        <c:documentation>
+            A function that converts a non-null value of the dimension's 
+            <c:link to="pvc.options.DimensionTypeOptions#valueType" />
+            into a string that (uniquely) identifies
+            the value in the dimension.
+        </c:documentation>
+        <c:argument name="this" type="null" required="true">
+            <c:documentation>
+                The global JavaScript object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="value" type="any" required="true">
+            <c:documentation>
+                The non-null value to convert.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="string">
+            <c:documentation>
+                The corresponding key.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+    
+    <c:functionType name="DimensionComparer" space="pvc.options">
+        <c:documentation>
+            A function that compares two different and non-null values of 
+            the dimension's <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+        </c:documentation>
+        <c:argument name="this" type="null" required="true">
+            <c:documentation>
+                The global JavaScript object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="a" type="any" required="true">
+            <c:documentation>
+                The first value to compare.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="b" type="any" required="true">
+            <c:documentation>
+                The second value to compare.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="number">
+            <c:documentation>
+                The number 0 if the two values have the same order, 
+                a negative number if <c:link to="a" /> is before <c:link to="b" />, and
+                a positive number if <c:link to="a" /> is after <c:link to="b" />.
+            </c:documentation>
+        </c:returns>
+    </c:functionType> 
+    
+    <c:functionType name="DimensionFormatter" space="pvc.options">
+        <c:documentation>
+            A function that formats a value, possibly null, of 
+            the dimension's <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+        </c:documentation>
+        <c:argument name="this" type="null" required="true">
+            <c:documentation>
+                The global JavaScript object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="value" type="any" required="true">
+            <c:documentation>
+                The value to format.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="sourceValue" type="any">
+            <c:documentation>
+                The raw value, 
+                when the value was read from a data source,
+                or <tt>undefined</tt>, otherwise.
+                
+                In the case where the raw value is 
+                a Google-table-like cell, 
+                it is the value of its <tt>v</tt>
+                property that is passed to this argument.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="string">
+            <c:documentation>
+                The string that is the formatted value.
+                Only the <tt>null</tt> value can have the empty string
+                as the formatted value.
+            </c:documentation>
+        </c:returns>
+    </c:functionType>
+
+    <!-- ATOM TYPES -->
+    
     <c:atomType name="ClearSelectionMode" space="pvc.options" base="string">
         <c:documentation>
             Controls if and how the selection can be cleared by the user.
         </c:documentation>
         
-        <c:atom value="manual">
+        <c:atom name="Manual" value="'manual'">
             <c:documentation>
                 The user has no way to explicitly fully clear the selection.
                 
@@ -456,7 +1086,7 @@
             </c:documentation>
         </c:atom>
         
-        <c:atom value="emptySpaceClick">
+        <c:atom name="EmptySpaceClick" value="'emptySpaceClick'">
             <c:documentation>
                 The user can click on any <i>empty area</i>
                 <i>inside</i> the chart to clear the selection.
@@ -464,4 +1094,89 @@
         </c:atom>
     </c:atomType>
     
+    <c:atomType name="DimensionValueType" space="pvc.options" base="function">
+        <c:documentation>
+            The types of values that a dimension can hold.
+            
+            Note that, 
+            whatever the value type of a dimension type,
+            <tt>null</tt> is always a supported value.
+        </c:documentation>
+        
+        <c:atom name="Any" value="null">
+            <c:documentation>
+                The "any" value type, 
+                specified as <tt>null</tt>, 
+                means that a dimension can hold any type of data.
+                
+                Values of this type are <i>not</i> cast.
+                
+                Each value may have a different type.
+                
+                Dimension types of this value type
+                are discrete.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Boolean" value="Boolean">
+            <c:documentation>
+                The dimension holds <i>boolean</i> values.
+                
+                Values of this type are cast by using the standard 
+                JavaScript <tt>Boolean</tt> function.
+                
+                Dimension types of this value type
+                are discrete.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Number" value="Number">
+            <c:documentation>
+                The dimension holds <i>number</i> values.
+                
+                Values of this type are cast by using the standard 
+                JavaScript <tt>Number</tt> function;
+                additionally, 
+                resulting <tt>NaN</tt> values 
+                are converted to <tt>null</tt>. 
+                
+                Dimension types of this value type
+                can be continuous or discrete.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Date" value="Date">
+            <c:documentation>
+                The dimension holds <i>date</i> values.
+                
+                Values of this type are cast by using the standard 
+                JavaScript <tt>Date</tt> constructor.
+                
+                Dimension types of this value type
+                can be continuous or discrete.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="String" value="String">
+            <c:documentation>
+                The dimension holds <i>string</i> values.
+                
+                Values of this type are cast by using the standard 
+                JavaScript <tt>String</tt> function.
+                
+                Dimension types of this value type
+                are discrete.
+                
+                The empty string value is 
+                always converted to the null value.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Object" value="Object">
+            <c:documentation>
+                The dimension holds <i>object</i> values.
+                
+                Values of this type are cast by using the standard 
+                JavaScript <tt>Object</tt> function.
+                
+                Dimension types of this value type
+                are discrete.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
 </c:model>

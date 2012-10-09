@@ -217,11 +217,12 @@ function(complexType, name, keyArgs){
     if(!this._converter) {
         var rawFormat = def.get(keyArgs, 'rawFormat');
         if(rawFormat) {
+            /*jshint onecase:true */
             switch(this.valueType) {
-                case Number:
-                    // TODO: receive extra format configuration arguments
-                    this._converter = pv.Format.createParser(pv.Format.number().fractionDigits(0, 2));
-                    break;
+//                case Number:
+//                    // TODO: receive extra format configuration arguments
+//                    // this._converter = pv.Format.createParser(pv.Format.number().fractionDigits(0, 2));
+//                    break;
                     
                 case Date:
                     this._converter = pv.Format.createParser(pv.Format.date(rawFormat));
@@ -239,12 +240,10 @@ function(complexType, name, keyArgs){
     
     /** @private */
     this._comparer = def.get(keyArgs, 'comparer');
-    if(this._comparer === undefined){
+    if(this._comparer === undefined && !this.isDiscrete){
         switch(this.valueType){
             case Number:
-                if(!this.isDiscrete) {
-                    this._comparer = def.compare;    
-                }
+                this._comparer = def.compare;
                 break;
                 
             case Date:

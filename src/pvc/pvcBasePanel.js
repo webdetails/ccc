@@ -913,11 +913,12 @@ pvc.BasePanel = pvc.Abstract.extend({
     _onRender: function(){
         var renderCallback = this.chart.options.renderCallback;
         if (renderCallback) {
-            var context = this.compatVersion() <= 1 ? 
-                            this.chart : 
-                            this._getContext();
-            
-            renderCallback.call(context);
+            if(this.compatVersion() <= 1){
+                renderCallback.call(this.chart);
+            } else {
+                var context = this._getContext();
+                renderCallback.call(context, context.scene);
+            }
         }
     },
     
