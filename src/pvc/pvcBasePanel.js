@@ -512,7 +512,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         function layoutChild(child, canResize) {
-            var resized  = false;
+            var resized = false;
             var paddings;
             
             childKeyArgs.canChange = canResize;
@@ -696,6 +696,16 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
     },
     
+    invalidateLayout: function(){
+        this._layoutInfo = null;
+        
+        if(this._children) {
+            this._children.forEach(function(child){
+                child.invalidateLayout();
+            });
+        }
+    },
+    
     /** 
      * CREATION PHASE
      * 
@@ -718,7 +728,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 return;
             }
             
-            if(this.isRoot) {
+            if(this.isRoot){
                 this._creating();
             }
             

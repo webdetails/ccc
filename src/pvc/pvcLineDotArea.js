@@ -41,87 +41,84 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
 
     _bindAxes: function(hasMultiRole){
         
-        if(!hasMultiRole || this.parent){
-            
-            var options = this.options;
-            var isStacked = !!options.stacked;
-            var nullInterpolationMode = options.nullInterpolationMode;
-            var axes = this.axes;
-            var valueRole = this.visualRoles('value');
-            
-            if(!options.secondAxis){
+        var options = this.options;
+        var isStacked = !!options.stacked;
+        var nullInterpolationMode = options.nullInterpolationMode;
+        var axes = this.axes;
+        var valueRole = this.visualRoles('value');
+        
+        if(!options.secondAxis){
+            axes.ortho 
+                .bind({
+                    role: valueRole,
+                    isStacked: isStacked,
+                    nullInterpolationMode: nullInterpolationMode
+                });
+        } else {
+            if(options.secondAxisIndependentScale){
+                // Separate scales =>
+                // axis ortho 0 represents data part 0
+                // axis ortho 1 represents data part 1
                 axes.ortho 
                     .bind({
                         role: valueRole,
+                        dataPartValue: '0',
+                        isStacked: isStacked,
+                        nullInterpolationMode: nullInterpolationMode
+                    });
+                
+                axes.ortho2
+                    .bind({
+                        role: valueRole,
+                        dataPartValue: '1',
                         isStacked: isStacked,
                         nullInterpolationMode: nullInterpolationMode
                     });
             } else {
-                if(options.secondAxisIndependentScale){
-                    // Separate scales =>
-                    // axis ortho 0 represents data part 0
-                    // axis ortho 1 represents data part 1
-                    axes.ortho 
-                        .bind({
-                            role: valueRole,
-                            dataPartValue: '0',
-                            isStacked: isStacked,
-                            nullInterpolationMode: nullInterpolationMode
-                        });
-                    
-                    axes.ortho2
-                        .bind({
-                            role: valueRole,
-                            dataPartValue: '1',
-                            isStacked: isStacked,
-                            nullInterpolationMode: nullInterpolationMode
-                        });
-                } else {
-                    // Common scale => 
-                    // axis ortho 0 represents both data parts
-                    var orthoDataCells = [{
-                            role: valueRole,
-                            dataPartValue: '0',
-                            isStacked: isStacked,
-                            nullInterpolationMode: nullInterpolationMode
-                        }, {
-                            role: valueRole,
-                            dataPartValue: '1',
-                            isStacked: isStacked,
-                            nullInterpolationMode: nullInterpolationMode
-                        }
-                    ];
-                    
-                    axes.ortho.bind(orthoDataCells);
-                    
-                    // TODO: Is it really needed to setScale on ortho2???
-                    // We set this here also so that we can set a scale later.
-                    // This is not used though, cause the scale
-                    // will be that calculated by 'ortho'...
-                    axes.ortho2.bind(orthoDataCells);
-                }
+                // Common scale => 
+                // axis ortho 0 represents both data parts
+                var orthoDataCells = [{
+                        role: valueRole,
+                        dataPartValue: '0',
+                        isStacked: isStacked,
+                        nullInterpolationMode: nullInterpolationMode
+                    }, {
+                        role: valueRole,
+                        dataPartValue: '1',
+                        isStacked: isStacked,
+                        nullInterpolationMode: nullInterpolationMode
+                    }
+                ];
                 
-                // ------
+                axes.ortho.bind(orthoDataCells);
                 
-                // TODO: should not this be the default color axes binding of BaseChart??
-                var colorRoleName = this.legendSource;
-                if(colorRoleName){
-                    var colorRole;
-                    
-                    ['color', 'color2'].forEach(function(axisId){
-                        var colorAxis = this.axes[axisId];
-                        if(colorAxis){
-                            if(!colorRole){
-                                colorRole = this.visualRoles(colorRoleName);
-                            }
-                            
-                            colorAxis.bind({
-                                role: colorRole,
-                                dataPartValue: '' + colorAxis.index
-                            });
+                // TODO: Is it really needed to setScale on ortho2???
+                // We set this here also so that we can set a scale later.
+                // This is not used though, cause the scale
+                // will be that calculated by 'ortho'...
+                axes.ortho2.bind(orthoDataCells);
+            }
+            
+            // ------
+            
+            // TODO: should not this be the default color axes binding of BaseChart??
+            var colorRoleName = this.legendSource;
+            if(colorRoleName){
+                var colorRole;
+                
+                ['color', 'color2'].forEach(function(axisId){
+                    var colorAxis = this.axes[axisId];
+                    if(colorAxis){
+                        if(!colorRole){
+                            colorRole = this.visualRoles(colorRoleName);
                         }
-                    }, this);
-                }
+                        
+                        colorAxis.bind({
+                            role: colorRole,
+                            dataPartValue: '' + colorAxis.index
+                        });
+                    }
+                }, this);
             }
         }
         

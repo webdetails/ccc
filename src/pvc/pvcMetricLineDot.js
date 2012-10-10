@@ -101,14 +101,9 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         
         this.base(hasMultiRole);
         
-        if(!hasMultiRole || this.parent){
-            
-            var sizeAxis = this.axes.size;
-            if(sizeAxis && !sizeAxis.isBound() && this._sizeRole.isBound()){
-                sizeAxis.bind(this._buildRolesDataCells(this._sizeRole));
-            }
-            
-            
+        var sizeAxis = this.axes.size;
+        if(sizeAxis && !sizeAxis.isBound() && this._sizeRole.isBound()){
+            sizeAxis.bind(this._buildRolesDataCells(this._sizeRole));
         }
     },
     

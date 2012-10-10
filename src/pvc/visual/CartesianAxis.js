@@ -326,6 +326,10 @@ def.scope(function(){
         cast: Number2
     };
     
+    function castDomainScope(scope, axis){
+        return pvc.parseDomainScope(scope, axis.orientation);
+    }
+    
     /*global axis_optionsDef:true*/
     var cartAxis_optionsDef = def.create(axis_optionsDef, {
         /*
@@ -401,6 +405,12 @@ def.scope(function(){
             cast:  Boolean,
             value: true 
         }, 
+        
+        DomainScope: {
+            resolve: resolveNormal,
+            cast:    castDomainScope,
+            value:  'global'
+        },
         
         /* 1 <- axisOffset, 
          * 2 <- secondAxisOffset, 
@@ -479,7 +489,7 @@ def.scope(function(){
         DomainRoundMode: {
             resolve: resolveNormal,
             cast:    String,
-            value:   'none'
+            value:   'tick'
         },
         TickExponentMin: {
             resolve: resolveNormal,

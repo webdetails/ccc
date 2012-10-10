@@ -44,7 +44,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         var anchor = options.anchor || this.anchor;
         
-        // sizeMax
+        // size
+        if(options.size == null){
+            var size = options.axisSize;
+            if(size != null){
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
+                options.size = new pvc.Size()
+                                    .setSize(size, {singleProp: this.anchorOrthoLength(anchor)});
+            }
+        }
+        
         if(options.sizeMax == null){
             var sizeMax = options.axisSizeMax;
             if(sizeMax != null){
@@ -113,10 +123,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     _calcLayoutCore: function(layoutInfo){
-        //var layoutInfo = this._layoutInfo;
-        
         // Fixed axis size?
-        layoutInfo.axisSize = this.axisSize;
+        var axisSize = layoutInfo.desiredClientSize[this.anchorOrthoLength()];
+        
+        layoutInfo.axisSize = axisSize; // may be undefined
         
         if (this.isDiscrete && this.useCompositeAxis){
             if(layoutInfo.axisSize == null){
@@ -136,8 +146,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }
             
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
+            this._calcAxisSizeFromLabel(); // -> layoutInfo.requiredAxisSize, layoutInfo.labelBBox
+            
             if(layoutInfo.axisSize == null){
-                this._calcAxisSizeFromLabel(); // -> layoutInfo.axisSize and layoutInfo.labelBBox
+                layoutInfo.axisSize = layoutInfo.requiredAxisSize;
             }
             
             /* III - Calculate Trimming Length if: FIXED/NEEDED > AVAILABLE */
@@ -208,15 +220,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         // --------------
         
-        layoutInfo.axisSize = this.tickLength + length; 
+        var axisSize = this.tickLength + length; 
         
         // Add equal margin on both sides?
         var angle = labelBBox.sourceAngle;
         if(!(angle === 0 && this.isAnchorTopOrBottom())){
             // Text height already has some free space in that case
             // so no need to add more.
-            layoutInfo.axisSize += this.tickLength;
+            axisSize += this.tickLength;
         }
+        
+        layoutInfo.requiredAxisSize = axisSize;
     },
     
     _getLabelBBoxQuadrantLength: function(labelBBox, quadrantSide){
@@ -327,7 +341,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     _calcMaxTextLengthThatFits: function(){
         var layoutInfo = this._layoutInfo;
         var availableClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
-        if(layoutInfo.axisSize <= availableClientLength){
+        
+        var efSize = Math.min(layoutInfo.axisSize, availableClientLength);
+        if(efSize >= layoutInfo.requiredAxisSize){
             // Labels fit
             // Clear to avoid unnecessary trimming
             layoutInfo.maxTextWidth = null;
@@ -338,11 +354,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var labelBBox = layoutInfo.labelBBox;
             if(!labelBBox){
                 // NOTE: requires previously calculated layoutInfo.maxTextWidth...
-                this._calcAxisSizeFromLabel();
+                this._calcLabelBBox();
+                
+                labelBBox = layoutInfo.labelBBox;
             }
             
             // Now move backwards, to the max text width...
-            var maxOrthoLength = availableClientLength - 2 * this.tickLength;
+            var maxOrthoLength = efSize - 2 * this.tickLength;
             
             // A point at the maximum orthogonal distance from the anchor
             var mostOrthoDistantPoint;
@@ -413,7 +431,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 maxTextWidth -= cutWidth;
             }
             
-            layoutInfo.maxTextWidth = maxTextWidth; 
+            layoutInfo.maxTextWidth = maxTextWidth;
         }
     },
     

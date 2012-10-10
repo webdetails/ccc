@@ -88,19 +88,24 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
     _bindAxes: function(hasMultiRole){
         
         this.base(hasMultiRole);
+      
+        /**
+         * Axes are created even when hasMultiRole && !parent
+         * because it is needed to read axis options in the root chart.
+         * Also binding occurs to be able to know its scale type. 
+         * Yet, their scales are not setup at the root level.
+         */
         
-        if(!hasMultiRole || this.parent){
-            var axes = this.axes;
+        var axes = this.axes;
             
-            var axis = axes.base;
-            if(!axis.isBound()){
-                axis.bind({role: this._xRole});
-            }
-            
-            axis = axes.ortho;
-            if(!axis.isBound()){
-                axis.bind({role: this._yRole});
-            }
+        var axis = axes.base;
+        if(!axis.isBound()){
+            axis.bind({role: this._xRole});
+        }
+        
+        axis = axes.ortho;
+        if(!axis.isBound()){
+            axis.bind({role: this._yRole});
         }
     },
     

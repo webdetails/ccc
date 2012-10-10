@@ -43,13 +43,17 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         
         this.base(hasMultiRole);
         
-        if(!hasMultiRole || this.parent){
-            /* Create axes */
-            this._addCartAxis(new pvc.visual.CartesianAxis(this, 'base',  0));
-            this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 0));
-            if(this.options.secondAxis){
-                this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 1));
-            }
+        /** 
+         * Create axes 
+         * Cartesian axes are created even when hasMultiRole && !parent
+         * because it is needed to read axis options in the root chart.
+         * Also binding occurs to be able to know its scale type. 
+         * Yet, their scales are not setup at the root level.
+         */
+        this._addCartAxis(new pvc.visual.CartesianAxis(this, 'base',  0));
+        this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 0));
+        if(this.options.secondAxis){
+            this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 1));
         }
     },
     
@@ -538,7 +542,7 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
             .select(function(dataCell){
                 return this._getContinuousVisibleCellExtent(valueAxis, dataCell);
             }, this)
-            .reduce(this._unionReduceExtent, null);
+            .reduce(pvc.unionExtents, null);
     },
 
     /**
@@ -575,29 +579,6 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
                 max: (useAbs ? Math.abs(maxValue) : maxValue) 
             };
         }
-    },
-    
-    /**
-     * Could/Should be static
-     */
-    _unionReduceExtent: function(result, range){
-        if(!result) {
-            if(!range){
-                return null;
-            }
-
-            result = {min: range.min, max: range.max};
-        } else if(range){
-            if(range.min < result.min){
-                result.min = range.min;
-            }
-
-            if(range.max > result.max){
-                result.max = range.max;
-            }
-        }
-
-        return result;
     },
     
     defaults: def.create(pvc.BaseChart.prototype.defaults, {

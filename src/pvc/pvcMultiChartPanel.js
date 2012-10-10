@@ -145,7 +145,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         var count = Math.min(leafCount, multiChartMax);
         if(count === 0) {
             // Shows no message to the user.
-            // An empty chart, like when all series were hidden through the legend.
+            // An empty chart, like when all series are hidden through the legend.
             return;
         }
         
@@ -292,6 +292,29 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         var smallChartMargins = options.multiChartMargins || 
                                 new pvc.Sides(new pvc.PercentValue(0.02));
         
+        // Index axes that need to be coordinated, by scopeType
+        var hasCoordination = false;
+        var rootAxes = chart.axes;
+        var rootAxesByScopeType = 
+            def
+            .query(def.ownKeys(rootAxes))
+            // filter entries of axis aliases 
+            .where(function(alias){ return rootAxes[alias].id === alias; })
+            .select(function(id){ return rootAxes[id]; })
+            .multipleIndex(function(axis){
+                
+                if(axis.scaleType !== 'Discrete' && // Not implemented (yet...)
+                   axis.option.isDefined('DomainScope')){
+                    
+                    var scopeType = axis.option('DomainScope');
+                    if(scopeType !== 'cell'){
+                        hasCoordination = true;
+                        return scopeType;
+                    }
+                }
+            })
+            ;
+        
         // ----------------------
         // Create and layout small charts
         var ChildClass = chart.constructor;
@@ -299,13 +322,30 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         var lastColIndex = li.colCount - 1;
         var lastRowIndex = li.rowCount - 1;
         
+        var preRenderKeyArgs, scopesByType, addChartToScope, childCharts;
+        if(hasCoordination){
+            childCharts  = [];
+            scopesByType = {};
+            preRenderKeyArgs = {isScaleCoordination: true};
+            
+            // Each scope is a specific 
+            // 'row', 'column' or the single 'global' scope 
+            addChartToScope = function(childChart, scopeType, scopeIndex){
+                var scopes = scopesByType[scopeType] || 
+                             (scopesByType[scopeType] = []);
+                
+                (scopes[scopeIndex] || (scopes[scopeIndex] = []))
+                    .push(childChart);
+            };
+        }
+        
         for(var index = 0 ; index < li.count ; index++) {
             var childData = li.data._children[index];
             
             var colIndex = (index % li.colCount);
             var rowIndex = Math.floor(index / li.colCount);
             
-            var margins   = {};
+            var margins = {};
             if(colIndex > 0){
                 margins.left = smallChartMargins.left;
             }
@@ -340,9 +380,83 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                 });
             
             var childChart = new ChildClass(childOptions);
-            childChart._preRender();
+            if(!hasCoordination){
+                childChart._preRender();
+            } else {
+                childChart._preRenderPhase1();
+                
+                // Index child charts by scope
+                //  on scopes having axes requiring coordination.
+                if(rootAxesByScopeType.row){
+                    addChartToScope(childChart, 'row', rowIndex);
+                }
+                
+                if(rootAxesByScopeType.column){
+                    addChartToScope(childChart, 'column', colIndex);
+                }
+                
+                if(rootAxesByScopeType.global){
+                    addChartToScope(childChart, 'global', 0);
+                }
+                
+                childCharts.push(childChart);
+            }
         }
         
-        this.base(li);
+        // Need _preRenderPhase2?
+        if(hasCoordination){
+            // For each scope type having scales requiring coordination
+            // find the union of the scales' domains for each
+            // scope instance
+            // Finally update all scales of the scope to have the 
+            // calculated domain.
+            def.eachOwn(rootAxesByScopeType, function(axes, scopeType){
+                axes.forEach(function(axis){
+                    
+                    scopesByType[scopeType]
+                        .forEach(function(scopeCharts){
+                            this._coordinateScopeAxes(axis.id, scopeCharts);
+                        }, this);
+                    
+                }, this);
+            }, this);
+            
+            // Finalize _preRender, now that scales are coordinated
+            childCharts.forEach(function(childChart){
+                childChart._preRenderPhase2();
+            });
+            
+            chart._coordinateSmallChartsLayout(childCharts, scopesByType);
+        }
+        
+        this.base(li); // calls _create on child chart's basePanel
+    },
+    
+    _coordinateScopeAxes: function(axisId, scopeCharts){
+        var unionExtent =
+            def
+            .query(scopeCharts)
+            .select(function(childChart){
+                var scale = childChart.axes[axisId].scale;
+                if(!scale.isNull){
+                    var domain = scale.domain();
+                    return {min: domain[0], max: domain[1]};
+                }
+            })
+            .reduce(pvc.unionExtents, null)
+            ;
+        
+        if(unionExtent){
+            // Fix the scale domain of every scale.
+            scopeCharts.forEach(function(childChart){
+                var axis  = childChart.axes[axisId];
+                var scale = axis.scale;
+                if(!scale.isNull){
+                    scale.domain(unionExtent.min, unionExtent.max);
+                    
+                    axis.setScale(scale); // force update of dependent info.
+                }
+            });
+        }
     }
 });

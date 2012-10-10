@@ -44,30 +44,35 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         
         this.base(hasMultiRole);
         
-        if(!hasMultiRole || this.parent){
-            var axes = this.axes;
-            
-            var axis = axes.base;
-            if(!axis.isBound()){
-                axis.bind(this._buildRolesDataCells('category'));
-            }
-            
-            var orthoDataCells;
-            
-            ['ortho', 'ortho2'].forEach(function(id){
-                axis = axes[id];
-                if(axis && !axis.isBound()){
-                    if(!orthoDataCells){
-                        var orthoRoleName = this.options.orthoAxisOrdinal ? 'series' : 'value';
-                        orthoDataCells = this._buildRolesDataCells(orthoRoleName, {
-                            isStacked: !!this.options.stacked
-                        });
-                    }
-                    
-                    axis.bind(orthoDataCells);
-                }
-            }, this);
+        /**
+         * Axes are created even when hasMultiRole && !parent
+         * because it is needed to read axis options in the root chart.
+         * Also binding occurs to be able to know its scale type. 
+         * Yet, their scales are not setup at the root level.
+         */
+        
+        var axes = this.axes;
+        
+        var axis = axes.base;
+        if(!axis.isBound()){
+            axis.bind(this._buildRolesDataCells('category'));
         }
+        
+        var orthoDataCells;
+        
+        ['ortho', 'ortho2'].forEach(function(id){
+            axis = axes[id];
+            if(axis && !axis.isBound()){
+                if(!orthoDataCells){
+                    var orthoRoleName = this.options.orthoAxisOrdinal ? 'series' : 'value';
+                    orthoDataCells = this._buildRolesDataCells(orthoRoleName, {
+                        isStacked: !!this.options.stacked
+                    });
+                }
+                
+                axis.bind(orthoDataCells);
+            }
+        }, this);
     },
     
     _interpolateDataCell: function(dataCell){
@@ -238,7 +243,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
 
         return {max: posSum || 0, min: negSum || 0};
     },
-
+    
     /**
      * Reduce operation of category ranges, into a global range.
      *
@@ -247,9 +252,112 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
      * Supports {@link #_getContinuousVisibleExtent}.
      */
     _reduceStackedCategoryValueExtent: function(result, catRange, catGroup){
-        return this._unionReduceExtent(result, catRange);
+        return pvc.unionExtents(result, catRange);
     },
+    
+    _coordinateSmallChartsLayout: function(childCharts, scopesByType){
+        // TODO: optimize the case were 
+        // the title panels have a fixed size and
+        // the x and y FixedMin and FixedMax are all specified...
+        // Don't need to coordinate in that case.
+        
+        this.base(childCharts, scopesByType);
+        
+        // Force layout and retrieve sizes of
+        // * title panel
+        // * y panel if column or global scope (column scope coordinates x scales, but then the other axis' size also affects the layout...)
+        // * x panel if row    or global scope
+        var titleSizeMax  = 0;
+        var titleOrthoLen;
+        
+        var axisIds = null;
+        var sizesMaxByAxisId = {}; // {id:  {axis: axisSizeMax, title: titleSizeMax} }
+        
+        // Calculate maximum sizes
+        childCharts.forEach(function(childChart){
+            
+            childChart.basePanel.layout();
+            
+            var size;
+            var panel = childChart.titlePanel;
+            if(panel){
+                if(!titleOrthoLen){
+                    titleOrthoLen = panel.anchorOrthoLength();
+                }
+                
+                size = panel[titleOrthoLen];
+                if(size > titleSizeMax){
+                    titleSizeMax = size;
+                }
+            }
+            
+            // ------
+            
+            var axesPanels = childChart.axesPanels;
+            if(!axisIds){
+                axisIds = 
+                    def
+                    .query(def.ownKeys(axesPanels))
+                    .where(function(alias){ 
+                        return alias === axesPanels[alias].axis.id; 
+                    })
+                    .select(function(id){
+                        // side effect
+                        sizesMaxByAxisId[id] = {axis: 0, title: 0};
+                        return id;
+                    })
+                    .array();
+            }
+            
+            axisIds.forEach(function(id){
+                var axisPanel = axesPanels[id];
+                var sizes = sizesMaxByAxisId[id];
+                
+                var ol = axisPanel.axis.orientation === 'x' ? 'height' : 'width';
+                size = axisPanel[ol];
+                if(size > sizes.axis){
+                    sizes.axis = size;
+                }
+                
+                var titlePanel = axisPanel.titlePanel;
+                if(titlePanel){
+                    size = titlePanel[ol];
+                    if(size > sizes.title){
+                        sizes.title = size;
+                    }
+                }
+            });
+        }, this);
+        
+        // Apply the maximum sizes to the corresponding panels
+        childCharts.forEach(function(childChart){
+            
+            if(titleSizeMax > 0){
+                var panel  = childChart.titlePanel;
+                panel.size = panel.size.clone().set(titleOrthoLen, titleSizeMax);
+            }
+            
+            // ------
+            
+            var axesPanels = childChart.axesPanels;
+            axisIds.forEach(function(id){
+                var axisPanel = axesPanels[id];
+                var sizes = sizesMaxByAxisId[id];
+                
+                var ol = axisPanel.axis.orientation === 'x' ? 'height' : 'width';
+                axisPanel.size = axisPanel.size.clone().set(ol, sizes.axis);
 
+                var titlePanel = axisPanel.titlePanel;
+                if(titlePanel){
+                    titlePanel.size = titlePanel.size.clone().set(ol, sizes.title);
+                }
+            });
+            
+            // Invalidate their previous layout
+            childChart.basePanel.invalidateLayout();
+        }, this);
+    },
+    
     markEventDefaults: {
         strokeStyle: "#5BCBF5",  /* Line Color */
         lineWidth: "0.5",  /* Line Width */

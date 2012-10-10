@@ -85,16 +85,14 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
     _bindAxes: function(hasMultiRole){
         
-        if(!hasMultiRole || this.parent){
-            var axis = this.axes.ortho;
-            if(!axis.isBound()){
-                axis.bind(this._buildRolesDataCells(pvc.BoxplotChart.measureRolesNames));
-            }
-            
-            axis = this.axes.ortho2;
-            if(axis && !axis.isBound()){
-                axis.bind(this._buildRolesDataCells(pvc.BoxplotChart.measureRolesNames[0]));
-            }
+        var axis = this.axes.ortho;
+        if(!axis.isBound()){
+            axis.bind(this._buildRolesDataCells(pvc.BoxplotChart.measureRolesNames));
+        }
+        
+        axis = this.axes.ortho2;
+        if(axis && !axis.isBound()){
+            axis.bind(this._buildRolesDataCells(pvc.BoxplotChart.measureRolesNames[0]));
         }
         
         this.base(hasMultiRole);

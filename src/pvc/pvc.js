@@ -454,6 +454,45 @@ var pvc = def.globalSpace('pvc', {
         return shape;
     };
     
+    pvc.parseDomainScope = function(scope, orientation){
+        if(scope){
+            switch(scope){
+                case 'cell':
+                case 'global':
+                    break;
+                
+                case 'section': // row (for y) or col (for x), depending on the associated orientation
+                    if(!orientation){
+                        throw def.error.argumentRequired('orientation');
+                    }
+                    
+                    scope = orientation === 'y' ? 'row' : 'column';
+                    break;
+                    
+                case 'column':
+                case 'row':
+                    if(orientation && orientation !== (scope === 'row' ? 'y' : 'x')){
+                        scope = 'section';
+                        
+                        if(pvc.debug >= 2){
+                            pvc.log("[Warning] Invalid 'DomainScope' option value: '" + scope + "' for the orientation: '" + orientation + "'.");
+                        }
+                    }
+                    break;
+                
+                default:
+                    if(pvc.debug >= 2){
+                        pvc.log("[Warning] Invalid 'DomainScope' option value: '" + scope + "'.");
+                    }
+                
+                    scope = null;
+                    break;
+            }
+        }
+        
+        return scope;
+    };
+    
     pvc.parseOverlappedLabelsMode = function(mode){
         if(mode){
             switch(mode){
@@ -495,6 +534,27 @@ var pvc = def.globalSpace('pvc', {
         }
         
         return align2;
+    };
+    
+    
+    pvc.unionExtents = function(result, range){
+        if(!result) {
+            if(!range){
+                return null;
+            }
+
+            result = {min: range.min, max: range.max};
+        } else if(range){
+            if(range.min < result.min){
+                result.min = range.min;
+            }
+
+            if(range.max > result.max){
+                result.max = range.max;
+            }
+        }
+
+        return result;
     };
     
     /**
@@ -982,6 +1042,7 @@ var pvc = def.globalSpace('pvc', {
             if(pvc.debug) {
                 pvc.log("Invalid 'size' value: " + JSON.stringify(size));
             }
+            
             return this;
         },
         
@@ -1000,6 +1061,8 @@ var pvc = def.globalSpace('pvc', {
                     }
                 }
             }
+            
+            return this;
         },
         
         clone: function(){

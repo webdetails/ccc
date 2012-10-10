@@ -111,6 +111,17 @@ def.scope(function(){
         }
         
         /**
+         * Indicates if an option with the given name is defined.
+         * @name pvc.options#isDefined
+         * @function
+         * @param {string} name The name of the option.
+         * @type boolean
+         */
+        function isDefined(name){
+            return def.hasOwn(_infos, name);
+        }
+        
+        /**
          * Specifies options' values given an object
          * with properties as option names
          * and values as option values.
@@ -175,6 +186,8 @@ def.scope(function(){
         
         option.option = option;
         option.isSpecified  = isSpecified;
+        option.isDefined    = isDefined;
+        
         option.defaultValue = getDefaultValue;
         
         option.specify  = specify;

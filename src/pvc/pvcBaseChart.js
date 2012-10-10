@@ -366,6 +366,11 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Later the {@link #render} method effectively renders.
      */
     _preRender: function(keyArgs) {
+        this._preRenderPhase1(keyArgs);
+        this._preRenderPhase2(keyArgs);
+    },
+    
+    _preRenderPhase1: function(keyArgs) {
         var options = this.options;
         
         /* Increment pre-render version to allow for cache invalidation  */
@@ -409,6 +414,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         /* Set axes scales */
         this._setAxesScales(hasMultiRole);
+    },
+    
+    _preRenderPhase2: function(keyArgs){
+        var hasMultiRole = this._isRoleAssigned('multiChart');
         
         /* Initialize chart panels */
         this._initChartPanels(hasMultiRole);
@@ -1168,6 +1177,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         // BIG HACK: force legend to be rendered after the small charts, 
         // to allow them to register legend renderers.
         this.basePanel._children.unshift(this.basePanel._children.pop());
+    },
+    
+    _coordinateSmallChartsLayout: function(childCharts, scopesByType){
+        // NOOP
     },
     
     useTextMeasureCache: function(fun, ctx){

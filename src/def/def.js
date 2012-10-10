@@ -2039,7 +2039,7 @@ def.type('Query')
         return min != null ? {min: min, max: max} : null;
     },
     
-    index: function(keyFun, ctx){
+    multipleIndex: function(keyFun, ctx){
         var keyIndex = {};
         
         this.each(function(item){
