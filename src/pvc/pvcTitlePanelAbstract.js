@@ -20,10 +20,8 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
         if (options.size == null) {
             var size = options.titleSize;
             if (size != null) {
-                // Single size (a number or a string with only one
-                // number)
-                // should be interpreted as meaning the orthogonal
-                // length.
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
                 options.size = new pvc.Size().setSize(size, {
                     singleProp: this.anchorOrthoLength(anchor)
                 });
@@ -34,10 +32,8 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
         if (options.sizeMax == null) {
             var sizeMax = options.titleSizeMax;
             if (sizeMax != null) {
-                // Single size (a number or a string with only one
-                // number)
-                // should be interpreted as meaning the orthogonal
-                // length.
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
                 options.sizeMax = new pvc.Size().setSize(sizeMax, {
                     singleProp: this.anchorOrthoLength(anchor)
                 });
@@ -65,8 +61,7 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
             
         var requestSize = new pvc.Size();
 
-        // TODO: take textAngle, textMargin and textBaseline into
-        // account
+        // TODO: take textAngle, textMargin and textBaseline into account
 
         // Naming is for anchor = top
         var a = this.anchor;

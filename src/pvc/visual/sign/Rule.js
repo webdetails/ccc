@@ -27,7 +27,7 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
         keyArgs = def.setDefaults(keyArgs,
                         'noHover',       true,
                         'noSelect',      true,
-                        'noTooltips',    true,
+                        'noTooltip',     true,
                         'noClick',       true,
                         'noDoubleClick', true);
 

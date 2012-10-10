@@ -1079,7 +1079,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 noClick:       false,
                 noDoubleClick: false,
                 noSelect:      false,
-                noTooltips:    false,
+                noTooltip:    false,
                 noHover:       false, // TODO: to work, scenes would need a common root
                 wrapper:       wrapper,
                 tooltipArgs:   {
@@ -1464,7 +1464,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 noClick:       false,
                 noDoubleClick: false,
                 noSelect:      false,
-                noTooltips:    false,
+                noTooltip:    false,
                 noHover:       false, // TODO: to work, scenes would need a common root
                 wrapper:       wrapper,
                 tooltipArgs:   {

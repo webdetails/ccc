@@ -426,7 +426,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                         noClick:       true,
                         noDoubleClick: true,
                         noSelect:      true,
-                        noTooltips:    true,
+                        noTooltip:    true,
                         noHover:       true 
                     })
                     .lockMark('data', function(scene){

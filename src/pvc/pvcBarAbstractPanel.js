@@ -273,7 +273,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                 noHover:       true,
                 noClick:       true,
                 noDoubleClick: true,
-                noTooltips:    true,
+                noTooltip:    true,
                 freePosition:  true,
                 extensionId:   isMin ? 'barUnderflowMarker' : 'barOverflowMarker',
                 wrapper:       wrapper

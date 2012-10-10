@@ -1735,7 +1735,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 noSelect:      true,
                 noClick:       true,
                 noDoubleClick: true,
-                noTooltips:    true
+                noTooltip:    true
             })
             .override('defaultStrokeWidth', function(){
                 return 1.5;

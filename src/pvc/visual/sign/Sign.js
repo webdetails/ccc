@@ -337,18 +337,18 @@ def.type('pvc.visual.Sign')
 .constructor
 .add({
     _bitShowsInteraction:  4,
-    _bitShowsTooltips:     8,
+    _bitShowsTooltip:      8,
     _bitSelectable:       16,
     _bitHoverable:        32,
     _bitClickable:        64,
     _bitDoubleClickable: 128,
     
-    showsInteraction:  function(){ return true; /*(this.bits & this._bitShowsInteraction ) !== 0;*/ },
-    showsTooltips:     function(){ return (this.bits & this._bitShowsTooltips  ) !== 0; },
-    isSelectable:      function(){ return (this.bits & this._bitSelectable     ) !== 0; },
-    isHoverable:       function(){ return (this.bits & this._bitHoverable      ) !== 0; },
-    isClickable:       function(){ return (this.bits & this._bitClickable      ) !== 0; },
-    isDoubleClickable: function(){ return (this.bits & this._bitDoubleClickable) !== 0; },
+    showsInteraction:  function(){ return (this.bits & this._bitShowsInteraction) !== 0; },
+    showsTooltip:      function(){ return (this.bits & this._bitShowsTooltip    ) !== 0; },
+    isSelectable:      function(){ return (this.bits & this._bitSelectable      ) !== 0; },
+    isHoverable:       function(){ return (this.bits & this._bitHoverable       ) !== 0; },
+    isClickable:       function(){ return (this.bits & this._bitClickable       ) !== 0; },
+    isDoubleClickable: function(){ return (this.bits & this._bitDoubleClickable ) !== 0; },
     
     extensionAbsIds: null,
     
@@ -359,8 +359,8 @@ def.type('pvc.visual.Sign')
         
         var bits = this.bits;
         
-        if(options.showTooltips && !def.get(keyArgs, 'noTooltips')){
-            bits |= this._bitShowsTooltips;
+        if(options.showTooltips && !def.get(keyArgs, 'noTooltip')){
+            bits |= this._bitShowsTooltip;
             
             this.panel._addPropTooltip(pvMark, def.get(keyArgs, 'tooltipArgs'));
         }
@@ -379,14 +379,18 @@ def.type('pvc.visual.Sign')
                 
                 panel._addPropHoverable(pvMark);
             }
-            
-            var showsInteraction = def.get(keyArgs, 'showsInteraction');
-            if(showsInteraction != null){
-                if(showsInteraction){
-                    bits |=  this._bitShowsInteraction;
-                } else {
-                    bits &= ~this._bitShowsInteraction;
-                }
+        }
+        
+        // By default interaction is SHOWN if the sign
+        // is sensitive to interactive events.
+        
+        // This must be after the previous options, that affect bits with _bitShowsInteraction
+        var showsInteraction = def.get(keyArgs, 'showsInteraction');
+        if(showsInteraction != null){
+            if(showsInteraction){
+                bits |=  this._bitShowsInteraction;
+            } else {
+                bits &= ~this._bitShowsInteraction;
             }
         }
         

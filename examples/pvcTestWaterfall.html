@@ -266,12 +266,9 @@ var wf1 = new pvc.WaterfallChart({
 
     showValues: true,
 
-    showXScale: true,
-    showYScale: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
     
-    orthoAxisDomainRoundMode: 'tick',
     orthoAxisDesiredTickCount: 10,
 
     extensionPoints: {
@@ -343,11 +340,8 @@ var wf2 = new pvc.WaterfallChart({
     barSizeRatio: 1.0,
 
     showValues: true,
-    showXScale: true,
-    showYScale: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
-    orthoAxisDomainRoundMode: 'tick',
     extensionPoints: {
         titleLabel_font: "16px sans-serif",         
     }});
@@ -390,11 +384,8 @@ var wf3 = new pvc.WaterfallChart({
     barSizeRatio: 1,
     margins: 20,
     showValues: true,
-    showXScale: true,
-    showYScale: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
-    orthoAxisDomainRoundMode: 'tick',
     extensionPoints: {
         titleLabel_font: "16px sans-serif",
         barWaterfallLine_strokeStyle:"red"
@@ -438,16 +429,9 @@ var wf4 = new pvc.WaterfallChart({
     barSizeRatio: 1,
 
     showValues: true,
-    showXScale: true,
-    showYScale: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
-    xAxisFullGrid: true,
-    yAxisFullGrid: true,
-    xAxisEndLine: true,
-    yAxisEndLine: true,
-    orthoAxisDomainRoundMode: 'tick',
-    
+    axisFullGrid: true,
     extensionPoints: {
         titleLabel_font: "16px sans-serif",          
         barWaterfallLine_strokeStyle:"red"
@@ -479,7 +463,6 @@ var wf5 = new pvc.WaterfallChart({
     selectable: true,
     hoverable:  true,
     showValues: true,
-    orthoAxisDomainRoundMode: 'tick',
     
     waterDirection: 'up',
     showWaterGroupAreas: true,

@@ -184,7 +184,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
             keyArgs.noDoubleClick = 
             keyArgs.freeColor = false;
             
-            keyArgs.noTooltips = !!wrapper; // V1 had no tooltips
+            keyArgs.noTooltip = !!wrapper; // V1 had no tooltips
         }
         
         var pvHeatGrid = this.pvHeatGrid = new pvc.visual.Panel(this, pvRowPanel, keyArgs)

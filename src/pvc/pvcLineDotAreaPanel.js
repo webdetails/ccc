@@ -161,7 +161,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 extensionId: 'area',
                 antialias:   showAreas && !showLines,
                 segmented:   !isDense,
-                noTooltips:  false,
+                noTooltip:  false,
                 wrapper:     wrapper
             })
             

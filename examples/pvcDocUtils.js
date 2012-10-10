@@ -223,14 +223,22 @@ def.scope(function(){
     }
    
     function renderAllChartExamples(){
-        var first = true;
-        for(var id in chartExamples){
-            if(first){
-                first = false;
-                $("#examples div").remove();
-            }
+        var ids = def.ownKeys(chartExamples);
+        var count = ids.length;
+        if(count){
+            $("#examples div").remove();
             
-            $e.render(id);
+            var index = 0;
+            var renderNextChart = function(){
+                var id = ids[index++];
+                $e.render(id);
+                
+                if(index < count){
+                    window.setTimeout(renderNextChart, 50);
+                }
+            };
+            
+            renderNextChart();
         }
     }
 });

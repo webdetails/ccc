@@ -154,7 +154,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         
         this.pvWaterfallLine = new pvc.visual.Rule(this, this.pvPanel, {
                 extensionId:  'barWaterfallLine',
-                noTooltips:    false,
+                noTooltip:    false,
                 noHover:       false,
                 noSelect:      false,
                 noClick:       false,

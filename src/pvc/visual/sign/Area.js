@@ -62,7 +62,7 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs, 
-                        'noTooltips',  true);
+                        'noTooltip',  true);
 
         this.base(keyArgs);
     },
