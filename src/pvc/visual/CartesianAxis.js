@@ -73,11 +73,11 @@ def.scope(function(){
             }
             
             if(scale){
-                if(!scale.isNull && this.scaleType !== 'Discrete'){
+                if(!scale.isNull && this.scaleType !== 'discrete'){
                     // Original data domain, before nice or tick rounding
                     this.domain = scale.domain();
                     
-                    if(this.scaleType === 'Continuous'){
+                    if(this.scaleType === 'numeric'){
                         var roundMode = this.option('DomainRoundMode');
                         if(roundMode === 'nice'){
                             scale.nice();
@@ -102,7 +102,7 @@ def.scope(function(){
             
             this.ticks = ticks;
             
-            if(scale.type === 'Continuous' && this.option('DomainRoundMode') === 'tick'){
+            if(scale.type === 'numeric' && this.option('DomainRoundMode') === 'tick'){
                 
                 delete this._roundingPaddings;
                 
@@ -125,7 +125,7 @@ def.scope(function(){
             
             // -------------
             
-            if(scale.type === 'Discrete'){
+            if(scale.type === 'discrete'){
                 if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
                     var bandRatio = this.chart.options.panelSizeRatio || 0.8;
                     scale.splitBandedCenter(scale.min, scale.max, bandRatio);
@@ -149,7 +149,7 @@ def.scope(function(){
                 var scale = this.scale;
                 var roundMode;
                 
-                while(scale && !scale.isNull && scale.type === 'Continuous' && 
+                while(scale && !scale.isNull && scale.type === 'numeric' && 
                       (roundMode = this.option('DomainRoundMode')) !== 'none'){
                     
                     var currDomain = scale.domain();
@@ -297,6 +297,25 @@ def.scope(function(){
         return chartOption.call(this, this.v1OptionId + 'Axis' + name); 
     });
     
+    // numericAxisLabelSpacingMin
+    axisSpecify.byScaleType = axisSpecify(function(name){
+        // this.scaleType
+        // * discrete
+        // * numeric    | continuous
+        // * timeseries | continuous
+        var st = this.scaleType;
+        if(st){
+            var value = chartOption.call(this, st + 'Axis' + name);
+            if(value === undefined && st !== 'discrete'){
+                value = chartOption.call(this, 'continuousAxis' + name);
+            }
+            
+            return value;
+        }
+        
+        return chartOption.call(this, this.v1OptionId + 'Axis' + name); 
+    });
+    
     // axisOffset
     axisSpecify.byCommonId = axisSpecify(function(name){
         return chartOption.call(this, 'axis' + name);
@@ -305,6 +324,7 @@ def.scope(function(){
     var resolveNormal = resolvers([
        axisSpecify.byId,
        axisSpecify.byV1OptionId,
+       axisSpecify.byScaleType,
        axisSpecify.byCommonId
     ]);
     
@@ -321,6 +341,7 @@ def.scope(function(){
                     return chartOption.call(this, this.id + name);
                 }
             }),
+            axisSpecify.byScaleType,
             axisSpecify.byCommonId
         ]),
         cast: Number2
@@ -419,6 +440,7 @@ def.scope(function(){
             resolve: resolvers([
                 axisSpecify.byId,
                 axisSpecify.byV1OptionId,
+                axisSpecify.byScaleType,
                 // axisOffset only applies to index 0!
                 axisSpecify(function(name){
                     switch(this.index) {

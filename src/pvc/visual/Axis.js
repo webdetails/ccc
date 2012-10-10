@@ -48,6 +48,12 @@ def.scope(function(){
         
         /**
          * Binds the axis to a set of data cells.
+         * 
+         * <p>
+         * Only after this operation is performed will
+         * options with a scale type prefix be found.
+         * </p>
+         * 
          * @param {object|object[]} dataCells The associated data cells.
          * @type pvc.visual.Axis
          */
@@ -66,6 +72,10 @@ def.scope(function(){
             return this;
         },
         
+        isDiscrete: function(){
+            return this.role && this.role.isDsiscrete();
+        },
+        
         isBound: function(){
             return !!this.role;
         },
@@ -82,7 +92,7 @@ def.scope(function(){
         _wrapScale: function(scale){
             scale.type = this.scaleType;
             
-            if(scale.type !== 'Discrete'){
+            if(scale.type !== 'discrete'){
                 var by;
                 var useAbs = this.scaleUsesAbs();
                 var nullAs = this.scaleTreatsNullAs(); 
@@ -124,7 +134,7 @@ def.scope(function(){
             var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,
                 grouping = this.role.grouping;
     
-            if(grouping.isSingleDimension && grouping.firstDimension.type.valueType === Number){
+            if(grouping.isSingleDimension && grouping.firstDimensionValueType() === Number){
                 var scale = this.scale,
                     nullToZero = def.get(keyArgs, 'nullToZero', true);
                 
@@ -157,14 +167,14 @@ def.scope(function(){
             if(L > 1){
                 var grouping = this.role.grouping, 
                     i;
-                if(this.scaleType === 'Discrete'){
+                if(this.scaleType === 'discrete'){
                     for(i = 1; i < L ; i++){
                         if(grouping.id !== this.dataCells[i].role.grouping.id){
                             throw def.error.operationInvalid("Discrete roles on the same axis must have equal groupings.");
                         }
                     }
                 } else {
-                    if(!grouping.firstDimension.type.isComparable){
+                    if(!grouping.firstDimensionType().isComparable){
                         throw def.error.operationInvalid("Continuous roles on the same axis must have 'comparable' groupings.");
                     }
     
@@ -194,10 +204,10 @@ def.scope(function(){
     
     function groupingScaleType(grouping){
         return grouping.isDiscrete() ?
-                    'Discrete' :
-                    (grouping.firstDimension.type.valueType === Date ?
-                    'Timeseries' :
-                    'Continuous');
+                    'discrete' :
+                    (grouping.firstDimensionValueType() === Date ?
+                    'timeSeries' :
+                    'numeric');
     }
     
     axis_optionsDef = {

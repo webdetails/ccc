@@ -93,12 +93,12 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         // Cached
         var sizeGrouping = this._sizeRole.grouping;
         if(sizeGrouping){
-            this._sizeDim = this.data.dimensions(sizeGrouping.firstDimension.name);
+            this._sizeDim = this.data.dimensions(sizeGrouping.firstDimensionName());
         }
 
         var colorGrouping = this._colorRole.grouping;
         if(colorGrouping) {
-            this._colorDim = this.data.dimensions(colorGrouping.firstDimension.name);
+            this._colorDim = this.data.dimensions(colorGrouping.firstDimensionName());
         }
     },
     

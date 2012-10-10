@@ -127,7 +127,7 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
      * @type pv.Scale
      */
     _createScaleByAxis: function(axis){
-        var createScale = this['_create' + axis.scaleType + 'ScaleByAxis'];
+        var createScale = this['_create' + def.firstUpperCase(axis.scaleType) + 'ScaleByAxis'];
         
         return createScale.call(this, axis);
     },
@@ -289,7 +289,7 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
      * @virtual
      * @type pv.Scale
      */
-    _createTimeseriesScaleByAxis: function(axis){
+    _createTimeSeriesScaleByAxis: function(axis){
         /* DOMAIN */
         var extent = this._getContinuousVisibleExtent(axis); // null when no data...
         
@@ -311,7 +311,7 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
     },
 
     /**
-     * Creates a continuous scale for a given axis.
+     * Creates a continuous numeric scale for a given axis.
      *
      * <p>
      * Uses the axis' option <tt>Offset</tt> to calculate excess domain margins at each end of the scale.
@@ -325,7 +325,7 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
      * @virtual
      * @type pv.Scale
      */
-    _createContinuousScaleByAxis: function(axis){
+    _createNumericScaleByAxis: function(axis){
         /* DOMAIN */
         var extent = this._getContinuousVisibleExtentConstrained(axis);
         

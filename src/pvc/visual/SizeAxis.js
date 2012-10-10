@@ -21,7 +21,7 @@ def.scope(function(){
         
         // ------------
         
-        /* this.scaleType === 'Discrete' && */
+        /* this.scaleType === 'discrete' && */
     
     })
     .add(/** @lends pvc.visual.SizeAxis# */{

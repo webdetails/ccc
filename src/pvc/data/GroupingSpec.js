@@ -109,9 +109,38 @@ def.type('pvc.data.GroupingSpec')
      * @type boolean
      */
     isDiscrete: function(){
-        return !this.isSingleDimension || this.firstDimension.type.isDiscrete;
+        var d;
+        return !this.isSingleDimension || 
+               (!!(d = this.firstDimension) && d.type.isDiscrete);
     },
-
+    
+    /**
+     * Obtains the dimension type of the first dimension spec., if any.
+     * @type pvc.visual.DimensionType
+     */
+    firstDimensionType: function(){
+        var d = this.firstDimension;
+        return d && d.type;
+    },
+    
+    /**
+     * Obtains the dimension name of the first dimension spec., if any.
+     * @type string
+     */
+    firstDimensionName: function(){
+        var dt = this.firstDimensionType();
+        return dt && dt.name;
+    },
+    
+    /**
+     * Obtains the dimension value type of the first dimension spec., if any.
+     * @type string
+     */
+    firstDimensionValueType: function(){
+        var dt = this.firstDimensionType();
+        return dt && dt.valueType;
+    },
+    
     /**
      * Indicates if the grouping has no levels.
      * @type boolean

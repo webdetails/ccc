@@ -139,19 +139,35 @@ def.type('pvc.visual.Role')
     label: null,
 
     /** 
+     * Obtains the first dimension type that is bound to the role.
+     * @type pvc.data.DimensionType
+     */
+    firstDimensionType: function(){
+        var g = this.grouping;
+        return g && g.firstDimensionType();
+    },
+    
+    /** 
      * Obtains the name of the first dimension type that is bound to the role.
      * @type string 
      */
     firstDimensionName: function(){
-        return this.grouping && this.grouping.firstDimension.name;
+        var g = this.grouping;
+        return g && g.firstDimensionName();
     },
     
     /** 
-     * Obtains the first dimension that is bound to the role.
-     * @type pvc.data.DimensionType
+     * Obtains the value type of the first dimension type that is bound to the role.
+     * @type function
      */
-    firstDimension: function(){
-        return this.grouping && this.grouping.firstDimension.type;
+    firstDimensionValueType: function(){
+        var g = this.grouping;
+        return g && g.firstDimensionValueType();
+    },
+
+    isDiscrete: function(){
+        var g = this.grouping;
+        return g && g.isDiscrete();
     },
     
     setIsReversed: function(isReversed){

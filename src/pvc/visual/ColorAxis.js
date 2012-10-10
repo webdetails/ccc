@@ -21,7 +21,7 @@ def.scope(function(){
         
         // ------------
         
-        /* this.scaleType === 'Discrete' && */
+        /* this.scaleType === 'discrete' && */
         
         // All this, currently only works well for discrete colors...
         // pvc.createColorScheme creates discrete color scale factories

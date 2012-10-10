@@ -668,8 +668,8 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         rootScene.hasSizeRole  = hasSizeRole;
         
         var chart = this.chart;
-        var xDimType = chart._xRole.firstDimension();
-        var yDimType = chart._yRole.firstDimension();
+        var xDimType = chart._xRole.firstDimensionType();
+        var yDimType = chart._yRole.firstDimensionType();
         
         var getColorRoleValue;
         var getSizeRoleValue;

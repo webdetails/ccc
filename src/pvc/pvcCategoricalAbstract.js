@@ -374,7 +374,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
 
         var baseScale = this.axes.base.scale;
         
-        if(baseScale.type !== 'Timeseries'){
+        if(baseScale.type !== 'timeSeries'){
             pvc.log("Attempting to mark an event on a non timeSeries chart");
             return;
         }

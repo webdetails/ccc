@@ -303,7 +303,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             .select(function(id){ return rootAxes[id]; })
             .multipleIndex(function(axis){
                 
-                if(axis.scaleType !== 'Discrete' && // Not implemented (yet...)
+                if(axis.scaleType !== 'discrete' && // Not implemented (yet...)
                    axis.option.isDefined('DomainScope')){
                     
                     var scopeType = axis.option('DomainScope');

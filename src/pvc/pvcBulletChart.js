@@ -460,7 +460,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             }),
             subtitle: options.bulletSubtitle,
             formattedSubtitle: def.scope(function(){
-                var formatter = subTitleGrouping && subTitleRole.firstDimension().formatter();
+                var formatter = subTitleGrouping && subTitleRole.firstDimensionType().formatter();
                 if(formatter){
                     return formatter(options.bulletSubtitle);
                 }

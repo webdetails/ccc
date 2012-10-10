@@ -40,11 +40,11 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                 this.pvFrameBar = this._createFrame(layoutInfo, axes);
             }
             
-            if(xAxis.scaleType === 'Continuous' && xAxis.option('ZeroLine')) {
+            if(xAxis.scaleType === 'continuous' && xAxis.option('ZeroLine')) {
                 this.xZeroLine = this._createZeroLine(xAxis, layoutInfo);
             }
 
-            if(yAxis.scaleType === 'Continuous' && yAxis.option('ZeroLine')) {
+            if(yAxis.scaleType === 'continuous' && yAxis.option('ZeroLine')) {
                 this.yZeroLine = this._createZeroLine(yAxis, layoutInfo);
             }
         }

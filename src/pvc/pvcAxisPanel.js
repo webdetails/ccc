@@ -141,7 +141,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
              */
             this._calcTicks();
             
-            if(this.scale.type === 'Discrete'){
+            if(this.scale.type === 'discrete'){
                 this._calcDiscreteTicksHidden();
             }
             
@@ -286,7 +286,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var isTopOrBottom = this.isAnchorTopOrBottom();
             var begSide    = isTopOrBottom ? 'left'  : 'top'   ;
             var endSide    = isTopOrBottom ? 'right' : 'bottom';
-            var isDiscrete = this.scale.type === 'Discrete';
+            var isDiscrete = this.scale.type === 'discrete';
             
             var clientLength = layoutInfo.clientSize[this.anchorLength()];
             this.axis.setScaleRange(clientLength);
@@ -448,9 +448,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         // update maxTextWidth, ticks and ticksText
         switch(this.scale.type){
-            case 'Discrete'  : this._calcDiscreteTicks();   break;
-            case 'Timeseries': this._calcTimeseriesTicks(); break;
-            case 'Continuous': this._calcNumberTicks(layoutInfo); break;
+            case 'discrete':   this._calcDiscreteTicks();   break;
+            case 'timeSeries': this._calcTimeseriesTicks(); break;
+            case 'numeric':    this._calcNumberTicks(layoutInfo); break;
             default: throw def.error.operationInvalid("Undefined axis scale type"); 
         }
         

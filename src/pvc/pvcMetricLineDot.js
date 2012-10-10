@@ -63,7 +63,7 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         // Cached
         var sizeGrouping = this._sizeRole.grouping;
         if(sizeGrouping){
-            this._sizeDim = this.data.dimensions(sizeGrouping.firstDimension.name);
+            this._sizeDim = this.data.dimensions(sizeGrouping.firstDimensionName());
         }
 
         /* Change the legend source role */
