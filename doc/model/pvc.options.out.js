@@ -1,11 +1,72 @@
 
 /**
- * The chart options <i>applicable</i>
- * to all charts.
+ * The global CCC namespace. 
+ * 
+ * @namespace
+ */
+pvc = {};
+
+/**
+ * The CCC options namespace.
+ * <p>
+ * All classes of this namespace are 
+ * <b>documentation</b> classes -
+ * they do not exist, in code, 
+ * and serve only to document the structure of the options objects 
+ * that each chart type accepts in its constructor.
+ * 
+ * <p>
+ * The following code shows how to 
+ * create and configure a very simple CCC Bar chart:
+ * 
+ * <pre>// Options are placed in a regular JS object
+ * var options = {
+ *     title:  "A CCC Bar chart",
+ *     legend: true,
+ *     crosstabMode: false
+ * };
+ * 
+ * var data = {
+ *     metadata: [
+ *         {colIndex: 0, colType: "String", colName: "Series"}, 
+ *         {colIndex: 1, colType: "String", colName: "Category"}, 
+ *         {colIndex: 2, colType: "String", colName: "Value"}
+ *     ],
+ *     resultset: [
+ *         ["London", "2010-01-02", 1],
+ *         ["London", "2010-01-03", 2],
+ *         ["London", "2010-01-04", 3],
+ *         ["London", "2010-01-05", 2],
+ *         ["Paris",  "2010-01-01", 3],
+ *         ["Paris",  "2010-01-02", 6],
+ *         ["Paris",  "2010-01-04", 1],
+ *         ["Paris",  "2010-01-05", 7],
+ *         ["Lisbon", "2010-01-01", 3],
+ *         ["Lisbon", "2010-01-02", 2],
+ *         ["Lisbon", "2010-01-03", 1],
+ *         ["Lisbon", "2010-01-04", 5]
+ *     ]
+ * };
+ * 
+ * new pvc.BarChart(options)
+ * .setData(data)
+ * .render();
+ * </pre>
+ * Note that the options object is a plain JavaScript object,
+ * and not a {@link pvc.options.BarChartOptions}
+ * 
+ * <p>
+ * 
+ * @namespace
+ */
+pvc.options = {};
+
+/**
+ * The common options documentation class of all charts.
  * 
  * @class
  */
-pvc.options.BaseChartOptions = function(){};
+pvc.options.ChartCommonOptions = function(){};
         
         
         
@@ -22,7 +83,7 @@ pvc.options.BaseChartOptions = function(){};
  * 
  * @category Actions
  */
-pvc.options.BaseChartOptions.prototype.clickAction = function(){};
+pvc.options.ChartCommonOptions.prototype.clickAction = function(){};
 /**
  * A callback function that is called,
  * when the user double-clicks on a visual element.
@@ -35,15 +96,19 @@ pvc.options.BaseChartOptions.prototype.clickAction = function(){};
  * 
  * @category Actions
  */
-pvc.options.BaseChartOptions.prototype.doubleClickAction = function(){};
+pvc.options.ChartCommonOptions.prototype.doubleClickAction = function(){};
 /**
  * A callback function that is called
  * before the chart is rendered,
  * but after if has been pre-rendered.
  * <p>
  * You can use this action to:
+ * 
  * <ul>
- * <li>use the <i>mark events</i> API on time-series categorical charts</li>
+ * 
+ * <li>use the 
+ * <i>mark events</i> API on time-series categorical charts</li>
+ * 
  * <li>extend in special ways the already created protovis marks.</li>
  * </ul>
  * 
@@ -55,7 +120,7 @@ pvc.options.BaseChartOptions.prototype.doubleClickAction = function(){};
  * 
  * @category Actions
  */
-pvc.options.BaseChartOptions.prototype.renderCallback = function(){};
+pvc.options.ChartCommonOptions.prototype.renderCallback = function(){};
 /**
  * A callback function that is called
  * when, after selection has changed,
@@ -69,7 +134,7 @@ pvc.options.BaseChartOptions.prototype.renderCallback = function(){};
  * 
  * @category Actions
  */
-pvc.options.BaseChartOptions.prototype.selectionChangedAction = function(){};
+pvc.options.ChartCommonOptions.prototype.selectionChangedAction = function(){};
 /**
  * A callback function that is called
  * when the user performs a selection,
@@ -87,17 +152,18 @@ pvc.options.BaseChartOptions.prototype.selectionChangedAction = function(){};
  * 
  * @category Actions
  */
-pvc.options.BaseChartOptions.prototype.userSelectionAction = function(){};
+pvc.options.ChartCommonOptions.prototype.userSelectionAction = function(){};
 /**
  * The CCC version that the chart should run in.
  * <p>
- * The value <tt>1</tt> emulates version 1 of CCC.
+ * The value 
+ * <tt>1</tt> emulates version 1 of CCC.
  * 
  * @returns {number}
  * @default Infinity
  * @category Behavior
  */
-pvc.options.BaseChartOptions.prototype.compatVersion = undefined;
+pvc.options.ChartCommonOptions.prototype.compatVersion = undefined;
 /**
  * A map whose keys are 
  * the dimension type group names and whose values are 
@@ -115,7 +181,7 @@ pvc.options.BaseChartOptions.prototype.compatVersion = undefined;
  * @returns {map(string : pvc.options.DimensionTypeOptions)}
  * @category Data
  */
-pvc.options.BaseChartOptions.prototype.dimensionGroups = undefined;
+pvc.options.ChartCommonOptions.prototype.dimensionGroups = undefined;
 /**
  * A map whose keys are 
  * the dimension type names and whose values are 
@@ -132,7 +198,7 @@ pvc.options.BaseChartOptions.prototype.dimensionGroups = undefined;
  * @returns {map(string : pvc.options.DimensionTypeOptions)}
  * @category Data
  */
-pvc.options.BaseChartOptions.prototype.dimensions = undefined;
+pvc.options.ChartCommonOptions.prototype.dimensions = undefined;
 /**
  * The separator used to join the labels of the values of 
  * a multi-dimensional visual role.
@@ -145,7 +211,7 @@ pvc.options.BaseChartOptions.prototype.dimensions = undefined;
  * @default ' ~ '
  * @category Data
  */
-pvc.options.BaseChartOptions.prototype.groupedLabelSep = undefined;
+pvc.options.ChartCommonOptions.prototype.groupedLabelSep = undefined;
 /**
  * Indicates if datums
  * whose value of all measure dimensions is null 
@@ -158,7 +224,7 @@ pvc.options.BaseChartOptions.prototype.groupedLabelSep = undefined;
  * @default true
  * @category Data
  */
-pvc.options.BaseChartOptions.prototype.ignoreNulls = undefined;
+pvc.options.ChartCommonOptions.prototype.ignoreNulls = undefined;
 /**
  * A function used to format non-null numeric values
  * as percentages.
@@ -184,18 +250,22 @@ pvc.options.BaseChartOptions.prototype.ignoreNulls = undefined;
  * 
  * @category Data
  */
-pvc.options.BaseChartOptions.prototype.percentValueFormat = function(){};
+pvc.options.ChartCommonOptions.prototype.percentValueFormat = function(){};
 /**
  * Indicates that dimensions of the "category" group 
- * (i.e. named <tt>category</tt>, <tt>category2</tt>, ...)
- * have a <tt>Date</tt> value type,
+ * (i.e. named 
+ * <tt>category</tt>, 
+ * <tt>category2</tt>, ...)
+ * have a 
+ * <tt>Date</tt> value type,
  * by default.
  * <p>
  * This option has no effect on other dimensions,
  * even if bound to a "category" visual role.
  * In those cases,
  * explicitly define the dimension with
- * the <tt>Date</tt> value type.
+ * the 
+ * <tt>Date</tt> value type.
  * <p>
  * Dimensions are considered continuous, by default,
  * when they have a continuous value type.
@@ -209,29 +279,36 @@ pvc.options.BaseChartOptions.prototype.percentValueFormat = function(){};
  * @default false
  * @category Data
  */
-pvc.options.BaseChartOptions.prototype.timeSeries = undefined;
+pvc.options.ChartCommonOptions.prototype.timeSeries = undefined;
 /**
- * The format string used by default to <i>parse</i>
- * dimensions of the <tt>Date</tt> value type.
+ * The format string used by default to 
+ * <i>parse</i>
+ * dimensions of the 
+ * <tt>Date</tt> value type.
  * <p>
  * The syntax of the format string is that of 
+ * 
  * <i>protovis</i>' date formats.
  * <p>
  * This property changes the default of the 
  * {@link pvc.options.DimensionTypeOptions#rawFormat}
  * <p>
  * property,
- * for dimensions with a <tt>Date</tt> value type.  
+ * for dimensions with a 
+ * <tt>Date</tt> value type.  
  * 
  * @returns {string}
  * @default '%Y-%m-%d'
  * @category Data
  */
-pvc.options.BaseChartOptions.prototype.timeSeriesFormat = undefined;
+pvc.options.ChartCommonOptions.prototype.timeSeriesFormat = undefined;
 /**
  * A function that formats the
- * non-null <i>numeric</i> values
- * of the dimensions named <tt>value</tt>, <tt>value2</tt>, etc.
+ * non-null 
+ * <i>numeric</i> values
+ * of the dimensions named 
+ * <tt>value</tt>, 
+ * <tt>value2</tt>, etc.
  * <p>
  * This property is used to default the property 
  * {@link pvc.options.DimensionTypeOptions#formatter}
@@ -250,15 +327,16 @@ pvc.options.BaseChartOptions.prototype.timeSeriesFormat = undefined;
  * 
  * @category Data
  */
-pvc.options.BaseChartOptions.prototype.valueFormat = function(){};
+pvc.options.ChartCommonOptions.prototype.valueFormat = function(){};
 /**
- * Indicates if the data source is in <i>crosstab</i> format.
+ * Indicates if the data source is in 
+ * <i>crosstab</i> format.
  * 
  * @returns {boolean}
  * @default true
  * @category Data Translation
  */
-pvc.options.BaseChartOptions.prototype.crosstabMode = undefined;
+pvc.options.ChartCommonOptions.prototype.crosstabMode = undefined;
 /**
  * Indicates if the data source has 
  * multiple value dimensions.
@@ -267,12 +345,15 @@ pvc.options.BaseChartOptions.prototype.crosstabMode = undefined;
  * @default false
  * @category Data Translation
  */
-pvc.options.BaseChartOptions.prototype.isMultiValued = undefined;
+pvc.options.ChartCommonOptions.prototype.isMultiValued = undefined;
 /**
- * The indexes of the data source's <i>virtual item</i> columns
+ * The indexes of the data source's 
+ * <i>virtual item</i> columns
  * that are to feed the 
  * default 
+ * 
  * <tt>value</tt>, 
+ * 
  * <tt>value2</tt>, ... 
  * dimensions.
  * <p>
@@ -280,19 +361,24 @@ pvc.options.BaseChartOptions.prototype.isMultiValued = undefined;
  * relational format with multiple values, 
  * i.e., 
  * when 
+ * 
  * <tt>crosstabMode=false</tt> and 
+ * 
  * <tt>isMultiValued=true</tt>.
  * 
  * @returns {number|string|list(number|string)}
  * @default true
  * @category Data Translation
  */
-pvc.options.BaseChartOptions.prototype.measuresIndexes = undefined;
+pvc.options.ChartCommonOptions.prototype.measuresIndexes = undefined;
 /**
- * The indexes of the data source's <i>virtual item</i> columns
+ * The indexes of the data source's 
+ * <i>virtual item</i> columns
  * that are to feed the 
  * default 
+ * 
  * <tt>multiChart</tt>, 
+ * 
  * <tt>multiChart2</tt>, ... 
  * dimensions.
  * 
@@ -300,7 +386,7 @@ pvc.options.BaseChartOptions.prototype.measuresIndexes = undefined;
  * @default true
  * @category Data Translation
  */
-pvc.options.BaseChartOptions.prototype.multiChartIndexes = undefined;
+pvc.options.ChartCommonOptions.prototype.multiChartIndexes = undefined;
 /**
  * An array of dimensions readers.
  * <p>
@@ -310,7 +396,7 @@ pvc.options.BaseChartOptions.prototype.multiChartIndexes = undefined;
  * @returns {list(pvc.options.DimensionsReaderOptions)}
  * @category Data Translation
  */
-pvc.options.BaseChartOptions.prototype.readers = undefined;
+pvc.options.ChartCommonOptions.prototype.readers = undefined;
 /**
  * Indicates if, 
  * in the data source, 
@@ -318,18 +404,23 @@ pvc.options.BaseChartOptions.prototype.readers = undefined;
  * instead of, as is more usual, in the columns.
  * <p>
  * The name of this option is inspired in 
- * the <i>crosstab</i> format, 
+ * the 
+ * <i>crosstab</i> format, 
  * where the "series" values are placed in the first row,
  * and "category" values are placed in the first column
  * (corner cell is empty).
  * <p>
- * When this option is <tt>true</tt>, in the <i>crosstab</i> format,
+ * When this option is 
+ * <tt>true</tt>, in the 
+ * <i>crosstab</i> format,
  * the result is equivalent to transposing the data table,
  * which results in "series" data being placed in the first column,
- * i.e. <i>in the rows</i>, 
+ * i.e. 
+ * <i>in the rows</i>, 
  * and the "category" data being placed in the first row.
  * <p>
- * In the <i>relational</i> data source format, 
+ * In the 
+ * <i>relational</i> data source format, 
  * this option effects a conceptually equivalent operation,
  * by switching the "series" and "category" columns.
  * 
@@ -337,7 +428,7 @@ pvc.options.BaseChartOptions.prototype.readers = undefined;
  * @default false
  * @category Data Translation
  */
-pvc.options.BaseChartOptions.prototype.seriesInRows = undefined;
+pvc.options.ChartCommonOptions.prototype.seriesInRows = undefined;
 /**
  * The identifier of the HTML element, 
  * or the element itself,
@@ -353,7 +444,7 @@ pvc.options.BaseChartOptions.prototype.seriesInRows = undefined;
  * @returns {string|object}
  * @category General
  */
-pvc.options.BaseChartOptions.prototype.canvas = undefined;
+pvc.options.ChartCommonOptions.prototype.canvas = undefined;
 /**
  * Indicates if a chart should show an entry animation, 
  * every time it is rendered.
@@ -364,7 +455,7 @@ pvc.options.BaseChartOptions.prototype.canvas = undefined;
  * @default true
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.animate = undefined;
+pvc.options.ChartCommonOptions.prototype.animate = undefined;
 /**
  * <p>
  * Controls if and how the selection can be cleared by the user.
@@ -373,11 +464,12 @@ pvc.options.BaseChartOptions.prototype.animate = undefined;
  * @default 'emptySpaceClick'
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.clearSelectionMode = undefined;
+pvc.options.ChartCommonOptions.prototype.clearSelectionMode = undefined;
 /**
  * Indicates if the chart is clickable by the user.
  * <p>
- * If this option is <tt>false</tt>, 
+ * If this option is 
+ * <tt>false</tt>, 
  * any click-related actions will not be executed 
  * (ex: 
  * {@link #clickAction},
@@ -388,25 +480,29 @@ pvc.options.BaseChartOptions.prototype.clearSelectionMode = undefined;
  * @default false
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.clickable = undefined;
+pvc.options.ChartCommonOptions.prototype.clickable = undefined;
 /**
- * When <tt>true</tt>, 
+ * When 
+ * <tt>true</tt>, 
  * indicates that a selection made by the user 
  * replaces the current selection, if any.
  * <p>
  * For the selection to be additive, 
- * the <tt>CTRL</tt> key must be pressed, 
+ * the 
+ * <tt>CTRL</tt> key must be pressed, 
  * by the end of the operation.
  * <p>
- * When <tt>false</tt>,
+ * When 
+ * <tt>false</tt>,
  * indicates that any selection made by the user is additive.
- * The <tt>CTRL</tt> key has no effect.
+ * The 
+ * <tt>CTRL</tt> key has no effect.
  * 
  * @returns {boolean}
  * @default true
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.ctrlSelectMode = undefined;
+pvc.options.ChartCommonOptions.prototype.ctrlSelectMode = undefined;
 /**
  * The maximum number of milliseconds,
  * between two consecutive clicks,
@@ -416,7 +512,7 @@ pvc.options.BaseChartOptions.prototype.ctrlSelectMode = undefined;
  * @default 300
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.doubleClickMaxDelay = undefined;
+pvc.options.ChartCommonOptions.prototype.doubleClickMaxDelay = undefined;
 /**
  * Indicates if the chart's visual elements
  * are automatically highlighted 
@@ -426,7 +522,7 @@ pvc.options.BaseChartOptions.prototype.doubleClickMaxDelay = undefined;
  * @default false
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.hoverable = undefined;
+pvc.options.ChartCommonOptions.prototype.hoverable = undefined;
 /**
  * Indicates if the chart's visual elements
  * can be selected by the user, 
@@ -437,7 +533,7 @@ pvc.options.BaseChartOptions.prototype.hoverable = undefined;
  * @default false
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.selectable = undefined;
+pvc.options.ChartCommonOptions.prototype.selectable = undefined;
 /**
  * Indicates if tooltips are shown
  * when the user hovers over visual elements with the mouse.
@@ -446,14 +542,14 @@ pvc.options.BaseChartOptions.prototype.selectable = undefined;
  * @default true
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.showTooltips = undefined;
+pvc.options.ChartCommonOptions.prototype.showTooltips = undefined;
 /**
  * Contains tooltip presentation options.
  * 
  * @returns {TooltipOptions}
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.tipsySettings = undefined;
+pvc.options.ChartCommonOptions.prototype.tipsySettings = undefined;
 /**
  * A callback function that is called,
  * to build the tooltip of a visual element.
@@ -474,7 +570,7 @@ pvc.options.BaseChartOptions.prototype.tipsySettings = undefined;
  * 
  * @category Interaction
  */
-pvc.options.BaseChartOptions.prototype.tooltipFormat = function(){};
+pvc.options.ChartCommonOptions.prototype.tooltipFormat = function(){};
 /**
  * The height of the chart, in pixels.
  * 
@@ -482,7 +578,7 @@ pvc.options.BaseChartOptions.prototype.tooltipFormat = function(){};
  * @default 300
  * @category Layout
  */
-pvc.options.BaseChartOptions.prototype.height = undefined;
+pvc.options.ChartCommonOptions.prototype.height = undefined;
 /**
  * The chart orientation indicates if 
  * its main direction should be laid out
@@ -493,7 +589,7 @@ pvc.options.BaseChartOptions.prototype.height = undefined;
  * @default 'vertical'
  * @category Layout
  */
-pvc.options.BaseChartOptions.prototype.orientation = undefined;
+pvc.options.ChartCommonOptions.prototype.orientation = undefined;
 /**
  * The width of the chart, in pixels.
  * 
@@ -501,36 +597,39 @@ pvc.options.BaseChartOptions.prototype.orientation = undefined;
  * @default 400
  * @category Layout
  */
-pvc.options.BaseChartOptions.prototype.width = undefined;
+pvc.options.ChartCommonOptions.prototype.width = undefined;
 /**
- * The base options type for the cartesian charts.
+ * The common options documentation class for the 
+ * <b>Cartesian</b> charts.
  * 
  * @class
- * @extends pvc.options.BaseChartOptions
+ * @extends pvc.options.ChartCommonOptions
  */
-pvc.options.CartesianChartOptions = function(){};
-        
-        
-        
-        
-/**
- * The base options type for the cartesian charts.
- * 
- * @class
- * @extends pvc.options.BaseChartOptions
- */
-pvc.options.CategoricalChartOptions = function(){};
+pvc.options.CartesianChartCommonOptions = function(){};
         
         
         
         
 /**
- * The base options type for the Bar family charts.
+ * The common options documentation class for the 
+ * <b>Categorical</b> charts. 
  * 
  * @class
- * @extends pvc.options.CategoricalChartOptions
+ * @extends pvc.options.CartesianChartCommonOptions
  */
-pvc.options.BarAbstractChartOptions = function(){};
+pvc.options.CategoricalChartCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * The common options documentation class of the 
+ * <b>Bar family</b> charts.
+ * 
+ * @class
+ * @extends pvc.options.CategoricalChartCommonOptions
+ */
+pvc.options.BarChartCommonOptions = function(){};
         
         
         
@@ -546,20 +645,189 @@ pvc.options.BarAbstractChartOptions = function(){};
  * @default 0.9
  * @category Layout
  */
-pvc.options.BarAbstractChartOptions.prototype.panelSizeRatio = undefined;
+pvc.options.BarChartCommonOptions.prototype.panelSizeRatio = undefined;
 /**
- * The base options type for the Line/Dot/Area family charts.
+ * The options documentation class of the 
+ * <b>Bar</b> chart class: {@link pvc.BarChart}.
  * 
  * @class
- * @extends pvc.options.CategoricalChartOptions
+ * @extends pvc.options.BarChartCommonOptions
  */
-pvc.options.LineDotAreaAbstractChartOptions = function(){};
+pvc.options.BarChartOptions = function(){};
         
         
         
         
 /**
- * Options related to the tooltip presentation.
+ * The options documentation class of the 
+ * <b>Normalized Bar</b> chart class: {@link pvc.NormalizedBarChart}.
+ * 
+ * @class
+ * @extends pvc.options.BarChartCommonOptions
+ */
+pvc.options.NormalizedBarChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Waterfall</b> chart class: {@link pvc.WaterfallChart}.
+ * 
+ * @class
+ * @extends pvc.options.BarChartCommonOptions
+ */
+pvc.options.WaterfallChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Box plot</b> chart class: {@link pvc.BoxplotChart}.
+ * 
+ * @class
+ * @extends pvc.options.BarChartCommonOptions
+ */
+pvc.options.BoxplotChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Heat grid</b> chart class: {@link pvc.HeatGridChart}.
+ * 
+ * @class
+ * @extends pvc.options.CategoricalChartCommonOptions
+ */
+pvc.options.HeatGridChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The common options documentation class for the 
+ * <b>Line/Dot/Area family</b> charts.
+ * 
+ * @class
+ * @extends pvc.options.CategoricalChartCommonOptions
+ */
+pvc.options.LineDotAreaChartCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Line</b> chart class: {@link pvc.LineChart}.
+ * 
+ * @class
+ * @extends pvc.options.LineDotAreaChartCommonOptions
+ */
+pvc.options.LineChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Dot</b> chart class: {@link pvc.DotChart}.
+ * 
+ * @class
+ * @extends pvc.options.LineDotAreaChartCommonOptions
+ */
+pvc.options.DotChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Area</b> chart class: {@link pvc.AreaChart}.
+ * 
+ * @class
+ * @extends pvc.options.LineDotAreaChartCommonOptions
+ */
+pvc.options.AreaChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Stacked Line</b> chart class: {@link pvc.StackedLineChart}.
+ * 
+ * @class
+ * @extends pvc.options.LineDotAreaChartCommonOptions
+ */
+pvc.options.StackedLineChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Stacked Area</b> chart class: {@link pvc.StackedAreaChart}.
+ * 
+ * @class
+ * @extends pvc.options.LineDotAreaChartCommonOptions
+ */
+pvc.options.StackedAreaChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The common options documentation class for the 
+ * <b>Metric Line/Dot family</b> charts.
+ * 
+ * @class
+ * @extends pvc.options.CartesianChartCommonOptions
+ */
+pvc.options.MetricLineDotChartCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Metric Line</b> chart class: {@link pvc.MetricLineChart}.
+ * 
+ * @class
+ * @extends pvc.options.MetricLineDotChartCommonOptions
+ */
+pvc.options.MetricLineChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Metric Dot (XY Scatter)</b> chart class: {@link pvc.MetricDotChart}.
+ * 
+ * @class
+ * @extends pvc.options.MetricLineDotChartCommonOptions
+ */
+pvc.options.MetricDotChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Bullet</b> chart class: {@link pvc.BulletChart}.
+ * 
+ * @class
+ * @extends pvc.options.ChartCommonOptions
+ */
+pvc.options.BulletChart = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the tooltip.
  * 
  * @class
  */
@@ -569,7 +837,7 @@ pvc.options.TooltipOptions = function(){};
         
         
 /**
- * Options to define a data dimension type.
+ * The options documentation class of a dimension type.
  * 
  * @class
  */
@@ -645,7 +913,8 @@ pvc.options.DimensionTypeOptions.prototype.comparer = function(){};
  * <p>
  * In the case where the raw value to convert is 
  * a Google-table-like cell, 
- * it is the value of its <tt>v</tt>
+ * it is the value of its 
+ * <tt>v</tt>
  * property that is passed to this argument.
  * 
  * @category Data
@@ -669,8 +938,10 @@ pvc.options.DimensionTypeOptions.prototype.converter = function(){};
  * both a continuous or a discrete dimension in its "category" visual role.  
  * <p>
  * The default value dependends on the value of {@link #valueType}.
- * If it can be continuous, then the default value is <tt>false</tt>.
- * If it cannot, the default value is <tt>true</tt>.
+ * If it can be continuous, then the default value is 
+ * <tt>false</tt>.
+ * If it cannot, the default value is 
+ * <tt>true</tt>.
  * 
  * @returns {boolean}
  * @category Data
@@ -683,13 +954,15 @@ pvc.options.DimensionTypeOptions.prototype.isDiscrete = undefined;
  * the value in the dimension.
  * <p>
  * The default key function is 
- * the standard JavaScript <tt>String</tt> function,
+ * the standard JavaScript 
+ * <tt>String</tt> function,
  * and is suitable for most value types.
  * <p>
  * If the dimension's value type is one of 
  * {@link pvc.options.DimensionValueType#Any} or
  * {@link pvc.options.DimensionValueType#Object}
- * the <tt>String</tt> function may not be suitable to 
+ * the 
+ * <tt>String</tt> function may not be suitable to 
  * identify the values.
  * <p>
  * If more than one value has a given key,
@@ -715,11 +988,12 @@ pvc.options.DimensionTypeOptions.prototype.key = function(){};
  * {@link pvc.options.DimensionValueType#Date}.
  * <p>
  * When the chart option 
- * {@link pvc.options.BaseChartOptions#timeSeriesFormat},
+ * {@link pvc.options.ChartCommonOptions#timeSeriesFormat},
  * is specified,
  * and the value type is 
  * {@link pvc.options.DimensionValueType#Date},
- * it is taken as the <i>default value</i> of this option.
+ * it is taken as the 
+ * <i>default value</i> of this option.
  * <p>
  * A converter function is created to parse
  * raw values with the specified format string.
@@ -765,7 +1039,7 @@ pvc.options.DimensionTypeOptions.prototype.format = undefined;
  * {@link pvc.options.DimensionTypeOptions#valueType}.
  * <p>
  * Note that, the chart option 
- * {@link pvc.options.BaseChartOptions#valueFormat},
+ * {@link pvc.options.ChartCommonOptions#valueFormat},
  * is used to build a default formatter function 
  * for numeric dimensions of the "value" dimension group.
  * <p>
@@ -779,11 +1053,13 @@ pvc.options.DimensionTypeOptions.prototype.format = undefined;
  * a default formatter is created for it.
  * <p>
  * Otherwise a value is formatted by calling 
- * the standard JavaScript <tt>String</tt> function on it.
+ * the standard JavaScript 
+ * <tt>String</tt> function on it.
  * 
  * @returns {string}
  * The string that is the formatted value.
- * Only the <tt>null</tt> value can have the empty string
+ * Only the 
+ * <tt>null</tt> value can have the empty string
  * as the formatted value.
  * 
  * @method
@@ -794,11 +1070,13 @@ pvc.options.DimensionTypeOptions.prototype.format = undefined;
  * @param {any} [sourceValue]
  * The raw value, 
  * when the value was read from a data source,
- * or <tt>undefined</tt>, otherwise.
+ * or 
+ * <tt>undefined</tt>, otherwise.
  * <p>
  * In the case where the raw value is 
  * a Google-table-like cell, 
- * it is the value of its <tt>v</tt>
+ * it is the value of its 
+ * <tt>v</tt>
  * property that is passed to this argument.
  * 
  * @category Presentation
@@ -809,8 +1087,11 @@ pvc.options.DimensionTypeOptions.prototype.formatter = function(){};
  * should be hidden from the user.
  * <p>
  * This option is useful to hide auxiliar dimensions that are used to:
+ * 
  * <ul> 
+ * 
  * <li>hold extra data, required for drill-down purposes</li>
+ * 
  * <li>
  * complete the minimal working information a chart needs to work, 
  * like, for example, 
@@ -822,7 +1103,9 @@ pvc.options.DimensionTypeOptions.prototype.formatter = function(){};
  * The only place where the values of a dimension that is not bound to a visual role
  * are shown to the user is the tooltip, as it is formatted by default.
  * To prevent this, 
- * set the dimension type's <tt>isHidden</tt> option to <tt>true</tt>.
+ * set the dimension type's 
+ * <tt>isHidden</tt> option to 
+ * <tt>true</tt>.
  * 
  * @returns {boolean}
  * @default false
@@ -832,7 +1115,8 @@ pvc.options.DimensionTypeOptions.prototype.isHidden = undefined;
 /**
  * The name of the dimension type as it is shown to the user.
  * <p>
- * The label <i>should</i> be unique.
+ * The label 
+ * <i>should</i> be unique.
  * <p>
  * The default value is built from the dimension name,
  * by converting the first character to upper case.
@@ -842,7 +1126,7 @@ pvc.options.DimensionTypeOptions.prototype.isHidden = undefined;
  */
 pvc.options.DimensionTypeOptions.prototype.label = undefined;
 /**
- * The options that configure a dimensions reader.
+ * The options documentation class of a data dimensions reader.
  * <p>
  * A dimensions reader is executed for each row of a 
  * data source to convert values of one or more columns
@@ -860,30 +1144,47 @@ pvc.options.DimensionTypeOptions.prototype.label = undefined;
  * independent of its format.
  * <p>
  * A dimensions reader can be configured in the following ways:
+ * 
  * <dl>
- * <dt>specify <tt>names</tt> but not <tt>reader</tt></dt>
+ * 
+ * <dt>specify 
+ * <tt>names</tt> but not 
+ * <tt>reader</tt></dt>
+ * 
  * <dd>
  * names are paired with any specified indexes, from left to right;
  * excess indexes feed dimensions whose name starts with the last specified name (a dimension group);
- * excess names are fed with the <i>non reserved</i>indexes 
+ * excess names are fed with the 
+ * <i>non reserved</i>indexes 
  * that follow the last specified index (or 0, if none);
  * indexes explicitly specified in dimensions readers are all
  * reserved beforehand
  * </dd>
- * <dt>specify <tt>indexes</tt> but not <tt>names</tt> and <tt>reader</tt></dt>
+ * 
+ * <dt>specify 
+ * <tt>indexes</tt> but not 
+ * <tt>names</tt> and 
+ * <tt>reader</tt></dt>
+ * 
  * <dd>
  * the specified indexes become reserved but are not read,
  * and so are effectively ignored 
  * </dd>
- * <dt>specify both <tt>reader</tt> and <tt>names</tt></dt>
+ * 
+ * <dt>specify both 
+ * <tt>reader</tt> and 
+ * <tt>names</tt></dt>
+ * 
  * <dd>
  * any specified indexes are reserved, 
  * and no pairing is performed between these and the specified names;
  * the reader function may 
  * read any cell from the virtual item and 
- * return atoms from any of the dimensions specified in <tt>names</tt>;
+ * return atoms from any of the dimensions specified in 
+ * <tt>names</tt>;
  * atoms of stated dimensions, that are not returned, 
- * result in a <i>null</i> value 
+ * result in a 
+ * <i>null</i> value 
  * </dd>
  * </dl>
  * 
@@ -929,13 +1230,17 @@ pvc.options.DimensionsReaderOptions.prototype.names = undefined;
  * A dimensions reader function can be specified 
  * to perform non-simple operations over the read cells, 
  * like the following:
+ * 
  * <ul>
+ * 
  * <li>
  * combine values from two or more cells into a single dimension,
  * </li>
+ * 
  * <li>
  * split the value of one cell into more than one dimension,
  * </li>
+ * 
  * <li>
  * feed a dimension with correlated data read from an external data source.
  * </li>
@@ -950,13 +1255,16 @@ pvc.options.DimensionsReaderOptions.prototype.names = undefined;
  * should be used instead.
  * <p>
  * The function may read cells whose indexes were not
- * "reserved" in <tt>indexes</tt>. 
+ * "reserved" in 
+ * <tt>indexes</tt>. 
  * Those cells might be read by other readers,
  * possibly default ones created by the translator.
  * 
  * @returns {pvc.data.Atom|list(pvc.data.Atom)}
  * An atom or array of atoms read from the virtual item, 
- * or <tt>null</tt> or <tt>undefined</tt>, 
+ * or 
+ * <tt>null</tt> or 
+ * <tt>undefined</tt>, 
  * if nothing was read. 
  * 
  * @method
@@ -986,7 +1294,9 @@ pvc.options.ClearSelectionMode = function(){};
         
         
 /**
- * The user can click on any <i>empty area</i>
+ * The user can click on any 
+ * <i>empty area</i>
+ * 
  * <i>inside</i> the chart to clear the selection.
  * 
  * @value 'emptySpaceClick'
@@ -1008,6 +1318,7 @@ pvc.options.ClearSelectionMode.prototype.Manual = 'manual';
  * <p>
  * Note that, 
  * whatever the value type of a dimension type,
+ * 
  * <tt>null</tt> is always a supported value.
  * 
  * @class
@@ -1021,10 +1332,12 @@ pvc.options.DimensionValueType = function(){};
         
 /**
  * The "any" value type, 
- * specified as <tt>null</tt>, 
+ * specified as 
+ * <tt>null</tt>, 
  * means that a dimension can hold any type of data.
  * <p>
- * Values of this type are <i>not</i> cast.
+ * Values of this type are 
+ * <i>not</i> cast.
  * <p>
  * Each value may have a different type.
  * <p>
@@ -1035,10 +1348,12 @@ pvc.options.DimensionValueType = function(){};
  */
 pvc.options.DimensionValueType.prototype.Any = null;
 /**
- * The dimension holds <i>boolean</i> values.
+ * The dimension holds 
+ * <i>boolean</i> values.
  * <p>
  * Values of this type are cast by using the standard 
- * JavaScript <tt>Boolean</tt> function.
+ * JavaScript 
+ * <tt>Boolean</tt> function.
  * <p>
  * Dimension types of this value type
  * are discrete.
@@ -1047,10 +1362,12 @@ pvc.options.DimensionValueType.prototype.Any = null;
  */
 pvc.options.DimensionValueType.prototype.Boolean = Boolean;
 /**
- * The dimension holds <i>date</i> values.
+ * The dimension holds 
+ * <i>date</i> values.
  * <p>
  * Values of this type are cast by using the standard 
- * JavaScript <tt>Date</tt> constructor.
+ * JavaScript 
+ * <tt>Date</tt> constructor.
  * <p>
  * Dimension types of this value type
  * can be continuous or discrete.
@@ -1059,13 +1376,17 @@ pvc.options.DimensionValueType.prototype.Boolean = Boolean;
  */
 pvc.options.DimensionValueType.prototype.Date = Date;
 /**
- * The dimension holds <i>number</i> values.
+ * The dimension holds 
+ * <i>number</i> values.
  * <p>
  * Values of this type are cast by using the standard 
- * JavaScript <tt>Number</tt> function;
+ * JavaScript 
+ * <tt>Number</tt> function;
  * additionally, 
- * resulting <tt>NaN</tt> values 
- * are converted to <tt>null</tt>. 
+ * resulting 
+ * <tt>NaN</tt> values 
+ * are converted to 
+ * <tt>null</tt>. 
  * <p>
  * Dimension types of this value type
  * can be continuous or discrete.
@@ -1074,10 +1395,12 @@ pvc.options.DimensionValueType.prototype.Date = Date;
  */
 pvc.options.DimensionValueType.prototype.Number = Number;
 /**
- * The dimension holds <i>object</i> values.
+ * The dimension holds 
+ * <i>object</i> values.
  * <p>
  * Values of this type are cast by using the standard 
- * JavaScript <tt>Object</tt> function.
+ * JavaScript 
+ * <tt>Object</tt> function.
  * <p>
  * Dimension types of this value type
  * are discrete.
@@ -1086,10 +1409,12 @@ pvc.options.DimensionValueType.prototype.Number = Number;
  */
 pvc.options.DimensionValueType.prototype.Object = Object;
 /**
- * The dimension holds <i>string</i> values.
+ * The dimension holds 
+ * <i>string</i> values.
  * <p>
  * Values of this type are cast by using the standard 
- * JavaScript <tt>String</tt> function.
+ * JavaScript 
+ * <tt>String</tt> function.
  * <p>
  * Dimension types of this value type
  * are discrete.

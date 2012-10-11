@@ -5,22 +5,69 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
 
-    <!-- COMPLEX TYPES -->
-    <c:complexType name="BaseChartOptions" space="pvc.options" abstract="true">
+    <!-- NAMESPACES -->
+    <c:space name="pvc">
+        <c:documentation>
+            The global CCC namespace. 
+        </c:documentation>
+    </c:space>
+    
+    <c:space name="pvc.options">
+        <c:documentation>
+            The CCC options namespace.
+            
+            All classes of this namespace are <b>documentation</b> classes -
+            they do not exist, in code, 
+            and serve only to document the structure of the options objects 
+            that each chart type accepts in its constructor.
+            
+            <c:example>
+                The following code shows how to 
+                create and configure a very simple CCC Bar chart:
+            <pre>// Options are placed in a plain JS object
+var options = {
+    title:  "A CCC Bar chart",
+    legend: true,
+    crosstabMode: false
+};
+
+var data = {
+    metadata: [
+        {colIndex: 0, colType: "String", colName: "Series"}, 
+        {colIndex: 1, colType: "String", colName: "Category"}, 
+        {colIndex: 2, colType: "String", colName: "Value"}
+    ],
+    resultset: [
+        ["London", "2010-01-02", 1],
+        ["London", "2010-01-03", 2],
+        ["London", "2010-01-04", 3],
+        ["London", "2010-01-05", 2],
+        ["Paris",  "2010-01-01", 3],
+        ["Paris",  "2010-01-02", 6],
+        ["Paris",  "2010-01-04", 1],
+        ["Paris",  "2010-01-05", 7],
+        ["Lisbon", "2010-01-01", 3],
+        ["Lisbon", "2010-01-02", 2],
+        ["Lisbon", "2010-01-03", 1],
+        ["Lisbon", "2010-01-04", 5]
+    ]
+};
+
+new pvc.BarChart(options)
+.setData(data)
+.render();</pre>
+            Note that the options object is a plain JavaScript object,
+            and not a <c:link to="pvc.options.BarChartOptions" />
+            </c:example>
+        </c:documentation>
+    </c:space>
+    
+    <!-- COMPLEX TYPES - CHARTS -->
+    <c:complexType name="ChartCommonOptions" space="pvc.options" abstract="true">
     
         <c:documentation>
-            The chart options <i>applicable</i>
-            to all charts.
+            The common options documentation class of all charts.
         </c:documentation>
-        
-        
-        <!-- Layout -->
-        <!--
-        margins:  undefined,
-        paddings: undefined,
-        contentMargins:  undefined,
-        contentPaddings: undefined, 
-         -->
         
         <!-- Style -->
         
@@ -33,6 +80,8 @@
         multiChartSingleRowFillsHeight: undefined,
         multiChartSingleColFillsHeight: undefined,
         multiChartMaxHeight: undefined,
+        multiChartPaddings
+        multiChartMargins
         -->
         
         <!-- Panels -->
@@ -78,13 +127,13 @@
         <!-- Layout -->
         <c:property name="width" type="number" default="400" category="Layout">
             <c:documentation>
-                The width of the chart, in pixels.
+                The width of the <i>root</i> chart, in pixels.
             </c:documentation>
         </c:property>
         
         <c:property name="height" type="number" default="300" category="Layout">
             <c:documentation>
-                The height of the chart, in pixels.
+                The height of the <i>root</i> chart, in pixels.
             </c:documentation>
         </c:property>
         
@@ -94,6 +143,58 @@
                 its main direction should be laid out
                 vertically or horizontally.
                 This property is supported by most chart types. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="margins" type="number string pvc.options.Sides" default="'3%'" category="Layout">
+            <c:documentation>
+                The <i>root</i> chart margins.
+                
+                The margins of non-root charts (small multiple charts)
+                are specified with the property <c:link to="#multiChartMargins" />.
+                
+                See <c:link to="pvc.options.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="paddings" type="number string pvc.options.Sides" default="0" category="Layout">
+            <c:documentation>
+                The <i>root</i> chart paddings.
+                
+                The paddings of non-root charts (small multiple charts)
+                are specified with the property <c:link to="#multiChartPaddings" />.
+                
+                See <c:link to="pvc.options.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="contentMargins" type="number string pvc.options.Sides" default="0" category="Layout">
+            <c:documentation>
+            <!-- 
+                The margins of the <i>root content panel</i>.
+                
+                The margins of the content panels of non-root charts (small multiple charts)
+                are specified with the property <c:link to="#multiChartMargins" />.
+                
+                See <c:link to="pvc.options.Sides" /> for information about 
+                the different supported data types.
+                 -->
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="contentPaddings" type="number string pvc.options.Sides" default="0" category="Layout">
+            <c:documentation>
+            <!-- 
+                The <i>root</i> chart paddings.
+                
+                The paddings of non-root charts (small multiple charts)
+                are specified with the property <c:link to="#multiChartPaddings" />.
+                
+                See <c:link to="pvc.options.Sides" /> for information about 
+                the different supported data types.
+                 -->
             </c:documentation>
         </c:property>
         
@@ -447,30 +548,30 @@
         </c:property>
     </c:complexType>
 
-    <c:complexType name="CartesianChartOptions" 
+    <c:complexType name="CartesianChartCommonOptions" 
                    space="pvc.options"
-                   base="pvc.options.BaseChartOptions" 
+                   base="pvc.options.ChartCommonOptions" 
                    abstract="true">
         <c:documentation>
-            The base options type for the cartesian charts.
+            The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
     </c:complexType>
     
-    <c:complexType name="CategoricalChartOptions" 
+    <c:complexType name="CategoricalChartCommonOptions" 
                    space="pvc.options"
-                   base="pvc.options.BaseChartOptions" 
+                   base="pvc.options.CartesianChartCommonOptions" 
                    abstract="true">
         <c:documentation>
-            The base options type for the cartesian charts.
+            The common options documentation class for the <b>Categorical</b> charts. 
         </c:documentation>
     </c:complexType>
     
-    <c:complexType name="BarAbstractChartOptions" 
+    <c:complexType name="BarChartCommonOptions" 
                    space="pvc.options"
-                   base="pvc.options.CategoricalChartOptions" 
+                   base="pvc.options.CategoricalChartCommonOptions" 
                    abstract="true">
         <c:documentation>
-            The base options type for the Bar family charts.
+            The common options documentation class of the <b>Bar family</b> charts.
         </c:documentation>
         <c:property name="panelSizeRatio" type="number" default="0.9" category="Layout">
             <c:documentation>
@@ -483,24 +584,142 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="LineDotAreaAbstractChartOptions" 
-                   space="pvc.options" 
-                   base="pvc.options.CategoricalChartOptions"
-                   abstract="true">
+    <c:complexType name="BarChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.BarChartCommonOptions">
         <c:documentation>
-            The base options type for the Line/Dot/Area family charts.
+            The options documentation class of the <b>Bar</b> chart class: <c:link to="pvc.BarChart" />.
         </c:documentation>
     </c:complexType>
     
+    <c:complexType name="NormalizedBarChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.BarChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Normalized Bar</b> chart class: <c:link to="pvc.NormalizedBarChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="WaterfallChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.BarChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Waterfall</b> chart class: <c:link to="pvc.WaterfallChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="BoxplotChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.BarChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Box plot</b> chart class: <c:link to="pvc.BoxplotChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="HeatGridChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.CategoricalChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Heat grid</b> chart class: <c:link to="pvc.HeatGridChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    
+    <c:complexType name="LineDotAreaChartCommonOptions" 
+                   space="pvc.options" 
+                   base="pvc.options.CategoricalChartCommonOptions"
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class for the <b>Line/Dot/Area family</b> charts.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="LineChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.LineDotAreaChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Line</b> chart class: <c:link to="pvc.LineChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="DotChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.LineDotAreaChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Dot</b> chart class: <c:link to="pvc.DotChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="AreaChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.LineDotAreaChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Area</b> chart class: <c:link to="pvc.AreaChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    
+    <c:complexType name="StackedLineChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.LineDotAreaChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Stacked Line</b> chart class: <c:link to="pvc.StackedLineChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="StackedAreaChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.LineDotAreaChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Stacked Area</b> chart class: <c:link to="pvc.StackedAreaChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    
+    <c:complexType name="MetricLineDotChartCommonOptions" 
+                   space="pvc.options" 
+                   base="pvc.options.CartesianChartCommonOptions"
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class for the <b>Metric Line/Dot family</b> charts.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="MetricLineChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.MetricLineDotChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Metric Line</b> chart class: <c:link to="pvc.MetricLineChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="MetricDotChartOptions" 
+                   space="pvc.options"
+                   base="pvc.options.MetricLineDotChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Metric Dot (XY Scatter)</b> chart class: <c:link to="pvc.MetricDotChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="BulletChart" 
+                   space="pvc.options"
+                   base="pvc.options.ChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Bullet</b> chart class: <c:link to="pvc.BulletChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <!-- COMPLEX TYPES - AUXILIAR -->
+    
     <c:complexType name="TooltipOptions" space="pvc.options">
         <c:documentation>
-            Options related to the tooltip presentation.
+            The options documentation class of the tooltip.
         </c:documentation>
     </c:complexType>
     
     <c:complexType name="DimensionTypeOptions" space="pvc.options">
         <c:documentation>
-            Options to define a data dimension type.
+            The options documentation class of a dimension type.
         </c:documentation>
         <c:property name="label" type="string" category="Presentation">
             <c:documentation>
@@ -579,7 +798,7 @@
                 <c:link to="pvc.options.DimensionValueType#Date" />.
                 
                 When the chart option 
-                <c:link to="pvc.options.BaseChartOptions#timeSeriesFormat" />,
+                <c:link to="pvc.options.ChartCommonOptions#timeSeriesFormat" />,
                 is specified,
                 and the value type is 
                 <c:link to="pvc.options.DimensionValueType#Date" />,
@@ -636,7 +855,7 @@
                 <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
                 
                 Note that, the chart option 
-                <c:link to="pvc.options.BaseChartOptions#valueFormat" />,
+                <c:link to="pvc.options.ChartCommonOptions#valueFormat" />,
                 is used to build a default formatter function 
                 for numeric dimensions of the "value" dimension group.
                 
@@ -701,7 +920,7 @@
     
     <c:complexType name="DimensionsReaderOptions" space="pvc.options">
         <c:documentation>
-            The options that configure a dimensions reader.
+            The options documentation class of a data dimensions reader.
             
             A dimensions reader is executed for each row of a 
             data source to convert values of one or more columns
@@ -808,6 +1027,84 @@
             </c:documentation> 
         </c:property>
     </c:complexType>
+    
+    <c:complexType name="Sides" space="pvc.options">
+        <c:documentation>
+            Describes the distances from 
+            each of the four planar sides:
+            "left", "right", "top" and "bottom".
+            
+            It is used to describe the margins and the paddings of panels.
+            
+            It is possible to specify any combination of the side properties.
+            
+            All side properties support values in absolute or relative units:
+            <dl>
+                <dt>absolute</dt>
+                <dd>
+                    if it is a <tt>number</tt> or a numeric <tt>string</tt>,
+                    the measure is in pixel units
+                </dd>
+                
+                <dt>relative</dt>
+                <dd>
+                    if it is a numeric <tt>string</tt> with a "%" suffix,
+                    the measure is a percentage of some reference size;
+                    usually, the reference size is 
+                    the size of the corresponding container panel side
+                    ("width" if side is "left" or "right", or "height" otherwise) 
+                </dd>
+            </dl>
+            
+            The special property, <tt>all</tt>, affects all unspecified properties at once. 
+            
+            <c:example>
+                The following is an example of a <i>sides</i>-structured object,
+                the hypothetical margins of a legend panel:
+                <pre>
+                var legendMargins = {left: 10, right: '20', all: '15%'};
+                </pre> 
+                It says that 
+                the left margin has 10 pixels, 
+                the right margin has 20 pixels, and 
+                the top and bottom margins have each 
+                    the size of 15 percent of the legend panel's height.
+            </c:example>
+            
+            <h3>Single number or numeric string interpretation</h3>
+            All chart options of type <c:link to="pvc.options.Size" /> 
+            allow specifying
+            a <tt>number</tt> or 
+            a <tt>string</tt> of a single number, possibly followed by a "%" sign, 
+            instead of the JSON form,
+            as meaning <i>all</i> properties.
+            
+            <!-- 
+            The interpretation of what the number or percentage stand 
+            for depends on the specific option. 
+            In the legend and title panels, for example, 
+            it is interpreted means the 
+             -->
+            <h3>String syntax</h3>
+            All chart options of type <c:link to="pvc.options.Size" /> 
+            also allow specifying a CSS2-like margins string, <c:link to="http://www.w3.org/TR/CSS21/box.html#propdef-margin" />.
+            <c:example>
+                The following shows the equivalence between the string and JSON syntax:
+                <pre>
+                var margins1 = '1';       // {all: '1'}
+                var margins2 = '1 2';     // {top: '1', bottom: '1', right: '2', left: '2'}
+                var margins3 = '1 2 3';   // {top: '1', bottom: '3', right: '2', left: '2'}
+                var margins4 = '1 2 3 4'; // {top: '1', bottom: '3', right: '2', left: '4'}
+                </pre>
+            </c:example>
+        </c:documentation>
+        <c:property name="all"    type="number string" />
+        <c:property name="left"   type="number string" />
+        <c:property name="right"  type="number string" />
+        <c:property name="top"    type="number string" />
+        <c:property name="bottom" type="number string" />
+    </c:complexType>
+    
     
     <!-- FUNCTION TYPES -->
     
@@ -1067,7 +1364,7 @@
             </c:documentation>
         </c:returns>
     </c:functionType>
-
+    
     <!-- ATOM TYPES -->
     
     <c:atomType name="ClearSelectionMode" space="pvc.options" base="string">

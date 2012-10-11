@@ -13,10 +13,27 @@
     <xsl:variable name='nl'><xsl:text>&#xd;&#xa;</xsl:text></xsl:variable>
     
 	<xsl:template match="/com:model">
+	    <xsl:apply-templates select="com:space" />
 		<xsl:apply-templates select="com:complexType" />
 		<xsl:apply-templates select="com:atomType" />
 	</xsl:template>
 	
+	<xsl:template match="com:space">
+        <!-- Generate the JS namespace constructor documentation -->
+        <xsl:value-of select="concat($nl, '/**')" />
+        
+        <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
+        
+        <!-- Output @namespace directive -->
+        <xsl:value-of select="concat($nl, ' * @namespace')" />
+        
+        <!-- Close documentation block -->
+        <xsl:value-of select="concat($nl, ' */')" /> 
+
+        <!-- Generate the JS class constructor -->
+        <xsl:value-of select="concat($nl, @name, ' = {};', $nl)" />
+    </xsl:template>
+    
 	<xsl:template match="com:complexType">
         <xsl:variable name="fullTypeName">
             <xsl:choose>
@@ -132,7 +149,7 @@
             
             <xsl:value-of select="concat($nl, ' */')" />
            
-           <xsl:variable name="equalsTo">
+            <xsl:variable name="equalsTo">
                 <xsl:choose>
                     <xsl:when test="$funTypeDef">
                         <xsl:value-of select="'function(){}'" />
@@ -216,8 +233,8 @@
                 <xsl:value-of select="replace($text2, '[\r\n]+\s*', concat($nl, ' * '))" />
             </xsl:when>
             <xsl:otherwise>
-                <!-- don't trim leading spaces -->
-                <xsl:value-of select="replace(., '[\r\n]+', concat($nl, ' * '))" />
+                <!-- don't trim leading spaces or compact multiple consecutive lines -->
+                <xsl:value-of select="replace(., '[\r\n]', concat($nl, ' * '))" />
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
@@ -225,6 +242,19 @@
     <xsl:template match="com:link" mode="process-jsdoc" priority="5">
         <!-- Translate to JSDoc link -->
         <xsl:value-of select="concat('{@link ', @to, '}')" />
+    </xsl:template>
+    
+    <xsl:template match="com:example" mode="process-jsdoc" priority="5">
+        <xsl:param name="mode" select="'xml'" />
+        
+        <xsl:value-of select="concat($nl, ' * &lt;', 'p', '&gt;')" />
+        
+        <xsl:apply-templates mode="process-jsdoc">
+            <xsl:with-param name="mode" select="$mode" />
+        </xsl:apply-templates>
+        
+        <xsl:value-of select="concat($nl, ' * &lt;', 'p', '&gt;')" />
+        
     </xsl:template>
     
     <xsl:template match="xhtml:pre" mode="process-jsdoc" priority="5">
@@ -237,6 +267,7 @@
             <xsl:with-param name="mode" select="'pre'" />
         </xsl:apply-templates>
         
+        <xsl:value-of select="concat($nl, ' * ')" />
         <xsl:apply-templates select="." mode="copy_end" />
     </xsl:template>
     
@@ -259,9 +290,9 @@
          -->
     <xsl:template match="*" mode="copy_begin">
         <!-- Begin opening tag -->
-        <xsl:text>&lt;</xsl:text>
-        <xsl:value-of select="name()"/>
-
+        
+        <xsl:value-of select="concat($nl, ' * &lt;', name())" />
+        
         <!-- Namespaces
         <xsl:for-each select="namespace::*">
             <xsl:text> xmlns</xsl:text>
@@ -279,8 +310,7 @@
         
         <!-- Attributes -->
         <xsl:for-each select="@*">
-            <xsl:text> </xsl:text>
-            <xsl:value-of select="name()"/>
+            <xsl:value-of select="concat(' ', name())" />
             <xsl:text>='</xsl:text>
             <xsl:call-template name="escape-xml">
                 <xsl:with-param name="text" select="."/>
@@ -294,9 +324,7 @@
     
     <xsl:template match="*" mode="copy_end">
         <!-- Closing tag -->
-        <xsl:text>&lt;/</xsl:text>
-        <xsl:value-of select="name()"/>
-        <xsl:text>&gt;</xsl:text>
+        <xsl:value-of select="concat('&lt;/', name(), '&gt;')" />
     </xsl:template>
     
     <xsl:template match="text()" mode="escape">

@@ -94,6 +94,11 @@
             <field xpath="@name" />
         </key>
         
+        <key name="space_unique_name">
+            <selector xpath="com:space" />
+            <field xpath="@name" />
+        </key>
+        
         <unique name="model_documentation_format_key">
            <selector xpath="." />
            <field xpath="documentation/@format" />
@@ -117,22 +122,41 @@
          -->
     </element>
     
-    <!-- To be used within documentation elements -->
+    <!-- Elements to be used inside c:documentation elements -->
     <element name="link">
         <complexType>
             <attribute name="to" type="string" use="required" />
         </complexType>
     </element>
     
+    <element name="example">
+        <complexType mixed="true">
+	        <sequence minOccurs="0" maxOccurs="unbounded">
+	            <any namespace="##any" processContents="lax" />
+	        </sequence>
+        </complexType>
+    </element>
+    
+    
+    <!-- Model XSD types -->
+    
     <complexType name="ModelType">
         <sequence>
             <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
             <choice minOccurs="0" maxOccurs="unbounded">
+                <element name="space" type="com:SpaceType" />
 	            <element name="complexType" type="com:ComplexTypeType" />
 	            <element name="atomType" type="com:AtomTypeType" />
 	            <element name="functionType" type="com:FunctionTypeType" />
 	       </choice>
        </sequence>
+    </complexType>
+    
+    <complexType name="SpaceType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+       </sequence>
+       <attribute name="name" type="com:IdType" use="required" />
     </complexType>
     
     <complexType name="ComplexTypeType">
