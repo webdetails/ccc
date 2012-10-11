@@ -132,7 +132,7 @@ def.type('pvc.visual.Sign')
     
     // Call this function with a final property value
     // to ensure that it will not be processed anymore
-    'final': function(value){
+    'final': function(value){ // invalid property id. in cgg env.
         this._final = true;
         return value;
     },

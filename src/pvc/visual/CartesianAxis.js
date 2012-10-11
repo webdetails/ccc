@@ -461,7 +461,8 @@ def.scope(function(){
         // For discrete axis
         OverlappedLabelsMode: {
             resolve: resolveNormal,
-            cast:    pvc.parseOverlappedLabelsMode
+            cast:    pvc.parseOverlappedLabelsMode,
+            value:   'hide'
         },
         
         /* RULES */

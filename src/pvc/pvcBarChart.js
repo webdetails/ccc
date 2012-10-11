@@ -77,7 +77,7 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 
                 ['color', 'color2'].forEach(function(axisId){
                     var colorAxis = this.axes[axisId];
-                    if(colorAxis){
+                    if(colorAxis && !colorAxis.isBound()){ // In multi-charts this would get bound twice, causing an error
                         if(!colorRole){
                             colorRole = this.visualRoles(colorRoleName);
                         }

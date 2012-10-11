@@ -115,7 +115,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 
                 if(valuesColIndexes == null){
                     autoColDimGroups
-                        .push({name: 'value', count: 1, float: false});
+                        .push({name: 'value', count: 1, 'float': false}); // float is an invalid property id. in CGG env.
                 }
                 
                 if(seriesInRows){
@@ -129,7 +129,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 
                 if(!seriesInRows){
                     autoColDimGroups
-                        .push({name: 'series', count: 1, float: false});
+                        .push({name: 'series', count: 1, 'float': false});
                 }
                 
                 // -----
@@ -201,8 +201,9 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                     return DT.dimensionGroupLevelName(groupName, level);
                 };
                 
-            var groupDimNames; 
-            if(dimGroup.float){
+            var groupDimNames;
+            /*jshint sub:true */
+            if(dimGroup['float']){
                 // The group's N first free dimension levels
                 groupDimNames = def.range(0, Infinity)
                     .select(buildLevelDimName)

@@ -430,31 +430,29 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         this.pvDot.rubberBandSelectionMode = 'center';
         
         // -- COLOR --
-        dot.override('baseColor', function(type){
-            var color = this.delegateExtension();
-            if(color === undefined){
-                if(!rootScene.hasColorRole){
-                    color = this.defaultColor(type);
-                } else {
-                    var colorValue = this.scene.vars.color.value;
-                    
-                    color = colorValue == null ?
-                                options.nullColor :
-                                colorScale(colorValue);
-                }
+        dot.override('defaultColor', function(type){
+            var color;
+            if(!rootScene.hasColorRole){
+                color = this.base(type);
+            } else {
+                var colorValue = this.scene.vars.color.value;
                 
-                if(type === 'stroke'){
-                    color = color.darker();
-                }
-                
-             // When no lines are shown, dots are shown with transparency,
-             // which helps in distinguishing overlapped dots.
-             // With lines shown, it would look strange.
-             // ANALYZER requirements, so until there's no way to configure it...
-//                if(!myself.showLines){
-//                    color = color.alpha(color.opacity * 0.85);
-//                }
+                color = colorValue == null ?
+                            options.nullColor :
+                            colorScale(colorValue);
             }
+            
+            if(type === 'stroke'){
+                color = color.darker();
+            }
+                
+            // When no lines are shown, dots are shown with transparency,
+            // which helps in distinguishing overlapped dots.
+            // With lines shown, it would look strange.
+            // ANALYZER requirements, so until there's no way to configure it...
+//          if(!myself.showLines){
+//              color = color.alpha(color.opacity * 0.85);
+//          }
             
             return color;
         });
@@ -471,16 +469,11 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         if(rootScene.hasColorRole){
             var colorScale = this._getColorRoleScale(data);
             
-            line.override('baseColor', function(type){
-                var color = this.delegateExtension();
-                if(color === undefined){
-                    var colorValue = this.scene.vars.color.value;
-                    color = colorValue == null ?
-                                options.nullColor :
-                                colorScale(colorValue);
-                }
-                
-                return color;
+            line.override('defaultColor', function(type){
+                var colorValue = this.scene.vars.color.value;
+                return colorValue == null ?
+                            options.nullColor :
+                            colorScale(colorValue);
             });
         }
         

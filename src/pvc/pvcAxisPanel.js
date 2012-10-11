@@ -73,7 +73,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         if(this.labelSpacingMin == null){
             // The user tolerance for "missing" stuff is much smaller with discrete stuff
-            this.labelSpacingMin = this.isDiscrete ? 0 : 1.5; // em
+            this.labelSpacingMin = this.isDiscrete ? 0.1 : 1.5; // em
         }
         
         if(this.showTicks == null){
@@ -331,7 +331,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }, this);
             
             if(pvc.debug >= 6 && overflowPaddings){
-                pvc.log("[OverflowPaddings] " +  this.panelName + " " + JSON.stringify(overflowPaddings));
+                pvc.log("[" + this.panelName + "] OverflowPaddings = " + JSON.stringify(overflowPaddings));
             }
         }
         
@@ -343,26 +343,20 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var availableClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
         
         var efSize = Math.min(layoutInfo.axisSize, availableClientLength);
-        if(efSize >= layoutInfo.requiredAxisSize){
+        if(efSize >= (layoutInfo.requiredAxisSize - this.tickLength)){ // let overflow by at most tickLength
             // Labels fit
-            // Clear to avoid unnecessary trimming
+            // Clear to avoid any unnecessary trimming
             layoutInfo.maxTextWidth = null;
         } else {
             // Text may not fit. 
             // Calculate maxTextWidth where text is to be trimmed.
-            
             var labelBBox = layoutInfo.labelBBox;
-            if(!labelBBox){
-                // NOTE: requires previously calculated layoutInfo.maxTextWidth...
-                this._calcLabelBBox();
-                
-                labelBBox = layoutInfo.labelBBox;
-            }
             
             // Now move backwards, to the max text width...
             var maxOrthoLength = efSize - 2 * this.tickLength;
             
             // A point at the maximum orthogonal distance from the anchor
+            // Points in the outwards orthogonal direction.
             var mostOrthoDistantPoint;
             var parallelDirection;
             switch(this.anchor){
@@ -387,6 +381,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     break;
             }
             
+            var orthoOutwardsDir = mostOrthoDistantPoint.norm();
+            
             // Intersect the line that passes through mostOrthoDistantPoint,
             // and has the direction parallelDirection with 
             // the top side and with the bottom side of the *original* label box.
@@ -396,27 +392,49 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             var topR = corners[2];
             var topL = corners[3];
             
-            var topRLSideDir = topR.minus(topL);
-            var botRLSideDir = botR.minus(botL);
+            var topLRSideDir = topR.minus(topL);
+            var botLRSideDir = botR.minus(botL);
             var intersect = pv.SvgScene.lineIntersect;
-            var botI = intersect(mostOrthoDistantPoint, parallelDirection, botL, botRLSideDir);
-            var topI = intersect(mostOrthoDistantPoint, parallelDirection, topL, topRLSideDir);
+            var botI = intersect(mostOrthoDistantPoint, parallelDirection, botL, botLRSideDir);
+            var topI = intersect(mostOrthoDistantPoint, parallelDirection, topL, topLRSideDir);
             
-            // Two cases
-            // A) If the angle is between -90 and 90, the text does not get upside down
-            // In that case, we're always interested in topI -> topR and botI -> botR
-            // B) Otherwise the relevant new segments are topI -> topL and botI -> botL
+            // botI and topI will replace two of the original BBox corners
+            // The original corners that are at the side of the 
+            // the line that passes at mostOrthoDistantPoint and has direction parallelDirection (dividing line)
+            // further away to the axis, are to be replaced.
             
-            var maxTextWidth;
-            if(Math.cos(labelBBox.sourceAngle) >= 0){
-                // A) [-90, 90]
-                maxTextWidth = Math.min(
-                                    topR.minus(topI).length(), 
-                                    botR.minus(botI).length());
-            } else {
-                maxTextWidth = Math.min(
-                        topL.minus(topI).length(), 
-                        botL.minus(botI).length());
+            var sideLRWidth  = labelBBox.sourceTextWidth;
+            var maxTextWidth = sideLRWidth;
+            
+            var botLI = botI.minus(botL);
+            var botLILen = botLI.length();
+            if(botLILen <= sideLRWidth && botLI.dot(topLRSideDir) >= 0){
+                // botI is between botL and botR
+                // One of botL and botR is in one side and 
+                // the other at the other side of the dividing line.
+                // On of the sides will be cut-off.
+                // The cut-off side is the one whose points have the biggest
+                // distance measured relative to orthoOutwardsDir
+                
+                if(botL.dot(orthoOutwardsDir) < botR.dot(orthoOutwardsDir)){
+                    // botR is farther, so is on the cut-off side
+                    maxTextWidth = botLILen; // surely, botLILen < maxTextWidth
+                } else {
+                    maxTextWidth = botI.minus(botR).length(); // idem
+                }
+            }
+            
+            var topLI = topI.minus(topL);
+            var topLILen = topLI.length();
+            if(topLILen <= sideLRWidth && topLI.dot(topLRSideDir) >= 0){
+                // topI is between topL and topR
+                
+                if(topL.dot(orthoOutwardsDir) < topR.dot(orthoOutwardsDir)){
+                    // topR is farther, so is on the cut-off side
+                    maxTextWidth = Math.min(maxTextWidth, topLILen);
+                } else {
+                    maxTextWidth = Math.min(maxTextWidth, topI.minus(topR).length());
+                }
             }
             
             // One other detail.
@@ -425,13 +443,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // won't do, because when text is centered, the cut we make in length
             // ends up distributed by both sides...
             if(labelBBox.sourceAlign === 'center'){
-                var cutWidth = labelBBox.sourceTextWidth - maxTextWidth;
+                var cutWidth = sideLRWidth - maxTextWidth;
                 
                 // Cut same width on the opposite side. 
                 maxTextWidth -= cutWidth;
             }
             
             layoutInfo.maxTextWidth = maxTextWidth;
+            
+            if(pvc.debug >= 3){
+                pvc.log("[" + this.panelName + "] Trimming labels' text at length " + maxTextWidth.toFixed(2) + "px maxOrthoLength=" + maxOrthoLength.toFixed(2) + "px");
+            }
         }
     },
     
@@ -536,11 +558,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     _calcDiscreteTicksHiddenCore: function(){
-        var mode = this.axis.option('OverlappedLabelsMode') || 'hide';
-//        if(!mode){
-//            mode = this.compatVersion() <= 1 ? 'leave' : 'hide';
-//        }
-        
+        var mode = this.axis.option('OverlappedLabelsMode');
         if(mode !== 'hide'){
             return 1;
         }
@@ -610,7 +628,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         } while(Math.ceil(tickCount / tickIncludeModulo) > 1);
         
         if(tickIncludeModulo > 1 && pvc.debug >= 3){
-            pvc.log("Showing only one in every " + tickIncludeModulo + " tick labels in axis " + this.panelName);
+            pvc.log("[" + this.panelName + "] Showing only one in every " + tickIncludeModulo + " tick labels");
         }
         
         return tickIncludeModulo;
@@ -636,7 +654,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var dir, prevResultTickCount;
         var ticksInfo, lastBelow, lastAbove;
         do {
-            if(doLog){ pvc.log("calculateNumberHTicks TickCount IN desired = " + desiredTickCount); }
+            if(doLog){ pvc.log("[" + this.panelName + "] calculateNumberHTicks TickCount IN desired = " + desiredTickCount); }
             
             ticksInfo = {};
             
@@ -673,7 +691,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             } else if(prevResultTickCount == null || resultTickCount !== prevResultTickCount){
                 
                 if(doLog){ 
-                    pvc.log("calculateNumberHTicks TickCount desired/resulting = " + desiredTickCount + " -> " + resultTickCount); 
+                    pvc.log("[" + this.panelName + "] calculateNumberHTicks TickCount desired/resulting = " + desiredTickCount + " -> " + resultTickCount); 
                 }
                 
                 prevResultTickCount = resultTickCount;
@@ -685,8 +703,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 var pctError = ticksInfo.error = Math.abs(excessLength / clientLength);
                 
                 if(doLog){
-                    pvc.log("calculateNumberHTicks error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + resultTickCount + " step=" + ticks.step);
-                    pvc.log("calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
+                    pvc.log("[" + this.panelName + "] calculateNumberHTicks error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + resultTickCount + " step=" + ticks.step);
+                    pvc.log("[" + this.panelName + "] calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
                 }
                 
                 if(excessLength > 0){
@@ -698,9 +716,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     if(lastBelow){
                         // We were below max length and then overshot...
                         // Choose the best conforming one
-                        if(pctError > lastBelow.error){
+                        // Always choose the one that conforms to MinSpacing
+                        //if(pctError > lastBelow.error){
                             ticksInfo = lastBelow;
-                        }
+                        //}
                         break;
                     }
                     
@@ -738,11 +757,11 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
             
             if(pvc.debug >= 5){
-                pvc.log("calculateNumberHTicks RESULT error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
+                pvc.log("[" + this.panelName + "] calculateNumberHTicks RESULT error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
             }
         }
         
-        if(doLog){ pvc.log("calculateNumberHTicks END"); }
+        if(doLog){ pvc.log("[" + this.panelName + "] calculateNumberHTicks END"); }
     },
     
     _calcNumberHDesiredTickCount: function(spacing){
@@ -1055,6 +1074,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 align = 'right';
                 baseline = 'middle';
                 break;
+            
             case 'right': 
                 align = 'left';
                 baseline = 'middle';
@@ -1110,7 +1130,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 } else {
                     text = tickScene.vars.tick.label;
                     if(maxTextWidth){
-                        text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", true);
+                        text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
                     }
                 }
                 
@@ -1302,7 +1322,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .text(function(tickScene){
                 var text = tickScene.vars.tick.label;
                 if(maxTextWidth){
-                    text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
+                    text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', false);
                 }
                 return text;
              })

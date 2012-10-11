@@ -75,7 +75,7 @@ def.scope(function(){
     }
 
     function trimToWidthB(len, text, font, trimTerminator, before){
-        len += getTextLength(trimTerminator, font);
+        len -= getTextLength(trimTerminator, font);
         
         return trimToWidth(len, text, font, trimTerminator, before);
     }
