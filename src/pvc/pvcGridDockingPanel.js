@@ -81,7 +81,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         //
         // Each adds its orthogonal length to the margin side where it is anchored.
         // The normal length is only correctly known after all non-fill
-        // children have been layed out once.
+        // children have been laid out once.
         // 
         // As such the child is only positioned on the anchor coordinate.
         // The orthogonal anchor coordinate is only set on the second phase.

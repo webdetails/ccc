@@ -68,13 +68,13 @@ pvc.TitlePanelAbstract = pvc.BasePanel.extend({
         var a_width = this.anchorLength(a);
         var a_height = this.anchorOrthoLength(a);
         
-        var textWidth = pvc.text.getTextLength(this.title, this.font) + 2;
-        var clientWidth = layoutInfo.clientSize[a_width];
+        // 2 - Small factor to avoid cropping text on either side
+        var textWidth    = pvc.text.getTextLength(this.title, this.font) + 2;
+        var clientWidth  = layoutInfo.clientSize[a_width];
         var desiredWidth = layoutInfo.desiredClientSize[a_width];
         
         if (desiredWidth == null) {
-            // 2 - Small factor to avoid cropping text on either side
-            desiredWidth = textWidth;
+            desiredWidth = textWidth > clientWidth ? clientWidth : textWidth;
         } else if(desiredWidth > clientWidth) {
             desiredWidth = clientWidth;
         }

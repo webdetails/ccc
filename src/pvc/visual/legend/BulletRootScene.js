@@ -40,7 +40,7 @@ def
         var textLeft   = markerDiam + this.vars.textMargin;
         var padding    = this.vars.padding;
         
-        // Names are for legend items when layed out in rows
+        // Names are for legend items when laid out in rows
         var a_width  = this.vars.horizontal ? 'width' : 'height';
         var a_height = pvc.BasePanel.oppositeLength[a_width]; // height or width
         

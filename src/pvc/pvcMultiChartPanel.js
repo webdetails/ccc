@@ -16,7 +16,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * 
      * <p>
      * The option "multiChartMax" is the maximum number of small charts 
-     * that can be layed out.
+     * that can be laid out.
      * 
      * This can be useful if the chart's size cannot grow or 
      * if it cannot grow too much.
@@ -39,7 +39,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * 
      * <p>
      * The option 'multiChartMaxColumns' is the
-     * maximum number of charts that can be layed  out in a row.
+     * maximum number of charts that can be laid  out in a row.
      * The default value is 3.
      * 
      * The value +Infinity can be specified, 
