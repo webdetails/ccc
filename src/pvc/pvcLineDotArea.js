@@ -202,9 +202,26 @@ pvc.LineChart = pvc.LineDotAreaAbstract.extend({
 });
 
 /**
+ * Area Chart
+ */
+pvc.AreaChart = pvc.LineDotAreaAbstract.extend({
+
+    constructor: function(options){
+
+        options = def.setUDefaults(options, 'showLines', true);
+        
+        this.base(options);
+
+        this.options.showAreas = true;
+    }
+});
+
+/**
  * Stacked Line Chart
  */
-pvc.StackedLineChart = pvc.LineDotAreaAbstract.extend({
+pvc.StackedLineChart = 
+pvc.mStackedLineChart = // V1 compatibility    
+    pvc.LineDotAreaAbstract.extend({
 
     constructor: function(options){
 
@@ -218,10 +235,14 @@ pvc.StackedLineChart = pvc.LineDotAreaAbstract.extend({
 /**
  * Stacked Area Chart
  */
-pvc.StackedAreaChart = pvc.LineDotAreaAbstract.extend({
+pvc.StackedAreaChart =
+pvc.mStackedAreaChart = // V1 compatibility
+pvc.LineDotAreaAbstract.extend({
 
     constructor: function(options){
-
+        
+        options = def.setUDefaults(options, 'showLines', true);
+        
         this.base(options);
 
         this.options.showAreas = true;
