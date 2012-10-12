@@ -38,7 +38,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * </p>
      * 
      * <p>
-     * The option 'multiChartMaxColumns' is the
+     * The option 'multiChartColumnsMax' is the
      * maximum number of charts that can be laid  out in a row.
      * The default value is 3.
      * 
@@ -49,20 +49,20 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * then the chart's width is increased. 
      * </p>
      * <p>
-     * The option 'multiChartWidth' can be specified to fix the width, 
+     * The option 'multiChartSmallWidth' can be specified to fix the width, 
      * of each small chart, in pixels or, in string "1%" format, 
      * as a percentage of the available width.
      * 
-     * When not specified, but the option "multiChartMaxColumns" is specified and finite,
+     * When not specified, but the option "multiChartColumnsMax" is specified and finite,
      * the width of the small charts is the available width divided
      * by the maximum number of charts in a row that <i>actually</i> occur
      * (so that if there are less small charts than 
      *  the maximum that can be placed on a row, 
      *  these, nevertheless, take up the whole width).
      * 
-     * When both the options "multiChartWidth" and "multiChartMaxColumns" 
+     * When both the options "multiChartSmallWidth" and "multiChartColumnsMax" 
      * are unspecified, then the behavior is the same as if
-     * the value "33%" had been specified for "multiChartWidth":
+     * the value "33%" had been specified for "multiChartSmallWidth":
      * 3 charts will fit in the chart's initially specified width,
      * yet the chart's width can grow to accommodate for further small charts.
      * </p>
@@ -81,7 +81,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * If the layout results in more than one row or 
      * when "multiChartSingleRowFillsHeight" is false,
      * the height of the small charts is determined using the option
-     * 'multiChartAspectRatio', which is, by definition, width / height.
+     * 'aspectRatio', which is, by definition, width / height.
      * A typical aspect ratio value would be 5/4, 4/3 or the golden ratio (~1.62).
      * 
      * When the option is unspecified, 
@@ -97,12 +97,13 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * then the chart's height is increased.
      * </p>
      * <p>
-     * The option 'multiChartMargins' can be specified to control the 
+     * The option 'margins' can be specified to control the 
      * spacing between small charts.
      * The default value is "2%".
      * Margins are only applied between small charts: 
      * the outer margins of border charts are always 0.  
      * </p>
+     * <p>The option 'paddings' is applied to each small chart.</p>
      * 
      * ** Orthogonal scroll bar on height/width overflow??
      * ** Legend vertical center on page height ?? Dynamic?
@@ -149,13 +150,13 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             return;
         }
         
-        // multiChartMaxColumns can be Infinity
-        var multiChartMaxColumns = +options.multiChartMaxColumns; // to number
-        if(isNaN(multiChartMaxColumns) || multiChartMax < 1) {
-            multiChartMaxColumns = 3;
+        // multiChartColumnsMax can be Infinity
+        var multiChartColumnsMax = +options.multiChartColumnsMax; // to number
+        if(isNaN(multiChartColumnsMax) || multiChartMax < 1) {
+            multiChartColumnsMax = 3;
         }
         
-        var colCount = Math.min(count, multiChartMaxColumns);
+        var colCount = Math.min(count, multiChartColumnsMax);
         // <Debug>
         /*jshint expr:true */
         colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
@@ -167,9 +168,9 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         rowCount >= 1 || def.assert("Must be at least 1");
         // </Debug>
         
-        var width = pvc.PercentValue.parse(options.multiChartWidth);
+        var width = pvc.PercentValue.parse(options.multiChartSmallWidth);
         if(width == null){
-            var colsInAvailableWidth = isFinite(multiChartMaxColumns) ? colCount : 3;
+            var colsInAvailableWidth = isFinite(multiChartColumnsMax) ? colCount : 3;
             width = new pvc.PercentValue(1 / colsInAvailableWidth);
         }
         
@@ -187,16 +188,16 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             }
         } else {
             // ar ::= width / height
-            var ar = +options.multiChartAspectRatio; // + is to number
+            var ar = +options.aspectRatio; // + is to number
             if(isNaN(ar) || ar <= 0){
                  // Determine a suitable aspect ratio
                 ar = this._calulateDefaultAspectRatio(width);
             }
             
-            // If  multiChartMaxHeight is specified, the height of each chart cannot be bigger
+            // If  multiChartSmallHeightMax is specified, the height of each chart cannot be bigger
             height = width / ar;
             
-            var maxHeight = +def.get(options, 'multiChartMaxHeight'); // null -> 0
+            var maxHeight = +def.get(options, 'multiChartSmallHeightMax'); // null -> 0
             if(!isNaN(maxHeight) && maxHeight > 0){
                 height = Math.min(height, maxHeight);
             }
@@ -281,6 +282,10 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
 //        return 5/2;
 //    },
     
+    _getExtensionId: function(){
+        return ['content', 'multiChartContent'];
+    },
+    
     _createCore: function(li){
         if(!li.data){
             // Empty
@@ -289,8 +294,13 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         
         var chart = this.chart;
         var options = chart.options;
-        var smallChartMargins = options.multiChartMargins || 
-                                new pvc.Sides(new pvc.PercentValue(0.02));
+        
+        var smallChartMargins = options.margins;
+        if(smallChartMargins == null){
+            smallChartMargins = new pvc.Sides(new pvc.PercentValue(0.02));
+        }
+        
+        var smallChartPaddings = options.paddings;
         
         // Index axes that need to be coordinated, by scopeType
         var hasCoordination = false;
@@ -369,15 +379,15 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                     left:       colIndex * li.width,
                     top:        rowIndex * li.height,
                     margins:    margins,
-                    paddings:   null, // TODO: create a multiChartPaddings property
-                    extensionPoints: {
-                        // This lets the main bg color show through AND
-                        // allows charts to overflow to other charts without that being covered
-                        // Notably, axes values tend to overflow a little bit.
-                        // Also setting to null, instead of transparent, for example
-                        // allows the rubber band to set its "special transparent" color
-                        base_fillStyle: null
-                    }
+                    paddings:   smallChartPaddings
+//                    extensionPoints: {
+//                        // This lets the main bg color show through AND
+//                        // allows charts to overflow to other charts without that being covered
+//                        // Notably, axes values tend to overflow a little bit.
+//                        // Also setting to null, instead of transparent, for example
+//                        // allows the rubber band to set its "special transparent" color
+//                        base_fillStyle: null
+//                    }
                 });
             
             var childChart = new ChildClass(childOptions);

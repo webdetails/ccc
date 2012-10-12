@@ -151,12 +151,12 @@ pvc.BasePanel = pvc.Abstract.extend({
         };
         
         var margins = options && options.margins;
-        if(!parent && margins === undefined){
-            // Give a default small margin on the root panel
-            //  because otherwise borders of panels may be clipped..
-            margins = 3;
-        }
-        
+//        if(!parent && margins === undefined){
+//            // Give a default small margin on the root panel
+//            //  because otherwise borders of panels may be clipped..
+//            margins = 3;
+//        }
+//        
         this.margins  = new pvc.Sides(margins);
         this.paddings = new pvc.Sides(options && options.paddings);
         this.size     = new pvc.Size (options && options.size    );
@@ -172,10 +172,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             
         } else {
             this.parent    = parent;
-            this.root      = parent.root;
-            this.topRoot   = parent.topRoot;
             this.isTopRoot = false;
             this.isRoot    = (parent.chart !== chart);
+            this.root      = this.isRoot ? this : parent.root;
+            this.topRoot   = parent.topRoot;
             this.data      = parent.data; // TODO
 
             if(this.isRoot) {
@@ -248,6 +248,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             return colorAxis.legendBulletGroupScene;
         }
         return null;
+    },
+    
+    isMultiChartRoot: function(){
+        return this.isTopRoot && this.chart.isMultiRoot;
     },
     
     _getLegendBulletRootScene: function(){
@@ -1123,7 +1127,14 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     _getExtensionId: function(){
         if (this.isRoot) {
-            return 'base';
+            var extensionIds = ['base'];
+            
+            // The multi chart root has an additional extension point
+            if(this.isMultiChartRoot()){
+                extensionIds.push('multiChartBase');
+            }
+            
+            return extensionIds;
         }
     },
     
@@ -1137,9 +1148,28 @@ pvc.BasePanel = pvc.Abstract.extend({
             return id;
         }
         
-        return id ?
-               (prefix + def.firstUpperCase(id)) :
-               prefix;
+        if(!id){
+            return prefix;
+        }
+        
+        if(!def.array.is(prefix) && !def.array.is(id)){
+            return id ?
+                    (prefix + def.firstUpperCase(id)) :
+                    prefix;
+        }
+        
+        return def
+            .query(prefix)
+            .selectMany(function(oneprefix){
+                return def
+                    .query(id)
+                    .select(function(oneid){
+                        return oneid ?
+                               (oneprefix + def.firstUpperCase(oneid)) :
+                               oneprefix;
+                    });
+            })
+            .array();
     },
     
     /**

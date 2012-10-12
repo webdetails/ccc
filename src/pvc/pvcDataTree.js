@@ -715,6 +715,7 @@ return pv.Label(x);
    },
    
    _getExtensionId: function(){
-       return 'chart';
+       // chart is deprecated
+       return ['chart', 'plot'];
    }
 });

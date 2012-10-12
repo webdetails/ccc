@@ -109,7 +109,8 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
     },
 
     _getExtensionId: function(){
-        return 'chart';
+        // chart is deprecated
+        return ['chart', 'plot'];
     },
         
     /* @override */

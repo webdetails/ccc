@@ -181,7 +181,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             })
             .override('baseColor', function(type){
                 var color = this.base(type);
-                if(!this._final && color && areaFillColorAlpha != null){
+                if(!this._finished && color && areaFillColorAlpha != null){
                     color = color.alpha(areaFillColorAlpha);
                 }
                 
@@ -260,7 +260,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 
-                if(!this._final && darkerLineAndDotColor && color){
+                if(!this._finished && darkerLineAndDotColor && color){
                     color = color.darker(0.6);
                 }
                 return color;
@@ -331,7 +331,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 
-                if(!this._final && darkerLineAndDotColor && color){
+                if(!this._finished && darkerLineAndDotColor && color){
                     color = color.darker(0.6);
                 }
                 return color;

@@ -74,12 +74,12 @@ new pvc.BarChart(options)
         <!-- MultiChart -->
         <!--
         multiChartMax: undefined,
-        multiChartMaxColumns: undefined,
-        multiChartWidth: undefined,
-        multiChartAspectRatio: undefined,
+        multiChartColumnsMax: undefined,
+        multiChartSmallWidth: undefined,
+        aspectRatio: undefined,
         multiChartSingleRowFillsHeight: undefined,
         multiChartSingleColFillsHeight: undefined,
-        multiChartMaxHeight: undefined,
+        multiChartSmallHeightMax: undefined,
         multiChartPaddings
         multiChartMargins
         -->

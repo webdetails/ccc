@@ -38,9 +38,9 @@ def.type('pvc.visual.Context')
         return this;
     },
     
-    'final': function(v){ // invalid property id. in cgg env.
+    finished: function(v){
         /*jshint sub:true */
-        return this.sign['final'](v);
+        return this.sign.finished(v);
     },
     
     delegate: function(dv){

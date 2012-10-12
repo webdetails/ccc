@@ -9,9 +9,7 @@ def.type('pvc.visual.Sign')
     
     var extensionIds = def.get(keyArgs, 'extensionId');
     if(extensionIds != null){
-        this.extensionAbsIds = def.array.to(extensionIds).map(function(extId){
-            return panel._makeExtensionAbsId(extId);
-        });
+        this.extensionAbsIds = def.array.to(panel._makeExtensionAbsId(extensionIds));
     }
     
     this.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true) && 
@@ -71,7 +69,7 @@ def.type('pvc.visual.Sign')
         
         // color
         methods[name] = function(arg){
-            delete this._final;
+            delete this._finished;
             
             var value;
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
@@ -81,7 +79,7 @@ def.type('pvc.visual.Sign')
                     return null;
                 }
                 
-                if(this.hasOwnProperty('_final')){
+                if(this.hasOwnProperty('_finished')){
                     return value;
                 }
                 
@@ -107,13 +105,7 @@ def.type('pvc.visual.Sign')
             
             // defName is installed as a user extension and 
             // is called if the user hasn't extended...
-            var value = this.delegateExtension();
-//            if(value === undefined){
-//                // defaultColor ?
-//                value = this[defName](arg);
-//            }
-            
-            return value;
+            return this.delegateExtension();
         };
         
         // defaultColor
@@ -132,8 +124,8 @@ def.type('pvc.visual.Sign')
     
     // Call this function with a final property value
     // to ensure that it will not be processed anymore
-    'final': function(value){ // invalid property id. in cgg env.
-        this._final = true;
+    finished: function(value){
+        this._finished = true;
         return value;
     },
     
@@ -461,11 +453,10 @@ def.type('pvc.visual.Sign')
     
     _initDefaultColorSceneScale: function(){
         var colorAxis = this.panel.defaultColorAxis();
-        if(colorAxis){
-            return colorAxis.sceneScale({nullToZero: false});
-        } 
-        
-        return def.fun.constant(pvc.defaultColor);
+        return colorAxis ? 
+               colorAxis.sceneScale({nullToZero: false}) :
+               def.fun.constant(pvc.defaultColor)
+               ;
     },
     
     defaultColorSceneScale: function(){

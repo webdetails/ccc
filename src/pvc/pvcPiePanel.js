@@ -513,7 +513,10 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     },
     
     _getExtensionId: function(){
-        return "chart";
+        // chart is deprecated
+        // content coincides, visually in this chart type
+        // - actually it shares the same panel...
+        return ['content', 'chart', 'plot'];
     },
     
     /**

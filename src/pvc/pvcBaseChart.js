@@ -32,6 +32,8 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     root: null,
     
+    isMultiRoot: false,
+    
     /**
      * A map of {@link pvc.visual.Axis} by axis id.
      */
@@ -404,6 +406,9 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._initData(keyArgs);
 
         var hasMultiRole = this._isRoleAssigned('multiChart');
+        if(!this.parent && hasMultiRole){
+            this.isMultiRoot = true;
+        }
         
         /* Initialize axes */
         this._initAxes(hasMultiRole);
@@ -1034,6 +1039,20 @@ pvc.BaseChart = pvc.Abstract.extend({
                new pvc.data.Data({linkParent: this._partData, datums: []}); // don't blow code ahead...
     },
 
+    _multiOrSmallOption: function(pMulti, pSmall){
+        var v;
+        if(this.isMultiRoot){
+            v = this.options[pMulti];
+            if(v === undefined){
+                v = this.options[pSmall];
+            }
+        } else {
+            v = this.options[pSmall];
+        }
+        
+        return v;
+    },
+    
     /**
      * Creates and initializes the base panel.
      */
@@ -1042,12 +1061,12 @@ pvc.BaseChart = pvc.Abstract.extend({
         var basePanelParent = this.parent && this.parent._multiChartPanel;
         
         this.basePanel = new pvc.BasePanel(this, basePanelParent, {
-            margins:  options.margins,
-            paddings: options.paddings,
+            margins:  this._multiOrSmallOption('multiChartMargins',  'margins' ),
+            paddings: this._multiOrSmallOption('multiChartPaddings', 'paddings'),
             size:     {width: options.width, height: options.height}
         });
     },
-
+    
     /**
      * Creates and initializes the title panel,
      * if the title is specified.
@@ -1056,17 +1075,17 @@ pvc.BaseChart = pvc.Abstract.extend({
         var options = this.options;
         if (!def.empty(options.title)) {
             this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
-                title:      options.title,
-                font:       options.titleFont,
-                anchor:     options.titlePosition,
-                align:      options.titleAlign,
-                alignTo:    options.titleAlignTo,
-                offset:     options.titleOffset,
-                inBounds:   options.titleInBounds,
-                margins:    options.titleMargins,
-                paddings:   options.titlePaddings,
-                titleSize:  options.titleSize,
-                titleSizeMax: options.titleSizeMax
+                title:        options.title,
+                font:         this._multiOrSmallOption('multiChartTitleFont',     'titleFont'),
+                anchor:       this._multiOrSmallOption('multiChartTitlePosition', 'titlePosition'),
+                align:        this._multiOrSmallOption('multiChartTitleAlign',    'titleAlign'),
+                alignTo:      this._multiOrSmallOption('multiChartTitleAlignTo',  'titleAlignTo'),
+                offset:       this._multiOrSmallOption('multiChartTitleOffset',   'titleOffset'),
+                inBounds:     this._multiOrSmallOption('multiChartTitleInBounds', 'titleInBounds'),
+                margins:      this._multiOrSmallOption('multiChartTitleMargins',  'titleMargins'),
+                paddings:     this._multiOrSmallOption('multiChartTitlePaddings', 'titlePaddings'),
+                titleSize:    this._multiOrSmallOption('multiChartTitleSize',     'titleSize'),
+                titleSizeMax: this._multiOrSmallOption('multiChartTitleSizeMax',  'titleSizeMax')
             });
         }
     },
@@ -1172,11 +1191,17 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Creates and initializes the multi-chart panel.
      */
     _initMultiChartPanel: function(){
-        this._multiChartPanel = new pvc.MultiChartPanel(this, this.basePanel);
+        var options   = this.options;
+        var basePanel = this.basePanel;
+        
+        this._multiChartPanel = new pvc.MultiChartPanel(this, basePanel, {
+            margins:  options.multiChartContentMargins,
+            paddings: options.multiChartContentPaddings
+        });
         
         // BIG HACK: force legend to be rendered after the small charts, 
         // to allow them to register legend renderers.
-        this.basePanel._children.unshift(this.basePanel._children.pop());
+        basePanel._children.unshift(basePanel._children.pop());
     },
     
     _coordinateSmallChartsLayout: function(childCharts, scopesByType){
@@ -1425,9 +1450,21 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Obtains the specified extension point.
      */
     _getExtension: function(id, prop) {
-        var component = def.getOwn(this._components, id);
-        if(component){
-            return component.get(prop);
+        var component;
+        if(!def.array.is(id)){
+            component = def.getOwn(this._components, id);
+            if(component){
+                return component.get(prop);
+            }
+        } else {
+            // Last extension points are applied last, so have priority...
+            var i = id.length - 1, value;
+            while(i >= 0){
+                component = def.getOwn(this._components, id[i--]);
+                if(component && (value = component.get(prop)) !== undefined){
+                    return value;
+                }
+            }
         }
     },
     
@@ -1561,13 +1598,30 @@ pvc.BaseChart = pvc.Abstract.extend({
         width:  400,
         height: 300,
         
-//        multiChartMax: undefined,
-//        multiChartMaxColumns: undefined,
-//        multiChartWidth: undefined,
-//        multiChartAspectRatio: undefined,
+//        multiChartMax:            undefined,
+//        multiChartColumnsMax:     undefined,
+//        multiChartSmallWidth:     undefined,
+//        multiChartSmallHeightMax: undefined,
+//        aspectRatio:    undefined,
 //        multiChartSingleRowFillsHeight: undefined,
 //        multiChartSingleColFillsHeight: undefined,
-//        multiChartMaxHeight: undefined,
+        
+//        multiChartMargins:     undefined,
+//        multiChartPaddings:    undefined,
+        
+//        multiChartContentMargins:  undefined,
+//        multiChartContentPaddings: undefined,
+
+//        multiChartTitlePosition: undefined,
+//        multiChartTitleAlign:    undefined,
+//        multiChartTitleAlignTo:  undefined,
+//        multiChartTitleOffset:   undefined,
+//        multiChartTitleInBounds: undefined,
+//        multiChartTitleSize:     undefined,
+//        multiChartTitleSizeMax:  undefined,
+//        multiChartTitleMargins:  undefined,
+//        multiChartTitlePaddings: undefined,
+//        multiChartTitleFont:     undefined,
         
         orientation: 'vertical',
         
@@ -1593,6 +1647,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         animate: true,
 
 //        title:         null,
+        
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
 //        titleAlignTo:  undefined,
