@@ -16,7 +16,7 @@ def.type('pvc.visual.Panel', pvc.visual.Sign)
         keyArgs = def.setDefaults(keyArgs,
                         'noSelect',      t,
                         'noHover',       t,
-                        'noTooltip',    t,
+                        'noTooltip',     t,
                         'noClick',       t,
                         'noDoubleClick', t);
 

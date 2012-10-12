@@ -65,6 +65,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }
         }
         
+        // Prevent the border from affecting the box model,
+        // providing a static 0 value, independently of the actual drawn value...
+        //this.borderWidth = 0;
+        
         this.base(chart, parent, options);
         
         this.axis = axis;

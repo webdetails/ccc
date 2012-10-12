@@ -28,6 +28,23 @@ pvc.BasePanel = pvc.Abstract.extend({
      */
     width: null,
     
+    /**
+     * The static effective border width of the panel.
+     * 
+     * If a constant extension point exists,
+     * its value is used to initialize this property.
+     * 
+     * If an extension point exists for the <tt>strokeStyle</tt> property,
+     * and its value is not null, 
+     * the width, taken from the extension point, or defaulted, is considered.
+     * Otherwise, the effective width is 0.
+     * 
+     * The default active value is <tt>1.5</tt>.
+     * 
+     * @type number
+     */
+    borderWidth: null,
+    
     anchor: "top",
     
     pvPanel: null, // padding/client pv panel (within border box, separated by paddings)
@@ -135,7 +152,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         var margins = options && options.margins;
         if(!parent && margins === undefined){
-            // Give a default 2 px margin on the root panel
+            // Give a default small margin on the root panel
             //  because otherwise borders of panels may be clipped..
             margins = 3;
         }
@@ -198,6 +215,22 @@ pvc.BasePanel = pvc.Abstract.extend({
             this.alignTo = alignTo;
             
             this.offset = new pvc.Offset(this.offset);
+        }
+        
+        if(this.borderWidth == null){
+            var borderWidth;
+            var extensionId = this._getExtensionId(); // height or width
+            if(extensionId){
+                var strokeStyle = this._getExtension(extensionId, 'strokeStyle');
+                if(strokeStyle != null){
+                    borderWidth = +this._getConstantExtension(extensionId, 'lineWidth'); 
+                    if(isNaN(borderWidth) || !isFinite(borderWidth)){
+                        borderWidth = 1.5;
+                    }
+                }
+            }
+            
+            this.borderWidth = borderWidth == null ? 0 : 1.5;
         }
     },
     
@@ -296,8 +329,12 @@ pvc.BasePanel = pvc.Abstract.extend({
                 availableSize.height = sizeMax.height;
             }
             
-            var margins  = (def.get(keyArgs, 'margins' ) || this.margins ).resolve(referenceSize);
-            var paddings = (def.get(keyArgs, 'paddings') || this.paddings).resolve(referenceSize);
+            var halfBorder   = this.borderWidth / 2;
+            var realMargins  = (def.get(keyArgs, 'margins' ) || this.margins ).resolve(referenceSize);
+            var realPaddings = (def.get(keyArgs, 'paddings') || this.paddings).resolve(referenceSize);
+            
+            var margins  = pvc.Sides.inflate(realMargins,  halfBorder);
+            var paddings = pvc.Sides.inflate(realPaddings, halfBorder);
             
             var spaceWidth  = margins.width  + paddings.width;
             var spaceHeight = margins.height + paddings.height;
@@ -323,10 +360,18 @@ pvc.BasePanel = pvc.Abstract.extend({
                 this._layoutInfo = {
                     canChange:         canChange,
                     referenceSize:     referenceSize,
+                    
+                    realMargins:       realMargins,
+                    realPaddings:      realPaddings,
+                    
+                    borderWidth:       this.borderWidth,
+                    
                     margins:           margins,
                     paddings:          paddings,
+                    
                     desiredClientSize: desiredClientSize,
                     clientSize:        availableClientSize,
+                    
                     pageClientSize:    prevLayoutInfo ? prevLayoutInfo.pageClientSize : availableClientSize.clone(),
                     previous:          prevLayoutInfo
                 };
@@ -402,7 +447,6 @@ pvc.BasePanel = pvc.Abstract.extend({
         if(!this._children) {
             return;
         }
-        
         
         var aolMap = pvc.BasePanel.orthogonalLength;
         var aoMap  = pvc.BasePanel.relativeAnchor;

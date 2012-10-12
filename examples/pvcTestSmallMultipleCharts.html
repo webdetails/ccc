@@ -397,7 +397,10 @@
                 //multiChartIndexes: 1,
                 //multiChartMaxColumns: Infinity,
                 multiChartMax: Infinity,
-
+                
+                //secondAxis: true,
+                //secondAxisIndependentScale: true,
+                
                 /* Small charts */
                 orientation: 'horizontal',
                 stacked:     true,
@@ -408,9 +411,9 @@
                 /* Visual Role mapping */
                 visualRoles: {
                     multiChart: "territory, country",
-                    series:           "year desc, quarter desc",
-                    category:         "line",
-                    value:            "sales"
+                    series:     "year desc, quarter desc",
+                    category:   "line",
+                    value:      "sales"
                 },
 
                 /* Data definition */
@@ -426,13 +429,23 @@
                 /* Data mapping */
                 readers: [
                    {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
+                   /*,
+                   {
+                       names: 'dataPart', 
+                       reader: function(vitem, dataPartDim){
+                           if(vitem[0] === '[Time].[2005]'){
+                               return 1;
+                           }
+                           return 0;
+                       }
+                   }*/
                 ],
 
                 /* Source Data Format */
                 crosstabMode: true,
                 isMultiValued: true,
                 dataOptions: {
-                    categoriesCount :  3,
+                    categoriesCount:   3,
                     measuresInColumns: true
                 }
              }

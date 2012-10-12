@@ -7,6 +7,10 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
     
     constructor: function(chart, parent, options) {
         
+        // Prevent the border from affecting the box model,
+        // providing a static 0 value, independently of the actual drawn value...
+        //this.borderWidth = 0;
+        
         this.base(chart, parent, options);
         
         // Initialize paddings from axes offsets

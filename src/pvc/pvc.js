@@ -701,8 +701,12 @@ var pvc = def.globalSpace('pvc', {
             sides[side] = value;
         }, this);
         
-        sides.width  = sides.left   + sides.right;
-        sides.height = sides.bottom + sides.top;
+        return pvc.Sides.updateSize(sides);
+    };
+    
+    pvc.Sides.updateSize = function(sides){
+        sides.width  = (sides.left   || 0) + (sides.right || 0);
+        sides.height = (sides.bottom || 0) + (sides.top   || 0);
         
         return sides;
     };
@@ -715,6 +719,16 @@ var pvc = def.globalSpace('pvc', {
         });
         
         return sides;
+    };
+    
+    pvc.Sides.inflate = function(sides, by){
+        var sidesOut = {};
+        
+        pvc.Sides.names.forEach(function(side){
+            sidesOut[side] = (sides[side] || 0) + by;
+        });
+        
+        return pvc.Sides.updateSize(sidesOut);
     };
     
     // -------------

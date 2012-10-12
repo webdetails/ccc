@@ -369,6 +369,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                     left:       colIndex * li.width,
                     top:        rowIndex * li.height,
                     margins:    margins,
+                    paddings:   null, // TODO: create a multiChartPaddings property
                     extensionPoints: {
                         // This lets the main bg color show through AND
                         // allows charts to overflow to other charts without that being covered

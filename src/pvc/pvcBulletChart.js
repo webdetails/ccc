@@ -452,7 +452,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
         var defaultData = {
             title: options.bulletTitle,
             formattedTitle: def.scope(function(){
-                var formatter = titleGrouping && titleRole.firstDimension().formatter();
+                var formatter = titleGrouping && titleRole.firstDimensionType().formatter();
                 if(formatter){
                     return formatter(options.bulletTitle);
                 }
