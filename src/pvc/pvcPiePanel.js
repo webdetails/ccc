@@ -19,7 +19,7 @@
  * <i>innerGap</i> - The percentage of (the smallest of) the panel width or height used by the pie. 
  * Default: 0.9 (90%)
  * 
- * Deprecated in favor of options <i>contentMargins</i> and <i>contentPaddings</i>.
+ * Deprecated in favor of options <i>leafContentMargins</i> and <i>leafContentPaddings</i>.
  * 
  * Has the following protovis extension points: 
  * <i>chart_</i> - for the main chart Panel 
@@ -516,7 +516,15 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         // chart is deprecated
         // content coincides, visually in this chart type
         // - actually it shares the same panel...
-        return ['content', 'chart', 'plot'];
+        
+        var extensionIds = ['content'];
+        if(this.chart.parent){ 
+            extensionIds.push('smallContent');
+        }
+        
+        extensionIds.push('chart', 'plot');
+        
+        return extensionIds;
     },
     
     /**

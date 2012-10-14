@@ -2,7 +2,7 @@
 pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
     
     _getExtensionId: function(){
-        return 'content';
+        return !this.chart.parent ? 'content' : 'smallContent';
     },
     
     /**

@@ -32,8 +32,6 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     root: null,
     
-    isMultiRoot: false,
-    
     /**
      * A map of {@link pvc.visual.Axis} by axis id.
      */
@@ -406,9 +404,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._initData(keyArgs);
 
         var hasMultiRole = this._isRoleAssigned('multiChart');
-        if(!this.parent && hasMultiRole){
-            this.isMultiRoot = true;
-        }
         
         /* Initialize axes */
         this._initAxes(hasMultiRole);
@@ -565,8 +560,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         } else {
             var options = this.options;
             this._preRenderContent({
-                margins:           options.contentMargins,
-                paddings:          options.contentPaddings,
+                margins:           hasMultiRole ? options.smallContentMargins  : options.contentMargins,
+                paddings:          hasMultiRole ? options.smallContentPaddings : options.contentPaddings,
                 clickAction:       options.clickAction,
                 doubleClickAction: options.doubleClickAction
             });
@@ -1039,20 +1034,6 @@ pvc.BaseChart = pvc.Abstract.extend({
                new pvc.data.Data({linkParent: this._partData, datums: []}); // don't blow code ahead...
     },
 
-    _multiOrSmallOption: function(pMulti, pSmall){
-        var v;
-        if(this.isMultiRoot){
-            v = this.options[pMulti];
-            if(v === undefined){
-                v = this.options[pSmall];
-            }
-        } else {
-            v = this.options[pSmall];
-        }
-        
-        return v;
-    },
-    
     /**
      * Creates and initializes the base panel.
      */
@@ -1061,8 +1042,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         var basePanelParent = this.parent && this.parent._multiChartPanel;
         
         this.basePanel = new pvc.BasePanel(this, basePanelParent, {
-            margins:  this._multiOrSmallOption('multiChartMargins',  'margins' ),
-            paddings: this._multiOrSmallOption('multiChartPaddings', 'paddings'),
+            margins:  options.margins,
+            paddings: options.paddings,
             size:     {width: options.width, height: options.height}
         });
     },
@@ -1074,18 +1055,19 @@ pvc.BaseChart = pvc.Abstract.extend({
     _initTitlePanel: function(){
         var options = this.options;
         if (!def.empty(options.title)) {
+            var isRoot = !this.parent;
             this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
                 title:        options.title,
-                font:         this._multiOrSmallOption('multiChartTitleFont',     'titleFont'),
-                anchor:       this._multiOrSmallOption('multiChartTitlePosition', 'titlePosition'),
-                align:        this._multiOrSmallOption('multiChartTitleAlign',    'titleAlign'),
-                alignTo:      this._multiOrSmallOption('multiChartTitleAlignTo',  'titleAlignTo'),
-                offset:       this._multiOrSmallOption('multiChartTitleOffset',   'titleOffset'),
-                inBounds:     this._multiOrSmallOption('multiChartTitleInBounds', 'titleInBounds'),
-                margins:      this._multiOrSmallOption('multiChartTitleMargins',  'titleMargins'),
-                paddings:     this._multiOrSmallOption('multiChartTitlePaddings', 'titlePaddings'),
-                titleSize:    this._multiOrSmallOption('multiChartTitleSize',     'titleSize'),
-                titleSizeMax: this._multiOrSmallOption('multiChartTitleSizeMax',  'titleSizeMax')
+                font:         options.titleFont,
+                anchor:       options.titlePosition,
+                align:        options.titleAlign,
+                alignTo:      options.titleAlignTo,
+                offset:       options.titleOffset,
+                inBounds:     options.titleInBounds,
+                margins:      options.titleMargins,
+                paddings:     options.titlePaddings,
+                titleSize:    options.titleSize,
+                titleSizeMax: options.titleSizeMax
             });
         }
     },
@@ -1191,12 +1173,11 @@ pvc.BaseChart = pvc.Abstract.extend({
      * Creates and initializes the multi-chart panel.
      */
     _initMultiChartPanel: function(){
-        var options   = this.options;
         var basePanel = this.basePanel;
-        
+        var options = this.options;
         this._multiChartPanel = new pvc.MultiChartPanel(this, basePanel, {
-            margins:  options.multiChartContentMargins,
-            paddings: options.multiChartContentPaddings
+            margins:  options.contentMargins,
+            paddings: options.contentPaddings
         });
         
         // BIG HACK: force legend to be rendered after the small charts, 
@@ -1597,31 +1578,34 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         width:  400,
         height: 300,
-        
-//        multiChartMax:            undefined,
-//        multiChartColumnsMax:     undefined,
-//        multiChartSmallWidth:     undefined,
-//        multiChartSmallHeightMax: undefined,
-//        aspectRatio:    undefined,
-//        multiChartSingleRowFillsHeight: undefined,
-//        multiChartSingleColFillsHeight: undefined,
-        
-//        multiChartMargins:     undefined,
-//        multiChartPaddings:    undefined,
-        
-//        multiChartContentMargins:  undefined,
-//        multiChartContentPaddings: undefined,
 
-//        multiChartTitlePosition: undefined,
-//        multiChartTitleAlign:    undefined,
-//        multiChartTitleAlignTo:  undefined,
-//        multiChartTitleOffset:   undefined,
-//        multiChartTitleInBounds: undefined,
-//        multiChartTitleSize:     undefined,
-//        multiChartTitleSizeMax:  undefined,
-//        multiChartTitleMargins:  undefined,
-//        multiChartTitlePaddings: undefined,
-//        multiChartTitleFont:     undefined,
+//      margins:  undefined,
+//      paddings: undefined,
+//      contentMargins:  undefined,
+//      contentPaddings: undefined,
+        
+//      multiChartMax: undefined,
+//      multiChartColumnsMax: undefined,
+//      multiChartSingleRowFillsHeight: undefined,
+//      multiChartSingleColFillsHeight: undefined,
+        
+//      smallWidth:       undefined,
+//      smallHeightMax:   undefined,
+//      smallAspectRatio: undefined,
+//      smallMargins:     undefined,
+//      smallPaddings:    undefined,
+//      smallContentMargins:  undefined,
+//      smallContentPaddings: undefined,
+//      smallTitlePosition: undefined,
+//      smallTitleAlign:    undefined,
+//      smallTitleAlignTo:  undefined,
+//      smallTitleOffset:   undefined,
+//      smallTitleInBounds: undefined,
+//      smallTitleSize:     undefined,
+//      smallTitleSizeMax:  undefined,
+//      smallTitleMargins:  undefined,
+//      smallTitlePaddings: undefined,
+//      smallTitleFont:     undefined,
         
         orientation: 'vertical',
         
@@ -1744,13 +1728,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
         
 //        renderCallback: undefined,
-//
-//        margins:  undefined,
-//        paddings: undefined,
-//        
-//        contentMargins:  undefined,
-//        contentPaddings: undefined,
-        
+
         compatVersion: Infinity // numeric, 1 currently recognized
     }
 });

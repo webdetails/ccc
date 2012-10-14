@@ -75,13 +75,13 @@ new pvc.BarChart(options)
         <!--
         multiChartMax: undefined,
         multiChartColumnsMax: undefined,
-        multiChartSmallWidth: undefined,
-        aspectRatio: undefined,
+        
+        smallWidth:       undefined,
+        smallAspectRatio: undefined,
+        smallHeightMax:   undefined,
+        
         multiChartSingleRowFillsHeight: undefined,
         multiChartSingleColFillsHeight: undefined,
-        multiChartSmallHeightMax: undefined,
-        multiChartPaddings
-        multiChartMargins
         -->
         
         <!-- Panels -->
@@ -98,7 +98,6 @@ new pvc.BarChart(options)
         
         <!-- Data -->
         <!-- dataOptions: undefined -->
-        
         
         <c:property name="canvas" type="string object" category="General">
             <c:documentation>
@@ -146,12 +145,14 @@ new pvc.BarChart(options)
             </c:documentation>
         </c:property>
         
-        <c:property name="margins" type="number string pvc.options.Sides" default="'3%'" category="Layout">
+        
+        <c:property name="margins" type="number string pvc.options.Sides" default="0" category="Layout">
             <c:documentation>
-                The <i>root</i> chart margins.
+                The margins of the <i>root</i> chart.
                 
-                The margins of non-root charts (small multiple charts)
-                are specified with the property <c:link to="#multiChartMargins" />.
+                In a <i>small multiples</i> chart, 
+                the margins of the <i>small</i> charts can be set
+                with the property <c:link to="#smallMargins" />.
                 
                 See <c:link to="pvc.options.Sides" /> for information about 
                 the different supported data types.
@@ -160,10 +161,11 @@ new pvc.BarChart(options)
         
         <c:property name="paddings" type="number string pvc.options.Sides" default="0" category="Layout">
             <c:documentation>
-                The <i>root</i> chart paddings.
+                The paddings of <i>root</i> chart.
                 
-                The paddings of non-root charts (small multiple charts)
-                are specified with the property <c:link to="#multiChartPaddings" />.
+                In a <i>small multiples</i> chart, 
+                the paddings of a <i>small</i> chart can be set
+                with the property <c:link to="#smallPaddings" />.
                 
                 See <c:link to="pvc.options.Sides" /> for information about 
                 the different supported data types.
@@ -172,29 +174,64 @@ new pvc.BarChart(options)
         
         <c:property name="contentMargins" type="number string pvc.options.Sides" default="0" category="Layout">
             <c:documentation>
-            <!-- 
-                The margins of the <i>root content panel</i>.
+                The margins of the <i>root</i> content panel.
                 
-                The margins of the content panels of non-root charts (small multiple charts)
-                are specified with the property <c:link to="#multiChartMargins" />.
+                In a <i>small multiples</i> chart, 
+                the margins of the <i>content panel</i> of a <i>small</i> chart 
+                can be set with the property <c:link to="#smallContentMargins" />.
                 
                 See <c:link to="pvc.options.Sides" /> for information about 
                 the different supported data types.
-                 -->
             </c:documentation>
         </c:property>
         
         <c:property name="contentPaddings" type="number string pvc.options.Sides" default="0" category="Layout">
             <c:documentation>
-            <!-- 
-                The <i>root</i> chart paddings.
+                The paddings of the <i>root</i> content panel.
                 
-                The paddings of non-root charts (small multiple charts)
-                are specified with the property <c:link to="#multiChartPaddings" />.
+                In a <i>small multiples</i> chart, 
+                the paddings of the <i>content panel</i> of a <i>small</i> chart 
+                can be set with the property <c:link to="#smallContentPaddings" />.
                 
                 See <c:link to="pvc.options.Sides" /> for information about 
                 the different supported data types.
-                 -->
+            </c:documentation>
+        </c:property>
+        
+        
+        <c:property name="smallMargins" type="number string pvc.options.Sides" default="'2%'" category="Multi-Chart - Layout">
+            <c:documentation>
+                The margins of a <i>small</i> chart.
+                
+                See <c:link to="pvc.options.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallPaddings" type="number string pvc.options.Sides" default="0" category="Multi-Chart - Layout">
+            <c:documentation>
+                The paddings of a <i>small</i> chart.
+                
+                See <c:link to="pvc.options.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallContentMargins" type="number string pvc.options.Sides" default="0" category="Multi-Chart - Layout">
+            <c:documentation>
+                The margins of the <i>content panel</i> of a <i>small</i> chart. 
+                
+                See <c:link to="pvc.options.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallContentPaddings" type="number string pvc.options.Sides" default="0" category="Multi-Chart - Layout">
+            <c:documentation>
+                The paddings of the <i>content panel</i> of a <i>small</i> chart.
+                
+                See <c:link to="pvc.options.Sides" /> for information about 
+                the different supported data types.
             </c:documentation>
         </c:property>
         

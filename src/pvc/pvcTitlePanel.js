@@ -23,15 +23,6 @@ pvc.TitlePanel = pvc.TitlePanelAbstract.extend({
     },
     
     _getExtensionPrefix: function(){
-        var basePrefix = this.base();
-        
-        var extensionIds = [basePrefix];
-        
-        // The multi-chart root has an additional extension point
-        if(this.root.isMultiChartRoot()){
-            extensionIds.push('multiChart' + def.firstUpperCase(basePrefix));
-        }
-        
-        return extensionIds;
+        return !this.chart.parent ? "title" : "smallTitle";
     }
 });

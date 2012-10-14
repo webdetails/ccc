@@ -49,7 +49,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * then the chart's width is increased. 
      * </p>
      * <p>
-     * The option 'multiChartSmallWidth' can be specified to fix the width, 
+     * The option 'smallWidth' can be specified to fix the width, 
      * of each small chart, in pixels or, in string "1%" format, 
      * as a percentage of the available width.
      * 
@@ -60,9 +60,9 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      *  the maximum that can be placed on a row, 
      *  these, nevertheless, take up the whole width).
      * 
-     * When both the options "multiChartSmallWidth" and "multiChartColumnsMax" 
+     * When both the options "smallWidth" and "multiChartColumnsMax" 
      * are unspecified, then the behavior is the same as if
-     * the value "33%" had been specified for "multiChartSmallWidth":
+     * the value "33%" had been specified for "smallWidth":
      * 3 charts will fit in the chart's initially specified width,
      * yet the chart's width can grow to accommodate for further small charts.
      * </p>
@@ -81,7 +81,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * If the layout results in more than one row or 
      * when "multiChartSingleRowFillsHeight" is false,
      * the height of the small charts is determined using the option
-     * 'aspectRatio', which is, by definition, width / height.
+     * 'smallAspectRatio', which is, by definition, width / height.
      * A typical aspect ratio value would be 5/4, 4/3 or the golden ratio (~1.62).
      * 
      * When the option is unspecified, 
@@ -141,7 +141,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
 //            }
 //        }
         
-        var data  = multiChartRole.flatten(chart.data, {visible: true});
+        var data = chart.data.flattenBy(multiChartRole, {visible: true});
         var leafCount = data._children.length;
         var count = Math.min(leafCount, multiChartMax);
         if(count === 0) {
@@ -168,7 +168,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         rowCount >= 1 || def.assert("Must be at least 1");
         // </Debug>
         
-        var width = pvc.PercentValue.parse(options.multiChartSmallWidth);
+        var width = pvc.PercentValue.parse(options.smallWidth);
         if(width == null){
             var colsInAvailableWidth = isFinite(multiChartColumnsMax) ? colCount : 3;
             width = new pvc.PercentValue(1 / colsInAvailableWidth);
@@ -188,16 +188,16 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             }
         } else {
             // ar ::= width / height
-            var ar = +options.aspectRatio; // + is to number
+            var ar = +options.smallAspectRatio; // + is to number
             if(isNaN(ar) || ar <= 0){
                  // Determine a suitable aspect ratio
                 ar = this._calulateDefaultAspectRatio(width);
             }
             
-            // If  multiChartSmallHeightMax is specified, the height of each chart cannot be bigger
+            // If  smallHeightMax is specified, the height of each chart cannot be bigger
             height = width / ar;
             
-            var maxHeight = +def.get(options, 'multiChartSmallHeightMax'); // null -> 0
+            var maxHeight = +def.get(options, 'smallHeightMax'); // null -> 0
             if(!isNaN(maxHeight) && maxHeight > 0){
                 height = Math.min(height, maxHeight);
             }
@@ -215,7 +215,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             'rowCount', rowCount);
         
         return {
-            width:  width  * colCount,
+            width:  width * colCount,
             height: Math.max(clientSize.height, height * rowCount) // vertical align center: pass only: height * rowCount
         };
     },
@@ -283,7 +283,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
 //    },
     
     _getExtensionId: function(){
-        return ['content', 'multiChartContent'];
+        return 'content';
     },
     
     _createCore: function(li){
@@ -295,12 +295,14 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         var chart = this.chart;
         var options = chart.options;
         
-        var smallChartMargins = options.margins;
-        if(smallChartMargins == null){
-            smallChartMargins = new pvc.Sides(new pvc.PercentValue(0.02));
+        var smallMargins = options.smallMargins;
+        if(smallMargins == null){
+            smallMargins = new pvc.Sides(new pvc.PercentValue(0.02));
+        } else {
+            smallMargins = new pvc.Sides(smallMargins);
         }
         
-        var smallChartPaddings = options.paddings;
+        var smallPaddings = new pvc.Sides(options.smallPaddings);
         
         // Index axes that need to be coordinated, by scopeType
         var hasCoordination = false;
@@ -349,6 +351,22 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             };
         }
         
+        var childOptionsBase = def.set(
+             Object.create(options), 
+            'parent',        chart,
+            'legend',        false,
+            'paddings',      smallPaddings,
+            'titleFont',     options.smallTitleFont,
+            'titlePosition', options.smallTitlePosition,
+            'titleAlign',    options.smallTitleAlign,
+            'titleAlignTo',  options.smallTitleAlignTo,
+            'titleOffset',   options.smallTitleOffset,
+            'titleInBounds', options.smallTitleInBounds,
+            'titleMargins',  options.smallTitleMargins,
+            'titlePaddings', options.smallTitlePaddings,
+            'titleSize',     options.smallTitleSize,
+            'titleSizeMax',  options.smallTitleSizeMax);
+        
         for(var index = 0 ; index < li.count ; index++) {
             var childData = li.data._children[index];
             
@@ -357,38 +375,27 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             
             var margins = {};
             if(colIndex > 0){
-                margins.left = smallChartMargins.left;
+                margins.left = smallMargins.left;
             }
             if(colIndex < lastColIndex){
-                margins.right = smallChartMargins.right;
+                margins.right = smallMargins.right;
             }
             if(rowIndex > 0){
-                margins.top = smallChartMargins.top;
+                margins.top = smallMargins.top;
             }
             if(rowIndex < lastRowIndex){
-                margins.bottom = smallChartMargins.bottom;
+                margins.bottom = smallMargins.bottom;
             }
             
-            var childOptions = def.create(options, {
-                    parent:     chart,
-                    title:      childData.absLabel,
-                    legend:     false,
-                    data:       childData,
-                    width:      li.width,
-                    height:     li.height,
-                    left:       colIndex * li.width,
-                    top:        rowIndex * li.height,
-                    margins:    margins,
-                    paddings:   smallChartPaddings
-//                    extensionPoints: {
-//                        // This lets the main bg color show through AND
-//                        // allows charts to overflow to other charts without that being covered
-//                        // Notably, axes values tend to overflow a little bit.
-//                        // Also setting to null, instead of transparent, for example
-//                        // allows the rubber band to set its "special transparent" color
-//                        base_fillStyle: null
-//                    }
-                });
+            var childOptions = def.set(
+                Object.create(childOptionsBase),
+                'title',      childData.absLabel,
+                'data',       childData,
+                'width',      li.width,
+                'height',     li.height,
+                'left',       colIndex * li.width,
+                'top',        rowIndex * li.height,
+                'margins',    margins);
             
             var childChart = new ChildClass(childOptions);
             if(!hasCoordination){

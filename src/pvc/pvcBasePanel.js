@@ -250,10 +250,6 @@ pvc.BasePanel = pvc.Abstract.extend({
         return null;
     },
     
-    isMultiChartRoot: function(){
-        return this.isTopRoot && this.chart.isMultiRoot;
-    },
-    
     _getLegendBulletRootScene: function(){
         return this.chart._getLegendBulletRootScene();
     },
@@ -1127,14 +1123,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     _getExtensionId: function(){
         if (this.isRoot) {
-            var extensionIds = ['base'];
-            
-            // The multi chart root has an additional extension point
-            if(this.isMultiChartRoot()){
-                extensionIds.push('multiChartBase');
-            }
-            
-            return extensionIds;
+            return !this.chart.parent ? 'base' : 'smallBase';
         }
     },
     
