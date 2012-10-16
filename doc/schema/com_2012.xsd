@@ -80,13 +80,13 @@
         </key>
         
         <key name="atom_unique_name">
-            <selector xpath="com:atomType/com:atom" />
-            <field xpath="@name" />
+            <selector xpath="com:atomType" />
+            <field xpath="com:atom/@name" />
         </key>
         
         <key name="atom_unique_value">
-            <selector xpath="com:atomType/com:atom" />
-            <field xpath="@value" />
+            <selector xpath="com:atomType" />
+            <field xpath="com:atom/@value" />
         </key>
         
         <key name="funType_unique_name">
@@ -137,6 +137,13 @@
         </complexType>
     </element>
     
+    <element name="deprecated">
+        <complexType mixed="true">
+            <sequence minOccurs="0" maxOccurs="unbounded">
+                <any namespace="##any" processContents="lax" />
+            </sequence>
+        </complexType>
+    </element>
     
     <!-- Model XSD types -->
     

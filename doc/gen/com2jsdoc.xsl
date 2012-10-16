@@ -99,7 +99,14 @@
             
             <xsl:variable name="typeTagText" select="fn:replace($typeTag, '([^:])\s+([^:])', '$1|$2')" />
             
-            <xsl:value-of select="concat($nl, ' * @returns {', $typeTagText, '}')" />
+            <xsl:choose>
+                <xsl:when test="$funTypeDef">
+                    <xsl:value-of select="concat($nl, ' * @returns {', $typeTagText, '}')" />
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="concat($nl, ' * @type ', $typeTagText)" />
+                </xsl:otherwise>
+            </xsl:choose>
             <xsl:apply-templates select="$funTypeDef/com:returns/com:documentation" mode="process-jsdoc" />
             
             <xsl:choose>
@@ -213,7 +220,13 @@
     <!-- Process Documentation Text -->
     
     <xsl:template match="com:documentation" mode="process-jsdoc" priority="5">
-        <xsl:apply-templates select="node()" mode="process-jsdoc" />
+        <xsl:apply-templates select="node()[local-name(.) != 'deprecated']" mode="process-jsdoc" />
+        <xsl:apply-templates select="com:deprecated" mode="header" />
+    </xsl:template>
+    
+    <xsl:template match="com:deprecated" mode="header" priority="5">
+        <xsl:value-of select="concat($nl, ' * @deprecated ')" />
+        <xsl:apply-templates mode="process-jsdoc" />
     </xsl:template>
     
     <xsl:template match="text()" mode="process-jsdoc" priority="5">
@@ -221,16 +234,22 @@
         
         <xsl:choose>
             <xsl:when test="$mode = 'xml'">
+                <!-- Trim -->
+                <xsl:variable name="text" select="." /> 
+                <!-- 
+                      select="replace(., '^([\r\n]*)(.+?)([\r\n]*)$', ' $2 ')" />
+                -->
+                               
                 <!-- Empty lines become <p>'s -->  
-                <xsl:variable name="text" 
-                              select="replace(., '[\r\n]+\s*$', concat($nl, '&lt;p&gt;'), 'm')" />
+                <xsl:variable name="text2" 
+                              select="replace($text, '[\r\n]+\s*$', concat($nl, '&lt;p&gt;'), 'm')" />
                 
                 <!-- Remove trailing <p> ... -->
-                <xsl:variable name="text2" 
-                              select="replace($text, '&lt;p&gt;$', '')" />
+                <xsl:variable name="text3" 
+                              select="replace($text2, '&lt;p&gt;$', '')" />
                               
                 <!-- trim leading spaces -->
-                <xsl:value-of select="replace($text2, '[\r\n]+\s*', concat($nl, ' * '))" />
+                <xsl:value-of select="replace($text3, '[\r\n]+\s*', concat($nl, ' * '))" />
             </xsl:when>
             <xsl:otherwise>
                 <!-- don't trim leading spaces or compact multiple consecutive lines -->

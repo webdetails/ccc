@@ -168,38 +168,53 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         rowCount >= 1 || def.assert("Must be at least 1");
         // </Debug>
         
-        var width = pvc.PercentValue.parse(options.smallWidth);
-        if(width == null){
-            var colsInAvailableWidth = isFinite(multiChartColumnsMax) ? colCount : 3;
-            width = new pvc.PercentValue(1 / colsInAvailableWidth);
+        var prevLayoutInfo = layoutInfo.previous;
+        var initialClientWidth  = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
+        var initialClientHeight = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
+        
+        var smallHeight    = pvc.PercentValue.parse(options.smallHeight);
+        //var smallHeightMax = pvc.PercentValue.parse(options.smallHeightMax);
+        var smallWidth     = pvc.PercentValue.parse(options.smallWidth );
+        
+        if(smallWidth != null){
+            smallWidth = pvc.PercentValue.resolve(smallWidth, initialClientWidth);
         }
         
-        width = pvc.PercentValue.resolve(width, clientSize.width);
-
-        var height;
-        if((rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
-           (colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
-            // Use the initial client height
-            var prevLayoutInfo = layoutInfo.previous;
-            if(!prevLayoutInfo){
-                height = clientSize.height;
+        if(smallHeight != null){
+            smallHeight = pvc.PercentValue.resolve(smallHeight, initialClientHeight);
+        }
+        
+        var ar = +options.smallAspectRatio; // + is to number
+        if(isNaN(ar) || ar <= 0){
+            ar = this._calulateDefaultAspectRatio();
+        }
+        
+        if(smallWidth == null){
+            if(isFinite(multiChartColumnsMax)){
+                // Distribute initially available client width by the effective max columns.
+                smallWidth = initialClientWidth / colCount;
             } else {
-                height = prevLayoutInfo.height;
+                // Single Row
+                // Chart grows in width as needed
+                if(smallHeight == null){
+                    // Both null
+                    // Height uses whole height
+                    smallHeight = initialClientHeight;
+                }
+                
+                // Now use aspect ratio to calculate width
+                smallWidth = ar * smallHeight;
             }
-        } else {
-            // ar ::= width / height
-            var ar = +options.smallAspectRatio; // + is to number
-            if(isNaN(ar) || ar <= 0){
-                 // Determine a suitable aspect ratio
-                ar = this._calulateDefaultAspectRatio(width);
-            }
-            
-            // If  smallHeightMax is specified, the height of each chart cannot be bigger
-            height = width / ar;
-            
-            var maxHeight = +def.get(options, 'smallHeightMax'); // null -> 0
-            if(!isNaN(maxHeight) && maxHeight > 0){
-                height = Math.min(height, maxHeight);
+        }
+        
+        if(smallHeight == null){
+            if((rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
+               (colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
+                
+                // Height uses whole height
+                smallHeight = initialClientHeight;
+            } else {
+                smallHeight = smallWidth / ar;
             }
         }
 
@@ -209,18 +224,20 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
            layoutInfo, 
             'data',  data,
             'count', count,
-            'width',  width,
-            'height', height,
+            'initialClientWidth',  initialClientWidth,
+            'initialClientHeight', initialClientHeight,
+            'width',  smallWidth,
+            'height', smallHeight,
             'colCount', colCount,
             'rowCount', rowCount);
         
         return {
-            width:  width * colCount,
-            height: Math.max(clientSize.height, height * rowCount) // vertical align center: pass only: height * rowCount
+            width:  smallWidth * colCount,
+            height: Math.max(clientSize.height, smallHeight * rowCount) // vertical align center: pass only: smallHeight * rowCount
         };
     },
     
-    _calulateDefaultAspectRatio: function(totalWidth){
+    _calulateDefaultAspectRatio: function(/*totalWidth*/){
         if(this.chart instanceof pvc.PieChart){
             // 5/4 <=> 10/8 < 10/7 
             return 10/7;
@@ -361,7 +378,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             'titleAlign',    options.smallTitleAlign,
             'titleAlignTo',  options.smallTitleAlignTo,
             'titleOffset',   options.smallTitleOffset,
-            'titleInBounds', options.smallTitleInBounds,
+            'titleKeepInBounds', options.smallTitleKeepInBounds,
             'titleMargins',  options.smallTitleMargins,
             'titlePaddings', options.smallTitlePaddings,
             'titleSize',     options.smallTitleSize,

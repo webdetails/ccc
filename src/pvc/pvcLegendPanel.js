@@ -22,45 +22,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     pvLegendPanel: null,
     
     textMargin: 6,    // The space *between* the marker and the text, in pixels.
-    padding:    2.5,  // Half the space *between* legend items, in pixels.
+    itemPadding:    2.5,  // Half the space *between* legend items, in pixels.
     markerSize: 15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
     font:  '10px sans-serif',
-    
-    constructor: function(chart, parent, options){
-        if(!options){
-            options = {};
-        }
-        
-        var isV1Compat = chart.compatVersion() <= 1;
-        if(isV1Compat){
-            var anchor = options.anchor || this.anchor;
-            var isVertical = anchor !== 'top' && anchor !== 'bottom';
-            
-            // Previously, an item had a height = to the item padding.
-            // So, the item padding included padding + inner height...
-            if(options.padding !== undefined){
-                options.padding = Math.max(0, (options.padding - 16) / 2);
-            } else {
-                options.padding = 4;
-            }
-            
-            // V1 minMarginX/Y were included in the size of the legend,
-            // so these correspond to padding
-            var minMarginX = Math.max(def.get(options, 'minMarginX', 8), 0);
-            
-            // V1 only implemented minMarginY for vertical and align = 'top'
-            var minMarginY;
-            if(isVertical && (options.align !== 'middle' && options.align !== 'bottom')){
-                minMarginY = Math.max(def.get(options, 'minMarginY', 20) - 20, 0);
-            } else {
-                minMarginY = 0;
-            }
-            
-            options.paddings = { left: minMarginX, top: minMarginY };
-        }
-        
-        this.base(chart, parent, options);
-    },
 
     /**
      * @override
@@ -76,7 +40,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
       var myself = this,
           clientSize = layoutInfo.clientSize,
           rootScene = this._getBulletRootScene(),
-          padding   = rootScene.vars.padding,
+          itemPadding   = rootScene.vars.itemPadding,
           contentSize = rootScene.vars.size,
           sceneColorProp = function(scene){ return scene.color; };
       
@@ -115,7 +79,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           [a_left  ](leftOffset)
           [a_top   ](function(){
               var prevRow = this.sibling(); 
-              return prevRow ? (prevRow[a_top] + prevRow[a_height] + padding[a_height]) : 0;
+              return prevRow ? (prevRow[a_top] + prevRow[a_height] + itemPadding[a_height]) : 0;
           })
           [a_width ](function(row){ return row.size.width;  })
           [a_height](function(row){ return row.size.height; })
@@ -139,10 +103,10 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           .lock(a_right,  null)
           .lock(a_bottom, null)
           .lockMark(a_left, function(clientScene){
-              var padding  = clientScene.vars.padding;
+              var itemPadding  = clientScene.vars.itemPadding;
               var prevItem = this.sibling();
               return prevItem ? 
-                      (prevItem[a_left] + prevItem[a_width] + padding[a_width]) : 
+                      (prevItem[a_left] + prevItem[a_width] + itemPadding[a_width]) : 
                       0;
           })
           .lockMark('height', function(itemScene){ return itemScene.vars.clientSize.height; })
@@ -252,7 +216,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                 font:       this.font,
                 markerSize: this.markerSize,
                 textMargin: this.textMargin, 
-                padding:    this.padding
+                itemPadding:    this.itemPadding
             });
             
             this._rootScene = rootScene;

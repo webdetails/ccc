@@ -750,7 +750,10 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     _initVisualRoles: function(){
         this._addVisualRoles({
-            multiChart: {defaultDimensionName: 'multiChart*'}
+            multiChart: {
+                defaultDimensionName: 'multiChart*', 
+                requireIsDiscrete: true
+            }
         });
 
         if(this._hasDataPartRole()){
@@ -1063,7 +1066,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                 align:        options.titleAlign,
                 alignTo:      options.titleAlignTo,
                 offset:       options.titleOffset,
-                inBounds:     options.titleInBounds,
+                keepInBounds:     options.titleKeepInBounds,
                 margins:      options.titleMargins,
                 paddings:     options.titlePaddings,
                 titleSize:    options.titleSize,
@@ -1088,7 +1091,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                 align:      colorAxis.option('Align'),
                 alignTo:    options.legendAlignTo,
                 offset:     options.legendOffset,
-                inBounds:   options.legendInBounds,
+                keepInBounds:   options.legendKeepInBounds,
                 size:       colorAxis.option('Size'),
                 sizeMax:    colorAxis.option('SizeMax'),
                 margins:    colorAxis.option('Margins'),
@@ -1100,11 +1103,9 @@ pvc.BaseChart = pvc.Abstract.extend({
                 minMarginX: options.legendMinMarginX, // V1 -> paddings
                 minMarginY: options.legendMinMarginY, // V1 -> paddings
                 textMargin: options.legendTextMargin,
-                padding:    options.legendPadding,
+                itemPadding:    options.legendItemPadding,
                 shape:      options.legendShape,
-                markerSize: options.legendMarkerSize,
-                drawLine:   options.legendDrawLine,
-                drawMarker: options.legendDrawMarker
+                markerSize: options.legendMarkerSize
             });
             
             this._initLegendScenes(this.legendPanel);
@@ -1590,17 +1591,18 @@ pvc.BaseChart = pvc.Abstract.extend({
 //      multiChartSingleColFillsHeight: undefined,
         
 //      smallWidth:       undefined,
-//      smallHeightMax:   undefined,
+//      smallHeight:      undefined,
 //      smallAspectRatio: undefined,
 //      smallMargins:     undefined,
 //      smallPaddings:    undefined,
+        
 //      smallContentMargins:  undefined,
 //      smallContentPaddings: undefined,
 //      smallTitlePosition: undefined,
 //      smallTitleAlign:    undefined,
 //      smallTitleAlignTo:  undefined,
 //      smallTitleOffset:   undefined,
-//      smallTitleInBounds: undefined,
+//      smallTitleKeepInBounds: undefined,
 //      smallTitleSize:     undefined,
 //      smallTitleSizeMax:  undefined,
 //      smallTitleMargins:  undefined,
@@ -1636,7 +1638,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         titleAlign:    "center", // left / right / center
 //        titleAlignTo:  undefined,
 //        titleOffset:   undefined,
-//        titleInBounds: undefined,
+//        titleKeepInBounds: undefined,
 //        titleSize:     undefined,
 //        titleSizeMax:  undefined,
 //        titleMargins:  undefined,
@@ -1651,17 +1653,18 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        legendAlign:      undefined,
 //        legendAlignTo:    undefined,
 //        legendOffset:     undefined,
-//        legendInBounds:   undefined,
+//        legendKeepInBounds:   undefined,
+//        legendMargins:    undefined,
+//        legendPaddings:   undefined,
+        
 //        legendMinMarginX: undefined,
 //        legendMinMarginY: undefined,
 //        legendTextMargin: undefined,
-//        legendPadding:    undefined, // ATTENTION: this is different from legendPaddings
+//        legendItemPadding:    undefined, // ATTENTION: this is different from legendPaddings
 //        legendShape:      undefined,
 //        legendDrawLine:   undefined,
 //        legendDrawMarker: undefined,
 //        legendMarkerSize: undefined,
-//        legendMargins:    undefined,
-//        legendPaddings:   undefined,
 //        legendClickMode:  undefined,
         
 //        colors: null,

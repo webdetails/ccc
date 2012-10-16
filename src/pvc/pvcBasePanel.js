@@ -713,7 +713,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 sideOPos += resolvedOffset[aofMap[sideo]] || 0;
             }
             
-            if(child.inBounds){
+            if(child.keepInBounds){
                 if(sidePos < 0){
                     sidePos = 0;
                 }

@@ -18,14 +18,14 @@ def
     this.base(parent, keyArgs);
     
     var markerDiam = def.get(keyArgs, 'markerSize', 15);
-    var padding    = new pvc.Sides(def.get(keyArgs, 'padding', 5))
+    var itemPadding    = new pvc.Sides(def.get(keyArgs, 'itemPadding', 5))
                         .resolve(markerDiam, markerDiam);
     def.set(this.vars,
         'horizontal', def.get(keyArgs, 'horizontal', false),
         'font',       def.get(keyArgs, 'font'),
         'markerSize', markerDiam, // Diameter of bullet/marker zone
         'textMargin', def.get(keyArgs, 'textMargin', 6),  // Space between marker and text 
-        'padding',    padding);
+        'itemPadding',    itemPadding);
 })
 .add(/** @lends pvc.visual.legend.BulletRootScene# */{
     layout: function(layoutInfo){
@@ -38,7 +38,7 @@ def
         // The size of the biggest cell
         var markerDiam = this.vars.markerSize;
         var textLeft   = markerDiam + this.vars.textMargin;
-        var padding    = this.vars.padding;
+        var itemPadding    = this.vars.itemPadding;
         
         // Names are for legend items when laid out in rows
         var a_width  = this.vars.horizontal ? 'width' : 'height';
@@ -108,7 +108,7 @@ def
             
             var newRowWidth = row.size.width + itemClientSize[a_width]; // or bottom
             if(!isFirstInRow){
-                newRowWidth += padding[a_width]; // separate from previous item
+                newRowWidth += itemPadding[a_width]; // separate from previous item
             }
             
             // If not the first column of a row and the item does not fit
@@ -137,7 +137,7 @@ def
             contentSize.height += rowSize.height;
             if(rows.length){
                 // Separate rows
-                contentSize.height += padding[a_height];
+                contentSize.height += itemPadding[a_height];
             }
             
             contentSize.width = Math.max(contentSize.width, rowSize.width);
