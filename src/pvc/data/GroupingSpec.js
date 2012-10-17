@@ -308,17 +308,18 @@ def.type('pvc.data.GroupingLevelSpec')
     },
     
     key: function(datum){
-        var keys  = [];
-        var atoms = [];
+        var keys   = [];
+        var atoms  = {};
         var datoms = datum.atoms;
-        var dims  = this.dimensionsInDefOrder;
+        var dims   = this.dimensionsInDefOrder;
         
         // This builds a key compatible with that of pvc.data.Complex#key
         //  as long as only the atoms of the dimensions here used become
         //  the only own atoms of the complex.
         for(var i = 0, D = this.depth ; i < D ; i++) {
-            var atom = datoms[dims[i].name];
-            atoms.push(atom);
+            var dimName = dims[i].name;
+            var atom = datoms[dimName];
+            atoms[dimName] = atom;
             if(atom.value != null){
                 keys.push(atom.globalKey);
             }

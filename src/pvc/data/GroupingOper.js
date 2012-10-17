@@ -193,7 +193,7 @@ add(/** @lends pvc.data.GroupingOper */{
             // Cannot be specParent
             specGroupParent = {
                 key:    '',
-                atoms:  [],
+                atoms:  {},
                 datums: [],
                 label:  groupSpec.flattenRootLabel
             };
@@ -290,17 +290,24 @@ add(/** @lends pvc.data.GroupingOper */{
                 if(!doFlatten){
                     groupParent.children.push(child);
                 } else {
+                    var childAtoms = child.atoms;
+                    
                     // Atoms must contain those of the groupParent
-                    child.atoms = groupParent.atoms.concat(child.atoms);
+                    def.copy(childAtoms, groupParent.atoms);
 
                     /* A key that does not include null atoms */
-                    key = def.query(child.atoms)
-                             .where (function(atom){ return atom.value != null; })
-                             .select(function(atom){ return atom.globalKey;   })
-                             .array()
-                             .join(',')
-                             ;
-
+                    key = '';
+                    for(var dimName in childAtoms){
+                        var atom = childAtoms[dimName];
+                        if(atom.value != null){
+                            if(key){
+                                key += ',' + atom.globalKey;
+                            } else {
+                                key = atom.globalKey;
+                            }
+                        }
+                    }
+                    
                     if(def.hasOwn(specParent.childrenByKey, key)){
                         // Duplicate key
                         // We need datums added to parent anyway

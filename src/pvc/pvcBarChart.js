@@ -21,36 +21,54 @@ pvc.BarChart = pvc.BarAbstract.extend({
     
         var options = this.options;
         
+        var trend = options.trendType;
+        if(trend === 'none'){
+            trend = null;
+        }
+        
         if(options.secondAxis){
             var axes = this.axes;
             var isStacked = !!options.stacked;
             var nullInterpolationMode = options.nullInterpolationMode;
             var valueRole = this.visualRoles('value');
-            
+            var orthoDataCells;
             if(options.secondAxisIndependentScale){
                 // Separate scales =>
-                // axis ortho 0 represents data part 0
+                // axis ortho 0 represents data part 0 + trend (if any)
                 // axis ortho 1 represents data part 1
-                axes.ortho 
-                    .bind({
-                        role: valueRole,
-                        dataPartValue: '0',
-                        isStacked: isStacked
-                    });
+                orthoDataCells = [{
+                    role: valueRole,
+                    dataPartValue: '0',
+                    isStacked: isStacked,
+                    trendType: trend
+                }];
                 
+                if(trend){
+                    // The scale must be big enough for the trend data
+                    orthoDataCells.push({
+                        role: valueRole,
+                        dataPartValue: 'trend'
+                    });
+                }
+                
+                axes.ortho.bind(orthoDataCells);
+                
+                // Regression is not applied to the lines 
                 axes.ortho2
                     .bind({
                         role: valueRole,
                         dataPartValue: '1',
                         nullInterpolationMode: nullInterpolationMode
                     });
+                
             } else {
                 // Common scale => 
                 // axis ortho 0 represents both data parts
-                var orthoDataCells = [{
+                orthoDataCells = [{
                         role: valueRole,
                         dataPartValue: '0',
-                        isStacked: isStacked
+                        isStacked: isStacked,
+                        trendType: trend
                     },
                     {
                         role: valueRole,
@@ -59,6 +77,14 @@ pvc.BarChart = pvc.BarAbstract.extend({
                     }
                 ];
                 
+                if(trend){
+                    // The scale must be big enough for the trend data
+                    orthoDataCells.push({
+                        role: valueRole,
+                        dataPartValue: 'trend'
+                    });
+                }
+                
                 axes.ortho.bind(orthoDataCells);
                 
                 // TODO: Is it really needed to setScale on ortho2???
@@ -66,28 +92,6 @@ pvc.BarChart = pvc.BarAbstract.extend({
                 // This is not used though, cause the scale
                 // will be that calculated by 'ortho'...
                 axes.ortho2.bind(orthoDataCells);
-            }
-            
-            // ------
-            
-            // TODO: should not this be the default color axes binding of BaseChart??
-            var colorRoleName = this.legendSource;
-            if(colorRoleName){
-                var colorRole;
-                
-                ['color', 'color2'].forEach(function(axisId){
-                    var colorAxis = this.axes[axisId];
-                    if(colorAxis && !colorAxis.isBound()){ // In multi-charts this would get bound twice, causing an error
-                        if(!colorRole){
-                            colorRole = this.visualRoles(colorRoleName);
-                        }
-                        
-                        colorAxis.bind({
-                            role: colorRole,
-                            dataPartValue: '' + colorAxis.index
-                        });
-                    }
-                }, this);
             }
         }
         
@@ -142,6 +146,26 @@ pvc.BarChart = pvc.BarAbstract.extend({
             barPanel.pvSecondDot  = linePanel.pvDot ;
             
             barPanel._linePanel = linePanel;
+        }
+        
+        var trend = options.trendType;
+        if(trend && trend !== 'none'){
+            if(pvc.debug >= 3){
+                pvc.log("Creating Trends LineDotArea panel.");
+            }
+            
+            var trendLinePanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
+                extensionPrefix: 'trend',
+                colorAxis:       this.axes.color2, // TODO TRENDS
+                dataPartValue:   'trend',
+                stacked:         false,
+                showValues:      options.trendShowValues,
+                valuesAnchor:    options.trendValuesAnchor,
+                showLines:       options.trendShowLines,
+                showDots:        options.trendShowDots,
+                showAreas:       options.trendShowAreas,
+                orientation:     options.orientation
+            }));
         }
         
         return barPanel;

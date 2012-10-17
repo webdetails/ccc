@@ -1546,17 +1546,6 @@ def.copyOwn(def.array, /** @lends def.array */{
         
         /* Item was not found but would be inserted at ~low */
         return ~low; // two's complement <=> -low - 1
-        
-        /*
-        case low == high (== mid)
-          if result > 0
-               [low <- mid + 1]  => (low > high)
-            insert at (new) low
-          
-          if result < 0
-               [high <- mid - 1] => (low > high)
-            insert at low
-       */
     },
 
     /**

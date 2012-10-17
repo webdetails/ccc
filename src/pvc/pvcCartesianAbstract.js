@@ -55,6 +55,43 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         if(this.options.secondAxis){
             this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 1));
         }
+        
+        /*  Create the trend color axis, at the root, if necessary */
+        if(!this.parent){
+            var colorRoleName = this.legendSource;
+            if(colorRoleName){
+                var options = this.options;
+                var trendType = options.trendType;
+                if(trendType && trendType !== 'none'){
+                    this._addAxis(new pvc.visual.ColorAxis(this, 'color', 2, {
+                        colorScheme: options.trendOwnColors ? 
+                                     pvc.createColorScheme(options.trendColors) : 
+                                     null
+                    }));
+                }
+            }
+        } else {
+            // Copy
+            var colorAxis = this.root.axes.color3;
+            if(colorAxis){
+                this.axes.color3 = colorAxis;
+            }
+        }
+    },
+    
+    _bindAxes: function(isMulti){
+        
+        this.base(isMulti);
+        
+        if(!this.parent){
+            var colorAxis = this.root.axes.color3;
+            if(colorAxis && !colorAxis.isBound()){
+                colorAxis.bind({
+                    role: this.visualRoles(/*colorRoleName*/ this.legendSource),
+                    dataPartValue: 'trend'
+                });
+            }
+        }
     },
     
     _addCartAxis: function(axis){
@@ -470,11 +507,11 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
         
         return this._serRole && this._serRole.grouping ?
-                   this._serRole.flatten(partData, {visible: true, isNull: ignoreNulls ? false : null}) :
-                   partData;
+               partData.flattenBy(this._serRole, {visible: true, isNull: ignoreNulls ? false : null}) :
+               partData;
     },
     
-    _assertSingleContinuousValueRole: function(valueRole){
+    _warnSingleContinuousValueRole: function(valueRole){
         if(!valueRole.grouping.isSingleDimension) {
             pvc.log("[WARNING] A linear scale can only be obtained for a single dimension role.");
         }
@@ -559,7 +596,7 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
     _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell){
         var valueRole = valueDataCell.role;
         
-        this._assertSingleContinuousValueRole(valueRole);
+        this._warnSingleContinuousValueRole(valueRole);
 
         if(valueRole.name === 'series') {
             /* not supported/implemented? */
@@ -607,6 +644,8 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         yAxisPosition: "left",
 
         secondAxisIndependentScale: false,
-        secondAxisColor: "blue"
+        secondAxisColor: "blue",
+        
+        trendType: 'none' // ['none'], 'linear', ...
     })
 });

@@ -40,6 +40,24 @@ function(dimTypeSpecs){
     this._dimsNames = [];
     
     /**
+     * A list of the calculations
+     * ordered by calculation order.
+     * 
+     * @type function[]
+     * @private
+     */
+    this._calculations = [];
+    
+    /**
+     * A set of the names of 
+     * dimension types being calculated.
+     * 
+     * @type map(string boolean)
+     * @private
+     */
+    this._calculatedDimNames = {};
+    
+    /**
      * An object with the dimension indexes by dimension name.
      * 
      * @type object
@@ -131,6 +149,19 @@ function(dimTypeSpecs){
      */
     dimensionsList: function(){
         return this._dimsList;
+    },
+    
+    /**
+     * Obtains an array with all the calculated dimension types,
+     * in order of evaluation.
+     * 
+     * <p>
+     * Do <b>NOT</b> modify the returned array. 
+     * </p>
+     * @type pvc.data.DimensionType[]
+     */
+    calculatedDimensionsList: function(){
+        return this._calcDimsList;
     },
     
     /**
@@ -230,9 +261,81 @@ function(dimTypeSpecs){
             def.array.insertAt(groupDims, ~level, dimension);
         }
         
+        // calculated
+        if(dimension._calculate){
+            var index = def.array.binarySearch(
+                        this._calcDimsList, 
+                        dimension._calculationOrder, 
+                        def.compare,
+                        function(dimType){ return dimType._calculationOrder; });
+            if(index >= 0){
+                // Add after
+                index++;
+            } else {
+                // Add at the two's complement of index
+                index = ~index;
+            }
+            
+            def.array.insertAt(this._calcDimsList, index, dimension);
+        }
+        
         this._isPctRoleDimTypeMap = null;
         
         return dimension;
+    },
+    
+    addCalculation: function(calcSpec, dimsOptions){
+        /*jshint expr:true */
+        calcSpec || def.fail.argumentRequired('calcSpec');
+        
+        var calculation = calcSpec.calculation ||
+                          def.fail.argumentRequired('calculations[i].calculation');
+        
+        var dimNames = calcSpec.names;
+        if(typeof dimNames === 'string'){
+            dimNames = dimNames.split(/\s*\,\s*/);
+        } else {
+            dimNames = def.array.as(dimNames);
+        }
+        
+        if(dimNames && dimNames.length){
+            var calcDimNames = this._calculatedDimNames;
+            
+            dimNames.forEach(function(name){
+                if(name){
+                    name = name.replace(/^\s*(.+?)\s*$/, "$1"); // trim
+                    
+                    !def.hasOwn(calcDimNames, name) || 
+                      def.fail.argumentInvalid('calculations[i].names', "Dimension name '{0}' is already being calculated.", [name]);
+                    
+                    // Dimension need to be created?
+                    var dimType = this._dims[name];
+                    if(!dimType){
+                        var dimSpec = pvc.data.DimensionType.extendSpec(name, null, dimsOptions);
+                        this.addDimension(name, dimSpec);
+                    }
+                    
+                    calcDimNames[name] = true;
+                    
+                    dimType._toCalculated();
+                }
+            }, this);
+        }
+        
+        this._calculations.push(calculation);
+    },
+    
+    _calculate: function(complex){
+        var calcs = this._calculations;
+        if(calcs.length){
+            var valuesByName = {}; 
+            
+            calcs.forEach(function(calc){
+                calc(complex, valuesByName);
+            });
+            
+            return valuesByName;
+        }
     },
     
     /**

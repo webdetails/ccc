@@ -87,7 +87,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             }
         
             if(InterpType){
-                this._assertSingleContinuousValueRole(dataCell.role);
+                this._warnSingleContinuousValueRole(dataCell.role);
                 
                 var visibleData = this._getVisibleData(dataCell.dataPartValue);
                 
@@ -162,7 +162,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                 return this.base(valueAxis, valueDataCell);
         }
         
-        this._assertSingleContinuousValueRole(valueRole);
+        this._warnSingleContinuousValueRole(valueRole);
         
         var dataPartValue = valueDataCell.dataPartValue;
         var valueDimName = valueRole.firstDimensionName();

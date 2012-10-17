@@ -30,7 +30,6 @@
  * @param {pvc.data.Data} data The data that owns this dimension.
  * @param {pvc.data.DimensionType} type The type of this dimension.
  */
-
 def.type('pvc.data.Dimension')
 .init(function(data, type){
     /* NOTE: this function is a hot spot and as such is performance critical */
@@ -678,7 +677,7 @@ def.type('pvc.data.Dimension')
      * <p>
      * An empty string value is considered equal to a null value. 
      * </P>
-     * @param {any} sourceValue The source value.
+     * @param {any | pvc.data.Atom} sourceValue The source value.
      * @param {boolean} [isInterpolated=false] Indicates that 
      * the (necessarily non-null) atom is the result of interpolation.
      * 
@@ -693,6 +692,14 @@ def.type('pvc.data.Dimension')
         // - NULL -
         if(sourceValue == null || sourceValue === '') {
             return this._nullAtom || dim_createNullAtom.call(this, sourceValue);
+        }
+        
+        if(sourceValue instanceof pvc.data.Atom){
+            if(sourceValue.dimension !== this){
+                throw def.error.operationInvalid("Atom is of a different dimension.");
+            }
+            
+            return sourceValue;
         }
         
         var value, label;

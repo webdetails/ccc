@@ -240,15 +240,18 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
 function relTransl_dataPartGet(secondAxisSeriesIndexes, seriesReader) {
     var me = this;
     
-    /* Create a reader that surely only returns 'series' atoms */
-    seriesReader = this._filterDimensionReader(seriesReader, 'series');
-    
     /* Defer calculation of axis2SeriesKeySet because *data* isn't yet available. */
     function calcAxis2SeriesKeySet() {
+        var atoms = {};
         var seriesKeys = def.query(me.source)
                                 .select(function(item){
-                                    var atom = seriesReader(item);
-                                    return (atom && atom.key) || null;
+                                    seriesReader(item, atoms);
+                                    var value = atoms.series;
+                                    if(value != null && value.v != null){
+                                        value = value.v;
+                                    }
+                                    
+                                    return value || null;
                                 })
                                 /* distinct excludes null keys */
                                 .distinct()

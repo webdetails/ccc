@@ -14,7 +14,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * of {@link pvc.data.TranslationOper#execute}.
      * </p>
      * 
-     * @param {def.Query} atomz An enumerable of {@link pvc.data.Atom[]}.
+     * @param {def.Query} atomz An enumerable of {@link map(string union(any || pvc.data.Atom))}.
      * @param {object} [keyArgs] Keyword arguments.
      * @param {function} [keyArgs.isNull] Predicate that indicates if a datum is considered null.
      * @param {function} [keyArgs.where] Filter function that approves or excludes each newly read new datum.
@@ -352,12 +352,12 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
             
             /* Create Null Datum */
             var sourceDatumFilter = whereSpec[0],
-                atoms = [];
+                atoms = {};
             
             for(var dimName in this._dimensions){
                 var dimAtoms = sourceDatumFilter[dimName];
                 if(dimAtoms) {
-                    atoms.push(dimAtoms[0]);
+                    atoms[dimName] = dimAtoms[0];
                 }
             }
             

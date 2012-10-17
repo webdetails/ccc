@@ -575,10 +575,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
         
         function createNullDatum(serData1, catData1) {
             // Create a null datum with col and row coordinate atoms
-            var atoms = def.array.append(
-                            def.own(serData1.atoms),
-                            def.own(catData1.atoms));
-
+            var atoms = def.copy(def.copy({}, serData1.atoms), catData1.atoms);
             return new pvc.data.Datum(data, atoms, true);
         }
     }

@@ -25,7 +25,7 @@ def.type('pvc.data.ComplexView', pvc.data.Complex)
 
     viewDimNames.forEach(function(dimName){
         if(def.hasOwnProp.call(sourceAtoms, dimName)){
-            ownSourceAtoms.push(sourceAtoms[dimName]);
+            ownSourceAtoms[dimName] = sourceAtoms[dimName];
         }
     });
 

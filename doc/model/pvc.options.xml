@@ -775,11 +775,6 @@ new pvc.BarChart(options)
         </c:property>
     
         <!-- Style -->
-        <!--
-            secondAxis: false,
-			secondAxisIndependentScale: false,
-        -->
-        
         <c:property name="secondAxis" type="boolean" default="false" category="Data">
             <c:documentation>
                 Indicates whether selected series should be plotted against 
@@ -800,13 +795,7 @@ new pvc.BarChart(options)
         
         <c:property name="secondAxisIdx" type="number string list(number|string)" category="Data">
             <c:documentation>
-                <c:deprecated>Use <c:link to="#secondAxisSeriesIndexes"/> instead.</c:deprecated>
-                The indexes of the series to show in the second axis.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="secondAxisSeriesIndexes" type="number string list(number|string)" default="-1" category="Data">
-            <c:documentation>
+                <c:deprecated>Use <c:link to="#secondAxisSeries"/> instead.</c:deprecated>
                 The zero-based indexes of the series, 
                 in <i>the order of appearance in the data source</i>, 
                 that are to be shown in the second axis, 
@@ -816,6 +805,21 @@ new pvc.BarChart(options)
                 So <tt>-1</tt> is the last series, 
                 <tt>-2</tt> is the next-to-last series, 
                 etc.
+                
+                This option is only relevant when the property
+                <c:link to="#secondAxis" /> has the value <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="secondAxisSeries" type="string list(string)" default="-1" category="Data">
+            <c:documentation>
+                The <i>key values</i> of the series visual role, 
+                that are to be shown in the second axis, 
+                on chart types that support it.
+                
+                If the series visual role has more than one dimension, 
+                the specified keys should be 
+                the result of joining the key of each dimension with a "~" character.
                 
                 This option is only relevant when the property
                 <c:link to="#secondAxis" /> has the value <tt>true</tt>.
@@ -1504,13 +1508,15 @@ new pvc.BarChart(options)
                 </dd>
                 <dt>specify both <tt>reader</tt> and <tt>names</tt></dt>
                 <dd>
-                    any specified indexes are reserved, 
+                    any specified indexes are reserved,
                     and no pairing is performed between these and the specified names;
                     the reader function may 
                     read any cell from the virtual item and 
                     return atoms from any of the dimensions specified in <tt>names</tt>;
                     atoms of stated dimensions, that are not returned, 
-                    result in a <i>null</i> value 
+                    result in a <i>null</i> value;
+                    this form allows, for example,
+                    splitting a value in the virtual item into two dimensions.
                 </dd>
             </dl>
         </c:documentation>
@@ -2513,7 +2519,7 @@ new pvc.BarChart(options)
     
     <c:functionType name="DimensionsReader" space="pvc.options.varia">
         <c:documentation>
-            A function reads atoms from a virtual item array.
+            A function that reads raw values from a virtual item array.
         </c:documentation>
         <c:argument name="this" type="pvc.data.Data" required="true">
             <c:documentation>
@@ -2525,21 +2531,17 @@ new pvc.BarChart(options)
                 The virtual item array.
             </c:documentation>
         </c:argument>
-        <c:argument name="dimension..." type="pvc.data.Dimension" required="true">
+        <c:argument name="outAtoms" type="object" required="true">
             <c:documentation>
-                The data dimensions,
-                corresponding to the dimension names specified in the 
-                dimensions reader options, 
-                in which read values are to be interned.
+                An object that should be filled with read raw values, 
+                each placed in a property with the name
+                of the corresponding dimension.
+                
+                It is also possible that the values be the atoms themselves, 
+                a technique that can be used to achieve greater performance,
+                when a dimension only has two or three possible values. 
             </c:documentation>
         </c:argument>
-        <c:returns type="pvc.data.Atom list(pvc.data.Atom)">
-            <c:documentation>
-                An atom or array of atoms read from the virtual item, 
-                or <tt>null</tt> or <tt>undefined</tt>, 
-                if nothing was read. 
-            </c:documentation>
-        </c:returns>
     </c:functionType> 
     
     <c:functionType name="NumberFormatter" space="pvc.options.varia">

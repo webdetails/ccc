@@ -293,6 +293,8 @@ function(complexType, name, keyArgs){
 })
 .add(/** @lends pvc.data.DimensionType# */{
     
+    isCalculated: false,
+    
     /**
      * Compares two values of the dimension's {@link #valueType}, in ascending order.
      * <p>
@@ -368,6 +370,10 @@ function(complexType, name, keyArgs){
     // Coercion to discrete upon the role binding (irreversible...)
     _toDiscrete: function(){
         this.isDiscrete = true;
+    },
+    
+    _toCalculated: function(){
+        this.isCalculated = true;
     },
     
     _createReverseAtomComparer: function(){

@@ -79,16 +79,6 @@
             <field xpath="@name" />
         </key>
         
-        <key name="atom_unique_name">
-            <selector xpath="com:atomType" />
-            <field xpath="com:atom/@name" />
-        </key>
-        
-        <key name="atom_unique_value">
-            <selector xpath="com:atomType" />
-            <field xpath="com:atom/@value" />
-        </key>
-        
         <key name="funType_unique_name">
             <selector xpath="com:functionType" />
             <field xpath="@name" />
@@ -153,7 +143,16 @@
             <choice minOccurs="0" maxOccurs="unbounded">
                 <element name="space" type="com:SpaceType" />
 	            <element name="complexType" type="com:ComplexTypeType" />
-	            <element name="atomType" type="com:AtomTypeType" />
+	            <element name="atomType" type="com:AtomTypeType">
+	                <key name="atom_unique_name">
+			            <selector xpath="com:atom" />
+			            <field xpath="@name" />
+			        </key>
+			        <key name="atom_unique_value">
+			            <selector xpath="com:atom" />
+			            <field xpath="@value" />
+			        </key>
+	            </element>
 	            <element name="functionType" type="com:FunctionTypeType" />
 	       </choice>
        </sequence>

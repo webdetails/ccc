@@ -51,9 +51,9 @@
  * 
  * @constructor
  * @param {object} keyArgs Keyword arguments
- * @param {pvc.data.Data}   [keyArgs.parent]     The parent data.
- * @param {pvc.data.Data}   [keyArgs.linkParent] The link parent data.
- * @param {pvc.data.Atom[]} [keyArgs.atoms]      The atoms shared by contained datums.
+ * @param {pvc.data.Data}   [keyArgs.parent]      The parent data.
+ * @param {pvc.data.Data}   [keyArgs.linkParent]  The link parent data.
+ * @param {map(string union(any pvc.data.Atom))} [keyArgs.atoms] The atoms shared by contained datums.
  * @param {pvc.data.Datum[]|def.Query} [keyArgs.datums] The contained datums array or enumerable.
  * @param {pvc.data.Data}    [keyArgs.owner] The owner data.
  * The topmost root data is its own owner.

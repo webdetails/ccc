@@ -98,28 +98,6 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
                 // will be that calculated by 'ortho'...
                 axes.ortho2.bind(orthoDataCells);
             }
-            
-            // ------
-            
-            // TODO: should not this be the default color axes binding of BaseChart??
-            var colorRoleName = this.legendSource;
-            if(colorRoleName){
-                var colorRole;
-                
-                ['color', 'color2'].forEach(function(axisId){
-                    var colorAxis = this.axes[axisId];
-                    if(colorAxis){
-                        if(!colorRole){
-                            colorRole = this.visualRoles(colorRoleName);
-                        }
-                        
-                        colorAxis.bind({
-                            role: colorRole,
-                            dataPartValue: '' + colorAxis.index
-                        });
-                    }
-                }, this);
-            }
         }
         
         this.base(hasMultiRole);

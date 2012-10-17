@@ -446,14 +446,31 @@ pvc.BaseChart = pvc.Abstract.extend({
             var colorRoleName = this.legendSource;
             if(colorRoleName){
                 // Create the color (legend) axis at the root chart
+                var options = this.options;
                 
-                colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 0));
+                colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 0, {
+                    colorScheme: pvc.createColorScheme(options.colors)
+                }));
+                
                 this.colors = colorAxis.colorsFactory;
                 
-                if(this.options.secondAxis){
-                    colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 1));
+                var colorsFactory;
+                if(options.secondAxis){
+                    var useOwnColors = options.secondAxisOwnColors;
+                    if(useOwnColors == null){
+                        useOwnColors = this.compatVersion() <= 1;
+                    }
                     
-                    if(this.options.secondAxisOwnColors){
+                    if(useOwnColors){
+                        /* if secondAxisColor is unspecified, assumes default color scheme. */
+                        colorsFactory = pvc.createColorScheme(options.secondAxisColor);
+                    }
+                    
+                    colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 1, {
+                        colorScheme: colorsFactory
+                    }));
+                    
+                    if(options.secondAxisOwnColors){
                         this.secondAxisColor = colorAxis.colorsFactory;
                     }
                 }
@@ -473,6 +490,11 @@ pvc.BaseChart = pvc.Abstract.extend({
                 this.axes.color2 = colorAxis;
                 this.secondAxisColor = root.secondAxisColor;
             }
+            
+            colorAxis = root.axes.color3;
+            if(colorAxis){
+                this.axes.color3 = colorAxis;
+            }
         }
     },
     
@@ -480,16 +502,20 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(!this.parent){
             var colorRoleName = this.legendSource;
             if(colorRoleName){
-                var colorDataCells;
+                var colorRole;
+                var hasSecondAxis = this.options.secondAxis;
                 
                 ['color', 'color2'].forEach(function(axisId){
                     var colorAxis = this.axes[axisId];
                     if(colorAxis && !colorAxis.isBound()){
-                        if(!colorDataCells){
-                            colorDataCells = this._buildRolesDataCells(colorRoleName);
+                        if(!colorRole){
+                            colorRole = this.visualRoles(colorRoleName);
                         }
                         
-                        colorAxis.bind(colorDataCells);
+                        colorAxis.bind({
+                            role: colorRole,
+                            dataPartValue: hasSecondAxis ? ('' + colorAxis.index) : null
+                        });
                     }
                 }, this);
             }
@@ -607,10 +633,31 @@ pvc.BaseChart = pvc.Abstract.extend({
         var data = this.data,
             complexType   = data ? data.type : new pvc.data.ComplexType(),
             translOptions = this._createTranslationOptions(),
-            translation   = this._createTranslation(complexType, translOptions);
+            translation   = this._createTranslation(complexType, translOptions),
+            axis2Series;
 
-        translation.configureType();
-
+        if(!data){
+            // Currently translOptions has what is needed to
+            // pass to pvc.data.DimensionType.extendSpec...
+            var calcSpecs = this.options.calculations;
+            if(calcSpecs){
+                calcSpecs.forEach(function(calcSpec){
+                    complexType.addCalculation(calcSpec, translOptions);
+                });
+            }
+            
+            axis2Series = this.options.secondAxisSeries;
+            if(axis2Series){
+                // Register the dimension
+                // Prevents readers from reading into it
+                // Allows the role to bind to it, below
+                complexType.addDimension('dataPart');
+            }
+            
+            // Now the translation can configure the type as well
+            translation.configureType();
+        }
+        
         if(pvc.debug >= 3){
             pvc.log(complexType.describe());
         }
@@ -627,6 +674,10 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._logVisualRoles();
         }
 
+        if(axis2Series){
+            this._addAxis2SeriesCalculation(complexType, axis2Series);
+        }
+        
         // ----------
 
         if(!data) {
@@ -651,7 +702,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 //    _onNewDimensionType: function(dimName, dimSpec){
 //        return dimSpec;
 //    },
-
+    
     _getLoadFilter: function(){
         if(this.options.ignoreNulls) {
             return function(datum){
@@ -683,7 +734,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             };
         }
     },
-
+    
     _createTranslation: function(complexType, translOptions){
         
         var TranslationClass = translOptions.crosstabMode ? 
@@ -697,14 +748,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         var options = this.options,
             dataOptions = options.dataOptions || {};
 
-        var secondAxisSeriesIndexes;
-        if(options.secondAxis){
-            secondAxisSeriesIndexes = options.secondAxisSeriesIndexes;
-            if(secondAxisSeriesIndexes === undefined){
-                secondAxisSeriesIndexes = options.secondAxisIdx;
-            }
-        }
-
         var valueFormat = options.valueFormat,
             valueFormatter;
         if(valueFormat && valueFormat !== this.defaults.valueFormat){
@@ -716,7 +759,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         return {
             //onNewDimensionType: this._onNewDimensionType.bind(this),
             compatVersion:     this.compatVersion(),
-            secondAxisSeriesIndexes: secondAxisSeriesIndexes,
+            secondAxisSeriesIndexes: options.secondAxisSeries ? null : options.secondAxisIdx,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
@@ -743,7 +786,34 @@ pvc.BaseChart = pvc.Abstract.extend({
             valueNumberFormatter: valueFormatter
         };
     },
-
+    
+    _addAxis2SeriesCalculation: function(complexType, axis2Series){
+        var serRole = this._serRole;
+        if(serRole && serRole.isBound()){
+            
+            var axis2SeriesSet = def.query(axis2Series).uniqueIndex();
+            var dimNames = serRole.grouping.dimensionNames();
+            var dataPartDim, part1Atom, part2Atom;
+            
+            complexType.addCalculation({
+                names: 'dataPart',
+                
+                calculation: function(datum, atoms){
+                    if(!dataPartDim){
+                        dataPartDim = datum.owner.dimensions('dataPart');
+                    }
+                    
+                    var seriesKey = pvc.data.Complex.values(datum, dimNames).join(',');
+                    
+                    atoms.dataPart = 
+                        def.hasOwnProp.call(axis2SeriesSet, seriesKey) ?
+                           (part2Atom || (part2Atom = dataPartDim.intern("1"))) :
+                           (part1Atom || (part1Atom = dataPartDim.intern("0")));
+                }
+            });
+        }
+    },
+    
     /**
      * Initializes each chart's specific roles.
      * @virtual
@@ -1015,25 +1085,35 @@ pvc.BaseChart = pvc.Abstract.extend({
         return !!this._visualRoles[roleName].grouping;
     },
     
-    partData: function(dataPartValue){
+    partData: function(dataPartValues){
         if(!this._partData){
             if(!this._dataPartRole || !this._dataPartRole.grouping){
                 /* Undefined or unbound */
-                this._partData = this.data;
-            } else {
-                // Visible and not
-                this._partData = this._dataPartRole.flatten(this.data);
+                return this._partData = this.data;
             }
+            
+            // Visible and not
+            this._partData = this.data.flattenBy(this._dataPartRole);
         }
         
-        if(!dataPartValue){
+        if(!dataPartValues || !this._dataPartRole || !this._dataPartRole.grouping){
             return this._partData;
         }
-
+        
         var dataPartDimName = this._dataPartRole.firstDimensionName();
-
+        
+        if(def.array.is(dataPartValues)){
+            if(dataPartValues.length > 1){
+                return this._partData.where([
+                             def.set({}, dataPartDimName, dataPartValues)
+                         ]);
+            }
+            
+            dataPartValues = dataPartValues[0];
+        }
+        
         // TODO: should, at least, call some static method of Atom to build a global key
-        return this._partData._childrenByKey[dataPartDimName + ':' + dataPartValue] || 
+        return this._partData._childrenByKey[dataPartDimName + ':' + dataPartValues] ||
                new pvc.data.Data({linkParent: this._partData, datums: []}); // don't blow code ahead...
     },
 
@@ -1100,8 +1180,6 @@ pvc.BaseChart = pvc.Abstract.extend({
                 scenes:     def.getPath(options, 'legend.scenes'),
                 
                 // Bullet legend
-                minMarginX: options.legendMinMarginX, // V1 -> paddings
-                minMarginY: options.legendMinMarginY, // V1 -> paddings
                 textMargin: options.legendTextMargin,
                 itemPadding:    options.legendItemPadding,
                 shape:      options.legendShape,
@@ -1616,6 +1694,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        visualRoles:       undefined,
 //        dimensions:        undefined,
 //        dimensionGroups:   undefined,
+//        calculations:      undefined,
 //        readers:           undefined,
         
         ignoreNulls:       true, // whether to ignore or keep "null"-measure datums upon loading
@@ -1657,8 +1736,6 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        legendMargins:    undefined,
 //        legendPaddings:   undefined,
         
-//        legendMinMarginX: undefined,
-//        legendMinMarginY: undefined,
 //        legendTextMargin: undefined,
 //        legendItemPadding:    undefined, // ATTENTION: this is different from legendPaddings
 //        legendShape:      undefined,
@@ -1670,8 +1747,8 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        colors: null,
 
         secondAxis: false,
-        secondAxisIdx: -1,
-//        secondAxisSeriesIndexes: undefined,
+        secondAxisIdx: -1, // deprecated
+//      secondAxisSeries: undefined,
 //        secondAxisColor: undefined,
 //        secondAxisOwnColors: undefined, // false
 

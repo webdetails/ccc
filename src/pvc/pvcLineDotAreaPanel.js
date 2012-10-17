@@ -31,15 +31,6 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     valuesAnchor: "right",
     valueRoleName: null,
     
-    constructor: function(chart, parent, options){
-        
-        this.base(chart, parent, options);
-
-        // Cache
-        options = this.chart.options;
-        this.stacked = options.stacked;
-    },
-    
     _creating: function(){
         // Register BULLET legend prototype marks
         var groupScene = this.defaultVisibleBulletGroupScene();
@@ -830,11 +821,9 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         function createNullDatum(serData1, catData1) {
             // Create a null datum with col and row coordinate atoms
             var atoms = serData1 && catData1 ?
-                            def.array.append(
-                                def.own(serData1.atoms),
-                                def.own(catData1.atoms)) :
-                            (serData1 ? def.own(serData1.atoms) :  def.own(catData1.atoms))
-                            ;
+                        def.copy(def.copy({}, serData1.atoms), catData1.atoms) :
+                        (serData1 ? serData1.atoms :  catData1.atoms)
+                        ;
             
             return new pvc.data.Datum(data, atoms, true);
         }

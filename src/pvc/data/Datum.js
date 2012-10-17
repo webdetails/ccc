@@ -23,14 +23,14 @@
  * Note that the datum will belong instead to the owner of this data. 
  * However the datums atoms will inherit from the atoms of the specified data.
  * This is essentially to facilitate the creation of null datums.
- * @param {pvc.data.Atom[]} [atoms] An array of atoms of <i>distinct</i> dimensions.
+ * @param {map(string any)} [atomsByName] A map of atoms or raw values by dimension name.
  * @param {boolean} [isNull=false] Indicates if the datum is a null datum.
  */
 def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
-function(data, atoms, isNull){
+function(data, atomsByName, isNull){
     
-    this.base(data, atoms);
+    this.base(data, atomsByName, /*atomsBase*/ null, /*wantLabel*/ false, /*calculate*/!isNull);
     
     if(isNull) {
         this.isNull = true;

@@ -186,7 +186,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
     
     /**
      * Performs the translation operation (override).
-     * @returns {def.Query} An enumerable of {@link pvc.data.Atom[]}
+     * @returns {def.Query} An enumerable of {@link map(string any)}
      * @override
      */
     _executeCore: function(){
@@ -243,7 +243,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                     // Dimensions that consume rows and/or columns may be evaluated many times.
                     // So, it's very important that pvc.data.Dimension#intern is as fast as possible
                     //  detecting already interned values.
-                    return this._readItem(null, item, dimsReaders);
+                    return this._readItem(item, dimsReaders);
                 }, this);
         }
         
@@ -630,10 +630,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 var calcAxis2SeriesKeySet = def.fun.constant(this._axis2SeriesKeySet);
-
-                /* Create a reader that surely only returns 'series' atoms */
-                seriesReader = this._filterDimensionReader(seriesReader, 'series');
-
                 this._userDimsReaders.push(
                         this._dataPartGet(calcAxis2SeriesKeySet, seriesReader));
             }

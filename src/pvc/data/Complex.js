@@ -29,8 +29,8 @@ var complex_nextId = 1;
  * @param {pvc.data.Complex} [source] 
  *        A complex that provides for an owner and default base atoms.
  * 
- * @param {pvc.data.Atom[]} [atoms]
- *        An array of atoms of distinct dimensions.
+ * @param {map(string any)} [atomsByName] 
+ *        A map of atoms or raw values by dimension name.
  *        
  * @param {object} [atomsBase] 
  *        An object to serve as prototype to the {@link #atoms} object.
@@ -46,7 +46,7 @@ var complex_nextId = 1;
  */
 def
 .type('pvc.data.Complex')
-.init(function(source, atoms, atomsBase, wantLabel) {
+.init(function(source, atomsByName, atomsBase, wantLabel, calculate) {
     /*jshint expr:true */
     
     /* NOTE: this function is a hot spot and as such is performance critical */
@@ -64,7 +64,7 @@ def
     this.owner = owner || this;
     this.atoms = atomsBase ? Object.create(atomsBase) : {};
 	
-    if (!atoms) {
+    if (!atomsByName) {
         this.value = null;
         this.key   = '';
         if(wantLabel){
@@ -77,33 +77,44 @@ def
         
         /* Fill the atoms map */
         var atomsMap = this.atoms;
-        var atom;
+        var atom, dimName, dimension, singleAtom, value;
         var count = 0;
-        var singleAtom;
-        var i;
-        var L = atoms.length;
-        for(i = 0 ; i < L ; i++){
-            atom  = atoms[i] || def.fail.argumentRequired('atom');
-            var value = atom.value; 
+        var ownerDims = owner._dimensions;
+        
+        for(dimName in atomsByName){
+            value = atomsByName[dimName];
             if(value != null){ // nulls are already in base proto object
-                var name = atom.dimension.name;
-                if(!atomsBase || atom !== atomsBase[name]) { // don't add atoms already in base proto object
-                    // <Debug>
-                    if(asserts){
-                        if(atom.dimension !== owner.dimensions(name)){
-                            throw def.error.operationInvalid("Invalid atom dimension '{0}'.", [name]);
-                        }
-    
-                        if(def.hasOwnProp.call(atomsMap, name)) {
-                            throw def.error.operationInvalid("An atom of the same dimension has already been added '{0}'.", [name]);
-                        }
-                    }
-                    // </Debug>
-                    
-                    count++;
-                    atomsMap[name] = atom;
-                    if(count === 1){
+                dimension = def.getOwn(ownerDims, dimName);
+                atom = dimension.intern(value);
+                
+                if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
+                    if(!count){
                         singleAtom = atom;
+                    }
+                    count++;
+                    atomsMap[dimName] = atom;
+                }
+            }
+        }
+        
+        if(calculate){
+            var newAtomsByName = owner.type._calculate(this);
+            if(newAtomsByName){
+                for(dimName in newAtomsByName){
+                    if(!def.hasOwnProp.call(atomsMap[dimName])){
+                        
+                        value = newAtomsByName[dimName];
+                        if(value != null){ // nulls are already in base proto object
+                            dimension = def.getOwn(ownerDims, dimName);
+                            atom = dimension.intern(value);
+                            if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
+                                if(!count){
+                                    singleAtom = atom;
+                                }
+                                count++;
+                                atomsMap[dimName] = atom;
+                            }
+                        }
                     }
                 }
             }
@@ -125,9 +136,9 @@ def
             var key = '', label = '';
             var labelSep = owner.labelSep;
             
-            L = dimNames.length;
-            for(i = 0 ; i < L ; i++){
-                var dimName = dimNames[i];
+            var L = dimNames.length;
+            for(var i = 0 ; i < L ; i++){
+                dimName = dimNames[i];
                 if(def.hasOwnProp.call(atomsMap, dimName)){
                     atom = atomsMap[dimName];
                     if(key){

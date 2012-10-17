@@ -115,9 +115,10 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         var dataPartDimension,
             axis2SeriesKeySet,
             part1Atom,
-            part2Atom;
+            part2Atom,
+            outAtomsSeries = {};
 
-        function dataPartGet(item) {
+        function dataPartGet(item, outAtoms) {
             /*
              * First time initialization.
              * Done here because *data* isn't available before.
@@ -132,12 +133,20 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 }
             }
 
-            var seriesAtom = seriesReader(item);
-            if(def.hasOwn(axis2SeriesKeySet, seriesAtom.key)){
-                return part2Atom || (part2Atom = dataPartDimension.intern("1"));
+            var partAtom;
+            seriesReader(item, outAtomsSeries);
+            var series = outAtomsSeries.series;
+            if(series != null && series.v != null){
+                series = series.v;
             }
             
-            return part1Atom || (part1Atom = dataPartDimension.intern("0"));
+            if(def.hasOwn(axis2SeriesKeySet, series)){
+                partAtom = part2Atom || (part2Atom = dataPartDimension.intern("1"));
+            } else {
+                partAtom = part1Atom || (part1Atom = dataPartDimension.intern("0"));
+            }
+            
+            outAtoms.dataPart = partAtom;
         }
 
         return dataPartGet;

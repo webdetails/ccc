@@ -100,11 +100,11 @@ def.type('pvc.data.TranslationOper')
         if(!reader) {
             if(hasDims){
                 this._userCreateReaders(dimNames, indexes);
-            } // else a reader that only serves to exlude indexes
+            } // else a reader that only serves to exclude indexes
         } else {
             hasDims || def.fail.argumentRequired('reader.names', "Required argument when a reader function is specified.");
             
-            this._userRead(this._wrapReader(reader, dimNames), dimNames);
+            this._userRead(reader, dimNames);
         }
     },
 
@@ -193,7 +193,7 @@ def.type('pvc.data.TranslationOper')
         var I = indexes.length,
             N = dimNames.length,
             dimName;
-
+        
         if(N > I) {
             // Pad indexes
             var nextIndex = I > 0 ? (indexes[I - 1] + 1) : 0;
@@ -254,28 +254,6 @@ def.type('pvc.data.TranslationOper')
         this._userDimsReaders.push(reader);
     },
 
-    //  TODO: docs
-    _wrapReader: function(reader, dimNames){
-        var me = this,
-            dimensions,
-            data;
-        
-        function createDimensions() {
-            data = me.data;
-            dimensions = dimNames.map(function(dimName){ return data.dimensions(dimName); });
-            dimensions.unshift(null); // item argument
-            return dimensions;
-        }
-        
-        function read(item) {
-            (dimensions || createDimensions())[0] = item;
-            
-            return reader.apply(data, dimensions);
-        }
-        
-        return read;
-    },
-    
     /**
      * Builds a dimensions reader that 
      * filters the atoms returned by a given dimensions reader
@@ -356,7 +334,7 @@ def.type('pvc.data.TranslationOper')
         
         return def.query(this._getItems())
                   .select(function(item){
-                      return this._readItem(null, item, dimsReaders);
+                      return this._readItem(item, dimsReaders);
                   }, this);
     },
     
@@ -402,15 +380,12 @@ def.type('pvc.data.TranslationOper')
      * Applies all the specified dimensions reader functions to an item 
      * and sets the resulting atoms in a specified array (virtual).
      * 
-     * @param {Array} [atoms] An array where to add resulting atoms.
      * @param {any} item The item to read.
      * @param {function[]} dimsReaders An array of dimensions reader functions.
-     * @returns {pvc.data.Atom[]} The specified atoms array or a new one if one was not specified.
+     * @returns {map(string any)} A map of read raw values by dimension name.
      * @virtual
      */
-    _readItem: function(atoms, item, dimsReaders) {
-        atoms = atoms || [];
-        
+    _readItem: function(item, dimsReaders) {
         // This function is performance critical and so does not use forEach
         // or array helpers, avoiding function calls, closures, etc.
         
@@ -421,48 +396,23 @@ def.type('pvc.data.TranslationOper')
         var r = 0, 
             R = dimsReaders.length, 
             a = 0,
-            data = this.data;
+            data = this.data,
+            valuesByDimName = {};
         
         while(r < R) {
-            
-            var result = dimsReaders[r++].call(data, item);
-            if(result != null){
-                if(result instanceof Array) {
-                    var j = 0, J = result.length;
-                    while(j < J) {
-                        if(result.value != null) { // no null atoms
-                            atoms[a++] = result[j];
-                        }
-
-                        j++;
-                    }
-
-                } else if(result.value != null){
-                    atoms[a++] = result;
-                }
-            }
+            dimsReaders[r++].call(data, item, valuesByDimName);
         }
-        
-        atoms.length = a;
         
         if(pvc.debug >= 4) {
-            var atomsMap = def.query(atoms).object({
-                name:  function(atom){ return atom.dimension.name; },
-                value: function(atom){ 
-                    return { id: atom.id, v: atom.value, f: atom.label };
-                }
-            });
-            
-            pvc.log('  -> atoms: ' + JSON.stringify(atomsMap));
+            pvc.log('  -> read: ' + JSON.stringify(valuesByDimName));
         }
         
-        return atoms;
+        return valuesByDimName;
     },
     
     /**
      * Given a dimension name and a property name,
-     * creates a dimensions reader that obtains that property from a given source item 
-     * and returns the corresponding atom (protected).
+     * creates a corresponding dimensions reader (protected).
      * 
      * @param {string} dimName The name of the dimension on which to intern read values.
      * @param {string} prop The property name to read from each item.
@@ -472,16 +422,14 @@ def.type('pvc.data.TranslationOper')
      * @type function
      */
     _propGet: function(dimName, prop, keyArgs) {
-        var me = this,
-            dimension;
+        var me = this;
         
         if(def.get(keyArgs, 'ensureDim', true)) {
             this.ensureDimensionType(dimName);
         }
         
-        function propGet(item) {
-            return (dimension || (dimension = me.data.dimensions(dimName)))
-                   .intern(item[prop]);
+        function propGet(item, atoms){
+            atoms[dimName] = item[prop];
         }
         
         return propGet;
@@ -508,9 +456,10 @@ def.type('pvc.data.TranslationOper')
             this.ensureDimensionType(dimName);
         }
         
-        function constGet(/* item */) {
-            return constAtom || 
-                   (constAtom = me.data.dimensions(dimName).intern(constRawValue));
+        function constGet(item, atoms) {
+            atoms[dimName] = 
+                    constAtom || 
+                    (constAtom = me.data.dimensions(dimName).intern(constRawValue));
         }
 
         return constGet;

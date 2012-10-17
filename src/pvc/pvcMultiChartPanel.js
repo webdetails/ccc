@@ -172,14 +172,12 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         var initialClientWidth  = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
         var initialClientHeight = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
         
-        var smallHeight    = pvc.PercentValue.parse(options.smallHeight);
-        //var smallHeightMax = pvc.PercentValue.parse(options.smallHeightMax);
-        var smallWidth     = pvc.PercentValue.parse(options.smallWidth );
-        
+        var smallWidth  = pvc.PercentValue.parse(options.smallWidth);
         if(smallWidth != null){
             smallWidth = pvc.PercentValue.resolve(smallWidth, initialClientWidth);
         }
         
+        var smallHeight = pvc.PercentValue.parse(options.smallHeight);
         if(smallHeight != null){
             smallHeight = pvc.PercentValue.resolve(smallHeight, initialClientHeight);
         }
@@ -191,8 +189,8 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         
         if(smallWidth == null){
             if(isFinite(multiChartColumnsMax)){
-                // Distribute initially available client width by the effective max columns.
-                smallWidth = initialClientWidth / colCount;
+                // Distribute currently available client width by the effective max columns.
+                smallWidth = clientSize.width / colCount;
             } else {
                 // Single Row
                 // Chart grows in width as needed
