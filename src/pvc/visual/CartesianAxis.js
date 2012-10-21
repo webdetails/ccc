@@ -52,11 +52,7 @@ def.scope(function(){
         this.orientedId  = $VCA.getOrientedId(this.orientation, this.index);
         this.v1OptionId  = $VCA.getV1OptionId(this.orientation, this.index);
     
-        if(this.index !== 1) {
-            this.isVisible = options['show' + def.firstUpperCase(this.orientedId) + 'Scale'];
-        } else {
-            this.isVisible = !!options.secondAxisIndependentScale; // options.secondAxis is already true or wouldn't be here
-        }
+        this.isVisible = !!options['show' + def.firstUpperCase(this.v1OptionId) + 'Scale'];
     })
     .add(/** @lends pvc.visual.CartesianAxis# */{
         

@@ -159,12 +159,13 @@ def
 //        }
         
         // Value atom
-        var valueAtom = interpolation._valDim.intern(value, /* isInterpolated */ true);
+        var valueAtom = interpolation._valDim.intern(value, /* isVirtual */ true);
         atoms[valueAtom.dimension.name] = valueAtom;
         
         // Create datum with an array of the collected atoms
         var newDatum = new pvc.data.Datum(group.owner, atoms);
         
+        newDatum.isVirtual = true;
         newDatum.isInterpolated = true;
         newDatum.interpolation = 'linear';
         

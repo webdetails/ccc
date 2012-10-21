@@ -8,26 +8,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
 
     constructor: function(options){
 
-        var isV1Compat = this.compatVersion(options) <= 1;
-        
-        if(isV1Compat && (!options || !options.timeSeries)){
-            /**
-             * If the 'x' role isn't explicitly defined (in any way),
-             * help with defaults and keep backward compatibility by
-             * making the 'x' role's default dimension - the 'category' dimension -
-             * a numeric one.
-             */
-            if(!options){ options = {}; }
-            if(!options.visualRoles || !options.visualRoles.x){
-                var dims   = options.dimensions || (options.dimensions = {}),
-                    catDim = dims.category || (dims.category = {});
-
-                if(catDim.valueType === undefined){
-                    catDim.valueType = Number;
-                }
-            }
-        }
-
         this.base(options);
 
         var parent = this.parent;
@@ -54,22 +34,20 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
 
         this.base();
 
-        var isV1Compat = (this.compatVersion() <= 1);
-
         this._addVisualRoles({
             x: {
                 isMeasure: true,
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                defaultDimensionName: isV1Compat ? 'category' : 'value'
+                defaultDimensionName: 'x'
             },
             y: {
                 isMeasure: true,
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                defaultDimensionName: isV1Compat ? 'value' : 'value2'
+                defaultDimensionName: 'y'
             }
         });
 

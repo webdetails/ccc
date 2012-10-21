@@ -1869,6 +1869,28 @@ pv.dict = function(keys, f) {
   }
   return m;
 };
+
+/** @private */
+pv.hasOwnProp = Object.prototype.hasOwnProperty;
+
+/**
+ * Copies own properties of <tt>b</tt> into <tt>a</tt>.
+ *
+ * @param {object} a the target object.
+ * @param {object} [b] the source object.
+ * @returns {object} the target object.
+ */
+pv.copyOwn = function(a, b){
+  if(b){
+    var hop = pv.hasOwnProp;
+      for(var p in b){
+        if(hop.call(b, p)){
+          a[p] = b[p];
+        }
+    }
+  }
+  return a;
+};
 /**
  * Returns a {@link pv.Dom} operator for the given map. This is a convenience
  * factory method, equivalent to <tt>new pv.Dom(map)</tt>. To apply the operator
@@ -3250,6 +3272,33 @@ pv.Scale.interpolator = function(start, end) {
  * @param {function} f an accessor function.
  * @returns {pv.Scale} a view of this scale by the specified accessor function.
  */
+
+pv.Scale.common = {
+    by: function(f) {
+      var scale = this;
+      function by() { return scale(f.apply(scale, arguments)); }
+      for (var method in scale) by[method] = scale[method];
+      return by;
+    },
+      
+    by1: function(f) {
+      var scale = this;
+      function by1(x) { return scale(f.call(scale, x)); }
+      for (var method in scale) by1[method] = scale[method];
+      return by1;
+    },
+    
+    transform: function(t){
+      var scale = this;
+      function transfScale(){ 
+        return t.call(scale, scale.apply(scale, arguments)); 
+      }
+        
+      for (var method in scale) transfScale[method] = scale[method];
+        
+      return transfScale;
+    }
+};
 /**
  * Returns a default quantitative, linear, scale for the specified domain. The
  * arguments to this constructor are optional, and equivalent to calling
@@ -3823,17 +3872,8 @@ pv.Scale.quantitative = function() {
    * @returns {pv.Scale.quantitative} a view of this scale by the specified
    * accessor function.
    */
-  scale.by = function(f) {
-    function by() { return scale(f.apply(this, arguments)); }
-    for (var method in scale) by[method] = scale[method];
-    return by;
-  };
   
-  scale.by1 = function(f) {
-    function by1(x) { return scale(f.call(this, x)); }
-    for (var method in scale) by1[method] = scale[method];
-    return by1;
-  };
+  pv.copyOwn(scale, pv.Scale.common);
 
   scale.domain.apply(scale, arguments);
   return scale;
@@ -4474,17 +4514,8 @@ pv.Scale.ordinal = function() {
    * @returns {pv.Scale.ordinal} a view of this scale by the specified accessor
    * function.
    */
-  scale.by = function(f) {
-    function by() { return scale(f.apply(this, arguments)); }
-    for (var method in scale) by[method] = scale[method];
-    return by;
-  };
   
-  scale.by1 = function(f) {
-    function by1(x) { return scale(f.call(this, x)); }
-    for (var method in scale) by1[method] = scale[method];
-    return by1;
-  };
+  pv.copyOwn(scale, pv.Scale.common);
     
   scale.domain.apply(scale, arguments);
   return scale;
@@ -4660,17 +4691,8 @@ pv.Scale.quantile = function() {
    * @returns {pv.Scale.quantile} a view of this scale by the specified
    * accessor function.
    */
-  scale.by = function(f) {
-    function by() { return scale(f.apply(this, arguments)); }
-    for (var method in scale) by[method] = scale[method];
-    return by;
-  };
-
-  scale.by1 = function(f) {
-    function by1(x) { return scale(f.call(this, x)); }
-    for (var method in scale) by1[method] = scale[method];
-    return by1;
-  };
+  
+  pv.copyOwn(scale, pv.Scale.common);
   
   scale.domain.apply(scale, arguments);
   return scale;
@@ -7809,8 +7831,14 @@ pv.SvgScene.eachChild = function(scenes, i, fun, ctx){
     if(scenes.mark.zOrderChildCount){
         var sorted = scenes[i].children.slice(0);
         sorted.sort(function(scenes1, scenes2){ // sort ascending
-            return scenes1.mark._zOrder - scenes2.mark._zOrder;
+            var compare = scenes1.mark._zOrder - scenes2.mark._zOrder;
+            if(compare === 0){
+                // Preserve original order for same zOrder childs
+                compare = scenes1.childIndex - scenes2.childIndex;
+            }
+            return compare;
         });
+        
         sorted.forEach(fun, ctx || this);
     } else {
         scenes[i].children.forEach(fun, ctx || this);
@@ -18910,11 +18938,9 @@ pv.Geo.scale = function(p) {
    * @returns {pv.Geo.scale} a view of this scale by the specified accessor
    * function.
    */
-  scale.by = function(f) {
-    function by() { return scale(f.apply(this, arguments)); }
-    for (var method in scale) by[method] = scale[method];
-    return by;
-  };
+  
+  pv.copyOwn(scale, pv.Scale.common);
+  
 
   if (arguments.length) scale.projection(p);
   return scale;

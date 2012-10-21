@@ -379,7 +379,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         this.isPreRendered = false;
 
         if(pvc.debug >= 3){
-            pvc.log("Prerendering in pvc");
+            pvc.log("Prerendering chart");
         }
         
         /* Any data exists or throws */
@@ -409,7 +409,9 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._initAxes(hasMultiRole);
         this._bindAxes(hasMultiRole);
         
-        /* Interpolate */
+        /* Trends and Interpolatation */
+        this._generateTrends(hasMultiRole);
+        
         this._interpolate(hasMultiRole);
         
         /* Set axes scales */
@@ -445,35 +447,32 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(!this.parent){
             var colorRoleName = this.legendSource;
             if(colorRoleName){
+                
+                // Clear any previous global color scales
+                delete this._rolesColorScale;
+                
                 // Create the color (legend) axis at the root chart
                 var options = this.options;
                 
-                colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 0, {
-                    colorScheme: pvc.createColorScheme(options.colors)
-                }));
+                colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 0, {dataPartValues: '0'}));
                 
-                this.colors = colorAxis.colorsFactory;
+                this.colors = colorAxis.option('Colors');
                 
-                var colorsFactory;
                 if(options.secondAxis){
-                    var useOwnColors = options.secondAxisOwnColors;
-                    if(useOwnColors == null){
-                        useOwnColors = this.compatVersion() <= 1;
+                    var useOwnColorScale = options.secondAxisOwnColorScale;
+                    if(useOwnColorScale == null){
+                        useOwnColorScale = this.compatVersion() <= 1;
                     }
                     
-                    if(useOwnColors){
-                        /* if secondAxisColor is unspecified, assumes default color scheme. */
-                        colorsFactory = pvc.createColorScheme(options.secondAxisColor);
-                    }
-                    
-                    colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 1, {
-                        colorScheme: colorsFactory
-                    }));
-                    
-                    if(options.secondAxisOwnColors){
-                        this.secondAxisColor = colorAxis.colorsFactory;
+                    if(useOwnColorScale){
+                        colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 1, {dataPartValues: '1'}));
+                    } else {
+                        // color0Axis
+                        colorAxis.addDataPartValue('1');
                     }
                 }
+                
+                this.secondAxisColor = colorAxis.option('Colors'); // color1Axis or color2Axis
             }
         } else {
             // Copy
@@ -503,23 +502,44 @@ pvc.BaseChart = pvc.Abstract.extend({
             var colorRoleName = this.legendSource;
             if(colorRoleName){
                 var colorRole;
-                var hasSecondAxis = this.options.secondAxis;
-                
-                ['color', 'color2'].forEach(function(axisId){
+                ['color', 'color2', 'color3'].forEach(function(axisId){
                     var colorAxis = this.axes[axisId];
                     if(colorAxis && !colorAxis.isBound()){
                         if(!colorRole){
                             colorRole = this.visualRoles(colorRoleName);
                         }
                         
-                        colorAxis.bind({
-                            role: colorRole,
-                            dataPartValue: hasSecondAxis ? ('' + colorAxis.index) : null
-                        });
+                        var dataCells = 
+                            colorAxis
+                            .getDataPartValues()
+                            .map(function(dataPartValue){
+                                return {
+                                    role: colorRole,
+                                    dataPartValue: dataPartValue
+                                };
+                            });
+                        if(dataCells.length){
+                            colorAxis.bind(dataCells);
+                        }
                     }
                 }, this);
             }
         }
+    },
+    
+    _generateTrends: function(){
+        def
+        .query(def.own(this.axes))
+        .selectMany(function(axis){ return axis.dataCells; })
+        .where(function(dataCell){
+            var trendType = dataCell.trendType;
+            return !!trendType && trendType !== 'none'; 
+         })
+         .distinct(function(dataCell){
+             return dataCell.role.name  + '|' +
+                   (dataCell.dataPartValue || '');
+         })
+         .each(this._generateTrendsDataCell, this);
     },
     
     _interpolate: function(){
@@ -540,9 +560,12 @@ pvc.BaseChart = pvc.Abstract.extend({
     _interpolateDataCell: function(dataCell){
     },
     
+    _generateTrendsDataCell: function(dataCell){
+    },
+    
     _setAxesScales: function(isMulti){
         if(!this.parent){
-            ['color', 'color2'].forEach(function(axisId){
+            ['color', 'color2', 'color3'].forEach(function(axisId){
                 var colorAxis = this.axes[axisId];
                 if(colorAxis && colorAxis.isBound()){
                     colorAxis.calculateScale();
@@ -571,6 +594,75 @@ pvc.BaseChart = pvc.Abstract.extend({
                 return dataCell;
             }, this)
             .array();
+    },
+    
+    // ---------------
+    
+    /**
+     * Obtains an unified color scale, 
+     * of all the color axes with specified colors.
+     * 
+     * This color scale is used to satisfy axes
+     * with non-specified colors.
+     * 
+     * Each color-role has a different unified color-scale,
+     * in order that the color keys are of the same types.
+     */
+    _getRoleColorScale: function(roleName){
+        return def.lazy(
+            def.lazy(this, '_rolesColorScale'),
+            roleName,
+            this._createRoleColorScale, this);
+    },
+    
+    _createRoleColorScale: function(roleName){
+        var firstScale, scale;
+        var valueToColorMap = {};
+        
+        for(var alias in this.axes){
+            
+            var axis = this.axes[alias];
+            
+            // Only use color axes with specified Colors
+            if (axis.id === alias && // exclude duplicates in axes map
+                axis.type === 'color' && 
+                axis.role.name === roleName &&
+                (axis.index === 0 || axis.option.isSpecified('Colors'))){
+                
+                scale = axis.scale;
+                if(!firstScale){ firstScale = scale; }
+                
+                axis.domainValues.forEach(addDomainValue);
+            }
+        }
+        
+        function addDomainValue(value){
+            // First color wins
+            var key = '' + value;
+            if(!def.hasOwnProp.call(valueToColorMap, key)){
+                valueToColorMap[key] = scale(value);
+            }
+        }
+        
+        if(!firstScale){
+            return pvc.createColorScheme()();
+        }
+        
+        scale = function(value){
+            var key = '' + value;
+            if(def.hasOwnProp.call(valueToColorMap, key)){
+                return valueToColorMap[key];
+            }
+            
+            // creates a new entry...
+            var color = firstScale(value);
+            valueToColorMap[key] = color;
+            return color;
+        };
+        
+        def.copy(scale, firstScale);
+        
+        return scale; 
     },
     
     // ---------------
@@ -617,7 +709,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             if(!data || def.get(keyArgs, 'reloadData', true)) {
                this._onLoadData();
             } else {
-                data.clearInterpolations();
+                data.clearVirtuals();
                 data.disposeChildren();
             }
         }
@@ -629,33 +721,69 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
 
+    _getDataPartDimName: function(){
+        var role = this._dataPartRole;
+        if(role){
+            if(role.isBound()){
+                return role.firstDimensionName();
+            } 
+            
+            var preGrouping = role.preBoundGrouping();
+            if(preGrouping) {
+                return preGrouping.firstDimensionName();
+            }
+            
+            return role.defaultDimensionName;
+        }
+    },
+    
     _onLoadData: function(){
         var data = this.data,
+            options = this.options,
             complexType   = data ? data.type : new pvc.data.ComplexType(),
             translOptions = this._createTranslationOptions(),
             translation   = this._createTranslation(complexType, translOptions),
-            axis2Series;
+            dataPartDimName,
+            axis2Series,
+            trendType;
 
+        if(pvc.debug >= 3){
+            translation.logSource();
+        }
+        
         if(!data){
             // Currently translOptions has what is needed to
             // pass to pvc.data.DimensionType.extendSpec...
-            var calcSpecs = this.options.calculations;
+            var calcSpecs = options.calculations;
             if(calcSpecs){
                 calcSpecs.forEach(function(calcSpec){
                     complexType.addCalculation(calcSpec, translOptions);
                 });
             }
             
-            axis2Series = this.options.secondAxisSeries;
-            if(axis2Series){
-                // Register the dimension
-                // Prevents readers from reading into it
-                // Allows the role to bind to it, below
-                complexType.addDimension('dataPart');
+            dataPartDimName = this._getDataPartDimName();
+            if(dataPartDimName){
+                trendType = options.trendType;
+                if(trendType === 'none'){
+                    trendType = null;
+                }
+            
+                axis2Series = options.secondAxis && options.secondAxisSeries;
+                if(axis2Series){
+                    // Register the dimension
+                    // Prevents readers from reading into it
+                    // Allows the role to bind to it, below
+                    this._addDataPartDimension(complexType, dataPartDimName);
+                }
             }
             
             // Now the translation can configure the type as well
             translation.configureType();
+            
+            if(axis2Series || !trendType || !this._addDataPartDimension(complexType, dataPartDimName)) {
+                // Signal not to add the default DataPart calculation
+                trendType = null;
+            }
         }
         
         if(pvc.debug >= 3){
@@ -675,7 +803,9 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
 
         if(axis2Series){
-            this._addAxis2SeriesCalculation(complexType, axis2Series);
+            this._addAxis2SeriesCalculation(complexType, axis2Series, dataPartDimName);
+        } else if(trendType) {
+            this._addDefaultDataPartCalculation(complexType, dataPartDimName);
         }
         
         // ----------
@@ -685,7 +815,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                 this.dataEngine =
                 this.data = new pvc.data.Data({
                     type:     complexType,
-                    labelSep: this.options.groupedLabelSep
+                    labelSep: options.groupedLabelSep
                 });
         } // else TODO: assert complexType has not changed...
         
@@ -698,6 +828,16 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         data.load(translation.execute(data), loadKeyArgs);
     },
+    
+    _addDataPartDimension: function(complexType, dataPartDimName){
+        if(!complexType.dimensions(dataPartDimName, {assertExists: false})){
+            var dimSpec = pvc.data.DimensionType.extendSpec(dataPartDimName);
+            
+            complexType.addDimension(dataPartDimName, dimSpec);
+            return true;
+        }
+    },
+    
 //    
 //    _onNewDimensionType: function(dimName, dimSpec){
 //        return dimSpec;
@@ -736,14 +876,17 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
     
     _createTranslation: function(complexType, translOptions){
+        var TranslationClass = this._getTranslationClass(translOptions);
         
-        var TranslationClass = translOptions.crosstabMode ? 
-                    pvc.data.CrosstabTranslationOper : 
-                    pvc.data.RelationalTranslationOper;
-
-        return new TranslationClass(complexType, this.resultset, this.metadata, translOptions);
+        return new TranslationClass(this, complexType, this.resultset, this.metadata, translOptions);
     },
-
+    
+    _getTranslationClass: function(translOptions){
+        return translOptions.crosstabMode ? 
+                pvc.data.CrosstabTranslationOper : 
+                pvc.data.RelationalTranslationOper;
+    },
+    
     _createTranslationOptions: function(){
         var options = this.options,
             dataOptions = options.dataOptions || {};
@@ -759,7 +902,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         return {
             //onNewDimensionType: this._onNewDimensionType.bind(this),
             compatVersion:     this.compatVersion(),
-            secondAxisSeriesIndexes: options.secondAxisSeries ? null : options.secondAxisIdx,
+            secondAxisSeriesIndexes: (!options.secondAxis || options.secondAxisSeries) ? null : options.secondAxisIdx,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
@@ -787,7 +930,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         };
     },
     
-    _addAxis2SeriesCalculation: function(complexType, axis2Series){
+    _addAxis2SeriesCalculation: function(complexType, axis2Series, dataPartDimName){
         var serRole = this._serRole;
         if(serRole && serRole.isBound()){
             
@@ -796,22 +939,39 @@ pvc.BaseChart = pvc.Abstract.extend({
             var dataPartDim, part1Atom, part2Atom;
             
             complexType.addCalculation({
-                names: 'dataPart',
+                names: dataPartDimName,
                 
                 calculation: function(datum, atoms){
                     if(!dataPartDim){
-                        dataPartDim = datum.owner.dimensions('dataPart');
+                        dataPartDim = datum.owner.dimensions(dataPartDimName);
                     }
                     
                     var seriesKey = pvc.data.Complex.values(datum, dimNames).join(',');
                     
-                    atoms.dataPart = 
+                    atoms[dataPartDimName] = 
                         def.hasOwnProp.call(axis2SeriesSet, seriesKey) ?
                            (part2Atom || (part2Atom = dataPartDim.intern("1"))) :
                            (part1Atom || (part1Atom = dataPartDim.intern("0")));
                 }
             });
         }
+    },
+    
+    _addDefaultDataPartCalculation: function(complexType, dataPartDimName){
+        var dataPartDim, part1Atom;
+        
+        complexType.addCalculation({
+            names: dataPartDimName,
+            
+            calculation: function(datum, atoms){
+                if(!dataPartDim){
+                    dataPartDim = datum.owner.dimensions(dataPartDimName);
+                }
+                
+                atoms[dataPartDimName] = part1Atom || 
+                    (part1Atom = dataPartDim.intern("0"));
+            }
+        });
     },
     
     /**
@@ -1029,15 +1189,14 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
 
     _logVisualRoles: function(){
-        var out = ["\n------------------------------------------"];
-        out.push("Visual Roles Information");
-
+        var out = ["VISUAL ROLES SUMMARY", pvc.logSeparator];
+        
         def.eachOwn(this._visualRoles, function(role, name){
             out.push("  " + name + def.array.create(18 - name.length, " ").join("") +
                     (role.grouping ? (" <-- " + role.grouping) : ''));
         });
         
-        out.push("------------------------------------------");
+        out.push(pvc.logSeparator);
 
         pvc.log(out.join("\n"));
     },
@@ -1202,45 +1361,53 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     _initLegendScenes: function(legendPanel){
         
-        var rootScene;
+        var rootScene, dataPartDimName;
         var legendIndex = 0; // always start from 0
         
-        addAxis.call(this, this.axes.color );
-        addAxis.call(this, this.axes.color2);
+        // For all color axes...
+        processAxis.call(this, this.axes.color);
+        processAxis.call(this, this.axes.color2);
+        processAxis.call(this, this.axes.color3);
         
         // ------------
-        
-        function addAxis(colorAxis){
-            if(colorAxis && colorAxis.domainData){
-                processAxis.call(this, colorAxis);
-            }
-        }
-        
+
         function processAxis(colorAxis){
-            var domainData = colorAxis.domainData;
-            
-            if(!rootScene){
-                rootScene = legendPanel._getBulletRootScene();
-            }
-            
-            var groupScene = rootScene.createGroup({
-                group:           domainData,
-                colorAxis:       colorAxis,
-                extensionPrefix: pvc.visual.Axis.getId('legend', legendIndex++)
-             });
-            
-            // For latter binding an appropriate bullet renderer
-            colorAxis.legendBulletGroupScene = groupScene;
-            
-            var partColorScale = colorAxis.scale;
-            
-            domainData
-                .children()
-                .each(function(itemData){
-                    var itemScene = groupScene.createItem({group: itemData});
+            var dataCells = colorAxis && colorAxis.dataCells;
+            if(dataCells){
+                dataCells
+                .forEach(function(dataCell){
+                    var domainData = dataCell.data;
                     
-                    itemScene.color = partColorScale(itemData.value);
-                });
+                    if(!rootScene){
+                        dataPartDimName = this._getDataPartDimName();
+                        rootScene = legendPanel._getBulletRootScene();
+                    }
+                    
+                    var dataPartAtom = domainData.atoms[dataPartDimName];
+                    var locked = dataPartAtom && dataPartAtom.value === 'trend';
+                    
+                    var groupScene = rootScene.createGroup({
+                        group:           domainData,
+                        colorAxis:       colorAxis,
+                        clickMode:       locked ? 'none' : undefined,
+                        extensionPrefix: pvc.visual.Axis.getId('legend', legendIndex++)
+                     });
+                    
+                    // For latter binding an appropriate bullet renderer
+                    dataCell.legendBulletGroupScene = groupScene;
+                    
+                    var partColorScale = colorAxis.scale;
+                    
+                    domainData
+                        .children()
+                        .each(function(itemData){
+                            var itemScene = groupScene.createItem({group: itemData});
+                            
+                            // HACK...
+                            itemScene.color = partColorScale(itemData.value);
+                        });
+                }, this);
+            }
         }
     },
     
@@ -1750,7 +1917,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         secondAxisIdx: -1, // deprecated
 //      secondAxisSeries: undefined,
 //        secondAxisColor: undefined,
-//        secondAxisOwnColors: undefined, // false
+//        secondAxisOwnColorScale: undefined, // false
 
         showTooltips: true,
         

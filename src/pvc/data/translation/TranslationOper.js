@@ -6,6 +6,7 @@
  * @class Represents one translation operation 
  * from some data source format to the list of atoms format.
  * 
+ * @property {pvc.BaseChart} chart The associated chart.
  * @property {pvc.data.ComplexType} complexType The complex type that represents the translated data.
  * @property {pvc.data.Data} data The data object which will be loaded with the translation result.
  * @property {object} source The source object, of some format, being translated.
@@ -13,6 +14,7 @@
  * @property {object} options  An object with translation options.
  * 
  * @constructor
+ * @param {pvc.BaseChart} chart The associated chart.
  * @param {pvc.data.ComplexType} complexType The complex type that will represent the translated data.
  * @param {object} source The source object, of some format, to be translated.
  * The source is not modified.
@@ -22,15 +24,12 @@
  * TODO: missing common options here
  */
 def.type('pvc.data.TranslationOper')
-.init(function(complexType, source, metadata, options){
+.init(function(chart, complexType, source, metadata, options){
+    this.chart = chart;
     this.complexType = complexType;
     this.source   = source;
     this.metadata = metadata || {};
     this.options  = options  || {};
-    
-    if(pvc.debug >= 3){
-        this._logSource();
-    }
 
     this._initType();
 })
@@ -39,7 +38,7 @@ def.type('pvc.data.TranslationOper')
     /**
      * Logs the contents of the source and metadata properties.
      */
-    _logSource: def.method({isAbstract: true}),
+    logSource: def.method({isAbstract: true}),
 
     /**
      * Obtains the number of fields of the virtual item.
@@ -122,7 +121,12 @@ def.type('pvc.data.TranslationOper')
      * @type undefined
      * @virtual
      */
-    configureType: def.method({isAbstract: true}),
+    configureType: function(){
+        this._configureTypeCore();
+    },
+    
+    /** @abstract */
+    _configureTypeCore: def.method({isAbstract: true}),
     
     _initType: function(){
         this._userDimsReaders = [];
@@ -190,6 +194,7 @@ def.type('pvc.data.TranslationOper')
         // Distribute indexes to names, from left to right
         // Excess indexes go to the last *group* name
         // Missing indexes are padded from available indexes starting from the last provided index
+        // If not enough available indexes exist, those names end up reading undefined
         var I = indexes.length,
             N = dimNames.length,
             dimName;
@@ -254,42 +259,6 @@ def.type('pvc.data.TranslationOper')
         this._userDimsReaders.push(reader);
     },
 
-    /**
-     * Builds a dimensions reader that 
-     * filters the atoms returned by a given dimensions reader
-     * and returns the first one that is of a specified dimension.
-     * 
-     * <p>
-     * If the given reader returns no atoms of the desired dimension,
-     * then the built reader returns <tt>undefined</tt>.
-     * </p>
-     * 
-     * @param {function} reader A dimensions reader to filter.
-     * @param {function} dimName The name of the filtered dimension.
-     * 
-     * @type function
-     */
-    _filterDimensionReader: function(reader, dimName){
-        
-        function extractDimensionReader(item) {
-            var atoms = reader(item);
-            if(atoms instanceof Array) {
-                return def.query(atoms)
-                    .first(function(atom){ 
-                        return atom.dimension.name === dimName; 
-                    });
-            }
-            
-            if(atoms.dimension.name === dimName) {
-                return atoms;
-            }
-            
-            //return undefined;
-        }
-        
-        return extractDimensionReader;
-    },
-    
     /**
      * Performs the translation operation for a data instance.
      * 
@@ -404,7 +373,21 @@ def.type('pvc.data.TranslationOper')
         }
         
         if(pvc.debug >= 4) {
-            pvc.log('  -> read: ' + JSON.stringify(valuesByDimName));
+            var atoms = {};
+            for(var dimName in valuesByDimName){
+                var atom = valuesByDimName[dimName];
+                if(def.object.is(atom)){
+                    atom = ('v' in atom) ? atom.v : ('value' in atom) ? atom.value : '...';
+                }
+                
+                atoms[dimName] = atom;
+            }
+            
+            try{
+                pvc.log('  -> read: ' + JSON.stringify(atoms));
+            } catch(ex){
+                /* NOOP usually a JSON circular structure */
+            }
         }
         
         return valuesByDimName;
@@ -479,6 +462,38 @@ def.type('pvc.data.TranslationOper')
         }
         
         return index < L ? index : -1;
+    },
+    
+    _getUnboundRoleDefaultDimNames: function(roleName, count, dims, level){
+        var role = this.chart.visualRoles(roleName, {assertExists: false});
+        if(role && !role.isPreBound()){
+            var dimGroupName = role.defaultDimensionName;
+            if(dimGroupName){
+                dimGroupName = dimGroupName.match(/^(.*?)(\*)?$/)[1];
+                
+                if(!dims){
+                    dims = [];
+                }
+                
+                if(level == null){
+                    level = 0;
+                }
+                
+                if(count == null) {
+                    count = 1;
+                }
+                
+                // Already bound dimensions count
+                while(count--){
+                    var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level++);
+                    if(!def.hasOwn(this._userUsedDims, dimName)){
+                        dims.push(dimName);
+                    }
+                }
+                
+                return dims.length ? dims : null;
+            }
+        }
     },
     
     // TODO: docs

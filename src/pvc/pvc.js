@@ -32,6 +32,8 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
     
+    pvc.logSeparator = "------------------------------------------";
+    
     var arraySlice = pvc.arraySlice = Array.prototype.slice;
     
     pvc.setDebug = function(level){
@@ -256,6 +258,10 @@ var pvc = def.globalSpace('pvc', {
      */
     pvc.defaultColorScheme = null;
     
+    pvc.brighterColorTransform = function(color){
+        return (color.rgb ? color : pv.color(color)).brighter(0.5);
+    };
+    
     /**
      * Sets the colors of the default color scheme used by charts 
      * to a specified color array.
@@ -312,6 +318,15 @@ var pvc = def.globalSpace('pvc', {
             return scale;
         };
     },
+    
+    // Wraps the color scheme function
+    // to return wrapped scales...
+    pvc.transformColorScheme = function(colorScheme, colorTransf){
+        return function(){
+            var scale  = colorScheme.apply(this, arguments);
+            return scale.transform(colorTransf);
+        };
+    };
     
     /**
      * Creates a color scheme based on the specified colors.

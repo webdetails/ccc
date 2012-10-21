@@ -250,6 +250,10 @@ def.type('pvc.visual.Role')
         return !!this.__grouping;
     },
     
+    preBoundGrouping: function(){
+        return this.__grouping;
+    },
+    
     isBound: function(){
         return !!this.grouping;
     },

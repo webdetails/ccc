@@ -119,7 +119,7 @@ def
 //        // Insert sort into this._catInfos
 //        
 //        // catValue may be a new dimension value
-//        var catAtom = this._firstCatDim.intern(catValue, /* isInterpolated */ true);
+//        var catAtom = this._firstCatDim.intern(catValue, /* isVirtual */ true);
 //        
 //        catValue = catAtom.value; // now may be a Date object...
 //        

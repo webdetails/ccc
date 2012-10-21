@@ -25,10 +25,10 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
     _processOptionsCore: function(options){
         this.base.apply(this, arguments);
 
-        options.secondAxis = options.showLines || options.showDots || options.showAreas;
+        this._showLinePanel = options.showLines || options.showDots || options.showAreas;
          
         // Not supported
-        options.secondAxisIndependentScale = false;
+        options.secondAxis = false;
         options.stacked = false;
         options.legend  = false;
     },
@@ -74,13 +74,10 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         this._addVisualRoles(rolesSpec);
     },
     
-    _createTranslation: function(complexType, translOptions){
-        return new pvc.data.BoxplotChartTranslationOper(
-            this,
-            complexType,
-            this.resultset,
-            this.metadata,
-            translOptions);
+    _getTranslationClass: function(translOptions){
+        return def
+            .type(this.base(translOptions))
+            .add(pvc.data.BoxplotChartTranslationOper);
     },
 
     _bindAxes: function(hasMultiRole){
@@ -88,11 +85,6 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         var axis = this.axes.ortho;
         if(!axis.isBound()){
             axis.bind(this._buildRolesDataCells(pvc.BoxplotChart.measureRolesNames));
-        }
-        
-        axis = this.axes.ortho2;
-        if(axis && !axis.isBound()){
-            axis.bind(this._buildRolesDataCells(pvc.BoxplotChart.measureRolesNames[0]));
         }
         
         this.base(hasMultiRole);
@@ -117,7 +109,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         // legacy field
         this.bpChartPanel = boxPanel;
         
-        if(options.secondAxis){
+        if(this._showLinePanel){
             if(pvc.debug >= 3){
                 pvc.log("Creating LineDotArea panel.");
             }
@@ -147,6 +139,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
     },
     
     defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
+        crosstabMode: false,
         boxplotColor: 'darkgreen',
         boxSizeRatio: 1/3,
         maxBoxSize:   Infinity,

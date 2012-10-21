@@ -79,7 +79,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
     _createCore: function(){
         this.base();
         
-        this.valueRoleName = this.chart.axes.ortho.role.name;
+        this.valueRoleName = this._orthoAxis.role.name;
 
         var myself = this,
             chart = this.chart,
@@ -92,7 +92,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
 
         // ------------------
         // DATA
-        var isBaseDiscrete = chart._catRole.grouping.isDiscrete(),
+        var isBaseDiscrete = this._baseAxis.role.grouping.isDiscrete(),
             data = this._getVisibleData(), // shared "categ then series" grouped data
             isDense   = (this.width <= 0) || (data._children.length / this.width > 0.5), //  > 100 categs / 200 pxs
             rootScene = this._buildScene(data, isBaseDiscrete);
@@ -466,16 +466,11 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
         var categDatas = data._children;
         var chart = this.chart,
-            valueDim = data.owner.dimensions(chart.axes.ortho.role.firstDimensionName()),
-            firstCategDim = !isBaseDiscrete ? data.owner.dimensions(chart.axes.base.role.firstDimensionName()) : null,
+            valueDim = data.owner.dimensions(this._orthoAxis.role.firstDimensionName()),
+            firstCategDim = !isBaseDiscrete ? data.owner.dimensions(this._baseAxis.role.firstDimensionName()) : null,
             isStacked = this.stacked,
             visibleKeyArgs = {visible: true, zeroIfNone: false},
-            
-            /* TODO: BIG HACK */
-            orthoScale = this.dataPartValue !== '1' ?
-                            chart.axes.ortho.scale :
-                            chart.axes.ortho2.scale,
-                        
+            orthoScale = this._orthoAxis.scale,
             orthoNullValue = def.scope(function(){
                 // If the data does not cross the origin, 
                 // Choose the value that's closer to 0.
@@ -490,7 +485,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 return 0;
             }),
             orthoZero = orthoScale(0),
-            sceneBaseScale = chart.axes.base.sceneScale({sceneVarName: 'category'});
+            sceneBaseScale = this._baseAxis.sceneScale({sceneVarName: 'category'});
         
         // ----------------------------------
         // I   - Create series scenes array.

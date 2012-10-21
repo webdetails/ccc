@@ -197,10 +197,10 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
             visibleKeyArgs = {visible: true, zeroIfNone: false},
             data = this._getVisibleData(),
             rootScene  = new pvc.visual.Scene(null, {panel: this, group: data}),
-            baseScale  = chart.axes.base.scale,
+            baseScale  = this._baseAxis.scale,
             bandWidth  = baseScale.range().band,
             boxWidth   = Math.min(bandWidth * this.boxSizeRatio, this.maxBoxSize),
-            orthoScale = chart.axes.ortho.scale
+            orthoScale = this._orthoAxis.scale
             ;
 
         /**

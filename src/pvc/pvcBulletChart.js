@@ -88,6 +88,7 @@ pvc.BulletChart = pvc.BaseChart.extend({
          *  >= 4    Title | Subtitle | Value | Marker | Ranges
          */
         // TODO: respect user reader definitions (names and indexes)
+        // TODO: create a translator class for this, like with the boxplot?
         if(size){
             switch(size){
                 case 1:

@@ -38,6 +38,7 @@
  * @extends pvc.data.MatrixTranslationOper
  *  
  * @constructor
+ * @param {pvc.BaseChart} chart The associated chart.
  * @param {pvc.data.ComplexType} complexType The complex type that will represent the translated data.
  * @param {object} source The matrix-relational array to be translated.
  * The source is not modified.
@@ -65,96 +66,244 @@
  * </p>
  */
 def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
-.add(/** @lends pvc.data.RelationalTranslationOper# */{
+.init(function(chart, complexType, source, metadata, options){
     
-    /**
-     * Called once, before {@link #execute}, 
-     * for the translation to configure the complex type.
-     * 
-     * @type undefined
-     * @override
-     */
-    configureType: function(){
-        var me = this;
+    this.base(chart, complexType, source, metadata, options);
+
+    this._measureData();
+})
+.add(/** @lends pvc.data.RelationalTranslationOper# */{
+    M: 0, // number of measures
+    C: 0, // number of categories
+    S: 0, // number of series
+    
+    /** @static */
+    _isDiscreteColDef: function(colDef){
+        var colType = colDef && colDef.colType;
+        return !colType || (colType.toLowerCase() === 'string');
+    },
+    
+    _measureData: function(){
+        var metadata = this.metadata;
         
-        function add(dimGet, dim) {
-            me._userDimsReaders.push(dimGet);
-            if(dim){
-                // <Debug>
-                /*jshint expr:true */
-                !def.hasOwn(me._userDimsReadersByDim, dim) || def.assert("Dimension already being read.");
-                // </Debug>
+        var J = this.J; // metadata.length
+        
+        // Split between series and categories
+        var C = this.options.categoriesCount;
+        if(C != null && (!isFinite(C) || C < 0)){
+            C = 0;
+        }
                 
-                me._userDimsReadersByDim[dim] = dimGet;
+        var S;
+        
+        // Assuming duplicate valuesColIndexes is not valid
+        // (v1 did not make this assumption)
+        var valuesColIndexes, M;
+        if(this.options.isMultiValued){
+            valuesColIndexes = this.options.measuresIndexes;
+            // The null test is required because measuresIndexes can be a number, a string...
+            if(valuesColIndexes != null){
+                // Normalize, filter indexes
+                valuesColIndexes = 
+                    def
+                    .query(valuesColIndexes)
+                    .select(function(index){ return +index; }) // to number
+                    .where(function(index){ return !isNaN(index) && index >= 0 && index < J; })
+                    .distinct()
+                    .array();
+                
+                M = valuesColIndexes.length;
+                if(!M){
+                    M = valuesColIndexes = null;
+                } 
+                else 
+                {
+                    /*jshint expr:true */ 
+                    (M <= J) || def.assert("M must be smaller than J");
+                }
             }
         }
-
-        var L = this.metadata.length,
-            unmappedColCount = L - this._userUsedIndexesCount;
-         
-        if(unmappedColCount > 0){
-
-            /* Value dimension(s) (fixed multiple indexes) */
-            var valuesColIndexes;
-            if(!this._userUsedDims.value &&
-               this.options.isMultiValued &&
-               // The null test is required because measuresIndexes can be a number, a string...
-               (valuesColIndexes = this.options.measuresIndexes) != null) {
-
-                this.defReader({names: 'value', indexes: valuesColIndexes });
+        
+        var D; // discrete count = D = S + C
+        if(M == null){
+            if(C != null &&  C >= J){
+                D = J;
+                C = J;
+                S = 0;
+                M = 0;
+            } else {
+                // finite C wins over M, and by last S
+                var Mmax = C != null ? (J - C) : Infinity; // >= 1
                 
-                unmappedColCount = L - this._userUsedIndexesCount;
+                // colIndex has already been fixed on _processMetadata
+                valuesColIndexes = def
+                    .query(metadata)
+                    .where(def.negate(this._isDiscreteColDef), this)
+                    .select(function(colDef){ return colDef.colIndex; })
+                    .take(Mmax)
+                    .array()
+                    ;
+
+                M = valuesColIndexes.length;
             }
+        }
+        
+        if(D == null){
+            // M wins over C
+            D = J - M;
+            if(D === 0){
+                S = C = 0;
+            } else if(C != null){
+                if(C > D){
+                    C = D;
+                    S = 0;
+                } else {
+                    S = D - C;
+                }
+            } else {
+                // Distribute between categories and series
+                S = D > 1 ? 1 : 0;
+                C = D - S;
+            }
+        }
+        
+        var seriesInRows = this.options.seriesInRows;
+        var colGroupSpecs = [];
+        if(D){
+            if(S && !seriesInRows){
+                colGroupSpecs.push({name: 'S', count: S});
+            }
+            
+            if(C){
+                colGroupSpecs.push({name: 'C', count: C});
+            }
+            
+            if(S && seriesInRows){
+                colGroupSpecs.push({name: 'S', count: S});
+            }
+        }
+        
+        if(M){
+            colGroupSpecs.push({name: 'M', count: M});
+        }
+        
+        var availableInputIndexes = def.range(0, J).array();
+        
+        // If valuesColIndexes != null, these are reserved for values
+        if(valuesColIndexes){
+            // Remove these indexes from available indexes
+            valuesColIndexes.forEach(function(inputIndex){
+                availableInputIndexes.splice(inputIndex, 1);
+            });
+        }
+        
+        // Set the fields with actual number of columns of each group
+        // Assign the input indexes of each group (Layout)
+        var specsByName = {};
+        colGroupSpecs.forEach(function(groupSpec){
+            var count = groupSpec.count;
+            var name  = groupSpec.name;
+            
+            // Index group by name
+            specsByName[name] = groupSpec;
+            
+            if(valuesColIndexes && name === 'M'){
+                groupSpec.indexes = valuesColIndexes;
+            } else {
+                groupSpec.indexes = availableInputIndexes.splice(0, count);
+            }
+        }, this);
+        
+        this.M = M;
+        this.S = S;
+        this.C = C;
+        
+        // Compose the total permutation array
+        // that transforms the input into the virtual item "normal form":
+        // S* C* M*
+        var itemPerm = [];
+        ['S', 'C', 'M'].forEach(function(name){
+            var groupSpec = specsByName[name];
+            if(groupSpec){
+                def.array.append(itemPerm, groupSpec.indexes);
+            }
+        });
+        
+        var colTypes = this._columnTypes;
+        this._itemTypes = itemPerm.map(function(index){ return colTypes[index]; });
+        
+        // The start indexes of each column group
+        this._itemCrossGroupIndex = {
+            S: 0,
+            C: this.S, 
+            M: this.S + this.C
+        };
+        
+        this._itemPerm = itemPerm;
+        
+        if(pvc.debug >= 3){
+            var out = [
+                "RELATIONAL TRANSLATOR MAPPING",
+                pvc.logSeparator,
+                "[" + 
+                    colGroupSpecs.map(function(groupSpec){
+                        return def.array.create(groupSpec.count, groupSpec.name).join('');
+                    })
+                    .join(' ') +
+                "]",
+                pvc.logSeparator
+            ];
 
-            if(unmappedColCount > 0){
-                /* Find the dimensions that are to be read automatically */
-                
-                var seriesInRows = this.options.seriesInRows;
-                
-                var autoColDimGroups = [];
-                
-                if(valuesColIndexes == null){
-                    autoColDimGroups
-                        .push({name: 'value', count: 1, 'float': false}); // float is an invalid property id. in CGG env.
-                }
-                
-                if(seriesInRows){
-                    autoColDimGroups
-                        .push({name: 'series', count: 1});
-                }
-                
-                var desiredCatCount = Math.max(1, def.get(this.options, 'categoriesCount', 1));
-                autoColDimGroups
-                    .push({name: 'category', count: desiredCatCount});
-                
-                if(!seriesInRows){
-                    autoColDimGroups
-                        .push({name: 'series', count: 1, 'float': false});
-                }
-                
-                // -----
-                
-                var autoColDims = this._createDimsMap(autoColDimGroups, unmappedColCount);
-                
-                /* Assign virtual item indexes to auto dims */
-                var index = 0;
-                var autoIndex = 0;
-                while(autoIndex < autoColDims.length) {
-                    var dimName = autoColDims[autoIndex];
-                    index = this._nextAvailableItemIndex(index);
+            pvc.log(out.join("\n"));
+        }
+    },
+    
+    /** 
+     * Default cross tab mapping from virtual item to dimensions. 
+     * @override 
+     */
+    _configureTypeCore: function(){
+        var me = this;
+        var index = 0;
+        var dimsReaders = [];
+        
+        function add(dimGroupName, colGroupName, level, count) {
+            var groupEndIndex = me._itemCrossGroupIndex[colGroupName] + count; // exclusive
+            while(count > 0) {
+                var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level);
+                if(!me._userUsedDims[dimName]) { // Skip name if occupied and continue with next name
                     
-                    /*jshint expr:true */
-                    (index < 0) && def.assert("Index must exist");
+                    // use first available slot for auto dims readers as long as within the group slots
+                    index = me._nextAvailableItemIndex(index);
+                    if(index >= groupEndIndex) {
+                        // this group has no more slots available
+                        return;
+                    }
                     
-                    // mark the index as mapped
-                    this._userItem[index] = true;
-
-                    add(this._propGet(dimName, index), dimName);
-
+                    dimsReaders.push({names: dimName, indexes: index});
+                    
                     index++; // consume index
-                    autoIndex++;
+                    count--;
                 }
+                
+                level++;
             }
+        }
+        
+        if(this.S > 0){
+            add('series', 'S', 0, this.S);
+        }
+        
+        if(this.C > 0){
+            add('category', 'C', 0, this.C);
+        }
+        
+        if(this.M > 0) {
+            add('value', 'M', 0, this.M);
+        }
+
+        if(dimsReaders) {
+            dimsReaders.forEach(this.defReader, this);
         }
         
         // ----
@@ -163,68 +312,24 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         if(axis2SeriesIndexes != null){
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
-                add(relTransl_dataPartGet.call(this, axis2SeriesIndexes, seriesReader));
+                this._userDimsReaders.push(
+                   relTransl_dataPartGet.call(this, axis2SeriesIndexes, seriesReader));
             }
         }
     },
     
-    /*
-     * Example orderedDimsMap =
-     * [
-     *    {name: 'value',    count: 1},
-     *    {name: 'category', count: 3},
-     *    {name: 'series',   count: 1}
-     *    ...
-     * ]
-     * 
-     * if count = 3, the result will be:
-     * ['category', 'category2', 'value']
-     */
-    _createDimsMap: function(orderedDimsMap, count){
-        var dimNames = [];
-        var i = 0;
-        var L = orderedDimsMap.length;
-        var DT = pvc.data.DimensionType;
+    // Permutes the input rows
+    _executeCore: function(){
+        var dimsReaders = this._getDimensionsReaders();
+        var permIndexes = this._itemPerm;
         
-        function isDimensionNotUsed(dimName){ 
-            return !def.hasOwn(this._userUsedDims, dimName); 
-        }
-        
-        while(i < L && count > 0){
-            var dimGroup = orderedDimsMap[i];
-            var groupName = dimGroup.name;
-            
-            // There's no problem here cause each function instance is 
-            // called before leaving each iteration.
-            /*jshint loopfunc:true*/
-            var buildLevelDimName = function(level){
-                    return DT.dimensionGroupLevelName(groupName, level);
-                };
-                
-            var groupDimNames;
-            /*jshint sub:true */
-            if(dimGroup['float']){
-                // The group's N first free dimension levels
-                groupDimNames = def.range(0, Infinity)
-                    .select(buildLevelDimName)
-                    .where(isDimensionNotUsed, this)
-                    .take(Math.min(dimGroup.count, count)) // only as much as there are free indexes
-                    .array();
-            } else {
-                // The group's N first dimension levels, or skip when not free
-                groupDimNames = def.range(0, dimGroup.count)
-                    .select(buildLevelDimName)
-                    .where(isDimensionNotUsed, this)
-                    .take(count) // only as much as there are free indexes
-                    .array();
-            }
-            
-            def.array.prepend(dimNames, groupDimNames);
-            count -= groupDimNames.length;
-            i++;
-        }
-        
-        return dimNames;
+        return def.query(this._getItems())
+                  .select(function(item){
+                      
+                      item = pv.permute(item, permIndexes);
+                      
+                      return this._readItem(item, dimsReaders);
+                  }, this);
     }
 });
 

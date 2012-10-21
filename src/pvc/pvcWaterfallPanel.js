@@ -58,22 +58,24 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
     
     _creating: function(){
         // Register BULLET legend prototype marks
-        var waterfallGroupScene = this._getLegendBulletRootScene()
-                                      .firstChild;
-        
-        if(waterfallGroupScene && !waterfallGroupScene.hasRenderer()){
-            var keyArgs = {
-                    drawRule:      true,
-                    drawMarker:    false,
-                    noSelect:      true,
-                    noHover:       true,
-                    rulePvProto:   new pv.Mark()
-                };
+        var rootScene = this._getLegendBulletRootScene();
+        if(rootScene){
+            var waterfallGroupScene = rootScene.firstChild;
             
-            this.extend(keyArgs.rulePvProto, 'barWaterfallLine', {constOnly: true});
-            
-            waterfallGroupScene.renderer(
-                    new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+            if(waterfallGroupScene && !waterfallGroupScene.hasRenderer()){
+                var keyArgs = {
+                        drawRule:      true,
+                        drawMarker:    false,
+                        noSelect:      true,
+                        noHover:       true,
+                        rulePvProto:   new pv.Mark()
+                    };
+                
+                this.extend(keyArgs.rulePvProto, 'barWaterfallLine', {constOnly: true});
+                
+                waterfallGroupScene.renderer(
+                        new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
+            }
         }
     },
     

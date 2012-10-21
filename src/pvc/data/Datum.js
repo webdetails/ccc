@@ -41,6 +41,12 @@ function(data, atomsByName, isNull){
     isSelected: false,
     isVisible:  true,
     isNull:     false,
+    
+    isVirtual:  false, // like isNull, but is actually in a Data
+    
+    isTrend:    false,
+    trendType:  null,
+    
     isInterpolated: false,
     //isInterpolatedMiddle: false,
     interpolation: null,

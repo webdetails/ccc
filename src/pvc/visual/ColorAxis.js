@@ -17,63 +17,68 @@ def.scope(function(){
         
         this.base(chart, type, index, keyArgs);
         
-        this.optionId = pvc.buildIndexedId('legend', this.index);
-        
-        // ------------
-        
-        /* this.scaleType === 'discrete' && */
-        
-        // All this, currently only works well for discrete colors...
-        // pvc.createColorScheme creates discrete color scale factories
-        var options = chart.options;
-        var colorsFactory = def.get(keyArgs, 'colorScheme');
-        
-        this.hasOwnColors = !!colorsFactory;
-        
-        if(!colorsFactory && index > 0){
-            var color0Axis = chart.axes.color;
-            // TODO: Should throw when null? Bind, below, will fail...
-            colorsFactory = color0Axis ? color0Axis.colorsFactory : null;
+        var optionId = def.get(keyArgs, 'optionId');
+        if(optionId == null){
+            optionId = pvc.buildIndexedId('legend', this.index);
         }
         
-        this.colorsFactory = colorsFactory;
+        var dataPartValues = def.get(keyArgs, 'dataPartValues');
+        if(dataPartValues == null){
+            dataPartValues = [];
+        } else {
+            dataPartValues = def.query(dataPartValues).array();
+        }
         
+        this._dataPartValues =  dataPartValues;
+        
+        this.optionId = optionId;
         this.isVisible = this.option('Visible');
     })
     .add(/** @lends pvc.visual.ColorAxis# */{
         
-        legendBulletGroupScene: null,
+        addDataPartValue: function(dataPartValue){
+            this._dataPartValues.push(dataPartValue);
+        },
+        
+        getDataPartValues: function(){
+            return this._dataPartValues;
+        },
         
         calculateScale: function(){
             /*jshint expr:true */
-            this.role || def.fail.operationInvalid('Axis is unbound.');
-            
-            if(this.role.isBound()){
-                var dataCell   = this.dataCell;
-                var domainData = this.chart.partData(dataCell.dataPartValue)
-                                      .flattenBy(dataCell.role);
+            var dataCells = this.dataCells;
+            if(dataCells){
+                var chart = this.chart;
                 
-                var scale;
-                if(!this.hasOwnColors){
-                    var color0Axis = this.chart.axes.color;
-                    scale = color0Axis ? color0Axis.scale : null;
-                }
+                var domainValues = 
+                    def
+                    .query(dataCells)
+                    .selectMany(function(dataCell){
+                        var role = dataCell.role;
+                        if(role && role.isBound()){
+                            var domainData = 
+                                chart
+                                .partData(dataCell.dataPartValue)
+                                .flattenBy(role)
+                                ;
+                            
+                            dataCell.data = domainData;
+                            
+                            return domainData.children();
+                        }
+                    })
+                    .distinct(function(childData){ return childData.key; })
+                    .select(function(child){ return child.value; })
+                    .array()
+                    ;
                 
-                if(!scale){
-                    this.hasOwnColors = true;
-                    
-                    var domainValues = domainData
-                                          .children()
-                                          .select(function(child){ return child.value; })
-                                          .array();
-                    scale = this.colorsFactory.call(null, domainValues);
-                }
+                var scale = this.option('Colors').call(null, domainValues);
+                
+                this.domainValues = domainValues;
                 
                 this.setScale(scale);
-                
-                this.domainData = domainData;
             }
-            
+              
             return this;
         },
         
@@ -141,6 +146,86 @@ def.scope(function(){
     
     /*global axis_optionsDef:true*/
     var colorAxis_optionsDef = def.create(axis_optionsDef, {
+        /*
+         * legendColors
+         * legend2Colors
+         * trendColors
+         * -----
+         * colors
+         * secondAxisColor (compat)
+         */
+        Colors: {
+            resolve: function(axis){
+                // Give precedence to "normalized" option names
+                // Like resolveNormal does:
+                var colors = axis._getOptionByOptionId('Colors');
+                if(colors == null){
+                    // Handle naming exceptions
+                    if(axis.index === 0){
+                        colors = chartOption.call(axis, 'colors');
+                    } else if(axis.index === 1){
+                        colors = chartOption.call(axis, 'secondAxisColor');
+                    }
+                    
+                    colors = pvc.colorScheme(colors);
+                }
+                
+                var isDefault = colors == null;
+                if(isDefault){
+                    if(axis.index === 0){
+                        // Assumes default pvc scale
+                        colors = pvc.createColorScheme(colors);
+                    } else {
+//                        // Inherit colors of axis-0
+//                        var color0Axis = axis.chart.axes.color;
+//                        if(color0Axis){
+//                            colors = color0Axis.option('Colors');
+//                        }
+                        // Use a color scheme that always returns 
+                        // the global color scale of the role
+                        colors = function(){ // ignore domain values
+                            return axis.chart._getRoleColorScale(axis.role.name);
+                        };
+                    }
+                }
+                
+                // Check if there is a color transform set
+                // and if so, transform the color scheme
+                // If the user specified the colors,
+                // do not apply default color transforms...
+                if(isDefault || this.option.isSpecified('ColorsTransform')){
+                    var colorTransf = this.option('ColorsTransform');
+                    if(colorTransf){
+                        colors = pvc.transformColorScheme(colors, colorTransf);
+                    }
+                }
+                
+                this.set(colors, isDefault);
+                return true;
+            }
+            //cast: pvc.colorScheme
+        },
+        
+        /*
+         * A function that transforms the colors
+         * of the color scheme:
+         * pv.Color -> pv.Color
+         */
+        ColorsTransform: {
+            resolve: function(axis){
+                if(resolveNormal.call(this, axis)){
+                    return true;
+                }
+                
+                if(axis.index === 1 || axis.optionId === 'trend'){
+                    this.defaultValue(pvc.brighterColorTransform);
+                    return true;
+                }
+            },
+            
+            cast: def.fun.to
+        },
+        
         /* 
          * legendVisible 
          */

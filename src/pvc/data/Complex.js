@@ -101,7 +101,7 @@ def
             var newAtomsByName = owner.type._calculate(this);
             if(newAtomsByName){
                 for(dimName in newAtomsByName){
-                    if(!def.hasOwnProp.call(atomsMap[dimName])){
+                    if(!def.hasOwnProp.call(atomsMap, dimName)){
                         
                         value = newAtomsByName[dimName];
                         if(value != null){ // nulls are already in base proto object

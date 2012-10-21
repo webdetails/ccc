@@ -111,6 +111,24 @@ def.scope(function(){
         }
         
         /**
+         * Obtains the value of an option given its name,
+         * but only if it has been specified (not defaulted).
+         * <p>
+         * This is a convenience method for calling {@link #option}
+         * with the <tt>noDefault</tt> argument with the value <tt>true</tt>.
+         * </p>
+         * 
+         * @name pvc.options#specified
+         * @function
+         * @param {string} name The name of the option.
+         * 
+         * @type any
+         */
+        function specified(name){
+            return option(name, /*noDefault*/ true);
+        }
+        
+        /**
          * Indicates if an option with the given name is defined.
          * @name pvc.options#isDefined
          * @function
@@ -185,8 +203,9 @@ def.scope(function(){
         // ------------
         
         option.option = option;
-        option.isSpecified  = isSpecified;
-        option.isDefined    = isDefined;
+        options.specified  = specified; 
+        option.isSpecified = isSpecified;
+        option.isDefined   = isDefined;
         
         option.defaultValue = getDefaultValue;
         
@@ -289,7 +308,7 @@ def.scope(function(){
         set: function(value, isDefault){
             if(value != null){
                 if(this.cast){
-                    // not a method
+                    // not a method // <<--??being called like one...
                     value = this.cast(value, this._context);
                 }
             }

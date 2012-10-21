@@ -34,29 +34,33 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         
         this.base();
         
-        var isV1Compat = (this.compatVersion() <= 1);
-        
         this._addVisualRoles({
-            color:  { 
-                isMeasure: true, 
-                //requireSingleDimension: true,  // TODO: generalize this...
-                //requireIsDiscrete: false, 
+            color: {
+                isMeasure: true,
+                //requireSingleDimension: true, // TODO: generalize this...
+                //requireIsDiscrete: false,
                 //valueType: Number,
-                defaultDimensionName: isV1Compat ? 'value2' : 'value3'
+                defaultDimensionName: 'color'
             },
-            size: { 
-                isMeasure: true, 
+            size: {
+                isMeasure: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
                 valueType: Number,
-                defaultDimensionName: isV1Compat ? 'value3' : 'value4' 
+                defaultDimensionName: 'size'
             }
         });
 
         this._colorRole = this.visualRoles('color');
-        this._sizeRole = this.visualRoles('size' );
+        this._sizeRole  = this.visualRoles('size' );
     },
-
+    
+    _getTranslationClass: function(translOptions){
+        return def
+            .type(this.base(translOptions))
+            .add(pvc.data.MetricLineDotChartTranslationOper);
+    },
+    
     _initData: function(keyArgs){
         this.base(keyArgs);
 

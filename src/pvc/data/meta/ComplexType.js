@@ -63,7 +63,7 @@ function(dimTypeSpecs){
      * @type object
      * @private
      */
-    this._dimsIndexByName = {};
+    this._dimsIndexByName = null;
     
     /**
      * An index of the dimension types by group name.
@@ -90,8 +90,7 @@ function(dimTypeSpecs){
 .add(/** @lends pvc.data.ComplexType# */{
     describe: function(){
 
-        var out = ["\n------------------------------------------"];
-        out.push("Complex Type Information");
+        var out = ["COMPLEX TYPE INFORMATION", pvc.logSeparator];
         
         this._dimsList.forEach(function(type){
             var features = [];
@@ -104,7 +103,7 @@ function(dimTypeSpecs){
             out.push("  " + type.name + " (" + features.join(', ') + ")");
         });
         
-        out.push("------------------------------------------");
+        out.push(pvc.logSeparator);
 
         return out.join("\n");
     },
@@ -239,13 +238,11 @@ function(dimTypeSpecs){
         
         var dimension = new pvc.data.DimensionType(this, name, dimTypeSpec);
         this._dims[name] = dimension;
-        this._dimsIndexByName[name] = this._dimsList.length;
-        this._dimsList.push(dimension);
-        this._dimsNames.push(name);
         
-        // group
+        this._dimsIndexByName = null; // reset
         
         var group = dimension.group;
+        var groupLevel;
         if(group) {
             var groupDims = def.getOwn(this._dimsByGroup, group),
                 groupDimsNames;
@@ -257,13 +254,46 @@ function(dimTypeSpecs){
                 groupDimsNames = this._dimsNamesByGroup[group];
             }
             
-            var level = def.array.insert(groupDimsNames, name, def.compare);
-            def.array.insertAt(groupDims, ~level, dimension);
+            // TODO this should be unified with dimension.groupLevel...
+            groupLevel = def.array.insert(groupDimsNames, name, def.compare);
+            groupLevel = ~groupLevel;
+            def.array.insertAt(groupDims, groupLevel, dimension);
         }
+        
+        var index;
+        var L = this._dimsList.length;
+        if(!group) {
+            index = L;
+        } else {
+            groupLevel = dimension.groupLevel;
+            
+            // Find the index of the last dimension of the same group
+            // or the one that has a higher level that this one
+            for(var i = 0 ; i < L ; i++){
+                var dim = this._dimsList[i];
+                if(dim.group === group){
+                    if(dim.groupLevel > groupLevel){
+                        // Before the current one
+                        index = i;
+                        break;
+                    }
+                    
+                    // After the current one
+                    index = i + 1;
+                }
+            } 
+               
+            if(index == null){
+                index = L;
+            }
+        }
+        
+        def.array.insertAt(this._dimsList,  index, dimension);
+        def.array.insertAt(this._dimsNames, index, name);
         
         // calculated
         if(dimension._calculate){
-            var index = def.array.binarySearch(
+            index = def.array.binarySearch(
                         this._calcDimsList, 
                         dimension._calculationOrder, 
                         def.compare,
@@ -370,6 +400,16 @@ function(dimTypeSpecs){
      */
     sortDimensionNames: function(dims, nameKey){
         var dimsIndexByName = this._dimsIndexByName;
+        if(!dimsIndexByName){
+            dimsIndexByName = 
+                def
+                .query(this._dimsList)
+                .object({
+                    name:  function(dim){ return dim.name; },
+                    value: function(dim, index){ return index; }
+                });
+            this._dimsIndexByName = dimsIndexByName;
+        }
         
         dims.sort(function(da, db){
             return def.compare(

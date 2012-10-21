@@ -52,44 +52,37 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
          */
         this._addCartAxis(new pvc.visual.CartesianAxis(this, 'base',  0));
         this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 0));
-        if(this.options.secondAxis){
+        if(this.options.secondAxis && this.options.secondAxisIndependentScale){
             this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 1));
         }
         
         /*  Create the trend color axis, at the root, if necessary */
         if(!this.parent){
+            var options = this.options;
+            var trendType;
             var colorRoleName = this.legendSource;
-            if(colorRoleName){
-                var options = this.options;
-                var trendType = options.trendType;
-                if(trendType && trendType !== 'none'){
-                    this._addAxis(new pvc.visual.ColorAxis(this, 'color', 2, {
-                        colorScheme: options.trendOwnColors ? 
-                                     pvc.createColorScheme(options.trendColors) : 
-                                     null
-                    }));
-                }
+            if(colorRoleName && 
+               (trendType = options.trendType) && 
+               (trendType !== 'none')){
+                // Trends must have its own color scale
+                // cause otherwise each trend series
+                // would have exactly the same color as the corresponding
+                // non-trended series; the only distinction between
+                // the two sets of points is its data part (and the values...).
+                // Specifically the currently user color scale key 
+                // (the value of the series or the category role)
+                // is the same. Same value => same color.
+                // So there's no "trendOwnColorScale"
+                this._addAxis(new pvc.visual.ColorAxis(this, 'color', 2, {
+                    optionId: 'trend',
+                    dataPartValues: 'trend'
+                }));
             }
         } else {
             // Copy
             var colorAxis = this.root.axes.color3;
             if(colorAxis){
                 this.axes.color3 = colorAxis;
-            }
-        }
-    },
-    
-    _bindAxes: function(isMulti){
-        
-        this.base(isMulti);
-        
-        if(!this.parent){
-            var colorAxis = this.root.axes.color3;
-            if(colorAxis && !colorAxis.isBound()){
-                colorAxis.bind({
-                    role: this.visualRoles(/*colorRoleName*/ this.legendSource),
-                    dataPartValue: 'trend'
-                });
             }
         }
     },
@@ -125,29 +118,17 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
     _createAxisScale: function(axis){
         var isOrtho = axis.type === 'ortho';
         var isCart  = isOrtho || axis.type === 'base';
-        var isSecondOrtho = isOrtho && axis.index === 1;
         
-        var scale;
-
-        if(isSecondOrtho && !this.options.secondAxisIndependentScale){
-            scale = this.axes.ortho.scale || 
-                    def.fail.operationInvalid("First ortho scale must be created first.");
-        } else {
-            scale = this._createScaleByAxis(axis);
-            
-            if(scale.isNull && pvc.debug >= 3){
-                pvc.log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
-            }
+        var scale = this._createScaleByAxis(axis);
+        if(scale.isNull && pvc.debug >= 3){
+            pvc.log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
         }
         
-        scale = axis
-            .setScale(scale)
-            .scale
-            ;
+        scale = axis.setScale(scale).scale;
         
         if(isCart){
             /* V1 fields xScale, yScale, secondScale */
-            if(isSecondOrtho) {
+            if(isOrtho && axis.index === 1) {
                 this.secondScale = scale;
             } else if(!axis.index) {
                 this[axis.orientation + 'Scale'] = scale;
@@ -290,12 +271,8 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         /* DOMAIN */
 
         // With composite axis, only 'singleLevel' flattening works well
-        var flatteningMode = null; //axis.option('Composite') ? 'singleLevel' : null,
         var baseData = this._getVisibleData(axis.dataCell.dataPartValue, {ignoreNulls: false});
-        var data = axis.role.flatten(baseData, {
-                                visible: true, // TODO: this visible seems to be meaningless ause baseData is already all visible
-                                flatteningMode: flatteningMode
-                            });
+        var data = baseData.flattenBy(axis.role);
         
         var scale  = new pv.Scale.ordinal();
         if(!data.count()){
@@ -468,9 +445,9 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
      */
     _getVisibleData: function(dataPartValue, keyArgs){
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls', true);
-        if(ignoreNulls){
+        if(ignoreNulls && this.options.ignoreNulls){
             // If already globally ignoring nulls, there's no need to do it explicitly anywhere
-            ignoreNulls = !this.options.ignoreNulls;
+            ignoreNulls = false;
         }
         
         keyArgs = keyArgs ? Object.create(keyArgs) : {};
@@ -639,13 +616,15 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         /* Non-standard axes options and defaults */
         showXScale: true,
         showYScale: true,
+        showSecondScale: true,
         
         xAxisPosition: "bottom",
         yAxisPosition: "left",
 
         secondAxisIndependentScale: false,
-        secondAxisColor: "blue",
+        // secondAxisColor: undefined,
         
-        trendType: 'none' // ['none'], 'linear', ...
+        trendType: 'none', // ['none'], 'linear', ...
+        trendOwnColorScale: false
     })
 });

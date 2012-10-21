@@ -841,11 +841,11 @@ new pvc.BarChart(options)
                 when they are shown on the second axis.
                 
                 This option is only relevant when the property
-                <c:link to="#secondAxisOwnColors" /> has the value <tt>true</tt>.
+                <c:link to="#secondAxisOwnColorScale" /> has the value <tt>true</tt>.
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisOwnColors" type="boolean" default="false" category="Style">
+        <c:property name="secondAxisOwnColorScale" type="boolean" default="false" category="Style">
             <c:documentation>
                 Indicates that the series shown in the second axis should
                 use a separate color scheme, 

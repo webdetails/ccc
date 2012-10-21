@@ -79,10 +79,10 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             rootScene = this._buildScene(data, seriesData)
             ;
 
-        var orthoScale = chart.axes.ortho.scale,
+        var orthoScale = this._orthoAxis.scale,
             orthoZero  = orthoScale(0),
-            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'value', nullToZero: false}),
-            baseRange = chart.axes.base.scale.range(),
+            sceneOrthoScale = this._orthoAxis.sceneScale({sceneVarName: 'value', nullToZero: false}),
+            baseRange = this._baseAxis.scale.range(),
             bandWidth = baseRange.band,
             barStepWidth = baseRange.step,
             barWidth,
@@ -125,7 +125,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             .lockMark('yZero',  orthoZero)
             .pvMark
             .band // categories
-                .x(chart.axes.base.sceneScale({sceneVarName: 'category'}))
+                .x(this._baseAxis.sceneScale({sceneVarName: 'category'}))
                 .w(bandWidth)
                 .differentialControl(this._barDifferentialControl())
             .item
@@ -231,7 +231,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     },
     
     _addOverflowMarkers: function(wrapper){
-        var orthoAxis = this.chart.axes.ortho;
+        var orthoAxis = this._orthoAxis;
         if(orthoAxis.option('FixedMax') != null){
             this.pvOverflowMarker = this._addOverflowMarker(false, orthoAxis.scale, wrapper);
         }

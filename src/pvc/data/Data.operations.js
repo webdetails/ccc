@@ -46,8 +46,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         data_setDatums.call(this, datums, { doAtomGC: true });
     },
     
-    clearInterpolations: function(){
-        // Recursively clears all interpolated datums and atoms
+    clearVirtuals: function(){
+        // Recursively clears all virtual datums and atoms
         var datums = this._datums;
         if(datums){
             this._sumAbsCache = null;
@@ -60,7 +60,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
             var removed;
             while(i < L){
                 var datum = datums[i];
-                if(datum.isInterpolated){
+                if(datum.isVirtual){
                     var id = datum.id;
                     if(selectedDatums && datum.isSelected) {
                         selectedDatums.rem(id);
@@ -91,7 +91,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                     L = children.length;
                     while(i < L){
                         var childData = children[i];
-                        childData.clearInterpolations();
+                        childData.clearVirtuals();
                         if(!childData.parent){
                             // Child group was empty and removed itself
                             L--;
@@ -103,15 +103,15 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
                 
                 if(this._linkChildren){
                     this._linkChildren.forEach(function(linkChildData){
-                        linkChildData.clearInterpolations();
+                        linkChildData.clearVirtuals();
                     });
                 }
             }
         }
         
         def.eachOwn(this._dimensions, function(dim){
-            /*global dim_uninternInterpolatedAtoms:true*/
-            dim_uninternInterpolatedAtoms.call(dim);
+            /*global dim_uninternVirtualAtoms:true*/
+            dim_uninternVirtualAtoms.call(dim);
         });
     },
     

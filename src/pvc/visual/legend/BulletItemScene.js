@@ -30,6 +30,19 @@ def
             value    = source.value;
             rawValue = source.rawValue;
             label    = source.ensureLabel();
+            
+            // This is to catch trend lines...
+            // Standard data source data parts are numbers, 
+            // so this shows the non-standard data part label
+            // after the item's label:
+            // 'Lisbon (Linear trend)'  
+            var dataPartDim = this.chart()._getDataPartDimName();
+            if(dataPartDim){
+                var dataPartAtom = source.atoms[dataPartDim];
+                if(isNaN(+dataPartAtom.value)){
+                    label += " (" + dataPartAtom.label + ")";
+                }
+            }
         }
     }
     

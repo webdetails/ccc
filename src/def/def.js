@@ -476,6 +476,11 @@ var def = /** @lends def */{
     add: function(a, b){ return a + b; },
 
     // negate?
+    negate: function(f){
+        return function(){
+            return !f.apply(this, arguments);
+        };
+    },
     
     // Constant functions ----------------
     
@@ -531,6 +536,10 @@ var def = /** @lends def */{
         
         to: function(thing){
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+        },
+        
+        lazy: function(scope, p, f){
+            return scope[p] || (scope[p] = (f ? f(p, scope) : []));
         }
     },
     
@@ -553,6 +562,11 @@ var def = /** @lends def */{
             return v && /*typeof(v) === 'object' &&*/ v.constructor === Object ?
                     v :
                     null;
+        },
+        
+        lazy: function(scope, p, f, ctx){
+            return scope[p] || 
+                  (scope[p] = (f ? f.call(ctx, p) : {}));
         }
     },
     
@@ -789,6 +803,8 @@ var def = /** @lends def */{
         throw def.error.assertionFailed(msg, scope);
     }
 };
+
+def.lazy = def.object.lazy;
 
 // Adapted from
 // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
@@ -1946,6 +1962,29 @@ def.type('Query')
     },
     
     /**
+     * Returns the last item that satisfies a specified predicate.
+     * <p>
+     * If no predicate is specified, the last item is returned. 
+     * </p>
+     *  
+     * @param {function} [pred] A predicate to apply to every item.
+     * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
+     * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
+     * 
+     * @type any
+     */
+    last: function(pred, ctx, dv){
+        var theItem = dv;
+        while(this.next()){
+            if(!pred || pred.call(ctx, this.item, this.index)) {
+                theItem = this.item;
+            }
+        }
+        
+        return theItem;
+    },
+    
+    /**
      * Returns <tt>true</tt> if there is at least one item satisfying a specified predicate.
      * <p>
      * If no predicate is specified, returns <tt>true</tt> if there is at least one item. 
@@ -2087,10 +2126,18 @@ def.type('Query')
     },
     
     take: function(n){
+        if(n <= 0){
+            return new def.NullQuery();
+        }
+        
+        if(!isFinite(n)){
+            return this; // all
+        }
+        
         return new def.TakeQuery(this, n);
     },
     
-    wahyl: function(pred, ctx){
+    whayl: function(pred, ctx){
         return new def.WhileQuery(this, pred, ctx);
     },
     

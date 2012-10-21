@@ -86,6 +86,7 @@ src/pvc/pvcLineDotArea.js
 src/pvc/pvcHeatGridPanel.js
 src/pvc/pvcHeatGridChart.js
 src/pvc/pvcMetricXYAbstract.js
+src/pvc/data/translation/MetricLineDotChartTranslationOper.js
 src/pvc/pvcMetricLineDotPanel.js
 src/pvc/pvcMetricLineDot.js
 src/pvc/pvcBulletChart.js

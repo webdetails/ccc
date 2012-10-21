@@ -67,7 +67,7 @@ function(dimension, value, label, rawValue, key) {
     this.globalKey = dimension.name + ":" + key;
 })
 .add( /** @lends pvc.data.Atom */{
-    isInterpolated: false,
+    isVirtual: false,
     
     rawValue: undefined,
 

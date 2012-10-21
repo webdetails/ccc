@@ -55,7 +55,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
                     nullInterpolationMode: nullInterpolationMode
                 });
         } else {
-            if(options.secondAxisIndependentScale){
+            if(axes.ortho2){
                 // Separate scales =>
                 // axis ortho 0 represents data part 0
                 // axis ortho 1 represents data part 1
@@ -77,26 +77,18 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
             } else {
                 // Common scale => 
                 // axis ortho 0 represents both data parts
-                var orthoDataCells = [{
-                        role: valueRole,
-                        dataPartValue: '0',
-                        isStacked: isStacked,
-                        nullInterpolationMode: nullInterpolationMode
-                    }, {
-                        role: valueRole,
-                        dataPartValue: '1',
-                        isStacked: isStacked,
-                        nullInterpolationMode: nullInterpolationMode
-                    }
-                ];
-                
-                axes.ortho.bind(orthoDataCells);
-                
-                // TODO: Is it really needed to setScale on ortho2???
-                // We set this here also so that we can set a scale later.
-                // This is not used though, cause the scale
-                // will be that calculated by 'ortho'...
-                axes.ortho2.bind(orthoDataCells);
+                axes.ortho.bind([{
+                            role: valueRole,
+                            dataPartValue: '0',
+                            isStacked: isStacked,
+                            nullInterpolationMode: nullInterpolationMode
+                        }, {
+                            role: valueRole,
+                            dataPartValue: '1',
+                            isStacked: isStacked,
+                            nullInterpolationMode: nullInterpolationMode
+                        }
+                    ]);
             }
         }
         
@@ -122,7 +114,7 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
         
         var linePanel = this.scatterChartPanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(options2, {
             colorAxis:      this.axes.color,
-            dataPartValue:  options.secondAxis ? '0' : null
+            dataPartValue:  '0'
         }));
         
         if(options.secondAxis){
@@ -132,7 +124,8 @@ pvc.LineDotAreaAbstract = pvc.CategoricalAbstract.extend({
             
             this.scatterChartPanel2 = new pvc.LineDotAreaPanel(this, parentPanel, def.create(options2, {
                 extensionPrefix: 'second',
-                colorAxis:       this.axes.color2,
+                orthoAxis:       this.axes.ortho2, // if null defaults to 1
+                colorAxis:       this.axes.color2, // if null defaults to 1
                 dataPartValue:   '1'
             }));
         }

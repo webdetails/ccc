@@ -9,6 +9,7 @@
  * @abstract
  * 
  * @constructor
+ * @param {pvc.BaseChart} chart The associated chart.
  * @param {pvc.data.ComplexType} complexType The complex type that will represent the translated data.
  * @param {pvc.data.Data} data The data object which will be loaded with the translation result.
  * @param {object} source The source matrix, in some format, to be translated.
@@ -37,27 +38,130 @@
 def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
 .add(/** @lends pvc.data.MatrixTranslationOper# */{
     
-    _logSource: function(){
-        pvc.log("ROWS (" + this.source.length + ")");
-        if(this.source){
-            def.query(this.source).take(10).each(function(row, index){
-                pvc.log("row " + index + ": " + JSON.stringify(row));
-            });
+    _initType: function(){
+        this.J = this.metadata.length;
+        this.I = this.source.length;
+        
+        this._processMetadata();
+        
+        this.base();
+    },
+    
+    _knownContinuousColTypes: {'numeric': 1, 'number': 1, 'integer': 1},
+    
+    _processMetadata: function(){
+        // Get the indexes of columns which are 
+        // not stated as continuous (numeric..)
+        // In these, 
+        // we can't trust their stated data type
+        // cause when nulls exist on the first row, 
+        // they frequently come stated as "string"...
+        var knownContinColTypes = this._knownContinuousColTypes;
+        var columns = 
+            def
+            .query(this.metadata)
+            // Fix indexes of colDefs
+            .select(function(colDef, colIndex){
+                // Ensure colIndex is trustable
+                colDef.colIndex = colIndex;
+                return colDef; 
+             })
+            .where(function(colDef){
+                var colType = colDef.colType;
+                return !colType ||
+                       knownContinColTypes[colType.toLowerCase()] !== 1;
+            })
+            .select(function(colDef){ return colDef.colIndex; })
+            .array();
+        
+        // 1 - continuous (number, date)
+        // 0 - discrete   (anything else)
+        // Assume all are continuous
+        var columnTypes = def.array.create(this.J, 1);
+        
+        // Number of rows in source
+        var I = this.I;
+        var source = this.source;
+        
+        // Number of columns remaining to confirm data type
+        var J = columns.length;
+        
+        for(var i = 0 ; i < I && J > 0 ; i++){
+            var row = source[i];
+            var m = 0;
+            while(m < J){
+                var j = columns[m];
+                var value = row[j];
+                if(value != null){
+                    columnTypes[j] = this._getSourceValueType(value);
+                    
+                    columns.splice(m, 1);
+                    J--;
+                } else {
+                    m++;
+                }
+            }
         }
-
-        pvc.log("COLS (" + this.metadata.length + ")");
-        if(this.metadata){
-            this.metadata.forEach(function(col){
-                pvc.log("column {" +
-                    "index: " + col.colIndex +
-                    ", name: "  + col.colName +
-                    ", label: "  + col.colLabel +
-                    ", type: "  + col.colType + "}"
-                );
-            });
-        }
+        
+        this._columnTypes = columnTypes;
     },
 
+    // 1 - continuous (number, date)
+    // 0 - discrete   (anything else)
+    /** @static */
+    _getSourceValueType: function(value){
+        switch(typeof value){
+            case 'number': return 1;
+            case 'object':
+                if(value instanceof Date){
+                    return 1;
+                }
+        }
+        
+        return 0; // discrete
+    },
+    
+    logSource: function(){
+        var out = [
+            "DATA SOURCE SUMMARY",
+            pvc.logSeparator,
+            "ROWS (10/" + this.I + ")"
+        ];
+        
+        def
+        .query(this.source)
+        .take(10)
+        .each(function(row, index){
+            out.push("  [" + index + "] " + JSON.stringify(row));
+        });
+        
+        if(this.I > 10){
+            out.push('  ...');
+        }
+        
+        out.push("COLS (" + this.J + ")");
+        
+        var colTypes = this._columnTypes;
+        this
+        .metadata
+        .forEach(function(col, j){
+            out.push(
+                "  [" + j + "] " + 
+                "'" + col.colName + "' (" +
+                "type: "      + col.colType + ", " + 
+                "inspected: " + (colTypes[j] ? 'continuous' : 'discrete') +
+                 (col.colLabel ? (", label: '" + col.colLabel + "'") : "")  + 
+                ")");
+        });
+        
+        out.push(pvc.logSeparator);
+        pvc.log(out.join('\n'));
+    },
+    
+    _getCategoriesCount: function(){
+        return Math.max(0, def.get(this.options, 'categoriesCount', 1));
+    },
+    
     /**
      * Creates the set of second axis series keys
      * corresponding to the specified

@@ -239,14 +239,24 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     defaultColorAxis: function(){
-        return this._colorAxis || this.chart.axes.color;
+        return this._colorAxis || (this._colorAxis = this.chart.axes.color);
     },
     
     defaultVisibleBulletGroupScene: function(){
+        // Return legendBulletGroupScene, 
+        // from the first data cell of same dataPartValue and 
+        // having one legendBulletGroupScene.
         var colorAxis = this.defaultColorAxis();
         if(colorAxis && colorAxis.isVisible){
-            return colorAxis.legendBulletGroupScene;
+            var dataPartValue = this.dataPartValue;
+            return def
+                .query(colorAxis.dataCells)
+                .where(function(dataCell){ return dataCell.dataPartValue === dataPartValue; })
+                .select(function(dataCell){ return dataCell.legendBulletGroupScene; })
+                .first(def.truthy)
+                ;
         }
+        
         return null;
     },
     
@@ -1511,6 +1521,8 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         if(firstDatum.isInterpolated){
             tooltip.push('<i>Interpolation</i>: ' + def.html.escape(firstDatum.interpolation) + '<br/>');
+        } else if(firstDatum.isTrend){
+            tooltip.push('<i>Trend</i>: ' + def.html.escape(firstDatum.trendType) + '<br/>');
         }
         
         /* TODO: Big HACK to prevent percentages from

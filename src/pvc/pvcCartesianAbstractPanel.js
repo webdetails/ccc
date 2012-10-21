@@ -5,16 +5,40 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
     stacked: false,
     offsetPaddings: null,
     
+    _baseAxis: null,
+    _orthoAxis: null,
+    
     constructor: function(chart, parent, options) {
         
         // Prevent the border from affecting the box model,
         // providing a static 0 value, independently of the actual drawn value...
         //this.borderWidth = 0;
         
+        if(options){
+            if(options.baseAxis){
+                this._baseAxis = options.baseAxis;
+                delete options.baseAxis;
+            }
+            
+            if(options.orthoAxis){
+                this._orthoAxis = options.orthoAxis;
+                delete options.orthoAxis;
+            }
+        }
+        
         this.base(chart, parent, options);
         
-        // Initialize paddings from axes offsets
         var axes = chart.axes;
+        
+        if(!this._baseAxis){
+            this._baseAxis = axes.base;
+        }
+        
+        if(!this._orthoAxis){
+            this._orthoAxis = axes.ortho;
+        }
+        
+        // Initialize paddings from axes offsets
         var paddings = {};
         var hasAny = false;
         
@@ -93,8 +117,8 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
         this.pvPanel.zOrder(-10);
 
         // Overflow
-        var orthoAxis = this.chart.axes.ortho,
-            baseAxis  = this.chart.axes.base;
+        var orthoAxis = this._orthoAxis,
+            baseAxis  = this._baseAxis;
         if (orthoAxis.option('FixedMin') != null ||
             orthoAxis.option('FixedMax') != null ||
             baseAxis .option('FixedMin') != null ||

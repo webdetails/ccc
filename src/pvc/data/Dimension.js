@@ -678,12 +678,12 @@ def.type('pvc.data.Dimension')
      * An empty string value is considered equal to a null value. 
      * </P>
      * @param {any | pvc.data.Atom} sourceValue The source value.
-     * @param {boolean} [isInterpolated=false] Indicates that 
-     * the (necessarily non-null) atom is the result of interpolation.
+     * @param {boolean} [isVirtual=false] Indicates that 
+     * the (necessarily non-null) atom is the result of interpolation or regression.
      * 
      * @type pvc.data.Atom
      */
-    intern: function(sourceValue, isInterpolated){
+    intern: function(sourceValue, isVirtual){
         // NOTE: This function is performance critical!
       
         // The null path and the existing atom path 
@@ -706,7 +706,7 @@ def.type('pvc.data.Dimension')
         var type = this.type;
         
         // - CONVERT - 
-        if(!isInterpolated){
+        if(!isVirtual){
             // Is google table style cell {v: , f: } ?
             if(typeof sourceValue === 'object' && ('v' in sourceValue)){
                 // Get info and get rid of the cell
@@ -746,8 +746,8 @@ def.type('pvc.data.Dimension')
         // - ATOM -
         var atom = this._atomsByKey[key];
         if(atom){
-            if(!isInterpolated && atom.isInterpolated){
-                delete atom.isInterpolated;
+            if(!isVirtual && atom.isVirtual){
+                delete atom.isVirtual;
             }
             return atom;
         }
@@ -759,7 +759,7 @@ def.type('pvc.data.Dimension')
                    key,
                    value,
                    label,
-                   isInterpolated);
+                   isVirtual);
     },
     
     /**
@@ -806,7 +806,7 @@ def.type('pvc.data.Dimension')
  * in {@link sourceValue}, in Google format.
  * @type pvc.data.Atom
  */
-function dim_createAtom(type, sourceValue, key, value, label, isInterpolated){
+function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
     var atom;
     if(this.owner === this){
         // Create the atom
@@ -829,8 +829,8 @@ function dim_createAtom(type, sourceValue, key, value, label, isInterpolated){
         
         // - ATOM! -
         atom = new pvc.data.Atom(this, value, label, sourceValue, key);
-        if(isInterpolated){
-            atom.isInterpolated = true;
+        if(isVirtual){
+            atom.isVirtual = true;
         }
     } else {
         var source = this.parent || this.linkParent;
@@ -842,7 +842,7 @@ function dim_createAtom(type, sourceValue, key, value, label, isInterpolated){
                     key, 
                     value, 
                     label,
-                    isInterpolated);
+                    isVirtual);
     }
         
     // Insert atom in order (or at the end when !_atomComparer)
@@ -1072,7 +1072,7 @@ function dim_uninternUnvisitedAtoms(){
     }
 }
 
-function dim_uninternInterpolatedAtoms(){
+function dim_uninternVirtualAtoms(){
     // This assumes that this same function has been called on child/link child dimensions
     var atoms = this._atoms;
     if(atoms){
@@ -1082,7 +1082,7 @@ function dim_uninternInterpolatedAtoms(){
         var removed;
         while(i < L){ 
             var atom = atoms[i];
-            if(!atom.isInterpolated){
+            if(!atom.isVirtual){
                 i++;
             } else {
                 // Remove the atom
