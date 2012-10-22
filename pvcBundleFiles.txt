@@ -81,14 +81,14 @@ src/pvc/visual/legend/WaterfallBulletGroupScene.js
 src/pvc/pvcWaterfallPanel.js
 src/pvc/pvcWaterfallChart.js
 
-src/pvc/pvcLineDotAreaPanel.js
-src/pvc/pvcLineDotArea.js
+src/pvc/pvcPointPanel.js
+src/pvc/pvcPoint.js
 src/pvc/pvcHeatGridPanel.js
 src/pvc/pvcHeatGridChart.js
 src/pvc/pvcMetricXYAbstract.js
-src/pvc/data/translation/MetricLineDotChartTranslationOper.js
-src/pvc/pvcMetricLineDotPanel.js
-src/pvc/pvcMetricLineDot.js
+src/pvc/data/translation/MetricPointChartTranslationOper.js
+src/pvc/pvcMetricPointPanel.js
+src/pvc/pvcMetricPoint.js
 src/pvc/pvcBulletChart.js
 src/pvc/pvcParallelCoordinates.js
 src/pvc/pvcDataTree.js

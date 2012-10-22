@@ -355,6 +355,10 @@ function(dimTypeSpecs){
         this._calculations.push(calculation);
     },
     
+    isCalculated: function(dimName){
+        return def.hasOwn(this._calculatedDimNames, dimName);
+    },
+    
     _calculate: function(complex){
         var calcs = this._calculations;
         if(calcs.length){

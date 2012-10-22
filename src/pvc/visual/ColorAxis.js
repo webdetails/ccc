@@ -166,27 +166,25 @@ def.scope(function(){
                     } else if(axis.index === 1){
                         colors = chartOption.call(axis, 'secondAxisColor');
                     }
-                    
-                    colors = pvc.colorScheme(colors);
                 }
                 
-                var isDefault = colors == null;
-                if(isDefault){
-                    if(axis.index === 0){
-                        // Assumes default pvc scale
-                        colors = pvc.createColorScheme(colors);
-                    } else {
-//                        // Inherit colors of axis-0
-//                        var color0Axis = axis.chart.axes.color;
-//                        if(color0Axis){
-//                            colors = color0Axis.option('Colors');
-//                        }
-                        // Use a color scheme that always returns 
-                        // the global color scale of the role
-                        colors = function(){ // ignore domain values
-                            return axis.chart._getRoleColorScale(axis.role.name);
-                        };
-                    }
+                var isDefault = (colors == null);
+                if(!isDefault){
+                    colors = pvc.colorScheme(colors);
+                } else if(axis.index === 0){
+                    // Assumes default pvc scale
+                    colors = pvc.createColorScheme(colors);
+                } else {
+//                  // Inherit colors of axis-0
+//                  var color0Axis = axis.chart.axes.color;
+//                  if(color0Axis){
+//                      colors = color0Axis.option('Colors');
+//                  }
+                    // Use a color scheme that always returns 
+                    // the global color scale of the role
+                    colors = function(){ // ignore domain values
+                        return axis.chart._getRoleColorScale(axis.role.name);
+                    };
                 }
                 
                 // Check if there is a color transform set
@@ -201,6 +199,7 @@ def.scope(function(){
                 }
                 
                 this.set(colors, isDefault);
+                
                 return true;
             }
             //cast: pvc.colorScheme

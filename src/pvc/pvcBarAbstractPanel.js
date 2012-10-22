@@ -46,12 +46,14 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         // Register BULLET legend prototype marks
         var groupScene = this.defaultVisibleBulletGroupScene();
         if(groupScene && !groupScene.hasRenderer()){
-            var colorAxis = groupScene.colorAxis;
-            if(colorAxis.option('DrawMarker')){
+            var colorAxis  = groupScene.colorAxis;
+            var drawLine   = colorAxis.option('DrawLine');
+            var drawMarker = !drawLine || colorAxis.option('DrawMarker');
+            if(drawMarker){
                 var keyArgs = {
                     drawMarker:    true,
                     markerShape:   colorAxis.option('Shape'),
-                    drawRule:      colorAxis.option('DrawLine'),
+                    drawRule:      drawLine,
                     markerPvProto: new pv.Mark()
                 };
                 

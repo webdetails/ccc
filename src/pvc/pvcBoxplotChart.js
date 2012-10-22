@@ -111,10 +111,10 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         
         if(this._showLinePanel){
             if(pvc.debug >= 3){
-                pvc.log("Creating LineDotArea panel.");
+                pvc.log("Creating Point panel.");
             }
 
-            var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
+            var linePanel = new pvc.PointPanel(this, parentPanel, def.create(baseOptions, {
                 extensionPrefix: 'second',
                 orientation:  options.orientation,
                 stacked:      false,

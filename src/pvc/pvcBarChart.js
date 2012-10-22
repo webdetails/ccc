@@ -318,10 +318,22 @@ pvc.BarChart = pvc.BarAbstract.extend({
         
         if(options.secondAxis){
             if(pvc.debug >= 3){
-                pvc.log("Creating LineDotArea panel.");
+                pvc.log("Creating Point panel.");
             }
             
-            var linePanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
+            // 
+            // barSecondLine_strokeStyle (legacy)
+            // barSecondDot_strokeStyle  (legacy)
+            // 
+            // barPanel, bar, barLabel, label
+            // 
+            // {<>, trend, second} + {scatterPanel, line, area(shade, dot, label, lineLabel}
+            // 
+            // l/d/a
+            // 
+            // trendPanel
+            
+            var linePanel = new pvc.PointPanel(this, parentPanel, def.create(baseOptions, {
                 extensionPrefix: 'second',
                 orthoAxis:      this.axes.ortho2, // if null defaults to 1
                 colorAxis:      this.axes.color2, // if null defaults to 1
@@ -347,10 +359,10 @@ pvc.BarChart = pvc.BarAbstract.extend({
         var trend = options.trendType;
         if(trend && trend !== 'none'){
             if(pvc.debug >= 3){
-                pvc.log("Creating Trends LineDotArea panel.");
+                pvc.log("Creating Trends Point panel.");
             }
             
-            var trendLinePanel = new pvc.LineDotAreaPanel(this, parentPanel, def.create(baseOptions, {
+            var trendLinePanel = new pvc.PointPanel(this, parentPanel, def.create(baseOptions, {
                 extensionPrefix: 'trend',
                 colorAxis:       this.axes.color3, // if null defaults to 1
                 dataPartValue:   'trend',

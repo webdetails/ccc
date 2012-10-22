@@ -961,7 +961,7 @@ new pvc.BarChart(options)
     </c:complexType>
     
     
-    <c:complexType name="LineDotAreaChartCommonOptions" 
+    <c:complexType name="PointChartCommonOptions" 
                    space="pvc.options" 
                    base="pvc.options.CategoricalChartCommonOptions"
                    abstract="true">
@@ -972,7 +972,7 @@ new pvc.BarChart(options)
     
     <c:complexType name="LineChartOptions" 
                    space="pvc.options"
-                   base="pvc.options.LineDotAreaChartCommonOptions">
+                   base="pvc.options.PointChartCommonOptions">
         <c:documentation>
             The options documentation class of the <b>Line</b> chart class: <c:link to="pvc.LineChart" />.
         </c:documentation>
@@ -980,7 +980,7 @@ new pvc.BarChart(options)
     
     <c:complexType name="DotChartOptions" 
                    space="pvc.options"
-                   base="pvc.options.LineDotAreaChartCommonOptions">
+                   base="pvc.options.PointChartCommonOptions">
         <c:documentation>
             The options documentation class of the <b>Dot</b> chart class: <c:link to="pvc.DotChart" />.
         </c:documentation>
@@ -988,7 +988,7 @@ new pvc.BarChart(options)
     
     <c:complexType name="AreaChartOptions" 
                    space="pvc.options"
-                   base="pvc.options.LineDotAreaChartCommonOptions">
+                   base="pvc.options.PointChartCommonOptions">
         <c:documentation>
             The options documentation class of the <b>Area</b> chart class: <c:link to="pvc.AreaChart" />.
         </c:documentation>
@@ -997,7 +997,7 @@ new pvc.BarChart(options)
     
     <c:complexType name="StackedLineChartOptions" 
                    space="pvc.options"
-                   base="pvc.options.LineDotAreaChartCommonOptions">
+                   base="pvc.options.PointChartCommonOptions">
         <c:documentation>
             The options documentation class of the <b>Stacked Line</b> chart class: <c:link to="pvc.StackedLineChart" />.
         </c:documentation>
@@ -1005,14 +1005,14 @@ new pvc.BarChart(options)
     
     <c:complexType name="StackedAreaChartOptions" 
                    space="pvc.options"
-                   base="pvc.options.LineDotAreaChartCommonOptions">
+                   base="pvc.options.PointChartCommonOptions">
         <c:documentation>
             The options documentation class of the <b>Stacked Area</b> chart class: <c:link to="pvc.StackedAreaChart" />.
         </c:documentation>
     </c:complexType>
     
     
-    <c:complexType name="MetricLineDotChartCommonOptions" 
+    <c:complexType name="MetricPointChartCommonOptions" 
                    space="pvc.options" 
                    base="pvc.options.CartesianChartCommonOptions"
                    abstract="true">
@@ -1023,7 +1023,7 @@ new pvc.BarChart(options)
     
     <c:complexType name="MetricLineChartOptions" 
                    space="pvc.options"
-                   base="pvc.options.MetricLineDotChartCommonOptions">
+                   base="pvc.options.MetricPointChartCommonOptions">
         <c:documentation>
             The options documentation class of the <b>Metric Line</b> chart class: <c:link to="pvc.MetricLineChart" />.
         </c:documentation>
@@ -1031,7 +1031,7 @@ new pvc.BarChart(options)
     
     <c:complexType name="MetricDotChartOptions" 
                    space="pvc.options"
-                   base="pvc.options.MetricLineDotChartCommonOptions">
+                   base="pvc.options.MetricPointChartCommonOptions">
         <c:documentation>
             The options documentation class of the <b>Metric Dot (XY Scatter)</b> chart class: <c:link to="pvc.MetricDotChart" />.
         </c:documentation>

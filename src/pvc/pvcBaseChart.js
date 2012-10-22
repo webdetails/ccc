@@ -744,14 +744,24 @@ pvc.BaseChart = pvc.Abstract.extend({
             translOptions = this._createTranslationOptions(),
             translation   = this._createTranslation(complexType, translOptions),
             dataPartDimName,
-            axis2Series,
-            trendType;
+            axis2Series;
 
         if(pvc.debug >= 3){
             translation.logSource();
         }
         
+        var addDataPartDefaultCalc = false;
         if(!data){
+            /* LOAD */
+            
+            // TODO
+            // By now, the translation has not yet defined 
+            // dimensions of options.dimensions
+            // (which probably should be done here, anyway...)
+            // So calculations may refer to dimensions in options.dimensions...
+            // and these will end up being defined with very default values in addCalculation...
+            
+            /* REGISTER CALCULATIONS */
             // Currently translOptions has what is needed to
             // pass to pvc.data.DimensionType.extendSpec...
             var calcSpecs = options.calculations;
@@ -761,28 +771,44 @@ pvc.BaseChart = pvc.Abstract.extend({
                 });
             }
             
+            // Is the role dataPart defined, 
+            // and, if so, is it preBound?
+            // What is the default or preBound dim name?
             dataPartDimName = this._getDataPartDimName();
             if(dataPartDimName){
-                trendType = options.trendType;
-                if(trendType === 'none'){
-                    trendType = null;
-                }
-            
-                axis2Series = options.secondAxis && options.secondAxisSeries;
-                if(axis2Series){
-                    // Register the dimension
-                    // Prevents readers from reading into it
-                    // Allows the role to bind to it, below
-                    this._addDataPartDimension(complexType, dataPartDimName);
+                if(!complexType.isCalculated(dataPartDimName)){
+                    // Axis2Series works by adding a calculation to 
+                    // the dataPart role (to classify in '0' or '1' dataPart),
+                    // so using it requires registering the dataPart dimension
+                    axis2Series = options.secondAxis && options.secondAxisSeries;
+                    if(axis2Series){
+                        // Also, doing now, 
+                        // prevents readers from reading into it.
+                        this._addDataPartDimension(complexType, dataPartDimName);
+                    }
                 }
             }
             
             // Now the translation can configure the type as well
             translation.configureType();
             
-            if(axis2Series || !trendType || !this._addDataPartDimension(complexType, dataPartDimName)) {
-                // Signal not to add the default DataPart calculation
-                trendType = null;
+            if(!axis2Series && dataPartDimName){
+                // If the user isn't explicitly reading the dimension,
+                // then the dimension must be created and its value defaulted.
+                
+                addDataPartDefaultCalc = !complexType.dimensions(dataPartDimName, {assertExists: false});
+                if(addDataPartDefaultCalc){
+                    this._addDataPartDimension(complexType, dataPartDimName);
+                }
+                
+                // Trends require the dataPart role to be bound.
+//                var trendType = options.trendType;
+//                if(trendType && trendType !== 'none'){
+//                    if(this._addDataPartDimension(complexType, dataPartDimName)){
+//                        // Was added now, so the default calculation is really needed
+//                        addDataPartDefaultCalc = true;
+//                    }
+//                }
             }
         }
         
@@ -802,15 +828,15 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._logVisualRoles();
         }
 
-        if(axis2Series){
-            this._addAxis2SeriesCalculation(complexType, axis2Series, dataPartDimName);
-        } else if(trendType) {
-            this._addDefaultDataPartCalculation(complexType, dataPartDimName);
-        }
-        
         // ----------
 
         if(!data) {
+            if(axis2Series){
+                this._addAxis2SeriesCalculation(complexType, axis2Series, dataPartDimName);
+            } else if(addDataPartDefaultCalc) {
+                this._addDefaultDataPartCalculation(complexType, dataPartDimName);
+            }
+            
             data =
                 this.dataEngine =
                 this.data = new pvc.data.Data({
