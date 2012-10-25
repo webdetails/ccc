@@ -301,6 +301,10 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      */
     datums: function(whereSpec, keyArgs){
         if(!whereSpec){
+            if(!keyArgs){
+                return def.query(this._datums);
+            }
+            
             return data_whereState(def.query(this._datums), keyArgs);
         }
         

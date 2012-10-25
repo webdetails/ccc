@@ -63,31 +63,95 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
         this._yDim = this.data.dimensions(this._yRole.firstDimensionName());
     },
     
-    _bindAxes: function(hasMultiRole){
+    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo){
+        var serRole = this._serRole;
+        var xRole   = this._xRole;
+        var yRole   = dataCell.role;
         
-        this.base(hasMultiRole);
-      
-        /**
-         * Axes are created even when hasMultiRole && !parent
-         * because it is needed to read axis options in the root chart.
-         * Also binding occurs to be able to know its scale type. 
-         * Yet, their scales are not setup at the root level.
-         */
+        this._warnSingleContinuousValueRole(yRole);
         
-        var axes = this.axes;
+        var dataPartDimName = this._dataPartRole.firstDimensionName();
+        var xDimName = xRole.firstDimensionName();
+        var yDimName = yRole.firstDimensionName();
+        
+        // Visible part data, possibly grouped by series (if series is bound)
+        var data = this._getVisibleData(dataCell.dataPartValue);
+        
+        // For each series...
+        def
+        .scope(function(){
+            return serRole.isBound()   ?
+                   data.children() : // data already only contains visible data
+                   def.query([data]) // null series
+                   ;
+        })
+        .each(genSeriesTrend, this)
+        ;
+        
+        function genSeriesTrend(serData){
+            var funX = function(datum){
+                    return datum.atoms[xDimName].value;
+                };
             
-        var axis = axes.base;
-        if(!axis.isBound()){
-            axis.bind({role: this._xRole});
-        }
-        
-        axis = axes.ortho;
-        if(!axis.isBound()){
-            axis.bind({role: this._yRole});
+            var funY = function(datum){
+                    return datum.atoms[yDimName].value;
+                };
+            
+            var trendModel = trendInfo.model(serData.datums(), funX, funY);
+            if(trendModel){
+                // Works well for linear, but for other interpolation types
+                // what is the correct sampling spacing?
+                var firstDatum = serData.firstDatum();
+                var xExtent = serData.dimensions(xDimName).extent();
+                var xPoints = [xExtent.min.value];
+                if(xExtent.min !== xExtent.max){
+                    xPoints.push(xExtent.max.value);
+                }
+                
+                // At least one point...
+                // Sample the line on each x and create a datum for it
+                // on the 'trend' data part
+                xPoints.forEach(function(trendX, index){
+                    var trendY = trendModel.sample(trendX);
+                    var atoms = Object.create(firstDatum.atoms);
+                    atoms[xDimName] = trendX;
+                    atoms[yDimName] = trendY;
+                    atoms[dataPartDimName] = trendInfo.dataPartAtom;
+                    
+                    var newDatum = new pvc.data.Datum(data.owner, atoms);
+                    newDatum.isVirtual = true;
+                    newDatum.isTrend   = true;
+                    newDatum.trendType = trendInfo.type;
+                    
+                    newDatums.push(newDatum);
+                }, this);
+            }
         }
     },
+//    
+//    _bindAxes: function(hasMultiRole){
+//        
+//        this.base(hasMultiRole);
+//      
+//        /**
+//         * Axes are created even when hasMultiRole && !parent
+//         * because it is needed to read axis options in the root chart.
+//         * Also binding occurs to be able to know its scale type. 
+//         * Yet, their scales are not setup at the root level.
+//         */
+//        
+//        var axes = this.axes;
+//            
+//        var axis = axes.base;
+//        if(!axis.isBound()){
+//            axis.bind({role: this._xRole});
+//        }
+//        
+//        axis = axes.ortho;
+//        if(!axis.isBound()){
+//            axis.bind({role: this._yRole});
+//        }
+//    },
     
-    defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
-        valuesAnchor: "right"
-    })
+    defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {})
 });

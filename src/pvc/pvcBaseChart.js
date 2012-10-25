@@ -385,9 +385,11 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._bindAxes(hasMultiRole);
         
         /* Trends and Interpolatation */
-        this._generateTrends(hasMultiRole);
-        
-        this._interpolate(hasMultiRole);
+        if(this.parent || !hasMultiRole){
+            this._generateTrends(hasMultiRole);
+            
+            this._interpolate(hasMultiRole);
+        }
         
         /* Set axes scales */
         this._setAxesScales(hasMultiRole);
@@ -606,7 +608,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
         
         this.axesList.push(axis);
-        def.array.lazy(this.axesByType, axis.type).push(axis);
+        def.array.lazy(this.axesByType, axis.type)[axis.index] = axis;
         
         // For child charts, that simply copy color axes
         if(axis.type === 'color' && axis.isBound()){
@@ -673,18 +675,20 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
     
     _generateTrends: function(){
-        def
-        .query(def.own(this.axes))
-        .selectMany(function(axis){ return axis.dataCells; })
-        .where(function(dataCell){
-            var trendType = dataCell.trendType;
-            return !!trendType && trendType !== 'none'; 
-         })
-         .distinct(function(dataCell){
-             return dataCell.role.name  + '|' +
-                   (dataCell.dataPartValue || '');
-         })
-         .each(this._generateTrendsDataCell, this);
+        if(this._dataPartRole){
+            def
+            .query(def.own(this.axes))
+            .selectMany(function(axis){ return axis.dataCells; })
+            .where(function(dataCell){
+                var trendType = dataCell.trendType;
+                return !!trendType && trendType !== 'none'; 
+             })
+             .distinct(function(dataCell){
+                 return dataCell.role.name  + '|' +
+                       (dataCell.dataPartValue || '');
+             })
+             .each(this._generateTrendsDataCell, this);
+        }
     },
     
     _interpolate: function(){

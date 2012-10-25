@@ -80,17 +80,6 @@ pvc.PieChartPanel = pvc.PlotPanel.extend({
         return datum;
     },
     
-    /* Layout independent and required by layout stuff only! */
-    _getCoreInfo: function(){
-        if(!this._coreInfo){
-            this._coreInfo = {
-               rootScene: this._buildScene()
-            };
-        }
-        
-        return this._coreInfo;
-    },
-    
     /**
      * @override
      */

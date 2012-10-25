@@ -23,6 +23,7 @@
         <script type="text/javascript" src="../src/pvc/pvc.js"></script>
         <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
         <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.trends.js"></script>
         <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
         <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
         <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
@@ -178,6 +179,8 @@
                 
                 groupedLabelSep: " & ",
                 
+                trendType: 'linear',
+                
                 /* Multi-chart */
 
                 //multiChartIndexes: 1,
@@ -185,8 +188,8 @@
                 multiChartMax: 10,
                 
                 /* Small charts */
-                orientation: 'horizontal',
-                stacked:     true,
+                orientation: 'vertical',
+                stacked:     false,
                 xAxisTitle:  "Quantity sold",
                 yAxisTitle:  "Country",
                 showValues:  false,
@@ -349,6 +352,8 @@
 
                 //multiChartColumnsMax: Infinity,
                 multiChartMax: 9,
+                
+                trendType: 'linear',
                 
                 /* Small charts */
                 //orientation: 'horizontal',

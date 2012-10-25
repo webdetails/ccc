@@ -400,7 +400,7 @@ function(dimTypeSpecs){
      * @param {function} [nameKey] Allows extracting the dimension name from
      * each of the elements of the specified array.
      * 
-     * @type undefined
+     * @type any[]
      */
     sortDimensionNames: function(dims, nameKey){
         var dimsIndexByName = this._dimsIndexByName;
@@ -421,6 +421,8 @@ function(dimTypeSpecs){
                     dimsIndexByName[nameKey ? nameKey(db) : db]);
                     
         });
+        
+        return dims;
     }
 });
 

@@ -40,6 +40,111 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         };
     },
     
+    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo){
+        var serRole = this._serRole;
+        var xRole   = this._catRole;
+        var yRole   = dataCell.role;
+        
+        this._warnSingleContinuousValueRole(yRole);
+        
+        var dataPartDimName = this._dataPartRole.firstDimensionName();
+        var yDimName = yRole.firstDimensionName();
+        var xDimName;
+        var isXDiscrete = xRole.isDiscrete();
+        if(!isXDiscrete){
+            xDimName = xRole.firstDimensionName();
+        }
+        
+        var sumKeyArgs = { zeroIfNone: false };
+        var ignoreNullsKeyArgs = {ignoreNulls: false};
+                
+        // Visible data grouped by category and then series
+        var data = this._getVisibleData(dataCell.dataPartValue);
+        
+        // TODO: It is usually the case, but not certain, that the base axis' 
+        // dataCell(s) span "all" data parts.
+        // The data that will be shown in the base scale...
+        // Ideally the base scale would already be set up...
+        var allPartsData   = this._getVisibleData(null, ignoreNullsKeyArgs);
+        var allCatDataRoot = allPartsData.flattenBy(xRole, ignoreNullsKeyArgs);
+        var allCatDatas    = allCatDataRoot._children;
+        
+        // For each series...
+        def
+        .scope(function(){
+            return (serRole && serRole.isBound())   ?
+                   data.flattenBy(serRole).children() : // data already only contains visible data
+                   def.query([null]) // null series
+                   ;
+        })
+        .each(genSeriesTrend, this);
+          
+        function genSeriesTrend(serData1){
+            var funX = isXDiscrete ? 
+                       null : // means: "use *index* as X value"
+                       function(allCatData){
+                           return allCatData.atoms[xDimName].value;
+                       };
+                       
+            var funY = function(allCatData){
+                var group = data._childrenByKey[allCatData.key];
+                if(group && serData1){
+                    group = group._childrenByKey[serData1.key];
+                }
+                
+                // When null, the data point ends up being ignored
+                return group ? group.dimensions(yDimName).sum(sumKeyArgs) : null;
+            };
+            
+            var trendModel = trendInfo.model(def.query(allCatDatas), funX, funY);
+            if(trendModel){
+                // At least one point...
+                // Sample the line on each x and create a datum for it
+                // on the 'trend' data part
+                allCatDatas.forEach(function(allCatData, index){
+                    var trendX = isXDiscrete ? 
+                                 index :
+                                 allCatData.atoms[xDimName].value;
+                    
+                    var trendY = trendModel.sample(trendX);
+                    
+                    var catData   = data._childrenByKey[allCatData.key];
+                    var efCatData = catData || allCatData;
+                    
+                    var atoms;
+                    var proto = catData;
+                    if(serData1){
+                        var catSerData = catData && 
+                                         catData._childrenByKey[serData1.key];
+                        
+                        if(catSerData){
+                            atoms = Object.create(catSerData._datums[0].atoms);
+                        } else {
+                            // Missing data point
+                            atoms = Object.create(efCatData._datums[0].atoms);
+                            
+                            // Now copy series atoms
+                            def.copyOwn(atoms, serData1.atoms);
+                        }
+                    } else {
+                        // Series is unbound
+                        atoms = Object.create(efCatData._datums[0].atoms);
+                    }
+                    
+                    atoms[yDimName] = trendY;
+                    atoms[dataPartDimName] = trendInfo.dataPartAtom;
+                    
+                    var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
+                    newDatum.isVirtual = true;
+                    newDatum.isTrend   = true;
+                    newDatum.trendType = trendInfo.type;
+                    
+                    newDatums.push(newDatum);
+                }, this);
+            }
+        }
+    },
+    
     _interpolateDataCell: function(dataCell){
         var nullInterpMode = dataCell.nullInterpolationMode;
         if(nullInterpMode){

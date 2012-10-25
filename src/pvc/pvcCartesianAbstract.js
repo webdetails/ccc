@@ -118,7 +118,28 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         
         return this;
     },
+        
+    _generateTrendsDataCell: function(dataCell){
+        /*jshint onecase:true */
+        var trendType =  dataCell.trendType;
+        if(trendType){
+            var trendInfo = pvc.trends.get(trendType);
+            
+            var newDatums = [];
+            
+            this._generateTrendsDataCellCore(newDatums, dataCell, trendInfo);
+            
+            if(newDatums.length){
+                this.data.owner.add(newDatums);
+            }
+        }
+    },
     
+    _generateTrendsDataCellCore: function(dataCell, trendInfo){
+        // abstract
+        // see Metric and Categorical implementations
+    },
+        
     _setAxesScales: function(hasMultiRole){
         
         this.base(hasMultiRole);

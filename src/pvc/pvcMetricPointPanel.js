@@ -42,7 +42,8 @@ pvc.MetricPointPanel = pvc.CartesianAbstractPanel.extend({
         
         this.base(chart, parent, plot, options);
         
-        this.axes.size  = chart.getAxis('size', plot.option('SizeAxis') - 1); // may be undefined
+        var sizeAxisIndex = plot.option('SizeAxis');
+        this.axes.size  = sizeAxisIndex != null ? chart.getAxis('size', sizeAxisIndex - 1) : null;
         this.showLines  = plot.option('LinesVisible'); // TODO
         this.showDots   = plot.option('DotsVisible' ); // TODO
         if(!this.showLines && !this.showDots){
@@ -94,11 +95,11 @@ pvc.MetricPointPanel = pvc.CartesianAbstractPanel.extend({
     _getRootScene: function(){
         var rootScene = this._rootScene;
         if(!rootScene){
-            var hasColorRole = !!this.chart._colorRole.grouping;
+            var hasColorRole = this.chart._colorRole.isBound();
             
             // --------------
             
-            var sizeAxis = this.chart.axes.size;
+            var sizeAxis = this.axes.size;
             var hasSizeRole = sizeAxis && sizeAxis.isBound() && !sizeAxis.scale.isNull;
             
             // --------------

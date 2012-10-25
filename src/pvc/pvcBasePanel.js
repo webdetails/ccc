@@ -57,7 +57,6 @@ pvc.BasePanel = pvc.Abstract.extend({
     root:      null, 
     topRoot:   null,
     
-    _coreInfo: null,   // once per create info (only for information that is: layout independent *and* required by layout)
     _layoutInfo: null, // once per layout info
     
     _signs: null,
@@ -761,7 +760,6 @@ pvc.BasePanel = pvc.Abstract.extend({
             this.pvPanel = null;
             
             delete this._signs;
-            delete this._coreInfo;
             
             /* Layout */
             this.layout();
@@ -1490,14 +1488,17 @@ pvc.BasePanel = pvc.Abstract.extend({
             tooltip.push('<i>Trend</i>: ' + def.html.escape(firstDatum.trendType) + '<br/>');
         }
         
+        var complexType = data.type;
+        
         /* TODO: Big HACK to prevent percentages from
          * showing up in the Lines of BarLine
          */
         var playingPercentMap = context.panel.stacked === false ? 
                                 null :
-                                data.type.getPlayingPercentVisualRoleDimensionMap();
+                                complexType.getPlayingPercentVisualRoleDimensionMap();
         
         var commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
+        var commonAtomsKeys = complexType.sortDimensionNames(def.keys(commonAtoms));
         
         function addDim(escapedDimLabel, label){
             tooltip.push('<b>' + escapedDimLabel + "</b>: " + (def.html.escape(label) || " - ") + '<br/>');
@@ -1515,8 +1516,8 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         var anyCommonAtom = false;
-        
-        def.each(commonAtoms, function(atom, dimName){
+        commonAtomsKeys.forEach(function(dimName){
+            var atom = commonAtoms[dimName];
             var dimType = atom.dimension.type;
             if(!dimType.isHidden){
                 if(!isMultiDatumGroup || atom.value != null) {
@@ -1530,7 +1531,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     addDim(def.html.escape(atom.dimension.type.label), valueLabel);
                 }
             }
-        });
+        }, this);
         
         if(isMultiDatumGroup) {
             if(anyCommonAtom){
@@ -1539,7 +1540,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             tooltip.push("<b>#</b>: " + group._datums.length + '<br/>');
             
-            group.freeDimensionNames().forEach(function(dimName){
+            complexType.sortDimensionNames(group.freeDimensionNames())
+            .forEach(function(dimName){
                 var dim = group.dimensions(dimName);
                 if(!dim.type.isHidden){
                     var dimLabel = def.html.escape(dim.type.label),

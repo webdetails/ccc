@@ -151,7 +151,7 @@ def.scope(function(){
                     // (the value of the series or the category role)
                     // is the same. Same value => same color.
                     if(this.name === 'trend'){
-                        optionInfo.specify(3);
+                        optionInfo.defaultValue(3);
                         return true;
                     }
                 },

@@ -38,10 +38,12 @@ def.scope(function(){
     pvc.visual.MetricPointPlot.optionsDef = def.create(
         pvc.visual.MetricXYPlot.optionsDef, {
             SizeRole: {
+                resolve: '_resolveFixed',
                 value: 'size'
             },
             
             SizeAxis: {
+                resolve: '_resolveFixed',
                 value: 1
             },
             
