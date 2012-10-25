@@ -12,7 +12,24 @@
  * <i>heatGridPanel_</i> - for the panel where the heatGrids sit
  * <i>heatGridLabel_</i> - for the main heatGrid label
  */
-pvc.HeatGridPanel = pvc.CategoricalAbstractPanel.extend({
+def
+.type('pvc.HeatGridPanel', pvc.CategoricalAbstractPanel)
+.init(function(chart, parent, plot, options) {
+    
+    this.base(chart, parent, plot, options);
+    
+    this.axes.size = chart.getAxis('size', plot.option('SizeAxis') - 1); // may be undefined
+    
+    this.useShapes = plot.option('UseShapes');
+    this.shape     = plot.option('Shape');
+    this.nullShape = plot.option('NullShape');
+    
+    this.colorScaleType = plot.option('ColorScaleType');
+    this.nullColor = plot.option('NullColor');
+    this.minColor  = plot.option('MinColor');
+    this.maxColor  = plot.option('MaxColor');        
+})
+.add({
 
     pvHeatGrid: null,
     pvHeatGridLabel: null,
@@ -20,22 +37,6 @@ pvc.HeatGridPanel = pvc.CategoricalAbstractPanel.extend({
     defaultBorder:  1,
     nullBorder:     2,
     selectedBorder: 2,
-    
-    constructor: function(chart, parent, plot, options) {
-        
-        this.base(chart, parent, plot, options);
-        
-        this.axes.size = chart.getAxis('size', plot.option('SizeAxis') - 1); // may be undefined
-        
-        this.useShapes = plot.option('UseShapes');
-        this.shape     = plot.option('Shape');
-        this.nullShape = plot.option('NullShape');
-        
-        this.colorScaleType = plot.option('ColorScaleType');
-        this.nullColor = plot.option('NullColor');
-        this.minColor  = plot.option('MinColor');
-        this.maxColor  = plot.option('MaxColor');        
-    },
     
     /**
      * @override

@@ -2,7 +2,18 @@
 /**
  * BarAbstract is the base class for generating charts of the bar family.
  */
-pvc.BarAbstract = pvc.CategoricalAbstract.extend({
+def
+.type('pvc.BarAbstract', pvc.CategoricalAbstract)
+.init(function(options){
+
+    this.base(options);
+
+    var parent = this.parent;
+    if(parent) {
+        this._valueRole = parent._valueRole;
+    }
+})
+.add({
     // NOTE
     // Timeseries category with bar charts are supported differently in V2 than in V1
     // They worked in v1 if the data set brought all
@@ -12,16 +23,6 @@ pvc.BarAbstract = pvc.CategoricalAbstract.extend({
     // To mimic v1 behavior the category dimensions are "coerced" to isDiscrete
     // The axis will be categoric, the parsing will work, 
     // and the formatting will be the desired one
-    
-    constructor: function(options){
-
-        this.base(options);
-
-        var parent = this.parent;
-        if(parent) {
-            this._valueRole = parent._valueRole;
-        }
-    },
 
     /**
      * Initializes each chart's specific roles.

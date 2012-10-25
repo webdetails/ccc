@@ -1211,6 +1211,11 @@ def.scope(function(){
             });
 
             return this;
+        },
+        
+        addStatic: function(mixin){
+            def.copy(this, mixin);
+            return this;
         }
     };
 

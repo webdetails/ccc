@@ -15,7 +15,28 @@
  * <i>lineDot_</i> - the dots on the line
  * <i>lineLabel_</i> - for the main line label
  */
-pvc.MetricPointPanel = pvc.CartesianAbstractPanel.extend({
+def
+.type('pvc.MetricPointPanel', pvc.CartesianAbstractPanel)
+.init(function(chart, parent, plot, options) {
+    
+    this.base(chart, parent, plot, options);
+    
+    var sizeAxisIndex = plot.option('SizeAxis');
+    this.axes.size  = sizeAxisIndex != null ? chart.getAxis('size', sizeAxisIndex - 1) : null;
+    this.showLines  = plot.option('LinesVisible'); // TODO
+    this.showDots   = plot.option('DotsVisible' ); // TODO
+    if(!this.showLines && !this.showDots){
+        this.showLines = true;
+        plot.option.specify({'LinesVisible': true});
+    }
+    
+    this.dotShape = plot.option('Shape');
+    
+    if(!this.offsetPaddings){
+        this.offsetPaddings = new pvc.Sides(0.01);
+    }
+})
+.add({
     
     pvLine: null,
     pvDot: null,
@@ -36,26 +57,6 @@ pvc.MetricPointPanel = pvc.CartesianAbstractPanel.extend({
         'series':   'series',
         'category': 'x',
         'value':    'y'
-    },
-    
-    constructor: function(chart, parent, plot, options) {
-        
-        this.base(chart, parent, plot, options);
-        
-        var sizeAxisIndex = plot.option('SizeAxis');
-        this.axes.size  = sizeAxisIndex != null ? chart.getAxis('size', sizeAxisIndex - 1) : null;
-        this.showLines  = plot.option('LinesVisible'); // TODO
-        this.showDots   = plot.option('DotsVisible' ); // TODO
-        if(!this.showLines && !this.showDots){
-            this.showLines = true;
-            plot.option.specify({'LinesVisible': true});
-        }
-        
-        this.dotShape = plot.option('Shape');
-        
-        if(!this.offsetPaddings){
-            this.offsetPaddings = new pvc.Sides(0.01);
-        }
     },
     
     _creating: function(){

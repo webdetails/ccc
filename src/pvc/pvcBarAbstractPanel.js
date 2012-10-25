@@ -16,7 +16,9 @@
  * <i>barPanel_</i> - for the panel where the bars sit
  * <i>barLabel_</i> - for the main bar label
  */
-pvc.BarAbstractPanel = pvc.CategoricalAbstractPanel.extend({
+def
+.type('pvc.BarAbstractPanel', pvc.CategoricalAbstractPanel)
+.add({
     
     pvBar: null,
     pvBarLabel: null,

@@ -2,7 +2,9 @@
 /**
  * PieChart is the main class for generating... pie charts (surprise!).
  */
-pvc.PieChart = pvc.BaseChart.extend({
+def
+.type('pvc.PieChart', pvc.BaseChart)
+.add({
 
     pieChartPanel: null,
     

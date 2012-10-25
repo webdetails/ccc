@@ -1,7 +1,52 @@
 /**
  * The main chart component
  */
-pvc.BaseChart = pvc.Abstract.extend({
+def
+.type('pvc.BaseChart', pvc.Abstract)
+.init(function(options) {
+    var parent = this.parent = def.get(options, 'parent') || null;
+    
+    this._initialOptions = options;
+    
+    /* DEBUG options */
+    if(pvc.debug >= 3 && !parent && options){
+        try {
+            pvc.log("INITIAL OPTIONS:\n" + pvc.stringify(options));
+        } catch(ex) {
+            /* SWALLOW usually a circular JSON structure */
+        }
+    }
+    
+    if(parent) {
+        // options != null
+        this.root = parent.root;
+        this.dataEngine =
+        this.data = options.data ||
+                    def.fail.argumentRequired('options.data');
+        
+        this.left = options.left;
+        this.top  = options.top;
+        this._visualRoles = parent._visualRoles;
+        this._measureVisualRoles = parent._measureVisualRoles;
+
+        if(parent._serRole) {
+            this._serRole = parent._serRole;
+        }
+
+        if(parent._dataPartRole) {
+            this._dataPartRole = parent._dataPartRole;
+        }
+        
+    } else {
+        this.root = this;
+        
+        this._visualRoles = {};
+        this._measureVisualRoles = [];
+    }
+    
+    this.options = def.mixin({}, this.defaults, options);
+})
+.add({
     /**
      * Indicates if the chart has been disposed.
      */
@@ -278,50 +323,6 @@ pvc.BaseChart = pvc.Abstract.extend({
     
     _axisCreationOrder: ['color', 'size', 'base', 'ortho'],
     
-    constructor: function(options) {
-        var parent = this.parent = def.get(options, 'parent') || null;
-        
-        this._initialOptions = options;
-        
-        /* DEBUG options */
-        if(pvc.debug >= 3 && !parent && options){
-            try {
-                pvc.log("INITIAL OPTIONS:\n" + pvc.stringify(options));
-            } catch(ex) {
-                /* SWALLOW usually a circular JSON structure */
-            }
-        }
-        
-        if(parent) {
-            // options != null
-            this.root = parent.root;
-            this.dataEngine =
-            this.data = options.data ||
-                        def.fail.argumentRequired('options.data');
-            
-            this.left = options.left;
-            this.top  = options.top;
-            this._visualRoles = parent._visualRoles;
-            this._measureVisualRoles = parent._measureVisualRoles;
-
-            if(parent._serRole) {
-                this._serRole = parent._serRole;
-            }
-
-            if(parent._dataPartRole) {
-                this._dataPartRole = parent._dataPartRole;
-            }
-            
-        } else {
-            this.root = this;
-            
-            this._visualRoles = {};
-            this._measureVisualRoles = [];
-        }
-        
-        this.options = def.mixin({}, this.defaults, options);
-    },
-    
     compatVersion: function(options){
         return (options || this.options).compatVersion;
     },
@@ -468,6 +469,19 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
     
+    /* VISUAL ROLES */
+    _addVisualRoles: function(roles){
+        def.eachOwn(roles, function(keyArgs, name){
+            var visualRole = new pvc.visual.Role(name, keyArgs);
+            this._visualRoles[name] = visualRole;
+            if(visualRole.isMeasure){
+                this._measureVisualRoles.push(visualRole);
+            }
+        }, this);
+    },
+    
+    
+    /* PLOTS */
     _initPlots: function(hasMultiRole){
         // reset plots
         if(!this.parent){
@@ -712,6 +726,8 @@ pvc.BaseChart = pvc.Abstract.extend({
     _generateTrendsDataCell: function(dataCell){
     },
     
+    // ---------------
+    
     _setAxesScales: function(isMulti){
         if(!this.parent){
             var colorAxes = this.axesByType.color;
@@ -737,19 +753,6 @@ pvc.BaseChart = pvc.Abstract.extend({
                 break;
         }
     },
-    
-    _buildRolesDataCells: function(roleNames, dataCellBase){
-        return def
-            .query(roleNames)
-            .select(function(roleName){
-                var dataCell = dataCellBase ? Object.create(dataCellBase) : {};
-                dataCell.role = def.string.is(roleName) ? this.visualRoles(roleName) : roleName;
-                return dataCell;
-            }, this)
-            .array();
-    },
-    
-    // ---------------
     
     /**
      * Obtains an unified color scale, 
@@ -815,38 +818,6 @@ pvc.BaseChart = pvc.Abstract.extend({
     
     // ---------------
     
-    _initChartPanels: function(hasMultiRole){
-        /* Initialize chart panels */
-        this._initBasePanel  ();
-        this._initTitlePanel ();
-        this._initLegendPanel();
-        
-        if(!this.parent && hasMultiRole) {
-            this._initMultiChartPanel();
-        } else {
-            var options = this.options;
-            this._preRenderContent({
-                margins:           hasMultiRole ? options.smallContentMargins  : options.contentMargins,
-                paddings:          hasMultiRole ? options.smallContentPaddings : options.contentPaddings,
-                clickAction:       options.clickAction,
-                doubleClickAction: options.doubleClickAction
-            });
-        }
-    },
-    
-    /**
-     * Override to create chart specific content panels here.
-     * No need to call base.
-     * 
-     * @param {object} contentOptions Object with content specific options. Can be modified.
-     * @param {pvc.Sides} [contentOptions.margins] The margins for the content panels. 
-     * @param {pvc.Sides} [contentOptions.paddings] The paddings for the content panels.
-     * 
-     * @virtual
-     */
-    _preRenderContent: function(contentOptions){
-        /* NOOP */
-    },
     
     /**
      * Initializes the data engine and roles
@@ -1002,11 +973,6 @@ pvc.BaseChart = pvc.Abstract.extend({
             return true;
         }
     },
-    
-//    
-//    _onNewDimensionType: function(dimName, dimSpec){
-//        return dimSpec;
-//    },
     
     _getLoadFilter: function(){
         if(this.options.ignoreNulls) {
@@ -1249,16 +1215,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         return null;
     },
 
-    _addVisualRoles: function(roles){
-        def.eachOwn(roles, function(keyArgs, name){
-            var visualRole = new pvc.visual.Role(name, keyArgs);
-            this._visualRoles[name] = visualRole;
-            if(visualRole.isMeasure){
-                this._measureVisualRoles.push(visualRole);
-            }
-        }, this);
-    },
-    
     _bindVisualRoles: function(type){
         
         var boundDimTypes = {};
@@ -1442,6 +1398,42 @@ pvc.BaseChart = pvc.Abstract.extend({
                new pvc.data.Data({linkParent: this._partData, datums: []}); // don't blow code ahead...
     },
 
+    // --------------------
+    
+    _initChartPanels: function(hasMultiRole){
+        /* Initialize chart panels */
+        this._initBasePanel  ();
+        this._initTitlePanel ();
+        this._initLegendPanel();
+        
+        if(!this.parent && hasMultiRole) {
+            this._initMultiChartPanel();
+        } else {
+            var options = this.options;
+            
+            this._preRenderContent({
+                margins:           hasMultiRole ? options.smallContentMargins  : options.contentMargins,
+                paddings:          hasMultiRole ? options.smallContentPaddings : options.contentPaddings,
+                clickAction:       options.clickAction,
+                doubleClickAction: options.doubleClickAction
+            });
+        }
+    },
+    
+    /**
+     * Override to create chart specific content panels here.
+     * No need to call base.
+     * 
+     * @param {object} contentOptions Object with content specific options. Can be modified.
+     * @param {pvc.Sides} [contentOptions.margins] The margins for the content panels. 
+     * @param {pvc.Sides} [contentOptions.paddings] The paddings for the content panels.
+     * 
+     * @virtual
+     */
+    _preRenderContent: function(contentOptions){
+        /* NOOP */
+    },
+    
     /**
      * Creates and initializes the base panel.
      */

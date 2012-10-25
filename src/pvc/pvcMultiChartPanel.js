@@ -1,5 +1,7 @@
 
-pvc.MultiChartPanel = pvc.BasePanel.extend({
+def
+.type('pvc.MultiChartPanel', pvc.BasePanel)
+.add({
     anchor: 'fill',
     
     /**

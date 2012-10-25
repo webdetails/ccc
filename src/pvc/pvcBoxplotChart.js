@@ -11,7 +11,9 @@
  * If you have an issue or suggestions regarding the ccc BoxPlot-charts
  * please contact CvK at cde@vinzi.nl
  */
-pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
+def
+.type('pvc.BoxplotChart', pvc.CategoricalAbstract)
+.add({
     
     legendSource: 'series',
 
@@ -128,6 +130,7 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
         //legend: false,
         crosstabMode: false
     })
-}, {
+})
+.addStatic({
     measureRolesNames: ['median', 'lowerQuartil', 'upperQuartil', 'minimum', 'maximum']
 });

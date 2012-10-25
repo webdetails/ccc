@@ -1,5 +1,7 @@
 
-pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
+def
+.type('pvc.CartesianGridDockingPanel', pvc.GridDockingPanel)
+.add({
     
     _getExtensionId: function(){
         return !this.chart.parent ? 'content' : 'smallContent';

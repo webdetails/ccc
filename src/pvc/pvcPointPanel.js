@@ -15,7 +15,21 @@
  * <i>lineDot_</i> - the dots on the line
  * <i>lineLabel_</i> - for the main line label
  */
-pvc.PointPanel = pvc.CategoricalAbstractPanel.extend({
+def
+.type('pvc.PointPanel', pvc.CategoricalAbstractPanel)
+.init(function(chart, parent, plot, options) {
+    
+    this.base(chart, parent, plot, options);
+    
+    this.showLines  = plot.option('LinesVisible'); // TODO
+    this.showDots   = plot.option('DotsVisible' ); // TODO
+    this.showAreas  = plot.option('AreasVisible'); // TODO
+    if(!this.showLines && !this.showDots && !this.showAreas){
+        this.showLines = true;
+        plot.option.specify({'LinesVisible': true});
+    }
+})
+.add({
     pvLine: null,
     pvArea: null,
     pvDot: null,
@@ -23,19 +37,6 @@ pvc.PointPanel = pvc.CategoricalAbstractPanel.extend({
     pvScatterPanel: null, // TODO: change this name!
     
     valueRoleName: null,
-    
-    constructor: function(chart, parent, plot, options) {
-        
-        this.base(chart, parent, plot, options);
-        
-        this.showLines  = plot.option('LinesVisible'); // TODO
-        this.showDots   = plot.option('DotsVisible' ); // TODO
-        this.showAreas  = plot.option('AreasVisible'); // TODO
-        if(!this.showLines && !this.showDots && !this.showAreas){
-            this.showLines = true;
-            plot.option.specify({'LinesVisible': true});
-        }
-    },
     
     _creating: function(){
         // Register BULLET legend prototype marks

@@ -2,19 +2,19 @@
 /**
  * MetricPointAbstract is the base class of metric dot and line.
  */
-pvc.MetricPointAbstract = pvc.MetricXYAbstract.extend({
+def
+.type('pvc.MetricPointAbstract', pvc.MetricXYAbstract)
+.init(function(options){
 
-    constructor: function(options){
+    this.base(options);
 
-        this.base(options);
-
-        var parent = this.parent;
-        if(parent) {
-            this._colorRole = parent._colorRole;
-            this._sizeRole = parent._sizeRole;
-        }
-    },
-    
+    var parent = this.parent;
+    if(parent) {
+        this._colorRole = parent._colorRole;
+        this._sizeRole = parent._sizeRole;
+    }
+})
+.add({
     /**
      * @override 
      */
@@ -230,7 +230,9 @@ pvc.MetricPointAbstract = pvc.MetricXYAbstract.extend({
 /**
  * Metric Dot Chart
  */
-pvc.MetricDotChart = pvc.MetricPointAbstract.extend({
+def
+.type('pvc.MetricDotChart', pvc.MetricPointAbstract)
+.add({
     _createPointPlot: function(){
         return new pvc.visual.MetricPointPlot(this, {
             fixed: {DotsVisible: true}
@@ -242,7 +244,9 @@ pvc.MetricDotChart = pvc.MetricPointAbstract.extend({
 /**
  * Metric Line Chart
  */
-pvc.MetricLineChart = pvc.MetricPointAbstract.extend({
+def
+.type('pvc.MetricLineChart', pvc.MetricPointAbstract)
+.add({
     _createPointPlot: function(){
         return new pvc.visual.MetricPointPlot(this, {
             fixed: {LinesVisible: true}

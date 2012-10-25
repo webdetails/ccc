@@ -18,21 +18,22 @@
  * If you have an issue or suggestions regarding the Waterfall-charts
  * please contact CvK at cde@vinzi.nl
  */
-pvc.WaterfallChart = pvc.BarAbstract.extend({
+def
+.type('pvc.WaterfallChart', pvc.BarAbstract)
+.init(function(options){
+
+    this.base(options);
+    
+    var parent = this.parent;
+    if(parent) {
+        this._isFalling = parent._isFalling;
+    }
+})
+.add({
 
     _isFalling: true,
     _ruleInfos: null,
     _waterColor: pv.color("#1f77b4").darker(),// pv.Color.names.darkslateblue,//royalblue,seagreen, //pv.color("#808285").darker(),
-
-    constructor: function(options){
-
-        this.base(options);
-        
-        var parent = this.parent;
-        if(parent) {
-            this._isFalling = parent._isFalling;
-        }
-    },
 
     /**
      * Processes options after user options and default options have been merged.

@@ -1,5 +1,7 @@
 
-pvc.GridDockingPanel = pvc.BasePanel.extend({
+def
+.type('pvc.GridDockingPanel', pvc.BasePanel)
+.add({
     anchor: 'fill',
     
     /**

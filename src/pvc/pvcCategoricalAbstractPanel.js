@@ -1,10 +1,9 @@
 
-pvc.CategoricalAbstractPanel = pvc.CartesianAbstractPanel.extend({
+def
+.type('pvc.CategoricalAbstractPanel', pvc.CartesianAbstractPanel)
+.init(function(chart, parent, plot, options){
     
-    constructor: function(chart, parent, plot, options) {
-        
-        this.base(chart, parent, plot, options);
-        
-        this.stacked = plot.option('Stacked');
-    }
+    this.base(chart, parent, plot, options);
+    
+    this.stacked = plot.option('Stacked');
 });

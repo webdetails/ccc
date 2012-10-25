@@ -36,37 +36,38 @@
  *     }
  * }
  */
-pvc.PieChartPanel = pvc.PlotPanel.extend({
+def
+.type('pvc.PieChartPanel', pvc.PlotPanel)
+.init(function(chart, parent, plot, options){
+    
+    if(options.paddings == null){
+        options.paddings = 
+            Math.round((1 - plot.option('InnerGap')) * 100 / 2 ) + "%";
+    }
+    
+    // Before base, just to bring to attention that ValuesMask depends on it
+    var labelStyle = plot.option('ValuesLabelStyle');
+    
+    this.base(chart, parent, plot, options);
+    
+    this.explodedOffsetRadius = plot.option('ExplodedSliceRadius');
+    this.explodedSliceIndex   = plot.option('ExplodedSliceIndex' );
+    this.activeOffsetRadius   = plot.option('ActiveSliceRadius'  );
+    this.labelStyle           = labelStyle;
+    if(labelStyle === 'linked'){
+        this.linkInsetRadius     = plot.option('LinkInsetRadius'    );
+        this.linkOutsetRadius    = plot.option('LinkOutsetRadius'   );
+        this.linkMargin          = plot.option('LinkMargin'         );
+        this.linkHandleWidth     = plot.option('LinkHandleWidth'    );
+        this.linkLabelSize       = plot.option('LinkLabelSize'      );
+        this.linkLabelSpacingMin = plot.option('LinkLabelSpacingMin');
+    }
+})
+.add({
     pvPie: null,
     pvPieLabel: null,
     
     valueRoleName: 'value',
-    
-    constructor: function(chart, parent, plot, options){
-        
-        if(options.paddings == null){
-            options.paddings = 
-                Math.round((1 - plot.option('InnerGap')) * 100 / 2 ) + "%";
-        }
-        
-        // Before base, just to bring to attention that ValuesMask depends on it
-        var labelStyle = plot.option('ValuesLabelStyle');
-        
-        this.base(chart, parent, plot, options);
-        
-        this.explodedOffsetRadius = plot.option('ExplodedSliceRadius');
-        this.explodedSliceIndex   = plot.option('ExplodedSliceIndex' );
-        this.activeOffsetRadius   = plot.option('ActiveSliceRadius'  );
-        this.labelStyle           = labelStyle;
-        if(labelStyle === 'linked'){
-            this.linkInsetRadius     = plot.option('LinkInsetRadius'    );
-            this.linkOutsetRadius    = plot.option('LinkOutsetRadius'   );
-            this.linkMargin          = plot.option('LinkMargin'         );
-            this.linkHandleWidth     = plot.option('LinkHandleWidth'    );
-            this.linkLabelSize       = plot.option('LinkLabelSize'      );
-            this.linkLabelSpacingMin = plot.option('LinkLabelSpacingMin');
-        }
-    },
     
     _getV1Datum: function(scene){
         // Ensure V1 tooltip function compatibility 

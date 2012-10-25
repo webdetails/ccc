@@ -2,18 +2,18 @@
 /**
  * CategoricalAbstract is the base class for all categorical or timeseries
  */
-pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
-
-    constructor: function(options){
-        
-        this.base(options);
-
-        var parent = this.parent;
-        if(parent) {
-            this._catRole = parent._catRole;
-        }
-    },
+def
+.type('pvc.CategoricalAbstract', pvc.CartesianAbstract)
+.init(function(options){
     
+    this.base(options);
+
+    var parent = this.parent;
+    if(parent) {
+        this._catRole = parent._catRole;
+    }
+})
+.add({
     /**
      * Initializes each chart's specific roles.
      * @override

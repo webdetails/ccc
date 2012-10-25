@@ -1,5 +1,7 @@
 /**
  * Bar Panel.
  */
-pvc.BarPanel = pvc.BarAbstractPanel.extend({
+def
+.type('pvc.BarPanel', pvc.BarAbstractPanel)
+.add({
 });

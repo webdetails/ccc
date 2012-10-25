@@ -1,14 +1,15 @@
 
-pvc.AxisTitlePanel = pvc.TitlePanelAbstract.extend({
+def
+.type('pvc.AxisTitlePanel', pvc.TitlePanelAbstract)
+.init(function(chart, parent, axis, options) {
+    
+    this.axis = axis;
+    
+    this.base(chart, parent, options);
+})
+.add({
     
     panelName: 'axis',
-    
-    constructor: function(chart, parent, axis, options) {
-        
-        this.axis = axis;
-        
-        this.base(chart, parent, options);
-    },
     
     _calcLayout: function(layoutInfo){
         var scale = this.axis.scale;

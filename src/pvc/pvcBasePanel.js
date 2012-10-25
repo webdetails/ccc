@@ -5,8 +5,119 @@
  * Each class that extends pvc.base will be 
  * responsible to know how to use it.
  */
-pvc.BasePanel = pvc.Abstract.extend({
+def
+.type('pvc.BasePanel', pvc.Abstract)
+.init(function(chart, parent, options) {
+    this.axes = {};
+    
+    if(options){
+        if(options.scenes){
+            this._sceneTypeExtensions = options.scenes;
+            delete options.scenes;
+        }
+        
+        var axes = options.axes;
+        if(axes){
+            def.copy(this.axes, axes);
+            delete options.axes;
+        }
+    }
+    
+    // TODO: Danger...
+    $.extend(this, options);
+    
+    this.chart = chart;
 
+    if(!this.axes.color){
+        this.axes.color = chart.axes.color;
+    }
+    
+    this.position = {
+        /*
+        top:    0,
+        right:  0,
+        bottom: 0,
+        left:   0
+        */
+    };
+    
+    this.margins  = new pvc.Sides(options && options.margins );
+    this.paddings = new pvc.Sides(options && options.paddings);
+    this.size     = new pvc.Size (options && options.size    );
+    this.sizeMax  = new pvc.Size (options && options.sizeMax );
+    
+    if(!parent) {
+        this.parent    = null;
+        this.root      = this;
+        this.topRoot   = this;
+        this.isRoot    = true;
+        this.isTopRoot = true;
+        this.data      = this.chart.data;
+        
+    } else {
+        this.parent    = parent;
+        this.isTopRoot = false;
+        this.isRoot    = (parent.chart !== chart);
+        this.root      = this.isRoot ? this : parent.root;
+        this.topRoot   = parent.topRoot;
+        this.data      = parent.data; // TODO
+
+        if(this.isRoot) {
+            this.position.left = chart.left; 
+            this.position.top  = chart.top;
+        }
+        
+        parent._addChild(this);
+    }
+    
+    /* Root panels do not need layout */
+    if(this.isRoot) {
+        this.anchor  = null;
+        this.align   = null;
+        this.alignTo = null;
+        this.offset  = null;
+    } else {
+        this.align = pvc.parseAlign(this.anchor, this.align);
+        
+        // * a string with a named alignTo value
+        // * a number
+        // * a PercentValue object
+        var alignTo = this.alignTo;
+        var side = this.anchor;
+        if(alignTo != null && alignTo !== '' && (side === 'left' || side === 'right')){
+            if(alignTo !== 'page-middle'){
+                if(!isNaN(+alignTo.charAt(0))){
+                    alignTo = pvc.PercentValue.parse(alignTo); // percent or number
+                } else {
+                    alignTo = pvc.parseAlign(side, alignTo);
+                }
+            }
+        } else {
+            alignTo = this.align;
+        }
+        
+        this.alignTo = alignTo;
+        
+        this.offset = new pvc.Offset(this.offset);
+    }
+    
+    if(this.borderWidth == null){
+        var borderWidth;
+        var extensionId = this._getExtensionId();
+        if(extensionId){
+            var strokeStyle = this._getExtension(extensionId, 'strokeStyle');
+            if(strokeStyle != null){
+                borderWidth = +this._getConstantExtension(extensionId, 'lineWidth'); 
+                if(isNaN(borderWidth) || !isFinite(borderWidth)){
+                    borderWidth = 1.5;
+                }
+            }
+        }
+        
+        this.borderWidth = borderWidth == null ? 0 : 1.5;
+    }
+})
+.add({
     chart: null,
     parent: null,
     _children: null,
@@ -113,117 +224,6 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     clickAction:       null,
     doubleClickAction: null,
-    
-    constructor: function(chart, parent, options) {
-        this.axes = {};
-        
-        if(options){
-            if(options.scenes){
-                this._sceneTypeExtensions = options.scenes;
-                delete options.scenes;
-            }
-            
-            var axes = options.axes;
-            if(axes){
-                def.copy(this.axes, axes);
-                delete options.axes;
-            }
-        }
-        
-        // TODO: Danger...
-        $.extend(this, options);
-        
-        this.chart = chart;
-
-        if(!this.axes.color){
-            this.axes.color = chart.axes.color;
-        }
-        
-        this.position = {
-            /*
-            top:    0,
-            right:  0,
-            bottom: 0,
-            left:   0
-            */
-        };
-        
-        this.margins  = new pvc.Sides(options && options.margins );
-        this.paddings = new pvc.Sides(options && options.paddings);
-        this.size     = new pvc.Size (options && options.size    );
-        this.sizeMax  = new pvc.Size (options && options.sizeMax );
-        
-        if(!parent) {
-            this.parent    = null;
-            this.root      = this;
-            this.topRoot   = this;
-            this.isRoot    = true;
-            this.isTopRoot = true;
-            this.data      = this.chart.data;
-            
-        } else {
-            this.parent    = parent;
-            this.isTopRoot = false;
-            this.isRoot    = (parent.chart !== chart);
-            this.root      = this.isRoot ? this : parent.root;
-            this.topRoot   = parent.topRoot;
-            this.data      = parent.data; // TODO
-
-            if(this.isRoot) {
-                this.position.left = chart.left; 
-                this.position.top  = chart.top;
-            }
-            
-            parent._addChild(this);
-        }
-        
-        /* Root panels do not need layout */
-        if(this.isRoot) {
-            this.anchor  = null;
-            this.align   = null;
-            this.alignTo = null;
-            this.offset  = null;
-        } else {
-            this.align = pvc.parseAlign(this.anchor, this.align);
-            
-            // * a string with a named alignTo value
-            // * a number
-            // * a PercentValue object
-            var alignTo = this.alignTo;
-            var side = this.anchor;
-            if(alignTo != null && alignTo !== '' && (side === 'left' || side === 'right')){
-                if(alignTo !== 'page-middle'){
-                    if(!isNaN(+alignTo.charAt(0))){
-                        alignTo = pvc.PercentValue.parse(alignTo); // percent or number
-                    } else {
-                        alignTo = pvc.parseAlign(side, alignTo);
-                    }
-                }
-            } else {
-                alignTo = this.align;
-            }
-            
-            this.alignTo = alignTo;
-            
-            this.offset = new pvc.Offset(this.offset);
-        }
-        
-        if(this.borderWidth == null){
-            var borderWidth;
-            var extensionId = this._getExtensionId();
-            if(extensionId){
-                var strokeStyle = this._getExtension(extensionId, 'strokeStyle');
-                if(strokeStyle != null){
-                    borderWidth = +this._getConstantExtension(extensionId, 'lineWidth'); 
-                    if(isNaN(borderWidth) || !isFinite(borderWidth)){
-                        borderWidth = 1.5;
-                    }
-                }
-            }
-            
-            this.borderWidth = borderWidth == null ? 0 : 1.5;
-        }
-    },
     
     compatVersion: function(options){
         return this.chart.compatVersion(options);
@@ -2085,7 +2085,8 @@ pvc.BasePanel = pvc.Abstract.extend({
     isOrientationHorizontal: function(orientation) {
         return this.chart.isOrientationHorizontal(orientation);
     }
-}, {
+})
+.addStatic({
     // Determine what is the associated method to
     // call to position the labels correctly
     relativeAnchor: {

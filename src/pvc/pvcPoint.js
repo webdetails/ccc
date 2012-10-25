@@ -3,7 +3,9 @@
  * PointAbstract is the class that will be extended by
  * dot, line, stacked-line and area charts.
  */
-pvc.PointAbstract = pvc.CategoricalAbstract.extend({
+def
+.type('pvc.PointAbstract', pvc.CategoricalAbstract)
+.add({
     
     _processOptionsCore: function(options){
         // Has no meaning in this chart type
@@ -138,7 +140,9 @@ pvc.PointAbstract = pvc.CategoricalAbstract.extend({
 /**
  * Dot Chart
  */
-pvc.DotChart = pvc.PointAbstract.extend({
+def
+.type('pvc.DotChart', pvc.PointAbstract)
+.add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
             fixed: {DotsVisible: true}
@@ -149,7 +153,9 @@ pvc.DotChart = pvc.PointAbstract.extend({
 /**
  * Line Chart
  */
-pvc.LineChart = pvc.PointAbstract.extend({
+def
+.type('pvc.LineChart', pvc.PointAbstract)
+.add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
             fixed: {LinesVisible: true}
@@ -160,7 +166,9 @@ pvc.LineChart = pvc.PointAbstract.extend({
 /**
  * Area Chart
  */
-pvc.AreaChart = pvc.PointAbstract.extend({
+def
+.type('pvc.AreaChart', pvc.PointAbstract)
+.add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
             fixed:    {AreasVisible: true},
@@ -172,9 +180,10 @@ pvc.AreaChart = pvc.PointAbstract.extend({
 /**
  * Stacked Line Chart
  */
-pvc.StackedLineChart = 
 pvc.mStackedLineChart = // V1 compatibility    
-pvc.PointAbstract.extend({
+def
+.type('pvc.StackedLineChart', pvc.PointAbstract)
+.add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
             fixed:    {LinesVisible: true, Stacked: true}
@@ -185,9 +194,10 @@ pvc.PointAbstract.extend({
 /**
  * Stacked Area Chart
  */
-pvc.StackedAreaChart =
 pvc.mStackedAreaChart = // V1 compatibility
-pvc.PointAbstract.extend({
+def
+.type('pvc.StackedAreaChart', pvc.PointAbstract)
+.add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
             fixed:    {AreasVisible: true, Stacked: true},

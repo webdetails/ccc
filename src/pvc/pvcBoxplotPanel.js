@@ -1,5 +1,15 @@
 
-pvc.BoxplotPanel = pvc.CategoricalAbstractPanel.extend({
+def
+.type('pvc.BoxplotPanel', pvc.CategoricalAbstractPanel)
+.init(function(chart, parent, plot, options) {
+    
+    this.base(chart, parent, plot, options);
+    
+    this.boxSizeRatio = plot.option('BoxSizeRatio');
+    this.maxBoxSize   = plot.option('BoxSizeMax');
+    this.boxplotColor = plot.option('BoxColor' );
+})
+.add({
     plotType: 'box',
     
     anchor: 'fill',
@@ -8,15 +18,6 @@ pvc.BoxplotPanel = pvc.CategoricalAbstractPanel.extend({
         'series':   'series',
         'category': 'category',
         'value':    'median'
-    },
-    
-    constructor: function(chart, parent, plot, options) {
-        
-        this.base(chart, parent, plot, options);
-        
-        this.boxSizeRatio = plot.option('BoxSizeRatio');
-        this.maxBoxSize   = plot.option('BoxSizeMax');
-        this.boxplotColor = plot.option('BoxColor' );
     },
     
     /**

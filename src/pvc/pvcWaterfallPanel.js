@@ -15,7 +15,9 @@
  * <i>barPanel_</i> - for the panel where the bars sit
  * <i>barLabel_</i> - for the main bar label
  */
-pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
+def
+.type('pvc.WaterfallPanel', pvc.BarAbstractPanel)
+.add({
     pvWaterfallLine: null,
     ruleData: null,
 

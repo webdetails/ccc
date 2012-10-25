@@ -12,7 +12,9 @@
  * <i>legendLabel_</i> - for the legend label
  * 
  */
-pvc.LegendPanel = pvc.BasePanel.extend({
+def
+.type('pvc.LegendPanel', pvc.BasePanel)
+.add({
     pvRule: null,
     pvDot: null,
     pvLabel: null,

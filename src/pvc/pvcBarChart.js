@@ -2,7 +2,9 @@
 /**
  * BarChart is the main class for generating... bar charts (another surprise!).
  */
-pvc.BarChart = pvc.BarAbstract.extend({
+def
+.type('pvc.BarChart', pvc.BarAbstract)
+.add({
     
     _initPlotsCore: function(hasMultiRole){
         var options = this.options;

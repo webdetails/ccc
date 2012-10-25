@@ -2,7 +2,15 @@
 /**
  * CartesianAbstract is the base class for all 2D cartesian space charts.
  */
-pvc.CartesianAbstract = pvc.BaseChart.extend({
+def
+.type('pvc.CartesianAbstract', pvc.BaseChart)
+.init(function(options){
+    
+    this.axesPanels = {};
+    
+    this.base(options);
+})
+.add({
     _gridDockPanel: null,
     
     axesPanels: null, 
@@ -18,13 +26,6 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
     xScale: null,
    
     _visibleDataCache: null,
-    
-    constructor: function(options){
-        
-        this.axesPanels = {};
-        
-        this.base(options);
-    },
     
     _getSeriesRoleSpec: function(){
         return { isRequired: true, defaultDimensionName: 'series*', autoCreateDimension: true };

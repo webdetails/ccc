@@ -5,7 +5,19 @@
  * Each node of the tree can have it's own datasource to visualize the
  * node. 
  */
-pvc.DataTree = pvc.BaseChart.extend({
+def
+.type('pvc.DataTree', pvc.BaseChart)
+.init(function(options){
+    // Force the value dimension not to be a number
+    options = options || {};
+    options.dimensionGroups = options.dimensionGroups || {};
+    if(!options.dimensionGroups.value) {
+        options.dimensionGroups.value = {valueType: null};
+    }
+    
+    this.base(options);
+})
+.add({
 
     // the structure of the dataTree is provided by a separate datasource
     structEngine:   null,
@@ -14,17 +26,6 @@ pvc.DataTree = pvc.BaseChart.extend({
 
     DataTreePanel : null,
     legendSource: 'category',
-
-    constructor: function(options){
-        // Force the value dimension not to be a number
-        options = options || {};
-        options.dimensionGroups = options.dimensionGroups || {};
-        if(!options.dimensionGroups.value) {
-            options.dimensionGroups.value = {valueType: null};
-        }
-        
-        this.base(options);
-    },
 
     setStructData: function(data){
         this.structDataset = data.resultset;
@@ -122,7 +123,9 @@ pvc.DataTree = pvc.BaseChart.extend({
  * <i>chart_</i> - for the main chart Panel
  *    << to be filled out >>
  */
-pvc.DataTreePanel = pvc.PlotPanel.extend({
+def
+.type('pvc.DataTreePanel', pvc.PlotPanel)
+.add({
   
   pvDataTree: null,
 

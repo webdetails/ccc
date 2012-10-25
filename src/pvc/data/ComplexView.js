@@ -30,7 +30,7 @@ def.type('pvc.data.ComplexView', pvc.data.Complex)
     });
 
     // Call base constructor
-    this.base(source, ownSourceAtoms, null, /* wantLabel */ true);
+    this.base(source, ownSourceAtoms, source.owner.atoms, /* wantLabel */ true);
 })
 .add({
     values: function(){

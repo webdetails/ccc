@@ -5,22 +5,23 @@
  * This code has been based on a protovis example:
  *    http://vis.stanford.edu/protovis/ex/cars.html
  */
-pvc.ParallelCoordinates = pvc.BaseChart.extend({
+def
+.type('pvc.ParallelCoordinates', pvc.BaseChart)
+.init(function(options){
+
+    // Force the value dimension not to be a number
+    options = options || {};
+    options.dimensions = options.dimensions || {};
+    if(!options.dimensions.value) {
+        options.dimensions.value = {valueType: null};
+    }
+  
+    this.base(options);
+})
+.add({
 
     parCoordPanel : null,
     legendSource: 'category',
-
-    constructor: function(options){
-
-        // Force the value dimension not to be a number
-        options = options || {};
-        options.dimensions = options.dimensions || {};
-        if(!options.dimensions.value) {
-            options.dimensions.value = {valueType: null};
-        }
-      
-        this.base(options);
-    },
 
     _preRenderContent: function(contentOptions){
 
@@ -70,7 +71,9 @@ pvc.ParallelCoordinates = pvc.BaseChart.extend({
  * <i>parCoord_</i> - for the parallel coordinates
  *    << to be completed >>
  */
-pvc.ParCoordPanel = pvc.BasePanel.extend({
+def
+.type('pvc.ParCoordPanel', pvc.BasePanel)
+.add({
     anchor: 'fill',
     pvParCoord: null,
 

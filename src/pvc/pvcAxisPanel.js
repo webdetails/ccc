@@ -2,7 +2,72 @@
 /**
  * AxisPanel panel.
  */
-pvc.AxisPanel = pvc.BasePanel.extend({
+def
+.type('pvc.AxisPanel', pvc.BasePanel)
+.init(function(chart, parent, axis, options) {
+    
+    options = def.create(options, {
+        anchor: axis.option('Position')
+    });
+    
+    var anchor = options.anchor || this.anchor;
+    
+    // size
+    if(options.size == null){
+        var size = options.axisSize;
+        if(size != null){
+            // Single size (a number or a string with only one number)
+            // should be interpreted as meaning the orthogonal length.
+            options.size = new pvc.Size()
+                                .setSize(size, {singleProp: this.anchorOrthoLength(anchor)});
+        }
+    }
+    
+    if(options.sizeMax == null){
+        var sizeMax = options.axisSizeMax;
+        if(sizeMax != null){
+            // Single size (a number or a string with only one number)
+            // should be interpreted as meaning the orthogonal length.
+            options.sizeMax = new pvc.Size()
+                                .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
+        }
+    }
+    
+    // Prevent the border from affecting the box model,
+    // providing a static 0 value, independently of the actual drawn value...
+    //this.borderWidth = 0;
+    
+    this.base(chart, parent, options);
+    
+    this.axis = axis;
+    this.roleName = axis.role.name;
+    this.isDiscrete = axis.role.grouping.isDiscrete();
+    
+    if(this.labelSpacingMin == null){
+        // The user tolerance for "missing" stuff is much smaller with discrete stuff
+        this.labelSpacingMin = this.isDiscrete ? 0.1 : 1.5; // em
+    }
+    
+    if(this.showTicks == null){
+        this.showTicks = !this.isDiscrete;
+    }
+
+    if(options.font === undefined){
+        var extFont = this._getConstantExtension('label', 'font');
+        if(extFont){
+            this.font = extFont;
+        }
+    }
+    
+    if(options.tickLength === undefined){
+        // height or width
+        var tickLength = +this._getConstantExtension('ticks', this.anchorOrthoLength(anchor)); 
+        if(!isNaN(tickLength) && isFinite(tickLength)){
+            this.tickLength = tickLength;
+        }
+    }
+})
+.add({
     pvRule:     null,
     pvTicks:    null,
     pvLabel:    null,
@@ -35,70 +100,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     hiddenLabelText: "\u00B7",
     
     _isScaleSetup: false,
-    
-    constructor: function(chart, parent, axis, options) {
-        
-        options = def.create(options, {
-            anchor: axis.option('Position')
-        });
-        
-        var anchor = options.anchor || this.anchor;
-        
-        // size
-        if(options.size == null){
-            var size = options.axisSize;
-            if(size != null){
-                // Single size (a number or a string with only one number)
-                // should be interpreted as meaning the orthogonal length.
-                options.size = new pvc.Size()
-                                    .setSize(size, {singleProp: this.anchorOrthoLength(anchor)});
-            }
-        }
-        
-        if(options.sizeMax == null){
-            var sizeMax = options.axisSizeMax;
-            if(sizeMax != null){
-                // Single size (a number or a string with only one number)
-                // should be interpreted as meaning the orthogonal length.
-                options.sizeMax = new pvc.Size()
-                                    .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
-            }
-        }
-        
-        // Prevent the border from affecting the box model,
-        // providing a static 0 value, independently of the actual drawn value...
-        //this.borderWidth = 0;
-        
-        this.base(chart, parent, options);
-        
-        this.axis = axis;
-        this.roleName = axis.role.name;
-        this.isDiscrete = axis.role.grouping.isDiscrete();
-        
-        if(this.labelSpacingMin == null){
-            // The user tolerance for "missing" stuff is much smaller with discrete stuff
-            this.labelSpacingMin = this.isDiscrete ? 0.1 : 1.5; // em
-        }
-        
-        if(this.showTicks == null){
-            this.showTicks = !this.isDiscrete;
-        }
-
-        if(options.font === undefined){
-            var extFont = this._getConstantExtension('label', 'font');
-            if(extFont){
-                this.font = extFont;
-            }
-        }
-        
-        if(options.tickLength === undefined){
-            // height or width
-            var tickLength = +this._getConstantExtension('ticks', this.anchorOrthoLength(anchor)); 
-            if(!isNaN(tickLength) && isFinite(tickLength)){
-                this.tickLength = tickLength;
-            }
-        }
-    },
     
     getTicks: function(){
         return this._layoutInfo && this._layoutInfo.ticks;
@@ -1633,20 +1634,28 @@ pvc.AxisPanel.create = function(chart, parentPanel, cartAxis, options){
     return new PanelClass(chart, parentPanel, cartAxis, options);
 };
 
-pvc.XAxisPanel = pvc.AxisPanel.extend({
+def
+.type('pvc.XAxisPanel', pvc.AxisPanel)
+.add({
     anchor: "bottom",
     panelName: "xAxis"
 });
 
-pvc.SecondXAxisPanel = pvc.XAxisPanel.extend({
+def
+.type('pvc.SecondXAxisPanel', pvc.XAxisPanel)
+.add({
     panelName: "secondXAxis"
 });
 
-pvc.YAxisPanel = pvc.AxisPanel.extend({
+def
+.type('pvc.YAxisPanel', pvc.AxisPanel)
+.add({
     anchor: "left",
     panelName: "yAxis"
 });
 
-pvc.SecondYAxisPanel = pvc.YAxisPanel.extend({
+def
+.type('pvc.SecondYAxisPanel', pvc.YAxisPanel)
+.add({
     panelName: "secondYAxis"
 });

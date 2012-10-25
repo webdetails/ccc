@@ -10,19 +10,19 @@
  *     - no legend as series become rows on the perpendicular axis 
  *  Please contact CvK if there are issues with HeatGrid at cde@vinzi.nl.
  */
-pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
+def
+.type('pvc.HeatGridChart', pvc.CategoricalAbstract)
+.init(function(options){
 
-    constructor: function(options){
+    this.base(options);
 
-        this.base(options);
-
-        var parent = this.parent;
-        if(parent) {
-            this._colorRole   = parent._colorRole;
-            this._sizeRole = parent._sizeRole;
-        }
-    },
-    
+    var parent = this.parent;
+    if(parent) {
+        this._colorRole   = parent._colorRole;
+        this._sizeRole = parent._sizeRole;
+    }
+})
+.add({
     _processOptionsCore: function(options){
         
         this.base(options);

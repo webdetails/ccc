@@ -4,19 +4,19 @@
  * (Metric stands for:
  *   Measure, Continuous or Not-categorical base and ortho axis)
  */
-pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
+def
+.type('pvc.MetricXYAbstract', pvc.CartesianAbstract)
+.init(function(options){
 
-    constructor: function(options){
+    this.base(options);
 
-        this.base(options);
-
-        var parent = this.parent;
-        if(parent) {
-            this._xRole = parent._xRole;
-            this._yRole = parent._yRole;
-        }
-    },
-    
+    var parent = this.parent;
+    if(parent) {
+        this._xRole = parent._xRole;
+        this._yRole = parent._yRole;
+    }
+})
+.add({
     _processOptionsCore: function(options){
         
         this.base(options);
