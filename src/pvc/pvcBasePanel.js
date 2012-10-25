@@ -70,8 +70,6 @@ pvc.BasePanel = pvc.Abstract.extend({
 
     dataPartValue: null,
     
-    _colorAxis: null,
-    
     /**
      * Indicates if the top root panel is rendering with animation
      * and, if so, the current phase of animation.
@@ -118,6 +116,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     doubleClickAction: null,
     
     constructor: function(chart, parent, options) {
+        this.axes = {};
         
         if(options){
             if(options.scenes){
@@ -125,14 +124,10 @@ pvc.BasePanel = pvc.Abstract.extend({
                 delete options.scenes;
             }
             
-            if(options.colorAxis){
-                this._colorAxis = options.colorAxis;
-                delete options.colorAxis;
-            }
-            
-            if(options.extensionPrefix){
-                this._extensionPrefix = options.extensionPrefix;
-                delete options.extensionPrefix;
+            var axes = options.axes;
+            if(axes){
+                def.copy(this.axes, axes);
+                delete options.axes;
             }
         }
         
@@ -141,6 +136,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         this.chart = chart;
 
+        if(!this.axes.color){
+            this.axes.color = chart.axes.color;
+        }
+        
         this.position = {
             /*
             top:    0,
@@ -150,14 +149,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             */
         };
         
-        var margins = options && options.margins;
-//        if(!parent && margins === undefined){
-//            // Give a default small margin on the root panel
-//            //  because otherwise borders of panels may be clipped..
-//            margins = 3;
-//        }
-//        
-        this.margins  = new pvc.Sides(margins);
+        this.margins  = new pvc.Sides(options && options.margins );
         this.paddings = new pvc.Sides(options && options.paddings);
         this.size     = new pvc.Size (options && options.size    );
         this.sizeMax  = new pvc.Size (options && options.sizeMax );
@@ -219,7 +211,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         if(this.borderWidth == null){
             var borderWidth;
-            var extensionId = this._getExtensionId(); // height or width
+            var extensionId = this._getExtensionId();
             if(extensionId){
                 var strokeStyle = this._getExtension(extensionId, 'strokeStyle');
                 if(strokeStyle != null){
@@ -238,16 +230,12 @@ pvc.BasePanel = pvc.Abstract.extend({
         return this.chart.compatVersion(options);
     },
     
-    defaultColorAxis: function(){
-        return this._colorAxis || (this._colorAxis = this.chart.axes.color);
-    },
-    
     defaultVisibleBulletGroupScene: function(){
         // Return legendBulletGroupScene, 
         // from the first data cell of same dataPartValue and 
         // having one legendBulletGroupScene.
-        var colorAxis = this.defaultColorAxis();
-        if(colorAxis && colorAxis.isVisible){
+        var colorAxis = this.axes.color;
+        if(colorAxis && colorAxis.option('LegendVisible')){
             var dataPartValue = this.dataPartValue;
             return def
                 .query(colorAxis.dataCells)
@@ -592,7 +580,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                         if(remTimes > 0){
                             paddings = new pvc.Sides(paddings);
                             if(pvc.debug >= 5){
-                                pvc.log("[BasePanel] Child requested paddings change: " + JSON.stringify(paddings));
+                                pvc.log("[BasePanel] Child requested paddings change: " + pvc.stringify(paddings));
                             }
                             return true; // again
                         }
@@ -1131,9 +1119,12 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
     },
     
+    _absBaseExtId: {abs: 'base'},
+    _absSmallBaseExtId: {abs: 'smallBase'},
+    
     _getExtensionId: function(){
         if (this.isRoot) {
-            return !this.chart.parent ? 'base' : 'smallBase';
+            return !this.chart.parent ? this._absBaseExtId : this._absSmallBaseExtId;
         }
     },
     
@@ -1142,33 +1133,7 @@ pvc.BasePanel = pvc.Abstract.extend({
     },
     
     _makeExtensionAbsId: function(id){
-        var prefix = this._getExtensionPrefix();
-        if(!prefix){
-            return id;
-        }
-        
-        if(!id){
-            return prefix;
-        }
-        
-        if(!def.array.is(prefix) && !def.array.is(id)){
-            return id ?
-                    (prefix + def.firstUpperCase(id)) :
-                    prefix;
-        }
-        
-        return def
-            .query(prefix)
-            .selectMany(function(oneprefix){
-                return def
-                    .query(id)
-                    .select(function(oneid){
-                        return oneid ?
-                               (oneprefix + def.firstUpperCase(oneid)) :
-                               oneprefix;
-                    });
-            })
-            .array();
+        return pvc.makeExtensionAbsId(id, this._getExtensionPrefix());
     },
     
     /**
@@ -1923,7 +1888,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         /* Only update selection, which is a global op, after all selection changes */
         
         if(pvc.debug >= 3) {
-            pvc.log('rubberBand ' + JSON.stringify(this.rubberBand));
+            pvc.log('rubberBand ' + pvc.stringify(this.rubberBand));
         }
         
         var chart = this.chart;
@@ -2015,7 +1980,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         function processShape(shape, instance) {
-            // pvc.log(datum.key + ": " + JSON.stringify(shape) + " intersects? " + shape.intersectsRect(this.rubberBand));
+            // pvc.log(datum.key + ": " + pvc.stringify(shape) + " intersects? " + shape.intersectsRect(this.rubberBand));
             if (shape.intersectsRect(rb)){
                 var group = instance.group;
                 var datums = group ? group._datums : def.array.as(instance.datum);
@@ -2023,7 +1988,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
                             if(pvc.debug >= 10) {
-                                pvc.log(datum.key + ": " + JSON.stringify(shape) + " mark type: " + pvMark.type);
+                                pvc.log(datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type);
                             }
                     
                             fun.call(ctx, datum);

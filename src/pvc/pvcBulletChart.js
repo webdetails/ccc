@@ -9,6 +9,7 @@ pvc.BulletChart = pvc.BaseChart.extend({
     legendSource: null, // not supported 
     
     constructor: function(options){
+        
         options = options || {};
 
         // Add range and marker dimension group defaults
@@ -24,20 +25,20 @@ pvc.BulletChart = pvc.BaseChart.extend({
             markerDimGroup.valueType = Number;
         }
 
-        options.legend = false;
-        options.selectable = false; // not supported yet
-
-        // TODO
-        //if(options.compatVersion <= 1 && options.tooltipFormat === undefined){
-            // Backwards compatible tooltip format
-            options.tooltipFormat = function(s, c, v) {
-                return this.chart.options.valueFormat(v);
-            };
-        //}
-
         this.base(options);
     },
 
+    /**
+     * @override 
+     */
+    _processOptionsCore: function(options){
+        
+        this.base(options);
+        
+        options.legend     = false;
+        options.selectable = false; // not supported yet
+    },
+    
     /**
      * Initializes each chart's specific roles.
      * @override
@@ -73,6 +74,7 @@ pvc.BulletChart = pvc.BaseChart.extend({
     },
 
     _createTranslation: function(complexType, translOptions){
+        
         var translation = this.base(complexType, translOptions),
             /*
              * By now the translation has already been initialized
@@ -116,25 +118,30 @@ pvc.BulletChart = pvc.BaseChart.extend({
         return translation;
     },
     
+    _initPlotsCore: function(hasMultiRole){
+        new pvc.visual.BulletPlot(this);
+    },
+    
     _preRenderContent: function(contentOptions){
         if(pvc.debug >= 3){
             pvc.log("Prerendering in bulletChart");
         }
     
-        this.bulletChartPanel = new pvc.BulletChartPanel(this, this.basePanel, def.create(contentOptions, {
-            showValues:         this.options.showValues,
-            showTooltips:       this.options.showTooltips,
-            orientation:        this.options.orientation
-        }));
+        var bulletPlot = this.plots.bullet;
+        this.bulletChartPanel = new pvc.BulletChartPanel(
+            this, 
+            this.basePanel, 
+            bulletPlot, 
+            def.create(contentOptions, {
+                showTooltips:  this.options.showTooltips
+            }));
     },
   
     defaults: def.create(pvc.BaseChart.prototype.defaults, {
         compatVersion: 1,
       
-        showValues: true,
-        orientation: "horizontal",
-        legend: false,
-
+        orientation: 'horizontal',
+        
         bulletSize:     30,  // Bullet size
         bulletSpacing:  50,  // Spacing between bullets
         bulletMargin:  100,  // Left margin
@@ -148,7 +155,10 @@ pvc.BulletChart = pvc.BaseChart.extend({
         bulletTitlePosition: "left", // Position of bullet title relative to bullet
 
 //      axisDoubleClickAction: null,
-
+        tooltipFormat: function(s, c, v) {
+            return this.chart.options.valueFormat(v);
+        },
+        
         crosstabMode: false,
         seriesInRows: false
     })
@@ -174,14 +184,12 @@ pvc.BulletChart = pvc.BaseChart.extend({
  */
 
 
-pvc.BulletChartPanel = pvc.BasePanel.extend({
-    anchor: 'fill',
+pvc.BulletChartPanel = pvc.PlotPanel.extend({
     pvBullets: null,
     pvBullet: null,
     data: null,
     onSelectionChange: null,
-    showValues: true,
-
+    
     /**
      * @override
      */
@@ -422,11 +430,6 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
         this.extend(this.pvBulletRuleLabel,"bulletRuleLabel");
         this.extend(this.pvBulletTitle,"bulletTitle");
         this.extend(this.pvBulletSubtitle,"bulletSubtitle");
-    },
-  
-    _getExtensionId: function(){
-        // chart is deprecated
-        return ['chart', 'plot'];
     },
   
     /*

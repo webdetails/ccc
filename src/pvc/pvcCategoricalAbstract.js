@@ -40,41 +40,6 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
         };
     },
     
-    _bindAxes: function(hasMultiRole){
-        
-        this.base(hasMultiRole);
-        
-        /**
-         * Axes are created even when hasMultiRole && !parent
-         * because it is needed to read axis options in the root chart.
-         * Also binding occurs to be able to know its scale type. 
-         * Yet, their scales are not setup at the root level.
-         */
-        
-        var axes = this.axes;
-        
-        var axis = axes.base;
-        if(!axis.isBound()){
-            axis.bind(this._buildRolesDataCells('category'));
-        }
-        
-        var orthoDataCells;
-        
-        ['ortho', 'ortho2'].forEach(function(id){
-            axis = axes[id];
-            if(axis && !axis.isBound()){
-                if(!orthoDataCells){
-                    var orthoRoleName = this.options.orthoAxisOrdinal ? 'series' : 'value';
-                    orthoDataCells = this._buildRolesDataCells(orthoRoleName, {
-                        isStacked: !!this.options.stacked
-                    });
-                }
-                
-                axis.bind(orthoDataCells);
-            }
-        }, this);
-    },
-    
     _interpolateDataCell: function(dataCell){
         var nullInterpMode = dataCell.nullInterpolationMode;
         if(nullInterpMode){
@@ -89,14 +54,18 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
             if(InterpType){
                 this._warnSingleContinuousValueRole(dataCell.role);
                 
+                // TODO: It is usually the case, but not certain, that the base axis' 
+                // dataCell(s) span "all" data parts.
+                var allPartsData = this._getVisibleData(null, {ignoreNulls: false});
                 var visibleData = this._getVisibleData(dataCell.dataPartValue);
                 
                 new InterpType(
+                     allPartsData,
                      visibleData, 
                      this._catRole,
                      this._serRole,
                      dataCell.role,
-                     dataCell.isStacked)
+                     true) // dataCell.isStacked
                 .interpolate();
             }
         }
@@ -433,10 +402,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     
     defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
      // Ortho <- value role
-        orthoAxisOrdinal: false, // when true => ortho axis gets the series role (instead of the value role)
-        
-        nullInterpolationMode: 'none',
-        
-        stacked: false
+        // TODO: this should go somewhere else
+        orthoAxisOrdinal: false // when true => ortho axis gets the series role (instead of the value role)
     })
 });

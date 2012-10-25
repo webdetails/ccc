@@ -1,42 +1,26 @@
 
-pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
-    anchor: 'fill',
-    orientation: "vertical",
-    stacked: false,
+pvc.CartesianAbstractPanel = pvc.PlotPanel.extend({
+    
     offsetPaddings: null,
     
-    _baseAxis: null,
-    _orthoAxis: null,
-    
-    constructor: function(chart, parent, options) {
+    constructor: function(chart, parent, plot, options) {
         
         // Prevent the border from affecting the box model,
         // providing a static 0 value, independently of the actual drawn value...
         //this.borderWidth = 0;
         
-        if(options){
-            if(options.baseAxis){
-                this._baseAxis = options.baseAxis;
-                delete options.baseAxis;
-            }
-            
-            if(options.orthoAxis){
-                this._orthoAxis = options.orthoAxis;
-                delete options.orthoAxis;
-            }
-        }
+        this.base(chart, parent, plot, options);
         
-        this.base(chart, parent, options);
+        var axes = this.axes;
+        var axis;
         
-        var axes = chart.axes;
+        axis = axes.base  = chart.getAxis('base',  plot.option('BaseAxis' ) - 1);
+        axes[axis.orientedId] = axis;
         
-        if(!this._baseAxis){
-            this._baseAxis = axes.base;
-        }
+        axis = axes.ortho = chart.getAxis('ortho', plot.option('OrthoAxis') - 1);
+        axes[axis.orientedId] = axis;
         
-        if(!this._orthoAxis){
-            this._orthoAxis = axes.ortho;
-        }
+        // ----------------
         
         // Initialize paddings from axes offsets
         var paddings = {};
@@ -63,10 +47,12 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
             }
         }
         
-        processAxis(axes.x);
-        processAxis(axes.secondX);
-        processAxis(axes.y);
-        processAxis(axes.secondY);
+        // TODO: should this be done in a chart?
+        var chartAxes = chart.axes;
+        processAxis(chartAxes.x);
+        processAxis(chartAxes.secondX);
+        processAxis(chartAxes.y);
+        processAxis(chartAxes.secondY);
         
         if(hasAny){
             this.offsetPaddings = paddings;
@@ -117,8 +103,8 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
         this.pvPanel.zOrder(-10);
 
         // Overflow
-        var orthoAxis = this._orthoAxis,
-            baseAxis  = this._baseAxis;
+        var orthoAxis = this.axes.ortho,
+            baseAxis  = this.axes.base;
         if (orthoAxis.option('FixedMin') != null ||
             orthoAxis.option('FixedMax') != null ||
             baseAxis .option('FixedMin') != null ||
@@ -130,21 +116,6 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
     
     _getVisibleData: function(){
         return this.chart._getVisibleData(this.dataPartValue);
-    },
-
-    _getExtensionId: function(){
-        // chart is deprecated
-        return ['chart', 'plot'];
-    },
-        
-    /* @override */
-    isOrientationVertical: function(){
-        return this.orientation === pvc.orientation.vertical;
-    },
-
-    /* @override */
-    isOrientationHorizontal: function(){
-        return this.orientation === pvc.orientation.horizontal;
     },
 
     /*

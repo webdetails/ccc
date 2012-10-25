@@ -40,35 +40,35 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
      */
     _processOptionsCore: function(options){
 
-        // Waterfall charts are always stacked
+        // Might still affect scale calculation
         options.stacked = true;
-        if(options.showWaterValues === undefined){
-            options.showWaterValues = options.showValues;
-        }
-
+        
+        // Not supported
+        options.plot2 = options.secondAxis = false;
+        
         // Doesn't work (yet?)
         options.useCompositeAxis = false;
-
+        
         this.base(options);
     },
-
-    /**
-     * Initializes each chart's specific roles.
-     * @override
-     */
-    _initVisualRoles: function(){
+  
+    _initPlotsCore: function(){
+        var options = this.options;
         
-        this.base();
-
-        this._isFalling = (this.options.waterDirection === 'down');
+        var waterPlot = new pvc.visual.WaterfallPlot(this);
+        
+        this._isFalling = waterPlot.option('Direction') === 'down';
         
         this._catRole.setFlatteningMode(this._isFalling ? 'tree-pre' : 'tree-post');
-        this._catRole.setFlattenRootLabel(this.options.allCategoryLabel);
+        this._catRole.setFlattenRootLabel(this.plots.water.option('AllCategoryLabel'));
     },
     
     _initLegendScenes: function(legendPanel){
         
-        var strokeStyle = this._getConstantExtension("barWaterfallLine", "strokeStyle");
+        var waterPlot = this.plots.water;
+        
+        var extAbsId = pvc.makeExtensionAbsId('line', waterPlot.extensionPrefixes);
+        var strokeStyle = this._getConstantExtension(extAbsId, "strokeStyle");
         if(strokeStyle){
             this._waterColor = pv.color(strokeStyle);
         }
@@ -76,8 +76,8 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         var rootScene = legendPanel._getBulletRootScene();
         
         new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, {
-            extensionPrefix: pvc.visual.Axis.getId('legend', 1), // legend2_
-            label: this.options.accumulatedLineLabel,
+            extensionPrefix: pvc.buildIndexedId('legend', 1), // legend2_ TODO
+            label: waterPlot.option('WaterLineLabel'),
             color: this._waterColor
         });
         
@@ -172,23 +172,8 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
             pvc.log("Prerendering in WaterfallChart");
         }
         
-        var options = this.options;
-        
-        return (this.wfChartPanel = new pvc.WaterfallPanel(this, parentPanel, def.create(baseOptions, {
-            waterfall:          options.waterfall,
-            barSizeRatio:       options.barSizeRatio,
-            maxBarSize:         options.maxBarSize,
-            showValues:         options.showValues,
-            orientation:        options.orientation
+        return (this.wfChartPanel = new pvc.WaterfallPanel(this, parentPanel, this.plots.water, def.create(baseOptions, {
+            waterfall:  this.options.waterfall
         })));
-    },
-    
-    defaults: def.create(pvc.BarAbstract.prototype.defaults, {
-        // down or up
-        waterDirection: 'down',
-//        showWaterValues: undefined, // defaults to showValues
-        showWaterGroupAreas: true,
-        allCategoryLabel: "All",
-        accumulatedLineLabel: "Accumulated"
-    })
+    }
 });

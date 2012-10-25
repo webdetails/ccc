@@ -25,7 +25,7 @@ def
     this.clickMode = def.get(keyArgs, 'clickMode');
     
     if(this.colorAxis && !this.clickMode){
-        this.clickMode = this.colorAxis.option('ClickMode');
+        this.clickMode = this.colorAxis.option('LegendClickMode');
     }
 })
 .add(/** @lends pvc.visual.legend.BulletGroupScene# */{
@@ -43,9 +43,9 @@ def
                 var colorAxis = this.colorAxis;
                 if(colorAxis){
                     keyArgs = {
-                        drawRule:    colorAxis.option('DrawLine'  ),
-                        drawMarker:  colorAxis.option('DrawMarker'),
-                        markerShape: colorAxis.option('Shape')
+                        drawRule:    colorAxis.option('LegendDrawLine'  ),
+                        drawMarker:  colorAxis.option('LegendDrawMarker'),
+                        markerShape: colorAxis.option('LegendShape')
                     };
                 }
                 

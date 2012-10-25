@@ -335,7 +335,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             }, this);
             
             if(pvc.debug >= 6 && overflowPaddings){
-                pvc.log("[" + this.panelName + "] OverflowPaddings = " + JSON.stringify(overflowPaddings));
+                pvc.log("[" + this.panelName + "] OverflowPaddings = " + pvc.stringify(overflowPaddings));
             }
         }
         

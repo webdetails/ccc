@@ -5,6 +5,7 @@
 pvc.PieChart = pvc.BaseChart.extend({
 
     pieChartPanel: null,
+    
     legendSource: 'category',
 
     /**
@@ -16,7 +17,11 @@ pvc.PieChart = pvc.BaseChart.extend({
         this.base();
         
         this._addVisualRoles({
-            category: { isRequired: true, defaultDimensionName: 'category*', autoCreateDimension: true },
+            category: { 
+                isRequired: true, 
+                defaultDimensionName: 'category*', 
+                autoCreateDimension: true 
+            },
             
             /* value: required, continuous, numeric */
             value:  { 
@@ -31,6 +36,10 @@ pvc.PieChart = pvc.BaseChart.extend({
         });
     },
     
+    _initPlotsCore: function(hasMultiRole){
+        new pvc.visual.PiePlot(this);
+    },
+    
     _preRenderContent: function(contentOptions) {
 
         this.base();
@@ -39,38 +48,10 @@ pvc.PieChart = pvc.BaseChart.extend({
             pvc.log("Prerendering in pieChart");
         }
         
-        var options = this.options;
+        var piePlot = this.plots.pie;
         
-        this.pieChartPanel = new pvc.PieChartPanel(this, this.basePanel, def.create(contentOptions, {
-            innerGap: options.innerGap,
-            explodedOffsetRadius: options.explodedSliceRadius,
-            explodedSliceIndex: options.explodedSliceIndex,
-            activeOffsetRadius: options.activeSliceRadius,
-            showValues:  options.showValues,
-            valuesMask:  options.valuesMask,
-            labelStyle:  options.valuesLabelStyle,
-            linkedLabel: options.linkedLabel,
-            labelFont:   options.valuesLabelFont,
-            scenes:      def.getPath(options, 'pie.scenes')
+        this.pieChartPanel = new pvc.PieChartPanel(this, this.basePanel, piePlot, def.create(contentOptions, {
+            scenes: def.getPath(this.options, 'pie.scenes')
         }));
-    },
-    
-    defaults: def.create(pvc.BaseChart.prototype.defaults, {
-//      showValues: undefined,
-//      innerGap: undefined,
-//      
-//      explodedSliceRadius: undefined,
-//      explodedSliceIndex: undefined,
-//      activeSliceRadius: undefined,
-//      
-//      valuesMask: undefined, // example: "{value} ({value.percent})"
-//      pie: undefined, // pie options object
-//      
-//      valuesLabelFont:  undefined,
-//      valuesLabelStyle: undefined,
-//      
-//      linkedLabel: undefined
-//      
-//      // tipsySettings: def.create(pvc.BaseChart.defaultOptions.tipsySettings, { offset: 15, gravity: 'se' })
-    })
+    }
 });

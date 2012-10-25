@@ -36,143 +36,36 @@
  *     }
  * }
  */
-pvc.PieChartPanel = pvc.BasePanel.extend({
-    anchor: 'fill',
-    
+pvc.PieChartPanel = pvc.PlotPanel.extend({
     pvPie: null,
     pvPieLabel: null,
     
-    // Always exploded slices
-    explodedOffsetRadius: 0,
-    explodedSliceIndex:  null,
-    
-    // Explode when active (hoverable)
-    activeOffsetRadius: new pvc.PercentValue(0.05),
-    
     valueRoleName: 'value',
     
-    showValues: true,
-    
-    // Examples:
-    // "{value} ({value.percent}) {category}"
-    // "{value}"
-    // "{value} ({value.percent})"
-    // "{#productId}" // Atom name
-    valuesMask: null, 
-    
-    labelStyle: 'linked', // 'linked' or 'inside'
-    /*
-     *                                         
-     *     (| elbowX)                         (| anchorX)
-     *      +----------------------------------+          (<-- baseY)
-     *      |                                    \
-     *      |   (link outset)                      \ (targetX,Y)
-     *      |                                        +----+ label
-     *    -----  <-- current outer radius      |<-------->|<------------>            
-     *      |   (link inset)                     (margin)   (label size)
-     *      
-     */
-    
-    labelFont: '10px sans-serif',
-    
-    linkedLabel: {
-        /**
-         * Percentage of the client radius that the 
-         * link is inset in a slice.
-         */
-        linkInsetRadius:  new pvc.PercentValue(0.05),
+    constructor: function(chart, parent, plot, options){
         
-        /**
-         * Percentage of the client radius that the 
-         * link extends outwards from the slice, 
-         * until it reaches the link "elbow".
-         */
-        linkOutsetRadius: new pvc.PercentValue(0.025),
-        
-        /**
-         * Percentage of the client width that separates 
-         * a link label from the link's anchor point.
-         * <p>
-         * Determines the width of the link segment that 
-         * connects the "anchor" point with the "target" point.
-         * Includes the space for the small handle at the end.
-         * </p>
-         */
-        linkMargin: new pvc.PercentValue(0.025),
-        
-        /**
-         * Link handle width.
-         */
-        linkHandleWidth: 0.5, // em
-        
-        /**
-         * Percentage of the client width that is reserved 
-         * for labels on each of the sides.
-         */
-        labelSize: new pvc.PercentValue(0.15),
-        
-        /**
-         * Minimum vertical space that separates consecutive link labels, in em units.
-         */
-        labelSpacingMin: 0.5 // em
-    },
-    
-    constructor: function(chart, parent, options){
-        if(!options){
-            options = {};
-        }
-        
-        var isV1Compat = chart.compatVersion() <= 1;
-        if(isV1Compat){
-            if(options.labelStyle == null){
-                options.labelStyle = 'inside';
-            }
-        }
-        
-        // innerGap translation to paddings
         if(options.paddings == null){
-            var innerGap = options.innerGap || 0.95;
-            delete options.innerGap;
-            if(innerGap > 0 && innerGap < 1){
-                options.paddings = Math.round((1 - innerGap) * 100 / 2 ) + "%";
-            }
+            options.paddings = 
+                Math.round((1 - plot.option('InnerGap')) * 100 / 2 ) + "%";
         }
         
-        // Cast
-        ['explodedOffsetRadius', 'activeOffsetRadius']
-        .forEach(function(name){
-            var value = options[name];
-            if(value != null){
-                options[name] = pvc.PercentValue.parse(value);
-            }
-        });
+        // Before base, just to bring to attention that ValuesMask depends on it
+        var labelStyle = plot.option('ValuesLabelStyle');
         
-        var labelStyle = options.labelStyle || this.labelStyle;
-        var isLinked = labelStyle === 'linked';
-        var valuesMask = options.valuesMask;
-        if(valuesMask == null){
-            options.valuesMask = isLinked ? "{value} ({value.percent})" : "{value}";
-        }
-       
-        if(isLinked){
-            var sourceLinkedLabel = options.linkedLabel;
-            if(sourceLinkedLabel){
-                // Inherit from default settings
-                var linkedLabel = options.linkedLabel = Object.create(this.linkedLabel);
-                def.copy(linkedLabel, sourceLinkedLabel);
-                
-                // Cast
-                ['linkInsetRadius', 'linkOutsetRadius', 'linkMargin', 'labelSize']
-                .forEach(function(name){
-                    var value = linkedLabel[name];
-                    if(value != null){
-                        linkedLabel[name] = pvc.PercentValue.parse(value);
-                    }
-                });
-            }
-        }
+        this.base(chart, parent, plot, options);
         
-        this.base(chart, parent, options);
+        this.explodedOffsetRadius = plot.option('ExplodedSliceRadius');
+        this.explodedSliceIndex   = plot.option('ExplodedSliceIndex' );
+        this.activeOffsetRadius   = plot.option('ActiveSliceRadius'  );
+        this.labelStyle           = labelStyle;
+        if(labelStyle === 'linked'){
+            this.linkInsetRadius     = plot.option('LinkInsetRadius'    );
+            this.linkOutsetRadius    = plot.option('LinkOutsetRadius'   );
+            this.linkMargin          = plot.option('LinkMargin'         );
+            this.linkHandleWidth     = plot.option('LinkHandleWidth'    );
+            this.linkLabelSize       = plot.option('LinkLabelSize'      );
+            this.linkLabelSpacingMin = plot.option('LinkLabelSpacingMin');
+        }
     },
     
     _getV1Datum: function(scene){
@@ -221,28 +114,27 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         
         // ---------------------
         
-        var labelFont = def.number.to(this._getExtension('pieLabel', 'font'));
+        var labelFont = this._getConstantExtension('label', 'font');
         if(!def.string.is(labelFont)){
-            labelFont = this.labelFont;
+            labelFont = this.valuesFont;
         }
         
         var maxPieRadius = clientRadius;
         
         if(this.showValues && this.labelStyle === 'linked'){
             // Reserve space for labels and links
-            var linkedLabel = this.linkedLabel;
-            var linkInsetRadius  = resolvePercentRadius(linkedLabel.linkInsetRadius);
-            var linkOutsetRadius = resolvePercentRadius(linkedLabel.linkOutsetRadius);
-            var linkMargin       = resolvePercentWidth(linkedLabel.linkMargin);
-            var linkLabelSize    = resolvePercentWidth(linkedLabel.labelSize);
+            var linkInsetRadius  = resolvePercentRadius(this.linkInsetRadius );
+            var linkOutsetRadius = resolvePercentRadius(this.linkOutsetRadius);
+            var linkMargin       = resolvePercentWidth (this.linkMargin      );
+            var linkLabelSize    = resolvePercentWidth (this.linkLabelSize   );
             
-            var textMargin = def.number.to(this._getExtension('pieLabel', 'textMargin'), 3);
+            var textMargin = def.number.to(this._getConstantExtension('label', 'textMargin'), 3);
             var textHeight = pvc.text.getTextHeight('m', labelFont);
             
-            var linkHandleWidth = linkedLabel.linkHandleWidth * textHeight; // em
+            var linkHandleWidth = this.linkHandleWidth * textHeight; // em
             linkMargin += linkHandleWidth;
             
-            var linkLabelSpacingMin = linkedLabel.labelSpacingMin * textHeight; // em
+            var linkLabelSpacingMin = this.linkLabelSpacingMin * textHeight; // em
             
             var freeWidthSpace = Math.max(0, clientWidth / 2 - clientRadius);
             
@@ -265,16 +157,16 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                 maxPieRadius -= linkAndLabelRadius;
                 
                 layoutInfo.link = {
-                    insetRadius:   linkInsetRadius,
-                    outsetRadius:  linkOutsetRadius,
-                    elbowRadius:   maxPieRadius + linkOutsetRadius,
-                    linkMargin:    linkMargin,
+                    insetRadius:     linkInsetRadius,
+                    outsetRadius:    linkOutsetRadius,
+                    elbowRadius:     maxPieRadius + linkOutsetRadius,
+                    linkMargin:      linkMargin,
                     handleWidth:     linkHandleWidth,
-                    labelSize:     linkLabelSize,
-                    maxTextWidth:  linkLabelSize - textMargin,
+                    labelSize:       linkLabelSize,
+                    maxTextWidth:    linkLabelSize - textMargin,
                     labelSpacingMin: linkLabelSpacingMin,
-                    textMargin:    textMargin,
-                    lineHeight:    textHeight
+                    textMargin:      textMargin,
+                    lineHeight:      textHeight
                 };
             }
         } 
@@ -330,7 +222,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         }
         
         this.pvPie = new pvc.visual.PieSlice(this, this.pvPanel, {
-                extensionId: 'pie',
+                extensionId: '',
                 center: center,
                 activeOffsetRadius: layoutInfo.activeOffsetRadius,
                 wrapper: wrapper,
@@ -389,7 +281,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             if(this.labelStyle === 'inside'){
                 
                 this.pvPieLabel = new pvc.visual.Label(this, this.pvPie.anchor("outer"), {
-                        extensionId: 'pieLabel',
+                        extensionId: 'label',
                         wrapper:     wrapper
                     })
                     .intercept('visible', function(scene){
@@ -421,7 +313,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                     this, 
                     this.pvLinkPanel, 
                     {
-                        extensionId:  'pieLinkLine',
+                        extensionId:  'linkLine',
                         freePosition:  true,
                         noClick:       true,
                         noDoubleClick: true,
@@ -463,7 +355,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
                     this, 
                     this.pvLinkPanel, 
                     {
-                        extensionId:   'pieLabel',
+                        extensionId:   'label',
                         noClick:       false,
                         noDoubleClick: false,
                         noSelect:      false,
@@ -512,19 +404,20 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         }
     },
     
+    _absExtContent: {abs: 'content'},
+    _absExtSmallContent: {abs: 'smallContent'},
+    
     _getExtensionId: function(){
         // chart is deprecated
         // content coincides, visually in this chart type
         // - actually it shares the same panel...
         
-        var extensionIds = ['content'];
+        var extensionIds = [this._absExtContent];
         if(this.chart.parent){ 
-            extensionIds.push('smallContent');
+            extensionIds.push(this._absExtSmallContent);
         }
         
-        extensionIds.push('chart', 'plot');
-        
-        return extensionIds;
+        return extensionIds.concat(this.base());
     },
     
     /**
@@ -551,7 +444,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
     _buildScene: function(){
         var rootScene  = new pvc.visual.PieRootScene(this);
         
-        // legacy property
+        // v1 property
         this.sum = rootScene.vars.sumAbs.value;
         
         return rootScene;

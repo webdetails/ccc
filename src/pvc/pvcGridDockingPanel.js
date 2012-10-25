@@ -365,8 +365,8 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             var changed = false;
             if(newPaddings){
                 if(pvc.debug >= 10){
-                    pvc.log("[GridDockingPanel] => clientSize=" + JSON.stringify(child._layoutInfo.clientSize));
-                    pvc.log("[GridDockingPanel] <= requestPaddings=" + JSON.stringify(newPaddings));
+                    pvc.log("[GridDockingPanel] => clientSize=" + pvc.stringify(child._layoutInfo.clientSize));
+                    pvc.log("[GridDockingPanel] <= requestPaddings=" + pvc.stringify(newPaddings));
                 }
                 
                 getAnchorPaddingsNames(a).forEach(function(side){
@@ -423,7 +423,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             var changed = false;
             if(overflowPaddings){
                 if(pvc.debug >= 10){
-                    pvc.log("[GridDockingPanel] <= overflowPaddings=" + JSON.stringify(overflowPaddings));
+                    pvc.log("[GridDockingPanel] <= overflowPaddings=" + pvc.stringify(overflowPaddings));
                 }
                 
                 getAnchorPaddingsNames(a).forEach(function(side){

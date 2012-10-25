@@ -701,6 +701,17 @@ var def = /** @lends def */{
         return s;
     },
     
+    firstLowerCase: function(s){
+        if(s) {
+            var c  = s.charAt(0),
+                cL = c.toLowerCase();
+            if(c !== cL) {
+                s = cL + s.substr(1);
+            }
+        }
+        return s;
+    },
+    
     /**
      * Formats a string by replacing 
      * place-holder markers, of the form "{foo}",

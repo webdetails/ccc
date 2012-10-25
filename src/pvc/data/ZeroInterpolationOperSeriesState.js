@@ -55,8 +55,8 @@ def
                 var dotCount = (stepCount - 1);
                 this._isOdd  = (dotCount % 2) > 0;
             } else {
-                var fromCat  = +last.catInfo.data.value;
-                var toCat    = +next.catInfo.data.value;
+                var fromCat  = +last.catInfo.value;
+                var toCat    = +next.catInfo.value;
                 this._middleCat = (toCat + fromCat) / 2;
             }
         }

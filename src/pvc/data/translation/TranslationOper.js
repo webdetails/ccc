@@ -359,7 +359,7 @@ def.type('pvc.data.TranslationOper')
         // or array helpers, avoiding function calls, closures, etc.
         
         if(pvc.debug >= 4) {
-            pvc.log('virtual item: ' + JSON.stringify(item));
+            pvc.log('virtual item: ' + pvc.stringify(item));
         }
         
         var r = 0, 
@@ -384,7 +384,7 @@ def.type('pvc.data.TranslationOper')
             }
             
             try{
-                pvc.log('  -> read: ' + JSON.stringify(atoms));
+                pvc.log('  -> read: ' + pvc.stringify(atoms));
             } catch(ex){
                 /* NOOP usually a JSON circular structure */
             }

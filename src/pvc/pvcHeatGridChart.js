@@ -33,10 +33,6 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
                 
             // Has no meaning in the current implementation
             'panelSizeRatio', 1);
-  
-        if(options.scalingType && !options.colorScaleType){
-            options.colorScaleType = options.scalingType;
-        }
     },
     
     /**
@@ -46,7 +42,9 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
     _initVisualRoles: function(){
         
         this.base();
-
+        
+        // TODO: get a translator for this!!
+        
         var colorDimName = 'value',
             sizeDimName  = 'value2';
 
@@ -102,26 +100,34 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         }
     },
     
-    _initAxes: function(hasMultiRole){
-        
-        this.base(hasMultiRole);
-        
-        if(!hasMultiRole || this.parent){
-            /* Create size and color axes */
-            
-            if(this.options.useShapes){
-                this._addAxis(new pvc.visual.SizeAxis(this, 'size', 0));
-            }
-        }
+    _initPlotsCore: function(hasMultiRole){
+        new pvc.visual.HeatGridPlot(this);
     },
     
-    _bindAxes: function(hasMultiRole){
+    _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
         
-        this.base(hasMultiRole);
+        this.base(plot, dataCellsByAxisTypeThenIndex);
         
-        var sizeAxis = this.axes.size;
-        if(sizeAxis && !sizeAxis.isBound() && this._sizeRole.isBound()){
-            sizeAxis.bind(this._buildRolesDataCells(this._sizeRole));
+        /* Configure Base Axis Data Cell */
+        if(plot.type === 'heatGrid' && plot.option('UseShapes')){
+            
+            var sizeRole = this.visualRoles(plot.option('SizeRole'));
+            if(sizeRole.isBound()){
+                
+                var sizeDataCellsByAxisIndex = 
+                    def
+                    .array
+                    .lazy(dataCellsByAxisTypeThenIndex, 'size');
+                
+                def
+                .array
+                .lazy(sizeDataCellsByAxisIndex, plot.option('SizeAxis') - 1)
+                .push({
+                    plot:          plot,
+                    role:          this.visualRoles(plot.option('SizeRole')),
+                    dataPartValue: plot.option('DataPart')
+                });
+            }
         }
     },
     
@@ -144,17 +150,20 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             pvc.log("Prerendering in heatGridChart");
         }
         
-        var options = this.options;
-        return (this.heatGridChartPanel = new pvc.HeatGridPanel(this, parentPanel, def.create(baseOptions, {
-            showValues:  options.showValues,
-            orientation: options.orientation
-        })));
+        var heatGridPlot = this.plots.heatGrid;
+        
+        return (this.heatGridChartPanel = 
+                new pvc.HeatGridPanel(
+                        this, 
+                        parentPanel, 
+                        heatGridPlot, 
+                        Object.create(baseOptions)));
     },
     
     defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
         colorValIdx: 0,
         sizeValIdx:  1,
-        measuresIndexes: [2],
+        measuresIndexes: [2], // TODO: ???
 
         //multi-dimensional clickable label
         showValues: true,
@@ -166,7 +175,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         
 //      nullShape: undefined,
 //      shape: undefined,
-        useShapes: false,
+//      useShapes: false,
       
         /* Size Role */
 //      sizeAxisUseAbs: true,
@@ -174,15 +183,18 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
 //      sizeAxisFixedMax: undefined,
 //      sizeAxisOriginIsZero: false,
         
+        // TODO: continuous color scale...
+        
         /* Color Role */
-        colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
+//        colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
         
         normPerBaseCategory: true,
         numSD: 2,                 // width (only for normal distribution)
-        colorRange: ['red', 'yellow','green'],
-//        colorRangeInterval:  undefined,
-//        minColor: undefined, //"white",
-//        maxColor: undefined, //"darkgreen",
-        nullColor:  "#efc5ad"  // white with a shade of orange
+        colorRange: ['red', 'yellow','green']
+        
+//      colorRangeInterval:  undefined,
+//      minColor: undefined, //"white",
+//      maxColor: undefined, //"darkgreen",
+//      nullColor:  "#efc5ad"  // white with a shade of orange
     })
 });

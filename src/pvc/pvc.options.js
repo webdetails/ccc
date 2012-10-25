@@ -43,7 +43,6 @@ def.scope(function(){
      * </li>
      * <li>cast  - a cast function, called to normalize the value of an option</li>
      * <li>value - the default value of the property, considered already cast</li>
-     * <li>alias - name or array of names on which the option is also registered.
      * </li>
      * </ul>
      * 
@@ -60,15 +59,7 @@ def.scope(function(){
         
         def.each(specs, function(spec, name){
             var info = new OptionInfo(name, option, context, spec);
-            
             _infos[info.name] = info;
-            
-            var aliases = info.alias;
-            if(aliases){
-                aliases.forEach(function(alias){
-                    _infos[alias] = info;
-                });
-            }
         });
         
         /** @private */
@@ -144,8 +135,8 @@ def.scope(function(){
          * with properties as option names
          * and values as option values.
          * <p>
-         * Only properties whose name is the name of a defined option,
-         * or one of its aliases, are taken into account.
+         * Only properties whose name is the name of a defined option 
+         * are taken into account.
          * </p>
          * <p>
          * Every property, own or inherited, is considered, 
@@ -203,7 +194,7 @@ def.scope(function(){
         // ------------
         
         option.option = option;
-        options.specified  = specified; 
+        option.specified   = specified; 
         option.isSpecified = isSpecified;
         option.isDefined   = isDefined;
         
@@ -214,6 +205,60 @@ def.scope(function(){
         
         return option;
     }
+    
+    // ------------
+     
+    // Creates a resolve method, 
+    // that combines a list of resolvers. 
+    // The resolve stops when the first resolver returns the value <c>true</c>,
+    // returning <c>true</c> as well.
+    function resolvers(list){
+        return function(optionInfo){
+            for(var i = 0, L = list.length ; i < L ; i++){
+                var m = list[i];
+                
+                if(def.string.is(m)){
+                    m = this[m];
+                } 
+                
+                if(m.call(this, optionInfo) === true){
+                    return true;
+                }
+            }
+        };
+    }
+    
+    function constantResolver(value, op){
+        return function(optionInfo){
+            optionInfo.specify(value);
+            return true;
+        };
+    }
+    
+    function specifyResolver(fun, op){
+        return function(optionInfo){
+            var value = fun.call(this, optionInfo);
+            if(value !== undefined){
+                optionInfo.specify(value);
+                return true;
+            }
+        };
+    }
+    
+    function defaultResolver(fun){
+        return function(optionInfo){
+            var value = fun.call(this, optionInfo);
+            if(value !== undefined){
+                optionInfo.defaultValue(value);
+                return true;
+            }
+        };
+    }
+    
+    options.resolvers    = resolvers;
+    options.constant     = constantResolver;
+    options.specify      = specifyResolver;
+    options.defaultValue = defaultResolver;
     
     // ------------
     
@@ -247,10 +292,10 @@ def.scope(function(){
         }
         
         // --------
-        
-        this.alias = def.array.as(def.get(spec, 'alias'));
+        // Can be used by resolvers...
+        this.alias = def.array.to(def.get(spec, 'alias'));
     })
-    .add( /** @lends @name pvc.options.Info#  */{
+    .add( /** @lends pvc.options.Info#  */{
         isSpecified: false,
         isResolved: false,
         value: undefined,
@@ -267,8 +312,14 @@ def.scope(function(){
                 // In case of re-entry, the initial default value is obtained.
                 this.isResolved = true;
                 
-                // Must call set, specify or setDefault
-                this.resolveCore(this._context);
+                var resolve = this.resolveCore;
+                var context = this._context;
+                if(context && def.string.is(resolve)){
+                    resolve = context[resolve];
+                }
+                
+                // Must call set, specify or defaultValue
+                resolve.call(context, this);
             }
             
             return this;
@@ -307,9 +358,14 @@ def.scope(function(){
          */
         set: function(value, isDefault){
             if(value != null){
-                if(this.cast){
-                    // not a method // <<--??being called like one...
-                    value = this.cast(value, this._context);
+                var cast = this.cast;
+                if(cast){
+                    var context = this._context;
+                    if(context && def.string.is(cast)){
+                        cast = context[cast];
+                    }
+                    
+                    value = cast.call(context, value, this);
                 }
             }
             

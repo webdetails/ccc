@@ -60,12 +60,14 @@
         <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
@@ -73,9 +75,24 @@
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
@@ -85,6 +102,7 @@
         <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
@@ -165,7 +183,7 @@
   <li>stacked (true|false)</li>
   <li>panelSizeRatio - Ratio of occupied vs total size of category band. Default: 0.9 (90%)</li>
   <li>barSizeRatio - In multiple series, percentage of inner band occupied by bars. Default: 0.9 (90%)</li>
-  <li>maxBarSize - Maximum size of a bar in pixels.</li>
+  <li>barSizeMax - Maximum size of a bar in pixels.</li>
   <li>barStackedMargin - Margin that separates (stacked) bars, in pixels. Default: 0</li>
 </ul>
 <h4>Line properties</h4>
@@ -178,7 +196,7 @@
 <h4>Axis properties</h4>
 <ul>
   <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
-  <li>secondAxis (true | false) - whether to show the second axis. Default: false</li>
+  <li>plot2 (true | false) - whether to show the second axis. Default: false</li>
   <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
   <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
   <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 50</li>
@@ -196,7 +214,7 @@
   <li>secondAxisIdx - Array of indexes of the series that are shown as lines.</li>
   <li>secondAxisIndependentScale (true | false) - if the second axis has an independent scale</li>
   <li>secondAxisOriginIsZero (true | false) - if the second axis should show the 0 value at the origin. Default: true</li>
-  <li>secondAxisColor - line and scale color. Default: blue</li>
+  <li>color2AxisColors - line and scale color. Default: blue</li>
 </ul>
 
 
@@ -478,26 +496,30 @@ new pvc.BarChart({
     width:  400,
     height: 250,
     title: "Stacked bar chart with line series",
-    stacked:    true,
-    secondAxis: true,
-    secondAxisIndependentScale: true,
-    secondAxisSeries: ['Paris', 'Lisbon'],
-    secondAxisOwnColorScale: true,
-    secondAxisColor: ['lightgreen', 'pink'],
-    nullInterpolationMode: 'linear',
+    stacked: true,
+    
+    plot2: true,
+    plot2Series: ['Paris', 'Lisbon'],
+    plot2OrthoAxis: 2,
+    plot2ColorAxis: 2,
+    color2AxisColors: ['lightgreen', 'pink'],
+    plot2NullInterpolationMode: 'linear',
+    
     animate:    true,
     clickable:  true,
     selectable: true,
     hoverable:  true,
+    
     legend:     true,
     legendPosition: 'right',
     legendAlign:    'middle',
+    
     showValues: false,
     axisFullGrid: true,
     orthoAxisOffset: 0.1,
     extensionPoints: {
-        secondLine_lineWidth: 2,
-        secondDot_shapeSize: 20
+        barSecondLine_lineWidth: 4,
+        barSecondDot_shapeSize: 20
     }
 })
 .setData(relational_01_neg, { crosstabMode: false })
@@ -529,7 +551,7 @@ new pvc.BarChart({
     showValues: false,
     legend:     true,
     panelSizeRatio: 0.7,
-    maxBarSize:     100,
+    barSizeMax:     100,
     contentMargins: '5%'
 })
 .setData(crosstab_02)

@@ -1,7 +1,6 @@
-def.scope(function(){
+var sizeAxis_optionsDef;
 
-    var $VA = pvc.visual.Axis;
-    
+def.scope(function(){
     /**
      * Initializes a size axis.
      * 
@@ -12,14 +11,10 @@ def.scope(function(){
      * @extends pvc.visual.Axis
      */
     def
-    .type('pvc.visual.SizeAxis', $VA)
+    .type('pvc.visual.SizeAxis', pvc.visual.Axis)
     .init(function(chart, type, index, keyArgs){
         
         this.base(chart, type, index, keyArgs);
-        
-        this.optionId = pvc.buildIndexedId('sizeAxis', this.index);
-        
-        // ------------
         
         /* this.scaleType === 'discrete' && */
     
@@ -43,83 +38,48 @@ def.scope(function(){
             scale.range(scale.min, scale.max);
             
             if(pvc.debug >= 4){
-                pvc.log("Scale: " + JSON.stringify(def.copyOwn(scale)));
+                pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
             }
             
             return this;
         },
         
-        _getOptionsDefinition: function(){
-            return sizeAxis_optionsDef;
+        _resolveByNaked: function(){
+            // prevent naked resolution of size axes
         },
         
-        _getOptionByOptionId: function(name){
-            return chartOption.call(this, this.optionId + name);
+        _getOptionsDefinition: function(){
+            return sizeAxis_optionsDef;
         }
     });
     
-    var $VSA = pvc.visual.SizeAxis;
-    
-    /* PRIVATE STUFF */
-    
-    function chartOption(name) {
-        return this.chart.options[name];
-    }
-    
-    function resolve(fun, operation){
-        return function(axis){
-            var value = fun.call(axis, this.name, this);
-            if(value !== undefined){
-                this[operation || 'specify'](value);
-                return true;
-            }
-        };
-    }
-    
-    resolve.byOptionId = resolve($VSA.prototype._getOptionByOptionId);
-    
-    function resolveNormal(axis){
-        return resolve.byOptionId.call(this, axis);
-    }
-    
     /*global axis_optionsDef:true */
-    var sizeAxis_optionsDef = def.create(axis_optionsDef, {
+    sizeAxis_optionsDef = def.create(axis_optionsDef, {
         /* sizeAxisOriginIsZero
          * Force zero to be part of the domain of the scale to make
          * the scale "proportionally" comparable.
          */
         OriginIsZero: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean,
             value:   false
         },
         
         FixedMin: {
-            resolve: resolveNormal,
-            cast:    Number2
+            resolve: '_resolveFull',
+            cast:    pvc.castNumber
         },
         
         FixedMax: {
-            resolve: resolveNormal,
-            cast:    Number2
+            resolve: '_resolveFull',
+            cast:    pvc.castNumber
         },
         
         UseAbs: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean,
             value:   false
         }
     });
     
-    function Number2(value) {
-        if(value != null) {
-            value = +value; // to number
-            if(isNaN(value)) {
-                value = null;
-            }
-        }
-        
-        return value;
-    }
-
 });

@@ -121,7 +121,13 @@ def
         }
         
         /* Build Key and Label in the order of type.dimensions */
-        if(count === 1){
+        if(count === 0){
+            this.value = null;
+            this.key   = '';
+            if(wantLabel){
+                this.label = "";
+            }
+        } else if(count === 1){
             this.value    = singleAtom.value;     // typed
             this.rawValue = singleAtom.rawValue;  // original
             this.key      = singleAtom.globalKey; // string
@@ -210,7 +216,7 @@ def
        }
 
        this.owner.type.dimensionsNames().forEach(function(name) {
-           s.push(name + ": " + JSON.stringify(this.atoms[name].value));
+           s.push(name + ": " + pvc.stringify(this.atoms[name].value));
        }, this);
 
        return s.join(" ");

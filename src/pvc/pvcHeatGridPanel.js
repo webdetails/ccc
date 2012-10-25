@@ -12,20 +12,30 @@
  * <i>heatGridPanel_</i> - for the panel where the heatGrids sit
  * <i>heatGridLabel_</i> - for the main heatGrid label
  */
-pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
-    anchor: 'fill',
+pvc.HeatGridPanel = pvc.CategoricalAbstractPanel.extend({
+
     pvHeatGrid: null,
     pvHeatGridLabel: null,
-    data: null,
-
-    showValues: true,
-    orientation: "vertical",
-    shape: "square",
-    nullShape: "cross",
-
+    
     defaultBorder:  1,
     nullBorder:     2,
     selectedBorder: 2,
+    
+    constructor: function(chart, parent, plot, options) {
+        
+        this.base(chart, parent, plot, options);
+        
+        this.axes.size = chart.getAxis('size', plot.option('SizeAxis') - 1); // may be undefined
+        
+        this.useShapes = plot.option('UseShapes');
+        this.shape     = plot.option('Shape');
+        this.nullShape = plot.option('NullShape');
+        
+        this.colorScaleType = plot.option('ColorScaleType');
+        this.nullColor = plot.option('NullColor');
+        this.minColor  = plot.option('MinColor');
+        this.maxColor  = plot.option('MaxColor');        
+    },
     
     /**
      * @override
@@ -37,30 +47,17 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
         // TODO: this options treatment is highly "non-standard". Refactor to chart + panel-constructor
         
         var chart = this.chart,
-            options = chart.options;
+            options = chart.options,
+            me = this;
 
         var colorDimName = this.colorDimName = chart._colorDim && chart._colorDim.name,
             sizeDimName  = this.sizeDimName  = chart._sizeDim  && chart._sizeDim.name;
         
-        // colors
-        options.nullColor = pv.color(options.nullColor);
-        
-        if(options.minColor != null) { options.minColor = pv.color(options.minColor); }
-        if(options.maxColor != null) { options.maxColor = pv.color(options.maxColor); }
-        
-        if(options.shape != null) {
-            this.shape = options.shape;
-        }
-        
-        if(options.nullShape !== undefined) { // can clear the null shape!
-            this.nullShape = options.nullShape;
-        }
-        
         var a_bottom = this.isOrientationVertical() ? "bottom" : "left";
 
         /* Use existing scales */
-        var xScale = chart.axes.x.scale,
-            yScale = chart.axes.y.scale;
+        var xScale = this.axes.x.scale,
+            yScale = this.axes.y.scale;
 
         /* Determine cell dimensions. */
         var w = (xScale.max - xScale.min) / xScale.domain().length;
@@ -93,7 +90,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
         if(colorDimName){
             var fillColorScaleByColKey = pvc.color.scales(def.create(false, options, {
                 /* Override/create these options, inherit the rest */
-                type: options.colorScaleType, 
+                type: this.colorScaleType, 
                 data: colRootData,
                 colorDimension: colorDimName
             }));
@@ -105,13 +102,13 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
                     var colAbsKey = leafScene.group.parent.absKey;
                     color = fillColorScaleByColKey[colAbsKey](colorValue);
                 } else {
-                    color = options.nullColor;
+                    color = me.nullColor;
                 }
                 
                 return color;
             };
         } else {
-            getFillColor = def.fun.constant(options.nullColor);
+            getFillColor = def.fun.constant(this.nullColor);
         }
         
         /* PV Panels */
@@ -174,7 +171,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
             wrapper:     wrapper
         };
         
-        if(!options.useShapes){
+        if(!this.useShapes){
             // When no shapes are used,
             // clicks, double-clicks and tooltips are all handled by
             // the cell panel
@@ -211,7 +208,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
             //.overflow('hidden'); //overflow important if showValues=true
         
         
-        if(options.useShapes){
+        if(this.useShapes){
             this.shapes = this.createHeatMap(w, h, getFillColor, wrapper);
         } else {
             this.shapes = pvHeatGrid
@@ -315,7 +312,7 @@ pvc.HeatGridPanel = pvc.CartesianAbstractPanel.extend({
         var maxArea = areaRange.max;
         
         var sizeScale;
-        var sizeAxis = chart.axes.size;
+        var sizeAxis = this.axes.size;
         if(sizeAxis && sizeAxis.isBound()){
             sizeScale = sizeAxis
                 .setScaleRange(areaRange)

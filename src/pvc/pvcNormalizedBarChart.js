@@ -3,20 +3,13 @@
  * A NormalizedBarChart is a 100% stacked bar chart.
  */
 pvc.NormalizedBarChart = pvc.BarAbstract.extend({
-
-    constructor: function(options){
-
-        options = def.set(options, 'stacked', true);
-
-        this.base(options);
-    },
-
+    
     /**
      * Processes options after user options and default options have been merged.
      * @override
      */
     _processOptionsCore: function(options){
-
+        // Still affects default data cell settings
         options.stacked = true;
 
         this.base(options);
@@ -48,13 +41,8 @@ pvc.NormalizedBarChart = pvc.BarAbstract.extend({
             pvc.log("Prerendering in NormalizedBarChart");
         }
         
-        var options = this.options;
-        return (this.barChartPanel = new pvc.NormalizedBarPanel(this, parentPanel, def.create(baseOptions, {
-            barSizeRatio:       options.barSizeRatio,
-            maxBarSize:         options.maxBarSize,
-            showValues:         options.showValues,
-            valuesAnchor:       options.valuesAnchor,
-            orientation:        options.orientation
-        })));
+        var plot = new pvc.visual.NormalizedBarPlot(this);
+        
+        return (this.barChartPanel = new pvc.NormalizedBarPanel(this, parentPanel, plot, baseOptions));
     }
 });

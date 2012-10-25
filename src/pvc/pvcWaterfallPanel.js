@@ -6,7 +6,7 @@
  * <i>showValues</i> - Show or hide bar value. Default: false
  * <i>barSizeRatio</i> - In multiple series, percentage of inner
  * band occupied by bars. Default: 0.9 (90%)
- * <i>maxBarSize</i> - Maximum size (width) of a bar in pixels. Default: 2000
+ * <i>barSizeMax</i> - Maximum size (width) of a bar in pixels. Default: 2000
  *
  * Has the following protovis extension points:
  *
@@ -71,7 +71,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                         rulePvProto:   new pv.Mark()
                     };
                 
-                this.extend(keyArgs.rulePvProto, 'barWaterfallLine', {constOnly: true});
+                this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
                 
                 waterfallGroupScene.renderer(
                         new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
@@ -102,12 +102,12 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             waterColor = chart._waterColor
             ;
 
-        if(options.showWaterGroupAreas){
+        if(this.plot.option('AreasVisible')){
             var panelColors = pv.Colors.category10();
             var waterGroupRootScene = this._buildWaterGroupScene();
             
             this.pvWaterfallGroupPanel = new pvc.visual.Panel(this, this.pvPanel, {
-                    extensionId: 'barWaterfallGroup'
+                    extensionId: 'group'
                 })
                 .lock('data', waterGroupRootScene.childNodes)
                 .pvMark
@@ -155,7 +155,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             ;
         
         this.pvWaterfallLine = new pvc.visual.Rule(this, this.pvPanel, {
-                extensionId:  'barWaterfallLine',
+                extensionId:  'line',
                 noTooltip:    false,
                 noHover:       false,
                 noSelect:      false,
@@ -181,12 +181,12 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
             .lineCap('butt')
             ;
 
-        if(chart.options.showWaterValues){
+        if(this.plot.option('WaterValuesVisible')){
             this.pvWaterfallLabel = new pvc.visual.Label(
                 this, 
                 this.pvWaterfallLine, 
                 {
-                    extensionId: 'barWaterfallLabel'
+                    extensionId: 'label'
                 })
                 .intercept('visible', function(scene){
                     if(scene.vars.category.group._isFlattenGroup){

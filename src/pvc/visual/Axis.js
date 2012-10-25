@@ -12,26 +12,25 @@ def.scope(function(){
      * 
      * @class Represents an axis for a role in a chart.
      * 
-     * @property {pvc.BaseChart} chart The associated chart.
-     * @property {string} type The type of the axis.
-     * @property {number} index The index of the axis within its type (0, 1, 2...).
+     * @extends pvc.visual.OptionsBase
+     * 
      * @property {pvc.visual.Role} role The associated visual role.
      * @property {pv.Scale} scale The associated scale.
      * 
      * @constructor
-     * @param {pvc.BaseChart} chart The associated cartesian chart.
+     * @param {pvc.BaseChart} chart The associated chart.
      * @param {string} type The type of the axis.
      * @param {number} [index=0] The index of the axis within its type.
      * @param {object} [keyArgs] Keyword arguments.
      */
     def
-    .type('pvc.visual.Axis')
+    .type('pvc.visual.Axis', pvc.visual.OptionsBase)
     .init(function(chart, type, index, keyArgs){
-        this.chart = chart;
-        this.type  = type;
-        this.index = index == null ? 0 : index;
-        this.id = pvc.visual.Axis.getId(type, this.index);
-        this.option = pvc.options(this._getOptionsDefinition(), this);
+        
+        this.base(chart, type, index, keyArgs);
+        
+        // Fills #axisIndex and #typeIndex
+        chart._addAxis(this);
     })
     .add(/** @lends pvc.visual.Axis# */{
         isVisible: true,
@@ -158,10 +157,6 @@ def.scope(function(){
             });
         },
         
-        _getOptionsDefinition: function(){
-            return axis_optionsDef;
-        },
-        
         _checkRoleCompatibility: function(){
             var L = this.dataCells.length;
             if(L > 1){
@@ -185,22 +180,12 @@ def.scope(function(){
                     }
                 }
             }
+        },
+        
+        _getOptionsDefinition: function(){
+            return axis_optionsDef;
         }
     });
-    
-    /**
-     * Calculates the id of an axis given its type and index.
-     * @param {string} type The type of the axis.
-     * @param {number} index The index of the axis within its type. 
-     * @type string
-     */
-    pvc.visual.Axis.getId = function(type, index){
-        if(index === 0) {
-            return type; // base, ortho, legend
-        }
-        
-        return type + "" + (index + 1); // base2, ortho3,..., legend2
-    };
     
     function groupingScaleType(grouping){
         return grouping.isDiscrete() ?
@@ -213,5 +198,4 @@ def.scope(function(){
     axis_optionsDef = {
     // NOOP
     };
-
 });

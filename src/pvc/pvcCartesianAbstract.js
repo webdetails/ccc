@@ -39,56 +39,84 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         this.base.apply(this, arguments);
     },
     
-    _initAxes: function(hasMultiRole){
+    _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
         
-        this.base(hasMultiRole);
+        this.base(plot, dataCellsByAxisTypeThenIndex);
         
-        /** 
-         * Create axes 
-         * Cartesian axes are created even when hasMultiRole && !parent
+        /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
          * because it is needed to read axis options in the root chart.
          * Also binding occurs to be able to know its scale type. 
          * Yet, their scales are not setup at the root level.
          */
-        this._addCartAxis(new pvc.visual.CartesianAxis(this, 'base',  0));
-        this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 0));
-        if(this.options.secondAxis && this.options.secondAxisIndependentScale){
-            this._addCartAxis(new pvc.visual.CartesianAxis(this, 'ortho', 1));
+        
+        /* Configure Base Axis Data Cell */
+        if(plot.option.isDefined('BaseAxis')){
+            var baseDataCellsByAxisIndex = 
+                def
+                .array
+                .lazy(dataCellsByAxisTypeThenIndex, 'base');
+            
+            def
+            .array
+            .lazy(baseDataCellsByAxisIndex, plot.option('BaseAxis') - 1)
+            .push({
+                plot:          plot,
+                role:          this.visualRoles(plot.option('BaseRole')),
+                dataPartValue: plot.option('DataPart')
+            });
         }
         
-        /*  Create the trend color axis, at the root, if necessary */
-        if(!this.parent){
-            var options = this.options;
-            var trendType;
-            var colorRoleName = this.legendSource;
-            if(colorRoleName && 
-               (trendType = options.trendType) && 
-               (trendType !== 'none')){
-                // Trends must have its own color scale
-                // cause otherwise each trend series
-                // would have exactly the same color as the corresponding
-                // non-trended series; the only distinction between
-                // the two sets of points is its data part (and the values...).
-                // Specifically the currently user color scale key 
-                // (the value of the series or the category role)
-                // is the same. Same value => same color.
-                // So there's no "trendOwnColorScale"
-                this._addAxis(new pvc.visual.ColorAxis(this, 'color', 2, {
-                    optionId: 'trend',
-                    dataPartValues: 'trend'
-                }));
+        /* Configure Ortho Axis Data Cell */
+        if(plot.option.isDefined('OrthoAxis')){
+            
+            var trendType = plot.option('TrendType'); // != null
+            if(trendType === 'none'){ 
+                trendType = null; 
             }
-        } else {
-            // Copy
-            var colorAxis = this.root.axes.color3;
-            if(colorAxis){
-                this.axes.color3 = colorAxis;
-            }
+            
+            var isStacked = plot.option.isDefined('Stacked') ?
+                            plot.option('Stacked') :
+                            undefined;
+            
+            var orthoDataCellsByAxisIndex = 
+                def
+                .array
+                .lazy(dataCellsByAxisTypeThenIndex, 'ortho');
+            
+            var orthoRoleNames = def.array.to(plot.option('OrthoRole'));
+            
+            var dataCellBase = {
+                dataPartValue: plot.option('DataPart' ),
+                isStacked:     isStacked,
+                trendType:     trendType,
+                nullInterpolationMode: plot.option('NullInterpolationMode')
+            };
+            
+            var orthoDataCells = 
+                def
+                .array
+                .lazy(orthoDataCellsByAxisIndex, plot.option('OrthoAxis') - 1);
+            
+            orthoRoleNames.forEach(function(orthoRoleName){
+                var dataCell = Object.create(dataCellBase);
+                dataCell.role = this.visualRoles(orthoRoleName);
+                orthoDataCells.push(dataCell);
+            }, this)
+            ;
         }
     },
     
-    _addCartAxis: function(axis){
-        return this.axes[axis.orientedId] = this._addAxis(axis);
+    _addAxis: function(axis){
+        this.base(axis);
+        
+        switch(axis.type){
+            case 'base':
+            case 'ortho':
+                this.axes[axis.orientedId] = axis;
+                break;
+        }
+        
+        return this;
     },
     
     _setAxesScales: function(hasMultiRole){
@@ -96,15 +124,12 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         this.base(hasMultiRole);
         
         if(!hasMultiRole || this.parent){
-            var axes = this.axes;
-            
-            this._createAxisScale(axes.base);
-            this._createAxisScale(axes.ortho);
-            
-            var axisOrtho2 = axes.ortho2;
-            if(axisOrtho2){
-                this._createAxisScale(axisOrtho2);
-            }
+            ['base', 'ortho'].forEach(function(type){
+                var axisOfType = this.axesByType[type];
+                if(axisOfType){
+                    axisOfType.forEach(this._createAxisScale, this);
+                }
+            }, this);
         }
     },
     
@@ -616,14 +641,11 @@ pvc.CartesianAbstract = pvc.BaseChart.extend({
         /* Non-standard axes options and defaults */
         showXScale: true,
         showYScale: true,
-        showSecondScale: true,
+        showSecondScale: true, // v2
         
         xAxisPosition: "bottom",
         yAxisPosition: "left",
 
-        secondAxisIndependentScale: false,
-        // secondAxisColor: undefined,
-        
         trendType: 'none', // ['none'], 'linear', ...
         trendOwnColorScale: false
     })

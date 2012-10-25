@@ -42,16 +42,14 @@ def.scope(function(){
     .type('pvc.visual.CartesianAxis', $VA)
     .init(function(chart, type, index, keyArgs){
         
-        this.base(chart, type, index, keyArgs);
-        
-        // ------------
-        
         var options = chart.options;
         
-        this.orientation = $VCA.getOrientation(this.type, options.orientation);
-        this.orientedId  = $VCA.getOrientedId(this.orientation, this.index);
-        this.v1OptionId  = $VCA.getV1OptionId(this.orientation, this.index);
+        this.orientation = $VCA.getOrientation(type, options.orientation);
+        this.orientedId  = $VCA.getOrientedId(this.orientation, index);
+        this.v1OptionId  = $VCA.getV1OptionId(this.orientation, index);
     
+        this.base(chart, type, index, keyArgs);
+        
         this.isVisible = !!options['show' + def.firstUpperCase(this.v1OptionId) + 'Scale'];
     })
     .add(/** @lends pvc.visual.CartesianAxis# */{
@@ -131,7 +129,7 @@ def.scope(function(){
             }
             
             if(pvc.debug >= 4){
-                pvc.log("Scale: " + JSON.stringify(def.copyOwn(scale)));
+                pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
             }
             
             return scale;
@@ -177,6 +175,8 @@ def.scope(function(){
             return cartAxis_optionsDef;
         }
     });
+    
+    // TODO: refactor all this, unify with base Axis code
     
     var $VCA = pvc.visual.CartesianAxis;
     
@@ -250,21 +250,6 @@ def.scope(function(){
         return this.chart.options[name];
     }
     
-    // Creates a resolve method, 
-    // suitable for an option manager option specification, 
-    // that combines a list of resolvers. 
-    // The resolve stops when the first resolver returns the value <c>true</c>,
-    // returning <c>true</c> as well.
-    function resolvers(list){
-        return function(axis){
-            for(var i = 0, L = list.length ; i < L ; i++){
-                if(list[i].call(this, axis) === true){
-                    return true;
-                }
-            }
-        };
-    }
-    
     function axisSpecify(getAxisPropValue){
         return axisResolve(getAxisPropValue, 'specify');
     }
@@ -274,10 +259,10 @@ def.scope(function(){
     }
     
     function axisResolve(getAxisPropValue, operation){
-        return function(axis){ 
-            var value = getAxisPropValue.call(axis, this.name, this);
+        return function(optionInfo){ 
+            var value = getAxisPropValue.call(this, optionInfo.name, optionInfo);
             if(value !== undefined){
-                this[operation || 'specify'](value);
+                optionInfo[operation || 'specify'](value);
                 return true;
             }
         };
@@ -317,7 +302,7 @@ def.scope(function(){
         return chartOption.call(this, 'axis' + name);
     });
     
-    var resolveNormal = resolvers([
+    var resolveNormal = pvc.options.resolvers([
        axisSpecify.byId,
        axisSpecify.byV1OptionId,
        axisSpecify.byScaleType,
@@ -328,7 +313,7 @@ def.scope(function(){
     
     /* orthoFixedMin, orthoFixedMax */
     var fixedMinMaxSpec = {
-        resolve: resolvers([
+        resolve: pvc.options.resolvers([
             axisSpecify.byId,
             axisSpecify.byV1OptionId,
             axisSpecify(function(name){
@@ -340,7 +325,7 @@ def.scope(function(){
             axisSpecify.byScaleType,
             axisSpecify.byCommonId
         ]),
-        cast: Number2
+        cast: pvc.castNumber 
     };
     
     function castDomainScope(scope, axis){
@@ -354,7 +339,7 @@ def.scope(function(){
          * >= 2  <- false
          */
         Composite: {
-            resolve: resolvers([
+            resolve: pvc.options.resolvers([
                 axisSpecify(function(name){
                     // Only first axis can be composite?
                     if(this.index > 0) {
@@ -374,7 +359,7 @@ def.scope(function(){
          */
         Size: {
             resolve: resolveNormal,
-            cast:    Number2
+            cast:    pvc.castNumber 
         },
         
         SizeMax: specNormal,
@@ -383,7 +368,7 @@ def.scope(function(){
          * secondAxisPosition <- opposite(xAxisPosition) 
          */
         Position: {
-            resolve: resolvers([
+            resolve: pvc.options.resolvers([
                 resolveNormal,
                 
                 // Dynamic default value
@@ -410,7 +395,7 @@ def.scope(function(){
          * 2 <- secondAxisOriginIsZero
          */
         OriginIsZero: {
-            resolve: resolvers([
+            resolve: pvc.options.resolvers([
                 resolveNormal,
                 axisSpecify(function(name){
                     switch(this.index){
@@ -433,7 +418,7 @@ def.scope(function(){
          * 2 <- secondAxisOffset, 
          */
         Offset:  {
-            resolve: resolvers([
+            resolve: pvc.options.resolvers([
                 axisSpecify.byId,
                 axisSpecify.byV1OptionId,
                 axisSpecify.byScaleType,
@@ -445,13 +430,13 @@ def.scope(function(){
                     }
                 })
             ]),
-            cast: Number2
+            cast: pvc.castNumber
         },
         
         // em
         LabelSpacingMin: {
             resolve: resolveNormal,
-            cast:    Number2
+            cast:    pvc.castNumber
         },
         
         // For discrete axis
@@ -490,11 +475,11 @@ def.scope(function(){
         /* TICKS */
         Ticks: {
             resolve: resolveNormal,
-            cast:    Boolean2
+            cast:    Boolean
         },
         DesiredTickCount: {
             resolve: resolveNormal,
-            cast: Number2
+            cast: pvc.castNumber
         },
         MinorTicks: {
             resolve: resolveNormal,
@@ -512,11 +497,11 @@ def.scope(function(){
         },
         TickExponentMin: {
             resolve: resolveNormal,
-            cast:    Number2 
+            cast:    pvc.castNumber  
         },
         TickExponentMax: {
             resolve: resolveNormal,
-            cast:    Number2
+            cast:    pvc.castNumber 
         },
         
         /* TITLE */
@@ -526,7 +511,7 @@ def.scope(function(){
         },
         TitleSize: {
             resolve: resolveNormal,
-            cast:    Number2 
+            cast:    pvc.castNumber  
         }, // It's a pvc.Size, actually
         TitleSizeMax: specNormal, 
         TitleFont: {
@@ -548,24 +533,4 @@ def.scope(function(){
         ClickAction: specNormal,
         DoubleClickAction: specNormal
     });
-    
-    function Number2(value) {
-        if(value != null) {
-            value = +value; // to number
-            if(isNaN(value)) {
-                value = null;
-            }
-        }
-        
-        return value;
-    }
-    
-    function Boolean2(value) {
-        if(value != null) {
-            value = !!value;
-        }
-        
-        return value;
-    }
-
 });

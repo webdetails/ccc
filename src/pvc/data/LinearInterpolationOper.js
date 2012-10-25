@@ -1,11 +1,13 @@
 def
 .type('pvc.data.LinearInterpolationOper')
-.init(function(data, catRole, serRole, valRole, stretchEnds){
+.init(function(allPartsData, data, catRole, serRole, valRole, stretchEnds){
     this._newDatums = [];
     
     this._data = data;
     
-    var catDatas  = this._catDatas  = data._children;
+    var allCatDataRoot = allPartsData.flattenBy(catRole, {ignoreNulls: false});
+    var allCatDatas    = allCatDataRoot._children;
+    
     var serDatas1 = this._serDatas1 = serRole.isBound() ?
                         data.flattenBy(serRole).children().array() :
                         [null]; // null series
@@ -17,11 +19,13 @@ def
     
     var visibleKeyArgs = {visible: true, zeroIfNone: false};
     
-    this._catInfos = catDatas.map(function(catData, catIndex){
+    this._catInfos = allCatDatas.map(function(allCatData, catIndex){
+        
+        var catData = data._childrenByKey[allCatData.key];
         
         var catInfo = {
-            data:           catData,
-            value:          catData.value, // TODO
+            data:           catData || allCatData, // may be null?
+            value:          allCatData.value,
             isInterpolated: false,
             serInfos:       null,
             index:          catIndex
@@ -31,7 +35,7 @@ def
             serDatas1
             .map(function(serData1){
                 var group = catData;
-                if(serData1){
+                if(group && serData1){
                     group = group._childrenByKey[serData1.key];
                 }
                 

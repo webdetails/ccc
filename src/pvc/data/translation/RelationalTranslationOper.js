@@ -55,7 +55,7 @@
  * are bound in order to the specified indexes.
  * </p>
  * <p>
- * The option 'secondAxisSeriesIndexes' 
+ * The option 'plot2SeriesIndexes' 
  * is incompatible with and 
  * takes precedence over 
  * this one.
@@ -307,13 +307,13 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         }
         
         // ----
-        // The null test is required because secondAxisSeriesIndexes can be a number, a string...
-        var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;
-        if(axis2SeriesIndexes != null){
+        // The null test is required because plot2SeriesIndexes can be a number, a string...
+        var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
+        if(plot2SeriesIndexes != null){
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 this._userDimsReaders.push(
-                   relTransl_dataPartGet.call(this, axis2SeriesIndexes, seriesReader));
+                   relTransl_dataPartGet.call(this, plot2SeriesIndexes, seriesReader));
             }
         }
     },
@@ -338,14 +338,14 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
  * 
  * @name pvc.data.RelationalTranslationOper#_dataPartGet
  * @function
- * @param {Array} secondAxisSeriesIndexes The indexes of series that are to be shown on the second axis. 
+ * @param {Array} plot2SeriesIndexes The indexes of series that are to be shown on the second axis. 
  * @param {function} seriesReader Dimension series atom getter.
  * @type function
  */
-function relTransl_dataPartGet(secondAxisSeriesIndexes, seriesReader) {
+function relTransl_dataPartGet(plot2SeriesIndexes, seriesReader) {
     var me = this;
     
-    /* Defer calculation of axis2SeriesKeySet because *data* isn't yet available. */
+    /* Defer calculation of plot2SeriesKeySet because *data* isn't yet available. */
     function calcAxis2SeriesKeySet() {
         var atoms = {};
         var seriesKeys = def.query(me.source)
@@ -362,7 +362,7 @@ function relTransl_dataPartGet(secondAxisSeriesIndexes, seriesReader) {
                                 .distinct()
                                 .array();
 
-        return me._createSecondAxisSeriesKeySet(secondAxisSeriesIndexes, seriesKeys);
+        return me._createSecondAxisSeriesKeySet(plot2SeriesIndexes, seriesKeys);
     }
     
     return this._dataPartGet(calcAxis2SeriesKeySet, seriesReader);

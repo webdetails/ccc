@@ -231,9 +231,12 @@ pv.extend = function(f) {
   return new g();
 };
 
-try {
-  eval("pv.parse = function(x) x;"); // native support
-} catch (e) {
+// Is there any browser (still) supporting this syntax?
+// Commented cause this messes up with the debugger's break on exceptions.
+
+//try {
+//  eval("pv.parse = function(x) x;"); // native support
+//} catch (e) {
 
 /**
  * @private Parses a Protovis specification, which may use JavaScript 1.8
@@ -276,7 +279,7 @@ try {
     s += js.substring(i);
     return s;
   };
-}
+//}
 
 /**
  * @private Computes the value of the specified CSS property <tt>p</tt> on the

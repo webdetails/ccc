@@ -81,8 +81,8 @@ def
                 var dotCount = (stepCount - 1);
                 this._isOdd  = (dotCount % 2) > 0;
             } else {
-                var fromCat  = +last.catInfo.data.value;
-                var toCat    = +next.catInfo.data.value;
+                var fromCat  = +last.catInfo.value;
+                var toCat    = +next.catInfo.value;
                 var deltaCat = toCat - fromCat;
                 
                 this._steep = deltaValue / deltaCat; // should not be infinite, cause categories are different
@@ -126,7 +126,7 @@ def
                 
             } else {
                 var cat = +catInfo.value;
-                var lastCat = +last.catInfo.data.value;
+                var lastCat = +last.catInfo.value;
                 
                 value = last.value + this._steep * (cat - lastCat);
                 group = cat < this._middleCat ? last.group : next.group;

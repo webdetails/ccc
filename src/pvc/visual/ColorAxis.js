@@ -1,7 +1,5 @@
 def.scope(function(){
 
-    var $VA = pvc.visual.Axis;
-    
     /**
      * Initializes a color axis.
      * 
@@ -12,36 +10,24 @@ def.scope(function(){
      * @extends pvc.visual.Axis
      */
     def
-    .type('pvc.visual.ColorAxis', $VA)
-    .init(function(chart, type, index, keyArgs){
-        
-        this.base(chart, type, index, keyArgs);
-        
-        var optionId = def.get(keyArgs, 'optionId');
-        if(optionId == null){
-            optionId = pvc.buildIndexedId('legend', this.index);
-        }
-        
-        var dataPartValues = def.get(keyArgs, 'dataPartValues');
-        if(dataPartValues == null){
-            dataPartValues = [];
-        } else {
-            dataPartValues = def.query(dataPartValues).array();
-        }
-        
-        this._dataPartValues =  dataPartValues;
-        
-        this.optionId = optionId;
-        this.isVisible = this.option('Visible');
-    })
+    .type('pvc.visual.ColorAxis', pvc.visual.Axis)
     .add(/** @lends pvc.visual.ColorAxis# */{
         
-        addDataPartValue: function(dataPartValue){
-            this._dataPartValues.push(dataPartValue);
-        },
-        
-        getDataPartValues: function(){
-            return this._dataPartValues;
+        bind: function(dataCells){
+            this.base(dataCells);
+            
+            // -- collect distinct plots
+            // ColorTransform depends on this
+            // Colors depends on ColorTransform
+            this._plotList = 
+                def
+                .query(dataCells)
+                .select(function(dataCell){ return dataCell.plot; })
+                .distinct(function(plot){ return plot && plot.id; })
+                .array()
+                ;
+            
+            return this;
         },
         
         calculateScale: function(){
@@ -72,59 +58,27 @@ def.scope(function(){
                     .array()
                     ;
                 
-                var scale = this.option('Colors').call(null, domainValues);
-                
                 this.domainValues = domainValues;
+                
+                var scale = this.option('TransformedColors').call(null, domainValues);
                 
                 this.setScale(scale);
             }
-              
+            
             return this;
+        },
+        
+        _buildOptionId: function(){
+            return this.id + "Axis";
         },
         
         _getOptionsDefinition: function(){
             return colorAxis_optionsDef;
-        },
-        
-        _getOptionByOptionId: function(name){
-            return chartOption.call(this, this.optionId + name);
         }
     });
     
-    var $VCA = pvc.visual.ColorAxis;
-    
     /* PRIVATE STUFF */
-    
-    /**
-     * Obtains the value of an option using a specified final name.
-     * 
-     * @name pvc.visual.CartesianAxis#_chartOption
-     * @function
-     * @param {string} name The chart option name.
-     * @private
-     * @type string
-     */
-    function chartOption(name) {
-        return this.chart.options[name];
-    }
-    
-    function resolve(fun, operation){
-        return function(axis){
-            var value = fun.call(axis, this.name, this);
-            if(value !== undefined){
-                this[operation || 'specify'](value);
-                return true;
-            }
-        };
-    }
-    
-    resolve.byOptionId = resolve($VCA.prototype._getOptionByOptionId);
-    
-    function resolveNormal(axis){
-        return resolve.byOptionId.call(this, axis);
-    }
-    
-    function castSize(size, axis){
+    function castSize(size){
         // Single size or sizeMax (a number or a string)
         // should be interpreted as meaning the orthogonal length.
         
@@ -139,7 +93,7 @@ def.scope(function(){
         return size;
     }
     
-    function castAlign(align, axis){
+    function castAlign(align){
         var position = this.option('Position');
         return pvc.parseAlign(position, align);
     }
@@ -147,62 +101,47 @@ def.scope(function(){
     /*global axis_optionsDef:true*/
     var colorAxis_optionsDef = def.create(axis_optionsDef, {
         /*
-         * legendColors
-         * legend2Colors
-         * trendColors
+         * colors  (maintained due to the naked first color axis rule)
+         * colorAxisColors
+         * color2AxisColors
+         * color3AxisColors
          * -----
-         * colors
-         * secondAxisColor (compat)
+         * secondAxisColor (V1 compatibility)
          */
         Colors: {
-            resolve: function(axis){
-                // Give precedence to "normalized" option names
-                // Like resolveNormal does:
-                var colors = axis._getOptionByOptionId('Colors');
-                if(colors == null){
+            resolve: pvc.options.resolvers([
+                '_resolveFixed',
+                '_resolveNormal',
+                function(optionInfo){
                     // Handle naming exceptions
-                    if(axis.index === 0){
-                        colors = chartOption.call(axis, 'colors');
-                    } else if(axis.index === 1){
-                        colors = chartOption.call(axis, 'secondAxisColor');
+                    var colors;
+                    if(this.index === 1){
+                        colors = this._chartOption('secondAxisColor');
+                        if(colors){
+                            optionInfo.specify(colors);
+                            return true;
+                        }
                     }
-                }
-                
-                var isDefault = (colors == null);
-                if(!isDefault){
-                    colors = pvc.colorScheme(colors);
-                } else if(axis.index === 0){
-                    // Assumes default pvc scale
-                    colors = pvc.createColorScheme(colors);
-                } else {
-//                  // Inherit colors of axis-0
-//                  var color0Axis = axis.chart.axes.color;
-//                  if(color0Axis){
-//                      colors = color0Axis.option('Colors');
-//                  }
-                    // Use a color scheme that always returns 
-                    // the global color scale of the role
-                    colors = function(){ // ignore domain values
-                        return axis.chart._getRoleColorScale(axis.role.name);
-                    };
-                }
-                
-                // Check if there is a color transform set
-                // and if so, transform the color scheme
-                // If the user specified the colors,
-                // do not apply default color transforms...
-                if(isDefault || this.option.isSpecified('ColorsTransform')){
-                    var colorTransf = this.option('ColorsTransform');
-                    if(colorTransf){
-                        colors = pvc.transformColorScheme(colors, colorTransf);
+                    
+                    if(this.index === 0){
+                        // Assumes default pvc scale
+                        colors = pvc.createColorScheme();
+                    } else { 
+                        // Use colors of axes with own colors.
+                        // Use a color scheme that always returns 
+                        // the global color scale of the role
+                        var me = this;
+                        colors = function(){ // ignore domain values
+                            return me.chart._getRoleColorScale(me.role.name);
+                        };
                     }
-                }
-                
-                this.set(colors, isDefault);
-                
-                return true;
-            }
-            //cast: pvc.colorScheme
+                    
+                    optionInfo.defaultValue(colors);
+                    return true;
+                },
+                '_resoveDefault'
+            ]),
+            cast: pvc.colorScheme
         },
         
         /*
@@ -210,131 +149,74 @@ def.scope(function(){
          * of the color scheme:
          * pv.Color -> pv.Color
          */
-        ColorsTransform: {
-            resolve: function(axis){
-                if(resolveNormal.call(this, axis)){
+        ColorTransform: {
+            resolve: function(optionInfo){
+                if(this._resolveNormal(optionInfo)){
                     return true;
                 }
                 
-                if(axis.index === 1 || axis.optionId === 'trend'){
-                    this.defaultValue(pvc.brighterColorTransform);
-                    return true;
+                if(this._plotList.length === 1){
+                    var name = this._plotList[0].name;
+                    if(name === 'plot2' || name === 'trend'){
+                        optionInfo.defaultValue(pvc.brighterColorTransform);
+                        return true;
+                    }
                 }
             },
             
             cast: def.fun.to
         },
         
+        TransformedColors: {
+            resolve: function(optionInfo){
+                // Check if there is a color transform set
+                // and if so, transform the color scheme
+                // If the user specified the colors,
+                // do not apply default color transforms...
+                
+                var colors = this.option('Colors');
+                var colorTransf = this.option('ColorTransform');
+                if(colors && 
+                   colorTransf && 
+                   (!this.option.isSpecified('Colors') || this.option.isSpecified('ColorTransform'))){
+                    colors = pvc.transformColorScheme(colors, colorTransf);
+                }
+                
+                optionInfo.specify(colors);
+            }
+        },
+        
+        // ------------
         /* 
          * legendVisible 
          */
-        Visible: {
-            resolve: resolveNormal,
+        LegendVisible: {
+            resolve: '_resolveNormal',
             cast:    Boolean,
             value:   true
         },
         
-        /* legendPosition */
-        Position: {
-            resolve: resolveNormal,
-            cast:    pvc.parsePosition,
-            value:   'bottom'
-        },
-        
-        /* legendSize,
-         * legend2Size 
-         */
-        Size: {
-            resolve: resolveNormal,
-            cast:    castSize
-        },
-        
-        SizeMax: {
-            resolve: resolveNormal,
-            cast:    castSize
-        },
-        
-        Align: {
-            resolve: function(axis){
-                if(!resolve.byOptionId.call(this, axis)){
-                    // Default value of align depends on position
-                    var position = this.option('Position');
-                    var align;
-                    if(position !== 'top' && position !== 'bottom'){
-                        align = 'top';
-                    } else if(axis.chart.compatVersion() <= 1) { // centered is better
-                        align = 'left';
-                    }
-                    
-                    this.defaultValue(align);
-                }
-            },
-            cast: castAlign
-        },
-        
-        Margins:  {
-            resolve: function(axis){
-                if(!resolve.byOptionId.call(this, axis)){
-                    
-                    // Default value of margins depends on position
-                    if(axis.chart.compatVersion() > 1){
-                        var position = this.option('Position');
-                        
-                        // Set default margins
-                        var margins = def.set({}, pvc.BasePanel.oppositeAnchor[position], 5);
-                        
-                        this.defaultValue(margins);
-                    }
-                }
-            },
-            cast: pvc.Sides.as
-        },
-        
-        Paddings: {
-            resolve: resolveNormal,
-            cast:    pvc.Sides.as,
-            value:   5
-        },
-        
-        Font: {
-            resolve: resolveNormal,
-            cast:    String,
-            value:   '10px sans-serif'
-        },
-        
-        ClickMode: {
-            resolve: resolveNormal,
+        LegendClickMode: {
+            resolve: '_resolveNormal',
             cast:    pvc.parseLegendClickMode,
             value:   'toggleVisible'
         },
         
-        DrawLine: {
-            resolve: resolveNormal,
+        LegendDrawLine: {
+            resolve: '_resolveNormal',
             cast:    Boolean,
             value:   false
         },
         
-        DrawMarker: {
-            resolve: resolveNormal,
+        LegendDrawMarker: {
+            resolve: '_resolveNormal',
             cast:    Boolean,
             value:   true
         },
         
-        Shape: {
-            resolve: resolveNormal,
+        LegendShape: {
+            resolve: '_resolveNormal',
             cast:    pvc.parseShape
         }
     });
-    
-    function Number2(value) {
-        if(value != null) {
-            value = +value; // to number
-            if(isNaN(value)) {
-                value = null;
-            }
-        }
-        
-        return value;
-    }
-
 });

@@ -8,7 +8,7 @@ def.type('pvc.visual.Sign')
     this.bits = 0;
     
     var extensionIds = def.get(keyArgs, 'extensionId');
-    if(extensionIds != null){
+    if(extensionIds != null){ // empty string is a valid extension id.
         this.extensionAbsIds = def.array.to(panel._makeExtensionAbsId(extensionIds));
     }
     
@@ -452,7 +452,7 @@ def.type('pvc.visual.Sign')
     },
     
     _initDefaultColorSceneScale: function(){
-        var colorAxis = this.panel.defaultColorAxis();
+        var colorAxis = this.panel.axes.color;
         return colorAxis ? 
                colorAxis.sceneScale({nullToZero: false}) :
                def.fun.constant(pvc.defaultColor)

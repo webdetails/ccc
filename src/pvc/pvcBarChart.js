@@ -4,112 +4,46 @@
  */
 pvc.BarChart = pvc.BarAbstract.extend({
     
-    _processOptionsCore: function(options){
+    _initPlotsCore: function(hasMultiRole){
+        var options = this.options;
         
-        this.base(options);
+        new pvc.visual.BarPlot(this);
         
-        if(options.secondAxis && !options.showLines && !options.showDots && !options.showAreas){
-            options.showLines = true;
+        // secondAxis V1 compatibility
+        if(options.plot2 || options.secondAxis){
+            // Line Plot
+            new pvc.visual.PointPlot(this, {
+                name: 'plot2',
+                fixed: {
+                    DataPart: '1'
+                },
+                defaults: {
+                    ColorAxis:    2,
+                    LinesVisible: true,
+                    DotsVisible:  true
+                }});
+        }
+        
+        var trend = options.trendType;
+        if(trend && trend !== 'none'){
+            // Trend Plot
+            new pvc.visual.PointPlot(this, {
+                name: 'trend',
+                fixed: {
+                    DataPart: 'trend',
+                    TrendType: 'none',
+                    NullInterpolatioMode: 'none'
+                },
+                defaults: {
+                    LinesVisible: true,
+                    DotsVisible:  true
+                }
+            });
         }
     },
     
     _hasDataPartRole: function(){
         return true;
-    },
-    
-    _bindAxes: function(hasMultiRole){
-    
-        var options = this.options;
-        
-        var trend = options.trendType;
-        if(trend === 'none'){
-            trend = null;
-        }
-        
-        var axes = this.axes;
-        var orthoDataCells;
-        var isStacked = !!options.stacked;
-        var valueRole = this.visualRoles('value');
-        
-        if(options.secondAxis){
-            var nullInterpolationMode = options.nullInterpolationMode;
-            
-            if(axes.ortho2){
-                // Separate scales =>
-                // axis ortho 0 represents data part 0 + trend (if any)
-                // axis ortho 1 represents data part 1
-                orthoDataCells = [{
-                    role: valueRole,
-                    dataPartValue: '0',
-                    isStacked: isStacked,
-                    trendType: trend
-                }];
-                
-                if(trend){
-                    // The scale must be big enough for the trend data
-                    orthoDataCells.push({
-                        role: valueRole,
-                        dataPartValue: 'trend'
-                    });
-                }
-                
-                axes.ortho.bind(orthoDataCells);
-                
-                // Regression is not applied to the lines 
-                axes.ortho2
-                    .bind({
-                        role: valueRole,
-                        dataPartValue: '1',
-                        nullInterpolationMode: nullInterpolationMode
-                    });
-                
-            } else {
-                // Common scale => 
-                // axis ortho 0 represents both data parts
-                orthoDataCells = [{
-                        role: valueRole,
-                        dataPartValue: '0',
-                        isStacked: isStacked,
-                        trendType: trend
-                    }, {
-                        role: valueRole,
-                        dataPartValue: '1',
-                        trendType: trend,
-                        nullInterpolationMode: nullInterpolationMode
-                    }
-                ];
-                
-                if(trend){
-                    // The scale must be big enough for the trend data
-                    orthoDataCells.push({
-                        role: valueRole,
-                        dataPartValue: 'trend'
-                    });
-                }
-                
-                axes.ortho.bind(orthoDataCells);
-            }
-        } else {
-            
-            orthoDataCells = [{
-                role: valueRole,
-                dataPartValue: '0',
-                isStacked: isStacked,
-                trendType: trend
-            }];
-            
-            if(trend){
-                // The scale must be big enough for the trend data
-                orthoDataCells.push({
-                    role: valueRole,
-                    dataPartValue: 'trend'
-                });
-            }
-            
-            axes.ortho.bind(orthoDataCells);
-        }
-        
-        this.base(hasMultiRole);
     },
     
     _generateTrendsDataCell: function(dataCell){
@@ -169,7 +103,6 @@ pvc.BarChart = pvc.BarAbstract.extend({
     },
     
     _generateTrendsDataCellLinear: function(dataCell){
-        
         // Roles
         var dataPartDimName = this._dataPartRole.firstDimensionName();
         var serRole = this._serRole;
@@ -187,7 +120,9 @@ pvc.BarChart = pvc.BarAbstract.extend({
         var data = this._getVisibleData(dataCell.dataPartValue);
         var catDatas = data._children;
         
-        // The data that wil show in the base scale...
+        // TODO: It is usually the case, but not certain, that the base axis' 
+        // dataCell(s) span "all" data parts.
+        // The data that will be shown in the base scale...
         // Ideally the base scale would already be set up...
         var allPartsData = this._getVisibleData(null, {ignoreNulls: false});
         var allCatDataRoot = allPartsData.flattenBy(xRole, {ignoreNulls: false});
@@ -302,86 +237,52 @@ pvc.BarChart = pvc.BarAbstract.extend({
         }
         
         var options = this.options;
-        var barPanel = new pvc.BarPanel(this, parentPanel, def.create(baseOptions, {
-            colorAxis:          this.axes.color,
-            dataPartValue:      '0',
-            barSizeRatio:       options.barSizeRatio,
-            maxBarSize:         options.maxBarSize,
-            showValues:         options.showValues,
-            valuesAnchor:       options.valuesAnchor,
-            orientation:        options.orientation,
-            showOverflowMarkers: options.showOverflowMarkers
-        }));
+        var plots = this.plots;
+        
+        var barPlot = plots.bar;
+        var barPanel = new pvc.BarPanel(
+                this, 
+                parentPanel, 
+                barPlot, 
+                Object.create(baseOptions));
 
         // legacy field
         this.barChartPanel = barPanel;
         
-        if(options.secondAxis){
+        var plot2Plot = plots.plot2;
+        if(plot2Plot){
             if(pvc.debug >= 3){
                 pvc.log("Creating Point panel.");
             }
             
-            // 
-            // barSecondLine_strokeStyle (legacy)
-            // barSecondDot_strokeStyle  (legacy)
-            // 
-            // barPanel, bar, barLabel, label
-            // 
-            // {<>, trend, second} + {scatterPanel, line, area(shade, dot, label, lineLabel}
-            // 
-            // l/d/a
-            // 
-            // trendPanel
-            
-            var linePanel = new pvc.PointPanel(this, parentPanel, def.create(baseOptions, {
-                extensionPrefix: 'second',
-                orthoAxis:      this.axes.ortho2, // if null defaults to 1
-                colorAxis:      this.axes.color2, // if null defaults to 1
-                dataPartValue:  '1',
-                stacked:        false,
-                showValues:     (this.compatVersion() > 1) && options.showValues,
-                valuesAnchor:   options.valuesAnchor != 'center' ? options.valuesAnchor : 'right',
-                showLines:      options.showLines,
-                showDots:       options.showDots,
-                showAreas:      options.showAreas,
-                orientation:    options.orientation
-            }));
-
-            this._linePanel = linePanel;
+            var pointPanel = new pvc.PointPanel(
+                    this, 
+                    parentPanel, 
+                    plot2Plot,
+                    Object.create(baseOptions));
             
             // Legacy fields
-            barPanel.pvSecondLine = linePanel.pvLine;
-            barPanel.pvSecondDot  = linePanel.pvDot ;
+            barPanel.pvSecondLine = pointPanel.pvLine;
+            barPanel.pvSecondDot  = pointPanel.pvDot;
             
-            barPanel._linePanel = linePanel;
+            pointPanel._applyV1BarSecondExtensions = true;
         }
         
-        var trend = options.trendType;
-        if(trend && trend !== 'none'){
+        var trendPlot = plots.trend;
+        if(trendPlot){
             if(pvc.debug >= 3){
                 pvc.log("Creating Trends Point panel.");
             }
             
-            var trendLinePanel = new pvc.PointPanel(this, parentPanel, def.create(baseOptions, {
-                extensionPrefix: 'trend',
-                colorAxis:       this.axes.color3, // if null defaults to 1
-                dataPartValue:   'trend',
-                stacked:         false,
-                showValues:      options.trendShowValues,
-                valuesAnchor:    options.trendValuesAnchor,
-                showLines:       options.trendShowLines,
-                showDots:        options.trendShowDots,
-                showAreas:       options.trendShowAreas,
-                orientation:     options.orientation
-            }));
+            new pvc.PointPanel(
+                    this, 
+                    parentPanel, 
+                    trendPlot,
+                    Object.create(baseOptions));
         }
         
         return barPanel;
-    },
+    }
     
-    defaults: def.create(pvc.BarAbstract.prototype.defaults, {
-        showDots:  true,
-        showLines: true,
-        showAreas: false
-    })
+    //defaults: def.create(pvc.BarAbstract.prototype.defaults, {})
 });

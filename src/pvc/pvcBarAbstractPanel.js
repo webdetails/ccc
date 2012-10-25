@@ -8,7 +8,7 @@
  * <i>showValues</i> - Show or hide bar value. Default: false
  * <i>barSizeRatio</i> - In multiple series, percentage of inner
  * band occupied by bars. Default: 0.9 (90%)
- * <i>maxBarSize</i> - Maximum size (width) of a bar in pixels. Default: 2000
+ * <i>barSizeMax</i> - Maximum size (width) of a bar in pixels. Default: 2000
  *
  * Has the following protovis extension points:
  * <i>chart_</i> - for the main chart Panel
@@ -16,48 +16,35 @@
  * <i>barPanel_</i> - for the panel where the bars sit
  * <i>barLabel_</i> - for the main bar label
  */
-pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
+pvc.BarAbstractPanel = pvc.CategoricalAbstractPanel.extend({
     
     pvBar: null,
     pvBarLabel: null,
     pvCategoryPanel: null,
     pvSecondLine: null,
     pvSecondDot: null,
-
-    data: null,
-
-    barSizeRatio: 0.9,
-    maxBarSize: 200,
-    showValues: true,
-    barWidth: null,
-    barStepWidth: null,
-    _linePanel: null,
-    showOverflowMarkers: true,
     
-    constructor: function(chart, parent, options){
-        this.base(chart, parent, options);
-
-        // Cache
-        options = this.chart.options;
-        this.stacked = options.stacked;
-    },
+    _linePanel: null,
+    
+    barWidth:     null,
+    barStepWidth: null,
     
     _creating: function(){
         // Register BULLET legend prototype marks
         var groupScene = this.defaultVisibleBulletGroupScene();
         if(groupScene && !groupScene.hasRenderer()){
             var colorAxis  = groupScene.colorAxis;
-            var drawLine   = colorAxis.option('DrawLine');
-            var drawMarker = !drawLine || colorAxis.option('DrawMarker');
+            var drawLine   = colorAxis.option('LegendDrawLine');
+            var drawMarker = !drawLine || colorAxis.option('LegendDrawMarker');
             if(drawMarker){
                 var keyArgs = {
                     drawMarker:    true,
-                    markerShape:   colorAxis.option('Shape'),
+                    markerShape:   colorAxis.option('LegendShape'),
                     drawRule:      drawLine,
                     markerPvProto: new pv.Mark()
                 };
                 
-                this.extend(keyArgs.markerPvProto, 'bar', {constOnly: true});
+                this.extend(keyArgs.markerPvProto, '', {constOnly: true}); // '' => bar itself
                 
                 groupScene.renderer(
                     new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs));
@@ -81,14 +68,15 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             rootScene = this._buildScene(data, seriesData)
             ;
 
-        var orthoScale = this._orthoAxis.scale,
+        var orthoScale = this.axes.ortho.scale,
             orthoZero  = orthoScale(0),
-            sceneOrthoScale = this._orthoAxis.sceneScale({sceneVarName: 'value', nullToZero: false}),
-            baseRange = this._baseAxis.scale.range(),
+            sceneOrthoScale = this.axes.ortho.sceneScale({sceneVarName: 'value', nullToZero: false}),
+            barSizeRatio = this.plot.option('BarSizeRatio'),
+            barSizeMax   = this.plot.option('BarSizeMax'),
+            baseRange = this.axes.base.scale.range(),
             bandWidth = baseRange.band,
             barStepWidth = baseRange.step,
             barWidth,
-
             reverseSeries = isVertical === isStacked // (V && S) || (!V && !S)
             ;
 
@@ -96,11 +84,11 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             barWidth = bandWidth;
         } else {
             var S = seriesData.childCount();
-            barWidth = S > 0 ? (bandWidth * this.barSizeRatio / S) : 0;
+            barWidth = S > 0 ? (bandWidth * barSizeRatio / S) : 0;
         }
         
-        if (barWidth > this.maxBarSize) {
-            barWidth = this.maxBarSize;
+        if (barWidth > barSizeMax) {
+            barWidth = barSizeMax;
         }
 
         this.barWidth  = barWidth;
@@ -117,7 +105,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         
         this.pvBarPanel = new pvc.visual.Panel(this, this.pvPanel, {
                 panelType:   pv.Layout.Band,
-                extensionId: 'barPanel'
+                extensionId: 'panel'
             })
             .lock('layers', rootScene.childNodes) // series -> categories
             .lockMark('values', function(seriesScene){ return seriesScene.childNodes; })
@@ -127,7 +115,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             .lockMark('yZero',  orthoZero)
             .pvMark
             .band // categories
-                .x(this._baseAxis.sceneScale({sceneVarName: 'category'}))
+                .x(this.axes.base.sceneScale({sceneVarName: 'category'}))
                 .w(bandWidth)
                 .differentialControl(this._barDifferentialControl())
             .item
@@ -140,13 +128,13 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                     return h != null ? chart.animate(0, h - orthoZero) : null;
                 })
                 .w(barWidth)
-                .horizontalRatio(this.barSizeRatio)
+                .horizontalRatio(barSizeRatio)
                 .verticalMargin(options.barStackedMargin || 0)
             .end
             ;
         
         this.pvBar = new pvc.visual.Bar(this, this.pvBarPanel.item, {
-                extensionId: 'bar',
+                extensionId: '', // with the prefix, it gets 'bar_'
                 freePosition: true,
                 wrapper:      wrapper
             })
@@ -155,7 +143,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             .antialias(false)
             ;
 
-        if(this.showOverflowMarkers){
+        if(this.plot.option('OverflowMarkersVisible')){
             this._addOverflowMarkers(wrapper);
         }
         
@@ -164,7 +152,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                 this, 
                 this.pvBar.anchor(this.valuesAnchor || 'center'), 
                 {
-                    extensionId: ['barLabel', 'label'],
+                    extensionId: 'label',
                     wrapper:     wrapper
                 })
                 .pvMark
@@ -189,6 +177,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
     /**
      * Called to obtain the bar verticalMode property value.
      * If it returns a function,
+     * 
      * that function will be called once.
      * @virtual
      */
@@ -219,21 +208,8 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
         return datum;
     },
     
-    /**
-     * @override
-     */
-    applyExtensions: function(){
-
-        this.base();
-        
-        if(this._linePanel){
-            this.extend(this._linePanel.pvLine, "barSecondLine");
-            this.extend(this._linePanel.pvDot,  "barSecondDot" );
-        }
-    },
-    
     _addOverflowMarkers: function(wrapper){
-        var orthoAxis = this._orthoAxis;
+        var orthoAxis = this.axes.ortho;
         if(orthoAxis.option('FixedMax') != null){
             this.pvOverflowMarker = this._addOverflowMarker(false, orthoAxis.scale, wrapper);
         }
@@ -277,7 +253,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
                 noDoubleClick: true,
                 noTooltip:    true,
                 freePosition:  true,
-                extensionId:   isMin ? 'barUnderflowMarker' : 'barOverflowMarker',
+                extensionId:   isMin ? 'underflowMarker' : 'overflowMarker',
                 wrapper:       wrapper
             })
             .intercept('visible', function(scene){

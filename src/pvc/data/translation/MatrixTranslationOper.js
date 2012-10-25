@@ -20,7 +20,7 @@
  * @param {boolean} [options.seriesInRows=false]
  * Indicates that series are to be switched with categories.
  *
- * @param {Number[]} [options.secondAxisSeriesIndexes] (former secondAxisIdx)
+ * @param {Number[]} [options.plot2SeriesIndexes] (former secondAxisIdx)
  * Array of series indexes in {@link #source} that are second axis' series.
  * Any non-null value is converted to an array.
  * Each value of the array is also converted to a number.
@@ -132,7 +132,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         .query(this.source)
         .take(10)
         .each(function(row, index){
-            out.push("  [" + index + "] " + JSON.stringify(row));
+            out.push("  [" + index + "] " + pvc.stringify(row));
         });
         
         if(this.I > 10){
@@ -165,12 +165,12 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
     /**
      * Creates the set of second axis series keys
      * corresponding to the specified
-     * secondAxisSeriesIndexes and seriesAtoms arrays (protected).
+     * plot2SeriesIndexes and seriesAtoms arrays (protected).
      *
      * Validates that the specified series indexes are valid
      * indexes of seriesAtoms array.
      *
-     * @param {Array} secondAxisSeriesIndexes Array of indexes of the second axis series values.
+     * @param {Array} plot2SeriesIndexes Array of indexes of the second axis series values.
      * @param {Array} seriesKeys Array of the data source's series atom keys.
      *
      * @returns {Object} A set of second axis series values or null if none.
@@ -178,35 +178,35 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
      * @private
      * @protected
      */
-    _createSecondAxisSeriesKeySet: function(secondAxisSeriesIndexes, seriesKeys){
-        var secondAxisSeriesKeySet = null,
+    _createSecondAxisSeriesKeySet: function(plot2SeriesIndexes, seriesKeys){
+        var plot2SeriesKeySet = null,
             seriesCount = seriesKeys.length;
-        def.query(secondAxisSeriesIndexes).each(function(indexText){
+        def.query(plot2SeriesIndexes).each(function(indexText){
             // Validate
             var seriesIndex = +indexText; // + -> convert to number
             if(isNaN(seriesIndex)){
-                throw def.error.argumentInvalid('secondAxisSeriesIndexes', "Element is not a number '{0}'.", [indexText]);
+                throw def.error.argumentInvalid('plot2SeriesIndexes', "Element is not a number '{0}'.", [indexText]);
             }
 
             if(seriesIndex < 0){
                 if(seriesIndex <= -seriesCount){
-                    throw def.error.argumentInvalid('secondAxisSeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
+                    throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
                 }
 
                 seriesIndex = seriesCount + seriesIndex;
             } else if(seriesIndex >= seriesCount){
-                throw def.error.argumentInvalid('secondAxisSeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
+                throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
             }
 
             // Set
-            if(!secondAxisSeriesKeySet){
-                secondAxisSeriesKeySet = {};
+            if(!plot2SeriesKeySet){
+                plot2SeriesKeySet = {};
             }
             
-            secondAxisSeriesKeySet[seriesKeys[seriesIndex]] = true;
+            plot2SeriesKeySet[seriesKeys[seriesIndex]] = true;
         });
 
-        return secondAxisSeriesKeySet;
+        return plot2SeriesKeySet;
     },
 
     // TODO: docs
@@ -217,7 +217,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         this.ensureDimensionType('dataPart');
 
         var dataPartDimension,
-            axis2SeriesKeySet,
+            plot2SeriesKeySet,
             part1Atom,
             part2Atom,
             outAtomsSeries = {};
@@ -228,12 +228,12 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
              * Done here because *data* isn't available before.
              */
             if(!dataPartDimension) {
-                axis2SeriesKeySet = calcAxis2SeriesKeySet();
+                plot2SeriesKeySet = calcAxis2SeriesKeySet();
                 dataPartDimension = me.data.dimensions('dataPart');
 
-                if(pvc.debug >=3 && axis2SeriesKeySet){
+                if(pvc.debug >=3 && plot2SeriesKeySet){
                     pvc.log("Second axis series values: " +
-                        JSON.stringify(def.keys(axis2SeriesKeySet)));
+                        pvc.stringify(def.keys(plot2SeriesKeySet)));
                 }
             }
 
@@ -244,7 +244,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 series = series.v;
             }
             
-            if(def.hasOwn(axis2SeriesKeySet, series)){
+            if(def.hasOwn(plot2SeriesKeySet, series)){
                 partAtom = part2Atom || (part2Atom = dataPartDimension.intern("1"));
             } else {
                 partAtom = part1Atom || (part1Atom = dataPartDimension.intern("0"));

@@ -36,6 +36,8 @@ pvc.BaseChart = pvc.Abstract.extend({
      * A map of {@link pvc.visual.Axis} by axis id.
      */
     axes: null,
+    axesList: null,
+    axesByType: null,
     
     /**
      * A map of {@link pvc.visual.Role} by name.
@@ -259,6 +261,23 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     _initialOptions: null,
     
+    _axisClassByType: {
+        'color': pvc.visual.ColorAxis,
+        'size':  pvc.visual.SizeAxis,
+        'base':  pvc.visual.CartesianAxis,
+        'ortho': pvc.visual.CartesianAxis
+    },
+    
+    // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
+    _axisCreateWhere: {
+        'color': 1,
+        'size':  2,
+        'base':  3,
+        'ortho': 3
+    },
+    
+    _axisCreationOrder: ['color', 'size', 'base', 'ortho'],
+    
     constructor: function(options) {
         var parent = this.parent = def.get(options, 'parent') || null;
         
@@ -267,7 +286,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         /* DEBUG options */
         if(pvc.debug >= 3 && !parent && options){
             try {
-                pvc.log("INITIAL OPTIONS:\n" + JSON.stringify(options));
+                pvc.log("INITIAL OPTIONS:\n" + pvc.stringify(options));
             } catch(ex) {
                 /* SWALLOW usually a circular JSON structure */
             }
@@ -300,62 +319,11 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._measureVisualRoles = [];
         }
         
-        this.axes = {};
-        
         this.options = def.mixin({}, this.defaults, options);
     },
     
     compatVersion: function(options){
         return (options || this.options).compatVersion;
-    },
-    
-    /**
-     * Processes options after user options and defaults have been merged.
-     * Applies restrictions,
-     * performs validations and
-     * options values implications.
-     */
-    _processOptions: function(){
-
-        var options = this.options;
-
-        this._processOptionsCore(options);
-        
-        /* DEBUG options */
-        if(pvc.debug >= 3 && options && !this.parent){
-            try {
-                pvc.log("CURRENT OPTIONS:\n" + JSON.stringify(options));
-            }catch(ex) {
-                /* SWALLOW usually a circular JSON structure */
-            }
-        }
-        
-        this._processExtensionPoints();
-        
-        return options;
-    },
-
-    /**
-     * Processes options after user options and default options have been merged.
-     * Override to apply restrictions, perform validation or
-     * options values implications.
-     * When overriden, the base implementation should be called.
-     * The implementation must be idempotent -
-     * its successive application should yield the same results.
-     * @virtual
-     */
-    _processOptionsCore: function(options){
-        // Disable animation if environment doesn't support it
-        if (!$.support.svg || pv.renderer() === 'batik') {
-            options.animate = false;
-        }
-        
-        if(options.showTooltips){
-            var ts = options.tipsySettings;
-            if(ts){
-                this.extend(ts, "tooltip");
-            }
-        }
     },
     
     /**
@@ -405,7 +373,14 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         var hasMultiRole = this._isRoleAssigned('multiChart');
         
+        /* Initialize plots */
+        this._initPlots(hasMultiRole);
+        
         /* Initialize axes */
+        this.axes = {};
+        this.axesList = [];
+        this.axesByType = {};
+        
         this._initAxes(hasMultiRole);
         this._bindAxes(hasMultiRole);
         
@@ -442,89 +417,259 @@ pvc.BaseChart = pvc.Abstract.extend({
     
     // --------------
     
-    _initAxes: function(isMulti){
-        var colorAxis;
-        if(!this.parent){
-            var colorRoleName = this.legendSource;
-            if(colorRoleName){
-                
-                // Clear any previous global color scales
-                delete this._rolesColorScale;
-                
-                // Create the color (legend) axis at the root chart
-                var options = this.options;
-                
-                colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 0, {dataPartValues: '0'}));
-                
-                this.colors = colorAxis.option('Colors');
-                
-                if(options.secondAxis){
-                    var useOwnColorScale = options.secondAxisOwnColorScale;
-                    if(useOwnColorScale == null){
-                        useOwnColorScale = this.compatVersion() <= 1;
-                    }
-                    
-                    if(useOwnColorScale){
-                        colorAxis = this._addAxis(new pvc.visual.ColorAxis(this, 'color', 1, {dataPartValues: '1'}));
-                    } else {
-                        // color0Axis
-                        colorAxis.addDataPartValue('1');
-                    }
-                }
-                
-                this.secondAxisColor = colorAxis.option('Colors'); // color1Axis or color2Axis
+    /**
+     * Processes options after user options and defaults have been merged.
+     * Applies restrictions,
+     * performs validations and
+     * options values implications.
+     */
+    _processOptions: function(){
+
+        var options = this.options;
+        
+        this._processOptionsCore(options);
+        
+        /* DEBUG options */
+        if(pvc.debug >= 3 && options && !this.parent){
+            try {
+                pvc.log("CURRENT OPTIONS:\n" + pvc.stringify(options));
+            }catch(ex) {
+                /* SWALLOW usually a circular JSON structure */
             }
-        } else {
-            // Copy
-            var root = this.root;
-            
-            colorAxis = root.axes.color;
-            if(colorAxis){
-                this.axes.color = colorAxis;
-                this.colors = root.colors;
-            }
-            
-            colorAxis = root.axes.color2;
-            if(colorAxis){
-                this.axes.color2 = colorAxis;
-                this.secondAxisColor = root.secondAxisColor;
-            }
-            
-            colorAxis = root.axes.color3;
-            if(colorAxis){
-                this.axes.color3 = colorAxis;
+        }
+        
+        this._processExtensionPoints();
+        
+        return options;
+    },
+
+    /**
+     * Processes options after user options and default options have been merged.
+     * Override to apply restrictions, perform validation or
+     * options values implications.
+     * When overriden, the base implementation should be called.
+     * The implementation must be idempotent -
+     * its successive application should yield the same results.
+     * @virtual
+     */
+    _processOptionsCore: function(options){
+        // Disable animation if environment doesn't support it
+        if (!$.support.svg || pv.renderer() === 'batik') {
+            options.animate = false;
+        }
+        
+        if(options.showTooltips){
+            var ts = options.tipsySettings;
+            if(ts){
+                this.extend(ts, "tooltip");
             }
         }
     },
     
-    _bindAxes: function(isMulti){
+    _initPlots: function(hasMultiRole){
+        // reset plots
         if(!this.parent){
-            var colorRoleName = this.legendSource;
-            if(colorRoleName){
-                var colorRole;
-                ['color', 'color2', 'color3'].forEach(function(axisId){
-                    var colorAxis = this.axes[axisId];
-                    if(colorAxis && !colorAxis.isBound()){
-                        if(!colorRole){
-                            colorRole = this.visualRoles(colorRoleName);
-                        }
-                        
-                        var dataCells = 
-                            colorAxis
-                            .getDataPartValues()
-                            .map(function(dataPartValue){
-                                return {
-                                    role: colorRole,
-                                    dataPartValue: dataPartValue
-                                };
-                            });
-                        if(dataCells.length){
-                            colorAxis.bind(dataCells);
-                        }
+            this.plots = {};
+            this.plotList = [];
+            this.plotsByType = {};
+            
+            this._initPlotsCore(hasMultiRole);
+        } else {
+            var root = this.root;
+            
+            this.plots = root.plots;
+            this.plotList = root.plotList;
+            this.plotsByType = root.plotsByType;
+        }
+    },
+    
+    _initPlotsCore: function(hasMultiRole){
+        // NOOP
+    },
+
+    _addPlot: function(plot){
+        var plotsByType = this.plotsByType;
+        var plots = this.plots;
+        
+        var plotType  = plot.type;
+        var plotIndex = plot.index;
+        var plotName  = plot.name;
+        var plotId    = plot.id;
+        
+        if(plotName && def.hasOwn(plots, plotName)){
+            throw def.error.operationInvalid("Plot name '{0}' already taken.", [plotName]);
+        }
+        
+        if(def.hasOwn(plots, plotId)){
+            throw def.error.operationInvalid("Plot id '{0}' already taken.", [plotId]);
+        }
+        
+        var typePlots = def.array.lazy(plotsByType, plotType);
+        if(def.hasOwn(typePlots, plotIndex)){
+            throw def.error.operationInvalid("Plot index '{0}' of type '{1}' already taken.", [plotIndex, plotType]);
+        }
+        
+        plot.globalIndex = this.plotList.length;
+        typePlots[plotIndex] = plot;
+        this.plotList.push(plot);
+        plots[plotId] = plot;
+        if(plotName){
+            plots[plotName] = plot;
+        }
+    },
+    
+    // --------------
+    
+    _initAxes: function(hasMultiRole){
+        
+        // Clear any previous global color scales
+        delete this._rolesColorScale;
+        
+        // type -> index -> [datacell array]
+        // Used by sub classes.
+        var dataCellsByAxisTypeThenIndex;
+        if(!this.parent){
+            dataCellsByAxisTypeThenIndex = {};
+            
+            this.plotList.forEach(function(plot){
+                this._collectPlotAxesDataCells(plot, dataCellsByAxisTypeThenIndex);
+            }, this);
+            
+        } else {
+            dataCellsByAxisTypeThenIndex = this.root._dataCellsByAxisTypeThenIndex;
+        }
+        
+        // Used later in _bindAxes as well.
+        this._dataCellsByAxisTypeThenIndex = dataCellsByAxisTypeThenIndex;
+        
+        /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
+         * because it is needed to read axis options in the root chart.
+         * Also binding occurs to be able to know its scale type. 
+         * Yet, their scales are not setup at the root level.
+         */
+        
+        // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
+        var here = 0;
+        // Root?
+        if(!this.parent){
+            here |= 1;
+        }
+        // Leaf?
+        if(this.parent || !hasMultiRole){
+            here |= 2;
+        }
+        
+        // Used later in _bindAxes as well.
+        this._axisCreateHere = here;
+        
+        this._axisCreationOrder.forEach(function(type){
+            // Create **here** ?
+            if((this._axisCreateWhere[type] & here) !== 0){
+                
+                var dataCellsByAxisIndex = dataCellsByAxisTypeThenIndex[type];
+                if(dataCellsByAxisIndex){
+                    
+                    var AxisClass = this._axisClassByType[type];
+                    if(AxisClass){
+                        dataCellsByAxisIndex.forEach(function(dataCells, axisIndex){
+                            
+                            new AxisClass(this, type, axisIndex);
+                            
+                        }, this);
                     }
-                }, this);
+                }
+            }
+        }, this);
+        
+        if(this.parent){
+            // Copy axes that exist in root and not here
+            this.root.axesList.forEach(function(axis){
+                if(!def.hasOwn(this.axes, axis.id)){
+                    this._addAxis(axis);
+                }
+            }, this);
+        }
+    },
+    
+    /**
+     * Adds an axis to the chart.
+     * 
+     * @param {pvc.visual.Axis} axis The axis.
+     *
+     * @type pvc.visual.Axis
+     */
+    _addAxis: function(axis){
+        
+        this.axes[axis.id] = axis;
+        if(axis.chart === this){
+            axis.axisIndex = this.axesList.length;
+        }
+        
+        this.axesList.push(axis);
+        def.array.lazy(this.axesByType, axis.type).push(axis);
+        
+        // For child charts, that simply copy color axes
+        if(axis.type === 'color' && axis.isBound()){
+            this._onColorAxisScaleSet(axis);
+        }
+        
+        return this;
+    },
+    
+    getAxis: function(type, index){
+        var typeAxes = this.axesByType[type];
+        if(typeAxes){
+            return typeAxes[index];
+        }
+    },
+    
+    _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
+        /* Configure Color Axis Data Cell */
+        if(plot.option.isDefined('ColorRole')){
+            var colorRoleName = plot.option('ColorRole');
+            if(colorRoleName){
+                var colorDataCellsByAxisIndex = 
+                    def
+                    .array
+                    .lazy(dataCellsByAxisTypeThenIndex, 'color');
+                
+                def
+                .array
+                .lazy(colorDataCellsByAxisIndex, plot.option('ColorAxis') - 1)
+                .push({
+                    plot: plot,
+                    role: this.visualRoles(colorRoleName),
+                    dataPartValue: plot.option('DataPart' )
+                });
             }
         }
+    },
+    
+    _bindAxes: function(hasMultiRole){
+        // Bind all axes with dataCells registered in #_dataCellsByAxisTypeThenIndex
+        // and which were created **here**
+        
+        var here = this._axisCreateHere;
+        
+        def
+        .eachOwn(
+            this._dataCellsByAxisTypeThenIndex, 
+            function(dataCellsByAxisIndex, type){
+                // Created **here** ?
+                if((this._axisCreateWhere[type] & here) !== 0){
+                    
+                    dataCellsByAxisIndex.forEach(function(dataCells, index){
+                        
+                        var axisId = pvc.buildIndexedId(type, index);
+                        var axis = this.axes[axisId];
+                        if(!axis.isBound()){
+                            axis.bind(dataCells);
+                        }
+                        
+                    }, this);
+                }
+            }, 
+            this);
     },
     
     _generateTrends: function(){
@@ -565,24 +710,28 @@ pvc.BaseChart = pvc.Abstract.extend({
     
     _setAxesScales: function(isMulti){
         if(!this.parent){
-            ['color', 'color2', 'color3'].forEach(function(axisId){
-                var colorAxis = this.axes[axisId];
-                if(colorAxis && colorAxis.isBound()){
-                    colorAxis.calculateScale();
-                }
-            }, this);
+            var colorAxes = this.axesByType.color;
+            if(colorAxes){
+                colorAxes.forEach(function(axis){
+                    if(axis.isBound()){
+                        axis.calculateScale();
+                        this._onColorAxisScaleSet(axis);
+                    }
+                }, this);
+            }
         }
     },
     
-    /**
-     * Adds an axis to the chart.
-     * 
-     * @param {pvc.visual.Axis} axis The axis.
-     *
-     * @type pvc.visual.Axis
-     */
-    _addAxis: function(axis){
-        return this.axes[axis.id] = axis;
+    _onColorAxisScaleSet: function(axis){
+        switch(axis.index){
+            case 0:
+                this.colors = axis.option('TransformedColors');
+                break;
+            
+            case 1:
+                this.secondAxisColor = axis.option('TransformedColors');
+                break;
+        }
     },
     
     _buildRolesDataCells: function(roleNames, dataCellBase){
@@ -619,22 +768,17 @@ pvc.BaseChart = pvc.Abstract.extend({
         var firstScale, scale;
         var valueToColorMap = {};
         
-        for(var alias in this.axes){
-            
-            var axis = this.axes[alias];
-            
+        this.axesByType.color.forEach(function(axis){
             // Only use color axes with specified Colors
-            if (axis.id === alias && // exclude duplicates in axes map
-                axis.type === 'color' && 
-                axis.role.name === roleName &&
-                (axis.index === 0 || axis.option.isSpecified('Colors'))){
+            if(axis.role.name === roleName &&
+              (axis.index === 0 || axis.option.isSpecified('Colors'))){
                 
                 scale = axis.scale;
                 if(!firstScale){ firstScale = scale; }
                 
                 axis.domainValues.forEach(addDomainValue);
             }
-        }
+        }, this);
         
         function addDomainValue(value){
             // First color wins
@@ -660,7 +804,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             return color;
         };
         
-        def.copy(scale, firstScale);
+        def.copy(scale, firstScale); // TODO: domain() and range() should be overriden...
         
         return scale; 
     },
@@ -744,7 +888,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             translOptions = this._createTranslationOptions(),
             translation   = this._createTranslation(complexType, translOptions),
             dataPartDimName,
-            axis2Series;
+            plot2Series;
 
         if(pvc.debug >= 3){
             translation.logSource();
@@ -780,8 +924,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                     // Axis2Series works by adding a calculation to 
                     // the dataPart role (to classify in '0' or '1' dataPart),
                     // so using it requires registering the dataPart dimension
-                    axis2Series = options.secondAxis && options.secondAxisSeries;
-                    if(axis2Series){
+                    plot2Series = (options.plot2 || options.secondAxis) && options.plot2Series;
+                    if(plot2Series){
                         // Also, doing now, 
                         // prevents readers from reading into it.
                         this._addDataPartDimension(complexType, dataPartDimName);
@@ -792,7 +936,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             // Now the translation can configure the type as well
             translation.configureType();
             
-            if(!axis2Series && dataPartDimName){
+            if(!plot2Series && dataPartDimName){
                 // If the user isn't explicitly reading the dimension,
                 // then the dimension must be created and its value defaulted.
                 
@@ -800,15 +944,6 @@ pvc.BaseChart = pvc.Abstract.extend({
                 if(addDataPartDefaultCalc){
                     this._addDataPartDimension(complexType, dataPartDimName);
                 }
-                
-                // Trends require the dataPart role to be bound.
-//                var trendType = options.trendType;
-//                if(trendType && trendType !== 'none'){
-//                    if(this._addDataPartDimension(complexType, dataPartDimName)){
-//                        // Was added now, so the default calculation is really needed
-//                        addDataPartDefaultCalc = true;
-//                    }
-//                }
             }
         }
         
@@ -831,8 +966,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         // ----------
 
         if(!data) {
-            if(axis2Series){
-                this._addAxis2SeriesCalculation(complexType, axis2Series, dataPartDimName);
+            if(plot2Series){
+                this._addPlot2SeriesCalculation(complexType, plot2Series, dataPartDimName);
             } else if(addDataPartDefaultCalc) {
                 this._addDefaultDataPartCalculation(complexType, dataPartDimName);
             }
@@ -914,9 +1049,10 @@ pvc.BaseChart = pvc.Abstract.extend({
     },
     
     _createTranslationOptions: function(){
-        var options = this.options,
-            dataOptions = options.dataOptions || {};
-
+        var options = this.options;
+        var dataOptions = options.dataOptions || {};
+        var plot2 = options.plot2 || options.secondAxis;
+        
         var valueFormat = options.valueFormat,
             valueFormatter;
         if(valueFormat && valueFormat !== this.defaults.valueFormat){
@@ -928,7 +1064,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         return {
             //onNewDimensionType: this._onNewDimensionType.bind(this),
             compatVersion:     this.compatVersion(),
-            secondAxisSeriesIndexes: (!options.secondAxis || options.secondAxisSeries) ? null : options.secondAxisIdx,
+            plot2SeriesIndexes: (!plot2 || options.plot2Series) ? null : options.secondAxisIdx,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
@@ -956,11 +1092,11 @@ pvc.BaseChart = pvc.Abstract.extend({
         };
     },
     
-    _addAxis2SeriesCalculation: function(complexType, axis2Series, dataPartDimName){
+    _addPlot2SeriesCalculation: function(complexType, plot2Series, dataPartDimName){
         var serRole = this._serRole;
         if(serRole && serRole.isBound()){
             
-            var axis2SeriesSet = def.query(axis2Series).uniqueIndex();
+            var plot2SeriesSet = def.query(plot2Series).uniqueIndex();
             var dimNames = serRole.grouping.dimensionNames();
             var dataPartDim, part1Atom, part2Atom;
             
@@ -975,7 +1111,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                     var seriesKey = pvc.data.Complex.values(datum, dimNames).join(',');
                     
                     atoms[dataPartDimName] = 
-                        def.hasOwnProp.call(axis2SeriesSet, seriesKey) ?
+                        def.hasOwnProp.call(plot2SeriesSet, seriesKey) ?
                            (part2Atom || (part2Atom = dataPartDim.intern("1"))) :
                            (part1Atom || (part1Atom = dataPartDim.intern("0")));
                 }
@@ -1346,29 +1482,30 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     _initLegendPanel: function(){
         var options = this.options;
-        if (options.legend) {
-            // Only one legend panel, so only "Panel" options
-            // of the first 'color' axis are taken into account
-            var colorAxis = this.axes.color; 
+        if (options.legend) { // global legend(s) switch
+            
+            var legend = new pvc.visual.Legend(this, 'legend', 0);
+            
+            // TODO: pass all these options to Legend class
             
             this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
-                anchor:     colorAxis.option('Position'),
-                align:      colorAxis.option('Align'),
-                alignTo:    options.legendAlignTo,
-                offset:     options.legendOffset,
-                keepInBounds:   options.legendKeepInBounds,
-                size:       colorAxis.option('Size'),
-                sizeMax:    colorAxis.option('SizeMax'),
-                margins:    colorAxis.option('Margins'),
-                paddings:   colorAxis.option('Paddings'),
-                font:       colorAxis.option('Font'),
-                scenes:     def.getPath(options, 'legend.scenes'),
+                anchor:       legend.option('Position'),
+                align:        legend.option('Align'),
+                alignTo:      options.legendAlignTo,
+                offset:       options.legendOffset,
+                keepInBounds: options.legendKeepInBounds,
+                size:         legend.option('Size'),
+                sizeMax:      legend.option('SizeMax'),
+                margins:      legend.option('Margins'),
+                paddings:     legend.option('Paddings'),
+                font:         legend.option('Font'),
+                scenes:       def.getPath(options, 'legend.scenes'),
                 
                 // Bullet legend
-                textMargin: options.legendTextMargin,
-                itemPadding:    options.legendItemPadding,
-                shape:      options.legendShape,
-                markerSize: options.legendMarkerSize
+                textMargin:   options.legendTextMargin,
+                itemPadding:  options.legendItemPadding,
+                markerSize:   options.legendMarkerSize
+                //shape:        options.legendShape // TODO: <- doesn't this come from the various color axes?
             });
             
             this._initLegendScenes(this.legendPanel);
@@ -1391,48 +1528,51 @@ pvc.BaseChart = pvc.Abstract.extend({
         var legendIndex = 0; // always start from 0
         
         // For all color axes...
-        processAxis.call(this, this.axes.color);
-        processAxis.call(this, this.axes.color2);
-        processAxis.call(this, this.axes.color3);
+        var colorAxes = this.axesByType.color;
+        if(colorAxes){
+            colorAxes.forEach(processAxis, this);
+        }
         
         // ------------
 
         function processAxis(colorAxis){
-            var dataCells = colorAxis && colorAxis.dataCells;
-            if(dataCells){
-                dataCells
-                .forEach(function(dataCell){
-                    var domainData = dataCell.data;
-                    
-                    if(!rootScene){
-                        dataPartDimName = this._getDataPartDimName();
-                        rootScene = legendPanel._getBulletRootScene();
-                    }
-                    
-                    var dataPartAtom = domainData.atoms[dataPartDimName];
-                    var locked = dataPartAtom && dataPartAtom.value === 'trend';
-                    
-                    var groupScene = rootScene.createGroup({
-                        group:           domainData,
-                        colorAxis:       colorAxis,
-                        clickMode:       locked ? 'none' : undefined,
-                        extensionPrefix: pvc.visual.Axis.getId('legend', legendIndex++)
-                     });
-                    
-                    // For latter binding an appropriate bullet renderer
-                    dataCell.legendBulletGroupScene = groupScene;
-                    
-                    var partColorScale = colorAxis.scale;
-                    
-                    domainData
-                        .children()
-                        .each(function(itemData){
-                            var itemScene = groupScene.createItem({group: itemData});
-                            
-                            // HACK...
-                            itemScene.color = partColorScale(itemData.value);
-                        });
-                }, this);
+            if(colorAxis.option('LegendVisible')){
+                var dataCells = colorAxis && colorAxis.dataCells;
+                if(dataCells){
+                    dataCells
+                    .forEach(function(dataCell){
+                        var domainData = dataCell.data;
+                        
+                        if(!rootScene){
+                            dataPartDimName = this._getDataPartDimName();
+                            rootScene = legendPanel._getBulletRootScene();
+                        }
+                        
+                        var dataPartAtom = domainData.atoms[dataPartDimName];
+                        var locked = dataPartAtom && dataPartAtom.value === 'trend';
+                        
+                        var groupScene = rootScene.createGroup({
+                            group:           domainData,
+                            colorAxis:       colorAxis,
+                            clickMode:       locked ? 'none' : undefined,
+                            extensionPrefix: pvc.buildIndexedId('legend', legendIndex++)
+                         });
+                        
+                        // For later binding an appropriate bullet renderer
+                        dataCell.legendBulletGroupScene = groupScene;
+                        
+                        var partColorScale = colorAxis.scale;
+                        
+                        domainData
+                            .children()
+                            .each(function(itemData){
+                                var itemScene = groupScene.createItem({group: itemData});
+                                
+                                // HACK...
+                                itemScene.color = partColorScale(itemData.value);
+                            });
+                    }, this);
+                }
             }
         }
     },
@@ -1624,7 +1764,17 @@ pvc.BaseChart = pvc.Abstract.extend({
      * WARNING: It's the user's responsibility to make sure that
      * unexisting methods don't blow this.
      */
-    extend: function(mark, id, keyArgs) {
+    extend: function(mark, ids, keyArgs){
+        if(def.array.is(ids)){
+            ids.forEach(function(id){
+                this._extendCore(mark, id, keyArgs); 
+            }, this);
+        } else {
+            this._extendCore(mark, ids, keyArgs);
+        }
+    },
+    
+    _extendCore: function(mark, id, keyArgs) {
         // if mark is null or undefined, skip
         if (mark) {
             var component = def.getOwn(this._components, id);
@@ -1647,9 +1797,9 @@ pvc.BaseChart = pvc.Abstract.extend({
                     if(mark.isLocked && mark.isLocked(m)){
                         if(logOut) {logOut.push(m + ": locked extension point!");}
                     } else if(mark.isIntercepted && mark.isIntercepted(m)) {
-                        if(logOut) {logOut.push(m + ":" + JSON.stringify(v) + " (controlled)");}
+                        if(logOut) {logOut.push(m + ":" + pvc.stringify(v) + " (controlled)");}
                     } else {
-                        if(logOut) {logOut.push(m + ": " + JSON.stringify(v)); }
+                        if(logOut) {logOut.push(m + ": " + pvc.stringify(v)); }
 
                         // Extend object css and svg properties
                         if(v != null){
@@ -1928,26 +2078,23 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        legendKeepInBounds:   undefined,
 //        legendMargins:    undefined,
 //        legendPaddings:   undefined,
-        
 //        legendTextMargin: undefined,
 //        legendItemPadding:    undefined, // ATTENTION: this is different from legendPaddings
-//        legendShape:      undefined,
-//        legendDrawLine:   undefined,
-//        legendDrawMarker: undefined,
 //        legendMarkerSize: undefined,
-//        legendClickMode:  undefined,
         
 //        colors: null,
 
-        secondAxis: false,
+        plot2: false,
+//      plot2Series
+        
+//      plot2: false, // deprecated
         secondAxisIdx: -1, // deprecated
-//      secondAxisSeries: undefined,
-//        secondAxisColor: undefined,
-//        secondAxisOwnColorScale: undefined, // false
+//      secondAxisColor //deprecated
+//      plot2OwnColorScale
 
         showTooltips: true,
         
-//        tooltipFormat: undefined,
+//      tooltipFormat: undefined,
         
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +

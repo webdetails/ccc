@@ -59,12 +59,14 @@
         <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
@@ -72,9 +74,24 @@
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
@@ -84,6 +101,7 @@
         <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
@@ -165,20 +183,20 @@ in a waterfall chart you just compare the size of bars as all bars are parallel 
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
   <li>showValues - Show or hide bar value. Default: false</li>
-  <li>waterDirection - Should the water fall? 'down', or not: 'up'. Default: 'down'</li>
+  <li>direction - Should the water fall? 'down', or not: 'up'. Default: 'down'</li>
   <li>allCategoryLabel - The label of the root group. Default: 'All'</li>
-  <li>accumulatedLineLabel - The legend label of the accumulated line. Default: 'Accumulated'</li>
-  <li>showWaterValues - Show or hide waterfall line values. Default: showValues</li>
-  <li>showWaterGroupAreas - Show or hide the areas that enclose waterfall groups. Default: true</li>
+  <li>waterLineLabel - The legend label of the accumulated line. Default: 'Accumulated'</li>
+  <li>waterValuesVisible - Show or hide waterfall line values. Default: showValues</li>
+  <li>areasVisible - Show or hide the areas that enclose waterfall groups. Default: true</li>
   <li>panelSizeRatio - Ratio of the band occupied by the pane.
 Default: 0.5 (50%)</li>
-  <li>maxBarSize - Maximum size of a bar in pixels. Default: 2000</li>
+  <li>barSizeMax - Maximum size of a bar in pixels. Default: 2000</li>
 </ul>
 
 <h4>Axis properties</h4>
 <ul>
   <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
-  <li>secondAxis (true | false) - whether to show the second axis. Default: false</li>
+  <li>plot2 (true | false) - whether to show the second axis. Default: false</li>
   <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
   <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
   <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
@@ -220,9 +238,9 @@ for Waterfall extension points:
   <li>barPanel_</li>
   <li>bar_</li>
   <li>chart_</li>
-  <li>barWaterfallLine_</li>
-  <li>barWaterfallLabel_</li>
-  <li>barWaterfallGroup_</li>
+  <li>waterLine_</li>
+  <li>waterLabel_</li>
+  <li>waterGroup_</li>
 </ul>
 Sample extension points:<br>
 <ul>
@@ -251,18 +269,18 @@ var wf1 = new pvc.WaterfallChart({
 
     orientation: 'vertical',
 
-    waterDirection: 'down',  // 'up',
-    showWaterGroupAreas: true,
-    showWaterValues: true,
+    direction: 'down',  // 'up',
+    areasVisible: true,
+    waterValuesVisible: true,
+    waterLineLabel: "Accumulated",
     allCategoryLabel: "All",
-    accumulatedLineLabel: "Accumulated",
-
+    
     animate: false,
     clickable:  true,
     selectable: true,
     hoverable:  true,
 
-    maxBarSize: 200,
+    barSizeMax: 200,
     panelSizeRatio:0.75,
 
     showValues: true,
@@ -273,7 +291,7 @@ var wf1 = new pvc.WaterfallChart({
     orthoAxisDesiredTickCount: 10,
 
     extensionPoints: {
-        barWaterfallLine_lineWidth: 2,
+        waterLine_lineWidth: 2,
         xAxisLabel_textAngle:    -Math.PI/3,
         xAxisLabel_textAlign:    "right",
         xAxisLabel_textBaseline: "top",
@@ -335,7 +353,7 @@ var wf2 = new pvc.WaterfallChart({
     hoverable: true,
     orientation: 'horizontal',
     stacked: true,
-    maxBarSize: 100,
+    barSizeMax: 100,
 
     panelSizeRatio:0.75,
     barSizeRatio: 1.0,
@@ -379,7 +397,7 @@ var wf3 = new pvc.WaterfallChart({
     hoverable: true,
     orientation: 'vertical',
     stacked: true,
-    maxBarSize: 100,
+    barSizeMax: 100,
 
     panelSizeRatio:0.75,
     barSizeRatio: 1,
@@ -424,7 +442,7 @@ var wf4 = new pvc.WaterfallChart({
     orientation: 'horizontal',
     stacked: true,
 
-    maxBarSize: 100,
+    barSizeMax: 100,
 
     panelSizeRatio:0.75,
     barSizeRatio: 1,
@@ -465,11 +483,11 @@ var wf5 = new pvc.WaterfallChart({
     hoverable:  true,
     showValues: true,
     
-    waterDirection: 'up',
-    showWaterGroupAreas: true,
-    showWaterValues: true,
+    direction: 'up',
+    areasVisible: true,
+    waterValuesVisible: true,
     allCategoryLabel: "Profit",
-    //accumulatedLineLabel: "Accumulated",
+    //waterLineLabel: "Accumulated",
     
     /* Visual Role mapping */
     visualRoles: {
@@ -501,7 +519,7 @@ var wf5 = new pvc.WaterfallChart({
         xAxisLabel_textAlign:    "right",
         xAxisLabel_textBaseline: "top",
         titleLabel_font: "16px sans-serif",
-        barWaterfallLine_lineWidth: 2
+        waterLine_lineWidth: 2
     }});
 
 wf5.setData(testWaterfallBalance, {

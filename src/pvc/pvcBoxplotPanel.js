@@ -1,11 +1,22 @@
 
-pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
+pvc.BoxplotPanel = pvc.CategoricalAbstractPanel.extend({
+    plotType: 'box',
+    
     anchor: 'fill',
     
     _v1DimRoleName: {
         'series':   'series',
         'category': 'category',
         'value':    'median'
+    },
+    
+    constructor: function(chart, parent, plot, options) {
+        
+        this.base(chart, parent, plot, options);
+        
+        this.boxSizeRatio = plot.option('BoxSizeRatio');
+        this.maxBoxSize   = plot.option('BoxSizeMax');
+        this.boxplotColor = plot.option('BoxColor' );
     },
     
     /**
@@ -105,10 +116,12 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
             .lock(a_bottom, function(scene){ return scene.vars.category.boxBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.boxHeight; })
             .override('defaultColor', function(type){
+                /*jshint onecase:true */
                 switch(type){
-                    case 'fill':   return boxFillColor;
+                    //case 'fill':   return boxFillColor;
                     case 'stroke': return strokeColor;
                 }
+                return this.base(type); 
             })
             .override('defaultStrokeWidth', def.fun.constant(1))
             .pvMark
@@ -197,10 +210,10 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
             visibleKeyArgs = {visible: true, zeroIfNone: false},
             data = this._getVisibleData(),
             rootScene  = new pvc.visual.Scene(null, {panel: this, group: data}),
-            baseScale  = this._baseAxis.scale,
+            baseScale  = this.axes.base.scale,
             bandWidth  = baseScale.range().band,
             boxWidth   = Math.min(bandWidth * this.boxSizeRatio, this.maxBoxSize),
-            orthoScale = this._orthoAxis.scale
+            orthoScale = this.axes.ortho.scale
             ;
 
         /**
@@ -214,6 +227,8 @@ pvc.BoxplotPanel = pvc.CartesianAbstractPanel.extend({
         function createCategScene(categData){
             var categScene = new pvc.visual.Scene(rootScene, {group: categData}),
                 vars = categScene.vars;
+            
+            var serVar = vars.series = new pvc.visual.ValueLabelVar(null, "");
             
             var catVar = vars.category = new pvc.visual.ValueLabelVar(
                                     categData.value,

@@ -427,15 +427,15 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 }, this);
             }
 
-            /* secondAxisSeriesIndexes only implemented for single-series */
+            /* plot2SeriesIndexes only implemented for single-series */
             if(this.C === 1 && !this._userUsedDims.dataPart) {
-                // The null test is required because secondAxisSeriesIndexes can be a number, a string...
-                var axis2SeriesIndexes = this.options.secondAxisSeriesIndexes;
-                if(axis2SeriesIndexes != null){
+                // The null test is required because plot2SeriesIndexes can be a number, a string...
+                var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
+                if(plot2SeriesIndexes != null){
                     var seriesKeys = this._colGroups.map(function(colGroup){
                         return '' + colGroup[0].v;
                     });
-                    this._axis2SeriesKeySet = this._createSecondAxisSeriesKeySet(axis2SeriesIndexes, seriesKeys);
+                    this._plot2SeriesKeySet = this._createSecondAxisSeriesKeySet(plot2SeriesIndexes, seriesKeys);
                 }
             }
         }
@@ -481,7 +481,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         // ----------------
 
         if(pvc.debug >= 3){
-            pvc.log("Crosstab translator " + JSON.stringify({
+            pvc.log("Crosstab translator " + pvc.stringify({
                 R: this.R,
                 C: this.C,
                 M: this.M
@@ -718,10 +718,10 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             dimsReaders.forEach(this.defReader, this);
         }
         
-        if(this._axis2SeriesKeySet){
+        if(this._plot2SeriesKeySet){
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
-                var calcAxis2SeriesKeySet = def.fun.constant(this._axis2SeriesKeySet);
+                var calcAxis2SeriesKeySet = def.fun.constant(this._plot2SeriesKeySet);
                 this._userDimsReaders.push(
                         this._dataPartGet(calcAxis2SeriesKeySet, seriesReader));
             }

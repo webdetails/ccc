@@ -795,7 +795,7 @@ new pvc.BarChart(options)
         
         <c:property name="secondAxisIdx" type="number string list(number|string)" category="Data">
             <c:documentation>
-                <c:deprecated>Use <c:link to="#secondAxisSeries"/> instead.</c:deprecated>
+                <c:deprecated>Use <c:link to="#plot2Series"/> instead.</c:deprecated>
                 The zero-based indexes of the series, 
                 in <i>the order of appearance in the data source</i>, 
                 that are to be shown in the second axis, 
@@ -811,7 +811,7 @@ new pvc.BarChart(options)
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisSeries" type="string list(string)" default="-1" category="Data">
+        <c:property name="plot2Series" type="string list(string)" default="-1" category="Data">
             <c:documentation>
                 The <i>key values</i> of the series visual role, 
                 that are to be shown in the second axis, 
@@ -834,22 +834,33 @@ new pvc.BarChart(options)
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Style">
+        <c:property name="color2AxisColors" type="list(pvc.options.varia.ColorString)" category="Style">
             <c:documentation>
                 The array of colors to use to 
-                distinguish visual elements of the same series,
-                when they are shown on the second axis.
+                distinguish visual elements of different series,
+                on a plot that uses the second color axis.
                 
-                This option is only relevant when the property
-                <c:link to="#secondAxisOwnColorScale" /> has the value <tt>true</tt>.
+                This option is relevant when the 
+                property <c:link to="#plot2ColorAxis" /> has the value <tt>2</tt>.
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisOwnColorScale" type="boolean" default="false" category="Style">
+        <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Style">
             <c:documentation>
-                Indicates that the series shown in the second axis should
+                <c:deprecated>Use <c:link to="color2AxisColors" /> instead.</c:deprecated>
+                The array of colors to use to 
+                distinguish visual elements of different series,
+                on a plot that uses the second color axis.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="plot2ColorAxis" type="number" default="1" category="Style">
+            <c:documentation>
+                Indicates that the data shown in the second plot should
                 use a separate color scheme, 
                 as specified in <c:link to="#secondAxisColor" />.
+                
+                Valid values are <tt>1</tt> and <tt>2</tt>.
             </c:documentation>
         </c:property>
         

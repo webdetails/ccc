@@ -122,8 +122,8 @@ pvc.DataTree = pvc.BaseChart.extend({
  * <i>chart_</i> - for the main chart Panel
  *    << to be filled out >>
  */
-pvc.DataTreePanel = pvc.BasePanel.extend({
-  anchor: 'fill',
+pvc.DataTreePanel = pvc.PlotPanel.extend({
+  
   pvDataTree: null,
 
   treeElements: null, 
@@ -712,10 +712,5 @@ return pv.Label(x);
    applyExtensions: function(){
       // Extend the dataTree
       this.extend(this.pvDataTree,"dataTree");
-   },
-   
-   _getExtensionId: function(){
-       // chart is deprecated
-       return ['chart', 'plot'];
    }
 });
