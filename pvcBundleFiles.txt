@@ -71,7 +71,16 @@ src/pvc/visual/plot/BoxPlot.js
 src/pvc/visual/plot/BulletPlot.js
 
 src/pvc/pvcAbstract.js
+
 src/pvc/pvcBaseChart.js
+src/pvc/pvcBaseChart.visualRoles.js
+src/pvc/pvcBaseChart.data.js
+src/pvc/pvcBaseChart.plots.js
+src/pvc/pvcBaseChart.axes.js
+src/pvc/pvcBaseChart.panels.js
+src/pvc/pvcBaseChart.selection.js
+src/pvc/pvcBaseChart.extension.js
+
 src/pvc/pvcBasePanel.js
 src/pvc/pvcPlotPanel.js
 src/pvc/pvcMultiChartPanel.js
