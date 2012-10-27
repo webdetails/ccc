@@ -52,7 +52,7 @@ def
         var aolMap = pvc.BasePanel.orthogonalLength;
         var aoMap  = pvc.BasePanel.relativeAnchor;
         var alMap  = pvc.BasePanel.parallelLength;
-        
+        var me = this;
         var childKeyArgs = {
                 force: true,
                 referenceSize: layoutInfo.clientSize
@@ -112,7 +112,7 @@ def
         
         function layoutCycle(remTimes, iteration){
             if(pvc.debug >= 5){
-                pvc.log("\n[GridDockingPanel] ==== LayoutCycle " + (isDisasterRecovery ? "Disaster MODE" : ("#" + (iteration + 1))));
+                me._log("==== LayoutCycle " + (isDisasterRecovery ? "Disaster MODE" : ("#" + (iteration + 1))));
             }
             
             var index, count;
@@ -124,7 +124,7 @@ def
             count = sideChildren.length;
             while(index < count){
                 if(pvc.debug >= 5){
-                    pvc.log("[GridDockingPanel] SIDE Child i=" + index);
+                    me._log("SIDE Child i=" + index);
                 }
                 
                 paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
@@ -146,11 +146,11 @@ def
                     } else {
                         if(remTimes > 0){
                             if(pvc.debug >= 5){
-                                pvc.log("[GridDockingPanel] SIDE Child i=" + index + " increased paddings");
+                                me._log("SIDE Child i=" + index + " increased paddings");
                             }
                             return true; // repeat
                         } else if(pvc.debug >= 2){
-                            pvc.log("[Warning] [GridDockingPanel] SIDE Child i=" + index + " increased paddings but no more iterations possible.");
+                            me._log("[Warning] SIDE Child i=" + index + " increased paddings but no more iterations possible.");
                         }
                     }
                 }
@@ -159,7 +159,7 @@ def
             
             if(ownPaddingsChanged){
                 if(pvc.debug >= 5){
-                    pvc.log("[GridDockingPanel] Restarting due to overflowPaddings change");
+                    me._log("Restarting due to overflowPaddings change");
                 }
                 return false; // stop;
             }
@@ -168,7 +168,7 @@ def
             count = fillChildren.length;
             while(index < count){
                 if(pvc.debug >= 5){
-                    pvc.log("[GridDockingPanel] FILL Child i=" + index);
+                    me._log("FILL Child i=" + index);
                 }
                 
                 paddingsChanged = layoutChildFill(fillChildren[index], canChange);
@@ -182,11 +182,11 @@ def
                     
                     if(remTimes > 0){
                         if(pvc.debug >= 5){
-                            pvc.log("[GridDockingPanel] FILL Child i=" + index + " increased paddings");
+                            me._log("FILL Child i=" + index + " increased paddings");
                         }
                         return true; // repeat
                     } else if(pvc.debug >= 2){
-                        pvc.log("[Warning] [GridDockingPanel] FILL Child i=" + index + " increased paddings but no more iterations possible.");
+                        me._log("[Warning] FILL Child i=" + index + " increased paddings but no more iterations possible.");
                     }
                 }
                 index++;
@@ -367,8 +367,8 @@ def
             var changed = false;
             if(newPaddings){
                 if(pvc.debug >= 10){
-                    pvc.log("[GridDockingPanel] => clientSize=" + pvc.stringify(child._layoutInfo.clientSize));
-                    pvc.log("[GridDockingPanel] <= requestPaddings=" + pvc.stringify(newPaddings));
+                    me._log("=> clientSize=" + pvc.stringify(child._layoutInfo.clientSize));
+                    me._log("<= requestPaddings=" + pvc.stringify(newPaddings));
                 }
                 
                 getAnchorPaddingsNames(a).forEach(function(side){
@@ -381,14 +381,14 @@ def
                         if(increase !== 0 && Math.abs(increase) >= Math.abs(0.01 * value)){
                             if(!canChange){
                                 if(pvc.debug >= 2){
-                                    pvc.log("[Warning] [GridDockingPanel] CANNOT change but child wanted to: " + side + "=" + newValue);
+                                    me._log("[Warning] CANNOT change but child wanted to: " + side + "=" + newValue);
                                 }
                             } else {
                                 changed = true;
                                 paddings[side] = newValue;
                                 
                                 if(pvc.debug >= 5){
-                                    pvc.log("[Warning] [GridDockingPanel]   changed padding " + side + " <- " + newValue);
+                                    me._log("[Warning]   changed padding " + side + " <- " + newValue);
                                 }
                             }
                         }
@@ -404,7 +404,7 @@ def
                     if(def.hasOwn(paddingHistory, paddingKey)){
                         // LOOP detected
                         if(pvc.debug >= 2){
-                            pvc.log("[GridDockingPanel] LOOP detected");
+                            me._log("LOOP detected");
                         }
                         changed = loopSignal;
                     } else {
@@ -425,7 +425,7 @@ def
             var changed = false;
             if(overflowPaddings){
                 if(pvc.debug >= 10){
-                    pvc.log("[GridDockingPanel] <= overflowPaddings=" + pvc.stringify(overflowPaddings));
+                    me._log("<= overflowPaddings=" + pvc.stringify(overflowPaddings));
                 }
                 
                 getAnchorPaddingsNames(a).forEach(function(side){
@@ -440,14 +440,14 @@ def
                         if(increase > Math.abs(0.05 * value)){
                             if(!canChange){
                                 if(pvc.debug >= 2){
-                                    pvc.log("[Warning] [GridDockingPanel] CANNOT change overflow  padding but child wanted to: " + side + "=" + newValue);
+                                    me._log("[Warning] CANNOT change overflow  padding but child wanted to: " + side + "=" + newValue);
                                 }
                             } else {
                                 changed = true;
                                 ownPaddings[side] = newValue;
                                 
                                 if(pvc.debug >= 5){
-                                    pvc.log("[GridDockingPanel]   changed overflow padding " + side + " <- " + newValue);
+                                    me._log("  changed overflow padding " + side + " <- " + newValue);
                                 }
                             }
                         }

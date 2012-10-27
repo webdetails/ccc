@@ -32,8 +32,15 @@ def.type('pvc.data.TranslationOper')
     this.options  = options  || {};
 
     this._initType();
+    
+    if(pvc.debug >= 4) {
+        this._logItems = true;
+        this._logItemCount = 0;
+    }
 })
 .add(/** @lends pvc.data.TranslationOper# */{
+    
+    _logItems: false,
     
     /**
      * Logs the contents of the source and metadata properties.
@@ -357,9 +364,16 @@ def.type('pvc.data.TranslationOper')
     _readItem: function(item, dimsReaders) {
         // This function is performance critical and so does not use forEach
         // or array helpers, avoiding function calls, closures, etc.
-        
-        if(pvc.debug >= 4) {
-            pvc.log('virtual item: ' + pvc.stringify(item));
+        var logItem = this._logItems;
+        if(logItem) {
+            var logItemCount = this._logItemCount;
+            if(logItemCount < 10){
+                pvc.log('virtual item [' + this._logItemCount + ']: ' + pvc.stringify(item));
+                this._logItemCount++;
+            } else {
+                pvc.log('...');
+                logItem = this._logItems = false;
+            }
         }
         
         var r = 0, 
@@ -372,7 +386,7 @@ def.type('pvc.data.TranslationOper')
             dimsReaders[r++].call(data, item, valuesByDimName);
         }
         
-        if(pvc.debug >= 4) {
+        if(logItem) {
             var atoms = {};
             for(var dimName in valuesByDimName){
                 var atom = valuesByDimName[dimName];
@@ -383,11 +397,7 @@ def.type('pvc.data.TranslationOper')
                 atoms[dimName] = atom;
             }
             
-            try{
-                pvc.log('  -> read: ' + pvc.stringify(atoms));
-            } catch(ex){
-                /* NOOP usually a JSON circular structure */
-            }
+            pvc.log('-> read: ' + pvc.stringify(atoms));
         }
         
         return valuesByDimName;
@@ -497,20 +507,19 @@ def.type('pvc.data.TranslationOper')
     },
     
     // TODO: docs
-    ensureDimensionType: function(dimName, dimSpec){
+    ensureDimensionType: function(dimName, dimSpec, keyArgs){
         var dimType = this.complexType.dimensions(dimName, {assertExists: false});
         if(!dimType) {
-            this.defDimensionType(dimName, dimSpec);
+            this.defDimensionType(dimName, dimSpec, keyArgs);
         }
     },
 
-    defDimensionType: function(dimName, dimSpec){
-        /** Passing options: isCategoryTimeSeries, timeSeriesFormat and dimensionGroups */
-        dimSpec = pvc.data.DimensionType.extendSpec(dimName, dimSpec, this.options);
-        
-        var callback = this.options.onNewDimensionType;
-        if(callback){
-            dimSpec = callback(dimName, dimSpec) || dimSpec;
+    defDimensionType: function(dimName, dimSpec, keyArgs){
+        if(def.get(keyArgs, 'isDataPart', false)){
+            dimSpec = pvc.data.DimensionType.extendDataPartSpec(dimName, dimSpec);
+        } else {
+            /** Passing options: isCategoryTimeSeries, timeSeriesFormat and dimensionGroups */
+            dimSpec = pvc.data.DimensionType.extendSpec(dimName, dimSpec, this.options);
         }
         
         return this.complexType.addDimension(dimName, dimSpec);

@@ -88,52 +88,76 @@ var pvc = def.globalSpace('pvc', {
         });
     };
     
-    pvc.stringify = function(t, maxLevel){
+    pvc.stringify = function(t, keyArgs){
+        var maxLevel = def.get(keyArgs, 'maxLevel') || 5;
+        var ownOnly  = def.get(keyArgs, 'ownOnly', true);
+        var funs     = def.get(keyArgs, 'funs',    false);
         var out = [];
-        stringifyRecursive(out, t, maxLevel || 5);
+        stringifyRecursive(out, t, maxLevel, ownOnly, funs);
         return out.join('');
     };
     
-    function stringifyRecursive(out, t, remLevels){
+    function stringifyRecursive(out, t, remLevels, ownOnly, funs){
         if(remLevels > 0){
             remLevels--;
             switch(typeof t){
                 case 'undefined': return out.push('undefined');
                 case 'object':
                     if(!t){ 
-                        return out.push('null'); 
+                        out.push('null');
+                        return true;
                     }
                     
                     if(t instanceof Array){
                         out.push('[');
                         t.forEach(function(item, index){
                             if(index){ out.push(', '); }
-                            stringifyRecursive(out, item, remLevels);
+                            if(!stringifyRecursive(out, item, remLevels, ownOnly, funs)){
+                                out.pop();
+                            }
                         });
                         out.push(']');
                     } else if(t.constructor === Object){
                         out.push('{');
                         var first = true;
                         for(var p in t){
-                            if(first){ first = false;  } 
-                            else     { out.push(', '); }
-                            out.push(p + ': ');
-                            stringifyRecursive(out, t[p], remLevels);
+                            if(!ownOnly || def.hasOwnProp.call(t, p)){
+                                if(!first){ out.push(', '); }
+                                out.push(p + ': ');
+                                if(!stringifyRecursive(out, t[p], remLevels, ownOnly, funs)){
+                                    out.pop();
+                                    if(!first){ out.pop(); }
+                                } else if(first){
+                                    first = false;
+                                }
+                            }
                         }
                         out.push('}');
                     } else {
                         out.push(JSON.stringify("'new ...'"));
                     }
-                    return;
+                    return true;
                 
                 case 'number':
-                case 'boolean': return out.push(''+t);
-                case 'string':  return out.push(JSON.stringify(t));
+                case 'boolean': 
+                    out.push(''+t);
+                    return true;
+                    
+                case 'string': 
+                    out.push(JSON.stringify(t));
+                    return true;
+                    
                 case 'function':
-                    return out.push(JSON.stringify(t.toString().substr(0, 13) + '...'));
+                    if(funs){
+                        out.push(JSON.stringify(t.toString().substr(0, 13) + '...'));
+                        return true;
+                    }
+                    
+                    return false;
             }
             
-            return out.push("'new ???'");
+            out.push("'new ???'");
+            return true;
         }
     } 
     

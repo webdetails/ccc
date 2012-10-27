@@ -43,7 +43,7 @@ def
     _initPlotsCore: function(hasMultiRole){
         var options = this.options;
         
-        this._createPointPlot();
+        var pointPlot = this._createPointPlot();
         
         // secondAxis V1 compatibility
         if(options.plot2 || options.secondAxis){
@@ -60,7 +60,7 @@ def
                 }});
         }
         
-        var trend = options.trendType;
+        var trend = pointPlot.option('TrendType');
         if(trend && trend !== 'none'){
             // Trend Plot
             new pvc.visual.PointPlot(this, {
@@ -72,7 +72,7 @@ def
                 },
                 defaults: {
                     LinesVisible: true,
-                    DotsVisible:  true
+                    DotsVisible:  false
                 }
             });
         }
@@ -82,10 +82,6 @@ def
     
     /* @override */
     _createMainContentPanel: function(parentPanel, baseOptions){
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in PointAbstract");
-        }
-        
         var options = this.options;
         var axes    = this.axes;
         var plots   = this.plots;
@@ -102,7 +98,7 @@ def
         var plot2Plot = plots.plot2;
         if(plot2Plot){
             if(pvc.debug >= 3){
-                pvc.log("Creating second Point panel.");
+                this._log("Creating second Point panel.");
             }
             
             new pvc.PointPanel(
@@ -115,7 +111,7 @@ def
         var trendPlot = plots.trend;
         if(trendPlot){
             if(pvc.debug >= 3){
-                pvc.log("Creating Trends Point panel.");
+                this._log("Creating Trends Point panel.");
             }
             
             new pvc.PointPanel(

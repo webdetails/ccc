@@ -428,7 +428,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }
 
             /* plot2SeriesIndexes only implemented for single-series */
-            if(this.C === 1 && !this._userUsedDims.dataPart) {
+            var dataPartDimName = this.options.dataPartDimName;
+            if(dataPartDimName && this.C === 1 && !this._userUsedDims[dataPartDimName]) {
                 // The null test is required because plot2SeriesIndexes can be a number, a string...
                 var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
                 if(plot2SeriesIndexes != null){

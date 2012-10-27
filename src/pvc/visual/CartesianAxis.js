@@ -44,15 +44,62 @@ def.scope(function(){
         
         var options = chart.options;
         
+        // x, y
         this.orientation = $VCA.getOrientation(type, options.orientation);
+        
+        // x, y, secondX, secondY, x3, y3, ... 
         this.orientedId  = $VCA.getOrientedId(this.orientation, index);
+        
+        // x, y, second, x3, y3, ...
         this.v1OptionId  = $VCA.getV1OptionId(this.orientation, index);
-    
+        
+        // id
+        // base, ortho, base2, ortho2, ...
+        
+        // scaleType
+        // discrete, continuous, numeric, timeseries
+        
+        // common
+        // axis
+        
         this.base(chart, type, index, keyArgs);
         
-        this.isVisible = !!options['show' + def.firstUpperCase(this.v1OptionId) + 'Scale'];
+        // For now scale type is left off, 
+        // cause it is yet unknown.
+        // In bind, prefixes are recalculated (see _syncExtensionPrefixes)
+        this.extensionPrefixes = [
+            this.id + 'Axis',
+            this.orientedId + 'Axis',
+            'axis'
+        ];
+        
     })
     .add(/** @lends pvc.visual.CartesianAxis# */{
+        
+        bind: function(dataCells){
+            
+            this.base(dataCells);
+            
+            this._syncExtensionPrefixes();
+            
+            return this;
+        },
+        
+        _syncExtensionPrefixes: function(){
+            var extensions = this.extensionPrefixes;
+            extensions.length = 2;
+            
+            var st = this.scaleType;
+            if(st){
+                extensions.push(st + 'Axis'); // specific
+                if(st !== 'discrete'){
+                    extensions.push('continuousAxis'); // generic
+                }
+            }
+            
+            // Common
+            extensions.push('axis');
+        },
         
         setScale: function(scale){
             var oldScale = this.scale;
@@ -129,7 +176,7 @@ def.scope(function(){
             }
             
             if(pvc.debug >= 4){
-                pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
+                this.chart._log("Scale: " + pvc.stringify(def.copyOwn(scale)));
             }
             
             return scale;
@@ -179,19 +226,7 @@ def.scope(function(){
     // TODO: refactor all this, unify with base Axis code
     
     var $VCA = pvc.visual.CartesianAxis;
-    
-    /**
-     * Obtains the type of the axis given an axis orientation and a chart orientation.
-     * 
-     * @param {string} axisOrientation The orientation of the axis. One of the values: 'x' or 'y'.
-     * @param {string} chartOrientation The orientation of the chart. One of the values: 'horizontal' or 'vertical'.
-     * 
-     * @type string
-    $VCA.getTypeFromOrientation = function(axisOrientation, chartOrientation){
-        return ((axisOrientation === 'x') === (chartOrientation === 'vertical')) ? 'base' : 'ortho';  // NXOR
-    };
-     */
-    
+
     /**
      * Obtains the orientation of the axis given an axis type and a chart orientation.
      * 
@@ -334,6 +369,20 @@ def.scope(function(){
     
     /*global axis_optionsDef:true*/
     var cartAxis_optionsDef = def.create(axis_optionsDef, {
+        Visible: {
+            resolve: pvc.options.resolvers([
+                axisSpecify.byId,
+                axisSpecify.byV1OptionId,
+                axisSpecify(function(name){ // V1
+                    return chartOption.call(this, 'show' + def.firstUpperCase(this.v1OptionId) + 'Scale');
+                }),
+                axisSpecify.byScaleType,
+                axisSpecify.byCommonId
+            ]),
+            cast:    Boolean,
+            value:   true
+        },
+        
         /*
          * 1     <- useCompositeAxis
          * >= 2  <- false
@@ -373,16 +422,16 @@ def.scope(function(){
                 
                 // Dynamic default value
                 axisDefault(function(name){
-                    if(this.index > 0) {
-                        // Use the position opposite to that of the first axis 
-                        // of same orientation
-                        var optionId0 = $VCA.getV1OptionId(this.orientation, 0);
-                        
-                        var position0 = chartOption.call(this, optionId0 + 'Axis' + name) ||
-                                        'left';
-                        
-                        return pvc.BasePanel.oppositeAnchor[position0];
+                    if(!this.typeIndex){
+                        return this.orientation === 'x' ? 'bottom' : 'left';
                     }
+                    
+                    // Use the position opposite to that of the first axis 
+                    // of same orientation (the same as type)
+                    var firstAxis = this.chart.axesByType[this.type].first;
+                    var position  = firstAxis.option('Position');
+                    
+                    return pvc.BasePanel.oppositeAnchor[position];
                 })
             ])
         },

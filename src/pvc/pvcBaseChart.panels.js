@@ -59,12 +59,21 @@ pvc.BaseChart
         /* Initialize chart panels */
         this._initBasePanel  ();
         this._initTitlePanel ();
-        this._initLegendPanel();
+        
+        var legendPanel = this._initLegendPanel();
         
         if(!this.parent && hasMultiRole) {
             this._initMultiChartPanel();
+            
+            if(legendPanel){
+                this._initLegendScenes(legendPanel);
+            }
         } else {
             var options = this.options;
+            
+            if(legendPanel){
+                this._initLegendScenes(legendPanel);
+            }
             
             this._preRenderContent({
                 margins:           hasMultiRole ? options.smallContentMargins  : options.contentMargins,
@@ -97,9 +106,9 @@ pvc.BaseChart
         var basePanelParent = this.parent && this.parent._multiChartPanel;
         
         this.basePanel = new pvc.BasePanel(this, basePanelParent, {
-            margins:  options.margins,
-            paddings: options.paddings,
-            size:     {width: options.width, height: options.height}
+            margins:  this.margins,
+            paddings: this.paddings,
+            size:     {width: this.width, height: this.height}
         });
     },
     
@@ -118,7 +127,7 @@ pvc.BaseChart
                 align:        options.titleAlign,
                 alignTo:      options.titleAlignTo,
                 offset:       options.titleOffset,
-                keepInBounds:     options.titleKeepInBounds,
+                keepInBounds: options.titleKeepInBounds,
                 margins:      options.titleMargins,
                 paddings:     options.titlePaddings,
                 titleSize:    options.titleSize,
@@ -159,8 +168,38 @@ pvc.BaseChart
                 //shape:        options.legendShape // TODO: <- doesn't this come from the various color axes?
             });
             
-            this._initLegendScenes(this.legendPanel);
+            return this.legendPanel;
         }
+    },
+    
+    _getLegendBulletRootScene: function(){
+        return this.legendPanel && this.legendPanel._getBulletRootScene();
+    },
+    
+    /**
+     * Creates and initializes the multi-chart panel.
+     */
+    _initMultiChartPanel: function(){
+        var basePanel = this.basePanel;
+        var options = this.options;
+        
+        this._multiChartPanel = new pvc.MultiChartPanel(
+            this, 
+            basePanel, 
+            {
+                margins:  options.contentMargins,
+                paddings: options.contentPaddings
+            });
+        
+        this._multiChartPanel.createSmallCharts();
+        
+        // BIG HACK: force legend to be rendered after the small charts, 
+        // to allow them to register legend renderers.
+        basePanel._children.unshift(basePanel._children.pop());
+    },
+    
+    _coordinateSmallChartsLayout: function(scopesByType){
+        // NOOP
     },
     
     /**
@@ -226,30 +265,6 @@ pvc.BaseChart
                 }
             }
         }
-    },
-    
-    _getLegendBulletRootScene: function(){
-        return this.legendPanel && this.legendPanel._getBulletRootScene();
-    },
-    
-    /**
-     * Creates and initializes the multi-chart panel.
-     */
-    _initMultiChartPanel: function(){
-        var basePanel = this.basePanel;
-        var options = this.options;
-        this._multiChartPanel = new pvc.MultiChartPanel(this, basePanel, {
-            margins:  options.contentMargins,
-            paddings: options.contentPaddings
-        });
-        
-        // BIG HACK: force legend to be rendered after the small charts, 
-        // to allow them to register legend renderers.
-        basePanel._children.unshift(basePanel._children.pop());
-    },
-    
-    _coordinateSmallChartsLayout: function(childCharts, scopesByType){
-        // NOOP
     }
 });
 

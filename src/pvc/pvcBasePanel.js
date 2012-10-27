@@ -229,6 +229,11 @@ def
         return this.chart.compatVersion(options);
     },
     
+    _createLogInstanceId: function(){
+        return "" + 
+               this.constructor + this.chart._createLogChildSuffix();
+    },
+    
     defaultVisibleBulletGroupScene: function(){
         // Return legendBulletGroupScene, 
         // from the first data cell of same dataPartValue and 
@@ -403,6 +408,18 @@ def
             if(!canChange && prevLayoutInfo){
                 delete layoutInfo.previous;
             }
+            
+            if(pvc.debug >= 4){
+                this._log("  -> layout size={width: " + this.width + ", height: " + this.height + "}"); 
+            }
+            
+            this._onLaidOut();
+        }
+    },
+    
+    _onLaidOut: function(){
+        if(this.isRoot){
+            this.chart._onLaidOut();
         }
     },
     
@@ -479,7 +496,7 @@ def
         
         var margins, remSize;
         
-        doMaxTimes(3, layoutCycle, this);
+        doMaxTimes(5, layoutCycle, this);
         
         /* Return possibly changed clientSize */
         return clientSize;
@@ -500,13 +517,8 @@ def
         
         function layoutCycle(remTimes, iteration){
             if(pvc.debug >= 5){
-                pvc.log("\n[BasePanel] ==== LayoutCycle #" + (iteration + 1));
+                this._log("==== LayoutCycle #" + (iteration + 1));
             }
-            
-            // Objects we can mutate
-            // Reset margins and remSize
-            margins = new pvc.Sides(0);
-            remSize = def.copyOwn(clientSize);
             
             var canResize = (remTimes > 0);
             
@@ -515,15 +527,14 @@ def
             margins = new pvc.Sides(0);
             remSize = def.copyOwn(clientSize);
             
-            var index, count, child;
-            
             // Lay out SIDE child panels
-            index = 0;
-            count = sideChildren.length;
+            var child;
+            var index = 0;
+            var count = sideChildren.length;
             while(index < count){
                 child = sideChildren[index];
                 if(pvc.debug >= 5){
-                    pvc.log("[BasePanel] SIDE Child i=" + index + " at " + child.anchor);
+                    this._log("SIDE Child i=" + index + " at " + child.anchor);
                 }
                 
                 if(layoutChild.call(this, child, canResize)){
@@ -539,7 +550,7 @@ def
             while(index < count){
                 child = fillChildren[index];
                 if(pvc.debug >= 5){
-                    pvc.log("[BasePanel] FILL Child i=" + index);
+                    this._log("FILL Child i=" + index);
                 }
                 
                 if(layoutChild.call(this, child, canResize)){
@@ -560,7 +571,7 @@ def
             
             doMaxTimes(3, function(remTimes, iteration){
                 if(pvc.debug >= 5){
-                    pvc.log("[BasePanel]   Attempt #" + (iteration + 1));
+                    this._log("  -> Attempt #" + (iteration + 1));
                 }
                 
                 childKeyArgs.paddings = paddings;
@@ -579,13 +590,13 @@ def
                         if(remTimes > 0){
                             paddings = new pvc.Sides(paddings);
                             if(pvc.debug >= 5){
-                                pvc.log("[BasePanel] Child requested paddings change: " + pvc.stringify(paddings));
+                                this._log("  -> Child requested paddings change: " + pvc.stringify(paddings));
                             }
                             return true; // again
                         }
                         
                         if(pvc.debug >= 2){
-                            pvc.log("[Warning] [BasePanel] FILL Child requests paddings change but no more iterations possible.");
+                            this._log("  -> [Warning] FILL Child requests paddings change but iterations limit has been reached.");
                         }
                         
                         // ignore overflow
@@ -610,9 +621,13 @@ def
             var resized = false;
             var addWidth = child.width - remSize.width;
             if(addWidth > 0){
+                if(pvc.debug >= 3){
+                    this._log("  -> addWidth=" + addWidth); 
+                }
+                
                 if(!canResize){
                     if(pvc.debug >= 2){
-                        pvc.log("[Warning] Layout iterations limit reached.");
+                        this._log("  -> [Warning] Layout iterations limit reached.");
                     }
                 } else {
                     resized = true;
@@ -624,9 +639,13 @@ def
             
             var addHeight = child.height - remSize.height;
             if(addHeight > 0){
+                if(pvc.debug >= 3){
+                    this._log("  -> addHeight=" + addHeight); 
+                }
+                
                 if(!canResize){
                     if(pvc.debug >= 2){
-                        pvc.log("[Warning] Layout iterations limit reached.");
+                        this._log("  -> [Warning] Layout iterations limit reached.");
                     }
                 } else {
                     resized = true;
@@ -1890,7 +1909,7 @@ def
         /* Only update selection, which is a global op, after all selection changes */
         
         if(pvc.debug >= 3) {
-            pvc.log('rubberBand ' + pvc.stringify(this.rubberBand));
+            this._log('rubberBand ' + pvc.stringify(this.rubberBand));
         }
         
         var chart = this.chart;
@@ -1982,7 +2001,6 @@ def
         }
         
         function processShape(shape, instance) {
-            // pvc.log(datum.key + ": " + pvc.stringify(shape) + " intersects? " + shape.intersectsRect(this.rubberBand));
             if (shape.intersectsRect(rb)){
                 var group = instance.group;
                 var datums = group ? group._datums : def.array.as(instance.datum);
@@ -1990,12 +2008,12 @@ def
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
                             if(pvc.debug >= 10) {
-                                pvc.log(datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type);
+                                this._log(datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type);
                             }
                     
                             fun.call(ctx, datum);
                         }
-                    });
+                    }, this);
                 }
             }
         }
@@ -2014,7 +2032,7 @@ def
                 } else {
                     if(instancePrev){
                         var shape = pvMark[shapeMethod](instancePrev, instance).apply(toScreen);
-                        processShape(shape, instancePrev);
+                        processShape.call(this, shape, instancePrev);
                     }
     
                     instancePrev = instance;
@@ -2024,7 +2042,7 @@ def
             pvMark.eachInstanceWithData(function(instance, toScreen){
                 if(!instance.isBreak && instance.visible) {
                     var shape = pvMark[shapeMethod](instance).apply(toScreen);
-                    processShape(shape, instance);
+                    processShape.call(this, shape, instance);
                 }
             }, this);
         }

@@ -329,13 +329,13 @@ def
         return pvc.unionExtents(result, catRange);
     },
     
-    _coordinateSmallChartsLayout: function(childCharts, scopesByType){
+    _coordinateSmallChartsLayout: function(scopesByType){
         // TODO: optimize the case were 
         // the title panels have a fixed size and
         // the x and y FixedMin and FixedMax are all specified...
         // Don't need to coordinate in that case.
-        
-        this.base(childCharts, scopesByType);
+
+        this.base(scopesByType);
         
         // Force layout and retrieve sizes of
         // * title panel
@@ -348,7 +348,7 @@ def
         var sizesMaxByAxisId = {}; // {id:  {axis: axisSizeMax, title: titleSizeMax} }
         
         // Calculate maximum sizes
-        childCharts.forEach(function(childChart){
+        this.children.forEach(function(childChart){
             
             childChart.basePanel.layout();
             
@@ -404,7 +404,7 @@ def
         }, this);
         
         // Apply the maximum sizes to the corresponding panels
-        childCharts.forEach(function(childChart){
+        this.children.forEach(function(childChart){
             
             if(titleSizeMax > 0){
                 var panel  = childChart.titlePanel;
@@ -449,7 +449,7 @@ def
         var baseScale = this.axes.base.scale;
         
         if(baseScale.type !== 'timeSeries'){
-            pvc.log("Attempting to mark an event on a non timeSeries chart");
+            this._log("Attempting to mark an event on a non timeSeries chart");
             return;
         }
 
@@ -463,7 +463,7 @@ def
             range = baseScale.range();
         
         if( dpos < range[0] || dpos > range[1]){
-            pvc.log("Event outside the allowed range, returning");
+            this._log("Event outside the allowed range, returning");
             return;
         }
 

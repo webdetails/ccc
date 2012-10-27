@@ -24,11 +24,6 @@ def
     legendSource: 'category',
 
     _preRenderContent: function(contentOptions){
-
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in parallelCoordinates");
-        }
-
         this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, def.create(contentOptions, {
             topRuleOffset : this.options.topRuleOffset,
             botRuleOffset : this.options.botRuleOffset,

@@ -84,10 +84,6 @@ def
     
     /* @override */
     _createMainContentPanel: function(parentPanel, baseOptions){
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in boxplotChart");
-        }
-        
         var options = this.options;
         var plots   = this.plots;
             
@@ -105,7 +101,7 @@ def
         var plot2Plot = plots.plot2;
         if(plot2Plot){
             if(pvc.debug >= 3){
-                pvc.log("Creating Point panel.");
+                this._log("Creating Point panel.");
             }
             
             var pointPanel = new pvc.PointPanel(
@@ -127,7 +123,7 @@ def
     
     defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
         // plot2: false
-        //legend: false,
+        // legend: false,
         crosstabMode: false
     })
 })

@@ -106,14 +106,14 @@ pvc.BaseChart
 
                 if(logOut){
                     if(logOut.length){
-                        pvc.log("Applying Extension Points for: '" + id + "'\n\t* " + logOut.join("\n\t* "));
+                        this._log("Applying Extension Points for: '" + id + "'\n\t* " + logOut.join("\n\t* "));
                     } else if(pvc.debug >= 5) {
-                        pvc.log("No Extension Points for: '" + id + "'");
+                        this._log("No Extension Points for: '" + id + "'");
                     }
                 }
             }
         } else if(pvc.debug >= 4){
-            pvc.log("Applying Extension Points for: '" + id + "' (target mark does not exist)");
+            this._log("Applying Extension Points for: '" + id + "' (target mark does not exist)");
         }
     },
 

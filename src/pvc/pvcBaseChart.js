@@ -11,7 +11,7 @@ def
     /* DEBUG options */
     if(pvc.debug >= 3 && !parent && options){
         try {
-            pvc.log("INITIAL OPTIONS:\n" + pvc.stringify(options));
+            this._log("OPTIONS:\n" + pvc.logSeparator + "\n" + pvc.stringify(options, {ownOnly: false, funs: true}));
         } catch(ex) {
             /* SWALLOW usually a circular JSON structure */
         }
@@ -20,17 +20,25 @@ def
     if(parent) {
         // options != null
         this.root = parent.root;
+        this.smallColIndex = options.smallColIndex;
+        this.smallRowIndex = options.smallRowIndex;
         
-        this.left = options.left;
-        this.top  = options.top;
+        parent._addChild(this);
     } else {
-        this.root = this;
+        this.root  = this;
     }
 
     this._constructData(options);
     this._constructVisualRoles(options);
     
     this.options = def.mixin({}, this.defaults, options);
+    
+    if(!parent){
+        this.width    = this.options.width; 
+        this.height   = this.options.height;
+        this.margins  = this.options.margins;
+        this.paddings = this.options.margins;
+    }
 })
 .add({
     /**
@@ -48,6 +56,13 @@ def
      * @type pvc.BaseChart
      */
     parent: null,
+    
+    /**
+     * The chart's child charts.
+     * 
+     * @type pvc.BaseChart[]
+     */
+    children: null,
     
     /**
      * The chart's root chart.
@@ -141,8 +156,36 @@ def
      */
     _initialOptions: null,
     
+    left: 0,
+    top:  0,
+    
+    width: null,
+    height: null,
+    margins:  null,
+    paddings: null,
+    
+    //------------------
     compatVersion: function(options){
         return (options || this.options).compatVersion;
+    },
+    
+    _createLogInstanceId: function(){
+        return "" + 
+            this.constructor + this._createLogChildSuffix();
+    },
+    
+    _createLogChildSuffix: function(){
+        return this.parent ? 
+               (" (" + (this.smallRowIndex + 1) + "," + 
+                       (this.smallColIndex + 1) + ")") : 
+               "";
+    },
+    
+    _addChild: function(childChart){
+        /*jshint expr:true */
+        (childChart.parent === this) || def.assert("Not a child of this chart.");
+        
+        this.children.push(childChart);
     },
     
     /**
@@ -164,10 +207,12 @@ def
         this._createVersion++;
         
         this.isPreRendered = false;
-
+        
         if(pvc.debug >= 3){
-            pvc.log("Prerendering chart");
+            this._log("Prerendering");
         }
+        
+        this.children = [];
         
         /* Any data exists or throws */
         this._checkNoData();
@@ -223,6 +268,45 @@ def
         this.isPreRendered = true;
     },
 
+    // --------------
+    
+    _setSmallLayout: function(keyArgs){
+        if(keyArgs){
+            var basePanel = this.basePanel;
+            
+            if(this._setProp('left', keyArgs) | this._setProp('top', keyArgs)){
+                if(basePanel) {
+                    def.set(
+                       basePanel.position,
+                       'left', this.left, 
+                       'top',  this.top);
+                }
+            }
+            
+            if(this._setProp('width', keyArgs) | this._setProp('height', keyArgs)){
+                if(basePanel){
+                    basePanel.size = new pvc.Size (this.width, this.height);
+                }
+            }
+            
+            if(this._setProp('margins', keyArgs) && basePanel){
+                basePanel.margins = new pvc.Sides(this.margins);
+            }
+            
+            if(this._setProp('paddings', keyArgs) && basePanel){
+                basePanel.paddings = new pvc.Sides(this.paddings);
+            }
+        }
+    },
+    
+    _setProp: function(p, keyArgs){
+        var v = keyArgs[p];
+        if(v != null){
+            this[p] = v;
+            return true;
+        }
+    },
+    
     // --------------
     
     /**
@@ -291,7 +375,7 @@ def
                 /*global NoDataException:true*/
                 if (e instanceof NoDataException) {
                     if(pvc.debug > 1){
-                        pvc.log("No data found.");
+                        this._log("No data found.");
                     }
     
                     this._addErrorPanelMessage("No data found", true);
@@ -314,8 +398,8 @@ def
         var options = this.options,
             pvPanel = new pv.Panel()
                         .canvas(options.canvas)
-                        .width(options.width)
-                        .height(options.height),
+                        .width(this.width)
+                        .height(this.height),
             pvMsg = pvPanel.anchor("center").add(pv.Label)
                         .text(text);
 

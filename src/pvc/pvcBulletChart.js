@@ -124,10 +124,6 @@ def
     },
     
     _preRenderContent: function(contentOptions){
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in bulletChart");
-        }
-    
         var bulletPlot = this.plots.bullet;
         this.bulletChartPanel = new pvc.BulletChartPanel(
             this, 

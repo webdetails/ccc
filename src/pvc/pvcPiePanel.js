@@ -140,7 +140,7 @@ def
             if(linkAndLabelRadius >= maxPieRadius){
                 this.showValues = false;
                 if(pvc.debug >= 2){
-                    pvc.log("Hiding linked labels due to insufficient space.");
+                    this._log("Hiding linked labels due to insufficient space.");
                 }
             } else {
                 

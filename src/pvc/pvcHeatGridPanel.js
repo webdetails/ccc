@@ -288,7 +288,7 @@ def
             areaSpan = maxArea - minArea;
             
             if(pvc.debug >= 2){
-                pvc.log("Using rescue mode dot area calculation due to insufficient space.");
+                this._log("Using rescue mode dot area calculation due to insufficient space.");
             }
         }
         

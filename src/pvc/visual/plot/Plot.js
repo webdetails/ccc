@@ -160,7 +160,7 @@ def.scope(function(){
             cast:  function(value){
                 value = pvc.castNumber(value);
                 if(value != null){
-                    value = def.between(value, 1, 3);
+                    value = def.between(value, 1, 10);
                 } else {
                     value = 1;
                 }

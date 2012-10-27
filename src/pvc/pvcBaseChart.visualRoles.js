@@ -280,7 +280,7 @@ pvc.BaseChart
         
         out.push(pvc.logSeparator);
 
-        pvc.log(out.join("\n"));
+        this._log(out.join("\n"));
     },
 
     /**

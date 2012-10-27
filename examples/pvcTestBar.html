@@ -506,27 +506,29 @@ new pvc.BarChart({
     stacked: true,
     
     plot2: true,
-    plot2Series: ['Paris', 'Lisbon'],
+    plot2Series: ['Paris'],
     plot2OrthoAxis: 2,
     plot2ColorAxis: 2,
-    color2AxisColors: ['lightgreen', 'pink'],
     plot2NullInterpolationMode: 'linear',
+    
+    color2AxisColors: ['yellow'],
+    
+    trendType: 'linear',
+    trendOrthoAxis: 3,
+    trendAreasVisible: true,
     
     animate:    true,
     clickable:  true,
     selectable: true,
     hoverable:  true,
-    
     legend:     true,
-    legendPosition: 'right',
-    legendAlign:    'middle',
     
-    showValues: false,
     axisFullGrid: true,
     orthoAxisOffset: 0.1,
     extensionPoints: {
-        barSecondLine_lineWidth: 4,
-        barSecondDot_shapeSize: 20
+        plot2Line_lineWidth: 3,
+        plot2Dot_shapeSize: 20,
+        continuousAxisTicks_strokeStyle: 'red'
     }
 })
 .setData(relational_01_neg, { crosstabMode: false })

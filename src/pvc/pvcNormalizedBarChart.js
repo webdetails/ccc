@@ -44,10 +44,6 @@ def
     
     /* @override */
     _createMainContentPanel: function(parentPanel, baseOptions){
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in NormalizedBarChart");
-        }
-        
         var normBarPlot = this.plots.normBar;
         
         var barPanel = 

@@ -17,11 +17,11 @@ def
         var yAxis = axes.y;
         
         // Full grid lines
-        if(xAxis.isVisible && xAxis.option('FullGrid')) {
+        if(xAxis.option('Visible') && xAxis.option('FullGrid')) {
             this.xGridRule = this._createGridRule(xAxis);
         }
         
-        if(yAxis.isVisible && yAxis.option('FullGrid')) {
+        if(yAxis.option('Visible') && yAxis.option('FullGrid')) {
             this.yGridRule = this._createGridRule(yAxis);
         }
         

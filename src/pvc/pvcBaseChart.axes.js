@@ -126,7 +126,15 @@ pvc.BaseChart
         }
         
         this.axesList.push(axis);
-        def.array.lazy(this.axesByType, axis.type)[axis.index] = axis;
+        
+        var typeAxes  = def.array.lazy(this.axesByType, axis.type);
+        var typeIndex = typeAxes.count || 0;
+        axis.typeIndex = typeIndex;
+        typeAxes[axis.index] = axis;
+        if(!typeIndex){
+            typeAxes.first = axis;
+        }
+        typeAxes.count = typeIndex + 1;
         
         // For child charts, that simply copy color axes
         if(axis.type === 'color' && axis.isBound()){
@@ -256,6 +264,10 @@ pvc.BaseChart
         def.copy(scale, firstScale); // TODO: domain() and range() should be overriden...
         
         return scale; 
+    },
+    
+    _onLaidOut: function(){
+        
     }
 });
 

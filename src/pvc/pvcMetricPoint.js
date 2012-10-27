@@ -29,9 +29,9 @@ def
     _initPlotsCore: function(){
         var options = this.options;
         
-        this._createPointPlot();
+        var pointPlot = this._createPointPlot();
         
-        var trend = options.trendType;
+        var trend = pointPlot.option('TrendType');
         if(trend && trend !== 'none'){
             // Trend Plot
             new pvc.visual.MetricPointPlot(this, {
@@ -45,7 +45,7 @@ def
                 },
                 defaults: {
                     LinesVisible: true,
-                    DotsVisible:  true
+                    DotsVisible:  false
                 }
             });
         }
@@ -172,10 +172,6 @@ def
       * @override 
       */
     _createMainContentPanel: function(parentPanel, baseOptions){
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in MetricPoint");
-        }
-        
         // TODO: integrate these options in the MetricPointPlot or in the SizeAxis?
         var options = this.options;
         var panelOptions = def.set(

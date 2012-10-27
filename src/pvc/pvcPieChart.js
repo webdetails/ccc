@@ -45,10 +45,6 @@ def
     _preRenderContent: function(contentOptions) {
 
         this.base();
-
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in pieChart");
-        }
         
         var piePlot = this.plots.pie;
         

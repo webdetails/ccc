@@ -116,7 +116,7 @@ def
             options.selectable = false;
             options.hoverable  = false;
             if(pvc.debug >= 3) {
-                pvc.log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
+                this._log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
             }
         }
        

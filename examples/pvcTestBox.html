@@ -351,16 +351,15 @@ Notice the base axis values, as well as what the tooltip shows.<br>
 <textarea cols="55" rows="20" id="pvcBox4Code">
 var box4 = new pvc.BoxplotChart({
     canvas:  "pvcBox4",
-    width:   400,
-    height:  300,
+    width:   600,
+    height:  400,
     title:   "Boxplot with two categories",
     
     legend: true,
-    legendPosition: 'right',
-    showXScale: false,
+    legendPosition:   'right',
+    baseAxisVisible:  false,
     baseAxisFullGrid: true,
     
-    boxSizeMax: 20,
     colorRole: 'category',
 
     plot2: true,
@@ -368,14 +367,16 @@ var box4 = new pvc.BoxplotChart({
     plot2ShowDots:  true,
     plot2ShowAreas: true,
     plot2ColorRole: 'category',
-    
+
+    color2AxisLegendVisible: false,
+
     animate: true,
     selectable: true,
     hoverable: true,
-    axisOffset: 0.01,
+    axisOffset: 0.03,
+
     extensionPoints: {
-        boxRuleWhisker_strokeDasharray: '- ',
-        line_shape: 'triangle'
+        boxRuleWhisker_strokeDasharray: '- '
     }
 });
 

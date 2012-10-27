@@ -12,19 +12,18 @@ def
 })
 .add({
     _gridDockPanel: null,
+    _mainContentPanel: null,
     
     axesPanels: null, 
     
+    // V1 properties
     yAxisPanel: null,
     xAxisPanel: null,
     secondXAxisPanel: null,
     secondYAxisPanel: null,
-    
-    _mainContentPanel: null,
-
     yScale: null,
     xScale: null,
-   
+    
     _visibleDataCache: null,
     
     _getSeriesRoleSpec: function(){
@@ -168,7 +167,7 @@ def
         
         var scale = this._createScaleByAxis(axis);
         if(scale.isNull && pvc.debug >= 3){
-            pvc.log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
+            this._log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
         }
         
         scale = axis.setScale(scale).scale;
@@ -198,15 +197,6 @@ def
     },
     
     _preRenderContent: function(contentOptions){
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in CartesianAbstract");
-        }
-        
-        var axes = this.axes;
-        var baseAxis = axes.base;
-        var orthoAxis = axes.ortho;
-        var ortho2Axis = axes.ortho2;
-        
         /* Create the grid/docking panel */
         this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel, {
             margins:  contentOptions.margins,
@@ -216,27 +206,25 @@ def
         /* Create child axis panels
          * The order is relevant because of docking order. 
          */
-        if(ortho2Axis) {
-            this._createAxisPanel(ortho2Axis);
-        }
-        this._createAxisPanel(baseAxis );
-        this._createAxisPanel(orthoAxis);
+        ['base', 'ortho'].forEach(function(type){
+            var typeAxes = this.axesByType[type];
+            if(typeAxes){
+                def
+                .query(typeAxes)
+                .reverse()
+                .each(function(axis){
+                    this._createAxisPanel(axis);
+                }, this)
+                ;
+            }
+        }, this);
         
-        /* Create main content panel */
+        /* Create main content panel 
+         * (something derived from pvc.CartesianAbstractPanel) */
         this._mainContentPanel = this._createMainContentPanel(this._gridDockPanel, {
             clickAction:        contentOptions.clickAction,
             doubleClickAction:  contentOptions.doubleClickAction
         });
-        
-        /* Force layout */
-        this.basePanel.layout();
-        
-        /* Set scale ranges, after layout */
-        this._setCartAxisScaleRange(baseAxis );
-        this._setCartAxisScaleRange(orthoAxis);
-        if(ortho2Axis){
-            this._setCartAxisScaleRange(ortho2Axis);
-        }
     },
     
     /**
@@ -245,7 +233,7 @@ def
      * @type pvc.AxisPanel
      */
     _createAxisPanel: function(axis){
-        if(axis.isVisible) {
+        if(axis.option('Visible')) {
             var titlePanel;
             var title = axis.option('Title');
             if (!def.empty(title)) {
@@ -261,12 +249,15 @@ def
                 });
             }
             
-            var panel = pvc.AxisPanel.create(this, this._gridDockPanel, axis, {
-                useCompositeAxis:  axis.option('Composite'),
-                font:              axis.option('Font'),
+            var panel = new pvc.AxisPanel(this, this._gridDockPanel, axis, {
                 anchor:            axis.option('Position'),
                 axisSize:          axis.option('Size'),
                 axisSizeMax:       axis.option('SizeMax'),
+                clickAction:       axis.option('ClickAction'),
+                doubleClickAction: axis.option('DoubleClickAction'),
+                
+                useCompositeAxis:  axis.option('Composite'),
+                font:              axis.option('Font'),
                 labelSpacingMin:   axis.option('LabelSpacingMin'),
                 tickExponentMin:   axis.option('TickExponentMin'),
                 tickExponentMax:   axis.option('TickExponentMax'),
@@ -277,13 +268,10 @@ def
                 domainRoundMode:   axis.option('DomainRoundMode'),
                 desiredTickCount:  axis.option('DesiredTickCount'),
                 showTicks:         axis.option('Ticks'),
-                showMinorTicks:    axis.option('MinorTicks'),
-                clickAction:       axis.option('ClickAction'),
-                doubleClickAction: axis.option('DoubleClickAction')
+                showMinorTicks:    axis.option('MinorTicks')
             });
             
             if(titlePanel){
-                titlePanel.panelName = panel.panelName;
                 panel.titlePanel = titlePanel;
             }
             
@@ -318,7 +306,12 @@ def
         /* DOMAIN */
 
         // With composite axis, only 'singleLevel' flattening works well
-        var baseData = this._getVisibleData(axis.dataCell.dataPartValue, {ignoreNulls: false});
+        var dataPartValues = 
+            axis.
+            dataCells.
+            map(function(dataCell){ return dataCell.dataPartValue; });
+        
+        var baseData = this._getVisibleData(dataPartValues, {ignoreNulls: false});
         var data = baseData.flattenBy(axis.role);
         
         var scale  = new pv.Scale.ordinal();
@@ -434,6 +427,18 @@ def
         return scale;
     },
     
+    _onLaidOut: function(){
+        if(this._mainContentPanel){ // not the root of a multi chart
+            /* Set scale ranges, after layout */
+            ['base', 'ortho'].forEach(function(type){
+                var axes = this.axesByType[type];
+                if(axes){
+                    axes.forEach(this._setCartAxisScaleRange, this);
+                }
+            }, this);
+        }
+    },
+    
     _setCartAxisScaleRange: function(axis){
         var info = this._mainContentPanel._layoutInfo;
         var size = (axis.orientation === 'x') ?
@@ -444,7 +449,7 @@ def
 
         return axis.scale;
     },
-    
+        
     _getAxesRoundingPaddings: function(){
         var axesPaddings = {};
         
@@ -500,7 +505,7 @@ def
         keyArgs = keyArgs ? Object.create(keyArgs) : {};
         keyArgs.ignoreNulls = ignoreNulls;
         
-        var key = ignoreNulls + '|' + dataPartValue,
+        var key = ignoreNulls + '|' + dataPartValue, // relying on array.toString, when an array
             data = def.getOwn(this._visibleDataCache, key);
         if(!data) {
             data = this._createVisibleData(dataPartValue, keyArgs);
@@ -537,11 +542,11 @@ def
     
     _warnSingleContinuousValueRole: function(valueRole){
         if(!valueRole.grouping.isSingleDimension) {
-            pvc.log("[WARNING] A linear scale can only be obtained for a single dimension role.");
+            this._log("[WARNING] A linear scale can only be obtained for a single dimension role.");
         }
         
         if(valueRole.grouping.isDiscrete()) {
-            pvc.log("[WARNING] The single dimension of role '{0}' should be continuous.", [valueRole.name]);
+            this._log("[WARNING] The single dimension of role '{0}' should be continuous.", [valueRole.name]);
         }
     },
     
@@ -649,26 +654,10 @@ def
         // Indicates that the *base* axis is a timeseries
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
-        
-//        originIsZero:  undefined,
-//        
-//        orthoFixedMin: undefined,
-//        orthoFixedMax: undefined,
 
-        useCompositeAxis: false,
+        useCompositeAxis: false
         
         // Show a frame around the plot area
-//        showPlotFrame: undefined,
-        
-        /* Non-standard axes options and defaults */
-        showXScale: true,
-        showYScale: true,
-        showSecondScale: true, // v2
-        
-        xAxisPosition: "bottom",
-        yAxisPosition: "left",
-
-        trendType: 'none', // ['none'], 'linear', ...
-        trendOwnColorScale: false
+//        showPlotFrame: undefined
     })
 });

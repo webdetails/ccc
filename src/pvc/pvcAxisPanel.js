@@ -41,7 +41,8 @@ def
     
     this.axis = axis;
     this.roleName = axis.role.name;
-    this.isDiscrete = axis.role.grouping.isDiscrete();
+    this.isDiscrete = axis.role.isDiscrete();
+    this._extensionPrefix = axis.extensionPrefixes;
     
     if(this.labelSpacingMin == null){
         // The user tolerance for "missing" stuff is much smaller with discrete stuff
@@ -81,7 +82,6 @@ def
     axisSize: undefined,
     tickLength: 6,
     
-    panelName: "axis", // override
     scale: null,
     ruleCrossesMargin: true,
     font: '9px sans-serif', // label font
@@ -336,7 +336,7 @@ def
             }, this);
             
             if(pvc.debug >= 6 && overflowPaddings){
-                pvc.log("[" + this.panelName + "] OverflowPaddings = " + pvc.stringify(overflowPaddings));
+                this._log("OverflowPaddings = " + pvc.stringify(overflowPaddings));
             }
         }
         
@@ -457,7 +457,7 @@ def
             layoutInfo.maxTextWidth = maxTextWidth;
             
             if(pvc.debug >= 3){
-                pvc.log("[" + this.panelName + "] Trimming labels' text at length " + maxTextWidth.toFixed(2) + "px maxOrthoLength=" + maxOrthoLength.toFixed(2) + "px");
+                this._log("Trimming labels' text at length " + maxTextWidth.toFixed(2) + "px maxOrthoLength=" + maxOrthoLength.toFixed(2) + "px");
             }
         }
     },
@@ -633,7 +633,7 @@ def
         } while(Math.ceil(tickCount / tickIncludeModulo) > 1);
         
         if(tickIncludeModulo > 1 && pvc.debug >= 3){
-            pvc.log("[" + this.panelName + "] Showing only one in every " + tickIncludeModulo + " tick labels");
+            this._log("Showing only one in every " + tickIncludeModulo + " tick labels");
         }
         
         return tickIncludeModulo;
@@ -659,7 +659,7 @@ def
         var dir, prevResultTickCount;
         var ticksInfo, lastBelow, lastAbove;
         do {
-            if(doLog){ pvc.log("[" + this.panelName + "] calculateNumberHTicks TickCount IN desired = " + desiredTickCount); }
+            if(doLog){ this._log("calculateNumberHTicks TickCount IN desired = " + desiredTickCount); }
             
             ticksInfo = {};
             
@@ -696,7 +696,7 @@ def
             } else if(prevResultTickCount == null || resultTickCount !== prevResultTickCount){
                 
                 if(doLog){ 
-                    pvc.log("[" + this.panelName + "] calculateNumberHTicks TickCount desired/resulting = " + desiredTickCount + " -> " + resultTickCount); 
+                    this._log("calculateNumberHTicks TickCount desired/resulting = " + desiredTickCount + " -> " + resultTickCount); 
                 }
                 
                 prevResultTickCount = resultTickCount;
@@ -708,8 +708,8 @@ def
                 var pctError = ticksInfo.error = Math.abs(excessLength / clientLength);
                 
                 if(doLog){
-                    pvc.log("[" + this.panelName + "] calculateNumberHTicks error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + resultTickCount + " step=" + ticks.step);
-                    pvc.log("[" + this.panelName + "] calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
+                    this._log("calculateNumberHTicks error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + resultTickCount + " step=" + ticks.step);
+                    this._log("calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
                 }
                 
                 if(excessLength > 0){
@@ -762,11 +762,11 @@ def
             layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
             
             if(pvc.debug >= 5){
-                pvc.log("[" + this.panelName + "] calculateNumberHTicks RESULT error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
+                this._log("calculateNumberHTicks RESULT error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
             }
         }
         
-        if(doLog){ pvc.log("[" + this.panelName + "] calculateNumberHTicks END"); }
+        if(doLog){ this._log("calculateNumberHTicks END"); }
     },
     
     _calcNumberHDesiredTickCount: function(spacing){
@@ -867,10 +867,6 @@ def
   
     _getExtensionId: function(){
         return ''; // NOTE: this is different from specifying null
-    },
-    
-    _getExtensionPrefix: function(){
-        return this.panelName;
     },
     
     _getRootScene: function(){
@@ -1625,37 +1621,4 @@ def
     }
     // end: composite axis
     /////////////////////////////////////////////////
-});
-
-pvc.AxisPanel.create = function(chart, parentPanel, cartAxis, options){
-    var PanelClass = pvc[def.firstUpperCase(cartAxis.orientedId) + 'AxisPanel'] || 
-        def.fail.argumentInvalid('cartAxis', "Unsupported cartesian axis");
-    
-    return new PanelClass(chart, parentPanel, cartAxis, options);
-};
-
-def
-.type('pvc.XAxisPanel', pvc.AxisPanel)
-.add({
-    anchor: "bottom",
-    panelName: "xAxis"
-});
-
-def
-.type('pvc.SecondXAxisPanel', pvc.XAxisPanel)
-.add({
-    panelName: "secondXAxis"
-});
-
-def
-.type('pvc.YAxisPanel', pvc.AxisPanel)
-.add({
-    anchor: "left",
-    panelName: "yAxis"
-});
-
-def
-.type('pvc.SecondYAxisPanel', pvc.YAxisPanel)
-.add({
-    panelName: "secondYAxis"
 });

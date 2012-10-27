@@ -30,20 +30,16 @@ def
     setStructData: function(data){
         this.structDataset = data.resultset;
         if (!this.structDataset.length){
-            pvc.log("Warning: Structure-dataset is empty");
+            this._log("Warning: Structure-dataset is empty");
         }
 
         this.structMetadata = data.metadata;
         if (!this.structMetadata.length){
-            pvc.log("Warning: Structure-Metadata is empty");
+            this._log("Warning: Structure-Metadata is empty");
         }
     },
   
     _preRenderContent: function(contentOptions){
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in data-tree");
-        }
-        
         // Create DataEngine
         var structEngine  = this.structEngine;
         var structType    = structEngine ? structEngine.type : new pvc.data.ComplexType();
@@ -64,7 +60,7 @@ def
         structEngine.load(translation.execute(structEngine));
 
         if(pvc.debug >= 3){
-            pvc.log(this.structEngine.getInfo());
+            this._log(this.structEngine.getInfo());
         }
 
         // ------------------
@@ -368,7 +364,7 @@ def
       }
     }
     
-    pvc.log("Error: value with key : "+key+" not found.");
+    this._log("Error: value with key : "+key+" not found.");
   },
 
   generateBoxPlots: function() {
@@ -407,7 +403,7 @@ def
         // switch order (assume computational artifact)
         if (dat[4] < dat[0]) {
           dat = dat.reverse();
-          pvc.log(" dataset "+ elem.box_id +
+          this._log(" dataset "+ elem.box_id +
                   " repaired (_p95 was smaller than _p5)");
           }
         if (dat[4] > dat[0]) {
@@ -555,7 +551,7 @@ def
     }
 
     for (var sel in boxNotFound) {
-        pvc.log("Could'nt find box for selector: "+ sel);
+        this._log("Could'nt find box for selector: "+ sel);
     }
     
     this.generateBoxPlots();

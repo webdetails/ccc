@@ -103,55 +103,29 @@ def
                 // what is the correct sampling spacing?
                 var firstDatum = serData.firstDatum();
                 var xExtent = serData.dimensions(xDimName).extent();
-                var xPoints = [xExtent.min.value];
                 if(xExtent.min !== xExtent.max){
-                    xPoints.push(xExtent.max.value);
+                    var xPoints = [xExtent.min.value, xExtent.max.value];
+                    // At least one point...
+                    // Sample the line on each x and create a datum for it
+                    // on the 'trend' data part
+                    xPoints.forEach(function(trendX, index){
+                        var trendY = trendModel.sample(trendX);
+                        var atoms = Object.create(firstDatum.atoms);
+                        atoms[xDimName] = trendX;
+                        atoms[yDimName] = trendY;
+                        atoms[dataPartDimName] = trendInfo.dataPartAtom;
+                        
+                        var newDatum = new pvc.data.Datum(data.owner, atoms);
+                        newDatum.isVirtual = true;
+                        newDatum.isTrend   = true;
+                        newDatum.trendType = trendInfo.type;
+                        
+                        newDatums.push(newDatum);
+                    }, this);
                 }
-                
-                // At least one point...
-                // Sample the line on each x and create a datum for it
-                // on the 'trend' data part
-                xPoints.forEach(function(trendX, index){
-                    var trendY = trendModel.sample(trendX);
-                    var atoms = Object.create(firstDatum.atoms);
-                    atoms[xDimName] = trendX;
-                    atoms[yDimName] = trendY;
-                    atoms[dataPartDimName] = trendInfo.dataPartAtom;
-                    
-                    var newDatum = new pvc.data.Datum(data.owner, atoms);
-                    newDatum.isVirtual = true;
-                    newDatum.isTrend   = true;
-                    newDatum.trendType = trendInfo.type;
-                    
-                    newDatums.push(newDatum);
-                }, this);
             }
         }
     },
-//    
-//    _bindAxes: function(hasMultiRole){
-//        
-//        this.base(hasMultiRole);
-//      
-//        /**
-//         * Axes are created even when hasMultiRole && !parent
-//         * because it is needed to read axis options in the root chart.
-//         * Also binding occurs to be able to know its scale type. 
-//         * Yet, their scales are not setup at the root level.
-//         */
-//        
-//        var axes = this.axes;
-//            
-//        var axis = axes.base;
-//        if(!axis.isBound()){
-//            axis.bind({role: this._xRole});
-//        }
-//        
-//        axis = axes.ortho;
-//        if(!axis.isBound()){
-//            axis.bind({role: this._yRole});
-//        }
-//    },
-    
+
     defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {})
 });

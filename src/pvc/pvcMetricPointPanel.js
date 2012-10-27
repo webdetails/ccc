@@ -149,7 +149,7 @@ def
         }
        
         if(pvc.debug >= 2){
-            pvc.log(
+            this._log(
                 def.format(
                     "Invalid option 'sizeAxisRatioTo' value. Assuming 'minWidthHeight'.", 
                     [this.sizeAxisRatioTo]));
@@ -204,7 +204,7 @@ def
             };
           
             if(pvc.debug >= 3){
-                pvc.log("Using rescue mode dot area calculation due to insufficient space.");
+                this._log("Using rescue mode dot area calculation due to insufficient space.");
             }
         }
       
@@ -348,7 +348,7 @@ def
             options.selectable = false;
             options.hoverable  = false;
             if(pvc.debug >= 3) {
-                pvc.log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
+                this._log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
             }
         }
        

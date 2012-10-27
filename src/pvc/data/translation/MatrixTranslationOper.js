@@ -213,8 +213,10 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
     _dataPartGet: function(calcAxis2SeriesKeySet, seriesReader) {
 
         var me = this;
-
-        this.ensureDimensionType('dataPart');
+        
+        var dataPartDimName = this.options.dataPartDimName;
+        
+        this.ensureDimensionType(dataPartDimName, null, {isDataPart: true});
 
         var dataPartDimension,
             plot2SeriesKeySet,
@@ -229,7 +231,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
              */
             if(!dataPartDimension) {
                 plot2SeriesKeySet = calcAxis2SeriesKeySet();
-                dataPartDimension = me.data.dimensions('dataPart');
+                dataPartDimension = me.data.dimensions(dataPartDimName);
 
                 if(pvc.debug >=3 && plot2SeriesKeySet){
                     pvc.log("Second axis series values: " +
@@ -250,7 +252,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 partAtom = part1Atom || (part1Atom = dataPartDimension.intern("0"));
             }
             
-            outAtoms.dataPart = partAtom;
+            outAtoms[dataPartDimName] = partAtom;
         }
 
         return dataPartGet;

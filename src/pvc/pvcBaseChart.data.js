@@ -79,17 +79,17 @@ pvc.BaseChart
         delete this._partData;
         
         if(pvc.debug >= 3){
-            pvc.log(this.data.getInfo());
+            this._log(this.data.getInfo());
         }
     },
 
     _onLoadData: function(){
         var data = this.data,
             options = this.options,
-            complexType   = data ? data.type : new pvc.data.ComplexType(),
-            translOptions = this._createTranslationOptions(),
-            translation   = this._createTranslation(complexType, translOptions),
-            dataPartDimName,
+            complexType     = data ? data.type : new pvc.data.ComplexType(),
+            translOptions   = this._createTranslationOptions(),
+            translation     = this._createTranslation(complexType, translOptions),
+            dataPartDimName = translOptions.dataPartDimName,
             plot2Series;
 
         if(pvc.debug >= 3){
@@ -120,7 +120,6 @@ pvc.BaseChart
             // Is the role dataPart defined, 
             // and, if so, is it preBound?
             // What is the default or preBound dim name?
-            dataPartDimName = this._getDataPartDimName();
             if(dataPartDimName){
                 if(!complexType.isCalculated(dataPartDimName)){
                     // Axis2Series works by adding a calculation to 
@@ -150,7 +149,7 @@ pvc.BaseChart
         }
         
         if(pvc.debug >= 3){
-            pvc.log(complexType.describe());
+            this._log(complexType.describe());
         }
 
         // ----------
@@ -203,11 +202,12 @@ pvc.BaseChart
     
     _getLoadFilter: function(){
         if(this.options.ignoreNulls) {
+            var me = this;
             return function(datum){
                 var isNull = datum.isNull;
                 
                 if(isNull && pvc.debug >= 4){
-                    pvc.log("Datum excluded.");
+                    me._log("Datum excluded.");
                 }
                 
                 return !isNull;
@@ -259,13 +259,12 @@ pvc.BaseChart
         }
 
         return {
-            //onNewDimensionType: this._onNewDimensionType.bind(this),
             compatVersion:     this.compatVersion(),
             plot2SeriesIndexes: (!plot2 || options.plot2Series) ? null : options.secondAxisIdx,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
-
+            dataPartDimName:   this._getDataPartDimName(),
             dimensionGroups:   options.dimensionGroups,
             dimensions:        options.dimensions,
             readers:           options.readers,
@@ -361,8 +360,27 @@ pvc.BaseChart
         }
         
         // TODO: should, at least, call some static method of Atom to build a global key
-        return this._partData._childrenByKey[dataPartDimName + ':' + dataPartValues] ||
-               new pvc.data.Data({linkParent: this._partData, datums: []}); // don't blow code ahead...
+        var child = this._partData._childrenByKey[dataPartDimName + ':' + dataPartValues];
+        if(!child){
+            // NOTE: 
+            // This helps, at least, the ColorAxis.dataCells setting
+            // the .data property, in a time where there aren't yet any datums of
+            // the 'trend' data part value.
+            // So we create a dummy empty place-holder child here,
+            // so that when the trend datums are added they end up here,
+            // and not in another new Data...
+            
+//          var rootDataPartDim = this._partData.owner.dimensions(dataPartDimName);
+//          var dataPartValueAtom = rootDataPartDim.intern(dataPartValues);
+//            
+            child = new pvc.data.Data({
+                parent: this._partData,
+                atoms:  def.set({}, dataPartDimName, dataPartValues), 
+                datums: []
+                // TODO: index
+            });
+        }
+        return child;
     },
 
     // --------------------
@@ -431,7 +449,7 @@ pvc.BaseChart
         
         this.resultset = resultset;
         if (!resultset.length) {
-            pvc.log("Warning: Resultset is empty");
+            this._log("Warning: Resultset is empty");
         }
         
         return this;
@@ -447,7 +465,7 @@ pvc.BaseChart
         
         this.metadata = metadata;
         if (!metadata.length) {
-            pvc.log("Warning: Metadata is empty");
+            this._log("Warning: Metadata is empty");
         }
         
         return this;

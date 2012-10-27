@@ -76,10 +76,6 @@ def
         
         var reqPad = {};
         pvc.Sides.names.forEach(function(side){
-//            var len_a = pvc.BasePanel.orthogonalLength[side];
-//            var len   = clientSize[len_a] + paddings[len_a];
-//            reqPad[side] = len * Math.max((op[side] || 0) - (rp[side] || 0), 0);
-            
             var len_a = pvc.BasePanel.orthogonalLength[side];
             
             var clientLen = clientSize[len_a];
@@ -93,7 +89,7 @@ def
             reqPad[side] = Math.max(offset - rounding, 0);
         }, this);
         
-        return reqPad;  
+        return reqPad;
     },
     
     /**

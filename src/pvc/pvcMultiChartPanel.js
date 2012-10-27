@@ -3,6 +3,216 @@ def
 .type('pvc.MultiChartPanel', pvc.BasePanel)
 .add({
     anchor: 'fill',
+    _multiInfo: null,
+    
+    createSmallCharts: function(){
+        var chart = this.chart;
+        var options = chart.options;
+        
+        /* I - Determine how many small charts to create */
+        
+        // multiChartMax can be Infinity
+        var multiChartMax = Number(options.multiChartMax);
+        if(isNaN(multiChartMax) || multiChartMax < 1) {
+            multiChartMax = Infinity;
+        }
+        
+        var multiChartRole = chart.visualRoles('multiChart');
+        var data = chart.data.flattenBy(multiChartRole, {visible: true});
+        var leafCount = data._children.length;
+        var count = Math.min(leafCount, multiChartMax);
+        if(count === 0) {
+            // Shows no message to the user.
+            // An empty chart, like when all series are hidden through the legend.
+            return;
+        }
+        
+        /* II - Determine basic layout (row and col count) */
+        
+        // multiChartColumnsMax can be Infinity
+        var multiChartColumnsMax = +options.multiChartColumnsMax; // to number
+        if(isNaN(multiChartColumnsMax) || multiChartMax < 1) {
+            multiChartColumnsMax = 3;
+        }
+        
+        var colCount = Math.min(count, multiChartColumnsMax);
+        // <Debug>
+        /*jshint expr:true */
+        colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
+        // </Debug>
+        
+        var rowCount = Math.ceil(count / colCount);
+        // <Debug>
+        /*jshint expr:true */
+        rowCount >= 1 || def.assert("Must be at least 1");
+        // </Debug>
+
+        /* III - Determine if axes need coordination (null if no coordination needed) */
+        
+        var coordRootAxesByScopeType = this._getCoordinatedRootAxesByScopeType();
+        var coordScopesByType, addChartToScope, indexChartByScope;
+        if(coordRootAxesByScopeType){
+            coordScopesByType = {};
+            
+            // Each scope is a specific 
+            // 'row', 'column' or the single 'global' scope 
+            addChartToScope = function(childChart, scopeType, scopeIndex){
+                var scopes = def.array.lazy(coordScopesByType, scopeType);
+                
+                def.array.lazy(scopes, scopeIndex).push(childChart);
+            };
+            
+            indexChartByScope = function(childChart){
+                // Index child charts by scope
+                //  on scopes having axes requiring coordination.
+                if(coordRootAxesByScopeType.row){
+                    addChartToScope(childChart, 'row', childChart.smallRowIndex);
+                }
+                
+                if(coordRootAxesByScopeType.column){
+                    addChartToScope(childChart, 'column', childChart.smallColIndex);
+                }
+                
+                if(coordRootAxesByScopeType.global){
+                    addChartToScope(childChart, 'global', 0);
+                }
+            };
+        }
+        
+        /* IV - Create and _preRender small charts */
+        var childOptionsBase = this._buildSmallChartsBaseOptions();
+        var ChildClass = chart.constructor;
+        for(var index = 0 ; index < count ; index++) {
+            var childData = data._children[index];
+            
+            var colIndex = (index % colCount);
+            var rowIndex = Math.floor(index / colCount);
+            var childOptions = def.set(
+                Object.create(childOptionsBase),
+                'smallColIndex', colIndex,
+                'smallRowIndex', rowIndex,
+                'title',         childData.absLabel, // does not change with trends 
+                'data',          childData);
+            
+            var childChart = new ChildClass(childOptions);
+            
+            if(!coordRootAxesByScopeType){
+                childChart._preRender();
+            } else {
+                // options, data, plots, axes, 
+                // trends, interpolation, axes_scales
+                childChart._preRenderPhase1();
+                
+                indexChartByScope(childChart);
+            }
+        }
+        
+        // Need _preRenderPhase2?
+        if(coordRootAxesByScopeType){
+            // For each scope type having scales requiring coordination
+            // find the union of the scales' domains for each
+            // scope instance
+            // Finally update all scales of the scope to have the 
+            // calculated domain.
+            def.eachOwn(coordRootAxesByScopeType, function(axes, scopeType){
+                axes.forEach(function(axis){
+                    
+                    coordScopesByType[scopeType]
+                        .forEach(function(scopeCharts){
+                            this._coordinateScopeAxes(axis.id, scopeCharts);
+                        }, this);
+                    
+                }, this);
+            }, this);
+            
+            // Finalize _preRender, now that scales are coordinated
+            chart.children.forEach(function(childChart){
+                childChart._preRenderPhase2();
+            });
+        }
+        
+        // By now, trends and interpolation
+        // have updated the data's with new Datums, if any.
+        
+        this._multiInfo = {
+          data:     data,
+          count:    count,
+          rowCount: rowCount,
+          colCount: colCount,
+          multiChartColumnsMax: multiChartColumnsMax,
+          coordScopesByType: coordScopesByType
+        };
+    },
+    
+    _getCoordinatedRootAxesByScopeType: function(){
+        // Index axes that need to be coordinated, by scopeType
+        var hasCoordination = false;
+        var rootAxesByScopeType = 
+            def
+            .query(this.chart.axesList)
+            .multipleIndex(function(axis){
+                if(axis.scaleType !== 'discrete' && // Not implemented (yet...)
+                   axis.option.isDefined('DomainScope')){
+                    
+                    var scopeType = axis.option('DomainScope');
+                    if(scopeType !== 'cell'){
+                        hasCoordination = true;
+                        return scopeType;
+                    }
+                }
+            })
+            ;
+        
+        return hasCoordination ? rootAxesByScopeType : null;
+    },
+    
+    _coordinateScopeAxes: function(axisId, scopeCharts){
+        var unionExtent =
+            def
+            .query(scopeCharts)
+            .select(function(childChart){
+                var scale = childChart.axes[axisId].scale;
+                if(!scale.isNull){
+                    var domain = scale.domain();
+                    return {min: domain[0], max: domain[1]};
+                }
+            })
+            .reduce(pvc.unionExtents, null)
+            ;
+        
+        if(unionExtent){
+            // Fix the scale domain of every scale.
+            scopeCharts.forEach(function(childChart){
+                var axis  = childChart.axes[axisId];
+                var scale = axis.scale;
+                if(!scale.isNull){
+                    scale.domain(unionExtent.min, unionExtent.max);
+                    
+                    axis.setScale(scale); // force update of dependent info.
+                }
+            });
+        }
+    },
+    
+    _buildSmallChartsBaseOptions: function(){
+        // All size-related information is only supplied later in #_createCore.
+        var chart = this.chart;
+        var options = chart.options;
+        return def.set(
+            Object.create(options), 
+               'parent',        chart,
+               'legend',        false,
+               'titleFont',     options.smallTitleFont,
+               'titlePosition', options.smallTitlePosition,
+               'titleAlign',    options.smallTitleAlign,
+               'titleAlignTo',  options.smallTitleAlignTo,
+               'titleOffset',   options.smallTitleOffset,
+               'titleKeepInBounds', options.smallTitleKeepInBounds,
+               'titleMargins',  options.smallTitleMargins,
+               'titlePaddings', options.smallTitlePaddings,
+               'titleSize',     options.smallTitleSize,
+               'titleSizeMax',  options.smallTitleSizeMax);
+    },
     
     /**
      * <p>
@@ -113,22 +323,14 @@ def
      * @override
      */
     _calcLayout: function(layoutInfo){
-        var chart = this.chart;
-        
-        var multiChartRole = chart.visualRoles('multiChart');
-        if(!multiChartRole.grouping){
-            // Not assigned
+        var multiInfo = this._multiInfo;
+        if(!multiInfo){
             return;
         }
         
-        var clientSize = layoutInfo.clientSize;
+        var chart = this.chart;
         var options = chart.options;
-        
-        // multiChartMax can be Infinity
-        var multiChartMax = Number(options.multiChartMax);
-        if(isNaN(multiChartMax) || multiChartMax < 1) {
-            multiChartMax = Infinity;
-        }
+        var clientSize = layoutInfo.clientSize;
         
         // TODO - multi-chart pagination
 //        var multiChartPageIndex;
@@ -142,33 +344,6 @@ def
 //                multiChartPageIndex++;
 //            }
 //        }
-        
-        var data = chart.data.flattenBy(multiChartRole, {visible: true});
-        var leafCount = data._children.length;
-        var count = Math.min(leafCount, multiChartMax);
-        if(count === 0) {
-            // Shows no message to the user.
-            // An empty chart, like when all series are hidden through the legend.
-            return;
-        }
-        
-        // multiChartColumnsMax can be Infinity
-        var multiChartColumnsMax = +options.multiChartColumnsMax; // to number
-        if(isNaN(multiChartColumnsMax) || multiChartMax < 1) {
-            multiChartColumnsMax = 3;
-        }
-        
-        var colCount = Math.min(count, multiChartColumnsMax);
-        // <Debug>
-        /*jshint expr:true */
-        colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
-        // </Debug>
-        
-        var rowCount = Math.ceil(count / colCount);
-        // <Debug>
-        /*jshint expr:true */
-        rowCount >= 1 || def.assert("Must be at least 1");
-        // </Debug>
         
         var prevLayoutInfo = layoutInfo.previous;
         var initialClientWidth  = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
@@ -190,9 +365,9 @@ def
         }
         
         if(smallWidth == null){
-            if(isFinite(multiChartColumnsMax)){
+            if(isFinite(multiInfo.multiChartColumnsMax)){
                 // Distribute currently available client width by the effective max columns.
-                smallWidth = clientSize.width / colCount;
+                smallWidth = clientSize.width / multiInfo.colCount;
             } else {
                 // Single Row
                 // Chart grows in width as needed
@@ -208,8 +383,8 @@ def
         }
         
         if(smallHeight == null){
-            if((rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
-               (colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
+            if((multiInfo.rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
+               (multiInfo.colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
                 
                 // Height uses whole height
                 smallHeight = initialClientHeight;
@@ -217,23 +392,19 @@ def
                 smallHeight = smallWidth / ar;
             }
         }
-
+        
         // ----------------------
         
         def.set(
            layoutInfo, 
-            'data',  data,
-            'count', count,
             'initialClientWidth',  initialClientWidth,
             'initialClientHeight', initialClientHeight,
             'width',  smallWidth,
-            'height', smallHeight,
-            'colCount', colCount,
-            'rowCount', rowCount);
+            'height', smallHeight);
         
         return {
-            width:  smallWidth * colCount,
-            height: Math.max(clientSize.height, smallHeight * rowCount) // vertical align center: pass only: smallHeight * rowCount
+            width:  smallWidth * multiInfo.colCount,
+            height: Math.max(clientSize.height, smallHeight * multiInfo.rowCount) // vertical align center: pass only: smallHeight * multiInfo.rowCount
         };
     },
     
@@ -304,7 +475,8 @@ def
     },
     
     _createCore: function(li){
-        if(!li.data){
+        var mi = this._multiInfo;
+        if(!mi){
             // Empty
             return;
         }
@@ -321,177 +493,46 @@ def
         
         var smallPaddings = new pvc.Sides(options.smallPaddings);
         
-        // Index axes that need to be coordinated, by scopeType
-        var hasCoordination = false;
-        var rootAxes = chart.axes;
-        var rootAxesByScopeType = 
-            def
-            .query(def.ownKeys(rootAxes))
-            // filter entries of axis aliases 
-            .where(function(alias){ return rootAxes[alias].id === alias; })
-            .select(function(id){ return rootAxes[id]; })
-            .multipleIndex(function(axis){
-                
-                if(axis.scaleType !== 'discrete' && // Not implemented (yet...)
-                   axis.option.isDefined('DomainScope')){
-                    
-                    var scopeType = axis.option('DomainScope');
-                    if(scopeType !== 'cell'){
-                        hasCoordination = true;
-                        return scopeType;
-                    }
-                }
-            })
-            ;
-        
-        // ----------------------
-        // Create and layout small charts
-        var ChildClass = chart.constructor;
-        
-        var lastColIndex = li.colCount - 1;
-        var lastRowIndex = li.rowCount - 1;
-        
-        var preRenderKeyArgs, scopesByType, addChartToScope, childCharts;
-        if(hasCoordination){
-            childCharts  = [];
-            scopesByType = {};
-            preRenderKeyArgs = {isScaleCoordination: true};
-            
-            // Each scope is a specific 
-            // 'row', 'column' or the single 'global' scope 
-            addChartToScope = function(childChart, scopeType, scopeIndex){
-                var scopes = scopesByType[scopeType] || 
-                             (scopesByType[scopeType] = []);
-                
-                (scopes[scopeIndex] || (scopes[scopeIndex] = []))
-                    .push(childChart);
-            };
-        }
-        
-        var childOptionsBase = def.set(
-             Object.create(options), 
-            'parent',        chart,
-            'legend',        false,
-            'paddings',      smallPaddings,
-            'titleFont',     options.smallTitleFont,
-            'titlePosition', options.smallTitlePosition,
-            'titleAlign',    options.smallTitleAlign,
-            'titleAlignTo',  options.smallTitleAlignTo,
-            'titleOffset',   options.smallTitleOffset,
-            'titleKeepInBounds', options.smallTitleKeepInBounds,
-            'titleMargins',  options.smallTitleMargins,
-            'titlePaddings', options.smallTitlePaddings,
-            'titleSize',     options.smallTitleSize,
-            'titleSizeMax',  options.smallTitleSizeMax);
-        
-        for(var index = 0 ; index < li.count ; index++) {
-            var childData = li.data._children[index];
-            
-            var colIndex = (index % li.colCount);
-            var rowIndex = Math.floor(index / li.colCount);
-            
-            var margins = {};
-            if(colIndex > 0){
-                margins.left = smallMargins.left;
-            }
-            if(colIndex < lastColIndex){
-                margins.right = smallMargins.right;
-            }
-            if(rowIndex > 0){
-                margins.top = smallMargins.top;
-            }
-            if(rowIndex < lastRowIndex){
-                margins.bottom = smallMargins.bottom;
-            }
-            
-            var childOptions = def.set(
-                Object.create(childOptionsBase),
-                'title',      childData.absLabel,
-                'data',       childData,
-                'width',      li.width,
-                'height',     li.height,
-                'left',       colIndex * li.width,
-                'top',        rowIndex * li.height,
-                'margins',    margins);
-            
-            var childChart = new ChildClass(childOptions);
-            if(!hasCoordination){
-                childChart._preRender();
-            } else {
-                childChart._preRenderPhase1();
-                
-                // Index child charts by scope
-                //  on scopes having axes requiring coordination.
-                if(rootAxesByScopeType.row){
-                    addChartToScope(childChart, 'row', rowIndex);
-                }
-                
-                if(rootAxesByScopeType.column){
-                    addChartToScope(childChart, 'column', colIndex);
-                }
-                
-                if(rootAxesByScopeType.global){
-                    addChartToScope(childChart, 'global', 0);
-                }
-                
-                childCharts.push(childChart);
-            }
-        }
-        
-        // Need _preRenderPhase2?
-        if(hasCoordination){
-            // For each scope type having scales requiring coordination
-            // find the union of the scales' domains for each
-            // scope instance
-            // Finally update all scales of the scope to have the 
-            // calculated domain.
-            def.eachOwn(rootAxesByScopeType, function(axes, scopeType){
-                axes.forEach(function(axis){
-                    
-                    scopesByType[scopeType]
-                        .forEach(function(scopeCharts){
-                            this._coordinateScopeAxes(axis.id, scopeCharts);
-                        }, this);
-                    
-                }, this);
-            }, this);
-            
-            // Finalize _preRender, now that scales are coordinated
-            childCharts.forEach(function(childChart){
-                childChart._preRenderPhase2();
+        chart.children.forEach(function(childChart){
+            childChart._setSmallLayout({
+                left:      childChart.smallColIndex * li.width,
+                top:       childChart.smallRowIndex * li.height,
+                width:     li.width,
+                height:    li.height,
+                margins:   this._buildSmallMargins(childChart, smallMargins),
+                paddings:  smallPaddings
             });
-            
-            chart._coordinateSmallChartsLayout(childCharts, scopesByType);
+        }, this);
+        
+        var coordScopesByType = mi.coordScopesByType;
+        if(coordScopesByType){
+            chart._coordinateSmallChartsLayout(coordScopesByType);
         }
         
         this.base(li); // calls _create on child chart's basePanel
     },
     
-    _coordinateScopeAxes: function(axisId, scopeCharts){
-        var unionExtent =
-            def
-            .query(scopeCharts)
-            .select(function(childChart){
-                var scale = childChart.axes[axisId].scale;
-                if(!scale.isNull){
-                    var domain = scale.domain();
-                    return {min: domain[0], max: domain[1]};
-                }
-            })
-            .reduce(pvc.unionExtents, null)
-            ;
+    _buildSmallMargins: function(childChart, smallMargins){
+        var mi = this._multiInfo;
+        var lastColIndex = mi.colCount - 1;
+        var lastRowIndex = mi.rowCount - 1;
+        var colIndex = childChart.smallColIndex;
+        var rowIndex = childChart.smallRowIndex;
         
-        if(unionExtent){
-            // Fix the scale domain of every scale.
-            scopeCharts.forEach(function(childChart){
-                var axis  = childChart.axes[axisId];
-                var scale = axis.scale;
-                if(!scale.isNull){
-                    scale.domain(unionExtent.min, unionExtent.max);
-                    
-                    axis.setScale(scale); // force update of dependent info.
-                }
-            });
+        var margins = {};
+        if(colIndex > 0){
+            margins.left = smallMargins.left;
         }
+        if(colIndex < lastColIndex){
+            margins.right = smallMargins.right;
+        }
+        if(rowIndex > 0){
+            margins.top = smallMargins.top;
+        }
+        if(rowIndex < lastRowIndex){
+            margins.bottom = smallMargins.bottom;
+        }
+        
+        return margins;
     }
 });

@@ -146,10 +146,6 @@ def
     
     /* @override */
     _createMainContentPanel: function(parentPanel, baseOptions){
-        if(pvc.debug >= 3){
-            pvc.log("Prerendering in heatGridChart");
-        }
-        
         var heatGridPlot = this.plots.heatGrid;
         
         return (this.heatGridChartPanel = 

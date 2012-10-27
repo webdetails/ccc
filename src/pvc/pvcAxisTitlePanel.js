@@ -6,11 +6,15 @@ def
     this.axis = axis;
     
     this.base(chart, parent, options);
+    
+    this._extensionPrefix = 
+        axis
+        .extensionPrefixes
+        .map(function(prefix){
+            return prefix + 'Title';
+        });
 })
 .add({
-    
-    panelName: 'axis',
-    
     _calcLayout: function(layoutInfo){
         var scale = this.axis.scale;
         if(!scale || scale.isNull){
@@ -27,9 +31,5 @@ def
         }
         
         return this.base(layoutInfo);
-    },
-    
-    _getExtensionPrefix: function(){
-        return this.panelName + def.firstUpperCase(this.base());
     }
 });
