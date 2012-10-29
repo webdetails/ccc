@@ -705,15 +705,15 @@ def.type('pvc.data.Dimension')
         var value, label;
         var type = this.type;
         
+        // Is google table style cell {v: , f: } ?
+        if(typeof sourceValue === 'object' && ('v' in sourceValue)){
+            // Get info and get rid of the cell
+            label = sourceValue.f;
+            sourceValue = sourceValue.v;
+        }
+        
         // - CONVERT - 
         if(!isVirtual){
-            // Is google table style cell {v: , f: } ?
-            if(typeof sourceValue === 'object' && ('v' in sourceValue)){
-                // Get info and get rid of the cell
-                label = sourceValue.f;
-                sourceValue = sourceValue.v;
-            }
-            
             var converter = type._converter;
             value = converter ? converter(sourceValue) : sourceValue;
             if(value == null || value === '') {

@@ -27,7 +27,11 @@ def
     _visibleDataCache: null,
     
     _getSeriesRoleSpec: function(){
-        return { isRequired: true, defaultDimensionName: 'series*', autoCreateDimension: true };
+        return { isRequired: true, defaultDimension: 'series*', autoCreateDimension: true, requireIsDiscrete: true };
+    },
+    
+    _getColorRoleSpec: function(){
+        return { isRequired: true, defaultSourceRole: 'series', requireIsDiscrete: true };
     },
 
     _initData: function(){
@@ -312,10 +316,10 @@ def
             map(function(dataCell){ return dataCell.dataPartValue; });
         
         var baseData = this._getVisibleData(dataPartValues, {ignoreNulls: false});
-        var data = baseData.flattenBy(axis.role);
+        var data = baseData && baseData.flattenBy(axis.role);
         
-        var scale  = new pv.Scale.ordinal();
-        if(!data.count()){
+        var scale = new pv.Scale.ordinal();
+        if(!data || !data.count()){
             scale.isNull = true;
         } else {
             var values = data.children()
@@ -509,9 +513,10 @@ def
             data = def.getOwn(this._visibleDataCache, key);
         if(!data) {
             data = this._createVisibleData(dataPartValue, keyArgs);
-            
-            (this._visibleDataCache || (this._visibleDataCache = {}))
-                [key] = data;
+            if(data){
+                (this._visibleDataCache || (this._visibleDataCache = {}))
+                    [key] = data;
+            }
         }
         
         return data;
@@ -533,6 +538,10 @@ def
      */
     _createVisibleData: function(dataPartValue, keyArgs){
         var partData = this.partData(dataPartValue);
+        if(!partData){
+            return null;
+        }
+        
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
         
         return this._serRole && this._serRole.grouping ?
@@ -633,7 +642,8 @@ def
         }
         
         var useAbs = valueAxis.scaleUsesAbs();
-        var extent = this._getVisibleData(valueDataCell.dataPartValue)
+        var data  = this._getVisibleData(valueDataCell.dataPartValue);
+        var extent = data && data
             .dimensions(valueRole.firstDimensionName())
             .extent({ abs: useAbs });
         

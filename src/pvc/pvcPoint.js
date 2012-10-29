@@ -26,18 +26,15 @@ def
         
         this.base();
         
-        this._addVisualRoles({
-            /* value: required, continuous, numeric */
-            value: { 
+        this._addVisualRole('value', { 
                 isMeasure: true, 
                 isRequired: true, 
                 isPercent: this.options.stacked,
                 requireSingleDimension: true, 
                 requireIsDiscrete: false, 
                 valueType: Number, 
-                defaultDimensionName: 'value' 
-            }
-        });
+                defaultDimension: 'value' 
+            });
     },
     
     _initPlotsCore: function(hasMultiRole){
@@ -68,6 +65,7 @@ def
                 fixed: {
                     DataPart: 'trend',
                     TrendType: 'none',
+                    ColorRole: 'series', // one trend per series
                     NullInterpolatioMode: 'none'
                 },
                 defaults: {

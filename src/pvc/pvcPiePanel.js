@@ -446,6 +446,7 @@ def
 .init(function(panel){
     var chart = panel.chart;
     var data = chart.visualRoles('category').flatten(chart.data, pvc.data.visibleKeyArgs);
+    var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
     
     this.base(null, {panel: panel, group: data});
     
@@ -477,6 +478,8 @@ def
             this.vars.value = new pvc.visual.ValueLabelVar(
                             value,
                             formatValue(value, categData));
+            
+            colorVarHelper.onNewScene(this, /* isLeaf */ true);
         });
     
     /* Extend with any user extensions */

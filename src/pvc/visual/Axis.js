@@ -36,9 +36,13 @@ def.scope(function(){
         isVisible: true,
         
         // should null values be converted to zero or to the minimum value in what scale is concerned?
-        // 'null', 'zero', 'min'
+        // 'null', 'zero', 'min', 'value'
         scaleTreatsNullAs: function(){
             return 'null';
+        },
+        
+        scaleNullRangeValue: function(){
+            return null;
         },
         
         scaleUsesAbs: function(){
@@ -91,10 +95,14 @@ def.scope(function(){
         _wrapScale: function(scale){
             scale.type = this.scaleType;
             
-            if(scale.type !== 'discrete'){
+            // Applying scaleNullRangeValue to discrete scales
+            // Caused problems in the discrete color scales
+            // where we want it to catch the first color of the color scale,
+            // in cases where there is only a null series...
+            if(scale.type !== 'discrete' ){
                 var by;
                 var useAbs = this.scaleUsesAbs();
-                var nullAs = this.scaleTreatsNullAs(); 
+                var nullAs = this.scaleTreatsNullAs();
                 if(nullAs && nullAs !== 'null'){
                     var nullValue = nullAs === 'min' ? scale.domain()[0] : 0;
                     
@@ -107,15 +115,22 @@ def.scope(function(){
                             return scale(v == null ? nullValue : v);
                         };
                     }
-                } else if(useAbs){
-                    by = function(v){
-                        return v == null ? null : scale(v < 0 ? -v : v);
-                    };
+                } else {
+                    var nullRangeValue = this.scaleNullRangeValue();
+                    if(useAbs){
+                        by = function(v){
+                            return v == null ? nullRangeValue : scale(v < 0 ? -v : v);
+                        };
+                    } else {
+                        by = function(v){
+                            return v == null ? nullRangeValue : scale(v);
+                        };
+                    }
                 }
                 
-                if(by){
-                    return def.copy(by, scale);
-                }
+                def.copy(by, scale);
+                
+                return by; // don't overwrite scale with by! it would cause infinite recursion...
             }
             
             return scale;

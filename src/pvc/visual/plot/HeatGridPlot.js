@@ -49,7 +49,7 @@ def.scope(function(){
                 value: true
             },
             
-            NullColor: {
+            NullColor: { // TODO: this is in the color axis already...
                 resolve: '_resolveFull',
                 cast:    pv.color,
                 value:   pv.color("#efc5ad")
@@ -86,6 +86,11 @@ def.scope(function(){
             ScalingType: {
                 resolve: '_resolveFull',
                 cast:    String
+            },
+            
+            OrthoRole: { // override
+                resolve: '_resolveFull',
+                value: 'series'
             }
         });
 });

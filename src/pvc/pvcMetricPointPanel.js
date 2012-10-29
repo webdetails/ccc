@@ -98,16 +98,13 @@ def
         if(!rootScene){
             var hasColorRole = this.chart._colorRole.isBound();
             
-            // --------------
-            
             var sizeAxis = this.axes.size;
             var hasSizeRole = sizeAxis && sizeAxis.isBound() && !sizeAxis.scale.isNull;
             
             // --------------
             
             this._rootScene = 
-            rootScene = 
-                this._buildScene(hasColorRole, hasSizeRole);
+            rootScene = this._buildScene(hasColorRole, hasSizeRole);
         }
         
         return rootScene;
@@ -121,7 +118,7 @@ def
         
         /* Determine Dot Size Scale */
         if(rootScene.hasSizeRole){
-            var areaRange  = this._calcDotAreaRange(layoutInfo);
+            var areaRange = this._calcDotAreaRange(layoutInfo);
             
             this.sizeScale = this.chart.axes.size
                 .setScaleRange(areaRange)
@@ -436,25 +433,17 @@ def
         
         // -- COLOR --
         dot.override('defaultColor', function(type){
-            var color;
-            if(!rootScene.hasColorRole){
-                color = this.base(type);
-            } else {
-                var colorValue = this.scene.vars.color.value;
-                
-                color = colorValue == null ?
-                            options.nullColor :
-                            colorScale(colorValue);
-            }
+            var color = this.base(type);
             
-            if(type === 'stroke'){
+            if(color && type === 'stroke'){
                 color = color.darker();
             }
-                
+            
             // When no lines are shown, dots are shown with transparency,
             // which helps in distinguishing overlapped dots.
             // With lines shown, it would look strange.
             // ANALYZER requirements, so until there's no way to configure it...
+            // TODO: this probably can now be done with ColorTransform
 //          if(!myself.showLines){
 //              color = color.alpha(color.opacity * 0.85);
 //          }
@@ -470,17 +459,6 @@ def
             
             return this.base(color, type);
         });
-        
-        if(rootScene.hasColorRole){
-            var colorScale = this._getColorRoleScale(data);
-            
-            line.override('defaultColor', function(type){
-                var colorValue = this.scene.vars.color.value;
-                return colorValue == null ?
-                            options.nullColor :
-                            colorScale(colorValue);
-            });
-        }
         
         // -- DOT SIZE --
         if(!rootScene.hasSizeRole){
@@ -558,67 +536,6 @@ def
         }
     },
     
-    /* Ignore 'by series' color.
-     * Series, then, only control the dots that are connected with lines.
-     * 
-     * Color is calculated per datum.
-     * Datums of the same series may each have a different color.
-     * This is true whether the color dimension is discrete or continuous.
-     * When the color dimension is discrete, the effect will look
-     * similar to a series color, the difference being that datums
-     * may be from the same series (same connected line) and
-     * have different colors.
-     * If lines are not shown there's however no way to tell if the
-     * color comes from the series or from the color role.
-     * A "normal" color legend may be shown for the color role.
-     * 
-     * The color role may be discrete of one or more dimensions, 
-     * or continuous.
-     * 
-     * If the role has 1 continuous dimension,
-     * the color scale may be (see pvc.color): 
-     * - discrete (continuous->discrete), 
-     * - linear or 
-     * - normally distributed.
-     * 
-     * Is the color scale shared between small multiple charts?
-     * It should be specifiable. Accordingly, the domain of 
-     * the color scale is chosen to be the root or the local data
-     * (this does not imply sharing the same color scale function instance).
-     * 
-     * If the role has 1 discrete dimension, or more than one dimension,
-     * the color scale will be discrete (->discrete),
-     * behaving just like the series color scale.
-     * The colors are taken from the chart's series colors.
-     * The domain for the scale is the root data, 
-     * thus allowing to show a common color legend, 
-     * in case multiple charts are used.
-     * 
-     */
-    _getColorRoleScale: function(data){
-        var chart = this.chart,
-            options = chart.options;
-        
-        if(chart._colorRole.grouping.isDiscrete()){
-            /* Legend-like color scale */
-            var colorValues = chart._colorRole
-                                .flatten(data.owner) // visible or invisible
-                                .children()
-                                .select(function(child){ return child.value; })
-                                .array();
-            
-            return chart.colors(colorValues);
-        }
-        
-        return pvc.color.scale(
-            def.create(false, options, {
-                /* Override/create these options, inherit the rest */
-                type: options.colorScaleType || 'linear', 
-                data: data.owner, // shared scale
-                colorDimension: chart._colorRole.firstDimensionName()
-            }));
-    },
-    
     /**
      * Renders this.pvScatterPanel - the parent of the marks that are affected by interaction changes.
      * @override
@@ -666,27 +583,11 @@ def
         rootScene.hasSizeRole  = hasSizeRole;
         
         var chart = this.chart;
+        var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
         var xDimType = chart._xRole.firstDimensionType();
         var yDimType = chart._yRole.firstDimensionType();
         
-        var getColorRoleValue;
         var getSizeRoleValue;
-        
-        if(hasColorRole){
-             var colorGrouping = chart._colorRole.grouping;//.singleLevelGrouping();
-             if(colorGrouping.isSingleDimension){ // TODO
-                 var colorDimName = chart._colorRole.firstDimensionName();
-                 
-                 getColorRoleValue = function(scene){
-                     return scene.atoms[colorDimName].value;
-                 };
-             } else {
-                 getColorRoleValue = function(scene) {
-                     return colorGrouping.view(scene.datum).value;
-                 };
-             }
-        }
-        
         if(chart._sizeDim){
             var sizeDimName = chart._sizeDim.name;
             
@@ -722,6 +623,8 @@ def
                                 seriesGroup.label,
                                 seriesGroup.rawValue);
             
+            colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
+            
             seriesGroup.datums().each(function(datum){
                 var xAtom = datum.atoms[chart._xDim.name];
                 if(xAtom.value == null){
@@ -739,13 +642,6 @@ def
                 scene.vars.x = Object.create(xAtom);
                 scene.vars.y = Object.create(yAtom);
                 
-                // TODO: improve for special single datum case (like HG)
-                if(getColorRoleValue){
-                    scene.vars.color = new pvc.visual.ValueLabelVar(
-                                getColorRoleValue(scene),
-                                "");
-                }
-                
                 if(getSizeRoleValue){
                     var sizeValue = getSizeRoleValue(scene);
                     scene.vars.size = new pvc.visual.ValueLabelVar(
@@ -753,6 +649,8 @@ def
                                             chart._sizeDim.format(sizeValue),
                                             sizeValue);
                 }
+                
+                colorVarHelper.onNewScene(scene, /* isLeaf */ true);
                 
                 scene.isIntermediate = false;
             });
@@ -829,13 +727,11 @@ def
                                     chart._yDim.format(interYValue),
                                     interYValue);
             
-            if(getColorRoleValue){
-                interScene.vars.color = toScene.vars.color;
-            }
-            
             if(getSizeRoleValue){
                 interScene.vars.size = toScene.vars.size;
             }
+            
+            colorVarHelper.onNewScene(interScene, /* isLeaf */ true);
             
             interScene.ownerScene = toScene;
             interScene.isIntermediate = true;

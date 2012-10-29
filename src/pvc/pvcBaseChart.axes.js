@@ -2,7 +2,7 @@ pvc.BaseChart
 .add({
     /**
      * An array of colors, represented as names, codes or {@link pv.Color} objects
-     * that is associated to each distinct value of the {@link #legendSource} dimension.
+     * that is associated to each distinct value of the "color" visual role.
      * 
      * <p>
      * The legend panel associates each distinct dimension value to a color of {@link #colors},
@@ -31,7 +31,7 @@ pvc.BaseChart
         'ortho': pvc.visual.CartesianAxis
     },
     
-    // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
+    // 1 = root, 2 = leaf, 1|2=3 = everywhere
     _axisCreateWhere: {
         'color': 1,
         'size':  2,
@@ -42,6 +42,10 @@ pvc.BaseChart
     _axisCreationOrder: ['color', 'size', 'base', 'ortho'],
     
     _initAxes: function(hasMultiRole){
+        this.axes = {};
+        this.axesList = [];
+        this.axesByType = {};
+        
         // Clear any previous global color scales
         delete this._rolesColorScale;
         
@@ -55,6 +59,7 @@ pvc.BaseChart
                 this._collectPlotAxesDataCells(plot, dataCellsByAxisTypeThenIndex);
             }, this);
             
+            this._fixTrendsLabel(dataCellsByAxisTypeThenIndex);
         } else {
             dataCellsByAxisTypeThenIndex = this.root._dataCellsByAxisTypeThenIndex;
         }
@@ -108,6 +113,32 @@ pvc.BaseChart
                     this._addAxis(axis);
                 }
             }, this);
+        }
+    },
+    
+    _fixTrendsLabel: function(dataCellsByAxisTypeThenIndex){
+     // Pre-register the label of the first trend type 
+        // in the "trend" data part atom, cause in multi-charts
+        // an empty label would be registered first...
+        var dataPartDimName = this._getDataPartDimName();
+        if(dataPartDimName){
+            // Find the first type of trend type
+            var firstTrendType = def
+                .query(def.ownKeys(dataCellsByAxisTypeThenIndex))
+                .selectMany(function(axisType){
+                    return dataCellsByAxisTypeThenIndex[axisType];
+                })
+                .selectMany()
+                .select(function(dataCell){ return dataCell.trendType; })
+                .first (function(trendType){ return trendType && trendType !== 'none'; })
+                ;
+            
+            if(firstTrendType){
+                var trendInfo = pvc.trends.get(firstTrendType);
+                this.data.owner
+                .dimensions(dataPartDimName)
+                .intern(trendInfo.dataPartAtom);
+            }
         }
     },
     
@@ -195,11 +226,11 @@ pvc.BaseChart
     _onColorAxisScaleSet: function(axis){
         switch(axis.index){
             case 0:
-                this.colors = axis.option('TransformedColors');
+                this.colors = axis.option('Colors');
                 break;
             
             case 1:
-                this.secondAxisColor = axis.option('TransformedColors');
+                this.secondAxisColor = axis.option('Colors');
                 break;
         }
     },

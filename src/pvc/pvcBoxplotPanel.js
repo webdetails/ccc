@@ -226,14 +226,13 @@ def
         return rootScene;
         
         function createCategScene(categData){
-            var categScene = new pvc.visual.Scene(rootScene, {group: categData}),
-                vars = categScene.vars;
+            var categScene = new pvc.visual.Scene(rootScene, {group: categData});
+            var vars = categScene.vars;
+            var colorVarHelper = new pvc.visual.ColorVarHelper(this.chart, this.chart._colorRole);
             
-            var serVar = vars.series = new pvc.visual.ValueLabelVar(null, "");
+            var serVar = vars.series   = new pvc.visual.ValueLabelVar(null, "");
+            var catVar = vars.category = new pvc.visual.ValueLabelVar(categData.value, categData.label);
             
-            var catVar = vars.category = new pvc.visual.ValueLabelVar(
-                                    categData.value,
-                                    categData.label);
             def.set(catVar,
                 'group',    categData,
                 'x',        baseScale(categData.value),
@@ -258,6 +257,10 @@ def
 
                 vars[role.name] = svar;
             });
+            
+            colorVarHelper.onNewScene(categScene, /* isLeaf */ true);
+            
+            // ------------
 
             var hasMin    = vars.minimum.value  != null,
                 hasLower  = vars.lowerQuartil.value != null,

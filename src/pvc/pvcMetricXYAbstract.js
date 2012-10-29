@@ -34,25 +34,20 @@ def
 
         this.base();
 
-        this._addVisualRoles({
-            x: {
+        this._xRole = this._addVisualRole('x', {
                 isMeasure: true,
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                defaultDimensionName: 'x'
-            },
-            y: {
+                defaultDimension: 'x'
+            });
+        this._yRole = this._addVisualRole('y', {
                 isMeasure: true,
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                defaultDimensionName: 'y'
-            }
-        });
-
-        this._xRole = this.visualRoles('x');
-        this._yRole = this.visualRoles('y');
+                defaultDimension: 'y'
+            });
     },
 
     _initData: function(){
@@ -110,7 +105,7 @@ def
                     // on the 'trend' data part
                     xPoints.forEach(function(trendX, index){
                         var trendY = trendModel.sample(trendX);
-                        var atoms = Object.create(firstDatum.atoms);
+                        var atoms = Object.create(serData.atoms); // just common atoms
                         atoms[xDimName] = trendX;
                         atoms[yDimName] = trendY;
                         atoms[dataPartDimName] = trendInfo.dataPartAtom;

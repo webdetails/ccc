@@ -99,7 +99,7 @@ def.type('pvc.visual.Sign')
         
         // baseColor
         methods[baseName] = function(arg){
-            // Override this method in case user extension
+            // Override this method if user extension
             // should not always be called.
             // It is possible to call the default method directly, if needed.
             

@@ -30,13 +30,8 @@ def.scope(function(){
         },
         
         OrthoRole: { // override
-            resolve: pvc.options.resolvers([ 
-                '_resolveFixed',
-                function(optionInfo){
-                    // TODO: HG should override this? 
-                    // Split the discrete/discrete case?
-                    optionInfo.specify(this.chart.options.orthoAxisOrdinal ? 'series' : 'value');
-                }])
+            resolve: '_resolveFull', 
+            value:   'value'
         }
     });
 });

@@ -66,7 +66,8 @@ def.type('pvc.visual.Role')
 .init(function(name, keyArgs){
     this.name = name;
     this.label = def.get(keyArgs, 'label') || name;
-
+    this.index = def.get(keyArgs, 'index') || 0;
+    
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
     }
@@ -75,13 +76,18 @@ def.type('pvc.visual.Role')
         this.autoCreateDimension = true;
     }
     
-    var defaultDimensionName = def.get(keyArgs, 'defaultDimensionName');
+    var defaultSourceRoleName = def.get(keyArgs, 'defaultSourceRole');
+    if(defaultSourceRoleName) {
+        this.defaultSourceRoleName = defaultSourceRoleName;
+    }
+    
+    var defaultDimensionName = def.get(keyArgs, 'defaultDimension');
     if(defaultDimensionName) {
         this.defaultDimensionName = defaultDimensionName;
     }
 
     if(!defaultDimensionName && this.autoCreateDimension){
-        throw def.error.argumentRequired('defaultDimensionName');
+        throw def.error.argumentRequired('defaultDimension');
     }
     
     var requireSingleDimension;
@@ -130,14 +136,16 @@ def.type('pvc.visual.Role')
     requireIsDiscrete: null,
     isMeasure: false,
     isPercent: false,
-    defaultDimensionName: null,
+    defaultSourceRoleName: null,
+    defaultDimensionName:  null,
     grouping: null,
     flatteningMode: 'singleLevel',
     flattenRootLabel: '',
     autoCreateDimension: false,
     isReversed: false,
     label: null,
-
+    sourceRole: null,
+    
     /** 
      * Obtains the first dimension type that is bound to the role.
      * @type pvc.data.DimensionType
@@ -168,6 +176,10 @@ def.type('pvc.visual.Role')
     isDiscrete: function(){
         var g = this.grouping;
         return g && g.isDiscrete();
+    },
+    
+    setSourceRole: function(sourceRole){
+        this.sourceRole = sourceRole;
     },
     
     setIsReversed: function(isReversed){

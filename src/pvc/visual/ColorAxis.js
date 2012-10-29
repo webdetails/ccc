@@ -13,6 +13,14 @@ def.scope(function(){
     .type('pvc.visual.ColorAxis', pvc.visual.Axis)
     .add(/** @lends pvc.visual.ColorAxis# */{
         
+        scaleNullRangeValue: function(){
+            return this.option('NullColor') || null;
+        },
+        
+        scaleUsesAbs: function(){
+            return this.option('UseAbs');
+        },
+        
         bind: function(dataCells){
             this.base(dataCells);
             
@@ -32,40 +40,95 @@ def.scope(function(){
         
         calculateScale: function(){
             /*jshint expr:true */
+            var scale;
             var dataCells = this.dataCells;
             if(dataCells){
                 var chart = this.chart;
-                
-                var domainValues = 
-                    def
-                    .query(dataCells)
-                    .selectMany(function(dataCell){
-                        var role = dataCell.role;
-                        if(role && role.isBound()){
-                            var domainData = 
-                                chart
-                                .partData(dataCell.dataPartValue)
-                                .flattenBy(role)
-                                ;
-                            
-                            dataCell.data = domainData;
-                            
-                            return domainData.children();
-                        }
-                    })
-                    .distinct(function(childData){ return childData.key; })
-                    .select(function(child){ return child.value; })
-                    .array()
-                    ;
-                
-                this.domainValues = domainValues;
-                
-                var scale = this.option('TransformedColors').call(null, domainValues);
-                
-                this.setScale(scale);
+                if(this.scaleType === 'discrete'){
+                    var domainValues = 
+                        def
+                        .query(dataCells)
+                        .selectMany(function(dataCell){
+                            var role = dataCell.role;
+                            if(role && role.isBound()){
+                                // Visible and not visible!
+                                var partData = chart.partData(dataCell.dataPartValue);
+                                var domainData = partData && partData.flattenBy(role);
+                                
+                                dataCell.data = domainData;
+                                
+                                return domainData && domainData.children();
+                            }
+                        })
+                        .distinct(function(childData){ return childData.key; })
+                        .select(function(child){ return child.value; })
+                        .array()
+                        ;
+                    
+                    this.domainValues = domainValues;
+                    
+                    // Call the transformed color scheme with the domain values
+                    //  to obtain a final scale object
+                    scale = this.option('Colors').call(null, domainValues);
+                } else {
+                    if(dataCells.length === 1){
+                        // Local scope: 
+                        // Visible only!
+//                        var visibleDomainData = 
+//                            chart
+//                            .partData(this.dataCell.dataPartValue)
+//                            .flattenBy(this.role, {visible: true})
+//                            ;
+                        
+                        var globalVisibleData = chart.data.owner.where(null, {visible: true});
+                        
+                        scale = pvc.color.scale({
+                            type: this.option('ScaleType'),
+                            colorRange: this.option('ColorRange'), 
+                            colorRangeInterval: this.option('ColorRangeInterval'), 
+                            minColor:  this.option('MinColor'),
+                            maxColor:  this.option('MaxColor'),
+                            nullColor: this.option('NullColor'), // TODO: already handled by the axis wrapping
+                            data:      globalVisibleData,
+                            colorDimension: this.role.firstDimensionName()
+                        });
+                    }
+                }
             }
             
+            this.setScale(scale);
+            
             return this;
+        },
+        
+        _wrapScale: function(scale){
+            // Check if there is a color transform set
+            // and if so, transform the color scheme
+            // If the user specified the colors,
+            // do not apply default color transforms...
+            var applyTransf;
+            if(this.scaleType === 'discrete'){
+                applyTransf = this.option.isSpecified('ColorTransform') || !this.option.isSpecified('Colors');
+            } else {
+                applyTransf = true;
+            }
+            
+            if(applyTransf){
+                var colorTransf = this.option('ColorTransform');
+                if(colorTransf){
+                    scale = scale.transform(colorTransf);
+                }
+            }
+            
+            return this.base(scale);
+        },
+        
+        sceneScale: function(keyArgs){
+            var varName = def.get(keyArgs, 'sceneVarName') || this.role.name;
+            
+            return this.scale.by1(function(scene){
+                return scene.vars[varName].value;
+            });
         },
         
         _buildOptionId: function(){
@@ -101,7 +164,7 @@ def.scope(function(){
     /*global axis_optionsDef:true*/
     var colorAxis_optionsDef = def.create(axis_optionsDef, {
         /*
-         * colors  (maintained due to the naked first color axis rule)
+         * colors (maintained due to the naked first color axis rule)
          * colorAxisColors
          * color2AxisColors
          * color3AxisColors
@@ -167,28 +230,60 @@ def.scope(function(){
             cast: def.fun.to
         },
         
-        TransformedColors: {
-            resolve: function(optionInfo){
-                // Check if there is a color transform set
-                // and if so, transform the color scheme
-                // If the user specified the colors,
-                // do not apply default color transforms...
-                
-                var colors = this.option('Colors');
-                var colorTransf = this.option('ColorTransform');
-                if(colors && 
-                   colorTransf && 
-                   (!this.option.isSpecified('Colors') || this.option.isSpecified('ColorTransform'))){
-                    colors = pvc.transformColorScheme(colors, colorTransf);
-                }
-                
-                optionInfo.specify(colors);
-            }
+        NullColor: {
+            resolve: '_resolveFull',
+            cast:    pv.color,
+            value:   pv.color("#efc5ad")
+        },
+        
+        // ------------
+        // Continuous color scale
+        ScaleType: {
+            resolve: pvc.options.resolvers([
+                '_resolveFixed',
+                '_resolveNormal',
+                pvc.options.specify(function(optionInfo){
+                    if(!this.typeIndex){
+                        return this._chartOption('colorScaleType');
+                    }
+                }),
+                '_resolveDefault'
+            ]),
+            cast:  pvc.parseContinuousColorScaleType,
+            value: 'linear'
+        },
+        
+        UseAbs: {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:   false
+        },
+        
+        ColorRange: {
+            resolve: '_resolveFull',
+            cast:    def.array.to,
+            value:   ['red', 'yellow','green']
+                     .map(function(name){ return pv.Color.names[name]; })
+        },
+        
+        ColorRangeInterval: { // for quantization in discrete scale type
+            resolve: '_resolveFull',
+            cast:    def.array.to
+        },
+        
+        MinColor: {
+            resolve: '_resolveFull',
+            cast:    pv.color
+        },
+        
+        MaxColor: {
+            resolve: '_resolveFull',
+            cast:    pv.color
         },
         
         // ------------
         /* 
-         * legendVisible 
+         * LegendVisible 
          */
         LegendVisible: {
             resolve: '_resolveNormal',

@@ -392,15 +392,6 @@ var pvc = def.globalSpace('pvc', {
         };
     },
     
-    // Wraps the color scheme function
-    // to return wrapped scales...
-    pvc.transformColorScheme = function(colorScheme, colorTransf){
-        return function(){
-            var scale  = colorScheme.apply(this, arguments);
-            return scale.transform(colorTransf);
-        };
-    };
-    
     /**
      * Creates a color scheme based on the specified colors.
      * When no colors are specified, the default color scheme is returned.
@@ -573,6 +564,27 @@ var pvc = def.globalSpace('pvc', {
         }
         
         return shape;
+    };
+    
+    pvc.parseContinuousColorScaleType = function(scaleType){
+        if(scaleType){
+            switch(scaleType){
+                case 'linear':
+                case 'normal':
+                case 'discrete':
+                    break;
+                
+                default:
+                    if(pvc.debug >= 2){
+                        pvc.log("[Warning] Invalid 'ScaleType' option value: '" + scaleType + "'.");
+                    }
+                
+                scaleType = null;
+                    break;
+            }
+        }
+        
+        return scaleType;  
     };
     
     pvc.parseDomainScope = function(scope, orientation){

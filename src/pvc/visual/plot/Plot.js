@@ -129,6 +129,12 @@ def.scope(function(){
         
         // ---------------
         
+        ColorRole: {
+            resolve: '_resolveFixed',
+            cast:    String,
+            value:   'color'
+        },
+        
         ColorAxis: {
             resolve: pvc.options.resolvers([
                 function(optionInfo){
@@ -168,18 +174,6 @@ def.scope(function(){
                 return value;
             },
             value: 1
-        },
-        
-        ColorRole: {
-            resolve: pvc.options.resolvers([
-                '_resolveFixed',
-                '_resolveNormal',
-                function(optionInfo){
-                    optionInfo.specify(this.chart.legendSource);
-                },
-                '_resolveDefault'
-            ]),
-            cast: String
         }
     };
 });

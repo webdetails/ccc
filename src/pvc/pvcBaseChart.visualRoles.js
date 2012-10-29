@@ -7,6 +7,7 @@ pvc.BaseChart
      * @type object
      */
     _visualRoles: null,
+    _visualRoleList: null,
     
     _serRole: null,
     _dataPartRole: null,
@@ -18,33 +19,23 @@ pvc.BaseChart
      */
     _measureVisualRoles: null,
     
-    /**
-     * The name of the visual role that
-     * the legend panel will be associated to.
-     * 
-     * <p>
-     * The legend panel displays each distinct role value
-     * with a marker and a label.
-     * 
-     * The marker's color is obtained from the parts color scales,
-     * given the role's value.
-     * </p>
-     * <p>
-     * The default dimension is the 'series' dimension.
-     * </p>
-     * 
-     * @type string
-     */
-    legendSource: "series",
-    
     _constructVisualRoles: function(options) {
         var parent = this.parent;
         if(parent) {
             this._visualRoles = parent._visualRoles;
+            this._visualRoleList = parent._visualRoleList;
             this._measureVisualRoles = parent._measureVisualRoles;
+            
+            if(parent._multiChartRole) {
+                this._multiChartRole = parent._multiChartRole;
+            }
             
             if(parent._serRole) {
                 this._serRole = parent._serRole;
+            }
+            
+            if(parent._colorRole) {
+                this._colorRole = parent._colorRole;
             }
 
             if(parent._dataPartRole) {
@@ -52,119 +43,9 @@ pvc.BaseChart
             }
         } else {
             this._visualRoles = {};
+            this._visualRoleList = [];
             this._measureVisualRoles = [];
         }
-    },
-    
-    _addVisualRoles: function(roles){
-        def.eachOwn(roles, function(keyArgs, name){
-            var visualRole = new pvc.visual.Role(name, keyArgs);
-            this._visualRoles[name] = visualRole;
-            if(visualRole.isMeasure){
-                this._measureVisualRoles.push(visualRole);
-            }
-        }, this);
-    },
-    
-    /**
-     * Initializes each chart's specific roles.
-     * @virtual
-     */
-    _initVisualRoles: function(){
-        this._addVisualRoles({
-            multiChart: {
-                defaultDimensionName: 'multiChart*', 
-                requireIsDiscrete: true
-            }
-        });
-
-        if(this._hasDataPartRole()){
-            this._addVisualRoles({
-                dataPart: {
-                    defaultDimensionName: 'dataPart',
-                    requireSingleDimension: true,
-                    requireIsDiscrete: true
-                }
-            });
-
-            // Cached
-            this._dataPartRole = this.visualRoles('dataPart');
-        }
-
-        var serRoleSpec = this._getSeriesRoleSpec();
-        if(serRoleSpec){
-            this._addVisualRoles({series: serRoleSpec});
-
-            // Cached
-            this._serRole = this.visualRoles('series');
-        }
-    },
-
-    /**
-     * Binds visual roles to grouping specifications
-     * that have not yet been bound to and validated against a complex type.
-     *
-     * This allows inferring proper defaults to
-     * dimensions bound to roles, by taking them from the roles requirements.
-     */
-    _bindVisualRolesPre: function(){
-        
-        def.eachOwn(this._visualRoles, function(visualRole){
-            visualRole.setIsReversed(false);
-        });
-        
-        /* Process user specified bindings */
-        var boundDimNames = {};
-        def.each(this.options.visualRoles, function(roleSpec, name){
-            var visualRole = this._visualRoles[name] ||
-                def.fail.operationInvalid("Role '{0}' is not supported by the chart type.", [name]);
-            
-            var groupingSpec;
-            if(roleSpec && typeof roleSpec === 'object'){
-                if(def.get(roleSpec, 'isReversed', false)){
-                    visualRole.setIsReversed(true);
-                }
-                
-                groupingSpec = roleSpec.dimensions;
-            } else {
-                groupingSpec = roleSpec;
-            }
-            
-            // !groupingSpec results in a null grouping being preBound
-            // A pre bound null grouping is later discarded in the post bind
-            if(groupingSpec !== undefined){
-                var grouping = pvc.data.GroupingSpec.parse(groupingSpec);
-
-                visualRole.preBind(grouping);
-
-                /* Collect dimension names bound to a *single* role */
-                grouping.dimensions().each(function(dimSpec){
-                    if(def.hasOwn(boundDimNames, dimSpec.name)){
-                        // two roles => no defaults at all
-                        delete boundDimNames[dimSpec.name];
-                    } else {
-                        boundDimNames[dimSpec.name] = visualRole;
-                    }
-                });
-            }
-        }, this);
-
-        /* Provide defaults to dimensions bound to a single role */
-        var dimsSpec = (this.options.dimensions || (this.options.dimensions = {}));
-        def.eachOwn(boundDimNames, function(role, name){
-            var dimSpec = dimsSpec[name] || (dimsSpec[name] = {});
-            if(role.valueType && dimSpec.valueType === undefined){
-                dimSpec.valueType = role.valueType;
-
-                if(role.requireIsDiscrete != null && dimSpec.isDiscrete === undefined){
-                    dimSpec.isDiscrete = role.requireIsDiscrete;
-                }
-            }
-
-            if(dimSpec.label === undefined){
-                dimSpec.label = role.label;
-            }
-        }, this);
     },
 
     _hasDataPartRole: function(){
@@ -174,100 +55,376 @@ pvc.BaseChart
     _getSeriesRoleSpec: function(){
         return null;
     },
-
-    _bindVisualRoles: function(type){
+    
+    _getColorRoleSpec: function(){
+        return null;
+    },
+    
+    _addVisualRole: function(name, keyArgs){
+        keyArgs = def.set(keyArgs, 'index', this._visualRoleList.length);
         
-        var boundDimTypes = {};
-
-        function bind(role, dimNames){
-            role.bind(pvc.data.GroupingSpec.parse(dimNames, type));
-            def.array.as(dimNames).forEach(function(dimName){
-                boundDimTypes[dimName] = true;
+        var visualRole = new pvc.visual.Role(name, keyArgs);
+        
+        this._visualRoleList.push(visualRole);
+        this._visualRoles[name] = visualRole;
+        if(visualRole.isMeasure){
+            this._measureVisualRoles.push(visualRole);
+        }
+        return visualRole;
+    },
+    
+    /**
+     * Initializes each chart's specific roles.
+     * @virtual
+     */
+    _initVisualRoles: function(){
+        this._multiChartRole = this._addVisualRole(
+            'multiChart', 
+            {
+                defaultDimension: 'multiChart*', 
+                requireIsDiscrete: true
             });
+
+        if(this._hasDataPartRole()){
+            this._dataPartRole = this._addVisualRole(
+                'dataPart', 
+                {
+                    defaultDimension: 'dataPart',
+                    requireSingleDimension: true,
+                    requireIsDiscrete: true
+                });
+        }
+
+        var serRoleSpec = this._getSeriesRoleSpec();
+        if(serRoleSpec){
+            this._serRole = this._addVisualRole('series', serRoleSpec);
         }
         
-        /* Process role pre binding */
-        def.eachOwn(this._visualRoles, function(visualRole, name){
-            if(visualRole.isPreBound()){
-                visualRole.postBind(type);
-                // Null groupings are discarded
-                if(visualRole.grouping){
-                    visualRole
-                        .grouping
-                        .dimensions().each(function(dimSpec){
-                            boundDimTypes[dimSpec.name] = true;
-                        });
-                }
-            }
-        }, this);
+        var colorRoleSpec = this._getColorRoleSpec();
+        if(colorRoleSpec){
+            this._colorRole = this._addVisualRole('color', colorRoleSpec);
+        }
+    },
+
+    /**
+     * Binds visual roles to grouping specifications
+     * that have not yet been bound to and validated against a complex type.
+     *
+     * This allows inferring proper defaults to
+     * dimensions bound to roles, 
+     * by taking them from the roles requirements.
+     */
+    _bindVisualRolesPre: function(){
+        // Clear reversed status of visual roles
+        def.eachOwn(this._visualRoles, function(role){
+            role.setIsReversed(false);
+        });
         
-        /*
-         * (Try to) Automatically bind unbound roles.
-         * Validate role required'ness.
-         */
-        def.eachOwn(this._visualRoles, function(role, name){
-            if(!role.grouping){
-
-                /* Try to bind automatically, to defaultDimensionName */
-                var dimName = role.defaultDimensionName;
-                if(dimName) {
-                    /* An asterisk at the end of the name indicates
-                     * that any dimension of that group is allowed.
-                     * If the role allows multiple dimensions,
-                     * then the meaning is greedy - use them all.
-                     * Otherwise, use only one.
-                     */
-                    var match = dimName.match(/^(.*?)(\*)?$/) ||
-                            def.fail.argumentInvalid('defaultDimensionName');
+        var sourcedRoles = [];
+        
+        // Process the visual roles with options
+        // It is important to process them in visual role definition order
+        // cause the processing that is done generally 
+        // depends on the processing order;
+        // A chart definition must behave the same 
+        // in every environment, independently of the order in which
+        // objects properties are enumerated.
+        var roleOptions = this.options.visualRoles;
+        if(roleOptions){
+            var dimsBoundToSingleRole = {};
+            
+            var rolesWithOptions = 
+                def
+                .query(def.keys(roleOptions))
+                .select(function(name){
+                    return this._visualRoles[name] ||
+                           def.fail.operationInvalid("Role '{0}' is not supported by the chart type.", [name]);
+                }, this)
+                .array();
+            
+            rolesWithOptions.sort(function(a, b){ return a.index - b.index; });
+                
+            /* Process options.visualRoles */
+            rolesWithOptions.forEach(function(visualRole){
+                var name     = visualRole.name;
+                var roleSpec = roleOptions[name];
+                
+                // Process the visual role specification
+                // * a string with the grouping dimensions, or
+                // * {dimensions: "product", isReversed:true, from: "series" }
+                var groupingSpec, sourceRoleName;
+                if(def.object.is(roleSpec)){
+                    if(def.nullyTo(roleSpec.isReversed, false)){
+                        visualRole.setIsReversed(true);
+                    }
                     
-                    var anyLevel = !!match[2];
-                    if(anyLevel) {
-                        // TODO: does not respect any index explicitly specified
-                        // before the *. Could mean >=...
-                        var groupDimNames = type.groupDimensionsNames(match[1], {assertExists: false});
-                        if(groupDimNames){
-                            var freeGroupDimNames = 
-                                    def.query(groupDimNames)
-                                        .where(function(dimName2){ return !def.hasOwn(boundDimTypes, dimName2); });
-
-                            if(role.requireSingleDimension){
-                                var freeDimName = freeGroupDimNames.first();
-                                if(freeDimName){
-                                    bind(role, freeDimName);
-                                    return;
-                                }
-                            } else {
-                                freeGroupDimNames = freeGroupDimNames.array();
-                                if(freeGroupDimNames.length){
-                                    bind(role, freeGroupDimNames);
-                                    return;
-                                }
-                            }
-                        }
-                    } else if(!def.hasOwn(boundDimTypes, dimName) &&
-                              type.dimensions(dimName, {assertExists: false})){
-                        bind(role, dimName);
-                        return;
+                    sourceRoleName = roleSpec.from;
+                    if(sourceRoleName){
+                        var sourceRole = this._visualRoles[sourceRoleName] ||
+                            def.fail.operationInvalid("Source role '{0}' is not supported by the chart type.", [sourceRoleName]);
+                        
+                        visualRole.setSourceRole(sourceRole);
+                        
+                        sourcedRoles.push(visualRole);
+                    } else {
+                        groupingSpec = roleSpec.dimensions;
                     }
-
-                    if(role.autoCreateDimension){
-                        /* Create a hidden dimension and bind the role and the dimension */
-                        var defaultName = match[1];
-                        type.addDimension(defaultName,
-                            pvc.data.DimensionType.extendSpec(defaultName, {isHidden: true}));
-                        bind(role, defaultName);
-                        return;
-                    }
-                }
-
-                if(role.isRequired) {
-                    throw def.error.operationInvalid("Chart type requires unassigned role '{0}'.", [name]);
+                } else {
+                    // Assumed to be a string
+                    groupingSpec = roleSpec;
                 }
                 
-                // Unbind role from any previous binding
-                role.bind(null);
+                // !groupingSpec (null or "") results in a null grouping being preBound
+                // A pre bound null grouping is later discarded in the post bind,
+                // but, in between, prevents translators from 
+                // reading to dimensions that would bind into those roles...
+                if(groupingSpec !== undefined){
+                    var grouping = pvc.data.GroupingSpec.parse(groupingSpec);
+    
+                    visualRole.preBind(grouping);
+    
+                    /* Collect dimension names bound to a *single* role */
+                    grouping.dimensions().each(function(groupDimSpec){
+                        if(def.hasOwn(dimsBoundToSingleRole, groupDimSpec.name)){
+                            // two roles => no defaults at all
+                            delete dimsBoundToSingleRole[groupDimSpec.name];
+                        } else {
+                            dimsBoundToSingleRole[groupDimSpec.name] = visualRole;
+                        }
+                    });
+                }
+            }, this);
+    
+            /* Provide defaults to dimensions bound to a single role
+             * by using the role's requirements 
+             */
+            var dimsSpec;
+            def.eachOwn(dimsBoundToSingleRole, function(role, name){
+                if(!dimsSpec){
+                    dimsSpec = def.lazy(this.options, 'dimensions');
+                }
+                
+                var dimSpec = def.lazy(dimsSpec, name);
+                
+                if(role.valueType && dimSpec.valueType === undefined){
+                    dimSpec.valueType = role.valueType;
+    
+                    if(role.requireIsDiscrete != null && dimSpec.isDiscrete === undefined){
+                        dimSpec.isDiscrete = role.requireIsDiscrete;
+                    }
+                }
+    
+                if(dimSpec.label === undefined){
+                    dimSpec.label = role.label;
+                }
+            }, this);
+        }
+        
+        /* Apply defaultSourceRole to roles not pre-bound */
+        def
+        .query(this._visualRoleList)
+        .where(function(role){ return role.defaultSourceRoleName && !role.sourceRole && !role.isPreBound(); })
+        .each (function(role){
+            var sourceRole = this._visualRoles[role.defaultSourceRoleName];
+            if(sourceRole){
+                role.setSourceRole(sourceRole);
+                sourcedRoles.push(role);
             }
-        }, this);
+        }, this)
+        ;
+        
+        /* Pre-bind sourced roles whose source role is itself pre-bound */
+        sourcedRoles.forEach(function(role){
+            var sourceRole = role.sourceRole;
+            if(sourceRole.isReversed){
+                role.setIsReversed(!role.isReversed);
+            }
+            
+            if(sourceRole.isPreBound()){
+                role.preBind(sourceRole.preBoundGrouping());
+            }
+        });
+    },
+    
+    _bindVisualRolesPost: function(complexType){
+        // Bound dimension names (which have at least one role bound to them)
+        var boundDimTypes = {};
+        
+        /* Now that the complex type is known and initialized,
+         * it is possible to validate the 
+         * grouping specifications of the pre-bound roles:
+         * whether their dimension names actually exist.
+         */
+        def
+        .query(this._visualRoleList)
+        .where(function(role) { return role.isPreBound(); })
+        .each (commitRolePreBinding, this);
+        
+        /* (Try to) Automatically bind **unbound** roles:
+         * -> to their default dimensions, if they exist and are not yet bound to
+         * -> if the default dimension does not exist and the 
+         *    role allows auto dimension creation, 
+         *    creates 1 *hidden* dimension (that will receive only null data)
+         * 
+         * Validates role required'ness.
+         */
+        var unboundSourcedRoles = [];
+        
+        def
+        .query(this._visualRoleList)
+        .where(function(role) {
+            var isSourcedRole = !!role.sourceRole;
+            var isRoleUnbound = !role.isBound();
+            if(isSourcedRole && isRoleUnbound){
+                unboundSourcedRoles.push(role);
+            }
+            
+            return !isSourcedRole && isRoleUnbound;
+        })
+        .each (autoBindUnboundRole, this);
+        
+        /* At last, process sourced roles. */
+        if(unboundSourcedRoles.length) {
+            unboundSourcedRoles
+                .forEach(bindSourcedRole, this);
+        }
+        
+        // ----------------
+        
+        function markDimBoundTo(dimName){
+            boundDimTypes[dimName] = true;
+        }
+        
+        function dimIsNotBoundTo(dimName){
+            return !def.hasOwn(boundDimTypes, dimName); 
+        }
+        
+        function dimIsDefined(dimName){
+            return complexType.dimensions(dimName, {assertExists: false});
+        }
+        
+        function bindRoleTo(role, dimNames){
+            if(def.array.is(dimNames)){
+                if(!dimNames.length){
+                    return;
+                }
+                
+                dimNames.forEach(markDimBoundTo);
+            } else {
+                markDimBoundTo(dimNames);
+            }
+            
+            role.bind(pvc.data.GroupingSpec.parse(dimNames, complexType));
+        }
+        
+        function bindRoleToGroupFreeDims(role, groupDimNames){
+            var freeGroupDimNames = 
+                def
+                .query(groupDimNames)
+                .where(dimIsNotBoundTo);
+
+            if(role.requireSingleDimension){
+                var firstFreeDimName = freeGroupDimNames.first();
+                if(firstFreeDimName){
+                    bindRoleTo(role, firstFreeDimName);
+                }
+            } else {
+                // May have no elements
+                bindRoleTo(role, freeGroupDimNames.array());
+            }
+        }
+        
+        function bindRoleToNewDim(role, dimName){
+            /* Create a hidden dimension and bind the role and the dimension */
+            complexType.addDimension(
+                dimName,
+                pvc.data.DimensionType.extendSpec(dimName, {isHidden: true}));
+            
+            bindRoleTo(role, dimName);
+        }
+        
+        function roleIsUnbound(role){
+            if(role.isRequired) {
+                throw def.error.operationInvalid("Chart type requires unassigned role '{0}'.", [role.name]);
+            }
+            
+            // Unbind role from any previous binding
+            role.bind(null);
+        }
+        
+        function commitRolePreBinding(role){
+            // Commits and validates the grouping specification.
+            // Null groupings are discarded.
+            // Sourced roles that were also pre-bound are here normally bound.
+            role.postBind(complexType);
+            
+            // Still bound? Wasn't a null grouping?
+            if(role.isBound()){
+                // Mark used dimensions
+                role.grouping
+                    .dimensionNames()
+                    .forEach(markDimBoundTo);
+            }
+        }
+        
+        function autoBindUnboundRole(role){
+            var name = role.name;
+            
+            /* Try to bind automatically, to defaultDimensionName */
+            var dimName = role.defaultDimensionName;
+            if(!dimName) {
+                roleIsUnbound(role);
+                return;
+            }
+                
+            /* An asterisk at the end of the name indicates
+             * that any dimension of that group is allowed.
+             * If the role allows multiple dimensions,
+             * then the meaning is greedy - use them all.
+             * Otherwise, use only one.
+             * 
+             *   "product*"
+             */
+            var match = dimName.match(/^(.*?)(\*)?$/) ||
+                        def.fail.argumentInvalid('defaultDimensionName');
+            
+            var defaultName =  match[1];
+            var greedy = /*!!*/match[2];
+            if(greedy) {
+                // TODO: does not respect any index explicitly specified
+                // before the *. Could mean >=...
+                var groupDimNames = complexType.groupDimensionsNames(defaultName, {assertExists: false});
+                if(groupDimNames){
+                    // Default dimension(s) is defined
+                    bindRoleToGroupFreeDims(role, groupDimNames);
+                    return;
+                }
+                // Follow to auto create dimension
+                
+            } else if(dimIsDefined(defaultName)){ // defaultName === dimName
+                if(dimIsNotBoundTo(defaultName)){
+                    bindRoleTo(role, defaultName);
+                }
+                return;
+            }
+
+            if(role.autoCreateDimension){
+                bindRoleToNewDim(role, defaultName);
+            }
+        }
+    
+        function bindSourcedRole(role){
+            var sourceRole = role.sourceRole;
+            if(sourceRole.isReversed){
+                role.setIsReversed(!role.isReversed);
+            }
+            
+            if(sourceRole.isBound()){
+                role.bind(sourceRole.grouping);
+            } else {
+                roleIsUnbound(role);
+            }
+        }
     },
 
     _logVisualRoles: function(){

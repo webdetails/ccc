@@ -21,8 +21,11 @@ def
 .add({
 
     parCoordPanel : null,
-    legendSource: 'category',
-
+    
+    _getColorRoleSpec: function(){
+        return { isRequired: true, defaultSourceRole: 'category', requireIsDiscrete: true };
+    },
+    
     _preRenderContent: function(contentOptions){
         this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, def.create(contentOptions, {
             topRuleOffset : this.options.topRuleOffset,

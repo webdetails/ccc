@@ -232,7 +232,7 @@ def
             this._bindVisualRolesPre();
         }
         
-        /* Initialize the data (and _bindVisualRoles) */
+        /* Initialize the data (and _bindVisualRolesPost) */
         this._initData(keyArgs);
 
         var hasMultiRole = this._isRoleAssigned('multiChart');
@@ -241,14 +241,10 @@ def
         this._initPlots(hasMultiRole);
         
         /* Initialize axes */
-        this.axes = {};
-        this.axesList = [];
-        this.axesByType = {};
-        
         this._initAxes(hasMultiRole);
         this._bindAxes(hasMultiRole);
         
-        /* Trends and Interpolatation */
+        /* Trends and Interpolation */
         if(this.parent || !hasMultiRole){
             this._generateTrends(hasMultiRole);
             

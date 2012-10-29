@@ -18,8 +18,7 @@ def
 
     var parent = this.parent;
     if(parent) {
-        this._colorRole   = parent._colorRole;
-        this._sizeRole = parent._sizeRole;
+        this._sizeRole  = parent._sizeRole;
     }
 })
 .add({
@@ -33,17 +32,8 @@ def
                 
             // Has no meaning in the current implementation
             'panelSizeRatio', 1);
-    },
-    
-    /**
-     * Initializes each chart's specific roles.
-     * @override
-     */
-    _initVisualRoles: function(){
         
-        this.base();
-        
-        // TODO: get a translator for this!!
+     // TODO: get a translator for this!!
         
         var colorDimName = 'value',
             sizeDimName  = 'value2';
@@ -54,34 +44,43 @@ def
                 case 1:  colorDimName = 'value2'; break;
                 default: colorDimName = 'value';
             }
-
+    
             switch(this.options.sizeValIdx){
                 case 0:  sizeDimName = 'value' ; break;
                 case 1:  sizeDimName = 'value2'; break;
                 default: sizeDimName = 'value' ;
             }
         }
-
-        this._addVisualRoles({
-            color:  {
+        
+        this._colorDimName = colorDimName;
+        this._sizeDimName  = sizeDimName ;
+    },
+    
+    _getColorRoleSpec: function(){
+        return {
+            isMeasure: true,
+            requireSingleDimension: true,
+            requireIsDiscrete: false,
+            valueType: Number,
+            defaultDimension: this._colorDimName
+        };
+    },
+    
+    /**
+     * Initializes each chart's specific roles.
+     * @override
+     */
+    _initVisualRoles: function(){
+        
+        this.base();
+        
+        this._sizeRole = this._addVisualRole('size', {
                 isMeasure: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
                 valueType: Number,
-                defaultDimensionName: colorDimName
-            },
-            
-            size: {
-                isMeasure: true,
-                requireSingleDimension: true,
-                requireIsDiscrete: false,
-                valueType: Number,
-                defaultDimensionName: sizeDimName
-            }
-        });
-
-        this._colorRole = this.visualRoles('color');
-        this._sizeRole  = this.visualRoles('size' );
+                defaultDimension: this._sizeDimName
+            });
     },
 
     _initData: function(keyArgs){
@@ -161,8 +160,6 @@ def
         sizeValIdx:  1,
         measuresIndexes: [2], // TODO: ???
 
-        //multi-dimensional clickable label
-        showValues: true,
         axisOffset: 0,
         
         showPlotFrame: false,
@@ -182,7 +179,7 @@ def
         // TODO: continuous color scale...
         
         /* Color Role */
-//        colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
+//      colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
         
         normPerBaseCategory: true,
         numSD: 2,                 // width (only for normal distribution)

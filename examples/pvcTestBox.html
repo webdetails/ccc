@@ -346,42 +346,46 @@ box3.render();
     <button class="tryMe" onclick='tryMe(this)'>Try me</button>
     <div id="pvcBox3"></div>
 
-<h3>A Boxplot with two categories</h3>
-Notice the base axis values, as well as what the tooltip shows.<br>
+<h3>A Boxplot with two category dimensions</h3>
+Notice the legend values and the content of the tooltip.<br>
 <textarea cols="55" rows="20" id="pvcBox4Code">
 var box4 = new pvc.BoxplotChart({
     canvas:  "pvcBox4",
     width:   600,
     height:  400,
-    title:   "Boxplot with two categories",
+    title:   "Boxplot with two category dimensions",
     
+    // Show legend
     legend: true,
     legendPosition:   'right',
-    baseAxisVisible:  false,
-    baseAxisFullGrid: true,
     
-    colorRole: 'category',
-
-    plot2: true,
-    plot2ShowLines: true,
-    plot2ShowDots:  true,
-    plot2ShowAreas: true,
-    plot2ColorRole: 'category',
-
-    color2AxisLegendVisible: false,
-
-    animate: true,
-    selectable: true,
-    hoverable: true,
+    // Hide base axis
+    baseAxisVisible:  false,
     axisOffset: 0.03,
+    
+    // Point color role to category role, instead of series
+    // which would color all boxes in blue
+    visualRoles: {color: {from: 'category'}},
 
+    // Show the median line
+    plot2: true,
+    plot2LinesVisible: true,
+    plot2DotsVisible:  true,
+    plot2AreasVisible: true,
+
+    // But hide its legend cause it's identical
+    // to the color1Axis...
+    color2AxisLegendVisible: false,
+    
+    selectable: true,
+    hoverable:  true,
+    
     extensionPoints: {
         boxRuleWhisker_strokeDasharray: '- '
     }
-});
-
-box4.setData(boxplotData_02);
-box4.render();
+})
+.setData(boxplotData_02)
+.render();
 </textarea>
     <button class="tryMe" onclick='tryMe(this)'>Try me</button>
     <div id="pvcBox4"></div>

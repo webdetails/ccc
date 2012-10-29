@@ -7,9 +7,11 @@ def
 .add({
 
     pieChartPanel: null,
-    
-    legendSource: 'category',
 
+    _getColorRoleSpec: function(){
+        return { isRequired: true, defaultSourceRole: 'category', requireIsDiscrete: true };
+    },
+    
     /**
      * Initializes each chart's specific roles.
      * @override
@@ -18,24 +20,21 @@ def
         
         this.base();
         
-        this._addVisualRoles({
-            category: { 
+        this._addVisualRole('category', { 
                 isRequired: true, 
-                defaultDimensionName: 'category*', 
+                defaultDimension: 'category*', 
                 autoCreateDimension: true 
-            },
+            });
             
-            /* value: required, continuous, numeric */
-            value:  { 
+        this._addVisualRole('value', { 
                 isMeasure:  true,
                 isRequired: true,
                 isPercent:  true,
                 requireSingleDimension: true, 
                 requireIsDiscrete: false,
                 valueType: Number, 
-                defaultDimensionName: 'value' 
-            }
-        });
+                defaultDimension: 'value' 
+            });
     },
     
     _initPlotsCore: function(hasMultiRole){

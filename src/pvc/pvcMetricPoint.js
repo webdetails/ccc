@@ -11,7 +11,7 @@ def
     var parent = this.parent;
     if(parent) {
         this._colorRole = parent._colorRole;
-        this._sizeRole = parent._sizeRole;
+        this._sizeRole  = parent._sizeRole;
     }
 })
 .add({
@@ -40,8 +40,9 @@ def
                     DataPart: 'trend',
                     TrendType: 'none',
                     NullInterpolatioMode: 'none',
-                    SizeRole: null,
-                    SizeAxis: null
+                    ColorRole: 'series', // one trend per series
+                    SizeRole:  null,
+                    SizeAxis:  null
                 },
                 defaults: {
                     LinesVisible: true,
@@ -57,6 +58,17 @@ def
         return true;
     },
     
+    _getColorRoleSpec: function(){
+        return {
+            isMeasure: true,
+            //requireSingleDimension: true, // TODO: generalize this...
+            //requireIsDiscrete: false,
+            //valueType: Number,
+            defaultSourceRole: 'series',
+            defaultDimension:  'color'
+        };
+    },
+    
     /**
      * Initializes each chart's specific roles.
      * @override
@@ -65,25 +77,13 @@ def
         
         this.base();
         
-        this._addVisualRoles({
-            color: {
-                isMeasure: true,
-                //requireSingleDimension: true, // TODO: generalize this...
-                //requireIsDiscrete: false,
-                //valueType: Number,
-                defaultDimensionName: 'color'
-            },
-            size: {
+        this._sizeRole = this._addVisualRole('size', {
                 isMeasure: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
                 valueType: Number,
-                defaultDimensionName: 'size'
-            }
-        });
-
-        this._colorRole = this.visualRoles('color');
-        this._sizeRole  = this.visualRoles('size' );
+                defaultDimension: 'size'
+            });
     },
     
     _getTranslationClass: function(translOptions){
@@ -100,23 +100,6 @@ def
         var sizeGrouping = this._sizeRole.grouping;
         if(sizeGrouping){
             this._sizeDim = this.data.dimensions(sizeGrouping.firstDimensionName());
-        }
-
-        /* Change the legend source role */
-        if(!this.parent){
-            var colorGrouping = this._colorRole.grouping;
-            if(colorGrouping) {
-                if(colorGrouping.isDiscrete()){
-                    // role is bound and discrete => change legend source
-                    this.legendSource = 'color';
-                } else {
-                    /* The "color legend" has no use
-                     * but to, possibly, show/hide "series",
-                     * if any
-                     */
-                    this.options.legend = false;
-                }
-            }
         }
     },
     
@@ -200,16 +183,16 @@ def
     defaults: def.create(pvc.MetricXYAbstract.prototype.defaults, {
         originIsZero: false,
         
-        tipsySettings: { offset: 15 },
+        tipsySettings: { offset: 15 }
         
         /* Continuous Color Role */
         // TODO:
-        colorScaleType: "linear", // "discrete", "normal" (distribution) or "linear"
-        colorRange: ['red', 'yellow','green'],
-//        colorRangeInterval:  undefined,
-//        minColor:  undefined, //"white",
-//        maxColor:  undefined, //"darkgreen",
-        nullColor: "#efc5ad"   // white with a shade of orange
+        //colorScaleType: "linear", // "discrete", "normal" (distribution) or "linear"
+        //colorRange: ['red', 'yellow','green'],
+        //colorRangeInterval:  undefined,
+        //minColor:  undefined, //"white",
+        //maxColor:  undefined, //"darkgreen",
+        //nullColor: "#efc5ad"   // white with a shade of orange
          
         /* Size Role */
 //      sizeAxisUseAbs:   true,

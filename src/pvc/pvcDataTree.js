@@ -25,8 +25,11 @@ def
     structDataset:  null,
 
     DataTreePanel : null,
-    legendSource: 'category',
-
+    
+    _getColorRoleSpec: function(){
+        return { isRequired: true, defaultSourceRole: 'category', requireIsDiscrete: true };
+    },
+    
     setStructData: function(data){
         this.structDataset = data.resultset;
         if (!this.structDataset.length){

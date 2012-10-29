@@ -143,7 +143,7 @@ pvc.BaseChart
     _initLegendPanel: function(){
         var options = this.options;
         if (options.legend) { // global legend(s) switch
-            
+
             var legend = new pvc.visual.Legend(this, 'legend', 0);
             
             // TODO: pass all these options to Legend class
@@ -206,8 +206,9 @@ pvc.BaseChart
      * Creates the legend group scenes of a chart.
      *
      * The default implementation creates
-     * one legend group for each existing data part value
-     * for the dimension in {@link #legendSource}.
+     * one legend group per data part value
+     * and with one legend item per 
+     * value of the "color" visual role.
      *
      * Legend groups are registered with the id prefix "part"
      * followed by the corresponding part value.
@@ -231,36 +232,38 @@ pvc.BaseChart
                 if(dataCells){
                     dataCells
                     .forEach(function(dataCell){
-                        var domainData = dataCell.data;
-                        
-                        if(!rootScene){
-                            dataPartDimName = this._getDataPartDimName();
-                            rootScene = legendPanel._getBulletRootScene();
+                        if(dataCell.role.isDiscrete()){
+                            var domainData = dataCell.data;
+                            
+                            if(!rootScene){
+                                dataPartDimName = this._getDataPartDimName();
+                                rootScene = legendPanel._getBulletRootScene();
+                            }
+                            
+                            var dataPartAtom = domainData.atoms[dataPartDimName];
+                            var locked = dataPartAtom && dataPartAtom.value === 'trend';
+                            
+                            var groupScene = rootScene.createGroup({
+                                group:           domainData,
+                                colorAxis:       colorAxis,
+                                clickMode:       locked ? 'none' : undefined,
+                                extensionPrefix: pvc.buildIndexedId('legend', legendIndex++)
+                             });
+                            
+                            // For later binding an appropriate bullet renderer
+                            dataCell.legendBulletGroupScene = groupScene;
+                            
+                            var partColorScale = colorAxis.scale;
+                            
+                            domainData
+                                .children()
+                                .each(function(itemData){
+                                    var itemScene = groupScene.createItem({group: itemData});
+                                    
+                                    // HACK...
+                                    itemScene.color = partColorScale(itemData.value);
+                                });
                         }
-                        
-                        var dataPartAtom = domainData.atoms[dataPartDimName];
-                        var locked = dataPartAtom && dataPartAtom.value === 'trend';
-                        
-                        var groupScene = rootScene.createGroup({
-                            group:           domainData,
-                            colorAxis:       colorAxis,
-                            clickMode:       locked ? 'none' : undefined,
-                            extensionPrefix: pvc.buildIndexedId('legend', legendIndex++)
-                         });
-                        
-                        // For later binding an appropriate bullet renderer
-                        dataCell.legendBulletGroupScene = groupScene;
-                        
-                        var partColorScale = colorAxis.scale;
-                        
-                        domainData
-                            .children()
-                            .each(function(itemData){
-                                var itemScene = groupScene.createItem({group: itemData});
-                                
-                                // HACK...
-                                itemScene.color = partColorScale(itemData.value);
-                            });
                     }, this);
                 }
             }

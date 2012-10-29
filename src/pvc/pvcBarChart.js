@@ -34,6 +34,7 @@ def
                 fixed: {
                     DataPart: 'trend',
                     TrendType: 'none',
+                    ColorRole: 'series', // one trend per series
                     NullInterpolatioMode: 'none'
                 },
                 defaults: {

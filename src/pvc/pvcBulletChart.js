@@ -27,7 +27,6 @@ def
 
     bulletChartPanel : null,
     allowNoData: true,
-    legendSource: null, // not supported 
 
     /**
      * @override 
@@ -48,30 +47,28 @@ def
 
         this.base();
 
-        this._addVisualRoles({
-            title:    { defaultDimensionName: 'title*'    },
-            subTitle: { defaultDimensionName: 'subTitle*' },
-            value: {
+        this._addVisualRole('title',    { defaultDimension: 'title*'    });
+        this._addVisualRole('subTitle', { defaultDimension: 'subTitle*' });
+        this._addVisualRole('value', {
                 isMeasure:  true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
                 valueType: Number,
-                defaultDimensionName: 'value*'
-            },
-            marker: {
+                defaultDimension: 'value*'
+            });
+        this._addVisualRole('marker', {
                 isMeasure:  true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
                 valueType: Number,
-                defaultDimensionName: 'marker*'
-            },
-            range: {
+                defaultDimension: 'marker*'
+            });
+        this._addVisualRole('range', {
                 isMeasure:  true,
                 requireIsDiscrete: false,
                 valueType: Number,
-                defaultDimensionName: 'range*'
-            }
-        });
+                defaultDimension: 'range*'
+            });
     },
 
     _createTranslation: function(complexType, translOptions){

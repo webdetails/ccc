@@ -515,7 +515,8 @@ def
 
         function createSeriesCategoryScene(serScene, catData1, serData1){
             /* Create leaf scene */
-            var group    = data
+            var group = 
+                data
                 ._childrenByKey[catData1.key]
                 ._childrenByKey[serData1.key];
             

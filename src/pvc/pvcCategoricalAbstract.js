@@ -22,20 +22,13 @@ def
         
         this.base();
       
-        var catRoleSpec = this._getCategoryRoleSpec() || 
-                          def.fail.operationInvalid("Must define the category role.");
-        
-        this._addVisualRoles({category: catRoleSpec});
-
-        // ---------
-        // Cached
-        this._catRole = this.visualRoles('category');
+        this._catRole = this._addVisualRole('category', this._getCategoryRoleSpec());
     },
     
     _getCategoryRoleSpec: function(){
-        return { 
+        return {
             isRequired: true, 
-            defaultDimensionName: 'category*', 
+            defaultDimension: 'category*', 
             autoCreateDimension: true 
         };
     },
@@ -161,17 +154,18 @@ def
                 
                 // TODO: It is usually the case, but not certain, that the base axis' 
                 // dataCell(s) span "all" data parts.
-                var allPartsData = this._getVisibleData(null, {ignoreNulls: false});
                 var visibleData = this._getVisibleData(dataCell.dataPartValue);
-                
-                new InterpType(
-                     allPartsData,
-                     visibleData, 
-                     this._catRole,
-                     this._serRole,
-                     dataCell.role,
-                     true) // dataCell.isStacked
-                .interpolate();
+                if(visibleData.childCount() > 0){
+                    var allPartsData = this._getVisibleData(null, {ignoreNulls: false});
+                    new InterpType(
+                         allPartsData,
+                         visibleData, 
+                         this._catRole,
+                         this._serRole,
+                         dataCell.role,
+                         true) // dataCell.isStacked
+                    .interpolate();
+                }
             }
         }
     },

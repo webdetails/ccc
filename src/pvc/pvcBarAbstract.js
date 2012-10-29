@@ -32,17 +32,14 @@ def
         
         this.base();
         
-        this._addVisualRoles({
-            /* value: required, continuous, numeric */
-            value:  {
-                isMeasure: true,
-                isRequired: true,
-                isPercent: this.options.stacked,
-                requireSingleDimension: true,
-                requireIsDiscrete: false,
-                valueType: Number,
-                defaultDimensionName: 'value'
-            }
+        this._addVisualRole('value', {
+            isMeasure: true,
+            isRequired: true,
+            isPercent: this.options.stacked,
+            requireSingleDimension: true,
+            requireIsDiscrete: false,
+            valueType: Number,
+            defaultDimension: 'value'
         });
 
         this._valueRole = this.visualRoles('value');

@@ -8273,7 +8273,7 @@ pv.Mark.funPropertyCaller = function(fun, cast){
     
     return function(){
         var value = fun.apply(this, stack);
-        return value != null ? cast(value) : null;
+        return value != null ? cast(value) : value; // some things depend on the null/undefined distinction
     };
 };
 

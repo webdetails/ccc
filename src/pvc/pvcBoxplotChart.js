@@ -14,8 +14,6 @@
 def
 .type('pvc.BoxplotChart', pvc.CategoricalAbstract)
 .add({
-    
-    legendSource: 'series',
 
     _processOptionsCore: function(options){
         this.base.apply(this, arguments);
@@ -43,19 +41,15 @@ def
                 valueType: Number
             };
 
-        var rolesSpec = def.query([
-                {name: 'median',       label: 'Median',  defaultDimensionName: 'median', isRequired: true},
-                {name: 'lowerQuartil', label: 'Lower Quartil', defaultDimensionName: 'lowerQuartil'},
-                {name: 'upperQuartil', label: 'Upper Quartil', defaultDimensionName: 'upperQuartil'},
-                {name: 'minimum',      label: 'Minimum', defaultDimensionName: 'minimum' },
-                {name: 'maximum',      label: 'Maximum', defaultDimensionName: 'maximum'}
-            ])
-            .object({
-                name:  function(info){ return info.name; },
-                value: function(info){ return def.create(roleSpecBase, info); }
-            });
-        
-        this._addVisualRoles(rolesSpec);
+        [
+            {name: 'median',       label: 'Median',        defaultDimension: 'median', isRequired: true},
+            {name: 'lowerQuartil', label: 'Lower Quartil', defaultDimension: 'lowerQuartil'},
+            {name: 'upperQuartil', label: 'Upper Quartil', defaultDimension: 'upperQuartil'},
+            {name: 'minimum',      label: 'Minimum',       defaultDimension: 'minimum' },
+            {name: 'maximum',      label: 'Maximum',       defaultDimension: 'maximum'}
+        ].forEach(function(info){
+            this._addVisualRole(info.name, def.create(roleSpecBase, info));
+        }, this);
     },
     
     _getTranslationClass: function(translOptions){
@@ -73,11 +67,11 @@ def
                 name: 'plot2',
                 defaults: {
                     LinesVisible: true,
-                    DotsVisible:  true
+                    DotsVisible:  true,
+                    OrthoRole: 'median'
                 },
                 fixed: {
-                    ColorAxis: 2,
-                    OrthoRole: 'median'
+                    ColorAxis: 2
                 }});
         }
     },
@@ -111,7 +105,7 @@ def
                     Object.create(baseOptions));
             
             // HACK:
-            pointPanel._v1DimRoleName.value = 'median';
+            pointPanel._v1DimRoleName.value = plot2Plot.option('OrthoRole');
             
             // Legacy fields
             boxPanel.pvSecondLine = pointPanel.pvLine;

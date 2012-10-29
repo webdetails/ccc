@@ -34,9 +34,7 @@ def
     pvArea: null,
     pvDot: null,
     pvLabel: null,
-    pvScatterPanel: null, // TODO: change this name!
-    
-    valueRoleName: null,
+    pvScatterPanel: null,
     
     _creating: function(){
         // Register BULLET legend prototype marks
@@ -93,23 +91,25 @@ def
     _createCore: function(){
         this.base();
         
-        this.valueRoleName = this.axes.ortho.role.name;
+        var myself = this;
+        var chart = this.chart;
+        var options   = chart.options;
+        var isStacked = this.stacked;
+        var showDots  = this.showDots;
+        var showAreas = this.showAreas;
+        var showLines = this.showLines;
+        var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
-        var myself = this,
-            chart = this.chart,
-            options = chart.options,
-            isStacked = this.stacked,
-            showDots  = this.showDots,
-            showAreas = this.showAreas,
-            showLines = this.showLines,
-            anchor = this.isOrientationVertical() ? "bottom" : "left";
-
+        this.valueRole     = chart.visualRoles(this.plot.option('OrthoRole'));
+        this.valueRoleName = this.valueRole.name;
+        this.valueDimName  = this.valueRole.firstDimensionName();
+        
         // ------------------
         // DATA
-        var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete(),
-            data = this._getVisibleData(), // shared "categ then series" grouped data
-            isDense   = (this.width <= 0) || (data._children.length / this.width > 0.5), //  > 100 categs / 200 pxs
-            rootScene = this._buildScene(data, isBaseDiscrete);
+        var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
+        var data      = this._getVisibleData(); // shared "categ then series" grouped data
+        var isDense   = (this.width <= 0) || (data._children.length / this.width > 0.5); //  > 100 categs / 200 pxs
+        var rootScene = this._buildScene(data, isBaseDiscrete);
 
         // Disable selection?
         if(isDense && (options.selectable || options.hoverable)) {
@@ -489,13 +489,14 @@ def
     _buildScene: function(data, isBaseDiscrete){
         var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
         var categDatas = data._children;
-        var chart = this.chart,
-            valueDim = data.owner.dimensions(this.axes.ortho.role.firstDimensionName()),
-            firstCategDim = !isBaseDiscrete ? data.owner.dimensions(this.axes.base.role.firstDimensionName()) : null,
-            isStacked = this.stacked,
-            visibleKeyArgs = {visible: true, zeroIfNone: false},
-            orthoScale = this.axes.ortho.scale,
-            orthoNullValue = def.scope(function(){
+        var chart = this.chart;
+        var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
+        var valueDim = data.owner.dimensions(this.valueDimName);
+        var firstCategDim = !isBaseDiscrete ? data.owner.dimensions(this.axes.base.role.firstDimensionName()) : null;
+        var isStacked = this.stacked;
+        var visibleKeyArgs = {visible: true, zeroIfNone: false};
+        var orthoScale = this.axes.ortho.scale;
+        var orthoNullValue = def.scope(function(){
                 // If the data does not cross the origin, 
                 // Choose the value that's closer to 0.
                 var domain = orthoScale.domain(),
@@ -507,9 +508,9 @@ def
                 }
                 
                 return 0;
-            }),
-            orthoZero = orthoScale(0),
-            sceneBaseScale = this.axes.base.sceneScale({sceneVarName: 'category'});
+            });
+        var orthoZero = orthoScale(0);
+        var sceneBaseScale = this.axes.base.sceneScale({sceneVarName: 'category'});
         
         // ----------------------------------
         // I   - Create series scenes array.
@@ -531,6 +532,7 @@ def
                         seriesData1 ? seriesData1.label : "",
                         seriesData1 ? seriesData1.rawValue : null);
             
+            colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
             /* Create series-categ scene */
             categDatas.forEach(function(categData, categIndex){
@@ -570,6 +572,8 @@ def
                 valueVar.accValue = value != null ? value : orthoNullValue;
                 
                 serCatScene.vars.value = valueVar;
+                
+                colorVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
                 
                 // -------------
                 
@@ -800,6 +804,8 @@ def
             interScene.basePosition   = interBasePosition;
             interScene.orthoPosition  = orthoZero;
             interScene.orthoLength    = orthoScale(interAccValue) - orthoZero;
+            
+            colorVarHelper.onNewScene(interScene, /* isLeaf */ true);
             
             return interScene;
         }

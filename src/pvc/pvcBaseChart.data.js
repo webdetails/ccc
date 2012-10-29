@@ -158,7 +158,7 @@ pvc.BaseChart
         // whose "every dimension in a measure role is null".
         // TODO: check why PRE is done only on createVersion 1 and this one 
         // is done on every create version
-        this._bindVisualRoles(complexType);
+        this._bindVisualRolesPost(complexType);
 
         if(pvc.debug >= 3){
             this._logVisualRoles();
@@ -369,10 +369,6 @@ pvc.BaseChart
             // So we create a dummy empty place-holder child here,
             // so that when the trend datums are added they end up here,
             // and not in another new Data...
-            
-//          var rootDataPartDim = this._partData.owner.dimensions(dataPartDimName);
-//          var dataPartValueAtom = rootDataPartDim.intern(dataPartValues);
-//            
             child = new pvc.data.Data({
                 parent: this._partData,
                 atoms:  def.set({}, dataPartDimName, dataPartValues), 

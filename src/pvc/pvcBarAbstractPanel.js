@@ -314,9 +314,10 @@ def
     },
 
     _buildScene: function(data, seriesData){
-        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data}),
-            categDatas = data._children;
-
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
+        var categDatas = data._children;
+        var colorVarHelper = new pvc.visual.ColorVarHelper(this.chart, this.chart._colorRole);
+        
         /**
          * Create starting scene tree
          */
@@ -332,7 +333,9 @@ def
                 seriesKey   = seriesData1.key;
 
             this._onNewSeriesScene(seriesScene, seriesData1);
-
+            
+            colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
+            
             categDatas.forEach(function(categData1){
                 /* Create leaf scene */
                 var categKey = categData1.key,
@@ -343,6 +346,8 @@ def
                     scene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
 
                 this._onNewSeriesCategoryScene(scene, categData1, seriesData1);
+                
+                colorVarHelper.onNewScene(scene, /* isLeaf */ true);
             }, this);
         }
 
