@@ -571,12 +571,6 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
                 }
             }
             break;
-
-        default:
-            if(dimName === 'dataPart'){
-                dimSpec = pvc.data.DimensionType.extendDataPartSpec(dimName, dimSpec, keyArgs);
-            }
-            break;
     }
     
     if(dimSpec.converter === undefined && 
@@ -585,28 +579,6 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
         dimSpec.rawFormat = def.get(keyArgs, 'timeSeriesFormat');
     }
     
-    return dimSpec;
-};
-
-pvc.data.DimensionType.extendDataPartSpec = function(dimName, dimSpec, keyArgs){
-    if(!dimSpec) { 
-        dimSpec = {
-            isDiscrete: true,
-            isHidden:   true,
-            comparer:   def.compare
-        };
-    } else {
-        if(dimSpec.isDiscrete === undefined){
-            dimSpec.isDiscrete = true;
-        }
-        if(dimSpec.isHidden === undefined){
-            dimSpec.isHidden = true;
-        }
-        if(dimSpec.comparer === undefined){
-            dimSpec.comparer = def.compare;
-        }
-    }
-
     return dimSpec;
 };
 

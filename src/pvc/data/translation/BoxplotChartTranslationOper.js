@@ -40,24 +40,5 @@ def.type('pvc.data.BoxplotChartTranslationOper')
         if(autoDimNames.length){
             this.defReader({names: autoDimNames});
         }
-    },
-
-    defDimensionType: function(dimName, dimSpec){
-        var dimGroup = pvc.data.DimensionType.dimensionGroupName(dimName);
-        
-        var label;
-        switch(dimGroup){
-            case 'median':       label = "Median"; break;
-            case 'lowerQuartil': label = "Lower Quartil"; break;
-            case 'upperQuartil': label = "Upper Quartil"; break;
-            case 'minimum':      label = "Minimum"; break;
-            case 'maximum':      label = "Maximum"; break;
-        }
-        
-        if(label){
-            dimSpec = def.setUDefaults(dimSpec, 'valueType', Number, 'label', label);
-        }
-        
-        return this.base(dimName, dimSpec);
     }
 });

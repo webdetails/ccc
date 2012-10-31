@@ -240,8 +240,10 @@ pvc.BaseChart
                                 rootScene = legendPanel._getBulletRootScene();
                             }
                             
-                            var dataPartAtom = domainData.atoms[dataPartDimName];
-                            var locked = dataPartAtom && dataPartAtom.value === 'trend';
+                            var dataPartAtom;
+                            var locked = colorAxis.option('LegendClickMode') === 'toggleVisible' && 
+                                         (dataPartAtom = domainData.atoms[dataPartDimName]) && 
+                                         dataPartAtom.value === 'trend';
                             
                             var groupScene = rootScene.createGroup({
                                 group:           domainData,

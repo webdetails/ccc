@@ -25,14 +25,6 @@
  * @extends pvc.data.MatrixTranslationOper
  */
 def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
-.init(function(chart, complexType, source, metadata, options){
-    
-    this.base(chart, complexType, source, metadata, options);
-
-    this._separator = this.options.separator || '~';
-
-    this._measureData();
-})
 .add(/** @lends pvc.data.CrosstabTranslationOper# */{
     /* LEGEND
      * ======
@@ -256,7 +248,12 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                   .selectMany(expandLine, this);
     },
     
-    _measureData: function(){
+    _processMetadata: function(){
+        
+        this.base();
+        
+        this._separator = this.options.separator || '~';
+        
         /* Don't change source */
         var lines = pvc.cloneMatrix(this.source);
 
@@ -425,19 +422,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 this._colGroups.forEach(function(colGroup, cg){
                     this._colGroups[cg] = [colGroup];
                 }, this);
-            }
-
-            /* plot2SeriesIndexes only implemented for single-series */
-            var dataPartDimName = this.options.dataPartDimName;
-            if(dataPartDimName && this.C === 1 && !this._userUsedDims[dataPartDimName]) {
-                // The null test is required because plot2SeriesIndexes can be a number, a string...
-                var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
-                if(plot2SeriesIndexes != null){
-                    var seriesKeys = this._colGroups.map(function(colGroup){
-                        return '' + colGroup[0].v;
-                    });
-                    this._plot2SeriesKeySet = this._createSecondAxisSeriesKeySet(plot2SeriesIndexes, seriesKeys);
-                }
             }
         }
         
@@ -689,7 +673,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             var crossEndIndex = itemLogicalGroupIndex[dimGroupName] + count; // exclusive
             while(count > 0) {
                 var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level);
-                if(!me._userUsedDims[dimName]) { // Skip name if occupied and continue with next name
+                if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
                     
                     // use first available slot for auto dims readers as long as within crossIndex and crossIndex + count
                     index = me._nextAvailableItemIndex(index);
@@ -708,6 +692,19 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
+        /* plot2SeriesIndexes only implemented for single-series */
+        var dataPartDimName = this.options.dataPartDimName;
+        if(dataPartDimName && this.C === 1 && !this.complexTypeProj.isReadOrCalc(dataPartDimName)) {
+            // The null test is required because plot2SeriesIndexes can be a number, a string...
+            var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
+            if(plot2SeriesIndexes != null){
+                var seriesKeys = this._colGroups.map(function(colGroup){
+                    return '' + colGroup[0].v;
+                });
+                this._plot2SeriesKeySet = this._createSecondAxisSeriesKeySet(plot2SeriesIndexes, seriesKeys);
+            }
+        }
+        
         ['series', 'category', 'value'].forEach(function(dimGroupName){
             var L = itemLogicalGroup[dimGroupName];
             if(L > 0){
@@ -723,8 +720,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 var calcAxis2SeriesKeySet = def.fun.constant(this._plot2SeriesKeySet);
-                this._userDimsReaders.push(
-                        this._dataPartGet(calcAxis2SeriesKeySet, seriesReader));
+                this._userRead(this._dataPartGet(calcAxis2SeriesKeySet, seriesReader), dataPartDimName);
             }
         }
     }

@@ -175,10 +175,6 @@ def.scope(function(){
                 scale.range(scale.min, scale.max);
             }
             
-            if(pvc.debug >= 4){
-                this.chart._log("Scale: " + pvc.stringify(def.copyOwn(scale)));
-            }
-            
             return scale;
         },
         

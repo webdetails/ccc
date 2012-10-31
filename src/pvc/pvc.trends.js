@@ -75,7 +75,7 @@ def.space('pvc.trends', function(trends){
             
             // y = alpha + beta * x
             var alpha, beta;
-            if(N > 0){
+            if(N >= 2){
                 var avgX  = sumX  / N;
                 var avgY  = sumY  / N;
                 var avgXY = sumXY / N;
@@ -92,8 +92,11 @@ def.space('pvc.trends', function(trends){
                 alpha = avgY - beta * avgX;
                 
                 return {
-                    alpha: alpha, 
+                    alpha: alpha,
                     beta:  beta,
+                    
+                    reset: def.noop,
+                    
                     // y = alpha + beta * x
                     sample: function(x){
                         return alpha + beta * (+x);

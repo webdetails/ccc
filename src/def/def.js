@@ -260,35 +260,57 @@ var def = /** @lends def */{
         return o;
     },
 
-    setDefaults: function(o){
+    setDefaults: function(o, o2){
         if(!o) {
             o = {};
         }
 
         var a = arguments;
-        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-            var p = a[i];
-            if(o[p] == null){
-                o[p] = a[i+1];
+        var A = a.length;
+        var p;
+        if(A === 2 && def.object.is(o2)){
+            for(p in o2){
+                if(o[p] == null){
+                    o[p] = o2[p];
+                }
+            }
+        } else {
+            A--;
+            for(var i = 1 ; i < A ; i += 2) {
+                p = a[i];
+                if(o[p] == null){
+                    o[p] = a[i+1];
+                }
             }
         }
-
+        
         return o;
     },
 
-    setUDefaults: function(o){
+    setUDefaults: function(o, o2){
         if(!o) {
             o = {};
         }
 
         var a = arguments;
-        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-            var p = a[i];
-            if(o[p] === undefined){
-                o[p] = a[i+1];
+        var A = a.length;
+        var p;
+        if(A === 2 && def.object.is(o2)){
+            for(p in o2){
+                if(o[p] === undefined){
+                    o[p] = o2[p];
+                }
+            }
+        } else {
+            A--;
+            for(var i = 1 ; i < A ; i += 2) {
+                p = a[i];
+                if(o[p] === undefined){
+                    o[p] = a[i+1];
+                }
             }
         }
-
+        
         return o;
     },
     

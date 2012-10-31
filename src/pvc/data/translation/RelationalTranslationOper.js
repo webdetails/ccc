@@ -66,12 +66,6 @@
  * </p>
  */
 def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
-.init(function(chart, complexType, source, metadata, options){
-    
-    this.base(chart, complexType, source, metadata, options);
-
-    this._measureData();
-})
 .add(/** @lends pvc.data.RelationalTranslationOper# */{
     M: 0, // number of measures
     C: 0, // number of categories
@@ -83,7 +77,10 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         return !colType || (colType.toLowerCase() === 'string');
     },
     
-    _measureData: function(){
+    _processMetadata: function(){
+        
+        this.base();
+    
         var metadata = this.metadata;
         
         var J = this.J; // metadata.length
@@ -271,7 +268,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
             var groupEndIndex = me._itemCrossGroupIndex[colGroupName] + count; // exclusive
             while(count > 0) {
                 var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level);
-                if(!me._userUsedDims[dimName]) { // Skip name if occupied and continue with next name
+                if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
                     
                     // use first available slot for auto dims readers as long as within the group slots
                     index = me._nextAvailableItemIndex(index);
@@ -312,8 +309,8 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         if(plot2SeriesIndexes != null){
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
-                this._userDimsReaders.push(
-                   relTransl_dataPartGet.call(this, plot2SeriesIndexes, seriesReader));
+                var dataPartDimName = this.options.dataPartDimName;
+                this._userRead(relTransl_dataPartGet.call(this, plot2SeriesIndexes, seriesReader), dataPartDimName);
             }
         }
     },

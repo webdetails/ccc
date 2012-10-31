@@ -93,6 +93,7 @@ def
                 dataPartValue: plot.option('DataPart' ),
                 isStacked:     isStacked,
                 trendType:     trendType,
+                trendLabel:    trendType && plot.option('TrendLabel'),
                 nullInterpolationMode: plot.option('NullInterpolationMode')
             };
             

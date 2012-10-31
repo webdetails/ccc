@@ -215,8 +215,6 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         var me = this;
         
         var dataPartDimName = this.options.dataPartDimName;
-        
-        this.ensureDimensionType(dataPartDimName, null, {isDataPart: true});
 
         var dataPartDimension,
             plot2SeriesKeySet,

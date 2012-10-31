@@ -380,6 +380,7 @@ def
         // -- LINE --
         var line = new pvc.visual.Line(this, this.pvScatterPanel, {
                 extensionId: 'line',
+                noTooltip:    false,
                 noHover:      true // TODO: SIGN check if not broken
             })
             /* Data */

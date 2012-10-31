@@ -236,8 +236,8 @@ def
             {
                 extensionId: extensionIds,
                 freePosition: true,
-                wrapper:     wrapper
-                //noHover:      true // TODO: SIGN check if not broken
+                wrapper:      wrapper,
+                noTooltip:    false
             })
             /* 
              * Line.visible =

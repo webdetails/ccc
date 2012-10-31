@@ -350,6 +350,11 @@ def.scope(function(){
                 return range[Rl];
             }
             
+            // TODO: Not a real scale; 
+            // some methods won't work on the result of by, by1 and transform.
+            // Give it a bit of protovis looks
+            def.copy(scale, pv.Scale.common);
+            
             return scale;
         }
     });

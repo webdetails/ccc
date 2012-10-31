@@ -68,6 +68,9 @@ def.type('pvc.visual.Role')
     this.label = def.get(keyArgs, 'label') || name;
     this.index = def.get(keyArgs, 'index') || 0;
     
+    this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
+    this.dimensionDefaults.label = this.label;
+    
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
     }
@@ -112,6 +115,7 @@ def.type('pvc.visual.Role')
             var valueType = def.get(keyArgs, 'valueType', null);
             if(valueType !== this.valueType) {
                 this.valueType = valueType;
+                this.dimensionDefaults.valueType = valueType;
             }
         }
     }
@@ -122,6 +126,7 @@ def.type('pvc.visual.Role')
     
     if(requireIsDiscrete != this.requireIsDiscrete) {
         this.requireIsDiscrete = !!requireIsDiscrete;
+        this.dimensionDefaults.isDiscrete = this.requireIsDiscrete;
     }
 
     var flatteningMode = def.get(keyArgs, 'flatteningMode');

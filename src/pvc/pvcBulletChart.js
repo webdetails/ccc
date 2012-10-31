@@ -71,9 +71,9 @@ def
             });
     },
 
-    _createTranslation: function(complexType, translOptions){
+    _createTranslation: function(translOptions){
         
-        var translation = this.base(complexType, translOptions),
+        var translation = this.base(translOptions),
             /*
              * By now the translation has already been initialized
              * and its virtualItemSize is determined.

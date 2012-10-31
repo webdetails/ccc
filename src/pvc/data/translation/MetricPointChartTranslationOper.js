@@ -17,6 +17,12 @@
  * +----------+----------+----------+----------+----------+
  * </pre>
  * 
+ * <p>
+ * Color dimensions will be continuous by default.
+ * If that is not the case, 
+ * an explicit dimension valueType definition must be provided.
+ * </p>
+ * 
  * @extends pvc.data.MatrixTranslationOper
  */
 def.type('pvc.data.MetricPointChartTranslationOper')
@@ -51,9 +57,14 @@ def.type('pvc.data.MetricPointChartTranslationOper')
         var autoDimNames = [];
         var F = freeMeaIndexes.length;
         if(F > 0){
-            // Bind the first M unbound roles
-            for(var i = 0 ; i < F ; i++){
+            // Collect the default dimension names of the 
+            // first F unbound roles
+            var R = this._meaLayoutRoles.length;
+            var i = 0;
+            while(i < R && autoDimNames.length < F){
+                // Each unbound role gets one of the free dimensions
                 this._getUnboundRoleDefaultDimNames(this._meaLayoutRoles[i], 1, autoDimNames);
+                i++;
             }
             
             N = autoDimNames.length;
@@ -75,23 +86,5 @@ def.type('pvc.data.MetricPointChartTranslationOper')
                 this.defReader({names: autoDimNames, indexes: freeDisIndexes});
             }
         }
-    },
-    
-    defDimensionType: function(dimName, dimSpec){
-        var dimGroup = pvc.data.DimensionType.dimensionGroupName(dimName);
-        switch(dimGroup){
-            case 'x':
-                var isCategoryTimeSeries = this.options.isCategoryTimeSeries;
-                dimSpec = def.setUDefaults(dimSpec, 'valueType', isCategoryTimeSeries ? Date : Number);
-                break;
-                
-            case 'y':
-            case 'color':
-            case 'size':
-                dimSpec = def.setUDefaults(dimSpec, 'valueType', Number);
-                break;
-        }
-        
-        return this.base(dimName, dimSpec);
     }
 });

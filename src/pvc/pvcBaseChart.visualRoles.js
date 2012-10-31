@@ -91,7 +91,11 @@ pvc.BaseChart
                 {
                     defaultDimension: 'dataPart',
                     requireSingleDimension: true,
-                    requireIsDiscrete: true
+                    requireIsDiscrete: true,
+                    dimensionDefaults: {
+                        isHidden: true,
+                        comparer: def.compare
+                    }
                 });
         }
 
@@ -114,7 +118,7 @@ pvc.BaseChart
      * dimensions bound to roles, 
      * by taking them from the roles requirements.
      */
-    _bindVisualRolesPre: function(){
+    _bindVisualRolesPreI: function(){
         // Clear reversed status of visual roles
         def.eachOwn(this._visualRoles, function(role){
             role.setIsReversed(false);
@@ -128,10 +132,11 @@ pvc.BaseChart
         // depends on the processing order;
         // A chart definition must behave the same 
         // in every environment, independently of the order in which
-        // objects properties are enumerated.
+        // object properties are enumerated.
         var roleOptions = this.options.visualRoles;
+        var dimsBoundToSingleRole;
         if(roleOptions){
-            var dimsBoundToSingleRole = {};
+            dimsBoundToSingleRole = {};
             
             var rolesWithOptions = 
                 def
@@ -164,7 +169,6 @@ pvc.BaseChart
                             def.fail.operationInvalid("Source role '{0}' is not supported by the chart type.", [sourceRoleName]);
                         
                         visualRole.setSourceRole(sourceRole);
-                        
                         sourcedRoles.push(visualRole);
                     } else {
                         groupingSpec = roleSpec.dimensions;
@@ -195,30 +199,28 @@ pvc.BaseChart
                 }
             }, this);
     
-            /* Provide defaults to dimensions bound to a single role
-             * by using the role's requirements 
-             */
-            var dimsSpec;
-            def.eachOwn(dimsBoundToSingleRole, function(role, name){
-                if(!dimsSpec){
-                    dimsSpec = def.lazy(this.options, 'dimensions');
-                }
-                
-                var dimSpec = def.lazy(dimsSpec, name);
-                
-                if(role.valueType && dimSpec.valueType === undefined){
-                    dimSpec.valueType = role.valueType;
-    
-                    if(role.requireIsDiscrete != null && dimSpec.isDiscrete === undefined){
-                        dimSpec.isDiscrete = role.requireIsDiscrete;
-                    }
-                }
-    
-                if(dimSpec.label === undefined){
-                    dimSpec.label = role.label;
-                }
-            }, this);
         }
+
+        this._sourcedRoles = sourcedRoles;
+        this._dimsBoundToSingleRole = dimsBoundToSingleRole;
+    },
+    
+    _bindVisualRolesPreII: function(){
+        /* Provide defaults to dimensions bound to a single role
+         * by using the role's requirements 
+         */
+        var dimsBoundToSingleRole = this._dimsBoundToSingleRole;
+        if(dimsBoundToSingleRole){
+            delete this._dimsBoundToSingleRole; // free memory
+            
+            def.eachOwn(
+                dimsBoundToSingleRole, 
+                this._setRoleBoundDimensionDefaults, 
+                this);
+        }
+        
+        var sourcedRoles = this._sourcedRoles;
+        delete this._sourcedRoles; // free memory
         
         /* Apply defaultSourceRole to roles not pre-bound */
         def
@@ -234,31 +236,38 @@ pvc.BaseChart
         ;
         
         /* Pre-bind sourced roles whose source role is itself pre-bound */
+        // Only if the role has no default dimension, cause otherwise, 
+        // it would prevent binding to it, if it comes to exist.
+        // In those cases, sourcing only effectively happens in the post phase.
         sourcedRoles.forEach(function(role){
             var sourceRole = role.sourceRole;
             if(sourceRole.isReversed){
                 role.setIsReversed(!role.isReversed);
             }
             
-            if(sourceRole.isPreBound()){
+            if(!role.defaultDimensionName && sourceRole.isPreBound()){
                 role.preBind(sourceRole.preBoundGrouping());
             }
         });
     },
     
-    _bindVisualRolesPost: function(complexType){
-        // Bound dimension names (which have at least one role bound to them)
+    _setRoleBoundDimensionDefaults: function(role, dimName){
+        this._complexTypeProj.setDimDefaults(dimName, role.dimensionDefaults);
+    },
+    
+    _bindVisualRolesPostI: function(){
+        
+        var complexTypeProj = this._complexTypeProj;
+        
+        // Dimension names to roles bound to it
         var boundDimTypes = {};
         
-        /* Now that the complex type is known and initialized,
-         * it is possible to validate the 
-         * grouping specifications of the pre-bound roles:
-         * whether their dimension names actually exist.
-         */
+        var unboundSourcedRoles = [];
+        
         def
         .query(this._visualRoleList)
         .where(function(role) { return role.isPreBound(); })
-        .each (commitRolePreBinding, this);
+        .each (markPreBoundRoleDims, this);
         
         /* (Try to) Automatically bind **unbound** roles:
          * -> to their default dimensions, if they exist and are not yet bound to
@@ -268,31 +277,31 @@ pvc.BaseChart
          * 
          * Validates role required'ness.
          */
-        var unboundSourcedRoles = [];
-        
         def
         .query(this._visualRoleList)
-        .where(function(role) {
-            var isSourcedRole = !!role.sourceRole;
-            var isRoleUnbound = !role.isBound();
-            if(isSourcedRole && isRoleUnbound){
-                unboundSourcedRoles.push(role);
-            }
-            
-            return !isSourcedRole && isRoleUnbound;
-        })
+        .where(function(role) { return !role.isPreBound(); })
         .each (autoBindUnboundRole, this);
         
-        /* At last, process sourced roles. */
-        if(unboundSourcedRoles.length) {
-            unboundSourcedRoles
-                .forEach(bindSourcedRole, this);
-        }
+        /* Sourced roles that could not be normally bound
+         * are now finally sourced 
+         */
+        unboundSourcedRoles.forEach(tryPreBindSourcedRole, this);
         
+        /* Apply defaults to single-bound-to dimensions
+         * TODO: this is being repeated for !pre-bound! dimensions
+         */
+        def
+        .query(def.ownKeys(boundDimTypes))
+        .where(function(dimName) { return boundDimTypes[dimName].length === 1; })
+        .each (function(dimName){
+            var singleRole = boundDimTypes[dimName][0];
+            this._setRoleBoundDimensionDefaults(singleRole, dimName);
+        }, this);
+
         // ----------------
         
-        function markDimBoundTo(dimName){
-            boundDimTypes[dimName] = true;
+        function markDimBoundTo(dimName, role){
+            def.array.lazy(boundDimTypes, dimName).push(role);
         }
         
         function dimIsNotBoundTo(dimName){
@@ -300,24 +309,23 @@ pvc.BaseChart
         }
         
         function dimIsDefined(dimName){
-            return complexType.dimensions(dimName, {assertExists: false});
+            return complexTypeProj.hasDim(dimName);
         }
         
-        function bindRoleTo(role, dimNames){
+        function preBindRoleTo(role, dimNames){
             if(def.array.is(dimNames)){
-                if(!dimNames.length){
-                    return;
-                }
-                
-                dimNames.forEach(markDimBoundTo);
+                dimNames.forEach(function(dimName){ 
+                    markDimBoundTo(dimName, role);
+                });
             } else {
-                markDimBoundTo(dimNames);
+                markDimBoundTo(dimNames, role);
             }
             
-            role.bind(pvc.data.GroupingSpec.parse(dimNames, complexType));
+            role.setSourceRole(null); // if any
+            role.preBind(pvc.data.GroupingSpec.parse(dimNames));
         }
         
-        function bindRoleToGroupFreeDims(role, groupDimNames){
+        function preBindRoleToGroupFreeDims(role, groupDimNames){
             var freeGroupDimNames = 
                 def
                 .query(groupDimNames)
@@ -326,21 +334,19 @@ pvc.BaseChart
             if(role.requireSingleDimension){
                 var firstFreeDimName = freeGroupDimNames.first();
                 if(firstFreeDimName){
-                    bindRoleTo(role, firstFreeDimName);
+                    preBindRoleTo(role, firstFreeDimName);
                 }
             } else {
                 // May have no elements
-                bindRoleTo(role, freeGroupDimNames.array());
+                preBindRoleTo(role, freeGroupDimNames.array());
             }
         }
         
-        function bindRoleToNewDim(role, dimName){
+        function preBindRoleToNewDim(role, dimName){
             /* Create a hidden dimension and bind the role and the dimension */
-            complexType.addDimension(
-                dimName,
-                pvc.data.DimensionType.extendSpec(dimName, {isHidden: true}));
+            complexTypeProj.setDim(dimName, {isHidden: true});
             
-            bindRoleTo(role, dimName);
+            preBindRoleTo(role, dimName);
         }
         
         function roleIsUnbound(role){
@@ -350,30 +356,31 @@ pvc.BaseChart
             
             // Unbind role from any previous binding
             role.bind(null);
+            role.setSourceRole(null); // if any
         }
         
-        function commitRolePreBinding(role){
-            // Commits and validates the grouping specification.
-            // Null groupings are discarded.
-            // Sourced roles that were also pre-bound are here normally bound.
-            role.postBind(complexType);
-            
-            // Still bound? Wasn't a null grouping?
-            if(role.isBound()){
-                // Mark used dimensions
-                role.grouping
-                    .dimensionNames()
-                    .forEach(markDimBoundTo);
-            }
+        function markPreBoundRoleDims(role){
+            role.preBoundGrouping()
+                .dimensionNames()
+                .forEach(markDimBoundTo);
         }
         
         function autoBindUnboundRole(role){
             var name = role.name;
             
+            if(role.sourceRole && role.isPreBound()){
+                unboundSourcedRoles.push(role);
+                return;
+            }
+            
             /* Try to bind automatically, to defaultDimensionName */
             var dimName = role.defaultDimensionName;
             if(!dimName) {
-                roleIsUnbound(role);
+                if(role.sourceRole){
+                    unboundSourcedRoles.push(role);
+                } else {
+                    roleIsUnbound(role);
+                }
                 return;
             }
                 
@@ -393,37 +400,56 @@ pvc.BaseChart
             if(greedy) {
                 // TODO: does not respect any index explicitly specified
                 // before the *. Could mean >=...
-                var groupDimNames = complexType.groupDimensionsNames(defaultName, {assertExists: false});
+                var groupDimNames = complexTypeProj.groupDimensionsNames(defaultName);
                 if(groupDimNames){
                     // Default dimension(s) is defined
-                    bindRoleToGroupFreeDims(role, groupDimNames);
+                    preBindRoleToGroupFreeDims(role, groupDimNames);
                     return;
                 }
                 // Follow to auto create dimension
                 
             } else if(dimIsDefined(defaultName)){ // defaultName === dimName
                 if(dimIsNotBoundTo(defaultName)){
-                    bindRoleTo(role, defaultName);
+                    preBindRoleTo(role, defaultName);
+      
                 }
                 return;
             }
 
             if(role.autoCreateDimension){
-                bindRoleToNewDim(role, defaultName);
-            }
-        }
-    
-        function bindSourcedRole(role){
-            var sourceRole = role.sourceRole;
-            if(sourceRole.isReversed){
-                role.setIsReversed(!role.isReversed);
+                preBindRoleToNewDim(role, defaultName);
+                return;
             }
             
-            if(sourceRole.isBound()){
-                role.bind(sourceRole.grouping);
+            if(role.sourceRole){
+                unboundSourcedRoles.push(role);
             } else {
                 roleIsUnbound(role);
             }
+        }
+    
+        function tryPreBindSourcedRole(role){
+            var sourceRole = role.sourceRole;
+            if(sourceRole.isPreBound()){
+                role.preBind(sourceRole.preBoundGrouping());
+            } else {
+                roleIsUnbound(role);
+            }
+        }
+    },
+    
+    _bindVisualRolesPostII: function(complexType){
+        
+        def
+        .query(this._visualRoleList)
+        .where(function(role) { return role.isPreBound(); })
+        .each (commitRolePreBinding, this);
+
+        function commitRolePreBinding(role){
+            // Commits and validates the grouping specification.
+            // Null groupings are discarded.
+            // Sourced roles that were also pre-bound are here normally bound.
+            role.postBind(complexType);
         }
     },
 

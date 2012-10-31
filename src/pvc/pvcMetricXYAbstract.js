@@ -39,14 +39,21 @@ def
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                defaultDimension: 'x'
+                defaultDimension: 'x',
+                dimensionDefaults: {
+                    valueType: this.options.timeSeries ? Date : Number
+                }
             });
+        
         this._yRole = this._addVisualRole('y', {
                 isMeasure: true,
                 isRequired: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                defaultDimension: 'y'
+                defaultDimension: 'y',
+                dimensionDefaults: {
+                    valueType: Number
+                }
             });
     },
 

@@ -67,6 +67,9 @@ def
         var overflowPaddingsSignal = {};
         var isDisasterRecovery = false;
         
+        if(pvc.debug >= 5){
+            me._log("  ==== Layout Init - Side Panels Round");
+        }
         
         // PHASE 0 - Initialization
         //
@@ -112,7 +115,7 @@ def
         
         function layoutCycle(remTimes, iteration){
             if(pvc.debug >= 5){
-                me._log("==== LayoutCycle " + (isDisasterRecovery ? "Disaster MODE" : ("#" + (iteration + 1))));
+                me._log("  ==== LayoutCycle " + (isDisasterRecovery ? "Disaster MODE" : ("#" + (iteration + 1))));
             }
             
             var index, count;
@@ -124,7 +127,7 @@ def
             count = sideChildren.length;
             while(index < count){
                 if(pvc.debug >= 5){
-                    me._log("SIDE Child i=" + index);
+                    me._log("    SIDE Child i=" + index);
                 }
                 
                 paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
@@ -146,11 +149,11 @@ def
                     } else {
                         if(remTimes > 0){
                             if(pvc.debug >= 5){
-                                me._log("SIDE Child i=" + index + " increased paddings");
+                                me._log("    SIDE Child i=" + index + " increased paddings");
                             }
                             return true; // repeat
                         } else if(pvc.debug >= 2){
-                            me._log("[Warning] SIDE Child i=" + index + " increased paddings but no more iterations possible.");
+                            me._log("    [Warning] SIDE Child i=" + index + " increased paddings but no more iterations possible.");
                         }
                     }
                 }
@@ -159,7 +162,7 @@ def
             
             if(ownPaddingsChanged){
                 if(pvc.debug >= 5){
-                    me._log("Restarting due to overflowPaddings change");
+                    me._log("    Restarting due to overflowPaddings change");
                 }
                 return false; // stop;
             }
@@ -168,7 +171,7 @@ def
             count = fillChildren.length;
             while(index < count){
                 if(pvc.debug >= 5){
-                    me._log("FILL Child i=" + index);
+                    me._log("    FILL Child i=" + index);
                 }
                 
                 paddingsChanged = layoutChildFill(fillChildren[index], canChange);
@@ -182,11 +185,11 @@ def
                     
                     if(remTimes > 0){
                         if(pvc.debug >= 5){
-                            me._log("FILL Child i=" + index + " increased paddings");
+                            me._log("    FILL Child i=" + index + " increased paddings");
                         }
                         return true; // repeat
                     } else if(pvc.debug >= 2){
-                        me._log("[Warning] FILL Child i=" + index + " increased paddings but no more iterations possible.");
+                        me._log("    [Warning] FILL Child i=" + index + " increased paddings but no more iterations possible.");
                     }
                 }
                 index++;
@@ -227,7 +230,11 @@ def
             }
         }
         
-        function layoutChild1Side(child) {
+        function layoutChild1Side(child, index) {
+            if(pvc.debug >= 5){
+                me._log("    SIDE Child i=" + index);
+            }
+            
             var paddingsChanged = false;
             
             var a = child.anchor;
@@ -367,8 +374,8 @@ def
             var changed = false;
             if(newPaddings){
                 if(pvc.debug >= 10){
-                    me._log("=> clientSize=" + pvc.stringify(child._layoutInfo.clientSize));
-                    me._log("<= requestPaddings=" + pvc.stringify(newPaddings));
+                    me._log("    => clientSize=" + pvc.stringify(child._layoutInfo.clientSize));
+                    me._log("    <= requestPaddings=" + pvc.stringify(newPaddings));
                 }
                 
                 getAnchorPaddingsNames(a).forEach(function(side){
@@ -376,19 +383,20 @@ def
                         var value    = paddings[side] || 0;
                         var newValue = Math.floor(10000 * (newPaddings[side] || 0)) / 10000;
                         var increase = newValue - value;
+                        var minChange = Math.max(1, Math.abs(0.01 * value));
                         
                         // STABILITY requirement
-                        if(increase !== 0 && Math.abs(increase) >= Math.abs(0.01 * value)){
+                        if(increase !== 0 && Math.abs(increase) >= minChange){
                             if(!canChange){
                                 if(pvc.debug >= 2){
-                                    me._log("[Warning] CANNOT change but child wanted to: " + side + "=" + newValue);
+                                    me._log("    [Warning] CANNOT change but child wanted to: " + side + "=" + newValue);
                                 }
                             } else {
                                 changed = true;
                                 paddings[side] = newValue;
                                 
                                 if(pvc.debug >= 5){
-                                    me._log("[Warning]   changed padding " + side + " <- " + newValue);
+                                    me._log("    changed padding " + side + " <- " + newValue);
                                 }
                             }
                         }
@@ -398,13 +406,13 @@ def
                 if(changed){
                     var paddingKey = pvc.Sides
                                         .names
-                                        .map(function(side){ return (paddings[side] || 0).toFixed(3); })
+                                        .map(function(side){ return (paddings[side] || 0).toFixed(0); })
                                         .join('|');
                     
                     if(def.hasOwn(paddingHistory, paddingKey)){
                         // LOOP detected
                         if(pvc.debug >= 2){
-                            me._log("LOOP detected");
+                            me._log("    [Warning] LOOP detected");
                         }
                         changed = loopSignal;
                     } else {
@@ -425,7 +433,7 @@ def
             var changed = false;
             if(overflowPaddings){
                 if(pvc.debug >= 10){
-                    me._log("<= overflowPaddings=" + pvc.stringify(overflowPaddings));
+                    me._log("    <= overflowPaddings=" + pvc.stringify(overflowPaddings));
                 }
                 
                 getAnchorPaddingsNames(a).forEach(function(side){
@@ -435,19 +443,20 @@ def
                         newValue -= margins[side]; // corners absorb some of it
                         
                         var increase = newValue - value;
+                        var minChange = Math.max(1, Math.abs(0.05 * value));
                         
                         // STABILITY & SPEED requirement
-                        if(increase > Math.abs(0.05 * value)){
+                        if(increase >= minChange){
                             if(!canChange){
                                 if(pvc.debug >= 2){
-                                    me._log("[Warning] CANNOT change overflow  padding but child wanted to: " + side + "=" + newValue);
+                                    me._log("    [Warning] CANNOT change overflow padding but child wanted to: " + side + "=" + newValue);
                                 }
                             } else {
                                 changed = true;
                                 ownPaddings[side] = newValue;
                                 
                                 if(pvc.debug >= 5){
-                                    me._log("  changed overflow padding " + side + " <- " + newValue);
+                                    me._log("     changed overflow padding " + side + " <- " + newValue);
                                 }
                             }
                         }

@@ -70,6 +70,11 @@ def.scope(function(){
                 value:   'none'
             },
             
+            TrendLabel: {
+                resolve: '_resolveFull',
+                cast:    String
+            },
+                        
             NullInterpolationMode: {
                 resolve: '_resolveFull',
                 cast:    pvc.parseNullInterpolationMode,

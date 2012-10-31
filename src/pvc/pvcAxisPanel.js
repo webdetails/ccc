@@ -101,6 +101,10 @@ def
     
     _isScaleSetup: false,
     
+    _createLogInstanceId: function(){
+        return this.base() + " - " + this.axis.id;
+    },
+    
     getTicks: function(){
         return this._layoutInfo && this._layoutInfo.ticks;
     },
@@ -272,6 +276,13 @@ def
     },
     
     _calcOverflowPaddings: function(){
+        if(!this._layoutInfo.canChange){
+            if(pvc.debug >= 2){
+                this._log("[WARNING] Layout cannot change. Skipping calculation of overflow paddings.");
+            }
+            return;
+        }
+
         if(!this._layoutInfo.labelBBox){
             this._calcLabelBBox();
         }
@@ -512,15 +523,7 @@ def
     },
     
     _calcNumberTicks: function(layoutInfo){
-        var desiredTickCount;
-        
-        var previousLayout;
-        if(!layoutInfo.canChange && (previousLayout = layoutInfo.previous)){
-            desiredTickCount = previousLayout.ticks.length;
-        } else {
-            desiredTickCount = this.desiredTickCount;
-        }
-         
+        var desiredTickCount = this.desiredTickCount;
         if(desiredTickCount == null){
             if(this.isAnchorTopOrBottom()){
                 this._calcNumberHTicks();
@@ -653,7 +656,7 @@ def
         var layoutInfo = this._layoutInfo;
         var clientLength = layoutInfo.clientSize[this.anchorLength()];
         var spacing = layoutInfo.textHeight * Math.max(0, this.labelSpacingMin/*em*/);
-        var desiredTickCount = this._calcNumberHDesiredTickCount(this, spacing);
+        var desiredTickCount = this._calcNumberHDesiredTickCount(spacing);
         
         var doLog = (pvc.debug >= 7);
         var dir, prevResultTickCount;
@@ -704,17 +707,30 @@ def
                 this._calcContinuousTicksText(ticksInfo);
                 
                 var length = this._calcNumberHLength(ticksInfo, spacing);
-                var excessLength  = length - clientLength;
+                var excessLength = ticksInfo.excessLength = length - clientLength;
                 var pctError = ticksInfo.error = Math.abs(excessLength / clientLength);
                 
                 if(doLog){
-                    this._log("calculateNumberHTicks error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + resultTickCount + " step=" + ticks.step);
+                    this._log("calculateNumberHTicks error=" + (excessLength >= 0 ? "+" : "-") + (ticksInfo.error * 100).toFixed(0) + "% count=" + resultTickCount + " step=" + ticks.step);
                     this._log("calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
                 }
                 
                 if(excessLength > 0){
                     // More ticks than can fit
                     if(desiredTickCount === 1){
+                        // Edge case
+                        // Cannot make dir = -1 ...
+                        if(resultTickCount === 3 && pctError <= 1){
+                         // remove the middle tick
+                            ticksInfo.ticks.splice(1,1);
+                            ticksInfo.ticksText.splice(1,1);
+                            ticksInfo.ticks.step *= 2;
+                        } else {
+                         // keep only the first tick
+                            ticksInfo.ticks.length = 1;
+                            ticksInfo.ticksText.length = 1;
+                        }
+                        delete ticksInfo.maxTextWidth;
                         break;
                     }
                     
@@ -739,10 +755,10 @@ def
                         // Acceptable
                         // or
                         // Already had exceeded the length and had decided to go down
+//                        if(lastAbove && pctError > lastAbove.error){
+//                            ticksInfo = lastAbove;
+//                        }
                         
-                        if(lastAbove && pctError > lastAbove.error){
-                            ticksInfo = lastAbove;
-                        }
                         break;
                     }
                     
@@ -762,7 +778,7 @@ def
             layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
             
             if(pvc.debug >= 5){
-                this._log("calculateNumberHTicks RESULT error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
+                this._log("calculateNumberHTicks RESULT error=" + (ticksInfo.excessLength >= 0 ? "+" : "-") + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
             }
         }
         
@@ -774,8 +790,9 @@ def
         // from the formatted min and max values of the domain.
         var layoutInfo = this._layoutInfo;
         var domainTextLength = this.scale.domain().map(function(tick){
+                tick = +tick.toFixed(2); // crop some decimal places...
                 var text = this.scale.tickFormat(tick);
-                return pvc.text.getTextLength(text, this.font); 
+                return pvc.text.getTextLength(text, this.font);
             }, this);
         
         var avgTextLength = Math.max((domainTextLength[1] + domainTextLength[0]) / 2, layoutInfo.textHeight);
@@ -788,32 +805,21 @@ def
     _calcNumberHLength: function(ticksInfo, spacing){
         // Measure full width, with spacing
         var ticksText = ticksInfo.ticksText;
-        var tickCount = ticksText.length;
-        var length = 0;
-        var maxLength = -Infinity;
-        for(var t = 0 ; t < tickCount ; t++){
-            var textLength = pvc.text.getTextLength(ticksText[t], this.font);
-            if(textLength > maxLength){
-                maxLength = textLength;
-            }
-            
-            if(t){
-                length += spacing;
-            }
-            
-            // Begin and end ticks
-            if(!t ||  t === tickCount - 1) {
-                // Include half the text size only, as centered labels are the most common scenario
-                length += textLength / 2;
-            } else {
-                // Middle ticks
-                length += textLength;
-            }
-        }
+        var maxTextWidth = 
+            def.query(ticksText)
+                .select(function(text){ 
+                    return pvc.text.getTextLength(text, this.font); 
+                }, this)
+                .max();
         
-        ticksInfo.maxTextWidth = maxLength;
-        
-        return length;
+        /*
+         * Include only half the text width on edge labels, 
+         * cause centered labels are the most common scenario.
+         * 
+         * |w s ww s ww s w|
+         * 
+         */
+        return Math.max(maxTextWidth, (ticksText.length - 1) * (maxTextWidth + spacing));
     },
     
     _createCore: function() {

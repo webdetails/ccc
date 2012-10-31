@@ -32,13 +32,6 @@ def
     this._constructVisualRoles(options);
     
     this.options = def.mixin({}, this.defaults, options);
-    
-    if(!parent){
-        this.width    = this.options.width; 
-        this.height   = this.options.height;
-        this.margins  = this.options.margins;
-        this.paddings = this.options.margins;
-    }
 })
 .add({
     /**
@@ -229,12 +222,18 @@ def
         /* Initialize root visual roles */
         if(!this.parent && this._createVersion === 1) {
             this._initVisualRoles();
-            this._bindVisualRolesPre();
+            
+            this._bindVisualRolesPreI();
+            
+            this._complexTypeProj = this._createComplexTypeProject();
+            
+            this._bindVisualRolesPreII();
         }
         
         /* Initialize the data (and _bindVisualRolesPost) */
         this._initData(keyArgs);
 
+        
         var hasMultiRole = this._isRoleAssigned('multiChart');
         
         /* Initialize plots */
@@ -314,6 +313,12 @@ def
     _processOptions: function(){
 
         var options = this.options;
+        if(!this.parent){
+            this.width    = options.width; 
+            this.height   = options.height;
+            this.margins  = options.margins;
+            this.paddings = options.margins;
+        }
         
         this._processOptionsCore(options);
         

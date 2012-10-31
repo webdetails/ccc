@@ -117,27 +117,40 @@ pvc.BaseChart
     },
     
     _fixTrendsLabel: function(dataCellsByAxisTypeThenIndex){
-     // Pre-register the label of the first trend type 
+        // Pre-register the label of the first trend type 
         // in the "trend" data part atom, cause in multi-charts
         // an empty label would be registered first...
+        // We end up using this to 
+        // allow to specify an alternate label for the trend.
         var dataPartDimName = this._getDataPartDimName();
         if(dataPartDimName){
-            // Find the first type of trend type
-            var firstTrendType = def
+            // Find the first data cell with a trend type
+            var firstDataCell = def
                 .query(def.ownKeys(dataCellsByAxisTypeThenIndex))
                 .selectMany(function(axisType){
                     return dataCellsByAxisTypeThenIndex[axisType];
                 })
                 .selectMany()
-                .select(function(dataCell){ return dataCell.trendType; })
-                .first (function(trendType){ return trendType && trendType !== 'none'; })
+                .first (function(dataCell){
+                    var trendType = dataCell.trendType;
+                    return trendType && trendType !== 'none'; 
+                })
                 ;
             
-            if(firstTrendType){
-                var trendInfo = pvc.trends.get(firstTrendType);
+            if(firstDataCell){
+                var trendInfo = pvc.trends.get(firstDataCell.trendType);
+                var dataPartAtom = trendInfo.dataPartAtom;
+                var trendLabel = firstDataCell.trendLabel;
+                if(trendLabel === undefined){
+                    trendLabel = dataPartAtom.f;
+                }
+                
                 this.data.owner
                 .dimensions(dataPartDimName)
-                .intern(trendInfo.dataPartAtom);
+                .intern({
+                    v: dataPartAtom.v,
+                    f: trendLabel
+                });
             }
         }
     },
@@ -258,9 +271,12 @@ pvc.BaseChart
         
         this.axesByType.color.forEach(function(axis){
             // Only use color axes with specified Colors
-            if(axis.role.name === roleName &&
-              (axis.index === 0 || axis.option.isSpecified('Colors'))){
-                
+            var axisRole = axis.role;
+            var isRoleCompatible = 
+                (axisRole.name === roleName) ||
+                (axisRole.sourceRole && axisRole.sourceRole.name === roleName);
+            
+            if(isRoleCompatible && (axis.index === 0 || axis.option.isSpecified('Colors'))){
                 scale = axis.scale;
                 if(!firstScale){ firstScale = scale; }
                 
@@ -294,7 +310,7 @@ pvc.BaseChart
         
         def.copy(scale, firstScale); // TODO: domain() and range() should be overriden...
         
-        return scale; 
+        return scale;
     },
     
     _onLaidOut: function(){

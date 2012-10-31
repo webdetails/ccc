@@ -15,7 +15,7 @@
  * 
  * @constructor
  * @param {pvc.BaseChart} chart The associated chart.
- * @param {pvc.data.ComplexType} complexType The complex type that will represent the translated data.
+ * @param {pvc.data.ComplexTypeProject} complexTypeProj The complex type project that will represent the translated data.
  * @param {object} source The source object, of some format, to be translated.
  * The source is not modified.
  * @param {object} [metadata] A metadata object describing the source.
@@ -24,9 +24,9 @@
  * TODO: missing common options here
  */
 def.type('pvc.data.TranslationOper')
-.init(function(chart, complexType, source, metadata, options){
+.init(function(chart, complexTypeProj, source, metadata, options){
     this.chart = chart;
-    this.complexType = complexType;
+    this.complexTypeProj = complexTypeProj;
     this.source   = source;
     this.metadata = metadata || {};
     this.options  = options  || {};
@@ -82,26 +82,13 @@ def.type('pvc.data.TranslationOper')
             dimNames =  def.array.as(dimNames);
         }
         
-        var hasDims = !!(dimNames && dimNames.length);
-        
-        if(hasDims){
-            dimNames.forEach(function(name){
-                name || def.fail.argumentRequired('readers[i].names');
-    
-                name = name.replace(/^\s*(.+?)\s*$/, "$1"); // trim
-    
-                !def.hasOwn(this._userUsedDims, name) || def.fail.argumentInvalid('readers[i].names', "Dimension name '{0}' is already being read.", [name]);
-                this._userUsedDims[name] = true;
-                this.ensureDimensionType(name);
-            }, this);
-        }
-        
         // Consumed/Reserved virtual item indexes
         var indexes = def.array.as(dimReaderSpec.indexes);
         if(indexes) {
             indexes.forEach(this._userUseIndex, this);
         }
-
+        
+        var hasDims = !!(dimNames && dimNames.length);
         var reader = dimReaderSpec.reader;
         if(!reader) {
             if(hasDims){
@@ -138,18 +125,11 @@ def.type('pvc.data.TranslationOper')
     _initType: function(){
         this._userDimsReaders = [];
         this._userDimsReadersByDim = {};
+        
         this._userItem = [];
-        this._userDefDims = {};
-        this._userUsedDims = {};
+        
         this._userUsedIndexes = {};
         this._userUsedIndexesCount = 0;
-        
-        // -------------
-        
-        var userDimsSpec = this.options.dimensions;
-        for(var dimName in userDimsSpec) { // userDimsSpec can be null
-            this._userDefDimension(dimName, userDimsSpec[dimName]);
-        }
         
         // -------------
         
@@ -162,16 +142,6 @@ def.type('pvc.data.TranslationOper')
         if(multiChartIndexes != null) {
             this.defReader({names: 'multiChart', indexes: multiChartIndexes });
         }
-    },
-
-    _userDefDimension: function(name, userDimSpec){
-        /*jshint expr:true */
-        name || def.fail.argumentInvalid('dimensions[i]', "Invalid dimension name.");
-        !def.hasOwn(this._userDefDims, name) ||
-            def.fail.argumentInvalid('dimensions[i]', "A dimension with name '{0}' is already defined.", [name]);
-
-        this._userDefDims[name] = true;
-        this.ensureDimensionType(name, userDimSpec);
     },
 
     _userUseIndex: function(index){
@@ -237,15 +207,6 @@ def.type('pvc.data.TranslationOper')
 
             for(var i = L ; i < I ; i++, level++) {
                 dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
-                if(i > L){ // first name was already registered
-                    /*jshint expr:true */
-                    !def.hasOwn(this._userUsedDims, dimName) ||
-                        def.fail.argumentInvalid('readers[i].names', "Dimension name '{0}' of last dimension group name is already being read.", [dimName]);
-                    
-                    this._userUsedDims[dimName] = true;
-                    // propGet ensures dim exists
-                }
-
                 this._userRead(this._propGet(dimName, indexes[i]), dimName);
             }
         }
@@ -257,15 +218,20 @@ def.type('pvc.data.TranslationOper')
         
         if(def.array.is(dimNames)){
             dimNames.forEach(function(name){
-                this._userDimsReadersByDim[name] = reader;
+                this._readDim(name, reader);
             }, this);
         } else {
-            this._userDimsReadersByDim[dimNames] = reader;
+            this._readDim(dimNames, reader);
         }
 
         this._userDimsReaders.push(reader);
     },
 
+    _readDim: function(name, reader){
+        this.complexTypeProj.readDim(name);
+        this._userDimsReadersByDim[name] = reader;
+    },
+    
     /**
      * Performs the translation operation for a data instance.
      * 
@@ -414,12 +380,7 @@ def.type('pvc.data.TranslationOper')
      * 
      * @type function
      */
-    _propGet: function(dimName, prop, keyArgs) {
-        var me = this;
-        
-        if(def.get(keyArgs, 'ensureDim', true)) {
-            this.ensureDimensionType(dimName);
-        }
+    _propGet: function(dimName, prop) {
         
         function propGet(item, atoms){
             atoms[dimName] = item[prop];
@@ -444,10 +405,6 @@ def.type('pvc.data.TranslationOper')
     _constGet: function(dimName, constRawValue, keyArgs) {
         var me = this,
             constAtom;
-        
-        if(def.get(keyArgs, 'ensureDim', true)) {
-            this.ensureDimensionType(dimName);
-        }
         
         function constGet(item, atoms) {
             atoms[dimName] = 
@@ -496,7 +453,7 @@ def.type('pvc.data.TranslationOper')
                 // Already bound dimensions count
                 while(count--){
                     var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level++);
-                    if(!def.hasOwn(this._userUsedDims, dimName)){
+                    if(!this.complexTypeProj.isReadOrCalc(dimName)){
                         dims.push(dimName);
                     }
                 }
@@ -504,24 +461,5 @@ def.type('pvc.data.TranslationOper')
                 return dims.length ? dims : null;
             }
         }
-    },
-    
-    // TODO: docs
-    ensureDimensionType: function(dimName, dimSpec, keyArgs){
-        var dimType = this.complexType.dimensions(dimName, {assertExists: false});
-        if(!dimType) {
-            this.defDimensionType(dimName, dimSpec, keyArgs);
-        }
-    },
-
-    defDimensionType: function(dimName, dimSpec, keyArgs){
-        if(def.get(keyArgs, 'isDataPart', false)){
-            dimSpec = pvc.data.DimensionType.extendDataPartSpec(dimName, dimSpec);
-        } else {
-            /** Passing options: isCategoryTimeSeries, timeSeriesFormat and dimensionGroups */
-            dimSpec = pvc.data.DimensionType.extendSpec(dimName, dimSpec, this.options);
-        }
-        
-        return this.complexType.addDimension(dimName, dimSpec);
     }
 });

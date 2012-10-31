@@ -15,17 +15,6 @@ def
     }
 })
 .add({
-    /**
-     * @override 
-     */
-    _processOptionsCore: function(options){
-        this.base(options);
-        
-        if(options.nullColor){
-            options.nullColor = pv.color(options.nullColor);
-        }
-    },
-    
     _initPlotsCore: function(){
         var options = this.options;
         
@@ -60,12 +49,12 @@ def
     
     _getColorRoleSpec: function(){
         return {
-            isMeasure: true,
-            //requireSingleDimension: true, // TODO: generalize this...
-            //requireIsDiscrete: false,
-            //valueType: Number,
+            //isMeasure: true, // TODO: not being set as measure when continuous...
             defaultSourceRole: 'series',
-            defaultDimension:  'color'
+            defaultDimension:  'color*',
+            dimensionDefaults: {
+                valueType: Number
+            }
         };
     },
     
@@ -81,8 +70,10 @@ def
                 isMeasure: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
-                valueType: Number,
-                defaultDimension: 'size'
+                defaultDimension: 'size',
+                dimensionDefaults: {
+                    valueType: Number
+                }
             });
     },
     

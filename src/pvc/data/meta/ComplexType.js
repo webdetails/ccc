@@ -254,6 +254,7 @@ function(dimTypeSpecs){
                 groupDimsNames = this._dimsNamesByGroup[group];
             }
             
+            // TODO: this sorting is lexicographic...
             // TODO this should be unified with dimension.groupLevel...
             groupLevel = def.array.insert(groupDimsNames, name, def.compare);
             groupLevel = ~groupLevel;
