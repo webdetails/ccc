@@ -32,32 +32,13 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     }
     
     /* Colors */
-    // NOTE: must be registered before fixAntialiasStrokeColor
     this._bindProperty('fillStyle', 'fillColor', 'color');
     
-    /* Using antialias causes the vertical separation
-     * of *segmented* areas to be noticed.
-     * When lines are also shown, not using antialias
-     * is ok because the ladder border that it causes is hidden by the line.
-     * 
-     * So, we only use antialias if there isn't a line 
-     * to cover the side effect of not using it.
-     */
-    if(segmented && antialias) {
-        // Try to hide the vertical lines noticeable between areas,
-        // due to antialias
-        this
-            ._lockDynamic('strokeStyle', 'fixAntialiasStrokeColor')
-            // NOTE: must be registered after fixAntialiasStrokeColor
-            ._lockDynamic('lineWidth', 'fixAntialiasStrokeWidth')
-            ;
-    } else {
-        // These really have no real meaning in the area and should not be used.
-        // If lines are desired, they should be created with showLines of LineChart
-        this.lock('strokeStyle', null)
-            .lock('lineWidth',   0)
-            ;
-    }
+    // These really have no real meaning in the area and should not be used.
+    // If lines are desired, they should be created with showLines of LineChart
+    this.lock('strokeStyle', null)
+        .lock('lineWidth',   0)
+        ;
 })
 .add({
     _addInteractive: function(keyArgs){
@@ -85,11 +66,6 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     dy: function(){ return 0; },
     
     /* COLOR */
-    fixAntialiasStrokeColor: function(){ 
-        /* Copy fill color */
-        return this.pvMark.fillStyle();
-    },
-    
     /**
      * @override
      */
@@ -101,15 +77,5 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
         }
 
         return this.base(color, type);
-    },
-    
-    /* STROKE */
-    fixAntialiasStrokeWidth: function(){
-        // Hide the line when using alpha
-        // Otherwise, show it to bridge the gaps of segmented areas.
-        // If the line is too thick, 
-        // the junctions become horrible on very small angles.
-        var color = this.pvMark.strokeStyle();
-        return (!color || color.a < 1) ? 0.00001 : 1;
     }
 });

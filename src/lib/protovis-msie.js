@@ -234,6 +234,7 @@ var vml = {
         es.top = (d.translate_y + d.y) + "px";
         elm.coordorigin = "0,0";
         elm.coordsize = "21600,21600";
+        elm._events = attr["pointer-events"] || 'none';
         vml.path( elm, attr.d );
         vml.fill( elm, attr, scenes, i );
         vml.stroke( elm, attr, scenes, i );
@@ -1150,8 +1151,12 @@ pv.listen = function(target, type, listener) {
 
 pv.VmlScene.dispatch = pv.listener(function(e){
   var t = e.target.$scene;
-  if (t && pv.Mark.dispatch(e.type, t.scenes, t.index, e)){
+  if (t){
+    var events = e.target._events;
+    if(events === 'none' || 
+       pv.Mark.dispatch(e.type, t.scenes, t.index, e)){
       e.preventDefault();
+    }
   }
 });
 

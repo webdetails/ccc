@@ -5733,7 +5733,7 @@ pv.Colors.category19 = function() {
             case 1: return new pv.FillStyle.Solid(stops[0].color, 1);
         }
 
-        return new pv.FillStyle.LinearGradient(angle, stops);
+        return new pv.FillStyle.LinearGradient(angle, stops, text);
     }
 
     /*
@@ -5766,7 +5766,7 @@ pv.Colors.category19 = function() {
             case 1: return new pv.FillStyle.Solid(stops[0].color, 1);
         }
 
-        return new pv.FillStyle.RadialGradient(50, 50, stops);
+        return new pv.FillStyle.RadialGradient(50, 50, stops, text);
     }
 
     function parseText(text){
@@ -5798,7 +5798,7 @@ pv.Colors.category19 = function() {
     
     /*
      * COLOR STOPS 
-     * <color-stop> := <color-spec> [<percentage-offset>] 
+     * <color-stop> := <color-spec> [<percentage-position>] 
      * 
      * <percentage-position> := <number>% 
      * 
@@ -5868,8 +5868,8 @@ pv.Colors.category19 = function() {
             }
         }
 
-        if (stops.length >= 2
-                && (minOffsetPercent < 0 || maxOffsetPercent > 100)) {
+        if (stops.length >= 2 && 
+            (minOffsetPercent < 0 || maxOffsetPercent > 100)) {
             // Normalize < 0 and > 100 values, cause SVG does not support them
             // TODO: what about the interpretation of an end < 100 or begin > 0?
             var colorDomain = [];
@@ -5879,8 +5879,9 @@ pv.Colors.category19 = function() {
                 colorRange.push(stop.color);
             });
 
-            var colorScale = pv.scale.linear().domain(colorDomain).range(
-                    colorRange);
+            var colorScale = pv.scale.linear()
+                .domain(colorDomain)
+                .range(colorRange);
 
             if (minOffsetPercent < 0) {
                 while (stops.length && stops[0].offset <= 0) {
@@ -5913,6 +5914,7 @@ pv.Colors.category19 = function() {
     
     var FillStyle = pv.FillStyle = function(type) {
         this.type = type;
+        this.key  = type;
     };
     
     /* 
@@ -5937,7 +5939,6 @@ pv.Colors.category19 = function() {
      * @extends pv.FillStyle
      */
     var Solid = pv.FillStyle.Solid = function(color, opacity) {
-        
         FillStyle.call(this, 'solid');
         
         if(color.rgb){
@@ -5947,6 +5948,8 @@ pv.Colors.category19 = function() {
             this.color   = color;
             this.opacity = opacity;
         }
+          
+        this.key += " " + this.color + " alpha(" + this.opacity + ")";
     };
     
     Solid.prototype = pv.extend(pv.FillStyle);
@@ -5979,6 +5982,16 @@ pv.Colors.category19 = function() {
             // Default color for renderers that do not support gradients
             this.color = stops[0].color.color;
         }
+        
+        this.key +=  
+          " stops(" + 
+          stops
+          .map(function(stop){
+            var color = stop.color;
+            return color.color + " alpha(" + color.opacity + ") at(" + stop.offset + ")"; 
+          })
+          .join(", ") + 
+          ")";
     };
     
     Gradient.prototype = pv.extend(pv.FillStyle);
@@ -6011,6 +6024,7 @@ pv.Colors.category19 = function() {
         Gradient.call(this, 'lineargradient', stops);
         
         this.angle = angle;
+        this.key +=  " angle(" + angle + ")";
     };
 
     LinearGradient.prototype = pv.extend(Gradient);
@@ -6026,12 +6040,13 @@ pv.Colors.category19 = function() {
         
         this.cx = cx;
         this.cy = cy;
+        this.key +=  " center(" + cx + "," + cy + ")";
     };
     
     RadialGradient.prototype = pv.extend(Gradient);
     
     RadialGradient.prototype._clone = function(stops){
-        return new RadialGradient(this.cx, this.cy, stops);
+        return new RadialGradient(this.cx, this.cy);
     };
 })();
 /**
@@ -6571,15 +6586,25 @@ pv.SvgScene.pathBasis = (function() {
  *
  * @param points the array of points.
  */
-pv.SvgScene.curveBasis = function(points) {
-  if (points.length <= 2) return "";
+pv.SvgScene.curveBasis = function(points, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1; 
+  } else {
+    L = to - from + 1;
+  }
+  
+  if (L <= 2) return "";
+  
   var path = "",
-      p0 = points[0],
+      p0 = points[from],
       p1 = p0,
       p2 = p0,
-      p3 = points[1];
+      p3 = points[from + 1];
   path += this.pathBasis(p0, p1, p2, p3);
-  for (var i = 2; i < points.length; i++) {
+  for (var i = from + 2 ; i <= to ; i++) {
     p0 = p1;
     p1 = p2;
     p2 = p3;
@@ -6601,21 +6626,31 @@ pv.SvgScene.curveBasis = function(points) {
  *
  * @param points the array of points.
  */
-pv.SvgScene.curveBasisSegments = function(points) {
-  if (points.length <= 2) return "";
+pv.SvgScene.curveBasisSegments = function(points, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1; 
+  } else {
+    L = to - from + 1;
+  }
+  
+  if (L <= 2) return ""; // BUG?
+  
   var paths = [],
-      p0 = points[0],
+      p0 = points[from],
       p1 = p0,
       p2 = p0,
-      p3 = points[1],
+      p3 = points[from + 1],
       firstPath = this.pathBasis.segment(p0, p1, p2, p3);
 
   p0 = p1;
   p1 = p2;
   p2 = p3;
-  p3 = points[2];
+  p3 = points[from + 2];
   paths.push(firstPath + this.pathBasis(p0, p1, p2, p3)); // merge first & second path
-  for (var i = 3; i < points.length; i++) {
+  for (var i = from + 3; i <= to ; i++) {
     p0 = p1;
     p1 = p2;
     p2 = p3;
@@ -6638,46 +6673,62 @@ pv.SvgScene.curveBasisSegments = function(points) {
  * @param points the array of points.
  * @param tangents the array of tangent vectors.
  */
-pv.SvgScene.curveHermite = function(points, tangents) {
-  if (tangents.length < 1
-      || (points.length != tangents.length
-      && points.length != tangents.length + 2)) return "";
-  var quad = points.length != tangents.length,
+pv.SvgScene.curveHermite = function(points, tangents, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1;
+  } else {
+    L = to - from + 1;
+  }
+  
+  var T = tangents.length;
+  if (T < 1 || (L !== T && L !== T + 2)) {
+    return "";
+  }
+  
+  var quad = L !== T,
       path = "",
-      p0 = points[0],
-      p = points[1],
+      p0 = points[from],
+      p  = points[from + 1],
       t0 = tangents[0],
-      t = t0,
-      pi = 1;
+      t  = t0,
+      pi = from + 1;
 
   if (quad) {
-    path += "Q" + (p.left - t0.x * 2 / 3) + ","  + (p.top - t0.y * 2 / 3)
-        + "," + p.left + "," + p.top;
-    p0 = points[1];
-    pi = 2;
+    path += "Q" + 
+            (p.left - t0.x * 2 / 3) + "," + (p.top  - t0.y * 2 / 3) + "," + 
+            p.left + "," + p.top;
+    p0 = points[from + 1];
+    pi = from + 2;
   }
 
-  if (tangents.length > 1) {
+  if (T > 1) {
     t = tangents[1];
     p = points[pi];
     pi++;
-    path += "C" + (p0.left + t0.x) + "," + (p0.top + t0.y)
-        + "," + (p.left - t.x) + "," + (p.top - t.y)
-        + "," + p.left + "," + p.top;
-    for (var i = 2; i < tangents.length; i++, pi++) {
+    path += "C" + 
+            (p0.left + t0.x) + "," + (p0.top  + t0.y) + "," + 
+            (p.left  -  t.x) + "," + (p.top   -  t.y) + "," + 
+             p.left + "," + p.top;
+    
+    for (var i = 2; i < L; i++, pi++) {
       p = points[pi];
       t = tangents[i];
-      path += "S" + (p.left - t.x) + "," + (p.top - t.y)
-          + "," + p.left + "," + p.top;
+      path += "S" + 
+              (p.left - t.x) + "," + (p.top - t.y) + "," + 
+              p.left + "," + p.top;
     }
   }
 
   if (quad) {
     var lp = points[pi];
-    path += "Q" + (p.left + t.x * 2 / 3) + ","  + (p.top + t.y * 2 / 3) + ","
-        + lp.left + "," + lp.top;
+    path += "Q" + 
+            (p.left + t.x * 2 / 3) + ","  + (p.top + t.y * 2 / 3) + "," + 
+            lp.left + "," + lp.top;
   }
-
+  
   return path;
 };
 
@@ -6688,42 +6739,62 @@ pv.SvgScene.curveHermite = function(points, tangents) {
  * @param points the array of points.
  * @param tangents the array of tangent vectors.
  */
-pv.SvgScene.curveHermiteSegments = function(points, tangents) {
-  if (tangents.length < 1
-      || (points.length != tangents.length
-      && points.length != tangents.length + 2)) return [];
-  var quad = points.length != tangents.length,
+pv.SvgScene.curveHermiteSegments = function(points, tangents, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1;
+  } else {
+    L = to - from + 1;
+  }
+  
+  var T = tangents.length;
+  if (T < 1 || (L !== T && L !== T + 2)) {
+    return [];
+  }
+  
+  var quad = L !== T,
       paths = [],
-      p0 = points[0],
+      p0 = points[from],
       p = p0,
       t0 = tangents[0],
-      t = t0,
-      pi = 1;
+      t  = t0,
+      pi = from + 1;
 
   if (quad) {
-    p = points[1];
-    paths.push("M" + p0.left + "," + p0.top
-        + "Q" + (p.left - t.x * 2 / 3) + "," + (p.top - t.y * 2 / 3)
-        + "," + p.left + "," + p.top);
-    pi = 2;
+    p = points[from + 1];
+    paths.push(
+        "M" + 
+        p0.left + "," + p0.top + 
+        "Q" + 
+        (p.left - t.x * 2 / 3) + "," + (p.top - t.y * 2 / 3) + "," + 
+        p.left + "," + p.top);
+    pi = from + 2;
   }
 
-  for (var i = 1; i < tangents.length; i++, pi++) {
+  for (var i = 1; i < T; i++, pi++) {
     p0 = p;
     t0 = t;
     p = points[pi];
     t = tangents[i];
-    paths.push("M" + p0.left + "," + p0.top
-        + "C" + (p0.left + t0.x) + "," + (p0.top + t0.y)
-        + "," + (p.left - t.x) + "," + (p.top - t.y)
-        + "," + p.left + "," + p.top);
+    paths.push(
+        "M" + 
+        p0.left + "," + p0.top + 
+        "C" + 
+        (p0.left + t0.x) + "," + (p0.top + t0.y) + "," + 
+        (p.left - t.x) + "," + (p.top - t.y) + "," + 
+        p.left + "," + p.top);
   }
 
   if (quad) {
     var lp = points[pi];
-    paths.push("M" + p.left + "," + p.top
-        + "Q" + (p.left + t.x * 2 / 3) + ","  + (p.top + t.y * 2 / 3) + ","
-        + lp.left + "," + lp.top);
+    paths.push(
+        "M" + 
+        p.left + "," + p.top + 
+        "Q" + 
+        (p.left + t.x * 2 / 3) + ","  + (p.top + t.y * 2 / 3) + "," + 
+        lp.left + "," + lp.top);
   }
 
   return paths;
@@ -6737,14 +6808,23 @@ pv.SvgScene.curveHermiteSegments = function(points, tangents) {
  * @param points the array of points.
  * @param tension the tension of hte cardinal spline.
  */
-pv.SvgScene.cardinalTangents = function(points, tension) {
+pv.SvgScene.cardinalTangents = function(points, tension, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1;
+  } else {
+    L = to - from + 1;
+  }
+  
   var tangents = [],
       a = (1 - tension) / 2,
-      p0 = points[0],
-      p1 = points[1],
-      p2 = points[2];
+      p0 = points[from],
+      p1 = points[from + 1],
+      p2 = points[from + 2];
 
-  for (var i = 3; i < points.length; i++) {
+  for (var i = from + 3 ; i <= to ; i++) {
     tangents.push({x: a * (p2.left - p0.left), y: a * (p2.top - p0.top)});
     p0 = p1;
     p1 = p2;
@@ -6752,6 +6832,7 @@ pv.SvgScene.cardinalTangents = function(points, tension) {
   }
 
   tangents.push({x: a * (p2.left - p0.left), y: a * (p2.top - p0.top)});
+  
   return tangents;
 };
 
@@ -6763,9 +6844,18 @@ pv.SvgScene.cardinalTangents = function(points, tension) {
  * @param points the array of points.
  * @param tension the tension of hte cardinal spline.
  */
-pv.SvgScene.curveCardinal = function(points, tension) {
-  if (points.length <= 2) return "";
-  return this.curveHermite(points, this.cardinalTangents(points, tension));
+pv.SvgScene.curveCardinal = function(points, tension, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1;
+  } else {
+    L = to - from + 1;
+  }
+  
+  if (L <= 2) return "";
+  return this.curveHermite(points, this.cardinalTangents(points, tension, from, to), from, to);
 };
 
 /**
@@ -6775,8 +6865,17 @@ pv.SvgScene.curveCardinal = function(points, tension) {
  * @param points the array of points.
  * @param tension the tension of hte cardinal spline.
  */
-pv.SvgScene.curveCardinalSegments = function(points, tension) {
-  if (points.length <= 2) return "";
+pv.SvgScene.curveCardinalSegments = function(points, tension, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1;
+  } else {
+    L = to - from + 1;
+  }
+  
+  if (L <= 2) return ""; // BUG?
   return this.curveHermiteSegments(points, this.cardinalTangents(points, tension));
 };
 
@@ -6786,30 +6885,41 @@ pv.SvgScene.curveCardinalSegments = function(points, tension) {
  *
  * @param points the array of points.
  */
-pv.SvgScene.monotoneTangents = function(points) {
+pv.SvgScene.monotoneTangents = function(points, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1;
+  } else {
+    L = to - from + 1;
+  }
+  
   var tangents = [],
       d = [],
       m = [],
       dx = [],
-      k = 0;
+      k = 0,
+      j;
 
   /* Compute the slopes of the secant lines between successive points. */
-  for (k = 0; k < points.length-1; k++) {
-    d[k] = (points[k+1].top - points[k].top)/(points[k+1].left - points[k].left);
+  for (k = 0 ; k < L - 1 ; k++) {
+    j = from + k;
+    d[k] = (points[j+1].top - points[j].top)/(points[j+1].left - points[j].left);
   }
 
   /* Initialize the tangents at every point as the average of the secants. */
   m[0] = d[0];
-  dx[0] = points[1].left - points[0].left;
-  for (k = 1; k < points.length - 1; k++) {
+  dx[0] = points[from + 1].left - points[from].left;
+  for (k = 1, j = from + k ; k < L - 1 ; k++, j++) {
     m[k] = (d[k-1]+d[k])/2;
-    dx[k] = (points[k+1].left - points[k-1].left)/2;
+    dx[k] = (points[j+1].left - points[j-1].left)/2;
   }
   m[k] = d[k-1];
-  dx[k] = (points[k].left - points[k-1].left);
+  dx[k] = (points[j].left - points[j-1].left);
 
   /* Step 3. Very important, step 3. Yep. Wouldn't miss it. */
-  for (k = 0; k < points.length - 1; k++) {
+  for (k = 0; k < L - 1; k++) {
     if (d[k] == 0) {
       m[ k ] = 0;
       m[k+1] = 0;
@@ -6817,7 +6927,7 @@ pv.SvgScene.monotoneTangents = function(points) {
   }
 
   /* Step 4 + 5. Out of 5 or more steps. */
-  for (k = 0; k < points.length - 1; k++) {
+  for (k = 0; k < L - 1; k++) {
     if ((Math.abs(m[k]) < 1e-5) || (Math.abs(m[k+1]) < 1e-5)) continue;
     var ak = m[k] / d[k],
         bk = m[k + 1] / d[k],
@@ -6830,7 +6940,7 @@ pv.SvgScene.monotoneTangents = function(points) {
   }
 
   var len;
-  for (var i = 0; i < points.length; i++) {
+  for (var i = 0 ; i < L ; i++) {
     len = 1 + m[i] * m[i]; // pv.vector(1, m[i]).norm().times(dx[i]/3)
     tangents.push({x: dx[i] / 3 / len, y: m[i] * dx[i] / 3 / len});
   }
@@ -6845,9 +6955,18 @@ pv.SvgScene.monotoneTangents = function(points) {
  *
  * @param points the array of points.
  */
-pv.SvgScene.curveMonotone = function(points) {
-  if (points.length <= 2) return "";
-  return this.curveHermite(points, this.monotoneTangents(points));
+pv.SvgScene.curveMonotone = function(points, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1;
+  } else {
+    L = to - from + 1;
+  }
+  
+  if (L <= 2) return "";
+  return this.curveHermite(points, this.monotoneTangents(points, from, to), from, to);
 };
 
 /**
@@ -6857,144 +6976,72 @@ pv.SvgScene.curveMonotone = function(points) {
  *
  * @param points the array of points.
  */
-pv.SvgScene.curveMonotoneSegments = function(points) {
-  if (points.length <= 2) return "";
-  return this.curveHermiteSegments(points, this.monotoneTangents(points));
+pv.SvgScene.curveMonotoneSegments = function(points, from, to) {
+  var L;
+  if(from == null){
+    L = points.length;
+    from = 0;
+    to   = L -1;
+  } else {
+    L = to - from + 1;
+  }
+  
+  if (L <= 2) return ""; // BUG?
+  return this.curveHermiteSegments(points, this.monotoneTangents(points, from, to), from, to);
 };
 pv.SvgScene.area = function(scenes) {
   var e = scenes.$g.firstChild;
 
   this.removeFillStyleDefinitions(scenes);
 
-  if (!scenes.length) return e;
+  var count = scenes.length;
+  if (!count){
+    return e;
+  }
+  
   var s = scenes[0];
-
+  
+  /* segmented - special */
+  if (s.segmented === 2) {
+    return this.areaSegmentSpecial(e, scenes);
+  }
+  
   /* segmented */
-  if (s.segmented) return this.areaSegment(scenes);
-
-  /* visible */
-  if (!s.visible) return e;
-  var fill = s.fillStyle, stroke = s.strokeStyle;
-  if (!fill.opacity && !stroke.opacity) return e;
-
-  if (fill.type && fill.type !== 'solid') {
-      this.addFillStyleDefinition(scenes,fill);
+  if (s.segmented) {
+    return this.areaSegment(e, scenes);
   }
-
-  if (stroke.type && stroke.type != 'solid') {
-      this.addFillStyleDefinition(scenes,stroke);
-  }
-
-  /** @private Computes the straight path for the range [i, j]. */
-  function path(i, j) {
-    var p1 = [], p2 = [];
-    for (var k = j; i <= k; i++, j--) {
-      var si = scenes[i],
-          sj = scenes[j],
-          pi = si.left + "," + si.top,
-          pj = (sj.left + sj.width) + "," + (sj.top + sj.height);
-
-      /* interpolate */
-      if (i < k) {
-        var sk = scenes[i + 1], sl = scenes[j - 1];
-        switch (s.interpolate) {
-          case "step-before": {
-            pi += "V" + sk.top;
-            pj += "H" + (sl.left + sl.width);
-            break;
-          }
-          case "step-after": {
-            pi += "H" + sk.left;
-            pj += "V" + (sl.top + sl.height);
-            break;
-          }
-        }
-      }
-
-      p1.push(pi);
-      p2.push(pj);
-    }
-    return p1.concat(p2).join("L");
-  }
-
-  /** @private Computes the curved path for the range [i, j]. */
-  function pathCurve(i, j) {
-    var pointsT = [], pointsB = [], pathT, pathB;
-
-    for (var k = j; i <= k; i++, j--) {
-      var sj = scenes[j];
-      pointsT.push(scenes[i]);
-      pointsB.push({left: sj.left + sj.width, top: sj.top + sj.height});
-    }
-
-    if (s.interpolate == "basis") {
-      pathT = pv.SvgScene.curveBasis(pointsT);
-      pathB = pv.SvgScene.curveBasis(pointsB);
-    } else if (s.interpolate == "cardinal") {
-      pathT = pv.SvgScene.curveCardinal(pointsT, s.tension);
-      pathB = pv.SvgScene.curveCardinal(pointsB, s.tension);
-    } else { // monotone
-      pathT = pv.SvgScene.curveMonotone(pointsT);
-      pathB = pv.SvgScene.curveMonotone(pointsB);
-    }
-
-    return pointsT[0].left + "," + pointsT[0].top + pathT
-         + "L" + pointsB[0].left + "," + pointsB[0].top + pathB;
-  }
-
-  /* points */
-  var d = [], si, sj;
-  for (var i = 0; i < scenes.length; i++) {
-    si = scenes[i]; if (!si.width && !si.height) continue;
-    for (var j = i + 1; j < scenes.length; j++) {
-      sj = scenes[j]; if (!sj.width && !sj.height) break;
-    }
-    if (i && (s.interpolate != "step-after")) i--;
-    if ((j < scenes.length) && (s.interpolate != "step-before")) j++;
-    d.push(((j - i > 2
-        && (s.interpolate == "basis"
-        || s.interpolate == "cardinal"
-        || s.interpolate == "monotone"))
-        ? pathCurve : path)(i, j - 1));
-    i = j - 1;
-  }
-  if (!d.length) return e;
-
-  e = this.expect(e, "path", scenes, 0, {
-      "shape-rendering": s.antialias ? null : "crispEdges",
-      "pointer-events": s.events,
-      "cursor": s.cursor,
-      "d": "M" + d.join("ZM") + "Z",
-      "fill": fill.color,
-      "fill-opacity": fill.opacity || null,
-      "stroke":            stroke.color,
-      "stroke-opacity":    stroke.opacity || null,
-      "stroke-width":      stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-linecap":    s.lineCap,
-      "stroke-linejoin":   s.lineJoin,
-      "stroke-miterlimit": s.strokeMiterLimit,
-      "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
-    });
-
-  if(s.svg) this.setAttributes(e, s.svg);
-  if(s.css) this.setStyle(e, s.css);
-
-  return this.append(e, scenes, 0);
+  
+  return this.areaPart(e, scenes, 0, count - 1, /*addEvents*/ true);
 };
 
-pv.SvgScene.areaSegment = function(scenes) {
-  var e = scenes.$g.firstChild, s = scenes[0], pathsT, pathsB;
-  if (s.interpolate == "basis"
-      || s.interpolate == "cardinal"
-      || s.interpolate == "monotone") {
-    var pointsT = [], pointsB = [];
+pv.SvgScene.areaSegmentSpecial = function(elm, scenes){
+  var elm = this.lineAreaParts(elm, scenes, this.areaPart);
+  
+  return this.areaPartsInteractive(elm, scenes);
+};
 
-    for (var i = 0, n = scenes.length; i < n; i++) {
-      var sj = scenes[n - i - 1];
-      pointsT.push(scenes[i]);
+pv.SvgScene.areaSegment = function(e, scenes) {
+  var s = scenes[0];
+  
+  var count = scenes.length;
+  
+  // Interpolated paths for scenes 0 to count-1
+  var pathsT, pathsB;
+  
+  if (s.interpolate == "basis"    || 
+      s.interpolate == "cardinal" || 
+      s.interpolate == "monotone"   ) {
+    
+    var pointsT = [];
+    var pointsB = [];
+    for (var i = 0 ; i < count ; i++) {
+      var si = scenes[i];
+      var sj = scenes[count - i - 1];
+      
+      pointsT.push(si);
       pointsB.push({left: sj.left + sj.width, top: sj.top + sj.height});
     }
-
+    
     if (s.interpolate == "basis") {
       pathsT = this.curveBasisSegments(pointsT);
       pathsB = this.curveBasisSegments(pointsB);
@@ -7007,26 +7054,36 @@ pv.SvgScene.areaSegment = function(scenes) {
     }
   }
 
-  for (var i = 0, n = scenes.length - 1; i < n; i++) {
-    var s1 = scenes[i], s2 = scenes[i + 1];
+  // -------------
+  
+  for (var i = 0 ; i < count - 1 ; i++) {
+    var s1 = scenes[i];
+    var s2 = scenes[i + 1];
 
     /* visible */
-    if (!s1.visible || !s2.visible) continue;
-    var fill = s1.fillStyle, stroke = s1.strokeStyle;
-    if (!fill.opacity && !stroke.opacity) continue;
-
+    if (!s1.visible || !s2.visible) {
+      continue;
+    }
+    
+    var fill   = s1.fillStyle;
+    var stroke = s1.strokeStyle;
+    if (!fill.opacity && !stroke.opacity) {
+      continue;
+    }
+    
     var d;
     if (pathsT) {
       var pathT = pathsT[i],
-          pathB = "L" + pathsB[n - i - 1].substr(1);
+          pathB = "L" + pathsB[count - i - 2].substr(1);
 
       d = pathT + pathB + "Z";
     } else {
       /* interpolate */
-      var si = s1, sj = s2;
+      var si = s1;
+      var sj = s2;
       switch (s1.interpolate) {
         case "step-before": si = s2; break;
-        case "step-after": sj = s1; break;
+        case "step-after":  sj = s1; break;
       }
 
       /* path */
@@ -7055,6 +7112,274 @@ pv.SvgScene.areaSegment = function(scenes) {
     e = this.append(e, scenes, i);
   }
   return e;
+};
+
+/* Area Segment Special */
+
+pv.SvgScene.areaPart = function(elm, scenes, from, to, addEvents) {
+  console.log("area from/to=" + from + "/" + to);
+  var count = to - from + 1;
+  if (count < 2){
+    // NOOP
+    return elm;
+  }
+  
+  var s = scenes[from];
+  if (!s.visible) {
+    return elm;
+  }
+  
+  /* fill & stroke */
+  
+  var fill   = s.fillStyle;
+  var stroke = s.strokeStyle;
+  
+  if (!fill.opacity && !stroke.opacity) {
+    return elm;
+  }
+  
+  var fillType = fill.type;
+  if (fillType && fillType !== 'solid') {
+    this.addFillStyleDefinition(scenes, fill);
+  }
+  
+  var strokeType = stroke.type;
+  if (strokeType && strokeType !== 'solid') {
+      this.addFillStyleDefinition(scenes, stroke);
+  }
+  
+  var isInterpBasis      = false;
+  var isInterpCardinal   = false;
+  var isInterpMonotone   = false;
+  var isInterpStepAfter  = false;
+  var isInterpStepBefore = false;
+  switch(s.interpolate){
+    case 'basis':       isInterpBasis      = true; break;
+    case 'cardinal':    isInterpCardinal   = true; break;
+    case 'monotone':    isInterpMonotone   = true; break;
+    case 'step-after':  isInterpStepAfter  = true; break;
+    case 'step-before': isInterpStepBefore = true; break;
+  }
+  
+  var isInterpBasisCardinalOrMonotone = isInterpBasis || isInterpCardinal || isInterpMonotone;
+  
+  /* points */
+  var d = [], si, sj;
+  for (var i = from ; i <= to ; i++) {
+    si = scenes[i];
+    if (!si.width && !si.height) {
+      continue;
+    }
+    
+    for (var j = i + 1; j <= to ; j++) {
+      sj = scenes[j];
+      if (!sj.width && !sj.height) {
+        break;
+      }
+    }
+    
+    if ((i > from) && !isInterpStepAfter){ 
+      i--;
+    }
+    
+    if ((j <= to) && !isInterpStepBefore) {
+      j++;
+    }
+    
+    var fun = isInterpBasisCardinalOrMonotone && (j - i > 2) ? 
+              this.areaPathCurve : 
+              this.areaPathStraight;
+    
+    d.push( fun.call(this, scenes, i, j - 1, s.interpolate) );
+    i = j - 1;
+  }
+  
+  if (!d.length) {
+    return elm;
+  }
+
+  var sop = stroke.opacity;
+  elm = this.expect(elm, "path", scenes, from, {
+      "shape-rendering":   s.antialias ? null : "crispEdges",
+      "pointer-events":    addEvents ? s.events : 'none',
+      "cursor":            s.cursor,
+      "d":                 "M" + d.join("ZM") + "Z",
+      "fill":              fill.color,
+      "fill-opacity":      fill.opacity || null,
+      "stroke":            stroke.color,
+      "stroke-opacity":    sop || null,
+      "stroke-width":      sop ? (s.lineWidth / this.scale) : null,
+      "stroke-linecap":    s.lineCap,
+      "stroke-linejoin":   s.lineJoin,
+      "stroke-miterlimit": s.strokeMiterLimit,
+      "stroke-dasharray":  sop ? this.parseDasharray(s) : null
+    });
+
+  if(s.svg) this.setAttributes(elm, s.svg);
+  if(s.css) this.setStyle(elm, s.css);
+
+  return this.append(elm, scenes, from);
+};
+
+/** @private Computes the straight path for the range [i, j]. */
+pv.SvgScene.areaPathStraight = function(scenes, i, j, interpolation){
+  var pointsT = [];
+  var pointsB = [];
+  
+  for (var k = j ; i <= k ; i++, j--) {
+    // i - top    line index, from i to j
+    // j - bottom line index, from j to i
+    var si = scenes[i],
+        sj = scenes[j],
+        pi = si.left + "," + si.top,
+        pj = (sj.left + sj.width) + "," + (sj.top + sj.height);
+
+    /* interpolate */
+    if (i < k) {
+      var sk = scenes[i + 1], // top    line 
+          sl = scenes[j - 1]; // bottom line
+      switch(interpolation){
+        case 'step-before':
+          pi += "V" + sk.top;
+          pj += "H" + (sl.left + sl.width);
+          break;
+        case 'step-after':
+          pi += "H" + sk.left;
+          pj += "V" + (sl.top + sl.height);
+          break;
+      }
+    }
+
+    pointsT.push(pi);
+    pointsB.push(pj);
+  }
+  
+  return pointsT.concat(pointsB).join("L");
+};
+
+/** @private Computes the curved path for the range [i, j]. */
+pv.SvgScene.areaPathCurve = function(scenes, i, j, interpolation){
+  var pointsT = [];
+  var pointsB = []; 
+  var pathT, pathB;
+
+  for (var k = j; i <= k; i++, j--) {
+    var sj = scenes[j];
+    pointsT.push(scenes[i]);
+    pointsB.push({left: sj.left + sj.width, top: sj.top + sj.height});
+  }
+  
+  switch(interpolation){
+    case 'basis':
+      pathT = this.curveBasis(pointsT);
+      pathB = this.curveBasis(pointsB);
+      break;
+      
+    case 'cardinal':
+      pathT = this.curveCardinal(pointsT, s.tension);
+      pathB = this.curveCardinal(pointsB, s.tension);
+      break;
+      
+    default: // monotone
+      pathT  = this.curveMonotone(pointsT);
+      pathB = this.curveMonotone(pointsB);
+  }
+
+  return pointsT[0].left + "," + pointsT[0].top + 
+         pathT + 
+         "L" + 
+         pointsB[0].left + "," + pointsB[0].top + 
+         pathB;
+};
+
+pv.SvgScene.areaPartsInteractive = function(elm, scenes){
+  if(!scenes.mark.$hasHandlers){
+    return elm;
+  }
+  
+  var s = scenes[0];
+  
+  var count = scenes.length;
+  
+  // Interpolated paths for scenes 0 to count-1
+  var pathsT, pathsB;
+  
+  if (s.interpolate == "basis"    || 
+      s.interpolate == "cardinal" || 
+      s.interpolate == "monotone"   ) {
+    
+    var pointsT = [];
+    var pointsB = [];
+    for (var i = 0 ; i < count ; i++) {
+      var si = scenes[i];
+      var sj = scenes[count - i - 1];
+      
+      pointsT.push(si);
+      pointsB.push({left: sj.left + sj.width, top: sj.top + sj.height});
+    }
+    
+    if (s.interpolate == "basis") {
+      pathsT = this.curveBasisSegments(pointsT);
+      pathsB = this.curveBasisSegments(pointsB);
+    } else if (s.interpolate == "cardinal") {
+      pathsT = this.curveCardinalSegments(pointsT, s.tension);
+      pathsB = this.curveCardinalSegments(pointsB, s.tension);
+    } else { // monotone
+      pathsT = this.curveMonotoneSegments(pointsT);
+      pathsB = this.curveMonotoneSegments(pointsB);
+    }
+  }
+
+  // -------------
+  
+  for (var i = 0 ; i < count - 1 ; i++) {
+    var s1 = scenes[i];
+    var s2 = scenes[i + 1];
+
+    /* visible */
+    if (!s1.visible || !s2.visible || !s1.events || s1.events === 'none') {
+      continue;
+    }
+    
+    var d;
+    if (pathsT) {
+      var pathT = pathsT[i],
+          pathB = "L" + pathsB[count - i - 2].substr(1);
+
+      d = pathT + pathB + "Z";
+    } else {
+      /* interpolate */
+      var si = s1;
+      var sj = s2;
+      switch (s1.interpolate) {
+        case "step-before": si = s2; break;
+        case "step-after":  sj = s1; break;
+      }
+
+      /* path */
+      d = "M" + s1.left + "," + si.top
+        + "L" + s2.left + "," + sj.top
+        + "L" + (s2.left + s2.width) + "," + (sj.top + sj.height)
+        + "L" + (s1.left + s1.width) + "," + (si.top + si.height)
+        + "Z";
+    }
+
+    elm = this.expect(elm, "path", scenes, i, {
+        "shape-rendering": "crispEdges",
+        "pointer-events":  s1.events,
+        "cursor":          s1.cursor,
+        "d":               d,
+        'fill':            'rgb(127,127,127)',
+        'fill-opacity':    0.005, // VML requires this much to fire events
+        "stroke":          null
+      });
+
+    if(s1.svg) this.setAttributes(elm, s1.svg);
+    if(s1.css) this.setStyle(elm, s1.css);
+
+    elm = this.append(elm, scenes, i);
+  }
+  return elm;
 };
 pv.SvgScene.minBarWidth = 1;
 pv.SvgScene.minBarHeight = 1;
@@ -7347,65 +7672,41 @@ pv.SvgScene.line = function(scenes) {
 
   this.removeFillStyleDefinitions(scenes);
   
-  if (scenes.length < 2) return e;
+  var count = scenes.length;
+  if (!count){
+    return e;
+  }
+  
   var s = scenes[0];
-
-  /* segmented */
-  if (s.segmented) return this.lineSegment(scenes);
-
-  /* visible */
-  if (!s.visible) return e;
-  var fill = s.fillStyle, stroke = s.strokeStyle;
-  if (!fill.opacity && !stroke.opacity) return e;
-
-  if (stroke.type && stroke.type != 'solid') {
-      this.addFillStyleDefinition(scenes,stroke);
+  
+  /* segmented - special */
+  if (s.segmented === 2) {
+    return this.lineSegmentSpecial(e, scenes);
+  }
+  
+  if (count < 2) return e;
+  
+  /* segmented - normal */
+  if (s.segmented) {
+    return this.lineSegment(e, scenes);
   }
 
-  /* points */
-  var d = "M" + s.left + "," + s.top;
-
-  if (scenes.length > 2 && (s.interpolate == "basis" || s.interpolate == "cardinal" || s.interpolate == "monotone")) {
-    switch (s.interpolate) {
-      case "basis": d += this.curveBasis(scenes); break;
-      case "cardinal": d += this.curveCardinal(scenes, s.tension); break;
-      case "monotone": d += this.curveMonotone(scenes); break;
-    }
-  } else {
-    for (var i = 1; i < scenes.length; i++) {
-      d += this.pathSegment(scenes[i - 1], scenes[i]);
-    }
-  }
-
-  e = this.expect(e, "path", scenes, 0, {
-      "shape-rendering": s.antialias ? null : "crispEdges",
-      "pointer-events": s.events,
-      "cursor": s.cursor,
-      "d": d,
-      "fill": fill.color,
-      "fill-opacity": fill.opacity || null,
-      "stroke": stroke.color,
-      "stroke-opacity": stroke.opacity || null,
-      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-linecap":    s.lineCap,
-      "stroke-linejoin":   s.lineJoin,
-      "stroke-miterlimit": s.strokeMiterLimit,
-      "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
-    });
-
-  if(s.svg) this.setAttributes(e, s.svg);
-  if(s.css) this.setStyle(e, s.css);
-
-  return this.append(e, scenes, 0);
+  return this.linePart(e, scenes, 0, count - 1, /*addEvents*/ true);
 };
 
-pv.SvgScene.lineSegment = function(scenes) {
-  var e = scenes.$g.firstChild;
 
+pv.SvgScene.lineSegmentSpecial = function(elm, scenes) {
+  
+  var elm = this.lineAreaParts(elm, scenes, this.linePart);
+  
+  return this.linePartsInteractive(elm, scenes);
+};
+
+pv.SvgScene.lineSegment = function(e, scenes) {
   var s = scenes[0];
   var paths;
   switch (s.interpolate) {
-    case "basis": paths = this.curveBasisSegments(scenes); break;
+    case "basis":    paths = this.curveBasisSegments(scenes); break;
     case "cardinal": paths = this.curveCardinalSegments(scenes, s.tension); break;
     case "monotone": paths = this.curveMonotoneSegments(scenes); break;
   }
@@ -7663,6 +7964,243 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
     return "M" + pt.x + "," + pt.y + 
            "L" + pts.map(function(pt2){ return pt2.x + "," + pt2.y; })
                   .join(" ");
+};
+
+/* Line Segment Special */
+
+pv.SvgScene.linePart = function(elm, scenes, from, to, addEvents) {
+  var count = to - from + 1; 
+  
+  // count > 0
+  
+  if(count === 1){
+    return this.lineDot(elm, scenes, from);
+  }
+  
+  var s = scenes[from];
+  if (!s.visible) {
+    return elm;
+  }
+  
+  /* fill & stroke */
+  
+  var fill   = s.fillStyle;
+  var stroke = s.strokeStyle;
+  
+  if (!fill.opacity && !stroke.opacity) {
+    return elm;
+  }
+  
+  var fillType = fill.type;
+  if (fillType && fillType !== 'solid') {
+    this.addFillStyleDefinition(scenes, fill);
+  }
+  
+  var strokeType = stroke.type;
+  if (strokeType && strokeType !== 'solid') {
+      this.addFillStyleDefinition(scenes, stroke);
+  }
+  
+  /* points */
+  var d = "M" + s.left + "," + s.top;
+  
+  var interpolated = (count > 2);
+  if(interpolated) {
+    switch(s.interpolate) {
+      case "basis":    d += this.curveBasis   (scenes, from, to); break;
+      case "cardinal": d += this.curveCardinal(scenes, s.tension, from, to); break;
+      case "monotone": d += this.curveMonotone(scenes, from, to); break;
+      default: interpolated = false;
+    }
+  } 
+  
+  if(!interpolated){
+    for (var i = from + 1 ; i <= to ; i++) {
+      d += this.pathSegment(scenes[i - 1], scenes[i]);
+    }
+  }
+  
+  var sop = stroke.opacity;
+  var attrs = {
+    'shape-rendering':   s.antialias ? null : 'crispEdges',
+    'pointer-events':    addEvents ? s.events : 'none',
+    'cursor':            s.cursor,
+    'd':                 d,
+    'fill':              fill.color,
+    'fill-opacity':      fill.opacity || null,
+    'stroke':            stroke.color,
+    'stroke-opacity':    sop || null,
+    'stroke-width':      sop ? (s.lineWidth / this.scale) : null,
+    'stroke-linecap':    s.lineCap,
+    'stroke-linejoin':   s.lineJoin,
+    'stroke-miterlimit': s.strokeMiterLimit,
+    'stroke-dasharray':  sop ? this.parseDasharray(s) : null
+  };
+  
+  elm = this.expect(elm, 'path', scenes, from, attrs, s.css);
+
+  if(s.svg) this.setAttributes(elm, s.svg);
+  
+  return this.append(elm, scenes, from);
+};
+
+/* Draws invisible segmented lines
+ * for all scenes that require event processing,
+ * to allow per scene events in the "special" segmented scenario.
+ * 
+ * The lines are only drawn if the associated mark 
+ * has any attached event handlers.
+ * 
+ * TODO: interpolate
+ */
+pv.SvgScene.linePartsInteractive = function(elm, scenes){
+  if(scenes.mark.$hasHandlers){
+    var from = 0;
+    var to = scenes.length - 1;
+    if(from < to){
+      for (var i = from ; i < to ; i++) {
+        var s1 = scenes[i];
+        var s2 = scenes[i + 1];
+        
+        if (s1.visible && s2.visible && s1.events !== 'none'){
+          var d = "M" + s1.left + "," + s1.top + this.pathSegment(s1, s2);
+          
+          var attrs = {
+              'shape-rendering':   'crispEdges',
+              'pointer-events':    s1.events,
+              'cursor':            s1.cursor,
+              'd':                 d,
+              'fill':              'rgb(127,127,127)',
+              'fill-opacity':      0.005, // VML requires this much to fire events
+              'stroke':            'rgb(127,127,127)',
+              'stroke-opacity':    0.005, // VML idem
+              'stroke-width':      5
+            };
+          
+            elm = this.expect(elm, 'path', scenes, i, attrs, s1.css);
+            elm = this.append(elm, scenes, i);
+        }
+      }
+    }
+  }
+  
+  return elm;
+};
+
+/* Draws a single circle with a diameter equal to the line width. */
+pv.SvgScene.lineDot = function(elm, scenes, i) {
+  var s = scenes[i];
+  var stroke = s.strokeStyle;
+  var radius = (s.lineWidth / this.scale) / 2;
+  
+  var attrs = {
+    'shape-rendering': s.antialias ? null : 'crispEdges',
+    'pointer-events':  s.events,
+    'cursor':          s.cursor,
+    'fill':            stroke.color,
+    'fill-opacity':    stroke.opacity || null,
+    'stroke':          'none',
+    'cx':              s.left,
+    'cy':              s.top,
+    'r':               radius
+  };
+  
+  elm = this.expect(elm, "circle", scenes, i, attrs, s.css);
+  
+  if(s.svg) this.setAttributes(elm, s.svg);
+  
+  return this.append(elm, scenes, i);
+};
+
+
+/* Line & Area Commons */
+
+pv.SvgScene.lineAreaParts = function(elm, scenes, lineAreaPart) {
+  var count = scenes.length;
+  
+  var ki = [];
+  var kf = [];
+  
+  var i = 0;
+  while(i < count){
+    
+    // Find the INITIAL scene
+    var si = scenes[i];
+    if(!this.isSceneVisible(si)){
+      i++;
+      continue;
+    }
+    
+    // Compute its line-area-key
+    this.lineAreaSceneKey(si, ki);
+    
+    // Find the FINAL scene
+    // the "i" in which to start the next part
+    var i2;
+    var f = i;
+    while(true){
+      var f2 = f + 1;
+      if(f2 >= count){
+        // No next scene
+        // Connect i to f (possibly, i === f)
+        // Continue with f + 1, to make it stop...
+        i2 = f2;
+        break;
+      }
+      
+      var sf = scenes[f2];
+      if(!this.isSceneVisible(sf)){
+        // f + 1 exists but is NOT visible
+        // Connect i to f (possibly, i === f)
+        // Continue with f + 2
+        i2 = f2 + 1;
+        break;
+      }
+      
+      // Accept f + 1 as final point
+      // f > i
+      f = f2;
+      
+      this.lineAreaSceneKey(sf, kf);
+      
+      if(!this.equalSceneKeys(ki, kf)){
+        // Break path due to != path properties
+        // Connect i to f
+        // Continue with f
+        i2 = f;
+        break;
+      }
+    }
+    
+    elm = lineAreaPart.call(this, elm, scenes, i, f);
+    
+    // next part
+    i = i2;
+  }
+  
+  return elm;
+};
+
+pv.SvgScene.lineAreaSceneKey = function(s, k){
+  k[0] = s.fillStyle.key;
+  k[1] = s.strokeStyle.key;
+  k[2] = s.lineWidth;
+  k[3] = (s.strokeDasharray || 'none');
+  k[4] = s.interpolate;
+  return k;
+};
+
+pv.SvgScene.isSceneVisible = function(s){
+  return s.visible && (s.fillStyle.opacity > 0 || s.strokeStyle.opacity > 0);
+};
+
+pv.SvgScene.equalSceneKeys = function(ka, kb){
+  for(var i = 0, K = ka.length ; i < K ; i++){
+    if(ka[i] !== kb[i]){
+      return false;
+    }
+  }
+  return true;
 };
 pv.SvgScene.panel = function(scenes) {
   var g = scenes.$g, e = g && g.firstChild;
@@ -9754,6 +10292,7 @@ pv.Mark.prototype.event = function(type, handler) {
       handlers = [handlers, handler];
   }
   
+  this.$hasHandlers = true;
   this.$handlers[type] = handlers;
   return this;
 };
@@ -10851,6 +11390,14 @@ pv.Line = function() {
   pv.Mark.call(this);
 };
 
+pv.Line.castSegmented = function(v){
+  if(!v){
+    return false;
+  }
+  
+  return v === 2 ? 2 : true;
+};
+
 pv.Line.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
     .property("lineJoin",  String)
@@ -10859,7 +11406,7 @@ pv.Line.prototype = pv.extend(pv.Mark)
     .property("strokeStyle", pv.fillStyle)
     .property("strokeDasharray", String)
     .property("fillStyle", pv.fillStyle)
-    .property("segmented", Boolean)
+    .property("segmented", pv.Line.castSegmented)
     .property("interpolate", String)
     .property("eccentricity", Number)
     .property("tension", Number);

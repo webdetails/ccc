@@ -165,8 +165,7 @@ def
 .add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
-            fixed:    {AreasVisible: true},
-            defaults: {LinesVisible: true}
+            fixed: {AreasVisible: true}
         });
     }
 });
@@ -180,7 +179,7 @@ def
 .add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
-            fixed:    {LinesVisible: true, Stacked: true}
+            fixed: {LinesVisible: true, Stacked: true}
         });
     }
 });

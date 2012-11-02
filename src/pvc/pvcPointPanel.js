@@ -108,17 +108,17 @@ def
         // DATA
         var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
         var data      = this._getVisibleData(); // shared "categ then series" grouped data
-        var isDense   = (this.width <= 0) || (data._children.length / this.width > 0.5); //  > 100 categs / 200 pxs
+        //var isDense   = (this.width <= 0) || (data._children.length / this.width > 0.5); //  > 100 categs / 200 pxs
         var rootScene = this._buildScene(data, isBaseDiscrete);
 
         // Disable selection?
-        if(isDense && (options.selectable || options.hoverable)) {
-            options.selectable = false;
-            options.hoverable  = false;
-            if(pvc.debug >= 3) {
-                this._log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
-            }
-        }
+//        if(isDense && (options.selectable || options.hoverable)) {
+//            options.selectable = false;
+//            options.hoverable  = false;
+//            if(pvc.debug >= 3) {
+//                this._log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
+//            }
+//        }
        
         // ---------------
         // BUILD
@@ -164,10 +164,11 @@ def
         
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
-                antialias:   showAreas && !showLines,
-                segmented:   !isDense,
-                noTooltip:  false,
-                wrapper:     wrapper
+                segmented:   2,
+                noTooltip:   false,
+                wrapper:     wrapper,
+                noSelect:    !showAreas,
+                noHover:     !showAreas
             })
             
             .lock('visible', def.retTrue)
@@ -192,15 +193,12 @@ def
                 
                 return color;
             })
-            .override('fixAntialiasStrokeWidth', function(){
-                // Hide a vertical line from 0 to the alone dot
-                // Hide horizontal lines of nulls near zero
-                if(this.scene.isNull || this.scene.isAlone) {
-                     return 0;
-                }
-
-                return this.base();
+            .override('dimColor', function(color, type){
+                return isStacked ? 
+                    pvc.toGrayScale(color, 1, null, null).brighter() :
+                    this.base(color, type);
             })
+            .lock('events', showAreas ? 'painted' : 'none')
             .pvMark
             ;
         
@@ -234,7 +232,7 @@ def
             this, 
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
             {
-                extensionId: extensionIds,
+                extensionId:  extensionIds,
                 freePosition: true,
                 wrapper:      wrapper,
                 noTooltip:    false
@@ -254,19 +252,11 @@ def
                     showDotsOnly ? 
                     def.retFalse : 
                     (isBaseDiscrete && isStacked ? 
-                    function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
-                    function(){ return !this.scene.isNull; })
+                     function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
+                     function(){ return !this.scene.isNull; })
             )
             
             /* Color & Line */
-            .override('color', function(type){
-                if(lineCopiesAreaColor && !this.scene.isActiveSeries()) {
-                    // This obtains the color of the same index area
-                    return myself.pvArea.fillStyle();
-                }
-                
-                return this.base(type);
-            })
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 
@@ -275,6 +265,9 @@ def
                 }
                 return color;
             })
+            .override('normalColor', function(color, type){
+                return showLines ? color : null;
+            })
             .override('baseStrokeWidth', function(){
                 var strokeWidth;
                 if(showLines){
@@ -282,6 +275,14 @@ def
                 }
                 
                 return strokeWidth == null ? 1.5 : strokeWidth; 
+            })
+            .intercept('strokeDasharray', function(){
+                var dashArray = this.delegateExtension();
+                if(dashArray === undefined){
+                    dashArray = this.scene.isInterpolated ? '.' : null; 
+                }
+                
+                return dashArray;
             })
             .pvMark
             ;
@@ -327,22 +328,27 @@ def
                 // TODO: review interpolated style/visibility
                 if(this.scene.isInterpolated && type === 'fill'){
                     var color = this.base(type);
-                    return color && pv.color(this.base(type)).alpha(0.5);
+                    return color && pv.color(color).brighter(0.5);
                 }
                 
                 // Follow normal logic
                 return this.base(type);
             })
+//            .override('interactiveColor', function(color, type){
+//              return this.scene.isInterpolated && type === 'stroke' ? 
+//                     color :
+//                     this.base(color, type);
+//            })
             .optionalMark('lineCap', 'round')
-            .intercept('strokeDasharray', function(){
-                var dashArray = this.delegateExtension();
-                if(dashArray === undefined){
-                    // TODO: review interpolated style/visibility
-                    dashArray = this.scene.isInterpolated ? '.' : null; 
-                }
-                
-                return dashArray;
-            })
+//            .intercept('strokeDasharray', function(){
+//                var dashArray = this.delegateExtension();
+//                if(dashArray === undefined){
+//                    // TODO: review interpolated style/visibility
+//                    dashArray = this.scene.isInterpolated ? '.' : null; 
+//                }
+//                
+//                return dashArray;
+//            })
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 
@@ -797,6 +803,7 @@ def
             
             interScene.vars.value = interValueVar;
             interScene.ownerScene     = toScene;
+            interScene.isInterpolated = toScene.isInterpolated;
             interScene.isIntermediate = true;
             interScene.isSingle       = false;
             interScene.isNull         = interIsNull;

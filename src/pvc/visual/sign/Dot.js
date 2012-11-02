@@ -101,13 +101,16 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             
             if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                 //return color.darker(1.5);
-                return pv.Color.names.darkgray.darker().darker();
-            }
-            
-            switch(type) {
-                case 'fill':
-                case 'stroke':
-                    return this.dimColor(color, type);
+                return color.alpha(0.8);
+//                switch(type){
+//                  case 'fill':   return pv.Color.names.darkgray.darker().darker();
+//                  case 'stroke': return color;
+//                }
+            } else {
+                switch(type) {
+                    case 'fill':   return this.dimColor(color, type);
+                    case 'stroke': return color.alpha(0.45);
+                }
             }
         }
 

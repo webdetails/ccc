@@ -240,17 +240,14 @@ function(complexType, name, keyArgs){
     
     /** @private */
     this._comparer = def.get(keyArgs, 'comparer');
-    if(this._comparer === undefined && !this.isDiscrete){
+    if(this._comparer === undefined){ // It is possible to prevent the default specifying null
         switch(this.valueType){
             case Number:
-                this._comparer = def.compare;
-                break;
-                
             case Date:
                 this._comparer = def.compare;
                 break;
                 
-             default:
+            default:
                  this._comparer = null;
         }
     }
