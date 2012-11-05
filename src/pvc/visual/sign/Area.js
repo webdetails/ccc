@@ -10,11 +10,10 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     
     this.base(panel, pvMark, keyArgs);
     
-    var antialias = def.get(keyArgs, 'antialias', true),
-        segmented = def.get(keyArgs, 'segmented', true);
+    var antialias = def.get(keyArgs, 'antialias', true);
     
     this
-        .lock('segmented', segmented) // fixed, not inherited
+        .lock('segmented', 'smart') // fixed, not inherited
         .lock('antialias', antialias)
         ;
 

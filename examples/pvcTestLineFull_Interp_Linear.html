@@ -176,7 +176,11 @@ var baseExampleDef = {
         /* Data format */
         crosstabMode: false,
         seriesInRows: false,
-        dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
+        dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } },
+        extensionPoints: {
+          line_interpolate: 'cardinal',
+          area_interpolate: 'cardinal'
+        }
      },
      showProps: lineExamplesShowProps
 };

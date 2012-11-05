@@ -6,7 +6,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     
     this.base(panel, pvMark, keyArgs);
     
-    this.lock('segmented', 2) // fixed
+    this.lock('segmented', 'smart') // fixed
         .lock('antialias', true)
         ;
 

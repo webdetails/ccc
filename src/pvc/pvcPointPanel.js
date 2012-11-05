@@ -107,18 +107,8 @@ def
         // ------------------
         // DATA
         var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
-        var data      = this._getVisibleData(); // shared "categ then series" grouped data
-        //var isDense   = (this.width <= 0) || (data._children.length / this.width > 0.5); //  > 100 categs / 200 pxs
+        var data = this._getVisibleData(); // shared "categ then series" grouped data
         var rootScene = this._buildScene(data, isBaseDiscrete);
-
-        // Disable selection?
-//        if(isDense && (options.selectable || options.hoverable)) {
-//            options.selectable = false;
-//            options.hoverable  = false;
-//            if(pvc.debug >= 3) {
-//                this._log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
-//            }
-//        }
        
         // ---------------
         // BUILD
@@ -164,14 +154,11 @@ def
         
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
-                segmented:   2,
                 noTooltip:   false,
-                wrapper:     wrapper,
-                noSelect:    !showAreas,
-                noHover:     !showAreas
+                wrapper:     wrapper
             })
             
-            .lock('visible', def.retTrue)
+            .lock('visible', function(){ return !this.scene.isNull; })
             
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
