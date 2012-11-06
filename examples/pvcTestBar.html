@@ -187,7 +187,7 @@
 <h4>Bar properties</h4>
 <ul>
   <li>orientation (horizontal | vertical)</li>
-  <li>showValues (true|false)</li>
+  <li>valuesVisible (true|false)</li>
   <li>stacked (true|false)</li>
   <li>panelSizeRatio - Ratio of occupied vs total size of category band. Default: 0.9 (90%)</li>
   <li>barSizeRatio - In multiple series, percentage of inner band occupied by bars. Default: 0.9 (90%)</li>
@@ -196,9 +196,9 @@
 </ul>
 <h4>Line properties</h4>
 <ul>
-  <li>showLines - Show or hide lines. Default: true</li>
-  <li>showDots - Show or hide dots. Default: false</li>
-  <li>showAreas - Show or hide areas. Default: false</li>
+  <li>linesVisible - Show or hide lines. Default: true</li>
+  <li>dotsVisible - Show or hide dots. Default: false</li>
+  <li>areasVisible - Show or hide areas. Default: false</li>
   <li>nullInterpolationMode (none | linear) - Interpolation mode for lines. Default: 'none'</li>
 </ul>
 <h4>Axis properties</h4>
@@ -284,7 +284,7 @@ new pvc.BarChart({
     animate:    false,
     selectable: true,
     hoverable:  true,
-    showValues: false,
+    valuesVisible: false,
     orthoAxisFixedMax: 60,
     orthoAxisLabelSpacingMin: 2,
     extensionPoints: {
@@ -325,7 +325,7 @@ new pvc.BarChart({
     hoverable:  true,
     legend:     true,
     legendPosition: 'right',
-    showValues:   false,
+    valuesVisible:   false,
     axisFullGrid: true,
     extensionPoints: {
         bar_lineWidth:     1,
@@ -364,7 +364,7 @@ new pvc.BarChart({
     legendPosition: 'right',
     axisFullGrid: true,
     axisOffset:   0.04,
-    showValues:   false,
+    valuesVisible:   false,
     extensionPoints: {
     	xAxisLabel_textAngle:    -1,
     	xAxisLabel_textAlign:    'right',
@@ -443,7 +443,7 @@ new pvc.BarChart({
     hoverable:  true,
     legend:     true,
     legendPosition: 'right',
-    showValues:   false,
+    valuesVisible:   false,
     axisFullGrid: true,
     orthoAxisLabelSpacingMin: 2.5,
     extensionPoints: {
@@ -558,7 +558,7 @@ new pvc.BarChart({
     selectable: true,
     hoverable:  true,
     stacked:    true,
-    showValues: false,
+    valuesVisible: false,
     legend:     true,
     panelSizeRatio: 0.7,
     barSizeMax:     100,

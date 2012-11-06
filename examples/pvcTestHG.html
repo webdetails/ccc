@@ -174,7 +174,7 @@ The intensity or the color of each cell depends on the value that it represents.
 <h4>Heat grid properties</h4>
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
-  <li>showValues - Show or hide heatGrid value. Default: false</li>
+  <li>valuesVisible - Show or hide heatGrid value. Default: false</li>
   <li>normPerBaseCategory - Normalize by column? true or false</li>
   <li>minColor - Default: "white"</li>
   <li>maxColor - Default: "darkgreen"</li>
@@ -229,7 +229,7 @@ var heatGrid1 = new pvc.HeatGridChart({
     height: 300,
     title:"Heat grid - Normalized by Product",
     animate:   false,
-    showValues: true,
+    valuesVisible: true,
     valuesAnchor: "right",
     normPerBaseCategory: true
     });
@@ -257,7 +257,7 @@ var heatGrid2 = new pvc.HeatGridChart({
     clickable:  false,
     selectable: true,
     hoverable:  true,
-    showValues: true,
+    valuesVisible: true,
     valuesAnchor: "right",
     showXScale: true,
     xAxisPosition: "bottom",
@@ -298,7 +298,7 @@ var heatGrid3 = new pvc.HeatGridChart({
     clickable: false,
     selectable: true,
     orientation: "horizontal",
-    showValues: false,
+    valuesVisible: false,
     showXScale: true,
     xAxisPosition: "bottom",
     showYScale: true,
@@ -332,7 +332,7 @@ var heatGrid4 = new pvc.HeatGridChart({
         '", color = '    + scene.vars.color.value);
     },
     orientation: "horizontal",
-    showValues: false,
+    valuesVisible: false,
     showXScale: true,
     xAxisPosition: "bottom",
     showYScale: true,
@@ -358,7 +358,7 @@ var heatGrid5 = new pvc.HeatGridChart({
     selectable: true,
     hoverable:  true,
     orientation: "vertical",
-    showValues: false,
+    valuesVisible: false,
     valuesAnchor: "right",
     normPerBaseCategory: false,
     visualRoles: {color: 'value2', size: 'value'},

@@ -192,7 +192,7 @@ For more information on boxplots you can visit
 <h4>Boxplot properties</h4>
 <ul>
   <li>orientation (horizontal | vertical)</li>
-  <li>showValues (true|false)</li>
+  <li>valuesVisible (true|false)</li>
   <li>stacked (true|false)</li>
   <li>panelSizeRatio - Ratio of occupied vs total size of category band. Default: 0.9 (90%)</li>
   <li>boxSizeRatio - Ratio of box size vs category band size. Default: 0.3 (30%)</li>
@@ -200,9 +200,9 @@ For more information on boxplots you can visit
 </ul>
 <h4>Line properties</h4>
 <ul>
-  <li>showLines - Show or hide lines. Default: true</li>
-  <li>showDots - Show or hide dots. Default: false</li>
-  <li>showAreas - Show or hide areas. Default: false</li>
+  <li>linesVisible - Show or hide lines. Default: true</li>
+  <li>dotsVisible - Show or hide dots. Default: false</li>
+  <li>areasVisible - Show or hide areas. Default: false</li>
   <li>nullInterpolationMode (none | linear) - Interpolation mode for lines. Default: 'none'</li>
 </ul>
 <h4>Axis properties</h4>
@@ -299,8 +299,8 @@ var box2 = new pvc.BoxplotChart({
     selectable: true,
     hoverable: true,
 
-    //showLines: true,
-    //showDots: true,
+    //linesVisible: true,
+    //dotsVisible: true,
     extensionPoints: {
         box_fillStyle:    'bisque',
         boxBar_fillStyle: 'orange',
@@ -330,8 +330,8 @@ var box3 = new pvc.BoxplotChart({
     baseAxisFullGrid: true,
     maxBoxSize: 20,
     plot2: true,
-    plot2ShowLines: true,
-    plot2ShowDots: true,
+    plot2LinesVisible: true,
+    plot2DotsVisible: true,
     selectable: true,
     hoverable: true,
     extensionPoints: {

@@ -199,7 +199,7 @@
                 stacked:     false,
                 xAxisTitle:  "Quantity sold",
                 yAxisTitle:  "Country",
-                showValues:  false,
+                valuesVisible:  false,
                 
                 /* Data translation */
                 crosstabMode: true,
@@ -221,7 +221,7 @@
             id: 'multi02',
             className: 'LineChart',
             dataVar:   'steelWheels01',
-            showProps: ['showAreas', 'showDots', 'stacked'],
+            showProps: ['areasVisible', 'dotsVisible', 'stacked'],
             def: {
                 /* Top */
                 title:   "Multi-chart of line charts with area",
@@ -237,9 +237,9 @@
                 /* Small charts */
                 //orientation: 'horizontal',
                 yAxisDesiredTickCount: 4,
-                showValues:  false,
-                showAreas:   true,
-                //showDots:    true,
+                valuesVisible:  false,
+                areasVisible:   true,
+                //dotsVisible:    true,
                 extensionPoints: {
                     xAxisLabel_textAngle:    -Math.PI/4,
                     xAxisLabel_textAlign:    "right",
@@ -284,7 +284,7 @@
             id: 'multi03',
             className: 'PieChart',
             dataVar:   'steelWheels01',
-            //showProps: ['showAreas', 'stacked'],
+            //showProps: ['areasVisible', 'stacked'],
             def: {
                 /* Top */
                 title:   "Multi-chart of pie charts",
@@ -301,7 +301,7 @@
                 
 
                 /* Small charts */
-                showValues:  true,
+                valuesVisible:  true,
                 innerGap: 0.9,
                 
                 extensionPoints: {
@@ -348,7 +348,7 @@
             dataVar:   'testHeatGrid4Measures',
 
 
-            showProps: ['showLines', 'showDots'],
+            showProps: ['linesVisible', 'dotsVisible'],
             def: {
                 /* Top */
                 title:   "Multi-chart of scatter dot charts (Qty x Sales)",
@@ -366,8 +366,8 @@
                 //orientation: 'horizontal',
                 originIsZero: false,
                 
-                showLines:  false,
-                showValues: false,
+                linesVisible:  false,
+                valuesVisible: false,
                 axisFullGrid: true,
                 
                 /* Visual Role mapping */
@@ -435,7 +435,7 @@
                 stacked:     true,
                 //xAxisTitle:  "Sales",
                 //yAxisTitle:  "Product Line",
-                showValues:  false,
+                valuesVisible:  false,
                 
                 /* Visual Role mapping */
                 visualRoles: {

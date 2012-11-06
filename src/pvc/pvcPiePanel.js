@@ -4,7 +4,7 @@
  * 
  * Specific options are: 
  * 
- * <i>showValues</i> - Show or hide slice value. Default: false 
+ * <i>valuesVisible</i> - Show or hide slice value. Default: false 
  * 
  * <i>explodedSliceIndex</i> - Index of the slice which is <i>always</i> exploded, or null to explode every slice. Default: null.
  * 
@@ -111,7 +111,7 @@ def
         
         var maxPieRadius = clientRadius;
         
-        if(this.showValues && this.labelStyle === 'linked'){
+        if(this.valuesVisible && this.labelStyle === 'linked'){
             // Reserve space for labels and links
             var linkInsetRadius  = resolvePercentRadius(this.linkInsetRadius );
             var linkOutsetRadius = resolvePercentRadius(this.linkOutsetRadius);
@@ -138,7 +138,7 @@ def
             //linkLabelSize += freeWidthSpace / 2;
             
             if(linkAndLabelRadius >= maxPieRadius){
-                this.showValues = false;
+                this.valuesVisible = false;
                 if(pvc.debug >= 2){
                     this._log("Hiding linked labels due to insufficient space.");
                 }
@@ -267,7 +267,7 @@ def
             .pvMark
             ;
         
-        if(this.showValues){
+        if(this.valuesVisible){
             if(this.labelStyle === 'inside'){
                 
                 this.pvPieLabel = new pvc.visual.Label(this, this.pvPie.anchor("outer"), {

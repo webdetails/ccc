@@ -144,7 +144,7 @@
     <script type="text/javascript" src="pvcDocUtils.js"></script>
     <script type="text/javascript">
 
-var lineExamplesShowProps = ['stacked', 'timeSeries', 'showAreas', 'showLines', 'showDots', 'nullInterpolationMode'];
+var lineExamplesShowProps = ['stacked', 'timeSeries', 'areasVisible', 'linesVisible', 'dotsVisible', 'nullInterpolationMode'];
 var baseExampleDef = {
     dataVar: 'relational_01',
     def: {
@@ -164,10 +164,10 @@ var baseExampleDef = {
             xAxisScale_dateTickFormat:    "%Y/%m/%d",
             xAxisScale_dateTickPrecision: 798336000/1.5 
         },
-        showAreas:  false,
-        showDots:   false,
-        showLines:  false,
-        showValues: false,
+        areasVisible:  false,
+        dotsVisible:   false,
+        linesVisible:  false,
+        valuesVisible: false,
         timeSeries: false,
         timeSeriesFormat: "%Y-%m-%d",
         
@@ -196,7 +196,7 @@ pvc.examples.register(def.create(baseExampleDef, {
     className: 'LineChart',
     def: {
         title:      "Timeseries Line Chart",
-        showLines:  true,
+        linesVisible:  true,
         timeSeries: true
      }
 }));
@@ -206,8 +206,8 @@ pvc.examples.register(def.create(baseExampleDef, {
     className: 'LineChart',
     def: {
         title:      "Timeseries Line Chart with Areas",
-        showLines:  true,
-        showAreas:  true,
+        linesVisible:  true,
+        areasVisible:  true,
         timeSeries: true
      }
 }));
@@ -217,9 +217,9 @@ pvc.examples.register(def.create(baseExampleDef, {
     className: 'LineChart',
     def: {
         title:      "Timeseries Line Chart with Areas and Dots",
-        showLines:  true,
-        showAreas:  true,
-        showDots:   true,
+        linesVisible:  true,
+        areasVisible:  true,
+        dotsVisible:   true,
         timeSeries: true
      }
 }));
@@ -229,7 +229,7 @@ pvc.examples.register(def.create(baseCategDef, {
     className: 'LineChart',
     def: {
         title: "Categorical Line Chart",
-        showLines:  true
+        linesVisible:  true
      }
 }));
 
@@ -239,8 +239,8 @@ pvc.examples.register(def.create(baseCategDef, {
     className: 'LineChart',
     def: {
         title:     "Categorical Line Chart with Areas",
-        showLines: true,
-        showAreas: true
+        linesVisible: true,
+        areasVisible: true
      }
 }));
 
@@ -249,7 +249,7 @@ pvc.examples.register(def.create(baseExampleDef, {
   className: 'DotChart',
   def: {
       title:      "Timeseries Dot Chart",
-      showDots:   true,
+      dotsVisible:   true,
       timeSeries: true
    }
 }));
@@ -259,7 +259,7 @@ pvc.examples.register(def.create(baseCategDef, {
   className: 'DotChart',
   def: {
       title: "Categorical Dot Chart",
-      showDots:   true
+      dotsVisible:   true
    }
 }));
 
@@ -272,8 +272,8 @@ pvc.examples.register(def.create(baseExampleDef, {
         title:      "Stacked Timeseries Line Chart",
         stacked:    true,
         timeSeries: true,
-        showLines:  true,
-        showDots:   true
+        linesVisible:  true,
+        dotsVisible:   true
      }
 }));
 
@@ -284,7 +284,7 @@ pvc.examples.register(def.create(baseExampleDef, {
     def: {
         title:      "Stacked Timeseries Area Chart",
         stacked:    true,
-        showAreas:  true,
+        areasVisible:  true,
         timeSeries: true
      }
 }));
@@ -295,8 +295,8 @@ pvc.examples.register(def.create(baseExampleDef, {
     def: {
         title:      "Stacked Timeseries Area Chart with Lines",
         stacked:    true,
-        showLines:  true,
-        showAreas:  true,
+        linesVisible:  true,
+        areasVisible:  true,
         timeSeries: true
     }
 }));
@@ -307,7 +307,7 @@ pvc.examples.register(def.create(baseCategDef, {
     def: {
         title: "Stacked Categorical Line Chart",
         stacked:   true,
-        showLines: true
+        linesVisible: true
     }
 }));
         
@@ -317,7 +317,7 @@ pvc.examples.register(def.create(baseCategDef, {
     def: {
         title:     "Stacked Categorical Area Chart",
         stacked:   true,
-        showAreas: true
+        areasVisible: true
      }
 }));
 
@@ -327,8 +327,8 @@ pvc.examples.register(def.create(baseCategDef, {
     def: {
         title:     "Stacked Categorical Area Chart with Lines",
         stacked:   true,
-        showLines: true,
-        showAreas: true
+        linesVisible: true,
+        areasVisible: true
      }
 }));
 
@@ -337,9 +337,9 @@ pvc.examples.register(def.create(baseCategDef, {
     className: 'StackedAreaChart',
     def: {
         title:     "Stacked Categorical Area Chart with Lines and Dots",
-        showAreas: true,
-        showLines: true,
-        showDots:  true
+        areasVisible: true,
+        linesVisible: true,
+        dotsVisible:  true
      }
 }));
 
@@ -349,7 +349,7 @@ pvc.examples.register(def.create(baseExampleDef, {
   def: {
       title:      "Stacked Timeseries Dot Chart",
       stacked:    true,
-      showDots:   true,
+      dotsVisible:   true,
       timeSeries: true
    }
 }));
@@ -360,7 +360,7 @@ pvc.examples.register(def.create(baseCategDef, {
   def: {
       title: "Stacked Categorical Dot Chart",
       stacked:    true,
-      showDots:   true
+      dotsVisible:   true
    }
 }));
 
@@ -372,8 +372,8 @@ pvc.examples.register(def.create(baseCategDef, {
     dataVar: 'relational_01_neg',
     def: {
         title:     "Categorical Line Chart with Negative Values",
-        showLines: true,
-        showAreas: true
+        linesVisible: true,
+        areasVisible: true
      }
 }));
 
@@ -384,9 +384,9 @@ pvc.examples.register(def.create(baseCategDef, {
     dataVar: 'relational_01_neg',
     def: {
         title:     "Categorical Line Chart with Negative Values",
-        showLines: true,
-        showAreas: true,
-        showDots:  true
+        linesVisible: true,
+        areasVisible: true,
+        dotsVisible:  true
      }
 }));
 
@@ -396,9 +396,9 @@ pvc.examples.register(def.create(baseExampleDef, {
     dataVar: 'testLDot2',
     def: {
         title:     "Numeric Category Dot/Line Chart with Negative Values",
-        showAreas: false,
-        showDots:  true,
-        showLines: true,
+        areasVisible: false,
+        dotsVisible:  true,
+        linesVisible: true,
         crosstabMode: true,
         dimensions: { 
             category: {
@@ -415,8 +415,8 @@ pvc.examples.register(def.create(baseExampleDef, {
     def: {
         title:     "Numeric-discrete Category Dot Chart with Negative Values",
         crosstabMode: true,
-        showDots:   true,
-        showLines:  false,
+        dotsVisible:   true,
+        linesVisible:  false,
         dimensions: { 
             category: {
                 valueType: Number, rawFormat: undefined, format: undefined, isDiscrete: true
@@ -431,14 +431,14 @@ pvc.examples.register(def.create(baseExampleDef, {
     dataVar: 'relational_04',
     def: {
         title:      "Line chart with second axis",
-        showLines:  true,
-        showAreas:  true,
-        showDots:   false,
+        linesVisible:  true,
+        areasVisible:  true,
+        dotsVisible:   false,
         plot2: true,
         plot2OrthoAxis: 2,
         plot2ColorAxis: 2,
         color2AxisColors: ['purple'],
-        showValues: false,
+        valuesVisible: false,
         dimensions: { category: {valueType: null, isDiscrete: true } }
      }
 }));

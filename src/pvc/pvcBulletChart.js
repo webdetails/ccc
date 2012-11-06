@@ -161,7 +161,7 @@ def
 /*
  * Bullet chart panel. Generates a bar chart. Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
- * <i>showValues</i> - Show or hide bar value. Default: false
+ * <i>valuesVisible</i> - Show or hide bar value. Default: false
  *
  * Has the following protovis extension points:
  *

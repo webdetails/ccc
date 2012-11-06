@@ -190,11 +190,11 @@ in a waterfall chart you just compare the size of bars as all bars are parallel 
 <h4>Waterfall properties</h4>
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
-  <li>showValues - Show or hide bar value. Default: false</li>
+  <li>valuesVisible - Show or hide bar value. Default: false</li>
   <li>direction - Should the water fall? 'down', or not: 'up'. Default: 'down'</li>
   <li>allCategoryLabel - The label of the root group. Default: 'All'</li>
   <li>waterLineLabel - The legend label of the accumulated line. Default: 'Accumulated'</li>
-  <li>waterValuesVisible - Show or hide waterfall line values. Default: showValues</li>
+  <li>waterValuesVisible - Show or hide waterfall line values. Default: valuesVisible</li>
   <li>areasVisible - Show or hide the areas that enclose waterfall groups. Default: true</li>
   <li>panelSizeRatio - Ratio of the band occupied by the pane.
 Default: 0.5 (50%)</li>
@@ -291,7 +291,7 @@ var wf1 = new pvc.WaterfallChart({
     barSizeMax: 200,
     panelSizeRatio:0.75,
 
-    showValues: true,
+    valuesVisible: true,
 
     yAxisPosition: "left",
     xAxisPosition: "bottom",
@@ -366,7 +366,7 @@ var wf2 = new pvc.WaterfallChart({
     panelSizeRatio:0.75,
     barSizeRatio: 1.0,
 
-    showValues: true,
+    valuesVisible: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
     extensionPoints: {
@@ -410,7 +410,7 @@ var wf3 = new pvc.WaterfallChart({
     panelSizeRatio:0.75,
     barSizeRatio: 1,
     margins: 20,
-    showValues: true,
+    valuesVisible: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
     extensionPoints: {
@@ -455,7 +455,7 @@ var wf4 = new pvc.WaterfallChart({
     panelSizeRatio:0.75,
     barSizeRatio: 1,
 
-    showValues: true,
+    valuesVisible: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
     axisFullGrid: true,
@@ -489,7 +489,7 @@ var wf5 = new pvc.WaterfallChart({
     clickable:  true,
     selectable: true,
     hoverable:  true,
-    showValues: true,
+    valuesVisible: true,
     
     direction: 'up',
     areasVisible: true,

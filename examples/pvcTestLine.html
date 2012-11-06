@@ -190,9 +190,9 @@ Line charts are often used to visualize time series data.
 <h4>Line chart properties</h4>
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
-  <li>showDots - Show or hide dots. Default: false</li>
-  <li>showAreas - Show or hide areas. Default: false</li>
-  <li>showValues - Show or hide line value. Default: false</li>
+  <li>dotsVisible - Show or hide dots. Default: false</li>
+  <li>areasVisible - Show or hide areas. Default: false</li>
+  <li>valuesVisible - Show or hide line value. Default: false</li>
   <li>stacked - Stacked? Default: false</li>
 </ul>
 <h4>Axis properties</h4>
@@ -264,12 +264,12 @@ The following is a line chart displaying three time series.<br>
           legendAlign: "right",
           selectable: true,
           orientation: 'vertical',
-          showAreas: true,
-          showDots: false,
+          areasVisible: true,
+          dotsVisible: false,
           timeSeries: true,
           timeSeriesFormat: "%Y-%m-%d",
 
-          showValues: false,
+          valuesVisible: false,
           yAxisPosition: "right",
           extensionPoints: {
             noDataMessage_text: "Example of a chart with missing data",
@@ -305,8 +305,8 @@ that connect the lines.<br>
           timeSeries: true,
           timeSeriesFormat: "%Y-%m-%d",
 
-          showValues: true,
-          showDots:true,
+          valuesVisible: true,
+          dotsVisible:true,
           yAxisPosition: "left",
           axisFullGrid: true,
           axisOffset: 0.05,
@@ -358,10 +358,10 @@ var line3 = new pvc.DotChart({
   margins: {all: 20},
   nullInterpolationMode: 'linear',
   showTooltips:true,
-  showDots:true,
-  showLines:true,
-  showAreas:true,
-  showValues:false,
+  dotsVisible:true,
+  linesVisible:true,
+  areasVisible:true,
+  valuesVisible:false,
   crosstabMode: false,
   dimensionGroups: {
     series:   {formatter: function(value){ return relationalCountrySalesYearLabels[value];    }},
@@ -393,9 +393,9 @@ var line4 = new pvc.LineChart({
   selectable: true,
   hoverable:  true,
   animate:    false,
-  showAreas:  true,
-  showDots:   false,
-  showValues: false,
+  areasVisible:  true,
+  dotsVisible:   false,
+  valuesVisible: false,
   crosstabMode: false,
   seriesInRows: false
 });

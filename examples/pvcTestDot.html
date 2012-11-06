@@ -186,8 +186,8 @@ The Dot chart can be a very useful alternative to the horizontal bar chart, bein
 <h4>Dot chart properties</h4>
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
-  <li>showDots - Show or hide dots. Default: false</li>
-  <li>showValues - Show or hide line value. Default: false</li>
+  <li>dotsVisible - Show or hide dots. Default: false</li>
+  <li>valuesVisible - Show or hide line value. Default: false</li>
 </ul>
 
 <h4>Axis properties</h4>
@@ -248,7 +248,7 @@ var dot1 = new pvc.DotChart({
     legend: false,
     selectable: true,
     showTooltips: true,
-    showValues: true,
+    valuesVisible: true,
     orientation: 'horizontal',
 });
 dot1.setData(relational_03,{
@@ -276,7 +276,7 @@ var dot2 = new pvc.DotChart({
     selectable: true,
     showTooltips: true,
 
-    showValues: true,
+    valuesVisible: true,
     orientation: 'horizontal',
     extensionPoints: {
 
@@ -315,7 +315,7 @@ var dot3 = new pvc.DotChart({
     legend: true,
     selectable: true,
     showTooltips: true,
-    showValues: true,
+    valuesVisible: true,
     orientation: 'vertical',
     timeSeries: true,
     timeSeriesFormat: "%Y-%m-%d",

@@ -185,7 +185,7 @@ An alternative to pie is the donut chart.
 </ul>
 <h4>Slice properties</h4>
 <ul>
-  <li>showValues - Show or hide slice value. Default: false</li>
+  <li>valuesVisible - Show or hide slice value. Default: false</li>
   <li>innerGap - The percentage of the inner area used by the
 pie. Default: 0.9 (90%)</li>
   <li>explodedSliceIndex - Index of the slice to explode.
@@ -235,7 +235,7 @@ var pie = new pvc.PieChart({
     hoverable: true,
     showTooltips: true,
     
-    showValues: true,
+    valuesVisible: true,
     valuesLabelStyle: 'inside',
     valuesMask: "{category}",
     
@@ -272,7 +272,7 @@ setting colors, fonts, and more.<br/>
           legendShape: 'circle',
           showTooltips: false,
           leafContentPaddings: '5%',
-          showValues: true,
+          valuesVisible: true,
           selectable: true,
           hoverable: true,
           explodedSliceIndex: 4,
@@ -313,7 +313,7 @@ A pie can be converted into a donut by simple adding an extension point:
           legend: false,
           showTooltips: true,
           explodedSliceRadius: 15,
-          showValues: true,
+          valuesVisible: true,
           selectable: true,
           hoverable:  true,
           extensionPoints: {

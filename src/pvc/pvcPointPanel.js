@@ -2,10 +2,10 @@
  * Point panel.
  * Class that draws all line/dot/area combinations.
  * Specific options are:
- * <i>showDots</i> - Show or hide dots. Default: true
- * <i>showAreas</i> - Show or hide dots. Default: false
- * <i>showLines</i> - Show or hide dots. Default: true
- * <i>showValues</i> - Show or hide line value. Default: false
+ * <i>dotsVisible</i> - Show or hide dots. Default: true
+ * <i>areasVisible</i> - Show or hide dots. Default: false
+ * <i>linesVisible</i> - Show or hide dots. Default: true
+ * <i>valuesVisible</i> - Show or hide line value. Default: false
  *
  * Has the following protovis extension points:
  *
@@ -21,11 +21,11 @@ def
     
     this.base(chart, parent, plot, options);
     
-    this.showLines  = plot.option('LinesVisible'); // TODO
-    this.showDots   = plot.option('DotsVisible' ); // TODO
-    this.showAreas  = plot.option('AreasVisible'); // TODO
-    if(!this.showLines && !this.showDots && !this.showAreas){
-        this.showLines = true;
+    this.linesVisible  = plot.option('LinesVisible'); // TODO
+    this.dotsVisible   = plot.option('DotsVisible' ); // TODO
+    this.areasVisible  = plot.option('AreasVisible'); // TODO
+    if(!this.linesVisible && !this.dotsVisible && !this.areasVisible){
+        this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
     }
 })
@@ -41,15 +41,15 @@ def
         var groupScene = this.defaultVisibleBulletGroupScene();
         if(groupScene && !groupScene.hasRenderer()){
             var colorAxis = groupScene.colorAxis;
-            var drawMarker = def.nullyTo(colorAxis.option('LegendDrawMarker', /*no default*/ true), this.showDots || this.showAreas);
+            var drawMarker = def.nullyTo(colorAxis.option('LegendDrawMarker', /*no default*/ true), this.dotsVisible || this.areasVisible);
             var drawRule   = !drawMarker || 
-                             def.nullyTo(colorAxis.option('LegendDrawLine',   /*no default*/ true), this.showLines && !this.showAreas);
+                             def.nullyTo(colorAxis.option('LegendDrawLine',   /*no default*/ true), this.linesVisible && !this.areasVisible);
             if(drawMarker || drawRule){
                 var keyArgs = {};
                 if((keyArgs.drawMarker = drawMarker)){
                     var markerShape = colorAxis.option('LegendShape', true);
                     
-                    if(this.showDots){
+                    if(this.dotsVisible){
                         if(!markerShape){ 
                             markerShape = 'circle'; // Dot's default shape
                         }
@@ -95,9 +95,9 @@ def
         var chart = this.chart;
         var options   = chart.options;
         var isStacked = this.stacked;
-        var showDots  = this.showDots;
-        var showAreas = this.showAreas;
-        var showLines = this.showLines;
+        var dotsVisible  = this.dotsVisible;
+        var areasVisible = this.areasVisible;
+        var linesVisible = this.linesVisible;
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
         this.valueRole     = chart.visualRoles(this.plot.option('OrthoRole'));
@@ -112,7 +112,7 @@ def
        
         // ---------------
         // BUILD
-        if(showAreas){
+        if(areasVisible){
             // Areas don't look good above the axes
             this.pvPanel.zOrder(-7);
         } else {
@@ -128,7 +128,7 @@ def
             ;
         
         // -- AREA --
-        var areaFillColorAlpha = showAreas && showLines && !isStacked ? 0.5 : null;
+        var areaFillColorAlpha = areasVisible && linesVisible && !isStacked ? 0.5 : null;
         
         var wrapper;
         if(this.compatVersion() <= 1){
@@ -170,7 +170,7 @@ def
             
             /* Color & Line */
             .override('color', function(type){
-                return showAreas ? this.base(type) : null;
+                return areasVisible ? this.base(type) : null;
             })
             .override('baseColor', function(type){
                 var color = this.base(type);
@@ -185,12 +185,12 @@ def
                     pvc.toGrayScale(color, 1, null, null).brighter() :
                     this.base(color, type);
             })
-            .lock('events', showAreas ? 'painted' : 'none')
+            .lock('events', areasVisible ? 'painted' : 'none')
             .pvMark
             ;
         
         // -- LINE --
-        var showDotsOnly = showDots && !showLines && !showAreas,
+        var dotsVisibleOnly = dotsVisible && !linesVisible && !areasVisible,
             
             /* When not showing lines, but showing areas,
              * we copy the area fillStyle so that
@@ -202,13 +202,13 @@ def
              * When the scene has the active series,
              * the line is shown "highlighted" anyway.
              */
-            lineCopiesAreaColor = !showLines && showAreas,
+            lineCopiesAreaColor = !linesVisible && areasVisible,
             
             /* When areas are shown with no alpha (stacked), 
              * make dots darker so they get 
              * distinguished from areas. 
              */
-            darkerLineAndDotColor = isStacked && showAreas;
+            darkerLineAndDotColor = isStacked && areasVisible;
          
         var extensionIds = ['line'];
         if(this._applyV1BarSecondExtensions){
@@ -226,9 +226,9 @@ def
             })
             /* 
              * Line.visible =
-             *  a) showLines
+             *  a) linesVisible
              *     or
-             *  b) (!showLines and) showAreas
+             *  b) (!linesVisible and) areasVisible
              *      and
              *  b.1) discrete base and stacked
              *       and
@@ -236,7 +236,7 @@ def
              *  b.2) not null
              */
             .lock('visible',
-                    showDotsOnly ? 
+                    dotsVisibleOnly ? 
                     def.retFalse : 
                     (isBaseDiscrete && isStacked ? 
                      function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
@@ -253,11 +253,11 @@ def
                 return color;
             })
             .override('normalColor', function(color, type){
-                return showLines ? color : null;
+                return linesVisible ? color : null;
             })
             .override('baseStrokeWidth', function(){
                 var strokeWidth;
-                if(showLines){
+                if(linesVisible){
                     strokeWidth = this.base();
                 }
                 
@@ -287,7 +287,7 @@ def
         
            
         // -- DOT --
-        var showAloneDots = !(showAreas && isBaseDiscrete && isStacked);
+        var showAloneDots = !(areasVisible && isBaseDiscrete && isStacked);
         
         extensionIds = ['dot'];
         if(this._applyV1BarSecondExtensions){
@@ -306,15 +306,15 @@ def
             })
             .override('color', function(type){
                 /* 
-                 * Handle showDots
+                 * Handle dotsVisible
                  * -----------------
-                 * Despite !showDots,
+                 * Despite !dotsVisible,
                  * show a dot anyway when:
                  * 1) it is active, or
                  * 2) it is single  (the only dot in its series and there's only one category) (and in areas+discreteCateg+stacked case)
                  * 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                  */
-                if(!showDots){
+                if(!dotsVisible){
                     var visible = this.scene.isActive ||
                                   (!showAloneDots && this.scene.isSingle) ||
                                   (showAloneDots && this.scene.isAlone);
@@ -363,7 +363,7 @@ def
                  * with a size = to the line's width^2
                  * (ideally, a line would show as a dot when only one point?)
                  */
-                if(!showDots) {
+                if(!dotsVisible) {
                     var visible = this.scene.isActive ||
                                   (!showAloneDots && this.scene.isSingle) ||
                                   (showAloneDots && this.scene.isAlone);
@@ -386,7 +386,7 @@ def
             ;
         
         // -- LABEL --
-        if(this.showValues){
+        if(this.valuesVisible){
             this.pvLabel = new pvc.visual.Label(
                 this, 
                 this.pvDot.anchor(this.valuesAnchor), 
@@ -417,7 +417,7 @@ def
         
         marks.push(this.pvDot);
         
-        if(this.showLines || this.showAreas){
+        if(this.linesVisible || this.areasVisible){
             marks.push(this.pvLine);
         }
         
@@ -740,7 +740,7 @@ def
                      belowScene){
             
             var interIsNull = fromScene.isNull || toScene.isNull;
-            if(interIsNull && !this.showAreas) {
+            if(interIsNull && !this.areasVisible) {
                 return null;
             }
             

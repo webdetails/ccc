@@ -14,7 +14,7 @@ var testHeatGridMegaOptions = {
     "titlePosition":"top",
     "margins":20,
     "showTooltips":true,
-    "showValues":false,
+    "valuesVisible":false,
     "clickable":true,
     "selectable":true,
     "ctrlSelectMode":false,

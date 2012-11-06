@@ -3,7 +3,7 @@
  * Waterfall chart panel.
  * Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
- * <i>showValues</i> - Show or hide bar value. Default: false
+ * <i>valuesVisible</i> - Show or hide bar value. Default: false
  * <i>barSizeRatio</i> - In multiple series, percentage of inner
  * band occupied by bars. Default: 0.9 (90%)
  * <i>barSizeMax</i> - Maximum size (width) of a bar in pixels. Default: 2000

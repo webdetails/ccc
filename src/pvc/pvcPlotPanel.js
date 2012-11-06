@@ -13,7 +13,7 @@ def
     this.dataPartValue = plot.option('DataPart');
     this.axes.color    = chart.getAxis('color', plot.option('ColorAxis') - 1);
     this.orientation   = plot.option('Orientation'  );
-    this.showValues    = plot.option('ValuesVisible'); // TODO
+    this.valuesVisible    = plot.option('ValuesVisible'); // TODO
     this.valuesAnchor  = plot.option('ValuesAnchor' );
     this.valuesMask    = plot.option('ValuesMask'   );
     this.valuesFont    = plot.option('ValuesFont'   );

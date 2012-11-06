@@ -34,7 +34,7 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     this._bindProperty('fillStyle', 'fillColor', 'color');
     
     // These really have no real meaning in the area and should not be used.
-    // If lines are desired, they should be created with showLines of LineChart
+    // If lines are desired, they should be created with linesVisible of LineChart
     this.lock('strokeStyle', null)
         .lock('lineWidth',   0)
         ;

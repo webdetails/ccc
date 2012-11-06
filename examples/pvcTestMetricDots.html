@@ -210,11 +210,11 @@ categories, as this might lead to data-points being plotted at the wrong locatio
 <h4>Metrics chart properties</h4>
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
-  <li>showDots - Show or hide dots. Default: true for
+  <li>dotsVisible - Show or hide dots. Default: true for
 MetricsDotChart, false for MetricsLineChart</li>
-  <li>showLines - Show or hide lines. Default: false for
+  <li>linesVisible - Show or hide lines. Default: false for
 MetricsDotChart, true for MetricsLineChart</li>
-  <li>showValues - Show or hide value. Default: false</li>
+  <li>valuesVisible - Show or hide value. Default: false</li>
 </ul>
 <h4>Axis properties</h4>
 <ul>
@@ -283,8 +283,8 @@ var Metrics1 = new pvc.MetricLineChart({
     title: "Simple Metrics Chart",
     legend: false,
     originIsZero: true,
-    showValues: false,
-    showDots: true,
+    valuesVisible: false,
+    dotsVisible: true,
     axisFullGrid: true,
     selectable:  true,
     hoverable: true,
@@ -312,8 +312,8 @@ var Metrics2 = new pvc.MetricLineChart({
     legendPosition: "bottom",
     legendAlign: "right",
     originIsZero: true,
-    showValues: false,
-    showDots: true,
+    valuesVisible: false,
+    dotsVisible: true,
     axisFullGrid: true,
     selectable:  true,
     hoverable: true,
@@ -341,7 +341,7 @@ var Metrics3 = new pvc.MetricLineChart({
     legendPosition: "bottom",
     legendAlign: "right",
     originIsZero: true,
-    showValues: false,
+    valuesVisible: false,
     clickable: true,
     clickAction: function(s,c,v){alert(s + " " + c + " " + v);},
     axisFullGrid: true,
@@ -370,7 +370,7 @@ var Metrics4 = new pvc.MetricDotChart({
     legendPosition: "bottom",
     legendAlign: "right",
     originIsZero: true,
-    showValues: false,
+    valuesVisible: false,
     axisFullGrid: true,
     selectable:  true,
     hoverable: true,
@@ -397,8 +397,8 @@ pv.listenForPageLoad(function() {
                     titlePosition: "bottom",
                     titleSize: 20,
                     legend: false,
-                    showValues: false,
-                    showDots: true,
+                    valuesVisible: false,
+                    dotsVisible: true,
                     axisFullGrid: true
                 });
                 LineC.setData(testLDot , {crosstabMode: true, seriesInRows: false});
@@ -414,8 +414,8 @@ pv.listenForPageLoad(function() {
                     titleSize: 20,
                     legend: false,
                     originIsZero: true,
-                    showValues: false,
-                    showDots: true,
+                    valuesVisible: false,
+                    dotsVisible: true,
                     axisFullGrid: true,
                     compatVersion: 1
                 });                

@@ -2,7 +2,7 @@
 /*
  * HeatGrid chart panel. Generates a heatGrid chart. Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
- * <i>showValues</i> - Show or hide heatGrid value. Default: false
+ * <i>valuesVisible</i> - Show or hide heatGrid value. Default: false
  * <i>maxHeatGridSize</i> - Maximum size of a heatGrid in pixels. Default: 2000
  *
  * Has the following protovis extension points:
@@ -206,7 +206,7 @@ def
             .lineWidth(0)
             ;
             // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode)
-            //.overflow('hidden'); //overflow important if showValues=true
+            //.overflow('hidden'); //overflow important if valuesVisible=true
         
         
         if(this.useShapes){
@@ -244,7 +244,7 @@ def
         // TODO: valueMask??
         var valueDimName = this.valueDimName = colorDimName || sizeDimName;
         
-        if(this.showValues && valueDimName){
+        if(this.valuesVisible && valueDimName){
             this.pvHeatGridLabel = new pvc.visual.Label(
                 this, 
                 this.pvHeatGrid.anchor("center"), 

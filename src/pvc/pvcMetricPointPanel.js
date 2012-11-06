@@ -3,9 +3,9 @@
  * Metric Line/Dot panel.
  * Class that draws dot and line plots.
  * Specific options are:
- * <i>showDots</i> - Show or hide dots. Default: true
- * <i>showLines</i> - Show or hide dots. Default: true
- * <i>showValues</i> - Show or hide line value. Default: false
+ * <i>dotsVisible</i> - Show or hide dots. Default: true
+ * <i>linesVisible</i> - Show or hide dots. Default: true
+ * <i>valuesVisible</i> - Show or hide line value. Default: false
  *
  * Has the following protovis extension points:
  *
@@ -23,10 +23,10 @@ def
     
     var sizeAxisIndex = plot.option('SizeAxis');
     this.axes.size  = sizeAxisIndex != null ? chart.getAxis('size', sizeAxisIndex - 1) : null;
-    this.showLines  = plot.option('LinesVisible'); // TODO
-    this.showDots   = plot.option('DotsVisible' ); // TODO
-    if(!this.showLines && !this.showDots){
-        this.showLines = true;
+    this.linesVisible  = plot.option('LinesVisible'); // TODO
+    this.dotsVisible   = plot.option('DotsVisible' ); // TODO
+    if(!this.linesVisible && !this.dotsVisible){
+        this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
     }
     
@@ -64,8 +64,8 @@ def
         var groupScene = this.defaultVisibleBulletGroupScene();
         if(groupScene && !groupScene.hasRenderer()){
             var colorAxis = groupScene.colorAxis;
-            var drawMarker = def.nullyTo(colorAxis.option('LegendDrawMarker', true), this.showDots);
-            var drawRule   = def.nullyTo(colorAxis.option('LegendDrawLine',   true), this.showLines);
+            var drawMarker = def.nullyTo(colorAxis.option('LegendDrawMarker', true), this.dotsVisible);
+            var drawRule   = def.nullyTo(colorAxis.option('LegendDrawLine',   true), this.linesVisible);
             if(drawMarker || drawRule){
                 var keyArgs = {};
                 if((keyArgs.drawMarker = drawMarker)){
@@ -386,7 +386,7 @@ def
             /* Data */
             .lock('data', function(seriesScene){ return seriesScene.childNodes; }) // TODO    
             
-            .lock('visible', this.showLines)
+            .lock('visible', this.linesVisible)
             
             /* Position & size */
             .override('x', function(){ return this.scene.basePosition;  })
@@ -398,7 +398,7 @@ def
         // -- DOT --
         var dot = new pvc.visual.Dot(this, this.pvLine, {
                 extensionId: 'dot',
-                activeSeriesAware: this.showLines
+                activeSeriesAware: this.linesVisible
             })
             .intercept('visible', function(){
                 return !this.scene.isIntermediate && this.delegateExtension(true);
@@ -408,14 +408,14 @@ def
             .override('y',  function(){ return this.scene.orthoPosition; })
             .override('color', function(type){
                 /* 
-                 * Handle showDots
+                 * Handle dotsVisible
                  * -----------------
-                 * Despite !showDots,
+                 * Despite !dotsVisible,
                  * show a dot anyway when:
                  * 1) it is active, or
                  * 2) it is single  (the only dot in the dataset)
                  */
-                if(!myself.showDots){
+                if(!myself.dotsVisible){
                     var visible = this.scene.isActive ||
                                   this.scene.isSingle;
                     if(!visible) {
@@ -445,7 +445,7 @@ def
             // With lines shown, it would look strange.
             // ANALYZER requirements, so until there's no way to configure it...
             // TODO: this probably can now be done with ColorTransform
-//          if(!myself.showLines){
+//          if(!myself.linesVisible){
 //              color = color.alpha(color.opacity * 0.85);
 //          }
             
@@ -470,7 +470,7 @@ def
                  * show the dot anyway, 
                  * with a size = to the line's width^2
                  */
-                if(!myself.showDots) {
+                if(!myself.dotsVisible) {
                     if(this.scene.isSingle) {
                         // Obtain the line Width of the "sibling" line
                         var lineWidth = Math.max(myself.pvLine.scene[this.pvMark.index].lineWidth, 0.2) / 2;
@@ -521,7 +521,7 @@ def
         }
         
         // -- LABEL --
-        if(this.showValues){
+        if(this.valuesVisible){
             this.pvLabel = new pvc.visual.Label(
                 this, 
                 this.pvDot.anchor(this.valuesAnchor), 
@@ -554,7 +554,7 @@ def
         
         marks.push(this.pvDot);
         
-        if(this.showLines){
+        if(this.linesVisible){
             marks.push(this.pvLine);
         }
         

@@ -188,7 +188,7 @@ Stacked area graphs are useful for displaying the trend of contribution of value
 <h4>Stacked Area chart properties</h4>
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
-  <li>showValues - Show or hide line value. Default: false</li>
+  <li>valuesVisible - Show or hide line value. Default: false</li>
   <li>stacked - Stacked? Default: true</li>
 </ul>
 
@@ -295,10 +295,10 @@ var stackedArea2 = new pvc.StackedAreaChart({
         
         nullInterpolationMode: 'linear', // 'zero', 'none'
         
-        showValues: false,
-        showLines: true,
+        valuesVisible: false,
+        linesVisible: true,
 
-        showDots: true,
+        dotsVisible: true,
         
         selectable: true,
         xAxisFullGrid: true,
