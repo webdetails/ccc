@@ -20,8 +20,8 @@ def
         
         var pointPlot = this._createPointPlot();
         
-        var trend = pointPlot.option('TrendType');
-        if(trend && trend !== 'none'){
+        var trend = pointPlot.option('Trend');
+        if(trend){
             // Trend Plot
             new pvc.visual.MetricPointPlot(this, {
                 name: 'trend',

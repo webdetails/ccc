@@ -26,8 +26,8 @@ def
                 }});
         }
         
-        var trend = barPlot.option('TrendType');
-        if(trend && trend !== 'none'){
+        var trend = barPlot.option('Trend');
+        if(trend){
             // Trend Plot
             new pvc.visual.PointPlot(this, {
                 name: 'trend',

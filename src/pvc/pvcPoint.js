@@ -57,8 +57,8 @@ def
                 }});
         }
         
-        var trend = pointPlot.option('TrendType');
-        if(trend && trend !== 'none'){
+        var trend = pointPlot.option('Trend');
+        if(trend){
             // Trend Plot
             new pvc.visual.PointPlot(this, {
                 name: 'trend',

@@ -36,12 +36,20 @@ def.space('pvc.trends', function(trends){
         
         'has', function(type){
             return def.hasOwn(_trends, type);
+        },
+        
+        'types', function(){
+            return def.ownKeys(_trends);
         });
     
     
     trends.define('linear', {
         label: 'Linear trend',
-        model: function(rowsQuery, funX, funY){
+        model: function(options){
+            var rows = def.get(options, 'rows'); 
+            var funX = def.get(options, 'x');
+            var funY = def.get(options, 'y');
+            
             var i = 0;
             var N = 0;
             var sumX  = 0;
@@ -52,8 +60,8 @@ def.space('pvc.trends', function(trends){
                 return value != null ? (+value) : NaN;  // to Number works for dates as well
             };
             
-            while(rowsQuery.next()){
-                var row = rowsQuery.item;
+            while(rows.next()){
+                var row = rows.item;
                 
                 // Ignore null && NaN values
                 
@@ -98,7 +106,7 @@ def.space('pvc.trends', function(trends){
                     reset: def.noop,
                     
                     // y = alpha + beta * x
-                    sample: function(x){
+                    sample: function(x/*, y, i*/){
                         return alpha + beta * (+x);
                     }
                 };
@@ -106,5 +114,95 @@ def.space('pvc.trends', function(trends){
         }
     });
     
+    // Source: http://en.wikipedia.org/wiki/Moving_average
+    trends.define('moving-average', {
+        label: 'Moving average',
+        model: function(options){
+            var W = Math.max(+(def.get(options, 'periods') || 3), 2);
+              
+            var sum = 0; // Current sum of values in avgValues
+            var avgValues = []; // Values in the average window
+            
+            return {
+                reset: function(){
+                    sum = 0;
+                    avgValues.length = 0;
+                },
+                
+                sample: function(x, y, i){
+                    // Only y is relevant for this trend type
+                    var L = W;
+                    if(y != null){
+                        avgValues.unshift(y);
+                        sum += y;
+                        
+                        L = avgValues.length;
+                        if(L > W){
+                            sum -= avgValues.pop();
+                            L = W;
+                        }
+                    }
+                    
+                    return sum / L;
+                }
+            };
+        }
+    });
     
+    // Source: http://en.wikipedia.org/wiki/Moving_average
+    trends.define('weighted-moving-average', {
+        label: 'Weighted Moving average',
+        model: function(options){
+            var W = Math.max(+(def.get(options, 'periods') || 3), 2);
+            
+            // Current sum of values in the window
+            var sum = 0; // Current sum of values in avgValues
+            
+            // Current numerator
+            var numer = 0;
+            
+            var avgValues = []; // Values in the average window
+            var L = 0;
+            
+            // Constant Denominator (from L = W onward it is constant)
+            // W +  (W - 1) + ... + 2 + 1
+            // = W * (W + 1) / 2;
+            var denom = 0;
+            
+            return {
+                reset: function(){
+                    sum = numer = denom = L = 0;
+                    avgValues.length = 0;
+                },
+                
+                sample: function(x, y/*, i*/){
+                    // Only y is relevant for this trend type
+                    if(y != null){
+                        
+                        if(L < W){
+                            // Still filling the avgValues array
+                            
+                            avgValues.push(y);
+                            L++;
+                            denom += L;
+                            numer += L * y;
+                            sum   += y;
+                        } else {
+                            // denom is now equal to: W * (W + 1) / 2; 
+                            numer += (L * y) - sum;
+                            sum   += y - avgValues[0]; // newest - oldest
+                            
+                            // Shift avgValues left
+                            for(var j = 1 ; j < W ; j++){
+                                avgValues[j - 1] = avgValues[j];
+                            }
+                            avgValues[W - 1] = y;
+                        }
+                    }
+                    
+                    return numer / denom;
+                }
+            };
+        }
+    });
 });

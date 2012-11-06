@@ -387,10 +387,7 @@ pvc.BaseChart
             def
             .query(def.own(this.axes))
             .selectMany(function(axis){ return axis.dataCells; })
-            .where(function(dataCell){
-                var trendType = dataCell.trendType;
-                return !!trendType && trendType !== 'none'; 
-             })
+            .where(function(dataCell){ return !!dataCell.trend; })
              .distinct(function(dataCell){
                  return dataCell.role.name  + '|' +
                        (dataCell.dataPartValue || '');

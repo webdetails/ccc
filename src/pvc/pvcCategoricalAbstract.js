@@ -37,6 +37,7 @@ def
         var serRole = this._serRole;
         var xRole   = this._catRole;
         var yRole   = dataCell.role;
+        var trendOptions = dataCell.trend;
         
         this._warnSingleContinuousValueRole(yRole);
         
@@ -78,7 +79,7 @@ def
                        function(allCatData){
                            return allCatData.atoms[xDimName].value;
                        };
-                       
+
             var funY = function(allCatData){
                 var group = data._childrenByKey[allCatData.key];
                 if(group && serData1){
@@ -89,7 +90,13 @@ def
                 return group ? group.dimensions(yDimName).sum(sumKeyArgs) : null;
             };
             
-            var trendModel = trendInfo.model(def.query(allCatDatas), funX, funY);
+            var options = def.create(trendOptions, {
+                rows: def.query(allCatDatas),
+                x: funX,
+                y: funY
+            });
+            
+            var trendModel = trendInfo.model(options);
             if(trendModel){
                 // At least one point...
                 // Sample the line on each x and create a datum for it
@@ -99,40 +106,41 @@ def
                                  index :
                                  allCatData.atoms[xDimName].value;
                     
-                    var trendY = trendModel.sample(trendX);
-                    
-                    var catData   = data._childrenByKey[allCatData.key];
-                    var efCatData = catData || allCatData;
-                    
-                    var atoms;
-                    var proto = catData;
-                    if(serData1){
-                        var catSerData = catData && 
-                                         catData._childrenByKey[serData1.key];
+                    var trendY = trendModel.sample(trendX, funY(allCatData), index);
+                    if(trendY != null){
+                        var catData   = data._childrenByKey[allCatData.key];
+                        var efCatData = catData || allCatData;
                         
-                        if(catSerData){
-                            atoms = Object.create(catSerData._datums[0].atoms);
-                        } else {
-                            // Missing data point
-                            atoms = Object.create(efCatData._datums[0].atoms);
+                        var atoms;
+                        var proto = catData;
+                        if(serData1){
+                            var catSerData = catData && 
+                                             catData._childrenByKey[serData1.key];
                             
-                            // Now copy series atoms
-                            def.copyOwn(atoms, serData1.atoms);
+                            if(catSerData){
+                                atoms = Object.create(catSerData._datums[0].atoms);
+                            } else {
+                                // Missing data point
+                                atoms = Object.create(efCatData._datums[0].atoms);
+                                
+                                // Now copy series atoms
+                                def.copyOwn(atoms, serData1.atoms);
+                            }
+                        } else {
+                            // Series is unbound
+                            atoms = Object.create(efCatData._datums[0].atoms);
                         }
-                    } else {
-                        // Series is unbound
-                        atoms = Object.create(efCatData._datums[0].atoms);
+                        
+                        atoms[yDimName] = trendY;
+                        atoms[dataPartDimName] = trendInfo.dataPartAtom;
+                        
+                        var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
+                        newDatum.isVirtual = true;
+                        newDatum.isTrend   = true;
+                        newDatum.trendType = trendInfo.type;
+                        
+                        newDatums.push(newDatum);
                     }
-                    
-                    atoms[yDimName] = trendY;
-                    atoms[dataPartDimName] = trendInfo.dataPartAtom;
-                    
-                    var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
-                    newDatum.isVirtual = true;
-                    newDatum.isTrend   = true;
-                    newDatum.trendType = trendInfo.type;
-                    
-                    newDatums.push(newDatum);
                 }, this);
             }
         }

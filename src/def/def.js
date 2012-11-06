@@ -2203,8 +2203,18 @@ def.type('ArrayLikeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        if(nextIndex < this._count){
-            this.item = this._list[nextIndex];
+        var count = this._count;
+        if(nextIndex < count){
+            var list = this._list;
+            
+            while(!objectHasOwn.call(list, nextIndex)){
+                nextIndex++;
+                if(nextIndex >= count){
+                    return 0;
+                }
+            }
+            
+            this.item = list[nextIndex];
             return 1;
         }
     },
@@ -2440,8 +2450,18 @@ def.type('ReverseQuery', def.Query)
             this._count  = this._source.length;
         }
         
-        if(nextIndex < this._count){
-            this.item = this._source[this._count - nextIndex - 1];
+        var count = this._count;
+        if(nextIndex < count){
+            var index = count - nextIndex - 1;
+            var source = this._source;
+            
+            while(!objectHasOwn.call(source, index)){
+                if(--index < 0){
+                    return 0;
+                }
+            }
+            
+            this.item = source[index];
             return 1;
         }
     }

@@ -673,10 +673,12 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseTrendType = function(value) {
         if(value){
-            switch(value){
-                case 'none':
-                case 'linear':
-                    return value;
+            if(value === 'none'){
+                return value;
+            }
+            
+            if(pvc.trends.has(value)){
+                return value;
             }
             
             if(pvc.debug >= 2){

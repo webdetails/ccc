@@ -266,7 +266,18 @@ def
             .intercept('strokeDasharray', function(){
                 var dashArray = this.delegateExtension();
                 if(dashArray === undefined){
-                    dashArray = this.scene.isInterpolated ? '.' : null; 
+                    var scene = this.scene;
+                    var useDash = scene.isInterpolated;
+                    if(!useDash){
+                        var next = scene.nextSibling;
+                        useDash = next && next.isIntermediate && next.isInterpolated;
+                        if(!useDash){
+                            var previous = scene.previousSibling;
+                            useDash = previous  && scene.isIntermediate && previous.isInterpolated;
+                        }
+                    }
+                    
+                    dashArray = useDash ? '. ' : null;
                 }
                 
                 return dashArray;

@@ -19,5 +19,9 @@ pvc.visual.BulletPlot.optionsDef = def.create(
     pvc.visual.Plot.optionsDef, {
         ShowValues: { // override
             value: true
+        },
+        
+        ColorRole: {
+            value: null
         }
     });

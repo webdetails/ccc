@@ -15,6 +15,32 @@ def.scope(function(){
         }
     });
     
+    function castTrend(trend){
+        var type = this.option('TrendType');
+        if(!type && trend){
+            type = trend.type;
+        }
+        
+        if(!type || type === 'none'){
+            return null;
+        }
+        
+        if(!trend){
+            trend = {};
+        } else {
+            trend = Object.create(trend);
+        }
+        
+        trend.type = type;
+       
+        var label = this.option('TrendLabel');
+        if(label !== undefined){
+            trend.label = label;
+        }
+        
+        return trend;
+    }
+    
     pvc.visual.CartesianPlot.optionsDef = def.create(
         pvc.visual.Plot.optionsDef, {
             BaseAxis: {
@@ -46,7 +72,7 @@ def.scope(function(){
                     '_resolveNormal',
                     '_resolveDefault'
                 ]),
-                cast:  function(value){
+                cast: function(value){
                     value = pvc.castNumber(value);
                     if(value != null){
                         value = def.between(value, 1, 10);
@@ -64,17 +90,35 @@ def.scope(function(){
                 // String or string array
             },
             
+            Trend: {
+                resolve: pvc.options.resolvers([
+                    '_resolveFixed',
+                    '_resolveNormal',
+                    function(optionInfo){
+                        var type = this.option('TrendType');
+                        if(type){
+                            // Cast handles the rest
+                            optionInfo.defaultValue({
+                                type: type
+                            });
+                            return true;
+                        }
+                    }
+                ]),
+                cast:    castTrend
+            },
+            
             TrendType: {
                 resolve: '_resolveFull',
-                cast:    pvc.parseTrendType,
-                value:   'none'
+                cast:    pvc.parseTrendType
+                //value:   'none'
             },
             
             TrendLabel: {
                 resolve: '_resolveFull',
                 cast:    String
             },
-                        
+            
             NullInterpolationMode: {
                 resolve: '_resolveFull',
                 cast:    pvc.parseNullInterpolationMode,

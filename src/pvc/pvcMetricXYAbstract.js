@@ -69,6 +69,7 @@ def
         var serRole = this._serRole;
         var xRole   = this._xRole;
         var yRole   = dataCell.role;
+        var trendOptions = dataCell.trend;
         
         this._warnSingleContinuousValueRole(yRole);
         
@@ -99,32 +100,38 @@ def
                     return datum.atoms[yDimName].value;
                 };
             
-            var trendModel = trendInfo.model(serData.datums(), funX, funY);
+
+            var options = def.create(trendOptions, {
+                    rows: serData.datums(),
+                    x: funX,
+                    y: funY
+                });
+
+            var trendModel = trendInfo.model(options);
             if(trendModel){
-                // Works well for linear, but for other interpolation types
-                // what is the correct sampling spacing?
-                var firstDatum = serData.firstDatum();
-                var xExtent = serData.dimensions(xDimName).extent();
-                if(xExtent.min !== xExtent.max){
-                    var xPoints = [xExtent.min.value, xExtent.max.value];
-                    // At least one point...
-                    // Sample the line on each x and create a datum for it
-                    // on the 'trend' data part
-                    xPoints.forEach(function(trendX, index){
-                        var trendY = trendModel.sample(trendX);
-                        var atoms = Object.create(serData.atoms); // just common atoms
-                        atoms[xDimName] = trendX;
-                        atoms[yDimName] = trendY;
-                        atoms[dataPartDimName] = trendInfo.dataPartAtom;
-                        
-                        var newDatum = new pvc.data.Datum(data.owner, atoms);
-                        newDatum.isVirtual = true;
-                        newDatum.isTrend   = true;
-                        newDatum.trendType = trendInfo.type;
-                        
-                        newDatums.push(newDatum);
-                    }, this);
-                }
+                serData
+                .datums()
+                .each(function(datum, index){
+                    var trendX = funX(datum);
+                    if(trendX){
+                        var trendY = trendModel.sample(trendX, funY(datum), index);
+                        if(trendY != null){
+                            var atoms = 
+                                def.set(
+                                    Object.create(serData.atoms), // just common atoms
+                                    xDimName, trendX,
+                                    yDimName, trendY,
+                                    dataPartDimName, trendInfo.dataPartAtom);
+                            
+                            newDatums.push( 
+                                def.set(
+                                    new pvc.data.Datum(data.owner, atoms),
+                                    'isVirtual', true,
+                                    'isTrend',   true,
+                                    'trendType', trendInfo.type));
+                        }
+                    }
+                });
             }
         }
     },

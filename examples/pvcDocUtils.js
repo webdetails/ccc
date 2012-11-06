@@ -228,17 +228,21 @@ def.scope(function(){
         if(count){
             $("#examples div").remove();
             
-            var index = 0;
-            var renderNextChart = function(){
-                var id = ids[index++];
+            ids.forEach(function(id){
                 $e.render(id);
-                
-                if(index < count){
-                    window.setTimeout(renderNextChart, 50);
-                }
-            };
+            });
             
-            renderNextChart();
+//            var index = 0;
+//            var renderNextChart = function(){
+//                var id = ids[index++];
+//                $e.render(id);
+//                
+//                if(index < count){
+//                    window.setTimeout(renderNextChart, 0);
+//                }
+//            };
+//            
+//            renderNextChart();
         }
     }
 });

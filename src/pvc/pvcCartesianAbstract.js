@@ -73,11 +73,7 @@ def
         /* Configure Ortho Axis Data Cell */
         if(plot.option.isDefined('OrthoAxis')){
             
-            var trendType = plot.option('TrendType'); // != null
-            if(trendType === 'none'){ 
-                trendType = null; 
-            }
-            
+            var trend = plot.option('Trend');
             var isStacked = plot.option.isDefined('Stacked') ?
                             plot.option('Stacked') :
                             undefined;
@@ -92,8 +88,7 @@ def
             var dataCellBase = {
                 dataPartValue: plot.option('DataPart' ),
                 isStacked:     isStacked,
-                trendType:     trendType,
-                trendLabel:    trendType && plot.option('TrendLabel'),
+                trend:         trend,
                 nullInterpolationMode: plot.option('NullInterpolationMode')
             };
             
@@ -126,9 +121,9 @@ def
         
     _generateTrendsDataCell: function(dataCell){
         /*jshint onecase:true */
-        var trendType =  dataCell.trendType;
-        if(trendType){
-            var trendInfo = pvc.trends.get(trendType);
+        var trend =  dataCell.trend;
+        if(trend){
+            var trendInfo = pvc.trends.get(trend.type);
             
             var newDatums = [];
             

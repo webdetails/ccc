@@ -131,16 +131,13 @@ pvc.BaseChart
                     return dataCellsByAxisTypeThenIndex[axisType];
                 })
                 .selectMany()
-                .first (function(dataCell){
-                    var trendType = dataCell.trendType;
-                    return trendType && trendType !== 'none'; 
-                })
+                .first (function(dataCell){ return !!dataCell.trend; })
                 ;
             
             if(firstDataCell){
-                var trendInfo = pvc.trends.get(firstDataCell.trendType);
+                var trendInfo = pvc.trends.get(firstDataCell.trend.type);
                 var dataPartAtom = trendInfo.dataPartAtom;
-                var trendLabel = firstDataCell.trendLabel;
+                var trendLabel = firstDataCell.trend.label;
                 if(trendLabel === undefined){
                     trendLabel = dataPartAtom.f;
                 }
