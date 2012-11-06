@@ -2212,6 +2212,7 @@ def.type('ArrayLikeQuery', def.Query)
                 if(nextIndex >= count){
                     return 0;
                 }
+                this._count--;
             }
             
             this.item = list[nextIndex];
@@ -2459,6 +2460,7 @@ def.type('ReverseQuery', def.Query)
                 if(--index < 0){
                     return 0;
                 }
+                this._count--;
             }
             
             this.item = source[index];
