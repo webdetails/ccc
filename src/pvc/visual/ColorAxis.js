@@ -60,8 +60,8 @@ def.scope(function(){
                                 return domainData && domainData.children();
                             }
                         })
-                        .distinct(function(childData){ return childData.key; })
-                        .select(function(child){ return child.value; })
+                        .distinct(function(child){ return child.key; })
+                        .select(function(child){ return def.nullyTo(child.value, ''); })
                         .array()
                         ;
                     

@@ -95,12 +95,13 @@ def.scope(function(){
         _wrapScale: function(scale){
             scale.type = this.scaleType;
             
+            var by;
+            
             // Applying scaleNullRangeValue to discrete scales
             // Caused problems in the discrete color scales
             // where we want it to catch the first color of the color scale,
             // in cases where there is only a null series...
             if(scale.type !== 'discrete' ){
-                var by;
                 var useAbs = this.scaleUsesAbs();
                 var nullAs = this.scaleTreatsNullAs();
                 if(nullAs && nullAs !== 'null'){
@@ -127,13 +128,15 @@ def.scope(function(){
                         };
                     }
                 }
-                
-                def.copy(by, scale);
-                
-                return by; // don't overwrite scale with by! it would cause infinite recursion...
+            } else {
+                // ensure null -> ""
+                by = function(v){
+                    return scale(v == null ? '' : v);
+                };
             }
             
-            return scale;
+            // don't overwrite scale with by! it would cause infinite recursion...
+            return def.copy(by, scale);
         },
         
         /**

@@ -319,7 +319,7 @@ def
             scale.isNull = true;
         } else {
             var values = data.children()
-                             .select(function(child){ return child.value; })
+                             .select(function(child){ return def.nullyTo(child.value, ""); })
                              .array();
             
             scale.domain(values);

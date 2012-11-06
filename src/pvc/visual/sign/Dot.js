@@ -7,7 +7,6 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     var protoMark = def.get(keyArgs, 'proto');
     if(protoMark){
         pvMark.extend(protoMark);
-        //pvMark.duckExtension(protoMark, pvc.extensionTag);
     }
     
     keyArgs = def.setDefaults(keyArgs, 'freeColor', false);

@@ -128,7 +128,9 @@ def
                 this.label = "";
             }
         } else if(count === 1){
-            this.value    = singleAtom.value;     // typed
+            var isDiscrete = singleAtom.dimension.type.isDiscrete;
+            
+            this.value    = isDiscrete ? singleAtom.globalKey : singleAtom.value; // typed when continuous
             this.rawValue = singleAtom.rawValue;  // original
             this.key      = singleAtom.globalKey; // string
             
