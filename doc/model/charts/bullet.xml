@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="BulletChart" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.ChartCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Bullet</b> chart class: <c:link to="pvc.BulletChart" />.
+        </c:documentation>
+    </c:complexType>
+    
+</c:model>

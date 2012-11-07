@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:space name="pvc.options.charts">
+        <c:documentation>
+            The namespace of chart options classes. 
+        </c:documentation>
+    </c:space>
+    
+    <c:include the="charts/common.xml" />
+    
+    <c:include the="charts/bullet.xml" />
+    
+	<c:include the="charts/cartesian-common.xml" />
+	
+	<c:include the="charts/categorical-common.xml" />
+	
+	<!-- CATEGORICAL -->
+	<c:include the="charts/box.xml" />
+	<c:include the="charts/heat-grid.xml" />
+	
+	<!-- BAR -->
+	<c:include the="charts/bar-common.xml" />
+	<c:include the="charts/bar.xml" />
+	<c:include the="charts/bar-normalized.xml" />
+	<c:include the="charts/waterfall.xml" />
+	
+	<!-- POINT-->
+	<c:include the="charts/point-common.xml" />
+    <c:include the="charts/line.xml" />
+    <c:include the="charts/line-stacked.xml" />
+    <c:include the="charts/dot.xml" />
+    <c:include the="charts/dot-stacked.xml" />
+    <c:include the="charts/area.xml" />
+    <c:include the="charts/area-stacked.xml" />
+    
+	<!-- METRIC POINT-->
+	<c:include the="charts/point-metric-common.xml" />
+	<c:include the="charts/line-metric.xml" />
+	<c:include the="charts/dot-metric.xml" />
+</c:model>

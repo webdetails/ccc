@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="RuleExtensionPoint" space="pvc.options.marks" base="pvc.options.marks.MarkExtensionPoint">
+         <c:documentation>
+            The class of protovis Rule extension points.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html" />.
+        </c:documentation>
+        
+        <c:property name="width" type="number">
+            <c:documentation>
+                The width of the rule, when it is horizontal.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html#width" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="height" type="number">
+            <c:documentation>
+                The height of the rule, when it is vertical. 
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html#height" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="strokeStyle" type="pvc.options.varia.ColorString">
+            <c:documentation>
+                The stroke color of the rule. 
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html#strokeStyle" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="lineWidth" type="number">
+            <c:documentation>
+                The line width of the rule.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html#lineWidth" />.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+</c:model>

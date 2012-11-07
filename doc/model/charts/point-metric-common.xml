@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="MetricPointChartCommonOptions" 
+                   space="pvc.options.charts" 
+                   base="pvc.options.charts.CartesianChartCommonOptions"
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class for the <b>Metric Line/Dot family</b> charts.
+        </c:documentation>
+    </c:complexType>
+    
+</c:model>

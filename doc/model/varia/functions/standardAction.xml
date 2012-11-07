@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:functionType name="StandardAction" space="pvc.options.varia">
+        <c:documentation>
+            A standard action function that is called 
+            when a certain event happens on a visual element.
+        </c:documentation>
+        <c:argument name="this" type="pvc.visual.Context" required="true">
+            <c:documentation>
+                The CCC visual context object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="scene" type="pvc.visual.Scene" required="true">
+            <c:documentation>
+                The scene associated with the visual item.
+            </c:documentation>
+        </c:argument>
+    </c:functionType>
+</c:model>

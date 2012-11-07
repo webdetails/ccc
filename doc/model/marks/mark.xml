@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="MarkExtensionPoint" space="pvc.options.marks">
+        <c:documentation>
+            The base class of protovis extension points.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html" />.
+        </c:documentation>
+        <c:property name="visible" type="boolean">
+            <c:documentation>
+                Indicates if a mark is visible.
+                
+                When a mark is not visible, 
+                all its other properties are not evaluated.
+                
+                When a mark is not visible, 
+                its children are not evaluated.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#visible" />.
+            </c:documentation>
+         </c:property>
+         <c:property name="left" type="number">
+            <c:documentation>
+                Indicates the distance between 
+                this mark's left side and 
+                its parent's left side.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#left" />.
+            </c:documentation>
+         </c:property>
+         <c:property name="right" type="number">
+            <c:documentation>
+                Indicates the distance between 
+                this mark's right side and 
+                its parent's right side.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#right" />.
+            </c:documentation>
+        </c:property>
+        <c:property name="top" type="number">
+            <c:documentation>
+                Indicates the distance between 
+                this mark's top side and 
+                its parent's top side.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#top" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="bottom" type="number">
+            <c:documentation>
+                Indicates the distance between 
+                this mark's bottom side and 
+                its parent's bottom side.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#bottom" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="events" type="string">
+            <c:documentation>
+                The mouse events that the mark can receive.
+                
+                The possible values are: 
+                <tt>'none'</tt>, <tt>'painted'</tt> and <tt>'all'</tt>.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#events" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="cursor" type="string">
+            <c:documentation>
+                The mouse cursor to show when the mouse is over.
+                The value is a CSS2 cursor: <c:link to="http://www.w3.org/TR/CSS2/ui.html#propdef-cursor" />.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html#cursor" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="add" type="function">
+            <c:documentation>
+                Use this extension point to add 
+                a new protovis mark to another mark.
+                
+                If the extension point refers to a panel mark,
+                the parent of the new mark will be that panel.
+                Otherwise, its parent will
+                be the parent panel of the mark of the extension point.
+                
+                <c:example>
+                The following example shows how to add an image to 
+                an axis tick:
+                <pre>
+                function yAxisTick(){
+                    return new pv.Image()
+                            .url('res/images/arrowYy.png')
+                            .lineWidth(0)
+                            .height(7)
+                            .width(5);
+                }
+                </pre>
+                </c:example>
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+</c:model>

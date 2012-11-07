@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="DockPosition" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The sides of a parent panel to 
+            which a child panel may be docked to.
+        </c:documentation>
+        
+        <c:atom name="Left" value="'left'">
+            <c:documentation>
+                The left side of the child panel 
+                is placed at the same position as the
+                left side of the parent panel. 
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Right" value="'right'">
+            <c:documentation>
+                The right side of the child panel 
+                is placed at the same position as the
+                right side of the parent panel. 
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Top" value="'top'">
+            <c:documentation>
+                The top side of the child panel 
+                is placed at the same position as the
+                top side of the parent panel. 
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Bottom" value="'bottom'">
+            <c:documentation>
+                The bottom side of the child panel 
+                is placed at the same position as the
+                bottom side of the parent panel. 
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

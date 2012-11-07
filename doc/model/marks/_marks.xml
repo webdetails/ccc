@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:space name="pvc.options.marks">
+        <c:documentation>
+            The namespace of the options of 
+            extension points of <i>protovis</i> marks. 
+        </c:documentation>
+    </c:space>
+    
+    <c:include the="marks/mark.xml" />
+    
+    <c:include the="marks/area.xml" />
+    <c:include the="marks/bar.xml" />
+    <c:include the="marks/dot.xml" />
+    <c:include the="marks/label.xml" />
+    <c:include the="marks/line.xml" />
+    <c:include the="marks/panel.xml" />
+    <c:include the="marks/rule.xml" />
+    <c:include the="marks/wedge.xml" />
+    <c:include the="marks/image.xml" />
+</c:model>

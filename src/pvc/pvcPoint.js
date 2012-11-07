@@ -185,6 +185,19 @@ def
 });
 
 /**
+ * Stacked Dot Chart
+ */
+def
+.type('pvc.StackedDotChart', pvc.PointAbstract)
+.add({
+    _createPointPlot: function(){
+        return new pvc.visual.PointPlot(this, {
+            fixed: {DotsVisible: true, Stacked: true}
+        });
+    }
+});
+
+/**
  * Stacked Area Chart
  */
 pvc.mStackedAreaChart = // V1 compatibility

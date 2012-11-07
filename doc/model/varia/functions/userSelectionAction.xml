@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:functionType name="UserSelectionAction" space="pvc.options.varia">
+        <c:documentation>
+            A callback function that is called
+            when the user performs a selection,
+            but before the corresponding datums' selected state is actually changed.
+        </c:documentation>
+        <c:argument name="this" type="pvc.visual.Context" required="true">
+            <c:documentation>
+                The CCC visual context object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="selectingDatums" type="list(pvc.data.Datum)" required="true">
+            <c:documentation>
+                An array with the datums that will be selected by the current operation.
+            </c:documentation>
+        </c:argument>
+        <c:returns type="list(pvc.data.Datum)">
+            <c:documentation>
+                The datums that should be actually selected.
+            </c:documentation>
+        </c:returns>
+    </c:functionType>
+</c:model>

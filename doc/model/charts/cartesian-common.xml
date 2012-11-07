@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="CartesianChartCommonOptions" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.ChartCommonOptions" 
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class for the <b>Cartesian</b> charts.
+        </c:documentation>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartCommonExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the cartesian charts.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="visualRoles" type="pvc.options.roles.CartesianCommonVisualRoles" category="Data Binding">
+            <c:documentation>
+                The options of visual roles that are common to (almost) all cartesian chart types.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="CartesianCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.ChartCommonVisualRoles">
+        <c:documentation>
+            The visual roles common to (almost) all cartesian chart types.
+        </c:documentation>
+        <c:property name="series" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>series</tt> visual role represents a 
+                <i>series</i> of connected data points.
+                
+                Most cartesian charts show the connectedness
+                of data points of a given series in some way, 
+                by connecting points with a line,
+                by giving them all the same color,
+                or, simply, 
+                by the order in which they are drawn,
+                and when overlapped, some stay on top of others.
+                
+                The <tt>series</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>series</tt> prefix.
+                
+                The visual role itself is optional,
+                yet, when unbound, 
+                a dimension with a "series" prefix
+                is automatically created for it,
+                and all datums will have the value <tt>null</tt>
+                in that dimension.
+                
+                The only cartesian chart type that 
+                does not support the <tt>series</tt> visual role is 
+                the <i>Box Plot</i>.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="CartesianChartCommonExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartCommonExtensionPoints">
+        <c:documentation>
+            The extension points common to all cartesian chart types.
+        </c:documentation>
+        
+        <c:property name="xAxisGrid" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the grid line rules that are drawn 
+                one per major tick of the <ii>XX</ii> axis 
+                (an horizontal axis has vertical grid line rules).
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="yAxisGrid" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the grid line rules that are drawn 
+                one per major tick of the <ii>YY</ii> axis 
+                (a vertical axis has horizontal grid line rules).
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="xAxisZeroLine" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the zero line rule that is drawn 
+                on the 0-valued tick, when there is one 
+                (an horizontal axis has a vertical zero line rule).
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="yAxisZeroLine" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the zero line rule that is drawn 
+                on the 0-valued tick, when there is one 
+                (a vertical axis has an horizontal zero line rule).
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+</c:model>

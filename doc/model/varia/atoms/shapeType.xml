@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="ShapeType" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The shapes that are available in protovis Dot marks.
+        </c:documentation>
+        
+        <c:atom name="Circle"   value="'circle'" />
+        <c:atom name="Square"   value="'square'" />
+        <c:atom name="Triangle" value="'triangle'" />
+        <c:atom name="Diamond"  value="'diamond'" />
+        <c:atom name="Cross"    value="'cross'" />
+        <c:atom name="Tick"     value="'tick'" />
+        <c:atom name="Bar"      value="'bar'" />
+    </c:atomType>
+</c:model>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="LegendPanelOptions" 
+                   space="pvc.options.panels" 
+                   base="pvc.options.panels.CommonDockedPanelOptions">
+        <c:documentation>
+            The options documentation class of the CCC legend panel.
+            
+            The default 
+            <c:link to="pvc.options.panels.CommonDockedPanelOptions#position" />
+            is <tt>'bottom'</tt>.
+            
+            The default 
+            <c:link to="pvc.options.panels.CommonDockedPanelOptions#font" />
+            is <tt>'10px sans-serif'</tt>.
+            
+            The default
+            <c:link to="pvc.options.panels.CommonDockedPanelOptions#paddings" />
+            is <tt>5</tt> pixels.
+        </c:documentation>
+        
+        <c:property name="textMargin" type="number" default="6" category="Layout">
+            <c:documentation>
+                The space between the marker and the associated label, in pixel units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="itemPadding" type="number" default="2.5" category="Layout">
+            <c:documentation>
+                Half the space between legend items, in pixel units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="markerSize" type="number" default="15" category="Layout">
+            <c:documentation>
+                The width and height of the marker panel.
+                
+                The marker itself will be slightly smaller.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="drawLine" type="boolean" category="Style">
+            <c:documentation>
+                Forces a rule to be shown or not in the marker zone.
+                
+                The default value depends on the chart type.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="drawMarker" type="boolean" category="Style">
+            <c:documentation>
+                Forces a shape to be shown or not in the marker zone.
+                
+                The default value depends on the chart type.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="shape" type="pvc.options.varia.ShapeType" category="Style">
+            <c:documentation>
+                Forces a given shape to be used in the marker zone.
+                
+                The default value depends on the chart type.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="clickMode" type="pvc.options.varia.LegendClickMode" default="'toggleVisible'" category="Style">
+            <c:documentation>
+                What happens when the user clicks a legend item. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.LegendPanelExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points provided by the legend panel.
+            </c:documentation>
+         </c:property>
+    </c:complexType>
+    
+    <c:complexType name="LegendPanelExtensionPoints" space="pvc.options.ext">
+        <c:documentation>
+            The extension points of the legend panel.
+            
+            To use an extension point you must find its full name: 
+            join the prefix property name, 
+            like <c:link to="#legendArea" />,
+            with one of the properties of the type of the extension point,
+            like <c:link to="pvc.options.marks.BarExtensionPoint#strokeStyle" />,
+            with an "_" character in between,
+            and obtain the name <tt>legendArea_strokeStyle</tt>.
+        </c:documentation>
+        
+        <c:property name="legendArea" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the top panel of the legend panel.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="legendPanel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of legend item panels.
+            </c:documentation>
+        </c:property>
+                
+        <c:property name="legendLabel" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the label of a legend item.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="legendDot" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the dot (the marker's shape) of a legend item.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="legendRule" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the rule (the marker's line) of a legend item.
+            </c:documentation>
+        </c:property>
+        
+        <!--  Shouldn't this apply to "label" and "panel" EPs as well??
+        <c:property name="legend2Dot" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the dot (the marker's shape) of 
+                a legend item of the second group.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="legend2Rule" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the rule (the marker's line) of a legend item
+                of the second group.
+            </c:documentation>
+        </c:property>
+        -->
+    </c:complexType>
+    
+</c:model>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:space name="pvc.options.roles">
+        <c:documentation>
+            The namespace of CCC visual roles option classes. 
+        </c:documentation>
+    </c:space>
+    
+    <c:complexType name="VisualRoleOptions" space="pvc.options.roles">
+        <c:documentation>
+            The options documentation class of a visual role.
+            
+            Where a visual role argument is expected, 
+            a <tt>string</tt> value is also accepted,
+            with the content of what would be specified in
+            the property <c:link to="#dimensions" />.
+        </c:documentation>
+        <c:property name="dimensions" type="string">
+            <c:documentation>
+                A list of dimension names and respective 
+                sort orders.
+                
+                A dimensions string is similar to an SQL 'order by' clause,
+                like the following examples show:
+                <dl>
+                    <dt>
+                        <tt>"productType"</tt>
+                    </dt>
+                    <dd>
+                        the visual role is bound to the single dimension named <tt>"productType"</tt>,
+                        and data will be sorted in ascending order
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <tt>"sales"</tt>
+                    </dt>
+                    <dd>
+                        the visual role is bound to the single dimension named <tt>"sales"</tt>,
+                        and data will be sorted in ascending order
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <tt>"country, productType"</tt>
+                    </dt>
+                    <dd>
+                        the visual role is bound to the dimensions 
+                        named <tt>"country"</tt> and <tt>"productType"</tt>,
+                        and data will be sorted first by
+                        <tt>"country"</tt>, in ascending order,
+                        and then by 
+                        <tt>"productType"</tt>, in ascending order
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <tt>"country desc, productType asc"</tt>
+                    </dt>
+                    <dd>
+                        the visual role is bound to the dimensions 
+                        named <tt>"country"</tt> and <tt>"productType"</tt>,
+                        and data will be sorted first by
+                        <tt>"country"</tt>, in descending order,
+                        and then by 
+                        <tt>"productType"</tt>, in ascending order
+                    </dd>
+                </dl>
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="isReversed" type="boolean" default="false">
+            <c:documentation>
+                Indicates that the visual role's data 
+                should be ordered in reverse order
+                in relation to the sort orders specified in
+                <c:link to="#dimensions" />.
+                
+                This option provides a quick way to reverse the order
+                of the whole visual role, without changing any partial
+                sort orders assigned to each dimension of the visual role.
+                
+                This option can be used to reverse the order of 
+                the data that is shown in an axis.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+</c:model>

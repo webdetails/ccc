@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:functionType name="DimensionsReader" space="pvc.options.varia">
+        <c:documentation>
+            A function that reads raw values from a virtual item array.
+        </c:documentation>
+        <c:argument name="this" type="pvc.data.Data" required="true">
+            <c:documentation>
+                The data instance into which atoms will be read.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="virtualItem" type="list(any)" required="true">
+            <c:documentation>
+                The virtual item array.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="outAtoms" type="object" required="true">
+            <c:documentation>
+                An object that should be filled with read raw values, 
+                each placed in a property with the name
+                of the corresponding dimension.
+                
+                It is also possible that the values be the atoms themselves, 
+                a technique that can be used to achieve greater performance,
+                when a dimension only has two or three possible values. 
+            </c:documentation>
+        </c:argument>
+    </c:functionType>
+</c:model>

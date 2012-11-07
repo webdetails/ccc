@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:space name="pvc.options.varia">
+        <c:documentation>
+            The namespace of various options-related helper types. 
+        </c:documentation>
+    </c:space>
+    
+    <!-- ATOMS -->
+    <c:include the="varia/atoms/alignment.xml" />
+    <c:include the="varia/atoms/clearSelectionMode.xml" />
+    <c:include the="varia/atoms/dimensionValueType.xml" />
+    <c:include the="varia/atoms/dockPosition.xml" />
+    <c:include the="varia/atoms/legendClickMode.xml" />
+    <c:include the="varia/atoms/orientation.xml" />
+    <c:include the="varia/atoms/shapeType.xml" />
+    
+    <!-- FUNCTIONS -->
+    <c:include the="varia/functions/dimensionComparer.xml" />
+    <c:include the="varia/functions/dimensionConverter.xml" />
+    <c:include the="varia/functions/dimensionFormatter.xml" />
+    <c:include the="varia/functions/dimensionKey.xml" />
+    <c:include the="varia/functions/dimensionsCalculation.xml" />
+    <c:include the="varia/functions/dimensionsReader.xml" />
+    <c:include the="varia/functions/numberFormatter.xml" />
+    <c:include the="varia/functions/selectionChangedAction.xml" />
+    <c:include the="varia/functions/standardAction.xml" />
+    <c:include the="varia/functions/tooltipFormatter.xml" />
+    <c:include the="varia/functions/userSelectionAction.xml" />
+    
+    <!-- COMPLEX TYPES - AUXILIAR -->
+    <c:complexType name="Sides" space="pvc.options.varia">
+        <c:documentation>
+            Describes the distances from 
+            each of the four planar sides:
+            "left", "right", "top" and "bottom".
+            
+            It is used to describe the margins and the paddings of panels.
+            
+            It is possible to specify any combination of the side properties.
+            
+            All side properties support values in absolute or relative units:
+            <dl>
+                <dt>absolute</dt>
+                <dd>
+                    if it is a <tt>number</tt> or a numeric <tt>string</tt>,
+                    the measure is in pixel units
+                </dd>
+                
+                <dt>relative</dt>
+                <dd>
+                    if it is a numeric <tt>string</tt> with a "%" suffix,
+                    the measure is a percentage of some reference size;
+                    usually, the reference size is 
+                    the size of the corresponding container panel side
+                    ("width" if side is "left" or "right", or "height" otherwise) 
+                </dd>
+            </dl>
+            
+            The special property, <tt>all</tt>, affects all unspecified properties at once. 
+            
+            <c:example>
+                The following is an example of a <i>sides</i>-structured object,
+                the hypothetical margins of a legend panel:
+                <pre>
+                var legendMargins = {left: 10, right: '20', all: '15%'};
+                </pre> 
+                It says that 
+                the left margin has 10 pixels, 
+                the right margin has 20 pixels, and 
+                the top and bottom margins have each 
+                    the size of 15 percent of the legend panel's height.
+            </c:example>
+            
+            <h3>Single number or numeric string interpretation</h3>
+            All chart options of type <c:link to="pvc.options.varia.Sides" /> 
+            allow specifying
+            a <tt>number</tt> or 
+            a <tt>string</tt> of a single number, possibly followed by a "%" sign, 
+            instead of the JSON form,
+            as meaning <i>all</i> properties.
+            
+            <!-- 
+            The interpretation of what the number or percentage stand 
+            for depends on the specific option. 
+            In the legend and title panels, for example, 
+            it is interpreted means the 
+             -->
+            <h3>String syntax</h3>
+            All chart options of type <c:link to="pvc.options.varia.Sides" /> 
+            also allow specifying a CSS2-like margins string, 
+            <c:link to="http://www.w3.org/TR/CSS21/box.html#propdef-margin" />.
+            <c:example>
+                The following shows the equivalence between the string and JSON syntax:
+                <pre>
+                var margins1 = '1';       // {all: '1'}
+                var margins2 = '1 2';     // {top: '1', bottom: '1', right: '2', left: '2'}
+                var margins3 = '1 2 3';   // {top: '1', bottom: '3', right: '2', left: '2'}
+                var margins4 = '1 2 3 4'; // {top: '1', bottom: '3', right: '2', left: '4'}
+                </pre>
+            </c:example>
+        </c:documentation>
+        <c:property name="all"    type="number string" />
+        <c:property name="left"   type="number string" />
+        <c:property name="right"  type="number string" />
+        <c:property name="top"    type="number string" />
+        <c:property name="bottom" type="number string" />
+    </c:complexType>
+    
+    <c:complexType name="Size" space="pvc.options.varia">
+        <c:documentation>
+            Describes the size 
+            of the horizontal and vertical dimensions
+            of an axis aligned box.
+            It is used to describe the margins and the paddings of panels.
+            
+            It is possible to specify any combination of the size properties.
+            
+            All size properties support values in absolute or relative units:
+            <dl>
+                <dt>absolute</dt>
+                <dd>
+                    if it is a <tt>number</tt> or a numeric <tt>string</tt>,
+                    the measure is in pixel units
+                </dd>
+                
+                <dt>relative</dt>
+                <dd>
+                    if it is a numeric <tt>string</tt> with a "%" suffix,
+                    the measure is a percentage of some reference size;
+                    usually, 
+                    the reference size is 
+                    the container panel's corresponding size
+                </dd>
+            </dl>
+            
+            The special property, <tt>all</tt>, affects all unspecified properties at once. 
+            
+            <c:example>
+                The following is an example of a <i>size</i>-structured object,
+                the hypothetical size of a title panel:
+                <pre>
+                var titleSize = {width: '80%', all: 100};
+                </pre> 
+                It says that 
+                the height has 100 pixels, 
+                and that the width is 80 percent of the base panel's width.
+            </c:example>
+            
+            <h3>Single number or numeric string interpretation</h3>
+            All chart options of type <c:link to="pvc.options.varia.Size" /> 
+            allow specifying
+            a <tt>number</tt> or 
+            a <tt>string</tt> of a single number, possibly followed by a "%" sign, 
+            instead of the JSON form.
+            //as meaning <i>all</i> properties.
+            
+            The interpretation of what the number or percentage stand 
+            for depends on the specific option. 
+            In the legend and title panels, for example, 
+            it is the size of the dimension orthogonal to the anchored to side.
+            So if a legend is anchored to the <tt>'left'</tt> side,
+            the number or percentage is the legend's width.  
+             
+            <h3>String syntax</h3>
+            All chart options of type <c:link to="pvc.options.varia.Size" /> 
+            also allow specifying a string with a fixed structure.
+            <c:example>
+                The following shows the equivalence between the string and JSON syntax:
+                <pre>
+                var size1 = '1';   // {all: '1'}
+                var size2 = '1 2'; // {width: '1', height: '2'}
+                </pre>
+            </c:example>
+        </c:documentation>
+        
+        <c:property name="all"    type="number string" />
+        <c:property name="width"  type="number string" />
+        <c:property name="height" type="number string" />
+    </c:complexType>
+    
+    <c:complexType name="ColorString" space="pvc.options.varia" base="string">
+        <c:documentation>
+            This class is a documentation class and 
+            really just documents the format of color strings.
+            
+            Colors can be specified as a string that follows one of the following formats:
+            <ul>
+                <li>
+                    an RGB or HSL color, as defined in <c:link to="http://www.w3.org/TR/css3-color/" />:
+                    <ul>
+                        <li>
+                            <tt>'#AE7'</tt>
+                        </li>
+                        <li>
+                            <tt>'#A0E070'</tt>
+                        </li>
+                        <li>
+                            <tt>rgb(255, 0, 0)</tt>
+                        </li>
+                        <li>
+                            <tt>rgba(100%, 0, 0, 0.5)</tt>
+                        </li>
+                        <li>
+                            <tt>hsl(100, 50%, 20%)</tt>
+                        </li>
+                        <li>
+                            <tt>hsla(100, 50%, 20%, 0.5)</tt>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    an SVG named color, as defined in <c:link to="http://www.w3.org/TR/SVG/types.html#ColorKeywords" />:
+                    <ul>
+                        <li><tt>'aliceblue'</tt></li>
+                        <li><tt>'aquamarine'</tt></li>
+                    </ul>
+                </li>
+                <li>
+                    a subset of the CSS3 gradients format,
+                    as defined in <c:link to="http://www.w3.org/TR/css3-images/#gradients" />:
+                    <ul>
+                        <li><tt>'linear-gradient(90deg, green, blue)'</tt></li>
+                        <li><tt>'linear-gradient(to bottom left, red, yellow 20%, green, blue)'</tt></li>
+                        <li><tt>'linear-gradient(red, rgb(0,0,255))'</tt></li>
+                        <li><tt>'radial-gradient(red, yellow 40%, red)'</tt></li>
+                    </ul>
+                </li>
+                <li>
+                    <tt>'transparent'</tt> for a transparent background
+                </li>
+            </ul>
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.html#.color" />.
+        </c:documentation>
+    </c:complexType>
+    
+</c:model>

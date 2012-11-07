@@ -68,6 +68,8 @@
      -->
      
     <element name="model" type="com:ModelType">
+        <!-- Splitting in several files renders these undesirable 
+        
         <key name="complexType_unique_name">
             <selector xpath="com:complexType" />
             <field xpath="@space" />
@@ -103,7 +105,7 @@
            <selector xpath="com:complexType/property" />
            <field xpath="documentation/@format" />
         </unique>
-        
+         -->
         <!-- does not work because of namespace being split in class_key 
         <keyref name="class_keyref" refer="com:class_key">
             <selector xpath="com:complexType" />
@@ -154,6 +156,11 @@
 			        </key>
 	            </element>
 	            <element name="functionType" type="com:FunctionTypeType" />
+	            <element name="include">
+			        <complexType>
+			            <attribute name="the" type="string" use="required" /> 
+			        </complexType>
+			    </element>
 	       </choice>
        </sequence>
     </complexType>

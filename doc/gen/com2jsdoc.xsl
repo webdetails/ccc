@@ -9,16 +9,24 @@
     
     <xsl:output method="text" />
     
+    <xsl:param name="relativePath" select="''" />
+    
     <!-- New Line character -->
     <xsl:variable name='nl'><xsl:text>&#xd;&#xa;</xsl:text></xsl:variable>
     
+    <xsl:variable name="funTypes" select="fun:getFunctionTypes(/)" />
+    
 	<xsl:template match="/com:model">
-	    <xsl:apply-templates select="com:space" />
-		<xsl:apply-templates select="com:complexType" />
-		<xsl:apply-templates select="com:atomType" />
+	   <xsl:apply-templates select="com:space|com:complexType|com:atomType|com:include" />
 	</xsl:template>
 	
-	<xsl:template match="com:space">
+	<xsl:template match="/com:model/com:include">
+	   <xsl:if test="string(@the) != ''">
+	       <xsl:apply-templates select="document(concat($relativePath,@the))/com:model" />
+       </xsl:if>
+    </xsl:template>
+    
+	<xsl:template match="/com:model/com:space">
         <!-- Generate the JS namespace constructor documentation -->
         <xsl:value-of select="concat($nl, '/**')" />
         
@@ -34,7 +42,7 @@
         <xsl:value-of select="concat($nl, @name, ' = {};', $nl)" />
     </xsl:template>
     
-	<xsl:template match="com:complexType">
+	<xsl:template match="/com:model/com:complexType">
         <xsl:variable name="fullTypeName">
             <xsl:choose>
                 <xsl:when test="@space">
@@ -77,7 +85,7 @@
             
             <!-- , or space are synonyms with | -->
             <xsl:variable name="type" select="string(@type)" />
-            <xsl:variable name="funTypeDef" select="/com:model/com:functionType[fun:getTypeFullName(.)=$type]" />
+            <xsl:variable name="funTypeDef" select="$funTypes[fun:getTypeFullName(.)=$type]" />
             
             <xsl:variable name="typeTag">
                 <xsl:choose>
@@ -173,7 +181,7 @@
         
     </xsl:template>
     
-    <xsl:template match="com:atomType"> 
+    <xsl:template match="/com:model/com:atomType"> 
     
         <xsl:variable name="fullTypeName" select="fun:getTypeFullName(.)" />
         
@@ -391,5 +399,17 @@
                 <xsl:value-of select="string($type/@name)" />
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:function>
+    
+    <xsl:function name="fun:getFunctionTypes">
+        <xsl:param name="doc" />
+        
+        <xsl:sequence select="$doc/com:model/com:functionType" />
+        
+        <xsl:for-each select="$doc/com:model/com:include">
+            <xsl:if test="string(@the) != ''">
+                <xsl:sequence select="fun:getFunctionTypes(document(concat($relativePath,@the)))" />
+	        </xsl:if>
+        </xsl:for-each>
     </xsl:function>
 </xsl:stylesheet>
