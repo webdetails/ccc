@@ -17,3 +17,4 @@ pvc-*.js
 /copy-ccc-to-plugins.bat
 /generatePenBundle.sh
 /publish_analyzer.bat
+/doc/kettle/output
