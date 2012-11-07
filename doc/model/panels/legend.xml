@@ -2,7 +2,7 @@
 <c:model 
     xmlns:c="urn:webdetails/com/2012" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:complexType name="LegendPanelOptions" 
@@ -60,7 +60,7 @@
             </c:documentation>
         </c:property>
 
-        <c:property name="shape" type="pvc.options.varia.ShapeType" category="Style">
+        <c:property name="shape" type="pvc.options.varia.DotShapeType" category="Style">
             <c:documentation>
                 Forces a given shape to be used in the marker zone.
                 

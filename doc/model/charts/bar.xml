@@ -2,7 +2,7 @@
 <c:model 
     xmlns:c="urn:webdetails/com/2012" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:complexType name="BarChartOptions" 
@@ -11,6 +11,12 @@
         <c:documentation>
             The options documentation class of the <b>Bar</b> chart class: <c:link to="pvc.BarChart" />.
         </c:documentation>
+        
+         <c:property name="bar" type="pvc.options.plots.PlotCommonOptions">
+            <c:documentation>
+                Blah
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
 </c:model>

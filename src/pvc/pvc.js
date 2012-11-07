@@ -725,7 +725,7 @@ var pvc = def.globalSpace('pvc', {
         return align2;
     };
     
-    // suitable for protovis.anchor(..) 
+    // suitable for protovis.anchor(..) of all but the Wedge mark... 
     pvc.parseAnchor = function(anchor){
         if(anchor){
             switch(anchor){
@@ -739,6 +739,23 @@ var pvc = def.globalSpace('pvc', {
             
             if(pvc.debug >= 2){
                 pvc.log(def.format("Invalid anchor value '{0}'.", [anchor]));
+            }
+        }
+    };
+    
+    pvc.parseAnchorWedge = function(anchor){
+        if(anchor){
+            switch(anchor){
+                case 'outer':
+                case 'inner':
+                case 'center':
+                case 'start':
+                case 'end':
+                    return anchor;
+            }
+            
+            if(pvc.debug >= 2){
+                pvc.log(def.format("Invalid wedge anchor value '{0}'.", [anchor]));
             }
         }
     };

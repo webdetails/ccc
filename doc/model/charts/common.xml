@@ -2,7 +2,7 @@
 <c:model 
     xmlns:c="urn:webdetails/com/2012" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
 	<!--
@@ -93,7 +93,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="orientation" type="pvc.options.varia.Orientation" default="'vertical'" category="Layout">
+        <c:property name="orientation" type="pvc.options.varia.ChartOrientation" default="'vertical'" category="Layout">
             <c:documentation>
                 The chart orientation indicates if 
                 its main direction is vertical or horizontal.
@@ -344,7 +344,7 @@
                 
                 When a chart is rendered explicitly, 
                 through its <tt>render</tt> method,
-                it is possble to control whether the entry animation 
+                it is possible to control whether the entry animation 
                 is performed or not.
             </c:documentation>
         </c:property>
@@ -403,7 +403,7 @@
         </c:property>
         
         <c:property name="clearSelectionMode" 
-                    type="pvc.options.varia.ClearSelectionMode" 
+                    type="pvc.options.varia.ChartClearSelectionMode" 
                     default="'emptySpaceClick'" 
                     category="Interaction">
             <c:documentation>

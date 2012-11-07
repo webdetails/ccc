@@ -2,7 +2,7 @@
 <c:model 
     xmlns:c="urn:webdetails/com/2012" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:complexType name="CommonDockedPanelOptions" space="pvc.options.panels" base="pvc.options.panels.CommonPanelOptions">
@@ -15,7 +15,7 @@
          -->
          
         <c:property name="position" 
-                     type="pvc.options.varia.DockPosition"
+                     type="pvc.options.varia.PanelPosition"
                      category="Layout">
             <c:documentation>
                 The docking position of the panel.
@@ -23,7 +23,7 @@
         </c:property>
         
         <c:property name="align" 
-                     type="pvc.options.varia.AlignmentSource"
+                     type="pvc.options.varia.PanelAlignmentSource"
                      category="Layout">
             <c:documentation>
                 The alignment side of the panel (the source)
@@ -40,7 +40,7 @@
         </c:property>
         
         <c:property name="alignTo" 
-                     type="number string pvc.options.varia.AlignmentTarget"
+                     type="number string pvc.options.varia.PanelAlignmentTarget"
                      category="Layout">
             <c:documentation>
                 The alignment side or position 
@@ -51,7 +51,7 @@
                 The default value is the value of 
                 <c:link to="pvc.options.panels.CommonDockedPanelOptions#align" />.
                 
-                See <c:link to="pvc.options.varia.AlignmentTarget" />
+                See <c:link to="pvc.options.varia.PanelAlignmentTarget" />
                 for information on supported data types.
             </c:documentation>
         </c:property>

@@ -2,10 +2,10 @@
 <c:model 
     xmlns:c="urn:webdetails/com/2012" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:atomType name="ShapeType" space="pvc.options.varia" base="string">
+    <c:atomType name="DotShapeType" space="pvc.options.varia" base="string">
         <c:documentation>
             The shapes that are available in protovis Dot marks.
         </c:documentation>

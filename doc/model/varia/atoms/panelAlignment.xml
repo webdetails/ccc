@@ -2,10 +2,10 @@
 <c:model 
     xmlns:c="urn:webdetails/com/2012" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
 
-    <c:atomType name="AlignmentSource" space="pvc.options.varia" base="string">
+    <c:atomType name="PanelAlignmentSource" space="pvc.options.varia" base="string">
         <c:documentation>
             The sides of a child panel, the source, 
             that can be aligned with 
@@ -13,10 +13,10 @@
             
             The alignment side must be 
             orthogonal to the side of 
-            the <c:link to="pvc.options.varia.DockPosition" />.
+            the <c:link to="pvc.options.varia.PanelPosition" />.
             
-            By combininig the alignment source
-            with the <c:link to="pvc.options.varia.AlignmentTarget"/>,
+            By combining the alignment source
+            with the <c:link to="pvc.options.varia.PanelAlignmentTarget"/>,
             different alignment combinations can be achieved.
             
             The alignment target side must be 
@@ -72,7 +72,7 @@
         </c:atom>
     </c:atomType>
     
-    <c:atomType name="AlignmentTarget" space="pvc.options.varia" base="string">
+    <c:atomType name="PanelAlignmentTarget" space="pvc.options.varia" base="string">
         <c:documentation>
             The sides of a parent panel, the target, 
             with which the alignment side of a source child panel 

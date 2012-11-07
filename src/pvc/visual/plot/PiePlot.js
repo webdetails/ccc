@@ -37,6 +37,11 @@ def.scope(function(){
                 value:   null // all exploded when radius > 0
             },
             
+            ValuesAnchor: { // override
+                cast:  pvc.parseAnchorWedge,
+                value: 'outer'
+            },
+            
             ShowValues: { // override
                 value: true
             },

@@ -270,7 +270,7 @@ def
         if(this.valuesVisible){
             if(this.labelStyle === 'inside'){
                 
-                this.pvPieLabel = new pvc.visual.Label(this, this.pvPie.anchor("outer"), {
+                this.pvPieLabel = new pvc.visual.Label(this, this.pvPie.anchor(this.valuesAnchor), {
                         extensionId: 'label',
                         wrapper:     wrapper
                     })

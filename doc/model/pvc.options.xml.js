@@ -531,7 +531,7 @@ pvc.options.charts.ChartCommonOptions.prototype.canvas = undefined;
  * When a chart is rendered explicitly, 
  * through its 
  * <tt>render</tt> method,
- * it is possble to control whether the entry animation 
+ * it is possible to control whether the entry animation 
  * is performed or not.
  * 
  * @type boolean
@@ -543,7 +543,7 @@ pvc.options.charts.ChartCommonOptions.prototype.animate = undefined;
  * <p>
  * Controls if and how the selection can be cleared by the user.
  * 
- * @type pvc.options.varia.ClearSelectionMode
+ * @type pvc.options.varia.ChartClearSelectionMode
  * @default 'emptySpaceClick'
  * @category Interaction
  */
@@ -725,7 +725,7 @@ pvc.options.charts.ChartCommonOptions.prototype.margins = undefined;
  * <p>
  * This property is supported by most chart types. 
  * 
- * @type pvc.options.varia.Orientation
+ * @type pvc.options.varia.ChartOrientation
  * @default 'vertical'
  * @category Layout
  */
@@ -2015,6 +2015,12 @@ pvc.options.charts.BarChartOptions = function(){};
         
         
 /**
+ * Blah
+ * 
+ * @type pvc.options.plots.PlotCommonOptions
+ */
+pvc.options.charts.BarChartOptions.prototype.bar = undefined;
+/**
  * The options documentation class of the 
  * <b>Normalized Bar</b> chart class: {@link pvc.NormalizedBarChart}.
  * 
@@ -2564,7 +2570,7 @@ pvc.options.panels.CommonDockedPanelOptions = function(){};
  * and 
  * <tt>'center'</tt>, otherwise.
  * 
- * @type pvc.options.varia.AlignmentSource
+ * @type pvc.options.varia.PanelAlignmentSource
  * @category Layout
  */
 pvc.options.panels.CommonDockedPanelOptions.prototype.align = undefined;
@@ -2577,10 +2583,10 @@ pvc.options.panels.CommonDockedPanelOptions.prototype.align = undefined;
  * The default value is the value of 
  * {@link pvc.options.panels.CommonDockedPanelOptions#align}.
  * <p>
- * See {@link pvc.options.varia.AlignmentTarget}
+ * See {@link pvc.options.varia.PanelAlignmentTarget}
  * for information on supported data types.
  * 
- * @type number|string|pvc.options.varia.AlignmentTarget
+ * @type number|string|pvc.options.varia.PanelAlignmentTarget
  * @category Layout
  */
 pvc.options.panels.CommonDockedPanelOptions.prototype.alignTo = undefined;
@@ -2619,7 +2625,7 @@ pvc.options.panels.CommonDockedPanelOptions.prototype.paddings = undefined;
 /**
  * The docking position of the panel.
  * 
- * @type pvc.options.varia.DockPosition
+ * @type pvc.options.varia.PanelPosition
  * @category Layout
  */
 pvc.options.panels.CommonDockedPanelOptions.prototype.position = undefined;
@@ -2743,7 +2749,7 @@ pvc.options.panels.LegendPanelOptions.prototype.extensionPoints = undefined;
  * <p>
  * The default value depends on the chart type.
  * 
- * @type pvc.options.varia.ShapeType
+ * @type pvc.options.varia.DotShapeType
  * @category Style
  */
 pvc.options.panels.LegendPanelOptions.prototype.shape = undefined;
@@ -2875,6 +2881,56 @@ pvc.options.ext.ChartTitlePanelExtensionPoints.prototype.title = undefined;
  */
 pvc.options.ext.ChartTitlePanelExtensionPoints.prototype.titleLabel = undefined;
 /**
+ * The namespace of plot options classes. 
+ * 
+ * @namespace
+ */
+pvc.options.plots = {};
+
+/**
+ * The common options documentation class of all plots.
+ * 
+ * @class
+ */
+pvc.options.plots.PlotCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * 
+ * Indicates if value labels are shown next to the visual elements.
+ * 
+ * @deprecated Use {@link #valuesVisible} instead.
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.PlotCommonOptions.prototype.showValues = undefined;
+/**
+ * The alignment of a value label 
+ * relative to its corresponding visual element position.
+ * <p>
+ * The possible values depend on the chart type.
+ * 
+ * @type string
+ * @default 
+ */
+pvc.options.plots.PlotCommonOptions.prototype.valuesAnchor = undefined;
+/**
+ * Indicates if value labels are shown next to the visual elements.
+ * <p>
+ * Most charts have some form of showing labels
+ * with the 
+ * <i>main</i> value next to the visual element.
+ * <p>
+ * The default value really varies with the chart type,
+ * so be sure to confirm it in the most specific plot class.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.PlotCommonOptions.prototype.valuesVisible = undefined;
+/**
  * The namespace of CCC visual roles option classes. 
  * 
  * @namespace
@@ -3002,16 +3058,72 @@ pvc.options.roles.VisualRoleOptions.prototype.isReversed = undefined;
 pvc.options.varia = {};
 
 /**
+ * Controls if and how the selection can be cleared by the user.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.ChartClearSelectionMode = function(){};
+        
+        
+        
+        
+/**
+ * The user can click on any 
+ * <i>empty area</i>
+ * 
+ * <i>inside</i> the chart to clear the selection.
+ * 
+ * @value 'emptySpaceClick'
+ */
+pvc.options.varia.ChartClearSelectionMode.prototype.EmptySpaceClick = 'emptySpaceClick';
+/**
+ * The user has no way to explicitly fully clear the selection.
+ * <p>
+ * It is still possible to clear the selection,
+ * if the selection behavior performs a toggling operation.
+ * <p>
+ * Selection can always be cleared by code.
+ * 
+ * @value 'manual'
+ */
+pvc.options.varia.ChartClearSelectionMode.prototype.Manual = 'manual';
+/**
+ * The main direction of drawing.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.ChartOrientation = function(){};
+        
+        
+        
+        
+/**
+ * Horizontal direction.
+ * 
+ * @value 'horizontal'
+ */
+pvc.options.varia.ChartOrientation.prototype.Horizontal = 'horizontal';
+/**
+ * Vertical direction.
+ * 
+ * @value 'vertical'
+ */
+pvc.options.varia.ChartOrientation.prototype.Vertical = 'vertical';
+/**
  * The sides of a child panel, the source, 
  * that can be aligned with 
  * a target side of a parent panel.
  * <p>
  * The alignment side must be 
  * orthogonal to the side of 
- * the {@link pvc.options.varia.DockPosition}.
+ * the {@link pvc.options.varia.PanelPosition}.
  * <p>
- * By combininig the alignment source
- * with the {@link pvc.options.varia.AlignmentTarget},
+ * By combining the alignment source
+ * with the {@link pvc.options.varia.PanelAlignmentTarget},
  * different alignment combinations can be achieved.
  * <p>
  * The alignment target side must be 
@@ -3021,7 +3133,7 @@ pvc.options.varia = {};
  * @enum
  * @extends string
  */
-pvc.options.varia.AlignmentSource = function(){};
+pvc.options.varia.PanelAlignmentSource = function(){};
         
         
         
@@ -3033,7 +3145,7 @@ pvc.options.varia.AlignmentSource = function(){};
  * 
  * @value 'bottom'
  */
-pvc.options.varia.AlignmentSource.prototype.Bottom = 'bottom';
+pvc.options.varia.PanelAlignmentSource.prototype.Bottom = 'bottom';
 /**
  * The horizontal center position of the child panel 
  * is placed at the same position as the
@@ -3041,7 +3153,7 @@ pvc.options.varia.AlignmentSource.prototype.Bottom = 'bottom';
  * 
  * @value 'center'
  */
-pvc.options.varia.AlignmentSource.prototype.Center = 'center';
+pvc.options.varia.PanelAlignmentSource.prototype.Center = 'center';
 /**
  * The left side of the child panel 
  * is placed at the same position as the
@@ -3049,7 +3161,7 @@ pvc.options.varia.AlignmentSource.prototype.Center = 'center';
  * 
  * @value 'left'
  */
-pvc.options.varia.AlignmentSource.prototype.Left = 'left';
+pvc.options.varia.PanelAlignmentSource.prototype.Left = 'left';
 /**
  * The vertical center position of the child panel 
  * is placed at the same position as the
@@ -3057,7 +3169,7 @@ pvc.options.varia.AlignmentSource.prototype.Left = 'left';
  * 
  * @value 'middle'
  */
-pvc.options.varia.AlignmentSource.prototype.Middle = 'middle';
+pvc.options.varia.PanelAlignmentSource.prototype.Middle = 'middle';
 /**
  * The right side of the child panel 
  * is placed at the same position as the
@@ -3065,7 +3177,7 @@ pvc.options.varia.AlignmentSource.prototype.Middle = 'middle';
  * 
  * @value 'right'
  */
-pvc.options.varia.AlignmentSource.prototype.Right = 'right';
+pvc.options.varia.PanelAlignmentSource.prototype.Right = 'right';
 /**
  * The top side of the child panel 
  * is placed at the same position as the
@@ -3073,7 +3185,7 @@ pvc.options.varia.AlignmentSource.prototype.Right = 'right';
  * 
  * @value 'top'
  */
-pvc.options.varia.AlignmentSource.prototype.Top = 'top';
+pvc.options.varia.PanelAlignmentSource.prototype.Top = 'top';
 /**
  * The sides of a parent panel, the target, 
  * with which the alignment side of a source child panel 
@@ -3109,7 +3221,7 @@ pvc.options.varia.AlignmentSource.prototype.Top = 'top';
  * @enum
  * @extends string
  */
-pvc.options.varia.AlignmentTarget = function(){};
+pvc.options.varia.PanelAlignmentTarget = function(){};
         
         
         
@@ -3121,7 +3233,7 @@ pvc.options.varia.AlignmentTarget = function(){};
  * 
  * @value 'bottom'
  */
-pvc.options.varia.AlignmentTarget.prototype.Bottom = 'bottom';
+pvc.options.varia.PanelAlignmentTarget.prototype.Bottom = 'bottom';
 /**
  * The source side of the child panel
  * is placed at the same position as the
@@ -3129,7 +3241,7 @@ pvc.options.varia.AlignmentTarget.prototype.Bottom = 'bottom';
  * 
  * @value 'center'
  */
-pvc.options.varia.AlignmentTarget.prototype.Center = 'center';
+pvc.options.varia.PanelAlignmentTarget.prototype.Center = 'center';
 /**
  * The source side of the child panel
  * is placed at the same position as the
@@ -3137,7 +3249,7 @@ pvc.options.varia.AlignmentTarget.prototype.Center = 'center';
  * 
  * @value 'left'
  */
-pvc.options.varia.AlignmentTarget.prototype.Left = 'left';
+pvc.options.varia.PanelAlignmentTarget.prototype.Left = 'left';
 /**
  * The source side of the child panel
  * is placed at the same position as the
@@ -3145,7 +3257,7 @@ pvc.options.varia.AlignmentTarget.prototype.Left = 'left';
  * 
  * @value 'middle'
  */
-pvc.options.varia.AlignmentTarget.prototype.Middle = 'middle';
+pvc.options.varia.PanelAlignmentTarget.prototype.Middle = 'middle';
 /**
  * The source side of the child panel
  * is placed at the same position as the
@@ -3172,7 +3284,7 @@ pvc.options.varia.AlignmentTarget.prototype.Middle = 'middle';
  * 
  * @value 'page-middle'
  */
-pvc.options.varia.AlignmentTarget.prototype.PageMiddle = 'page-middle';
+pvc.options.varia.PanelAlignmentTarget.prototype.PageMiddle = 'page-middle';
 /**
  * The source side of the child panel
  * is placed at the same position as the
@@ -3180,7 +3292,7 @@ pvc.options.varia.AlignmentTarget.prototype.PageMiddle = 'page-middle';
  * 
  * @value 'right'
  */
-pvc.options.varia.AlignmentTarget.prototype.Right = 'right';
+pvc.options.varia.PanelAlignmentTarget.prototype.Right = 'right';
 /**
  * The source side of the child panel
  * is placed at the same position as the
@@ -3188,39 +3300,52 @@ pvc.options.varia.AlignmentTarget.prototype.Right = 'right';
  * 
  * @value 'top'
  */
-pvc.options.varia.AlignmentTarget.prototype.Top = 'top';
+pvc.options.varia.PanelAlignmentTarget.prototype.Top = 'top';
 /**
- * Controls if and how the selection can be cleared by the user.
+ * The sides of a parent panel to 
+ * which a child panel may be docked to.
  * 
  * @class
  * @enum
  * @extends string
  */
-pvc.options.varia.ClearSelectionMode = function(){};
+pvc.options.varia.PanelPosition = function(){};
         
         
         
         
 /**
- * The user can click on any 
- * <i>empty area</i>
+ * The bottom side of the child panel 
+ * is placed at the same position as the
+ * bottom side of the parent panel. 
  * 
- * <i>inside</i> the chart to clear the selection.
- * 
- * @value 'emptySpaceClick'
+ * @value 'bottom'
  */
-pvc.options.varia.ClearSelectionMode.prototype.EmptySpaceClick = 'emptySpaceClick';
+pvc.options.varia.PanelPosition.prototype.Bottom = 'bottom';
 /**
- * The user has no way to explicitly fully clear the selection.
- * <p>
- * It is still possible to clear the selection,
- * if the selection behavior performs a toggling operation.
- * <p>
- * Selection can always be cleared by code.
+ * The left side of the child panel 
+ * is placed at the same position as the
+ * left side of the parent panel. 
  * 
- * @value 'manual'
+ * @value 'left'
  */
-pvc.options.varia.ClearSelectionMode.prototype.Manual = 'manual';
+pvc.options.varia.PanelPosition.prototype.Left = 'left';
+/**
+ * The right side of the child panel 
+ * is placed at the same position as the
+ * right side of the parent panel. 
+ * 
+ * @value 'right'
+ */
+pvc.options.varia.PanelPosition.prototype.Right = 'right';
+/**
+ * The top side of the child panel 
+ * is placed at the same position as the
+ * top side of the parent panel. 
+ * 
+ * @value 'top'
+ */
+pvc.options.varia.PanelPosition.prototype.Top = 'top';
 /**
  * The types of values that a dimension can hold.
  * <p>
@@ -3334,51 +3459,6 @@ pvc.options.varia.DimensionValueType.prototype.Object = Object;
  */
 pvc.options.varia.DimensionValueType.prototype.String = String;
 /**
- * The sides of a parent panel to 
- * which a child panel may be docked to.
- * 
- * @class
- * @enum
- * @extends string
- */
-pvc.options.varia.DockPosition = function(){};
-        
-        
-        
-        
-/**
- * The bottom side of the child panel 
- * is placed at the same position as the
- * bottom side of the parent panel. 
- * 
- * @value 'bottom'
- */
-pvc.options.varia.DockPosition.prototype.Bottom = 'bottom';
-/**
- * The left side of the child panel 
- * is placed at the same position as the
- * left side of the parent panel. 
- * 
- * @value 'left'
- */
-pvc.options.varia.DockPosition.prototype.Left = 'left';
-/**
- * The right side of the child panel 
- * is placed at the same position as the
- * right side of the parent panel. 
- * 
- * @value 'right'
- */
-pvc.options.varia.DockPosition.prototype.Right = 'right';
-/**
- * The top side of the child panel 
- * is placed at the same position as the
- * top side of the parent panel. 
- * 
- * @value 'top'
- */
-pvc.options.varia.DockPosition.prototype.Top = 'top';
-/**
  * Control the beahvior of the legend
  * when the user clicks a legend item.
  * 
@@ -3410,37 +3490,13 @@ pvc.options.varia.LegendClickMode.prototype.ToggleSelected = 'toggleSelected';
  */
 pvc.options.varia.LegendClickMode.prototype.ToggleVisible = 'toggleVisible';
 /**
- * The main direction of drawing.
- * 
- * @class
- * @enum
- * @extends string
- */
-pvc.options.varia.Orientation = function(){};
-        
-        
-        
-        
-/**
- * Horizontal direction.
- * 
- * @value 'horizontal'
- */
-pvc.options.varia.Orientation.prototype.Horizontal = 'horizontal';
-/**
- * Vertical direction.
- * 
- * @value 'vertical'
- */
-pvc.options.varia.Orientation.prototype.Vertical = 'vertical';
-/**
  * The shapes that are available in protovis Dot marks.
  * 
  * @class
  * @enum
  * @extends string
  */
-pvc.options.varia.ShapeType = function(){};
+pvc.options.varia.DotShapeType = function(){};
         
         
         
@@ -3448,31 +3504,31 @@ pvc.options.varia.ShapeType = function(){};
 /**
  * @value 'bar'
  */
-pvc.options.varia.ShapeType.prototype.Bar = 'bar';
+pvc.options.varia.DotShapeType.prototype.Bar = 'bar';
 /**
  * @value 'circle'
  */
-pvc.options.varia.ShapeType.prototype.Circle = 'circle';
+pvc.options.varia.DotShapeType.prototype.Circle = 'circle';
 /**
  * @value 'cross'
  */
-pvc.options.varia.ShapeType.prototype.Cross = 'cross';
+pvc.options.varia.DotShapeType.prototype.Cross = 'cross';
 /**
  * @value 'diamond'
  */
-pvc.options.varia.ShapeType.prototype.Diamond = 'diamond';
+pvc.options.varia.DotShapeType.prototype.Diamond = 'diamond';
 /**
  * @value 'square'
  */
-pvc.options.varia.ShapeType.prototype.Square = 'square';
+pvc.options.varia.DotShapeType.prototype.Square = 'square';
 /**
  * @value 'tick'
  */
-pvc.options.varia.ShapeType.prototype.Tick = 'tick';
+pvc.options.varia.DotShapeType.prototype.Tick = 'tick';
 /**
  * @value 'triangle'
  */
-pvc.options.varia.ShapeType.prototype.Triangle = 'triangle';
+pvc.options.varia.DotShapeType.prototype.Triangle = 'triangle';
 /**
  * Describes the distances from 
  * each of the four planar sides:

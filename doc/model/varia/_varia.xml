@@ -2,7 +2,7 @@
 <c:model 
     xmlns:c="urn:webdetails/com/2012" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:webdetails/com/2012 ../schema/com_2012.xsd"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:space name="pvc.options.varia">
@@ -12,13 +12,13 @@
     </c:space>
     
     <!-- ATOMS -->
-    <c:include the="varia/atoms/alignment.xml" />
-    <c:include the="varia/atoms/clearSelectionMode.xml" />
+    <c:include the="varia/atoms/chartClearSelectionMode.xml" />
+    <c:include the="varia/atoms/chartOrientation.xml" />
+    <c:include the="varia/atoms/panelAlignment.xml" />
+    <c:include the="varia/atoms/panelPosition.xml" />
     <c:include the="varia/atoms/dimensionValueType.xml" />
-    <c:include the="varia/atoms/dockPosition.xml" />
     <c:include the="varia/atoms/legendClickMode.xml" />
-    <c:include the="varia/atoms/orientation.xml" />
-    <c:include the="varia/atoms/shapeType.xml" />
+    <c:include the="varia/atoms/dotShapeType.xml" />
     
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/dimensionComparer.xml" />
