@@ -12,7 +12,7 @@
             The options documentation class of the <b>Box plot</b> chart.
         </c:documentation>
         
-        <c:property name="box" type="pvc.options.plots.BoxPlotOptions" category="Plot">
+        <c:property name="box" type="pvc.options.plots.BoxPlotOptions" category="Plots">
             <c:documentation>
                 The box plot is the <b>main plot</b> of the box plot chart,
                 which means that 

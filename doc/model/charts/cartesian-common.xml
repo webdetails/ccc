@@ -13,7 +13,7 @@
             The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartCommonExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianCommonExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object 
                 contains style definitions for 
@@ -65,12 +65,12 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="CartesianChartCommonExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartCommonExtensionPoints">
+    <c:complexType name="CartesianCommonExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartCommonExtensionPoints">
         <c:documentation>
             The extension points common to all cartesian chart types.
         </c:documentation>
         
-        <c:property name="xAxisGrid" type="pvc.options.marks.RuleExtensionPoint">
+        <c:property name="xAxisGrid" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
             <c:documentation>
                 The extension point of the grid line rules that are drawn 
                 one per major tick of the <ii>XX</ii> axis 
@@ -78,7 +78,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="yAxisGrid" type="pvc.options.marks.RuleExtensionPoint">
+        <c:property name="yAxisGrid" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
             <c:documentation>
                 The extension point of the grid line rules that are drawn 
                 one per major tick of the <ii>YY</ii> axis 
@@ -86,7 +86,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="xAxisZeroLine" type="pvc.options.marks.RuleExtensionPoint">
+        <c:property name="xAxisZeroLine" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
             <c:documentation>
                 The extension point of the zero line rule that is drawn 
                 on the 0-valued tick, when there is one 
@@ -94,7 +94,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="yAxisZeroLine" type="pvc.options.marks.RuleExtensionPoint">
+        <c:property name="yAxisZeroLine" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
             <c:documentation>
                 The extension point of the zero line rule that is drawn 
                 on the 0-valued tick, when there is one 

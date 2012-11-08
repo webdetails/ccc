@@ -12,7 +12,7 @@
             The options documentation class of the <b>Stacked Dot</b> chart.
         </c:documentation>
         
-        <c:property name="point" type="pvc.options.plots.StackedDotPlotOptions" category="Plot">
+        <c:property name="point" type="pvc.options.plots.StackedDotPlotOptions" category="Plots">
             <c:documentation>
                 The point plot is the <b>main plot</b> of the stacked dot chart,
                 which means that 

@@ -14,6 +14,39 @@
             The common options documentation class for the <b>Metric Line/Dot family</b> charts.
         </c:documentation>
         
+    <c:property name="visualRoles" type="pvc.options.roles.MetricPointCommonVisualRoles" category="Data Binding">
+            <c:documentation>
+                The options of visual roles common to the <b>metric point</b> plots.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.MetricPointCommonExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="MetricPointCommonVisualRoles" 
+                   space="pvc.options.roles"
+                   base="pvc.options.roles.CartesianCommonVisualRoles"
+                   facets="pvc.options.facets.MultiVisualRolesFacet">
+        <c:documentation>
+            The visual roles common to the <b>metric point</b> plots.
+        </c:documentation>
+        
+    </c:complexType>
+    
+    <c:complexType name="MetricPointCommonExtensionPoints" 
+                   space="pvc.options.ext"
+                   base="pvc.options.ext.CartesianCommonExtensionPoints"
+                   facets="pvc.options.facets.MultiExtensionPointsFacet
+                           pvc.options.facets.LinesAndDotsPlotFacet">
+        <c:documentation>
+            The extension points common to the <b>metric point</b> plots.
+        </c:documentation>
     </c:complexType>
     
     <c:complexType name="MetricPointPlotCommonOptions" 
@@ -30,36 +63,6 @@
                 Besides the property concatenation way of specifying this
                 property and its sub-properties, 
                 this option may also be specified as a plain JSON object.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="dotsVisible" type="boolean" default="false">
-            <c:documentation>
-                Indicates if the visual elements show dots/markers
-                in each point's position.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="linesVisible" type="boolean" default="false">
-            <c:documentation>
-                Indicates if the visual elements are connected
-                with lines.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="showDots" type="boolean">
-            <c:documentation>
-                <c:deprecated>Use <c:link to="#dotsVisible" /> instead.</c:deprecated>
-                Indicates if the visual elements show dots/markers
-                in each point's position.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="showLines" type="boolean">
-            <c:documentation>
-                <c:deprecated>Use <c:link to="#linesVisible" /> instead.</c:deprecated>
-                Indicates if the visual elements are connected
-                with lines.
             </c:documentation>
         </c:property>
         

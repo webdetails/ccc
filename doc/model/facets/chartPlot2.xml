@@ -10,7 +10,7 @@
             The options documentation class of the plot2 facet.
         </c:documentation>
         
-        <c:property name="plot2" type="boolean pvc.options.plots.PointPlotCommonOptions" default="false" category="Plot">
+        <c:property name="plot2" type="boolean pvc.options.plots.PointPlotCommonOptions" default="false" category="Plots">
             <c:documentation>
                 Activates the second plot.
                 
@@ -65,7 +65,7 @@
             only supported by the chart types that had them then.
         </c:documentation>
         
-        <c:property name="secondAxis" type="boolean" default="false" category="Plot">
+        <c:property name="secondAxis" type="boolean" default="false" category="Plots">
             <c:documentation>
                 <c:deprecated>Use <c:link to="#plot2"/> instead.</c:deprecated>
                 Indicates whether selected series  

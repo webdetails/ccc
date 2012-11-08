@@ -12,7 +12,7 @@
             The options documentation class of the <b>Bullet</b> chart.
         </c:documentation>
         
-        <c:property name="bullet" type="pvc.options.plots.BulletPlotOptions" category="Plot">
+        <c:property name="bullet" type="pvc.options.plots.BulletPlotOptions" category="Plots">
             <c:documentation>
                 The bullet plot is the <b>main plot</b> of the bullet chart,
                 which means that 

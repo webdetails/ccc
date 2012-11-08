@@ -15,7 +15,7 @@
             The options documentation class of the <b>Bar</b> chart.
         </c:documentation>
         
-        <c:property name="bar" type="pvc.options.plots.BarPlotOptions" category="Plot">
+        <c:property name="bar" type="pvc.options.plots.BarPlotOptions" category="Plots">
             <c:documentation>
                 The bar plot is the <b>main plot</b> of the bar chart,
                 which means that 

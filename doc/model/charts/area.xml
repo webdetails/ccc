@@ -12,7 +12,7 @@
             The options documentation class of the <b>Area</b> chart.
         </c:documentation>
         
-        <c:property name="point" type="pvc.options.plots.AreaPlotOptions" category="Plot">
+        <c:property name="point" type="pvc.options.plots.AreaPlotOptions" category="Plots">
             <c:documentation>
                 The point plot is the <b>main plot</b> of the area chart,
                 which means that 

@@ -12,7 +12,7 @@
             The options documentation class of the <b>Stacked Area</b> chart.
         </c:documentation>
         
-        <c:property name="point" type="pvc.options.plots.StackedAreaPlotOptions" category="Plot">
+        <c:property name="point" type="pvc.options.plots.StackedAreaPlotOptions" category="Plots">
             <c:documentation>
                 The point plot is the <b>main plot</b> of the stacked area chart,
                 which means that 

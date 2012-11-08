@@ -6,6 +6,10 @@
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:include the="facets/chartMulti.xml" />
+    <c:include the="facets/extMulti.xml" />
+    <c:include the="facets/rolesMulti.xml" />
+    
     <c:include the="facets/chartPlot2.xml" />
     <c:include the="facets/chartTrend.xml" />
+    <c:include the="facets/plotLinesAndDots.xml" />
 </c:model>

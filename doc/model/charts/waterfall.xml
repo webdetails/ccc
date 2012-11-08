@@ -12,7 +12,7 @@
             The options documentation class of the <b>Waterfall</b> chart.
         </c:documentation>
         
-        <c:property name="water" type="pvc.options.plots.WaterfallPlotOptions" category="Plot">
+        <c:property name="water" type="pvc.options.plots.WaterfallPlotOptions" category="Plots">
             <c:documentation>
                 The waterfall plot is the <b>main plot</b> of the waterfall chart,
                 which means that 

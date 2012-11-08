@@ -6,7 +6,17 @@
 		<meta name="generator" content="JsDoc Toolkit" />
 		{! Link.base = "../"; /* all generated links will be relative to this */ !}
 		<title>JsDoc Reference - {+data.alias+}</title>
-
+        
+        {! 
+            var _namespace = data.alias;
+            if(!data.isNamespace){
+                var lastIndexNmsp = _namespace.lastIndexOf('.');
+                if(lastIndexNmsp >= 0){
+                    _namespace = _namespace.substr(0, lastIndexNmsp);
+                }
+            }
+        !}
+        
 		<style type="text/css">
 			{+include("static/default.css")+}
 		</style>
@@ -59,17 +69,18 @@
 						data.augments
 						.sort()
 						.map(
-							function($) { return new Link().toSymbol($); }
+							function($) { return new Link().toSymbol($).withoutNamespace(_namespace); }
 						)
 						.join(", ")
 					+}.<br />
 				</if>
 			
 				{+resolveLinks(data.classDesc)+}
-				
+				<!-- Don't want this, cause our source file is dummy
 				<if test="!data.isBuiltin()">{# isn't defined in any file #}
 					<br /><i>Defined in: </i> {+new Link().toSrc(data.srcFile)+}.
 				</if>
+                -->
 			</p>
 
 <!-- ============================== constructor summary ==================== -->			
@@ -85,14 +96,19 @@
 				<tbody>
 					<tr>
 						<td class="attributes">{!
+                            if (data.deprecated) output += "&lt;deprecated&gt; ";
+                            if (data.isAbstract) output += "&lt;abstract&gt; ";
 							if (data.isPrivate) output += "&lt;private&gt; ";
 							if (data.isInner) output += "&lt;inner&gt; ";
 						!}&nbsp;</td>
 						<td class="nameDescription" {!if (data.comment.getTag("hilited").length){output += 'style="color: red"'}!}>
+                            <!--
+                            Don't want constructor arguments, just the class description and link to detail
+                            -->
 							<div class="fixedFont">
-								<b>{+ new Link().toSymbol(data.alias).inner('constructor')+}</b><if test="classType != 'Namespace '">{+ makeSignature(data.params) +}</if>
+								<b>{+ new Link().toSymbol(data.alias).withoutNamespace(_namespace).inner('constructor')+}</b><!--<if test="classType != 'Namespace '">{+ makeSignature(data.params) +}</if>-->
 							</div>
-							<div class="description">{+resolveLinks(summarize(data.desc))+}</div>
+                            <div class="description">{+resolveLinks(summarize(data.desc))+}</div>
 						</td>
 					</tr>
 				</tbody>
@@ -101,7 +117,7 @@
 
 <!-- ============================== properties summary ===================== -->
 			<if test="data.properties.length">
-				{! var ownProperties = data.properties.filter(function($){return $.memberOf == data.alias && !$.isNamespace}).sort(makeSortby("category", "name")); !}
+				{! var ownProperties = data.properties.filter(function($){return /*$.memberOf == data.alias && */ !$.isNamespace}).sort(makeSortby("category", "name")); !}
 				<if test="ownProperties.length">
 				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class {+data.alias+}.">
 					<caption>Field Summary</caption>
@@ -113,6 +129,7 @@
 					</thead>
 					<tbody>
 					<for each="member" in="ownProperties">
+                        <!-- First member of a given category, output a category header -->
                         <if test="member.category && (!$member_i || member.category !== ownProperties[$member_keys[$member_i - 1]].category)">
                             <tr>
                                 <th scope="col" colspan="2">{! 
@@ -122,6 +139,7 @@
                         </if>
 						<tr>
 							<td class="attributes">{!
+                                if (member.deprecated) output += "&lt;deprecated&gt; ";
                                 if (member.isPrivate)  output += "&lt;private&gt; ";
 								if (member.isInner)    output += "&lt;inner&gt; ";
 								if (member.isStatic)   output += "&lt;static&gt; ";
@@ -131,14 +149,18 @@
 								<div class="fixedFont">
 								<if test="member.isStatic && member.memberOf != '_global_'">{+member.memberOf+}.</if><b>{+new Link().toSymbol(member.alias).withText(member.name)+}</b>
 								</div>
-								<div class="description">{+resolveLinks(summarize(member.desc))+}</div>
+								<div class="description">{+resolveLinks(summarize(member.desc))+}
+                                <if test="member.memberOf != data.alias">
+                                    <span class="borrowedMember">(Borrowed from {+ new Link().toSymbol(member.memberOf).withoutNamespace(_namespace) +}.)</span>
+                                </if>
+                                </div>
 							</td>
 						</tr>
 					</for>
 					</tbody>
 				</table>
 				</if>
-				
+				<!-- Prefer inherited members along own ones
 				<if test="data.inheritsFrom.length">
 				<dl class="inheritsList">
 				{!
@@ -166,11 +188,12 @@
 				!}
 				</dl>
 				</if>
+                -->
 			</if>
 
 <!-- ============================== methods summary ======================== -->
 			<if test="data.methods.length">
-				{! var ownMethods = data.methods.filter(function($){return $.memberOf == data.alias  && !$.isNamespace}).sort(makeSortby("category", "name")); !}
+				{! var ownMethods = data.methods.filter(function($){return /*$.memberOf == data.alias  && */ !$.isNamespace}).sort(makeSortby("category", "name")); !}
 				<if test="ownMethods.length">
 				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class {+data.alias+}.">
 					<caption>Method Summary</caption>
@@ -182,8 +205,9 @@
 					</thead>
 					<tbody>
 					<for each="member" in="ownMethods">
+                        <!-- First member of a given category, output a category header -->
                         <if test="member.category && (!$member_i || member.category !== ownMethods[$member_keys[$member_i - 1]].category)">
-                            <tr>
+                            <tr class="categoryHeader">
                                 <th scope="col" colspan="2">{! 
                                     output+=member.category; 
                                  !}</th>
@@ -191,6 +215,7 @@
                         </if>
 						<tr>
 							<td class="attributes">{!
+                                if (member.deprecated) output += "&lt;deprecated&gt; ";
 								if (member.isPrivate) output += "&lt;private&gt; ";
 								if (member.isInner) output += "&lt;inner&gt; ";
 								if (member.isStatic) output += "&lt;static&gt; ";
@@ -198,14 +223,18 @@
 							<td class="nameDescription">
 								<div class="fixedFont"><if test="member.isStatic && member.memberOf != '_global_'">{+member.memberOf+}.</if><b>{+new Link().toSymbol(member.alias).withText(member.name.replace(/\^\d+$/, ''))+}</b>{+makeSignature(member.params)+}
 								</div>
-								<div class="description">{+resolveLinks(summarize(member.desc))+}</div>
+								<div class="description">{+resolveLinks(summarize(member.desc))+}
+                                <if test="member.memberOf != data.alias">
+                                    <span class="borrowedMember">(Borrowed from {+ new Link().toSymbol(member.memberOf).withoutNamespace(_namespace) +}.)</span>
+                                </if>
+                                </div>
 							</td>
 						</tr>
 					</for>
 					</tbody>
 				</table>
 				</if>
-				
+				<!-- Prefer inherited members along own ones
 				<if test="data.inheritsFrom.length">
 				<dl class="inheritsList">
 				{!
@@ -233,6 +262,7 @@
 				!}
 				</dl>
 				</if>
+                -->
 			</if>
 <!-- ============================== events summary ======================== -->
 			<if test="data.events.length">
@@ -250,6 +280,7 @@
 					<for each="member" in="ownEvents">
 						<tr>
 							<td class="attributes">{!
+                                if (member.deprecated) output += "&lt;deprecated&gt; ";
 								if (member.isPrivate) output += "&lt;private&gt; ";
 								if (member.isInner) output += "&lt;inner&gt; ";
 								if (member.isStatic) output += "&lt;static&gt; ";
@@ -302,10 +333,13 @@
 				</div>
 				
 				<div class="fixedFont">{!
-					if (data.isPrivate) output += "&lt;private&gt; ";
+                    if (data.deprecated) output += "&lt;deprecated&gt; ";
+					if (data.isAbstract) output += "&lt;abstract&gt; ";
+                    if (data.isPrivate) output += "&lt;private&gt; ";
 					if (data.isInner) output += "&lt;inner&gt; ";
 				!}
-						<b>{+ data.alias +}</b><if test="classType != 'Namespace '">{+ makeSignature(data.params) +}</if>
+                <!-- Don't want constructor arguments -->
+						<b>{+ data.alias +}</b><!--<if test="classType != 'Namespace '">{+ makeSignature(data.params) +}</if>-->
 				</div>
 				
 				<div class="description">
@@ -318,8 +352,6 @@
 				<pre class="code">{+example+}</pre>
 				</for>
 				</if>
-				
-				
 					<if test="data.params.length">
 						<dl class="detailList">
 						<dt class="heading">Parameters:</dt>
@@ -393,6 +425,7 @@
 				<for each="member" in="ownProperties">
 					<a name="{+Link.symbolNameToLinkName(member)+}"> </a>
 					<div class="fixedFont">{!
+                        if (member.deprecated) output += "&lt;deprecated&gt; ";
 						if (member.isPrivate) output += "&lt;private&gt; ";
 						if (member.isInner) output += "&lt;inner&gt; ";
 						if (member.isStatic) output += "&lt;static&gt; ";

@@ -22,6 +22,16 @@ function Link() {
 		if (defined(text)) this.text = text;
 		return this;
 	}
+    this.withoutNamespace = function(namespaceName) {
+        if(defined(namespaceName)){
+            this.namespaceName = namespaceName;
+            if(namespaceName && this.alias && this.alias.indexOf(namespaceName) === 0){
+                this.text = this.alias.substr(namespaceName.length + 1);
+            }
+        }
+        
+		return this;
+	}
 	this.toSrc = function(filename) {
 		if (defined(filename)) this.src = filename;
 		return this;
@@ -119,6 +129,8 @@ Link.getSymbol= function(alias) {
 }
 
 /** Create a link to another symbol. */
+var _notExistsLinkWarned = {};
+
 Link.prototype._makeSymbolLink = function(alias) {
 	var linkBase = Link.base+publish.conf.symbolsDir;
 	var linkTo = Link.getSymbol(alias);
@@ -142,7 +154,10 @@ Link.prototype._makeSymbolLink = function(alias) {
                 break;
             
             default:
-                LOG.warn("symbolName='" + alias + "' does not exist.");
+                if(!Object.prototype.hasOwnProperty.call(_notExistsLinkWarned, alias)){
+                    _notExistsLinkWarned[alias] = 1;
+                    LOG.warn("symbolName='" + alias + "' does not exist.");
+                }
         }
         
         return this.text || alias;

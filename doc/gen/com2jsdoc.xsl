@@ -69,6 +69,11 @@
            <xsl:value-of select="concat($nl, ' * @extends ', @base)" />
 	    </xsl:if>
 	    
+	    <xsl:if test="string(@abstract) != ''">
+           <!-- Output @extends directive -->
+           <xsl:value-of select="concat($nl, ' * @abstract')" />
+        </xsl:if>
+	    
 	    <!-- Close documentation block -->
         <xsl:value-of select="concat($nl, ' */')" /> 
 
@@ -78,8 +83,7 @@
         <!-- Output properties -->
         <!-- from facets -->
         <xsl:if test="string(@facets) != ''">
-            <xsl:value-of select="concat('FACETS: ', @facets)" />
-	        <xsl:for-each select="tokenize(@facets, '\s+')">
+            <xsl:for-each select="tokenize(@facets, '\s+')">
 	            <xsl:variable name="facetTypeDef" select="$facetTypes[fun:getTypeFullName(.)=string(current())]" />
 	            <xsl:if test="$facetTypeDef">
 	               <xsl:for-each select="$facetTypeDef/com:property">

@@ -13,6 +13,39 @@
         <c:documentation>
             The common options documentation class of <b>Categorical</b> charts with a <i>continuous orthogonal axis</i>. 
         </c:documentation>
+        
+        <c:property name="visualRoles" type="pvc.options.roles.CategoricalContinuousCommonVisualRoles" category="Data Binding">
+            <c:documentation>
+                The options of visual roles common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.CategoricalContinuousCommonExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="CategoricalContinuousCommonVisualRoles" 
+                   space="pvc.options.roles"
+                   base="pvc.options.roles.CategoricalCommonVisualRoles"
+                   facets="pvc.options.facets.MultiVisualRolesFacet">
+        <c:documentation>
+            The visual roles common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
+        </c:documentation>
+        
+    </c:complexType>
+    
+    <c:complexType name="CategoricalContinuousCommonExtensionPoints" 
+                   space="pvc.options.ext"
+                   base="pvc.options.ext.CartesianCommonExtensionPoints"
+                   facets="pvc.options.facets.MultiExtensionPointsFacet">
+        <c:documentation>
+            The extension points common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
+        </c:documentation>
     </c:complexType>
     
     <c:complexType name="CategoricalContinuousPlotCommonOptions" 
@@ -20,10 +53,10 @@
                    base="pvc.options.plots.CategoricalPlotCommonOptions" 
                    abstract="true">
         <c:documentation>
-            The common options documentation class of <b>categorical</b> plots with a <i>continuous orthogonal axis</i>. 
+            The common options documentation class of <b>categorical</b> plot types with a <i>continuous orthogonal axis</i>.
         </c:documentation>
         
-        <c:property name="stacked" default="false" type="boolean">
+        <c:property name="stacked" default="false" type="boolean" category="Style">
             <c:documentation>
                 Indicates that visual elements having 
                 identical category, but different series,
@@ -34,7 +67,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="nullInterpolationMode" default="'none'" type="pvc.options.varia.NullInterpolationMode">
+        <c:property name="nullInterpolationMode" default="'none'" type="pvc.options.varia.NullInterpolationMode" category="Data">
             <c:documentation>
                 The interpolation mode used to 
                 fill-in null or missing values.
@@ -51,7 +84,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="orthoAxis" default="1" type="number">
+        <c:property name="orthoAxis" default="1" type="number" category="Axes">
             <c:documentation>
                 The index of the orthogonal cartesian axis to use for the plot.
                 

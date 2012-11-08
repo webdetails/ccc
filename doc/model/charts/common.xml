@@ -72,7 +72,7 @@
         </c:property>
         
         <!-- Behavior -->
-        <c:property name="compatVersion" type="number" default="Infinity" category="Behavior">
+        <c:property name="compatVersion" type="number" default="Infinity" category="General">
             <c:documentation>
                 The CCC version that the chart should run in.
                 
@@ -529,38 +529,6 @@
         <c:documentation>
             The visual roles common to all chart types.
         </c:documentation>
-        <c:property name="multiChart" type="string pvc.options.roles.VisualRoleOptions">
-            <c:documentation>
-                The <tt>multiChart</tt> visual role
-                allows turning a chart in a small multiples chart
-                <c:link to="http://en.wikipedia.org/wiki/Small_multiple" />.
-                
-                Almost all main chart types support being shown
-                as a small multiples chart.
-                Currently, the exceptions are the charts: 
-                <i>Heat Grid</i>, 
-                <i>Bullet</i>, 
-                <i>Data Tree</i> and
-                <i>Parallel Coordinates</i>.
-                
-                The <tt>multiChart</tt> visual role
-                can be bound to any number of dimensions,
-                that are, or will be turned into, discrete.
-                
-                The <tt>multiChart</tt> visual role automatically binds to 
-                every dimension whose name has the <tt>multiChart</tt> prefix.
-                
-                One <i>small</i> chart is generated per
-                unique combination of the values of the bound dimensions
-                that is present in the source data.
-                Each small chart then receives as its data
-                the partition of the source data that shares its 
-                unique combination of values.
-                
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
     </c:complexType>
     
     <!-- scale is undocummented -->
@@ -583,23 +551,9 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallBase" type="pvc.options.marks.PanelExtensionPoint">
-            <c:documentation>
-                The extension point of the base (root) panel of the <i>small</i> charts.
-            </c:documentation>
-        </c:property>
-        
         <c:property name="content" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the content panel of the <i>root</i> chart.
-                
-                The content panel is a child of the base panel.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallContent" type="pvc.options.marks.PanelExtensionPoint">
-            <c:documentation>
-                The extension point of the content panel of the <i>small</i> charts.
                 
                 The content panel is a child of the base panel.
             </c:documentation>
@@ -999,7 +953,7 @@
             The common options documentation class of all plots.
         </c:documentation>
         
-        <c:property name="valuesVisible" default="false" type="boolean">
+        <c:property name="valuesVisible" default="false" type="boolean" category="Style">
             <c:documentation>
                 Indicates if value labels are shown next to the visual elements.
                 
@@ -1010,13 +964,13 @@
                 so be sure to confirm it in the most specific plot class.
             </c:documentation>
         </c:property>
-        <c:property name="showValues" default="false" type="boolean">
+        <c:property name="showValues" default="false" type="boolean" category="Style">
             <c:documentation>
                 <c:deprecated>Use <c:link to="#valuesVisible"/> instead.</c:deprecated>
                 Indicates if value labels are shown next to the visual elements.
             </c:documentation>
         </c:property>
-        <c:property name="valuesAnchor" type="function pvc.options.varia.MarkAnchor pvc.options.varia.WedgeAnchor">
+        <c:property name="valuesAnchor" type="function pvc.options.varia.MarkAnchor pvc.options.varia.WedgeAnchor" category="Style">
             <c:documentation>
                 The alignment of a value label 
                 relative to its corresponding visual element position.
@@ -1027,7 +981,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="valuesFont" type="string">
+        <c:property name="valuesFont" type="string" category="Style">
             <c:documentation>
                 The font of a value label.
                 
@@ -1039,7 +993,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="colorAxis" type="number">
+        <c:property name="colorAxis" type="number" category="Axes">
             <c:documentation>
                 The index of the color axis to use for the plot.
                 

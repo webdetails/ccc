@@ -12,7 +12,7 @@
             The options documentation class of the <b>Dot</b> chart.
         </c:documentation>
         
-        <c:property name="point" type="pvc.options.plots.DotPlotOptions" category="Plot">
+        <c:property name="point" type="pvc.options.plots.DotPlotOptions" category="Plots">
             <c:documentation>
                 The point plot is the <b>main plot</b> of the dot chart,
                 which means that 

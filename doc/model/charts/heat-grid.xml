@@ -12,7 +12,7 @@
             The options documentation class of the <b>Heat grid</b> chart.
         </c:documentation>
         
-        <c:property name="heatGrid" type="pvc.options.plots.HeatGridPlotOptions" category="Plot">
+        <c:property name="heatGrid" type="pvc.options.plots.HeatGridPlotOptions" category="Plots">
             <c:documentation>
                 The heat grid plot is the <b>main plot</b> of the heat grid chart,
                 which means that 
