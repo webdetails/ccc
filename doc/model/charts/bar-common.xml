@@ -7,7 +7,7 @@
     
     <c:complexType name="BarChartCommonOptions" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.CategoricalChartCommonOptions" 
+                   base="pvc.options.charts.CategoricalContinuousChartCommonOptions" 
                    abstract="true">
         <c:documentation>
             The common options documentation class of the <b>Bar family</b> charts.
@@ -23,4 +23,13 @@
         </c:property>
     </c:complexType>
     
+    <c:complexType name="BarPlotCommonOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.CategoricalContinuousPlotCommonOptions"
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class of the <b>Bar family</b> plots.
+        </c:documentation>
+
+    </c:complexType>
 </c:model>

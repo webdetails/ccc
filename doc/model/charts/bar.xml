@@ -7,16 +7,39 @@
     
     <c:complexType name="BarChartOptions" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.BarChartCommonOptions">
+                   base="pvc.options.charts.BarChartCommonOptions"
+                   facets="pvc.options.facets.ChartPlot2OptionsFacet 
+                           pvc.options.facets.CategoricalChartTrendOptionsFacet
+                           pvc.options.facets.ChartPlot2V1OptionsFacet">
         <c:documentation>
-            The options documentation class of the <b>Bar</b> chart class: <c:link to="pvc.BarChart" />.
+            The options documentation class of the <b>Bar</b> chart.
         </c:documentation>
         
-         <c:property name="bar" type="pvc.options.plots.PlotCommonOptions">
+        <c:property name="bar" type="pvc.options.plots.BarPlotOptions" category="Plot">
             <c:documentation>
-                Blah
+                The bar plot is the <b>main plot</b> of the bar chart,
+                which means that 
+                its properties may be used <i>without</i> the "bar" property suffix.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+    <c:complexType name="BarPlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.BarPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Bar</b> plot.
+        </c:documentation>
+
+        <c:property name="trend" type="pvc.options.varia.PlotTrendingOptions">
+            <c:documentation>
+                Contains the plot's trending options.
+                
+                Besides the property concatenation way of specifying this
+                property and its sub-properties, 
+                this option may also be specified as a plain JSON object.
             </c:documentation>
         </c:property>
     </c:complexType>
-    
 </c:model>

@@ -14,7 +14,8 @@
     <!-- New Line character -->
     <xsl:variable name='nl'><xsl:text>&#xd;&#xa;</xsl:text></xsl:variable>
     
-    <xsl:variable name="funTypes" select="fun:getFunctionTypes(/)" />
+    <xsl:variable name="funTypes"   select="fun:getFunctionTypes(/)" />
+    <xsl:variable name="facetTypes" select="fun:getFacetTypes(/)" />
     
 	<xsl:template match="/com:model">
 	   <xsl:apply-templates select="com:space|com:complexType|com:atomType|com:include" />
@@ -43,6 +44,7 @@
     </xsl:template>
     
 	<xsl:template match="/com:model/com:complexType">
+	    <xsl:variable name="complexTypeDef" select="." />
         <xsl:variable name="fullTypeName">
             <xsl:choose>
                 <xsl:when test="@space">
@@ -54,8 +56,7 @@
             </xsl:choose>
         </xsl:variable>
         
-        <!-- Generate the JS class constructor documentation 
-        -->
+        <!-- Generate the JS class constructor documentation -->
         <xsl:value-of select="concat($nl, '/**')" />
         
         <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
@@ -74,111 +75,148 @@
         <!-- Generate the JS class constructor -->
         <xsl:value-of select="concat($nl, $fullTypeName)" /> = function(){};
         
-        
         <!-- Output properties -->
+        <!-- from facets -->
+        <xsl:if test="string(@facets) != ''">
+            <xsl:value-of select="concat('FACETS: ', @facets)" />
+	        <xsl:for-each select="tokenize(@facets, '\s+')">
+	            <xsl:variable name="facetTypeDef" select="$facetTypes[fun:getTypeFullName(.)=string(current())]" />
+	            <xsl:if test="$facetTypeDef">
+	               <xsl:for-each select="$facetTypeDef/com:property">
+			            <xsl:sort select="@category" />
+			            <xsl:sort select="@name" />
+			            
+			            <!-- Only output if property not declared/overriden locally
+			                 TODO: what about facet property clashes?
+			             -->
+			            <xsl:if test="not($complexTypeDef/com:property[@name=current()/@name])">
+				            <xsl:apply-templates select=".">
+				                <xsl:with-param name="fullTypeName" select="$fullTypeName" />
+				            </xsl:apply-templates>
+			            </xsl:if>
+			        </xsl:for-each>
+	            </xsl:if>
+	        </xsl:for-each>
+        </xsl:if>
+        
         <xsl:for-each select="com:property">
             <xsl:sort select="@category" />
             <xsl:sort select="@name" />
             
-            <xsl:value-of select="concat($nl, '/**')" />
-            <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
-            
-            <!-- , or space are synonyms with | -->
-            <xsl:variable name="type" select="string(@type)" />
-            <xsl:variable name="funTypeDef" select="$funTypes[fun:getTypeFullName(.)=$type]" />
-            
-            <xsl:variable name="typeTag">
-                <xsl:choose>
-                    <xsl:when test="$funTypeDef">
-                        <xsl:choose>
-                            <xsl:when test="$funTypeDef/com:returns/@type">
-                                <xsl:value-of select="$funTypeDef/com:returns/@type" />
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:value-of select="'undefined'" />
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="$type" />
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:variable>
-            
-            <xsl:variable name="typeTagText" select="fn:replace($typeTag, '([^:])\s+([^:])', '$1|$2')" />
-            
-            <xsl:choose>
-                <xsl:when test="$funTypeDef">
-                    <xsl:value-of select="concat($nl, ' * @returns {', $typeTagText, '}')" />
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="concat($nl, ' * @type ', $typeTagText)" />
-                </xsl:otherwise>
-            </xsl:choose>
-            <xsl:apply-templates select="$funTypeDef/com:returns/com:documentation" mode="process-jsdoc" />
-            
-            <xsl:choose>
-                <xsl:when test="$funTypeDef">
-                    <!-- Regular Arguments -->
-                    <xsl:value-of select="concat($nl, ' * @method')" />
-                    
-                    <xsl:for-each select="$funTypeDef/com:argument">
-                        <xsl:choose>
-                            <xsl:when test="@name != 'this'">
-                                <xsl:value-of select="concat($nl, ' * @param ')" />
-		                        <xsl:value-of select="concat('{', fn:replace(@type, '([^:])\s+([^:])', '$1|$2') ,'} ')" />
-		                        <xsl:if test="count(@required) = 0 or @required='false'">
-		                            <xsl:value-of select="'['" />
-		                        </xsl:if>
-		                        
-		                        <xsl:value-of select="@name" />
-		                        
-		                        <xsl:if test="@default">
-		                            <xsl:value-of select="concat('=', @default)" />
-		                        </xsl:if>
-		                        
-		                        <xsl:if test="count(@required) = 0 or @required='false'">
-		                            <xsl:value-of select="']'" />
-		                        </xsl:if>
-		                        
-		                        <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:value-of select="concat($nl, ' * @this ', fn:replace(@type, '([^:])\s+([^:])', '$1|$2'))" />
-                            </xsl:otherwise>
-                        </xsl:choose>
-                        
-                    </xsl:for-each>
-                    
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:if test="count(@default) > 0">
-                        <xsl:value-of select="concat($nl, ' * @default ', @default)" />
-                    </xsl:if>
-                </xsl:otherwise>
-            </xsl:choose>
-            
-            <xsl:if test="string(@category) != ''">
-                <xsl:value-of select="concat($nl, ' * @category ', @category)" />
-            </xsl:if>
-            
-            <xsl:value-of select="concat($nl, ' */')" />
-           
-            <xsl:variable name="equalsTo">
-                <xsl:choose>
-                    <xsl:when test="$funTypeDef">
-                        <xsl:value-of select="'function(){}'" />
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="'undefined'" />
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:variable>
-            
-            <!-- Generate the JS property -->
-            <xsl:value-of select="concat($nl, $fullTypeName, '.prototype.', @name, ' = ', $equalsTo, ';')" />
+            <xsl:apply-templates select=".">
+                <xsl:with-param name="fullTypeName" select="$fullTypeName" />
+            </xsl:apply-templates>
         </xsl:for-each>
         
+    </xsl:template>
+    
+    <xsl:template match="com:property">
+        <xsl:param name="fullTypeName" />
+        
+        <xsl:value-of select="concat($nl, '/**')" />
+        <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
+        
+        <!-- , or space are synonyms with | -->
+        <xsl:variable name="type" select="string(@type)" />
+        <xsl:variable name="funTypeDef" select="$funTypes[fun:getTypeFullName(.)=$type]" />
+        
+        <xsl:variable name="typeTag">
+            <xsl:choose>
+                <xsl:when test="$funTypeDef">
+                    <xsl:choose>
+                        <xsl:when test="$funTypeDef/com:returns/@type">
+                            <xsl:value-of select="$funTypeDef/com:returns/@type" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="'undefined'" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$type" />
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        
+        <xsl:variable name="typeTagText" select="fn:replace($typeTag, '([^:])\s+([^:])', '$1|$2')" />
+        
+        <xsl:choose>
+            <xsl:when test="$funTypeDef">
+                <xsl:value-of select="concat($nl, ' * @returns {', $typeTagText, '}')" />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="concat($nl, ' * @type ', $typeTagText)" />
+            </xsl:otherwise>
+        </xsl:choose>
+        <xsl:apply-templates select="$funTypeDef/com:returns/com:documentation" mode="process-jsdoc" />
+        
+        <xsl:choose>
+            <xsl:when test="$funTypeDef">
+                <!-- Regular Arguments -->
+                <xsl:value-of select="concat($nl, ' * @method')" />
+                
+                <xsl:for-each select="$funTypeDef/com:argument">
+                    <xsl:choose>
+                        <xsl:when test="@name != 'this'">
+                            <xsl:value-of select="concat($nl, ' * @param ')" />
+                            <xsl:value-of select="concat('{', fn:replace(@type, '([^:])\s+([^:])', '$1|$2') ,'} ')" />
+                            <xsl:if test="count(@required) = 0 or @required='false'">
+                                <xsl:value-of select="'['" />
+                            </xsl:if>
+                            
+                            <xsl:value-of select="@name" />
+                            
+                            <xsl:if test="@default">
+                                <xsl:value-of select="concat('=', @default)" />
+                            </xsl:if>
+                            
+                            <xsl:if test="count(@required) = 0 or @required='false'">
+                                <xsl:value-of select="']'" />
+                            </xsl:if>
+                            
+                            <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="concat($nl, ' * @this ', fn:replace(@type, '([^:])\s+([^:])', '$1|$2'))" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                    
+                </xsl:for-each>
+                
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:if test="count(@default) > 0">
+                    <xsl:value-of select="concat($nl, ' * @default ', @default)" />
+                </xsl:if>
+            </xsl:otherwise>
+        </xsl:choose>
+        
+        <xsl:if test="string(@category) != ''">
+            <xsl:value-of select="concat($nl, ' * @category ', @category)" />
+        </xsl:if>
+        
+        <xsl:if test="string(@fixed) != ''">
+            <xsl:value-of select="concat($nl, ' * @constant')" />
+        </xsl:if>
+        
+        <xsl:value-of select="concat($nl, ' */')" />
+       
+        <xsl:variable name="equalsTo">
+            <xsl:choose>
+                <xsl:when test="$funTypeDef">
+                    <xsl:value-of select="'function(){}'" />
+                </xsl:when>
+                <xsl:when test="string(@fixed) != ''">
+                    <xsl:value-of select="@fixed" />
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="'undefined'" />
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        
+        <!-- Generate the JS property -->
+        <xsl:value-of select="concat($nl, $fullTypeName, '.prototype.', @name, ' = ', $equalsTo, ';')" />
     </xsl:template>
     
     <xsl:template match="/com:model/com:atomType"> 
@@ -410,6 +448,18 @@
             <xsl:if test="string(@the) != ''">
                 <xsl:sequence select="fun:getFunctionTypes(document(concat($relativePath,@the)))" />
 	        </xsl:if>
+        </xsl:for-each>
+    </xsl:function>
+    
+    <xsl:function name="fun:getFacetTypes">
+        <xsl:param name="doc" />
+        
+        <xsl:sequence select="$doc/com:model/com:facetType" />
+        
+        <xsl:for-each select="$doc/com:model/com:include">
+            <xsl:if test="string(@the) != ''">
+                <xsl:sequence select="fun:getFacetTypes(document(concat($relativePath,@the)))" />
+            </xsl:if>
         </xsl:for-each>
     </xsl:function>
 </xsl:stylesheet>

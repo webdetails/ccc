@@ -270,58 +270,6 @@ pvc.options.charts.ChartCommonOptions.prototype.ignoreNulls = undefined;
  */
 pvc.options.charts.ChartCommonOptions.prototype.percentValueFormat = function(){};
 /**
- * The 
- * <i>key values</i> of the series visual role, 
- * that are to be shown in the second plot.
- * <p>
- * If the series visual role has more than one dimension, 
- * the specified keys should be 
- * the result of joining the key of each dimension with a "~" character.
- * <p>
- * This option is only relevant when the property
- * {@link #plot2} has the value 
- * <tt>true</tt>.
- * 
- * @type string|list(string)
- * @category Data
- */
-pvc.options.charts.ChartCommonOptions.prototype.plot2Series = undefined;
-/**
- * 
- * The zero-based indexes of the series, 
- * in 
- * <i>the order of appearance in the data source</i>, 
- * that are to be shown in the second axis, 
- * on chart types that support it.
- * <p>
- * A negative index designates an index from the last series.
- * So 
- * <tt>-1</tt> is the last series, 
- * 
- * <tt>-2</tt> is the next-to-last series, 
- * etc.
- * <p>
- * This option is only relevant when the property
- * {@link #secondAxis} has the value 
- * <tt>true</tt>.
- * 
- * @deprecated Use {@link #plot2Series} instead.
- * @type number|string|list(number|string)
- * @category Data
- */
-pvc.options.charts.ChartCommonOptions.prototype.secondAxisIdx = undefined;
-/**
- * 
- * Indicates whether the secondary axis should be 
- * shown and with an independent range.
- * 
- * @deprecated Use {@link #plot2OrthoAxis} instead, to specify an alternate orthogonal axis.
- * @type boolean
- * @default false
- * @category Data
- */
-pvc.options.charts.ChartCommonOptions.prototype.secondAxisIndependentScale = undefined;
-/**
  * Indicates that dimensions of the "category" group 
  * (i.e. named 
  * <tt>category</tt>, 
@@ -449,22 +397,6 @@ pvc.options.charts.ChartCommonOptions.prototype.isMultiValued = undefined;
  */
 pvc.options.charts.ChartCommonOptions.prototype.measuresIndexes = undefined;
 /**
- * The indexes of the data source's 
- * <i>virtual item</i> columns
- * that are to feed the 
- * default 
- * 
- * <tt>multiChart</tt>, 
- * 
- * <tt>multiChart2</tt>, ... 
- * dimensions.
- * 
- * @type number|string
- * @default true
- * @category Data Translation
- */
-pvc.options.charts.ChartCommonOptions.prototype.multiChartIndexes = undefined;
-/**
  * An array of dimensions readers.
  * <p>
  * Can be specified to customize the 
@@ -540,7 +472,6 @@ pvc.options.charts.ChartCommonOptions.prototype.canvas = undefined;
  */
 pvc.options.charts.ChartCommonOptions.prototype.animate = undefined;
 /**
- * <p>
  * Controls if and how the selection can be cleared by the user.
  * 
  * @type pvc.options.varia.ChartClearSelectionMode
@@ -758,228 +689,6 @@ pvc.options.charts.ChartCommonOptions.prototype.paddings = undefined;
  */
 pvc.options.charts.ChartCommonOptions.prototype.width = undefined;
 /**
- * The maximum number of 
- * <i>small</i> charts that should
- * be displayed in a row.
- * <p>
- * This property can receive a value of 
- * <tt>Infinity</tt>
- * to indicate that all charts should be laid out in a single row.
- * 
- * @type number
- * @default 3
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.multiChartColumnsMax = undefined;
-/**
- * The maximum number of 
- * <i>small</i> charts that should
- * be displayed.
- * <p>
- * The first 
- * <i>small</i> charts are chosen.
- * 
- * @type number
- * @default Infinity
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.multiChartMax = undefined;
-/**
- * Indicates that, 
- * when the layout results in a single column
- * and the value of {@link #smallHeight}
- * is still to be determined, 
- * it should be set to all the initially available content height,
- * instead of determining the height from the 
- * {@link #smallAspectRatio} and the {@link #smallWidth}.
- * 
- * @type boolean
- * @default true
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.multiChartSingleColFillsHeight = undefined;
-/**
- * Indicates that, 
- * when the layout results in a single row
- * and the value of {@link #smallHeight}
- * is still to be determined, 
- * it should be set to all the initially available content height,
- * instead of determining the height from the 
- * {@link #smallAspectRatio} and the {@link #smallWidth}.
- * 
- * @type boolean
- * @default true
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.multiChartSingleRowFillsHeight = undefined;
-/**
- * The ratio of the width over the height of a 
- * <i>small</i> chart.
- * <p>
- * It is used when the set of properties
- * {@link #smallWidth},
- * {@link #smallHeight},
- * {@link #multiChartColumnsMax},
- * {@link #multiChartSingleRowFillsHeight} and
- * {@link #multiChartSingleColFillsHeight},
- * is under-specified and 
- * is not enough to determine the value of both
- * {@link #smallWidth} and
- * {@link #smallHeight}.
- * <p>
- * The default value of the aspect ratio depends on the chart type,
- * but is something around 
- * <tt>4/3</tt>.
- * 
- * @type number
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.smallAspectRatio = undefined;
-/**
- * The margins of the 
- * <i>content panel</i> of a 
- * <i>small</i> chart. 
- * <p>
- * See {@link pvc.options.varia.Sides} for information about 
- * the different supported data types.
- * 
- * @type number|string|pvc.options.varia.Sides
- * @default 0
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.smallContentMargins = undefined;
-/**
- * The paddings of the 
- * <i>content panel</i> of a 
- * <i>small</i> chart.
- * <p>
- * See {@link pvc.options.varia.Sides} for information about 
- * the different supported data types.
- * 
- * @type number|string|pvc.options.varia.Sides
- * @default 0
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.smallContentPaddings = undefined;
-/**
- * Fixates the height of each 
- * <i>small</i> chart.
- * <p>
- * A value of type 
- * <tt>number</tt>, 
- * or of type 
- * <tt>string</tt>, but with numeric content, 
- * is interpreted as being in pixel units.
- * <p>
- * A value of type 
- * <tt>string</tt>, 
- * with numeric content that is suffixed by a "%" character,
- * is interpreted as a percentage of the initially available content height.
- * <p>
- * This property may cause the 
- * <i>small multiples</i> chart 
- * to take up a greater width than the one specified in {@link #height}.
- * <p>
- * When this property is unspecified, 
- * its value depends on the evaluation of the
- * {@link #smallWidth} property, 
- * which may impose it a value. 
- * If after the evaluation of {@link #smallWidth} 
- * this property remains unspecified, 
- * it is determined as follows.
- * <p>
- * If the layout will have a single column 
- * and the property {@link #multiChartSingleColFillsHeight}
- * is 
- * <tt>true</tt> (it is by default)
- * then the height will be the initially available content height.
- * <p>
- * If the layout will have a single row 
- * and the property {@link #multiChartSingleRowFillsHeight}
- * is 
- * <tt>true</tt> (it is by default)
- * then the height will be the initially available content height.
- * <p>
- * Otherwise, the property {@link #smallAspectRatio} is 
- * used to determine the height of the small chart from its determined width.
- * <p>
- * The aspect ratio is defaulted to a value that depends on the chart type,
- * but is something around 
- * <tt>4/3</tt>.
- * 
- * @type number|string
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.smallHeight = undefined;
-/**
- * The margins of a 
- * <i>small</i> chart.
- * <p>
- * See {@link pvc.options.varia.Sides} for information about 
- * the different supported data types.
- * 
- * @type number|string|pvc.options.varia.Sides
- * @default '2%'
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.smallMargins = undefined;
-/**
- * The paddings of a 
- * <i>small</i> chart.
- * <p>
- * See {@link pvc.options.varia.Sides} for information about 
- * the different supported data types.
- * 
- * @type number|string|pvc.options.varia.Sides
- * @default 0
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.smallPaddings = undefined;
-/**
- * Fixates the width of each 
- * <i>small</i> chart.
- * <p>
- * A value of type 
- * <tt>number</tt>, 
- * or of type 
- * <tt>string</tt>, but with numeric content, 
- * is interpreted as being in pixel units.
- * <p>
- * A value of type 
- * <tt>string</tt>, 
- * with numeric content that is suffixed by a "%" character,
- * is interpreted as a percentage of the initially available content width.
- * <p>
- * This property may cause the 
- * <i>small multiples</i> chart 
- * to take up a greater width than the one specified in {@link #width}.
- * <p>
- * When this property is unspecified,
- * a specified finite value, or a defaulted value, of the property {@link #multiChartColumnsMax} is
- * used to determine it: 
- * by dividing the initially available content width 
- * by the maximum number of charts in a row that 
- * <i>actually</i> occur
- * (so that if there are less small charts than 
- * the maximum that can be placed in a row, 
- * these, nevertheless, take up the whole width).
- * <p>
- * When an infinite value is specified for 
- * {@link #multiChartColumnsMax}, 
- * the small charts are laid out in a single row, 
- * and so the width is calculated from the height {@link #smallHeight}, 
- * using the aspect ratio {@link #smallAspectRatio}.
- * The height is defaulted to the initially available content height.
- * The aspect ratio is defaulted to a value that depends on the chart type,
- * but is something around 
- * <tt>4/3</tt>.
- * The width is then calculated.
- * 
- * @type number|string
- * @category Multi-Chart - Layout
- */
-pvc.options.charts.ChartCommonOptions.prototype.smallWidth = undefined;
-/**
  * The legend panel of the root chart.
  * <p>
  * When a value of type 
@@ -1016,45 +725,6 @@ pvc.options.charts.ChartCommonOptions.prototype.smallTitle = undefined;
  */
 pvc.options.charts.ChartCommonOptions.prototype.title = undefined;
 /**
- * Indicates that the 
- * series identified in {@link #plot2Series}
- * are plotted in a separate plot.
- * <p>
- * In the bar chart, in the box-plot chart and in 
- * the point-family charts the second plot is a generic point plot.
- * <p>
- * In the metric point chart, 
- * the second plot is another metric point plot.
- * 
- * @type boolean
- * @default false
- * @category Plot
- */
-pvc.options.charts.ChartCommonOptions.prototype.plot2 = undefined;
-/**
- * 
- * Indicates whether selected series  
- * are plotted in a separate plot.
- * 
- * @deprecated Use {@link #plot2} instead.
- * @type boolean
- * @default false
- * @category Plot
- */
-pvc.options.charts.ChartCommonOptions.prototype.secondAxis = undefined;
-/**
- * The discrete colors scheme to use to distinguish visual elements
- * that are colored using the 
- * <i>second</i> color axis. 
- * <p>
- * With a few exceptions, 
- * color axes map values of the "color" visual role.
- * 
- * @type list(pvc.options.varia.ColorString)
- * @category Style
- */
-pvc.options.charts.ChartCommonOptions.prototype.color2AxisColors = undefined;
-/**
  * The discrete colors scheme to use to distinguish visual elements
  * that are colored using the 
  * <i>first</i> color axis. 
@@ -1075,31 +745,6 @@ pvc.options.charts.ChartCommonOptions.prototype.colors = undefined;
  * @category Style
  */
 pvc.options.charts.ChartCommonOptions.prototype.extensionPoints = undefined;
-/**
- * Indicates that the data shown in the second plot should
- * use a separate color scheme, 
- * as specified in {@link #secondAxisColor}.
- * <p>
- * Valid values are 
- * <tt>1</tt> and 
- * <tt>2</tt>.
- * 
- * @type number
- * @default 1
- * @category Style
- */
-pvc.options.charts.ChartCommonOptions.prototype.plot2ColorAxis = undefined;
-/**
- * 
- * The discrete colors scheme to use to distinguish visual elements
- * that are colored using the 
- * <i>second</i> color axis. 
- * 
- * @deprecated Use {@link #color2AxisColors} instead.
- * @type list(pvc.options.varia.ColorString)
- * @category Style
- */
-pvc.options.charts.ChartCommonOptions.prototype.secondAxisColor = undefined;
 /**
  * The visual roles common to all chart types.
  * 
@@ -1746,13 +1391,113 @@ pvc.options.DimensionsReaderOptions.prototype.names = undefined;
  */
 pvc.options.DimensionsReaderOptions.prototype.reader = function(){};
 /**
+ * The common options documentation class of all plots.
+ * 
+ * @class
+ */
+pvc.options.plots.PlotCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * The index of the color axis to use for the plot.
+ * <p>
+ * The possible values are 
+ * <tt>1</tt>, 
+ * <tt>2</tt> and 
+ * <tt>3</tt>.
+ * <p>
+ * The default value depends on the plot.
+ * The main plot of a chart always uses the axis 
+ * <tt>1</tt>.
+ * The 
+ * <tt>plot2</tt> plot uses the axis 
+ * <tt>2</tt>, by default.
+ * The 
+ * <tt>trend</tt> plot uses the axis 
+ * <tt>3</tt>, by default.
+ * 
+ * @type number
+ */
+pvc.options.plots.PlotCommonOptions.prototype.colorAxis = undefined;
+/**
+ * 
+ * Indicates if value labels are shown next to the visual elements.
+ * 
+ * @deprecated Use {@link #valuesVisible} instead.
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.PlotCommonOptions.prototype.showValues = undefined;
+/**
+ * The alignment of a value label 
+ * relative to its corresponding visual element position.
+ * <p>
+ * The possible values and the default value actually depend on the chart type
+ * so be sure to access this property's documentation through the 
+ * concrete class' documentation.
+ * 
+ * @type function|pvc.options.varia.MarkAnchor|pvc.options.varia.WedgeAnchor
+ */
+pvc.options.plots.PlotCommonOptions.prototype.valuesAnchor = undefined;
+/**
+ * The font of a value label.
+ * <p>
+ * This property can also be specified 
+ * through the "label" extension point of a plot.
+ * <p>
+ * In some charts the value label font is 
+ * taken into account for layout purposes.
+ * 
+ * @type string
+ */
+pvc.options.plots.PlotCommonOptions.prototype.valuesFont = undefined;
+/**
+ * Indicates if value labels are shown next to the visual elements.
+ * <p>
+ * Most charts have some form of showing labels
+ * with the 
+ * <i>main</i> value next to the visual element.
+ * <p>
+ * The default value really varies with the chart type,
+ * so be sure to confirm it in the most specific plot class.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.PlotCommonOptions.prototype.valuesVisible = undefined;
+/**
  * The options documentation class of the 
- * <b>Bullet</b> chart class: {@link pvc.BulletChart}.
+ * <b>Bullet</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.ChartCommonOptions
  */
 pvc.options.charts.BulletChart = function(){};
+        
+        
+        
+        
+/**
+ * The bullet plot is the 
+ * <b>main plot</b> of the bullet chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "bullet" property suffix.
+ * 
+ * @type pvc.options.plots.BulletPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.BulletChart.prototype.bullet = undefined;
+/**
+ * The options documentation class of the 
+ * <b>Bullet</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.PlotCommonOptions
+ */
+pvc.options.plots.BulletPlotOptions = function(){};
         
         
         
@@ -1881,7 +1626,19 @@ pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.yAxisGrid = undefi
  */
 pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.yAxisZeroLine = undefined;
 /**
- * The common options documentation class for the 
+ * The common options documentation class of 
+ * <b>cartesian</b> plots.
+ * 
+ * @class
+ * @extends pvc.options.plots.PlotCommonOptions
+ */
+pvc.options.plots.CartesianPlotCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * The common options documentation class of 
  * <b>Categorical</b> charts. 
  * 
  * @class
@@ -1955,11 +1712,338 @@ pvc.options.roles.CategoricalCommonVisualRoles = function(){};
  */
 pvc.options.roles.CategoricalCommonVisualRoles.prototype.category = undefined;
 /**
- * The options documentation class of the 
- * <b>Box plot</b> chart class: {@link pvc.BoxplotChart}.
+ * The common options documentation class of 
+ * <b>categorical</b> plots.
+ * 
+ * @class
+ * @extends pvc.options.plots.CartesianPlotCommonOptions
+ */
+pvc.options.plots.CategoricalPlotCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * The common options documentation class of 
+ * <b>Categorical</b> charts with a 
+ * <i>continuous orthogonal axis</i>. 
  * 
  * @class
  * @extends pvc.options.charts.CategoricalChartCommonOptions
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions = function(){};
+        
+        
+        
+        FACETS: pvc.options.facets.ChartMultiOptionsFacet
+/**
+ * The indexes of the data source's 
+ * <i>virtual item</i> columns
+ * that are to feed the 
+ * default 
+ * 
+ * <tt>multiChart</tt>, 
+ * 
+ * <tt>multiChart2</tt>, ... 
+ * dimensions.
+ * 
+ * @type number|string
+ * @default true
+ * @category Data Translation
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.multiChartIndexes = undefined;
+/**
+ * The maximum number of 
+ * <i>small</i> charts that should
+ * be displayed in a row.
+ * <p>
+ * This property can receive a value of 
+ * <tt>Infinity</tt>
+ * to indicate that all charts should be laid out in a single row.
+ * 
+ * @type number
+ * @default 3
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.multiChartColumnsMax = undefined;
+/**
+ * The maximum number of 
+ * <i>small</i> charts that should
+ * be displayed.
+ * <p>
+ * The first 
+ * <i>small</i> charts are chosen.
+ * 
+ * @type number
+ * @default Infinity
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.multiChartMax = undefined;
+/**
+ * Indicates that, 
+ * when the layout results in a single column
+ * and the value of {@link #smallHeight}
+ * is still to be determined, 
+ * it should be set to all the initially available content height,
+ * instead of determining the height from the 
+ * {@link #smallAspectRatio} and the {@link #smallWidth}.
+ * 
+ * @type boolean
+ * @default true
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.multiChartSingleColFillsHeight = undefined;
+/**
+ * Indicates that, 
+ * when the layout results in a single row
+ * and the value of {@link #smallHeight}
+ * is still to be determined, 
+ * it should be set to all the initially available content height,
+ * instead of determining the height from the 
+ * {@link #smallAspectRatio} and the {@link #smallWidth}.
+ * 
+ * @type boolean
+ * @default true
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.multiChartSingleRowFillsHeight = undefined;
+/**
+ * The ratio of the width over the height of a 
+ * <i>small</i> chart.
+ * <p>
+ * It is used when the set of properties
+ * {@link #smallWidth},
+ * {@link #smallHeight},
+ * {@link #multiChartColumnsMax},
+ * {@link #multiChartSingleRowFillsHeight} and
+ * {@link #multiChartSingleColFillsHeight},
+ * is under-specified and 
+ * is not enough to determine the value of both
+ * {@link #smallWidth} and
+ * {@link #smallHeight}.
+ * <p>
+ * The default value of the aspect ratio depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * 
+ * @type number
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallAspectRatio = undefined;
+/**
+ * The margins of the 
+ * <i>content panel</i> of a 
+ * <i>small</i> chart. 
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallContentMargins = undefined;
+/**
+ * The paddings of the 
+ * <i>content panel</i> of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallContentPaddings = undefined;
+/**
+ * Fixates the height of each 
+ * <i>small</i> chart.
+ * <p>
+ * A value of type 
+ * <tt>number</tt>, 
+ * or of type 
+ * <tt>string</tt>, but with numeric content, 
+ * is interpreted as being in pixel units.
+ * <p>
+ * A value of type 
+ * <tt>string</tt>, 
+ * with numeric content that is suffixed by a "%" character,
+ * is interpreted as a percentage of the initially available content height.
+ * <p>
+ * This property may cause the 
+ * <i>small multiples</i> chart 
+ * to take up a greater width than the one specified in {@link #height}.
+ * <p>
+ * When this property is unspecified, 
+ * its value depends on the evaluation of the
+ * {@link #smallWidth} property, 
+ * which may impose it a value. 
+ * If after the evaluation of {@link #smallWidth} 
+ * this property remains unspecified, 
+ * it is determined as follows.
+ * <p>
+ * If the layout will have a single column 
+ * and the property {@link #multiChartSingleColFillsHeight}
+ * is 
+ * <tt>true</tt> (it is by default)
+ * then the height will be the initially available content height.
+ * <p>
+ * If the layout will have a single row 
+ * and the property {@link #multiChartSingleRowFillsHeight}
+ * is 
+ * <tt>true</tt> (it is by default)
+ * then the height will be the initially available content height.
+ * <p>
+ * Otherwise, the property {@link #smallAspectRatio} is 
+ * used to determine the height of the small chart from its determined width.
+ * <p>
+ * The aspect ratio is defaulted to a value that depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * 
+ * @type number|string
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallHeight = undefined;
+/**
+ * The margins of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default '2%'
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallMargins = undefined;
+/**
+ * The paddings of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallPaddings = undefined;
+/**
+ * Fixates the width of each 
+ * <i>small</i> chart.
+ * <p>
+ * A value of type 
+ * <tt>number</tt>, 
+ * or of type 
+ * <tt>string</tt>, but with numeric content, 
+ * is interpreted as being in pixel units.
+ * <p>
+ * A value of type 
+ * <tt>string</tt>, 
+ * with numeric content that is suffixed by a "%" character,
+ * is interpreted as a percentage of the initially available content width.
+ * <p>
+ * This property may cause the 
+ * <i>small multiples</i> chart 
+ * to take up a greater width than the one specified in {@link #width}.
+ * <p>
+ * When this property is unspecified,
+ * a specified finite value, or a defaulted value, of the property {@link #multiChartColumnsMax} is
+ * used to determine it: 
+ * by dividing the initially available content width 
+ * by the maximum number of charts in a row that 
+ * <i>actually</i> occur
+ * (so that if there are less small charts than 
+ * the maximum that can be placed in a row, 
+ * these, nevertheless, take up the whole width).
+ * <p>
+ * When an infinite value is specified for 
+ * {@link #multiChartColumnsMax}, 
+ * the small charts are laid out in a single row, 
+ * and so the width is calculated from the height {@link #smallHeight}, 
+ * using the aspect ratio {@link #smallAspectRatio}.
+ * The height is defaulted to the initially available content height.
+ * The aspect ratio is defaulted to a value that depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * The width is then calculated.
+ * 
+ * @type number|string
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallWidth = undefined;
+/**
+ * The common options documentation class of 
+ * <b>categorical</b> plots with a 
+ * <i>continuous orthogonal axis</i>. 
+ * 
+ * @class
+ * @extends pvc.options.plots.CategoricalPlotCommonOptions
+ */
+pvc.options.plots.CategoricalContinuousPlotCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * The interpolation mode used to 
+ * fill-in null or missing values.
+ * <p>
+ * The interpolation is applied to
+ * the measure roles of the plot that 
+ * are represented in the orthogonal cartesian axis.
+ * <p>
+ * With the exception of the box plot, 
+ * this role is the 
+ * <tt>value</tt> role.
+ * All of the box plot measure roles:
+ * 
+ * <tt>median</tt>, 
+ * <tt>lowerQuartil</tt>, 
+ * <tt>upperQuartil</tt>, 
+ * <tt>minimum</tt>, and 
+ * <tt>maximum</tt>,
+ * are interpolated using the specified mode.
+ * 
+ * @type pvc.options.varia.NullInterpolationMode
+ * @default 'none'
+ */
+pvc.options.plots.CategoricalContinuousPlotCommonOptions.prototype.nullInterpolationMode = undefined;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * <p>
+ * The possible values are 
+ * <tt>1</tt>, 
+ * <tt>2</tt> and 
+ * <tt>3</tt>.
+ * <p>
+ * The main plot of a chart always uses the axis 
+ * <tt>1</tt>.
+ * 
+ * @type number
+ * @default 1
+ */
+pvc.options.plots.CategoricalContinuousPlotCommonOptions.prototype.orthoAxis = undefined;
+/**
+ * Indicates that visual elements having 
+ * identical category, but different series,
+ * should be displayed on top of each other, 
+ * along the plot's orthogonal direction, 
+ * instead of side-by-side, 
+ * along the base direction.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.CategoricalContinuousPlotCommonOptions.prototype.stacked = undefined;
+/**
+ * The options documentation class of the 
+ * <b>Box plot</b> chart.
+ * 
+ * @class
+ * @extends pvc.options.charts.CategoricalContinuousChartCommonOptions
  */
 pvc.options.charts.BoxplotChartOptions = function(){};
         
@@ -1967,8 +2051,39 @@ pvc.options.charts.BoxplotChartOptions = function(){};
         
         
 /**
+ * The box plot is the 
+ * <b>main plot</b> of the box plot chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "box" property suffix.
+ * 
+ * @type pvc.options.plots.BoxPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.BoxplotChartOptions.prototype.box = undefined;
+/**
  * The options documentation class of the 
- * <b>Heat grid</b> chart class: {@link pvc.HeatGridChart}.
+ * <b>Box</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.CategoricalContinuousPlotCommonOptions
+ */
+pvc.options.plots.BoxPlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * The box plot only shows a single series of data
+ * and, as such, this property is meaningless.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.BoxPlotOptions.prototype.stacked = false;
+/**
+ * The options documentation class of the 
+ * <b>Heat grid</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.CategoricalChartCommonOptions
@@ -1979,11 +2094,34 @@ pvc.options.charts.HeatGridChartOptions = function(){};
         
         
 /**
+ * The heat grid plot is the 
+ * <b>main plot</b> of the heat grid chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "heatGrid" property suffix.
+ * 
+ * @type pvc.options.plots.HeatGridPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.HeatGridChartOptions.prototype.heatGrid = undefined;
+/**
+ * The options documentation class of the 
+ * <b>Heat grid</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.CategoricalPlotCommonOptions
+ */
+pvc.options.plots.HeatGridPlotOptions = function(){};
+        
+        
+        
+        
+/**
  * The common options documentation class of the 
  * <b>Bar family</b> charts.
  * 
  * @class
- * @extends pvc.options.charts.CategoricalChartCommonOptions
+ * @extends pvc.options.charts.CategoricalContinuousChartCommonOptions
  */
 pvc.options.charts.BarChartCommonOptions = function(){};
         
@@ -2003,8 +2141,20 @@ pvc.options.charts.BarChartCommonOptions = function(){};
  */
 pvc.options.charts.BarChartCommonOptions.prototype.panelSizeRatio = undefined;
 /**
+ * The common options documentation class of the 
+ * <b>Bar family</b> plots.
+ * 
+ * @class
+ * @extends pvc.options.plots.CategoricalContinuousPlotCommonOptions
+ */
+pvc.options.plots.BarPlotCommonOptions = function(){};
+        
+        
+        
+        
+/**
  * The options documentation class of the 
- * <b>Bar</b> chart class: {@link pvc.BarChart}.
+ * <b>Bar</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.BarChartCommonOptions
@@ -2013,16 +2163,165 @@ pvc.options.charts.BarChartOptions = function(){};
         
         
         
-        
+        FACETS: pvc.options.facets.ChartPlot2OptionsFacet                             pvc.options.facets.CategoricalChartTrendOptionsFacet                            pvc.options.facets.ChartPlot2V1OptionsFacet
 /**
- * Blah
+ * The 
+ * <i>key values</i> of the series visual role, 
+ * that are to be shown in the second plot.
+ * <p>
+ * If the series visual role has more than one dimension, 
+ * the specified keys should be 
+ * the result of joining the key of each dimension with a "~" character.
+ * <p>
+ * This option is only relevant when the property
+ * {@link #plot2} has the value 
+ * <tt>true</tt>.
  * 
- * @type pvc.options.plots.PlotCommonOptions
+ * @type string|list(string)
+ * @category Data
+ */
+pvc.options.charts.BarChartOptions.prototype.plot2Series = undefined;
+/**
+ * Activates the second plot.
+ * <p>
+ * The series identified in {@link #plot2Series}
+ * are plotted in the second plot.
+ * <p>
+ * The second plot is a 
+ * <i>generic</i> point plot, 
+ * which means that 
+ * its properties 
+ * {@link pvc.options.plots.CategoricalContinuousPlotCommonOptions#stacked},
+ * {@link pvc.options.plots.PointPlotCommonOptions#linesVisible},
+ * {@link pvc.options.plots.PointPlotCommonOptions#dotsVisible}, 
+ * and
+ * {@link pvc.options.plots.PointPlotCommonOptions#areasVisible}
+ * can be set freely.
+ * <p>
+ * By default, the second plot shows lines and dots/markers.
+ * 
+ * @type boolean|pvc.options.plots.PointPlotCommonOptions
+ * @default false
+ * @category Plot
+ */
+pvc.options.charts.BarChartOptions.prototype.plot2 = undefined;
+/**
+ * The discrete colors scheme to use to distinguish visual elements
+ * that are colored using the 
+ * <i>second</i> color axis. 
+ * <p>
+ * With a few exceptions, 
+ * color axes map values of the "color" visual role.
+ * 
+ * @type list(pvc.options.varia.ColorString)
+ * @category Style
+ */
+pvc.options.charts.BarChartOptions.prototype.color2AxisColors = undefined;
+/**
+ * The trend plot is activated when 
+ * the 
+ * <i>other</i> chart plots indicate that their 
+ * data should be trended.
+ * <p>
+ * To activate trending for a plot specify 
+ * its 
+ * <tt>trend type</tt> option.
+ * <p>
+ * The trend plot shows lines, by default.
+ * 
+ * @type pvc.options.plots.PointPlotCommonOptions
+ * @category Plot
+ */
+pvc.options.charts.BarChartOptions.prototype.trend = undefined;
+/**
+ * 
+ * Indicates whether the secondary axis should be 
+ * shown and with an independent range.
+ * 
+ * @deprecated Use {@link #plot2OrthoAxis} instead, to specify an alternate orthogonal axis.
+ * @type boolean
+ * @default false
+ * @category Axis
+ */
+pvc.options.charts.BarChartOptions.prototype.secondAxisIndependentScale = undefined;
+/**
+ * 
+ * The zero-based indexes of the series, 
+ * in 
+ * <i>the order of appearance in the data source</i>, 
+ * that are to be shown in the second axis, 
+ * on chart types that support it.
+ * <p>
+ * A negative index designates an index from the last series.
+ * So 
+ * <tt>-1</tt> is the last series, 
+ * 
+ * <tt>-2</tt> is the next-to-last series, 
+ * etc.
+ * 
+ * @deprecated Use {@link #plot2Series} instead.
+ * @type number|string|list(number|string)
+ * @category Data Translation
+ */
+pvc.options.charts.BarChartOptions.prototype.secondAxisIdx = undefined;
+/**
+ * 
+ * Indicates whether selected series  
+ * are plotted in a separate plot.
+ * 
+ * @deprecated Use {@link #plot2} instead.
+ * @type boolean
+ * @default false
+ * @category Plot
+ */
+pvc.options.charts.BarChartOptions.prototype.secondAxis = undefined;
+/**
+ * 
+ * The discrete colors scheme to use to distinguish visual elements
+ * that are colored using the 
+ * <i>second</i> color axis. 
+ * 
+ * @deprecated Use {@link #color2AxisColors} instead.
+ * @type list(pvc.options.varia.ColorString)
+ * @category Style
+ */
+pvc.options.charts.BarChartOptions.prototype.secondAxisColor = undefined;
+/**
+ * The bar plot is the 
+ * <b>main plot</b> of the bar chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "bar" property suffix.
+ * 
+ * @type pvc.options.plots.BarPlotOptions
+ * @category Plot
  */
 pvc.options.charts.BarChartOptions.prototype.bar = undefined;
 /**
  * The options documentation class of the 
- * <b>Normalized Bar</b> chart class: {@link pvc.NormalizedBarChart}.
+ * <b>Bar</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.BarPlotCommonOptions
+ */
+pvc.options.plots.BarPlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * Contains the plot's trending options.
+ * <p>
+ * Besides the property concatenation way of specifying this
+ * property and its sub-properties, 
+ * this option may also be specified as a plain JSON object.
+ * 
+ * @type pvc.options.varia.PlotTrendingOptions
+ */
+pvc.options.plots.BarPlotOptions.prototype.trend = undefined;
+/**
+ * The options documentation class of the 
+ * <b>Normalized Bar</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.BarChartCommonOptions
@@ -2034,7 +2333,19 @@ pvc.options.charts.NormalizedBarChartOptions = function(){};
         
 /**
  * The options documentation class of the 
- * <b>Waterfall</b> chart class: {@link pvc.WaterfallChart}.
+ * <b>Normalized Bar</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.BarPlotCommonOptions
+ */
+pvc.options.plots.NormalizedBarPlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the 
+ * <b>Waterfall</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.BarChartCommonOptions
@@ -2045,20 +2356,187 @@ pvc.options.charts.WaterfallChartOptions = function(){};
         
         
 /**
- * The common options documentation class for the 
- * <b>Line/Dot/Area family</b> charts.
+ * The waterfall plot is the 
+ * <b>main plot</b> of the waterfall chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "water" property suffix.
+ * 
+ * @type pvc.options.plots.WaterfallPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.WaterfallChartOptions.prototype.water = undefined;
+/**
+ * The options documentation class of the 
+ * <b>Bar</b> plot.
  * 
  * @class
- * @extends pvc.options.charts.CategoricalChartCommonOptions
+ * @extends pvc.options.plots.BarPlotCommonOptions
  */
-pvc.options.charts.PointChartCommonOptions = function(){};
+pvc.options.plots.WaterfallPlotOptions = function(){};
         
         
         
         
 /**
+ * The common options documentation class for the 
+ * <b>Line/Dot/Area family</b> charts.
+ * 
+ * @class
+ * @extends pvc.options.charts.CategoricalContinuousChartCommonOptions
+ */
+pvc.options.charts.PointChartCommonOptions = function(){};
+        
+        
+        
+        FACETS: pvc.options.facets.ChartPlot2OptionsFacet                            pvc.options.facets.CategoricalChartTrendOptionsFacet
+/**
+ * The 
+ * <i>key values</i> of the series visual role, 
+ * that are to be shown in the second plot.
+ * <p>
+ * If the series visual role has more than one dimension, 
+ * the specified keys should be 
+ * the result of joining the key of each dimension with a "~" character.
+ * <p>
+ * This option is only relevant when the property
+ * {@link #plot2} has the value 
+ * <tt>true</tt>.
+ * 
+ * @type string|list(string)
+ * @category Data
+ */
+pvc.options.charts.PointChartCommonOptions.prototype.plot2Series = undefined;
+/**
+ * Activates the second plot.
+ * <p>
+ * The series identified in {@link #plot2Series}
+ * are plotted in the second plot.
+ * <p>
+ * The second plot is a 
+ * <i>generic</i> point plot, 
+ * which means that 
+ * its properties 
+ * {@link pvc.options.plots.CategoricalContinuousPlotCommonOptions#stacked},
+ * {@link pvc.options.plots.PointPlotCommonOptions#linesVisible},
+ * {@link pvc.options.plots.PointPlotCommonOptions#dotsVisible}, 
+ * and
+ * {@link pvc.options.plots.PointPlotCommonOptions#areasVisible}
+ * can be set freely.
+ * <p>
+ * By default, the second plot shows lines and dots/markers.
+ * 
+ * @type boolean|pvc.options.plots.PointPlotCommonOptions
+ * @default false
+ * @category Plot
+ */
+pvc.options.charts.PointChartCommonOptions.prototype.plot2 = undefined;
+/**
+ * The discrete colors scheme to use to distinguish visual elements
+ * that are colored using the 
+ * <i>second</i> color axis. 
+ * <p>
+ * With a few exceptions, 
+ * color axes map values of the "color" visual role.
+ * 
+ * @type list(pvc.options.varia.ColorString)
+ * @category Style
+ */
+pvc.options.charts.PointChartCommonOptions.prototype.color2AxisColors = undefined;
+/**
+ * The trend plot is activated when 
+ * the 
+ * <i>other</i> chart plots indicate that their 
+ * data should be trended.
+ * <p>
+ * To activate trending for a plot specify 
+ * its 
+ * <tt>trend type</tt> option.
+ * <p>
+ * The trend plot shows lines, by default.
+ * 
+ * @type pvc.options.plots.PointPlotCommonOptions
+ * @category Plot
+ */
+pvc.options.charts.PointChartCommonOptions.prototype.trend = undefined;
+/**
+ * The common options documentation class of the 
+ * <b>point</b> plots.
+ * 
+ * @class
+ * @extends pvc.options.plots.CategoricalContinuousPlotCommonOptions
+ */
+pvc.options.plots.PointPlotCommonOptions = function(){};
+        
+        
+        
+        
+/**
+ * Indicates if the visual elements are 
+ * connected with shaded areas extending
+ * from the visual elements to the zero line.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.PointPlotCommonOptions.prototype.areasVisible = undefined;
+/**
+ * Indicates if the visual elements show dots/markers
+ * in each point's position.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.PointPlotCommonOptions.prototype.dotsVisible = undefined;
+/**
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.PointPlotCommonOptions.prototype.linesVisible = undefined;
+/**
+ * 
+ * Indicates if the visual elements are 
+ * connected with shaded areas extending
+ * from the visual elements to the zero line.
+ * 
+ * @deprecated Use {@link #areasVisible} instead.
+ * @type boolean
+ */
+pvc.options.plots.PointPlotCommonOptions.prototype.showAreas = undefined;
+/**
+ * 
+ * Indicates if the visual elements show dots/markers
+ * in each point's position.
+ * 
+ * @deprecated Use {@link #dotsVisible} instead.
+ * @type boolean
+ */
+pvc.options.plots.PointPlotCommonOptions.prototype.showDots = undefined;
+/**
+ * 
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @deprecated Use {@link #linesVisible} instead.
+ * @type boolean
+ */
+pvc.options.plots.PointPlotCommonOptions.prototype.showLines = undefined;
+/**
+ * Contains the plot's trending options.
+ * <p>
+ * Besides the property concatenation way of specifying this
+ * property and its sub-properties, 
+ * this option may also be specified as a plain JSON object.
+ * 
+ * @type pvc.options.varia.PlotTrendingOptions
+ */
+pvc.options.plots.PointPlotCommonOptions.prototype.trend = undefined;
+/**
  * The options documentation class of the 
- * <b>Line</b> chart class: {@link pvc.LineChart}.
+ * <b>Line</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.PointChartCommonOptions
@@ -2069,8 +2547,39 @@ pvc.options.charts.LineChartOptions = function(){};
         
         
 /**
+ * The point plot is the 
+ * <b>main plot</b> of the line chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "point" property suffix.
+ * 
+ * @type pvc.options.plots.LinePlotOptions
+ * @category Plot
+ */
+pvc.options.charts.LineChartOptions.prototype.point = undefined;
+/**
  * The options documentation class of the 
- * <b>Stacked Line</b> chart class: {@link pvc.StackedLineChart}.
+ * <b>line</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlotCommonOptions
+ */
+pvc.options.plots.LinePlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * This plot type necessarily shows lines connecting
+ * visual elements.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.LinePlotOptions.prototype.linesVisible = true;
+/**
+ * The options documentation class of the 
+ * <b>Stacked Line</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.PointChartCommonOptions
@@ -2081,8 +2590,46 @@ pvc.options.charts.StackedLineChartOptions = function(){};
         
         
 /**
+ * The point plot is the 
+ * <b>main plot</b> of the stacked line chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "point" property suffix.
+ * 
+ * @type pvc.options.plots.StackedLinePlotOptions
+ * @category Plot
+ */
+pvc.options.charts.StackedLineChartOptions.prototype.point = undefined;
+/**
  * The options documentation class of the 
- * <b>Dot</b> chart class: {@link pvc.DotChart}.
+ * <b>stacked line</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlotCommonOptions
+ */
+pvc.options.plots.StackedLinePlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * This plot type necessarily shows lines connecting
+ * visual elements.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.StackedLinePlotOptions.prototype.linesVisible = true;
+/**
+ * This plot type is necessarily stacked.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.StackedLinePlotOptions.prototype.stacked = true;
+/**
+ * The options documentation class of the 
+ * <b>Dot</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.PointChartCommonOptions
@@ -2093,8 +2640,38 @@ pvc.options.charts.DotChartOptions = function(){};
         
         
 /**
+ * The point plot is the 
+ * <b>main plot</b> of the dot chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "point" property suffix.
+ * 
+ * @type pvc.options.plots.DotPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.DotChartOptions.prototype.point = undefined;
+/**
  * The options documentation class of the 
- * <b>Stacked Dot</b> chart class: {@link pvc.StackedDotChart}.
+ * <b>dot</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlotCommonOptions
+ */
+pvc.options.plots.DotPlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * This plot type necessarily shows dots/markers.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.DotPlotOptions.prototype.dotsVisible = true;
+/**
+ * The options documentation class of the 
+ * <b>Stacked Dot</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.PointChartCommonOptions
@@ -2105,8 +2682,45 @@ pvc.options.charts.StackedDotChartOptions = function(){};
         
         
 /**
+ * The point plot is the 
+ * <b>main plot</b> of the stacked dot chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "point" property suffix.
+ * 
+ * @type pvc.options.plots.StackedDotPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.StackedDotChartOptions.prototype.point = undefined;
+/**
  * The options documentation class of the 
- * <b>Area</b> chart class: {@link pvc.AreaChart}.
+ * <b>stacked dot</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlotCommonOptions
+ */
+pvc.options.plots.StackedDotPlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * This plot type necessarily shows dots/markers.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.StackedDotPlotOptions.prototype.dotsVisible = true;
+/**
+ * This plot type is necessarily stacked.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.StackedDotPlotOptions.prototype.stacked = true;
+/**
+ * The options documentation class of the 
+ * <b>Area</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.PointChartCommonOptions
@@ -2117,8 +2731,39 @@ pvc.options.charts.AreaChartOptions = function(){};
         
         
 /**
+ * The point plot is the 
+ * <b>main plot</b> of the area chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "point" property suffix.
+ * 
+ * @type pvc.options.plots.AreaPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.AreaChartOptions.prototype.point = undefined;
+/**
  * The options documentation class of the 
- * <b>Stacked Area</b> chart class: {@link pvc.StackedAreaChart}.
+ * <b>area</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlotCommonOptions
+ */
+pvc.options.plots.AreaPlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * This plot type necessarily shows 
+ * shaded areas connecting visual elements.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.AreaPlotOptions.prototype.areasVisible = true;
+/**
+ * The options documentation class of the 
+ * <b>Stacked Area</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.PointChartCommonOptions
@@ -2128,6 +2773,44 @@ pvc.options.charts.StackedAreaChartOptions = function(){};
         
         
         
+/**
+ * The point plot is the 
+ * <b>main plot</b> of the stacked area chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "point" property suffix.
+ * 
+ * @type pvc.options.plots.StackedAreaPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.StackedAreaChartOptions.prototype.point = undefined;
+/**
+ * The options documentation class of the 
+ * <b>stacked area</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlotCommonOptions
+ */
+pvc.options.plots.StackedAreaPlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * This plot type necessarily shows 
+ * shaded areas connecting visual elements.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.StackedAreaPlotOptions.prototype.areasVisible = true;
+/**
+ * This plot type is necessarily stacked.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.StackedAreaPlotOptions.prototype.stacked = true;
 /**
  * The common options documentation class for the 
  * <b>Metric Line/Dot family</b> charts.
@@ -2139,10 +2822,84 @@ pvc.options.charts.MetricPointChartCommonOptions = function(){};
         
         
         
+        FACETS: pvc.options.facets.MetricChartTrendOptionsFacet
+/**
+ * The trend plot is activated when 
+ * the 
+ * <i>other</i> chart plots indicate that their 
+ * data should be trended.
+ * <p>
+ * To activate trending for a plot specify 
+ * its 
+ * <tt>trend type</tt> option.
+ * <p>
+ * Depending on the chart type
+ * <p>
+ * The trend plot shows lines, by default.
+ * 
+ * @type pvc.options.plots.MetricPointPlotCommonOptions
+ * @category Plot
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.trend = undefined;
+/**
+ * The common options documentation class of the 
+ * <b>metric point</b> plots.
+ * 
+ * @class
+ * @extends pvc.options.plots.CartesianPlotCommonOptions
+ */
+pvc.options.plots.MetricPointPlotCommonOptions = function(){};
+        
+        
+        
         
 /**
+ * Indicates if the visual elements show dots/markers
+ * in each point's position.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.dotsVisible = undefined;
+/**
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.linesVisible = undefined;
+/**
+ * 
+ * Indicates if the visual elements show dots/markers
+ * in each point's position.
+ * 
+ * @deprecated Use {@link #dotsVisible} instead.
+ * @type boolean
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.showDots = undefined;
+/**
+ * 
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @deprecated Use {@link #linesVisible} instead.
+ * @type boolean
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.showLines = undefined;
+/**
+ * Contains the plot's trending options.
+ * <p>
+ * Besides the property concatenation way of specifying this
+ * property and its sub-properties, 
+ * this option may also be specified as a plain JSON object.
+ * 
+ * @type pvc.options.varia.PlotTrendingOptions
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.trend = undefined;
+/**
  * The options documentation class of the 
- * <b>Metric Line</b> chart class: {@link pvc.MetricLineChart}.
+ * <b>Metric Line</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.MetricPointChartCommonOptions
@@ -2153,8 +2910,39 @@ pvc.options.charts.MetricLineChartOptions = function(){};
         
         
 /**
+ * The metric point plot is the 
+ * <b>main plot</b> of the metric line chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "scatter" property suffix.
+ * 
+ * @type pvc.options.plots.MetricLinePlotOptions
+ * @category Plot
+ */
+pvc.options.charts.MetricLineChartOptions.prototype.scatter = undefined;
+/**
  * The options documentation class of the 
- * <b>Metric Dot (XY Scatter)</b> chart class: {@link pvc.MetricDotChart}.
+ * <b>metric line</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.MetricPointPlotCommonOptions
+ */
+pvc.options.plots.MetricLinePlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * This plot type necessarily shows lines connecting
+ * visual elements.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.MetricLinePlotOptions.prototype.linesVisible = true;
+/**
+ * The options documentation class of the 
+ * <b>Metric Dot (XY Scatter)</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.MetricPointChartCommonOptions
@@ -2164,6 +2952,36 @@ pvc.options.charts.MetricDotChartOptions = function(){};
         
         
         
+/**
+ * The metric point plot is the 
+ * <b>main plot</b> of the metric dot chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "scatter" property suffix.
+ * 
+ * @type pvc.options.plots.MetricDotPlotOptions
+ * @category Plot
+ */
+pvc.options.charts.MetricDotChartOptions.prototype.scatter = undefined;
+/**
+ * The options documentation class of the 
+ * <b>metric dot</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.MetricPointPlotCommonOptions
+ */
+pvc.options.plots.MetricDotPlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * This plot type necessarily shows dots/markers.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.MetricDotPlotOptions.prototype.dotsVisible = true;
 /**
  * The namespace of CCC chart extension point classes. 
  * 
@@ -2888,48 +3706,74 @@ pvc.options.ext.ChartTitlePanelExtensionPoints.prototype.titleLabel = undefined;
 pvc.options.plots = {};
 
 /**
- * The common options documentation class of all plots.
+ * The options documentation class for 
+ * specifying trending options for a plot.
+ * <p>
+ * Each trend type may define additional options.
  * 
  * @class
  */
-pvc.options.plots.PlotCommonOptions = function(){};
+pvc.options.varia.PlotTrendingOptions = function(){};
         
         
         
         
 /**
- * 
- * Indicates if value labels are shown next to the visual elements.
- * 
- * @deprecated Use {@link #valuesVisible} instead.
- * @type boolean
- * @default false
- */
-pvc.options.plots.PlotCommonOptions.prototype.showValues = undefined;
-/**
- * The alignment of a value label 
- * relative to its corresponding visual element position.
+ * A description to show next to the trended data.
  * <p>
- * The possible values depend on the chart type.
+ * The description shows next to legend items and 
+ * in auto-generated tooltips.
+ * <p>
+ * The default value is the description of the associated trend type.  
  * 
  * @type string
- * @default 
  */
-pvc.options.plots.PlotCommonOptions.prototype.valuesAnchor = undefined;
+pvc.options.varia.PlotTrendingOptions.prototype.label = undefined;
 /**
- * Indicates if value labels are shown next to the visual elements.
+ * The type of trend to perform on the data of the associated plot.
  * <p>
- * Most charts have some form of showing labels
- * with the 
- * <i>main</i> value next to the visual element.
+ * The specified trend type must have been 
+ * previously defined in the CCC library, 
+ * through the 
+ * <tt>pvc.trends.define</tt> method.
  * <p>
- * The default value really varies with the chart type,
- * so be sure to confirm it in the most specific plot class.
+ * Some trend types come with the CCC library. 
+ * Currently these are:
  * 
- * @type boolean
- * @default false
+ * <dl>
+ * 
+ * <dt>'linear'</dt>
+ * 
+ * <dd>
+ * performs a 
+ * <bb>simple linear regression</bb>
+ * (see {@link http://en.wikipedia.org/wiki/Simple_linear_regression})
+ * </dd>
+ * 
+ * <dt>'moving-average'</dt>
+ * 
+ * <dd>
+ * performs a simple moving average
+ * (see {@link http://en.wikipedia.org/wiki/Moving_average});
+ * the additional option 
+ * <tt>periods</tt> may be specified to 
+ * control the number of data points of the average window. 
+ * </dd>
+ * 
+ * <dt>'weighted-moving-average'</dt>
+ * 
+ * <dd>
+ * performs a weighted moving average
+ * (see {@link http://en.wikipedia.org/wiki/Moving_average});
+ * the additional option 
+ * <tt>periods</tt> may be specified to 
+ * control the number of data points of the average window
+ * </dd>
+ * </dl> 
+ * 
+ * @type string
  */
-pvc.options.plots.PlotCommonOptions.prototype.valuesVisible = undefined;
+pvc.options.varia.PlotTrendingOptions.prototype.type = undefined;
 /**
  * The namespace of CCC visual roles option classes. 
  * 
@@ -3529,6 +4373,113 @@ pvc.options.varia.DotShapeType.prototype.Tick = 'tick';
  * @value 'triangle'
  */
 pvc.options.varia.DotShapeType.prototype.Triangle = 'triangle';
+/**
+ * The anchors that are available to all protovis marks,
+ * with the exception of the Wedge mark 
+ * (see {@link pvc.options.varia.WedgeAnchor}).
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.MarkAnchor = function(){};
+        
+        
+        
+        
+/**
+ * @value 'bottom'
+ */
+pvc.options.varia.MarkAnchor.prototype.Bottom = 'bottom';
+/**
+ * @value 'center'
+ */
+pvc.options.varia.MarkAnchor.prototype.Center = 'center';
+/**
+ * @value 'left'
+ */
+pvc.options.varia.MarkAnchor.prototype.Left = 'left';
+/**
+ * @value 'right'
+ */
+pvc.options.varia.MarkAnchor.prototype.Right = 'right';
+/**
+ * @value 'top'
+ */
+pvc.options.varia.MarkAnchor.prototype.Top = 'top';
+/**
+ * The anchors that are available to the protovis Wedge mark.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.WedgeAnchor = function(){};
+        
+        
+        
+        
+/**
+ * @value 'center'
+ */
+pvc.options.varia.WedgeAnchor.prototype.Center = 'center';
+/**
+ * @value 'end'
+ */
+pvc.options.varia.WedgeAnchor.prototype.End = 'end';
+/**
+ * @value 'inner'
+ */
+pvc.options.varia.WedgeAnchor.prototype.Inner = 'inner';
+/**
+ * @value 'outer'
+ */
+pvc.options.varia.WedgeAnchor.prototype.Outer = 'outer';
+/**
+ * @value 'start'
+ */
+pvc.options.varia.WedgeAnchor.prototype.Start = 'start';
+/**
+ * The mode of interpolation for filling null or missing measure values.
+ * <p>
+ * Some chart types 
+ * show visual elements corresponding to 
+ * interpolated data points with a different visual style.
+ * The automatically generated visual element tooltips 
+ * indicate that the associated data point 
+ * is the result of interpolation.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.NullInterpolationMode = function(){};
+        
+        
+        
+        
+/**
+ * Data is linearly interpolated to 
+ * fill-in null values or missing datums.
+ * 
+ * @value 'linear'
+ */
+pvc.options.varia.NullInterpolationMode.prototype.Linear = 'linear';
+/**
+ * Null values or missing datums are shown as a visual 
+ * <i>gap</i>.
+ * 
+ * @value 'none'
+ */
+pvc.options.varia.NullInterpolationMode.prototype.None = 'none';
+/**
+ * Data is interpolated using the constant value 
+ * <tt>0</tt> 
+ * to fill-in null values or missing datums.
+ * 
+ * @value 'zero'
+ */
+pvc.options.varia.NullInterpolationMode.prototype.Zero = 'zero';
 /**
  * Describes the distances from 
  * each of the four planar sides:

@@ -9,8 +9,25 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.BarChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Waterfall</b> chart class: <c:link to="pvc.WaterfallChart" />.
+            The options documentation class of the <b>Waterfall</b> chart.
         </c:documentation>
+        
+        <c:property name="water" type="pvc.options.plots.WaterfallPlotOptions" category="Plot">
+            <c:documentation>
+                The waterfall plot is the <b>main plot</b> of the waterfall chart,
+                which means that 
+                its properties may be used <i>without</i> the "water" property suffix.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="WaterfallPlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.BarPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Bar</b> plot.
+        </c:documentation>
+
     </c:complexType>
     
 </c:model>

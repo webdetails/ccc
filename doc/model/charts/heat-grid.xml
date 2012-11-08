@@ -9,8 +9,25 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.CategoricalChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Heat grid</b> chart class: <c:link to="pvc.HeatGridChart" />.
+            The options documentation class of the <b>Heat grid</b> chart.
         </c:documentation>
+        
+        <c:property name="heatGrid" type="pvc.options.plots.HeatGridPlotOptions" category="Plot">
+            <c:documentation>
+                The heat grid plot is the <b>main plot</b> of the heat grid chart,
+                which means that 
+                its properties may be used <i>without</i> the "heatGrid" property suffix.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="HeatGridPlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.CategoricalPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Heat grid</b> plot.
+        </c:documentation>
+
     </c:complexType>
     
 </c:model>

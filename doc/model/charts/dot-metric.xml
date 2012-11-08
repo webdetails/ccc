@@ -9,8 +9,29 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.MetricPointChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Metric Dot (XY Scatter)</b> chart class: <c:link to="pvc.MetricDotChart" />.
+            The options documentation class of the <b>Metric Dot (XY Scatter)</b> chart.
         </c:documentation>
+        
+        <c:property name="scatter" type="pvc.options.plots.MetricDotPlotOptions" category="Plot">
+            <c:documentation>
+                The metric point plot is the <b>main plot</b> of the metric dot chart,
+                which means that 
+                its properties may be used <i>without</i> the "scatter" property suffix.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
+    <c:complexType name="MetricDotPlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.MetricPointPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>metric dot</b> plot.
+        </c:documentation>
+        
+        <c:property name="dotsVisible" type="boolean" fixed="true">
+            <c:documentation>
+                This plot type necessarily shows dots/markers.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
 </c:model>

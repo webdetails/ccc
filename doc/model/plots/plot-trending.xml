@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="PlotTrendingOptions" space="pvc.options.varia">
+        <c:documentation>
+            The options documentation class for 
+            specifying trending options for a plot.
+            
+            Each trend type may define additional options.
+        </c:documentation>
+        
+        <c:property name="type" type="string">
+            <c:documentation>
+                The type of trend to perform on the data of the associated plot.
+                
+                The specified trend type must have been 
+                previously defined in the CCC library, 
+                through the <tt>pvc.trends.define</tt> method.
+                
+                Some trend types come with the CCC library. 
+                Currently these are:
+                <dl>
+                    <dt>'linear'</dt>
+                    <dd>
+                        performs a <bb>simple linear regression</bb>
+                        (see <c:link to="http://en.wikipedia.org/wiki/Simple_linear_regression" />)
+                    </dd>
+                    <dt>'moving-average'</dt>
+                    <dd>
+                        performs a simple moving average
+                        (see <c:link to="http://en.wikipedia.org/wiki/Moving_average" />);
+                        the additional option <tt>periods</tt> may be specified to 
+                        control the number of data points of the average window. 
+                    </dd>
+                    <dt>'weighted-moving-average'</dt>
+                    <dd>
+                        performs a weighted moving average
+                        (see <c:link to="http://en.wikipedia.org/wiki/Moving_average" />);
+                        the additional option <tt>periods</tt> may be specified to 
+                        control the number of data points of the average window
+                    </dd>
+                </dl> 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="label" type="string">
+            <c:documentation>
+                A description to show next to the trended data.
+                
+                The description shows next to legend items and 
+                in auto-generated tooltips.
+                
+                The default value is the description of the associated trend type.  
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+</c:model>

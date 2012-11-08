@@ -9,8 +9,31 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.MetricPointChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Metric Line</b> chart class: <c:link to="pvc.MetricLineChart" />.
+            The options documentation class of the <b>Metric Line</b> chart.
         </c:documentation>
+        
+        <c:property name="scatter" type="pvc.options.plots.MetricLinePlotOptions" category="Plot">
+            <c:documentation>
+                The metric point plot is the <b>main plot</b> of the metric line chart,
+                which means that 
+                its properties may be used <i>without</i> the "scatter" property suffix.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="MetricLinePlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.MetricPointPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>metric line</b> plot.
+        </c:documentation>
+        
+        <c:property name="linesVisible" type="boolean" fixed="true">
+            <c:documentation>
+                This plot type necessarily shows lines connecting
+                visual elements.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
 </c:model>

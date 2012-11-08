@@ -156,6 +156,7 @@
 			        </key>
 	            </element>
 	            <element name="functionType" type="com:FunctionTypeType" />
+	            <element name="facetType" type="com:FacetTypeType" />
 	            <element name="include">
 			        <complexType>
 			            <attribute name="the" type="string" use="required" /> 
@@ -180,7 +181,21 @@
         <attribute name="name" type="com:IdType" use="required" />
         <attribute name="space" type="string" />
         <attribute name="base" type="com:IdType" />
+        <attribute name="facets" type="com:IdTypeList" />
         <attribute name="abstract" type="boolean" default="false" />
+    </complexType>
+    
+    <complexType name="FacetTypeType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+            <element name="property" type="com:PropertyType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="name" type="com:IdType" use="required" />
+        <attribute name="space" type="string" />
+        <!-- 
+        <attribute name="base" type="com:IdType" />
+        <attribute name="abstract" type="boolean" default="false" />
+         -->
     </complexType>
     
     <complexType name="PropertyType">
@@ -191,6 +206,7 @@
         <attribute name="type" type="com:ValueTypeType" default="string" />
         <attribute name="required" type="boolean" default="false" />
         <attribute name="default" type="anySimpleType" />
+        <attribute name="fixed" type="anySimpleType" />
         <attribute name="category" type="string" />
     </complexType>
     
@@ -268,6 +284,10 @@
     
     <simpleType name="IdType">
         <restriction base="NMTOKEN" />
+    </simpleType>
+    
+    <simpleType name="IdTypeList">
+        <list itemType="com:IdType" />
     </simpleType>
     
     <simpleType name="DocumentationFormatType">

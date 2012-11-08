@@ -5,12 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:space name="pvc.options.plots">
-        <c:documentation>
-            The namespace of plot options classes. 
-        </c:documentation>
-    </c:space>
-    
-    <c:include the="plots/plot-trending.xml" />
-    
+    <c:include the="facets/chartMulti.xml" />
+    <c:include the="facets/chartPlot2.xml" />
+    <c:include the="facets/chartTrend.xml" />
 </c:model>

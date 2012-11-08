@@ -9,8 +9,32 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.PointChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Area</b> chart class: <c:link to="pvc.AreaChart" />.
+            The options documentation class of the <b>Area</b> chart.
         </c:documentation>
+        
+        <c:property name="point" type="pvc.options.plots.AreaPlotOptions" category="Plot">
+            <c:documentation>
+                The point plot is the <b>main plot</b> of the area chart,
+                which means that 
+                its properties may be used <i>without</i> the "point" property suffix.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+    <c:complexType name="AreaPlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.PointPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>area</b> plot.
+        </c:documentation>
+        
+        <c:property name="areasVisible" type="boolean" fixed="true">
+            <c:documentation>
+                This plot type necessarily shows 
+                shaded areas connecting visual elements.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
 </c:model>

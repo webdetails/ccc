@@ -19,6 +19,9 @@
     <c:include the="varia/atoms/dimensionValueType.xml" />
     <c:include the="varia/atoms/legendClickMode.xml" />
     <c:include the="varia/atoms/dotShapeType.xml" />
+    <c:include the="varia/atoms/markAnchor.xml" />
+    <c:include the="varia/atoms/wedgeAnchor.xml" />
+    <c:include the="varia/atoms/nullInterpolationMode.xml" />
     
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/dimensionComparer.xml" />

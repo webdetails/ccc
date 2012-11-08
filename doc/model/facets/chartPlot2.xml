@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:facetType name="ChartPlot2OptionsFacet" space="pvc.options.facets">
+        <c:documentation>
+            The options documentation class of the plot2 facet.
+        </c:documentation>
+        
+        <c:property name="plot2" type="boolean pvc.options.plots.PointPlotCommonOptions" default="false" category="Plot">
+            <c:documentation>
+                Activates the second plot.
+                
+                The series identified in <c:link to="#plot2Series" />
+                are plotted in the second plot.
+                
+                The second plot is a <i>generic</i> point plot, 
+                which means that 
+                its properties 
+                <c:link to="pvc.options.plots.CategoricalContinuousPlotCommonOptions#stacked"/>,
+                <c:link to="pvc.options.plots.PointPlotCommonOptions#linesVisible"/>,
+                <c:link to="pvc.options.plots.PointPlotCommonOptions#dotsVisible"/>, 
+                and
+                <c:link to="pvc.options.plots.PointPlotCommonOptions#areasVisible"/>
+                can be set freely.
+                
+                By default, the second plot shows lines and dots/markers.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="plot2Series" type="string list(string)" category="Data">
+            <c:documentation>
+                The <i>key values</i> of the series visual role, 
+                that are to be shown in the second plot.
+                
+                If the series visual role has more than one dimension, 
+                the specified keys should be 
+                the result of joining the key of each dimension with a "~" character.
+                
+                This option is only relevant when the property
+                <c:link to="#plot2" /> has the value <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <!-- TODO: color2Axis internals -->
+        <c:property name="color2AxisColors" type="list(pvc.options.varia.ColorString)" category="Style">
+            <c:documentation>
+                The discrete colors scheme to use to distinguish visual elements
+                that are colored using the <i>second</i> color axis. 
+                
+                With a few exceptions, 
+                color axes map values of the "color" visual role.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+    
+    <c:facetType name="ChartPlot2V1OptionsFacet" space="pvc.options.facets">
+        <c:documentation>
+            The options documentation class of the plot2 V1 facet.
+            
+            Contains the additional plot2 related options of V1,
+            only supported by the chart types that had them then.
+        </c:documentation>
+        
+        <c:property name="secondAxis" type="boolean" default="false" category="Plot">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#plot2"/> instead.</c:deprecated>
+                Indicates whether selected series  
+                are plotted in a separate plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="secondAxisIdx" type="number string list(number|string)" category="Data Translation">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#plot2Series"/> instead.</c:deprecated>
+                The zero-based indexes of the series, 
+                in <i>the order of appearance in the data source</i>, 
+                that are to be shown in the second axis, 
+                on chart types that support it.
+                
+                A negative index designates an index from the last series.
+                So <tt>-1</tt> is the last series, 
+                <tt>-2</tt> is the next-to-last series, 
+                etc.
+            </c:documentation>
+        </c:property>
+        
+        <!-- TODO: color2Axis internals -->
+        <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Style">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#color2AxisColors" /> instead.</c:deprecated>
+                The discrete colors scheme to use to distinguish visual elements
+                that are colored using the <i>second</i> color axis. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="secondAxisIndependentScale" type="boolean" default="false" category="Axis">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#plot2OrthoAxis"/> instead, to specify an alternate orthogonal axis.</c:deprecated>
+                Indicates whether the secondary axis should be 
+                shown and with an independent range.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+    
+</c:model>

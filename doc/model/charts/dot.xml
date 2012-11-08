@@ -9,8 +9,29 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.PointChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Dot</b> chart class: <c:link to="pvc.DotChart" />.
+            The options documentation class of the <b>Dot</b> chart.
         </c:documentation>
+        
+        <c:property name="point" type="pvc.options.plots.DotPlotOptions" category="Plot">
+            <c:documentation>
+                The point plot is the <b>main plot</b> of the dot chart,
+                which means that 
+                its properties may be used <i>without</i> the "point" property suffix.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
+    <c:complexType name="DotPlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.PointPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>dot</b> plot.
+        </c:documentation>
+        
+        <c:property name="dotsVisible" type="boolean" fixed="true">
+            <c:documentation>
+                This plot type necessarily shows dots/markers.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
 </c:model>

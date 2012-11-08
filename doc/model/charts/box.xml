@@ -7,10 +7,34 @@
     
     <c:complexType name="BoxplotChartOptions" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.CategoricalChartCommonOptions">
+                   base="pvc.options.charts.CategoricalContinuousChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Box plot</b> chart class: <c:link to="pvc.BoxplotChart" />.
+            The options documentation class of the <b>Box plot</b> chart.
         </c:documentation>
+        
+        <c:property name="box" type="pvc.options.plots.BoxPlotOptions" category="Plot">
+            <c:documentation>
+                The box plot is the <b>main plot</b> of the box plot chart,
+                which means that 
+                its properties may be used <i>without</i> the "box" property suffix.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
+    <c:complexType name="BoxPlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.CategoricalContinuousPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Box</b> plot.
+        </c:documentation>
+        
+        <c:property name="stacked" fixed="false" type="boolean">
+            <c:documentation>
+                The box plot only shows a single series of data
+                and, as such, this property is meaningless.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
 </c:model>

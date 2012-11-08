@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="CategoricalContinuousChartCommonOptions" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.CategoricalChartCommonOptions"
+                   facets="pvc.options.facets.ChartMultiOptionsFacet" 
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class of <b>Categorical</b> charts with a <i>continuous orthogonal axis</i>. 
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="CategoricalContinuousPlotCommonOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.CategoricalPlotCommonOptions" 
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class of <b>categorical</b> plots with a <i>continuous orthogonal axis</i>. 
+        </c:documentation>
+        
+        <c:property name="stacked" default="false" type="boolean">
+            <c:documentation>
+                Indicates that visual elements having 
+                identical category, but different series,
+                should be displayed on top of each other, 
+                along the plot's orthogonal direction, 
+                instead of side-by-side, 
+                along the base direction.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="nullInterpolationMode" default="'none'" type="pvc.options.varia.NullInterpolationMode">
+            <c:documentation>
+                The interpolation mode used to 
+                fill-in null or missing values.
+                
+                The interpolation is applied to
+                the measure roles of the plot that 
+                are represented in the orthogonal cartesian axis.
+                
+                With the exception of the box plot, 
+                this role is the <tt>value</tt> role.
+                All of the box plot measure roles:
+                <tt>median</tt>, <tt>lowerQuartil</tt>, <tt>upperQuartil</tt>, <tt>minimum</tt>, and <tt>maximum</tt>,
+                are interpolated using the specified mode.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="orthoAxis" default="1" type="number">
+            <c:documentation>
+                The index of the orthogonal cartesian axis to use for the plot.
+                
+                The possible values are <tt>1</tt>, <tt>2</tt> and <tt>3</tt>.
+                
+                The main plot of a chart always uses the axis <tt>1</tt>.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+</c:model>

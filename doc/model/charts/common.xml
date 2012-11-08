@@ -155,185 +155,6 @@
             </c:documentation>
         </c:property>
         
-        
-        <!-- MULTI / SMALL -->
-        <c:property name="multiChartMax" type="number" default="Infinity" category="Multi-Chart - Layout">
-            <c:documentation>
-                The maximum number of <i>small</i> charts that should
-                be displayed.
-                
-                The first <i>small</i> charts are chosen.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="multiChartColumnsMax" type="number" default="3" category="Multi-Chart - Layout">
-            <c:documentation>
-                The maximum number of <i>small</i> charts that should
-                be displayed in a row.
-                
-                This property can receive a value of <tt>Infinity</tt>
-                to indicate that all charts should be laid out in a single row.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallWidth" type="number string" category="Multi-Chart - Layout">
-            <c:documentation>
-                Fixates the width of each <i>small</i> chart.
-                
-                A value of type <tt>number</tt>, 
-                or of type <tt>string</tt>, but with numeric content, 
-                is interpreted as being in pixel units.
-                
-                A value of type <tt>string</tt>, 
-                with numeric content that is suffixed by a "%" character,
-                is interpreted as a percentage of the initially available content width.
-                
-                This property may cause the <i>small multiples</i> chart 
-                to take up a greater width than the one specified in <c:link to="#width" />.
-                
-                When this property is unspecified,
-                a specified finite value, or a defaulted value, of the property <c:link to="#multiChartColumnsMax" /> is
-                used to determine it: 
-                by dividing the initially available content width 
-                by the maximum number of charts in a row that <i>actually</i> occur
-                (so that if there are less small charts than 
-                the maximum that can be placed in a row, 
-                these, nevertheless, take up the whole width).
-                 
-                When an infinite value is specified for 
-                <c:link to="#multiChartColumnsMax" />, 
-                the small charts are laid out in a single row, 
-                and so the width is calculated from the height <c:link to="#smallHeight" />, 
-                using the aspect ratio <c:link to="#smallAspectRatio" />.
-                The height is defaulted to the initially available content height.
-                The aspect ratio is defaulted to a value that depends on the chart type,
-                but is something around <tt>4/3</tt>.
-                The width is then calculated.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallHeight" type="number string" category="Multi-Chart - Layout">
-            <c:documentation>
-                Fixates the height of each <i>small</i> chart.
-                
-                A value of type <tt>number</tt>, 
-                or of type <tt>string</tt>, but with numeric content, 
-                is interpreted as being in pixel units.
-                
-                A value of type <tt>string</tt>, 
-                with numeric content that is suffixed by a "%" character,
-                is interpreted as a percentage of the initially available content height.
-                
-                This property may cause the <i>small multiples</i> chart 
-                to take up a greater width than the one specified in <c:link to="#height" />.
-                
-                When this property is unspecified, 
-                its value depends on the evaluation of the
-                <c:link to="#smallWidth" /> property, 
-                which may impose it a value. 
-                If after the evaluation of <c:link to="#smallWidth" /> 
-                this property remains unspecified, 
-                it is determined as follows.
-                 
-                If the layout will have a single column 
-                and the property <c:link to="#multiChartSingleColFillsHeight" />
-                is <tt>true</tt> (it is by default)
-                then the height will be the initially available content height.
-                
-                If the layout will have a single row 
-                and the property <c:link to="#multiChartSingleRowFillsHeight" />
-                is <tt>true</tt> (it is by default)
-                then the height will be the initially available content height.
-                
-                Otherwise, the property <c:link to="#smallAspectRatio" /> is 
-                used to determine the height of the small chart from its determined width.
-                
-                The aspect ratio is defaulted to a value that depends on the chart type,
-                but is something around <tt>4/3</tt>.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallAspectRatio" type="number" category="Multi-Chart - Layout">
-            <c:documentation>
-                The ratio of the width over the height of a <i>small</i> chart.
-                
-                It is used when the set of properties
-                <c:link to="#smallWidth" />,
-                <c:link to="#smallHeight" />,
-                <c:link to="#multiChartColumnsMax" />,
-                <c:link to="#multiChartSingleRowFillsHeight" /> and
-                <c:link to="#multiChartSingleColFillsHeight" />,
-                is under-specified and 
-                is not enough to determine the value of both
-                <c:link to="#smallWidth" /> and
-                <c:link to="#smallHeight" />.
-                
-                The default value of the aspect ratio depends on the chart type,
-                but is something around <tt>4/3</tt>.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="multiChartSingleRowFillsHeight" type="boolean" default="true" category="Multi-Chart - Layout">
-            <c:documentation>
-                Indicates that, 
-                when the layout results in a single row
-                and the value of <c:link to="#smallHeight" />
-                is still to be determined, 
-                it should be set to all the initially available content height,
-                instead of determining the height from the 
-                <c:link to="#smallAspectRatio" /> and the <c:link to="#smallWidth" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="multiChartSingleColFillsHeight" type="boolean" default="true" category="Multi-Chart - Layout">
-            <c:documentation>
-                Indicates that, 
-                when the layout results in a single column
-                and the value of <c:link to="#smallHeight" />
-                is still to be determined, 
-                it should be set to all the initially available content height,
-                instead of determining the height from the 
-                <c:link to="#smallAspectRatio" /> and the <c:link to="#smallWidth" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallMargins" type="number string pvc.options.varia.Sides" default="'2%'" category="Multi-Chart - Layout">
-            <c:documentation>
-                The margins of a <i>small</i> chart.
-                
-                See <c:link to="pvc.options.varia.Sides" /> for information about 
-                the different supported data types.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallPaddings" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart - Layout">
-            <c:documentation>
-                The paddings of a <i>small</i> chart.
-                
-                See <c:link to="pvc.options.varia.Sides" /> for information about 
-                the different supported data types.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallContentMargins" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart - Layout">
-            <c:documentation>
-                The margins of the <i>content panel</i> of a <i>small</i> chart. 
-                
-                See <c:link to="pvc.options.varia.Sides" /> for information about 
-                the different supported data types.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallContentPaddings" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart - Layout">
-            <c:documentation>
-                The paddings of the <i>content panel</i> of a <i>small</i> chart.
-                
-                See <c:link to="pvc.options.varia.Sides" /> for information about 
-                the different supported data types.
-            </c:documentation>
-        </c:property>
-        
-        
         <!-- Interaction -->
         <c:property name="animate" type="boolean" default="true" category="Interaction">
             <c:documentation>
@@ -407,7 +228,6 @@
                     default="'emptySpaceClick'" 
                     category="Interaction">
             <c:documentation>
-            
                 Controls if and how the selection can be cleared by the user.
             </c:documentation>
         </c:property>
@@ -643,17 +463,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="multiChartIndexes" type="number string" default="true" category="Data Translation">
-            <c:documentation>
-                The indexes of the data source's <i>virtual item</i> columns
-                that are to feed the 
-                default 
-                <tt>multiChart</tt>, 
-                <tt>multiChart2</tt>, ... 
-                dimensions.
-            </c:documentation>
-        </c:property>
-        
         <c:property name="isMultiValued" type="boolean" default="false" category="Data Translation">
             <c:documentation>
                 Indicates if the data source has 
@@ -696,63 +505,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisIdx" type="number string list(number|string)" category="Data">
-            <c:documentation>
-                <c:deprecated>Use <c:link to="#plot2Series"/> instead.</c:deprecated>
-                The zero-based indexes of the series, 
-                in <i>the order of appearance in the data source</i>, 
-                that are to be shown in the second axis, 
-                on chart types that support it.
-                
-                A negative index designates an index from the last series.
-                So <tt>-1</tt> is the last series, 
-                <tt>-2</tt> is the next-to-last series, 
-                etc.
-                
-                This option is only relevant when the property
-                <c:link to="#secondAxis" /> has the value <tt>true</tt>.
-            </c:documentation>
-        </c:property>
-        
-        <!-- Plot -->
-        <c:property name="plot2" type="boolean" default="false" category="Plot">
-            <c:documentation>
-                Indicates that the 
-                series identified in <c:link to="#plot2Series" />
-                are plotted in a separate plot.
-                
-                In the bar chart, in the box-plot chart and in 
-                the point-family charts the second plot is a generic point plot.
-                
-                In the metric point chart, 
-                the second plot is another metric point plot.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="plot2Series" type="string list(string)" category="Data">
-            <c:documentation>
-                The <i>key values</i> of the series visual role, 
-                that are to be shown in the second plot.
-                
-                If the series visual role has more than one dimension, 
-                the specified keys should be 
-                the result of joining the key of each dimension with a "~" character.
-                
-                This option is only relevant when the property
-                <c:link to="#plot2" /> has the value <tt>true</tt>.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="plot2ColorAxis" type="number" default="1" category="Style">
-            <c:documentation>
-                Indicates that the data shown in the second plot should
-                use a separate color scheme, 
-                as specified in <c:link to="#secondAxisColor" />.
-                
-                Valid values are <tt>1</tt> and <tt>2</tt>.
-            </c:documentation>
-        </c:property>
-        
+        <!-- TODO: color1Axis internals -->
         <c:property name="colors" type="list(pvc.options.varia.ColorString)" category="Style">
             <c:documentation>
                 The discrete colors scheme to use to distinguish visual elements
@@ -760,40 +513,6 @@
                 
                 With a few exceptions, 
                 color axes map values of the "color" visual role.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="color2AxisColors" type="list(pvc.options.varia.ColorString)" category="Style">
-            <c:documentation>
-                The discrete colors scheme to use to distinguish visual elements
-                that are colored using the <i>second</i> color axis. 
-                
-                With a few exceptions, 
-                color axes map values of the "color" visual role.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Style">
-            <c:documentation>
-                <c:deprecated>Use <c:link to="#color2AxisColors" /> instead.</c:deprecated>
-                The discrete colors scheme to use to distinguish visual elements
-                that are colored using the <i>second</i> color axis. 
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="secondAxis" type="boolean" default="false" category="Plot">
-            <c:documentation>
-                <c:deprecated>Use <c:link to="#plot2"/> instead.</c:deprecated>
-                Indicates whether selected series  
-                are plotted in a separate plot.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="secondAxisIndependentScale" type="boolean" default="false" category="Data">
-            <c:documentation>
-                <c:deprecated>Use <c:link to="#plot2OrthoAxis"/> instead, to specify an alternate orthogonal axis.</c:deprecated>
-                Indicates whether the secondary axis should be 
-                shown and with an independent range.
             </c:documentation>
         </c:property>
         
@@ -1275,4 +994,66 @@
         </c:property>
     </c:complexType>
     
+     <c:complexType name="PlotCommonOptions" space="pvc.options.plots" abstract="true">
+        <c:documentation>
+            The common options documentation class of all plots.
+        </c:documentation>
+        
+        <c:property name="valuesVisible" default="false" type="boolean">
+            <c:documentation>
+                Indicates if value labels are shown next to the visual elements.
+                
+                Most charts have some form of showing labels
+                with the <i>main</i> value next to the visual element.
+                
+                The default value really varies with the chart type,
+                so be sure to confirm it in the most specific plot class.
+            </c:documentation>
+        </c:property>
+        <c:property name="showValues" default="false" type="boolean">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#valuesVisible"/> instead.</c:deprecated>
+                Indicates if value labels are shown next to the visual elements.
+            </c:documentation>
+        </c:property>
+        <c:property name="valuesAnchor" type="function pvc.options.varia.MarkAnchor pvc.options.varia.WedgeAnchor">
+            <c:documentation>
+                The alignment of a value label 
+                relative to its corresponding visual element position.
+                
+                The possible values and the default value actually depend on the chart type
+                so be sure to access this property's documentation through the 
+                concrete class' documentation.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valuesFont" type="string">
+            <c:documentation>
+                The font of a value label.
+                
+                This property can also be specified 
+                through the "label" extension point of a plot.
+                
+                In some charts the value label font is 
+                taken into account for layout purposes.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="colorAxis" type="number">
+            <c:documentation>
+                The index of the color axis to use for the plot.
+                
+                The possible values are <tt>1</tt>, <tt>2</tt> and <tt>3</tt>.
+                
+                The default value depends on the plot.
+                The main plot of a chart always uses the axis <tt>1</tt>.
+                The <tt>plot2</tt> plot uses the axis <tt>2</tt>, by default.
+                The <tt>trend</tt> plot uses the axis <tt>3</tt>, by default.
+            </c:documentation>
+        </c:property>
+        
+        <!-- 
+        TODO - ValuesMask - Pie Only
+         -->
+    </c:complexType>
 </c:model>

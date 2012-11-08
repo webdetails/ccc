@@ -9,7 +9,15 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.BarChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Normalized Bar</b> chart class: <c:link to="pvc.NormalizedBarChart" />.
+            The options documentation class of the <b>Normalized Bar</b> chart.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="NormalizedBarPlotOptions"
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.BarPlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Normalized Bar</b> plot.
         </c:documentation>
     </c:complexType>
     

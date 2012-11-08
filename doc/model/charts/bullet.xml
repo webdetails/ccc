@@ -9,8 +9,25 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.ChartCommonOptions">
         <c:documentation>
-            The options documentation class of the <b>Bullet</b> chart class: <c:link to="pvc.BulletChart" />.
+            The options documentation class of the <b>Bullet</b> chart.
         </c:documentation>
+        
+        <c:property name="bullet" type="pvc.options.plots.BulletPlotOptions" category="Plot">
+            <c:documentation>
+                The bullet plot is the <b>main plot</b> of the bullet chart,
+                which means that 
+                its properties may be used <i>without</i> the "bullet" property suffix.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="BulletPlotOptions" 
+                   space="pvc.options.plots" 
+                   base="pvc.options.plots.PlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Bullet</b> plot.
+        </c:documentation>
+    
     </c:complexType>
     
 </c:model>

@@ -10,7 +10,7 @@
                    base="pvc.options.charts.CartesianChartCommonOptions" 
                    abstract="true">
         <c:documentation>
-            The common options documentation class for the <b>Categorical</b> charts. 
+            The common options documentation class of <b>Categorical</b> charts. 
         </c:documentation>
         
         <!-- Roles -->
@@ -65,4 +65,13 @@
         </c:property>
     </c:complexType>
     
+    <c:complexType name="CategoricalPlotCommonOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.CartesianPlotCommonOptions" 
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class of <b>categorical</b> plots.
+        </c:documentation>
+
+    </c:complexType>
 </c:model>

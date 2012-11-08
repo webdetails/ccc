@@ -19,6 +19,8 @@
 	
 	<c:include the="charts/categorical-common.xml" />
 	
+	<c:include the="charts/categorical-continuous-common.xml" />
+	
 	<!-- CATEGORICAL -->
 	<c:include the="charts/box.xml" />
 	<c:include the="charts/heat-grid.xml" />
