@@ -16,6 +16,11 @@ def.scope(function(){
     });
     
     function castTrend(trend){
+        // The trend plot itself does not have trends...
+        if(this.name === 'trend'){
+            return null;
+        }
+        
         var type = this.option('TrendType');
         if(!type && trend){
             type = trend.type;
@@ -63,7 +68,9 @@ def.scope(function(){
                         }
                         
                         // V1 compatibility
-                        if(this.name === 'plot2' && this._chartOption('secondAxisIndependentScale')){
+                        if(this.name === 'plot2' &&
+                           this.chart._allowV1SecondAxis &&
+                           this._chartOption('secondAxisIndependentScale')){
                             optionInfo.specify(2);
                             return true;
                         }
@@ -86,7 +93,10 @@ def.scope(function(){
             },
             
             OrthoRole: {
-                resolve: '_resolveFull'
+                resolve: pvc.options.resolvers([
+                      '_resolveFixed',
+                      '_resolveDefault'
+                    ])
                 // String or string array
             },
             

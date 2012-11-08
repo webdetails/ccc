@@ -25,13 +25,11 @@ def.scope(function(){
         },
         
         BaseRole: {
-            resolve: null,
-            value:   'category'
+            value: 'category'
         },
         
-        OrthoRole: { // override
-            resolve: '_resolveFull', 
-            value:   'value'
+        OrthoRole: { // override 
+            value: 'value'
         }
     });
 });

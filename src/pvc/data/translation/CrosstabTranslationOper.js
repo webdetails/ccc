@@ -701,7 +701,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 var seriesKeys = this._colGroups.map(function(colGroup){
                     return '' + colGroup[0].v;
                 });
-                this._plot2SeriesKeySet = this._createSecondAxisSeriesKeySet(plot2SeriesIndexes, seriesKeys);
+                this._plot2SeriesKeySet = this._createPlot2SeriesKeySet(plot2SeriesIndexes, seriesKeys);
             }
         }
         

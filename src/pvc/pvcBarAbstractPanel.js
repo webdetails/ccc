@@ -165,6 +165,7 @@ def
                     // Too small a bar to show any value?
                     return length >= 4;
                 })
+                .font(this.valuesFont) // default
                 .text(function(scene){
                     var valueVar = options.showValuePercentage ?
                                    scene.vars.value.percent :

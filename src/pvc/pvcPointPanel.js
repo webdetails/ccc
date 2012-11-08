@@ -395,6 +395,7 @@ def
                     wrapper:     wrapper
                 })
                 .pvMark
+                .font(this.valuesFont) // default
                 .text(function(scene){ return scene.vars.value.label; })
                 ;
         }

@@ -113,6 +113,9 @@ def
             case 'base':
             case 'ortho':
                 this.axes[axis.orientedId] = axis;
+                if(axis.v1SecondOrientedId){
+                    this.axes[axis.v1SecondOrientedId] = axis;
+                }
                 break;
         }
         
@@ -279,8 +282,8 @@ def
             this.axesPanels[axis.orientedId] = panel;
             
             // V1 fields
-            if(axis.index <= 1) {
-                this[axis.orientedId + 'AxisPanel'] = panel;
+            if(axis.index <= 1 && axis.v1SecondOrientedId) {
+                this[axis.v1SecondOrientedId + 'AxisPanel'] = panel;
             }
             
             return panel;

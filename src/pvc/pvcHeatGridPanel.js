@@ -253,6 +253,7 @@ def
                     wrapper:     wrapper
                 })
                 .pvMark
+                .font(this.valuesFont) // default
                 .text(function(leafScene){
                     return leafScene.atoms[valueDimName].label;
                 })

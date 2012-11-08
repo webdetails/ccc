@@ -18,7 +18,6 @@ def.scope(function(){
     pvc.visual.MetricXYPlot.optionsDef = def.create(
         pvc.visual.CartesianPlot.optionsDef, {
             BaseRole: { // override
-                resolve: null,
                 value:   'x'
             },
             
@@ -27,8 +26,7 @@ def.scope(function(){
             },
             
             OrthoRole: {
-                resolve: null,
-                value:   'y'
+                value: 'y'
             }
         });
 });

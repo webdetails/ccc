@@ -157,6 +157,8 @@ def
     margins:  null,
     paddings: null,
     
+    _allowV1SecondAxis: false, 
+        
     //------------------
     compatVersion: function(options){
         return (options || this.options).compatVersion;
@@ -318,6 +320,12 @@ def
             this.height   = options.height;
             this.margins  = options.margins;
             this.paddings = options.margins;
+        }
+        
+        if(this._allowV1SecondAxis){
+            if(this.plot2 === undefined){
+                this.plot2 = !!options.secondAxis;
+            }
         }
         
         this._processOptionsCore(options);
@@ -552,10 +560,6 @@ def
 
         plot2: false,
 //      plot2Series
-        
-//      secondAxis: false, // deprecated
-        secondAxisIdx: -1, // deprecated
-//      secondAxisColor //deprecated
 
         showTooltips: true,
 //      tooltipFormat: undefined,

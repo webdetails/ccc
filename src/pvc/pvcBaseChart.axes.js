@@ -15,8 +15,7 @@ pvc.BaseChart
      * @type (string|pv.Color)[]
      */
     colors: null,
-    secondAxisColor: null,
-    
+
     /**
      * A map of {@link pvc.visual.Axis} by axis id.
      */
@@ -240,7 +239,9 @@ pvc.BaseChart
                 break;
             
             case 1:
-                this.secondAxisColor = axis.option('Colors');
+                if(this._allowV1SecondAxis){
+                    this.secondAxisColor = axis.option('Colors');
+                }
                 break;
         }
     },

@@ -5,10 +5,10 @@ def.scope(function(){
      * 
      * @name pvc.visual.BoxPlot
      * @class Represents a box plot.
-     * @extends pvc.visual.BarPlotAbstract
+     * @extends pvc.visual.CategoricalPlot
      */
     def
-    .type('pvc.visual.BoxPlot', pvc.visual.BarPlotAbstract)
+    .type('pvc.visual.BoxPlot', pvc.visual.CategoricalPlot)
     .add({
         type: 'box',
         
@@ -18,15 +18,16 @@ def.scope(function(){
     });
     
     pvc.visual.BoxPlot.optionsDef = def.create(
-        pvc.visual.BarPlotAbstract.optionsDef, 
+        pvc.visual.CategoricalPlot.optionsDef, 
         {
+            // NO Values Label!
+            
             Stacked: {
                 resolve: null,
                 value:   false
             },
             
             OrthoRole: {
-                resolve: null,
                 value:   ['median', 'lowerQuartil', 'upperQuartil', 'minimum', 'maximum'] // content of pvc.BoxplotChart.measureRolesNames
             },
             

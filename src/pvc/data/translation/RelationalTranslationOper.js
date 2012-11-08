@@ -359,7 +359,7 @@ function relTransl_dataPartGet(plot2SeriesIndexes, seriesReader) {
                                 .distinct()
                                 .array();
 
-        return me._createSecondAxisSeriesKeySet(plot2SeriesIndexes, seriesKeys);
+        return me._createPlot2SeriesKeySet(plot2SeriesIndexes, seriesKeys);
     }
     
     return this._dataPartGet(calcAxis2SeriesKeySet, seriesReader);

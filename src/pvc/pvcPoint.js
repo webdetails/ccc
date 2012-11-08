@@ -42,8 +42,7 @@ def
         
         var pointPlot = this._createPointPlot();
         
-        // secondAxis V1 compatibility
-        if(options.plot2 || options.secondAxis){
+        if(options.plot2){
             // Line Plot
             new pvc.visual.PointPlot(this, {
                 name: 'plot2',

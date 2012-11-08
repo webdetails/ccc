@@ -45,7 +45,7 @@ def
         options.stacked = true;
         
         // Not supported
-        options.plot2 = options.secondAxis = false;
+        options.plot2 = false;
         
         // Doesn't work (yet?)
         options.useCompositeAxis = false;

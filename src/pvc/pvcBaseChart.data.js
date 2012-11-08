@@ -236,7 +236,7 @@ pvc.BaseChart
     _createTranslationOptions: function(dataPartDimName){
         var options = this.options;
         var dataOptions = options.dataOptions || {};
-        var plot2 = options.plot2 || options.secondAxis;
+        var plot2 = options.plot2;
         
         var valueFormat = options.valueFormat,
             valueFormatter;
@@ -248,7 +248,11 @@ pvc.BaseChart
 
         return {
             compatVersion:     this.compatVersion(),
-            plot2SeriesIndexes: (!plot2 || options.plot2Series) ? null : options.secondAxisIdx,
+            plot2SeriesIndexes: (!this._allowV1SecondAxis || 
+                                !plot2 || 
+                                options.plot2Series) ? 
+                                null : 
+                                options.secondAxisIdx,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
@@ -280,9 +284,7 @@ pvc.BaseChart
         var options = this.options;
         var serRole = this._serRole;
         
-        var plot2Series = (this._serRole != null) && 
-                          (options.plot2 || options.secondAxis) && 
-                          options.plot2Series;
+        var plot2Series = (this._serRole != null) && options.plot2 && options.plot2Series;
         if(!plot2Series){
             return;
         }

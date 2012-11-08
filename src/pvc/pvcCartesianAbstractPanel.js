@@ -9,18 +9,25 @@ def
     
     this.base(chart, parent, plot, options);
     
-    var axes = this.axes;
-    var axis;
+    function addAxis(axis){
+        var axes = this.axes;
+        
+        axes[axis.type] = axis;
+        
+        // TODO: these are really needed??
+        axes[axis.orientedId] = axis;
+        if(axis.v1SecondOrientedId){
+            axes[axis.v1SecondOrientedId] = axis;
+        }
+    }
     
-    axis = axes.base  = chart.getAxis('base',  plot.option('BaseAxis' ) - 1);
-    axes[axis.orientedId] = axis;
-    
-    axis = axes.ortho = chart.getAxis('ortho', plot.option('OrthoAxis') - 1);
-    axes[axis.orientedId] = axis;
+    addAxis(chart.getAxis('base',  plot.option('BaseAxis' ) - 1));
+    addAxis(chart.getAxis('ortho', plot.option('OrthoAxis') - 1));
     
     // ----------------
     
-    // Initialize paddings from axes offsets
+    // Initialize paddings from **chart** axes offsets
+    // TODO: move this to the chart?
     var paddings = {};
     var hasAny = false;
     

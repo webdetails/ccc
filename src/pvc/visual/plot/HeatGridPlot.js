@@ -89,8 +89,23 @@ def.scope(function(){
             },
             
             OrthoRole: { // override
-                resolve: '_resolveFull',
                 value: 'series'
+            },
+            
+            OrthoAxis: { // override
+                resolve: null
+            },
+            
+            // Not supported
+            NullInterpolationMode: {
+                resolve: null,
+                value: ' none'
+            },
+            
+            // Not supported
+            Stacked: { // override
+                resolve: null, 
+                value: false
             }
         });
 });

@@ -178,7 +178,7 @@ def.scope(function(){
                 function(optionInfo){
                     // Handle naming exceptions
                     var colors;
-                    if(this.index === 1){
+                    if(this.index === 1 && this.chart._allowV1SecondAxis){
                         colors = this._chartOption('secondAxisColor');
                         if(colors){
                             optionInfo.specify(colors);

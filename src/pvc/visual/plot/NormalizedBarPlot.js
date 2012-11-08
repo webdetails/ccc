@@ -20,7 +20,8 @@ def.scope(function(){
         pvc.visual.BarPlotAbstract.optionsDef, 
         {
             Stacked: {
-                resolve: pvc.options.constant(true)
+                resolve: null, 
+                value: true
             }
         });
 });

@@ -20,7 +20,7 @@
  * @param {boolean} [options.seriesInRows=false]
  * Indicates that series are to be switched with categories.
  *
- * @param {Number[]} [options.plot2SeriesIndexes] (former secondAxisIdx)
+ * @param {Number[]} [options.plot2SeriesIndexes]
  * Array of series indexes in {@link #source} that are second axis' series.
  * Any non-null value is converted to an array.
  * Each value of the array is also converted to a number.
@@ -178,7 +178,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
      * @private
      * @protected
      */
-    _createSecondAxisSeriesKeySet: function(plot2SeriesIndexes, seriesKeys){
+    _createPlot2SeriesKeySet: function(plot2SeriesIndexes, seriesKeys){
         var plot2SeriesKeySet = null,
             seriesCount = seriesKeys.length;
         def.query(plot2SeriesIndexes).each(function(indexText){

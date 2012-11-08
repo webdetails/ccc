@@ -5,6 +5,12 @@
 def
 .type('pvc.BarChart', pvc.BarAbstract)
 .add({
+// Options
+//  secondAxis: false, // deprecated
+//  secondAxisIdx: -1, // deprecated
+//  secondAxisColor    // deprecated
+
+    _allowV1SecondAxis: true, 
     
     _initPlotsCore: function(hasMultiRole){
         var options = this.options;
@@ -12,7 +18,7 @@ def
         var barPlot = new pvc.visual.BarPlot(this);
         
         // secondAxis V1 compatibility
-        if(options.plot2 || options.secondAxis){
+        if(options.plot2){
             // Line Plot
             new pvc.visual.PointPlot(this, {
                 name: 'plot2',

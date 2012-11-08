@@ -47,11 +47,16 @@ def.scope(function(){
         // x, y
         this.orientation = $VCA.getOrientation(type, options.orientation);
         
-        // x, y, secondX, secondY, x3, y3, ... 
-        this.orientedId  = $VCA.getOrientedId(this.orientation, index);
+        // x, y, x2, y2, x3, y3, ...
+        this.orientedId = $VCA.getOrientedId(this.orientation, index);
+        
+        // x, y, secondX, secondY, x3, y3, ...
+        if(chart._allowV1SecondAxis &&  this.index === 1){
+            this.v1SecondOrientedId = $VCA.getV1SecondOrientedId(this.orientation, index);
+        }
         
         // x, y, second, x3, y3, ...
-        this.v1OptionId  = $VCA.getV1OptionId(this.orientation, index);
+        this.v1OptionId = $VCA.getV1OptionId(this.orientation, index);
         
         // id
         // base, ortho, base2, ortho2, ...
@@ -67,12 +72,18 @@ def.scope(function(){
         // For now scale type is left off, 
         // cause it is yet unknown.
         // In bind, prefixes are recalculated (see _syncExtensionPrefixes)
-        this.extensionPrefixes = [
-            this.id + 'Axis',
-            this.orientedId + 'Axis',
-            'axis'
+        var extensions = this.extensionPrefixes = [
+            this.id + 'Axis', 
+            this.orientedId + 'Axis'
         ];
         
+        if(this.v1SecondOrientedId){
+            extensions.push(this.v1SecondOrientedId + 'Axis');
+        }
+        
+        this._extPrefAxisPosition = extensions.length;
+        
+        extensions.push('axis');
     })
     .add(/** @lends pvc.visual.CartesianAxis# */{
         
@@ -87,7 +98,9 @@ def.scope(function(){
         
         _syncExtensionPrefixes: function(){
             var extensions = this.extensionPrefixes;
-            extensions.length = 2;
+            
+            // remove until 'axis' (inclusive)
+            extensions.length = this._extPrefAxisPosition;
             
             var st = this.scaleType;
             if(st){
@@ -241,13 +254,27 @@ def.scope(function(){
      * @param {number} index The index of the axis within its type. 
      * @type string
      */
-    $VCA.getOrientedId = function(orientation, index){
+    $VCA.getV1SecondOrientedId = function(orientation, index){
         switch(index) {
             case 0: return orientation; // x, y
             case 1: return "second" + orientation.toUpperCase(); // secondX, secondY
         }
         
         return orientation + "" + (index + 1); // y3, x4,...
+    };
+    
+    /**
+     * Calculates the oriented id of an axis given its orientation and index.
+     * @param {string} orientation The orientation of the axis.
+     * @param {number} index The index of the axis within its type. 
+     * @type string
+     */
+    $VCA.getOrientedId = function(orientation, index){
+        if(index === 0) {
+            return orientation; // x, y
+        }
+        
+        return orientation + (index + 1); // x2, y3, x4,...
     };
     
     /**
@@ -304,9 +331,23 @@ def.scope(function(){
         return chartOption.call(this, this.id + "Axis" + name);
     });
     
-    // xAxisOffset, yAxisOffset, secondAxisOffset
+    // xAxisOffset, yAxisOffset, x2AxisOffset
+    // if this.v1SecondOrientedId
+    //    secondXAxisOffset
+    axisSpecify.byOrientedId = axisSpecify(function(name){
+        var value = chartOption.call(this, this.orientedId + "Axis" + name);
+        if(value === undefined && this.v1SecondOrientedId){
+            value = chartOption.call(this, this.v1SecondOrientedId + "Axis" + name);
+        }
+        
+        return value;
+    });
+    
+    // secondAxisOffset
     axisSpecify.byV1OptionId = axisSpecify(function(name){
-        return chartOption.call(this, this.v1OptionId + 'Axis' + name); 
+        if(this.index === 1){
+            return chartOption.call(this, 'secondAxis' + name);
+        }
     });
     
     // numericAxisLabelSpacingMin
@@ -324,8 +365,6 @@ def.scope(function(){
             
             return value;
         }
-        
-        return chartOption.call(this, this.v1OptionId + 'Axis' + name); 
     });
     
     // axisOffset
@@ -335,6 +374,7 @@ def.scope(function(){
     
     var resolveNormal = pvc.options.resolvers([
        axisSpecify.byId,
+       axisSpecify.byOrientedId,
        axisSpecify.byV1OptionId,
        axisSpecify.byScaleType,
        axisSpecify.byCommonId
@@ -346,6 +386,7 @@ def.scope(function(){
     var fixedMinMaxSpec = {
         resolve: pvc.options.resolvers([
             axisSpecify.byId,
+            axisSpecify.byOrientedId,
             axisSpecify.byV1OptionId,
             axisSpecify(function(name){
                 if(!this.index && this.type === 'ortho'){
@@ -368,9 +409,12 @@ def.scope(function(){
         Visible: {
             resolve: pvc.options.resolvers([
                 axisSpecify.byId,
+                axisSpecify.byOrientedId,
                 axisSpecify.byV1OptionId,
-                axisSpecify(function(name){ // V1
-                    return chartOption.call(this, 'show' + def.firstUpperCase(this.v1OptionId) + 'Scale');
+                axisSpecify(function(name){ // V1 - showXScale, showYScale, showSecondScale
+                    if(this.index <= 1){
+                        return chartOption.call(this, 'show' + def.firstUpperCase(this.v1OptionId) + 'Scale');
+                    }
                 }),
                 axisSpecify.byScaleType,
                 axisSpecify.byCommonId
@@ -445,7 +489,11 @@ def.scope(function(){
                 axisSpecify(function(name){
                     switch(this.index){
                         case 0: return chartOption.call(this, 'originIsZero');
-                        case 1: return chartOption.call(this, 'secondAxisOriginIsZero');
+                        case 1:
+                            if(this.chart._allowV1SecondAxis){
+                                return chartOption.call(this, 'secondAxisOriginIsZero');
+                            }
+                            break;
                     }
                 })
             ]),
@@ -465,13 +513,18 @@ def.scope(function(){
         Offset:  {
             resolve: pvc.options.resolvers([
                 axisSpecify.byId,
+                axisSpecify.byOrientedId,
                 axisSpecify.byV1OptionId,
                 axisSpecify.byScaleType,
                 // axisOffset only applies to index 0!
                 axisSpecify(function(name){
                     switch(this.index) {
                         case 0: return chartOption.call(this, 'axisOffset');
-                        case 1: return chartOption.call(this, 'secondAxisOffset');
+                        case 1:
+                            if(this.chart._allowV1SecondAxis){
+                                return chartOption.call(this, 'secondAxisOffset');
+                            }
+                            break;
                     }
                 })
             ]),
