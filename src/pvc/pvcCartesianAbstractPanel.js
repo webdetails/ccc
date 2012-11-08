@@ -9,9 +9,9 @@ def
     
     this.base(chart, parent, plot, options);
     
+    var axes = this.axes;
+    
     function addAxis(axis){
-        var axes = this.axes;
-        
         axes[axis.type] = axis;
         
         // TODO: these are really needed??
