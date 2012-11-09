@@ -13,17 +13,17 @@
             The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CartesianCommonExtensionPoints" category="Style">
+        <c:property name="visualRoles" type="pvc.options.roles.CartesianCommonVisualRoles" category="Data Binding">
+            <c:documentation>
+                The visual roles that are common to (almost) all cartesian chart types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartCommonExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object 
                 contains style definitions for 
                 various visual elements of the cartesian charts.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="visualRoles" type="pvc.options.roles.CartesianCommonVisualRoles" category="Data Binding">
-            <c:documentation>
-                The visual roles that are common to (almost) all cartesian chart types.
             </c:documentation>
         </c:property>
     </c:complexType>
@@ -81,11 +81,23 @@
         
     </c:complexType>
     
-    <c:complexType name="CartesianCommonExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartCommonExtensionPoints">
+    <c:complexType name="CartesianChartCommonExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartCommonExtensionPoints">
         <c:documentation>
             The extension points common to all cartesian chart types.
         </c:documentation>
         
+        <c:property name="plotFrame" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the plot frame of the charts.
+                
+                The plot frame covers the plot panel but stays
+                aligned with and below the axes' rules.
+                
+                The root of a small multiples chart does not have a plot frame.
+            </c:documentation>
+        </c:property>
+        
+        <!-- TODO: shouldn't these be passed to the axes panels? -->
         <c:property name="xAxisGrid" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
             <c:documentation>
                 The extension point of the grid line rules that are drawn 
@@ -126,6 +138,6 @@
         <c:documentation>
             The common options documentation class of <b>cartesian</b> plots.
         </c:documentation>
-
+        
     </c:complexType>
 </c:model>

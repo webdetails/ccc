@@ -11,6 +11,15 @@
         <c:documentation>
             The options documentation class of the <b>Normalized Bar</b> chart.
         </c:documentation>
+        
+        <c:property name="bar" type="pvc.options.plots.NormalizedBarPlotOptions" category="Plots">
+            <c:documentation>
+                The normalized bar plot is the <b>main plot</b> of the normalized area chart,
+                which means that 
+                its properties may be used <i>without</i> the "normBar" property suffix.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
     <c:complexType name="NormalizedBarPlotOptions"

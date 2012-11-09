@@ -20,13 +20,30 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CategoricalContinuousCommonExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.CategoricalContinuousChartCommonExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object 
                 contains style definitions for 
                 various visual elements of the chart.
             </c:documentation>
         </c:property>
+    </c:complexType>
+    
+    <c:complexType name="CategoricalContinuousChartCommonExtensionPoints" 
+                   space="pvc.options.ext"
+                   facets="pvc.options.facets.MultiExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>extension property (ex: <tt>smallBase</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>smallBase_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
     </c:complexType>
     
     <c:complexType name="CategoricalContinuousCommonVisualRoles" 
@@ -37,15 +54,6 @@
             The visual roles common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
         </c:documentation>
         
-    </c:complexType>
-    
-    <c:complexType name="CategoricalContinuousCommonExtensionPoints" 
-                   space="pvc.options.ext"
-                   base="pvc.options.ext.CartesianCommonExtensionPoints"
-                   facets="pvc.options.facets.MultiExtensionPointsFacet">
-        <c:documentation>
-            The extension points common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
-        </c:documentation>
     </c:complexType>
     
     <c:complexType name="CategoricalContinuousPlotCommonOptions" 
@@ -93,5 +101,6 @@
                 The main plot of a chart always uses the axis <tt>1</tt>.
             </c:documentation>
         </c:property>
+        
     </c:complexType>
 </c:model>

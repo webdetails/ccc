@@ -64,8 +64,14 @@ new pvc.BarChart(options)
         </c:documentation>
     </c:space>
     
+    <c:space name="pvc.options.ext">
+        <c:documentation>
+            The namespace of CCC chart extension point classes. 
+        </c:documentation>
+    </c:space>
+    
+    
     <c:include the="charts/_charts.xml" />
-    <c:include the="ext/_ext.xml" />
     <c:include the="marks/_marks.xml" />
     <c:include the="panels/_panels.xml" />
     <c:include the="plots/_plots.xml" />

@@ -7,9 +7,9 @@
     
     <c:complexType name="ChartTitlePanelOptions" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.CommonDockedPanelOptions">
+                   base="pvc.options.panels.TitlePanelOptions">
         <c:documentation>
-            The options documentation class of the CCC title panel.
+            The options documentation class of the chart title panel.
             
             The default 
             <c:link to="pvc.options.panels.CommonDockedPanelOptions#position" />
@@ -19,55 +19,67 @@
             <c:link to="pvc.options.panels.CommonDockedPanelOptions#font" />
             is <tt>'14px sans-serif'</tt>.
         </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="TitlePanelOptions" 
+                   space="pvc.options.panels" 
+                   base="pvc.options.panels.CommonDockedPanelOptions">
+        <c:documentation>
+            The options documentation class of the title panel.
+        </c:documentation>
         
         <!--
         titleOffset // not documented
          -->
          
-         <c:property name="extensionPoints" type="pvc.options.ext.ChartTitlePanelExtensionPoints" category="Style">
+         <c:property name="extensionPoints" type="pvc.options.ext.TitlePanelExtensionPoints" category="Style">
             <c:documentation>
-                The extension points provided by the chart title panel.
+                The extension points of the title panel.
             </c:documentation>
          </c:property>
     </c:complexType>
     
-    <c:complexType name="ChartTitlePanelExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="TitlePanelExtensionPoints" space="pvc.options.ext">
         <c:documentation>
-            The extension points of the chart title panel.
+            The extension points of the title panel.
             
-            To use an extension point you must find its full name: 
-            join the prefix property name, 
-            like <c:link to="#title" />,
-            with one of the properties of the type of the extension point,
-            like <c:link to="pvc.options.marks.BarExtensionPoint#fillStyle" />,
-            with an "_" character in between,
-            and obtain the name <tt>title_fillStyle</tt>.
+            To use an extension point you must find its full name. 
+            If it is the chart's title panel, by joining:
+            <ol>
+                <li>chart title panel property name: <tt>title</tt></li>
+                <li>extension property (ex: <tt>label</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>textStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>titleLabel_textStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            If it is the title panel of an axis, by joining:
+            <ol>
+                <li>chart axis panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>axis panel title property name: <tt>title</tt></li>
+                <li>extension property (ex: <tt>label</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>textStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisTitleLabel_textStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
         
-        <c:property name="title" type="pvc.options.marks.PanelExtensionPoint">
+        <c:property name="." type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
-                The extension point of the top panel of 
-                the title panel of the <i>root</i> chart.
+                The extension point of the top-level panel mark.
+                
+                This extension point, having no own name, 
+                coincides with the property name of the panel.
+                For example, for the chart's title panel: 
+                <tt>title_fillStyle</tt>.
             </c:documentation>
         </c:property>
         
-        <c:property name="titleLabel" type="pvc.options.marks.LabelExtensionPoint">
+        <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
-                The extension point of the label that holds the title text itself,
-                when the title panel belongs to the <i>root</i> chart.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallTitle" type="pvc.options.marks.PanelExtensionPoint">
-            <c:documentation>
-                The extension point of the main panel of a <i>small</i> chart.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="smallTitleLabel" type="pvc.options.marks.LabelExtensionPoint">
-            <c:documentation>
-                The extension point of the label that holds the title text itself,
-                when the title panel belongs to a <i>small</i> chart.
+                The extension point of the title label mark.
             </c:documentation>
         </c:property>
     </c:complexType>

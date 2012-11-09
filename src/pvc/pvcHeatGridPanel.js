@@ -167,8 +167,13 @@ def
         }
         
         /* Cell panel */
+        var extensionIds = ['panel'];
+        if(this.compatVersion() <= 1){
+            extensionIds.push(''); // let access as "heatGrid_"
+        }
+        
         keyArgs = { // reuse var
-            extensionId: ['heatGridPanel', 'heatGrid'],
+            extensionId: extensionIds,
             wrapper:     wrapper
         };
         
@@ -203,7 +208,7 @@ def
             .lock(a_width, w)
             
             .antialias(false)
-            .lineWidth(0)
+            //.lineWidth(0)
             ;
             // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode)
             //.overflow('hidden'); //overflow important if valuesVisible=true
@@ -249,7 +254,7 @@ def
                 this, 
                 this.pvHeatGrid.anchor("center"), 
                 {
-                    extensionId: 'heatGridLabel',
+                    extensionId: 'label',
                     wrapper:     wrapper
                 })
                 .pvMark
@@ -359,6 +364,7 @@ def
         
         // Dot
         var keyArgs = {
+            extensionId: 'dot',
             freePosition: true,
             activeSeriesAware: false,
             noHover:      false,

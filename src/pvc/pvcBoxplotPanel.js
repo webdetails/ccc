@@ -38,8 +38,13 @@ def
             ;
 
         /* Category Panel */
+        var extensionIds = ['panel'];
+        if(this.compatVersion() <= 1){
+            extensionIds.push(''); // let access as "box_"
+        }
+        
         this.pvBoxPanel = new pvc.visual.Panel(this, this.pvPanel, {
-                extensionId: ['boxPanel', 'box']
+                extensionId: extensionIds
             })
             .lock('data', rootScene.childNodes)
             .lockMark(a_left, function(scene){

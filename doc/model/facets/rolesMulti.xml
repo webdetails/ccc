@@ -10,7 +10,7 @@
             The options documentation class of the multi-chart visual roles facet.
         </c:documentation>
         
-        <c:property name="multiChart" type="string pvc.options.roles.VisualRoleOptions"  category="Multi-Chart">
+        <c:property name="multiChart" type="string pvc.options.roles.VisualRoleOptions">
             <c:documentation>
                 The <tt>multiChart</tt> visual role
                 allows turning a chart in a small multiples chart

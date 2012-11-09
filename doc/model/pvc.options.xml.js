@@ -64,6 +64,13 @@ pvc = {};
 pvc.options = {};
 
 /**
+ * The namespace of CCC chart extension point classes. 
+ * 
+ * @namespace
+ */
+pvc.options.ext = {};
+
+/**
  * The namespace of chart options classes. 
  * 
  * @namespace
@@ -337,7 +344,7 @@ pvc.options.charts.ChartCommonOptions.prototype.timeSeriesFormat = undefined;
  */
 pvc.options.charts.ChartCommonOptions.prototype.valueFormat = function(){};
 /**
- * The options of visual roles that are common to all chart types.
+ * The visual roles that are common to all chart types.
  * 
  * @type pvc.options.roles.ChartCommonVisualRoles
  * @category Data Binding
@@ -703,18 +710,6 @@ pvc.options.charts.ChartCommonOptions.prototype.width = undefined;
  */
 pvc.options.charts.ChartCommonOptions.prototype.legend = undefined;
 /**
- * The title panel of the 
- * <i>small</i> chart.
- * <p>
- * The text of the title of small charts is the 
- * compound label of the data bound to the 
- * <tt>multiChart</tt> visual role.
- * 
- * @type pvc.options.panels.ChartTitlePanelOptions
- * @category Panels
- */
-pvc.options.charts.ChartCommonOptions.prototype.smallTitle = undefined;
-/**
  * The title panel of the root chart.
  * <p>
  * When a value of type 
@@ -737,15 +732,6 @@ pvc.options.charts.ChartCommonOptions.prototype.title = undefined;
  * @category Style
  */
 pvc.options.charts.ChartCommonOptions.prototype.colors = undefined;
-/**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
- * 
- * @type pvc.options.ext.ChartCommonExtensionPoints
- * @category Style
- */
-pvc.options.charts.ChartCommonOptions.prototype.extensionPoints = undefined;
 /**
  * The visual roles common to all chart types.
  * 
@@ -788,9 +774,7 @@ pvc.options.ext.ChartCommonExtensionPoints.prototype.base = undefined;
  * <p>
  * The plot panel is a child of the content panel.
  * 
- * @deprecated 
- * Please use the extension point {@link #plot} instead. 
- * 
+ * @deprecated Use the extension point {@link #plot} instead.
  * @type pvc.options.marks.PanelExtensionPoint
  */
 pvc.options.ext.ChartCommonExtensionPoints.prototype.chart = undefined;
@@ -807,10 +791,18 @@ pvc.options.ext.ChartCommonExtensionPoints.prototype.content = undefined;
  * The extension point of the plot panel of the charts.
  * <p>
  * The plot panel is a child of the content panel.
+ * <p>
+ * The root of a small multiples chart does not have a plot panel.
  * 
  * @type pvc.options.marks.PanelExtensionPoint
  */
 pvc.options.ext.ChartCommonExtensionPoints.prototype.plot = undefined;
+/**
+ * The extension point of the selection rubber-band.
+ * 
+ * @type pvc.options.marks.BarExtensionPoint
+ */
+pvc.options.ext.ChartCommonExtensionPoints.prototype.rubberBand = undefined;
 /**
  * The options documentation class of the tooltip.
  * 
@@ -1367,6 +1359,15 @@ pvc.options.plots.PlotCommonOptions = function(){};
  */
 pvc.options.plots.PlotCommonOptions.prototype.colorAxis = undefined;
 /**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.ChartCommonExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.PlotCommonOptions.prototype.extensionPoints = undefined;
+/**
  * 
  * Indicates if value labels are shown next to the visual elements.
  * 
@@ -1418,12 +1419,539 @@ pvc.options.plots.PlotCommonOptions.prototype.valuesFont = undefined;
 pvc.options.plots.PlotCommonOptions.prototype.valuesVisible = undefined;
 /**
  * The options documentation class of the 
+ * <b>Pie</b> chart.
+ * 
+ * @class
+ * @extends pvc.options.charts.ChartCommonOptions
+ */
+pvc.options.charts.PieChartOptions = function(){};
+        
+        
+        
+        
+/**
+ * The indexes of the data source's 
+ * <i>virtual item</i> columns
+ * that are to feed the 
+ * default 
+ * 
+ * <tt>multiChart</tt>, 
+ * 
+ * <tt>multiChart2</tt>, ... 
+ * dimensions.
+ * 
+ * @type number|string
+ * @default true
+ * @category Multi-Chart - Data Translation
+ */
+pvc.options.charts.PieChartOptions.prototype.multiChartIndexes = undefined;
+/**
+ * The maximum number of 
+ * <i>small</i> charts that should
+ * be displayed in a row.
+ * <p>
+ * This property can receive a value of 
+ * <tt>Infinity</tt>
+ * to indicate that all charts should be laid out in a single row.
+ * 
+ * @type number
+ * @default 3
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.multiChartColumnsMax = undefined;
+/**
+ * The maximum number of 
+ * <i>small</i> charts that should
+ * be displayed.
+ * <p>
+ * The first 
+ * <i>small</i> charts are chosen.
+ * 
+ * @type number
+ * @default Infinity
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.multiChartMax = undefined;
+/**
+ * Indicates that, 
+ * when the layout results in a single column
+ * and the value of {@link #smallHeight}
+ * is still to be determined, 
+ * it should be set to all the initially available content height,
+ * instead of determining the height from the 
+ * {@link #smallAspectRatio} and the {@link #smallWidth}.
+ * 
+ * @type boolean
+ * @default true
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.multiChartSingleColFillsHeight = undefined;
+/**
+ * Indicates that, 
+ * when the layout results in a single row
+ * and the value of {@link #smallHeight}
+ * is still to be determined, 
+ * it should be set to all the initially available content height,
+ * instead of determining the height from the 
+ * {@link #smallAspectRatio} and the {@link #smallWidth}.
+ * 
+ * @type boolean
+ * @default true
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.multiChartSingleRowFillsHeight = undefined;
+/**
+ * The ratio of the width over the height of a 
+ * <i>small</i> chart.
+ * <p>
+ * It is used when the set of properties
+ * {@link #smallWidth},
+ * {@link #smallHeight},
+ * {@link #multiChartColumnsMax},
+ * {@link #multiChartSingleRowFillsHeight} and
+ * {@link #multiChartSingleColFillsHeight},
+ * is under-specified and 
+ * is not enough to determine the value of both
+ * {@link #smallWidth} and
+ * {@link #smallHeight}.
+ * <p>
+ * The default value of the aspect ratio depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * 
+ * @type number
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.smallAspectRatio = undefined;
+/**
+ * The margins of the 
+ * <i>content panel</i> of a 
+ * <i>small</i> chart. 
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.smallContentMargins = undefined;
+/**
+ * The paddings of the 
+ * <i>content panel</i> of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.smallContentPaddings = undefined;
+/**
+ * Fixates the height of each 
+ * <i>small</i> chart.
+ * <p>
+ * A value of type 
+ * <tt>number</tt>, 
+ * or of type 
+ * <tt>string</tt>, but with numeric content, 
+ * is interpreted as being in pixel units.
+ * <p>
+ * A value of type 
+ * <tt>string</tt>, 
+ * with numeric content that is suffixed by a "%" character,
+ * is interpreted as a percentage of the initially available content height.
+ * <p>
+ * This property may cause the 
+ * <i>small multiples</i> chart 
+ * to take up a greater width than the one specified in {@link #height}.
+ * <p>
+ * When this property is unspecified, 
+ * its value depends on the evaluation of the
+ * {@link #smallWidth} property, 
+ * which may impose it a value. 
+ * If after the evaluation of {@link #smallWidth} 
+ * this property remains unspecified, 
+ * it is determined as follows.
+ * <p>
+ * If the layout will have a single column 
+ * and the property {@link #multiChartSingleColFillsHeight}
+ * is 
+ * <tt>true</tt> (it is by default)
+ * then the height will be the initially available content height.
+ * <p>
+ * If the layout will have a single row 
+ * and the property {@link #multiChartSingleRowFillsHeight}
+ * is 
+ * <tt>true</tt> (it is by default)
+ * then the height will be the initially available content height.
+ * <p>
+ * Otherwise, the property {@link #smallAspectRatio} is 
+ * used to determine the height of the small chart from its determined width.
+ * <p>
+ * The aspect ratio is defaulted to a value that depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * 
+ * @type number|string
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.smallHeight = undefined;
+/**
+ * The margins of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default '2%'
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.smallMargins = undefined;
+/**
+ * The paddings of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.smallPaddings = undefined;
+/**
+ * Fixates the width of each 
+ * <i>small</i> chart.
+ * <p>
+ * A value of type 
+ * <tt>number</tt>, 
+ * or of type 
+ * <tt>string</tt>, but with numeric content, 
+ * is interpreted as being in pixel units.
+ * <p>
+ * A value of type 
+ * <tt>string</tt>, 
+ * with numeric content that is suffixed by a "%" character,
+ * is interpreted as a percentage of the initially available content width.
+ * <p>
+ * This property may cause the 
+ * <i>small multiples</i> chart 
+ * to take up a greater width than the one specified in {@link #width}.
+ * <p>
+ * When this property is unspecified,
+ * a specified finite value, or a defaulted value, of the property {@link #multiChartColumnsMax} is
+ * used to determine it: 
+ * by dividing the initially available content width 
+ * by the maximum number of charts in a row that 
+ * <i>actually</i> occur
+ * (so that if there are less small charts than 
+ * the maximum that can be placed in a row, 
+ * these, nevertheless, take up the whole width).
+ * <p>
+ * When an infinite value is specified for 
+ * {@link #multiChartColumnsMax}, 
+ * the small charts are laid out in a single row, 
+ * and so the width is calculated from the height {@link #smallHeight}, 
+ * using the aspect ratio {@link #smallAspectRatio}.
+ * The height is defaulted to the initially available content height.
+ * The aspect ratio is defaulted to a value that depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * The width is then calculated.
+ * 
+ * @type number|string
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.PieChartOptions.prototype.smallWidth = undefined;
+/**
+ * The title panel of the 
+ * <i>small</i> chart.
+ * <p>
+ * The text of the title of small charts is the 
+ * compound label of the data bound to the 
+ * <tt>multiChart</tt> visual role.
+ * 
+ * @type pvc.options.panels.ChartTitlePanelOptions
+ * @category Multi-Chart - Panels
+ */
+pvc.options.charts.PieChartOptions.prototype.smallTitle = undefined;
+/**
+ * The visual roles that of the 
+ * <i>pie</i> chart type.
+ * 
+ * @type pvc.options.roles.PieVisualRoles
+ * @category Data Binding
+ */
+pvc.options.charts.PieChartOptions.prototype.visualRoles = undefined;
+/**
+ * The pie plot is the 
+ * <b>main plot</b> of the pie chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "pie" property suffix.
+ * 
+ * @type pvc.options.plots.PiePlotOptions
+ * @category Plots
+ */
+pvc.options.charts.PieChartOptions.prototype.pie = undefined;
+/**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.PieChartExtensionPoints
+ * @category Style
+ */
+pvc.options.charts.PieChartOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the pie chart type.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>extension property (ex: 
+ * <tt>smallBase</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>smallBase_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * 
+ * @class
+ */
+pvc.options.ext.PieChartExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the base (root) panel of the 
+ * <i>small</i> charts.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ * @category Multi-Chart
+ */
+pvc.options.ext.PieChartExtensionPoints.prototype.smallBase = undefined;
+/**
+ * The extension point of the content panel of the 
+ * <i>small</i> charts.
+ * <p>
+ * The content panel is a child of the base panel.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ * @category Multi-Chart
+ */
+pvc.options.ext.PieChartExtensionPoints.prototype.smallContent = undefined;
+/**
+ * The visual roles of the 
+ * <i>pie</i> chart type.
+ * 
+ * @class
+ * @extends pvc.options.roles.ChartCommonVisualRoles
+ */
+pvc.options.roles.PieVisualRoles = function(){};
+        
+        
+        
+        
+/**
+ * The 
+ * <tt>multiChart</tt> visual role
+ * allows turning a chart in a small multiples chart
+ * {@link http://en.wikipedia.org/wiki/Small_multiple}.
+ * <p>
+ * Almost all main chart types support being shown
+ * as a small multiples chart.
+ * Currently, the exceptions are the charts: 
+ * 
+ * <i>Heat Grid</i>, 
+ * 
+ * <i>Bullet</i>, 
+ * 
+ * <i>Data Tree</i> and
+ * 
+ * <i>Parallel Coordinates</i>.
+ * <p>
+ * The 
+ * <tt>multiChart</tt> visual role
+ * can be bound to any number of dimensions,
+ * that are, or will be turned into, discrete.
+ * <p>
+ * The 
+ * <tt>multiChart</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>multiChart</tt> prefix.
+ * <p>
+ * One 
+ * <i>small</i> chart is generated per
+ * unique combination of the values of the bound dimensions
+ * that is present in the source data.
+ * Each small chart then receives as its data
+ * the partition of the source data that shares its 
+ * unique combination of values.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.PieVisualRoles.prototype.multiChart = undefined;
+/**
+ * The 
+ * <tt>category</tt> visual role represents a slice of the pie.
+ * <p>
+ * The 
+ * <tt>category</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>category</tt> prefix.
+ * <p>
+ * The visual role itself is optional,
+ * yet, when unbound, 
+ * a dimension with a "category" prefix
+ * is automatically created for it,
+ * and all datums will have the value 
+ * <tt>null</tt>
+ * in that dimension.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.PieVisualRoles.prototype.category = undefined;
+/**
+ * The 
+ * <tt>color</tt> visual role controls the color of pie slices.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>color</tt> prefix
+ * or, if none exists, 
+ * the dimensions of the "category" role.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role is discrete.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.PieVisualRoles.prototype.color = undefined;
+/**
+ * The 
+ * <tt>value</tt> visual role controls the 
+ * relative angle span of each pie slice.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role automatically binds to 
+ * a single dimension whose name has the 
+ * <tt>value</tt> prefix.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role is required.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.PieVisualRoles.prototype.value = undefined;
+/**
+ * The options documentation class of the 
+ * <b>Pie</b> plot.
+ * 
+ * @class
+ * @extends pvc.options.plots.PlotCommonOptions
+ */
+pvc.options.plots.PiePlotOptions = function(){};
+        
+        
+        
+        
+/**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.PiePlotExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.PiePlotOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the pie plot type.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>plot property name (ex: 
+ * <tt>pie</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>slice</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>pieSlice_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * The extension points of the 
+ * <i>main plot</i> of a chart
+ * may be used without the plot property name prefix.
+ * In the example, when the 
+ * <tt>pie</tt> plot is the main plot, 
+ * the extension point can be written as 
+ * <tt>slice_strokeStyle</tt>.
+ * 
+ * @class
+ */
+pvc.options.ext.PiePlotExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the value label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.PiePlotExtensionPoints.prototype.label = undefined;
+/**
+ * The extension point of the line mark that links the 
+ * pie slices and the linked labels.
+ * 
+ * @type pvc.options.marks.LineExtensionPoint
+ */
+pvc.options.ext.PiePlotExtensionPoints.prototype.linkLine = undefined;
+/**
+ * The extension point of the pie slice - the wedge mark.
+ * 
+ * @type pvc.options.marks.WedgeExtensionPoint
+ */
+pvc.options.ext.PiePlotExtensionPoints.prototype.slice = undefined;
+/**
+ * The options documentation class of the 
  * <b>Bullet</b> chart.
  * 
  * @class
  * @extends pvc.options.charts.ChartCommonOptions
  */
-pvc.options.charts.BulletChart = function(){};
+pvc.options.charts.BulletChartOptions = function(){};
         
         
         
@@ -1438,7 +1966,7 @@ pvc.options.charts.BulletChart = function(){};
  * @type pvc.options.plots.BulletPlotOptions
  * @category Plots
  */
-pvc.options.charts.BulletChart.prototype.bullet = undefined;
+pvc.options.charts.BulletChartOptions.prototype.bullet = undefined;
 /**
  * The options documentation class of the 
  * <b>Bullet</b> plot.
@@ -1451,6 +1979,58 @@ pvc.options.plots.BulletPlotOptions = function(){};
         
         
         
+/**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.BulletPlotExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.BulletPlotOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the bullet plot type.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>plot property name (ex: 
+ * <tt>bullet</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>panel</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>bulletPanel_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * The extension points of the 
+ * <i>main plot</i> of a chart
+ * may be used without the plot property name prefix.
+ * In the example, when the 
+ * <tt>bullet</tt> plot is the main plot, 
+ * the extension point can be written as 
+ * <tt>panel_strokeStyle</tt>.
+ * 
+ * @class
+ */
+pvc.options.ext.BulletPlotExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the bullet panel mark.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.panel = undefined;
 /**
  * The common options documentation class for the 
  * <b>Cartesian</b> charts.
@@ -1465,7 +2045,7 @@ pvc.options.charts.CartesianChartCommonOptions = function(){};
         
         
 /**
- * The options of visual roles that are common to (almost) all cartesian chart types.
+ * The visual roles that are common to (almost) all cartesian chart types.
  * 
  * @type pvc.options.roles.CartesianCommonVisualRoles
  * @category Data Binding
@@ -1476,7 +2056,7 @@ pvc.options.charts.CartesianChartCommonOptions.prototype.visualRoles = undefined
  * contains style definitions for 
  * various visual elements of the cartesian charts.
  * 
- * @type pvc.options.ext.CartesianCommonExtensionPoints
+ * @type pvc.options.ext.CartesianChartCommonExtensionPoints
  * @category Style
  */
 pvc.options.charts.CartesianChartCommonOptions.prototype.extensionPoints = undefined;
@@ -1493,12 +2073,32 @@ pvc.options.roles.CartesianCommonVisualRoles = function(){};
         
 /**
  * The 
+ * <tt>color</tt> visual role controls the color of visual elements.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>color</tt> prefix
+ * or, if none exists, 
+ * the dimensions of the "series" role.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role is discrete.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.CartesianCommonVisualRoles.prototype.color = undefined;
+/**
+ * The 
  * <tt>series</tt> visual role represents a 
  * 
  * <i>series</i> of connected data points.
  * <p>
- * Most cartesian charts show the connectedness
- * of data points of a given series in some way, 
+ * Most cartesian charts represent graphically 
+ * the connectedness of data points of a given series in some way, 
  * by connecting points with a line,
  * by giving them all the same color,
  * or, simply, 
@@ -1519,10 +2119,10 @@ pvc.options.roles.CartesianCommonVisualRoles = function(){};
  * in that dimension.
  * <p>
  * The only cartesian chart type that 
- * does not support the 
- * <tt>series</tt> visual role is 
- * the 
- * <i>Box Plot</i>.
+ * 
+ * <i>ignores</i> the 
+ * <tt>series</tt> visual role is the 
+ * <i>Box plot</i>.
  * <p>
  * See {@link pvc.options.roles.VisualRoleOptions}
  * for more information on supported data types.
@@ -1536,11 +2136,22 @@ pvc.options.roles.CartesianCommonVisualRoles.prototype.series = undefined;
  * @class
  * @extends pvc.options.ext.ChartCommonExtensionPoints
  */
-pvc.options.ext.CartesianCommonExtensionPoints = function(){};
+pvc.options.ext.CartesianChartCommonExtensionPoints = function(){};
         
         
         
         
+/**
+ * The extension point of the plot frame of the charts.
+ * <p>
+ * The plot frame covers the plot panel but stays
+ * aligned with and below the axes' rules.
+ * <p>
+ * The root of a small multiples chart does not have a plot frame.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.plotFrame = undefined;
 /**
  * The extension point of the grid line rules that are drawn 
  * one per major tick of the 
@@ -1550,7 +2161,7 @@ pvc.options.ext.CartesianCommonExtensionPoints = function(){};
  * @type pvc.options.marks.RuleExtensionPoint
  * @category Axes
  */
-pvc.options.ext.CartesianCommonExtensionPoints.prototype.xAxisGrid = undefined;
+pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.xAxisGrid = undefined;
 /**
  * The extension point of the zero line rule that is drawn 
  * on the 0-valued tick, when there is one 
@@ -1559,7 +2170,7 @@ pvc.options.ext.CartesianCommonExtensionPoints.prototype.xAxisGrid = undefined;
  * @type pvc.options.marks.RuleExtensionPoint
  * @category Axes
  */
-pvc.options.ext.CartesianCommonExtensionPoints.prototype.xAxisZeroLine = undefined;
+pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.xAxisZeroLine = undefined;
 /**
  * The extension point of the grid line rules that are drawn 
  * one per major tick of the 
@@ -1569,7 +2180,7 @@ pvc.options.ext.CartesianCommonExtensionPoints.prototype.xAxisZeroLine = undefin
  * @type pvc.options.marks.RuleExtensionPoint
  * @category Axes
  */
-pvc.options.ext.CartesianCommonExtensionPoints.prototype.yAxisGrid = undefined;
+pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.yAxisGrid = undefined;
 /**
  * The extension point of the zero line rule that is drawn 
  * on the 0-valued tick, when there is one 
@@ -1578,7 +2189,7 @@ pvc.options.ext.CartesianCommonExtensionPoints.prototype.yAxisGrid = undefined;
  * @type pvc.options.marks.RuleExtensionPoint
  * @category Axes
  */
-pvc.options.ext.CartesianCommonExtensionPoints.prototype.yAxisZeroLine = undefined;
+pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.yAxisZeroLine = undefined;
 /**
  * The common options documentation class of 
  * <b>cartesian</b> plots.
@@ -1606,7 +2217,7 @@ pvc.options.charts.CategoricalChartCommonOptions = function(){};
         
         
 /**
- * The options of visual roles that are common to all categorical chart types.
+ * The visual roles that are common to all categorical chart types.
  * 
  * @type pvc.options.roles.CategoricalCommonVisualRoles
  * @category Data Binding
@@ -1707,7 +2318,7 @@ pvc.options.charts.CategoricalContinuousChartCommonOptions = function(){};
  * 
  * @type number|string
  * @default true
- * @category Data Translation
+ * @category Multi-Chart - Data Translation
  */
 pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.multiChartIndexes = undefined;
 /**
@@ -1933,7 +2544,19 @@ pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallPaddin
  */
 pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallWidth = undefined;
 /**
- * The options of visual roles common to 
+ * The title panel of the 
+ * <i>small</i> chart.
+ * <p>
+ * The text of the title of small charts is the 
+ * compound label of the data bound to the 
+ * <tt>multiChart</tt> visual role.
+ * 
+ * @type pvc.options.panels.ChartTitlePanelOptions
+ * @category Multi-Chart - Panels
+ */
+pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallTitle = undefined;
+/**
+ * The visual roles common to 
  * <b>categorical</b> chart types with a 
  * <i>continuous orthogonal axis</i>.
  * 
@@ -1946,10 +2569,56 @@ pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.visualRoles
  * contains style definitions for 
  * various visual elements of the chart.
  * 
- * @type pvc.options.ext.CategoricalContinuousCommonExtensionPoints
+ * @type pvc.options.ext.CategoricalContinuousChartCommonExtensionPoints
  * @category Style
  */
 pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the 
+ * <b>categorical</b> chart types with a 
+ * <i>continuous orthogonal axis</i>.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>extension property (ex: 
+ * <tt>smallBase</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>smallBase_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * 
+ * @class
+ */
+pvc.options.ext.CategoricalContinuousChartCommonExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the base (root) panel of the 
+ * <i>small</i> charts.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ * @category Multi-Chart
+ */
+pvc.options.ext.CategoricalContinuousChartCommonExtensionPoints.prototype.smallBase = undefined;
+/**
+ * The extension point of the content panel of the 
+ * <i>small</i> charts.
+ * <p>
+ * The content panel is a child of the base panel.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ * @category Multi-Chart
+ */
+pvc.options.ext.CategoricalContinuousChartCommonExtensionPoints.prototype.smallContent = undefined;
 /**
  * The visual roles common to 
  * <b>categorical</b> chart types with a 
@@ -2003,40 +2672,8 @@ pvc.options.roles.CategoricalContinuousCommonVisualRoles = function(){};
  * for more information on supported data types.
  * 
  * @type string|pvc.options.roles.VisualRoleOptions
- * @category Multi-Chart
  */
 pvc.options.roles.CategoricalContinuousCommonVisualRoles.prototype.multiChart = undefined;
-/**
- * The extension points common to 
- * <b>categorical</b> chart types with a 
- * <i>continuous orthogonal axis</i>.
- * 
- * @class
- * @extends pvc.options.ext.CartesianCommonExtensionPoints
- */
-pvc.options.ext.CategoricalContinuousCommonExtensionPoints = function(){};
-        
-        
-        
-        
-/**
- * The extension point of the base (root) panel of the 
- * <i>small</i> charts.
- * 
- * @type pvc.options.marks.PanelExtensionPoint
- * @category Multi-Chart
- */
-pvc.options.ext.CategoricalContinuousCommonExtensionPoints.prototype.smallBase = undefined;
-/**
- * The extension point of the content panel of the 
- * <i>small</i> charts.
- * <p>
- * The content panel is a child of the base panel.
- * 
- * @type pvc.options.marks.PanelExtensionPoint
- * @category Multi-Chart
- */
-pvc.options.ext.CategoricalContinuousCommonExtensionPoints.prototype.smallContent = undefined;
 /**
  * The common options documentation class of 
  * <b>categorical</b> plot types with a 
@@ -2118,16 +2755,150 @@ pvc.options.charts.BoxplotChartOptions = function(){};
         
         
 /**
+ * The visual roles that are common to the 
+ * <i>bar family</i> chart types.
+ * 
+ * @type pvc.options.roles.BarCommonVisualRoles
+ * @category Data Binding
+ */
+pvc.options.charts.BoxplotChartOptions.prototype.visualRoles = undefined;
+/**
  * The box plot is the 
  * <b>main plot</b> of the box plot chart,
  * which means that 
  * its properties may be used 
  * <i>without</i> the "box" property suffix.
  * 
- * @type pvc.options.plots.BoxPlotOptions
+ * @type pvc.options.plots.BoxplotPlotOptions
  * @category Plots
  */
 pvc.options.charts.BoxplotChartOptions.prototype.box = undefined;
+/**
+ * The visual roles of the 
+ * <i>box plot</i> chart type.
+ * 
+ * @class
+ * @extends pvc.options.roles.CategoricalContinuousCommonVisualRoles
+ */
+pvc.options.roles.BoxplotCommonVisualRoles = function(){};
+        
+        
+        
+        
+/**
+ * The 
+ * <tt>lowerQuartil</tt> visual role 
+ * controls the bottom position of the box visual element,
+ * along the orthogonal axis.
+ * <p>
+ * The 
+ * <tt>lowerQuartil</tt> visual role automatically binds to 
+ * a single numeric dimension whose name has the 
+ * <tt>lowerQuartil</tt> prefix.
+ * <p>
+ * The 
+ * <tt>lowerQuartil</tt> visual role is optional.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.BoxplotCommonVisualRoles.prototype.lowerQuartil = undefined;
+/**
+ * The 
+ * <tt>maximum</tt> visual role 
+ * controls the position of the rule that crosses 
+ * the bottom whisker of the box visual element,
+ * along the orthogonal axis.
+ * <p>
+ * The 
+ * <tt>maximum</tt> visual role automatically binds to 
+ * a single numeric dimension whose name has the 
+ * <tt>maximum</tt> prefix.
+ * <p>
+ * The 
+ * <tt>maximum</tt> visual role is optional.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.BoxplotCommonVisualRoles.prototype.maximum = undefined;
+/**
+ * The 
+ * <tt>median</tt> visual role 
+ * controls the position of the middle rule of the box visual element,
+ * along the orthogonal axis.
+ * <p>
+ * The 
+ * <tt>median</tt> visual role automatically binds to 
+ * a single numeric dimension whose name has the 
+ * <tt>median</tt> prefix.
+ * <p>
+ * The 
+ * <tt>median</tt> visual role is required.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.BoxplotCommonVisualRoles.prototype.median = undefined;
+/**
+ * The 
+ * <tt>minimum</tt> visual role 
+ * controls the position of the rule that crosses 
+ * the top whisker of the box visual element,
+ * along the orthogonal axis.
+ * <p>
+ * The 
+ * <tt>minimum</tt> visual role automatically binds to 
+ * a single numeric dimension whose name has the 
+ * <tt>minimum</tt> prefix.
+ * <p>
+ * The 
+ * <tt>minimum</tt> visual role is optional.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.BoxplotCommonVisualRoles.prototype.minimum = undefined;
+/**
+ * The 
+ * <tt>series</tt> visual role represents a 
+ * 
+ * <i>series</i> of connected data points. 
+ * In this chart type, although supported, 
+ * data bound to is not represented in its visual elements.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ * @constant
+ */
+pvc.options.roles.BoxplotCommonVisualRoles.prototype.series = null;
+/**
+ * The 
+ * <tt>upperQuartil</tt> visual role 
+ * controls the top position of the box visual element,
+ * along the orthogonal axis.
+ * <p>
+ * The 
+ * <tt>upperQuartil</tt> visual role automatically binds to 
+ * a single numeric dimension whose name has the 
+ * <tt>upperQuartil</tt> prefix.
+ * <p>
+ * The 
+ * <tt>upperQuartil</tt> visual role is optional.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.BoxplotCommonVisualRoles.prototype.upperQuartil = undefined;
 /**
  * The options documentation class of the 
  * <b>Box</b> plot.
@@ -2135,7 +2906,7 @@ pvc.options.charts.BoxplotChartOptions.prototype.box = undefined;
  * @class
  * @extends pvc.options.plots.CategoricalContinuousPlotCommonOptions
  */
-pvc.options.plots.BoxPlotOptions = function(){};
+pvc.options.plots.BoxplotPlotOptions = function(){};
         
         
         
@@ -2147,7 +2918,99 @@ pvc.options.plots.BoxPlotOptions = function(){};
  * @type boolean
  * @constant
  */
-pvc.options.plots.BoxPlotOptions.prototype.stacked = false;
+pvc.options.plots.BoxplotPlotOptions.prototype.stacked = false;
+/**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.BoxplotPlotExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.BoxplotPlotOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the box plot type.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>plot property name (ex: 
+ * <tt>box</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>panel</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>boxPanel_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * The extension points of the 
+ * <i>main plot</i> of a chart
+ * may be used without the plot property name prefix.
+ * In the example, when the 
+ * <tt>box</tt> plot is the main plot, 
+ * the extension point can be written as 
+ * <tt>panel_strokeStyle</tt>.
+ * 
+ * @class
+ */
+pvc.options.ext.BoxplotPlotExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the box mark.
+ * <p>
+ * The box mark is a bar that extends from the 
+ * orthogonal position of the 
+ * 
+ * <tt>lowerQuartil</tt> to the position of the 
+ * <tt>upperQuartil</tt>.
+ * 
+ * @type pvc.options.marks.BarExtensionPoint
+ */
+pvc.options.ext.BoxplotPlotExtensionPoints.prototype.bar = undefined;
+/**
+ * The extension point of the category panel of the box plot.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.BoxplotPlotExtensionPoints.prototype.panel = undefined;
+/**
+ * The extension point of the rule that crosses the 
+ * top whisker of the box plot visual element.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.BoxplotPlotExtensionPoints.prototype.ruleMax = undefined;
+/**
+ * The extension point of the rule that 
+ * cuts in two the box bar of the box plot visual element.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.BoxplotPlotExtensionPoints.prototype.ruleMedian = undefined;
+/**
+ * The extension point of the rule that crosses the 
+ * bottom whisker of the box plot visual element.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.BoxplotPlotExtensionPoints.prototype.ruleMin = undefined;
+/**
+ * The extension point of the top and bottom whiskers of 
+ * the box plot visual element.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.BoxplotPlotExtensionPoints.prototype.ruleWhisker = undefined;
 /**
  * The options documentation class of the 
  * <b>Heat grid</b> chart.
@@ -2161,6 +3024,14 @@ pvc.options.charts.HeatGridChartOptions = function(){};
         
         
 /**
+ * The visual roles of the 
+ * <b>heat grid</b> chart type.
+ * 
+ * @type pvc.options.roles.HeatGridVisualRoles
+ * @category Data Binding
+ */
+pvc.options.charts.HeatGridChartOptions.prototype.visualRoles = undefined;
+/**
  * The heat grid plot is the 
  * <b>main plot</b> of the heat grid chart,
  * which means that 
@@ -2171,6 +3042,89 @@ pvc.options.charts.HeatGridChartOptions = function(){};
  * @category Plots
  */
 pvc.options.charts.HeatGridChartOptions.prototype.heatGrid = undefined;
+/**
+ * The visual roles of the 
+ * <b>heat grid</b> chart type.
+ * 
+ * @class
+ * @extends pvc.options.roles.CategoricalCommonVisualRoles
+ */
+pvc.options.roles.HeatGridVisualRoles = function(){};
+        
+        
+        
+        
+/**
+ * The 
+ * <tt>category</tt> visual role 
+ * of the heat grid chart organizes visual elements
+ * along the discrete base axis, 
+ * and is restricted to be discrete.
+ * <p>
+ * For additional information, 
+ * see the base version of this property:
+ * {@link pvc.options.roles.CategoricalCommonVisualRoles}.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.HeatGridVisualRoles.prototype.category = undefined;
+/**
+ * The 
+ * <tt>color</tt> visual role controls the color of 
+ * the visual elements.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role automatically binds to 
+ * a single numeric dimension, 
+ * whose name is 
+ * <tt>value</tt>.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role is optional and numeric.
+ * <p>
+ * When unbound, the visual elements all show the same color.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.HeatGridVisualRoles.prototype.color = undefined;
+/**
+ * The 
+ * <tt>series</tt> visual role 
+ * of the heat grid chart organizes visual elements
+ * along the discrete orthogonal axis.
+ * <p>
+ * For additional information, 
+ * see the base version of this property:
+ * {@link pvc.options.roles.CartesianCommonVisualRoles}.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.HeatGridVisualRoles.prototype.series = undefined;
+/**
+ * The 
+ * <tt>size</tt> visual role controls the size of 
+ * the dot visual elements, when in "shapes" mode".
+ * <p>
+ * The 
+ * <tt>size</tt> visual role automatically binds to 
+ * a single numeric dimension whose name is 
+ * <tt>value2</tt>.
+ * <p>
+ * The 
+ * <tt>size</tt> visual role is optional and numeric.
+ * <p>
+ * When unbound, all the dot visual elements are 
+ * sized to the grid cell size.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.HeatGridVisualRoles.prototype.size = undefined;
 /**
  * The options documentation class of the 
  * <b>Heat grid</b> plot.
@@ -2183,6 +3137,72 @@ pvc.options.plots.HeatGridPlotOptions = function(){};
         
         
         
+/**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.HeatGridPlotExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.HeatGridPlotOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the 
+ * <i>Heat grid</i> plot types.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>plot property name (ex: 
+ * <tt>heatGrid</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>panel</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>heatGridPanel_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * The extension points of the 
+ * <i>main plot</i> of a chart
+ * may be used without the plot property name prefix.
+ * In the example, when the 
+ * <tt>heatGrid</tt> plot is the main plot, 
+ * the extension point can be written as 
+ * <tt>panel_strokeStyle</tt>.
+ * 
+ * @class
+ */
+pvc.options.ext.HeatGridPlotExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the dot mark, 
+ * existent in the "shapes" mode.
+ * 
+ * @type pvc.options.marks.BarExtensionPoint
+ */
+pvc.options.ext.HeatGridPlotExtensionPoints.prototype.dot = undefined;
+/**
+ * The extension point of the value label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.HeatGridPlotExtensionPoints.prototype.label = undefined;
+/**
+ * The extension point of the "cell" panel of the heat grid plot.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.HeatGridPlotExtensionPoints.prototype.panel = undefined;
 /**
  * The common options documentation class of the 
  * <b>Bar family</b> charts.
@@ -2197,6 +3217,14 @@ pvc.options.charts.BarChartCommonOptions = function(){};
         
         
 /**
+ * The visual roles that are common to the 
+ * <i>bar family</i> chart types.
+ * 
+ * @type pvc.options.roles.BarCommonVisualRoles
+ * @category Data Binding
+ */
+pvc.options.charts.BarChartCommonOptions.prototype.visualRoles = undefined;
+/**
  * Percentage of occupied space over total space 
  * in a discrete axis band.
  * <p>
@@ -2208,6 +3236,49 @@ pvc.options.charts.BarChartCommonOptions = function(){};
  * @category Layout
  */
 pvc.options.charts.BarChartCommonOptions.prototype.panelSizeRatio = undefined;
+/**
+ * The visual roles common to the 
+ * <i>Bar family</i> chart types.
+ * 
+ * @class
+ * @extends pvc.options.roles.CategoricalContinuousCommonVisualRoles
+ */
+pvc.options.roles.BarCommonVisualRoles = function(){};
+        
+        
+        
+        
+/**
+ * The 
+ * <tt>category</tt> visual role 
+ * of the bar family charts is restricted to be discrete.
+ * <p>
+ * For additional information, 
+ * see the base version of this property:
+ * {@link pvc.options.roles.CategoricalCommonVisualRoles}.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.BarCommonVisualRoles.prototype.category = undefined;
+/**
+ * The 
+ * <tt>value</tt> visual role 
+ * controls the height of bars.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role automatically binds to 
+ * a single numeric dimension whose name has the 
+ * <tt>value</tt> prefix.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role is required.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.BarCommonVisualRoles.prototype.value = undefined;
 /**
  * The common options documentation class of the 
  * <b>Bar family</b> plots.
@@ -2221,6 +3292,94 @@ pvc.options.plots.BarPlotCommonOptions = function(){};
         
         
         
+/**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.BarPlotCommonExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.BarPlotCommonOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the 
+ * <i>bar family</i> plot types.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>plot property name (ex: 
+ * <tt>bar</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>panel</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>barPanel_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * The extension points of the 
+ * <i>main plot</i> of a chart
+ * may be used without the plot property name prefix.
+ * In the example, when the 
+ * <tt>bar</tt> plot is the main plot, 
+ * the extension point can be written as 
+ * <tt>panel_strokeStyle</tt>.
+ * 
+ * @class
+ */
+pvc.options.ext.BarPlotCommonExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the bar mark.
+ * <p>
+ * This extension point can only be used by prefixing it 
+ * with the property name of the plot.
+ * <p>
+ * So, supposing this plot is under a property named 
+ * <tt>bar</tt>,
+ * and it is desired to access the 
+ * <tt>strokeStyle</tt> property of the bar mark,
+ * the full name of the extension property 
+ * would be 
+ * <tt>bar_strokeStyle</tt>.
+ * 
+ * @type pvc.options.marks.BarExtensionPoint
+ */
+pvc.options.ext.BarPlotCommonExtensionPoints.prototype.. = undefined;
+/**
+ * The extension point of the value label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.BarPlotCommonExtensionPoints.prototype.label = undefined;
+/**
+ * The extension point of the overflow marker.
+ * 
+ * @type pvc.options.marks.DotExtensionPoint
+ */
+pvc.options.ext.BarPlotCommonExtensionPoints.prototype.overflowMarker = undefined;
+/**
+ * The extension point of the series panel of the bar plot.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.BarPlotCommonExtensionPoints.prototype.panel = undefined;
+/**
+ * The extension point of the underflow marker.
+ * 
+ * @type pvc.options.marks.DotExtensionPoint
+ */
+pvc.options.ext.BarPlotCommonExtensionPoints.prototype.underflowMarker = undefined;
 /**
  * The options documentation class of the 
  * <b>Bar</b> chart.
@@ -2356,6 +3515,14 @@ pvc.options.charts.BarChartOptions.prototype.secondAxis = undefined;
  */
 pvc.options.charts.BarChartOptions.prototype.secondAxisColor = undefined;
 /**
+ * The visual roles of the 
+ * <i>bar</i> chart type.
+ * 
+ * @type pvc.options.roles.BarVisualRoles
+ * @category Data Binding
+ */
+pvc.options.charts.BarChartOptions.prototype.visualRoles = undefined;
+/**
  * The bar plot is the 
  * <b>main plot</b> of the bar chart,
  * which means that 
@@ -2366,6 +3533,18 @@ pvc.options.charts.BarChartOptions.prototype.secondAxisColor = undefined;
  * @category Plots
  */
 pvc.options.charts.BarChartOptions.prototype.bar = undefined;
+/**
+ * The visual roles of the 
+ * <b>bar</b> chart type.
+ * 
+ * @class
+ * @extends pvc.options.roles.BarCommonVisualRoles
+ */
+pvc.options.roles.BarVisualRoles = function(){};
+        
+        
+        
+        
 /**
  * The options documentation class of the 
  * <b>Bar</b> plot.
@@ -2400,6 +3579,17 @@ pvc.options.charts.NormalizedBarChartOptions = function(){};
         
         
         
+/**
+ * The normalized bar plot is the 
+ * <b>main plot</b> of the normalized area chart,
+ * which means that 
+ * its properties may be used 
+ * <i>without</i> the "normBar" property suffix.
+ * 
+ * @type pvc.options.plots.NormalizedBarPlotOptions
+ * @category Plots
+ */
+pvc.options.charts.NormalizedBarChartOptions.prototype.bar = undefined;
 /**
  * The options documentation class of the 
  * <b>Normalized Bar</b> plot.
@@ -2447,6 +3637,75 @@ pvc.options.plots.WaterfallPlotOptions = function(){};
         
         
         
+/**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.WaterfallPlotCommonExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.WaterfallPlotOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the waterfall plot type.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>plot property name (ex: 
+ * <tt>water</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>line</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>waterLine_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * The extension points of the 
+ * <i>main plot</i> of a chart
+ * may be used without the plot property name prefix.
+ * In the example, when the 
+ * <tt>water</tt> plot is the main plot, 
+ * the extension point can be written as 
+ * <tt>line_strokeStyle</tt>.
+ * 
+ * @class
+ * @extends pvc.options.ext.BarPlotCommonExtensionPoints
+ */
+pvc.options.ext.WaterfallPlotCommonExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the group panel mark.
+ * <p>
+ * The group panel visually contains all bars that 
+ * belong to the same group.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.WaterfallPlotCommonExtensionPoints.prototype.group = undefined;
+/**
+ * The extension point of the top water line mark.
+ * 
+ * @type pvc.options.marks.LineExtensionPoint
+ */
+pvc.options.ext.WaterfallPlotCommonExtensionPoints.prototype.line = undefined;
+/**
+ * The extension point of the category total label mark, 
+ * that is placed near the water line.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.WaterfallPlotCommonExtensionPoints.prototype.lineLabel = undefined;
 /**
  * The common options documentation class for the 
  * <b>Line/Dot/Area family</b> charts.
@@ -2530,6 +3789,45 @@ pvc.options.charts.PointChartCommonOptions.prototype.color2AxisColors = undefine
  */
 pvc.options.charts.PointChartCommonOptions.prototype.trend = undefined;
 /**
+ * The visual roles that are common to the 
+ * <i>line/dot/area family</i> chart types.
+ * 
+ * @type pvc.options.roles.PointCommonVisualRoles
+ * @category Data Binding
+ */
+pvc.options.charts.PointChartCommonOptions.prototype.visualRoles = undefined;
+/**
+ * The visual roles common to the 
+ * <i>point</i> chart types.
+ * 
+ * @class
+ * @extends pvc.options.roles.CategoricalContinuousCommonVisualRoles
+ */
+pvc.options.roles.PointCommonVisualRoles = function(){};
+        
+        
+        
+        
+/**
+ * The 
+ * <tt>value</tt> visual role 
+ * controls the orthogonal position of points.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role automatically binds to 
+ * a single numeric dimension whose name has the 
+ * <tt>value</tt> prefix.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role is required.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.PointCommonVisualRoles.prototype.value = undefined;
+/**
  * The common options documentation class of the 
  * <b>point</b> plots.
  * 
@@ -2600,6 +3898,15 @@ pvc.options.plots.PointPlotCommonOptions.prototype.trend = undefined;
  */
 pvc.options.plots.PointPlotCommonOptions.prototype.areasVisible = undefined;
 /**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.PointPlotCommonExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.PointPlotCommonOptions.prototype.extensionPoints = undefined;
+/**
  * 
  * Indicates if the visual elements are 
  * connected with shaded areas extending
@@ -2610,6 +3917,74 @@ pvc.options.plots.PointPlotCommonOptions.prototype.areasVisible = undefined;
  * @category Style
  */
 pvc.options.plots.PointPlotCommonOptions.prototype.showAreas = undefined;
+/**
+ * The extension points common to the 
+ * <b>point</b> plot types.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>plot property name (ex: 
+ * <tt>point</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>area</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>fillStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>pointArea_fillStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * The extension points of the 
+ * <i>main plot</i> of a chart
+ * may be used without the plot property name prefix.
+ * In the example, when the 
+ * <tt>point</tt> plot is the main plot, 
+ * the extension point can be written as 
+ * <tt>area_fillStyle</tt>.
+ * 
+ * @class
+ */
+pvc.options.ext.PointPlotCommonExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the area mark.
+ * 
+ * @type pvc.options.marks.AreaExtensionPoint
+ */
+pvc.options.ext.PointPlotCommonExtensionPoints.prototype.area = undefined;
+/**
+ * The extension point of the dot mark.
+ * 
+ * @type pvc.options.marks.DotExtensionPoint
+ */
+pvc.options.ext.PointPlotCommonExtensionPoints.prototype.dot = undefined;
+/**
+ * The extension point of the value label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.PointPlotCommonExtensionPoints.prototype.label = undefined;
+/**
+ * The extension point of the line mark.
+ * 
+ * @type pvc.options.marks.LineExtensionPoint
+ */
+pvc.options.ext.PointPlotCommonExtensionPoints.prototype.line = undefined;
+/**
+ * The extension point of the series panel mark.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.PointPlotCommonExtensionPoints.prototype.panel = undefined;
 /**
  * The options documentation class of the 
  * <b>Line</b> chart.
@@ -2919,8 +4294,258 @@ pvc.options.charts.MetricPointChartCommonOptions = function(){};
  */
 pvc.options.charts.MetricPointChartCommonOptions.prototype.trend = undefined;
 /**
- * The options of visual roles common to the 
- * <b>metric point</b> plots.
+ * The indexes of the data source's 
+ * <i>virtual item</i> columns
+ * that are to feed the 
+ * default 
+ * 
+ * <tt>multiChart</tt>, 
+ * 
+ * <tt>multiChart2</tt>, ... 
+ * dimensions.
+ * 
+ * @type number|string
+ * @default true
+ * @category Multi-Chart - Data Translation
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.multiChartIndexes = undefined;
+/**
+ * The maximum number of 
+ * <i>small</i> charts that should
+ * be displayed in a row.
+ * <p>
+ * This property can receive a value of 
+ * <tt>Infinity</tt>
+ * to indicate that all charts should be laid out in a single row.
+ * 
+ * @type number
+ * @default 3
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.multiChartColumnsMax = undefined;
+/**
+ * The maximum number of 
+ * <i>small</i> charts that should
+ * be displayed.
+ * <p>
+ * The first 
+ * <i>small</i> charts are chosen.
+ * 
+ * @type number
+ * @default Infinity
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.multiChartMax = undefined;
+/**
+ * Indicates that, 
+ * when the layout results in a single column
+ * and the value of {@link #smallHeight}
+ * is still to be determined, 
+ * it should be set to all the initially available content height,
+ * instead of determining the height from the 
+ * {@link #smallAspectRatio} and the {@link #smallWidth}.
+ * 
+ * @type boolean
+ * @default true
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.multiChartSingleColFillsHeight = undefined;
+/**
+ * Indicates that, 
+ * when the layout results in a single row
+ * and the value of {@link #smallHeight}
+ * is still to be determined, 
+ * it should be set to all the initially available content height,
+ * instead of determining the height from the 
+ * {@link #smallAspectRatio} and the {@link #smallWidth}.
+ * 
+ * @type boolean
+ * @default true
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.multiChartSingleRowFillsHeight = undefined;
+/**
+ * The ratio of the width over the height of a 
+ * <i>small</i> chart.
+ * <p>
+ * It is used when the set of properties
+ * {@link #smallWidth},
+ * {@link #smallHeight},
+ * {@link #multiChartColumnsMax},
+ * {@link #multiChartSingleRowFillsHeight} and
+ * {@link #multiChartSingleColFillsHeight},
+ * is under-specified and 
+ * is not enough to determine the value of both
+ * {@link #smallWidth} and
+ * {@link #smallHeight}.
+ * <p>
+ * The default value of the aspect ratio depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * 
+ * @type number
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.smallAspectRatio = undefined;
+/**
+ * The margins of the 
+ * <i>content panel</i> of a 
+ * <i>small</i> chart. 
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.smallContentMargins = undefined;
+/**
+ * The paddings of the 
+ * <i>content panel</i> of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.smallContentPaddings = undefined;
+/**
+ * Fixates the height of each 
+ * <i>small</i> chart.
+ * <p>
+ * A value of type 
+ * <tt>number</tt>, 
+ * or of type 
+ * <tt>string</tt>, but with numeric content, 
+ * is interpreted as being in pixel units.
+ * <p>
+ * A value of type 
+ * <tt>string</tt>, 
+ * with numeric content that is suffixed by a "%" character,
+ * is interpreted as a percentage of the initially available content height.
+ * <p>
+ * This property may cause the 
+ * <i>small multiples</i> chart 
+ * to take up a greater width than the one specified in {@link #height}.
+ * <p>
+ * When this property is unspecified, 
+ * its value depends on the evaluation of the
+ * {@link #smallWidth} property, 
+ * which may impose it a value. 
+ * If after the evaluation of {@link #smallWidth} 
+ * this property remains unspecified, 
+ * it is determined as follows.
+ * <p>
+ * If the layout will have a single column 
+ * and the property {@link #multiChartSingleColFillsHeight}
+ * is 
+ * <tt>true</tt> (it is by default)
+ * then the height will be the initially available content height.
+ * <p>
+ * If the layout will have a single row 
+ * and the property {@link #multiChartSingleRowFillsHeight}
+ * is 
+ * <tt>true</tt> (it is by default)
+ * then the height will be the initially available content height.
+ * <p>
+ * Otherwise, the property {@link #smallAspectRatio} is 
+ * used to determine the height of the small chart from its determined width.
+ * <p>
+ * The aspect ratio is defaulted to a value that depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * 
+ * @type number|string
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.smallHeight = undefined;
+/**
+ * The margins of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default '2%'
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.smallMargins = undefined;
+/**
+ * The paddings of a 
+ * <i>small</i> chart.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.smallPaddings = undefined;
+/**
+ * Fixates the width of each 
+ * <i>small</i> chart.
+ * <p>
+ * A value of type 
+ * <tt>number</tt>, 
+ * or of type 
+ * <tt>string</tt>, but with numeric content, 
+ * is interpreted as being in pixel units.
+ * <p>
+ * A value of type 
+ * <tt>string</tt>, 
+ * with numeric content that is suffixed by a "%" character,
+ * is interpreted as a percentage of the initially available content width.
+ * <p>
+ * This property may cause the 
+ * <i>small multiples</i> chart 
+ * to take up a greater width than the one specified in {@link #width}.
+ * <p>
+ * When this property is unspecified,
+ * a specified finite value, or a defaulted value, of the property {@link #multiChartColumnsMax} is
+ * used to determine it: 
+ * by dividing the initially available content width 
+ * by the maximum number of charts in a row that 
+ * <i>actually</i> occur
+ * (so that if there are less small charts than 
+ * the maximum that can be placed in a row, 
+ * these, nevertheless, take up the whole width).
+ * <p>
+ * When an infinite value is specified for 
+ * {@link #multiChartColumnsMax}, 
+ * the small charts are laid out in a single row, 
+ * and so the width is calculated from the height {@link #smallHeight}, 
+ * using the aspect ratio {@link #smallAspectRatio}.
+ * The height is defaulted to the initially available content height.
+ * The aspect ratio is defaulted to a value that depends on the chart type,
+ * but is something around 
+ * <tt>4/3</tt>.
+ * The width is then calculated.
+ * 
+ * @type number|string
+ * @category Multi-Chart - Layout
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.smallWidth = undefined;
+/**
+ * The title panel of the 
+ * <i>small</i> chart.
+ * <p>
+ * The text of the title of small charts is the 
+ * compound label of the data bound to the 
+ * <tt>multiChart</tt> visual role.
+ * 
+ * @type pvc.options.panels.ChartTitlePanelOptions
+ * @category Multi-Chart - Panels
+ */
+pvc.options.charts.MetricPointChartCommonOptions.prototype.smallTitle = undefined;
+/**
+ * The visual roles common to the 
+ * <b>metric point</b> chart types.
  * 
  * @type pvc.options.roles.MetricPointCommonVisualRoles
  * @category Data Binding
@@ -2931,10 +4556,55 @@ pvc.options.charts.MetricPointChartCommonOptions.prototype.visualRoles = undefin
  * contains style definitions for 
  * various visual elements of the chart.
  * 
- * @type pvc.options.ext.MetricPointCommonExtensionPoints
+ * @type pvc.options.ext.MetricPointChartCommonExtensionPoints
  * @category Style
  */
 pvc.options.charts.MetricPointChartCommonOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the 
+ * <i>metric line/dot/area family</i> chart types.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>extension property (ex: 
+ * <tt>smallBase</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>smallBase_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * 
+ * @class
+ */
+pvc.options.ext.MetricPointChartCommonExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the base (root) panel of the 
+ * <i>small</i> charts.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ * @category Multi-Chart
+ */
+pvc.options.ext.MetricPointChartCommonExtensionPoints.prototype.smallBase = undefined;
+/**
+ * The extension point of the content panel of the 
+ * <i>small</i> charts.
+ * <p>
+ * The content panel is a child of the base panel.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ * @category Multi-Chart
+ */
+pvc.options.ext.MetricPointChartCommonExtensionPoints.prototype.smallContent = undefined;
 /**
  * The visual roles common to the 
  * <b>metric point</b> plots.
@@ -2987,77 +4657,169 @@ pvc.options.roles.MetricPointCommonVisualRoles = function(){};
  * for more information on supported data types.
  * 
  * @type string|pvc.options.roles.VisualRoleOptions
- * @category Multi-Chart
  */
 pvc.options.roles.MetricPointCommonVisualRoles.prototype.multiChart = undefined;
 /**
+ * The 
+ * <tt>color</tt> visual role controls the color of the
+ * dots and lines of the visual elements.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role automatically binds to 
+ * every discrete dimension, or a single continuous dimension, 
+ * whose name has the 
+ * <tt>color</tt> prefix
+ * or, if none exists, 
+ * the dimensions of the "series" role.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role is discrete or continuous.
+ * <p>
+ * The default value type of dimensions bound to it is 
+ * <tt>Number</tt>.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.MetricPointCommonVisualRoles.prototype.color = undefined;
+/**
+ * The 
+ * <tt>size</tt> visual role controls the size of 
+ * the dots of the visual elements,
+ * and, as such, it is only represented if dots are visible.
+ * <p>
+ * The 
+ * <tt>size</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>size</tt> prefix.
+ * <p>
+ * The 
+ * <tt>size</tt> visual role is continuous and optional.
+ * <p>
+ * The default value type of the dimension bound to it is 
+ * <tt>Number</tt>.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.MetricPointCommonVisualRoles.prototype.size = undefined;
+/**
+ * The 
+ * <tt>x</tt> visual role controls the base position
+ * of the "point" visual element.
+ * <p>
+ * The 
+ * <tt>x</tt> visual role automatically binds to 
+ * a single dimension whose name has the 
+ * <tt>x</tt> prefix.
+ * <p>
+ * The 
+ * <tt>x</tt> visual role is continuous and required.
+ * <p>
+ * The default value type of the dimension bound to it 
+ * depends on the value of the chart option 
+ * {@link pvc.options.charts.ChartCommonOptions#timeSeries}.
+ * If it is 
+ * <tt>true</tt>
+ * it is 
+ * <tt>Date</tt>, otherwise, 
+ * it is 
+ * <tt>Number</tt>.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.MetricPointCommonVisualRoles.prototype.x = undefined;
+/**
+ * The 
+ * <tt>y</tt> visual role controls the orthogonal position
+ * of the "point" visual element.
+ * <p>
+ * The 
+ * <tt>y</tt> visual role automatically binds to 
+ * a single dimension whose name has the 
+ * <tt>y</tt> prefix.
+ * <p>
+ * The 
+ * <tt>y</tt> visual role is continuous and required.
+ * <p>
+ * The default value type of the dimension bound to it is 
+ * <tt>Number</tt>.
+ * <p>
+ * See {@link pvc.options.roles.VisualRoleOptions}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.roles.VisualRoleOptions
+ */
+pvc.options.roles.MetricPointCommonVisualRoles.prototype.y = undefined;
+/**
  * The extension points common to the 
- * <b>metric point</b> plots.
+ * <b>metric point</b> plot types.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>plot property name (ex: 
+ * <tt>point</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>line</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>pointLine_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * The extension points of the 
+ * <i>main plot</i> of a chart
+ * may be used without the plot property name prefix.
+ * In the example, when the 
+ * <tt>point</tt> plot is the main plot, 
+ * the extension point can be written as 
+ * <tt>line_strokeStyle</tt>.
  * 
  * @class
- * @extends pvc.options.ext.CartesianCommonExtensionPoints
  */
-pvc.options.ext.MetricPointCommonExtensionPoints = function(){};
+pvc.options.ext.MetricPointPlotCommonExtensionPoints = function(){};
         
         
         
         
 /**
- * The extension point of the base (root) panel of the 
- * <i>small</i> charts.
+ * The extension point of the dot mark.
+ * 
+ * @type pvc.options.marks.DotExtensionPoint
+ */
+pvc.options.ext.MetricPointPlotCommonExtensionPoints.prototype.dot = undefined;
+/**
+ * The extension point of the value label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.MetricPointPlotCommonExtensionPoints.prototype.label = undefined;
+/**
+ * The extension point of the line mark.
+ * 
+ * @type pvc.options.marks.LineExtensionPoint
+ */
+pvc.options.ext.MetricPointPlotCommonExtensionPoints.prototype.line = undefined;
+/**
+ * The extension point of the series panel mark.
  * 
  * @type pvc.options.marks.PanelExtensionPoint
- * @category Multi-Chart
  */
-pvc.options.ext.MetricPointCommonExtensionPoints.prototype.smallBase = undefined;
-/**
- * The extension point of the content panel of the 
- * <i>small</i> charts.
- * <p>
- * The content panel is a child of the base panel.
- * 
- * @type pvc.options.marks.PanelExtensionPoint
- * @category Multi-Chart
- */
-pvc.options.ext.MetricPointCommonExtensionPoints.prototype.smallContent = undefined;
-/**
- * Indicates if the visual elements show dots/markers
- * in each point's position.
- * 
- * @type boolean
- * @default false
- * @category Style
- */
-pvc.options.ext.MetricPointCommonExtensionPoints.prototype.dotsVisible = undefined;
-/**
- * Indicates if the visual elements are connected
- * with lines.
- * 
- * @type boolean
- * @default false
- * @category Style
- */
-pvc.options.ext.MetricPointCommonExtensionPoints.prototype.linesVisible = undefined;
-/**
- * 
- * Indicates if the visual elements show dots/markers
- * in each point's position.
- * 
- * @deprecated Use {@link #dotsVisible} instead.
- * @type boolean
- * @category Style
- */
-pvc.options.ext.MetricPointCommonExtensionPoints.prototype.showDots = undefined;
-/**
- * 
- * Indicates if the visual elements are connected
- * with lines.
- * 
- * @deprecated Use {@link #linesVisible} instead.
- * @type boolean
- * @category Style
- */
-pvc.options.ext.MetricPointCommonExtensionPoints.prototype.showLines = undefined;
+pvc.options.ext.MetricPointPlotCommonExtensionPoints.prototype.panel = undefined;
 /**
  * The common options documentation class of the 
  * <b>metric point</b> plots.
@@ -3071,6 +4833,44 @@ pvc.options.plots.MetricPointPlotCommonOptions = function(){};
         
         
 /**
+ * Indicates if the visual elements show dots/markers
+ * in each point's position.
+ * 
+ * @type boolean
+ * @default false
+ * @category Style
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.dotsVisible = undefined;
+/**
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @type boolean
+ * @default false
+ * @category Style
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.linesVisible = undefined;
+/**
+ * 
+ * Indicates if the visual elements show dots/markers
+ * in each point's position.
+ * 
+ * @deprecated Use {@link #dotsVisible} instead.
+ * @type boolean
+ * @category Style
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.showDots = undefined;
+/**
+ * 
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @deprecated Use {@link #linesVisible} instead.
+ * @type boolean
+ * @category Style
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.showLines = undefined;
+/**
  * Contains the plot's trending options.
  * <p>
  * Besides the property concatenation way of specifying this
@@ -3080,6 +4880,15 @@ pvc.options.plots.MetricPointPlotCommonOptions = function(){};
  * @type pvc.options.varia.PlotTrendingOptions
  */
 pvc.options.plots.MetricPointPlotCommonOptions.prototype.trend = undefined;
+/**
+ * The extension points object 
+ * contains style definitions for 
+ * various visual elements of the chart.
+ * 
+ * @type pvc.options.ext.MetricPointPlotCommonExtensionPoints
+ * @category Style
+ */
+pvc.options.plots.MetricPointPlotCommonOptions.prototype.extensionPoints = undefined;
 /**
  * The options documentation class of the 
  * <b>Metric Line</b> chart.
@@ -3165,13 +4974,6 @@ pvc.options.plots.MetricDotPlotOptions = function(){};
  * @constant
  */
 pvc.options.plots.MetricDotPlotOptions.prototype.dotsVisible = true;
-/**
- * The namespace of CCC chart extension point classes. 
- * 
- * @namespace
- */
-pvc.options.ext = {};
-
 /**
  * The namespace of the options of 
  * extension points of 
@@ -3757,14 +5559,24 @@ pvc.options.panels.LegendPanelOptions.prototype.shape = undefined;
 /**
  * The extension points of the legend panel.
  * <p>
- * To use an extension point you must find its full name: 
- * join the prefix property name, 
- * like {@link #legendArea},
- * with one of the properties of the type of the extension point,
- * like {@link pvc.options.marks.BarExtensionPoint#strokeStyle},
- * with an "_" character in between,
- * and obtain the name 
- * <tt>legendArea_strokeStyle</tt>.
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>panel property name (ex: 
+ * <tt>legend</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>label</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>textStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>legendLabel_textStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
  * 
  * @class
  */
@@ -3774,37 +5586,37 @@ pvc.options.ext.LegendPanelExtensionPoints = function(){};
         
         
 /**
- * The extension point of the top panel of the legend panel.
+ * The extension point of the top-most panel mark of the legend panel.
  * 
  * @type pvc.options.marks.PanelExtensionPoint
  */
-pvc.options.ext.LegendPanelExtensionPoints.prototype.legendArea = undefined;
+pvc.options.ext.LegendPanelExtensionPoints.prototype.area = undefined;
 /**
- * The extension point of the dot (the marker's shape) of a legend item.
+ * The extension point of the dot mark (the marker's shape) of a legend item.
  * 
  * @type pvc.options.marks.DotExtensionPoint
  */
-pvc.options.ext.LegendPanelExtensionPoints.prototype.legendDot = undefined;
+pvc.options.ext.LegendPanelExtensionPoints.prototype.dot = undefined;
 /**
- * The extension point of the label of a legend item.
+ * The extension point of the label mark of a legend item.
  * 
  * @type pvc.options.marks.LabelExtensionPoint
  */
-pvc.options.ext.LegendPanelExtensionPoints.prototype.legendLabel = undefined;
+pvc.options.ext.LegendPanelExtensionPoints.prototype.label = undefined;
 /**
- * The extension point of legend item panels.
+ * The extension point of legend item panel mark.
  * 
  * @type pvc.options.marks.PanelExtensionPoint
  */
-pvc.options.ext.LegendPanelExtensionPoints.prototype.legendPanel = undefined;
+pvc.options.ext.LegendPanelExtensionPoints.prototype.panel = undefined;
 /**
- * The extension point of the rule (the marker's line) of a legend item.
+ * The extension point of the rule mark (the marker's line) of a legend item.
  * 
  * @type pvc.options.marks.RuleExtensionPoint
  */
-pvc.options.ext.LegendPanelExtensionPoints.prototype.legendRule = undefined;
+pvc.options.ext.LegendPanelExtensionPoints.prototype.rule = undefined;
 /**
- * The options documentation class of the CCC title panel.
+ * The options documentation class of the chart title panel.
  * <p>
  * The default 
  * {@link pvc.options.panels.CommonDockedPanelOptions#position}
@@ -3817,7 +5629,7 @@ pvc.options.ext.LegendPanelExtensionPoints.prototype.legendRule = undefined;
  * <tt>'14px sans-serif'</tt>.
  * 
  * @class
- * @extends pvc.options.panels.CommonDockedPanelOptions
+ * @extends pvc.options.panels.TitlePanelOptions
  */
 pvc.options.panels.ChartTitlePanelOptions = function(){};
         
@@ -3825,62 +5637,93 @@ pvc.options.panels.ChartTitlePanelOptions = function(){};
         
         
 /**
- * The extension points provided by the chart title panel.
+ * The options documentation class of the title panel.
  * 
- * @type pvc.options.ext.ChartTitlePanelExtensionPoints
+ * @class
+ * @extends pvc.options.panels.CommonDockedPanelOptions
+ */
+pvc.options.panels.TitlePanelOptions = function(){};
+        
+        
+        
+        
+/**
+ * The extension points of the title panel.
+ * 
+ * @type pvc.options.ext.TitlePanelExtensionPoints
  * @category Style
  */
-pvc.options.panels.ChartTitlePanelOptions.prototype.extensionPoints = undefined;
+pvc.options.panels.TitlePanelOptions.prototype.extensionPoints = undefined;
 /**
- * The extension points of the chart title panel.
+ * The extension points of the title panel.
  * <p>
- * To use an extension point you must find its full name: 
- * join the prefix property name, 
- * like {@link #title},
- * with one of the properties of the type of the extension point,
- * like {@link pvc.options.marks.BarExtensionPoint#fillStyle},
- * with an "_" character in between,
- * and obtain the name 
- * <tt>title_fillStyle</tt>.
+ * To use an extension point you must find its full name. 
+ * If it is the chart's title panel, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>chart title panel property name: 
+ * <tt>title</tt></li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>label</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>textStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>titleLabel_textStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * <p>
+ * If it is the title panel of an axis, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>chart axis panel property name (ex: 
+ * <tt>xAxis</tt>)</li>
+ * 
+ * <li>axis panel title property name: 
+ * <tt>title</tt></li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>label</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>textStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>xAxisTitleLabel_textStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
  * 
  * @class
  */
-pvc.options.ext.ChartTitlePanelExtensionPoints = function(){};
+pvc.options.ext.TitlePanelExtensionPoints = function(){};
         
         
         
         
 /**
- * The extension point of the main panel of a 
- * <i>small</i> chart.
+ * The extension point of the top-level panel mark.
+ * <p>
+ * This extension point, having no own name, 
+ * coincides with the property name of the panel.
+ * For example, for the chart's title panel: 
+ * 
+ * <tt>title_fillStyle</tt>.
  * 
  * @type pvc.options.marks.PanelExtensionPoint
  */
-pvc.options.ext.ChartTitlePanelExtensionPoints.prototype.smallTitle = undefined;
+pvc.options.ext.TitlePanelExtensionPoints.prototype.. = undefined;
 /**
- * The extension point of the label that holds the title text itself,
- * when the title panel belongs to a 
- * <i>small</i> chart.
+ * The extension point of the title label mark.
  * 
  * @type pvc.options.marks.LabelExtensionPoint
  */
-pvc.options.ext.ChartTitlePanelExtensionPoints.prototype.smallTitleLabel = undefined;
-/**
- * The extension point of the top panel of 
- * the title panel of the 
- * <i>root</i> chart.
- * 
- * @type pvc.options.marks.PanelExtensionPoint
- */
-pvc.options.ext.ChartTitlePanelExtensionPoints.prototype.title = undefined;
-/**
- * The extension point of the label that holds the title text itself,
- * when the title panel belongs to the 
- * <i>root</i> chart.
- * 
- * @type pvc.options.marks.LabelExtensionPoint
- */
-pvc.options.ext.ChartTitlePanelExtensionPoints.prototype.titleLabel = undefined;
+pvc.options.ext.TitlePanelExtensionPoints.prototype.label = undefined;
 /**
  * The namespace of plot options classes. 
  * 
@@ -4071,7 +5914,7 @@ pvc.options.roles.VisualRoleOptions.prototype.dimensions = undefined;
  * sort orders assigned to each dimension of the visual role.
  * <p>
  * This option can be used to reverse the order of 
- * the data that is shown in an axis.
+ * the data that is shown in a discrete axis.
  * 
  * @type boolean
  * @default false

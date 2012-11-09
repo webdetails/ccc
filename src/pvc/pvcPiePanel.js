@@ -203,7 +203,9 @@ def
         // ------------
         
         var wrapper;
+        var extensionIds = ['slice'];
         if(this.compatVersion() <= 1){
+            extensionIds.push(''); // let access as "pie_"
             wrapper = function(v1f){
                 return function(pieCatScene){
                     return v1f.call(this, pieCatScene.vars.value.value);
@@ -212,7 +214,7 @@ def
         }
         
         this.pvPie = new pvc.visual.PieSlice(this, this.pvPanel, {
-                extensionId: '',
+                extensionId: extensionIds,
                 center: center,
                 activeOffsetRadius: layoutInfo.activeOffsetRadius,
                 wrapper: wrapper,

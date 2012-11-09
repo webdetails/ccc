@@ -135,5 +135,77 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="extensionPoints" type="pvc.options.ext.BoxplotPlotExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="BoxplotPlotExtensionPoints" space="pvc.options.ext">
+        <c:documentation>
+            The extension points of the box plot type.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>plot property name (ex: <tt>box</tt>)</li>
+                <li>extension property (ex: <tt>panel</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>boxPanel_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            The extension points of the <i>main plot</i> of a chart
+            may be used without the plot property name prefix.
+            In the example, when the <tt>box</tt> plot is the main plot, 
+            the extension point can be written as <tt>panel_strokeStyle</tt>.
+        </c:documentation>
+        
+        <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the category panel of the box plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="ruleWhisker" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the top and bottom whiskers of 
+                the box plot visual element.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="bar" type="pvc.options.marks.BarExtensionPoint">
+            <c:documentation>
+                The extension point of the box mark.
+                 
+                The box mark is a bar that extends from the 
+                orthogonal position of the 
+                <tt>lowerQuartil</tt> to the position of the <tt>upperQuartil</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="ruleMin" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the rule that crosses the 
+                bottom whisker of the box plot visual element.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="ruleMax" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the rule that crosses the 
+                top whisker of the box plot visual element.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="ruleMedian" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the rule that 
+                cuts in two the box bar of the box plot visual element.
+            </c:documentation>
+        </c:property>
     </c:complexType>
 </c:model>

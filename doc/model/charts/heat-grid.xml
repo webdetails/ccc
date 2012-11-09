@@ -25,14 +25,6 @@
                 The visual roles of the <b>heat grid</b> chart type.
             </c:documentation>
         </c:property>
-        
-        <c:property name="extensionPoints" type="pvc.options.ext.HeatGridExtensionPoints" category="Style">
-            <c:documentation>
-                The extension points object 
-                contains style definitions for 
-                various visual elements of the chart.
-            </c:documentation>
-        </c:property>
     </c:complexType>
     
     <c:complexType name="HeatGridVisualRoles" 
@@ -112,14 +104,52 @@
             The options documentation class of the <b>Heat grid</b> plot.
         </c:documentation>
 
+        <c:property name="extensionPoints" type="pvc.options.ext.HeatGridPlotExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
-    <c:complexType name="HeatGridExtensionPoints" 
-                   space="pvc.options.ext"
-                   base="pvc.options.plots.CartesianCommonExtensionPoints">
+    <c:complexType name="HeatGridPlotExtensionPoints" space="pvc.options.ext">
         <c:documentation>
-            The options documentation class of the <b>Heat grid</b> extension points.
+            The extension points of the <i>Heat grid</i> plot types.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>plot property name (ex: <tt>heatGrid</tt>)</li>
+                <li>extension property (ex: <tt>panel</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>heatGridPanel_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            The extension points of the <i>main plot</i> of a chart
+            may be used without the plot property name prefix.
+            In the example, when the <tt>heatGrid</tt> plot is the main plot, 
+            the extension point can be written as <tt>panel_strokeStyle</tt>.
         </c:documentation>
-
+        
+        <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the "cell" panel of the heat grid plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the value label mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dot" type="pvc.options.marks.BarExtensionPoint">
+            <c:documentation>
+                The extension point of the dot mark, 
+                existent in the "shapes" mode.
+            </c:documentation>
+        </c:property>
     </c:complexType>
 </c:model>

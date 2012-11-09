@@ -10,7 +10,16 @@
             The options documentation class of the multi-chart facet.
         </c:documentation>
         
-        <c:property name="multiChartIndexes" type="number string" default="true" category="Data Translation">
+        <c:property name="smallTitle" type="pvc.options.panels.ChartTitlePanelOptions" category="Multi-Chart - Panels">
+            <c:documentation>
+                The title panel of the <i>small</i> chart.
+                
+                The text of the title of small charts is the 
+                compound label of the data bound to the <tt>multiChart</tt> visual role.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="multiChartIndexes" type="number string" default="true" category="Multi-Chart - Data Translation">
             <c:documentation>
                 The indexes of the data source's <i>virtual item</i> columns
                 that are to feed the 

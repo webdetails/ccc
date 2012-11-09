@@ -10,7 +10,7 @@ def.scope(function(){
     def
     .type('pvc.visual.NormalizedBarPlot', pvc.visual.BarPlotAbstract)
     .add({
-        type: 'normBar',
+        type: 'bar',
         _getOptionsDefinition: function(){
             return pvc.visual.NormalizedBarPlot.optionsDef;
         }

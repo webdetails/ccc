@@ -27,15 +27,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallTitle" type="pvc.options.panels.ChartTitlePanelOptions" category="Panels">
-            <c:documentation>
-                The title panel of the <i>small</i> chart.
-                
-                The text of the title of small charts is the 
-                compound label of the data bound to the <tt>multiChart</tt> visual role.
-            </c:documentation>
-        </c:property>
-        
         <c:property name="legend" type="boolean pvc.options.panels.LegendPanelOptions" category="Panels">
             <c:documentation>
                 The legend panel of the root chart.
@@ -515,14 +506,6 @@
                 color axes map values of the "color" visual role.
             </c:documentation>
         </c:property>
-        
-        <c:property name="extensionPoints" type="pvc.options.ext.ChartCommonExtensionPoints" category="Style">
-            <c:documentation>
-                The extension points object 
-                contains style definitions for 
-                various visual elements of the chart.
-            </c:documentation>
-        </c:property>
     </c:complexType>
     
     <c:complexType name="ChartCommonVisualRoles" space="pvc.options.roles">
@@ -564,19 +547,26 @@
                 The extension point of the plot panel of the charts.
                 
                 The plot panel is a child of the content panel.
+                
+                The root of a small multiples chart does not have a plot panel.
             </c:documentation>
         </c:property>
         
         <c:property name="chart" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
-                <c:deprecated>
-                    Please use the extension point <c:link to="#plot" /> instead. 
-                </c:deprecated>
+                <c:deprecated>Use the extension point <c:link to="#plot" /> instead.</c:deprecated>
                 The extension point of the plot panel of the charts.
                 
                 The plot panel is a child of the content panel.
             </c:documentation>
         </c:property>
+        
+        <c:property name="rubberBand" type="pvc.options.marks.BarExtensionPoint">
+            <c:documentation>
+                The extension point of the selection rubber-band.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
     <c:complexType name="TooltipOptions" space="pvc.options">
@@ -964,12 +954,14 @@
                 so be sure to confirm it in the most specific plot class.
             </c:documentation>
         </c:property>
+        
         <c:property name="showValues" default="false" type="boolean" category="Style">
             <c:documentation>
                 <c:deprecated>Use <c:link to="#valuesVisible"/> instead.</c:deprecated>
                 Indicates if value labels are shown next to the visual elements.
             </c:documentation>
         </c:property>
+        
         <c:property name="valuesAnchor" type="function pvc.options.varia.MarkAnchor pvc.options.varia.WedgeAnchor" category="Style">
             <c:documentation>
                 The alignment of a value label 
@@ -1009,5 +1001,13 @@
         <!-- 
         TODO - ValuesMask - Pie Only
          -->
+         
+        <c:property name="extensionPoints" type="pvc.options.ext.ChartCommonExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
     </c:complexType>
 </c:model>

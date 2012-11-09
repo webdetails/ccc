@@ -99,7 +99,7 @@ def.scope(function(){
             // Not supported
             NullInterpolationMode: {
                 resolve: null,
-                value: ' none'
+                value: 'none'
             },
             
             // Not supported

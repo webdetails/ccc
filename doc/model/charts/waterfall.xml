@@ -27,7 +27,59 @@
         <c:documentation>
             The options documentation class of the <b>Bar</b> plot.
         </c:documentation>
+    
+        <c:property name="extensionPoints" type="pvc.options.ext.WaterfallPlotCommonExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
 
+    <c:complexType name="WaterfallPlotCommonExtensionPoints" 
+                   space="pvc.options.ext"
+                   base="pvc.options.ext.BarPlotCommonExtensionPoints">
+        <c:documentation>
+            The extension points of the waterfall plot type.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>plot property name (ex: <tt>water</tt>)</li>
+                <li>extension property (ex: <tt>line</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>waterLine_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            The extension points of the <i>main plot</i> of a chart
+            may be used without the plot property name prefix.
+            In the example, when the <tt>water</tt> plot is the main plot, 
+            the extension point can be written as <tt>line_strokeStyle</tt>.
+        </c:documentation>
+        
+        <c:property name="group" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the group panel mark.
+                
+                The group panel visually contains all bars that 
+                belong to the same group.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="line" type="pvc.options.marks.LineExtensionPoint">
+            <c:documentation>
+                The extension point of the top water line mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="lineLabel" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the category total label mark, 
+                that is placed near the water line.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
 </c:model>

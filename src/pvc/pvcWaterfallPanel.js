@@ -188,7 +188,7 @@ def
                 this, 
                 this.pvWaterfallLine, 
                 {
-                    extensionId: 'label'
+                    extensionId: 'lineLabel'
                 })
                 .intercept('visible', function(scene){
                     if(scene.vars.category.group._isFlattenGroup){

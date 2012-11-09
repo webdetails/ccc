@@ -78,53 +78,55 @@
             <c:documentation>
                 The extension points provided by the legend panel.
             </c:documentation>
-         </c:property>
+        </c:property>
     </c:complexType>
     
     <c:complexType name="LegendPanelExtensionPoints" space="pvc.options.ext">
         <c:documentation>
             The extension points of the legend panel.
             
-            To use an extension point you must find its full name: 
-            join the prefix property name, 
-            like <c:link to="#legendArea" />,
-            with one of the properties of the type of the extension point,
-            like <c:link to="pvc.options.marks.BarExtensionPoint#strokeStyle" />,
-            with an "_" character in between,
-            and obtain the name <tt>legendArea_strokeStyle</tt>.
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>legend</tt>)</li>
+                <li>extension property (ex: <tt>label</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>textStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>legendLabel_textStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
         
-        <c:property name="legendArea" type="pvc.options.marks.PanelExtensionPoint">
+        <c:property name="area" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
-                The extension point of the top panel of the legend panel.
+                The extension point of the top-most panel mark of the legend panel.
             </c:documentation>
         </c:property>
         
-        <c:property name="legendPanel" type="pvc.options.marks.PanelExtensionPoint">
+        <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
-                The extension point of legend item panels.
+                The extension point of legend item panel mark.
             </c:documentation>
         </c:property>
                 
-        <c:property name="legendLabel" type="pvc.options.marks.LabelExtensionPoint">
+        <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>
-                The extension point of the label of a legend item.
+                The extension point of the label mark of a legend item.
             </c:documentation>
         </c:property>
         
-        <c:property name="legendDot" type="pvc.options.marks.DotExtensionPoint">
+        <c:property name="dot" type="pvc.options.marks.DotExtensionPoint">
             <c:documentation>
-                The extension point of the dot (the marker's shape) of a legend item.
+                The extension point of the dot mark (the marker's shape) of a legend item.
             </c:documentation>
         </c:property>
         
-        <c:property name="legendRule" type="pvc.options.marks.RuleExtensionPoint">
+        <c:property name="rule" type="pvc.options.marks.RuleExtensionPoint">
             <c:documentation>
-                The extension point of the rule (the marker's line) of a legend item.
+                The extension point of the rule mark (the marker's line) of a legend item.
             </c:documentation>
         </c:property>
         
-        <!--  Shouldn't this apply to "label" and "panel" EPs as well??
+        <!-- TODO: Shouldn't this apply to "label" and "panel" EPs as well??
         <c:property name="legend2Dot" type="pvc.options.marks.DotExtensionPoint">
             <c:documentation>
                 The extension point of the dot (the marker's shape) of 

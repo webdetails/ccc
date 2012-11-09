@@ -22,8 +22,8 @@
                 according to the chart's 
                 <tt>plot2Series</tt> option
                 (depending on the chart,
-                <c:link to="pvc.options.charts.BarChartOptions#plot2Series", or
-                <c:link to="pvc.options.charts.PointChartCommonOptions#plot2Series").
+                <c:link to="pvc.options.charts.BarChartOptions#plot2Series" />, or
+                <c:link to="pvc.options.charts.PointChartCommonOptions#plot2Series" />).
                 
                 The <tt>dataPart</tt> visual role
                 can be bound to a single dimension

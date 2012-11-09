@@ -86,7 +86,7 @@
                 sort orders assigned to each dimension of the visual role.
                 
                 This option can be used to reverse the order of 
-                the data that is shown in an axis.
+                the data that is shown in a discrete axis.
             </c:documentation>
         </c:property>
     </c:complexType>

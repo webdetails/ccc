@@ -27,7 +27,6 @@
                 The visual roles that are common to the <i>bar family</i> chart types.
             </c:documentation>
         </c:property>
-        
     </c:complexType>
     
     <c:complexType name="BarCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CategoricalContinuousCommonVisualRoles">
@@ -69,6 +68,72 @@
         <c:documentation>
             The common options documentation class of the <b>Bar family</b> plots.
         </c:documentation>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.BarPlotCommonExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
 
+    <c:complexType name="BarPlotCommonExtensionPoints" space="pvc.options.ext">
+        <c:documentation>
+            The extension points of the <i>bar family</i> plot types.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>plot property name (ex: <tt>bar</tt>)</li>
+                <li>extension property (ex: <tt>panel</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>barPanel_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            The extension points of the <i>main plot</i> of a chart
+            may be used without the plot property name prefix.
+            In the example, when the <tt>bar</tt> plot is the main plot, 
+            the extension point can be written as <tt>panel_strokeStyle</tt>.
+        </c:documentation>
+        
+        <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the series panel of the bar plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="." type="pvc.options.marks.BarExtensionPoint">
+            <c:documentation>
+                The extension point of the bar mark.
+                
+                This extension point can only be used by prefixing it 
+                with the property name of the plot.
+                
+                So, supposing this plot is under a property named <tt>bar</tt>,
+                and it is desired to access the <tt>strokeStyle</tt> property of the bar mark,
+                the full name of the extension property 
+                would be <tt>bar_strokeStyle</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the value label mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="underflowMarker" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the underflow marker.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="overflowMarker" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the overflow marker.
+            </c:documentation>
+        </c:property>
     </c:complexType>
 </c:model>

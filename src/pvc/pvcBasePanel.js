@@ -41,7 +41,19 @@ def
         */
     };
     
-    this.margins  = new pvc.Sides(options && options.margins );
+    var margins = options && options.margins;
+    if(!parent && margins === undefined){
+        // FIXME: Give a default margin on the root panel
+        //  because otherwise borders of panels may be clipped..
+        // Even now that the box model supports borders,
+        // the "plot" panel still gets drawn outside
+        // cause it is drawn over? See the box plot...
+        // The rubber band also should take its border into account
+        //  to not be drawn off...
+        margins = 3;
+    }
+    
+    this.margins  = new pvc.Sides(margins);
     this.paddings = new pvc.Sides(options && options.paddings);
     this.size     = new pvc.Size (options && options.size    );
     this.sizeMax  = new pvc.Size (options && options.sizeMax );

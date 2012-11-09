@@ -357,7 +357,7 @@ def
         this.pvPanel.zOrder(1); // Above axes
         
         this.pvScatterPanel = new pvc.visual.Panel(this, this.pvPanel, {
-                extensionId: 'scatterPanel'
+                extensionId: 'panel'
             })
             .lock('data', rootScene.childNodes)
             .pvMark
@@ -522,11 +522,16 @@ def
         
         // -- LABEL --
         if(this.valuesVisible){
+            var extensionIds = ['label'];
+            if(this.compatVersion() <= 1){
+                extensionIds.push('lineLabel');
+            }
+            
             this.pvLabel = new pvc.visual.Label(
                 this, 
                 this.pvDot.anchor(this.valuesAnchor), 
                 {
-                    extensionId: ['lineLabel', 'label'],
+                    extensionId: extensionIds,
                     wrapper:     wrapper
                 })
                 .pvMark
