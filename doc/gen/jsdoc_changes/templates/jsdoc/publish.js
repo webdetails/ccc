@@ -200,10 +200,10 @@ function makeSignature(params) {
 }
 
 /** Find symbol {@link ...} strings in text and turn into html links */
-function resolveLinks(str, from) {
+function resolveLinks(str, nmspc) {
 	str = str.replace(/\{@link ([^} ]+) ?\}/gi,
 		function(match, symbolName) {
-			return new Link().toSymbol(symbolName);
+			return new Link().toSymbol(symbolName).withoutNamespace(nmspc);
 		}
 	);
 	

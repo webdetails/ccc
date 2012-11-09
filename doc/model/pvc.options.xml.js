@@ -496,7 +496,7 @@ pvc.options.charts.ChartCommonOptions.prototype.clearSelectionMode = undefined;
  * (ex: 
  * {@link #clickAction},
  * {@link #doubleClickAction}, or
- * {@link pvc.options.varia.DiscreteAxisOptions#clickAction}).
+ * {@link pvc.options.panels.DiscreteAxisOptions#clickAction}).
  * 
  * @type boolean
  * @default false
@@ -1359,9 +1359,8 @@ pvc.options.plots.PlotCommonOptions = function(){};
  */
 pvc.options.plots.PlotCommonOptions.prototype.colorAxis = undefined;
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the chart.
  * 
  * @type pvc.options.ext.ChartCommonExtensionPoints
  * @category Style
@@ -1699,9 +1698,8 @@ pvc.options.charts.PieChartOptions.prototype.visualRoles = undefined;
  */
 pvc.options.charts.PieChartOptions.prototype.pie = undefined;
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the plot.
  * 
  * @type pvc.options.ext.PieChartExtensionPoints
  * @category Style
@@ -1980,9 +1978,8 @@ pvc.options.plots.BulletPlotOptions = function(){};
         
         
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the plot.
  * 
  * @type pvc.options.ext.BulletPlotExtensionPoints
  * @category Style
@@ -2045,6 +2042,34 @@ pvc.options.charts.CartesianChartCommonOptions = function(){};
         
         
 /**
+ * The base axis panel.
+ * <p>
+ * When the chart {@link pvc.options.charts.ChartCommonOptions#orientation}
+ * is 
+ * <tt>vertical</tt> the base axis is laid out horizontally.
+ * <p>
+ * See {@link pvc.options.panels.CartesianAxisPanelOptions}
+ * to know the additional names by which a cartesian axis can be referred to.
+ * 
+ * @type pvc.options.panels.CartesianAxisPanelOptions
+ * @category Axes
+ */
+pvc.options.charts.CartesianChartCommonOptions.prototype.baseAxis = undefined;
+/**
+ * The orthogonal axis panel.
+ * <p>
+ * When the chart {@link pvc.options.charts.ChartCommonOptions#orientation}
+ * is 
+ * <tt>vertical</tt> the orthogonal axis is laid out vertically.
+ * <p>
+ * See {@link pvc.options.panels.CartesianAxisPanelOptions}
+ * to know the additional names by which a cartesian axis can be referred to.
+ * 
+ * @type pvc.options.panels.CartesianAxisPanelOptions
+ * @category Axes
+ */
+pvc.options.charts.CartesianChartCommonOptions.prototype.orthoAxis = undefined;
+/**
  * The visual roles that are common to (almost) all cartesian chart types.
  * 
  * @type pvc.options.roles.CartesianCommonVisualRoles
@@ -2052,9 +2077,8 @@ pvc.options.charts.CartesianChartCommonOptions = function(){};
  */
 pvc.options.charts.CartesianChartCommonOptions.prototype.visualRoles = undefined;
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the cartesian charts.
+ * The extension points object contains style definitions for 
+ * the marks of the chart.
  * 
  * @type pvc.options.ext.CartesianChartCommonExtensionPoints
  * @category Style
@@ -2565,9 +2589,8 @@ pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallTitle 
  */
 pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.visualRoles = undefined;
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the chart.
  * 
  * @type pvc.options.ext.CategoricalContinuousChartCommonExtensionPoints
  * @category Style
@@ -2920,9 +2943,8 @@ pvc.options.plots.BoxplotPlotOptions = function(){};
  */
 pvc.options.plots.BoxplotPlotOptions.prototype.stacked = false;
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the plot.
  * 
  * @type pvc.options.ext.BoxplotPlotExtensionPoints
  * @category Style
@@ -3138,9 +3160,8 @@ pvc.options.plots.HeatGridPlotOptions = function(){};
         
         
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the plot.
  * 
  * @type pvc.options.ext.HeatGridPlotExtensionPoints
  * @category Style
@@ -3293,9 +3314,8 @@ pvc.options.plots.BarPlotCommonOptions = function(){};
         
         
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the plot.
  * 
  * @type pvc.options.ext.BarPlotCommonExtensionPoints
  * @category Style
@@ -3638,9 +3658,8 @@ pvc.options.plots.WaterfallPlotOptions = function(){};
         
         
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the plot.
  * 
  * @type pvc.options.ext.WaterfallPlotCommonExtensionPoints
  * @category Style
@@ -3898,9 +3917,8 @@ pvc.options.plots.PointPlotCommonOptions.prototype.trend = undefined;
  */
 pvc.options.plots.PointPlotCommonOptions.prototype.areasVisible = undefined;
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the plot.
  * 
  * @type pvc.options.ext.PointPlotCommonExtensionPoints
  * @category Style
@@ -4552,9 +4570,8 @@ pvc.options.charts.MetricPointChartCommonOptions.prototype.smallTitle = undefine
  */
 pvc.options.charts.MetricPointChartCommonOptions.prototype.visualRoles = undefined;
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the chart.
  * 
  * @type pvc.options.ext.MetricPointChartCommonExtensionPoints
  * @category Style
@@ -4881,9 +4898,8 @@ pvc.options.plots.MetricPointPlotCommonOptions.prototype.showLines = undefined;
  */
 pvc.options.plots.MetricPointPlotCommonOptions.prototype.trend = undefined;
 /**
- * The extension points object 
- * contains style definitions for 
- * various visual elements of the chart.
+ * The extension points object contains style definitions for 
+ * the marks of the plot.
  * 
  * @type pvc.options.ext.MetricPointPlotCommonExtensionPoints
  * @category Style
@@ -5463,7 +5479,7 @@ pvc.options.panels.CommonDockedPanelOptions.prototype.sizeMax = undefined;
  */
 pvc.options.panels.CommonDockedPanelOptions.prototype.font = undefined;
 /**
- * The options documentation class of the CCC legend panel.
+ * The options documentation class of the legend panel.
  * <p>
  * The default 
  * {@link pvc.options.panels.CommonDockedPanelOptions#position}
@@ -5724,6 +5740,244 @@ pvc.options.ext.TitlePanelExtensionPoints.prototype.. = undefined;
  * @type pvc.options.marks.LabelExtensionPoint
  */
 pvc.options.ext.TitlePanelExtensionPoints.prototype.label = undefined;
+/**
+ * The options documentation class of the cartesian axis panel.
+ * <p>
+ * A cartesian axis panel can referred to in several ways,
+ * in order of precedence:
+ * 
+ * <dl>
+ * 
+ * <dt>By 
+ * <b>id</b></dt>
+ * 
+ * <dd>
+ * the id of the axis is its type followed by it's index (when >= 2);
+ * (ex: 
+ * <tt>base</tt>, 
+ * <tt>ortho</tt>, 
+ * <tt>base2</tt>, 
+ * <tt>ortho2</tt>, ...)
+ * </dd>
+ * 
+ * <dt>By 
+ * <b>oriented id</b></dt>
+ * 
+ * <dd>
+ * the oriented id of the axis is its orientation followed by it's index (when >= 2); 
+ * </dd>
+ * 
+ * <dd>(ex: 
+ * <tt>x</tt>, 
+ * <tt>y</tt>, 
+ * <tt>x2</tt>, 
+ * <tt>y2</tt>, ...)</dd>
+ * 
+ * <dt>By 
+ * <b>legacy name</b></dt>
+ * 
+ * <dd>
+ * in the special case of the bar chart, 
+ * the second axes may be referred to by the (now deprecated) names 
+ * 
+ * <tt>secondX</tt> and 
+ * <tt>secondY</tt>
+ * </dd>
+ * 
+ * <dt>By 
+ * <b>scale type</b></dt>
+ * 
+ * <dd>
+ * the scale type can be 
+ * <tt>discrete</tt> or 
+ * <tt>continuous</tt> and, 
+ * in the later case, with lower precedence, 
+ * 
+ * <tt>numeric</tt> and 
+ * <tt>timeSeries</tt> are also possible
+ * </dd>
+ * 
+ * <dt>By 
+ * <b>catch all name</b></dt>
+ * 
+ * <dd>the name 
+ * <tt>axis</tt> matches any cartesian axis</dd>
+ * </dl>
+ * <p>
+ * These names apply equally to the prefixes used to 
+ * build extension point names.
+ * <p>
+ * Which of the names is used depends on 
+ * which better selects the axes for the properties being specified.
+ * If a property should only be applied to vertical axes, 
+ * independently of the chart's orientation, the 
+ * <i>oriented id</i>
+ * should be used. 
+ * If, otherwise, a property is to be applied to the base axis,
+ * whether it is vertically or horizontally aligned, 
+ * then the normal 
+ * <i>id</i> should be used.
+ * If, a property should only apply to continuous axes,
+ * the 
+ * <b>scale type</b> name should be used.
+ * <p>
+ * For more information on options
+ * that are specific to only certain scale types, 
+ * please see one of the following sub-classes:
+ * 
+ * <ul>
+ * 
+ * <li>{@link pvc.options.panels.DiscreteCartesianAxisPanelOptions}</li>
+ * 
+ * <li>{@link pvc.options.panels.NumericCartesianAxisPanelOptions}</li>
+ * 
+ * <li>{@link pvc.options.panels.TimeSeriesCartesianAxisPanelOptions}</li>
+ * </ul>
+ * 
+ * @class
+ * @extends pvc.options.panels.CommonPanelOptions
+ * @abstract
+ */
+pvc.options.panels.CartesianAxisPanelOptions = function(){};
+        
+        
+        
+        
+/**
+ * The extension points object contains style definitions for 
+ * the marks of the panel.
+ * 
+ * @type pvc.options.ext.CartesianAxisPanelExtensionPoints
+ * @category Style
+ */
+pvc.options.panels.CartesianAxisPanelOptions.prototype.extensionPoints = undefined;
+/**
+ * The extension points of the cartesian axis panel.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>panel property name (ex: 
+ * <tt>xAxis</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>label</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>textStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>xAxisLabel_textStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * 
+ * @class
+ */
+pvc.options.ext.CartesianAxisPanelExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the tick label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.label = undefined;
+/**
+ * The extension point of a 
+ * <i>minor</i> tick rule mark.
+ * (only for continuous axes)
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.minorTicks = undefined;
+/**
+ * The extension point of a 
+ * <i>major</i> tick rule mark.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.ticks = undefined;
+/**
+ * The extension point of the tick panel.
+ * <p>
+ * One tick panel contains one tick rule and one label.
+ * It can be used to conveniently hide all the elements 
+ * of a tick simultaneously.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.ticksPanel = undefined;
+/**
+ * The options documentation class of the cartesian axis panel
+ * for discrete scale types.
+ * <p>
+ * For more information about cartesian axes 
+ * please see the comments in the base class
+ * {@link pvc.options.panels.CartesianAxisPanelOptions}.    
+ * 
+ * @class
+ * @extends pvc.options.panels.CartesianAxisPanelOptions
+ */
+pvc.options.panels.DiscreteCartesianAxisPanelOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the cartesian axis panel
+ * for continuous scale types (numeric or timeSeries).
+ * <p>
+ * For more information about cartesian axes 
+ * please see the comments in the base class
+ * {@link pvc.options.panels.CartesianAxisPanelOptions}.    
+ * 
+ * @class
+ * @extends pvc.options.panels.CartesianAxisPanelOptions
+ * @abstract
+ */
+pvc.options.panels.ContinuousCartesianAxisPanelOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the cartesian axis panel
+ * for numeric scale types.
+ * <p>
+ * For more information about cartesian axes 
+ * please see the comments in the ascendant class
+ * {@link pvc.options.panels.CartesianAxisPanelOptions}.    
+ * 
+ * @class
+ * @extends pvc.options.panels.ContinuousCartesianAxisPanelOptions
+ * @abstract
+ */
+pvc.options.panels.NumericCartesianAxisPanelOptions = function(){};
+        
+        
+        
+        
+/**
+ * The options documentation class of the cartesian axis panel
+ * for time series scale types.
+ * <p>
+ * For more information about cartesian axes 
+ * please see the comments in the ascendant class
+ * {@link pvc.options.panels.CartesianAxisPanelOptions}.    
+ * 
+ * @class
+ * @extends pvc.options.panels.ContinuousCartesianAxisPanelOptions
+ * @abstract
+ */
+pvc.options.panels.TimeSeriesCartesianAxisPanelOptions = function(){};
+        
+        
+        
+        
 /**
  * The namespace of plot options classes. 
  * 

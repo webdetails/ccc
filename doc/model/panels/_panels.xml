@@ -15,4 +15,9 @@
     <c:include the="panels/docked-common.xml" />
     <c:include the="panels/legend.xml" />
     <c:include the="panels/title.xml" />
+    <c:include the="panels/axis-cartesian.xml" />
+    <c:include the="panels/axis-cartesian-discrete.xml" />
+    <c:include the="panels/axis-cartesian-continuous.xml" />
+    <c:include the="panels/axis-cartesian-numeric.xml" />
+    <c:include the="panels/axis-cartesian-timeSeries.xml" />
 </c:model>

@@ -13,6 +13,30 @@
             The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
         
+        <c:property name="baseAxis" type="pvc.options.panels.CartesianAxisPanelOptions" category="Axes">
+            <c:documentation>
+	            The base axis panel.
+	            
+	            When the chart <c:link to="pvc.options.charts.ChartCommonOptions#orientation" />
+	            is <tt>vertical</tt> the base axis is laid out horizontally.
+	            
+	            See <c:link to="pvc.options.panels.CartesianAxisPanelOptions" />
+	            to know the additional names by which a cartesian axis can be referred to.
+	        </c:documentation>
+        </c:property>
+        
+        <c:property name="orthoAxis" type="pvc.options.panels.CartesianAxisPanelOptions" category="Axes">
+            <c:documentation>
+                The orthogonal axis panel.
+                
+                When the chart <c:link to="pvc.options.charts.ChartCommonOptions#orientation" />
+                is <tt>vertical</tt> the orthogonal axis is laid out vertically.
+                
+                See <c:link to="pvc.options.panels.CartesianAxisPanelOptions" />
+                to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="visualRoles" type="pvc.options.roles.CartesianCommonVisualRoles" category="Data Binding">
             <c:documentation>
                 The visual roles that are common to (almost) all cartesian chart types.
@@ -21,9 +45,8 @@
         
         <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartCommonExtensionPoints" category="Style">
             <c:documentation>
-                The extension points object 
-                contains style definitions for 
-                various visual elements of the cartesian charts.
+                The extension points object contains style definitions for 
+                the marks of the chart.
             </c:documentation>
         </c:property>
     </c:complexType>

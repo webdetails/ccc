@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="CartesianAxisPanelOptions" 
+                   space="pvc.options.panels" 
+                   base="pvc.options.panels.CommonPanelOptions"
+                   abstract="true">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel.
+            
+            A cartesian axis panel can referred to in several ways,
+            in order of precedence:
+            <dl>
+                <dt>By <b>id</b></dt>
+                <dd>the id of the axis is its type followed by it's index (when >= 2)</dd>
+                <dd>(ex: <tt>base</tt>, <tt>ortho</tt>, <tt>base2</tt>, <tt>ortho2</tt>, ...)</dd>
+                
+                <dt>By <b>oriented id</b></dt>
+                <dd>the oriented id of the axis is its orientation followed by it's index (when >= 2)</dd>
+                <dd>(ex: <tt>x</tt>, <tt>y</tt>, <tt>x2</tt>, <tt>y2</tt>, ...)</dd>
+                
+                <dt>By <b>legacy name</b></dt>
+                <dd>
+                    in the special case of the bar chart, 
+                    the second axes may be referred to by the (now deprecated) names 
+                    <tt>secondX</tt> and <tt>secondY</tt>
+                </dd>
+                
+                <dt>By <b>scale type</b></dt>
+                <dd>
+                    the scale type can be <tt>discrete</tt> or <tt>continuous</tt> and, 
+                    in the later case, with lower precedence, 
+                    <tt>numeric</tt> and <tt>timeSeries</tt> are also possible
+                </dd>
+                
+                <dt>By <b>catch all name</b></dt>
+                <dd>the name <tt>axis</tt> matches any cartesian axis</dd>
+            </dl>
+            
+            These names apply equally to the prefixes used to 
+            build extension point names.
+            
+            Which of the names is used depends on 
+            which better selects the axes for the properties being specified.
+            If a property should only be applied to vertical axes, 
+            independently of the chart's orientation, the <i>oriented id</i>
+            should be used. 
+            If, otherwise, a property should only be applied to the base axis,
+            whether or not it is horizontally aligned, 
+            then the normal <i>id</i> should be used.
+            If, a property should only apply to continuous axes,
+            the <i>scale type</i> should be used.
+            
+            For more information on options
+            that are specific to only certain scale types, 
+            please see one of the following sub-classes:
+            <ul>
+                <li><c:link to="pvc.options.panels.DiscreteCartesianAxisPanelOptions" /></li>
+                <li><c:link to="pvc.options.panels.NumericCartesianAxisPanelOptions" /></li>
+                <li><c:link to="pvc.options.panels.TimeSeriesCartesianAxisPanelOptions" /></li>
+            </ul>
+        </c:documentation>
+        
+        <c:property name="position" 
+                     type="pvc.options.varia.PanelPosition"
+                     category="Layout">
+            <c:documentation>
+                The position of the panel.
+                
+                The position of the axis is constrained by 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianAxisPanelExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="CartesianAxisPanelExtensionPoints" space="pvc.options.ext">
+        <c:documentation>
+            The extension points of the cartesian axis panel.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>label</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>textStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisLabel_textStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+        
+        <c:property name="ticksPanel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the tick panel.
+                
+                One tick panel contains one tick rule and one label.
+                It can be used to conveniently hide all the elements 
+                of a tick simultaneously.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="ticks" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of a <i>major</i> tick rule mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="minorTicks" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of a <i>minor</i> tick rule mark.
+                (only for continuous axes)
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the tick label mark.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+</c:model>

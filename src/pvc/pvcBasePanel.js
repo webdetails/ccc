@@ -2157,6 +2157,15 @@ def
         left:   "top",
         center: "middle"
     },
+    
+    verticalAlign2: {
+        top:    "top",
+        bottom: "bottom",
+        middle: "middle",
+        right:  "top",
+        left:   "bottom",
+        center: "middle"
+    },
 
     relativeAnchorMirror: {
         top: "right",

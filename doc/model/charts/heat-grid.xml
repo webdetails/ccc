@@ -106,9 +106,8 @@
 
         <c:property name="extensionPoints" type="pvc.options.ext.HeatGridPlotExtensionPoints" category="Style">
             <c:documentation>
-                The extension points object 
-                contains style definitions for 
-                various visual elements of the chart.
+                The extension points object contains style definitions for 
+                the marks of the plot.
             </c:documentation>
         </c:property>
     </c:complexType>

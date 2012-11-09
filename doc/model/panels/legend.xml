@@ -9,7 +9,7 @@
                    space="pvc.options.panels" 
                    base="pvc.options.panels.CommonDockedPanelOptions">
         <c:documentation>
-            The options documentation class of the CCC legend panel.
+            The options documentation class of the legend panel.
             
             The default 
             <c:link to="pvc.options.panels.CommonDockedPanelOptions#position" />

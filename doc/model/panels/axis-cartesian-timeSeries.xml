@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="TimeSeriesCartesianAxisPanelOptions" 
+                   space="pvc.options.panels" 
+                   base="pvc.options.panels.ContinuousCartesianAxisPanelOptions"
+                   abstract="true">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for time series scale types.
+            
+            For more information about cartesian axes 
+            please see the comments in the ascendant class
+            <c:link to="pvc.options.panels.CartesianAxisPanelOptions" />.    
+        </c:documentation>
+        
+    </c:complexType>
+    
+</c:model>

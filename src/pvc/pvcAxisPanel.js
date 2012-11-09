@@ -487,7 +487,7 @@ def
         // update maxTextWidth, ticks and ticksText
         switch(this.scale.type){
             case 'discrete':   this._calcDiscreteTicks();   break;
-            case 'timeSeries': this._calcTimeseriesTicks(); break;
+            case 'timeSeries': this._calcTimeSeriesTicks(); break;
             case 'numeric':    this._calcNumberTicks(layoutInfo); break;
             default: throw def.error.operationInvalid("Undefined axis scale type"); 
         }
@@ -518,7 +518,7 @@ def
                             .array();
     },
     
-    _calcTimeseriesTicks: function(){
+    _calcTimeSeriesTicks: function(){
         this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
     },
     

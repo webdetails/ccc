@@ -55,14 +55,11 @@ def.scope(function(){
             this.v1SecondOrientedId = $VCA.getV1SecondOrientedId(this.orientation, index);
         }
         
-        // x, y, second, x3, y3, ...
-        this.v1OptionId = $VCA.getV1OptionId(this.orientation, index);
-        
         // id
         // base, ortho, base2, ortho2, ...
         
         // scaleType
-        // discrete, continuous, numeric, timeseries
+        // discrete, continuous, numeric, timeSeries
         
         // common
         // axis
@@ -277,22 +274,6 @@ def.scope(function(){
         return orientation + (index + 1); // x2, y3, x4,...
     };
     
-    /**
-     * Calculates the V1 options id of an axis given its orientation and index.
-     * 
-     * @param {string} orientation The orientation of the axis.
-     * @param {number} index The index of the axis within its type. 
-     * @type string
-     */
-    $VCA.getV1OptionId = function(orientation, index){
-        switch(index) {
-            case 0: return orientation; // x, y
-            case 1: return "second";    // second
-        }
-        
-        return orientation + "" + (index + 1); // y3, x4,...
-    };
-    
     /* PRIVATE STUFF */
     
     /**
@@ -355,7 +336,7 @@ def.scope(function(){
         // this.scaleType
         // * discrete
         // * numeric    | continuous
-        // * timeseries | continuous
+        // * timeSeries | continuous
         var st = this.scaleType;
         if(st){
             var value = chartOption.call(this, st + 'Axis' + name);
@@ -404,6 +385,22 @@ def.scope(function(){
         return pvc.parseDomainScope(scope, axis.orientation);
     }
     
+    function castAxisPosition(side){
+        if(side){
+            if(def.hasOwn(pvc.Sides.namesSet, side)){
+                var mapAlign = pvc.BasePanel[this.orientation === 'y' ? 'horizontalAlign' : 'verticalAlign2'];
+                return mapAlign[side];
+            }
+            
+            if(pvc.debug >= 2){
+                pvc.log(def.format("Invalid axis position value '{0}'.", [side]));
+            }
+        }
+        
+        // Ensure a proper value
+        return this.orientation === 'x' ? 'bottom' : 'left';
+    }
+    
     /*global axis_optionsDef:true*/
     var cartAxis_optionsDef = def.create(axis_optionsDef, {
         Visible: {
@@ -413,7 +410,11 @@ def.scope(function(){
                 axisSpecify.byV1OptionId,
                 axisSpecify(function(name){ // V1 - showXScale, showYScale, showSecondScale
                     if(this.index <= 1){
-                        return chartOption.call(this, 'show' + def.firstUpperCase(this.v1OptionId) + 'Scale');
+                        var v1OptionId = this.index === 0 ? 
+                            def.firstUpperCase(this.orientation) :
+                            'Second';
+                        
+                        return chartOption.call(this, 'show' + v1OptionId + 'Scale');
                     }
                 }),
                 axisSpecify.byScaleType,
@@ -473,7 +474,9 @@ def.scope(function(){
                     
                     return pvc.BasePanel.oppositeAnchor[position];
                 })
-            ])
+            ]),
+            
+            cast: castAxisPosition
         },
         
         /* orthoFixedMin, orthoFixedMax */
@@ -550,12 +553,13 @@ def.scope(function(){
             cast:    Boolean,
             value:   false
         },
-        FullGridCrossesMargin: {
+        FullGridCrossesMargin: { // experimental
             resolve: resolveNormal,
             cast:    Boolean,
             value:   true
         },
-        EndLine:  {
+        
+        EndLine:  { // deprecated
             resolve: resolveNormal,
             cast:    Boolean
         },
@@ -564,7 +568,7 @@ def.scope(function(){
             cast:    Boolean,
             value:   true 
         },
-        RuleCrossesMargin: {
+        RuleCrossesMargin: { // experimental
             resolve: resolveNormal,
             cast:    Boolean,
             value:   true
