@@ -16,7 +16,7 @@
         <!-- Roles -->
         <c:property name="visualRoles" type="pvc.options.roles.CategoricalCommonVisualRoles" category="Data Binding">
             <c:documentation>
-                The options of visual roles that are common to all categorical chart types.
+                The visual roles that are common to all categorical chart types.
             </c:documentation>
         </c:property>
         

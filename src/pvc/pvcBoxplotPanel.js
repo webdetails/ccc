@@ -230,6 +230,8 @@ def
             var vars = categScene.vars;
             var colorVarHelper = new pvc.visual.ColorVarHelper(this.chart, this.chart._colorRole);
             
+            // Series distinction is ignored
+            // If the role is bound by the user, its data will not be visible 
             var serVar = vars.series   = new pvc.visual.ValueLabelVar(null, "");
             var catVar = vars.category = new pvc.visual.ValueLabelVar(categData.value, categData.label);
             

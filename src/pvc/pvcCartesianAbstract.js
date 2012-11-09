@@ -31,7 +31,7 @@ def
     },
     
     _getColorRoleSpec: function(){
-        return { isRequired: true, defaultSourceRole: 'series', requireIsDiscrete: true };
+        return { isRequired: true, defaultDimension: 'color*', defaultSourceRole: 'series', requireIsDiscrete: true };
     },
 
     _initData: function(){

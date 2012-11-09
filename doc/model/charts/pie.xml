@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="PieChartOptions" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.ChartCommonOptions"
+                   facets="pvc.options.facets.MultiChartOptionsFacet">
+        <c:documentation>
+            The options documentation class of the <b>Pie</b> chart.
+        </c:documentation>
+        
+        <c:property name="pie" type="pvc.options.plots.PiePlotOptions" category="Plots">
+            <c:documentation>
+                The pie plot is the <b>main plot</b> of the pie chart,
+                which means that 
+                its properties may be used <i>without</i> the "pie" property suffix.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="visualRoles" type="pvc.options.roles.PieVisualRoles" category="Data Binding">
+            <c:documentation>
+                The visual roles that of the <i>pie</i> chart type.
+            </c:documentation>
+        </c:property>
+        
+        <!-- MultiExtensionPointsFacet  -->
+    </c:complexType>
+    
+    <c:complexType name="PieVisualRoles" 
+                   space="pvc.options.roles" 
+                   base="pvc.options.roles.ChartCommonVisualRoles"
+                   facets="pvc.options.facets.MultiVisualRolesFacet">
+        <c:documentation>
+            The visual roles of the <i>pie</i> chart type.
+        </c:documentation>
+        
+        <c:property name="category" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>category</tt> visual role represents a slice of the pie.
+                
+                The <tt>category</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>category</tt> prefix.
+                
+                The visual role itself is optional,
+                yet, when unbound, 
+                a dimension with a "category" prefix
+                is automatically created for it,
+                and all datums will have the value <tt>null</tt>
+                in that dimension.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="color" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>color</tt> visual role controls the color of pie slices.
+                
+                The <tt>color</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>color</tt> prefix
+                or, if none exists, 
+                the dimensions of the "category" role.
+                
+                The <tt>color</tt> visual role is discrete.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="value" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>value</tt> visual role controls the 
+                relative angle span of each pie slice.
+                
+                The <tt>value</tt> visual role automatically binds to 
+                a single dimension whose name has the <tt>value</tt> prefix.
+                
+                The <tt>value</tt> visual role is required.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="PiePlotOptions" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.PlotCommonOptions">
+        <c:documentation>
+            The options documentation class of the <b>Pie</b> plot.
+        </c:documentation>
+        
+    </c:complexType>
+</c:model>

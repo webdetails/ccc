@@ -9,7 +9,7 @@ def
     pieChartPanel: null,
 
     _getColorRoleSpec: function(){
-        return { isRequired: true, defaultSourceRole: 'category', requireIsDiscrete: true };
+        return { isRequired: true, defaultSourceRole: 'category', defaultDimension: 'color*', requireIsDiscrete: true };
     },
     
     /**

@@ -19,6 +19,90 @@
                 its properties may be used <i>without</i> the "heatGrid" property suffix.
             </c:documentation>
         </c:property>
+    
+        <c:property name="visualRoles" type="pvc.options.roles.HeatGridVisualRoles" category="Data Binding">
+            <c:documentation>
+                The visual roles of the <b>heat grid</b> chart type.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.HeatGridExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="HeatGridVisualRoles" 
+                   space="pvc.options.roles"
+                   base="pvc.options.roles.CategoricalCommonVisualRoles">
+        <c:documentation>
+            The visual roles of the <b>heat grid</b> chart type.
+        </c:documentation>
+        
+        <c:property name="series" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>series</tt> visual role 
+                of the heat grid chart organizes visual elements
+                along the discrete orthogonal axis.
+                
+                For additional information, 
+                see the base version of this property:
+                <c:link to="pvc.options.roles.CartesianCommonVisualRoles" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="category" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>category</tt> visual role 
+                of the heat grid chart organizes visual elements
+                along the discrete base axis, 
+                and is restricted to be discrete.
+                
+                For additional information, 
+                see the base version of this property:
+                <c:link to="pvc.options.roles.CategoricalCommonVisualRoles" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="color" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>color</tt> visual role controls the color of 
+                the visual elements.
+                
+                The <tt>color</tt> visual role automatically binds to 
+                a single numeric dimension, 
+                whose name is <tt>value</tt>.
+                
+                The <tt>color</tt> visual role is optional and numeric.
+                
+                When unbound, the visual elements all show the same color.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="size" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>size</tt> visual role controls the size of 
+                the dot visual elements, when in "shapes" mode".
+                
+                The <tt>size</tt> visual role automatically binds to 
+                a single numeric dimension whose name is <tt>value2</tt>.
+                
+                The <tt>size</tt> visual role is optional and numeric.
+                
+                When unbound, all the dot visual elements are 
+                sized to the grid cell size.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
     <c:complexType name="HeatGridPlotOptions" 
@@ -30,4 +114,12 @@
 
     </c:complexType>
     
+    <c:complexType name="HeatGridExtensionPoints" 
+                   space="pvc.options.ext"
+                   base="pvc.options.plots.CartesianCommonExtensionPoints">
+        <c:documentation>
+            The options documentation class of the <b>Heat grid</b> extension points.
+        </c:documentation>
+
+    </c:complexType>
 </c:model>

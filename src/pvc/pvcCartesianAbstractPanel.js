@@ -14,7 +14,7 @@ def
     function addAxis(axis){
         axes[axis.type] = axis;
         
-        // TODO: these are really needed??
+        // TODO: are these really needed??
         axes[axis.orientedId] = axis;
         if(axis.v1SecondOrientedId){
             axes[axis.v1SecondOrientedId] = axis;
@@ -27,7 +27,7 @@ def
     // ----------------
     
     // Initialize paddings from **chart** axes offsets
-    // TODO: move this to the chart?
+    // TODO: move this to the chart??
     var paddings = {};
     var hasAny = false;
     
@@ -52,7 +52,6 @@ def
         }
     }
     
-    // TODO: should this be done in a chart?
     var chartAxes = chart.axes;
     processAxis(chartAxes.x);
     processAxis(chartAxes.secondX);
@@ -107,12 +106,16 @@ def
         this.pvPanel.zOrder(-10);
 
         // Overflow
-        var orthoAxis = this.axes.ortho,
-            baseAxis  = this.axes.base;
-        if (orthoAxis.option('FixedMin') != null ||
-            orthoAxis.option('FixedMax') != null ||
-            baseAxis .option('FixedMin') != null ||
-            baseAxis .option('FixedMax') != null){
+        var hideOverflow =
+            def
+            .query(['ortho', 'base'])
+            .select(function(axisType) { return this.axes[axisType]; }, this)
+            .any(function(axis){
+                return axis.option('FixedMin') != null ||
+                       axis.option('FixedMax') != null;
+            });
+        
+        if (hideOverflow){
             // Padding area is used by bubbles and other vizs without problem
             this.pvPanel.borderPanel.overflow("hidden");
         }
@@ -126,6 +129,9 @@ def
      * @override
      */
     _detectDatumsUnderRubberBand: function(datumsByKey, rb, keyArgs){
+        // TODO: this is done for x and y axis only, which is ok for now,
+        // as only discrete axes use selection and
+        // multiple axis are only continuous...
         var any = false,
             chart = this.chart,
             xAxisPanel = chart.xAxisPanel,

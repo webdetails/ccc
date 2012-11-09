@@ -43,10 +43,6 @@ def
     
     //_createPointPlot: function(){},
     
-    _hasDataPartRole: function(){
-        return true;
-    },
-    
     _getColorRoleSpec: function(){
         return {
             //isMeasure: true, // TODO: not being set as measure when continuous...

@@ -22,10 +22,6 @@ def
         options.stacked = false;
     },
 
-    _hasDataPartRole: function(){
-        return true;
-    },
-    
     /**
      * Initializes each chart's specific roles.
      * @override

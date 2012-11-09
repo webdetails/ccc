@@ -8,13 +8,43 @@
     <c:complexType name="PointChartCommonOptions" 
                    space="pvc.options.charts" 
                    base="pvc.options.charts.CategoricalContinuousChartCommonOptions"
-                   facets="pvc.options.facets.ChartPlot2OptionsFacet
+                   facets="pvc.options.facets.Plot2ChartOptionsFacet
                            pvc.options.facets.CategoricalChartTrendOptionsFacet"
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Line/Dot/Area family</b> charts.
         </c:documentation>
         
+        <c:property name="visualRoles" type="pvc.options.roles.PointCommonVisualRoles" category="Data Binding">
+            <c:documentation>
+                The visual roles that are common to the <i>line/dot/area family</i> chart types.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+    <c:complexType name="PointCommonVisualRoles" 
+                   space="pvc.options.roles" 
+                   base="pvc.options.roles.CategoricalContinuousCommonVisualRoles"
+                   facets="pvc.options.roles.DataPartVisualRolesFacet">
+        <c:documentation>
+            The visual roles common to the <i>point</i> chart types.
+        </c:documentation>
+        
+        <c:property name="value" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>value</tt> visual role 
+                controls the orthogonal position of points.
+                
+                The <tt>value</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>value</tt> prefix.
+                
+                The <tt>value</tt> visual role is required.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
     <c:complexType name="PointPlotCommonOptions" 

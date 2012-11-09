@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:facetType name="ChartMultiOptionsFacet" space="pvc.options.facets">
+    <c:facetType name="MultiChartOptionsFacet" space="pvc.options.facets">
         <c:documentation>
             The options documentation class of the multi-chart facet.
         </c:documentation>

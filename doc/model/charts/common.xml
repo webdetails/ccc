@@ -49,7 +49,7 @@
         <!-- Roles -->
         <c:property name="visualRoles" type="pvc.options.roles.ChartCommonVisualRoles" category="Data Binding">
             <c:documentation>
-                The options of visual roles that are common to all chart types.
+                The visual roles that are common to all chart types.
             </c:documentation>
         </c:property>
         

@@ -8,7 +8,7 @@
     <c:complexType name="BarChartOptions" 
                    space="pvc.options.charts"
                    base="pvc.options.charts.BarChartCommonOptions"
-                   facets="pvc.options.facets.ChartPlot2OptionsFacet 
+                   facets="pvc.options.facets.Plot2ChartOptionsFacet 
                            pvc.options.facets.CategoricalChartTrendOptionsFacet
                            pvc.options.facets.ChartPlot2V1OptionsFacet">
         <c:documentation>
@@ -23,6 +23,20 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="visualRoles" type="pvc.options.roles.BarVisualRoles" category="Data Binding">
+            <c:documentation>
+                The visual roles of the <i>bar</i> chart type.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="BarVisualRoles" 
+                   space="pvc.options.roles"
+                   base="pvc.options.roles.BarCommonVisualRoles"
+                   facets="pvc.options.roles.DataPartVisualRolesFacet">
+        <c:documentation>
+            The visual roles of the <b>bar</b> chart type.
+        </c:documentation>
     </c:complexType>
     
     <c:complexType name="BarPlotOptions" 

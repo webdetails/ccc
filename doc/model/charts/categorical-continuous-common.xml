@@ -8,7 +8,7 @@
     <c:complexType name="CategoricalContinuousChartCommonOptions" 
                    space="pvc.options.charts"
                    base="pvc.options.charts.CategoricalChartCommonOptions"
-                   facets="pvc.options.facets.ChartMultiOptionsFacet" 
+                   facets="pvc.options.facets.MultiChartOptionsFacet" 
                    abstract="true">
         <c:documentation>
             The common options documentation class of <b>Categorical</b> charts with a <i>continuous orthogonal axis</i>. 
@@ -16,7 +16,7 @@
         
         <c:property name="visualRoles" type="pvc.options.roles.CategoricalContinuousCommonVisualRoles" category="Data Binding">
             <c:documentation>
-                The options of visual roles common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
+                The visual roles common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
             </c:documentation>
         </c:property>
         

@@ -21,6 +21,45 @@
              margins between bands.
             </c:documentation>
         </c:property>
+        
+        <c:property name="visualRoles" type="pvc.options.roles.BarCommonVisualRoles" category="Data Binding">
+            <c:documentation>
+                The visual roles that are common to the <i>bar family</i> chart types.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+    <c:complexType name="BarCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CategoricalContinuousCommonVisualRoles">
+        <c:documentation>
+            The visual roles common to the <i>Bar family</i> chart types.
+        </c:documentation>
+        
+        <c:property name="category" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>category</tt> visual role 
+                of the bar family charts is restricted to be discrete.
+                
+                For additional information, 
+                see the base version of this property:
+                <c:link to="pvc.options.roles.CategoricalCommonVisualRoles" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="value" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>value</tt> visual role 
+                controls the height of bars.
+                
+                The <tt>value</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>value</tt> prefix.
+                
+                The <tt>value</tt> visual role is required.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
     <c:complexType name="BarPlotCommonOptions" 

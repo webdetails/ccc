@@ -56,6 +56,15 @@ def
         this._sizeDimName  = sizeDimName ;
     },
     
+    _getCategoryRoleSpec: function(){
+        var catRoleSpec = this.base();
+        
+        // Force dimension to be discrete!
+        catRoleSpec.requireIsDiscrete = true;
+        
+        return catRoleSpec;
+    },
+    
     _getColorRoleSpec: function(){
         return {
             isMeasure: true,

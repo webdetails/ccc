@@ -13,6 +13,7 @@
     
     <c:include the="charts/common.xml" />
     
+    <c:include the="charts/pie.xml" />
     <c:include the="charts/bullet.xml" />
     
 	<c:include the="charts/cartesian-common.xml" />

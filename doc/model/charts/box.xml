@@ -12,7 +12,7 @@
             The options documentation class of the <b>Box plot</b> chart.
         </c:documentation>
         
-        <c:property name="box" type="pvc.options.plots.BoxPlotOptions" category="Plots">
+        <c:property name="box" type="pvc.options.plots.BoxplotPlotOptions" category="Plots">
             <c:documentation>
                 The box plot is the <b>main plot</b> of the box plot chart,
                 which means that 
@@ -20,9 +20,108 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="visualRoles" type="pvc.options.roles.BarCommonVisualRoles" category="Data Binding">
+            <c:documentation>
+                The visual roles that are common to the <i>bar family</i> chart types.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
-    <c:complexType name="BoxPlotOptions" 
+    <c:complexType name="BoxplotCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CategoricalContinuousCommonVisualRoles">
+        <c:documentation>
+            The visual roles of the <i>box plot</i> chart type.
+        </c:documentation>
+        
+        <c:property name="series" type="string pvc.options.roles.VisualRoleOptions" fixed="null">
+            <c:documentation>
+                The <tt>series</tt> visual role represents a 
+                <i>series</i> of connected data points. 
+                In this chart type, although supported, 
+                data bound to is not represented in its visual elements.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="median" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>median</tt> visual role 
+                controls the position of the middle rule of the box visual element,
+                along the orthogonal axis.
+                
+                The <tt>median</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>median</tt> prefix.
+                
+                The <tt>median</tt> visual role is required.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        <c:property name="lowerQuartil" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>lowerQuartil</tt> visual role 
+                controls the bottom position of the box visual element,
+                along the orthogonal axis.
+                
+                The <tt>lowerQuartil</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>lowerQuartil</tt> prefix.
+                
+                The <tt>lowerQuartil</tt> visual role is optional.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        <c:property name="upperQuartil" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>upperQuartil</tt> visual role 
+                controls the top position of the box visual element,
+                along the orthogonal axis.
+                
+                The <tt>upperQuartil</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>upperQuartil</tt> prefix.
+                
+                The <tt>upperQuartil</tt> visual role is optional.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        <c:property name="minimum" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>minimum</tt> visual role 
+                controls the position of the rule that crosses 
+                the top whisker of the box visual element,
+                along the orthogonal axis.
+                
+                The <tt>minimum</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>minimum</tt> prefix.
+                
+                The <tt>minimum</tt> visual role is optional.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        <c:property name="maximum" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>maximum</tt> visual role 
+                controls the position of the rule that crosses 
+                the bottom whisker of the box visual element,
+                along the orthogonal axis.
+                
+                The <tt>maximum</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>maximum</tt> prefix.
+                
+                The <tt>maximum</tt> visual role is optional.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="BoxplotPlotOptions" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.CategoricalContinuousPlotCommonOptions">
         <c:documentation>

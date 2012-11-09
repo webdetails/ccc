@@ -23,7 +23,7 @@
         
         <c:property name="visualRoles" type="pvc.options.roles.CartesianCommonVisualRoles" category="Data Binding">
             <c:documentation>
-                The options of visual roles that are common to (almost) all cartesian chart types.
+                The visual roles that are common to (almost) all cartesian chart types.
             </c:documentation>
         </c:property>
     </c:complexType>
@@ -37,8 +37,8 @@
                 The <tt>series</tt> visual role represents a 
                 <i>series</i> of connected data points.
                 
-                Most cartesian charts show the connectedness
-                of data points of a given series in some way, 
+                Most cartesian charts represent graphically 
+                the connectedness of data points of a given series in some way, 
                 by connecting points with a line,
                 by giving them all the same color,
                 or, simply, 
@@ -56,13 +56,29 @@
                 in that dimension.
                 
                 The only cartesian chart type that 
-                does not support the <tt>series</tt> visual role is 
-                the <i>Box Plot</i>.
+                <i>ignores</i> the <tt>series</tt> visual role is the <i>Box plot</i>.
                 
                 See <c:link to="pvc.options.roles.VisualRoleOptions" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
+        
+        <c:property name="color" type="string pvc.options.roles.VisualRoleOptions">
+            <c:documentation>
+                The <tt>color</tt> visual role controls the color of visual elements.
+                
+                The <tt>color</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>color</tt> prefix
+                or, if none exists, 
+                the dimensions of the "series" role.
+                
+                The <tt>color</tt> visual role is discrete.
+                
+                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
     <c:complexType name="CartesianCommonExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartCommonExtensionPoints">
