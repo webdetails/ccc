@@ -28,7 +28,6 @@ def
     
     // Initialize paddings from **chart** axes offsets
     // TODO: move this to the chart??
-    // TODO: and generalize on any axis (among base and ortho)
     var paddings = {};
     var hasAny = false;
     
@@ -53,11 +52,14 @@ def
         }
     }
     
-    var chartAxes = chart.axes;
-    processAxis(chartAxes.x);
-    processAxis(chartAxes.secondX);
-    processAxis(chartAxes.y);
-    processAxis(chartAxes.secondY);
+    var chartAxes = chart.axesByType;
+    
+    ['base', 'ortho'].forEach(function(type){
+        var typeAxes = chartAxes[type];
+        if(typeAxes){
+            typeAxes.forEach(processAxis);
+        }
+    });
     
     if(hasAny){
         this.offsetPaddings = paddings;

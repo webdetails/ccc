@@ -5,14 +5,14 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="BulletChartOptions" 
+    <c:complexType name="BulletChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.ChartCommonOptions">
+                   base="pvc.options.charts.Chart">
         <c:documentation>
             The options documentation class of the <b>Bullet</b> chart.
         </c:documentation>
         
-        <c:property name="bullet" type="pvc.options.plots.BulletPlotOptions" category="Plots">
+        <c:property name="bullet" type="pvc.options.plots.BulletPlot" category="Plots">
             <c:documentation>
                 The bullet plot is the <b>main plot</b> of the bullet chart,
                 which means that 
@@ -21,9 +21,9 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="BulletPlotOptions" 
+    <c:complexType name="BulletPlot" 
                    space="pvc.options.plots" 
-                   base="pvc.options.plots.PlotCommonOptions">
+                   base="pvc.options.plots.Plot">
         <c:documentation>
             The options documentation class of the <b>Bullet</b> plot.
         </c:documentation>

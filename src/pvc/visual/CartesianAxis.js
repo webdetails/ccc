@@ -50,9 +50,9 @@ def.scope(function(){
         // x, y, x2, y2, x3, y3, ...
         this.orientedId = $VCA.getOrientedId(this.orientation, index);
         
-        // x, y, secondX, secondY, x3, y3, ...
-        if(chart._allowV1SecondAxis &&  this.index === 1){
-            this.v1SecondOrientedId = $VCA.getV1SecondOrientedId(this.orientation, index);
+        // secondX, secondY
+        if(chart._allowV1SecondAxis &&  index === 1){
+            this.v1SecondOrientedId = 'second' + this.orientation.toUpperCase();
         }
         
         // id
@@ -251,21 +251,6 @@ def.scope(function(){
      * @param {number} index The index of the axis within its type. 
      * @type string
      */
-    $VCA.getV1SecondOrientedId = function(orientation, index){
-        switch(index) {
-            case 0: return orientation; // x, y
-            case 1: return "second" + orientation.toUpperCase(); // secondX, secondY
-        }
-        
-        return orientation + "" + (index + 1); // y3, x4,...
-    };
-    
-    /**
-     * Calculates the oriented id of an axis given its orientation and index.
-     * @param {string} orientation The orientation of the axis.
-     * @param {number} index The index of the axis within its type. 
-     * @type string
-     */
     $VCA.getOrientedId = function(orientation, index){
         if(index === 0) {
             return orientation; // x, y
@@ -313,15 +298,8 @@ def.scope(function(){
     });
     
     // xAxisOffset, yAxisOffset, x2AxisOffset
-    // if this.v1SecondOrientedId
-    //    secondXAxisOffset
     axisSpecify.byOrientedId = axisSpecify(function(name){
-        var value = chartOption.call(this, this.orientedId + "Axis" + name);
-        if(value === undefined && this.v1SecondOrientedId){
-            value = chartOption.call(this, this.v1SecondOrientedId + "Axis" + name);
-        }
-        
-        return value;
+        return chartOption.call(this, this.orientedId + "Axis" + name);
     });
     
     // secondAxisOffset

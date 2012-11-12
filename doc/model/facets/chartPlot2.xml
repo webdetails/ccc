@@ -5,12 +5,12 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:facetType name="Plot2ChartOptionsFacet" space="pvc.options.facets">
+    <c:facetType name="Plot2ChartFacet" space="pvc.options.facets">
         <c:documentation>
             The options documentation class of the plot2 facet.
         </c:documentation>
         
-        <c:property name="plot2" type="boolean pvc.options.plots.PointPlotCommonOptions" default="false" category="Plots">
+        <c:property name="plot2" type="boolean pvc.options.plots.PointPlot" default="false" category="Plots">
             <c:documentation>
                 Activates the second plot.
                 
@@ -20,11 +20,11 @@
                 The second plot is a <i>generic</i> point plot, 
                 which means that 
                 its properties 
-                <c:link to="pvc.options.plots.CategoricalContinuousPlotCommonOptions#stacked"/>,
-                <c:link to="pvc.options.plots.PointPlotCommonOptions#linesVisible"/>,
-                <c:link to="pvc.options.plots.PointPlotCommonOptions#dotsVisible"/>, 
+                <c:link to="pvc.options.plots.CategoricalNumericPlot#stacked"/>,
+                <c:link to="pvc.options.plots.PointPlot#linesVisible"/>,
+                <c:link to="pvc.options.plots.PointPlot#dotsVisible"/>, 
                 and
-                <c:link to="pvc.options.plots.PointPlotCommonOptions#areasVisible"/>
+                <c:link to="pvc.options.plots.PointPlot#areasVisible"/>
                 can be set freely.
                 
                 By default, the second plot shows lines and dots/markers.
@@ -57,7 +57,7 @@
         </c:property>
     </c:facetType>
     
-    <c:facetType name="ChartPlot2V1OptionsFacet" space="pvc.options.facets">
+    <c:facetType name="ChartPlot2V1Facet" space="pvc.options.facets">
         <c:documentation>
             The options documentation class of the plot2 V1 facet.
             
@@ -76,7 +76,7 @@
         <c:property name="showSecondScale" type="boolean" default="true" category="Axes">
             <c:documentation>
                 <c:deprecated>
-                    Use <c:link to="pvc.options.panels.CartesianAxisOptions#visible"/>, 
+                    Use <c:link to="pvc.options.panels.CartesianAxis#visible"/>, 
                     of the <tt>ortho2</tt> axis, instead.
                 </c:deprecated>
                 Indicates whether the second orthogonal axis panel is shown.

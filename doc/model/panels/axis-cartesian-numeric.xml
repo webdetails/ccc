@@ -5,42 +5,77 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="NumericCartesianAxisOptions" 
-                   space="pvc.options.panels" 
-                   base="pvc.options.panels.ContinuousCartesianAxisOptions"
-                   facets="pvc.options.facets.AxisLabelOverlappingOptionsFacet"
-                   abstract="true">
+    <c:complexType name="NumericCartesianAxis"
+                   space="pvc.options.panels"
+                   base="pvc.options.panels.CartesianAxis"
+                   facets="pvc.options.panels.ContinuousCartesianAxisFacet 
+                           pvc.options.panels.NumericCartesianAxisFacet
+                           pvc.options.panels.CartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
-            for numeric scale types.
+            for continuous scale types.
             
-            For more information about cartesian axes 
-            please see the comments in the base class
-            <c:link to="pvc.options.panels.CartesianAxisOptions" />.    
+            For additional information, please see <c:link to="pvc.options.panels.CartesianAxis" />.
         </c:documentation>
         
-        <c:property name="zeroLine" type="boolean" default="true" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.NumericCartesianAxisExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="NumericCartesianAxisExtensionPoints"
+                   space="pvc.options.ext"
+                   base="pvc.options.ext.CartesianAxisExtensionPoints"
+                   facets="pvc.options.ext.ContinuousCartesianAxisExtensionPointsFacet 
+                           pvc.options.ext.NumericCartesianAxisExtensionPointsFacet
+                           pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the cartesian axis panel for continuous scale types.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>zeroLine</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisZeroLine_lineWidth</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+    </c:complexType>
+    
+    <c:facetType name="NumericCartesianAxisFacet" space="pvc.options.panels">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for numeric scale types.    
+        </c:documentation>
+        
+        <c:property name="zeroLine" type="boolean" default="true" category="Continuous-Numeric > Style">
             <c:documentation>
                 Indicates if the zero line rule is drawn, 
                 on the position of the 0-valued tick, 
-                when there is one. 
-                (an horizontal axis has a vertical zero line rule,
-                 and a vertical axis has an horizontal zero line rule).
+                when there is one (applies to continuous-numeric axes).
+                
+                An horizontal axis has a vertical zero line rule,
+                while a a vertical axis has an horizontal zero line rule.
             </c:documentation>
         </c:property>
         
         <c:property name="domainRoundMode" 
                     type="pvc.options.varia.AxisDomainRoundingMode" 
-                    category="Style"
-                    default="tick">
+                    default="tick"
+                    category="Continuous-Numeric > Style">
             <c:documentation>
-                The axis' domain rounding mode.
+                The axis' domain rounding mode (applies to continuous-numeric axes).
             </c:documentation>
         </c:property>
         
-        <c:property name="desiredTickCount" type="number" category="Style">
+        <c:property name="desiredTickCount" type="number" category="Continuous-Numeric > Style">
             <c:documentation>
-                The <i>desired</i> number of major ticks.
+                The <i>desired</i> number of major ticks (applies to continuous-numeric axes).
                 
                 When specified the tick calculation algorithm chooses, 
                 amongst possible tick steps, 
@@ -58,9 +93,9 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="tickExponentMin" type="number" category="Style">
+        <c:property name="tickExponentMin" type="number" category="Continuous-Numeric > Style">
             <c:documentation>
-                The minimum exponent of <tt>10</tt> that is used to generate ticks.
+                The minimum exponent of <tt>10</tt> that is used to generate ticks (applies to continuous-numeric axes).
                 
                 The generated ticks are separated by a <i>step</i> value.
                 A step value is a certain power of <tt>10</tt>,
@@ -99,9 +134,9 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="tickExponentMax" type="number" category="Style">
+        <c:property name="tickExponentMax" type="number" category="Continuous-Numeric > Style">
             <c:documentation>
-                The maximum exponent of <tt>10</tt> that is used to generate ticks.
+                The maximum exponent of <tt>10</tt> that is used to generate ticks (applies to continuous-numeric axes).
                 
                 The generated ticks are separated by a <i>step</i> value.
                 A step value is a certain power of <tt>10</tt>,
@@ -123,36 +158,14 @@
                 on the generated tick values.
             </c:documentation>
         </c:property>
-        
-        <c:property name="extensionPoints" type="pvc.options.ext.NumericCartesianAxisExtensionPoints" category="Style">
-            <c:documentation>
-                The extension points object contains style definitions for 
-                the marks of the panel.
-            </c:documentation>
-        </c:property>
-    </c:complexType>
+    </c:facetType>
     
-    <c:complexType name="NumericCartesianAxisExtensionPoints" 
-                   space="pvc.options.ext"
-                   base="pvc.options.ext.CartesianAxisExtensionPoints">
-        <c:documentation>
-            The extension points of the numeric cartesian axis panel.
-            
-            To use an extension point you must find its full name, by joining:
-            <ol>
-                <li>panel property name (ex: <tt>xAxis</tt>)</li>
-                <li>extension property (ex: <tt>zeroLine</tt>)</li>
-                <li>the "_" character</li>
-                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
-            </ol>
-            and obtaining, for the examples, the camel-cased name: <tt>xAxisZeroLine_lineWidth</tt>
-            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-        </c:documentation>
-        
-        <c:property name="zeroLine" type="pvc.options.marks.RuleExtensionPoint" category="Style">
+    <c:facetType name="NumericCartesianAxisExtensionPointsFacet" space="pvc.options.ext">
+                   
+        <c:property name="zeroLine" type="pvc.options.marks.RuleExtensionPoint" category="Continuous-Numeric > Style">
             <c:documentation>
-                The extension point of the zero line rule.
+                The extension point of the zero line rule (applies to continuous-numeric axes).
             </c:documentation>
         </c:property>
-    </c:complexType>
+    </c:facetType>
 </c:model>

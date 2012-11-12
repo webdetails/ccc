@@ -9,7 +9,7 @@
         <c:documentation>
             A function that converts a non-null raw value
             into a value of the dimension's 
-            <c:link to="pvc.options.DimensionTypeOptions#valueType" />
+            <c:link to="pvc.options.DimensionType#valueType" />
             or some value that 
             its cast function can convert from.
         </c:documentation>

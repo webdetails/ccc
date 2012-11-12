@@ -5,14 +5,14 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="StackedDotChartOptions" 
+    <c:complexType name="StackedDotChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.PointChartCommonOptions">
+                   base="pvc.options.charts.PointChart">
         <c:documentation>
             The options documentation class of the <b>Stacked Dot</b> chart.
         </c:documentation>
         
-        <c:property name="point" type="pvc.options.plots.StackedDotPlotOptions" category="Plots">
+        <c:property name="point" type="pvc.options.plots.StackedDotPlot" category="Plots">
             <c:documentation>
                 The point plot is the <b>main plot</b> of the stacked dot chart,
                 which means that 
@@ -21,9 +21,9 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="StackedDotPlotOptions" 
+    <c:complexType name="StackedDotPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.PointPlotCommonOptions">
+                   base="pvc.options.plots.PointPlot">
         <c:documentation>
             The options documentation class of the <b>stacked dot</b> plot.
         </c:documentation>

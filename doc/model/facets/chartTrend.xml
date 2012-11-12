@@ -5,12 +5,12 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:facetType name="CategoricalChartTrendOptionsFacet" space="pvc.options.facets">
+    <c:facetType name="CategoricalChartTrendFacet" space="pvc.options.facets">
         <c:documentation>
             The options documentation class of the categorical trend facet.
         </c:documentation>
         
-        <c:property name="trend" type="pvc.options.plots.PointPlotCommonOptions" category="Plots">
+        <c:property name="trend" type="pvc.options.plots.PointPlot" category="Plots">
             <c:documentation>
                 The trend plot is activated when 
                 the <i>other</i> chart plots indicate that their 
@@ -25,12 +25,12 @@
         
     </c:facetType>
     
-    <c:facetType name="MetricChartTrendOptionsFacet" space="pvc.options.facets">
+    <c:facetType name="MetricChartTrendFacet" space="pvc.options.facets">
         <c:documentation>
             The options documentation class of the metric trend facet.
         </c:documentation>
         
-        <c:property name="trend" type="pvc.options.plots.MetricPointPlotCommonOptions" category="Plots">
+        <c:property name="trend" type="pvc.options.plots.MetricPointPlot" category="Plots">
             <c:documentation>
                 The trend plot is activated when 
                 the <i>other</i> chart plots indicate that their 

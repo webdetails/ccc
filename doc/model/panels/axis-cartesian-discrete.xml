@@ -5,47 +5,77 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="DiscreteCartesianAxisOptions" 
-                   space="pvc.options.panels" 
-                   base="pvc.options.panels.CartesianAxisOptions">
+    <c:complexType name="DiscreteCartesianAxis"
+                   space="pvc.options.panels"
+                   base="pvc.options.panels.CartesianAxis"
+                   facets="pvc.options.panels.DiscreteCartesianAxisFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
-            for discrete scale types.
+            for discrete scale type.
             
-            For more information about cartesian axes 
-            please see the comments in the base class
-            <c:link to="pvc.options.panels.CartesianAxisOptions" />.
+            For additional information, please see <c:link to="pvc.options.panels.CartesianAxis" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="FlattenedDiscreteCartesianAxis"
+                   space="pvc.options.panels"
+                   base="pvc.options.panels.DiscreteCartesianAxis"
+                   facets="pvc.options.panels.CartesianAxisTicksFacet">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for flattened and discrete scale type.
             
-            For more information on a specific
-            type of discrete axis,   
-            please see:
-            <c:link to="pvc.options.panels.FlattenedCartesianAxisOptions" />
-            and
-            <c:link to="pvc.options.panels.HierarchicalCartesianAxisOptions" />.
+            For additional information, please see <c:link to="pvc.options.panels.CartesianAxis" />.
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="AnyDiscreteCartesianAxis"
+                   space="pvc.options.panels"
+                   base="pvc.options.panels.DiscreteCartesianAxis"
+                   facets="pvc.options.panels.CartesianAxisTicksFacet">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for discrete scale type.
+            
+            For additional information, please see <c:link to="pvc.options.panels.CartesianAxis" />.
         </c:documentation>
         
-        <c:property name="composite" type="boolean" default="false" category="General">
+         <c:property name="composite" type="boolean" default="false" category="Discrete > General">
             <c:documentation>
                 Indicates if the axis should show 
                 discrete multi-dimensional data in 
                 a hierarchical form, when <tt>true</tt>,
-                or a flattened form, when <tt>false</tt>.
+                or a flattened form, when <tt>false</tt>
+                (applies to discrete axes).
+                
+                Flattened axes, present multi-dimensional roles
+                by joining the multiple values with a separator character.
             </c:documentation>
         </c:property>
         
-        <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Actions">
-            <c:documentation>
-                A callback function that is called
-                when the user clicks on a tick label.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="doubleClickAction" type="pvc.options.varia.StandardAction" category="Actions">
-            <c:documentation>
-                A callback function that is called
-                when the user double-clicks on a tick label.
-            </c:documentation>
-        </c:property>
     </c:complexType>
+    
+    <c:facetType name="DiscreteCartesianAxisFacet" space="pvc.options.panels">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for discrete scale types.
+        </c:documentation>
+        
+        <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Discrete > Actions">
+            <c:documentation>
+                A callback function that is called
+                when the user clicks on a tick label
+                (applies to discrete axes).
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="doubleClickAction" type="pvc.options.varia.StandardAction" category="Discrete > Actions">
+            <c:documentation>
+                A callback function that is called
+                when the user double-clicks on a tick label
+                (applies to discrete axes).
+            </c:documentation>
+        </c:property>
+    </c:facetType>
     
 </c:model>

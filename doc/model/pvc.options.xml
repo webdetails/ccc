@@ -59,7 +59,7 @@ new pvc.BarChart(options)
 .setData(data)
 .render();</pre>
             Note that the options object is a plain JavaScript object,
-            and not a <c:link to="pvc.options.charts.BarChartOptions" />
+            and not a <c:link to="pvc.options.charts.BarChart" />
             </c:example>
         </c:documentation>
     </c:space>

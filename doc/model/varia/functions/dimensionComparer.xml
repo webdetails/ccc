@@ -8,7 +8,7 @@
     <c:functionType name="DimensionComparer" space="pvc.options.varia">
         <c:documentation>
             A function that compares two different and non-null values of 
-            the dimension's <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+            the dimension's <c:link to="pvc.options.DimensionType#valueType" />.
         </c:documentation>
         <c:argument name="this" type="null" required="true">
             <c:documentation>

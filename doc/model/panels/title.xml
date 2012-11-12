@@ -5,25 +5,25 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="ChartTitleOptions" 
+    <c:complexType name="ChartTitle" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.TitleOptions">
+                   base="pvc.options.panels.Title">
         <c:documentation>
             The options documentation class of the chart title panel.
             
             The default 
-            <c:link to="pvc.options.panels.CommonDockedPanelOptions#position" />
+            <c:link to="pvc.options.panels.DockedPanel#position" />
             is <tt>'top'</tt>.
             
             The default 
-            <c:link to="pvc.options.panels.CommonDockedPanelOptions#font" />
+            <c:link to="pvc.options.panels.DockedPanel#font" />
             is <tt>'14px sans-serif'</tt>.
         </c:documentation>
     </c:complexType>
     
-    <c:complexType name="TitleOptions" 
+    <c:complexType name="Title" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.CommonDockedPanelOptions">
+                   base="pvc.options.panels.DockedPanel">
         <c:documentation>
             The options documentation class of the title panel.
         </c:documentation>

@@ -5,15 +5,15 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="PieChartOptions" 
+    <c:complexType name="PieChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.ChartCommonOptions"
-                   facets="pvc.options.facets.MultiChartOptionsFacet">
+                   base="pvc.options.charts.Chart"
+                   facets="pvc.options.facets.MultiChartFacet">
         <c:documentation>
             The options documentation class of the <b>Pie</b> chart.
         </c:documentation>
         
-        <c:property name="pie" type="pvc.options.plots.PiePlotOptions" category="Plots">
+        <c:property name="pie" type="pvc.options.plots.PiePlot" category="Plots">
             <c:documentation>
                 The pie plot is the <b>main plot</b> of the pie chart,
                 which means that 
@@ -54,13 +54,13 @@
     
     <c:complexType name="PieVisualRoles" 
                    space="pvc.options.roles" 
-                   base="pvc.options.roles.ChartCommonVisualRoles"
+                   base="pvc.options.roles.ChartVisualRoles"
                    facets="pvc.options.facets.MultiVisualRolesFacet">
         <c:documentation>
             The visual roles of the <i>pie</i> chart type.
         </c:documentation>
         
-        <c:property name="category" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="category" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>category</tt> visual role represents a slice of the pie.
                 
@@ -74,12 +74,12 @@
                 and all datums will have the value <tt>null</tt>
                 in that dimension.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
         
-        <c:property name="color" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="color" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>color</tt> visual role controls the color of pie slices.
                 
@@ -90,12 +90,12 @@
                 
                 The <tt>color</tt> visual role is discrete.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
         
-        <c:property name="value" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="value" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>value</tt> visual role controls the 
                 relative angle span of each pie slice.
@@ -105,15 +105,15 @@
                 
                 The <tt>value</tt> visual role is required.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
     </c:complexType>
     
-    <c:complexType name="PiePlotOptions" 
+    <c:complexType name="PiePlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.PlotCommonOptions">
+                   base="pvc.options.plots.Plot">
         <c:documentation>
             The options documentation class of the <b>Pie</b> plot.
         </c:documentation>

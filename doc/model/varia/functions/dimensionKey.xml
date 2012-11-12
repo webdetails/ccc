@@ -8,7 +8,7 @@
     <c:functionType name="DimensionKey" space="pvc.options.varia">
         <c:documentation>
             A function that converts a non-null value of the dimension's 
-            <c:link to="pvc.options.DimensionTypeOptions#valueType" />
+            <c:link to="pvc.options.DimensionType#valueType" />
             into a string that (uniquely) identifies
             the value in the dimension.
         </c:documentation>

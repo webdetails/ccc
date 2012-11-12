@@ -5,12 +5,12 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:facetType name="MultiChartOptionsFacet" space="pvc.options.facets">
+    <c:facetType name="MultiChartFacet" space="pvc.options.facets">
         <c:documentation>
             The options documentation class of the multi-chart facet.
         </c:documentation>
         
-        <c:property name="smallTitle" type="pvc.options.panels.ChartTitleOptions" category="Multi-Chart - Panels">
+        <c:property name="smallTitle" type="pvc.options.panels.ChartTitle" category="Multi-Chart - Panels">
             <c:documentation>
                 The title panel of the <i>small</i> chart.
                 

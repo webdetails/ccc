@@ -10,7 +10,7 @@
             The options documentation class of the multi-chart visual roles facet.
         </c:documentation>
         
-        <c:property name="multiChart" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="multiChart" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>multiChart</tt> visual role
                 allows turning a chart in a small multiples chart
@@ -38,7 +38,7 @@
                 the partition of the source data that shares its 
                 unique combination of values.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>

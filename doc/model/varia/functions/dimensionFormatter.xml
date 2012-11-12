@@ -8,7 +8,7 @@
     <c:functionType name="DimensionFormatter" space="pvc.options.varia">
         <c:documentation>
             A function that formats a value, possibly null, of 
-            the dimension's <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+            the dimension's <c:link to="pvc.options.DimensionType#valueType" />.
         </c:documentation>
         <c:argument name="this" type="null" required="true">
             <c:documentation>

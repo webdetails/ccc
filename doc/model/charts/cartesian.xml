@@ -5,34 +5,34 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="CartesianChartCommonOptions" 
+    <c:complexType name="CartesianChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.ChartCommonOptions" 
+                   base="pvc.options.charts.Chart" 
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
         
-        <c:property name="baseAxis" type="pvc.options.panels.CartesianAxisOptions" category="Axes">
+        <c:property name="baseAxis" type="pvc.options.panels.CartesianAxis" category="Axes">
             <c:documentation>
 	            The base axis panel.
 	            
-	            When the chart <c:link to="pvc.options.charts.ChartCommonOptions#orientation" />
+	            When the chart <c:link to="pvc.options.charts.Chart#orientation" />
 	            is <tt>vertical</tt> the base axis is laid out horizontally.
 	            
-	            See <c:link to="pvc.options.panels.CartesianAxisOptions" />
+	            See <c:link to="pvc.options.panels.CartesianAxis" />
 	            to know the additional names by which a cartesian axis can be referred to.
 	        </c:documentation>
         </c:property>
         
-        <c:property name="orthoAxis" type="pvc.options.panels.CartesianAxisOptions" category="Axes">
+        <c:property name="orthoAxis" type="pvc.options.panels.CartesianAxis" category="Axes">
             <c:documentation>
                 The orthogonal axis panel.
                 
-                When the chart <c:link to="pvc.options.charts.ChartCommonOptions#orientation" />
+                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.
                 
-                See <c:link to="pvc.options.panels.CartesianAxisOptions" />
+                See <c:link to="pvc.options.panels.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
@@ -40,7 +40,7 @@
         <c:property name="showXScale" type="boolean" default="true" category="Axes">
             <c:documentation>
                 <c:deprecated>
-                    Use <c:link to="pvc.options.panels.CartesianAxisOptions#visible"/>, 
+                    Use <c:link to="pvc.options.panels.CartesianAxis#visible"/>, 
                     of the <tt>x</tt> axis, instead.
                 </c:deprecated>
                 Indicates whether the <tt>x</tt> axis panel is shown.
@@ -50,20 +50,20 @@
         <c:property name="showYScale" type="boolean" default="true" category="Axes">
             <c:documentation>
                 <c:deprecated>
-                    Use <c:link to="pvc.options.panels.CartesianAxisOptions#visible"/>, 
+                    Use <c:link to="pvc.options.panels.CartesianAxis#visible"/>, 
                     of the <tt>y</tt> axis, instead.
                 </c:deprecated>
                 Indicates whether the <tt>y</tt> axis panel is shown.
             </c:documentation>
         </c:property>
         
-        <c:property name="visualRoles" type="pvc.options.roles.CartesianCommonVisualRoles" category="Data Binding">
+        <c:property name="visualRoles" type="pvc.options.roles.CartesianVisualRoles" category="Data Binding">
             <c:documentation>
                 The visual roles that are common to (almost) all cartesian chart types.
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartCommonExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -71,11 +71,11 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="CartesianCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.ChartCommonVisualRoles">
+    <c:complexType name="CartesianVisualRoles" space="pvc.options.roles" base="pvc.options.roles.ChartVisualRoles">
         <c:documentation>
             The visual roles common to (almost) all cartesian chart types.
         </c:documentation>
-        <c:property name="series" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="series" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>series</tt> visual role represents a 
                 <i>series</i> of connected data points.
@@ -101,12 +101,12 @@
                 The only cartesian chart type that 
                 <i>ignores</i> the <tt>series</tt> visual role is the <i>Box plot</i>.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
         
-        <c:property name="color" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="color" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>color</tt> visual role controls the color of visual elements.
                 
@@ -117,14 +117,14 @@
                 
                 The <tt>color</tt> visual role is discrete.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
         
     </c:complexType>
     
-    <c:complexType name="CartesianChartCommonExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartCommonExtensionPoints">
+    <c:complexType name="CartesianChartExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartExtensionPoints">
         <c:documentation>
             The extension points common to all cartesian chart types.
         </c:documentation>
@@ -159,9 +159,9 @@
         
     </c:complexType>
     
-    <c:complexType name="CartesianPlotCommonOptions" 
+    <c:complexType name="CartesianPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.PlotCommonOptions" 
+                   base="pvc.options.plots.Plot" 
                    abstract="true">
         <c:documentation>
             The common options documentation class of <b>cartesian</b> plots.

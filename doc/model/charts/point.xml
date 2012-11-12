@@ -5,17 +5,29 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="PointChartCommonOptions" 
+    <c:complexType name="PointChart" 
                    space="pvc.options.charts" 
-                   base="pvc.options.charts.CategoricalContinuousChartCommonOptions"
-                   facets="pvc.options.facets.Plot2ChartOptionsFacet
-                           pvc.options.facets.CategoricalChartTrendOptionsFacet"
+                   base="pvc.options.charts.CategoricalNumericChart"
+                   facets="pvc.options.facets.Plot2ChartFacet
+                           pvc.options.facets.CategoricalChartTrendFacet"
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Line/Dot/Area family</b> charts.
         </c:documentation>
         
-        <c:property name="visualRoles" type="pvc.options.roles.PointCommonVisualRoles" category="Data Binding">
+        <c:property name="baseAxis" type="pvc.options.panels.AnyNonHierarchicalCartesianAxis" category="Axes">
+            <c:documentation>
+                The base axis panel.
+                
+                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                is <tt>vertical</tt> the base axis is laid out horizontally.
+                
+                See <c:link to="pvc.options.panels.CartesianAxis" />
+                to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="visualRoles" type="pvc.options.roles.PointVisualRoles" category="Data Binding">
             <c:documentation>
                 The visual roles that are common to the <i>line/dot/area family</i> chart types.
             </c:documentation>
@@ -23,15 +35,15 @@
         
     </c:complexType>
     
-    <c:complexType name="PointCommonVisualRoles" 
+    <c:complexType name="PointVisualRoles" 
                    space="pvc.options.roles" 
-                   base="pvc.options.roles.CategoricalContinuousCommonVisualRoles"
+                   base="pvc.options.roles.CategoricalNumericVisualRoles"
                    facets="pvc.options.roles.DataPartVisualRolesFacet">
         <c:documentation>
             The visual roles common to the <i>point</i> chart types.
         </c:documentation>
         
-        <c:property name="value" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="value" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>value</tt> visual role 
                 controls the orthogonal position of points.
@@ -41,21 +53,21 @@
                 
                 The <tt>value</tt> visual role is required.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
     </c:complexType>
     
-    <c:complexType name="PointPlotCommonOptions" 
+    <c:complexType name="PointPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.CategoricalContinuousPlotCommonOptions"
+                   base="pvc.options.plots.CategoricalNumericPlot"
                    facets="pvc.options.facets.LinesAndDotsPlotFacet">
         <c:documentation>
             The common options documentation class of the <b>point</b> plots.
         </c:documentation>
         
-        <c:property name="trend" type="pvc.options.varia.PlotTrendingOptions">
+        <c:property name="trend" type="pvc.options.varia.PlotTrending">
             <c:documentation>
                 Contains the plot's trending options.
                 
@@ -82,7 +94,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.PointPlotCommonExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.PointPlotExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.
@@ -90,7 +102,7 @@
         </c:property>
     </c:complexType>
 
-    <c:complexType name="PointPlotCommonExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="PointPlotExtensionPoints" space="pvc.options.ext">
         <c:documentation>
             The extension points common to the <b>point</b> plot types.
             

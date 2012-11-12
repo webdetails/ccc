@@ -5,22 +5,58 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="ContinuousCartesianAxisOptions" 
-                   space="pvc.options.panels" 
-                   base="pvc.options.panels.CartesianAxisOptions"
-                   abstract="true">
+    <c:complexType name="AnyContinuousCartesianAxis"
+                   space="pvc.options.panels"
+                   base="pvc.options.panels.CartesianAxis"
+                   facets="pvc.options.panels.ContinuousCartesianAxisFacet 
+                           pvc.options.panels.NumericCartesianAxisFacet
+                           pvc.options.panels.CartesianAxisTicksFacet">
+        <c:documentation>
+            The options documentation class of the cartesian axis panel
+            for continuous scale types.
+            
+            For additional information, please see <c:link to="pvc.options.panels.CartesianAxis" />.
+        </c:documentation>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.AnyContinuousCartesianAxisExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="AnyContinuousCartesianAxisExtensionPoints"
+                   space="pvc.options.ext"
+                   base="pvc.options.ext.CartesianAxisExtensionPoints"
+                   facets="pvc.options.ext.ContinuousCartesianAxisExtensionPointsFacet 
+                           pvc.options.ext.NumericCartesianAxisExtensionPointsFacet
+                           pvc.options.ext.CartesianAxisTicksExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the cartesian axis panel for continuous scale types.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>zeroLine</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisZeroLine_lineWidth</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+    </c:complexType>
+    
+    <c:facetType name="ContinuousCartesianAxisFacet" 
+                   space="pvc.options.panels">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for continuous scale types (numeric or timeSeries).
-            
-            For more information about cartesian axes 
-            please see the comments in the base class
-            <c:link to="pvc.options.panels.CartesianAxisOptions" />.    
         </c:documentation>
         
-        <c:property name="fixedMin" type="number string Date" default="0" category="Scale">
+        <c:property name="fixedMin" type="number string Date" default="0" category="Continuous > Scale">
             <c:documentation>
-                The fixed minimum domain value that the axis will show.
+                The fixed minimum domain value that the axis will show (applies to continuous axes).
                 
                 The value should be convertible to the scale type of the axis.
                 A string value is converted to a number.
@@ -40,9 +76,9 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="fixedMax" type="number string Date" default="0" category="Scale">
+        <c:property name="fixedMax" type="number string Date" default="0" category="Continuous > Scale">
             <c:documentation>
-                The fixed maximum domain value that the axis will show.
+                The fixed maximum domain value that the axis will show (applies to continuous axes).
                 
                 The value should be convertible to the scale type of the axis.
                 A string value is converted to a number.
@@ -62,9 +98,9 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="originIsZero" type="boolean" category="Scale">
+        <c:property name="originIsZero" type="boolean" category="Continuous > Scale">
             <c:documentation>
-                Indicates if it should be ensured that zero domain value is shown.
+                Indicates if it should be ensured that zero domain value is shown (applies to continuous axes).
                 
                 The properties 
                 <tt>fixedMin</tt> and 
@@ -82,11 +118,11 @@
         </c:property>
         
         <!-- DomainScope -->
-        <c:property name="domainScope" type="pvc.options.varia.AxisDomainScope" category="Scale">
+        <c:property name="domainScope" type="pvc.options.varia.AxisDomainScope" category="Continuous > Scale">
             <c:documentation>
                 Controls the type of scale domain coordination
                 that should be performed 
-                amongst the axes of the same id of each <i>small chart</i>.
+                amongst the axes of the same id of each <i>small chart</i> (applies to continuous axes).
                 
                 The value <c:link to="pvc.options.varia.AxisDomainScope#Row" />
                 can only be specified if the axis has vertical orientation.
@@ -96,56 +132,26 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="ticks" type="boolean" default="true" category="Style">
+        <c:property name="minorTicks" type="boolean" default="true" category="Continuous > Style">
             <c:documentation>
-                Indicates if major ticks are shown for each tick value. 
+                Indicates if minor ticks are shown between major ticks (applies to continuous axes). 
             </c:documentation>
         </c:property>
         
-        <c:property name="minorTicks" type="boolean" default="true" category="Style">
+        <c:property name="tickFormatter" type="pvc.options.varia.AxisTickFormatter" category="Continuous > Style">
             <c:documentation>
-                Indicates if minor ticks are shown between major ticks. 
+                A tick formatter function (applies to continuous axes).
             </c:documentation>
         </c:property>
-        
-        <c:property name="tickFormatter" type="pvc.options.varia.AxisTickFormatter" category="Style">
-            <c:documentation>
-                A tick formatter function.  
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="extensionPoints" type="pvc.options.ext.ContinuousCartesianAxisExtensionPoints" category="Style">
-            <c:documentation>
-                The extension points object contains style definitions for 
-                the marks of the panel.
-            </c:documentation>
-        </c:property>
-    </c:complexType>
+    </c:facetType>
     
-    <c:complexType name="ContinuousCartesianAxisExtensionPoints" 
-                   space="pvc.options.ext"
-                   base="pvc.options.ext.CartesianAxisExtensionPoints"
-                   facets="pvc.options.facets.AxisTicksExtensionPointsFacet">
-        <c:documentation>
-            The extension points of the continuous cartesian axis panel.
-            
-            To use an extension point you must find its full name, by joining:
-            <ol>
-                <li>panel property name (ex: <tt>xAxis</tt>)</li>
-                <li>extension property (ex: <tt>minorTicks</tt>)</li>
-                <li>the "_" character</li>
-                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
-            </ol>
-            and obtaining, for the examples, the camel-cased name: <tt>xAxisMinorTicks_strokeStyle</tt>
-            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-        </c:documentation>
-        
-        <c:property name="minorTicks" type="pvc.options.marks.RuleExtensionPoint">
+    <c:facetType name="ContinuousCartesianAxisExtensionPointsFacet" space="pvc.options.panels">
+        <c:property name="minorTicks" type="pvc.options.marks.RuleExtensionPoint" category="Continuous > Style">
             <c:documentation>
-                The extension point of a <i>minor</i> tick rule mark.
+                The extension point of a <i>minor</i> tick rule mark (applies to continuous axes).
             </c:documentation>
         </c:property>
-        
-    </c:complexType>
+    </c:facetType>
+    
     
 </c:model>

@@ -8,17 +8,17 @@
 	<!--
 	TODO
 	
-	dataOptions
+	data
 	 -->
     
-    <c:complexType name="ChartCommonOptions" space="pvc.options.charts" abstract="true">
+    <c:complexType name="Chart" space="pvc.options.charts" abstract="true">
     
         <c:documentation>
             The common options documentation class of all charts.
         </c:documentation>
         
         <!-- Panels -->
-        <c:property name="title" type="string pvc.options.panels.ChartTitleOptions" category="Panels">
+        <c:property name="title" type="string pvc.options.panels.ChartTitle" category="Panels">
             <c:documentation>
                 The title panel of the root chart.
                 
@@ -27,7 +27,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="legend" type="boolean pvc.options.panels.LegendOptions" category="Panels">
+        <c:property name="legend" type="boolean pvc.options.panels.Legend" category="Panels">
             <c:documentation>
                 The legend panel of the root chart.
                 
@@ -38,14 +38,14 @@
         </c:property>
         
         <!-- Roles -->
-        <c:property name="visualRoles" type="pvc.options.roles.ChartCommonVisualRoles" category="Data Binding">
+        <c:property name="visualRoles" type="pvc.options.roles.ChartVisualRoles" category="Data Binding">
             <c:documentation>
                 The visual roles that are common to all chart types.
             </c:documentation>
         </c:property>
         
         <!-- Data -->
-        <!-- dataOptions: undefined -->
+        <!-- data: undefined -->
         
         <c:property name="canvas" type="string object" category="General">
             <c:documentation>
@@ -170,7 +170,7 @@
                 (ex: 
                 <c:link to="#clickAction" />,
                 <c:link to="#doubleClickAction" />, or
-                <c:link to="pvc.options.panels.DiscreteCartesianAxisOptions#clickAction" />).
+                <c:link to="pvc.options.panels.DiscreteCartesianAxis#clickAction" />).
             </c:documentation>
         </c:property>
         
@@ -241,7 +241,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="tipsySettings" type="pvc.options.TooltipOptions" category="Interaction">
+        <c:property name="tipsySettings" type="pvc.options.Tooltip" category="Interaction">
             <c:documentation>
                 Contains tooltip presentation options.
             </c:documentation>
@@ -338,7 +338,7 @@
                 <i>protovis</i>' date formats.
                 
                 This property changes the default of the 
-                <c:link to="pvc.options.DimensionTypeOptions#rawFormat" />
+                <c:link to="pvc.options.DimensionType#rawFormat" />
                 
                  property,
                 for dimensions with a <tt>Date</tt> value type.  
@@ -363,7 +363,7 @@
                 of the dimensions named <tt>value</tt>, <tt>value2</tt>, etc.
                 
                 This property is used to default the property 
-                <c:link to="pvc.options.DimensionTypeOptions#formatter" />
+                <c:link to="pvc.options.DimensionType#formatter" />
                 of the mentioned dimensions.
                 
                 The default value of this option is a function that 
@@ -389,7 +389,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dimensions" type="map(string : pvc.options.DimensionTypeOptions)" category="Data">
+        <c:property name="dimensions" type="map(string : pvc.options.DimensionType)" category="Data">
             <c:documentation>
                 A map whose keys are 
                 the dimension type names and whose values are 
@@ -405,7 +405,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dimensionGroups" type="map(string : pvc.options.DimensionTypeOptions)" category="Data">
+        <c:property name="dimensionGroups" type="map(string : pvc.options.DimensionType)" category="Data">
             <c:documentation>
                 A map whose keys are 
                 the dimension type group names and whose values are 
@@ -479,7 +479,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="readers" type="list(pvc.options.DimensionsReaderOptions)" category="Data Translation">
+        <c:property name="readers" type="list(pvc.options.DimensionsReader)" category="Data Translation">
             <c:documentation>
                 An array of dimensions readers.
                  
@@ -488,7 +488,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="calculations" type="list(pvc.options.DimensionsCalculationOptions)" category="Data">
+        <c:property name="calculations" type="list(pvc.options.DimensionsCalculation)" category="Data">
             <c:documentation>
                 An array of dimensions calculations.
                  
@@ -508,14 +508,14 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="ChartCommonVisualRoles" space="pvc.options.roles">
+    <c:complexType name="ChartVisualRoles" space="pvc.options.roles">
         <c:documentation>
             The visual roles common to all chart types.
         </c:documentation>
     </c:complexType>
     
     <!-- scale is undocummented -->
-    <c:complexType name="ChartCommonExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="ChartExtensionPoints" space="pvc.options.ext">
         <c:documentation>
             The extension points common to all chart types.
             
@@ -569,14 +569,14 @@
         
     </c:complexType>
     
-    <c:complexType name="TooltipOptions" space="pvc.options">
+    <c:complexType name="Tooltip" space="pvc.options">
         <c:documentation>
             The options documentation class of the tooltip.
             <!-- TODO -->
         </c:documentation>
     </c:complexType>
     
-    <c:complexType name="DimensionTypeOptions" space="pvc.options">
+    <c:complexType name="DimensionType" space="pvc.options">
         <c:documentation>
             The options documentation class of a dimension type.
         </c:documentation>
@@ -662,7 +662,7 @@
                 <c:link to="pvc.options.varia.DimensionValueType#Date" />.
                 
                 When the chart option 
-                <c:link to="pvc.options.charts.ChartCommonOptions#timeSeriesFormat" />,
+                <c:link to="pvc.options.charts.Chart#timeSeriesFormat" />,
                 is specified,
                 and the value type is 
                 <c:link to="pvc.options.varia.DimensionValueType#Date" />,
@@ -675,7 +675,7 @@
         <c:property name="key" type="pvc.options.varia.DimensionKey" category="Data">
             <c:documentation>
                 A function that converts a non-null value of the dimension's 
-                <c:link to="pvc.options.DimensionTypeOptions#valueType" />
+                <c:link to="pvc.options.DimensionType#valueType" />
                 into a string that (uniquely) identifies
                 the value in the dimension.
                 
@@ -696,7 +696,7 @@
         <c:property name="comparer" type="pvc.options.varia.DimensionComparer" category="Data">
             <c:documentation>
                 A function that compares two different and non-null values of the dimension's 
-                <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+                <c:link to="pvc.options.DimensionType#valueType" />.
                 
                 When unspecified, 
                 a default natural order comparer function
@@ -715,10 +715,10 @@
                 A function that formats a value, 
                 possibly null, 
                 of the dimension's 
-                <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+                <c:link to="pvc.options.DimensionType#valueType" />.
                 
                 Note that, the chart option 
-                <c:link to="pvc.options.charts.ChartCommonOptions#valueFormat" />,
+                <c:link to="pvc.options.charts.Chart#valueFormat" />,
                 is used to build a default formatter function 
                 for numeric dimensions of the "value" dimension group.
                 
@@ -739,7 +739,7 @@
             <c:documentation>
                 A protovis format string that is to format a value of 
                 the dimension's 
-                <c:link to="pvc.options.DimensionTypeOptions#valueType" />.
+                <c:link to="pvc.options.DimensionType#valueType" />.
                 
                 Currently, this option is ignored unless the 
                 option <c:link to="#formatter" /> is unspecified
@@ -781,7 +781,7 @@
         
     </c:complexType>
     
-    <c:complexType name="DimensionsCalculationOptions" space="pvc.options">
+    <c:complexType name="DimensionsCalculation" space="pvc.options">
         <c:documentation>
             A dimensions calculation allows the values of a dimension
             to be calculated from the typed values of 
@@ -818,7 +818,7 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="DimensionsReaderOptions" space="pvc.options">
+    <c:complexType name="DimensionsReader" space="pvc.options">
         <c:documentation>
             The options documentation class of a data dimensions reader.
             
@@ -920,15 +920,15 @@
                 Dimensions reader functions need not be specifed to perform
                 conversion or formatting operations of a single cell.
                 For those cases, the dimension type's 
-                <c:link to="pvc.options.DimensionTypeOptions#converter" />
+                <c:link to="pvc.options.DimensionType#converter" />
                 and 
-                <c:link to="pvc.options.DimensionTypeOptions#formatter" />
+                <c:link to="pvc.options.DimensionType#formatter" />
                 are more appropriate.
                 
                 Also, when the value of a dimension 
                 is calculated from the value of other dimensions, 
                 a dimensions calculation may be more appropriate:
-                see <c:link to="pvc.options.DimensionsCalculationOptions"/>.
+                see <c:link to="pvc.options.DimensionsCalculation"/>.
                 
                 The function may read cells whose indexes were not
                 "reserved" in <tt>indexes</tt>. 
@@ -938,7 +938,7 @@
         </c:property>
     </c:complexType>
     
-     <c:complexType name="PlotCommonOptions" space="pvc.options.plots" abstract="true">
+     <c:complexType name="Plot" space="pvc.options.plots" abstract="true">
         <c:documentation>
             The common options documentation class of all plots.
         </c:documentation>
@@ -1002,7 +1002,7 @@
         TODO - ValuesMask - Pie Only
          -->
          
-        <c:property name="extensionPoints" type="pvc.options.ext.ChartCommonExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.ChartExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.

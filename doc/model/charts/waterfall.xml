@@ -5,14 +5,14 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="WaterfallChartOptions" 
+    <c:complexType name="WaterfallChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.BarChartCommonOptions">
+                   base="pvc.options.charts.BarChartCommon">
         <c:documentation>
             The options documentation class of the <b>Waterfall</b> chart.
         </c:documentation>
         
-        <c:property name="water" type="pvc.options.plots.WaterfallPlotOptions" category="Plots">
+        <c:property name="water" type="pvc.options.plots.WaterfallPlot" category="Plots">
             <c:documentation>
                 The waterfall plot is the <b>main plot</b> of the waterfall chart,
                 which means that 
@@ -21,14 +21,14 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="WaterfallPlotOptions" 
+    <c:complexType name="WaterfallPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.BarPlotCommonOptions">
+                   base="pvc.options.plots.BarPlotCommon">
         <c:documentation>
             The options documentation class of the <b>Bar</b> plot.
         </c:documentation>
     
-        <c:property name="extensionPoints" type="pvc.options.ext.WaterfallPlotCommonExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.WaterfallPlotExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.
@@ -36,7 +36,7 @@
         </c:property>
     </c:complexType>
 
-    <c:complexType name="WaterfallPlotCommonExtensionPoints" 
+    <c:complexType name="WaterfallPlotExtensionPoints" 
                    space="pvc.options.ext"
                    base="pvc.options.ext.BarPlotCommonExtensionPoints">
         <c:documentation>

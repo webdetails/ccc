@@ -5,14 +5,14 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="MetricLineChartOptions" 
+    <c:complexType name="MetricLineChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.MetricPointChartCommonOptions">
+                   base="pvc.options.charts.MetricPointChart">
         <c:documentation>
             The options documentation class of the <b>Metric Line</b> chart.
         </c:documentation>
         
-        <c:property name="scatter" type="pvc.options.plots.MetricLinePlotOptions" category="Plots">
+        <c:property name="scatter" type="pvc.options.plots.MetricLinePlot" category="Plots">
             <c:documentation>
                 The metric point plot is the <b>main plot</b> of the metric line chart,
                 which means that 
@@ -21,9 +21,9 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="MetricLinePlotOptions" 
+    <c:complexType name="MetricLinePlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.MetricPointPlotCommonOptions">
+                   base="pvc.options.plots.MetricPointPlot">
         <c:documentation>
             The options documentation class of the <b>metric line</b> plot.
         </c:documentation>

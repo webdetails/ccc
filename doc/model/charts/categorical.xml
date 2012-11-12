@@ -5,16 +5,16 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
 
-    <c:complexType name="CategoricalChartCommonOptions" 
+    <c:complexType name="CategoricalChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.CartesianChartCommonOptions" 
+                   base="pvc.options.charts.CartesianChart" 
                    abstract="true">
         <c:documentation>
             The common options documentation class of <b>Categorical</b> charts. 
         </c:documentation>
         
         <!-- Roles -->
-        <c:property name="visualRoles" type="pvc.options.roles.CategoricalCommonVisualRoles" category="Data Binding">
+        <c:property name="visualRoles" type="pvc.options.roles.CategoricalVisualRoles" category="Data Binding">
             <c:documentation>
                 The visual roles that are common to all categorical chart types.
             </c:documentation>
@@ -22,11 +22,11 @@
         
     </c:complexType>
     
-    <c:complexType name="CategoricalCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CartesianCommonVisualRoles">
+    <c:complexType name="CategoricalVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CartesianVisualRoles">
         <c:documentation>
             The visual roles common to all categorical chart types.
         </c:documentation>
-        <c:property name="category" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="category" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>category</tt> visual role 
                 represents a certain <i>logical grouping</i> of the data points.
@@ -59,15 +59,15 @@
                 and all datums will have the value <tt>null</tt>
                 in that dimension.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
     </c:complexType>
     
-    <c:complexType name="CategoricalPlotCommonOptions" 
+    <c:complexType name="CategoricalPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.CartesianPlotCommonOptions" 
+                   base="pvc.options.plots.CartesianPlot" 
                    abstract="true">
         <c:documentation>
             The common options documentation class of <b>categorical</b> plots.

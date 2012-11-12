@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="CommonDockedPanelOptions" space="pvc.options.panels" base="pvc.options.panels.CommonPanelOptions">
+    <c:complexType name="DockedPanel" space="pvc.options.panels" base="pvc.options.panels.Panel">
         <c:documentation>
             The common options documentation class of CCC docked panels.
         </c:documentation>
@@ -33,7 +33,7 @@
                 orthogonal to the docking side.
                 
                 The default value is <tt>'middle'</tt>,
-                if <c:link to="pvc.options.panels.CommonDockedPanelOptions#position" />
+                if <c:link to="pvc.options.panels.DockedPanel#position" />
                 is an horizontal side, 
                 and <tt>'center'</tt>, otherwise.
             </c:documentation>
@@ -49,7 +49,7 @@
                 the source.
                 
                 The default value is the value of 
-                <c:link to="pvc.options.panels.CommonDockedPanelOptions#align" />.
+                <c:link to="pvc.options.panels.DockedPanel#align" />.
                 
                 See <c:link to="pvc.options.varia.PanelAlignmentTarget" />
                 for information on supported data types.

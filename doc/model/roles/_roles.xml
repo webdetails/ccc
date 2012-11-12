@@ -11,7 +11,7 @@
         </c:documentation>
     </c:space>
     
-    <c:complexType name="VisualRoleOptions" space="pvc.options.roles">
+    <c:complexType name="VisualRole" space="pvc.options.roles">
         <c:documentation>
             The options documentation class of a visual role.
             

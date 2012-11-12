@@ -5,22 +5,34 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
 
-    <c:complexType name="CategoricalContinuousChartCommonOptions" 
+    <c:complexType name="CategoricalNumericChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.CategoricalChartCommonOptions"
-                   facets="pvc.options.facets.MultiChartOptionsFacet" 
+                   base="pvc.options.charts.CategoricalChart"
+                   facets="pvc.options.facets.MultiChartFacet" 
                    abstract="true">
         <c:documentation>
-            The common options documentation class of <b>Categorical</b> charts with a <i>continuous orthogonal axis</i>. 
+            The common options documentation class of <b>Categorical</b> charts with a <i>continuous-numeric orthogonal axis</i>. 
         </c:documentation>
         
-        <c:property name="visualRoles" type="pvc.options.roles.CategoricalContinuousCommonVisualRoles" category="Data Binding">
+        <c:property name="orthoAxis" type="pvc.options.panels.NumericCartesianAxis" category="Axes">
             <c:documentation>
-                The visual roles common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
+                The orthogonal axis panel.
+                
+                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                is <tt>vertical</tt> the orthogonal axis is laid out vertically.
+                
+                See <c:link to="pvc.options.panels.CartesianAxis" />
+                to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CategoricalContinuousChartCommonExtensionPoints" category="Style">
+        <c:property name="visualRoles" type="pvc.options.roles.CategoricalNumericVisualRoles" category="Data Binding">
+            <c:documentation>
+                The visual roles common to <b>categorical</b> chart types with a <i>continuous-numeric orthogonal axis</i>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.CategoricalNumericChartExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -28,11 +40,11 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="CategoricalContinuousChartCommonExtensionPoints" 
+    <c:complexType name="CategoricalNumericChartExtensionPoints" 
                    space="pvc.options.ext"
                    facets="pvc.options.facets.MultiExtensionPointsFacet">
         <c:documentation>
-            The extension points of the <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
+            The extension points of the <b>categorical</b> chart types with a <i>continuous-numeric orthogonal axis</i>.
             
             To use an extension point you must find its full name, by joining:
             <ol>
@@ -45,22 +57,22 @@
         </c:documentation>
     </c:complexType>
     
-    <c:complexType name="CategoricalContinuousCommonVisualRoles" 
+    <c:complexType name="CategoricalNumericVisualRoles" 
                    space="pvc.options.roles"
-                   base="pvc.options.roles.CategoricalCommonVisualRoles"
+                   base="pvc.options.roles.CategoricalVisualRoles"
                    facets="pvc.options.facets.MultiVisualRolesFacet">
         <c:documentation>
-            The visual roles common to <b>categorical</b> chart types with a <i>continuous orthogonal axis</i>.
+            The visual roles common to <b>categorical</b> chart types with a <i>continuous-numeric orthogonal axis</i>.
         </c:documentation>
         
     </c:complexType>
     
-    <c:complexType name="CategoricalContinuousPlotCommonOptions" 
+    <c:complexType name="CategoricalNumericPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.CategoricalPlotCommonOptions" 
+                   base="pvc.options.plots.CategoricalPlot" 
                    abstract="true">
         <c:documentation>
-            The common options documentation class of <b>categorical</b> plot types with a <i>continuous orthogonal axis</i>.
+            The common options documentation class of <b>categorical</b> plot types with a <i>continuous-numeric orthogonal axis</i>.
         </c:documentation>
         
         <c:property name="stacked" default="false" type="boolean" category="Style">

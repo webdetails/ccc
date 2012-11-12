@@ -5,14 +5,14 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="NormalizedBarChartOptions" 
+    <c:complexType name="NormalizedBarChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.BarChartCommonOptions">
+                   base="pvc.options.charts.BarChartCommon">
         <c:documentation>
             The options documentation class of the <b>Normalized Bar</b> chart.
         </c:documentation>
         
-        <c:property name="bar" type="pvc.options.plots.NormalizedBarPlotOptions" category="Plots">
+        <c:property name="bar" type="pvc.options.plots.NormalizedBarPlot" category="Plots">
             <c:documentation>
                 The normalized bar plot is the <b>main plot</b> of the normalized area chart,
                 which means that 
@@ -22,9 +22,9 @@
         
     </c:complexType>
     
-    <c:complexType name="NormalizedBarPlotOptions"
+    <c:complexType name="NormalizedBarPlot"
                    space="pvc.options.plots"
-                   base="pvc.options.plots.BarPlotCommonOptions">
+                   base="pvc.options.plots.BarPlotCommon">
         <c:documentation>
             The options documentation class of the <b>Normalized Bar</b> plot.
         </c:documentation>

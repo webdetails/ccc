@@ -5,14 +5,26 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="BoxplotChartOptions" 
+    <c:complexType name="BoxplotChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.CategoricalContinuousChartCommonOptions">
+                   base="pvc.options.charts.CategoricalNumericChart">
         <c:documentation>
             The options documentation class of the <b>Box plot</b> chart.
         </c:documentation>
         
-        <c:property name="box" type="pvc.options.plots.BoxplotPlotOptions" category="Plots">
+        <c:property name="baseAxis" type="pvc.options.panels.FlattenedDiscreteCartesianAxis" category="Axes">
+            <c:documentation>
+                The base axis panel.
+                
+                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                is <tt>vertical</tt> the base axis is laid out horizontally.
+                
+                See <c:link to="pvc.options.panels.CartesianAxis" />
+                to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="box" type="pvc.options.plots.BoxplotPlot" category="Plots">
             <c:documentation>
                 The box plot is the <b>main plot</b> of the box plot chart,
                 which means that 
@@ -28,12 +40,12 @@
         
     </c:complexType>
     
-    <c:complexType name="BoxplotCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CategoricalContinuousCommonVisualRoles">
+    <c:complexType name="BoxplotVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CategoricalNumericVisualRoles">
         <c:documentation>
             The visual roles of the <i>box plot</i> chart type.
         </c:documentation>
         
-        <c:property name="series" type="string pvc.options.roles.VisualRoleOptions" fixed="null">
+        <c:property name="series" type="string pvc.options.roles.VisualRole" fixed="null">
             <c:documentation>
                 The <tt>series</tt> visual role represents a 
                 <i>series</i> of connected data points. 
@@ -42,7 +54,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="median" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="median" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>median</tt> visual role 
                 controls the position of the middle rule of the box visual element,
@@ -53,11 +65,11 @@
                 
                 The <tt>median</tt> visual role is required.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
-        <c:property name="lowerQuartil" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="lowerQuartil" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>lowerQuartil</tt> visual role 
                 controls the bottom position of the box visual element,
@@ -68,11 +80,11 @@
                 
                 The <tt>lowerQuartil</tt> visual role is optional.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
-        <c:property name="upperQuartil" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="upperQuartil" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>upperQuartil</tt> visual role 
                 controls the top position of the box visual element,
@@ -83,11 +95,11 @@
                 
                 The <tt>upperQuartil</tt> visual role is optional.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
-        <c:property name="minimum" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="minimum" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>minimum</tt> visual role 
                 controls the position of the rule that crosses 
@@ -99,11 +111,11 @@
                 
                 The <tt>minimum</tt> visual role is optional.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
-        <c:property name="maximum" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="maximum" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>maximum</tt> visual role 
                 controls the position of the rule that crosses 
@@ -115,15 +127,15 @@
                 
                 The <tt>maximum</tt> visual role is optional.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
     </c:complexType>
     
-    <c:complexType name="BoxplotPlotOptions" 
+    <c:complexType name="BoxplotPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.CategoricalContinuousPlotCommonOptions">
+                   base="pvc.options.plots.CategoricalNumericPlot">
         <c:documentation>
             The options documentation class of the <b>Box</b> plot.
         </c:documentation>

@@ -16,11 +16,11 @@
     <c:include the="charts/pie.xml" />
     <c:include the="charts/bullet.xml" />
     
-	<c:include the="charts/cartesian-common.xml" />
+	<c:include the="charts/cartesian.xml" />
 	
-	<c:include the="charts/categorical-common.xml" />
+	<c:include the="charts/categorical.xml" />
 	
-	<c:include the="charts/categorical-continuous-common.xml" />
+	<c:include the="charts/categorical-numeric.xml" />
 	
 	<!-- CATEGORICAL -->
 	<c:include the="charts/box.xml" />
@@ -33,7 +33,7 @@
 	<c:include the="charts/waterfall.xml" />
 	
 	<!-- POINT-->
-	<c:include the="charts/point-common.xml" />
+	<c:include the="charts/point.xml" />
     <c:include the="charts/line.xml" />
     <c:include the="charts/line-stacked.xml" />
     <c:include the="charts/dot.xml" />
@@ -42,7 +42,7 @@
     <c:include the="charts/area-stacked.xml" />
     
 	<!-- METRIC POINT-->
-	<c:include the="charts/point-metric-common.xml" />
+	<c:include the="charts/point-metric.xml" />
 	<c:include the="charts/line-metric.xml" />
 	<c:include the="charts/dot-metric.xml" />
 </c:model>

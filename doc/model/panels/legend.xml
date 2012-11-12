@@ -5,22 +5,22 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="LegendOptions" 
+    <c:complexType name="Legend" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.CommonDockedPanelOptions">
+                   base="pvc.options.panels.DockedPanel">
         <c:documentation>
             The options documentation class of the legend panel.
             
             The default 
-            <c:link to="pvc.options.panels.CommonDockedPanelOptions#position" />
+            <c:link to="pvc.options.panels.DockedPanel#position" />
             is <tt>'bottom'</tt>.
             
             The default 
-            <c:link to="pvc.options.panels.CommonDockedPanelOptions#font" />
+            <c:link to="pvc.options.panels.DockedPanel#font" />
             is <tt>'10px sans-serif'</tt>.
             
             The default
-            <c:link to="pvc.options.panels.CommonDockedPanelOptions#paddings" />
+            <c:link to="pvc.options.panels.DockedPanel#paddings" />
             is <tt>5</tt> pixels.
         </c:documentation>
         

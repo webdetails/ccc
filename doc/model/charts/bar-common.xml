@@ -5,13 +5,26 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="BarChartCommonOptions" 
+    <c:complexType name="BarChartCommon" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.CategoricalContinuousChartCommonOptions" 
+                   base="pvc.options.charts.CategoricalNumericChart" 
                    abstract="true">
         <c:documentation>
             The common options documentation class of the <b>Bar family</b> charts.
         </c:documentation>
+        
+        <c:property name="baseAxis" type="pvc.options.panels.FlattenedDiscreteCartesianAxis" category="Axes">
+            <c:documentation>
+                The base axis panel.
+                
+                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                is <tt>vertical</tt> the base axis is laid out horizontally.
+                
+                See <c:link to="pvc.options.panels.CartesianAxis" />
+                to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="panelSizeRatio" type="number" default="0.9" category="Layout">
             <c:documentation>
              Percentage of occupied space over total space 
@@ -29,23 +42,23 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="BarCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CategoricalContinuousCommonVisualRoles">
+    <c:complexType name="BarCommonVisualRoles" space="pvc.options.roles" base="pvc.options.roles.CategoricalNumericVisualRoles">
         <c:documentation>
             The visual roles common to the <i>Bar family</i> chart types.
         </c:documentation>
         
-        <c:property name="category" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="category" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>category</tt> visual role 
                 of the bar family charts is restricted to be discrete.
                 
                 For additional information, 
                 see the base version of this property:
-                <c:link to="pvc.options.roles.CategoricalCommonVisualRoles" />.
+                <c:link to="pvc.options.roles.CategoricalVisualRoles" />.
             </c:documentation>
         </c:property>
         
-        <c:property name="value" type="string pvc.options.roles.VisualRoleOptions">
+        <c:property name="value" type="string pvc.options.roles.VisualRole">
             <c:documentation>
                 The <tt>value</tt> visual role 
                 controls the height of bars.
@@ -55,15 +68,15 @@
                 
                 The <tt>value</tt> visual role is required.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.
             </c:documentation>
         </c:property>
     </c:complexType>
     
-    <c:complexType name="BarPlotCommonOptions" 
+    <c:complexType name="BarPlotCommon" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.CategoricalContinuousPlotCommonOptions"
+                   base="pvc.options.plots.CategoricalNumericPlot"
                    abstract="true">
         <c:documentation>
             The common options documentation class of the <b>Bar family</b> plots.

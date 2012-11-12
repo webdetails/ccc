@@ -10,7 +10,7 @@
             The options documentation class of the data part visual roles facet.
         </c:documentation>
         
-        <c:property name="dataPart" type="string pvc.options.roles.VisualRoleOptions"  category="Plots">
+        <c:property name="dataPart" type="string pvc.options.roles.VisualRole"  category="Plots">
             <c:documentation>
                 The <tt>dataPart</tt> visual role
                 allows fine grained partitioning
@@ -22,8 +22,8 @@
                 according to the chart's 
                 <tt>plot2Series</tt> option
                 (depending on the chart,
-                <c:link to="pvc.options.charts.BarChartOptions#plot2Series" />, or
-                <c:link to="pvc.options.charts.PointChartCommonOptions#plot2Series" />).
+                <c:link to="pvc.options.charts.BarChart#plot2Series" />, or
+                <c:link to="pvc.options.charts.PointChart#plot2Series" />).
                 
                 The <tt>dataPart</tt> visual role
                 can be bound to a single dimension
@@ -37,7 +37,7 @@
                 The datums with the fixed data part value <tt>1</tt> 
                 are shown in the chart's second plot.
                 
-                See <c:link to="pvc.options.roles.VisualRoleOptions" />
+                See <c:link to="pvc.options.roles.VisualRole" />
                 for more information on supported data types.   
             </c:documentation>
         </c:property>
