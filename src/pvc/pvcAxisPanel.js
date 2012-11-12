@@ -519,7 +519,7 @@ def
     },
     
     _calcTimeSeriesTicks: function(){
-        this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
+        this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
     },
     
     _calcNumberTicks: function(layoutInfo){

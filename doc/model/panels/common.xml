@@ -9,6 +9,24 @@
         <c:documentation>
             The common options documentation class of the CCC panels.
         </c:documentation>
+        
+        <c:property name="size" type="number string pvc.options.varia.Size" category="Layout">
+            <c:documentation>
+                The fixed size of the panel.
+                
+                See <c:link to="pvc.options.varia.Size" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="sizeMax" type="number string pvc.options.varia.Size" category="Layout">
+            <c:documentation>
+                The maximum size of the panel.
+                
+                See <c:link to="pvc.options.varia.Size" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
 </c:model>

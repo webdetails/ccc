@@ -208,7 +208,7 @@ Default: 0.5 (50%)</li>
   <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
   <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
   <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
-  <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
   <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
   <li>{x,y}AxisTitle - The axis title text. Default: null</li>
   <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
@@ -458,7 +458,7 @@ var wf4 = new pvc.WaterfallChart({
     valuesVisible: true,
     yAxisPosition: "left",
     xAxisPosition: "bottom",
-    axisFullGrid: true,
+    axisGrid: true,
     extensionPoints: {
         titleLabel_font: "16px sans-serif",          
         barWaterfallLine_strokeStyle:"red"

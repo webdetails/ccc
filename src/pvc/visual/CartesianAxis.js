@@ -378,7 +378,7 @@ def.scope(function(){
             axisSpecify.byScaleType,
             axisSpecify.byCommonId
         ]),
-        cast: pvc.castNumber 
+        cast: pvc.castNumber
     };
     
     function castDomainScope(scope, axis){
@@ -435,10 +435,11 @@ def.scope(function(){
                     if(this.index > 0) {
                         return false;
                     }
-                    
-                    return chartOption.call(this, 'useCompositeAxis');
                 }),
-                resolveNormal
+                resolveNormal,
+                axisSpecify(function(name){
+                    return chartOption.call(this, 'useCompositeAxis');
+                })
             ]),
             cast:  Boolean,
             value: false
@@ -449,10 +450,13 @@ def.scope(function(){
          */
         Size: {
             resolve: resolveNormal,
-            cast:    pvc.castNumber 
+            cast:    pvc.Size.to 
         },
         
-        SizeMax: specNormal,
+        SizeMax: {
+            resolve: resolveNormal,
+            cast:    pvc.Size.to 
+        },
         
         /* xAxisPosition,
          * secondAxisPosition <- opposite(xAxisPosition) 
@@ -484,7 +488,7 @@ def.scope(function(){
         FixedMax: fixedMinMaxSpec,
         
         /* 1 <- originIsZero
-         * 2 <- secondAxisOriginIsZero
+         * 2 <- secondAxisOriginIsZero (v1 && bar)
          */
         OriginIsZero: {
             resolve: pvc.options.resolvers([
@@ -511,9 +515,9 @@ def.scope(function(){
         },
         
         /* 1 <- axisOffset, 
-         * 2 <- secondAxisOffset, 
+         * 2 <- secondAxisOffset (V1 && bar)
          */
-        Offset:  {
+        Offset: {
             resolve: pvc.options.resolvers([
                 axisSpecify.byId,
                 axisSpecify.byOrientedId,
@@ -540,7 +544,6 @@ def.scope(function(){
             cast:    pvc.castNumber
         },
         
-        // For discrete axis
         OverlappedLabelsMode: {
             resolve: resolveNormal,
             cast:    pvc.parseOverlappedLabelsMode,
@@ -548,12 +551,24 @@ def.scope(function(){
         },
         
         /* RULES */
-        FullGrid: {
+        FullGrid: { // deprecated
             resolve: resolveNormal,
             cast:    Boolean,
             value:   false
         },
-        FullGridCrossesMargin: { // experimental
+        
+        Grid: {
+            resolve: pvc.options.resolvers([
+                         resolveNormal,
+                         axisSpecify(function(){
+                             return this.option('FullGrid');
+                         })
+                     ]),
+            cast:    Boolean,
+            value:   false
+        },
+        
+        GridCrossesMargin: { // experimental
             resolve: resolveNormal,
             cast:    Boolean,
             value:   true
@@ -579,7 +594,7 @@ def.scope(function(){
             resolve: resolveNormal,
             cast:    Boolean
         },
-        DesiredTickCount: {
+        DesiredTickCount: { // secondAxisDesiredTickCount (v1 && bar)
             resolve: resolveNormal,
             cast: pvc.castNumber
         },
@@ -592,9 +607,9 @@ def.scope(function(){
             resolve: resolveNormal,
             cast:    def.fun.as
         },
-        DomainRoundMode: {
+        DomainRoundMode: { // secondAxisRoundDomain (bug && v1 && bar), secondAxisDomainRoundMode (v1 && bar)
             resolve: resolveNormal,
-            cast:    String,
+            cast:    pvc.parseDomainRoundingMode,
             value:   'tick'
         },
         TickExponentMin: {
@@ -627,12 +642,12 @@ def.scope(function(){
             cast:    String 
         },
         
-        Font: {
+        Font: { // axisLabelFont (v1 && index == 0 && HeatGrid)
             resolve: resolveNormal,
             cast:    String
         },
         
-        ClickAction: specNormal,
-        DoubleClickAction: specNormal
+        ClickAction: specNormal,      // (v1 && index === 0) 
+        DoubleClickAction: specNormal // idem
     });
 });

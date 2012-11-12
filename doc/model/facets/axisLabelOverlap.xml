@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:facetType name="AxisLabelOverlappingOptionsFacet" space="pvc.options.facets">
+        <c:documentation>
+            The options documentation class of the axes label overlapping facet.
+        </c:documentation>
+        
+        <c:property name="overlappedLabelsMode" 
+                    type="pvc.options.varia.AxisOverlappedLabelsMode"
+                    default="'hide'" 
+                    category="Layout">
+            <c:documentation>
+                Controls how labels are laid out when they overlap.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="labelSpacingMin" type="number" category="Layout">
+            <c:documentation>
+                The minimum spacing between tick labels, in <i>em</i> units.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+    
+</c:model>

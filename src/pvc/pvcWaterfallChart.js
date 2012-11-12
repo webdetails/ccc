@@ -47,8 +47,8 @@ def
         // Not supported
         options.plot2 = false;
         
-        // Doesn't work (yet?)
-        options.useCompositeAxis = false;
+        // Doesn't work (yet?);
+        options.baseAxisComposite = false;
         
         this.base(options);
     },

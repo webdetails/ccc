@@ -5,9 +5,9 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="ContinuousCartesianAxisPanelOptions" 
+    <c:complexType name="ContinuousCartesianAxisOptions" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.CartesianAxisPanelOptions"
+                   base="pvc.options.panels.CartesianAxisOptions"
                    abstract="true">
         <c:documentation>
             The options documentation class of the cartesian axis panel
@@ -15,8 +15,136 @@
             
             For more information about cartesian axes 
             please see the comments in the base class
-            <c:link to="pvc.options.panels.CartesianAxisPanelOptions" />.    
+            <c:link to="pvc.options.panels.CartesianAxisOptions" />.    
         </c:documentation>
+        
+        <c:property name="fixedMin" type="number string Date" default="0" category="Scale">
+            <c:documentation>
+                The fixed minimum domain value that the axis will show.
+                
+                The value should be convertible to the scale type of the axis.
+                A string value is converted to a number.
+                If a numeric value is obtained and 
+                the scale type is time series,
+                then the number is interpreted as being the result of 
+                the JavaScript's <tt>Date.getTime()</tt> method.
+                
+                The value may be bigger or smaller than the actual
+                minimum value of the data.
+                
+                When this property is specified, 
+                clipping is activated in the plot panel. 
+                Elements that are drawn beyond its area are clipped.
+                
+                This property takes precedence over the property <tt>originIsZero</tt>. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="fixedMax" type="number string Date" default="0" category="Scale">
+            <c:documentation>
+                The fixed maximum domain value that the axis will show.
+                
+                The value should be convertible to the scale type of the axis.
+                A string value is converted to a number.
+                If a numeric value is obtained and 
+                the scale type is time series,
+                then the number is interpreted as being the result of 
+                the JavaScript's <tt>Date.getTime()</tt> method.
+                
+                The value may be bigger or smaller than the actual
+                maximum value of the data.
+                
+                When this property is specified, 
+                clipping is activated in the plot panel. 
+                Elements that are drawn beyond its area are clipped.
+                
+                This property takes precedence over the property <tt>originIsZero</tt>. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="originIsZero" type="boolean" category="Scale">
+            <c:documentation>
+                Indicates if it should be ensured that zero domain value is shown.
+                
+                The properties 
+                <tt>fixedMin</tt> and 
+                <tt>fixedMax</tt> have precedence over this one.
+                If this property is <tt>true</tt>
+                and respecting it would require changing 
+                the minimum value, 
+                but the option <tt>fixedMin</tt> is also specified,
+                then this property is ignored.
+                The same would apply if 
+                it were required to change 
+                the maximum value,
+                but the property <tt>fixedMax</tt> was also specified.  
+            </c:documentation>
+        </c:property>
+        
+        <!-- DomainScope -->
+        <c:property name="domainScope" type="pvc.options.varia.AxisDomainScope" category="Scale">
+            <c:documentation>
+                Controls the type of scale domain coordination
+                that should be performed 
+                amongst the axes of the same id of each <i>small chart</i>.
+                
+                The value <c:link to="pvc.options.varia.AxisDomainScope#Row" />
+                can only be specified if the axis has vertical orientation.
+                Conversely, 
+                the value <c:link to="pvc.options.varia.AxisDomainScope#Column" />
+                can only be specified if the axis has horizontal orientation.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="ticks" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if major ticks are shown for each tick value. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="minorTicks" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if minor ticks are shown between major ticks. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="tickFormatter" type="pvc.options.varia.AxisTickFormatter" category="Style">
+            <c:documentation>
+                A tick formatter function.  
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.ContinuousCartesianAxisExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="ContinuousCartesianAxisExtensionPoints" 
+                   space="pvc.options.ext"
+                   base="pvc.options.ext.CartesianAxisExtensionPoints"
+                   facets="pvc.options.facets.AxisTicksExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the continuous cartesian axis panel.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>minorTicks</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisMinorTicks_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+        
+        <c:property name="minorTicks" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of a <i>minor</i> tick rule mark.
+            </c:documentation>
+        </c:property>
         
     </c:complexType>
     

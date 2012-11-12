@@ -28,6 +28,7 @@ def
     
     // Initialize paddings from **chart** axes offsets
     // TODO: move this to the chart??
+    // TODO: and generalize on any axis (among base and ortho)
     var paddings = {};
     var hasAny = false;
     
@@ -41,7 +42,7 @@ def
     
     function processAxis(axis){
         var offset = axis && axis.option('Offset');
-        if(offset != null && offset >= 0) {
+        if(offset != null && offset > 0 && offset < 1) {
             if(axis.orientation === 'x'){
                 setSide('left',  offset);
                 setSide('right', offset);

@@ -5,19 +5,154 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="NumericCartesianAxisPanelOptions" 
+    <c:complexType name="NumericCartesianAxisOptions" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.ContinuousCartesianAxisPanelOptions"
+                   base="pvc.options.panels.ContinuousCartesianAxisOptions"
+                   facets="pvc.options.facets.AxisLabelOverlappingOptionsFacet"
                    abstract="true">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for numeric scale types.
             
             For more information about cartesian axes 
-            please see the comments in the ascendant class
-            <c:link to="pvc.options.panels.CartesianAxisPanelOptions" />.    
+            please see the comments in the base class
+            <c:link to="pvc.options.panels.CartesianAxisOptions" />.    
         </c:documentation>
         
+        <c:property name="zeroLine" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if the zero line rule is drawn, 
+                on the position of the 0-valued tick, 
+                when there is one. 
+                (an horizontal axis has a vertical zero line rule,
+                 and a vertical axis has an horizontal zero line rule).
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="domainRoundMode" 
+                    type="pvc.options.varia.AxisDomainRoundingMode" 
+                    category="Style"
+                    default="tick">
+            <c:documentation>
+                The axis' domain rounding mode.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="desiredTickCount" type="number" category="Style">
+            <c:documentation>
+                The <i>desired</i> number of major ticks.
+                
+                When specified the tick calculation algorithm chooses, 
+                amongst possible tick steps, 
+                the one that results in a number of ticks
+                that is closest to the specified value.
+                
+                When unspecified, 
+                an <i>optimum</i> number of ticks is 
+                determined by taking 
+                the 
+                available space,
+                label font size,
+                minimum label spacing and
+                into account.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="tickExponentMin" type="number" category="Style">
+            <c:documentation>
+                The minimum exponent of <tt>10</tt> that is used to generate ticks.
+                
+                The generated ticks are separated by a <i>step</i> value.
+                A step value is a certain power of <tt>10</tt>,
+                possibly multiplied by <tt>2</tt> or <tt>5</tt>.
+                
+                For example, 
+                for a chosen exponent of <tt>2</tt>,
+                the corresponding power of <tt>10</tt> is <tt>10^2=100</tt> and
+                the generated ticks could be:
+                <tt>0</tt>, <tt>100</tt>, <tt>200</tt>, ...
+                
+                If the multiplier <tt>2</tt> was chosen, 
+                those ticks would instead be:
+                <tt>0</tt>, <tt>200</tt>, <tt>400</tt>, ...
+                 
+                Setting this property to <tt>2</tt> would ensure 
+                that generated ticks would be separated by the step values
+                <tt>100</tt>, <tt>200</tt> or <tt>500</tt>,
+                or by steps whose corresponding exponent is 
+                bigger than <tt>2</tt>, 
+                like: <tt>1000</tt>, <tt>2000</tt> or <tt>5000</tt>.
+                
+                A more typical use case is ensuring that generated ticks are integers.
+                A value of <tt>tickExponentMin</tt> of <tt>0</tt> would accomplish that.
+                
+                Generally, 
+                to impose a maximum number of decimal places on the generated ticks, 
+                a negative number can be specified.
+                For example, the value <tt>-1</tt> could generate the ticks:
+                <tt>0.1</tt>, <tt>0.2</tt>, <tt>0.3</tt>, ...
+                If the multiplier <tt>5</tt> was chosen, 
+                those ticks would instead be:
+                <tt>0.5</tt>, <tt>1.0</tt>, <tt>1.5</tt>, ...
+                It could not generate ticks 
+                with more that one decimal place.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="tickExponentMax" type="number" category="Style">
+            <c:documentation>
+                The maximum exponent of <tt>10</tt> that is used to generate ticks.
+                
+                The generated ticks are separated by a <i>step</i> value.
+                A step value is a certain power of <tt>10</tt>,
+                possibly multiplied by <tt>2</tt> or <tt>5</tt>.
+                
+                For example, 
+                for a chosen exponent of <tt>4</tt>,
+                the corresponding power of <tt>10</tt> is <tt>10^4=10000</tt> and
+                the generated ticks could be:
+                <tt>0</tt>, <tt>10000</tt>, <tt>20000</tt>, ...
+                
+                If the multiplier <tt>5</tt> was chosen, 
+                those ticks would instead be:
+                <tt>0</tt>, <tt>50000</tt>, <tt>100000</tt>, ...
+                 
+                Setting this property allows imposing a limit on 
+                the size of numbers chosen to separate ticks,
+                which may be seen as imposing a minimum granularity 
+                on the generated tick values.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.NumericCartesianAxisExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the panel.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
+    <c:complexType name="NumericCartesianAxisExtensionPoints" 
+                   space="pvc.options.ext"
+                   base="pvc.options.ext.CartesianAxisExtensionPoints">
+        <c:documentation>
+            The extension points of the numeric cartesian axis panel.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>panel property name (ex: <tt>xAxis</tt>)</li>
+                <li>extension property (ex: <tt>zeroLine</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>lineWidth</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>xAxisZeroLine_lineWidth</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+        
+        <c:property name="zeroLine" type="pvc.options.marks.RuleExtensionPoint" category="Style">
+            <c:documentation>
+                The extension point of the zero line rule.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
 </c:model>

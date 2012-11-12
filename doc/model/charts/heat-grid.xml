@@ -12,6 +12,14 @@
             The options documentation class of the <b>Heat grid</b> chart.
         </c:documentation>
         
+        <c:property name="useCompositeAxis" type="boolean" default="false" category="Axes">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="pvc.options.panels.DiscreteCartesianAxisOptions#composite" /> instead.</c:deprecated>
+                Indicates if the chart axes are shown
+                in a hierarchical form.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="heatGrid" type="pvc.options.plots.HeatGridPlotOptions" category="Plots">
             <c:documentation>
                 The heat grid plot is the <b>main plot</b> of the heat grid chart,

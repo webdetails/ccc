@@ -264,8 +264,8 @@ def
                 labelSpacingMin:   axis.option('LabelSpacingMin'),
                 tickExponentMin:   axis.option('TickExponentMin'),
                 tickExponentMax:   axis.option('TickExponentMax'),
-                fullGrid:          axis.option('FullGrid'),
-                fullGridCrossesMargin: axis.option('FullGridCrossesMargin'),
+                Grid:          axis.option('Grid'),
+                GridCrossesMargin: axis.option('GridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
                 zeroLine:          axis.option('ZeroLine'),
                 domainRoundMode:   axis.option('DomainRoundMode'),
@@ -390,21 +390,30 @@ def
         if(!extent){
             scale.isNull = true;
         } else {
+            var tmp;
             var dMin = extent.min;
             var dMax = extent.max;
-    
+            
+            if(dMin > dMax){
+                tmp = dMin;
+                dMin = dMax;
+                dMax = tmp;
+            }
+            
             /*
              * If both negative or both positive
              * the scale does not contain the number 0.
-             *
-             * Currently this option ignores locks. Is this all right?
              */
             var originIsZero = axis.option('OriginIsZero');
             if(originIsZero && (dMin * dMax > 0)){
                 if(dMin > 0){
-                    dMin = 0;
+                    if(!extent.lockedMin){
+                        dMin = 0;
+                    }
                 } else {
-                    dMax = 0;
+                    if(!extent.lockedMax){
+                        dMax = 0;
+                    }
                 }
             }
     
@@ -414,7 +423,7 @@ def
              * Ignoring locks.
              */
             if(dMin > dMax){
-                var tmp = dMin;
+                tmp = dMin;
                 dMin = dMax;
                 dMax = tmp;
             }
@@ -562,12 +571,17 @@ def
      * @virtual
      */
     _getContinuousVisibleExtentConstrained: function(axis, min, max){
+        var lockedMin = false;
+        var lockedMax = false;
+        
         if(min == null) {
             min = axis.option('FixedMin');
+            lockedMin = (min != null);
         }
         
         if(max == null) {
             max = axis.option('FixedMax');
+            lockedMax = (max != null);
         }
         
         if(min == null || max == null) {
@@ -585,7 +599,7 @@ def
             }
         }
         
-        return {min: min, max: max};
+        return {min: min, max: max, lockedMin: lockedMin, lockedMax: lockedMax};
     },
     
     /**
@@ -662,11 +676,9 @@ def
 
         // Indicates that the *base* axis is a timeseries
         timeSeries: false,
-        timeSeriesFormat: "%Y-%m-%d",
-
-        useCompositeAxis: false
+        timeSeriesFormat: "%Y-%m-%d"
         
         // Show a frame around the plot area
-//        showPlotFrame: undefined
+        // showPlotFrame: undefined
     })
 });

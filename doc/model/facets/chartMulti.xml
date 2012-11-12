@@ -10,7 +10,7 @@
             The options documentation class of the multi-chart facet.
         </c:documentation>
         
-        <c:property name="smallTitle" type="pvc.options.panels.ChartTitlePanelOptions" category="Multi-Chart - Panels">
+        <c:property name="smallTitle" type="pvc.options.panels.ChartTitleOptions" category="Multi-Chart - Panels">
             <c:documentation>
                 The title panel of the <i>small</i> chart.
                 

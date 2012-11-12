@@ -626,6 +626,27 @@ var pvc = def.globalSpace('pvc', {
         return scope;
     };
     
+    pvc.parseDomainRoundingMode = function(mode){
+        if(mode){
+            switch(mode){
+                case 'none':
+                case 'nice':
+                case 'tick':
+                    break;
+                    
+                default:
+                    if(pvc.debug >= 2){
+                        pvc.log("[Warning] Invalid 'DomainRoundMode' value: '" + mode + "'.");
+                    }
+                
+                    mode = null;
+                    break;
+            }
+        }
+        
+        return mode;
+    };
+    
     pvc.parseOverlappedLabelsMode = function(mode){
         if(mode){
             switch(mode){
@@ -1267,10 +1288,15 @@ var pvc = def.globalSpace('pvc', {
                 this.set(def.get(keyArgs, 'singleProp', 'all'), size);
                 return this;
             } else if (typeof size === 'object') {
-                this.set('all', size.all);
-                for(var p in size){
-                    if(p !== 'all'){
-                        this.set(p, size[p]);
+                if(size instanceof pvc.PercentValue){
+                    this.set(def.get(keyArgs, 'singleProp', 'all'), size);
+                } else {
+                    
+                    this.set('all', size.all);
+                    for(var p in size){
+                        if(p !== 'all'){
+                            this.set(p, size[p]);
+                        }
                     }
                 }
                 return this;
@@ -1284,7 +1310,7 @@ var pvc = def.globalSpace('pvc', {
         },
         
         set: function(prop, value){
-            if(value != null && def.hasOwn(pvc.Size.namesSet, prop)){
+            if(value != null && (prop === 'all' || def.hasOwn(pvc.Size.namesSet, prop))){
                 value = pvc.PercentValue.parse(value);
                 if(value != null){
                     if(prop === 'all'){
@@ -1338,6 +1364,14 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.Size.as = function(v){
         if(v != null && !(v instanceof Size)){
+            v = new Size().setSize(v);
+        }
+        
+        return v;
+    };
+    
+    pvc.Size.to = function(v){
+        if(v != null){
             v = new Size().setSize(v);
         }
         

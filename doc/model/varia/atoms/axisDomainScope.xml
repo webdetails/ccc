@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="AxisDomainScope" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The type of scale domain coordination 
+            amongst axes of the same id of 
+            <i>small charts</i>.
+        </c:documentation>
+        
+        <c:atom name="Cell" value="'cell'">
+            <c:documentation>
+                No scale domain coordination.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Global" value="'global'">
+            <c:documentation>
+                The axes of same id of 
+                all the <i>small charts</i>
+                use the same scale domain.  
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Row" value="'row'">
+            <c:documentation>
+                The axes of same id of 
+                <i>small charts</i> of each row
+                will use the same scale domain.  
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Column" value="'column'">
+            <c:documentation>
+                The axes of same id of 
+                <i>small charts</i> of each column
+                will use the same scale domain.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="Section" value="'section'">
+            <c:documentation>
+                The axes of same id of 
+                <i>small charts</i> of each row or column
+                will use the same scale domain.
+                
+                The determination of whether <tt>section</tt> 
+                applies to 
+                rows or columns
+                is performed according to a reference orientation.
+                
+                In the case of cartesian axes, 
+                the reference orientation
+                is the axis' orientation.
+                 
+                If the reference orientation is horizontal, 
+                then <tt>section </tt> applies to columns.
+                Otherwise it applies to rows.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

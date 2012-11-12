@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:functionType name="AxisTickFormatter" space="pvc.options.varia">
+        <c:documentation>
+            A function that formats a continuous axis tick value.
+            
+            Depending on the axis' scale type, 
+            the values may be numbers or dates. 
+        </c:documentation>
+        <c:argument name="this" type="null" required="true">
+            <c:documentation>
+                The global JavaScript object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="value" type="number Date" required="true">
+            <c:documentation>
+                The value to format.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="precision" type="number" required="true">
+            <c:documentation>
+                The precision in which value should be formatted.
+                
+                When the axis has a <tt>timeSeries</tt> scale type,
+                the argument is the chosen 
+                number of milliseconds between tick values.
+                The standard precisions are:
+                <dl>
+                    <dt><tt>31536e6</tt></dt><dd>1 year</dd>
+                    <dt><tt>2592e6</tt></dt><dd>30 days</dd>
+                    <dt><tt>6048e5</tt></dt><dd>7 days</dd>
+                    <dt><tt>864e5</tt></dt><dd>1 day</dd>
+                    <dt><tt>36e5</tt></dt><dd>1 hour</dd>
+                    <dt><tt>6e4</tt></dt><dd>1 minute</dd>
+                    <dt><tt>1e3</tt></dt><dd>1 second</dd>
+                    <dt><tt>1</tt></dt><dd>1 millisecond</dd>
+                </dl>
+                
+                When the axis has a <tt>numeric</tt> scale type,
+                the argument is the number of decimal places of the 
+                chosen step value. 
+            </c:documentation>
+        </c:argument>
+        <c:returns type="string">
+            <c:documentation>
+                The string that is the formatted value.
+            </c:documentation>
+        </c:returns>
+    </c:functionType>
+    
+</c:model>

@@ -22,6 +22,9 @@
     <c:include the="varia/atoms/markAnchor.xml" />
     <c:include the="varia/atoms/wedgeAnchor.xml" />
     <c:include the="varia/atoms/nullInterpolationMode.xml" />
+    <c:include the="varia/atoms/axisDomainScope.xml" />
+    <c:include the="varia/atoms/axisDomainRoundingMode.xml" />
+    <c:include the="varia/atoms/axisOverlappedLabelsMode.xml" />
     
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/dimensionComparer.xml" />
@@ -35,6 +38,7 @@
     <c:include the="varia/functions/standardAction.xml" />
     <c:include the="varia/functions/tooltipFormatter.xml" />
     <c:include the="varia/functions/userSelectionAction.xml" />
+    <c:include the="varia/functions/axisTickFormatter.xml" />
     
     <!-- COMPLEX TYPES - AUXILIAR -->
     <c:complexType name="Sides" space="pvc.options.varia">
@@ -161,7 +165,6 @@
             a <tt>number</tt> or 
             a <tt>string</tt> of a single number, possibly followed by a "%" sign, 
             instead of the JSON form.
-            //as meaning <i>all</i> properties.
             
             The interpretation of what the number or percentage stand 
             for depends on the specific option. 

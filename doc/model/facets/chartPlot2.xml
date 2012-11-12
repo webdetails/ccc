@@ -73,6 +73,16 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="showSecondScale" type="boolean" default="true" category="Axes">
+            <c:documentation>
+                <c:deprecated>
+                    Use <c:link to="pvc.options.panels.CartesianAxisOptions#visible"/>, 
+                    of the <tt>ortho2</tt> axis, instead.
+                </c:deprecated>
+                Indicates whether the second orthogonal axis panel is shown.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="secondAxisIdx" type="number string list(number|string)" category="Data Translation">
             <c:documentation>
                 <c:deprecated>Use <c:link to="#plot2Series"/> instead.</c:deprecated>

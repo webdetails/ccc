@@ -212,7 +212,7 @@ For more information on boxplots you can visit
   <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
   <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
   <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
-  <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
   <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
   <li>{x,y}AxisTitle - The axis title text. Default: null</li>
   <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
@@ -292,7 +292,7 @@ var box2 = new pvc.BoxplotChart({
     title:   "Horizontal and styled Boxplot chart",
     animate: false,
     orientation: 'horizontal',
-    baseAxisFullGrid: true,
+    baseAxisGrid: true,
     //boxSizeRatio: 0.3,
     panelSizeRatio: 0.8,
     maxBoxSize: 10,
@@ -327,7 +327,7 @@ var box3 = new pvc.BoxplotChart({
     height:  300,
     title:   "Boxplot with line chart",
     animate: false,
-    baseAxisFullGrid: true,
+    baseAxisGrid: true,
     maxBoxSize: 20,
     plot2: true,
     plot2LinesVisible: true,

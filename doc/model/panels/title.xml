@@ -5,9 +5,9 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="ChartTitlePanelOptions" 
+    <c:complexType name="ChartTitleOptions" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.TitlePanelOptions">
+                   base="pvc.options.panels.TitleOptions">
         <c:documentation>
             The options documentation class of the chart title panel.
             
@@ -21,7 +21,7 @@
         </c:documentation>
     </c:complexType>
     
-    <c:complexType name="TitlePanelOptions" 
+    <c:complexType name="TitleOptions" 
                    space="pvc.options.panels" 
                    base="pvc.options.panels.CommonDockedPanelOptions">
         <c:documentation>

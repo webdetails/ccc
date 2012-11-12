@@ -13,5 +13,7 @@
     <c:include the="facets/chartTrend.xml" />
     <c:include the="facets/plotLinesAndDots.xml" />
     <c:include the="facets/rolesDataPart.xml" />
+    <c:include the="facets/axisLabelOverlap.xml"/>
+    <c:include the="facets/axisExtTicks.xml"/>
     
 </c:model>

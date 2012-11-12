@@ -30,8 +30,7 @@ def
              * so it isn't possible to provide a single correct scale,
              * that would satisfy all the bars...
              */
-            min = 0;
-            max = 100;
+            return {min: 0, max: 100, lockedMin: true, lockedMax: true};
         }
 
         return this.base(axis, min, max);

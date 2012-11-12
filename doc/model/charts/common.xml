@@ -18,7 +18,7 @@
         </c:documentation>
         
         <!-- Panels -->
-        <c:property name="title" type="string pvc.options.panels.ChartTitlePanelOptions" category="Panels">
+        <c:property name="title" type="string pvc.options.panels.ChartTitleOptions" category="Panels">
             <c:documentation>
                 The title panel of the root chart.
                 
@@ -27,7 +27,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="legend" type="boolean pvc.options.panels.LegendPanelOptions" category="Panels">
+        <c:property name="legend" type="boolean pvc.options.panels.LegendOptions" category="Panels">
             <c:documentation>
                 The legend panel of the root chart.
                 
@@ -170,7 +170,7 @@
                 (ex: 
                 <c:link to="#clickAction" />,
                 <c:link to="#doubleClickAction" />, or
-                <c:link to="pvc.options.panels.DiscreteAxisOptions#clickAction" />).
+                <c:link to="pvc.options.panels.DiscreteCartesianAxisOptions#clickAction" />).
             </c:documentation>
         </c:property>
         
@@ -264,14 +264,14 @@
         
         <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Actions">
             <c:documentation>
-                A callback function that is called,
+                A callback function that is called
                 when the user clicks on a visual element.
             </c:documentation>
         </c:property>
         
         <c:property name="doubleClickAction" type="pvc.options.varia.StandardAction" category="Actions">
             <c:documentation>
-                A callback function that is called,
+                A callback function that is called
                 when the user double-clicks on a visual element.
             </c:documentation>
         </c:property>

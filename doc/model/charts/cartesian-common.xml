@@ -13,27 +13,47 @@
             The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
         
-        <c:property name="baseAxis" type="pvc.options.panels.CartesianAxisPanelOptions" category="Axes">
+        <c:property name="baseAxis" type="pvc.options.panels.CartesianAxisOptions" category="Axes">
             <c:documentation>
 	            The base axis panel.
 	            
 	            When the chart <c:link to="pvc.options.charts.ChartCommonOptions#orientation" />
 	            is <tt>vertical</tt> the base axis is laid out horizontally.
 	            
-	            See <c:link to="pvc.options.panels.CartesianAxisPanelOptions" />
+	            See <c:link to="pvc.options.panels.CartesianAxisOptions" />
 	            to know the additional names by which a cartesian axis can be referred to.
 	        </c:documentation>
         </c:property>
         
-        <c:property name="orthoAxis" type="pvc.options.panels.CartesianAxisPanelOptions" category="Axes">
+        <c:property name="orthoAxis" type="pvc.options.panels.CartesianAxisOptions" category="Axes">
             <c:documentation>
                 The orthogonal axis panel.
                 
                 When the chart <c:link to="pvc.options.charts.ChartCommonOptions#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.
                 
-                See <c:link to="pvc.options.panels.CartesianAxisPanelOptions" />
+                See <c:link to="pvc.options.panels.CartesianAxisOptions" />
                 to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="showXScale" type="boolean" default="true" category="Axes">
+            <c:documentation>
+                <c:deprecated>
+                    Use <c:link to="pvc.options.panels.CartesianAxisOptions#visible"/>, 
+                    of the <tt>x</tt> axis, instead.
+                </c:deprecated>
+                Indicates whether the <tt>x</tt> axis panel is shown.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="showYScale" type="boolean" default="true" category="Axes">
+            <c:documentation>
+                <c:deprecated>
+                    Use <c:link to="pvc.options.panels.CartesianAxisOptions#visible"/>, 
+                    of the <tt>y</tt> axis, instead.
+                </c:deprecated>
+                Indicates whether the <tt>y</tt> axis panel is shown.
             </c:documentation>
         </c:property>
         
@@ -137,21 +157,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="xAxisZeroLine" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
-            <c:documentation>
-                The extension point of the zero line rule that is drawn 
-                on the 0-valued tick, when there is one 
-                (an horizontal axis has a vertical zero line rule).
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="yAxisZeroLine" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
-            <c:documentation>
-                The extension point of the zero line rule that is drawn 
-                on the 0-valued tick, when there is one 
-                (a vertical axis has an horizontal zero line rule).
-            </c:documentation>
-        </c:property>
     </c:complexType>
     
     <c:complexType name="CartesianPlotCommonOptions" 

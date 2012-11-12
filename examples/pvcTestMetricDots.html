@@ -222,7 +222,7 @@ MetricsDotChart, true for MetricsLineChart</li>
   <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
   <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
   <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
-  <li>{x,y}AxisFullGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
   <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
   <li>{x,y}AxisTitle - The axis title text. Default: null</li>
   <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
@@ -285,7 +285,7 @@ var Metrics1 = new pvc.MetricLineChart({
     originIsZero: true,
     valuesVisible: false,
     dotsVisible: true,
-    axisFullGrid: true,
+    axisGrid: true,
     selectable:  true,
     hoverable: true,
     compatVersion: 1
@@ -314,7 +314,7 @@ var Metrics2 = new pvc.MetricLineChart({
     originIsZero: true,
     valuesVisible: false,
     dotsVisible: true,
-    axisFullGrid: true,
+    axisGrid: true,
     selectable:  true,
     hoverable: true,
     compatVersion: 1
@@ -344,7 +344,7 @@ var Metrics3 = new pvc.MetricLineChart({
     valuesVisible: false,
     clickable: true,
     clickAction: function(s,c,v){alert(s + " " + c + " " + v);},
-    axisFullGrid: true,
+    axisGrid: true,
     selectable:  true,
     hoverable: true,
     compatVersion: 1
@@ -371,7 +371,7 @@ var Metrics4 = new pvc.MetricDotChart({
     legendAlign: "right",
     originIsZero: true,
     valuesVisible: false,
-    axisFullGrid: true,
+    axisGrid: true,
     selectable:  true,
     hoverable: true,
     compatVersion: 1
@@ -399,7 +399,7 @@ pv.listenForPageLoad(function() {
                     legend: false,
                     valuesVisible: false,
                     dotsVisible: true,
-                    axisFullGrid: true
+                    axisGrid: true
                 });
                 LineC.setData(testLDot , {crosstabMode: true, seriesInRows: false});
                 LineC.render();
@@ -416,7 +416,7 @@ pv.listenForPageLoad(function() {
                     originIsZero: true,
                     valuesVisible: false,
                     dotsVisible: true,
-                    axisFullGrid: true,
+                    axisGrid: true,
                     compatVersion: 1
                 });                
                 LineL.setData(testLDot , {crosstabMode: true, seriesInRows: false});

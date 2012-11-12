@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="LegendPanelOptions" 
+    <c:complexType name="LegendOptions" 
                    space="pvc.options.panels" 
                    base="pvc.options.panels.CommonDockedPanelOptions">
         <c:documentation>

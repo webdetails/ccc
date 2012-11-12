@@ -5,19 +5,18 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="TimeSeriesCartesianAxisOptions" 
+    <c:complexType name="HierarchicalCartesianAxisOptions"
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.ContinuousCartesianAxisOptions"
-                   abstract="true">
+                   base="pvc.options.panels.DiscreteCartesianAxisOptions">
         <c:documentation>
             The options documentation class of the cartesian axis panel
-            for time series scale types.
+            for discrete scale types, 
+            that presents multi-dimensional roles in a hierarchical form.
             
             For more information about cartesian axes 
-            please see the comments in the ascendant class
-            <c:link to="pvc.options.panels.CartesianAxisOptions" />.    
+            please see the comments in the base class
+            <c:link to="pvc.options.panels.DiscreteCartesianAxisOptions" />.    
         </c:documentation>
-        
     </c:complexType>
     
 </c:model>

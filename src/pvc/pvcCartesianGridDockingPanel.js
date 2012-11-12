@@ -17,11 +17,11 @@ def
         var yAxis = axes.y;
         
         // Full grid lines
-        if(xAxis.option('Visible') && xAxis.option('FullGrid')) {
+        if(xAxis.option('Visible') && xAxis.option('Grid')) {
             this.xGridRule = this._createGridRule(xAxis);
         }
         
-        if(yAxis.option('Visible') && yAxis.option('FullGrid')) {
+        if(yAxis.option('Visible') && yAxis.option('Grid')) {
             this.yGridRule = this._createGridRule(yAxis);
         }
         
@@ -59,14 +59,9 @@ def
         } 
         
         // Composite axis don't fill ticks
-        var isDiscrete   = axis.role.grouping.isDiscrete();
-        var useComposite = axis.option('Composite');
-        if(isDiscrete && useComposite){
-            return;
-        }
-        
-        var axisPanel = this.chart.axesPanels[axis.id];
-        var rootScene = axisPanel._getRootScene();
+        var isDiscrete = axis.role.grouping.isDiscrete();
+        var axisPanel  = this.chart.axesPanels[axis.id];
+        var rootScene  = axisPanel._getRootScene();
         if(!rootScene){
             return;
         }
@@ -84,9 +79,9 @@ def
         var obeg = margins[obeg_a];
         var oend = margins[oend_a];
         
-//      TODO: Implement FullGridCrossesMargin ...
+//      TODO: Implement GridCrossesMargin ...
 //        var orthoAxis = this._getOrthoAxis(axis.type);
-//        if(!orthoAxis.option('FullGridCrossesMargin')){
+//        if(!orthoAxis.option('GridCrossesMargin')){
 //            obeg += paddings[obeg_a];
 //            oend += paddings[oend_a];
 //        }
@@ -111,7 +106,7 @@ def
         }
         
         var pvGridRule = new pvc.visual.Rule(this, this.pvPanel, {
-                extensionId: axis.orientation + 'AxisGrid',
+                extensionId: axis.extensionPrefixes.map(function(prefix){ return prefix + 'Grid'; }),
                 wrapper:     wrapper
             })
             .lock('data', tickScenes)
@@ -158,7 +153,7 @@ def
      * Frame/EndLine: -8
      * ZeroLine:      -9   <<------
      * Content:       -10 (default)
-     * FullGrid:      -12
+     * Grid:      -12
      * -------------------
      * BOT
      */
@@ -175,7 +170,7 @@ def
         var top    = margins.top;
         var bottom = margins.bottom;
         
-        // TODO: Implement FullGridCrossesMargin ...
+        // TODO: Implement GridCrossesMargin ...
         // Need to find the correct bounding box.
         // xScale(xScale.domain()[0]) -> xScale(xScale.domain()[1])
         // and
@@ -211,7 +206,7 @@ def
     
             // Domain crosses zero?
             if(domain[0] * domain[1] <= 0){
-                // TODO: Implement FullGridCrossesMargin ...
+                // TODO: Implement GridCrossesMargin ...
                 
                 var a = axis.orientation === 'x' ? 'left' : 'bottom';
                 var len_a  = this.anchorLength(a);
@@ -231,7 +226,7 @@ def
                     });
                 
                 return new pvc.visual.Rule(this, this.pvPanel, {
-                        extensionId: axis.orientation + 'AxisZeroLine'
+                        extensionId: axis.extensionPrefixes.map(function(prefix){ return prefix + 'ZeroLine'; })
                     })
                     .lock('data', [rootScene])
                     .lock(len_a,  null)

@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="CartesianAxisPanelOptions" 
+    <c:complexType name="CartesianAxisOptions" 
                    space="pvc.options.panels" 
                    base="pvc.options.panels.CommonPanelOptions"
                    abstract="true">
@@ -56,26 +56,124 @@
             the <i>scale type</i> should be used.
             
             For more information on options
-            that are specific to only certain scale types, 
+            that are specific to only certain axis types,
             please see one of the following sub-classes:
             <ul>
-                <li><c:link to="pvc.options.panels.DiscreteCartesianAxisPanelOptions" /></li>
-                <li><c:link to="pvc.options.panels.NumericCartesianAxisPanelOptions" /></li>
-                <li><c:link to="pvc.options.panels.TimeSeriesCartesianAxisPanelOptions" /></li>
+                <li>
+                    <c:link to="pvc.options.panels.DiscreteCartesianAxisOptions" />
+                    <ul>
+                        <li><c:link to="pvc.options.panels.FlattenedCartesianAxisOptions" /></li>
+                        <li><c:link to="pvc.options.panels.HierarchicalCartesianAxisOptions" /></li>
+                    </ul>
+                </li>
+                <li>
+                     <c:link to="pvc.options.panels.ContinuousCartesianAxisOptions" />
+	                <ul>
+	                    <li><c:link to="pvc.options.panels.NumericCartesianAxisOptions" /></li>
+	                    <li><c:link to="pvc.options.panels.TimeSeriesCartesianAxisOptions" /></li>
+	                </ul>
+                </li>
             </ul>
         </c:documentation>
+        
+        <c:property name="visible" 
+                     type="boolean"
+                     default="true"
+                     category="Layout">
+            <c:documentation>
+                Indicates if the axis panel is shown.
+                
+                This property replaces the following 
+                (now deprecated) chart properties:
+                <ul>
+                    <li><tt>showXScale</tt></li>
+                    <li><tt>showYScale</tt></li>
+                    <li><tt>showSecondScale</tt></li>
+                </ul>
+            </c:documentation>
+        </c:property>
         
         <c:property name="position" 
                      type="pvc.options.varia.PanelPosition"
                      category="Layout">
             <c:documentation>
-                The position of the panel.
+                The position of the axis panel.
                 
-                The position of the axis is constrained by 
+                The default value depends on the orientation and index
+                of the axis. 
+                For an horizontal axis, it is <tt>bottom</tt>.
+                For an vertical axis, it is <tt>left</tt>.
+                For axes other than the first, 
+                the default side is the opposite of that of the first axis: 
+                <tt>top</tt> for the horizontal axes and 
+                <tt>right</tt> for the vertical axes.
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CartesianAxisPanelExtensionPoints" category="Style">
+        <c:property name="size" type="number string pvc.options.varia.Size" category="Layout">
+            <c:documentation>
+                The fixed size of the panel's orthogonal dimension.
+                
+                If a size object is specified, 
+                only the component orthogonal to the axis orientation is considered.
+                
+                See <c:link to="pvc.options.varia.Size" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="sizeMax" type="number string pvc.options.varia.Size" category="Layout">
+            <c:documentation>
+                The maximum size of the panel's orthogonal dimension.
+                
+                If a size object is specified, 
+                only the component orthogonal to the axis orientation is considered.
+                
+                See <c:link to="pvc.options.varia.Size" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="offset" type="number" default="0" category="Layout">
+            <c:documentation>
+                The percentage padding, 
+                on each of the sides of the plot panel
+                that are orthogonal to the axis orientation.
+                
+                The percentage is a number 
+                greater than or equal to <tt>0</tt> and less than <tt>1</tt>. 
+                It is relative to length of the plot's side that 
+                has the same direction as the axis.
+                
+                The padded area is useful to leave enough free space 
+                between the plot's visual elements and the axes panels.
+                
+                If an axis is horizontal, 
+                the padding affects the left and right sides,
+                and if it is vertical, 
+                affects the top and bottom sides.
+                
+                If more than one axis of a given orientation specifies an offset, 
+                the maximum specified offset is used.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="grid" type="boolean" default="false" category="Style">
+            <c:documentation>
+                Indicates if grid rules are drawn 
+                separating discrete values or
+                at each major continuous tick.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="fullGrid" type="boolean" default="false" category="Style">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#grid" /> instead.</c:deprecated>
+                Indicates if grid rules are drawn.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianAxisExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the panel.
@@ -83,7 +181,7 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="CartesianAxisPanelExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="CartesianAxisExtensionPoints" space="pvc.options.ext">
         <c:documentation>
             The extension points of the cartesian axis panel.
             
@@ -97,29 +195,6 @@
             and obtaining, for the examples, the camel-cased name: <tt>xAxisLabel_textStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
-        
-        <c:property name="ticksPanel" type="pvc.options.marks.PanelExtensionPoint">
-            <c:documentation>
-                The extension point of the tick panel.
-                
-                One tick panel contains one tick rule and one label.
-                It can be used to conveniently hide all the elements 
-                of a tick simultaneously.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="ticks" type="pvc.options.marks.RuleExtensionPoint">
-            <c:documentation>
-                The extension point of a <i>major</i> tick rule mark.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="minorTicks" type="pvc.options.marks.RuleExtensionPoint">
-            <c:documentation>
-                The extension point of a <i>minor</i> tick rule mark.
-                (only for continuous axes)
-            </c:documentation>
-        </c:property>
         
         <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
             <c:documentation>

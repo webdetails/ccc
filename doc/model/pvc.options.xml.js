@@ -89,7 +89,7 @@ pvc.options.charts.ChartCommonOptions = function(){};
         
         
 /**
- * A callback function that is called,
+ * A callback function that is called
  * when the user clicks on a visual element.
  * 
  * @returns {undefined}
@@ -102,7 +102,7 @@ pvc.options.charts.ChartCommonOptions = function(){};
  */
 pvc.options.charts.ChartCommonOptions.prototype.clickAction = function(){};
 /**
- * A callback function that is called,
+ * A callback function that is called
  * when the user double-clicks on a visual element.
  * 
  * @returns {undefined}
@@ -496,7 +496,7 @@ pvc.options.charts.ChartCommonOptions.prototype.clearSelectionMode = undefined;
  * (ex: 
  * {@link #clickAction},
  * {@link #doubleClickAction}, or
- * {@link pvc.options.panels.DiscreteAxisOptions#clickAction}).
+ * {@link pvc.options.panels.DiscreteCartesianAxisOptions#clickAction}).
  * 
  * @type boolean
  * @default false
@@ -705,7 +705,7 @@ pvc.options.charts.ChartCommonOptions.prototype.width = undefined;
  * The default is 
  * <tt>false</tt>.
  * 
- * @type boolean|pvc.options.panels.LegendPanelOptions
+ * @type boolean|pvc.options.panels.LegendOptions
  * @category Panels
  */
 pvc.options.charts.ChartCommonOptions.prototype.legend = undefined;
@@ -716,7 +716,7 @@ pvc.options.charts.ChartCommonOptions.prototype.legend = undefined;
  * <tt>string</tt> is specified, 
  * it is the title text.
  * 
- * @type string|pvc.options.panels.ChartTitlePanelOptions
+ * @type string|pvc.options.panels.ChartTitleOptions
  * @category Panels
  */
 pvc.options.charts.ChartCommonOptions.prototype.title = undefined;
@@ -1674,7 +1674,7 @@ pvc.options.charts.PieChartOptions.prototype.smallWidth = undefined;
  * compound label of the data bound to the 
  * <tt>multiChart</tt> visual role.
  * 
- * @type pvc.options.panels.ChartTitlePanelOptions
+ * @type pvc.options.panels.ChartTitleOptions
  * @category Multi-Chart - Panels
  */
 pvc.options.charts.PieChartOptions.prototype.smallTitle = undefined;
@@ -2048,10 +2048,10 @@ pvc.options.charts.CartesianChartCommonOptions = function(){};
  * is 
  * <tt>vertical</tt> the base axis is laid out horizontally.
  * <p>
- * See {@link pvc.options.panels.CartesianAxisPanelOptions}
+ * See {@link pvc.options.panels.CartesianAxisOptions}
  * to know the additional names by which a cartesian axis can be referred to.
  * 
- * @type pvc.options.panels.CartesianAxisPanelOptions
+ * @type pvc.options.panels.CartesianAxisOptions
  * @category Axes
  */
 pvc.options.charts.CartesianChartCommonOptions.prototype.baseAxis = undefined;
@@ -2062,13 +2062,43 @@ pvc.options.charts.CartesianChartCommonOptions.prototype.baseAxis = undefined;
  * is 
  * <tt>vertical</tt> the orthogonal axis is laid out vertically.
  * <p>
- * See {@link pvc.options.panels.CartesianAxisPanelOptions}
+ * See {@link pvc.options.panels.CartesianAxisOptions}
  * to know the additional names by which a cartesian axis can be referred to.
  * 
- * @type pvc.options.panels.CartesianAxisPanelOptions
+ * @type pvc.options.panels.CartesianAxisOptions
  * @category Axes
  */
 pvc.options.charts.CartesianChartCommonOptions.prototype.orthoAxis = undefined;
+/**
+ * 
+ * Indicates whether the 
+ * <tt>x</tt> axis panel is shown.
+ * 
+ * @deprecated 
+ * Use {@link pvc.options.panels.CartesianAxisOptions#visible}, 
+ * of the 
+ * <tt>x</tt> axis, instead.
+ * 
+ * @type boolean
+ * @default true
+ * @category Axes
+ */
+pvc.options.charts.CartesianChartCommonOptions.prototype.showXScale = undefined;
+/**
+ * 
+ * Indicates whether the 
+ * <tt>y</tt> axis panel is shown.
+ * 
+ * @deprecated 
+ * Use {@link pvc.options.panels.CartesianAxisOptions#visible}, 
+ * of the 
+ * <tt>y</tt> axis, instead.
+ * 
+ * @type boolean
+ * @default true
+ * @category Axes
+ */
+pvc.options.charts.CartesianChartCommonOptions.prototype.showYScale = undefined;
 /**
  * The visual roles that are common to (almost) all cartesian chart types.
  * 
@@ -2187,15 +2217,6 @@ pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.plotFrame = undefi
  */
 pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.xAxisGrid = undefined;
 /**
- * The extension point of the zero line rule that is drawn 
- * on the 0-valued tick, when there is one 
- * (an horizontal axis has a vertical zero line rule).
- * 
- * @type pvc.options.marks.RuleExtensionPoint
- * @category Axes
- */
-pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.xAxisZeroLine = undefined;
-/**
  * The extension point of the grid line rules that are drawn 
  * one per major tick of the 
  * <ii>YY</ii> axis 
@@ -2205,15 +2226,6 @@ pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.xAxisZeroLine = un
  * @category Axes
  */
 pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.yAxisGrid = undefined;
-/**
- * The extension point of the zero line rule that is drawn 
- * on the 0-valued tick, when there is one 
- * (a vertical axis has an horizontal zero line rule).
- * 
- * @type pvc.options.marks.RuleExtensionPoint
- * @category Axes
- */
-pvc.options.ext.CartesianChartCommonExtensionPoints.prototype.yAxisZeroLine = undefined;
 /**
  * The common options documentation class of 
  * <b>cartesian</b> plots.
@@ -2575,7 +2587,7 @@ pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallWidth 
  * compound label of the data bound to the 
  * <tt>multiChart</tt> visual role.
  * 
- * @type pvc.options.panels.ChartTitlePanelOptions
+ * @type pvc.options.panels.ChartTitleOptions
  * @category Multi-Chart - Panels
  */
 pvc.options.charts.CategoricalContinuousChartCommonOptions.prototype.smallTitle = undefined;
@@ -3046,6 +3058,17 @@ pvc.options.charts.HeatGridChartOptions = function(){};
         
         
 /**
+ * 
+ * Indicates if the chart axes are shown
+ * in a hierarchical form.
+ * 
+ * @deprecated Use {@link pvc.options.panels.DiscreteCartesianAxisOptions#composite} instead.
+ * @type boolean
+ * @default false
+ * @category Axes
+ */
+pvc.options.charts.HeatGridChartOptions.prototype.useCompositeAxis = undefined;
+/**
  * The visual roles of the 
  * <b>heat grid</b> chart type.
  * 
@@ -3481,6 +3504,20 @@ pvc.options.charts.BarChartOptions.prototype.color2AxisColors = undefined;
  * @category Plots
  */
 pvc.options.charts.BarChartOptions.prototype.trend = undefined;
+/**
+ * 
+ * Indicates whether the second orthogonal axis panel is shown.
+ * 
+ * @deprecated 
+ * Use {@link pvc.options.panels.CartesianAxisOptions#visible}, 
+ * of the 
+ * <tt>ortho2</tt> axis, instead.
+ * 
+ * @type boolean
+ * @default true
+ * @category Axes
+ */
+pvc.options.charts.BarChartOptions.prototype.showSecondScale = undefined;
 /**
  * 
  * Indicates whether the secondary axis should be 
@@ -4557,7 +4594,7 @@ pvc.options.charts.MetricPointChartCommonOptions.prototype.smallWidth = undefine
  * compound label of the data bound to the 
  * <tt>multiChart</tt> visual role.
  * 
- * @type pvc.options.panels.ChartTitlePanelOptions
+ * @type pvc.options.panels.ChartTitleOptions
  * @category Multi-Chart - Panels
  */
 pvc.options.charts.MetricPointChartCommonOptions.prototype.smallTitle = undefined;
@@ -5365,6 +5402,26 @@ pvc.options.panels.CommonPanelOptions = function(){};
         
         
 /**
+ * The fixed size of the panel.
+ * <p>
+ * See {@link pvc.options.varia.Size} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Size
+ * @category Layout
+ */
+pvc.options.panels.CommonPanelOptions.prototype.size = undefined;
+/**
+ * The maximum size of the panel.
+ * <p>
+ * See {@link pvc.options.varia.Size} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Size
+ * @category Layout
+ */
+pvc.options.panels.CommonPanelOptions.prototype.sizeMax = undefined;
+/**
  * The common options documentation class of CCC docked panels.
  * 
  * @class
@@ -5449,26 +5506,6 @@ pvc.options.panels.CommonDockedPanelOptions.prototype.paddings = undefined;
  */
 pvc.options.panels.CommonDockedPanelOptions.prototype.position = undefined;
 /**
- * The fixed size of the panel.
- * <p>
- * See {@link pvc.options.varia.Size} for information about 
- * the different supported data types.
- * 
- * @type number|string|pvc.options.varia.Size
- * @category Layout
- */
-pvc.options.panels.CommonDockedPanelOptions.prototype.size = undefined;
-/**
- * The maximum size of the panel.
- * <p>
- * See {@link pvc.options.varia.Size} for information about 
- * the different supported data types.
- * 
- * @type number|string|pvc.options.varia.Size
- * @category Layout
- */
-pvc.options.panels.CommonDockedPanelOptions.prototype.sizeMax = undefined;
-/**
  * The font of the panel.
  * <p>
  * See the supported font format in 
@@ -5499,7 +5536,7 @@ pvc.options.panels.CommonDockedPanelOptions.prototype.font = undefined;
  * @class
  * @extends pvc.options.panels.CommonDockedPanelOptions
  */
-pvc.options.panels.LegendPanelOptions = function(){};
+pvc.options.panels.LegendOptions = function(){};
         
         
         
@@ -5511,7 +5548,7 @@ pvc.options.panels.LegendPanelOptions = function(){};
  * @default 2.5
  * @category Layout
  */
-pvc.options.panels.LegendPanelOptions.prototype.itemPadding = undefined;
+pvc.options.panels.LegendOptions.prototype.itemPadding = undefined;
 /**
  * The width and height of the marker panel.
  * <p>
@@ -5521,7 +5558,7 @@ pvc.options.panels.LegendPanelOptions.prototype.itemPadding = undefined;
  * @default 15
  * @category Layout
  */
-pvc.options.panels.LegendPanelOptions.prototype.markerSize = undefined;
+pvc.options.panels.LegendOptions.prototype.markerSize = undefined;
 /**
  * The space between the marker and the associated label, in pixel units.
  * 
@@ -5529,7 +5566,7 @@ pvc.options.panels.LegendPanelOptions.prototype.markerSize = undefined;
  * @default 6
  * @category Layout
  */
-pvc.options.panels.LegendPanelOptions.prototype.textMargin = undefined;
+pvc.options.panels.LegendOptions.prototype.textMargin = undefined;
 /**
  * What happens when the user clicks a legend item. 
  * 
@@ -5537,7 +5574,7 @@ pvc.options.panels.LegendPanelOptions.prototype.textMargin = undefined;
  * @default 'toggleVisible'
  * @category Style
  */
-pvc.options.panels.LegendPanelOptions.prototype.clickMode = undefined;
+pvc.options.panels.LegendOptions.prototype.clickMode = undefined;
 /**
  * Forces a rule to be shown or not in the marker zone.
  * <p>
@@ -5546,7 +5583,7 @@ pvc.options.panels.LegendPanelOptions.prototype.clickMode = undefined;
  * @type boolean
  * @category Style
  */
-pvc.options.panels.LegendPanelOptions.prototype.drawLine = undefined;
+pvc.options.panels.LegendOptions.prototype.drawLine = undefined;
 /**
  * Forces a shape to be shown or not in the marker zone.
  * <p>
@@ -5555,14 +5592,14 @@ pvc.options.panels.LegendPanelOptions.prototype.drawLine = undefined;
  * @type boolean
  * @category Style
  */
-pvc.options.panels.LegendPanelOptions.prototype.drawMarker = undefined;
+pvc.options.panels.LegendOptions.prototype.drawMarker = undefined;
 /**
  * The extension points provided by the legend panel.
  * 
  * @type pvc.options.ext.LegendPanelExtensionPoints
  * @category Style
  */
-pvc.options.panels.LegendPanelOptions.prototype.extensionPoints = undefined;
+pvc.options.panels.LegendOptions.prototype.extensionPoints = undefined;
 /**
  * Forces a given shape to be used in the marker zone.
  * <p>
@@ -5571,7 +5608,7 @@ pvc.options.panels.LegendPanelOptions.prototype.extensionPoints = undefined;
  * @type pvc.options.varia.DotShapeType
  * @category Style
  */
-pvc.options.panels.LegendPanelOptions.prototype.shape = undefined;
+pvc.options.panels.LegendOptions.prototype.shape = undefined;
 /**
  * The extension points of the legend panel.
  * <p>
@@ -5645,9 +5682,9 @@ pvc.options.ext.LegendPanelExtensionPoints.prototype.rule = undefined;
  * <tt>'14px sans-serif'</tt>.
  * 
  * @class
- * @extends pvc.options.panels.TitlePanelOptions
+ * @extends pvc.options.panels.TitleOptions
  */
-pvc.options.panels.ChartTitlePanelOptions = function(){};
+pvc.options.panels.ChartTitleOptions = function(){};
         
         
         
@@ -5658,7 +5695,7 @@ pvc.options.panels.ChartTitlePanelOptions = function(){};
  * @class
  * @extends pvc.options.panels.CommonDockedPanelOptions
  */
-pvc.options.panels.TitlePanelOptions = function(){};
+pvc.options.panels.TitleOptions = function(){};
         
         
         
@@ -5669,7 +5706,7 @@ pvc.options.panels.TitlePanelOptions = function(){};
  * @type pvc.options.ext.TitlePanelExtensionPoints
  * @category Style
  */
-pvc.options.panels.TitlePanelOptions.prototype.extensionPoints = undefined;
+pvc.options.panels.TitleOptions.prototype.extensionPoints = undefined;
 /**
  * The extension points of the title panel.
  * <p>
@@ -5751,21 +5788,18 @@ pvc.options.ext.TitlePanelExtensionPoints.prototype.label = undefined;
  * <dt>By 
  * <b>id</b></dt>
  * 
- * <dd>
- * the id of the axis is its type followed by it's index (when >= 2);
- * (ex: 
+ * <dd>the id of the axis is its type followed by it's index (when >= 2)</dd>
+ * 
+ * <dd>(ex: 
  * <tt>base</tt>, 
  * <tt>ortho</tt>, 
  * <tt>base2</tt>, 
- * <tt>ortho2</tt>, ...)
- * </dd>
+ * <tt>ortho2</tt>, ...)</dd>
  * 
  * <dt>By 
  * <b>oriented id</b></dt>
  * 
- * <dd>
- * the oriented id of the axis is its orientation followed by it's index (when >= 2); 
- * </dd>
+ * <dd>the oriented id of the axis is its orientation followed by it's index (when >= 2)</dd>
  * 
  * <dd>(ex: 
  * <tt>x</tt>, 
@@ -5813,44 +5847,177 @@ pvc.options.ext.TitlePanelExtensionPoints.prototype.label = undefined;
  * independently of the chart's orientation, the 
  * <i>oriented id</i>
  * should be used. 
- * If, otherwise, a property is to be applied to the base axis,
- * whether it is vertically or horizontally aligned, 
+ * If, otherwise, a property should only be applied to the base axis,
+ * whether or not it is horizontally aligned, 
  * then the normal 
  * <i>id</i> should be used.
  * If, a property should only apply to continuous axes,
  * the 
- * <b>scale type</b> name should be used.
+ * <i>scale type</i> should be used.
  * <p>
  * For more information on options
- * that are specific to only certain scale types, 
+ * that are specific to only certain axis types,
  * please see one of the following sub-classes:
  * 
  * <ul>
  * 
- * <li>{@link pvc.options.panels.DiscreteCartesianAxisPanelOptions}</li>
+ * <li>
+ * {@link pvc.options.panels.DiscreteCartesianAxisOptions}
  * 
- * <li>{@link pvc.options.panels.NumericCartesianAxisPanelOptions}</li>
+ * <ul>
  * 
- * <li>{@link pvc.options.panels.TimeSeriesCartesianAxisPanelOptions}</li>
+ * <li>{@link pvc.options.panels.FlattenedCartesianAxisOptions}</li>
+ * 
+ * <li>{@link pvc.options.panels.HierarchicalCartesianAxisOptions}</li>
+ * </ul>
+ * </li>
+ * 
+ * <li>
+ * {@link pvc.options.panels.ContinuousCartesianAxisOptions}
+ * 
+ * <ul>
+ * 
+ * <li>{@link pvc.options.panels.NumericCartesianAxisOptions}</li>
+ * 
+ * <li>{@link pvc.options.panels.TimeSeriesCartesianAxisOptions}</li>
+ * </ul>
+ * </li>
  * </ul>
  * 
  * @class
  * @extends pvc.options.panels.CommonPanelOptions
  * @abstract
  */
-pvc.options.panels.CartesianAxisPanelOptions = function(){};
+pvc.options.panels.CartesianAxisOptions = function(){};
         
         
         
         
 /**
+ * The percentage padding, 
+ * on each of the sides of the plot panel
+ * that are orthogonal to the axis orientation.
+ * <p>
+ * The percentage is a number 
+ * greater than or equal to 
+ * <tt>0</tt> and less than 
+ * <tt>1</tt>. 
+ * It is relative to length of the plot's side that 
+ * has the same direction as the axis.
+ * <p>
+ * The padded area is useful to leave enough free space 
+ * between the plot's visual elements and the axes panels.
+ * <p>
+ * If an axis is horizontal, 
+ * the padding affects the left and right sides,
+ * and if it is vertical, 
+ * affects the top and bottom sides.
+ * <p>
+ * If more than one axis of a given orientation specifies an offset, 
+ * the maximum specified offset is used.
+ * 
+ * @type number
+ * @default 0
+ * @category Layout
+ */
+pvc.options.panels.CartesianAxisOptions.prototype.offset = undefined;
+/**
+ * The position of the axis panel.
+ * <p>
+ * The default value depends on the orientation and index
+ * of the axis. 
+ * For an horizontal axis, it is 
+ * <tt>bottom</tt>.
+ * For an vertical axis, it is 
+ * <tt>left</tt>.
+ * For axes other than the first, 
+ * the default side is the opposite of that of the first axis: 
+ * 
+ * <tt>top</tt> for the horizontal axes and 
+ * 
+ * <tt>right</tt> for the vertical axes.
+ * 
+ * @type pvc.options.varia.PanelPosition
+ * @category Layout
+ */
+pvc.options.panels.CartesianAxisOptions.prototype.position = undefined;
+/**
+ * The fixed size of the panel's orthogonal dimension.
+ * <p>
+ * If a size object is specified, 
+ * only the component orthogonal to the axis orientation is considered.
+ * <p>
+ * See {@link pvc.options.varia.Size} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Size
+ * @category Layout
+ */
+pvc.options.panels.CartesianAxisOptions.prototype.size = undefined;
+/**
+ * The maximum size of the panel's orthogonal dimension.
+ * <p>
+ * If a size object is specified, 
+ * only the component orthogonal to the axis orientation is considered.
+ * <p>
+ * See {@link pvc.options.varia.Size} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Size
+ * @category Layout
+ */
+pvc.options.panels.CartesianAxisOptions.prototype.sizeMax = undefined;
+/**
+ * Indicates if the axis panel is shown.
+ * <p>
+ * This property replaces the following 
+ * (now deprecated) chart properties:
+ * 
+ * <ul>
+ * 
+ * <li>
+ * <tt>showXScale</tt></li>
+ * 
+ * <li>
+ * <tt>showYScale</tt></li>
+ * 
+ * <li>
+ * <tt>showSecondScale</tt></li>
+ * </ul>
+ * 
+ * @type boolean
+ * @default true
+ * @category Layout
+ */
+pvc.options.panels.CartesianAxisOptions.prototype.visible = undefined;
+/**
  * The extension points object contains style definitions for 
  * the marks of the panel.
  * 
- * @type pvc.options.ext.CartesianAxisPanelExtensionPoints
+ * @type pvc.options.ext.CartesianAxisExtensionPoints
  * @category Style
  */
-pvc.options.panels.CartesianAxisPanelOptions.prototype.extensionPoints = undefined;
+pvc.options.panels.CartesianAxisOptions.prototype.extensionPoints = undefined;
+/**
+ * 
+ * Indicates if grid rules are drawn.
+ * 
+ * @deprecated Use {@link #grid} instead.
+ * @type boolean
+ * @default false
+ * @category Style
+ */
+pvc.options.panels.CartesianAxisOptions.prototype.fullGrid = undefined;
+/**
+ * Indicates if grid rules are drawn 
+ * separating discrete values or
+ * at each major continuous tick.
+ * 
+ * @type boolean
+ * @default false
+ * @category Style
+ */
+pvc.options.panels.CartesianAxisOptions.prototype.grid = undefined;
 /**
  * The extension points of the cartesian axis panel.
  * <p>
@@ -5875,7 +6042,7 @@ pvc.options.panels.CartesianAxisPanelOptions.prototype.extensionPoints = undefin
  * 
  * @class
  */
-pvc.options.ext.CartesianAxisPanelExtensionPoints = function(){};
+pvc.options.ext.CartesianAxisExtensionPoints = function(){};
         
         
         
@@ -5885,22 +6052,158 @@ pvc.options.ext.CartesianAxisPanelExtensionPoints = function(){};
  * 
  * @type pvc.options.marks.LabelExtensionPoint
  */
-pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.label = undefined;
+pvc.options.ext.CartesianAxisExtensionPoints.prototype.label = undefined;
 /**
- * The extension point of a 
- * <i>minor</i> tick rule mark.
- * (only for continuous axes)
+ * The options documentation class of the cartesian axis panel
+ * for discrete scale types.
+ * <p>
+ * For more information about cartesian axes 
+ * please see the comments in the base class
+ * {@link pvc.options.panels.CartesianAxisOptions}.
+ * <p>
+ * For more information on a specific
+ * type of discrete axis,   
+ * please see:
+ * {@link pvc.options.panels.FlattenedCartesianAxisOptions}
+ * and
+ * {@link pvc.options.panels.HierarchicalCartesianAxisOptions}.
+ * 
+ * @class
+ * @extends pvc.options.panels.CartesianAxisOptions
+ */
+pvc.options.panels.DiscreteCartesianAxisOptions = function(){};
+        
+        
+        
+        
+/**
+ * A callback function that is called
+ * when the user clicks on a tick label.
+ * 
+ * @returns {undefined}
+ * @method
+ * @this pvc.visual.Context
+ * @param {pvc.visual.Scene} scene
+ * The scene associated with the visual item.
+ * 
+ * @category Actions
+ */
+pvc.options.panels.DiscreteCartesianAxisOptions.prototype.clickAction = function(){};
+/**
+ * A callback function that is called
+ * when the user double-clicks on a tick label.
+ * 
+ * @returns {undefined}
+ * @method
+ * @this pvc.visual.Context
+ * @param {pvc.visual.Scene} scene
+ * The scene associated with the visual item.
+ * 
+ * @category Actions
+ */
+pvc.options.panels.DiscreteCartesianAxisOptions.prototype.doubleClickAction = function(){};
+/**
+ * Indicates if the axis should show 
+ * discrete multi-dimensional data in 
+ * a hierarchical form, when 
+ * <tt>true</tt>,
+ * or a flattened form, when 
+ * <tt>false</tt>.
+ * 
+ * @type boolean
+ * @default false
+ * @category General
+ */
+pvc.options.panels.DiscreteCartesianAxisOptions.prototype.composite = undefined;
+/**
+ * The options documentation class of the cartesian axis panel
+ * for discrete scale types, 
+ * that presents multi-dimensional roles in a flattened form,
+ * by joining multiple values with a separator character.
+ * <p>
+ * For more information about cartesian axes 
+ * please see the comments in the base class
+ * {@link pvc.options.panels.CartesianAxisOptions}.    
+ * 
+ * @class
+ * @extends pvc.options.panels.DiscreteCartesianAxisOptions
+ */
+pvc.options.panels.FlattenedCartesianAxisOptions = function(){};
+        
+        
+        
+        
+/**
+ * The minimum spacing between tick labels, in 
+ * <i>em</i> units.
+ * 
+ * @type number
+ * @category Layout
+ */
+pvc.options.panels.FlattenedCartesianAxisOptions.prototype.labelSpacingMin = undefined;
+/**
+ * Controls how labels are laid out when they overlap.
+ * 
+ * @type pvc.options.varia.AxisOverlappedLabelsMode
+ * @default 'hide'
+ * @category Layout
+ */
+pvc.options.panels.FlattenedCartesianAxisOptions.prototype.overlappedLabelsMode = undefined;
+/**
+ * The extension points object contains style definitions for 
+ * the marks of the panel.
+ * 
+ * @type pvc.options.ext.FlattenedCartesianAxisExtensionPoints
+ * @category Style
+ */
+pvc.options.panels.FlattenedCartesianAxisOptions.prototype.extensionPoints = undefined;
+/**
+ * Indicates if ticks are shown for each category value. 
+ * 
+ * @type boolean
+ * @default false
+ * @category Style
+ */
+pvc.options.panels.FlattenedCartesianAxisOptions.prototype.ticks = undefined;
+/**
+ * The extension points of the flattened discrete cartesian axis panel.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>panel property name (ex: 
+ * <tt>xAxis</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>label</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>textStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>xAxisLabel_textStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * 
+ * @class
+ * @extends pvc.options.ext.CartesianAxisExtensionPoints
+ */
+pvc.options.ext.FlattenedCartesianAxisExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of a discrete,
+ * or continuous 
+ * <i>major</i>,
+ * tick rule mark.
  * 
  * @type pvc.options.marks.RuleExtensionPoint
  */
-pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.minorTicks = undefined;
-/**
- * The extension point of a 
- * <i>major</i> tick rule mark.
- * 
- * @type pvc.options.marks.RuleExtensionPoint
- */
-pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.ticks = undefined;
+pvc.options.ext.FlattenedCartesianAxisExtensionPoints.prototype.ticks = undefined;
 /**
  * The extension point of the tick panel.
  * <p>
@@ -5910,19 +6213,20 @@ pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.ticks = undefined;
  * 
  * @type pvc.options.marks.PanelExtensionPoint
  */
-pvc.options.ext.CartesianAxisPanelExtensionPoints.prototype.ticksPanel = undefined;
+pvc.options.ext.FlattenedCartesianAxisExtensionPoints.prototype.ticksPanel = undefined;
 /**
  * The options documentation class of the cartesian axis panel
- * for discrete scale types.
+ * for discrete scale types, 
+ * that presents multi-dimensional roles in a hierarchical form.
  * <p>
  * For more information about cartesian axes 
  * please see the comments in the base class
- * {@link pvc.options.panels.CartesianAxisPanelOptions}.    
+ * {@link pvc.options.panels.DiscreteCartesianAxisOptions}.    
  * 
  * @class
- * @extends pvc.options.panels.CartesianAxisPanelOptions
+ * @extends pvc.options.panels.DiscreteCartesianAxisOptions
  */
-pvc.options.panels.DiscreteCartesianAxisPanelOptions = function(){};
+pvc.options.panels.HierarchicalCartesianAxisOptions = function(){};
         
         
         
@@ -5933,47 +6237,503 @@ pvc.options.panels.DiscreteCartesianAxisPanelOptions = function(){};
  * <p>
  * For more information about cartesian axes 
  * please see the comments in the base class
- * {@link pvc.options.panels.CartesianAxisPanelOptions}.    
+ * {@link pvc.options.panels.CartesianAxisOptions}.    
  * 
  * @class
- * @extends pvc.options.panels.CartesianAxisPanelOptions
+ * @extends pvc.options.panels.CartesianAxisOptions
  * @abstract
  */
-pvc.options.panels.ContinuousCartesianAxisPanelOptions = function(){};
+pvc.options.panels.ContinuousCartesianAxisOptions = function(){};
         
         
         
         
 /**
+ * Controls the type of scale domain coordination
+ * that should be performed 
+ * amongst the axes of the same id of each 
+ * <i>small chart</i>.
+ * <p>
+ * The value {@link pvc.options.varia.AxisDomainScope#Row}
+ * can only be specified if the axis has vertical orientation.
+ * Conversely, 
+ * the value {@link pvc.options.varia.AxisDomainScope#Column}
+ * can only be specified if the axis has horizontal orientation.
+ * 
+ * @type pvc.options.varia.AxisDomainScope
+ * @category Scale
+ */
+pvc.options.panels.ContinuousCartesianAxisOptions.prototype.domainScope = undefined;
+/**
+ * The fixed maximum domain value that the axis will show.
+ * <p>
+ * The value should be convertible to the scale type of the axis.
+ * A string value is converted to a number.
+ * If a numeric value is obtained and 
+ * the scale type is time series,
+ * then the number is interpreted as being the result of 
+ * the JavaScript's 
+ * <tt>Date.getTime()</tt> method.
+ * <p>
+ * The value may be bigger or smaller than the actual
+ * maximum value of the data.
+ * <p>
+ * When this property is specified, 
+ * clipping is activated in the plot panel. 
+ * Elements that are drawn beyond its area are clipped.
+ * <p>
+ * This property takes precedence over the property 
+ * <tt>originIsZero</tt>. 
+ * 
+ * @type number|string|Date
+ * @default 0
+ * @category Scale
+ */
+pvc.options.panels.ContinuousCartesianAxisOptions.prototype.fixedMax = undefined;
+/**
+ * The fixed minimum domain value that the axis will show.
+ * <p>
+ * The value should be convertible to the scale type of the axis.
+ * A string value is converted to a number.
+ * If a numeric value is obtained and 
+ * the scale type is time series,
+ * then the number is interpreted as being the result of 
+ * the JavaScript's 
+ * <tt>Date.getTime()</tt> method.
+ * <p>
+ * The value may be bigger or smaller than the actual
+ * minimum value of the data.
+ * <p>
+ * When this property is specified, 
+ * clipping is activated in the plot panel. 
+ * Elements that are drawn beyond its area are clipped.
+ * <p>
+ * This property takes precedence over the property 
+ * <tt>originIsZero</tt>. 
+ * 
+ * @type number|string|Date
+ * @default 0
+ * @category Scale
+ */
+pvc.options.panels.ContinuousCartesianAxisOptions.prototype.fixedMin = undefined;
+/**
+ * Indicates if it should be ensured that zero domain value is shown.
+ * <p>
+ * The properties 
+ * 
+ * <tt>fixedMin</tt> and 
+ * 
+ * <tt>fixedMax</tt> have precedence over this one.
+ * If this property is 
+ * <tt>true</tt>
+ * and respecting it would require changing 
+ * the minimum value, 
+ * but the option 
+ * <tt>fixedMin</tt> is also specified,
+ * then this property is ignored.
+ * The same would apply if 
+ * it were required to change 
+ * the maximum value,
+ * but the property 
+ * <tt>fixedMax</tt> was also specified.  
+ * 
+ * @type boolean
+ * @category Scale
+ */
+pvc.options.panels.ContinuousCartesianAxisOptions.prototype.originIsZero = undefined;
+/**
+ * The extension points object contains style definitions for 
+ * the marks of the panel.
+ * 
+ * @type pvc.options.ext.ContinuousCartesianAxisExtensionPoints
+ * @category Style
+ */
+pvc.options.panels.ContinuousCartesianAxisOptions.prototype.extensionPoints = undefined;
+/**
+ * Indicates if minor ticks are shown between major ticks. 
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.panels.ContinuousCartesianAxisOptions.prototype.minorTicks = undefined;
+/**
+ * A tick formatter function.  
+ * 
+ * @returns {string}
+ * The string that is the formatted value.
+ * 
+ * @method
+ * @this null
+ * @param {number|Date} value
+ * The value to format.
+ * 
+ * @param {number} precision
+ * The precision in which value should be formatted.
+ * <p>
+ * When the axis has a 
+ * <tt>timeSeries</tt> scale type,
+ * the argument is the chosen 
+ * number of milliseconds between tick values.
+ * The standard precisions are:
+ * 
+ * <dl>
+ * 
+ * <dt>
+ * <tt>31536e6</tt></dt>
+ * <dd>1 year</dd>
+ * 
+ * <dt>
+ * <tt>2592e6</tt></dt>
+ * <dd>30 days</dd>
+ * 
+ * <dt>
+ * <tt>6048e5</tt></dt>
+ * <dd>7 days</dd>
+ * 
+ * <dt>
+ * <tt>864e5</tt></dt>
+ * <dd>1 day</dd>
+ * 
+ * <dt>
+ * <tt>36e5</tt></dt>
+ * <dd>1 hour</dd>
+ * 
+ * <dt>
+ * <tt>6e4</tt></dt>
+ * <dd>1 minute</dd>
+ * 
+ * <dt>
+ * <tt>1e3</tt></dt>
+ * <dd>1 second</dd>
+ * 
+ * <dt>
+ * <tt>1</tt></dt>
+ * <dd>1 millisecond</dd>
+ * </dl>
+ * <p>
+ * When the axis has a 
+ * <tt>numeric</tt> scale type,
+ * the argument is the number of decimal places of the 
+ * chosen step value. 
+ * 
+ * @category Style
+ */
+pvc.options.panels.ContinuousCartesianAxisOptions.prototype.tickFormatter = function(){};
+/**
+ * Indicates if major ticks are shown for each tick value. 
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.panels.ContinuousCartesianAxisOptions.prototype.ticks = undefined;
+/**
+ * The extension points of the continuous cartesian axis panel.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>panel property name (ex: 
+ * <tt>xAxis</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>minorTicks</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>xAxisMinorTicks_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * 
+ * @class
+ * @extends pvc.options.ext.CartesianAxisExtensionPoints
+ */
+pvc.options.ext.ContinuousCartesianAxisExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of a discrete,
+ * or continuous 
+ * <i>major</i>,
+ * tick rule mark.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.ContinuousCartesianAxisExtensionPoints.prototype.ticks = undefined;
+/**
+ * The extension point of the tick panel.
+ * <p>
+ * One tick panel contains one tick rule and one label.
+ * It can be used to conveniently hide all the elements 
+ * of a tick simultaneously.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.ContinuousCartesianAxisExtensionPoints.prototype.ticksPanel = undefined;
+/**
+ * The extension point of a 
+ * <i>minor</i> tick rule mark.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.ContinuousCartesianAxisExtensionPoints.prototype.minorTicks = undefined;
+/**
  * The options documentation class of the cartesian axis panel
  * for numeric scale types.
  * <p>
  * For more information about cartesian axes 
- * please see the comments in the ascendant class
- * {@link pvc.options.panels.CartesianAxisPanelOptions}.    
+ * please see the comments in the base class
+ * {@link pvc.options.panels.CartesianAxisOptions}.    
  * 
  * @class
- * @extends pvc.options.panels.ContinuousCartesianAxisPanelOptions
+ * @extends pvc.options.panels.ContinuousCartesianAxisOptions
  * @abstract
  */
-pvc.options.panels.NumericCartesianAxisPanelOptions = function(){};
+pvc.options.panels.NumericCartesianAxisOptions = function(){};
         
         
         
         
+/**
+ * The minimum spacing between tick labels, in 
+ * <i>em</i> units.
+ * 
+ * @type number
+ * @category Layout
+ */
+pvc.options.panels.NumericCartesianAxisOptions.prototype.labelSpacingMin = undefined;
+/**
+ * Controls how labels are laid out when they overlap.
+ * 
+ * @type pvc.options.varia.AxisOverlappedLabelsMode
+ * @default 'hide'
+ * @category Layout
+ */
+pvc.options.panels.NumericCartesianAxisOptions.prototype.overlappedLabelsMode = undefined;
+/**
+ * The 
+ * <i>desired</i> number of major ticks.
+ * <p>
+ * When specified the tick calculation algorithm chooses, 
+ * amongst possible tick steps, 
+ * the one that results in a number of ticks
+ * that is closest to the specified value.
+ * <p>
+ * When unspecified, 
+ * an 
+ * <i>optimum</i> number of ticks is 
+ * determined by taking 
+ * the 
+ * available space,
+ * label font size,
+ * minimum label spacing and
+ * into account.
+ * 
+ * @type number
+ * @category Style
+ */
+pvc.options.panels.NumericCartesianAxisOptions.prototype.desiredTickCount = undefined;
+/**
+ * The axis' domain rounding mode.
+ * 
+ * @type pvc.options.varia.AxisDomainRoundingMode
+ * @default tick
+ * @category Style
+ */
+pvc.options.panels.NumericCartesianAxisOptions.prototype.domainRoundMode = undefined;
+/**
+ * The extension points object contains style definitions for 
+ * the marks of the panel.
+ * 
+ * @type pvc.options.ext.NumericCartesianAxisExtensionPoints
+ * @category Style
+ */
+pvc.options.panels.NumericCartesianAxisOptions.prototype.extensionPoints = undefined;
+/**
+ * The maximum exponent of 
+ * <tt>10</tt> that is used to generate ticks.
+ * <p>
+ * The generated ticks are separated by a 
+ * <i>step</i> value.
+ * A step value is a certain power of 
+ * <tt>10</tt>,
+ * possibly multiplied by 
+ * <tt>2</tt> or 
+ * <tt>5</tt>.
+ * <p>
+ * For example, 
+ * for a chosen exponent of 
+ * <tt>4</tt>,
+ * the corresponding power of 
+ * <tt>10</tt> is 
+ * <tt>10^4=10000</tt> and
+ * the generated ticks could be:
+ * 
+ * <tt>0</tt>, 
+ * <tt>10000</tt>, 
+ * <tt>20000</tt>, ...
+ * <p>
+ * If the multiplier 
+ * <tt>5</tt> was chosen, 
+ * those ticks would instead be:
+ * 
+ * <tt>0</tt>, 
+ * <tt>50000</tt>, 
+ * <tt>100000</tt>, ...
+ * <p>
+ * Setting this property allows imposing a limit on 
+ * the size of numbers chosen to separate ticks,
+ * which may be seen as imposing a minimum granularity 
+ * on the generated tick values.
+ * 
+ * @type number
+ * @category Style
+ */
+pvc.options.panels.NumericCartesianAxisOptions.prototype.tickExponentMax = undefined;
+/**
+ * The minimum exponent of 
+ * <tt>10</tt> that is used to generate ticks.
+ * <p>
+ * The generated ticks are separated by a 
+ * <i>step</i> value.
+ * A step value is a certain power of 
+ * <tt>10</tt>,
+ * possibly multiplied by 
+ * <tt>2</tt> or 
+ * <tt>5</tt>.
+ * <p>
+ * For example, 
+ * for a chosen exponent of 
+ * <tt>2</tt>,
+ * the corresponding power of 
+ * <tt>10</tt> is 
+ * <tt>10^2=100</tt> and
+ * the generated ticks could be:
+ * 
+ * <tt>0</tt>, 
+ * <tt>100</tt>, 
+ * <tt>200</tt>, ...
+ * <p>
+ * If the multiplier 
+ * <tt>2</tt> was chosen, 
+ * those ticks would instead be:
+ * 
+ * <tt>0</tt>, 
+ * <tt>200</tt>, 
+ * <tt>400</tt>, ...
+ * <p>
+ * Setting this property to 
+ * <tt>2</tt> would ensure 
+ * that generated ticks would be separated by the step values
+ * 
+ * <tt>100</tt>, 
+ * <tt>200</tt> or 
+ * <tt>500</tt>,
+ * or by steps whose corresponding exponent is 
+ * bigger than 
+ * <tt>2</tt>, 
+ * like: 
+ * <tt>1000</tt>, 
+ * <tt>2000</tt> or 
+ * <tt>5000</tt>.
+ * <p>
+ * A more typical use case is ensuring that generated ticks are integers.
+ * A value of 
+ * <tt>tickExponentMin</tt> of 
+ * <tt>0</tt> would accomplish that.
+ * <p>
+ * Generally, 
+ * to impose a maximum number of decimal places on the generated ticks, 
+ * a negative number can be specified.
+ * For example, the value 
+ * <tt>-1</tt> could generate the ticks:
+ * 
+ * <tt>0.1</tt>, 
+ * <tt>0.2</tt>, 
+ * <tt>0.3</tt>, ...
+ * If the multiplier 
+ * <tt>5</tt> was chosen, 
+ * those ticks would instead be:
+ * 
+ * <tt>0.5</tt>, 
+ * <tt>1.0</tt>, 
+ * <tt>1.5</tt>, ...
+ * It could not generate ticks 
+ * with more that one decimal place.
+ * 
+ * @type number
+ * @category Style
+ */
+pvc.options.panels.NumericCartesianAxisOptions.prototype.tickExponentMin = undefined;
+/**
+ * Indicates if the zero line rule is drawn, 
+ * on the position of the 0-valued tick, 
+ * when there is one. 
+ * (an horizontal axis has a vertical zero line rule,
+ * and a vertical axis has an horizontal zero line rule).
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.panels.NumericCartesianAxisOptions.prototype.zeroLine = undefined;
+/**
+ * The extension points of the numeric cartesian axis panel.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>panel property name (ex: 
+ * <tt>xAxis</tt>)</li>
+ * 
+ * <li>extension property (ex: 
+ * <tt>zeroLine</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>lineWidth</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>xAxisZeroLine_lineWidth</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
+ * 
+ * @class
+ * @extends pvc.options.ext.CartesianAxisExtensionPoints
+ */
+pvc.options.ext.NumericCartesianAxisExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the zero line rule.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ * @category Style
+ */
+pvc.options.ext.NumericCartesianAxisExtensionPoints.prototype.zeroLine = undefined;
 /**
  * The options documentation class of the cartesian axis panel
  * for time series scale types.
  * <p>
  * For more information about cartesian axes 
  * please see the comments in the ascendant class
- * {@link pvc.options.panels.CartesianAxisPanelOptions}.    
+ * {@link pvc.options.panels.CartesianAxisOptions}.    
  * 
  * @class
- * @extends pvc.options.panels.ContinuousCartesianAxisPanelOptions
+ * @extends pvc.options.panels.ContinuousCartesianAxisOptions
  * @abstract
  */
-pvc.options.panels.TimeSeriesCartesianAxisPanelOptions = function(){};
+pvc.options.panels.TimeSeriesCartesianAxisOptions = function(){};
         
         
         
@@ -6760,6 +7520,152 @@ pvc.options.varia.NullInterpolationMode.prototype.None = 'none';
  * @value 'zero'
  */
 pvc.options.varia.NullInterpolationMode.prototype.Zero = 'zero';
+/**
+ * The type of scale domain coordination 
+ * amongst axes of the same id of 
+ * 
+ * <i>small charts</i>.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.AxisDomainScope = function(){};
+        
+        
+        
+        
+/**
+ * No scale domain coordination.
+ * 
+ * @value 'cell'
+ */
+pvc.options.varia.AxisDomainScope.prototype.Cell = 'cell';
+/**
+ * The axes of same id of 
+ * 
+ * <i>small charts</i> of each column
+ * will use the same scale domain.
+ * 
+ * @value 'column'
+ */
+pvc.options.varia.AxisDomainScope.prototype.Column = 'column';
+/**
+ * The axes of same id of 
+ * all the 
+ * <i>small charts</i>
+ * use the same scale domain.  
+ * 
+ * @value 'global'
+ */
+pvc.options.varia.AxisDomainScope.prototype.Global = 'global';
+/**
+ * The axes of same id of 
+ * 
+ * <i>small charts</i> of each row
+ * will use the same scale domain.  
+ * 
+ * @value 'row'
+ */
+pvc.options.varia.AxisDomainScope.prototype.Row = 'row';
+/**
+ * The axes of same id of 
+ * 
+ * <i>small charts</i> of each row or column
+ * will use the same scale domain.
+ * <p>
+ * The determination of whether 
+ * <tt>section</tt> 
+ * applies to 
+ * rows or columns
+ * is performed according to a reference orientation.
+ * <p>
+ * In the case of cartesian axes, 
+ * the reference orientation
+ * is the axis' orientation.
+ * <p>
+ * If the reference orientation is horizontal, 
+ * then 
+ * <tt>section </tt> applies to columns.
+ * Otherwise it applies to rows.
+ * 
+ * @value 'section'
+ */
+pvc.options.varia.AxisDomainScope.prototype.Section = 'section';
+/**
+ * The rounding mode applied to a numeric axis' scale domain.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.AxisDomainRoundingMode = function(){};
+        
+        
+        
+        
+/**
+ * The scale domain is made "nice" by 
+ * ensuring that its bounds are "nice" numbers,
+ * extending the domain, if necessary.
+ * 
+ * @value 'nice'
+ */
+pvc.options.varia.AxisDomainRoundingMode.prototype.Nice = 'nice';
+/**
+ * The scale domain is exactly the domain of the data.
+ * 
+ * @value 'none'
+ */
+pvc.options.varia.AxisDomainRoundingMode.prototype.None = 'none';
+/**
+ * The scale domain is extended in order to 
+ * coincide with the calculated ticks.
+ * <p>
+ * Ticks naturally are nice numbers, 
+ * yet, additionally, 
+ * this mode ensures that ticks coincide with 
+ * the end of the axis' scale,
+ * as long as the axis'
+ * {@link pvc.options.panels.CartesianAxisOptions#offset}
+ * is zero.
+ * 
+ * @value 'tick'
+ */
+pvc.options.varia.AxisDomainRoundingMode.prototype.Tick = 'tick';
+/**
+ * The layout modes that handle the situation where 
+ * labels of axes ticks overlap.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.AxisOverlappedLabelsMode = function(){};
+        
+        
+        
+        
+/**
+ * Hide labels that overlap.
+ * <p>
+ * Between two labels, as many as required are hidden
+ * until the minimum specified spacing is respected.
+ * <p>
+ * In the place of the hidden labels,
+ * a dot is placed that, 
+ * when hovering over, 
+ * indicates the value of the hidden labels.
+ * 
+ * @value 'hide'
+ */
+pvc.options.varia.AxisOverlappedLabelsMode.prototype.Hide = 'hide';
+/**
+ * Let labels overlap.
+ * 
+ * @value 'leave'
+ */
+pvc.options.varia.AxisOverlappedLabelsMode.prototype.Leave = 'leave';
 /**
  * Describes the distances from 
  * each of the four planar sides:
