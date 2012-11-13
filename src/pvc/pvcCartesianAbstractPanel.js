@@ -137,8 +137,8 @@ def
         // multiple axis are only continuous...
         var any = false,
             chart = this.chart,
-            xAxisPanel = chart.xAxisPanel,
-            yAxisPanel = chart.yAxisPanel,
+            xAxisPanel = chart.axesPanels.x,
+            yAxisPanel = chart.axesPanels.y,
             xDatumsByKey,
             yDatumsByKey;
 

@@ -13,6 +13,18 @@
             The options documentation class of the <b>Pie</b> chart.
         </c:documentation>
         
+        <c:property name="colorAxis" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
+            <c:documentation>
+                The first color axis options.
+                
+                This axis can also be accessed by the property name <tt>color</tt>.
+                
+                See <c:link to="pvc.options.axes.ColorAxis" />
+                for more information on the way that 
+                the color axes' properties may be accessed. 
+            </c:documentation>
+        </c:property>
+        
         <c:property name="pie" type="pvc.options.plots.PiePlot" category="Plots">
             <c:documentation>
                 The pie plot is the <b>main plot</b> of the pie chart,
@@ -144,17 +156,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="activeSliceRadius" type="number string" category="Layout">
-            <c:documentation>
-                Increment radius of an active slice, in pixel units or a percentage.
-                
-                When the value is a string, 
-                and if it is suffixed with "%", 
-                it represents a percentage of the 
-                biggest radius that can fit in the client area of the plot. 
-            </c:documentation>
-        </c:property>
-        
         <c:property name="activeSliceRadius" type="number string" default="'5%'" category="Layout">
             <c:documentation>
                 Increment radius of an <i>active</i> slice, 
@@ -166,7 +167,7 @@
                 biggest radius that can fit in the client area of the plot.
                 
                 This property is only relevant if 
-                <c:link to="pvc.options.charts.Chart.hoverable" /> is <tt>true</tt>.
+                <c:link to="pvc.options.charts.Chart#hoverable" /> is <tt>true</tt>.
                 
                 The <i>normal</i> radius is 
                 the biggest radius that can fit in the client area of the plot
@@ -194,7 +195,7 @@
                 minus the resolved active radius and 
                 minus the resolved exploded radius.
                 
-                See <c:link to="activeSliceRadius" /> and <c:link to="explodedSliceIndex" />.
+                See <c:link to="#activeSliceRadius" /> and <c:link to="#explodedSliceIndex" />.
             </c:documentation>
         </c:property>
         

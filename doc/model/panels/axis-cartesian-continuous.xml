@@ -54,7 +54,7 @@
             for continuous scale types (numeric or timeSeries).
         </c:documentation>
         
-        <c:property name="fixedMin" type="number string Date" default="0" category="Continuous > Scale">
+        <c:property name="fixedMin" type="number string Date" category="Continuous > Scale">
             <c:documentation>
                 The fixed minimum domain value that the axis will show (applies to continuous axes).
                 
@@ -76,7 +76,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="fixedMax" type="number string Date" default="0" category="Continuous > Scale">
+        <c:property name="fixedMax" type="number string Date" category="Continuous > Scale">
             <c:documentation>
                 The fixed maximum domain value that the axis will show (applies to continuous axes).
                 

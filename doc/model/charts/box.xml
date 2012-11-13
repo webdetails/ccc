@@ -14,7 +14,7 @@
         
         <c:property name="baseAxis" type="pvc.options.panels.FlattenedDiscreteCartesianAxis" category="Axes">
             <c:documentation>
-                The base axis panel.
+                The base cartesian axis panel options.
                 
                 When the chart <c:link to="pvc.options.charts.Chart#orientation" />
                 is <tt>vertical</tt> the base axis is laid out horizontally.
@@ -163,7 +163,7 @@
                 
                 The bar of a box is centered in each band. 
                 Bands may have space between them, 
-                depending on <c:link to="pvc.options.BoxplotChart#panelSizeRatio" />.
+                depending on <c:link to="pvc.options.charts.BoxplotChart#panelSizeRatio" />.
                 
                 A number between <tt>0.05</tt> and <tt>1</tt>.
                 

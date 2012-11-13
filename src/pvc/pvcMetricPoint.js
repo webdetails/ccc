@@ -175,11 +175,11 @@ def
         /* Continuous Color Role */
         // TODO:
         //colorScaleType: "linear", // "discrete", "normal" (distribution) or "linear"
-        //colorRange: ['red', 'yellow','green'],
-        //colorRangeInterval:  undefined,
-        //minColor:  undefined, //"white",
-        //maxColor:  undefined, //"darkgreen",
-        //nullColor: "#efc5ad"   // white with a shade of orange
+        //colors: ['red', 'yellow','green'],
+        //colorDomain:  undefined,
+        //colorMin:  undefined, //"white",
+        //colorMax:  undefined, //"darkgreen",
+        //colorNull: "#efc5ad"   // white with a shade of orange
          
         /* Size Role */
 //      sizeAxisUseAbs:   true,

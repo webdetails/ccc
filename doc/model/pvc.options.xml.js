@@ -171,6 +171,20 @@ pvc.options.charts.Chart.prototype.selectionChangedAction = function(){};
  */
 pvc.options.charts.Chart.prototype.userSelectionAction = function(){};
 /**
+ * The first color axis options.
+ * <p>
+ * This axis can also be accessed by the property name 
+ * <tt>color</tt>.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.ColorAxis
+ * @category Axes
+ */
+pvc.options.charts.Chart.prototype.colorAxis = undefined;
+/**
  * An array of dimensions calculations.
  * <p>
  * Can be specified to calculate the values of certain dimensions.
@@ -732,6 +746,14 @@ pvc.options.charts.Chart.prototype.title = undefined;
  * @category Style
  */
 pvc.options.charts.Chart.prototype.colors = undefined;
+/**
+ * The extension points object contains style definitions for 
+ * the marks of the chart.
+ * 
+ * @type pvc.options.ext.ChartExtensionPoints
+ * @category Style
+ */
+pvc.options.charts.Chart.prototype.extensionPoints = undefined;
 /**
  * The visual roles common to all chart types.
  * 
@@ -1359,14 +1381,6 @@ pvc.options.plots.Plot = function(){};
  */
 pvc.options.plots.Plot.prototype.colorAxis = undefined;
 /**
- * The extension points object contains style definitions for 
- * the marks of the chart.
- * 
- * @type pvc.options.ext.ChartExtensionPoints
- * @category Style
- */
-pvc.options.plots.Plot.prototype.extensionPoints = undefined;
-/**
  * 
  * Indicates if value labels are shown next to the visual elements.
  * 
@@ -1679,6 +1693,20 @@ pvc.options.charts.PieChart.prototype.smallWidth = undefined;
  */
 pvc.options.charts.PieChart.prototype.smallTitle = undefined;
 /**
+ * The first color axis options.
+ * <p>
+ * This axis can also be accessed by the property name 
+ * <tt>color</tt>.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.DiscreteColorAxis
+ * @category Axes
+ */
+pvc.options.charts.PieChart.prototype.colorAxis = undefined;
+/**
  * The visual roles that of the 
  * <i>pie</i> chart type.
  * 
@@ -1686,6 +1714,21 @@ pvc.options.charts.PieChart.prototype.smallTitle = undefined;
  * @category Data Binding
  */
 pvc.options.charts.PieChart.prototype.visualRoles = undefined;
+/**
+ * 
+ * The percentage size of the plot area that is 
+ * occupied by the pie.
+ * <p>
+ * An equivalent content paddings may be specified as: 
+ * ((1 - innerGap) * 100 / 2 ) + "%";
+ * 
+ * @deprecated 
+ * Use {@link pvc.options.charts.Chart#contentPaddings} instead.
+ * 
+ * @type number
+ * @category Layout
+ */
+pvc.options.charts.PieChart.prototype.innerGap = undefined;
 /**
  * The pie plot is the 
  * <b>main plot</b> of the pie chart,
@@ -1878,6 +1921,213 @@ pvc.options.plots.PiePlot = function(){};
         
         
 /**
+ * Increment radius of an 
+ * <i>active</i> slice, 
+ * in pixel units or as a percentage.
+ * <p>
+ * When the value is a string, 
+ * and if it is suffixed with "%", 
+ * it represents a percentage of the 
+ * biggest radius that can fit in the client area of the plot.
+ * <p>
+ * This property is only relevant if 
+ * {@link pvc.options.charts.Chart#hoverable} is 
+ * <tt>true</tt>.
+ * <p>
+ * The 
+ * <i>normal</i> radius is 
+ * the biggest radius that can fit in the client area of the plot
+ * minus the space occupied by linked labels,
+ * minus the resolved active radius and 
+ * minus the resolved exploded radius.
+ * <p>
+ * See {@link #explodedSliceRadius}.
+ * 
+ * @type number|string
+ * @default '5%'
+ * @category Layout
+ */
+pvc.options.plots.PiePlot.prototype.activeSliceRadius = undefined;
+/**
+ * The index of the exploded slice,
+ * or 
+ * <tt>null</tt>, 
+ * for all slices to be exploded.
+ * <p>
+ * The exploded slice or slices 
+ * are shown exploded 
+ * only when {@link #explodedSliceRadius} 
+ * is greater than 
+ * <tt>0</tt>.
+ * 
+ * @type number
+ * @default null
+ * @category Layout
+ */
+pvc.options.plots.PiePlot.prototype.explodedSliceIndex = undefined;
+/**
+ * Increment radius of an 
+ * <i>exploded</i> slice, 
+ * in pixel units or as a percentage.
+ * <p>
+ * When the value is a string,
+ * and if it is suffixed with "%",
+ * it represents a percentage of the 
+ * biggest radius that can fit in the client area of the plot.
+ * <p>
+ * The 
+ * <i>normal</i> radius is 
+ * the biggest radius that can fit in the client area of the plot
+ * minus the space occupied by linked labels,
+ * minus the resolved active radius and 
+ * minus the resolved exploded radius.
+ * <p>
+ * See {@link #activeSliceRadius} and {@link #explodedSliceIndex}.
+ * 
+ * @type number|string
+ * @default 0
+ * @category Layout
+ */
+pvc.options.plots.PiePlot.prototype.explodedSliceRadius = undefined;
+/**
+ * The style used to place value labels.
+ * 
+ * @type pvc.options.varia.PieValuesLabelStyle
+ * @default 'linked'
+ * @category Layout
+ */
+pvc.options.plots.PiePlot.prototype.valuesLabelStyle = undefined;
+/**
+ * The values mask used to build the text of value labels.
+ * <p>
+ * The mask may contain scene variable names and/or scene atom names,
+ * like in the examples:
+ * 
+ * <ul>
+ * 
+ * <li>scene variables: 
+ * <tt>{category}: {value} EUR</tt>, could yield 
+ * <tt>Drinks: 3.45 EUR</tt></li>
+ * 
+ * <li>atom variables:  
+ * <tt>{#family} - {#product}</tt>, could yield 
+ * <tt>Plains - Boeing 747</tt></li>
+ * </ul> 
+ * <p>
+ * The default value depends on the label style:
+ * 
+ * <ul>
+ * 
+ * <li>
+ * <tt>inside</tt> - 
+ * <tt>{value}</tt></li>
+ * 
+ * <li>
+ * <tt>linked</tt> - 
+ * <tt>{value} ({value.percent})</tt></li>
+ * </ul>
+ * <p>
+ * The 
+ * <tt>percent</tt> variable is a 
+ * sub-variable of the 
+ * <tt>value</tt> scene variable.
+ * 
+ * @type string
+ * @category Layout
+ */
+pvc.options.plots.PiePlot.prototype.valuesMask = undefined;
+/**
+ * The width of the link line handle width, in 
+ * <i>em</i> units.
+ * <p>
+ * The 
+ * <i>handle</i> is 
+ * the last segment of the link line,
+ * an horizontal line segment just before the label. 
+ * 
+ * @type number
+ * @default 0.5
+ * @category Layout > Linked Labels
+ */
+pvc.options.plots.PiePlot.prototype.linkHandleWidth = undefined;
+/**
+ * The length of the link line segment that is 
+ * inset into a slice,
+ * in pixel units, or as a percentage.
+ * <p>
+ * When the value is a string,
+ * and if it is suffixed with "%",
+ * it represents a percentage of the 
+ * biggest radius that can fit in the client area of the plot.
+ * 
+ * @type number|string
+ * @default '5%'
+ * @category Layout > Linked Labels
+ */
+pvc.options.plots.PiePlot.prototype.linkInsetRadius = undefined;
+/**
+ * The width of the columns reserved, 
+ * on each side of the pie,
+ * for laying out the linked label marks.
+ * <p>
+ * When the value is a string,
+ * and if it is suffixed with "%",
+ * it represents a percentage of the 
+ * 
+ * <i>client width</i> of the plot.
+ * 
+ * @type number|string
+ * @default '15%'
+ * @category Layout > Linked Labels
+ */
+pvc.options.plots.PiePlot.prototype.linkLabelSize = undefined;
+/**
+ * The minimum vertical space between consecutive link labels, 
+ * in 
+ * <i>em</i> units.
+ * 
+ * @type number
+ * @default 0.5
+ * @category Layout > Linked Labels
+ */
+pvc.options.plots.PiePlot.prototype.linkLabelSpacingMin = undefined;
+/**
+ * The width of the space 
+ * that separates the label from 
+ * the end of the line segment that starts in the link elbow,
+ * in pixel units, or as a percentage.
+ * <p>
+ * The value of this property includes 
+ * the size of the link line handle.
+ * <p>
+ * When the value is a string,
+ * and if it is suffixed with "%",
+ * it represents a percentage of the 
+ * 
+ * <i>client width</i> of the plot.
+ * 
+ * @type number|string
+ * @default '2.5%'
+ * @category Layout > Linked Labels
+ */
+pvc.options.plots.PiePlot.prototype.linkMargin = undefined;
+/**
+ * The length of the link line segment that 
+ * extends outwards from the slice, 
+ * until it reaches the link line "elbow",
+ * in pixel units, or as a percentage.
+ * <p>
+ * When the value is a string,
+ * and if it is suffixed with "%",
+ * it represents a percentage of the 
+ * biggest radius that can fit in the client area of the plot.
+ * 
+ * @type number|string
+ * @default '2.5%'
+ * @category Layout > Linked Labels
+ */
+pvc.options.plots.PiePlot.prototype.linkOutsetRadius = undefined;
+/**
  * The extension points object 
  * contains style definitions for 
  * various visual elements of the chart.
@@ -1886,6 +2136,23 @@ pvc.options.plots.PiePlot = function(){};
  * @category Style
  */
 pvc.options.plots.PiePlot.prototype.extensionPoints = undefined;
+/**
+ * The alignment of a non-linked value label
+ * relative to its corresponding visual element position.
+ * 
+ * @type function|pvc.options.varia.WedgeAnchor
+ * @default 'outer'
+ * @category Style
+ */
+pvc.options.plots.PiePlot.prototype.valuesAnchor = undefined;
+/**
+ * Indicates if value labels are shown per visual element.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.PiePlot.prototype.valuesVisible = undefined;
 /**
  * The extension points of the pie plot type.
  * <p>
@@ -2042,7 +2309,7 @@ pvc.options.charts.CartesianChart = function(){};
         
         
 /**
- * The base axis panel.
+ * The base cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -2056,7 +2323,7 @@ pvc.options.charts.CartesianChart = function(){};
  */
 pvc.options.charts.CartesianChart.prototype.baseAxis = undefined;
 /**
- * The orthogonal axis panel.
+ * The orthogonal cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -2206,26 +2473,6 @@ pvc.options.ext.CartesianChartExtensionPoints = function(){};
  * @type pvc.options.marks.PanelExtensionPoint
  */
 pvc.options.ext.CartesianChartExtensionPoints.prototype.plotFrame = undefined;
-/**
- * The extension point of the grid line rules that are drawn 
- * one per major tick of the 
- * <ii>XX</ii> axis 
- * (an horizontal axis has vertical grid line rules).
- * 
- * @type pvc.options.marks.RuleExtensionPoint
- * @category Axes
- */
-pvc.options.ext.CartesianChartExtensionPoints.prototype.xAxisGrid = undefined;
-/**
- * The extension point of the grid line rules that are drawn 
- * one per major tick of the 
- * <ii>YY</ii> axis 
- * (a vertical axis has horizontal grid line rules).
- * 
- * @type pvc.options.marks.RuleExtensionPoint
- * @category Axes
- */
-pvc.options.ext.CartesianChartExtensionPoints.prototype.yAxisGrid = undefined;
 /**
  * The common options documentation class of 
  * <b>cartesian</b> plots.
@@ -2592,7 +2839,21 @@ pvc.options.charts.CategoricalNumericChart.prototype.smallWidth = undefined;
  */
 pvc.options.charts.CategoricalNumericChart.prototype.smallTitle = undefined;
 /**
- * The orthogonal axis panel.
+ * The first color axis options.
+ * <p>
+ * This axis can also be accessed by the property name 
+ * <tt>color</tt>.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.DiscreteColorAxis
+ * @category Axes
+ */
+pvc.options.charts.CategoricalNumericChart.prototype.colorAxis = undefined;
+/**
+ * The orthogonal cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -2804,7 +3065,7 @@ pvc.options.charts.BoxplotChart = function(){};
         
         
 /**
- * The base axis panel.
+ * The base cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -2825,6 +3086,18 @@ pvc.options.charts.BoxplotChart.prototype.baseAxis = undefined;
  * @category Data Binding
  */
 pvc.options.charts.BoxplotChart.prototype.visualRoles = undefined;
+/**
+ * Percentage of occupied space over total space 
+ * in a discrete axis band.
+ * <p>
+ * The remaining space will be of 
+ * margins between bands.
+ * 
+ * @type number
+ * @default 0.9
+ * @category Layout
+ */
+pvc.options.charts.BoxplotChart.prototype.panelSizeRatio = undefined;
 /**
  * The box plot is the 
  * <b>main plot</b> of the box plot chart,
@@ -2983,6 +3256,36 @@ pvc.options.plots.BoxplotPlot = function(){};
  */
 pvc.options.plots.BoxplotPlot.prototype.stacked = false;
 /**
+ * The maximum width of a box plot bar, in pixel units.
+ * <p>
+ * A number not less than 
+ * <tt>1</tt>, possibly infinity.
+ * 
+ * @type number
+ * @default Infinity
+ * @category Style
+ */
+pvc.options.plots.BoxplotPlot.prototype.boxSizeMax = undefined;
+/**
+ * The percentage of space of each band that is occupied by the box bar.
+ * <p>
+ * The bar of a box is centered in each band. 
+ * Bands may have space between them, 
+ * depending on {@link pvc.options.charts.BoxplotChart#panelSizeRatio}.
+ * <p>
+ * A number between 
+ * <tt>0.05</tt> and 
+ * <tt>1</tt>.
+ * <p>
+ * The default value is the result of 
+ * <tt>1/3</tt>.
+ * 
+ * @type number
+ * @default 0.333
+ * @category Style
+ */
+pvc.options.plots.BoxplotPlot.prototype.boxSizeRatio = undefined;
+/**
  * The extension points object contains style definitions for 
  * the marks of the plot.
  * 
@@ -2990,6 +3293,16 @@ pvc.options.plots.BoxplotPlot.prototype.stacked = false;
  * @category Style
  */
 pvc.options.plots.BoxplotPlot.prototype.extensionPoints = undefined;
+/**
+ * 
+ * The maximum width of a box plot bar, in pixel units.
+ * 
+ * @deprecated Use {@link #boxSizeMax} instead.
+ * @type number
+ * @default Infinity
+ * @category Style
+ */
+pvc.options.plots.BoxplotPlot.prototype.maxBoxSize = undefined;
 /**
  * The extension points of the box plot type.
  * <p>
@@ -3086,7 +3399,7 @@ pvc.options.charts.HeatGridChart = function(){};
         
         
 /**
- * The base axis panel.
+ * The base cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -3100,7 +3413,21 @@ pvc.options.charts.HeatGridChart = function(){};
  */
 pvc.options.charts.HeatGridChart.prototype.baseAxis = undefined;
 /**
- * The orthogonal axis panel.
+ * The first color axis options.
+ * <p>
+ * This axis can also be accessed by the property name 
+ * <tt>color</tt>.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.HeatGridColorAxis
+ * @category Axes
+ */
+pvc.options.charts.HeatGridChart.prototype.colorAxis = undefined;
+/**
+ * The orthogonal cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -3114,9 +3441,16 @@ pvc.options.charts.HeatGridChart.prototype.baseAxis = undefined;
  */
 pvc.options.charts.HeatGridChart.prototype.orthoAxis = undefined;
 /**
+ * The size axis options.
  * 
- * Indicates if the chart axes are shown
- * in a hierarchical form.
+ * @type pvc.options.axes.SizeAxis
+ * @category Axes
+ */
+pvc.options.charts.HeatGridChart.prototype.sizeAxis = undefined;
+/**
+ * 
+ * Indicates if the cartesian axes are shown
+ * in a composite/hierarchical form.
  * 
  * @deprecated Use {@link pvc.options.panels.AnyDiscreteCartesianAxis#composite} instead.
  * @type boolean
@@ -3247,6 +3581,58 @@ pvc.options.plots.HeatGridPlot = function(){};
  */
 pvc.options.plots.HeatGridPlot.prototype.extensionPoints = undefined;
 /**
+ * The shape to use when the value of the 
+ * <i>size</i> role is 
+ * <tt>null</tt>.
+ * <p>
+ * See {@link #useShapes}.
+ * 
+ * @type pvc.options.varia.DotShapeType
+ * @default 'cross'
+ * @category Style
+ */
+pvc.options.plots.HeatGridPlot.prototype.nullShape = undefined;
+/**
+ * The shape to use in the dot mark (applies when using shapes).
+ * <p>
+ * See {@link #useShapes}.
+ * 
+ * @type pvc.options.varia.DotShapeType
+ * @default 'square'
+ * @category Style
+ */
+pvc.options.plots.HeatGridPlot.prototype.shape = undefined;
+/**
+ * Indicates if the heat-grid uses as visual elements 
+ * dot-shapes, within each grid cell.
+ * <p>
+ * When 
+ * <tt>false</tt> the visual elements are the grid cells
+ * themselves.
+ * <p>
+ * When shapes are used the 
+ * {@link pvc.options.roles.HeatGridVisualRoles#size} 
+ * visual role can be used.
+ * 
+ * @type boolean
+ * @default false
+ * @category Style
+ */
+pvc.options.plots.HeatGridPlot.prototype.useShapes = undefined;
+/**
+ * Indicates if value labels are shown next to the visual elements.
+ * <p>
+ * The heat-grid shows as values 
+ * the color role value, if bound, 
+ * or, otherwise, 
+ * the size role value, if bound.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.HeatGridPlot.prototype.valuesVisible = undefined;
+/**
  * The extension points of the 
  * <i>Heat grid</i> plot types.
  * <p>
@@ -3317,7 +3703,7 @@ pvc.options.charts.BarChartCommon = function(){};
         
         
 /**
- * The base axis panel.
+ * The base cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -3407,6 +3793,41 @@ pvc.options.plots.BarPlotCommon = function(){};
         
         
 /**
+ * The maximum width of a bar, in pixel units.
+ * <p>
+ * A number not less than 
+ * <tt>1</tt>, possibly infinity.
+ * 
+ * @type number
+ * @default 2000
+ * @category Style
+ */
+pvc.options.plots.BarPlotCommon.prototype.barSizeMax = undefined;
+/**
+ * The percentage of the grouped bar width 
+ * versus the space between grouped bars (does not apply to stacked bars).
+ * <p>
+ * A number between 
+ * <tt>0.05</tt> and 
+ * <tt>1</tt>.
+ * 
+ * @type number
+ * @default 0.9
+ * @category Style
+ */
+pvc.options.plots.BarPlotCommon.prototype.barSizeRatio = undefined;
+/**
+ * The space between bars of a given stack, in pixel units 
+ * (applies to stacked bars).
+ * <p>
+ * A non-negative number.
+ * 
+ * @type number
+ * @default 0
+ * @category Style
+ */
+pvc.options.plots.BarPlotCommon.prototype.barStackedMargin = undefined;
+/**
  * The extension points object contains style definitions for 
  * the marks of the plot.
  * 
@@ -3414,6 +3835,39 @@ pvc.options.plots.BarPlotCommon = function(){};
  * @category Style
  */
 pvc.options.plots.BarPlotCommon.prototype.extensionPoints = undefined;
+/**
+ * 
+ * The maximum width of a bar, in pixel units.
+ * 
+ * @deprecated Use {@link #barSizeMax} instead.
+ * @type number
+ * @default 2000
+ * @category Style
+ */
+pvc.options.plots.BarPlotCommon.prototype.maxBarSize = undefined;
+/**
+ * Indicates if overflow and underflow markers are shown 
+ * when the bars are drawn off the plot area.
+ * <p>
+ * Bars can be drawn off the plot area by use of the 
+ * continuous axis properties 
+ * <tt>fixedMin</tt> and 
+ * <tt>fixedMax</tt>. 
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.BarPlotCommon.prototype.overflowMarkersVisible = undefined;
+/**
+ * The alignment of a value label 
+ * relative to its corresponding visual element position.
+ * 
+ * @type function|pvc.options.varia.MarkAnchor
+ * @default 'center'
+ * @category Style
+ */
+pvc.options.plots.BarPlotCommon.prototype.valuesAnchor = undefined;
 /**
  * The extension points of the 
  * <i>bar family</i> plot types.
@@ -3730,6 +4184,13 @@ pvc.options.plots.NormalizedBarPlot = function(){};
         
         
 /**
+ * This plot type is necessarily stacked.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.NormalizedBarPlot.prototype.stacked = true;
+/**
  * The options documentation class of the 
  * <b>Waterfall</b> chart.
  * 
@@ -3765,6 +4226,39 @@ pvc.options.plots.WaterfallPlot = function(){};
         
         
 /**
+ * This plot type is necessarily stacked.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.WaterfallPlot.prototype.stacked = true;
+/**
+ * The description of the fictitious root category 
+ * that aggregates all other categories.
+ * 
+ * @type string
+ * @default 'All'
+ * @category Style
+ */
+pvc.options.plots.WaterfallPlot.prototype.allCategoryLabel = undefined;
+/**
+ * Indicates if areas are shown surrounding the bars of each 
+ * category group.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.WaterfallPlot.prototype.areasVisible = undefined;
+/**
+ * The direction of the waterfall.
+ * 
+ * @type pvc.options.varia.WaterDirection
+ * @default 'down'
+ * @category Style
+ */
+pvc.options.plots.WaterfallPlot.prototype.direction = undefined;
+/**
  * The extension points object contains style definitions for 
  * the marks of the plot.
  * 
@@ -3772,6 +4266,27 @@ pvc.options.plots.WaterfallPlot = function(){};
  * @category Style
  */
 pvc.options.plots.WaterfallPlot.prototype.extensionPoints = undefined;
+/**
+ * The description of the legend item of
+ * the water line.
+ * 
+ * @type string
+ * @default 'Accumulated'
+ * @category Style
+ */
+pvc.options.plots.WaterfallPlot.prototype.waterLineLabel = undefined;
+/**
+ * Indicates if value labels are shown above or below
+ * the water line showing the accumulated value.
+ * <p>
+ * The default value is 
+ * the value of the property
+ * {@link pvc.options.plots.Plot#valuesVisible}. 
+ * 
+ * @type boolean
+ * @category Style
+ */
+pvc.options.plots.WaterfallPlot.prototype.waterValuesVisible = undefined;
 /**
  * The extension points of the waterfall plot type.
  * <p>
@@ -3915,7 +4430,7 @@ pvc.options.charts.PointChart.prototype.color2AxisColors = undefined;
  */
 pvc.options.charts.PointChart.prototype.trend = undefined;
 /**
- * The base axis panel.
+ * The base cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -4056,6 +4571,15 @@ pvc.options.plots.PointPlot.prototype.extensionPoints = undefined;
  * @category Style
  */
 pvc.options.plots.PointPlot.prototype.showAreas = undefined;
+/**
+ * The alignment of a value label 
+ * relative to its corresponding visual element position.
+ * 
+ * @type function|pvc.options.varia.MarkAnchor
+ * @default 'right'
+ * @category Style
+ */
+pvc.options.plots.PointPlot.prototype.valuesAnchor = undefined;
 /**
  * The extension points common to the 
  * <b>point</b> plot types.
@@ -4683,7 +5207,7 @@ pvc.options.charts.MetricPointChart.prototype.smallWidth = undefined;
  */
 pvc.options.charts.MetricPointChart.prototype.smallTitle = undefined;
 /**
- * The base axis panel.
+ * The base cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -4697,7 +5221,21 @@ pvc.options.charts.MetricPointChart.prototype.smallTitle = undefined;
  */
 pvc.options.charts.MetricPointChart.prototype.baseAxis = undefined;
 /**
- * The orthogonal axis panel.
+ * The first color axis options.
+ * <p>
+ * This axis can also be accessed by the property name 
+ * <tt>color</tt>.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.AnyColorAxis
+ * @category Axes
+ */
+pvc.options.charts.MetricPointChart.prototype.colorAxis = undefined;
+/**
+ * The orthogonal cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
  * is 
@@ -4710,6 +5248,13 @@ pvc.options.charts.MetricPointChart.prototype.baseAxis = undefined;
  * @category Axes
  */
 pvc.options.charts.MetricPointChart.prototype.orthoAxis = undefined;
+/**
+ * The size axis options.
+ * 
+ * @type pvc.options.axes.SizeAxis
+ * @category Axes
+ */
+pvc.options.charts.MetricPointChart.prototype.sizeAxis = undefined;
 /**
  * The visual roles common to the 
  * <b>metric point</b> chart types.
@@ -5054,6 +5599,23 @@ pvc.options.plots.MetricPointPlot.prototype.trend = undefined;
  * @category Style
  */
 pvc.options.plots.MetricPointPlot.prototype.extensionPoints = undefined;
+/**
+ * Forces a given shape to be used in the dot mark.
+ * 
+ * @type pvc.options.varia.DotShapeType
+ * @default 'circle'
+ * @category Style
+ */
+pvc.options.plots.MetricPointPlot.prototype.shape = undefined;
+/**
+ * The alignment of a value label 
+ * relative to its corresponding visual element position.
+ * 
+ * @type function|pvc.options.varia.MarkAnchor
+ * @default 'right'
+ * @category Style
+ */
+pvc.options.plots.MetricPointPlot.prototype.valuesAnchor = undefined;
 /**
  * The options documentation class of the 
  * <b>Metric Line</b> chart.
@@ -5497,6 +6059,674 @@ pvc.options.marks.ImageExtensionPoint = function(){};
         
         
 /**
+ * The namespace of CCC axes options classes. 
+ * 
+ * @namespace
+ */
+pvc.options.axes = {};
+
+/**
+ * The options documentation class of the color axis.
+ * <p>
+ * A color axis panel and its properties 
+ * can be referred to in several ways,
+ * in order of precedence:
+ * 
+ * <dl>
+ * 
+ * <dt>By 
+ * <b>full id</b></dt>
+ * 
+ * <dd>
+ * the id of the axis is the word 
+ * <tt>color</tt>, 
+ * followed by it's index (when >= 2),
+ * and terminated by the word 
+ * <tt>Axis</tt>.
+ * </dd>
+ * 
+ * <dd>(ex: 
+ * <tt>colorAxis</tt>, 
+ * <tt>color2Axis</tt>, 
+ * <tt>color3Axis</tt>, ...)</dd>
+ * 
+ * <dt>By the single word 
+ * <tt>color</tt>, when it is the first one</dt>
+ * 
+ * <dd>
+ * to make it easier to specify the properties of 
+ * the most used color axis - the first one - 
+ * it can be referred to without the suffix 
+ * <tt>Axis</tt>,
+ * resulting in the name 
+ * <tt>color</tt>.
+ * </dd>
+ * 
+ * <dt>Without id, when it is the first one, for legend properties and the 
+ * <tt>colors</tt> property</dt>
+ * 
+ * <dd>
+ * Legend related properties of the first axis
+ * can be referred to directly, without the axis id.
+ * The same applies to the property 
+ * <tt>colors</tt>.
+ * <p>
+ * As an example, 
+ * the name of the property 
+ * <tt>legendDrawLine</tt> 
+ * can be used directly, instead of its full name:
+ * 
+ * <tt>colorLegendDrawLine</tt>.
+ * <p>
+ * For color axes other than the first, 
+ * the legend properties still need to be referred to 
+ * with its full name, like in:
+ * 
+ * <tt>color2AxisLegendDrawLine</tt>.
+ * </dd>
+ * </dl>
+ * <p>
+ * The domain of color axes 
+ * is evaluated at the root chart level. 
+ * When in a 
+ * <i>small multiples</i> chart, 
+ * colors are shared among 
+ * <i>small</i> charts.
+ * <p>
+ * For more information on options
+ * that are specific to only certain color axis types,
+ * please see one of the following concrete sub-classes:
+ * 
+ * <ul>
+ * 
+ * <li>
+ * Numeric or discrete domain color axes: {@link pvc.options.axes.AnyColorAxis}
+ * </li>
+ * 
+ * <li>
+ * Discrete domain color axes: {@link pvc.options.axes.DiscreteColorAxis}
+ * </li>
+ * 
+ * <li>
+ * Heat-grid - numeric domain color axis: {@link pvc.options.axes.HeatGridColorAxis}
+ * </li>
+ * </ul>
+ * 
+ * @class
+ */
+pvc.options.axes.ColorAxis = function(){};
+        
+        
+        
+        
+/**
+ * The colors of a color axis.
+ * <p>
+ * It can be a single color as documented in 
+ * {@link pvc.options.varia.ColorString} or 
+ * a single 
+ * <i>protovis</i> color object 
+ * (like: 
+ * <tt>pv.color('red')</tt> or 
+ * <tt>pv.Color.names.blueviolet</tt>).
+ * <p>
+ * Additionally, an array of color strings or 
+ * 
+ * <i>protovis</i> colors can be specified.
+ * <p>
+ * If a function is specified, it can be:
+ * 
+ * <ul>
+ * 
+ * <li>
+ * 
+ * <b>a protovis scale</b>,
+ * like the one obtained by:
+ * 
+ * <tt>pv.colors('red', 'blueviolet')</tt>
+ * </li>
+ * 
+ * <li>
+ * 
+ * <b>a scale factory</b> - a function that 
+ * given the domain values as arguments
+ * return a protovis color scale
+ * </li>
+ * </ul>
+ * <p>
+ * The default color scheme depends on the 
+ * axis domain being discrete or numeric.
+ * <p>
+ * For 
+ * <b>discrete domains</b>, the default value is the 
+ * <i>protovis</i>
+ * 
+ * <tt>category10</tt> color scheme:
+ * 
+ * <ol style='font-weight:bold'>
+ * 
+ * <li style='color:#1f77b4'>value</li> 
+ * 
+ * <li style='color:#ff7f0e'>value</li>
+ * 
+ * <li style='color:#2ca02c'>value</li>
+ * 
+ * <li style='color:#d62728'>value</li>
+ * 
+ * <li style='color:#9467bd'>value</li>
+ * 
+ * <li style='color:#8c564b'>value</li>
+ * 
+ * <li style='color:#e377c2'>value</li>
+ * 
+ * <li style='color:#7f7f7f'>value</li>
+ * 
+ * <li style='color:#bcbd22'>value</li>
+ * 
+ * <li style='color:#17becf'>value</li>
+ * </ol>
+ * <p>
+ * For 
+ * <b>numeric domains</b>, the default value is the
+ * color scheme:
+ * 
+ * <ol style='font-weight:bold'>
+ * 
+ * <li style='color:red'>value</li> 
+ * 
+ * <li style='color:yellow'>value</li>
+ * 
+ * <li style='color:green'>value</li>
+ * </ol>
+ * 
+ * @type pvc.options.varia.ColorString|pv.Color|list(pvc.options.varia.ColorString|pv.Color)|function
+ * @category Scale
+ */
+pvc.options.axes.ColorAxis.prototype.colors = undefined;
+/**
+ * The color transform function.
+ * <p>
+ * Allows applying an effect to the colors that an axis outputs.
+ * <p>
+ * The default value is 
+ * <tt>null</tt> 
+ * except for color axes that are used only by one of
+ * the 
+ * <tt>trend</tt> or 
+ * <tt>plot2</tt> plots,
+ * and whose 
+ * <tt>colors</tt> property was not specified.
+ * In these cases, the default value is
+ * 
+ * <tt>pvc.brighterColorTransform</tt>.
+ * 
+ * @returns {pv.Color}
+ * The transformed color.
+ * 
+ * @method
+ * @this null
+ * @param {pv.Color} color
+ * The color to transform.
+ * 
+ * @category Scale
+ */
+pvc.options.axes.ColorAxis.prototype.transform = function(){};
+/**
+ * The options documentation class of a color axis
+ * that can have either a discrete or numeric domain.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for additional information.
+ * 
+ * @class
+ * @extends pvc.options.axes.ColorAxis
+ */
+pvc.options.axes.AnyColorAxis = function(){};
+        
+        
+        
+        
+/**
+ * What happens when the user clicks a legend item
+ * (applies to discrete domain axes).
+ * <p>
+ * Note that when 
+ * {@link pvc.options.charts.Chart#hoverable}
+ * is 
+ * <tt>true</tt>, 
+ * the legend item marker will be hoverable.
+ * <p>
+ * When {@link pvc.options.charts.Chart#selectable}
+ * is 
+ * <tt>true</tt>, 
+ * the legend item marker will be selectable,
+ * whatever the value of this property is.
+ * In that case, only the label part of the legend marker,
+ * will respect this property.
+ * 
+ * @type pvc.options.varia.LegendClickMode
+ * @default 'toggleVisible'
+ * @category Discrete > Style
+ */
+pvc.options.axes.AnyColorAxis.prototype.legendClickMode = undefined;
+/**
+ * Forces a rule to be shown or not in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type boolean
+ * @category Discrete > Style
+ */
+pvc.options.axes.AnyColorAxis.prototype.legendDrawLine = undefined;
+/**
+ * Forces a shape to be shown or not in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type boolean
+ * @category Discrete > Style
+ */
+pvc.options.axes.AnyColorAxis.prototype.legendDrawMarker = undefined;
+/**
+ * Forces a given shape to be used in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type pvc.options.varia.DotShapeType
+ * @category Discrete > Style
+ */
+pvc.options.axes.AnyColorAxis.prototype.legendShape = undefined;
+/**
+ * Indicates if the legend items of this color axis
+ * should be visible
+ * (applies to discrete domain axes).
+ * 
+ * @type boolean
+ * @default true
+ * @category Discrete > Style
+ */
+pvc.options.axes.AnyColorAxis.prototype.legendVisible = undefined;
+/**
+ * The domain values
+ * (applies to numeric domain axes).
+ * 
+ * @type list(pvc.options.varia.ColorString)
+ * @category Numeric > Scale
+ */
+pvc.options.axes.AnyColorAxis.prototype.domain = undefined;
+/**
+ * The maximum color
+ * (applies to numeric domain axes).
+ * 
+ * @type pvc.options.varia.ColorString|pv.Color
+ * @category Numeric > Scale
+ */
+pvc.options.axes.AnyColorAxis.prototype.max = undefined;
+/**
+ * The minimum color
+ * (applies to numeric domain axes).
+ * 
+ * @type pvc.options.varia.ColorString|pv.Color
+ * @category Numeric > Scale
+ */
+pvc.options.axes.AnyColorAxis.prototype.min = undefined;
+/**
+ * The color used for a null domain value
+ * (applies to numeric domain axes).
+ * <p>
+ * The default value is 
+ * 
+ * <span style='color:#efc5ad;font-weight:bold'>this color</span>.
+ * 
+ * @type pvc.options.varia.ColorString|pv.Color
+ * @default '#efc5ad'
+ * @category Numeric > Scale
+ */
+pvc.options.axes.AnyColorAxis.prototype.missing = undefined;
+/**
+ * The type of scale to use, 
+ * in what concerns the range of the scale
+ * (applies to numeric domain axes).
+ * 
+ * @type pvc.options.varia.ColorScaleType
+ * @default 'linear'
+ * @category Numeric > Scale
+ */
+pvc.options.axes.AnyColorAxis.prototype.scaleType = undefined;
+/**
+ * Indicates if the axis scale is 
+ * applied over the absolute value of the domain values
+ * (applies to numeric domain axes).
+ * 
+ * @type boolean
+ * @default false
+ * @category Numeric > Scale
+ */
+pvc.options.axes.AnyColorAxis.prototype.useAbs = undefined;
+/**
+ * The options documentation class of a discrete domain color axis.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for additional information.
+ * 
+ * @class
+ * @extends pvc.options.axes.ColorAxis
+ */
+pvc.options.axes.DiscreteColorAxis = function(){};
+        
+        
+        
+        
+/**
+ * What happens when the user clicks a legend item
+ * (applies to discrete domain axes).
+ * <p>
+ * Note that when 
+ * {@link pvc.options.charts.Chart#hoverable}
+ * is 
+ * <tt>true</tt>, 
+ * the legend item marker will be hoverable.
+ * <p>
+ * When {@link pvc.options.charts.Chart#selectable}
+ * is 
+ * <tt>true</tt>, 
+ * the legend item marker will be selectable,
+ * whatever the value of this property is.
+ * In that case, only the label part of the legend marker,
+ * will respect this property.
+ * 
+ * @type pvc.options.varia.LegendClickMode
+ * @default 'toggleVisible'
+ * @category Discrete > Style
+ */
+pvc.options.axes.DiscreteColorAxis.prototype.legendClickMode = undefined;
+/**
+ * Forces a rule to be shown or not in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type boolean
+ * @category Discrete > Style
+ */
+pvc.options.axes.DiscreteColorAxis.prototype.legendDrawLine = undefined;
+/**
+ * Forces a shape to be shown or not in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type boolean
+ * @category Discrete > Style
+ */
+pvc.options.axes.DiscreteColorAxis.prototype.legendDrawMarker = undefined;
+/**
+ * Forces a given shape to be used in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type pvc.options.varia.DotShapeType
+ * @category Discrete > Style
+ */
+pvc.options.axes.DiscreteColorAxis.prototype.legendShape = undefined;
+/**
+ * Indicates if the legend items of this color axis
+ * should be visible
+ * (applies to discrete domain axes).
+ * 
+ * @type boolean
+ * @default true
+ * @category Discrete > Style
+ */
+pvc.options.axes.DiscreteColorAxis.prototype.legendVisible = undefined;
+/**
+ * The options documentation class of the 
+ * HeatGrid numeric color axis.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for additional information.
+ * 
+ * @class
+ * @extends pvc.options.axes.ColorAxis
+ */
+pvc.options.axes.HeatGridColorAxis = function(){};
+        
+        
+        
+        
+/**
+ * What happens when the user clicks a legend item
+ * (applies to discrete domain axes).
+ * <p>
+ * Note that when 
+ * {@link pvc.options.charts.Chart#hoverable}
+ * is 
+ * <tt>true</tt>, 
+ * the legend item marker will be hoverable.
+ * <p>
+ * When {@link pvc.options.charts.Chart#selectable}
+ * is 
+ * <tt>true</tt>, 
+ * the legend item marker will be selectable,
+ * whatever the value of this property is.
+ * In that case, only the label part of the legend marker,
+ * will respect this property.
+ * 
+ * @type pvc.options.varia.LegendClickMode
+ * @default 'toggleVisible'
+ * @category Discrete > Style
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.legendClickMode = undefined;
+/**
+ * Forces a rule to be shown or not in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type boolean
+ * @category Discrete > Style
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.legendDrawLine = undefined;
+/**
+ * Forces a shape to be shown or not in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type boolean
+ * @category Discrete > Style
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.legendDrawMarker = undefined;
+/**
+ * Forces a given shape to be used in the marker zone
+ * (applies to discrete domain axes).
+ * <p>
+ * The default value depends on the chart type.
+ * 
+ * @type pvc.options.varia.DotShapeType
+ * @category Discrete > Style
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.legendShape = undefined;
+/**
+ * Indicates if the legend items of this color axis
+ * should be visible
+ * (applies to discrete domain axes).
+ * 
+ * @type boolean
+ * @default true
+ * @category Discrete > Style
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.legendVisible = undefined;
+/**
+ * The domain values
+ * (applies to numeric domain axes).
+ * 
+ * @type list(pvc.options.varia.ColorString)
+ * @category Numeric > Scale
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.domain = undefined;
+/**
+ * The maximum color
+ * (applies to numeric domain axes).
+ * 
+ * @type pvc.options.varia.ColorString|pv.Color
+ * @category Numeric > Scale
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.max = undefined;
+/**
+ * The minimum color
+ * (applies to numeric domain axes).
+ * 
+ * @type pvc.options.varia.ColorString|pv.Color
+ * @category Numeric > Scale
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.min = undefined;
+/**
+ * The color used for a null domain value
+ * (applies to numeric domain axes).
+ * <p>
+ * The default value is 
+ * 
+ * <span style='color:#efc5ad;font-weight:bold'>this color</span>.
+ * 
+ * @type pvc.options.varia.ColorString|pv.Color
+ * @default '#efc5ad'
+ * @category Numeric > Scale
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.missing = undefined;
+/**
+ * The type of scale to use, 
+ * in what concerns the range of the scale
+ * (applies to numeric domain axes).
+ * 
+ * @type pvc.options.varia.ColorScaleType
+ * @default 'linear'
+ * @category Numeric > Scale
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.scaleType = undefined;
+/**
+ * Indicates if the axis scale is 
+ * applied over the absolute value of the domain values
+ * (applies to numeric domain axes).
+ * 
+ * @type boolean
+ * @default false
+ * @category Numeric > Scale
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.useAbs = undefined;
+/**
+ * A separate scale is used for each category.
+ * <p>
+ * This property is currently only supported 
+ * by the {@link pvc.options.charts.HeatGridChart}.
+ * 
+ * @type boolean
+ * @category Numeric > Scale
+ */
+pvc.options.axes.HeatGridColorAxis.prototype.normByCategory = undefined;
+/**
+ * The options documentation class of the size axis.
+ * <p>
+ * A size axis panel and its properties 
+ * can be referred to by using its 
+ * <b>full id</b>,
+ * which is the word 
+ * <tt>size</tt>, 
+ * followed by it's index (when >= 2),
+ * and terminated by the word 
+ * <tt>Axis</tt>
+ * (ex: 
+ * <tt>sizeAxis</tt>, 
+ * <tt>size2Axis</tt>, 
+ * <tt>size3Axis</tt>, ...).
+ * <p>
+ * The domain of size axes 
+ * is evaluated at the leaf chart level. 
+ * When in a 
+ * <i>small multiples</i> chart, 
+ * sizes are local to each 
+ * <i>small</i> chart.
+ * <p>
+ * Currently, size axes only support 
+ * <i>numeric</i> domain values.
+ * 
+ * @class
+ */
+pvc.options.axes.SizeAxis = function(){};
+        
+        
+        
+        
+/**
+ * The fixed maximum domain value that the axis will show (applies to numeric axes).
+ * <p>
+ * A string value is converted to a number.
+ * <p>
+ * The value may be bigger or smaller than the actual
+ * maximum value of the data.
+ * <p>
+ * This property takes precedence over the property 
+ * <tt>originIsZero</tt>. 
+ * 
+ * @type number|string
+ * @category Numeric > Scale
+ */
+pvc.options.axes.SizeAxis.prototype.fixedMax = undefined;
+/**
+ * The fixed minimum domain value that the axis will show
+ * (applies to numeric axes).
+ * <p>
+ * A string value is converted to a number.
+ * <p>
+ * The value may be bigger or smaller than the actual
+ * minimum value of the data.
+ * This property takes precedence over the property 
+ * <tt>originIsZero</tt>. 
+ * 
+ * @type number|string
+ * @category Numeric > Scale
+ */
+pvc.options.axes.SizeAxis.prototype.fixedMin = undefined;
+/**
+ * Indicates if it should be ensured that zero domain value is shown (applies to continuous axes).
+ * <p>
+ * The properties 
+ * 
+ * <tt>fixedMin</tt> and 
+ * 
+ * <tt>fixedMax</tt> have precedence over this one.
+ * If this property is 
+ * <tt>true</tt>
+ * and respecting it would require changing 
+ * the minimum value, 
+ * but the option 
+ * <tt>fixedMin</tt> is also specified,
+ * then this property is ignored.
+ * The same would apply if 
+ * it were required to change 
+ * the maximum value,
+ * but the property 
+ * <tt>fixedMax</tt> was also specified.  
+ * 
+ * @type boolean
+ * @category Numeric > Scale
+ */
+pvc.options.axes.SizeAxis.prototype.originIsZero = undefined;
+/**
+ * Indicates if the axis scale is 
+ * applied over the absolute value of the domain values
+ * (applies to numeric domain axes).
+ * 
+ * @type boolean
+ * @default false
+ * @category Numeric > Scale
+ */
+pvc.options.axes.SizeAxis.prototype.useAbs = undefined;
+/**
  * The namespace of CCC panels options classes. 
  * 
  * @namespace
@@ -5680,47 +6910,12 @@ pvc.options.panels.Legend.prototype.markerSize = undefined;
  */
 pvc.options.panels.Legend.prototype.textMargin = undefined;
 /**
- * What happens when the user clicks a legend item. 
- * 
- * @type pvc.options.varia.LegendClickMode
- * @default 'toggleVisible'
- * @category Style
- */
-pvc.options.panels.Legend.prototype.clickMode = undefined;
-/**
- * Forces a rule to be shown or not in the marker zone.
- * <p>
- * The default value depends on the chart type.
- * 
- * @type boolean
- * @category Style
- */
-pvc.options.panels.Legend.prototype.drawLine = undefined;
-/**
- * Forces a shape to be shown or not in the marker zone.
- * <p>
- * The default value depends on the chart type.
- * 
- * @type boolean
- * @category Style
- */
-pvc.options.panels.Legend.prototype.drawMarker = undefined;
-/**
  * The extension points provided by the legend panel.
  * 
  * @type pvc.options.ext.LegendPanelExtensionPoints
  * @category Style
  */
 pvc.options.panels.Legend.prototype.extensionPoints = undefined;
-/**
- * Forces a given shape to be used in the marker zone.
- * <p>
- * The default value depends on the chart type.
- * 
- * @type pvc.options.varia.DotShapeType
- * @category Style
- */
-pvc.options.panels.Legend.prototype.shape = undefined;
 /**
  * The extension points of the legend panel.
  * <p>
@@ -6175,6 +7370,13 @@ pvc.options.ext.CartesianAxisExtensionPoints = function(){};
         
         
 /**
+ * The extension point of the grid line rules.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ * @category Style
+ */
+pvc.options.ext.CartesianAxisExtensionPoints.prototype.grid = undefined;
+/**
  * The extension point of the tick label mark.
  * 
  * @type pvc.options.marks.LabelExtensionPoint
@@ -6259,7 +7461,6 @@ pvc.options.panels.AnyNonHierarchicalCartesianAxis.prototype.domainScope = undef
  * <tt>originIsZero</tt>. 
  * 
  * @type number|string|Date
- * @default 0
  * @category Continuous > Scale
  */
 pvc.options.panels.AnyNonHierarchicalCartesianAxis.prototype.fixedMax = undefined;
@@ -6285,7 +7486,6 @@ pvc.options.panels.AnyNonHierarchicalCartesianAxis.prototype.fixedMax = undefine
  * <tt>originIsZero</tt>. 
  * 
  * @type number|string|Date
- * @default 0
  * @category Continuous > Scale
  */
 pvc.options.panels.AnyNonHierarchicalCartesianAxis.prototype.fixedMin = undefined;
@@ -6833,7 +8033,6 @@ pvc.options.panels.AnyContinuousCartesianAxis.prototype.domainScope = undefined;
  * <tt>originIsZero</tt>. 
  * 
  * @type number|string|Date
- * @default 0
  * @category Continuous > Scale
  */
 pvc.options.panels.AnyContinuousCartesianAxis.prototype.fixedMax = undefined;
@@ -6859,7 +8058,6 @@ pvc.options.panels.AnyContinuousCartesianAxis.prototype.fixedMax = undefined;
  * <tt>originIsZero</tt>. 
  * 
  * @type number|string|Date
- * @default 0
  * @category Continuous > Scale
  */
 pvc.options.panels.AnyContinuousCartesianAxis.prototype.fixedMin = undefined;
@@ -7265,7 +8463,6 @@ pvc.options.panels.NumericCartesianAxis.prototype.domainScope = undefined;
  * <tt>originIsZero</tt>. 
  * 
  * @type number|string|Date
- * @default 0
  * @category Continuous > Scale
  */
 pvc.options.panels.NumericCartesianAxis.prototype.fixedMax = undefined;
@@ -7291,7 +8488,6 @@ pvc.options.panels.NumericCartesianAxis.prototype.fixedMax = undefined;
  * <tt>originIsZero</tt>. 
  * 
  * @type number|string|Date
- * @default 0
  * @category Continuous > Scale
  */
 pvc.options.panels.NumericCartesianAxis.prototype.fixedMin = undefined;
@@ -8573,6 +9769,98 @@ pvc.options.varia.AxisOverlappedLabelsMode.prototype.Hide = 'hide';
  * @value 'leave'
  */
 pvc.options.varia.AxisOverlappedLabelsMode.prototype.Leave = 'leave';
+/**
+ * The possible value label styles of pie charts
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.PieValuesLabelStyle = function(){};
+        
+        
+        
+        
+/**
+ * Value labels are placed inside 
+ * their corresponding pie slice.
+ * 
+ * @value 'inside'
+ */
+pvc.options.varia.PieValuesLabelStyle.prototype.Inside = 'inside';
+/**
+ * Value labels are placed outside 
+ * their corresponding pie slice,
+ * linked to it by a line.
+ * 
+ * @value 'linked'
+ */
+pvc.options.varia.PieValuesLabelStyle.prototype.Linked = 'linked';
+/**
+ * The direction of the waterfall.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.WaterDirection = function(){};
+        
+        
+        
+        
+/**
+ * The water of the waterfall falls,
+ * from left to right.
+ * 
+ * @value 'down'
+ */
+pvc.options.varia.WaterDirection.prototype.Down = 'down';
+/**
+ * The water of the waterfall falls,
+ * from right to left,
+ * (or climbs, from left to right).
+ * 
+ * @value 'up'
+ */
+pvc.options.varia.WaterDirection.prototype.Up = 'up';
+/**
+ * The type of color scale for continuous color axes.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.ColorScaleType = function(){};
+        
+        
+        
+        
+/**
+ * A discrete scale is used.
+ * <p>
+ * The numeric domain is quantized and 
+ * then mapped to a discrete number of colors.
+ * 
+ * @value 'discrete'
+ */
+pvc.options.varia.ColorScaleType.prototype.Discrete = 'discrete';
+/**
+ * A linear scale is used to map 
+ * a numeric domain into 
+ * a color range.
+ * 
+ * @value 'linear'
+ */
+pvc.options.varia.ColorScaleType.prototype.Linear = 'linear';
+/**
+ * A normal distribution scale is used.
+ * <p>
+ * This scale type is 
+ * <i>currently</i> unsupported.
+ * 
+ * @value 'normal'
+ */
+pvc.options.varia.ColorScaleType.prototype.Normal = 'normal';
 /**
  * Describes the distances from 
  * each of the four planar sides:

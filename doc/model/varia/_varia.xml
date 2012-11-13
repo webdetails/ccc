@@ -27,8 +27,10 @@
     <c:include the="varia/atoms/axisOverlappedLabelsMode.xml" />
     <c:include the="varia/atoms/pieValuesLabelStyle.xml" />
     <c:include the="varia/atoms/waterDirection.xml" />
+    <c:include the="varia/atoms/colorScaleType.xml" />
     
     <!-- FUNCTIONS -->
+    <c:include the="varia/functions/colorTransform.xml" />
     <c:include the="varia/functions/dimensionComparer.xml" />
     <c:include the="varia/functions/dimensionConverter.xml" />
     <c:include the="varia/functions/dimensionFormatter.xml" />

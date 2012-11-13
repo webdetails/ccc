@@ -73,6 +73,7 @@ new pvc.BarChart(options)
     
     <c:include the="charts/_charts.xml" />
     <c:include the="marks/_marks.xml" />
+    <c:include the="axes/_axes.xml" />
     <c:include the="panels/_panels.xml" />
     <c:include the="plots/_plots.xml" />
     <c:include the="facets/_facets.xml" />

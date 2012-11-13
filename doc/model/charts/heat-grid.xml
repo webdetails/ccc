@@ -12,9 +12,27 @@
             The options documentation class of the <b>Heat grid</b> chart.
         </c:documentation>
         
+        <c:property name="sizeAxis" type="pvc.options.axes.SizeAxis" category="Axes">
+            <c:documentation>
+                The size axis options.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="colorAxis" type="pvc.options.axes.HeatGridColorAxis" category="Axes">
+            <c:documentation>
+                The first color axis options.
+                
+                This axis can also be accessed by the property name <tt>color</tt>.
+                
+                See <c:link to="pvc.options.axes.ColorAxis" />
+                for more information on the way that 
+                the color axes' properties may be accessed. 
+            </c:documentation>
+        </c:property>
+        
         <c:property name="baseAxis" type="pvc.options.panels.AnyDiscreteCartesianAxis" category="Axes">
             <c:documentation>
-                The base axis panel.
+                The base cartesian axis panel options.
                 
                 When the chart <c:link to="pvc.options.charts.Chart#orientation" />
                 is <tt>vertical</tt> the base axis is laid out horizontally.
@@ -26,7 +44,7 @@
         
         <c:property name="orthoAxis" type="pvc.options.panels.AnyDiscreteCartesianAxis" category="Axes">
             <c:documentation>
-                The orthogonal axis panel.
+                The orthogonal cartesian axis panel options.
                 
                 When the chart <c:link to="pvc.options.charts.Chart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.
@@ -39,8 +57,8 @@
         <c:property name="useCompositeAxis" type="boolean" default="false" category="Axes">
             <c:documentation>
                 <c:deprecated>Use <c:link to="pvc.options.panels.AnyDiscreteCartesianAxis#composite" /> instead.</c:deprecated>
-                Indicates if the chart axes are shown
-                in a hierarchical form.
+                Indicates if the cartesian axes are shown
+                in a composite/hierarchical form.
             </c:documentation>
         </c:property>
         

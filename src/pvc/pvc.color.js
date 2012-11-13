@@ -57,10 +57,10 @@ def.scope(function(){
      * <p>
      * Valid values are 'linear', 'discrete' and 'normal' (normal probability distribution).
      * </p>
-     * @param {string|pv.color} [keyArgs.minColor] The minimum color.
-     * @param {string|pv.color} [keyArgs.maxColor] The maximum color.
-     * @param {string|pv.color} [keyArgs.nullColor] The color shown for null values.
-     * @param {(string|pv.color)[]} [keyArgs.colorRange] Array of colors.
+     * @param {string|pv.color} [keyArgs.colorMin] The minimum color.
+     * @param {string|pv.color} [keyArgs.colorMax] The maximum color.
+     * @param {string|pv.color} [keyArgs.colorNull] The color shown for null values.
+     * @param {(string|pv.color)[]} [keyArgs.colors] Array of colors.
      * <p>
      * This argument is ignored if both minimum and maximum colors are specified.
      * Otherwise, if only one of minimum or maximum is specified, it is prepended or appended to
@@ -70,7 +70,7 @@ def.scope(function(){
      * When unspecified, the color range is assumed to be 'red', 'yellow' and 'green'. 
      * </p>
      * @param {string} keyArgs.colorDimension The name of the data dimension that is the <b>domain</b> of the color scale.
-     * @param {object[]} [keyArgs.colorRangeInterval] An array of domain values to match colors in the color range.
+     * @param {object[]} [keyArgs.colorDomain] An array of domain values to match colors in the color range.
      * 
      * @type function 
      */
@@ -112,7 +112,7 @@ def.scope(function(){
             this.domainComparer = function(a, b){ return dimType.compare(a, b); };
         }
        
-        this.nullRangeValue = keyArgs.nullColor ? pv.color(keyArgs.nullColor) : pv.Color.transparent;
+        this.nullRangeValue = keyArgs.colorNull ? pv.color(keyArgs.colorNull) : pv.Color.transparent;
        
         this.domainRangeCountDif = 0;
     })
@@ -162,7 +162,7 @@ def.scope(function(){
         _createScale: def.method({isAbstract: true}),
        
         _createCategoryScalesMap: function(createCategoryScale){
-            return this.data.leafs()
+            return this.data.children()
                 .object({
                     name:    function(leafData){ return leafData.absKey; },
                     value:   createCategoryScale,
@@ -172,19 +172,19 @@ def.scope(function(){
        
         _getRange: function(){
             var keyArgs = this.keyArgs,
-                range = keyArgs.colorRange || ['red', 'yellow','green'];
+                range = keyArgs.colors || ['red', 'yellow','green'];
        
-            if(keyArgs.minColor != null && keyArgs.maxColor != null){
+            if(keyArgs.colorMin != null && keyArgs.colorMax != null){
                
-                range = [keyArgs.minColor, keyArgs.maxColor];
+                range = [keyArgs.colorMin, keyArgs.colorMax];
                
-            } else if (keyArgs.minColor != null){
+            } else if (keyArgs.colorMin != null){
                
-                range.unshift(keyArgs.minColor);
+                range.unshift(keyArgs.colorMin);
                
-            } else if (keyArgs.maxColor != null){
+            } else if (keyArgs.colorMax != null){
                
-                range.push(keyArgs.maxColor);
+                range.push(keyArgs.colorMax);
             }
        
             return range.map(function(c) { return pv.color(c); });
@@ -212,7 +212,7 @@ def.scope(function(){
         },
        
         _getDomain: function() {
-            var domain = this.keyArgs.colorRangeInterval;
+            var domain = this.keyArgs.colorDomain;
             if(domain != null){
                 if(this.domainComparer) {
                     domain.sort(this.domainComparer);
@@ -266,7 +266,7 @@ def.scope(function(){
                             default:
                                 /* Ignore args domain altogether */
                                 if(pvc.debug >= 2){
-                                        pvc.log("Ignoring option 'colorRangeInterval' due to unsupported length." +
+                                        pvc.log("Ignoring option 'colorDomain' due to unsupported length." +
                                                 def.format(" Should have '{0}', but instead has '{1}'.", [this.desiredDomainCount, domain.length]));
                                 }
                                 domain = null;
@@ -394,7 +394,7 @@ def.scope(function(){
         return pv.Scale.linear()
           .domain(-options.numSD * sd[f] + mean[f],
                   options.numSD * sd[f] + mean[f])
-          .range(options.minColor, options.maxColor);
+          .range(options.colorMin, options.colorMax);
       });
       
     } else {   // normalize over the whole array
@@ -422,7 +422,7 @@ def.scope(function(){
       var scale = pv.Scale.linear()
         .domain(-options.numSD * sd + mean,
                 options.numSD * sd + mean)
-        .range(options.minColor, options.maxColor);
+        .range(options.colorMin, options.colorMax);
       
       fillColorScaleByColKey = pv.dict(colAbsValues, function(f){
         return scale;

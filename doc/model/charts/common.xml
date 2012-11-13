@@ -5,17 +5,23 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-	<!--
-	TODO
-	
-	data
-	 -->
-    
     <c:complexType name="Chart" space="pvc.options.charts" abstract="true">
     
         <c:documentation>
             The common options documentation class of all charts.
         </c:documentation>
+        
+        <c:property name="colorAxis" type="pvc.options.axes.ColorAxis" category="Axes">
+            <c:documentation>
+                The first color axis options.
+                
+                This axis can also be accessed by the property name <tt>color</tt>.
+                
+                See <c:link to="pvc.options.axes.ColorAxis" />
+                for more information on the way that 
+                the color axes' properties may be accessed. 
+            </c:documentation>
+        </c:property>
         
         <!-- Panels -->
         <c:property name="title" type="string pvc.options.panels.ChartTitle" category="Panels">
@@ -1004,9 +1010,5 @@
                 The <tt>trend</tt> plot uses the axis <tt>3</tt>, by default.
             </c:documentation>
         </c:property>
-        
-        <!-- 
-        TODO - ValuesMask - Pie Only
-         -->
     </c:complexType>
 </c:model>

@@ -15,7 +15,7 @@
         
         <c:property name="baseAxis" type="pvc.options.panels.CartesianAxis" category="Axes">
             <c:documentation>
-	            The base axis panel.
+	            The base cartesian axis panel options.
 	            
 	            When the chart <c:link to="pvc.options.charts.Chart#orientation" />
 	            is <tt>vertical</tt> the base axis is laid out horizontally.
@@ -27,7 +27,7 @@
         
         <c:property name="orthoAxis" type="pvc.options.panels.CartesianAxis" category="Axes">
             <c:documentation>
-                The orthogonal axis panel.
+                The orthogonal cartesian axis panel options.
                 
                 When the chart <c:link to="pvc.options.charts.Chart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.

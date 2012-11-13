@@ -175,11 +175,10 @@ The intensity or the color of each cell depends on the value that it represents.
 <ul>
   <li>orientation - horizontal or vertical. Default: vertical</li>
   <li>valuesVisible - Show or hide heatGrid value. Default: false</li>
-  <li>normPerBaseCategory - Normalize by column? true or false</li>
-  <li>minColor - Default: "white"</li>
-  <li>maxColor - Default: "darkgreen"</li>
-  <li>nullColor - Default:&nbsp; "#efc5ad" (white with a
-shade of orange)</li>
+  <li>colorNormByCategory - Normalize by column? true or false</li>
+  <li>colorMin - Default: "white"</li>
+  <li>colorMax - Default: "darkgreen"</li>
+  <li>colorNull - Default:&nbsp; "#efc5ad" (white with a shade of orange)</li>
 </ul>
 
 <h4>Axis properties</h4>
@@ -220,7 +219,7 @@ The following examples show revenues by product and market.
 All the examples show the same dataset with different settings.
 
 <h3>Heat grid - Normalized by Product (column)</h3>
-This chart is normalized by column (normPerBaseCategory = true).
+This chart is normalized by column (colorNormByCategory = true).
 This chart uses the default color mapping: light green for low revenues; dark green for high revenues; orange for null values.<br>
 <textarea cols="55" rows="18" id="pvcHG1Code">
 var heatGrid1 = new pvc.HeatGridChart({
@@ -231,7 +230,7 @@ var heatGrid1 = new pvc.HeatGridChart({
     animate:   false,
     valuesVisible: true,
     valuesAnchor: "right",
-    normPerBaseCategory: true
+    colorNormByCategory: true
     });
 
 heatGrid1.setData(testHeatGrid, {crosstabMode: true, seriesInRows: false });
@@ -246,7 +245,7 @@ TO DO: If we want to add a legend this needs to be a relative scale as the actua
 per product column.
 </p> 
 <h3>Heat grid - Normalized over the full matrix</h3>
-In this chart we have normalized over the full matrix (normPerBaseCategory = false).
+In this chart we have normalized over the full matrix (colorNormByCategory = false).
 <br>
 <textarea cols="55" rows="18" id="pvcHG2Code">
 var heatGrid2 = new pvc.HeatGridChart({
@@ -264,7 +263,7 @@ var heatGrid2 = new pvc.HeatGridChart({
     showYScale: true,
     yAxisPosition: "left",
     axisOffset: 0,
-    normPerBaseCategory: false,
+    colorNormByCategory: false,
 
     extensionPoints: {
       xAxisLabel_textAngle:-0.3,
@@ -286,7 +285,7 @@ different colors to revenue values as all cells use the same color mapping.
 
 <h3>Heat grid - Normalized by Product (row)</h3>
 This is the same chart with a different orientation, 
-and a different color-scheme (minColor and maxColor properties)<br>
+and a different color-scheme (colorMin and colorMax properties)<br>
 Again the data is normalized by product (by Row).
 <br>
 <textarea cols="55" rows="18" id="pvcHG3Code">
@@ -303,8 +302,8 @@ var heatGrid3 = new pvc.HeatGridChart({
     xAxisPosition: "bottom",
     showYScale: true,
     yAxisPosition: "left",
-    minColor: "#FEDFE1",
-    maxColor: "#F11929"
+    colorMin: "#FEDFE1",
+    colorMax: "#F11929"
 });
 heatGrid3.setData(testHeatGrid,
                  {crosstabMode: true,
@@ -360,12 +359,12 @@ var heatGrid5 = new pvc.HeatGridChart({
     orientation: "vertical",
     valuesVisible: false,
     valuesAnchor: "right",
-    normPerBaseCategory: false,
+    colorNormByCategory: false,
     visualRoles: {color: 'value2', size: 'value'},
     useShapes: true,
-    nullColor:'blue',
+    colorNull:'blue',
     nullShape:null,
-    colorRange:['red','yellow', 'lightgreen','darkgreen'],
+    colors:['red','yellow', 'lightgreen','darkgreen'],
     dataOptions: {
         categoriesCount : 2,
         measuresInColumns: true

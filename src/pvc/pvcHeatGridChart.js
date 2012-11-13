@@ -22,6 +22,8 @@ def
     }
 })
 .add({
+    _allowColorPerCategory: true,
+    
     _processOptionsCore: function(options){
         
         this.base(options);
@@ -190,13 +192,13 @@ def
         /* Color Role */
 //      colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
         
-        normPerBaseCategory: true,
-        numSD: 2,                 // width (only for normal distribution)
-        colorRange: ['red', 'yellow','green']
+        colorNormByCategory: true,
+        numSD: 2   // width (only for normal distribution)
+        //colors: ['red', 'yellow','green']
         
-//      colorRangeInterval:  undefined,
-//      minColor: undefined, //"white",
-//      maxColor: undefined, //"darkgreen",
-//      nullColor:  "#efc5ad"  // white with a shade of orange
+//      colorDomain:  undefined,
+//      colorMin: undefined, //"white",
+//      colorMax: undefined, //"darkgreen",
+//      colorNull:  "#efc5ad"  // white with a shade of orange
     })
 });

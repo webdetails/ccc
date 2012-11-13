@@ -14,9 +14,21 @@
             The common options documentation class of <b>Categorical</b> charts with a <i>continuous-numeric orthogonal axis</i>. 
         </c:documentation>
         
+        <c:property name="colorAxis" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
+            <c:documentation>
+                The first color axis options.
+                
+                This axis can also be accessed by the property name <tt>color</tt>.
+                
+                See <c:link to="pvc.options.axes.ColorAxis" />
+                for more information on the way that 
+                the color axes' properties may be accessed. 
+            </c:documentation>
+        </c:property>
+        
         <c:property name="orthoAxis" type="pvc.options.panels.NumericCartesianAxis" category="Axes">
             <c:documentation>
-                The orthogonal axis panel.
+                The orthogonal cartesian axis panel options.
                 
                 When the chart <c:link to="pvc.options.charts.Chart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.

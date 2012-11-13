@@ -97,6 +97,14 @@ def
         if(this._defaults){
             return this._defaults[optionInfo.name];
         }
-    })
+    }),
+    
+    _specifyChartOption: function(optionInfo, asName){
+        var value = this._chartOption(asName);
+        if(value != null){
+            optionInfo.specify(value);
+            return true;
+        }
+    }
 });
 

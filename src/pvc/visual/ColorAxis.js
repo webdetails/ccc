@@ -14,7 +14,7 @@ def.scope(function(){
     .add(/** @lends pvc.visual.ColorAxis# */{
         
         scaleNullRangeValue: function(){
-            return this.option('NullColor') || null;
+            return this.option('Missing') || null;
         },
         
         scaleUsesAbs: function(){
@@ -25,8 +25,8 @@ def.scope(function(){
             this.base(dataCells);
             
             // -- collect distinct plots
-            // ColorTransform depends on this
-            // Colors depends on ColorTransform
+            // Transform depends on this
+            // Colors depends on Transform
             this._plotList = 
                 def
                 .query(dataCells)
@@ -80,18 +80,32 @@ def.scope(function(){
 //                            .flattenBy(this.role, {visible: true})
 //                            ;
                         
-                        var globalVisibleData = chart.data.owner.where(null, {visible: true});
+                        var visibleDomainData;
+                        if(chart._getVisibleData){ // only cartesian charts have
+                            visibleDomainData = chart.root._getVisibleData(this.dataCell.dataPartValue);
+                        } else {
+                            visibleDomainData = chart.data.owner.where(null, {visible: true});
+                        }
                         
-                        scale = pvc.color.scale({
-                            type: this.option('ScaleType'),
-                            colorRange: this.option('ColorRange'), 
-                            colorRangeInterval: this.option('ColorRangeInterval'), 
-                            minColor:  this.option('MinColor'),
-                            maxColor:  this.option('MaxColor'),
-                            nullColor: this.option('NullColor'), // TODO: already handled by the axis wrapping
-                            data:      globalVisibleData,
-                            colorDimension: this.role.firstDimensionName()
-                        });
+                        var normByCateg = this.option('NormByCategory');
+                        
+                        var scaleOptions = {
+                            type:        this.option('ScaleType'),
+                            colors:      this.option('Colors')().range(), // obtain the underlying colors array
+                            colorDomain: this.option('Domain'), 
+                            colorMin:    this.option('Min'),
+                            colorMax:    this.option('Max'),
+                            colorNull:   this.option('Missing'), // TODO: already handled by the axis wrapping
+                            data:        visibleDomainData,
+                            colorDimension: this.role.firstDimensionName(),
+                            normPerBaseCategory:normByCateg
+                        };
+                        
+                        if(normByCateg){
+                            this.scalesByCateg = pvc.color.scales(scaleOptions);
+                        } else {
+                            scale = pvc.color.scale(scaleOptions);
+                        }
                     }
                 }
             }
@@ -108,13 +122,13 @@ def.scope(function(){
             // do not apply default color transforms...
             var applyTransf;
             if(this.scaleType === 'discrete'){
-                applyTransf = this.option.isSpecified('ColorTransform') || !this.option.isSpecified('Colors');
+                applyTransf = this.option.isSpecified('Transform') || !this.option.isSpecified('Colors');
             } else {
                 applyTransf = true;
             }
             
             if(applyTransf){
-                var colorTransf = this.option('ColorTransform');
+                var colorTransf = this.option('Transform');
                 if(colorTransf){
                     scale = scale.transform(colorTransf);
                 }
@@ -137,6 +151,21 @@ def.scope(function(){
         
         _getOptionsDefinition: function(){
             return colorAxis_optionsDef;
+        },
+        
+        _resolveByNaked: pvc.options.specify(function(optionInfo){
+            // The first of the type receives options without the "Axis" suffix.
+            if(!this.index){
+                return this._chartOption(this.id + def.firstUpperCase(optionInfo.name));
+            }
+        }),
+        
+        _specifyV1ChartOption: function(optionInfo, asName){
+            if(!this.index &&
+                this.chart.compatVersion() <= 1 && 
+                this._specifyChartOption(optionInfo, asName)){
+                return true;
+            }
         }
     });
     
@@ -161,13 +190,26 @@ def.scope(function(){
         return pvc.parseAlign(position, align);
     }
     
+    function legendResolve(optionInfo){
+        if(this._resolveNormal(optionInfo)){
+            return true;
+        }
+        
+        // Naked
+        if(!this.index && 
+           this._specifyChartOption(def.firstLowerCase(optionInfo.name))){
+            return true;
+        }
+    }
+    
     /*global axis_optionsDef:true*/
     var colorAxis_optionsDef = def.create(axis_optionsDef, {
         /*
-         * colors (maintained due to the naked first color axis rule)
+         * colors (special case)
          * colorAxisColors
          * color2AxisColors
          * color3AxisColors
+         * 
          * -----
          * secondAxisColor (V1 compatibility)
          */
@@ -177,26 +219,36 @@ def.scope(function(){
                 '_resolveNormal',
                 function(optionInfo){
                     // Handle naming exceptions
-                    var colors;
-                    if(this.index === 1 && this.chart._allowV1SecondAxis){
-                        colors = this._chartOption('secondAxisColor');
-                        if(colors){
-                            optionInfo.specify(colors);
-                            return true;
-                        }
+                    if(this.index === 0 && 
+                       this._specifyChartOption(optionInfo, 'colors')){
+                        return true;
                     }
                     
-                    if(this.index === 0){
-                        // Assumes default pvc scale
-                        colors = pvc.createColorScheme();
-                    } else { 
-                        // Use colors of axes with own colors.
-                        // Use a color scheme that always returns 
-                        // the global color scale of the role
-                        var me = this;
-                        colors = function(){ // ignore domain values
-                            return me.chart._getRoleColorScale(me.role.name);
-                        };
+                    if(this.index === 1 &&
+                       this.chart._allowV1SecondAxis &&
+                       this._specifyChartOption(optionInfo, 'secondAxisColor')){
+                        return true;
+                    }
+                    
+                    // Compute default value
+                    
+                    var colors;
+                    if(this.scaleType === 'discrete'){
+                        if(this.index === 0){
+                            // Assumes default pvc scale
+                            colors = pvc.createColorScheme();
+                        } else { 
+                            // Use colors of axes with own colors.
+                            // Use a color scheme that always returns 
+                            // the global color scale of the role
+                            var me = this;
+                            colors = function(){ // ignore domain values
+                                return me.chart._getRoleColorScale(me.role.name);
+                            };
+                        }
+                    } else {
+                        colors = ['red', 'yellow','green']
+                                 .map(function(name){ return pv.Color.names[name]; });
                     }
                     
                     optionInfo.defaultValue(colors);
@@ -212,7 +264,7 @@ def.scope(function(){
          * of the color scheme:
          * pv.Color -> pv.Color
          */
-        ColorTransform: {
+        Transform: {
             resolve: function(optionInfo){
                 if(this._resolveNormal(optionInfo)){
                     return true;
@@ -230,27 +282,39 @@ def.scope(function(){
             cast: def.fun.to
         },
         
-        NullColor: {
-            resolve: '_resolveFull',
-            cast:    pv.color,
-            value:   pv.color("#efc5ad")
+        NormByCategory: {
+            resolve: function(optionInfo){
+                if(!this.chart._allowColorPerCategory){
+                    optionInfo.specify(false);
+                    return true;
+                }
+                
+                if(this._specifyV1ChartOption(optionInfo, 'normPerBaseCategory')){
+                    return true;
+                }
+                
+                if(this._resolveNormal(optionInfo)){
+                    return true;
+                }
+            },
+            cast:    Boolean,
+            value:   false
         },
         
         // ------------
         // Continuous color scale
         ScaleType: {
-            resolve: pvc.options.resolvers([
-                '_resolveFixed',
-                '_resolveNormal',
-                pvc.options.specify(function(optionInfo){
-                    if(!this.typeIndex){
-                        return this._chartOption('colorScaleType');
-                    }
-                }),
-                '_resolveDefault'
-            ]),
-            cast:  pvc.parseContinuousColorScaleType,
-            value: 'linear'
+            resolve: function(optionInfo){
+                if(this._resolveFull(optionInfo)){
+                    return true;
+                }
+                
+                if(this._specifyV1ChartOption(optionInfo, 'scalingType')){
+                    return true;
+                }
+            },
+            cast:    pvc.parseContinuousColorScaleType,
+            value:   'linear'
         },
         
         UseAbs: {
@@ -259,58 +323,97 @@ def.scope(function(){
             value:   false
         },
         
-        ColorRange: {
+        Range: {
             resolve: '_resolveFull',
             cast:    def.array.to,
             value:   ['red', 'yellow','green']
                      .map(function(name){ return pv.Color.names[name]; })
         },
         
-        ColorRangeInterval: { // for quantization in discrete scale type
-            resolve: '_resolveFull',
+        Domain: {
+            resolve: function(optionInfo){
+                if(this._resolveFull(optionInfo)){
+                    return true;
+                }
+                
+                if(this._specifyV1ChartOption(optionInfo, 'colorRangeInterval')){
+                    return true;
+                }
+            },
             cast:    def.array.to
         },
         
-        MinColor: {
-            resolve: '_resolveFull',
-            cast:    pv.color
+        Min: {
+            resolve: function(optionInfo){
+                if(this._resolveNormal(optionInfo)){
+                    return true;
+                }
+                
+                if(this._specifyV1ChartOption(optionInfo, 'minColor')){
+                    return true;
+                }
+            },
+            cast: pv.color
         },
         
-        MaxColor: {
-            resolve: '_resolveFull',
-            cast:    pv.color
+        Max: {
+            resolve: function(optionInfo){
+                if(this._resolveNormal(optionInfo)){
+                    return true;
+                }
+                
+                if(this._specifyV1ChartOption(optionInfo, 'maxColor')){
+                    return true;
+                }
+            },
+            cast: pv.color
+        },
+        
+        Missing: { // Null, in lower case is reserved in JS...
+            resolve: function(optionInfo){
+                if(this._resolveNormal(optionInfo)){
+                    return true;
+                }
+                
+                if(this._specifyV1ChartOption(optionInfo, 'nullColor')){
+                   return true;
+                }
+            },
+            cast: pv.color,
+            value: pv.color("#efc5ad")
         },
         
         // ------------
+        
         /* 
          * LegendVisible 
          */
         LegendVisible: {
-            resolve: '_resolveNormal',
+            resolve: legendResolve,
             cast:    Boolean,
             value:   true
         },
         
         LegendClickMode: {
-            resolve: '_resolveNormal',
+            resolve: legendResolve,
             cast:    pvc.parseLegendClickMode,
             value:   'toggleVisible'
         },
         
         LegendDrawLine: {
-            resolve: '_resolveNormal',
+            resolve: legendResolve,
             cast:    Boolean,
             value:   false
         },
         
         LegendDrawMarker: {
-            resolve: '_resolveNormal',
+            resolve: legendResolve,
             cast:    Boolean,
             value:   true
         },
         
         LegendShape: {
-            resolve: '_resolveNormal',
+            resolve: legendResolve,
             cast:    pvc.parseShape
         }
     });

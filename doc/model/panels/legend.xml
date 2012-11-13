@@ -44,36 +44,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="drawLine" type="boolean" category="Style">
-            <c:documentation>
-                Forces a rule to be shown or not in the marker zone.
-                
-                The default value depends on the chart type.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="drawMarker" type="boolean" category="Style">
-            <c:documentation>
-                Forces a shape to be shown or not in the marker zone.
-                
-                The default value depends on the chart type.
-            </c:documentation>
-        </c:property>
-
-        <c:property name="shape" type="pvc.options.varia.DotShapeType" category="Style">
-            <c:documentation>
-                Forces a given shape to be used in the marker zone.
-                
-                The default value depends on the chart type.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="clickMode" type="pvc.options.varia.LegendClickMode" default="'toggleVisible'" category="Style">
-            <c:documentation>
-                What happens when the user clicks a legend item. 
-            </c:documentation>
-        </c:property>
-        
         <c:property name="extensionPoints" type="pvc.options.ext.LegendPanelExtensionPoints" category="Style">
             <c:documentation>
                 The extension points provided by the legend panel.
