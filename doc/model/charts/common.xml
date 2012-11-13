@@ -506,6 +506,13 @@
                 color axes map values of the "color" visual role.
             </c:documentation>
         </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.ChartExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the chart.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
     <c:complexType name="ChartVisualRoles" space="pvc.options.roles">
@@ -514,7 +521,7 @@
         </c:documentation>
     </c:complexType>
     
-    <!-- scale is undocummented -->
+    <!-- scale_ and tooltip_ are undocummented -->
     <c:complexType name="ChartExtensionPoints" space="pvc.options.ext">
         <c:documentation>
             The extension points common to all chart types.
@@ -1001,12 +1008,5 @@
         <!-- 
         TODO - ValuesMask - Pie Only
          -->
-         
-        <c:property name="extensionPoints" type="pvc.options.ext.ChartExtensionPoints" category="Style">
-            <c:documentation>
-                The extension points object contains style definitions for 
-                the marks of the chart.
-            </c:documentation>
-        </c:property>
     </c:complexType>
 </c:model>

@@ -45,8 +45,24 @@ def
 
         this.base();
         
-        var piePlot = this.plots.pie;
+        if(contentOptions.paddings == null){
+            var paddings;
+            if(this.compatVersion() <= 1){
+                var innerGap = pvc.castNumber(this.options.innerGap);
+                if(innerGap != null){
+                    innerGap = def.between(innerGap, 0.1, 1);
+                    paddings = ((1 - innerGap) * 100 / 2).toFixed(2) + "%";
+                }
+            }
+            
+            if(paddings == null){
+                paddings = new pvc.PercentValue(0.025);
+            }
+            
+            contentOptions.paddings = paddings;
+        }
         
+        var piePlot = this.plots.pie;
         this.pieChartPanel = new pvc.PieChartPanel(this, this.basePanel, piePlot, def.create(contentOptions, {
             scenes: def.getPath(this.options, 'pie.scenes')
         }));

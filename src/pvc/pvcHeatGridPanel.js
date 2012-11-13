@@ -26,8 +26,8 @@ def
     
     this.colorScaleType = plot.option('ColorScaleType');
     this.nullColor = plot.option('NullColor');
-    this.minColor  = plot.option('MinColor');
-    this.maxColor  = plot.option('MaxColor');        
+    this.minColor  = plot.option('MinColor'); // TODO: not being used...
+    this.maxColor  = plot.option('MaxColor'); // TODO: not being used...
 })
 .add({
 

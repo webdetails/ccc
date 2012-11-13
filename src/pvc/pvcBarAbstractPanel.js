@@ -171,7 +171,7 @@ def
                                    scene.vars.value.percent :
                                    scene.vars.value;
                     
-                    return valueVar.label; 
+                    return valueVar.label;
                 })
                 ;
         }

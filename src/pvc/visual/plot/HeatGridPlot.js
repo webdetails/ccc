@@ -83,7 +83,7 @@ def.scope(function(){
                 value:   'linear'
             },
             
-            ScalingType: {
+            ScalingType: { // deprecated
                 resolve: '_resolveFull',
                 cast:    String
             },

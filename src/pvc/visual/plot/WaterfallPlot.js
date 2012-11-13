@@ -21,7 +21,7 @@ def.scope(function(){
         {
             Stacked: { // override
                 resolve: null, 
-                value: true
+                value:   true
             },
             
             WaterLineLabel: {

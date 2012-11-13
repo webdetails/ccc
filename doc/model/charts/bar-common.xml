@@ -82,6 +82,56 @@
             The common options documentation class of the <b>Bar family</b> plots.
         </c:documentation>
         
+        <c:property name="valuesAnchor" type="function pvc.options.varia.MarkAnchor" default="'center'" category="Style">
+            <c:documentation>
+                The alignment of a value label 
+                relative to its corresponding visual element position.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="barSizeRatio" type="number" default="0.9" category="Style">
+            <c:documentation>
+                The percentage of the grouped bar width 
+                versus the space between grouped bars (does not apply to stacked bars).
+                
+                A number between <tt>0.05</tt> and <tt>1</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="barSizeMax" type="number" default="2000" category="Style">
+            <c:documentation>
+                The maximum width of a bar, in pixel units.
+                
+                A number not less than <tt>1</tt>, possibly infinity.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="maxBarSize" type="number" default="2000" category="Style">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#barSizeMax" /> instead.</c:deprecated>
+                The maximum width of a bar, in pixel units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="barStackedMargin" type="number" default="0" category="Style">
+            <c:documentation>
+                The space between bars of a given stack, in pixel units 
+                (applies to stacked bars).
+                
+                A non-negative number.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="overflowMarkersVisible" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if overflow and underflow markers are shown 
+                when the bars are drawn off the plot area.
+                
+                Bars can be drawn off the plot area by use of the 
+                continuous axis properties <tt>fixedMin</tt> and <tt>fixedMax</tt>. 
+            </c:documentation>
+        </c:property>
+        
         <c:property name="extensionPoints" type="pvc.options.ext.BarPlotCommonExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 

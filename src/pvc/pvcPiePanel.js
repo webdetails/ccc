@@ -40,11 +40,6 @@ def
 .type('pvc.PieChartPanel', pvc.PlotPanel)
 .init(function(chart, parent, plot, options){
     
-    if(options.paddings == null){
-        options.paddings = 
-            Math.round((1 - plot.option('InnerGap')) * 100 / 2 ) + "%";
-    }
-    
     // Before base, just to bring to attention that ValuesMask depends on it
     var labelStyle = plot.option('ValuesLabelStyle');
     

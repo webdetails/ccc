@@ -46,16 +46,6 @@ def.scope(function(){
                 value: true
             },
             
-            // deprecated
-            InnerGap: {
-                resolve: '_resolveFull',
-                cast: function(value){
-                    value = pvc.castNumber(value) || 0.95;
-                    return def.between(value, 0.1, 1);
-                },
-                value: 0.95
-            },
-            
             ValuesLabelStyle: {
                 resolve: pvc.options.resolvers([
                     '_resolveFixed',

@@ -210,6 +210,13 @@
                 The extension point of the tick label mark.
             </c:documentation>
         </c:property>
+        
+        <c:property name="grid" type="pvc.options.marks.RuleExtensionPoint" category="Style">
+            <c:documentation>
+                The extension point of the grid line rules.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
     <c:complexType name="AnyNonHierarchicalCartesianAxis"

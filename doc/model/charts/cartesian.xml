@@ -139,24 +139,7 @@
                 The root of a small multiples chart does not have a plot frame.
             </c:documentation>
         </c:property>
-        
-        <!-- TODO: shouldn't these be passed to the axes panels? -->
-        <c:property name="xAxisGrid" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
-            <c:documentation>
-                The extension point of the grid line rules that are drawn 
-                one per major tick of the <ii>XX</ii> axis 
-                (an horizontal axis has vertical grid line rules).
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="yAxisGrid" type="pvc.options.marks.RuleExtensionPoint" category="Axes">
-            <c:documentation>
-                The extension point of the grid line rules that are drawn 
-                one per major tick of the <ii>YY</ii> axis 
-                (a vertical axis has horizontal grid line rules).
-            </c:documentation>
-        </c:property>
-        
+
     </c:complexType>
     
     <c:complexType name="CartesianPlot" 

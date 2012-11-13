@@ -115,6 +115,7 @@ def
         // plot2: false
         // legend: false,
         crosstabMode: false
+        // panelSizeRatio
     })
 })
 .addStatic({

@@ -7,7 +7,6 @@ def
     
     this.boxSizeRatio = plot.option('BoxSizeRatio');
     this.maxBoxSize   = plot.option('BoxSizeMax');
-    this.boxplotColor = plot.option('BoxColor' );
 })
 .add({
     plotType: 'box',
@@ -32,11 +31,14 @@ def
         var a_bottom = this.isOrientationVertical() ? "bottom" : "left",
             a_left   = this.anchorOrtho(a_bottom),
             a_width  = this.anchorLength(a_bottom),
-            a_height = this.anchorOrthoLength(a_bottom),
-            strokeColor  = pv.color(this.boxplotColor),
-            boxFillColor = pv.color('limegreen')
+            a_height = this.anchorOrthoLength(a_bottom)
             ;
 
+        function defaultColor(type){
+            var color = this.base(type);
+            return type === 'stroke' ? color.darker(1) : color;
+        }
+        
         /* Category Panel */
         var extensionIds = ['panel'];
         if(this.compatVersion() <= 1){
@@ -60,11 +62,7 @@ def
             rule.lock(a_left, function(){ 
                     return this.pvMark.parent[a_width]() / 2;
                 })
-                .override('defaultColor', function(type){
-                    if(type === 'stroke') { 
-                        return strokeColor;
-                    }
-                })
+                .override('defaultColor', defaultColor)
                 ;
 
             return rule;
@@ -121,14 +119,7 @@ def
             })
             .lock(a_bottom, function(scene){ return scene.vars.category.boxBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.boxHeight; })
-            .override('defaultColor', function(type){
-                /*jshint onecase:true */
-                switch(type){
-                    //case 'fill':   return boxFillColor;
-                    case 'stroke': return strokeColor;
-                }
-                return this.base(type); 
-            })
+            .override('defaultColor', defaultColor)
             .override('defaultStrokeWidth', def.fun.constant(1))
             .pvMark
             ;
@@ -137,10 +128,8 @@ def
         function setupHRule(rule){
             setupHCateg(rule);
             
-            rule.override('defaultColor', function(type){
-                    if(type === 'stroke') { return strokeColor; }
-                })
-                ;
+            rule.override('defaultColor', defaultColor);
+            
             return rule;
         }
         

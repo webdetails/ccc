@@ -67,6 +67,13 @@
             The common options documentation class of the <b>point</b> plots.
         </c:documentation>
         
+        <c:property name="valuesAnchor" type="function pvc.options.varia.MarkAnchor" default="'right'" category="Style">
+            <c:documentation>
+                The alignment of a value label 
+                relative to its corresponding visual element position.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="trend" type="pvc.options.varia.PlotTrending">
             <c:documentation>
                 Contains the plot's trending options.

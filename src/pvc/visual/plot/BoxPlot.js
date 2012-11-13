@@ -33,8 +33,19 @@ def.scope(function(){
             
             BoxSizeRatio: {
                 resolve: '_resolveFull',
-                cast:    pvc.castNumber,
-                value:   1/3
+                cast: function(value){
+                    value = pvc.castNumber(value);
+                    if(value == null){
+                        value = 1;
+                    } else if(value < 0.05){
+                        value = 0.05;
+                    } else if(value > 1){
+                        value = 1;
+                    }
+                    
+                    return value;
+                },
+                value: 1/3
             },
             
             BoxSizeMax: {
@@ -50,20 +61,23 @@ def.scope(function(){
                     },
                     '_resolveDefault'
                 ]),
-                cast:    pvc.castNumber,
-                value:   Infinity
+                cast: function(value){
+                    value = pvc.castNumber(value);
+                    if(value == null){
+                        value = Infinity;
+                    } else if(value < 1){
+                        value = 1;
+                    }
+                    
+                    return value;
+                },
+                value: Infinity
             },
             
             // Deprecated
             MaxBoxSize: {
                 resolve: '_resolveFull',
                 cast:    pvc.castNumber
-            },
-            
-            BoxColor: {
-                resolve: '_resolveFull',
-                cast:    pv.color,
-                value:   pv.color('darkgreen')
             }
         });
 });

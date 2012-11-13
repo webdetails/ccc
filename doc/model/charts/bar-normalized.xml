@@ -28,6 +28,12 @@
         <c:documentation>
             The options documentation class of the <b>Normalized Bar</b> plot.
         </c:documentation>
+        
+        <c:property name="stacked" fixed="true" type="boolean">
+            <c:documentation>
+                This plot type is necessarily stacked.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
 </c:model>

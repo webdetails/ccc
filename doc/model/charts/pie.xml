@@ -21,6 +21,19 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="innerGap" type="number" category="Layout">
+            <c:documentation>
+                <c:deprecated>
+                    Use <c:link to="pvc.options.charts.Chart#contentPaddings" /> instead.
+                </c:deprecated>
+                The percentage size of the plot area that is 
+                occupied by the pie.
+                
+                An equivalent content paddings may be specified as: 
+                ((1 - innerGap) * 100 / 2 ) + "%";
+            </c:documentation>
+        </c:property>
+        
         <c:property name="visualRoles" type="pvc.options.roles.PieVisualRoles" category="Data Binding">
             <c:documentation>
                 The visual roles that of the <i>pie</i> chart type.
@@ -118,6 +131,190 @@
             The options documentation class of the <b>Pie</b> plot.
         </c:documentation>
         
+        <c:property name="valuesAnchor" type="function pvc.options.varia.WedgeAnchor" default="'outer'" category="Style">
+            <c:documentation>
+                The alignment of a non-linked value label
+                relative to its corresponding visual element position.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valuesVisible" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if value labels are shown per visual element.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="activeSliceRadius" type="number string" category="Layout">
+            <c:documentation>
+                Increment radius of an active slice, in pixel units or a percentage.
+                
+                When the value is a string, 
+                and if it is suffixed with "%", 
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="activeSliceRadius" type="number string" default="'5%'" category="Layout">
+            <c:documentation>
+                Increment radius of an <i>active</i> slice, 
+                in pixel units or as a percentage.
+                
+                When the value is a string, 
+                and if it is suffixed with "%", 
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot.
+                
+                This property is only relevant if 
+                <c:link to="pvc.options.charts.Chart.hoverable" /> is <tt>true</tt>.
+                
+                The <i>normal</i> radius is 
+                the biggest radius that can fit in the client area of the plot
+                minus the space occupied by linked labels,
+                minus the resolved active radius and 
+                minus the resolved exploded radius.
+                
+                See <c:link to="#explodedSliceRadius" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="explodedSliceRadius" type="number string" default="0" category="Layout">
+            <c:documentation>
+                Increment radius of an <i>exploded</i> slice, 
+                in pixel units or as a percentage.
+                
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot.
+                
+                The <i>normal</i> radius is 
+                the biggest radius that can fit in the client area of the plot
+                minus the space occupied by linked labels,
+                minus the resolved active radius and 
+                minus the resolved exploded radius.
+                
+                See <c:link to="activeSliceRadius" /> and <c:link to="explodedSliceIndex" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="explodedSliceIndex" type="number" default="null" category="Layout">
+            <c:documentation>
+                The index of the exploded slice,
+                or <tt>null</tt>, 
+                for all slices to be exploded.
+                
+                The exploded slice or slices 
+                are shown exploded 
+                only when <c:link to="#explodedSliceRadius" /> 
+                is greater than <tt>0</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valuesMask" type="string" category="Layout">
+            <c:documentation>
+                The values mask used to build the text of value labels.
+                
+                The mask may contain scene variable names and/or scene atom names,
+                like in the examples:
+                <ul>
+                    <li>scene variables: <tt>{category}: {value} EUR</tt>, could yield <tt>Drinks: 3.45 EUR</tt></li>
+                    <li>atom variables:  <tt>{#family} - {#product}</tt>, could yield <tt>Plains - Boeing 747</tt></li>
+                </ul> 
+                
+                The default value depends on the label style:
+                <ul>
+                    <li><tt>inside</tt> - <tt>{value}</tt></li>
+                    <li><tt>linked</tt> - <tt>{value} ({value.percent})</tt></li>
+                </ul>
+                
+                The <tt>percent</tt> variable is a 
+                sub-variable of the <tt>value</tt> scene variable.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valuesLabelStyle" 
+                    type="pvc.options.varia.PieValuesLabelStyle" 
+                    default="'linked'" 
+                    category="Layout">
+            <c:documentation>
+                The style used to place value labels.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkInsetRadius" type="number string" default="'5%'" category="Layout > Linked Labels">
+            <c:documentation>
+                The length of the link line segment that is 
+                inset into a slice,
+                in pixel units, or as a percentage.
+             
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkOutsetRadius" type="number string" default="'2.5%'" category="Layout > Linked Labels">
+            <c:documentation>
+                The length of the link line segment that 
+                extends outwards from the slice, 
+                until it reaches the link line "elbow",
+                in pixel units, or as a percentage.
+             
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkMargin" type="number string" default="'2.5%'" category="Layout > Linked Labels">
+            <c:documentation>
+                The width of the space 
+                that separates the label from 
+                the end of the line segment that starts in the link elbow,
+                in pixel units, or as a percentage.
+                
+                The value of this property includes 
+                the size of the link line handle.
+                
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                <i>client width</i> of the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkHandleWidth" type="number" default="0.5" category="Layout > Linked Labels">
+            <c:documentation>
+                The width of the link line handle width, in <i>em</i> units.
+                
+                The <i>handle</i> is 
+                the last segment of the link line,
+                an horizontal line segment just before the label. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkLabelSize" type="number string" default="'15%'" category="Layout > Linked Labels">
+            <c:documentation>
+                The width of the columns reserved, 
+                on each side of the pie,
+                for laying out the linked label marks.
+                
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                <i>client width</i> of the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkLabelSpacingMin" type="number" default="0.5" category="Layout > Linked Labels">
+            <c:documentation>
+                The minimum vertical space between consecutive link labels, 
+                in <i>em</i> units.
+            </c:documentation>
+        </c:property>
         
         <c:property name="extensionPoints" type="pvc.options.ext.PiePlotExtensionPoints" category="Style">
             <c:documentation>

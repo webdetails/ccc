@@ -20,8 +20,19 @@ def.scope(function(){
         
         BarSizeRatio: { // for grouped bars
             resolve: '_resolveFull',
-            cast:    pvc.castNumber,
-            value:   0.9
+            cast: function(value){
+                value = pvc.castNumber(value);
+                if(value == null){
+                    value = 1;
+                } else if(value < 0.05){
+                    value = 0.05;
+                } else if(value > 1){
+                    value = 1;
+                }
+                
+                return value;
+            },
+            value: 0.9
         },
         
         BarSizeMax: {
@@ -38,13 +49,29 @@ def.scope(function(){
                          },
                          '_resolveDefault'
                      ]),
-            cast:    pvc.castNumber,
-            value:   2000
+            cast: function(value){
+                value = pvc.castNumber(value);
+                if(value == null){
+                    value = Infinity;
+                } else if(value < 1){
+                    value = 1;
+                }
+                
+                return value;
+            },
+            value: 2000
         },
         
         BarStackedMargin: { // for stacked bars
             resolve: '_resolveFull',
-            cast:    pvc.castNumber,
+            cast: function(value){
+                value = pvc.castNumber(value);
+                if(value != null && value < 0){
+                    value = 0;
+                }
+                
+                return value;
+            },
             value:   0
         },
         

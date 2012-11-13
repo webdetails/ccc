@@ -24,6 +24,16 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="panelSizeRatio" type="number" default="0.9" category="Layout">
+            <c:documentation>
+             Percentage of occupied space over total space 
+             in a discrete axis band.
+             
+             The remaining space will be of 
+             margins between bands.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="box" type="pvc.options.plots.BoxplotPlot" category="Plots">
             <c:documentation>
                 The box plot is the <b>main plot</b> of the box plot chart,
@@ -144,6 +154,35 @@
             <c:documentation>
                 The box plot only shows a single series of data
                 and, as such, this property is meaningless.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="boxSizeRatio" type="number" default="0.333" category="Style">
+            <c:documentation>
+                The percentage of space of each band that is occupied by the box bar.
+                
+                The bar of a box is centered in each band. 
+                Bands may have space between them, 
+                depending on <c:link to="pvc.options.BoxplotChart#panelSizeRatio" />.
+                
+                A number between <tt>0.05</tt> and <tt>1</tt>.
+                
+                The default value is the result of <tt>1/3</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="boxSizeMax" type="number" default="Infinity" category="Style">
+            <c:documentation>
+                The maximum width of a box plot bar, in pixel units.
+                
+                A number not less than <tt>1</tt>, possibly infinity.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="maxBoxSize" type="number" default="Infinity" category="Style">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#boxSizeMax" /> instead.</c:deprecated>
+                The maximum width of a box plot bar, in pixel units.
             </c:documentation>
         </c:property>
         

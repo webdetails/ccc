@@ -135,7 +135,48 @@
         <c:documentation>
             The options documentation class of the <b>Heat grid</b> plot.
         </c:documentation>
-
+        
+        <c:property name="useShapes" type="boolean" default="false" category="Style">
+            <c:documentation>
+                Indicates if the heat-grid uses as visual elements 
+                dot-shapes, within each grid cell.
+                
+                When <tt>false</tt> the visual elements are the grid cells
+                themselves.
+                
+                When shapes are used the 
+                <c:link to="pvc.options.roles.HeatGridVisualRoles#size" /> 
+                visual role can be used.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="shape" type="pvc.options.varia.DotShapeType" default="'square'" category="Style">
+            <c:documentation>
+                The shape to use in the dot mark (applies when using shapes).
+                
+                See <c:link to="#useShapes" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="nullShape" type="pvc.options.varia.DotShapeType" default="'cross'" category="Style">
+            <c:documentation>
+                The shape to use when the value of the <i>size</i> role is <tt>null</tt>.
+                
+                See <c:link to="#useShapes" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valuesVisible" default="true" type="boolean" category="Style">
+            <c:documentation>
+                Indicates if value labels are shown next to the visual elements.
+                
+                The heat-grid shows as values 
+                the color role value, if bound, 
+                or, otherwise, 
+                the size role value, if bound.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="extensionPoints" type="pvc.options.ext.HeatGridPlotExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
