@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="TooltipGravity" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The gravity of the tooltip controls 
+            where the tooltip is place relative to the
+            visual element's anchor point.
+            
+            The gravity is the 
+            tooltip's corner or side
+            that is placed at the visual element's anchor point.
+            
+            Said in yet another way: 
+            «Gravity is the direction of the tooltip arrow.
+             The arrow points to the target element.»
+            
+            <c:example>
+                The following diagram illustrates the
+                tooltip arrow anchor points.
+                
+                When <c:link to="pvc.options.Tooltip#useCorners" />
+                is <tt>true</tt>,
+                the "crossed" gravities are really at
+                the tooltip box corners.
+                <pre>
+               nw    n    ne
+              +-o----o----o-+
+              |             |
+            w o   Tooltip   o e
+              |             |
+              +-o----o----o-+
+               sw    s    se
+                </pre>
+            </c:example>
+            
+        </c:documentation>
+        
+        <c:atom name="South" value="'s'">
+            <c:documentation>
+                Bottom tooltip side is placed at the 
+                visual element's anchor point,
+                resulting in the tooltip being above it.  
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="North" value="'n'">
+            <c:documentation>
+                Top tooltip side is placed at the 
+                visual element's anchor point,
+                resulting in the tooltip being below it. 
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="East" value="'e'">
+            <c:documentation>
+                Right tooltip side is placed at the 
+                visual element's anchor point,
+                resulting in the tooltip being at its left.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="West" value="'w'">
+            <c:documentation>
+                Left tooltip side is placed at the 
+                visual element's anchor point,
+                resulting in the tooltip being at its right.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="NorthWest" value="'nw'">
+            <c:documentation>
+                Upper-left tooltip corner is placed at the 
+                visual element's anchor point,
+                resulting in the tooltip being below it and at its right.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="NorthEast" value="'ne'">
+            <c:documentation>
+                Upper-right tooltip corner is placed at the 
+                visual element's anchor point,
+                resulting in the tooltip being below it and at its left.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="SouthWest" value="'sw'">
+            <c:documentation>
+                Lower-left tooltip corner is placed at the 
+                visual element's anchor point,
+                resulting in the tooltip being above it and at its right.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="SouthEast" value="'se'">
+            <c:documentation>
+                Lower-right tooltip corner is placed at the 
+                visual element's anchor point,
+                resulting in the tooltip being above it and at its left.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+    
+</c:model>

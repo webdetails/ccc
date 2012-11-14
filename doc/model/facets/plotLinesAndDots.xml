@@ -5,9 +5,9 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:facetType name="LinesAndDotsPlotFacet" space="pvc.options.facets">
+    <c:facetType name="LinesAndDotsPlotFacet" space="pvc.options.plots">
         <c:documentation>
-            The options documentation class of the lines and dots facet.
+            The options documentation class of the lines and dots plot facet.
         </c:documentation>
         
         <c:property name="dotsVisible" type="boolean" default="false" category="Style">

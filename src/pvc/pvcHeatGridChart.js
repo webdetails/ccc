@@ -173,7 +173,7 @@ def
 
         axisOffset: 0,
         
-        showPlotFrame: false,
+        plotFrameVisible: false,
 
         //customTooltip: undefined, // V1 & useShapes only
         

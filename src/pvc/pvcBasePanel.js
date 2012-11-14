@@ -1359,23 +1359,23 @@ def
     
     /* TOOLTIP */ 
     _addPropTooltip: function(pvMark, keyArgs){
-        var options = this.chart.options;
+        var chartTipOptions = this.chart._tooltipOptions;
         
-        var tipsySettings;
-        var nowTipsySettings = def.get(keyArgs, 'tipsySettings');
-        if(nowTipsySettings){
-            tipsySettings = def.create(options.tipsySettings, nowTipsySettings);
+        var tipOptions;
+        var nowTipOptions = def.get(keyArgs, 'options');
+        if(nowTipOptions){
+            tipOptions = def.create(chartTipOptions, nowTipOptions);
         } else {
-            tipsySettings = Object.create(options.tipsySettings);
+            tipOptions = Object.create(chartTipOptions);
         }
         
         var buildTooltip = def.get(keyArgs, 'buildTooltip') ||
-                           this._getTooltipBuilder(tipsySettings);
+                           this._getTooltipBuilder(tipOptions);
         if(!buildTooltip){
             return;
         }
         
-        tipsySettings.isEnabled = this._isTooltipEnabled.bind(this);
+        tipOptions.isEnabled = this._isTooltipEnabled.bind(this);
         
         var tipsyEvent = def.get(keyArgs, 'tipsyEvent');
         if(!tipsyEvent) {
@@ -1385,7 +1385,7 @@ def
 //                case 'area':
 //                    this._requirePointEvent();
 //                    tipsyEvent = 'point';
-//                    tipsySettings.usesPoint = true;
+//                    tipOptions.usesPoint = true;
 //                    break;
                 
 //                default:
@@ -1398,16 +1398,16 @@ def
         pvMark.localProperty("tooltip"/*, Function | String*/) 
               .tooltip(this._createTooltipProp(pvMark, buildTooltip, isLazy))
               .title(function(){ return '';} ) // Prevent browser tooltip
-              .event(tipsyEvent, pv.Behavior.tipsy(tipsySettings || options.tipsySettings));
+              .event(tipsyEvent, pv.Behavior.tipsy(tipOptions));
         
         this._ensurePropEvents(pvMark);
     },
     
-    _getTooltipBuilder: function(tipsySettings){
+    _getTooltipBuilder: function(tipOptions){
         var options = this.chart.options;
         var isV1Compat = this.compatVersion() <= 1;
         
-        var tooltipFormat = options.tooltipFormat;
+        var tooltipFormat = tipOptions.format;
         if(!tooltipFormat) {
             if(!isV1Compat){
                 return this._buildDataTooltip;
@@ -1420,24 +1420,13 @@ def
         }
         
         if(isV1Compat){
-            var isSourceHtml = def.getPath(
-                    this.chart._initialOptions, 
-                    'tipsySettings.html', 
-                    false);
-            var isTargetHtml = tipsySettings.html;
-            var doEscape = isTargetHtml && !isSourceHtml;
-            
             return function(context){
-                var tooltipText = tooltipFormat.call(
+                return tooltipFormat.call(
                         context.panel, 
                         context.getV1Series(),
                         context.getV1Category(),
                         context.getV1Value() || '',
                         context.getV1Datum());
-                
-                return doEscape ? 
-                       def.html.escape(tooltipText) : 
-                       tooltipText;
             };
         }
         

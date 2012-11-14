@@ -126,7 +126,7 @@ def
         orthoAxisOffset: 0.04,
         baseAxisOffset:  0.01, // TODO: should depend on being discrete or continuous base
         
-        tipsySettings: { offset: 15 }
+        tooltipOffset: 15
     })
 });
 

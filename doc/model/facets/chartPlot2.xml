@@ -5,9 +5,9 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:facetType name="Plot2ChartFacet" space="pvc.options.facets">
+    <c:facetType name="Plot2ChartFacet" space="pvc.options.charts">
         <c:documentation>
-            The options documentation class of the plot2 facet.
+            The options documentation class of the plot2 chart facet.
         </c:documentation>
         
         <c:property name="plot2" type="boolean pvc.options.plots.PointPlot" default="false" category="Plots">
@@ -57,9 +57,9 @@
         </c:property>
     </c:facetType>
     
-    <c:facetType name="ChartPlot2V1Facet" space="pvc.options.facets">
+    <c:facetType name="Plot2V1ChartFacet" space="pvc.options.charts">
         <c:documentation>
-            The options documentation class of the plot2 V1 facet.
+            The options documentation class of the plot2 V1 chart facet.
             
             Contains the additional plot2 related options of V1,
             only supported by the chart types that had them then.

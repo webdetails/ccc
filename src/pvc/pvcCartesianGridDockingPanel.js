@@ -29,16 +29,16 @@ def
 
         var contentPanel = chart._mainContentPanel;
         if(contentPanel) {
-            var showPlotFrame = chart.options.showPlotFrame;
-            if(showPlotFrame == null){
+            var plotFrameVisible = chart.options.plotFrameVisible;
+            if(plotFrameVisible == null){
                 if(chart.compatVersion <= 1){
-                    showPlotFrame = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
+                    plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
                 } else {
-                    showPlotFrame = true;
+                    plotFrameVisible = true;
                 }
             }
             
-            if(showPlotFrame) {
+            if(plotFrameVisible) {
                 this.pvFrameBar = this._createFrame(layoutInfo, axes);
             }
             

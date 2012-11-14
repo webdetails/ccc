@@ -133,7 +133,25 @@ pvc.BaseChart
         // A chart definition must behave the same 
         // in every environment, independently of the order in which
         // object properties are enumerated.
-        var roleOptions = this.options.visualRoles;
+        var options = this.options;
+        var roleOptions = options.visualRoles;
+        
+        // Accept visual roles directly in the options
+        // as <roleName>Role: 
+        this._visualRoleList.forEach(function(visualRole){
+            var name = visualRole.name;
+            var roleSpec = options[name + 'Role'];
+            if(roleSpec !== undefined){
+                if(!roleOptions){
+                    roleOptions = options.visualRoles = {};
+                }
+                
+                if(roleOptions[name] === undefined){
+                    roleOptions[name] = roleSpec;
+                }
+            }
+        });
+        
         var dimsBoundToSingleRole;
         if(roleOptions){
             dimsBoundToSingleRole = {};

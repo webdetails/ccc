@@ -43,16 +43,6 @@
             </c:documentation>
         </c:property>
         
-        <!-- Roles -->
-        <c:property name="visualRoles" type="pvc.options.roles.ChartVisualRoles" category="Data Binding">
-            <c:documentation>
-                The visual roles that are common to all chart types.
-            </c:documentation>
-        </c:property>
-        
-        <!-- Data -->
-        <!-- data: undefined -->
-        
         <c:property name="canvas" type="string object" category="General">
             <c:documentation>
                 The identifier of the HTML element, 
@@ -197,10 +187,25 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="showTooltips" type="boolean" default="true" category="Interaction">
+        <c:property name="tooltip" type="boolean pvc.options.Tooltip" default="true" category="Interaction">
             <c:documentation>
-                Indicates if tooltips are shown
-                when the user hovers over visual elements with the mouse.
+                Indicates if tooltips are enabled 
+                and contains additional tooltip presentation options.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="tipsySettings" type="pvc.options.Tooltip" category="Interaction">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#tooltip" /> instead.</c:deprecated>
+                Contains additional tooltip presentation options.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="showTooltips" type="boolean" category="Interaction">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#tooltip" /> instead.</c:deprecated>
+                Indicates if tooltips are enabled 
+                and contains additional tooltip presentation options.
             </c:documentation>
         </c:property>
         
@@ -234,22 +239,6 @@
                 The maximum number of milliseconds,
                 between two consecutive clicks,
                 for them to be considered a double-click.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="tooltipFormat" type="pvc.options.varia.TooltipFormatter" category="Interaction">
-            <c:documentation>
-                A callback function that is called,
-                to build the tooltip of a visual element.
-                
-                Whether the tooltip format is HTML or plain text must 
-                be known by the formatter.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="tipsySettings" type="pvc.options.Tooltip" category="Interaction">
-            <c:documentation>
-                Contains tooltip presentation options.
             </c:documentation>
         </c:property>
         
@@ -314,8 +303,8 @@
         
         <c:property name="timeSeries" type="boolean" default="false" category="Data">
             <c:documentation>
-                Indicates that dimensions of the "category" group 
-                (i.e. named <tt>category</tt>, <tt>category2</tt>, ...)
+                Indicates that dimensions whose 
+                name is "category1", "category2", etc, 
                 have a <tt>Date</tt> value type,
                 by default.
                 
@@ -471,10 +460,9 @@
             <c:documentation>
                 The indexes of the data source's <i>virtual item</i> columns
                 that are to feed the 
-                default 
+                default dimensions 
                 <tt>value</tt>, 
-                <tt>value2</tt>, ... 
-                dimensions.
+                <tt>value2</tt>, etc.
                 
                 This option only applies to data sources in 
                 relational format with multiple values, 
@@ -519,12 +507,6 @@
                 the marks of the chart.
             </c:documentation>
         </c:property>
-    </c:complexType>
-    
-    <c:complexType name="ChartVisualRoles" space="pvc.options.roles">
-        <c:documentation>
-            The visual roles common to all chart types.
-        </c:documentation>
     </c:complexType>
     
     <!-- scale_ and tooltip_ are undocummented -->
@@ -585,8 +567,98 @@
     <c:complexType name="Tooltip" space="pvc.options">
         <c:documentation>
             The options documentation class of the tooltip.
-            <!-- TODO -->
         </c:documentation>
+        
+        <c:property name="enabled" type="boolean" default="true">
+            <c:documentation>
+                Indicates if the tooltip is enabled.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="gravity" type="pvc.options.varia.TooltipGravity" default="'s'">
+            <c:documentation>
+                The preferred tooltip gravity.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="delayIn" type="number" default="200">
+            <c:documentation>
+                The delay for the tooltip to show, in milliseconds.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="delayOut" type="number" default="80">
+            <c:documentation>
+                The delay for the tooltip to hide, in milliseconds.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="offset" type="number" default="2">
+            <c:documentation>
+                The distance of the closest tooltip edge or corner 
+                to the visual element's tooltip anchor point.
+                
+                The default value depends on the chart type. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="opacity" type="number" default="0.9">
+            <c:documentation>
+                The distance of the closest tooltip edge or corner 
+                to the visual element's tooltip anchor point.
+                
+                The default value depends on the chart type. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="html" type="boolean" default="true">
+            <c:documentation>
+                Indicates if the tooltip text 
+                that the function <c:link to="#format" /> builds 
+                is in HTML format.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="format" type="pvc.options.varia.TooltipFormatter" category="Interaction">
+            <c:documentation>
+                A callback function that is called,
+                to build the tooltip of a visual element.
+                
+                If <c:link to="#format" /> is <tt>true</tt>,
+                the resulting text is in HTML format,
+                otherwise, it is plain text.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="useCorners" type="boolean" default="false">
+            <c:documentation>
+                Indicates if the tooltip gravities should be 
+                aligned with corners.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="arrowVisible" type="boolean" default="true">
+            <c:documentation>
+                Indicates if the tooltip shows an arrow 
+                pointing to the 
+                visual element's anchor point.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="followMouse" type="boolean" default="false">
+            <c:documentation>
+                Indicates if the 
+                visual element's anchor point
+                should be the current mouse position.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="fade" type="boolean" default="false">
+            <c:documentation>
+                Indicates if the tooltip fades in and out,
+                after the corresponding delay has expired.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
     <c:complexType name="DimensionType" space="pvc.options">
@@ -1008,6 +1080,86 @@
                 The main plot of a chart always uses the axis <tt>1</tt>.
                 The <tt>plot2</tt> plot uses the axis <tt>2</tt>, by default.
                 The <tt>trend</tt> plot uses the axis <tt>3</tt>, by default.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="VisualRole" space="pvc.options">
+        <c:documentation>
+            The options documentation class of a visual role.
+            
+            Where a visual role argument is expected, 
+            a <tt>string</tt> value is also accepted,
+            with the content of what would be specified in
+            the property <c:link to="#dimensions" />.
+        </c:documentation>
+        <c:property name="dimensions" type="string">
+            <c:documentation>
+                A list of dimension names and respective 
+                sort orders.
+                
+                A dimensions string is similar to an SQL 'order by' clause,
+                like the following examples show:
+                <dl>
+                    <dt>
+                        <tt>"productType"</tt>
+                    </dt>
+                    <dd>
+                        the visual role is bound to the single dimension named <tt>"productType"</tt>,
+                        and data will be sorted in ascending order
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <tt>"sales"</tt>
+                    </dt>
+                    <dd>
+                        the visual role is bound to the single dimension named <tt>"sales"</tt>,
+                        and data will be sorted in ascending order
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <tt>"country, productType"</tt>
+                    </dt>
+                    <dd>
+                        the visual role is bound to the dimensions 
+                        named <tt>"country"</tt> and <tt>"productType"</tt>,
+                        and data will be sorted first by
+                        <tt>"country"</tt>, in ascending order,
+                        and then by 
+                        <tt>"productType"</tt>, in ascending order
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <tt>"country desc, productType asc"</tt>
+                    </dt>
+                    <dd>
+                        the visual role is bound to the dimensions 
+                        named <tt>"country"</tt> and <tt>"productType"</tt>,
+                        and data will be sorted first by
+                        <tt>"country"</tt>, in descending order,
+                        and then by 
+                        <tt>"productType"</tt>, in ascending order
+                    </dd>
+                </dl>
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="isReversed" type="boolean" default="false">
+            <c:documentation>
+                Indicates that the visual role's data 
+                should be ordered in reverse order
+                in relation to the sort orders specified in
+                <c:link to="#dimensions" />.
+                
+                This option provides a quick way to reverse the order
+                of the whole visual role, without changing any partial
+                sort orders assigned to each dimension of the visual role.
+                
+                This option can be used to reverse the order of 
+                the data that is shown in a discrete axis.
             </c:documentation>
         </c:property>
     </c:complexType>

@@ -8,9 +8,10 @@
     <c:complexType name="BarChart" 
                    space="pvc.options.charts"
                    base="pvc.options.charts.BarChartCommon"
-                   facets="pvc.options.facets.Plot2ChartFacet 
-                           pvc.options.facets.CategoricalChartTrendFacet
-                           pvc.options.facets.ChartPlot2V1Facet">
+                   facets="pvc.options.charts.Plot2ChartFacet 
+                           pvc.options.charts.CategoricalChartTrendFacet
+                           pvc.options.charts.Plot2V1ChartFacet
+                           pvc.options.charts.DataPartChartFacet">
         <c:documentation>
             The options documentation class of the <b>Bar</b> chart.
         </c:documentation>
@@ -22,21 +23,6 @@
                 its properties may be used <i>without</i> the "bar" property suffix.
             </c:documentation>
         </c:property>
-        
-        <c:property name="visualRoles" type="pvc.options.roles.BarVisualRoles" category="Data Binding">
-            <c:documentation>
-                The visual roles of the <i>bar</i> chart type.
-            </c:documentation>
-        </c:property>
-    </c:complexType>
-    
-    <c:complexType name="BarVisualRoles" 
-                   space="pvc.options.roles"
-                   base="pvc.options.roles.BarCommonVisualRoles"
-                   facets="pvc.options.roles.DataPartVisualRolesFacet">
-        <c:documentation>
-            The visual roles of the <b>bar</b> chart type.
-        </c:documentation>
     </c:complexType>
     
     <c:complexType name="BarPlot" 

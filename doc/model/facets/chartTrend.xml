@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:facetType name="CategoricalChartTrendFacet" space="pvc.options.facets">
+    <c:facetType name="CategoricalChartTrendFacet" space="pvc.options.charts">
         <c:documentation>
             The options documentation class of the categorical trend facet.
         </c:documentation>
@@ -25,7 +25,7 @@
         
     </c:facetType>
     
-    <c:facetType name="MetricChartTrendFacet" space="pvc.options.facets">
+    <c:facetType name="MetricChartTrendFacet" space="pvc.options.charts">
         <c:documentation>
             The options documentation class of the metric trend facet.
         </c:documentation>

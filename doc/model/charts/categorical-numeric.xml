@@ -8,7 +8,7 @@
     <c:complexType name="CategoricalNumericChart" 
                    space="pvc.options.charts"
                    base="pvc.options.charts.CategoricalChart"
-                   facets="pvc.options.facets.MultiChartFacet" 
+                   facets="pvc.options.charts.MultiChartFacet" 
                    abstract="true">
         <c:documentation>
             The common options documentation class of <b>Categorical</b> charts with a <i>continuous-numeric orthogonal axis</i>. 
@@ -38,12 +38,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="visualRoles" type="pvc.options.roles.CategoricalNumericVisualRoles" category="Data Binding">
-            <c:documentation>
-                The visual roles common to <b>categorical</b> chart types with a <i>continuous-numeric orthogonal axis</i>.
-            </c:documentation>
-        </c:property>
-        
         <c:property name="extensionPoints" type="pvc.options.ext.CategoricalNumericChartExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
@@ -54,7 +48,7 @@
     
     <c:complexType name="CategoricalNumericChartExtensionPoints" 
                    space="pvc.options.ext"
-                   facets="pvc.options.facets.MultiExtensionPointsFacet">
+                   facets="pvc.options.ext.MultiExtensionPointsFacet">
         <c:documentation>
             The extension points of the <b>categorical</b> chart types with a <i>continuous-numeric orthogonal axis</i>.
             
@@ -67,16 +61,6 @@
             and obtaining, for the examples, the camel-cased name: <tt>smallBase_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
-    </c:complexType>
-    
-    <c:complexType name="CategoricalNumericVisualRoles" 
-                   space="pvc.options.roles"
-                   base="pvc.options.roles.CategoricalVisualRoles"
-                   facets="pvc.options.facets.MultiVisualRolesFacet">
-        <c:documentation>
-            The visual roles common to <b>categorical</b> chart types with a <i>continuous-numeric orthogonal axis</i>.
-        </c:documentation>
-        
     </c:complexType>
     
     <c:complexType name="CategoricalNumericPlot" 

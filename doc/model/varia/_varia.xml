@@ -28,6 +28,8 @@
     <c:include the="varia/atoms/pieValuesLabelStyle.xml" />
     <c:include the="varia/atoms/waterDirection.xml" />
     <c:include the="varia/atoms/colorScaleType.xml" />
+    <c:include the="varia/atoms/tooltipGravity.xml" />
+    <c:include the="varia/atoms/lineAreaInterpolation.xml" />
     
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />

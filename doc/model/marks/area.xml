@@ -12,8 +12,75 @@
             See the associated protovis documentation at
             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html" />.
         </c:documentation>
-        <!--
-        TODO 
+        
+        <c:property name="fillStyle" type="pvc.options.varia.ColorString">
+            <c:documentation>
+                The fill color of the area.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html#fillStyle" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="strokeStyle" type="pvc.options.varia.ColorString">
+            <c:documentation>
+                The border stroke color of the area. 
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html#strokeStyle" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="lineWidth" type="number">
+            <c:documentation>
+                The width of the border of the bar. 
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html#lineWidth" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="width" type="number">
+            <c:documentation>
+                The width of the area (use for horizontal orientation).
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html#width" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="height" type="number">
+            <c:documentation>
+                The height of the area (use for vertical orientation). 
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html#height" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="interpolate" type="pvc.options.varia.LineAreaInterpolation">
+            <c:documentation>
+                How to interpolate the area between values. 
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html#interpolate" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="tension" type="number">
+            <c:documentation>
+                The tension of cardinal splines,
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html#tension" />.
+            </c:documentation>
+        </c:property>
+        
+        <!-- TODO 
+        lineJoin
+        lineCap
+        strokeDasharray
+        strokeMiterLimit
          -->
     </c:complexType>
 </c:model>

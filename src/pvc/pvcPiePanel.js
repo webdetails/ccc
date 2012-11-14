@@ -214,8 +214,8 @@ def
                 activeOffsetRadius: layoutInfo.activeOffsetRadius,
                 wrapper: wrapper,
                 tooltipArgs:   {
-                    tipsySettings: {
-                        corners: true,
+                    options: {
+                        useCorners: true,
                         gravity: function(){
                             var isRightPlane = Math.cos(this.midAngle()) >= 0;
                             var isTopPlane   = Math.sin(this.midAngle()) >= 0;

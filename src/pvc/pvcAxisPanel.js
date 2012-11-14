@@ -1114,7 +1114,7 @@ def
                     buildTooltip: function(context){ return context.scene.vars.tick.label; },
                     isLazy: false,
                     
-                    tipsySettings: {
+                    options: {
                         gravity: this._calcTipsyGravity()
                     }
                 }
@@ -1499,7 +1499,7 @@ def
                     isLazy: false,
                     buildTooltip: function(context){ return context.scene.vars.tick.label; },
                     
-                    tipsySettings: {
+                    options: {
                         gravity: this._calcTipsyGravity(),
                         offset:  diagMargin * 2
                     }

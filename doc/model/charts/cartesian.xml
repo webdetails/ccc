@@ -13,6 +13,53 @@
             The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
         
+        <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>series</tt> visual role represents a 
+                <i>series</i> of connected data points.
+                
+                Most cartesian charts represent graphically 
+                the connectedness of data points of a given series in some way, 
+                by connecting points with a line,
+                by giving them all the same color,
+                or, simply, 
+                by the order in which they are drawn,
+                and when overlapped, some stay on top of others.
+                
+                The <tt>series</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>series</tt> prefix.
+                
+                The visual role itself is optional,
+                yet, when unbound, 
+                a dimension with a "series" prefix
+                is automatically created for it,
+                and all datums will have the value <tt>null</tt>
+                in that dimension.
+                
+                The only cartesian chart type that 
+                <i>ignores</i> the <tt>series</tt> visual role is the <i>Box plot</i>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>color</tt> visual role controls the color of visual elements.
+                
+                The <tt>color</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>color</tt> prefix
+                or, if none exists, 
+                the dimensions of the "series" role.
+                
+                The <tt>color</tt> visual role is discrete.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="baseAxis" type="pvc.options.panels.CartesianAxis" category="Axes">
             <c:documentation>
 	            The base cartesian axis panel options.
@@ -57,9 +104,15 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="visualRoles" type="pvc.options.roles.CartesianVisualRoles" category="Data Binding">
+        <c:property name="plotFrameVisible" type="boolean" default="true" category="Style">
             <c:documentation>
-                The visual roles that are common to (almost) all cartesian chart types.
+                Indicates whether the plot frame is drawn
+                in leaf charts.
+                
+                The plot frame covers the plot panel but stays
+                aligned with and below the axes' rules.
+                
+                The root of a small multiples chart does not have a plot frame.
             </c:documentation>
         </c:property>
         
@@ -69,59 +122,6 @@
                 the marks of the chart.
             </c:documentation>
         </c:property>
-    </c:complexType>
-    
-    <c:complexType name="CartesianVisualRoles" space="pvc.options.roles" base="pvc.options.roles.ChartVisualRoles">
-        <c:documentation>
-            The visual roles common to (almost) all cartesian chart types.
-        </c:documentation>
-        <c:property name="series" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>series</tt> visual role represents a 
-                <i>series</i> of connected data points.
-                
-                Most cartesian charts represent graphically 
-                the connectedness of data points of a given series in some way, 
-                by connecting points with a line,
-                by giving them all the same color,
-                or, simply, 
-                by the order in which they are drawn,
-                and when overlapped, some stay on top of others.
-                
-                The <tt>series</tt> visual role automatically binds to 
-                every dimension whose name has the <tt>series</tt> prefix.
-                
-                The visual role itself is optional,
-                yet, when unbound, 
-                a dimension with a "series" prefix
-                is automatically created for it,
-                and all datums will have the value <tt>null</tt>
-                in that dimension.
-                
-                The only cartesian chart type that 
-                <i>ignores</i> the <tt>series</tt> visual role is the <i>Box plot</i>.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="color" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>color</tt> visual role controls the color of visual elements.
-                
-                The <tt>color</tt> visual role automatically binds to 
-                every dimension whose name has the <tt>color</tt> prefix
-                or, if none exists, 
-                the dimensions of the "series" role.
-                
-                The <tt>color</tt> visual role is discrete.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
-        
     </c:complexType>
     
     <c:complexType name="CartesianChartExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartExtensionPoints">

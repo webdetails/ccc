@@ -170,7 +170,7 @@ def
     defaults: def.create(pvc.MetricXYAbstract.prototype.defaults, {
         originIsZero: false,
         
-        tipsySettings: { offset: 15 }
+        tooltipOffset: 15
         
         /* Continuous Color Role */
         // TODO:

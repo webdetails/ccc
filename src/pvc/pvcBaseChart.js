@@ -351,11 +351,83 @@ def
                 options.animate = false;
             }
             
-            if(options.showTooltips){
-                var ts = options.tipsySettings;
-                if(ts){
-                    this.extend(ts, "tooltip");
+            this._processTooltipOptions(options);
+        }
+    },
+    
+    _tooltipDefaults: {
+        gravity:     's',
+        delayIn:      200,
+        delayOut:     80, // smoother moving between marks with tooltips, possibly slightly separated
+        offset:       2,
+        opacity:      0.9,
+        html:         true,
+        //fade:        false, // fade out
+        useCorners:   false,
+        arrowVisible: true,
+        followMouse:  false
+    },
+    
+    _processTooltipOptions: function(options){
+        var isV1Compat = this.compatVersion() <= 1;
+        
+        var tipOptions = options.tooltip;
+        var tipEnabled = options.tooltipEnabled;
+        if(tipEnabled == null){
+            if(tipOptions){
+                tipEnabled = tipOptions.enabled;
+            }
+            
+            if(tipEnabled == null){
+                if(isV1Compat){
+                    tipEnabled = options.showTooltips;
                 }
+                
+                if(tipEnabled == null){
+                    tipEnabled = true;
+                }
+            }
+        }
+        
+        if(tipEnabled){
+            if(!tipOptions){
+                tipOptions = {};
+            }
+            
+            if(isV1Compat){
+                this._importV1TooltipOptions(tipOptions, options);
+            }
+            
+            def.eachOwn(this._tooltipDefaults, function(dv, p){
+                var value = options['tooltip' + def.firstUpperCase(p)];
+                if(value !== undefined){
+                    tipOptions[p] = value;
+                } else if(tipOptions[p] === undefined){
+                    tipOptions[p] = dv;
+                }
+            });
+        } else {
+            tipOptions = {};
+        }
+        
+        this._tooltipEnabled = tipEnabled;
+        this._tooltipOptions = tipOptions;
+    },
+    
+    _importV1TooltipOptions: function(tipOptions, options){
+        var v1TipOptions = options.tipsySettings;
+        if(v1TipOptions){
+            this.extend(v1TipOptions, "tooltip");
+            
+            for(var p in v1TipOptions){
+                if(tipOptions[p] === undefined){
+                    tipOptions[p] = v1TipOptions[p];
+                }
+            }
+            
+            // Force V1 html default
+            if(tipOptions.html == null){
+                tipOptions.html = false;
             }
         }
     },
@@ -559,26 +631,10 @@ def
 //        colors: null,
 
         plot2: false,
-//      plot2Series
-
-        showTooltips: true,
-//      tooltipFormat: undefined,
         
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
                    (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");
-        },
-        
-        tipsySettings: {
-            gravity:    "s",
-            delayIn:     200,
-            delayOut:    80, // smoother moving between marks with tooltips, possibly slightly separated
-            offset:      2,
-            opacity:     0.8,
-            html:        true,
-            fade:        false, // fade out
-            corners:     false,
-            followMouse: false
         },
         
         valueFormat: def.scope(function(){

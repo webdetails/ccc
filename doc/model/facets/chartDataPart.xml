@@ -5,12 +5,12 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:facetType name="DataPartVisualRolesFacet" space="pvc.options.facets">
+    <c:facetType name="DataPartChartFacet" space="pvc.options.charts">
         <c:documentation>
-            The options documentation class of the data part visual roles facet.
+            The options documentation class of the data part visual role facet.
         </c:documentation>
         
-        <c:property name="dataPart" type="string pvc.options.roles.VisualRole"  category="Plots">
+        <c:property name="dataPartRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
                 The <tt>dataPart</tt> visual role
                 allows fine grained partitioning
@@ -37,7 +37,7 @@
                 The datums with the fixed data part value <tt>1</tt> 
                 are shown in the chart's second plot.
                 
-                See <c:link to="pvc.options.roles.VisualRole" />
+                See <c:link to="pvc.options.VisualRole" />
                 for more information on supported data types.   
             </c:documentation>
         </c:property>

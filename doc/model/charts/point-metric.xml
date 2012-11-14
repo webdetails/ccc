@@ -8,12 +8,90 @@
     <c:complexType name="MetricPointChart" 
                    space="pvc.options.charts" 
                    base="pvc.options.charts.CartesianChart"
-                   facets="pvc.options.facets.MetricChartTrendFacet
-                           pvc.options.facets.MultiChartFacet"
+                   facets="pvc.options.charts.MetricChartTrendFacet
+                           pvc.options.charts.MultiChartFacet"
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Metric Line/Dot family</b> charts.
         </c:documentation>
+        
+        
+        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>color</tt> visual role controls the color of the
+                dots and lines of the visual elements.
+                
+                The <tt>color</tt> visual role automatically binds to 
+                every discrete dimension, or a single continuous dimension, 
+                whose name has the <tt>color</tt> prefix
+                or, if none exists, 
+                the dimensions of the "series" role.
+                
+                The <tt>color</tt> visual role is discrete or continuous.
+                
+                The default value type of dimensions bound to it is <tt>Number</tt>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="sizeRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>size</tt> visual role controls the size of 
+                the dots of the visual elements,
+                and, as such, it is only represented if dots are visible.
+                
+                The <tt>size</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>size</tt> prefix.
+                
+                The <tt>size</tt> visual role is continuous and optional.
+                
+                The default value type of the dimension bound to it is <tt>Number</tt>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="xRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>x</tt> visual role controls the base position
+                of the "point" visual element.
+                
+                The <tt>x</tt> visual role automatically binds to 
+                a single dimension whose name has the <tt>x</tt> prefix.
+                
+                The <tt>x</tt> visual role is continuous and required.
+                
+                The default value type of the dimension bound to it 
+                depends on the value of the chart option 
+                <c:link to="pvc.options.charts.Chart#timeSeries" />.
+                If it is <tt>true</tt>
+                it is <tt>Date</tt>, otherwise, 
+                it is <tt>Number</tt>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="yRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>y</tt> visual role controls the orthogonal position
+                of the "point" visual element.
+                
+                The <tt>y</tt> visual role automatically binds to 
+                a single dimension whose name has the <tt>y</tt> prefix.
+                
+                The <tt>y</tt> visual role is continuous and required.
+                
+                The default value type of the dimension bound to it is <tt>Number</tt>.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
         
         <c:property name="sizeAxis" type="pvc.options.axes.SizeAxis" category="Axes">
             <c:documentation>
@@ -57,12 +135,6 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="visualRoles" type="pvc.options.roles.MetricPointVisualRoles" category="Data Binding">
-            <c:documentation>
-                The visual roles common to the <b>metric point</b> chart types.
-            </c:documentation>
-        </c:property>
-        
         <c:property name="extensionPoints" type="pvc.options.ext.MetricPointChartExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
@@ -73,7 +145,7 @@
     
     <c:complexType name="MetricPointChartExtensionPoints" 
                    space="pvc.options.ext"
-                   facets="pvc.options.facets.MultiExtensionPointsFacet">
+                   facets="pvc.options.ext.MultiExtensionPointsFacet">
         <c:documentation>
             The extension points of the <i>metric line/dot/area family</i> chart types.
             
@@ -86,92 +158,6 @@
             and obtaining, for the examples, the camel-cased name: <tt>smallBase_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
-    </c:complexType>
-    
-    <c:complexType name="MetricPointVisualRoles" 
-                   space="pvc.options.roles"
-                   base="pvc.options.roles.CartesianVisualRoles"
-                   facets="pvc.options.facets.MultiVisualRolesFacet">
-        <c:documentation>
-            The visual roles common to the <b>metric point</b> plots.
-        </c:documentation>
-        
-        <c:property name="color" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>color</tt> visual role controls the color of the
-                dots and lines of the visual elements.
-                
-                The <tt>color</tt> visual role automatically binds to 
-                every discrete dimension, or a single continuous dimension, 
-                whose name has the <tt>color</tt> prefix
-                or, if none exists, 
-                the dimensions of the "series" role.
-                
-                The <tt>color</tt> visual role is discrete or continuous.
-                
-                The default value type of dimensions bound to it is <tt>Number</tt>.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="size" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>size</tt> visual role controls the size of 
-                the dots of the visual elements,
-                and, as such, it is only represented if dots are visible.
-                
-                The <tt>size</tt> visual role automatically binds to 
-                every dimension whose name has the <tt>size</tt> prefix.
-                
-                The <tt>size</tt> visual role is continuous and optional.
-                
-                The default value type of the dimension bound to it is <tt>Number</tt>.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="x" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>x</tt> visual role controls the base position
-                of the "point" visual element.
-                
-                The <tt>x</tt> visual role automatically binds to 
-                a single dimension whose name has the <tt>x</tt> prefix.
-                
-                The <tt>x</tt> visual role is continuous and required.
-                
-                The default value type of the dimension bound to it 
-                depends on the value of the chart option 
-                <c:link to="pvc.options.charts.Chart#timeSeries" />.
-                If it is <tt>true</tt>
-                it is <tt>Date</tt>, otherwise, 
-                it is <tt>Number</tt>.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="y" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>y</tt> visual role controls the orthogonal position
-                of the "point" visual element.
-                
-                The <tt>y</tt> visual role automatically binds to 
-                a single dimension whose name has the <tt>y</tt> prefix.
-                
-                The <tt>y</tt> visual role is continuous and required.
-                
-                The default value type of the dimension bound to it is <tt>Number</tt>.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
     </c:complexType>
     
     <c:complexType name="MetricPointPlotExtensionPoints" space="pvc.options.ext">
@@ -222,7 +208,7 @@
     <c:complexType name="MetricPointPlot" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.CartesianPlot"
-                   facets="pvc.options.facets.LinesAndDotsPlotFacet">
+                   facets="pvc.options.plots.LinesAndDotsPlotFacet">
         <c:documentation>
             The common options documentation class of the <b>metric point</b> plots.
         </c:documentation>

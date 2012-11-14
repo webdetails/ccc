@@ -12,6 +12,67 @@
             The options documentation class of the <b>Heat grid</b> chart.
         </c:documentation>
         
+        <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>series</tt> visual role 
+                of the heat grid chart organizes visual elements
+                along the discrete orthogonal axis.
+                
+                For additional information, 
+                see the base version of this property:
+                <c:link to="pvc.options.charts.CartesianChart#seriesRole" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>category</tt> visual role 
+                of the heat grid chart organizes visual elements
+                along the discrete base axis, 
+                and is restricted to be discrete.
+                
+                For additional information, 
+                see the base version of this property:
+                <c:link to="pvc.options.charts.CategoricalChart#categoryRole" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>color</tt> visual role controls the color of 
+                the visual elements.
+                
+                The <tt>color</tt> visual role automatically binds to 
+                a single numeric dimension, 
+                whose name is <tt>value</tt>.
+                
+                The <tt>color</tt> visual role is optional and numeric.
+                
+                When unbound, the visual elements all show the same color.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="sizeRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>size</tt> visual role controls the size of 
+                the dot visual elements, when in "shapes" mode".
+                
+                The <tt>size</tt> visual role automatically binds to 
+                a single numeric dimension whose name is <tt>value2</tt>.
+                
+                The <tt>size</tt> visual role is optional and numeric.
+                
+                When unbound, all the dot visual elements are 
+                sized to the grid cell size.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="sizeAxis" type="pvc.options.axes.SizeAxis" category="Axes">
             <c:documentation>
                 The size axis options.
@@ -69,82 +130,6 @@
                 its properties may be used <i>without</i> the "heatGrid" property suffix.
             </c:documentation>
         </c:property>
-    
-        <c:property name="visualRoles" type="pvc.options.roles.HeatGridVisualRoles" category="Data Binding">
-            <c:documentation>
-                The visual roles of the <b>heat grid</b> chart type.
-            </c:documentation>
-        </c:property>
-    </c:complexType>
-    
-    <c:complexType name="HeatGridVisualRoles" 
-                   space="pvc.options.roles"
-                   base="pvc.options.roles.CategoricalVisualRoles">
-        <c:documentation>
-            The visual roles of the <b>heat grid</b> chart type.
-        </c:documentation>
-        
-        <c:property name="series" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>series</tt> visual role 
-                of the heat grid chart organizes visual elements
-                along the discrete orthogonal axis.
-                
-                For additional information, 
-                see the base version of this property:
-                <c:link to="pvc.options.roles.CartesianVisualRoles" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="category" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>category</tt> visual role 
-                of the heat grid chart organizes visual elements
-                along the discrete base axis, 
-                and is restricted to be discrete.
-                
-                For additional information, 
-                see the base version of this property:
-                <c:link to="pvc.options.roles.CategoricalVisualRoles" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="color" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>color</tt> visual role controls the color of 
-                the visual elements.
-                
-                The <tt>color</tt> visual role automatically binds to 
-                a single numeric dimension, 
-                whose name is <tt>value</tt>.
-                
-                The <tt>color</tt> visual role is optional and numeric.
-                
-                When unbound, the visual elements all show the same color.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="size" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>size</tt> visual role controls the size of 
-                the dot visual elements, when in "shapes" mode".
-                
-                The <tt>size</tt> visual role automatically binds to 
-                a single numeric dimension whose name is <tt>value2</tt>.
-                
-                The <tt>size</tt> visual role is optional and numeric.
-                
-                When unbound, all the dot visual elements are 
-                sized to the grid cell size.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
-        
     </c:complexType>
     
     <c:complexType name="HeatGridPlot" 
@@ -163,7 +148,7 @@
                 themselves.
                 
                 When shapes are used the 
-                <c:link to="pvc.options.roles.HeatGridVisualRoles#size" /> 
+                <c:link to="pvc.options.charts.HeatGridChart#sizeRole" /> 
                 visual role can be used.
             </c:documentation>
         </c:property>

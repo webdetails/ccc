@@ -397,7 +397,7 @@ def
         };
         
         var options = chart.options;
-        if(wrapper && options.showTooltips){
+        if(wrapper && chart._tooltipEnabled){
             var customTooltip = options.customTooltip;
             if(!customTooltip){
                 customTooltip = function(s,c,d){ 

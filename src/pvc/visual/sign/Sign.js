@@ -351,7 +351,7 @@ def.type('pvc.visual.Sign')
         
         var bits = this.bits;
         
-        if(options.showTooltips && !def.get(keyArgs, 'noTooltip')){
+        if(this.chart._tooltipEnabled && !def.get(keyArgs, 'noTooltip')){
             bits |= this._bitShowsTooltip;
             
             this.panel._addPropTooltip(pvMark, def.get(keyArgs, 'tooltipArgs'));

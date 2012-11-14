@@ -127,7 +127,7 @@ def
             this.basePanel, 
             bulletPlot, 
             def.create(contentOptions, {
-                showTooltips:  this.options.showTooltips
+                tooltipEnabled:  this.chart._tooltipEnabled
             }));
     },
   
@@ -331,7 +331,7 @@ def
             });
 
 
-        if(this.showTooltips){
+        if(this.tooltipEnabled){
             // Extend default
             // TODO: how to deal with different measures in tooltips depending on mark
       
@@ -356,8 +356,8 @@ def
                 })
                 ;
       
-            this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.chart.options.tipsySettings));
-            this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.chart.options.tipsySettings));
+            this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
+            this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
         }
 
         this.pvBulletRule = this.pvBullet.tick.add(pv.Rule);

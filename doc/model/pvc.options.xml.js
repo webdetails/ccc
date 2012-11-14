@@ -281,10 +281,8 @@ pvc.options.charts.Chart.prototype.ignoreNulls = undefined;
  */
 pvc.options.charts.Chart.prototype.percentValueFormat = function(){};
 /**
- * Indicates that dimensions of the "category" group 
- * (i.e. named 
- * <tt>category</tt>, 
- * <tt>category2</tt>, ...)
+ * Indicates that dimensions whose 
+ * name is "category1", "category2", etc, 
  * have a 
  * <tt>Date</tt> value type,
  * by default.
@@ -358,13 +356,6 @@ pvc.options.charts.Chart.prototype.timeSeriesFormat = undefined;
  */
 pvc.options.charts.Chart.prototype.valueFormat = function(){};
 /**
- * The visual roles that are common to all chart types.
- * 
- * @type pvc.options.roles.ChartVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.Chart.prototype.visualRoles = undefined;
-/**
  * Indicates if the data source is in 
  * <i>crosstab</i> format.
  * 
@@ -386,12 +377,11 @@ pvc.options.charts.Chart.prototype.isMultiValued = undefined;
  * The indexes of the data source's 
  * <i>virtual item</i> columns
  * that are to feed the 
- * default 
+ * default dimensions 
  * 
  * <tt>value</tt>, 
  * 
- * <tt>value2</tt>, ... 
- * dimensions.
+ * <tt>value2</tt>, etc.
  * <p>
  * This option only applies to data sources in 
  * relational format with multiple values, 
@@ -571,42 +561,33 @@ pvc.options.charts.Chart.prototype.hoverable = undefined;
  */
 pvc.options.charts.Chart.prototype.selectable = undefined;
 /**
- * Indicates if tooltips are shown
- * when the user hovers over visual elements with the mouse.
  * 
+ * Indicates if tooltips are enabled 
+ * and contains additional tooltip presentation options.
+ * 
+ * @deprecated Use {@link #tooltip} instead.
  * @type boolean
- * @default true
  * @category Interaction
  */
 pvc.options.charts.Chart.prototype.showTooltips = undefined;
 /**
- * Contains tooltip presentation options.
  * 
+ * Contains additional tooltip presentation options.
+ * 
+ * @deprecated Use {@link #tooltip} instead.
  * @type pvc.options.Tooltip
  * @category Interaction
  */
 pvc.options.charts.Chart.prototype.tipsySettings = undefined;
 /**
- * A callback function that is called,
- * to build the tooltip of a visual element.
- * <p>
- * Whether the tooltip format is HTML or plain text must 
- * be known by the formatter.
+ * Indicates if tooltips are enabled 
+ * and contains additional tooltip presentation options.
  * 
- * @returns {string}
- * The tooltip text.
- * 
- * @method
- * @this pvc.visual.Context
- * @param {pvc.visual.Scene} scene
- * The scene whose tooltip is to be built.
- * <p>
- * Use the data contained in the scene object to 
- * build the tooltip.
- * 
+ * @type boolean|pvc.options.Tooltip
+ * @default true
  * @category Interaction
  */
-pvc.options.charts.Chart.prototype.tooltipFormat = function(){};
+pvc.options.charts.Chart.prototype.tooltip = undefined;
 /**
  * The margins of the 
  * <i>root</i> content panel.
@@ -755,16 +736,6 @@ pvc.options.charts.Chart.prototype.colors = undefined;
  */
 pvc.options.charts.Chart.prototype.extensionPoints = undefined;
 /**
- * The visual roles common to all chart types.
- * 
- * @class
- */
-pvc.options.roles.ChartVisualRoles = function(){};
-        
-        
-        
-        
-/**
  * The extension points common to all chart types.
  * <p>
  * To use an extension point you must find its full name: 
@@ -828,7 +799,6 @@ pvc.options.ext.ChartExtensionPoints.prototype.rubberBand = undefined;
 /**
  * The options documentation class of the tooltip.
  * 
- * 
  * @class
  */
 pvc.options.Tooltip = function(){};
@@ -836,6 +806,112 @@ pvc.options.Tooltip = function(){};
         
         
         
+/**
+ * Indicates if the tooltip shows an arrow 
+ * pointing to the 
+ * visual element's anchor point.
+ * 
+ * @type boolean
+ * @default true
+ */
+pvc.options.Tooltip.prototype.arrowVisible = undefined;
+/**
+ * The delay for the tooltip to show, in milliseconds.
+ * 
+ * @type number
+ * @default 200
+ */
+pvc.options.Tooltip.prototype.delayIn = undefined;
+/**
+ * The delay for the tooltip to hide, in milliseconds.
+ * 
+ * @type number
+ * @default 80
+ */
+pvc.options.Tooltip.prototype.delayOut = undefined;
+/**
+ * Indicates if the tooltip is enabled.
+ * 
+ * @type boolean
+ * @default true
+ */
+pvc.options.Tooltip.prototype.enabled = undefined;
+/**
+ * Indicates if the 
+ * visual element's anchor point
+ * should be the current mouse position.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.Tooltip.prototype.followMouse = undefined;
+/**
+ * The preferred tooltip gravity.
+ * 
+ * @type pvc.options.varia.TooltipGravity
+ * @default 's'
+ */
+pvc.options.Tooltip.prototype.gravity = undefined;
+/**
+ * Indicates if the tooltip text 
+ * that the function {@link #format} builds 
+ * is in HTML format.
+ * 
+ * @type boolean
+ * @default true
+ */
+pvc.options.Tooltip.prototype.html = undefined;
+/**
+ * The distance of the closest tooltip edge or corner 
+ * to the visual element's tooltip anchor point.
+ * <p>
+ * The default value depends on the chart type. 
+ * 
+ * @type number
+ * @default 2
+ */
+pvc.options.Tooltip.prototype.offset = undefined;
+/**
+ * The distance of the closest tooltip edge or corner 
+ * to the visual element's tooltip anchor point.
+ * <p>
+ * The default value depends on the chart type. 
+ * 
+ * @type number
+ * @default 0.9
+ */
+pvc.options.Tooltip.prototype.opacity = undefined;
+/**
+ * Indicates if the tooltip gravities should be 
+ * aligned with corners.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.Tooltip.prototype.useCorners = undefined;
+/**
+ * A callback function that is called,
+ * to build the tooltip of a visual element.
+ * <p>
+ * If {@link #format} is 
+ * <tt>true</tt>,
+ * the resulting text is in HTML format,
+ * otherwise, it is plain text.
+ * 
+ * @returns {string}
+ * The tooltip text.
+ * 
+ * @method
+ * @this pvc.visual.Context
+ * @param {pvc.visual.Scene} scene
+ * The scene whose tooltip is to be built.
+ * <p>
+ * Use the data contained in the scene object to 
+ * build the tooltip.
+ * 
+ * @category Interaction
+ */
+pvc.options.Tooltip.prototype.format = function(){};
 /**
  * The options documentation class of a dimension type.
  * 
@@ -1431,6 +1507,119 @@ pvc.options.plots.Plot.prototype.valuesFont = undefined;
  */
 pvc.options.plots.Plot.prototype.valuesVisible = undefined;
 /**
+ * The options documentation class of a visual role.
+ * <p>
+ * Where a visual role argument is expected, 
+ * a 
+ * <tt>string</tt> value is also accepted,
+ * with the content of what would be specified in
+ * the property {@link #dimensions}.
+ * 
+ * @class
+ */
+pvc.options.VisualRole = function(){};
+        
+        
+        
+        
+/**
+ * A list of dimension names and respective 
+ * sort orders.
+ * <p>
+ * A dimensions string is similar to an SQL 'order by' clause,
+ * like the following examples show:
+ * 
+ * <dl>
+ * 
+ * <dt>
+ * 
+ * <tt>"productType"</tt>
+ * </dt>
+ * 
+ * <dd>
+ * the visual role is bound to the single dimension named 
+ * <tt>"productType"</tt>,
+ * and data will be sorted in ascending order
+ * </dd>
+ * </dl>
+ * 
+ * <dl>
+ * 
+ * <dt>
+ * 
+ * <tt>"sales"</tt>
+ * </dt>
+ * 
+ * <dd>
+ * the visual role is bound to the single dimension named 
+ * <tt>"sales"</tt>,
+ * and data will be sorted in ascending order
+ * </dd>
+ * </dl>
+ * 
+ * <dl>
+ * 
+ * <dt>
+ * 
+ * <tt>"country, productType"</tt>
+ * </dt>
+ * 
+ * <dd>
+ * the visual role is bound to the dimensions 
+ * named 
+ * <tt>"country"</tt> and 
+ * <tt>"productType"</tt>,
+ * and data will be sorted first by
+ * 
+ * <tt>"country"</tt>, in ascending order,
+ * and then by 
+ * 
+ * <tt>"productType"</tt>, in ascending order
+ * </dd>
+ * </dl>
+ * 
+ * <dl>
+ * 
+ * <dt>
+ * 
+ * <tt>"country desc, productType asc"</tt>
+ * </dt>
+ * 
+ * <dd>
+ * the visual role is bound to the dimensions 
+ * named 
+ * <tt>"country"</tt> and 
+ * <tt>"productType"</tt>,
+ * and data will be sorted first by
+ * 
+ * <tt>"country"</tt>, in descending order,
+ * and then by 
+ * 
+ * <tt>"productType"</tt>, in ascending order
+ * </dd>
+ * </dl>
+ * 
+ * @type string
+ */
+pvc.options.VisualRole.prototype.dimensions = undefined;
+/**
+ * Indicates that the visual role's data 
+ * should be ordered in reverse order
+ * in relation to the sort orders specified in
+ * {@link #dimensions}.
+ * <p>
+ * This option provides a quick way to reverse the order
+ * of the whole visual role, without changing any partial
+ * sort orders assigned to each dimension of the visual role.
+ * <p>
+ * This option can be used to reverse the order of 
+ * the data that is shown in a discrete axis.
+ * 
+ * @type boolean
+ * @default false
+ */
+pvc.options.VisualRole.prototype.isReversed = undefined;
+/**
  * The options documentation class of the 
  * <b>Pie</b> chart.
  * 
@@ -1693,6 +1882,49 @@ pvc.options.charts.PieChart.prototype.smallWidth = undefined;
  */
 pvc.options.charts.PieChart.prototype.smallTitle = undefined;
 /**
+ * The 
+ * <tt>multiChart</tt> visual role
+ * allows turning a chart in a small multiples chart
+ * {@link http://en.wikipedia.org/wiki/Small_multiple}.
+ * <p>
+ * Almost all main chart types support being shown
+ * as a small multiples chart.
+ * Currently, the exceptions are the charts: 
+ * 
+ * <i>Heat Grid</i>, 
+ * 
+ * <i>Bullet</i>, 
+ * 
+ * <i>Data Tree</i> and
+ * 
+ * <i>Parallel Coordinates</i>.
+ * <p>
+ * The 
+ * <tt>multiChart</tt> visual role
+ * can be bound to any number of dimensions,
+ * that are, or will be turned into, discrete.
+ * <p>
+ * The 
+ * <tt>multiChart</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>multiChart</tt> prefix.
+ * <p>
+ * One 
+ * <i>small</i> chart is generated per
+ * unique combination of the values of the bound dimensions
+ * that is present in the source data.
+ * Each small chart then receives as its data
+ * the partition of the source data that shares its 
+ * unique combination of values.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.PieChart.prototype.multiChartRole = undefined;
+/**
  * The first color axis options.
  * <p>
  * This axis can also be accessed by the property name 
@@ -1706,14 +1938,6 @@ pvc.options.charts.PieChart.prototype.smallTitle = undefined;
  * @category Axes
  */
 pvc.options.charts.PieChart.prototype.colorAxis = undefined;
-/**
- * The visual roles that of the 
- * <i>pie</i> chart type.
- * 
- * @type pvc.options.roles.PieVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.PieChart.prototype.visualRoles = undefined;
 /**
  * 
  * The percentage size of the plot area that is 
@@ -1748,6 +1972,71 @@ pvc.options.charts.PieChart.prototype.pie = undefined;
  * @category Style
  */
 pvc.options.charts.PieChart.prototype.extensionPoints = undefined;
+/**
+ * The 
+ * <tt>category</tt> visual role represents a slice of the pie.
+ * <p>
+ * The 
+ * <tt>category</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>category</tt> prefix.
+ * <p>
+ * The visual role itself is optional,
+ * yet, when unbound, 
+ * a dimension with a "category" prefix
+ * is automatically created for it,
+ * and all datums will have the value 
+ * <tt>null</tt>
+ * in that dimension.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.PieChart.prototype.categoryRole = undefined;
+/**
+ * The 
+ * <tt>color</tt> visual role controls the color of pie slices.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>color</tt> prefix
+ * or, if none exists, 
+ * the dimensions of the "category" role.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role is discrete.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.PieChart.prototype.colorRole = undefined;
+/**
+ * The 
+ * <tt>value</tt> visual role controls the 
+ * relative angle span of each pie slice.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role automatically binds to 
+ * a single dimension whose name has the 
+ * <tt>value</tt> prefix.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role is required.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.PieChart.prototype.valueRole = undefined;
 /**
  * The extension points of the pie chart type.
  * <p>
@@ -1792,122 +2081,6 @@ pvc.options.ext.PieChartExtensionPoints.prototype.smallBase = undefined;
  * @category Multi-Chart
  */
 pvc.options.ext.PieChartExtensionPoints.prototype.smallContent = undefined;
-/**
- * The visual roles of the 
- * <i>pie</i> chart type.
- * 
- * @class
- * @extends pvc.options.roles.ChartVisualRoles
- */
-pvc.options.roles.PieVisualRoles = function(){};
-        
-        
-        
-        
-/**
- * The 
- * <tt>multiChart</tt> visual role
- * allows turning a chart in a small multiples chart
- * {@link http://en.wikipedia.org/wiki/Small_multiple}.
- * <p>
- * Almost all main chart types support being shown
- * as a small multiples chart.
- * Currently, the exceptions are the charts: 
- * 
- * <i>Heat Grid</i>, 
- * 
- * <i>Bullet</i>, 
- * 
- * <i>Data Tree</i> and
- * 
- * <i>Parallel Coordinates</i>.
- * <p>
- * The 
- * <tt>multiChart</tt> visual role
- * can be bound to any number of dimensions,
- * that are, or will be turned into, discrete.
- * <p>
- * The 
- * <tt>multiChart</tt> visual role automatically binds to 
- * every dimension whose name has the 
- * <tt>multiChart</tt> prefix.
- * <p>
- * One 
- * <i>small</i> chart is generated per
- * unique combination of the values of the bound dimensions
- * that is present in the source data.
- * Each small chart then receives as its data
- * the partition of the source data that shares its 
- * unique combination of values.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.PieVisualRoles.prototype.multiChart = undefined;
-/**
- * The 
- * <tt>category</tt> visual role represents a slice of the pie.
- * <p>
- * The 
- * <tt>category</tt> visual role automatically binds to 
- * every dimension whose name has the 
- * <tt>category</tt> prefix.
- * <p>
- * The visual role itself is optional,
- * yet, when unbound, 
- * a dimension with a "category" prefix
- * is automatically created for it,
- * and all datums will have the value 
- * <tt>null</tt>
- * in that dimension.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.PieVisualRoles.prototype.category = undefined;
-/**
- * The 
- * <tt>color</tt> visual role controls the color of pie slices.
- * <p>
- * The 
- * <tt>color</tt> visual role automatically binds to 
- * every dimension whose name has the 
- * <tt>color</tt> prefix
- * or, if none exists, 
- * the dimensions of the "category" role.
- * <p>
- * The 
- * <tt>color</tt> visual role is discrete.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.PieVisualRoles.prototype.color = undefined;
-/**
- * The 
- * <tt>value</tt> visual role controls the 
- * relative angle span of each pie slice.
- * <p>
- * The 
- * <tt>value</tt> visual role automatically binds to 
- * a single dimension whose name has the 
- * <tt>value</tt> prefix.
- * <p>
- * The 
- * <tt>value</tt> visual role is required.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.PieVisualRoles.prototype.value = undefined;
 /**
  * The options documentation class of the 
  * <b>Pie</b> plot.
@@ -2367,13 +2540,6 @@ pvc.options.charts.CartesianChart.prototype.showXScale = undefined;
  */
 pvc.options.charts.CartesianChart.prototype.showYScale = undefined;
 /**
- * The visual roles that are common to (almost) all cartesian chart types.
- * 
- * @type pvc.options.roles.CartesianVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.CartesianChart.prototype.visualRoles = undefined;
-/**
  * The extension points object contains style definitions for 
  * the marks of the chart.
  * 
@@ -2381,17 +2547,6 @@ pvc.options.charts.CartesianChart.prototype.visualRoles = undefined;
  * @category Style
  */
 pvc.options.charts.CartesianChart.prototype.extensionPoints = undefined;
-/**
- * The visual roles common to (almost) all cartesian chart types.
- * 
- * @class
- * @extends pvc.options.roles.ChartVisualRoles
- */
-pvc.options.roles.CartesianVisualRoles = function(){};
-        
-        
-        
-        
 /**
  * The 
  * <tt>color</tt> visual role controls the color of visual elements.
@@ -2406,12 +2561,13 @@ pvc.options.roles.CartesianVisualRoles = function(){};
  * The 
  * <tt>color</tt> visual role is discrete.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.CartesianVisualRoles.prototype.color = undefined;
+pvc.options.charts.CartesianChart.prototype.colorRole = undefined;
 /**
  * The 
  * <tt>series</tt> visual role represents a 
@@ -2445,12 +2601,13 @@ pvc.options.roles.CartesianVisualRoles.prototype.color = undefined;
  * <tt>series</tt> visual role is the 
  * <i>Box plot</i>.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.CartesianVisualRoles.prototype.series = undefined;
+pvc.options.charts.CartesianChart.prototype.seriesRole = undefined;
 /**
  * The extension points common to all cartesian chart types.
  * 
@@ -2500,24 +2657,6 @@ pvc.options.charts.CategoricalChart = function(){};
         
         
 /**
- * The visual roles that are common to all categorical chart types.
- * 
- * @type pvc.options.roles.CategoricalVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.CategoricalChart.prototype.visualRoles = undefined;
-/**
- * The visual roles common to all categorical chart types.
- * 
- * @class
- * @extends pvc.options.roles.CartesianVisualRoles
- */
-pvc.options.roles.CategoricalVisualRoles = function(){};
-        
-        
-        
-        
-/**
  * The 
  * <tt>category</tt> visual role 
  * represents a certain 
@@ -2555,12 +2694,13 @@ pvc.options.roles.CategoricalVisualRoles = function(){};
  * <tt>null</tt>
  * in that dimension.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.CategoricalVisualRoles.prototype.category = undefined;
+pvc.options.charts.CategoricalChart.prototype.categoryRole = undefined;
 /**
  * The common options documentation class of 
  * <b>categorical</b> plots.
@@ -2839,6 +2979,49 @@ pvc.options.charts.CategoricalNumericChart.prototype.smallWidth = undefined;
  */
 pvc.options.charts.CategoricalNumericChart.prototype.smallTitle = undefined;
 /**
+ * The 
+ * <tt>multiChart</tt> visual role
+ * allows turning a chart in a small multiples chart
+ * {@link http://en.wikipedia.org/wiki/Small_multiple}.
+ * <p>
+ * Almost all main chart types support being shown
+ * as a small multiples chart.
+ * Currently, the exceptions are the charts: 
+ * 
+ * <i>Heat Grid</i>, 
+ * 
+ * <i>Bullet</i>, 
+ * 
+ * <i>Data Tree</i> and
+ * 
+ * <i>Parallel Coordinates</i>.
+ * <p>
+ * The 
+ * <tt>multiChart</tt> visual role
+ * can be bound to any number of dimensions,
+ * that are, or will be turned into, discrete.
+ * <p>
+ * The 
+ * <tt>multiChart</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>multiChart</tt> prefix.
+ * <p>
+ * One 
+ * <i>small</i> chart is generated per
+ * unique combination of the values of the bound dimensions
+ * that is present in the source data.
+ * Each small chart then receives as its data
+ * the partition of the source data that shares its 
+ * unique combination of values.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.CategoricalNumericChart.prototype.multiChartRole = undefined;
+/**
  * The first color axis options.
  * <p>
  * This axis can also be accessed by the property name 
@@ -2866,15 +3049,6 @@ pvc.options.charts.CategoricalNumericChart.prototype.colorAxis = undefined;
  * @category Axes
  */
 pvc.options.charts.CategoricalNumericChart.prototype.orthoAxis = undefined;
-/**
- * The visual roles common to 
- * <b>categorical</b> chart types with a 
- * <i>continuous-numeric orthogonal axis</i>.
- * 
- * @type pvc.options.roles.CategoricalNumericVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.CategoricalNumericChart.prototype.visualRoles = undefined;
 /**
  * The extension points object contains style definitions for 
  * the marks of the chart.
@@ -2929,61 +3103,6 @@ pvc.options.ext.CategoricalNumericChartExtensionPoints.prototype.smallBase = und
  * @category Multi-Chart
  */
 pvc.options.ext.CategoricalNumericChartExtensionPoints.prototype.smallContent = undefined;
-/**
- * The visual roles common to 
- * <b>categorical</b> chart types with a 
- * <i>continuous-numeric orthogonal axis</i>.
- * 
- * @class
- * @extends pvc.options.roles.CategoricalVisualRoles
- */
-pvc.options.roles.CategoricalNumericVisualRoles = function(){};
-        
-        
-        
-        
-/**
- * The 
- * <tt>multiChart</tt> visual role
- * allows turning a chart in a small multiples chart
- * {@link http://en.wikipedia.org/wiki/Small_multiple}.
- * <p>
- * Almost all main chart types support being shown
- * as a small multiples chart.
- * Currently, the exceptions are the charts: 
- * 
- * <i>Heat Grid</i>, 
- * 
- * <i>Bullet</i>, 
- * 
- * <i>Data Tree</i> and
- * 
- * <i>Parallel Coordinates</i>.
- * <p>
- * The 
- * <tt>multiChart</tt> visual role
- * can be bound to any number of dimensions,
- * that are, or will be turned into, discrete.
- * <p>
- * The 
- * <tt>multiChart</tt> visual role automatically binds to 
- * every dimension whose name has the 
- * <tt>multiChart</tt> prefix.
- * <p>
- * One 
- * <i>small</i> chart is generated per
- * unique combination of the values of the bound dimensions
- * that is present in the source data.
- * Each small chart then receives as its data
- * the partition of the source data that shares its 
- * unique combination of values.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.CategoricalNumericVisualRoles.prototype.multiChart = undefined;
 /**
  * The common options documentation class of 
  * <b>categorical</b> plot types with a 
@@ -3079,14 +3198,6 @@ pvc.options.charts.BoxplotChart = function(){};
  */
 pvc.options.charts.BoxplotChart.prototype.baseAxis = undefined;
 /**
- * The visual roles that are common to the 
- * <i>bar family</i> chart types.
- * 
- * @type pvc.options.roles.BarCommonVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.BoxplotChart.prototype.visualRoles = undefined;
-/**
  * Percentage of occupied space over total space 
  * in a discrete axis band.
  * <p>
@@ -3110,18 +3221,6 @@ pvc.options.charts.BoxplotChart.prototype.panelSizeRatio = undefined;
  */
 pvc.options.charts.BoxplotChart.prototype.box = undefined;
 /**
- * The visual roles of the 
- * <i>box plot</i> chart type.
- * 
- * @class
- * @extends pvc.options.roles.CategoricalNumericVisualRoles
- */
-pvc.options.roles.BoxplotVisualRoles = function(){};
-        
-        
-        
-        
-/**
  * The 
  * <tt>lowerQuartil</tt> visual role 
  * controls the bottom position of the box visual element,
@@ -3135,12 +3234,13 @@ pvc.options.roles.BoxplotVisualRoles = function(){};
  * The 
  * <tt>lowerQuartil</tt> visual role is optional.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.BoxplotVisualRoles.prototype.lowerQuartil = undefined;
+pvc.options.charts.BoxplotChart.prototype.lowerQuartilRole = undefined;
 /**
  * The 
  * <tt>maximum</tt> visual role 
@@ -3156,12 +3256,13 @@ pvc.options.roles.BoxplotVisualRoles.prototype.lowerQuartil = undefined;
  * The 
  * <tt>maximum</tt> visual role is optional.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.BoxplotVisualRoles.prototype.maximum = undefined;
+pvc.options.charts.BoxplotChart.prototype.maximumRole = undefined;
 /**
  * The 
  * <tt>median</tt> visual role 
@@ -3176,12 +3277,13 @@ pvc.options.roles.BoxplotVisualRoles.prototype.maximum = undefined;
  * The 
  * <tt>median</tt> visual role is required.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.BoxplotVisualRoles.prototype.median = undefined;
+pvc.options.charts.BoxplotChart.prototype.medianRole = undefined;
 /**
  * The 
  * <tt>minimum</tt> visual role 
@@ -3197,12 +3299,13 @@ pvc.options.roles.BoxplotVisualRoles.prototype.median = undefined;
  * The 
  * <tt>minimum</tt> visual role is optional.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.BoxplotVisualRoles.prototype.minimum = undefined;
+pvc.options.charts.BoxplotChart.prototype.minimumRole = undefined;
 /**
  * The 
  * <tt>series</tt> visual role represents a 
@@ -3211,10 +3314,11 @@ pvc.options.roles.BoxplotVisualRoles.prototype.minimum = undefined;
  * In this chart type, although supported, 
  * data bound to is not represented in its visual elements.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  * @constant
  */
-pvc.options.roles.BoxplotVisualRoles.prototype.series = null;
+pvc.options.charts.BoxplotChart.prototype.seriesRole = null;
 /**
  * The 
  * <tt>upperQuartil</tt> visual role 
@@ -3229,12 +3333,13 @@ pvc.options.roles.BoxplotVisualRoles.prototype.series = null;
  * The 
  * <tt>upperQuartil</tt> visual role is optional.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.BoxplotVisualRoles.prototype.upperQuartil = undefined;
+pvc.options.charts.BoxplotChart.prototype.upperQuartilRole = undefined;
 /**
  * The options documentation class of the 
  * <b>Box</b> plot.
@@ -3459,14 +3564,6 @@ pvc.options.charts.HeatGridChart.prototype.sizeAxis = undefined;
  */
 pvc.options.charts.HeatGridChart.prototype.useCompositeAxis = undefined;
 /**
- * The visual roles of the 
- * <b>heat grid</b> chart type.
- * 
- * @type pvc.options.roles.HeatGridVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.HeatGridChart.prototype.visualRoles = undefined;
-/**
  * The heat grid plot is the 
  * <b>main plot</b> of the heat grid chart,
  * which means that 
@@ -3478,18 +3575,6 @@ pvc.options.charts.HeatGridChart.prototype.visualRoles = undefined;
  */
 pvc.options.charts.HeatGridChart.prototype.heatGrid = undefined;
 /**
- * The visual roles of the 
- * <b>heat grid</b> chart type.
- * 
- * @class
- * @extends pvc.options.roles.CategoricalVisualRoles
- */
-pvc.options.roles.HeatGridVisualRoles = function(){};
-        
-        
-        
-        
-/**
  * The 
  * <tt>category</tt> visual role 
  * of the heat grid chart organizes visual elements
@@ -3498,11 +3583,12 @@ pvc.options.roles.HeatGridVisualRoles = function(){};
  * <p>
  * For additional information, 
  * see the base version of this property:
- * {@link pvc.options.roles.CategoricalVisualRoles}.
+ * {@link pvc.options.charts.CategoricalChart#categoryRole}.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.HeatGridVisualRoles.prototype.category = undefined;
+pvc.options.charts.HeatGridChart.prototype.categoryRole = undefined;
 /**
  * The 
  * <tt>color</tt> visual role controls the color of 
@@ -3519,12 +3605,13 @@ pvc.options.roles.HeatGridVisualRoles.prototype.category = undefined;
  * <p>
  * When unbound, the visual elements all show the same color.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.HeatGridVisualRoles.prototype.color = undefined;
+pvc.options.charts.HeatGridChart.prototype.colorRole = undefined;
 /**
  * The 
  * <tt>series</tt> visual role 
@@ -3533,11 +3620,12 @@ pvc.options.roles.HeatGridVisualRoles.prototype.color = undefined;
  * <p>
  * For additional information, 
  * see the base version of this property:
- * {@link pvc.options.roles.CartesianVisualRoles}.
+ * {@link pvc.options.charts.CartesianChart#seriesRole}.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.HeatGridVisualRoles.prototype.series = undefined;
+pvc.options.charts.HeatGridChart.prototype.seriesRole = undefined;
 /**
  * The 
  * <tt>size</tt> visual role controls the size of 
@@ -3554,12 +3642,13 @@ pvc.options.roles.HeatGridVisualRoles.prototype.series = undefined;
  * When unbound, all the dot visual elements are 
  * sized to the grid cell size.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.HeatGridVisualRoles.prototype.size = undefined;
+pvc.options.charts.HeatGridChart.prototype.sizeRole = undefined;
 /**
  * The options documentation class of the 
  * <b>Heat grid</b> plot.
@@ -3611,7 +3700,7 @@ pvc.options.plots.HeatGridPlot.prototype.shape = undefined;
  * themselves.
  * <p>
  * When shapes are used the 
- * {@link pvc.options.roles.HeatGridVisualRoles#size} 
+ * {@link pvc.options.charts.HeatGridChart#sizeRole} 
  * visual role can be used.
  * 
  * @type boolean
@@ -3717,14 +3806,6 @@ pvc.options.charts.BarChartCommon = function(){};
  */
 pvc.options.charts.BarChartCommon.prototype.baseAxis = undefined;
 /**
- * The visual roles that are common to the 
- * <i>bar family</i> chart types.
- * 
- * @type pvc.options.roles.BarCommonVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.BarChartCommon.prototype.visualRoles = undefined;
-/**
  * Percentage of occupied space over total space 
  * in a discrete axis band.
  * <p>
@@ -3737,29 +3818,18 @@ pvc.options.charts.BarChartCommon.prototype.visualRoles = undefined;
  */
 pvc.options.charts.BarChartCommon.prototype.panelSizeRatio = undefined;
 /**
- * The visual roles common to the 
- * <i>Bar family</i> chart types.
- * 
- * @class
- * @extends pvc.options.roles.CategoricalNumericVisualRoles
- */
-pvc.options.roles.BarCommonVisualRoles = function(){};
-        
-        
-        
-        
-/**
  * The 
  * <tt>category</tt> visual role 
  * of the bar family charts is restricted to be discrete.
  * <p>
  * For additional information, 
  * see the base version of this property:
- * {@link pvc.options.roles.CategoricalVisualRoles}.
+ * {@link pvc.options.charts.CategoricalChart#categoryRole}.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.BarCommonVisualRoles.prototype.category = undefined;
+pvc.options.charts.BarChartCommon.prototype.categoryRole = undefined;
 /**
  * The 
  * <tt>value</tt> visual role 
@@ -3773,12 +3843,13 @@ pvc.options.roles.BarCommonVisualRoles.prototype.category = undefined;
  * The 
  * <tt>value</tt> visual role is required.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.BarCommonVisualRoles.prototype.value = undefined;
+pvc.options.charts.BarChartCommon.prototype.valueRole = undefined;
 /**
  * The common options documentation class of the 
  * <b>Bar family</b> plots.
@@ -4096,13 +4167,45 @@ pvc.options.charts.BarChart.prototype.secondAxis = undefined;
  */
 pvc.options.charts.BarChart.prototype.secondAxisColor = undefined;
 /**
- * The visual roles of the 
- * <i>bar</i> chart type.
+ * The 
+ * <tt>dataPart</tt> visual role
+ * allows fine grained partitioning
+ * of the data  that shows in the main plot
+ * and in the second plot.
+ * <p>
+ * By default, 
+ * data is partitioned into two data parts
+ * according to the chart's 
  * 
- * @type pvc.options.roles.BarVisualRoles
- * @category Data Binding
+ * <tt>plot2Series</tt> option
+ * (depending on the chart,
+ * {@link pvc.options.charts.BarChart#plot2Series}, or
+ * {@link pvc.options.charts.PointChart#plot2Series}).
+ * <p>
+ * The 
+ * <tt>dataPart</tt> visual role
+ * can be bound to a single dimension
+ * that is, or is turned into, discrete.
+ * <p>
+ * The 
+ * <tt>dataPart</tt> visual role automatically binds to 
+ * a dimension whose name has the 
+ * <tt>dataPart</tt> prefix.
+ * <p>
+ * The datums with the fixed data part value 
+ * <tt>0</tt> 
+ * are shown in the chart's main plot.
+ * The datums with the fixed data part value 
+ * <tt>1</tt> 
+ * are shown in the chart's second plot.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.   
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.charts.BarChart.prototype.visualRoles = undefined;
+pvc.options.charts.BarChart.prototype.dataPartRole = undefined;
 /**
  * The bar plot is the 
  * <b>main plot</b> of the bar chart,
@@ -4114,18 +4217,6 @@ pvc.options.charts.BarChart.prototype.visualRoles = undefined;
  * @category Plots
  */
 pvc.options.charts.BarChart.prototype.bar = undefined;
-/**
- * The visual roles of the 
- * <b>bar</b> chart type.
- * 
- * @class
- * @extends pvc.options.roles.BarCommonVisualRoles
- */
-pvc.options.roles.BarVisualRoles = function(){};
-        
-        
-        
-        
 /**
  * The options documentation class of the 
  * <b>Bar</b> plot.
@@ -4430,6 +4521,46 @@ pvc.options.charts.PointChart.prototype.color2AxisColors = undefined;
  */
 pvc.options.charts.PointChart.prototype.trend = undefined;
 /**
+ * The 
+ * <tt>dataPart</tt> visual role
+ * allows fine grained partitioning
+ * of the data  that shows in the main plot
+ * and in the second plot.
+ * <p>
+ * By default, 
+ * data is partitioned into two data parts
+ * according to the chart's 
+ * 
+ * <tt>plot2Series</tt> option
+ * (depending on the chart,
+ * {@link pvc.options.charts.BarChart#plot2Series}, or
+ * {@link pvc.options.charts.PointChart#plot2Series}).
+ * <p>
+ * The 
+ * <tt>dataPart</tt> visual role
+ * can be bound to a single dimension
+ * that is, or is turned into, discrete.
+ * <p>
+ * The 
+ * <tt>dataPart</tt> visual role automatically binds to 
+ * a dimension whose name has the 
+ * <tt>dataPart</tt> prefix.
+ * <p>
+ * The datums with the fixed data part value 
+ * <tt>0</tt> 
+ * are shown in the chart's main plot.
+ * The datums with the fixed data part value 
+ * <tt>1</tt> 
+ * are shown in the chart's second plot.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.   
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.PointChart.prototype.dataPartRole = undefined;
+/**
  * The base cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
@@ -4444,26 +4575,6 @@ pvc.options.charts.PointChart.prototype.trend = undefined;
  */
 pvc.options.charts.PointChart.prototype.baseAxis = undefined;
 /**
- * The visual roles that are common to the 
- * <i>line/dot/area family</i> chart types.
- * 
- * @type pvc.options.roles.PointVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.PointChart.prototype.visualRoles = undefined;
-/**
- * The visual roles common to the 
- * <i>point</i> chart types.
- * 
- * @class
- * @extends pvc.options.roles.CategoricalNumericVisualRoles
- */
-pvc.options.roles.PointVisualRoles = function(){};
-        
-        
-        
-        
-/**
  * The 
  * <tt>value</tt> visual role 
  * controls the orthogonal position of points.
@@ -4476,12 +4587,13 @@ pvc.options.roles.PointVisualRoles = function(){};
  * The 
  * <tt>value</tt> visual role is required.
  * <p>
- * See {@link pvc.options.roles.VisualRole}
+ * See {@link pvc.options.VisualRole}
  * for more information on supported data types.
  * 
- * @type string|pvc.options.roles.VisualRole
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
  */
-pvc.options.roles.PointVisualRoles.prototype.value = undefined;
+pvc.options.charts.PointChart.prototype.valueRole = undefined;
 /**
  * The common options documentation class of the 
  * <b>point</b> plots.
@@ -5207,6 +5319,49 @@ pvc.options.charts.MetricPointChart.prototype.smallWidth = undefined;
  */
 pvc.options.charts.MetricPointChart.prototype.smallTitle = undefined;
 /**
+ * The 
+ * <tt>multiChart</tt> visual role
+ * allows turning a chart in a small multiples chart
+ * {@link http://en.wikipedia.org/wiki/Small_multiple}.
+ * <p>
+ * Almost all main chart types support being shown
+ * as a small multiples chart.
+ * Currently, the exceptions are the charts: 
+ * 
+ * <i>Heat Grid</i>, 
+ * 
+ * <i>Bullet</i>, 
+ * 
+ * <i>Data Tree</i> and
+ * 
+ * <i>Parallel Coordinates</i>.
+ * <p>
+ * The 
+ * <tt>multiChart</tt> visual role
+ * can be bound to any number of dimensions,
+ * that are, or will be turned into, discrete.
+ * <p>
+ * The 
+ * <tt>multiChart</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>multiChart</tt> prefix.
+ * <p>
+ * One 
+ * <i>small</i> chart is generated per
+ * unique combination of the values of the bound dimensions
+ * that is present in the source data.
+ * Each small chart then receives as its data
+ * the partition of the source data that shares its 
+ * unique combination of values.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.MetricPointChart.prototype.multiChartRole = undefined;
+/**
  * The base cartesian axis panel options.
  * <p>
  * When the chart {@link pvc.options.charts.Chart#orientation}
@@ -5256,14 +5411,6 @@ pvc.options.charts.MetricPointChart.prototype.orthoAxis = undefined;
  */
 pvc.options.charts.MetricPointChart.prototype.sizeAxis = undefined;
 /**
- * The visual roles common to the 
- * <b>metric point</b> chart types.
- * 
- * @type pvc.options.roles.MetricPointVisualRoles
- * @category Data Binding
- */
-pvc.options.charts.MetricPointChart.prototype.visualRoles = undefined;
-/**
  * The extension points object contains style definitions for 
  * the marks of the chart.
  * 
@@ -5271,6 +5418,109 @@ pvc.options.charts.MetricPointChart.prototype.visualRoles = undefined;
  * @category Style
  */
 pvc.options.charts.MetricPointChart.prototype.extensionPoints = undefined;
+/**
+ * The 
+ * <tt>color</tt> visual role controls the color of the
+ * dots and lines of the visual elements.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role automatically binds to 
+ * every discrete dimension, or a single continuous dimension, 
+ * whose name has the 
+ * <tt>color</tt> prefix
+ * or, if none exists, 
+ * the dimensions of the "series" role.
+ * <p>
+ * The 
+ * <tt>color</tt> visual role is discrete or continuous.
+ * <p>
+ * The default value type of dimensions bound to it is 
+ * <tt>Number</tt>.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.MetricPointChart.prototype.colorRole = undefined;
+/**
+ * The 
+ * <tt>size</tt> visual role controls the size of 
+ * the dots of the visual elements,
+ * and, as such, it is only represented if dots are visible.
+ * <p>
+ * The 
+ * <tt>size</tt> visual role automatically binds to 
+ * every dimension whose name has the 
+ * <tt>size</tt> prefix.
+ * <p>
+ * The 
+ * <tt>size</tt> visual role is continuous and optional.
+ * <p>
+ * The default value type of the dimension bound to it is 
+ * <tt>Number</tt>.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.MetricPointChart.prototype.sizeRole = undefined;
+/**
+ * The 
+ * <tt>x</tt> visual role controls the base position
+ * of the "point" visual element.
+ * <p>
+ * The 
+ * <tt>x</tt> visual role automatically binds to 
+ * a single dimension whose name has the 
+ * <tt>x</tt> prefix.
+ * <p>
+ * The 
+ * <tt>x</tt> visual role is continuous and required.
+ * <p>
+ * The default value type of the dimension bound to it 
+ * depends on the value of the chart option 
+ * {@link pvc.options.charts.Chart#timeSeries}.
+ * If it is 
+ * <tt>true</tt>
+ * it is 
+ * <tt>Date</tt>, otherwise, 
+ * it is 
+ * <tt>Number</tt>.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.MetricPointChart.prototype.xRole = undefined;
+/**
+ * The 
+ * <tt>y</tt> visual role controls the orthogonal position
+ * of the "point" visual element.
+ * <p>
+ * The 
+ * <tt>y</tt> visual role automatically binds to 
+ * a single dimension whose name has the 
+ * <tt>y</tt> prefix.
+ * <p>
+ * The 
+ * <tt>y</tt> visual role is continuous and required.
+ * <p>
+ * The default value type of the dimension bound to it is 
+ * <tt>Number</tt>.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.MetricPointChart.prototype.yRole = undefined;
 /**
  * The extension points of the 
  * <i>metric line/dot/area family</i> chart types.
@@ -5316,159 +5566,6 @@ pvc.options.ext.MetricPointChartExtensionPoints.prototype.smallBase = undefined;
  * @category Multi-Chart
  */
 pvc.options.ext.MetricPointChartExtensionPoints.prototype.smallContent = undefined;
-/**
- * The visual roles common to the 
- * <b>metric point</b> plots.
- * 
- * @class
- * @extends pvc.options.roles.CartesianVisualRoles
- */
-pvc.options.roles.MetricPointVisualRoles = function(){};
-        
-        
-        
-        
-/**
- * The 
- * <tt>multiChart</tt> visual role
- * allows turning a chart in a small multiples chart
- * {@link http://en.wikipedia.org/wiki/Small_multiple}.
- * <p>
- * Almost all main chart types support being shown
- * as a small multiples chart.
- * Currently, the exceptions are the charts: 
- * 
- * <i>Heat Grid</i>, 
- * 
- * <i>Bullet</i>, 
- * 
- * <i>Data Tree</i> and
- * 
- * <i>Parallel Coordinates</i>.
- * <p>
- * The 
- * <tt>multiChart</tt> visual role
- * can be bound to any number of dimensions,
- * that are, or will be turned into, discrete.
- * <p>
- * The 
- * <tt>multiChart</tt> visual role automatically binds to 
- * every dimension whose name has the 
- * <tt>multiChart</tt> prefix.
- * <p>
- * One 
- * <i>small</i> chart is generated per
- * unique combination of the values of the bound dimensions
- * that is present in the source data.
- * Each small chart then receives as its data
- * the partition of the source data that shares its 
- * unique combination of values.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.MetricPointVisualRoles.prototype.multiChart = undefined;
-/**
- * The 
- * <tt>color</tt> visual role controls the color of the
- * dots and lines of the visual elements.
- * <p>
- * The 
- * <tt>color</tt> visual role automatically binds to 
- * every discrete dimension, or a single continuous dimension, 
- * whose name has the 
- * <tt>color</tt> prefix
- * or, if none exists, 
- * the dimensions of the "series" role.
- * <p>
- * The 
- * <tt>color</tt> visual role is discrete or continuous.
- * <p>
- * The default value type of dimensions bound to it is 
- * <tt>Number</tt>.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.MetricPointVisualRoles.prototype.color = undefined;
-/**
- * The 
- * <tt>size</tt> visual role controls the size of 
- * the dots of the visual elements,
- * and, as such, it is only represented if dots are visible.
- * <p>
- * The 
- * <tt>size</tt> visual role automatically binds to 
- * every dimension whose name has the 
- * <tt>size</tt> prefix.
- * <p>
- * The 
- * <tt>size</tt> visual role is continuous and optional.
- * <p>
- * The default value type of the dimension bound to it is 
- * <tt>Number</tt>.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.MetricPointVisualRoles.prototype.size = undefined;
-/**
- * The 
- * <tt>x</tt> visual role controls the base position
- * of the "point" visual element.
- * <p>
- * The 
- * <tt>x</tt> visual role automatically binds to 
- * a single dimension whose name has the 
- * <tt>x</tt> prefix.
- * <p>
- * The 
- * <tt>x</tt> visual role is continuous and required.
- * <p>
- * The default value type of the dimension bound to it 
- * depends on the value of the chart option 
- * {@link pvc.options.charts.Chart#timeSeries}.
- * If it is 
- * <tt>true</tt>
- * it is 
- * <tt>Date</tt>, otherwise, 
- * it is 
- * <tt>Number</tt>.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.MetricPointVisualRoles.prototype.x = undefined;
-/**
- * The 
- * <tt>y</tt> visual role controls the orthogonal position
- * of the "point" visual element.
- * <p>
- * The 
- * <tt>y</tt> visual role automatically binds to 
- * a single dimension whose name has the 
- * <tt>y</tt> prefix.
- * <p>
- * The 
- * <tt>y</tt> visual role is continuous and required.
- * <p>
- * The default value type of the dimension bound to it is 
- * <tt>Number</tt>.
- * <p>
- * See {@link pvc.options.roles.VisualRole}
- * for more information on supported data types.
- * 
- * @type string|pvc.options.roles.VisualRole
- */
-pvc.options.roles.MetricPointVisualRoles.prototype.y = undefined;
 /**
  * The extension points common to the 
  * <b>metric point</b> plot types.
@@ -8918,126 +9015,6 @@ pvc.options.varia.PlotTrending.prototype.label = undefined;
  */
 pvc.options.varia.PlotTrending.prototype.type = undefined;
 /**
- * The namespace of CCC visual roles option classes. 
- * 
- * @namespace
- */
-pvc.options.roles = {};
-
-/**
- * The options documentation class of a visual role.
- * <p>
- * Where a visual role argument is expected, 
- * a 
- * <tt>string</tt> value is also accepted,
- * with the content of what would be specified in
- * the property {@link #dimensions}.
- * 
- * @class
- */
-pvc.options.roles.VisualRole = function(){};
-        
-        
-        
-        
-/**
- * A list of dimension names and respective 
- * sort orders.
- * <p>
- * A dimensions string is similar to an SQL 'order by' clause,
- * like the following examples show:
- * 
- * <dl>
- * 
- * <dt>
- * 
- * <tt>"productType"</tt>
- * </dt>
- * 
- * <dd>
- * the visual role is bound to the single dimension named 
- * <tt>"productType"</tt>,
- * and data will be sorted in ascending order
- * </dd>
- * </dl>
- * 
- * <dl>
- * 
- * <dt>
- * 
- * <tt>"sales"</tt>
- * </dt>
- * 
- * <dd>
- * the visual role is bound to the single dimension named 
- * <tt>"sales"</tt>,
- * and data will be sorted in ascending order
- * </dd>
- * </dl>
- * 
- * <dl>
- * 
- * <dt>
- * 
- * <tt>"country, productType"</tt>
- * </dt>
- * 
- * <dd>
- * the visual role is bound to the dimensions 
- * named 
- * <tt>"country"</tt> and 
- * <tt>"productType"</tt>,
- * and data will be sorted first by
- * 
- * <tt>"country"</tt>, in ascending order,
- * and then by 
- * 
- * <tt>"productType"</tt>, in ascending order
- * </dd>
- * </dl>
- * 
- * <dl>
- * 
- * <dt>
- * 
- * <tt>"country desc, productType asc"</tt>
- * </dt>
- * 
- * <dd>
- * the visual role is bound to the dimensions 
- * named 
- * <tt>"country"</tt> and 
- * <tt>"productType"</tt>,
- * and data will be sorted first by
- * 
- * <tt>"country"</tt>, in descending order,
- * and then by 
- * 
- * <tt>"productType"</tt>, in ascending order
- * </dd>
- * </dl>
- * 
- * @type string
- */
-pvc.options.roles.VisualRole.prototype.dimensions = undefined;
-/**
- * Indicates that the visual role's data 
- * should be ordered in reverse order
- * in relation to the sort orders specified in
- * {@link #dimensions}.
- * <p>
- * This option provides a quick way to reverse the order
- * of the whole visual role, without changing any partial
- * sort orders assigned to each dimension of the visual role.
- * <p>
- * This option can be used to reverse the order of 
- * the data that is shown in a discrete axis.
- * 
- * @type boolean
- * @default false
- */
-pvc.options.roles.VisualRole.prototype.isReversed = undefined;
-/**
  * The namespace of various options-related helper types. 
  * 
  * @namespace
@@ -9861,6 +9838,113 @@ pvc.options.varia.ColorScaleType.prototype.Linear = 'linear';
  * @value 'normal'
  */
 pvc.options.varia.ColorScaleType.prototype.Normal = 'normal';
+/**
+ * The gravity of the tooltip controls 
+ * where the tooltip is place relative to the
+ * visual element's anchor point.
+ * <p>
+ * The gravity is the 
+ * tooltip's corner or side
+ * that is placed at the visual element's anchor point.
+ * <p>
+ * Said in yet another way: 
+ * «Gravity is the direction of the tooltip arrow.
+ * The arrow points to the target element.»
+ * 
+ * <p>
+ * The following diagram illustrates the
+ * tooltip arrow anchor points.
+ * <p>
+ * When the {@link pvc.options.Tooltip#useCorners}
+ * the "crossed" gravities are really at
+ * the tooltip box corners.
+ * 
+ * <pre>
+ *                nw    n    ne
+ *               +-o----o----o-+
+ *               |             |
+ *             w o   Tooltip   o e
+ *               |             |
+ *               +-o----o----o-+
+ *                sw    s    se
+ *                 
+ * </pre>
+ * 
+ * <p>
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.TooltipGravity = function(){};
+        
+        
+        
+        
+/**
+ * Right tooltip side is placed at the 
+ * visual element's anchor point,
+ * resulting in the tooltip being at its left.
+ * 
+ * @value 'e'
+ */
+pvc.options.varia.TooltipGravity.prototype.East = 'e';
+/**
+ * Top tooltip side is placed at the 
+ * visual element's anchor point,
+ * resulting in the tooltip being below it. 
+ * 
+ * @value 'n'
+ */
+pvc.options.varia.TooltipGravity.prototype.North = 'n';
+/**
+ * Upper-right tooltip corner is placed at the 
+ * visual element's anchor point,
+ * resulting in the tooltip being below it and at its left.
+ * 
+ * @value 'ne'
+ */
+pvc.options.varia.TooltipGravity.prototype.NorthEast = 'ne';
+/**
+ * Upper-left tooltip corner is placed at the 
+ * visual element's anchor point,
+ * resulting in the tooltip being below it and at its right.
+ * 
+ * @value 'nw'
+ */
+pvc.options.varia.TooltipGravity.prototype.NorthWest = 'nw';
+/**
+ * Bottom tooltip side is placed at the 
+ * visual element's anchor point,
+ * resulting in the tooltip being above it.  
+ * 
+ * @value 's'
+ */
+pvc.options.varia.TooltipGravity.prototype.South = 's';
+/**
+ * Lower-right tooltip corner is placed at the 
+ * visual element's anchor point,
+ * resulting in the tooltip being above it and at its left.
+ * 
+ * @value 'se'
+ */
+pvc.options.varia.TooltipGravity.prototype.SouthEast = 'se';
+/**
+ * Lower-left tooltip corner is placed at the 
+ * visual element's anchor point,
+ * resulting in the tooltip being above it and at its right.
+ * 
+ * @value 'sw'
+ */
+pvc.options.varia.TooltipGravity.prototype.SouthWest = 'sw';
+/**
+ * Left tooltip side is placed at the 
+ * visual element's anchor point,
+ * resulting in the tooltip being at its right.
+ * 
+ * @value 'w'
+ */
+pvc.options.varia.TooltipGravity.prototype.West = 'w';
 /**
  * Describes the distances from 
  * each of the four planar sides:

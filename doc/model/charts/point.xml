@@ -8,12 +8,28 @@
     <c:complexType name="PointChart" 
                    space="pvc.options.charts" 
                    base="pvc.options.charts.CategoricalNumericChart"
-                   facets="pvc.options.facets.Plot2ChartFacet
-                           pvc.options.facets.CategoricalChartTrendFacet"
+                   facets="pvc.options.charts.Plot2ChartFacet
+                           pvc.options.charts.CategoricalChartTrendFacet
+                           pvc.options.charts.DataPartChartFacet"
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Line/Dot/Area family</b> charts.
         </c:documentation>
+        
+        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>value</tt> visual role 
+                controls the orthogonal position of points.
+                
+                The <tt>value</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>value</tt> prefix.
+                
+                The <tt>value</tt> visual role is required.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
         
         <c:property name="baseAxis" type="pvc.options.panels.AnyNonHierarchicalCartesianAxis" category="Axes">
             <c:documentation>
@@ -27,42 +43,12 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="visualRoles" type="pvc.options.roles.PointVisualRoles" category="Data Binding">
-            <c:documentation>
-                The visual roles that are common to the <i>line/dot/area family</i> chart types.
-            </c:documentation>
-        </c:property>
-        
-    </c:complexType>
-    
-    <c:complexType name="PointVisualRoles" 
-                   space="pvc.options.roles" 
-                   base="pvc.options.roles.CategoricalNumericVisualRoles"
-                   facets="pvc.options.roles.DataPartVisualRolesFacet">
-        <c:documentation>
-            The visual roles common to the <i>point</i> chart types.
-        </c:documentation>
-        
-        <c:property name="value" type="string pvc.options.roles.VisualRole">
-            <c:documentation>
-                The <tt>value</tt> visual role 
-                controls the orthogonal position of points.
-                
-                The <tt>value</tt> visual role automatically binds to 
-                a single numeric dimension whose name has the <tt>value</tt> prefix.
-                
-                The <tt>value</tt> visual role is required.
-                
-                See <c:link to="pvc.options.roles.VisualRole" />
-                for more information on supported data types.
-            </c:documentation>
-        </c:property>
     </c:complexType>
     
     <c:complexType name="PointPlot" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.CategoricalNumericPlot"
-                   facets="pvc.options.facets.LinesAndDotsPlotFacet">
+                   facets="pvc.options.plots.LinesAndDotsPlotFacet">
         <c:documentation>
             The common options documentation class of the <b>point</b> plots.
         </c:documentation>

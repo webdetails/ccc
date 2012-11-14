@@ -679,6 +679,6 @@ def
         timeSeriesFormat: "%Y-%m-%d"
         
         // Show a frame around the plot area
-        // showPlotFrame: undefined
+        // plotFrameVisible: undefined
     })
 });
