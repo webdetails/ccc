@@ -54,7 +54,9 @@ def
     font: "12px sans-serif",
 
     defaultPaddings: 2,
-
+    
+    _extensionPrefix: 'title',
+    
     /**
      * @override
      */
@@ -204,9 +206,5 @@ def
     
     _getExtensionId: function() {
         return '';
-    },
-
-    _getExtensionPrefix: function() {
-        return 'title';
     }
 });

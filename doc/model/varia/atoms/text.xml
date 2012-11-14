@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="TextAlignment" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The horizontal alignment of text. 
+        </c:documentation>
+        
+        <c:atom name="Left" value="'left'" />
+        <c:atom name="Center" value="'center'" />
+        <c:atom name="Right" value="'right'" />
+    </c:atomType>
+    
+    <c:atomType name="TextBaseline" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The vertical alignment of text. 
+        </c:documentation>
+        
+        <c:atom name="Top"    value="'top'" />
+        <c:atom name="Middle" value="'middle'" />
+        <c:atom name="Bottom" value="'bottom'" />
+    </c:atomType>
+    
+</c:model>

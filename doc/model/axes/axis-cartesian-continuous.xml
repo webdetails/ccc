@@ -6,16 +6,16 @@
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:complexType name="AnyContinuousCartesianAxis"
-                   space="pvc.options.panels"
-                   base="pvc.options.panels.CartesianAxis"
-                   facets="pvc.options.panels.ContinuousCartesianAxisFacet 
-                           pvc.options.panels.NumericCartesianAxisFacet
-                           pvc.options.panels.CartesianAxisTicksFacet">
+                   space="pvc.options.axes"
+                   base="pvc.options.axes.CartesianAxis"
+                   facets="pvc.options.axes.ContinuousCartesianAxisFacet 
+                           pvc.options.axes.NumericCartesianAxisFacet
+                           pvc.options.axes.CartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for continuous scale types.
             
-            For additional information, please see <c:link to="pvc.options.panels.CartesianAxis" />.
+            For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
         
         <c:property name="extensionPoints" type="pvc.options.ext.AnyContinuousCartesianAxisExtensionPoints" category="Style">
@@ -48,7 +48,7 @@
     </c:complexType>
     
     <c:facetType name="ContinuousCartesianAxisFacet" 
-                   space="pvc.options.panels">
+                   space="pvc.options.axes">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             for continuous scale types (numeric or timeSeries).
@@ -145,7 +145,7 @@
         </c:property>
     </c:facetType>
     
-    <c:facetType name="ContinuousCartesianAxisExtensionPointsFacet" space="pvc.options.panels">
+    <c:facetType name="ContinuousCartesianAxisExtensionPointsFacet" space="pvc.options.axes">
         <c:property name="minorTicks" type="pvc.options.marks.RuleExtensionPoint" category="Continuous > Style">
             <c:documentation>
                 The extension point of a <i>minor</i> tick rule mark (applies to continuous axes).

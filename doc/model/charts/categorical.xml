@@ -52,13 +52,4 @@
         </c:property>    
     </c:complexType>
     
-    <c:complexType name="CategoricalPlot" 
-                   space="pvc.options.plots"
-                   base="pvc.options.plots.CartesianPlot" 
-                   abstract="true">
-        <c:documentation>
-            The common options documentation class of <b>categorical</b> plots.
-        </c:documentation>
-
-    </c:complexType>
 </c:model>

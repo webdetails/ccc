@@ -5,15 +5,53 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="WedgeExtensionPoint" space="pvc.options.marks" base="pvc.options.marks.MarkExtensionPoint">
+    <c:complexType name="WedgeExtensionPoint" 
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.MarkExtensionPoint"
+                   facets="pvc.options.marks.StrokeBasicFacet
+                           pvc.options.marks.FillBasicFacet">
          <c:documentation>
             The class of protovis Wedge extension points.
             
             See the associated protovis documentation at
             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Wedge.html" />.
         </c:documentation>
-        <!--
-        TODO 
-         -->
+        
+        <c:property name="angle" type="number" default="0">
+            <c:documentation>
+                The angular span of each slice, in <i>radian</i> units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="startAngle" type="number" default="0">
+            <c:documentation>
+                The start angle of each slice, in <i>radian</i> units.
+                
+                When unspecified, 
+                the start angle assumes the end angle of the previous slice.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="endAngle" type="number" default="0">
+            <c:documentation>
+                The end angle of each slice, in <i>radian</i> units.
+                
+                When unspecified, 
+                the end angle is the start angle plus the angular span.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="innerRadius" type="number">
+            <c:documentation>
+                The inner radius of each slice, in <i>pixel</i> units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="outerRadius" type="number">
+            <c:documentation>
+                The outer radius of each slice, in <i>pixel</i> units.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
 </c:model>

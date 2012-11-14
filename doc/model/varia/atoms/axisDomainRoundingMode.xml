@@ -34,7 +34,7 @@
                 this mode ensures that ticks coincide with 
                 the end of the axis' scale,
                 as long as the axis'
-                <c:link to="pvc.options.panels.CartesianAxis#offset" />
+                <c:link to="pvc.options.axes.CartesianAxis#offset" />
                 is zero.
             </c:documentation>
         </c:atom>

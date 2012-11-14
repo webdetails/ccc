@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="StrokeLineJoin" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The possible ways to join the segments of a line.
+            
+            See <c:link to="http://www.w3.org/TR/SVG/painting.html#StrokeProperties" />
+            for more information on stroke properties.
+        </c:documentation>
+        
+        <c:atom name="Miter" value="'miter'">
+            <c:documentation>
+                Join segments with sharp angle corners. 
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Round" value="'round'">
+            <c:documentation>
+                Join segments with rounded corners.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Bevel" value="'bevel'">
+            <c:documentation>
+                Join segments with cut-off corners.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+    
+    <c:atomType name="StrokeLineCap" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The possible ways to draw the ends of a line or line pattern.
+            
+            See <c:link to="http://www.w3.org/TR/SVG/painting.html#StrokeProperties" />
+            for more information on stroke properties.
+        </c:documentation>
+        
+        <c:atom name="Butt" value="'butt'">
+            <c:documentation>
+                The end is straight, at the end position. 
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Round" value="'round'">
+            <c:documentation>
+                The end is a semi-circle,
+                whose radius is half the line width
+                and whose center is at the end position.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Square" value="'square'">
+            <c:documentation>
+                The end is a square,
+                whith a side length equal to the line width
+                and whose center is at the end position.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+    
+    <c:atomType name="StrokeDasharray" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The possible stroke patterns.
+            
+            The actual length of stroke patterns' dashes and spaces is 
+            proportional to the line width. 
+            
+            The pattern dashes are sensitive to 
+            the line cap property. 
+            The use of <c:link to="pvc.options.varia.StrokeLineCap#Round" />
+            generates circle-ended dashes.
+            The line caps <c:link to="pvc.options.varia.StrokeLineCap#Butt" />
+            and <c:link to="pvc.options.varia.StrokeLineCap#Square" />
+            yield the same result: 
+            square-ended dashes, of equal length.
+            
+            See <c:link to="http://www.w3.org/TR/SVG/painting.html#StrokeProperties" />
+            for more information on stroke properties.
+        </c:documentation>
+        
+        <c:atom name="ShortDash" value="'shortdash'">
+            <c:documentation>
+                 A pattern.
+                 Can also be specified as <tt>"."</tt>
+            </c:documentation>
+        </c:atom>
+        <c:atom name="ShortDashDot" value="'shortdashdot'">
+            <c:documentation>
+                 A pattern.
+                 Can also be specified as <tt>"-."</tt>
+            </c:documentation>
+        </c:atom>
+        <c:atom name="ShortDashDotDot" value="'shortdashdotdot'">
+            <c:documentation>
+                 A pattern.
+                 Can also be specified as <tt>"-.."</tt>
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Dot" value="'dot'">
+            <c:documentation>
+                A pattern.
+                Can also be specified as <tt>". "</tt>
+            </c:documentation>
+        </c:atom>
+        <c:atom name="Dash" value="'dash'">
+            <c:documentation>
+                A pattern.
+                Can also be specified as <tt>"- "</tt>
+            </c:documentation>
+        </c:atom>
+        <c:atom name="LongDash" value="'longdash'">
+            <c:documentation>
+                 A pattern.
+                 Can also be specified as <tt>"--"</tt>
+            </c:documentation>
+        </c:atom>
+        <c:atom name="DashDot" value="'dashdot'">
+            <c:documentation>
+                 A pattern.
+                 Can also be specified as <tt>"- ."</tt>
+            </c:documentation>
+        </c:atom>
+        <c:atom name="LongDashDot" value="'longdashdot'">
+            <c:documentation>
+                 A pattern.
+                 Can also be specified as <tt>"--."</tt>
+            </c:documentation>
+        </c:atom>
+        <c:atom name="LongDashDotDot" value="'longdashdotdot'">
+            <c:documentation>
+                 A pattern.
+                 Can also be specified as <tt>"--.."</tt>
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

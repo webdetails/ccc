@@ -30,6 +30,8 @@
     <c:include the="varia/atoms/colorScaleType.xml" />
     <c:include the="varia/atoms/tooltipGravity.xml" />
     <c:include the="varia/atoms/lineAreaInterpolation.xml" />
+    <c:include the="varia/atoms/stroke.xml" />
+    <c:include the="varia/atoms/text.xml" />
     
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />

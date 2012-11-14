@@ -428,7 +428,7 @@ def.scope(function(){
          */
         Size: {
             resolve: resolveNormal,
-            cast:    pvc.Size.to 
+            cast:    pvc.Size.to
         },
         
         SizeMax: {
@@ -606,18 +606,30 @@ def.scope(function(){
         },
         TitleSize: {
             resolve: resolveNormal,
-            cast:    pvc.castNumber  
-        }, // It's a pvc.Size, actually
-        TitleSizeMax: specNormal, 
+            cast:    pvc.Size.to
+        },
+        TitleSizeMax: {
+            resolve: resolveNormal,
+            cast:    pvc.Size.to
+        }, 
         TitleFont: {
             resolve: resolveNormal,
             cast:    String 
         },
-        TitleMargins:  specNormal,
-        TitlePaddings: specNormal,
+        TitleMargins:  {
+            resolve: resolveNormal,
+            cast:    pvc.Sides.as 
+        },
+        TitlePaddings: {
+            resolve: resolveNormal,
+            cast:    pvc.Sides.as 
+        },
         TitleAlign: {
             resolve: resolveNormal,
-            cast:    String 
+            cast: function castAlign(align){
+                var position = this.option('Position');
+                return pvc.parseAlign(position, align);
+            }
         },
         
         Font: { // axisLabelFont (v1 && index == 0 && HeatGrid)

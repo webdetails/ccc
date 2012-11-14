@@ -28,8 +28,8 @@
         <c:returns type="number">
             <c:documentation>
                 The number 0 if the two values have the same order, 
-                a negative number if <c:link to="a" /> is before <c:link to="b" />, and
-                a positive number if <c:link to="a" /> is after <c:link to="b" />.
+                a negative number if <tt>a</tt> is before <tt>b</tt>, and
+                a positive number if <tt>a</tt> is after <tt>b</tt>.
             </c:documentation>
         </c:returns>
     </c:functionType> 

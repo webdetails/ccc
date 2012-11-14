@@ -6,13 +6,15 @@
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:complexType name="CartesianAxis" 
-                   space="pvc.options.panels" 
+                   space="pvc.options.axes" 
                    base="pvc.options.panels.Panel"
                    abstract="true">
         <c:documentation>
-            The options documentation class of the cartesian axis panel.
+            The options documentation class of 
+            the cartesian axis 
+            and cartesian axis panel.
             
-            A cartesian axis panel can be referred to in several ways,
+            A cartesian axis (and its panel) can be referred to in several ways,
             in order of precedence:
             <dl>
                 <dt>By <b>id</b></dt>
@@ -71,19 +73,19 @@
             please see one of the following concrete sub-classes:
             <ul>
                 <li>
-                    Numeric-only axes: <c:link to="pvc.options.panels.NumericCartesianAxis" />
+                    Numeric-only axes: <c:link to="pvc.options.axes.NumericCartesianAxis" />
                 </li>
                 <li>
-                    Normal discrete: <c:link to="pvc.options.panels.FlattenedDiscreteCartesianAxis" />
+                    Normal discrete: <c:link to="pvc.options.axes.FlattenedDiscreteCartesianAxis" />
                 </li>
                 <li>
-                    Numeric or time-series: <c:link to="pvc.options.panels.AnyContinuousCartesianAxis" />
+                    Numeric or time-series: <c:link to="pvc.options.axes.AnyContinuousCartesianAxis" />
                 </li>
                 <li>
-                    Normal or hierarchical discrete:: <c:link to="pvc.options.panels.AnyDiscreteCartesianAxis" />
+                    Normal or hierarchical discrete:: <c:link to="pvc.options.axes.AnyDiscreteCartesianAxis" />
                 </li>
                 <li>
-                    Numeric, time-series or normal discrete: <c:link to="pvc.options.panels.AnyNonHierarchicalCartesianAxis" />
+                    Numeric, time-series or normal discrete: <c:link to="pvc.options.axes.AnyNonHierarchicalCartesianAxis" />
                 </li>
             </ul>
         </c:documentation>
@@ -182,6 +184,12 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="title" type="string pvc.options.panels.CartesianAxisTitlePanel" category="Style">
+            <c:documentation>
+                The axis title and title options.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="extensionPoints" type="pvc.options.ext.CartesianAxisExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
@@ -220,12 +228,12 @@
     </c:complexType>
     
     <c:complexType name="AnyNonHierarchicalCartesianAxis"
-                   space="pvc.options.panels"
-                   base="pvc.options.panels.CartesianAxis"
-                   facets="pvc.options.panels.DiscreteCartesianAxisFacet 
-                           pvc.options.panels.ContinuousCartesianAxisFacet 
-                           pvc.options.panels.NumericCartesianAxisFacet
-                           pvc.options.panels.CartesianAxisTicksFacet">
+                   space="pvc.options.axes"
+                   base="pvc.options.axes.CartesianAxis"
+                   facets="pvc.options.axes.DiscreteCartesianAxisFacet 
+                           pvc.options.axes.ContinuousCartesianAxisFacet 
+                           pvc.options.axes.NumericCartesianAxisFacet
+                           pvc.options.axes.CartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
             that cannot be discrete-hierarchical.
@@ -263,7 +271,7 @@
     </c:complexType>
     
     
-    <c:facetType name="CartesianAxisTicksFacet" space="pvc.options.panels">
+    <c:facetType name="CartesianAxisTicksFacet" space="pvc.options.axes">
         <c:documentation>
             The options documentation class of the axes ticks facet.
         </c:documentation>

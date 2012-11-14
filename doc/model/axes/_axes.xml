@@ -13,4 +13,9 @@
     
     <c:include the="axes/axis-color.xml" />
     <c:include the="axes/axis-size.xml"  />
+    
+    <c:include the="axes/axis-cartesian.xml" />
+    <c:include the="axes/axis-cartesian-discrete.xml" />
+    <c:include the="axes/axis-cartesian-continuous.xml" />
+    <c:include the="axes/axis-cartesian-numeric.xml" />
 </c:model>

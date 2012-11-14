@@ -111,26 +111,26 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="baseAxis" type="pvc.options.panels.AnyContinuousCartesianAxis" category="Axes">
+        <c:property name="baseAxis" type="pvc.options.axes.AnyContinuousCartesianAxis" category="Axes">
             <c:documentation>
                 The base cartesian axis panel options.
                 
                 When the chart <c:link to="pvc.options.charts.Chart#orientation" />
                 is <tt>vertical</tt> the base axis is laid out horizontally.
                 
-                See <c:link to="pvc.options.panels.CartesianAxis" />
+                See <c:link to="pvc.options.axes.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
         
-        <c:property name="orthoAxis" type="pvc.options.panels.AnyContinuousCartesianAxis" category="Axes">
+        <c:property name="orthoAxis" type="pvc.options.axes.AnyContinuousCartesianAxis" category="Axes">
             <c:documentation>
                 The orthogonal cartesian axis panel options.
                 
                 When the chart <c:link to="pvc.options.charts.Chart#orientation" />
                 is <tt>vertical</tt> the orthogonal axis is laid out vertically.
                 
-                See <c:link to="pvc.options.panels.CartesianAxis" />
+                See <c:link to="pvc.options.axes.CartesianAxis" />
                 to know the additional names by which a cartesian axis can be referred to.
             </c:documentation>
         </c:property>
@@ -207,7 +207,7 @@
     
     <c:complexType name="MetricPointPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.CartesianPlot"
+                   base="pvc.options.plots.Plot"
                    facets="pvc.options.plots.LinesAndDotsPlotFacet">
         <c:documentation>
             The common options documentation class of the <b>metric point</b> plots.

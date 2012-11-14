@@ -16,14 +16,12 @@ def
     }
     
     this.base(chart, parent, options);
+    
+    this._extensionPrefix = !chart.parent ? "title" : "smallTitle";
 })
 .add({
 
     font: "14px sans-serif",
     
-    defaultPaddings: 4,
-    
-    _getExtensionPrefix: function(){
-        return !this.chart.parent ? "title" : "smallTitle";
-    }
+    defaultPaddings: 4
 });

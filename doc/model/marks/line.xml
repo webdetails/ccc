@@ -5,63 +5,19 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="LineExtensionPoint" space="pvc.options.marks" base="pvc.options.marks.MarkExtensionPoint">
+    <c:complexType name="LineExtensionPoint" 
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.MarkExtensionPoint"
+                   facets="pvc.options.marks.StrokeBasicFacet
+                           pvc.options.marks.FillBasicFacet
+                           pvc.options.marks.StrokeJoinFacet
+                           pvc.options.marks.LineAreaInterpolateFacet">
          <c:documentation>
             The class of protovis Line extension points.
             
             See the associated protovis documentation at
             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Line.html" />.
         </c:documentation>
-        
-        <c:property name="fillStyle" type="pvc.options.varia.ColorString">
-            <c:documentation>
-                The fill color of the line.
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Line.html#fillStyle" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="strokeStyle" type="pvc.options.varia.ColorString">
-            <c:documentation>
-                The border stroke color of the line. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Line.html#strokeStyle" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="lineWidth" type="number">
-            <c:documentation>
-                The width of the line. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Line.html#lineWidth" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="interpolate" type="pvc.options.varia.LineAreaInterpolation">
-            <c:documentation>
-                How to interpolate the line between values. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Line.html#interpolate" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="tension" type="number">
-            <c:documentation>
-                The tension of cardinal splines,
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Line.html#tension" />.
-            </c:documentation>
-        </c:property>
-        <!-- TODO 
-        lineJoin
-        lineCap
-        strokeDasharray
-        strokeMiterLimit
-         -->
+
     </c:complexType>
 </c:model>

@@ -5,7 +5,11 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="BarExtensionPoint" space="pvc.options.marks" base="pvc.options.marks.MarkExtensionPoint">
+    <c:complexType name="BarExtensionPoint" 
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.MarkExtensionPoint"
+                   facets="pvc.options.marks.StrokeBasicFacet
+                           pvc.options.marks.FillBasicFacet">
          <c:documentation>
             The class of protovis Bar extension points.
             
@@ -13,48 +17,15 @@
             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Bar.html" />.
         </c:documentation>
         
-        <c:property name="fillStyle" type="pvc.options.varia.ColorString">
-            <c:documentation>
-                The fill color of the bar.
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Bar.html#fillStyle" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="strokeStyle" type="pvc.options.varia.ColorString">
-            <c:documentation>
-                The border stroke color of the bar. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Bar.html#strokeStyle" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="lineWidth" type="number">
-            <c:documentation>
-                The width of the border of the bar. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Bar.html#lineWidth" />.
-            </c:documentation>
-        </c:property>
-        
         <c:property name="width" type="number">
             <c:documentation>
-                The width of the bar. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Bar.html#width" />.
+                The width of the bar.
             </c:documentation>
         </c:property>
         
         <c:property name="height" type="number">
             <c:documentation>
-                The height of the bar. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Bar.html#height" />.
+                The height of the bar.
             </c:documentation>
         </c:property>
     </c:complexType>

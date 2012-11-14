@@ -5,7 +5,10 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="RuleExtensionPoint" space="pvc.options.marks" base="pvc.options.marks.MarkExtensionPoint">
+    <c:complexType name="RuleExtensionPoint" 
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.MarkExtensionPoint"
+                   facets="pvc.options.marks.StrokeBasicFacet">
          <c:documentation>
             The class of protovis Rule extension points.
             
@@ -16,36 +19,12 @@
         <c:property name="width" type="number">
             <c:documentation>
                 The width of the rule, when it is horizontal.
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html#width" />.
             </c:documentation>
         </c:property>
         
         <c:property name="height" type="number">
             <c:documentation>
-                The height of the rule, when it is vertical. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html#height" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="strokeStyle" type="pvc.options.varia.ColorString">
-            <c:documentation>
-                The stroke color of the rule. 
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html#strokeStyle" />.
-            </c:documentation>
-        </c:property>
-        
-        <c:property name="lineWidth" type="number">
-            <c:documentation>
-                The line width of the rule.
-                
-                See the associated protovis documentation at
-                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Rule.html#lineWidth" />.
+                The height of the rule, when it is vertical.
             </c:documentation>
         </c:property>
         

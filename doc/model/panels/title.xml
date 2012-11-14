@@ -5,23 +5,70 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="ChartTitle" 
+    <c:complexType name="ChartTitlePanel" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.Title">
+                   base="pvc.options.panels.TitlePanel">
         <c:documentation>
             The options documentation class of the chart title panel.
-            
-            The default 
-            <c:link to="pvc.options.panels.DockedPanel#position" />
-            is <tt>'top'</tt>.
+        </c:documentation>
+        
+        <c:property name="position" 
+                    type="pvc.options.varia.PanelPosition"
+                    category="Layout"
+                    default="'top'">
+            <c:documentation>
+                The docking position of the panel.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="font" type="string" default="'14px sans-serif'" category="Style">
+            <c:documentation>
+                The font of the panel.
+                
+                See the supported font format in 
+                <c:link to="http://www.w3.org/TR/CSS2/fonts.html#font-shorthand" />
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="CartesianAxisTitlePanel" 
+                   space="pvc.options.panels" 
+                   base="pvc.options.panels.TitlePanel">
+        <c:documentation>
+            The options documentation class of the cartesian axes title panel.
             
             The default 
             <c:link to="pvc.options.panels.DockedPanel#font" />
             is <tt>'14px sans-serif'</tt>.
         </c:documentation>
+        
+        <c:property name="position" 
+                    type="pvc.options.varia.PanelPosition"
+                    fixed="null"
+                    category="Layout">
+            <c:documentation>
+                The position of the title panel is the same 
+                as that of its cartesian axis.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="paddings" type="string" fixed="null" category="Layout">
+            <c:documentation>
+                The paddings of the panel. Not supported.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="font" type="string" default="'12px sans-serif'" category="Style">
+            <c:documentation>
+                The font of the panel.
+                
+                See the supported font format in 
+                <c:link to="http://www.w3.org/TR/CSS2/fonts.html#font-shorthand" />
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
-    <c:complexType name="Title" 
+    <c:complexType name="TitlePanel" 
                    space="pvc.options.panels" 
                    base="pvc.options.panels.DockedPanel">
         <c:documentation>

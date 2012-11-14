@@ -24,7 +24,7 @@
         </c:property>
         
         <!-- Panels -->
-        <c:property name="title" type="string pvc.options.panels.ChartTitle" category="Panels">
+        <c:property name="title" type="string pvc.options.panels.ChartTitlePanel" category="Panels">
             <c:documentation>
                 The title panel of the root chart.
                 
@@ -33,7 +33,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="legend" type="boolean pvc.options.panels.Legend" category="Panels">
+        <c:property name="legend" type="boolean pvc.options.panels.LegendPanel" category="Panels">
             <c:documentation>
                 The legend panel of the root chart.
                 
@@ -96,7 +96,7 @@
                 
                 In a <i>small multiples</i> chart, 
                 the margins of the <i>small</i> charts can be set
-                with the property <c:link to="#smallMargins" />.
+                with the property <tt>smallMargins</tt>.
                 
                 See <c:link to="pvc.options.varia.Sides" /> for information about 
                 the different supported data types.
@@ -105,11 +105,11 @@
         
         <c:property name="paddings" type="number string pvc.options.varia.Sides" default="0" category="Layout">
             <c:documentation>
-                The paddings of <i>root</i> chart.
+                The paddings of the <i>root</i> chart.
                 
                 In a <i>small multiples</i> chart, 
                 the paddings of a <i>small</i> chart can be set
-                with the property <c:link to="#smallPaddings" />.
+                with the property <tt>smallPaddings</tt>.
                 
                 See <c:link to="pvc.options.varia.Sides" /> for information about 
                 the different supported data types.
@@ -122,7 +122,7 @@
                 
                 In a <i>small multiples</i> chart, 
                 the margins of the <i>content panel</i> of a <i>small</i> chart 
-                can be set with the property <c:link to="#smallContentMargins" />.
+                can be set with the property <tt>smallContentMargins</tt>.
                 
                 See <c:link to="pvc.options.varia.Sides" /> for information about 
                 the different supported data types.
@@ -135,7 +135,7 @@
                 
                 In a <i>small multiples</i> chart, 
                 the paddings of the <i>content panel</i> of a <i>small</i> chart 
-                can be set with the property <c:link to="#smallContentPaddings" />.
+                can be set with the property <tt>smallContentPaddings</tt>.
                 
                 See <c:link to="pvc.options.varia.Sides" /> for information about 
                 the different supported data types.
@@ -166,7 +166,7 @@
                 (ex: 
                 <c:link to="#clickAction" />,
                 <c:link to="#doubleClickAction" />, or
-                <c:link to="pvc.options.panels.DiscreteCartesianAxis#clickAction" />).
+                <c:link to="pvc.options.axes.DiscreteCartesianAxis#clickAction" />).
             </c:documentation>
         </c:property>
         

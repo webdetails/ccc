@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="Legend" 
+    <c:complexType name="LegendPanel" 
                    space="pvc.options.panels" 
                    base="pvc.options.panels.DockedPanel">
         <c:documentation>
@@ -23,6 +23,15 @@
             <c:link to="pvc.options.panels.DockedPanel#paddings" />
             is <tt>5</tt> pixels.
         </c:documentation>
+        
+        <c:property name="font" type="string" default="'9px sans-serif'" category="Style">
+            <c:documentation>
+                The font of the panel.
+                
+                See the supported font format in 
+                <c:link to="http://www.w3.org/TR/CSS2/fonts.html#font-shorthand" />
+            </c:documentation>
+        </c:property>
         
         <c:property name="textMargin" type="number" default="6" category="Layout">
             <c:documentation>

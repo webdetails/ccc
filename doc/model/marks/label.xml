@@ -12,8 +12,65 @@
             See the associated protovis documentation at
             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Label.html" />.
         </c:documentation>
-        <!--
-        TODO 
-         -->
+        
+        <c:property name="font" type="string">
+            <c:documentation>
+                The font used by the label.
+                
+                See the supported font format in 
+                <c:link to="http://www.w3.org/TR/CSS2/fonts.html#font-shorthand" />
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="text" type="string">
+            <c:documentation>
+                The text to show in the label.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="textStyle" type="pvc.options.varia.ColorString">
+            <c:documentation>
+                The text color.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="textAngle" type="number" default="0">
+            <c:documentation>
+                The angle of the text, in <i>radian</i> units.
+                
+                The text angle is 0 at horizontal direction 
+                and grows clock-wise. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="textAlign" type="pvc.options.varia.TextAlignment">
+            <c:documentation>
+                The horizontal text alignment.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="textBaseline" type="pvc.options.varia.TextBaseline">
+            <c:documentation>
+                The vertical text alignment.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="textDecoration" type="string">
+            <c:documentation>
+                A CSS3 text decoration.
+                
+                See the syntax of this string at:
+                <c:link to="http://www.w3.org/TR/2012/WD-css-text-decor-3-20121113/#text-decoration" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="textShadow" type="string">
+            <c:documentation>
+                A CSS3 text shadow.
+                
+                See the syntax of this string at:
+                <c:link to="http://www.w3.org/TR/2012/WD-css-text-decor-3-20121113/#text-shadow-property" />.
+            </c:documentation>
+        </c:property>
     </c:complexType>
 </c:model>

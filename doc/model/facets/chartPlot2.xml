@@ -76,7 +76,7 @@
         <c:property name="showSecondScale" type="boolean" default="true" category="Axes">
             <c:documentation>
                 <c:deprecated>
-                    Use <c:link to="pvc.options.panels.CartesianAxis#visible"/>, 
+                    Use <c:link to="pvc.options.axes.CartesianAxis#visible"/>, 
                     of the <tt>ortho2</tt> axis, instead.
                 </c:deprecated>
                 Indicates whether the second orthogonal axis panel is shown.
@@ -109,7 +109,11 @@
         
         <c:property name="secondAxisIndependentScale" type="boolean" default="false" category="Axis">
             <c:documentation>
-                <c:deprecated>Use <c:link to="#plot2OrthoAxis"/> instead, to specify an alternate orthogonal axis.</c:deprecated>
+                <c:deprecated>
+                    Use
+                    <c:link to="pvc.options.plots.CategoricalNumericPlot#orthoAxis" />
+                    of the <tt>plot2</tt> plot, instead, 
+                    to specify an alternate orthogonal axis.</c:deprecated>
                 Indicates whether the secondary axis should be 
                 shown and with an independent range.
             </c:documentation>
