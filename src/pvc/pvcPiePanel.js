@@ -23,9 +23,9 @@
  * 
  * Has the following protovis extension points: 
  * <i>chart_</i> - for the main chart Panel 
- * <i>pie_</i> - for the main pie wedge 
- * <i>pieLabel_</i> - for the main pie label
- * <i>pieLinkLine_</i> - for the link lines, for when labelStyle = 'linked'
+ * <i>slice_</i> - for the main pie wedge 
+ * <i>sliceLabel_</i> - for the main pie label
+ * <i>sliceLinkLine_</i> - for the link lines, for when labelStyle = 'linked'
  * 
  * Example Pie Category Scene extension:
  * pie: {

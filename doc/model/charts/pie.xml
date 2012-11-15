@@ -332,7 +332,7 @@
             the extension point can be written as <tt>slice_strokeStyle</tt>.
         </c:documentation>
         
-        <c:property name="slice" type="pvc.options.marks.WedgeExtensionPoint">
+        <c:property name="slice" type="pvc.options.marks.PieChartWedgeExtensionPoint">
             <c:documentation>
                 The extension point of the pie slice - the wedge mark.
             </c:documentation>
@@ -352,4 +352,26 @@
         </c:property>
         
     </c:complexType>
+    
+    <c:complexType name="PieChartWedgeExtensionPoint"
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.WedgeExtensionPoint">
+        <c:documentation>
+            The class of the Pie chart's protovis Wedge extension points.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Wedge.html" />.
+        </c:documentation>
+        
+        <c:property name="innerRadiusEx" type="pvc.options.varia.PercentValue">
+            <c:documentation>
+                The inner radius of each slice, in <i>pixel</i> units or as 
+                a percentage of the outer radius.
+                
+                This extension point is only defined in 
+                the <i>pie</i> chart's wedge mark.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType> 
 </c:model>

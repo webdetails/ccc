@@ -2391,9 +2391,35 @@ pvc.options.ext.PiePlotExtensionPoints.prototype.linkLine = undefined;
 /**
  * The extension point of the pie slice - the wedge mark.
  * 
- * @type pvc.options.marks.WedgeExtensionPoint
+ * @type pvc.options.marks.PieChartWedgeExtensionPoint
  */
 pvc.options.ext.PiePlotExtensionPoints.prototype.slice = undefined;
+/**
+ * The class of the Pie chart's protovis Wedge extension points.
+ * <p>
+ * See the associated protovis documentation at
+ * {@link http://mbostock.github.com/protovis/jsdoc/symbols/pv.Wedge.html}.
+ * 
+ * @class
+ * @extends pvc.options.marks.WedgeExtensionPoint
+ */
+pvc.options.marks.PieChartWedgeExtensionPoint = function(){};
+        
+        
+        
+        
+/**
+ * The inner radius of each slice, in 
+ * <i>pixel</i> units or as 
+ * a percentage of the outer radius.
+ * <p>
+ * This extension point is only defined in 
+ * the 
+ * <i>pie</i> chart's wedge mark.
+ * 
+ * @type pvc.options.varia.PercentValue
+ */
+pvc.options.marks.PieChartWedgeExtensionPoint.prototype.innerRadiusEx = undefined;
 /**
  * The options documentation class of the 
  * <b>Bullet</b> chart.

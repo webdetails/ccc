@@ -209,15 +209,15 @@ for&nbsp;Pie extension points:
   <li>legendDot_</li>
   <li>legendLabel_</li>
   <li>tooltip_</li>
-  <li>pie_</li>
-  <li>pieLabel_</li>
+  <li>slice_</li>
+  <li>sliceLabel_</li>
   <li>chart_</li>
 </ul>
 Sample extension points:<br>
 <ul>
   <li>base_fillStyle</li>
   <li>titleLabel_font</li>
-  <li>pieLabel_textAngle</li>
+  <li>sliceLabel_textAngle</li>
 </ul>
 
 <h2>Examples</h2>
@@ -241,8 +241,8 @@ var pie = new pvc.PieChart({
     
     extensionPoints: {
        titleLabel_font: "18px sans-serif",
-       pie_strokeStyle: 'white',
-       //pie_lineWidth:   0.6,
+       slice_strokeStyle: 'white',
+       //slice_lineWidth:   0.6,
        //base_fillStyle:  'blue' 
     }
 });
@@ -301,7 +301,7 @@ setting colors, fonts, and more.<br/>
 
 A pie can be converted into a donut by simple adding an extension point:
 <ul>
-  <li>pie_innerRadius</li>
+  <li>slice_innerRadius</li>
 </ul>
 <textarea cols="55" rows="23" id="pvcPie3Code">
         var pie = new pvc.PieChart({
@@ -317,8 +317,8 @@ A pie can be converted into a donut by simple adding an extension point:
           selectable: true,
           hoverable:  true,
           extensionPoints: {
-            //pie_innerRadius: 30,
-            pie_innerRadiusEx: '60%',
+            //slice_innerRadius: 30,
+            slice_innerRadiusEx: '60%',
             titleLabel_font: "18px sans-serif"
           }
         });
