@@ -13,9 +13,9 @@ new pvc.BarChart({
     axisOffset:   0.04,
     valuesVisible:   false,
     extensionPoints: {
-    	xAxisLabel_textAngle:    -1,
-    	xAxisLabel_textAlign:    'right',
-    	xAxisLabel_textBaseline: 'top'
+        xAxisLabel_textAngle:    -1,
+        xAxisLabel_textAlign:    'right',
+        xAxisLabel_textBaseline: 'top'
     }
 })
 .setData(relational_01_neg, {crosstabMode: false })

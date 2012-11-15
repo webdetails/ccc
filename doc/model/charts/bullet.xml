@@ -49,6 +49,20 @@
             by using <c:link to="#readers" />. 
         </c:documentation>
         
+        <c:property name="clickAction" type="pvc.options.varia.BulletChartClickAction" category="Actions">
+            <c:documentation>
+                A callback function that is called
+                when the user clicks on a bullet.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="axisDoubleClickAction" type="pvc.options.varia.BulletChartDoubleClickAction" category="Actions">
+            <c:documentation>
+                A callback function that is called
+                when the user double-clicks on a bullet's title or sub-title.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="titleRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
                 The <tt>title</tt> visual role represents a 
@@ -173,6 +187,58 @@
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
     </c:complexType>
+    
+    <c:functionType name="BulletChartClickAction" space="pvc.options.varia">
+        <c:argument name="title" type="string" required="true">
+            <c:documentation>
+                The title.
+            </c:documentation>
+        </c:argument>
+        
+        <c:argument name="subtitle" type="string" required="true">
+            <c:documentation>
+                The sub-title.
+            </c:documentation>
+        </c:argument>
+        
+        <c:argument name="measures" type="list(string)" required="true">
+            <c:documentation>
+                The array of measures.
+            </c:documentation>
+        </c:argument>
+        
+        <c:argument name="ev" type="HTMLDOMEvent" required="true">
+            <c:documentation>
+                The HTML DOM event object
+            </c:documentation>
+        </c:argument>
+    </c:functionType>
+    
+    <c:functionType name="BulletChartDoubleClickAction" space="pvc.options.varia">
+        <c:argument name="datum" type="object" required="true">
+            <c:documentation>
+                An object describing the data of the double-clicked bullet.
+                The object has the following properties:
+                <ul>
+                    <li>title</li>
+                    <li>formattedTitle</li>
+                    <li>subtitle</li>
+                    <li>formattedSubtitle</li>
+                    <li>ranges</li>
+                    <li>formattedRanges</li>
+                    <li>measures</li>
+                    <li>formattedMeasures</li>
+                    <li>markers</li>
+                    <li>formattedMarkers</li>
+                </ul>
+            </c:documentation>
+        </c:argument>
+        <c:argument name="ev" type="HTMLDOMEvent" required="true">
+            <c:documentation>
+                The HTML DOM event object
+            </c:documentation>
+        </c:argument>
+    </c:functionType>
     
     <c:complexType name="BulletPlot" 
                    space="pvc.options.plots">

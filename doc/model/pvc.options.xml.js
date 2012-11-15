@@ -2417,7 +2417,7 @@ pvc.options.marks.PieChartWedgeExtensionPoint = function(){};
  * the 
  * <i>pie</i> chart's wedge mark.
  * 
- * @type pvc.options.varia.PercentValue
+ * @type number|string
  */
 pvc.options.marks.PieChartWedgeExtensionPoint.prototype.innerRadiusEx = undefined;
 /**
@@ -2486,19 +2486,6 @@ pvc.options.charts.BulletChart = function(){};
         
         
         
-/**
- * A callback function that is called
- * when the user clicks on a visual element.
- * 
- * @returns {undefined}
- * @method
- * @this pvc.visual.Context
- * @param {pvc.visual.Scene} scene
- * The scene associated with the visual item.
- * 
- * @category Actions
- */
-pvc.options.charts.BulletChart.prototype.clickAction = function(){};
 /**
  * A callback function that is called
  * before the chart is rendered,
@@ -2892,6 +2879,66 @@ pvc.options.charts.BulletChart.prototype.width = undefined;
  * @category Panels
  */
 pvc.options.charts.BulletChart.prototype.title = undefined;
+/**
+ * A callback function that is called
+ * when the user double-clicks on a bullet's title or sub-title.
+ * 
+ * @returns {undefined}
+ * @method
+ * @param {object} datum
+ * An object describing the data of the double-clicked bullet.
+ * The object has the following properties:
+ * 
+ * <ul>
+ * 
+ * <li>title</li>
+ * 
+ * <li>formattedTitle</li>
+ * 
+ * <li>subtitle</li>
+ * 
+ * <li>formattedSubtitle</li>
+ * 
+ * <li>ranges</li>
+ * 
+ * <li>formattedRanges</li>
+ * 
+ * <li>measures</li>
+ * 
+ * <li>formattedMeasures</li>
+ * 
+ * <li>markers</li>
+ * 
+ * <li>formattedMarkers</li>
+ * </ul>
+ * 
+ * @param {HTMLDOMEvent} ev
+ * The HTML DOM event object
+ * 
+ * @category Actions
+ */
+pvc.options.charts.BulletChart.prototype.axisDoubleClickAction = function(){};
+/**
+ * A callback function that is called
+ * when the user clicks on a bullet.
+ * 
+ * @returns {undefined}
+ * @method
+ * @param {string} title
+ * The title.
+ * 
+ * @param {string} subtitle
+ * The sub-title.
+ * 
+ * @param {list(string)} measures
+ * The array of measures.
+ * 
+ * @param {HTMLDOMEvent} ev
+ * The HTML DOM event object
+ * 
+ * @category Actions
+ */
+pvc.options.charts.BulletChart.prototype.clickAction = function(){};
 /**
  * The bullet plot.
  * 

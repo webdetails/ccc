@@ -363,7 +363,7 @@
             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Wedge.html" />.
         </c:documentation>
         
-        <c:property name="innerRadiusEx" type="pvc.options.varia.PercentValue">
+        <c:property name="innerRadiusEx" type="number string">
             <c:documentation>
                 The inner radius of each slice, in <i>pixel</i> units or as 
                 a percentage of the outer radius.

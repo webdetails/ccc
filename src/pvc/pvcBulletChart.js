@@ -386,7 +386,7 @@ def
     
                     } : null;
     
-        if (doubleClickAction) {
+        if (options.clickable && doubleClickAction) {
             this.pvBulletTitle
                 .cursor("pointer")
                 .events('all')  //labels don't have events by default
