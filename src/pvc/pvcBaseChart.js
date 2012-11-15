@@ -320,7 +320,7 @@ def
             this.width    = options.width; 
             this.height   = options.height;
             this.margins  = options.margins;
-            this.paddings = options.margins;
+            this.paddings = options.paddings;
         }
         
         if(this._allowV1SecondAxis){
