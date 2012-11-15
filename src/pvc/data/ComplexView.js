@@ -35,5 +35,8 @@ def.type('pvc.data.ComplexView', pvc.data.Complex)
 .add({
     values: function(){
         return pvc.data.Complex.values(this, this.viewDimNames);
+    },
+    labels: function(){
+        return pvc.data.Complex.labels(this, this.viewDimNames);
     }
 });

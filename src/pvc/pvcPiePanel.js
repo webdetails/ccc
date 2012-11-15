@@ -391,17 +391,14 @@ def
         }
     },
     
-    _absExtContent: {abs: 'content'},
-    _absExtSmallContent: {abs: 'smallContent'},
-    
     _getExtensionId: function(){
         // chart is deprecated
         // content coincides, visually in this chart type
         // - actually it shares the same panel...
         
-        var extensionIds = [this._absExtContent];
+        var extensionIds = [{abs: 'content'}];
         if(this.chart.parent){ 
-            extensionIds.push(this._absExtSmallContent);
+            extensionIds.push({abs: 'smallContent'});
         }
         
         return extensionIds.concat(this.base());

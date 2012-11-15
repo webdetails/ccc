@@ -32,6 +32,7 @@
     <c:include the="varia/atoms/lineAreaInterpolation.xml" />
     <c:include the="varia/atoms/stroke.xml" />
     <c:include the="varia/atoms/text.xml" />
+    <c:include the="varia/atoms/rectangleSide.xml" />
     
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />

@@ -50,15 +50,14 @@ def
         this._addVisualRole('title',    { defaultDimension: 'title*'    });
         this._addVisualRole('subTitle', { defaultDimension: 'subTitle*' });
         this._addVisualRole('value', {
+                //isRequired: true, // due to the no data mode
                 isMeasure:  true,
-                requireSingleDimension: true,
                 requireIsDiscrete: false,
                 valueType: Number,
                 defaultDimension: 'value*'
             });
         this._addVisualRole('marker', {
                 isMeasure:  true,
-                requireSingleDimension: true,
                 requireIsDiscrete: false,
                 valueType: Number,
                 defaultDimension: 'marker*'
@@ -127,7 +126,7 @@ def
             this.basePanel, 
             bulletPlot, 
             def.create(contentOptions, {
-                tooltipEnabled:  this.chart._tooltipEnabled
+                tooltipEnabled:  this._tooltipEnabled
             }));
     },
   
@@ -161,7 +160,6 @@ def
 /*
  * Bullet chart panel. Generates a bar chart. Specific options are:
  * <i>orientation</i> - horizontal or vertical. Default: vertical
- * <i>valuesVisible</i> - Show or hide bar value. Default: false
  *
  * Has the following protovis extension points:
  *
@@ -189,7 +187,7 @@ def
     /**
      * @override
      */
-    _createCore: function() {
+    _createCore: function(layoutInfo) {
         var chart  = this.chart,
             options = chart.options,
             data = this.buildData();
@@ -198,7 +196,7 @@ def
         var size, angle, align, titleLeftOffset, titleTopOffset, ruleAnchor, leftPos, topPos, titleSpace;
     
         if(options.orientation=="horizontal"){
-            size = this.width - this.chart.options.bulletMargin - 20;
+            size = layoutInfo.clientSize.width - this.chart.options.bulletMargin - 20;
             angle=0;
             switch (options.bulletTitlePosition) {
             case 'top':
@@ -238,7 +236,7 @@ def
                 return (this.index * (options.bulletSize + options.bulletSpacing)) + titleSpace;
             };
         } else {
-            size = this.height - this.chart.options.bulletMargin - 20;
+            size = layoutInfo.clientSize.height - this.chart.options.bulletMargin - 20;
             switch (options.bulletTitlePosition) {
                 case 'top':
                     leftPos = this.chart.options.bulletMargin;
@@ -292,17 +290,10 @@ def
         
 
         this.pvBullet = this.pvBullets.add(pv.Layout.Bullet)
-            .orient(anchor)
-            .ranges(function(d){
-                return d.ranges;
-            })
-            .measures(function(d){
-                return d.measures;
-            })
-            .markers(function(d){
-                return d.markers;
-            });
-    
+            .orient  (anchor)
+            .ranges  (function(d){ return d.ranges;   })
+            .measures(function(d){ return d.measures; })
+            .markers (function(d){ return d.markers;  });
     
         if (options.clickable && this.clickAction){
             var me = this;
@@ -313,23 +304,23 @@ def
                     var s = d.title;
                     var c = d.subtitle;
                     var ev = pv.event;
-                        return me.clickAction(s,c, d.measures, ev);
+                    return me.clickAction(s,c, d.measures, ev);
                 });
         }
     
         this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
+        
         this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
-            .text(function(d){
-                return options.valueFormat(d);
+            .text(function(v, d){
+                return d.formattedMeasures[this.index];
             });
 
         this.pvBulletMarker = this.pvBullet.marker.add(pv.Dot)
             .shape("square")
             .fillStyle("white")
-            .text(function(d){
-                return options.valueFormat(d);
+            .text(function(v, d){
+                return d.formattedMarkers[this.index];
             });
-
 
         if(this.tooltipEnabled){
             // Extend default
@@ -352,12 +343,12 @@ def
                 .tooltip(function(v, d){
                     var s = d.title;
                     var c = d.subtitle;
-                        return chart.options.tooltipFormat.call(myself,s,c,v);
+                    return chart.options.tooltipFormat.call(myself,s,c,v);
                 })
                 ;
       
             this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
-            this.pvBulletMarker.event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
+            this.pvBulletMarker .event("mouseover", pv.Behavior.tipsy(this.chart._tooltipOptions));
         }
 
         this.pvBulletRule = this.pvBullet.tick.add(pv.Rule);
@@ -427,7 +418,12 @@ def
         this.extend(this.pvBulletTitle,"bulletTitle");
         this.extend(this.pvBulletSubtitle,"bulletSubtitle");
     },
-  
+    
+    _getExtensionId: function(){
+        // content coincides, visually in this chart type
+        return [{abs: 'content'}].concat(this.base());
+    },
+    
     /*
      * Data array to back up bullet charts.
      */
@@ -435,42 +431,43 @@ def
         var data,
             chart = this.chart,
             options = chart.options,
+            
             titleRole = chart.visualRoles('title'),
             titleGrouping = titleRole.grouping,
+            
             subTitleRole = chart.visualRoles('subTitle'),
             subTitleGrouping = subTitleRole.grouping,
+            
             valueRole = chart.visualRoles('value'),
-            valueDimName = valueRole.grouping && valueRole.firstDimensionName(),
+            valueGrouping = valueRole.grouping,
+            
             markerRole = chart.visualRoles('marker'),
-            markerDimName = markerRole.grouping && markerRole.firstDimensionName(),
+            markerGrouping = markerRole.grouping,
+            
             rangeRole = chart.visualRoles('range'),
             rangeGrouping = rangeRole.grouping;
         
         var defaultData = {
-            title: options.bulletTitle,
-            formattedTitle: def.scope(function(){
-                var formatter = titleGrouping && titleRole.firstDimensionType().formatter();
-                if(formatter){
-                    return formatter(options.bulletTitle);
-                }
-                return options.bulletTitle;
-            }),
-            subtitle: options.bulletSubtitle,
-            formattedSubtitle: def.scope(function(){
-                var formatter = subTitleGrouping && subTitleRole.firstDimensionType().formatter();
-                if(formatter){
-                    return formatter(options.bulletSubtitle);
-                }
-                return options.bulletSubtitle;
-            }),
-            ranges:   options.bulletRanges   || [],
-            measures: options.bulletMeasures || [],
-            markers:  options.bulletMarkers  || []
+            title:             options.bulletTitle,
+            formattedTitle:    options.bulletTitle,
+            
+            subtitle:          options.bulletSubtitle,
+            formattedSubtitle: options.bulletSubtitle,
+            
+            ranges:            def.array.to(options.bulletRanges)   || [],
+            measures:          def.array.to(options.bulletMeasures) || [],
+            markers:           def.array.to(options.bulletMarkers)  || []
         };
-
-        if(!valueRole.grouping &&
-           !titleGrouping &&
-           !markerRole.grouping &&
+        
+        def.set(defaultData,
+            'formattedRanges',   defaultData.ranges  .map(String),
+            'formattedMeasures', defaultData.measures.map(String),
+            'formattedMarkers',  defaultData.markers .map(String)
+            );
+        
+        if(!valueGrouping    &&
+           !titleGrouping    &&
+           !markerGrouping   &&
            !subTitleGrouping &&
            !rangeGrouping){
 
@@ -478,11 +475,12 @@ def
        } else {
             data = chart.data.datums().select(function(datum){
                 var d = Object.create(defaultData),
-                    atoms = datum.atoms,
                     view;
 
-                if(valueDimName){
-                    d.measures = [atoms[valueDimName].value];
+                if(valueGrouping){
+                    view = valueGrouping.view(datum);
+                    d.measures = view.values();
+                    d.formattedMeasures = view.labels();
                 }
 
                 if(titleGrouping){
@@ -497,12 +495,16 @@ def
                     d.formattedSubtitle = view.label;
                 }
 
-                if(markerDimName){
-                    d.markers = [atoms[markerDimName].value];
+                if(markerGrouping){
+                    view = markerGrouping.view(datum);
+                    d.markers = view.values();
+                    d.formattedMarkers = view.labels();
                 }
 
                 if(rangeGrouping){
-                    d.ranges = rangeGrouping.view(datum).values();
+                    view = rangeGrouping.view(datum);
+                    d.ranges = view.values();
+                    d.formattedRanges = view.labels();
                 }
 
                 return d;

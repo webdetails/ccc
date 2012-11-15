@@ -231,3 +231,10 @@ pvc.data.Complex.values = function(complex, dimNames){
         return atoms[dimName].value;
     });
 };
+
+pvc.data.Complex.labels = function(complex, dimNames){
+    var atoms = complex.atoms;
+    return dimNames.map(function(dimName){
+        return atoms[dimName].label;
+    });
+};

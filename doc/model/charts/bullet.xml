@@ -7,27 +7,254 @@
     
     <c:complexType name="BulletChart" 
                    space="pvc.options.charts"
-                   base="pvc.options.charts.Chart">
+                   facets="pvc.options.charts.BasicChartFacet">
         <c:documentation>
             The options documentation class of the <b>Bullet</b> chart.
+            
+            This chart type was only partially updated, 
+            to support some of the new CCC v.2 features.
+            
+            The bullet chart's data translator 
+            accepts data of the following form 
+            without requiring any further configuration:
+		    <table>
+                <thead>
+                    <tr>
+				        <th>
+				        Number of columns
+				        </th>
+                        <th>
+                        Structure
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+				    <tr>
+				        <td>1</td><td>Value</td>
+                    </tr>
+                    <tr>
+                        <td>2</td><td>Title | Value</td>
+                    </tr>
+                    <tr>
+                        <td>3</td><td>Title | Value | Marker</td>
+                    </tr>
+                    <tr>
+                        <td> &gt;= 4 </td><td>Title | Subtitle | Value | Marker | Ranges</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            To use the bullet chart's visual roles in its most general form,
+            it is required to manually configure the data translator,
+            by using <c:link to="#readers" />. 
         </c:documentation>
+        
+        <c:property name="titleRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>title</tt> visual role represents a 
+                the title of each bullet.
+                
+                The <tt>title</tt> visual role automatically binds to 
+                all dimensions whose name has the <tt>title</tt> prefix.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="subTitleRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>subTitle</tt> visual role represents a 
+                the sub-title of each bullet.
+                
+                The <tt>subTitle</tt> visual role automatically binds to 
+                all dimensions whose name has the <tt>subTitle</tt> prefix.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>value</tt> visual role 
+                represents current values for a given
+                title and sub-title categories.
+                
+                The values, one for each dimension bound to the <tt>value</tt> role,
+                are represented by overlapping bars, 
+                each painted with a successively brighter blue color.
+                The length of each bar is proportional to the corresponding value.
+                Negative values are considered <tt>0</tt>.
+                
+                The <tt>value</tt> visual role automatically binds to 
+                all numeric dimensions whose name has the <tt>value</tt> prefix.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="markerRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>marker</tt> visual role 
+                represents a set of reference or target values for a given
+                title and sub-title categories.
+                
+                The <tt>marker</tt> is represented by markers/dots
+                placed at the positions corresponding to the marker values.
+                Negative values are considered <tt>0</tt>.
+                
+                Each dimension that is bound to the <tt>marker</tt> role
+                is represented by a different marker.
+                
+                The <tt>marker</tt> visual role automatically binds to 
+                all numeric dimensions whose name has the <tt>marker</tt> prefix.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="rangeRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>range</tt> visual role 
+                represents a classification of the values of the
+                <tt>value</tt> visual role.
+                
+                The <tt>value</tt> domain
+                is split into several parts (or classes) at
+                the given points.
+                
+                Each dimension that is bound to the <tt>range</tt> role
+                splits the <tt>value</tt> domain at a certain point.
+                
+                By default, each part is painted with a successively brighter gray color.
+                
+                The <tt>range</tt> visual role automatically binds to 
+                all numeric dimensions whose name has the <tt>range</tt> prefix.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
         
         <c:property name="bullet" type="pvc.options.plots.BulletPlot" category="Plots">
             <c:documentation>
-                The bullet plot is the <b>main plot</b> of the bullet chart,
-                which means that 
-                its properties may be used <i>without</i> the "bullet" property suffix.
+                The bullet plot.
             </c:documentation>
         </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.BulletChartExtensionPoints" category="Style">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the chart.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+    <c:complexType name="BulletChartExtensionPoints" 
+                   space="pvc.options.ext"
+                   facets="pvc.options.ext.BasicChartExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the <b>bullet</b> chart types.
+            
+            This <b>bullet</b> chart type was only partially updated, 
+            to support some of the new CCC v.2 features.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>extension property (ex: <tt>base</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>base_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
     </c:complexType>
     
     <c:complexType name="BulletPlot" 
-                   space="pvc.options.plots" 
-                   base="pvc.options.plots.Plot">
+                   space="pvc.options.plots">
         <c:documentation>
             The options documentation class of the <b>Bullet</b> plot.
+            
+            This <b>bullet</b> chart type was only partially updated, 
+            to support some of the new CCC v.2 features.
         </c:documentation>
     
+        <c:property name="margin" type="number" default="100" category="Style">
+            <c:documentation>
+                The top margin, for vertical orientation, 
+                or left margin, for horizontal orientation,
+                in <i>pixel</i> units. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="spacing" type="number" default="50" category="Style">
+            <c:documentation>
+                The space between bullets, in <i>pixel</i> units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="size" type="number" default="30" category="Style">
+            <c:documentation>
+                The orthogonal size of each bullet, in <i>pixel</i> units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="title" type="string" default="'Bullet'" category="Data">
+            <c:documentation>
+                The default bullet title.
+                
+                Used when no data is supplied or 
+                when the <tt>title</tt> role is unbound.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="subtitle" type="string" category="Data">
+            <c:documentation>
+                The default bullet sub-title.
+                
+                Used when no data is supplied or 
+                when the <tt>subTitle</tt> role is unbound.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="markers" type="string list(string)" category="Data">
+            <c:documentation>
+                The default bullet markers.
+                
+                Used when no data is supplied or 
+                when the <tt>marker</tt> role is unbound.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="measures" type="string list(string)" category="Data">
+            <c:documentation>
+                The default bullet measures.
+                
+                Used when no data is supplied or 
+                when the <tt>value</tt> role is unbound.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="ranges" type="string list(string)" category="Data">
+            <c:documentation>
+                The default bullet ranges.
+                
+                Used when no data is supplied or 
+                when the <tt>range</tt> role is unbound.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="titlePosition" type="pvc.options.varia.RectangleSide" default="'left'" category="Layout">
+            <c:documentation>
+                The side of the bullet 
+                where the title and sub-title are placed.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="extensionPoints" type="pvc.options.ext.BulletPlotExtensionPoints" category="Style">
             <c:documentation>
                 The extension points object contains style definitions for 
@@ -40,6 +267,9 @@
         <c:documentation>
             The extension points of the bullet plot type.
             
+            This <b>bullet</b> chart type was only partially updated, 
+            to support some of the new CCC v.2 features.
+            
             To use an extension point you must find its full name, by joining:
             <ol>
                 <li>plot property name (ex: <tt>bullet</tt>)</li>
@@ -49,16 +279,62 @@
             </ol>
             and obtaining, for the examples, the camel-cased name: <tt>bulletPanel_strokeStyle</tt>
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
-            
-            The extension points of the <i>main plot</i> of a chart
-            may be used without the plot property name prefix.
-            In the example, when the <tt>bullet</tt> plot is the main plot, 
-            the extension point can be written as <tt>panel_strokeStyle</tt>.
         </c:documentation>
+        
+        <c:property name="bulletsPanel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the bullets panel mark, 
+                must be used <b>without</b> the <tt>bullet</tt> prefix.
+                
+                One instance of this panel is generated per datum.
+            </c:documentation>
+        </c:property>
         
         <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the bullet panel mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="range" type="pvc.options.marks.BarExtensionPoint">
+            <c:documentation>
+                The extension point of the bullet ranges bar mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="measure" type="pvc.options.marks.BarExtensionPoint">
+            <c:documentation>
+                The extension point of the bullet measures bar mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="marker" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the bullet markers dot mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="rule" type="pvc.options.marks.RuleExtensionPoint">
+            <c:documentation>
+                The extension point of the bullet axis ticks rule mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="ruleLabel" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the bullet axis ticks label mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="title" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the bullet title label mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="subtitle" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the bullet sub-title label mark.
             </c:documentation>
         </c:property>
     </c:complexType>

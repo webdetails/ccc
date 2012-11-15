@@ -53,6 +53,9 @@
             When in a <i>small multiples</i> chart, 
             colors are shared among <i>small</i> charts.
             
+            With a few exceptions, 
+            color axes map values of the "color" visual role.
+                
             For more information on options
             that are specific to only certain color axis types,
             please see one of the following concrete sub-classes:

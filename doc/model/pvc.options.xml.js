@@ -103,19 +103,6 @@ pvc.options.charts.Chart = function(){};
 pvc.options.charts.Chart.prototype.clickAction = function(){};
 /**
  * A callback function that is called
- * when the user double-clicks on a visual element.
- * 
- * @returns {undefined}
- * @method
- * @this pvc.visual.Context
- * @param {pvc.visual.Scene} scene
- * The scene associated with the visual item.
- * 
- * @category Actions
- */
-pvc.options.charts.Chart.prototype.doubleClickAction = function(){};
-/**
- * A callback function that is called
  * before the chart is rendered,
  * but after if has been pre-rendered.
  * <p>
@@ -138,52 +125,6 @@ pvc.options.charts.Chart.prototype.doubleClickAction = function(){};
  * @category Actions
  */
 pvc.options.charts.Chart.prototype.renderCallback = function(){};
-/**
- * A callback function that is called
- * when, after selection has changed,
- * the chart is updated to reflect the change.
- * 
- * @returns {undefined}
- * @method
- * @this pvc.visual.Context
- * @param {list(pvc.data.Datum)} selectedDatums
- * An array with the resulting selected datums.
- * 
- * @category Actions
- */
-pvc.options.charts.Chart.prototype.selectionChangedAction = function(){};
-/**
- * A callback function that is called
- * when the user performs a selection,
- * but before the corresponding datums' selected state are actually changed.
- * <p>
- * This function is usefull to restrict, amplify, or normalize the selection.
- * 
- * @returns {list(pvc.data.Datum)}
- * The datums that should be actually selected.
- * 
- * @method
- * @this pvc.visual.Context
- * @param {list(pvc.data.Datum)} selectingDatums
- * An array with the datums that will be selected by the current operation.
- * 
- * @category Actions
- */
-pvc.options.charts.Chart.prototype.userSelectionAction = function(){};
-/**
- * The first color axis options.
- * <p>
- * This axis can also be accessed by the property name 
- * <tt>color</tt>.
- * <p>
- * See {@link pvc.options.axes.ColorAxis}
- * for more information on the way that 
- * the color axes' properties may be accessed. 
- * 
- * @type pvc.options.axes.ColorAxis
- * @category Axes
- */
-pvc.options.charts.Chart.prototype.colorAxis = undefined;
 /**
  * An array of dimensions calculations.
  * <p>
@@ -254,81 +195,6 @@ pvc.options.charts.Chart.prototype.groupedLabelSep = undefined;
  * @category Data
  */
 pvc.options.charts.Chart.prototype.ignoreNulls = undefined;
-/**
- * A function used to format non-null numeric values
- * as percentages.
- * <p>
- * The numeric value has still to be multiplied by 100.
- * <p>
- * This function is used whenever a chart needs to 
- * show percentages of a numeric dimension, 
- * like is the case for the tooltips of a stacked chart or
- * the percentages shown in a Pie chart.
- * <p>
- * The default value of this option is a function that 
- * formats percentages with one decimal place and 
- * a "%" character suffix.
- * 
- * @returns {string!}
- * The number formatted as a non-empty string.
- * 
- * @method
- * @this null
- * @param {number!} value
- * The non-null number to format.
- * 
- * @category Data
- */
-pvc.options.charts.Chart.prototype.percentValueFormat = function(){};
-/**
- * Indicates that dimensions whose 
- * name is "category1", "category2", etc, 
- * have a 
- * <tt>Date</tt> value type,
- * by default.
- * <p>
- * This option has no effect on other dimensions,
- * even if bound to a "category" visual role.
- * In those cases,
- * explicitly define the dimension with
- * the 
- * <tt>Date</tt> value type.
- * <p>
- * Dimensions are considered continuous, by default,
- * when they have a continuous value type.
- * However, 
- * not all visual roles support continuous dimensions.
- * In those cases, 
- * the dimension is treated as a discrete dimension,
- * event though it has a continuous value type.
- * 
- * @type boolean
- * @default false
- * @category Data
- */
-pvc.options.charts.Chart.prototype.timeSeries = undefined;
-/**
- * The format string used by default to 
- * <i>parse</i>
- * dimensions of the 
- * <tt>Date</tt> value type.
- * <p>
- * The syntax of the format string is that of 
- * 
- * <i>protovis</i>' date formats.
- * <p>
- * This property changes the default of the 
- * {@link pvc.options.DimensionType#rawFormat}
- * <p>
- * property,
- * for dimensions with a 
- * <tt>Date</tt> value type.  
- * 
- * @type string
- * @default '%Y-%m-%d'
- * @category Data
- */
-pvc.options.charts.Chart.prototype.timeSeriesFormat = undefined;
 /**
  * A function that formats the
  * non-null 
@@ -467,31 +333,6 @@ pvc.options.charts.Chart.prototype.canvas = undefined;
  */
 pvc.options.charts.Chart.prototype.compatVersion = undefined;
 /**
- * Indicates if a chart should show an entry animation, 
- * every time it is fully rendered.
- * Most charts perform some sort of entry animation 
- * of its main visual elements.
- * <p>
- * When a chart is rendered explicitly, 
- * through its 
- * <tt>render</tt> method,
- * it is possible to control whether the entry animation 
- * is performed or not.
- * 
- * @type boolean
- * @default true
- * @category Interaction
- */
-pvc.options.charts.Chart.prototype.animate = undefined;
-/**
- * Controls if and how the selection can be cleared by the user.
- * 
- * @type pvc.options.varia.ChartClearSelectionMode
- * @default 'emptySpaceClick'
- * @category Interaction
- */
-pvc.options.charts.Chart.prototype.clearSelectionMode = undefined;
-/**
  * Indicates if the chart is clickable by the user.
  * <p>
  * If this option is 
@@ -507,59 +348,6 @@ pvc.options.charts.Chart.prototype.clearSelectionMode = undefined;
  * @category Interaction
  */
 pvc.options.charts.Chart.prototype.clickable = undefined;
-/**
- * When 
- * <tt>true</tt>, 
- * indicates that a selection made by the user 
- * replaces the current selection, if any.
- * <p>
- * For the selection to be additive, 
- * the 
- * <tt>CTRL</tt> key must be pressed, 
- * by the end of the operation.
- * <p>
- * When 
- * <tt>false</tt>,
- * indicates that any selection made by the user is additive.
- * The 
- * <tt>CTRL</tt> key has no effect.
- * 
- * @type boolean
- * @default true
- * @category Interaction
- */
-pvc.options.charts.Chart.prototype.ctrlSelectMode = undefined;
-/**
- * The maximum number of milliseconds,
- * between two consecutive clicks,
- * for them to be considered a double-click.
- * 
- * @type number
- * @default 300
- * @category Interaction
- */
-pvc.options.charts.Chart.prototype.doubleClickMaxDelay = undefined;
-/**
- * Indicates if the chart's visual elements
- * are automatically highlighted 
- * when the user hovers over them with the mouse.
- * 
- * @type boolean
- * @default false
- * @category Interaction
- */
-pvc.options.charts.Chart.prototype.hoverable = undefined;
-/**
- * Indicates if the chart's visual elements
- * can be selected by the user, 
- * by clicking on them 
- * or using the rubber-band.
- * 
- * @type boolean
- * @default false
- * @category Interaction
- */
-pvc.options.charts.Chart.prototype.selectable = undefined;
 /**
  * 
  * Indicates if tooltips are enabled 
@@ -696,6 +484,229 @@ pvc.options.charts.Chart.prototype.paddings = undefined;
  */
 pvc.options.charts.Chart.prototype.width = undefined;
 /**
+ * The title panel of the root chart.
+ * <p>
+ * When a value of type 
+ * <tt>string</tt> is specified, 
+ * it is the title text.
+ * 
+ * @type string|pvc.options.panels.ChartTitlePanel
+ * @category Panels
+ */
+pvc.options.charts.Chart.prototype.title = undefined;
+/**
+ * A callback function that is called
+ * when the user double-clicks on a visual element.
+ * 
+ * @returns {undefined}
+ * @method
+ * @this pvc.visual.Context
+ * @param {pvc.visual.Scene} scene
+ * The scene associated with the visual item.
+ * 
+ * @category Actions
+ */
+pvc.options.charts.Chart.prototype.doubleClickAction = function(){};
+/**
+ * A callback function that is called
+ * when, after selection has changed,
+ * the chart is updated to reflect the change.
+ * 
+ * @returns {undefined}
+ * @method
+ * @this pvc.visual.Context
+ * @param {list(pvc.data.Datum)} selectedDatums
+ * An array with the resulting selected datums.
+ * 
+ * @category Actions
+ */
+pvc.options.charts.Chart.prototype.selectionChangedAction = function(){};
+/**
+ * A callback function that is called
+ * when the user performs a selection,
+ * but before the corresponding datums' selected state are actually changed.
+ * <p>
+ * This function is usefull to restrict, amplify, or normalize the selection.
+ * 
+ * @returns {list(pvc.data.Datum)}
+ * The datums that should be actually selected.
+ * 
+ * @method
+ * @this pvc.visual.Context
+ * @param {list(pvc.data.Datum)} selectingDatums
+ * An array with the datums that will be selected by the current operation.
+ * 
+ * @category Actions
+ */
+pvc.options.charts.Chart.prototype.userSelectionAction = function(){};
+/**
+ * The first color axis options.
+ * <p>
+ * This axis can also be accessed by the property name 
+ * <tt>color</tt>.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.ColorAxis
+ * @category Axes
+ */
+pvc.options.charts.Chart.prototype.colorAxis = undefined;
+/**
+ * A function used to format non-null numeric values
+ * as percentages.
+ * <p>
+ * The numeric value has still to be multiplied by 100.
+ * <p>
+ * This function is used whenever a chart needs to 
+ * show percentages of a numeric dimension, 
+ * like is the case for the tooltips of a stacked chart or
+ * the percentages shown in a Pie chart.
+ * <p>
+ * The default value of this option is a function that 
+ * formats percentages with one decimal place and 
+ * a "%" character suffix.
+ * 
+ * @returns {string!}
+ * The number formatted as a non-empty string.
+ * 
+ * @method
+ * @this null
+ * @param {number!} value
+ * The non-null number to format.
+ * 
+ * @category Data
+ */
+pvc.options.charts.Chart.prototype.percentValueFormat = function(){};
+/**
+ * Indicates that dimensions whose 
+ * name is "category1", "category2", etc, 
+ * have a 
+ * <tt>Date</tt> value type,
+ * by default.
+ * <p>
+ * This option has no effect on other dimensions,
+ * even if bound to a "category" visual role.
+ * In those cases,
+ * explicitly define the dimension with
+ * the 
+ * <tt>Date</tt> value type.
+ * <p>
+ * Dimensions are considered continuous, by default,
+ * when they have a continuous value type.
+ * However, 
+ * not all visual roles support continuous dimensions.
+ * In those cases, 
+ * the dimension is treated as a discrete dimension,
+ * event though it has a continuous value type.
+ * 
+ * @type boolean
+ * @default false
+ * @category Data
+ */
+pvc.options.charts.Chart.prototype.timeSeries = undefined;
+/**
+ * The format string used by default to 
+ * <i>parse</i>
+ * dimensions of the 
+ * <tt>Date</tt> value type.
+ * <p>
+ * The syntax of the format string is that of 
+ * 
+ * <i>protovis</i>' date formats.
+ * <p>
+ * This property changes the default of the 
+ * {@link pvc.options.DimensionType#rawFormat}
+ * <p>
+ * property,
+ * for dimensions with a 
+ * <tt>Date</tt> value type.  
+ * 
+ * @type string
+ * @default '%Y-%m-%d'
+ * @category Data
+ */
+pvc.options.charts.Chart.prototype.timeSeriesFormat = undefined;
+/**
+ * Indicates if a chart should show an entry animation, 
+ * every time it is fully rendered.
+ * Most charts perform some sort of entry animation 
+ * of its main visual elements.
+ * <p>
+ * When a chart is rendered explicitly, 
+ * through its 
+ * <tt>render</tt> method,
+ * it is possible to control whether the entry animation 
+ * is performed or not.
+ * 
+ * @type boolean
+ * @default true
+ * @category Interaction
+ */
+pvc.options.charts.Chart.prototype.animate = undefined;
+/**
+ * Controls if and how the selection can be cleared by the user.
+ * 
+ * @type pvc.options.varia.ChartClearSelectionMode
+ * @default 'emptySpaceClick'
+ * @category Interaction
+ */
+pvc.options.charts.Chart.prototype.clearSelectionMode = undefined;
+/**
+ * When 
+ * <tt>true</tt>, 
+ * indicates that a selection made by the user 
+ * replaces the current selection, if any.
+ * <p>
+ * For the selection to be additive, 
+ * the 
+ * <tt>CTRL</tt> key must be pressed, 
+ * by the end of the operation.
+ * <p>
+ * When 
+ * <tt>false</tt>,
+ * indicates that any selection made by the user is additive.
+ * The 
+ * <tt>CTRL</tt> key has no effect.
+ * 
+ * @type boolean
+ * @default true
+ * @category Interaction
+ */
+pvc.options.charts.Chart.prototype.ctrlSelectMode = undefined;
+/**
+ * The maximum number of milliseconds,
+ * between two consecutive clicks,
+ * for them to be considered a double-click.
+ * 
+ * @type number
+ * @default 300
+ * @category Interaction
+ */
+pvc.options.charts.Chart.prototype.doubleClickMaxDelay = undefined;
+/**
+ * Indicates if the chart's visual elements
+ * are automatically highlighted 
+ * when the user hovers over them with the mouse.
+ * 
+ * @type boolean
+ * @default false
+ * @category Interaction
+ */
+pvc.options.charts.Chart.prototype.hoverable = undefined;
+/**
+ * Indicates if the chart's visual elements
+ * can be selected by the user, 
+ * by clicking on them 
+ * or using the rubber-band.
+ * 
+ * @type boolean
+ * @default false
+ * @category Interaction
+ */
+pvc.options.charts.Chart.prototype.selectable = undefined;
+/**
  * The legend panel of the root chart.
  * <p>
  * When a value of type 
@@ -709,29 +720,6 @@ pvc.options.charts.Chart.prototype.width = undefined;
  */
 pvc.options.charts.Chart.prototype.legend = undefined;
 /**
- * The title panel of the root chart.
- * <p>
- * When a value of type 
- * <tt>string</tt> is specified, 
- * it is the title text.
- * 
- * @type string|pvc.options.panels.ChartTitlePanel
- * @category Panels
- */
-pvc.options.charts.Chart.prototype.title = undefined;
-/**
- * The discrete colors scheme to use to distinguish visual elements
- * that are colored using the 
- * <i>first</i> color axis. 
- * <p>
- * With a few exceptions, 
- * color axes map values of the "color" visual role.
- * 
- * @type list(pvc.options.varia.ColorString)
- * @category Style
- */
-pvc.options.charts.Chart.prototype.colors = undefined;
-/**
  * The extension points object contains style definitions for 
  * the marks of the chart.
  * 
@@ -742,14 +730,21 @@ pvc.options.charts.Chart.prototype.extensionPoints = undefined;
 /**
  * The extension points common to all chart types.
  * <p>
- * To use an extension point you must find its full name: 
- * join the prefix property name, 
- * like {@link #base},
- * with one of the properties of the type of the extension point,
- * like {@link pvc.options.marks.PanelExtensionPoint#overflow},
- * with an "_" character in between,
- * and obtain the name 
- * <tt>base_overflow</tt>.
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>extension property (ex: 
+ * <tt>base</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>base_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
  * 
  * @class
  */
@@ -2402,9 +2397,63 @@ pvc.options.ext.PiePlotExtensionPoints.prototype.slice = undefined;
 /**
  * The options documentation class of the 
  * <b>Bullet</b> chart.
+ * <p>
+ * This chart type was only partially updated, 
+ * to support some of the new CCC v.2 features.
+ * <p>
+ * The bullet chart's data translator 
+ * accepts data of the following form 
+ * without requiring any further configuration:
+ * 
+ * <table>
+ * 
+ * <thead>
+ * 
+ * <tr>
+ * 
+ * <th>
+ * Number of columns
+ * </th>
+ * 
+ * <th>
+ * Structure
+ * </th>
+ * </tr>
+ * </thead>
+ * 
+ * <tbody>
+ * 
+ * <tr>
+ * 
+ * <td>1</td>
+ * <td>Value</td>
+ * </tr>
+ * 
+ * <tr>
+ * 
+ * <td>2</td>
+ * <td>Title | Value</td>
+ * </tr>
+ * 
+ * <tr>
+ * 
+ * <td>3</td>
+ * <td>Title | Value | Marker</td>
+ * </tr>
+ * 
+ * <tr>
+ * 
+ * <td> >= 4 </td>
+ * <td>Title | Subtitle | Value | Marker | Ranges</td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * <p>
+ * To use the bullet chart's visual roles in its most general form,
+ * it is required to manually configure the data translator,
+ * by using {@link #readers}. 
  * 
  * @class
- * @extends pvc.options.charts.Chart
  */
 pvc.options.charts.BulletChart = function(){};
         
@@ -2412,28 +2461,692 @@ pvc.options.charts.BulletChart = function(){};
         
         
 /**
- * The bullet plot is the 
- * <b>main plot</b> of the bullet chart,
- * which means that 
- * its properties may be used 
- * <i>without</i> the "bullet" property suffix.
+ * A callback function that is called
+ * when the user clicks on a visual element.
+ * 
+ * @returns {undefined}
+ * @method
+ * @this pvc.visual.Context
+ * @param {pvc.visual.Scene} scene
+ * The scene associated with the visual item.
+ * 
+ * @category Actions
+ */
+pvc.options.charts.BulletChart.prototype.clickAction = function(){};
+/**
+ * A callback function that is called
+ * before the chart is rendered,
+ * but after if has been pre-rendered.
+ * <p>
+ * You can use this action to:
+ * 
+ * <ul>
+ * 
+ * <li>use the 
+ * <i>mark events</i> API on time-series categorical charts</li>
+ * 
+ * <li>extend in special ways the already created protovis marks.</li>
+ * </ul>
+ * 
+ * @returns {undefined}
+ * @method
+ * @this pvc.visual.Context
+ * @param {pvc.visual.Scene} scene
+ * The scene associated with the visual item.
+ * 
+ * @category Actions
+ */
+pvc.options.charts.BulletChart.prototype.renderCallback = function(){};
+/**
+ * An array of dimensions calculations.
+ * <p>
+ * Can be specified to calculate the values of certain dimensions.
+ * 
+ * @type list(pvc.options.DimensionsCalculation)
+ * @category Data
+ */
+pvc.options.charts.BulletChart.prototype.calculations = undefined;
+/**
+ * A map whose keys are 
+ * the dimension type group names and whose values are 
+ * the default dimension type group options.
+ * <p>
+ * A dimension type group is 
+ * a group of dimension types
+ * that have a common non-numeric prefix in its name.
+ * <p>
+ * This property does not define any dimension types, per si,
+ * but allows specifying default values
+ * for dimension types of a group, 
+ * that apply in case they are effectively used.
+ * 
+ * @type map(string : pvc.options.DimensionType)
+ * @category Data
+ */
+pvc.options.charts.BulletChart.prototype.dimensionGroups = undefined;
+/**
+ * A map whose keys are 
+ * the dimension type names and whose values are 
+ * the dimension type options. 
+ * <p>
+ * You don't need to define dimensions 
+ * unless you want to change their name or properties.
+ * Charts automatically define default dimensions
+ * to satisfy their visual roles' requirements.
+ * <p>
+ * Dimension options can be partial, 
+ * so that it is possible to override only certain options.
+ * 
+ * @type map(string : pvc.options.DimensionType)
+ * @category Data
+ */
+pvc.options.charts.BulletChart.prototype.dimensions = undefined;
+/**
+ * The separator used to join the labels of the values of 
+ * a multi-dimensional visual role.
+ * <p>
+ * For example, if a visual role, 
+ * has the dimensions "Territory" and "ProductType",
+ * a compound value could be shown as "EMEA ~ Classic Cars". 
+ * 
+ * @type string
+ * @default ' ~ '
+ * @category Data
+ */
+pvc.options.charts.BulletChart.prototype.groupedLabelSep = undefined;
+/**
+ * Indicates if datums
+ * whose value of all measure dimensions is null 
+ * should be ignored.
+ * <p>
+ * A dimension is considered a measure dimension if 
+ * there is at least one measure role currently bound to it.
+ * 
+ * @type boolean
+ * @default true
+ * @category Data
+ */
+pvc.options.charts.BulletChart.prototype.ignoreNulls = undefined;
+/**
+ * A function that formats the
+ * non-null 
+ * <i>numeric</i> values
+ * of the dimensions named 
+ * <tt>value</tt>, 
+ * <tt>value2</tt>, etc.
+ * <p>
+ * This property is used to default the property 
+ * {@link pvc.options.DimensionType#formatter}
+ * of the mentioned dimensions.
+ * <p>
+ * The default value of this option is a function that 
+ * formats numbers with two decimal places.
+ * 
+ * @returns {string!}
+ * The number formatted as a non-empty string.
+ * 
+ * @method
+ * @this null
+ * @param {number!} value
+ * The non-null number to format.
+ * 
+ * @category Data
+ */
+pvc.options.charts.BulletChart.prototype.valueFormat = function(){};
+/**
+ * Indicates if the data source is in 
+ * <i>crosstab</i> format.
+ * 
+ * @type boolean
+ * @default true
+ * @category Data Translation
+ */
+pvc.options.charts.BulletChart.prototype.crosstabMode = undefined;
+/**
+ * Indicates if the data source has 
+ * multiple value dimensions.
+ * 
+ * @type boolean
+ * @default false
+ * @category Data Translation
+ */
+pvc.options.charts.BulletChart.prototype.isMultiValued = undefined;
+/**
+ * The indexes of the data source's 
+ * <i>virtual item</i> columns
+ * that are to feed the 
+ * default dimensions 
+ * 
+ * <tt>value</tt>, 
+ * 
+ * <tt>value2</tt>, etc.
+ * <p>
+ * This option only applies to data sources in 
+ * relational format with multiple values, 
+ * i.e., 
+ * when 
+ * 
+ * <tt>crosstabMode=false</tt> and 
+ * 
+ * <tt>isMultiValued=true</tt>.
+ * 
+ * @type number|string|list(number|string)
+ * @default true
+ * @category Data Translation
+ */
+pvc.options.charts.BulletChart.prototype.measuresIndexes = undefined;
+/**
+ * An array of dimensions readers.
+ * <p>
+ * Can be specified to customize the 
+ * translation process of the data source. 
+ * 
+ * @type list(pvc.options.DimensionsReader)
+ * @category Data Translation
+ */
+pvc.options.charts.BulletChart.prototype.readers = undefined;
+/**
+ * Indicates if, 
+ * in the data source, 
+ * the "series" data is in the rows, 
+ * instead of, as is more usual, in the columns.
+ * <p>
+ * The name of this option is inspired in 
+ * the 
+ * <i>crosstab</i> format, 
+ * where the "series" values are placed in the first row,
+ * and "category" values are placed in the first column
+ * (corner cell is empty).
+ * <p>
+ * When this option is 
+ * <tt>true</tt>, in the 
+ * <i>crosstab</i> format,
+ * the result is equivalent to transposing the data table,
+ * which results in "series" data being placed in the first column,
+ * i.e. 
+ * <i>in the rows</i>, 
+ * and the "category" data being placed in the first row.
+ * <p>
+ * In the 
+ * <i>relational</i> data source format, 
+ * this option effects a conceptually equivalent operation,
+ * by switching the "series" and "category" columns.
+ * 
+ * @type boolean
+ * @default false
+ * @category Data Translation
+ */
+pvc.options.charts.BulletChart.prototype.seriesInRows = undefined;
+/**
+ * The identifier of the HTML element, 
+ * or the element itself,
+ * where the chart is to be created in.
+ * <p>
+ * The chart element will be a child of
+ * the canvas element.
+ * <p>
+ * When unspecified, the chart
+ * element will be added as the 
+ * last child of the HTML document body.
+ * 
+ * @type string|object
+ * @category General
+ */
+pvc.options.charts.BulletChart.prototype.canvas = undefined;
+/**
+ * The CCC version that the chart should run in.
+ * <p>
+ * The value 
+ * <tt>1</tt> emulates version 1 of CCC.
+ * 
+ * @type number
+ * @default Infinity
+ * @category General
+ */
+pvc.options.charts.BulletChart.prototype.compatVersion = undefined;
+/**
+ * Indicates if the chart is clickable by the user.
+ * <p>
+ * If this option is 
+ * <tt>false</tt>, 
+ * any click-related actions will not be executed 
+ * (ex: 
+ * {@link #clickAction},
+ * {@link #doubleClickAction}, or
+ * {@link pvc.options.axes.DiscreteCartesianAxis#clickAction}).
+ * 
+ * @type boolean
+ * @default false
+ * @category Interaction
+ */
+pvc.options.charts.BulletChart.prototype.clickable = undefined;
+/**
+ * 
+ * Indicates if tooltips are enabled 
+ * and contains additional tooltip presentation options.
+ * 
+ * @deprecated Use {@link #tooltip} instead.
+ * @type boolean
+ * @category Interaction
+ */
+pvc.options.charts.BulletChart.prototype.showTooltips = undefined;
+/**
+ * 
+ * Contains additional tooltip presentation options.
+ * 
+ * @deprecated Use {@link #tooltip} instead.
+ * @type pvc.options.Tooltip
+ * @category Interaction
+ */
+pvc.options.charts.BulletChart.prototype.tipsySettings = undefined;
+/**
+ * Indicates if tooltips are enabled 
+ * and contains additional tooltip presentation options.
+ * 
+ * @type boolean|pvc.options.Tooltip
+ * @default true
+ * @category Interaction
+ */
+pvc.options.charts.BulletChart.prototype.tooltip = undefined;
+/**
+ * The margins of the 
+ * <i>root</i> content panel.
+ * <p>
+ * In a 
+ * <i>small multiples</i> chart, 
+ * the margins of the 
+ * <i>content panel</i> of a 
+ * <i>small</i> chart 
+ * can be set with the property 
+ * <tt>smallContentMargins</tt>.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Layout
+ */
+pvc.options.charts.BulletChart.prototype.contentMargins = undefined;
+/**
+ * The paddings of the 
+ * <i>root</i> content panel.
+ * <p>
+ * In a 
+ * <i>small multiples</i> chart, 
+ * the paddings of the 
+ * <i>content panel</i> of a 
+ * <i>small</i> chart 
+ * can be set with the property 
+ * <tt>smallContentPaddings</tt>.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Layout
+ */
+pvc.options.charts.BulletChart.prototype.contentPaddings = undefined;
+/**
+ * The height of the 
+ * <i>root</i> chart, in pixels.
+ * 
+ * @type number
+ * @default 300
+ * @category Layout
+ */
+pvc.options.charts.BulletChart.prototype.height = undefined;
+/**
+ * The margins of the 
+ * <i>root</i> chart.
+ * <p>
+ * In a 
+ * <i>small multiples</i> chart, 
+ * the margins of the 
+ * <i>small</i> charts can be set
+ * with the property 
+ * <tt>smallMargins</tt>.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Layout
+ */
+pvc.options.charts.BulletChart.prototype.margins = undefined;
+/**
+ * The chart orientation indicates if 
+ * its main direction is vertical or horizontal.
+ * <p>
+ * This property is supported by most chart types. 
+ * 
+ * @type pvc.options.varia.ChartOrientation
+ * @default 'vertical'
+ * @category Layout
+ */
+pvc.options.charts.BulletChart.prototype.orientation = undefined;
+/**
+ * The paddings of the 
+ * <i>root</i> chart.
+ * <p>
+ * In a 
+ * <i>small multiples</i> chart, 
+ * the paddings of a 
+ * <i>small</i> chart can be set
+ * with the property 
+ * <tt>smallPaddings</tt>.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 0
+ * @category Layout
+ */
+pvc.options.charts.BulletChart.prototype.paddings = undefined;
+/**
+ * The width of the 
+ * <i>root</i> chart, in pixels.
+ * 
+ * @type number
+ * @default 400
+ * @category Layout
+ */
+pvc.options.charts.BulletChart.prototype.width = undefined;
+/**
+ * The title panel of the root chart.
+ * <p>
+ * When a value of type 
+ * <tt>string</tt> is specified, 
+ * it is the title text.
+ * 
+ * @type string|pvc.options.panels.ChartTitlePanel
+ * @category Panels
+ */
+pvc.options.charts.BulletChart.prototype.title = undefined;
+/**
+ * The bullet plot.
  * 
  * @type pvc.options.plots.BulletPlot
  * @category Plots
  */
 pvc.options.charts.BulletChart.prototype.bullet = undefined;
 /**
- * The options documentation class of the 
- * <b>Bullet</b> plot.
+ * The extension points object contains style definitions for 
+ * the marks of the chart.
+ * 
+ * @type pvc.options.ext.BulletChartExtensionPoints
+ * @category Style
+ */
+pvc.options.charts.BulletChart.prototype.extensionPoints = undefined;
+/**
+ * The 
+ * <tt>marker</tt> visual role 
+ * represents a set of reference or target values for a given
+ * title and sub-title categories.
+ * <p>
+ * The 
+ * <tt>marker</tt> is represented by markers/dots
+ * placed at the positions corresponding to the marker values.
+ * Negative values are considered 
+ * <tt>0</tt>.
+ * <p>
+ * Each dimension that is bound to the 
+ * <tt>marker</tt> role
+ * is represented by a different marker.
+ * <p>
+ * The 
+ * <tt>marker</tt> visual role automatically binds to 
+ * all numeric dimensions whose name has the 
+ * <tt>marker</tt> prefix.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.BulletChart.prototype.markerRole = undefined;
+/**
+ * The 
+ * <tt>range</tt> visual role 
+ * represents a classification of the values of the
+ * 
+ * <tt>value</tt> visual role.
+ * <p>
+ * The 
+ * <tt>value</tt> domain
+ * is split into several parts (or classes) at
+ * the given points.
+ * <p>
+ * Each dimension that is bound to the 
+ * <tt>range</tt> role
+ * splits the 
+ * <tt>value</tt> domain at a certain point.
+ * <p>
+ * By default, each part is painted with a successively brighter gray color.
+ * <p>
+ * The 
+ * <tt>range</tt> visual role automatically binds to 
+ * all numeric dimensions whose name has the 
+ * <tt>range</tt> prefix.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.BulletChart.prototype.rangeRole = undefined;
+/**
+ * The 
+ * <tt>subTitle</tt> visual role represents a 
+ * the sub-title of each bullet.
+ * <p>
+ * The 
+ * <tt>subTitle</tt> visual role automatically binds to 
+ * all dimensions whose name has the 
+ * <tt>subTitle</tt> prefix.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.BulletChart.prototype.subTitleRole = undefined;
+/**
+ * The 
+ * <tt>title</tt> visual role represents a 
+ * the title of each bullet.
+ * <p>
+ * The 
+ * <tt>title</tt> visual role automatically binds to 
+ * all dimensions whose name has the 
+ * <tt>title</tt> prefix.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.BulletChart.prototype.titleRole = undefined;
+/**
+ * The 
+ * <tt>value</tt> visual role 
+ * represents current values for a given
+ * title and sub-title categories.
+ * <p>
+ * The values, one for each dimension bound to the 
+ * <tt>value</tt> role,
+ * are represented by overlapping bars, 
+ * each painted with a successively brighter blue color.
+ * The length of each bar is proportional to the corresponding value.
+ * Negative values are considered 
+ * <tt>0</tt>.
+ * <p>
+ * The 
+ * <tt>value</tt> visual role automatically binds to 
+ * all numeric dimensions whose name has the 
+ * <tt>value</tt> prefix.
+ * <p>
+ * See {@link pvc.options.VisualRole}
+ * for more information on supported data types.
+ * 
+ * @type string|pvc.options.VisualRole
+ * @category Visual roles
+ */
+pvc.options.charts.BulletChart.prototype.valueRole = undefined;
+/**
+ * The extension points of the 
+ * <b>bullet</b> chart types.
+ * <p>
+ * This 
+ * <b>bullet</b> chart type was only partially updated, 
+ * to support some of the new CCC v.2 features.
+ * <p>
+ * To use an extension point you must find its full name, by joining:
+ * 
+ * <ol>
+ * 
+ * <li>extension property (ex: 
+ * <tt>base</tt>)</li>
+ * 
+ * <li>the "_" character</li>
+ * 
+ * <li>extension sub-property (ex: 
+ * <tt>strokeStyle</tt>)</li>
+ * </ol>
+ * and obtaining, for the examples, the camel-cased name: 
+ * <tt>base_strokeStyle</tt>
+ * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
  * 
  * @class
- * @extends pvc.options.plots.Plot
+ */
+pvc.options.ext.BulletChartExtensionPoints = function(){};
+        
+        
+        
+        
+/**
+ * The extension point of the base (root) panel of the 
+ * <i>root</i> chart.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.BulletChartExtensionPoints.prototype.base = undefined;
+/**
+ * 
+ * The extension point of the plot panel of the charts.
+ * <p>
+ * The plot panel is a child of the content panel.
+ * 
+ * @deprecated Use the extension point {@link #plot} instead.
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.BulletChartExtensionPoints.prototype.chart = undefined;
+/**
+ * The extension point of the content panel of the 
+ * <i>root</i> chart.
+ * <p>
+ * The content panel is a child of the base panel.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.BulletChartExtensionPoints.prototype.content = undefined;
+/**
+ * The extension point of the plot panel of the charts.
+ * <p>
+ * The plot panel is a child of the content panel.
+ * <p>
+ * The root of a small multiples chart does not have a plot panel.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.BulletChartExtensionPoints.prototype.plot = undefined;
+/**
+ * The options documentation class of the 
+ * <b>Bullet</b> plot.
+ * <p>
+ * This 
+ * <b>bullet</b> chart type was only partially updated, 
+ * to support some of the new CCC v.2 features.
+ * 
+ * @class
  */
 pvc.options.plots.BulletPlot = function(){};
         
         
         
         
+/**
+ * The default bullet markers.
+ * <p>
+ * Used when no data is supplied or 
+ * when the 
+ * <tt>marker</tt> role is unbound.
+ * 
+ * @type string|list(string)
+ * @category Data
+ */
+pvc.options.plots.BulletPlot.prototype.markers = undefined;
+/**
+ * The default bullet measures.
+ * <p>
+ * Used when no data is supplied or 
+ * when the 
+ * <tt>value</tt> role is unbound.
+ * 
+ * @type string|list(string)
+ * @category Data
+ */
+pvc.options.plots.BulletPlot.prototype.measures = undefined;
+/**
+ * The default bullet ranges.
+ * <p>
+ * Used when no data is supplied or 
+ * when the 
+ * <tt>range</tt> role is unbound.
+ * 
+ * @type string|list(string)
+ * @category Data
+ */
+pvc.options.plots.BulletPlot.prototype.ranges = undefined;
+/**
+ * The default bullet sub-title.
+ * <p>
+ * Used when no data is supplied or 
+ * when the 
+ * <tt>subTitle</tt> role is unbound.
+ * 
+ * @type string
+ * @category Data
+ */
+pvc.options.plots.BulletPlot.prototype.subtitle = undefined;
+/**
+ * The default bullet title.
+ * <p>
+ * Used when no data is supplied or 
+ * when the 
+ * <tt>title</tt> role is unbound.
+ * 
+ * @type string
+ * @default 'Bullet'
+ * @category Data
+ */
+pvc.options.plots.BulletPlot.prototype.title = undefined;
+/**
+ * The side of the bullet 
+ * where the title and sub-title are placed.
+ * 
+ * @type pvc.options.varia.RectangleSide
+ * @default 'left'
+ * @category Layout
+ */
+pvc.options.plots.BulletPlot.prototype.titlePosition = undefined;
 /**
  * The extension points object contains style definitions for 
  * the marks of the plot.
@@ -2443,7 +3156,40 @@ pvc.options.plots.BulletPlot = function(){};
  */
 pvc.options.plots.BulletPlot.prototype.extensionPoints = undefined;
 /**
+ * The top margin, for vertical orientation, 
+ * or left margin, for horizontal orientation,
+ * in 
+ * <i>pixel</i> units. 
+ * 
+ * @type number
+ * @default 100
+ * @category Style
+ */
+pvc.options.plots.BulletPlot.prototype.margin = undefined;
+/**
+ * The orthogonal size of each bullet, in 
+ * <i>pixel</i> units.
+ * 
+ * @type number
+ * @default 30
+ * @category Style
+ */
+pvc.options.plots.BulletPlot.prototype.size = undefined;
+/**
+ * The space between bullets, in 
+ * <i>pixel</i> units.
+ * 
+ * @type number
+ * @default 50
+ * @category Style
+ */
+pvc.options.plots.BulletPlot.prototype.spacing = undefined;
+/**
  * The extension points of the bullet plot type.
+ * <p>
+ * This 
+ * <b>bullet</b> chart type was only partially updated, 
+ * to support some of the new CCC v.2 features.
  * <p>
  * To use an extension point you must find its full name, by joining:
  * 
@@ -2463,14 +3209,6 @@ pvc.options.plots.BulletPlot.prototype.extensionPoints = undefined;
  * and obtaining, for the examples, the camel-cased name: 
  * <tt>bulletPanel_strokeStyle</tt>
  * (see {@link http://en.wikipedia.org/wiki/CamelCase}).
- * <p>
- * The extension points of the 
- * <i>main plot</i> of a chart
- * may be used without the plot property name prefix.
- * In the example, when the 
- * <tt>bullet</tt> plot is the main plot, 
- * the extension point can be written as 
- * <tt>panel_strokeStyle</tt>.
  * 
  * @class
  */
@@ -2480,11 +3218,64 @@ pvc.options.ext.BulletPlotExtensionPoints = function(){};
         
         
 /**
+ * The extension point of the bullets panel mark, 
+ * must be used 
+ * <b>without</b> the 
+ * <tt>bullet</tt> prefix.
+ * <p>
+ * One instance of this panel is generated per datum.
+ * 
+ * @type pvc.options.marks.PanelExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.bulletsPanel = undefined;
+/**
+ * The extension point of the bullet markers dot mark.
+ * 
+ * @type pvc.options.marks.DotExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.marker = undefined;
+/**
+ * The extension point of the bullet measures bar mark.
+ * 
+ * @type pvc.options.marks.BarExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.measure = undefined;
+/**
  * The extension point of the bullet panel mark.
  * 
  * @type pvc.options.marks.PanelExtensionPoint
  */
 pvc.options.ext.BulletPlotExtensionPoints.prototype.panel = undefined;
+/**
+ * The extension point of the bullet ranges bar mark.
+ * 
+ * @type pvc.options.marks.BarExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.range = undefined;
+/**
+ * The extension point of the bullet axis ticks rule mark.
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.rule = undefined;
+/**
+ * The extension point of the bullet axis ticks label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.ruleLabel = undefined;
+/**
+ * The extension point of the bullet sub-title label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.subtitle = undefined;
+/**
+ * The extension point of the bullet title label mark.
+ * 
+ * @type pvc.options.marks.LabelExtensionPoint
+ */
+pvc.options.ext.BulletPlotExtensionPoints.prototype.title = undefined;
 /**
  * The common options documentation class for the 
  * <b>Cartesian</b> charts.
@@ -6590,6 +7381,9 @@ pvc.options.axes = {};
  * colors are shared among 
  * <i>small</i> charts.
  * <p>
+ * With a few exceptions, 
+ * color axes map values of the "color" visual role.
+ * <p>
  * For more information on options
  * that are specific to only certain color axis types,
  * please see one of the following concrete sub-classes:
@@ -10643,6 +11437,34 @@ pvc.options.varia.TextBaseline.prototype.Middle = 'middle';
  * @value 'top'
  */
 pvc.options.varia.TextBaseline.prototype.Top = 'top';
+/**
+ * The names of the four sides of a rectangle.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.RectangleSide = function(){};
+        
+        
+        
+        
+/**
+ * @value 'bottom'
+ */
+pvc.options.varia.RectangleSide.prototype.Bottom = 'bottom';
+/**
+ * @value 'left'
+ */
+pvc.options.varia.RectangleSide.prototype.Left = 'left';
+/**
+ * @value 'right'
+ */
+pvc.options.varia.RectangleSide.prototype.Right = 'right';
+/**
+ * @value 'top'
+ */
+pvc.options.varia.RectangleSide.prototype.Top = 'top';
 /**
  * Describes the distances from 
  * each of the four planar sides:
