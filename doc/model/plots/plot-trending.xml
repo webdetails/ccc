@@ -11,6 +11,9 @@
             specifying trending options for a plot.
             
             Each trend type may define additional options.
+            
+            Trending is performed after null interpolation,
+            so that it takes the interpolated datums into account. 
         </c:documentation>
         
         <c:property name="type" type="string">

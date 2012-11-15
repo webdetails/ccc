@@ -16,11 +16,12 @@ def
         var options = this.options;
         
         var barPlot = new pvc.visual.BarPlot(this);
+        var trend   = barPlot.option('Trend');
         
         // secondAxis V1 compatibility
         if(options.plot2){
             // Line Plot
-            new pvc.visual.PointPlot(this, {
+            var plot2Plot = new pvc.visual.PointPlot(this, {
                 name: 'plot2',
                 fixed: {
                     DataPart: '1'
@@ -30,9 +31,12 @@ def
                     LinesVisible: true,
                     DotsVisible:  true
                 }});
+            
+            if(!trend){
+                trend = plot2Plot.option('Trend');
+            }
         }
         
-        var trend = barPlot.option('Trend');
         if(trend){
             // Trend Plot
             new pvc.visual.PointPlot(this, {

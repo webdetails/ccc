@@ -10250,6 +10250,9 @@ pvc.options.plots = {};
  * specifying trending options for a plot.
  * <p>
  * Each trend type may define additional options.
+ * <p>
+ * Trending is performed after null interpolation,
+ * so that it takes the interpolated datums into account. 
  * 
  * @class
  */

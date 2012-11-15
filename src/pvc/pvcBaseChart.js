@@ -247,9 +247,10 @@ def
         
         /* Trends and Interpolation */
         if(this.parent || !hasMultiRole){
-            this._generateTrends(hasMultiRole);
-            
+            // Interpolated data affects generated trends
             this._interpolate(hasMultiRole);
+            
+            this._generateTrends(hasMultiRole);
         }
         
         /* Set axes scales */

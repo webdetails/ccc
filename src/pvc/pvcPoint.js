@@ -41,10 +41,11 @@ def
         var options = this.options;
         
         var pointPlot = this._createPointPlot();
+        var trend = pointPlot.option('Trend');
         
         if(options.plot2){
             // Line Plot
-            new pvc.visual.PointPlot(this, {
+            var plot2Plot = new pvc.visual.PointPlot(this, {
                 name: 'plot2',
                 fixed: {
                     DataPart: '1'
@@ -54,9 +55,12 @@ def
                     LinesVisible: true,
                     DotsVisible:  true
                 }});
+
+            if(!trend){
+                trend = plot2Plot.option('Trend');
+            }
         }
         
-        var trend = pointPlot.option('Trend');
         if(trend){
             // Trend Plot
             new pvc.visual.PointPlot(this, {
