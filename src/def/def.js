@@ -1901,6 +1901,23 @@ def.type('Query')
         return array;
     },
     
+    sort: function(compare, by){
+        if(!compare){
+            compare = def.compare;
+        }
+        
+        if(by){
+            var keyCompare = compare;
+            compare = function(a, b){
+                return keyCompare(by(a), by(b));
+            };
+        }
+        
+        var sorted = this.array().sort(compare);
+        
+        return new def.ArrayLikeQuery(sorted);
+    },
+    
     /**
      * Consumes the query and fills an object
      * with its items.

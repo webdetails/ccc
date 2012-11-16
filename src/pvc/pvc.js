@@ -1370,9 +1370,9 @@ var pvc = def.globalSpace('pvc', {
         return v;
     };
     
-    pvc.Size.to = function(v){
+    pvc.Size.to = function(v, keyArgs){
         if(v != null){
-            v = new Size().setSize(v);
+            v = new Size().setSize(v, keyArgs);
         }
         
         return v;

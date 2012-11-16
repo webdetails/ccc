@@ -23,6 +23,9 @@ def
         this.smallColIndex = options.smallColIndex;
         this.smallRowIndex = options.smallRowIndex;
         
+        this._tooltipEnabled = parent._tooltipEnabled;
+        this._tooltipOptions = parent._tooltipOptions;
+        
         parent._addChild(this);
     } else {
         this.root  = this;
@@ -209,9 +212,6 @@ def
         
         this.children = [];
         
-        /* Any data exists or throws */
-        this._checkNoData();
-        
         if (!this.parent) {
             // Now's as good a time as any to completely clear out all
             //  tipsy tooltips
@@ -220,6 +220,12 @@ def
         
         /* Options may be changed between renders */
         this._processOptions();
+        
+        /* Any data exists or throws
+         * (must be done AFTER processing options
+         *  because of width, height properties and noData extension point...) 
+         */
+        this._checkNoData();
         
         /* Initialize root visual roles */
         if(!this.parent && this._createVersion === 1) {
@@ -314,7 +320,7 @@ def
      * options values implications.
      */
     _processOptions: function(){
-
+        
         var options = this.options;
         if(!this.parent){
             this.width    = options.width; 
@@ -363,10 +369,11 @@ def
         offset:       2,
         opacity:      0.9,
         html:         true,
-        //fade:        false, // fade out
+        fade:         false,
         useCorners:   false,
         arrowVisible: true,
-        followMouse:  false
+        followMouse:  false,
+        format:       undefined
     },
     
     _processTooltipOptions: function(options){

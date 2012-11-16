@@ -43,14 +43,14 @@ def
     
     /* @override */
     _createMainContentPanel: function(parentPanel, baseOptions){
-        var normBarPlot = this.plots.normBar;
+        var barPlot = this.plots.bar;
         
         var barPanel = 
         this.barChartPanel = 
             new pvc.NormalizedBarPanel(
                 this, 
                 parentPanel, 
-                normBarPlot, 
+                barPlot, 
                 Object.create(baseOptions));
         
         return barPanel;

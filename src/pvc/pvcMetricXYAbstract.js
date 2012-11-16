@@ -100,18 +100,21 @@ def
                     return datum.atoms[yDimName].value;
                 };
             
-
+            var datums = 
+                serData
+                .datums()
+                .sort(null, /* by */funX)
+                .array();
+            
             var options = def.create(trendOptions, {
-                    rows: serData.datums(),
+                    rows: def.query(datums),
                     x: funX,
                     y: funY
                 });
 
             var trendModel = trendInfo.model(options);
             if(trendModel){
-                serData
-                .datums()
-                .each(function(datum, index){
+                datums.forEach(function(datum, index){
                     var trendX = funX(datum);
                     if(trendX){
                         var trendY = trendModel.sample(trendX, funY(datum), index);
@@ -123,7 +126,7 @@ def
                                     yDimName, trendY,
                                     dataPartDimName, trendInfo.dataPartAtom);
                             
-                            newDatums.push( 
+                            newDatums.push(
                                 def.set(
                                     new pvc.data.Datum(data.owner, atoms),
                                     'isVirtual', true,

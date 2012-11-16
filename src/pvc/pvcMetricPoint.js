@@ -15,6 +15,7 @@ def
     }
 })
 .add({
+    
     _initPlotsCore: function(){
         var options = this.options;
         
@@ -42,6 +43,11 @@ def
     },
     
     //_createPointPlot: function(){},
+    
+    /* Required because of trends */
+    _hasDataPartRole: function(){
+        return true;
+    },
     
     _getColorRoleSpec: function(){
         return {

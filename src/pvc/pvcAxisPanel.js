@@ -12,26 +12,27 @@ def
     
     var anchor = options.anchor || this.anchor;
     
-    // size
-    if(options.size == null){
-        var size = options.axisSize;
-        if(size != null){
+    function readSize(prop){
+        var value = options[prop];
+        if(value == null){
+            value = options['axis' + def.firstUpperCase(prop)];
+        }
+        
+        if(value != null){
             // Single size (a number or a string with only one number)
             // should be interpreted as meaning the orthogonal length.
-            options.size = new pvc.Size()
-                                .setSize(size, {singleProp: this.anchorOrthoLength(anchor)});
+            var aol = this.anchorOrthoLength(anchor);
+            value = pvc.Size.to(value, {singleProp: aol});
+            
+            delete value[this.anchorLength(anchor)];
         }
+        
+        return value;
     }
     
-    if(options.sizeMax == null){
-        var sizeMax = options.axisSizeMax;
-        if(sizeMax != null){
-            // Single size (a number or a string with only one number)
-            // should be interpreted as meaning the orthogonal length.
-            options.sizeMax = new pvc.Size()
-                                .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
-        }
-    }
+    // size && sizeMax
+    options.size    = readSize.call(this, 'size');
+    options.sizeMax = readSize.call(this, 'sizeMax');
     
     // Prevent the border from affecting the box model,
     // providing a static 0 value, independently of the actual drawn value...
