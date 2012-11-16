@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:atomType name="ColorString" space="pvc.options.varia" base="string">
+        <c:documentation>
+            This type is a documentation type and 
+            really just documents the format of color strings.
+            
+            Colors can be specified as a string that follows one of the following formats:
+            <ul>
+                <li>
+                    an RGB or HSL color, as defined in <c:link to="http://www.w3.org/TR/css3-color/" />:
+                    <ul>
+                        <li>
+                            <tt>'#AE7'</tt>
+                        </li>
+                        <li>
+                            <tt>'#A0E070'</tt>
+                        </li>
+                        <li>
+                            <tt>rgb(255, 0, 0)</tt>
+                        </li>
+                        <li>
+                            <tt>rgba(100%, 0, 0, 0.5)</tt>
+                        </li>
+                        <li>
+                            <tt>hsl(100, 50%, 20%)</tt>
+                        </li>
+                        <li>
+                            <tt>hsla(100, 50%, 20%, 0.5)</tt>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    an SVG named color, as defined in <c:link to="http://www.w3.org/TR/SVG/types.html#ColorKeywords" />:
+                    <ul>
+                        <li><tt>'aliceblue'</tt></li>
+                        <li><tt>'aquamarine'</tt></li>
+                    </ul>
+                </li>
+                <li>
+                    a subset of the CSS3 gradients format,
+                    as defined in <c:link to="http://www.w3.org/TR/css3-images/#gradients" />:
+                    <ul>
+                        <li><tt>'linear-gradient(90deg, green, blue)'</tt></li>
+                        <li><tt>'linear-gradient(to bottom left, red, yellow 20%, green, blue)'</tt></li>
+                        <li><tt>'linear-gradient(red, rgb(0,0,255))'</tt></li>
+                        <li><tt>'radial-gradient(red, yellow 40%, red)'</tt></li>
+                    </ul>
+                </li>
+                <li>
+                    <tt>'transparent'</tt> for a transparent background
+                </li>
+            </ul>
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.html#.color" />.
+        </c:documentation>
+    </c:atomType>
+    
+</c:model>

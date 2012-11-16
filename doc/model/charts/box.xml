@@ -122,7 +122,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="box" type="pvc.options.plots.BoxplotPlot" category="Plots">
+        <c:property name="box" expandUse="optional" type="pvc.options.plots.BoxplotPlot" category="Plots">
             <c:documentation>
                 The box plot is the <b>main plot</b> of the box plot chart,
                 which means that 
@@ -133,7 +133,8 @@
     
     <c:complexType name="BoxplotPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.CategoricalNumericPlot">
+                   base="pvc.options.plots.CategoricalNumericPlot"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>Box</b> plot.
         </c:documentation>

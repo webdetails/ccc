@@ -12,7 +12,7 @@
             The options documentation class of the <b>Metric Line</b> chart.
         </c:documentation>
         
-        <c:property name="scatter" type="pvc.options.plots.MetricLinePlot" category="Plots">
+        <c:property name="scatter" expandUse="optional" type="pvc.options.plots.MetricLinePlot" category="Plots">
             <c:documentation>
                 The metric point plot is the <b>main plot</b> of the metric line chart,
                 which means that 
@@ -23,7 +23,8 @@
     
     <c:complexType name="MetricLinePlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.MetricPointPlot">
+                   base="pvc.options.plots.MetricPointPlot"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>metric line</b> plot.
         </c:documentation>

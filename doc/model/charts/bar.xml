@@ -16,7 +16,7 @@
             The options documentation class of the <b>Bar</b> chart.
         </c:documentation>
         
-        <c:property name="bar" type="pvc.options.plots.BarPlot" category="Plots">
+        <c:property name="bar" expandUse="optional" type="pvc.options.plots.BarPlot" category="Plots">
             <c:documentation>
                 The bar plot is the <b>main plot</b> of the bar chart,
                 which means that 
@@ -27,7 +27,8 @@
     
     <c:complexType name="BarPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.BarPlotCommon">
+                   base="pvc.options.plots.BarPlotCommon"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>Bar</b> plot.
         </c:documentation>

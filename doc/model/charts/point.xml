@@ -48,7 +48,8 @@
     <c:complexType name="PointPlot" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.CategoricalNumericPlot"
-                   facets="pvc.options.plots.LinesAndDotsPlotFacet">
+                   facets="pvc.options.plots.LinesAndDotsPlotFacet"
+                   use="expanded">
         <c:documentation>
             The common options documentation class of the <b>point</b> plots.
         </c:documentation>

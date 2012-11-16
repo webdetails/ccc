@@ -10,6 +10,20 @@
             The options documentation class of the basic chart facet.
         </c:documentation>
         
+        <!-- Roles -->
+        <c:property name="visualRoles" type="map(string : pvc.options.VisualRole)" category="Visual roles">
+            <c:documentation>
+                The chart's visual roles.
+                
+                Besides the existing visual role properties
+                - named after the visual role's name followed by the word <tt>Role</tt> -
+                the visual roles map can be used, in code,
+                as an alternative to specify the visual role's information.
+                The visual role name is the map's key, 
+                and the value, its options. 
+            </c:documentation>
+        </c:property>
+        
         <c:property name="title" type="string pvc.options.panels.ChartTitlePanel" category="Panels">
             <c:documentation>
                 The title panel of the root chart.

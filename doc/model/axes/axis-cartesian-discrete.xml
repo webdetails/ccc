@@ -8,6 +8,8 @@
     <c:complexType name="DiscreteCartesianAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.CartesianAxis"
+                   abstract="true"
+                   use="expanded"
                    facets="pvc.options.axes.DiscreteCartesianAxisFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
@@ -20,6 +22,7 @@
     <c:complexType name="FlattenedDiscreteCartesianAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.DiscreteCartesianAxis"
+                   use="expanded"
                    facets="pvc.options.axes.CartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel
@@ -32,6 +35,7 @@
     <c:complexType name="AnyDiscreteCartesianAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.DiscreteCartesianAxis"
+                   use="expanded"
                    facets="pvc.options.axes.CartesianAxisTicksFacet">
         <c:documentation>
             The options documentation class of the cartesian axis panel

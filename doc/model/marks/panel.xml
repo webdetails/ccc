@@ -5,7 +5,10 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="PanelExtensionPoint" space="pvc.options.marks" base="pvc.options.marks.BarExtensionPoint">
+    <c:complexType name="PanelExtensionPoint" 
+                   space="pvc.options.marks" 
+                   use="expanded"
+                   base="pvc.options.marks.BarExtensionPoint">
          <c:documentation>
             The class of protovis Panel extension points.
             

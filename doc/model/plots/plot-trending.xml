@@ -5,7 +5,9 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="PlotTrending" space="pvc.options.varia">
+    <c:complexType name="PlotTrending" 
+                   space="pvc.options.varia"
+                   use="expanded">
         <c:documentation>
             The options documentation class for 
             specifying trending options for a plot.

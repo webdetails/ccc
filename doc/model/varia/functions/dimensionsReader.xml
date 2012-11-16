@@ -5,7 +5,7 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:functionType name="DimensionsReader" space="pvc.options.varia">
+    <c:functionType name="DimensionsReaderFun" space="pvc.options.varia">
         <c:documentation>
             A function that reads raw values from a virtual item array.
         </c:documentation>

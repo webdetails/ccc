@@ -7,6 +7,7 @@
     
     <c:complexType name="LegendPanel" 
                    space="pvc.options.panels" 
+                   use="expanded"
                    base="pvc.options.panels.DockedPanel">
         <c:documentation>
             The options documentation class of the legend panel.

@@ -65,7 +65,8 @@
     <c:complexType name="BarPlotCommon" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.CategoricalNumericPlot"
-                   abstract="true">
+                   abstract="true"
+                   use="expanded">
         <c:documentation>
             The common options documentation class of the <b>Bar family</b> plots.
         </c:documentation>

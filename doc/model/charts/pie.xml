@@ -64,7 +64,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="colorAxis" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
+        <c:property name="color" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
             <c:documentation>
                 The first color axis options.
                 
@@ -76,7 +76,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="pie" type="pvc.options.plots.PiePlot" category="Plots">
+        <c:property name="pie" expandUse="optional" type="pvc.options.plots.PiePlot" category="Plots">
             <c:documentation>
                 The pie plot is the <b>main plot</b> of the pie chart,
                 which means that 
@@ -124,7 +124,8 @@
     
     <c:complexType name="PiePlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.Plot">
+                   base="pvc.options.plots.Plot"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>Pie</b> plot.
         </c:documentation>
@@ -355,7 +356,8 @@
     
     <c:complexType name="PieChartWedgeExtensionPoint"
                    space="pvc.options.marks" 
-                   base="pvc.options.marks.WedgeExtensionPoint">
+                   base="pvc.options.marks.WedgeExtensionPoint"
+                   use="expanded">
         <c:documentation>
             The class of the Pie chart's protovis Wedge extension points.
             

@@ -91,6 +91,8 @@
             <field xpath="@name" />
         </key>
         
+         -->
+         
         <unique name="model_documentation_format_key">
            <selector xpath="." />
            <field xpath="documentation/@format" />
@@ -105,7 +107,7 @@
            <selector xpath="com:complexType/property" />
            <field xpath="documentation/@format" />
         </unique>
-         -->
+        
         <!-- does not work because of namespace being split in class_key 
         <keyref name="class_keyref" refer="com:class_key">
             <selector xpath="com:complexType" />
@@ -144,7 +146,12 @@
             <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
             <choice minOccurs="0" maxOccurs="unbounded">
                 <element name="space" type="com:SpaceType" />
-	            <element name="complexType" type="com:ComplexTypeType" />
+	            <element name="complexType" type="com:ComplexTypeType">
+	                <key name="complex_unique_prop_name">
+                        <selector xpath="com:property" />
+                        <field xpath="@name" />
+                    </key>
+	            </element>
 	            <element name="atomType" type="com:AtomTypeType">
 	                <key name="atom_unique_name">
 			            <selector xpath="com:atom" />
@@ -183,6 +190,7 @@
         <attribute name="base" type="com:IdType" />
         <attribute name="facets" type="com:IdTypeList" />
         <attribute name="abstract" type="boolean" default="false" />
+        <attribute name="use" type="com:ComplexUseType" default="literal" />
     </complexType>
     
     <complexType name="FacetTypeType">
@@ -208,6 +216,7 @@
         <attribute name="default" type="anySimpleType" />
         <attribute name="fixed" type="anySimpleType" />
         <attribute name="category" type="string" />
+        <attribute name="expandUse" type="com:PropertyExpandUseType" default="required" /> 
     </complexType>
     
     <complexType name="AtomTypeType">
@@ -265,10 +274,10 @@
     </complexType>
     
     <simpleType name="ValueTypeType">
-        <union memberTypes="com:PrimitiveTypeType string" />
+        <union memberTypes="com:PrimitiveSimpleTypeType string" />
     </simpleType>
     
-    <simpleType name="PrimitiveTypeType">
+    <simpleType name="PrimitiveSimpleTypeType">
         <restriction base="string">
             <enumeration value="undefined" />
             <enumeration value="literal" />
@@ -279,6 +288,21 @@
             <enumeration value="function" />
             <enumeration value="date" />
             <enumeration value="percentage" />
+        </restriction>
+    </simpleType>
+    
+    <simpleType name="ComplexUseType">
+        <restriction base="string">
+            <enumeration value="literal" />
+            <enumeration value="expanded" />
+            <enumeration value="any" />
+        </restriction>
+    </simpleType>
+    
+    <simpleType name="PropertyExpandUseType">
+        <restriction base="string">
+            <enumeration value="optional" />
+            <enumeration value="required" />
         </restriction>
     </simpleType>
     

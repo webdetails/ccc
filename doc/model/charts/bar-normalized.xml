@@ -12,7 +12,7 @@
             The options documentation class of the <b>Normalized Bar</b> chart.
         </c:documentation>
         
-        <c:property name="bar" type="pvc.options.plots.NormalizedBarPlot" category="Plots">
+        <c:property name="bar" expandUse="optional" type="pvc.options.plots.NormalizedBarPlot" category="Plots">
             <c:documentation>
                 The normalized bar plot is the <b>main plot</b> of the normalized area chart,
                 which means that 
@@ -24,7 +24,8 @@
     
     <c:complexType name="NormalizedBarPlot"
                    space="pvc.options.plots"
-                   base="pvc.options.plots.BarPlotCommon">
+                   base="pvc.options.plots.BarPlotCommon"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>Normalized Bar</b> plot.
         </c:documentation>

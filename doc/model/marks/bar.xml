@@ -7,6 +7,7 @@
     
     <c:complexType name="BarExtensionPoint" 
                    space="pvc.options.marks" 
+                   use="expanded"
                    base="pvc.options.marks.MarkExtensionPoint"
                    facets="pvc.options.marks.StrokeBasicFacet
                            pvc.options.marks.FillBasicFacet">

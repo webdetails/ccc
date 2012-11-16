@@ -6,7 +6,9 @@
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:complexType name="ColorAxis" 
-                   space="pvc.options.axes">
+                   space="pvc.options.axes"
+                   abstract="true"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the color axis.
             
@@ -87,7 +89,7 @@
             </c:documentation>
         </c:property>
         
-         <c:property name="colors" type="pvc.options.varia.ColorString pv.Color list(pvc.options.varia.ColorString pv.Color) function" category="Scale">
+        <c:property name="colors" type="pvc.options.varia.ColorString pv.Color list(pvc.options.varia.ColorString pv.Color) function" category="Scale">
             <c:documentation>
                 The colors of a color axis.
                 
@@ -146,6 +148,7 @@
     <c:complexType name="AnyColorAxis" 
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
+                   use="expanded"
                    facets="pvc.options.axes.DiscreteColorAxisFacet
                            pvc.options.axes.NumericColorAxisFacet">
         <c:documentation>
@@ -160,6 +163,7 @@
     <c:complexType name="DiscreteColorAxis" 
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
+                   use="expanded"
                    facets="pvc.options.axes.DiscreteColorAxisFacet">
         <c:documentation>
             The options documentation class of a discrete domain color axis.
@@ -172,6 +176,7 @@
     <c:complexType name="HeatGridColorAxis" 
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
+                   use="expanded"
                    facets="pvc.options.axes.DiscreteColorAxisFacet
                            pvc.options.axes.NumericColorAxisFacet">
         <c:documentation>

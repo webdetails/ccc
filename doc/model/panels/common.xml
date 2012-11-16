@@ -5,7 +5,9 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="Panel" space="pvc.options.panels">
+    <c:complexType name="Panel" 
+                   space="pvc.options.panels"
+                   abstract="true">
         <c:documentation>
             The common options documentation class of the CCC panels.
         </c:documentation>

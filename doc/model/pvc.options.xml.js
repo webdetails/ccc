@@ -495,6 +495,21 @@ pvc.options.charts.Chart.prototype.width = undefined;
  */
 pvc.options.charts.Chart.prototype.title = undefined;
 /**
+ * The chart's visual roles.
+ * <p>
+ * Besides the existing visual role properties
+ * - named after the visual role's name followed by the word 
+ * <tt>Role</tt> -
+ * the visual roles map can be used, in code,
+ * as an alternative to specify the visual role's information.
+ * The visual role name is the map's key, 
+ * and the value, its options. 
+ * 
+ * @type map(string : pvc.options.VisualRole)
+ * @category Visual roles
+ */
+pvc.options.charts.Chart.prototype.visualRoles = undefined;
+/**
  * A callback function that is called
  * when the user double-clicks on a visual element.
  * 
@@ -552,7 +567,7 @@ pvc.options.charts.Chart.prototype.userSelectionAction = function(){};
  * @type pvc.options.axes.ColorAxis
  * @category Axes
  */
-pvc.options.charts.Chart.prototype.colorAxis = undefined;
+pvc.options.charts.Chart.prototype.color = undefined;
 /**
  * A function used to format non-null numeric values
  * as percentages.
@@ -1949,7 +1964,7 @@ pvc.options.charts.PieChart.prototype.multiChartRole = undefined;
  * @type pvc.options.axes.DiscreteColorAxis
  * @category Axes
  */
-pvc.options.charts.PieChart.prototype.colorAxis = undefined;
+pvc.options.charts.PieChart.prototype.color = undefined;
 /**
  * 
  * The percentage size of the plot area that is 
@@ -2879,6 +2894,21 @@ pvc.options.charts.BulletChart.prototype.width = undefined;
  * @category Panels
  */
 pvc.options.charts.BulletChart.prototype.title = undefined;
+/**
+ * The chart's visual roles.
+ * <p>
+ * Besides the existing visual role properties
+ * - named after the visual role's name followed by the word 
+ * <tt>Role</tt> -
+ * the visual roles map can be used, in code,
+ * as an alternative to specify the visual role's information.
+ * The visual role name is the map's key, 
+ * and the value, its options. 
+ * 
+ * @type map(string : pvc.options.VisualRole)
+ * @category Visual roles
+ */
+pvc.options.charts.BulletChart.prototype.visualRoles = undefined;
 /**
  * A callback function that is called
  * when the user double-clicks on a bullet's title or sub-title.
@@ -3904,7 +3934,7 @@ pvc.options.charts.CategoricalNumericChart.prototype.multiChartRole = undefined;
  * @type pvc.options.axes.DiscreteColorAxis
  * @category Axes
  */
-pvc.options.charts.CategoricalNumericChart.prototype.colorAxis = undefined;
+pvc.options.charts.CategoricalNumericChart.prototype.color = undefined;
 /**
  * The orthogonal cartesian axis panel options.
  * <p>
@@ -4400,7 +4430,7 @@ pvc.options.charts.HeatGridChart.prototype.baseAxis = undefined;
  * @type pvc.options.axes.HeatGridColorAxis
  * @category Axes
  */
-pvc.options.charts.HeatGridChart.prototype.colorAxis = undefined;
+pvc.options.charts.HeatGridChart.prototype.color = undefined;
 /**
  * The orthogonal cartesian axis panel options.
  * <p>
@@ -6264,7 +6294,7 @@ pvc.options.charts.MetricPointChart.prototype.baseAxis = undefined;
  * @type pvc.options.axes.AnyColorAxis
  * @category Axes
  */
-pvc.options.charts.MetricPointChart.prototype.colorAxis = undefined;
+pvc.options.charts.MetricPointChart.prototype.color = undefined;
 /**
  * The orthogonal cartesian axis panel options.
  * <p>
@@ -6690,6 +6720,7 @@ pvc.options.marks = {};
  * {@link http://mbostock.github.com/protovis/jsdoc/symbols/pv.Mark.html}.
  * 
  * @class
+ * @abstract
  */
 pvc.options.marks.MarkExtensionPoint = function(){};
         
@@ -7477,6 +7508,7 @@ pvc.options.axes = {};
  * </ul>
  * 
  * @class
+ * @abstract
  */
 pvc.options.axes.ColorAxis = function(){};
         
@@ -8823,6 +8855,7 @@ pvc.options.ext.AnyNonHierarchicalCartesianAxisExtensionPoints.prototype.ticksPa
  * 
  * @class
  * @extends pvc.options.axes.CartesianAxis
+ * @abstract
  */
 pvc.options.axes.DiscreteCartesianAxis = function(){};
         
@@ -9827,6 +9860,7 @@ pvc.options.panels = {};
  * The common options documentation class of the CCC panels.
  * 
  * @class
+ * @abstract
  */
 pvc.options.panels.Panel = function(){};
         
@@ -9858,6 +9892,7 @@ pvc.options.panels.Panel.prototype.sizeMax = undefined;
  * 
  * @class
  * @extends pvc.options.panels.Panel
+ * @abstract
  */
 pvc.options.panels.DockedPanel = function(){};
         
@@ -10155,6 +10190,7 @@ pvc.options.panels.CartesianAxisTitlePanel.prototype.font = undefined;
  * 
  * @class
  * @extends pvc.options.panels.DockedPanel
+ * @abstract
  */
 pvc.options.panels.TitlePanel = function(){};
         
@@ -11542,6 +11578,102 @@ pvc.options.varia.RectangleSide.prototype.Right = 'right';
  */
 pvc.options.varia.RectangleSide.prototype.Top = 'top';
 /**
+ * This type is a documentation type and 
+ * really just documents the format of color strings.
+ * <p>
+ * Colors can be specified as a string that follows one of the following formats:
+ * 
+ * <ul>
+ * 
+ * <li>
+ * an RGB or HSL color, as defined in {@link http://www.w3.org/TR/css3-color/}:
+ * 
+ * <ul>
+ * 
+ * <li>
+ * 
+ * <tt>'#AE7'</tt>
+ * </li>
+ * 
+ * <li>
+ * 
+ * <tt>'#A0E070'</tt>
+ * </li>
+ * 
+ * <li>
+ * 
+ * <tt>rgb(255, 0, 0)</tt>
+ * </li>
+ * 
+ * <li>
+ * 
+ * <tt>rgba(100%, 0, 0, 0.5)</tt>
+ * </li>
+ * 
+ * <li>
+ * 
+ * <tt>hsl(100, 50%, 20%)</tt>
+ * </li>
+ * 
+ * <li>
+ * 
+ * <tt>hsla(100, 50%, 20%, 0.5)</tt>
+ * </li>
+ * </ul>
+ * </li>
+ * 
+ * <li>
+ * an SVG named color, as defined in {@link http://www.w3.org/TR/SVG/types.html#ColorKeywords}:
+ * 
+ * <ul>
+ * 
+ * <li>
+ * <tt>'aliceblue'</tt></li>
+ * 
+ * <li>
+ * <tt>'aquamarine'</tt></li>
+ * </ul>
+ * </li>
+ * 
+ * <li>
+ * a subset of the CSS3 gradients format,
+ * as defined in {@link http://www.w3.org/TR/css3-images/#gradients}:
+ * 
+ * <ul>
+ * 
+ * <li>
+ * <tt>'linear-gradient(90deg, green, blue)'</tt></li>
+ * 
+ * <li>
+ * <tt>'linear-gradient(to bottom left, red, yellow 20%, green, blue)'</tt></li>
+ * 
+ * <li>
+ * <tt>'linear-gradient(red, rgb(0,0,255))'</tt></li>
+ * 
+ * <li>
+ * <tt>'radial-gradient(red, yellow 40%, red)'</tt></li>
+ * </ul>
+ * </li>
+ * 
+ * <li>
+ * 
+ * <tt>'transparent'</tt> for a transparent background
+ * </li>
+ * </ul>
+ * <p>
+ * See the associated protovis documentation at
+ * {@link http://mbostock.github.com/protovis/jsdoc/symbols/pv.html#.color}.
+ * 
+ * @class
+ * @enum
+ * @extends string
+ */
+pvc.options.varia.ColorString = function(){};
+        
+        
+        
+        
+/**
  * Describes the distances from 
  * each of the four planar sides:
  * "left", "right", "top" and "bottom".
@@ -11754,98 +11886,3 @@ pvc.options.varia.Size.prototype.height = undefined;
  * @type number|string
  */
 pvc.options.varia.Size.prototype.width = undefined;
-/**
- * This class is a documentation class and 
- * really just documents the format of color strings.
- * <p>
- * Colors can be specified as a string that follows one of the following formats:
- * 
- * <ul>
- * 
- * <li>
- * an RGB or HSL color, as defined in {@link http://www.w3.org/TR/css3-color/}:
- * 
- * <ul>
- * 
- * <li>
- * 
- * <tt>'#AE7'</tt>
- * </li>
- * 
- * <li>
- * 
- * <tt>'#A0E070'</tt>
- * </li>
- * 
- * <li>
- * 
- * <tt>rgb(255, 0, 0)</tt>
- * </li>
- * 
- * <li>
- * 
- * <tt>rgba(100%, 0, 0, 0.5)</tt>
- * </li>
- * 
- * <li>
- * 
- * <tt>hsl(100, 50%, 20%)</tt>
- * </li>
- * 
- * <li>
- * 
- * <tt>hsla(100, 50%, 20%, 0.5)</tt>
- * </li>
- * </ul>
- * </li>
- * 
- * <li>
- * an SVG named color, as defined in {@link http://www.w3.org/TR/SVG/types.html#ColorKeywords}:
- * 
- * <ul>
- * 
- * <li>
- * <tt>'aliceblue'</tt></li>
- * 
- * <li>
- * <tt>'aquamarine'</tt></li>
- * </ul>
- * </li>
- * 
- * <li>
- * a subset of the CSS3 gradients format,
- * as defined in {@link http://www.w3.org/TR/css3-images/#gradients}:
- * 
- * <ul>
- * 
- * <li>
- * <tt>'linear-gradient(90deg, green, blue)'</tt></li>
- * 
- * <li>
- * <tt>'linear-gradient(to bottom left, red, yellow 20%, green, blue)'</tt></li>
- * 
- * <li>
- * <tt>'linear-gradient(red, rgb(0,0,255))'</tt></li>
- * 
- * <li>
- * <tt>'radial-gradient(red, yellow 40%, red)'</tt></li>
- * </ul>
- * </li>
- * 
- * <li>
- * 
- * <tt>'transparent'</tt> for a transparent background
- * </li>
- * </ul>
- * <p>
- * See the associated protovis documentation at
- * {@link http://mbostock.github.com/protovis/jsdoc/symbols/pv.html#.color}.
- * 
- * @class
- * @extends string
- */
-pvc.options.varia.ColorString = function(){};
-        
-        
-        
-        

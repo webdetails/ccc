@@ -5,7 +5,10 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="MarkExtensionPoint" space="pvc.options.marks">
+    <c:complexType name="MarkExtensionPoint" 
+                   space="pvc.options.marks"
+                   abstract="true"
+                   use="expanded">
         <c:documentation>
             The base class of protovis extension points.
             

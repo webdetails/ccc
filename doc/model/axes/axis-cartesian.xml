@@ -8,7 +8,8 @@
     <c:complexType name="CartesianAxis" 
                    space="pvc.options.axes" 
                    base="pvc.options.panels.Panel"
-                   abstract="true">
+                   abstract="true"
+                   use="expanded">
         <c:documentation>
             The options documentation class of 
             the cartesian axis 
@@ -230,6 +231,7 @@
     <c:complexType name="AnyNonHierarchicalCartesianAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.CartesianAxis"
+                   use="expanded"
                    facets="pvc.options.axes.DiscreteCartesianAxisFacet 
                            pvc.options.axes.ContinuousCartesianAxisFacet 
                            pvc.options.axes.NumericCartesianAxisFacet

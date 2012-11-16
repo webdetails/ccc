@@ -7,6 +7,7 @@
     
     <c:complexType name="ChartTitlePanel" 
                    space="pvc.options.panels" 
+                   use="expanded"
                    base="pvc.options.panels.TitlePanel">
         <c:documentation>
             The options documentation class of the chart title panel.
@@ -33,6 +34,7 @@
     
     <c:complexType name="CartesianAxisTitlePanel" 
                    space="pvc.options.panels" 
+                   use="expanded"
                    base="pvc.options.panels.TitlePanel">
         <c:documentation>
             The options documentation class of the cartesian axes title panel.
@@ -70,7 +72,8 @@
     
     <c:complexType name="TitlePanel" 
                    space="pvc.options.panels" 
-                   base="pvc.options.panels.DockedPanel">
+                   base="pvc.options.panels.DockedPanel"
+                   abstract="true">
         <c:documentation>
             The options documentation class of the title panel.
         </c:documentation>

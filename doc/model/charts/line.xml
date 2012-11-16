@@ -12,7 +12,7 @@
             The options documentation class of the <b>Line</b> chart.
         </c:documentation>
         
-        <c:property name="point" type="pvc.options.plots.LinePlot" category="Plots">
+        <c:property name="point" expandUse="optional" type="pvc.options.plots.LinePlot" category="Plots">
             <c:documentation>
                 The point plot is the <b>main plot</b> of the line chart,
                 which means that 
@@ -23,7 +23,8 @@
     
     <c:complexType name="LinePlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.PointPlot">
+                   base="pvc.options.plots.PointPlot"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>line</b> plot.
         </c:documentation>

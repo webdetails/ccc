@@ -79,7 +79,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="colorAxis" type="pvc.options.axes.HeatGridColorAxis" category="Axes">
+        <c:property name="color" type="pvc.options.axes.HeatGridColorAxis" category="Axes">
             <c:documentation>
                 The first color axis options.
                 
@@ -123,7 +123,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="heatGrid" type="pvc.options.plots.HeatGridPlot" category="Plots">
+        <c:property name="heatGrid" expandUse="optional" type="pvc.options.plots.HeatGridPlot" category="Plots">
             <c:documentation>
                 The heat grid plot is the <b>main plot</b> of the heat grid chart,
                 which means that 
@@ -134,7 +134,8 @@
     
     <c:complexType name="HeatGridPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.Plot">
+                   base="pvc.options.plots.Plot"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>Heat grid</b> plot.
         </c:documentation>

@@ -6,7 +6,8 @@
     xmlns="http://www.w3.org/1999/xhtml">
     
     <c:complexType name="SizeAxis" 
-                   space="pvc.options.axes">
+                   space="pvc.options.axes"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the size axis.
             

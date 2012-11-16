@@ -99,7 +99,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="colorAxis" type="pvc.options.axes.AnyColorAxis" category="Axes">
+        <c:property name="color" type="pvc.options.axes.AnyColorAxis" category="Axes">
             <c:documentation>
                 The first color axis options.
                 
@@ -208,7 +208,8 @@
     <c:complexType name="MetricPointPlot" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.Plot"
-                   facets="pvc.options.plots.LinesAndDotsPlotFacet">
+                   facets="pvc.options.plots.LinesAndDotsPlotFacet"
+                   use="expanded">
         <c:documentation>
             The common options documentation class of the <b>metric point</b> plots.
         </c:documentation>

@@ -5,7 +5,10 @@
     xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
     xmlns="http://www.w3.org/1999/xhtml">
     
-    <c:complexType name="DockedPanel" space="pvc.options.panels" base="pvc.options.panels.Panel">
+    <c:complexType name="DockedPanel" 
+                   space="pvc.options.panels" 
+                   base="pvc.options.panels.Panel"
+                   abstract="true">
         <c:documentation>
             The common options documentation class of CCC docked panels.
         </c:documentation>

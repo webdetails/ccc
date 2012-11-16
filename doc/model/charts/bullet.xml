@@ -241,7 +241,8 @@
     </c:functionType>
     
     <c:complexType name="BulletPlot" 
-                   space="pvc.options.plots">
+                   space="pvc.options.plots"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>Bullet</b> plot.
             

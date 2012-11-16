@@ -14,7 +14,7 @@
             The common options documentation class of <b>Categorical</b> charts with a <i>continuous-numeric orthogonal axis</i>. 
         </c:documentation>
         
-        <c:property name="colorAxis" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
+        <c:property name="color" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
             <c:documentation>
                 The first color axis options.
                 
@@ -66,7 +66,8 @@
     <c:complexType name="CategoricalNumericPlot" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.Plot" 
-                   abstract="true">
+                   abstract="true"
+                   use="expanded">
         <c:documentation>
             The common options documentation class of <b>categorical</b> plot types with a <i>continuous-numeric orthogonal axis</i>.
         </c:documentation>

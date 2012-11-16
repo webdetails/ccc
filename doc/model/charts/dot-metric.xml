@@ -12,7 +12,7 @@
             The options documentation class of the <b>Metric Dot (XY Scatter)</b> chart.
         </c:documentation>
         
-        <c:property name="scatter" type="pvc.options.plots.MetricDotPlot" category="Plots">
+        <c:property name="scatter" expandUse="optional" type="pvc.options.plots.MetricDotPlot" category="Plots">
             <c:documentation>
                 The metric point plot is the <b>main plot</b> of the metric dot chart,
                 which means that 
@@ -23,7 +23,8 @@
     
     <c:complexType name="MetricDotPlot" 
                    space="pvc.options.plots"
-                   base="pvc.options.plots.MetricPointPlot">
+                   base="pvc.options.plots.MetricPointPlot"
+                   use="expanded">
         <c:documentation>
             The options documentation class of the <b>metric dot</b> plot.
         </c:documentation>

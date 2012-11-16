@@ -8,6 +8,7 @@
     <c:complexType name="NumericCartesianAxis"
                    space="pvc.options.axes"
                    base="pvc.options.axes.CartesianAxis"
+                   use="expanded"
                    facets="pvc.options.axes.ContinuousCartesianAxisFacet 
                            pvc.options.axes.NumericCartesianAxisFacet
                            pvc.options.axes.CartesianAxisTicksFacet">
