@@ -7041,6 +7041,12 @@ pvc.options.marks.DotExtensionPoint.prototype.strokeStyle = undefined;
  */
 pvc.options.marks.DotExtensionPoint.prototype.fillStyle = undefined;
 /**
+ * The name of the shape that the dot assumes.
+ * 
+ * @type pvc.options.varia.DotShapeType
+ */
+pvc.options.marks.DotExtensionPoint.prototype.shape = undefined;
+/**
  * The rotation angle, in 
  * <i>radian</i> units.
  * <p>
@@ -7051,26 +7057,20 @@ pvc.options.marks.DotExtensionPoint.prototype.fillStyle = undefined;
  * @type number
  * @default 0
  */
-pvc.options.marks.DotExtensionPoint.prototype.angle = undefined;
+pvc.options.marks.DotExtensionPoint.prototype.shapeAngle = undefined;
 /**
  * The radius of the dot, in 
  * <i>pixel</i> units.
  * 
  * @type number
  */
-pvc.options.marks.DotExtensionPoint.prototype.radius = undefined;
-/**
- * The name of the shape that the dot assumes.
- * 
- * @type pvc.options.varia.DotShapeType
- */
-pvc.options.marks.DotExtensionPoint.prototype.shape = undefined;
+pvc.options.marks.DotExtensionPoint.prototype.shapeRadius = undefined;
 /**
  * The size of the dot, in 
  * <i>square pixel</i> units.
  * <p>
  * The size is proportional to the area of the shape
- * and is better suited than the {@link #radius} 
+ * and is better suited than the {@link #shapeRadius} 
  * for representing measures.
  * <p>
  * For the record: 
@@ -7078,7 +7078,7 @@ pvc.options.marks.DotExtensionPoint.prototype.shape = undefined;
  * 
  * @type number
  */
-pvc.options.marks.DotExtensionPoint.prototype.size = undefined;
+pvc.options.marks.DotExtensionPoint.prototype.shapeSize = undefined;
 /**
  * The class of protovis Label extension points.
  * <p>

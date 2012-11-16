@@ -18,7 +18,7 @@
             <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Dot.html" />.
         </c:documentation>
         
-        <c:property name="angle" type="number" default="0">
+        <c:property name="shapeAngle" type="number" default="0">
             <c:documentation>
                 The rotation angle, in <i>radian</i> units.
                 
@@ -34,18 +34,18 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="radius" type="number">
+        <c:property name="shapeRadius" type="number">
             <c:documentation>
                 The radius of the dot, in <i>pixel</i> units.
             </c:documentation>
         </c:property>
         
-        <c:property name="size" type="number">
+        <c:property name="shapeSize" type="number">
             <c:documentation>
                 The size of the dot, in <i>square pixel</i> units.
                 
                 The size is proportional to the area of the shape
-                and is better suited than the <c:link to="#radius" /> 
+                and is better suited than the <c:link to="#shapeRadius" /> 
                 for representing measures.
                 
                 For the record: <tt>size = radius * radius</tt>.
