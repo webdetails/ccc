@@ -19,7 +19,7 @@
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.NumericCartesianAxisExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.NumericCartesianAxisExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the panel.
@@ -29,6 +29,7 @@
     
     <c:complexType name="NumericCartesianAxisExtensionPoints"
                    space="pvc.options.ext"
+                   use="expanded"
                    base="pvc.options.ext.CartesianAxisExtensionPoints"
                    facets="pvc.options.ext.ContinuousCartesianAxisExtensionPointsFacet 
                            pvc.options.ext.NumericCartesianAxisExtensionPointsFacet
@@ -67,7 +68,7 @@
         
         <c:property name="domainRoundMode" 
                     type="pvc.options.varia.AxisDomainRoundingMode" 
-                    default="tick"
+                    default="'tick'"
                     category="Continuous-Numeric > Style">
             <c:documentation>
                 The axis' domain rounding mode (applies to continuous-numeric axes).

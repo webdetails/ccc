@@ -31,7 +31,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="plot2Series" type="string list(string)" category="Data">
+        <c:property name="plot2Series" type="string list(string)" category="Plots > Plot2 > Data">
             <c:documentation>
                 The <i>key values</i> of the series visual role, 
                 that are to be shown in the second plot.
@@ -45,7 +45,7 @@
             </c:documentation>
         </c:property>
         
-        <!-- TODO: color2Axis internals -->
+        <!-- TODO: color2Axis internals
         <c:property name="color2AxisColors" type="list(pvc.options.varia.ColorString)" category="Style">
             <c:documentation>
                 The discrete colors scheme to use to distinguish visual elements
@@ -55,6 +55,7 @@
                 color axes map values of the "color" visual role.
             </c:documentation>
         </c:property>
+        -->
     </c:facetType>
     
     <c:facetType name="Plot2V1ChartFacet" space="pvc.options.charts">
@@ -101,13 +102,13 @@
         <!-- TODO: color2Axis internals -->
         <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Style">
             <c:documentation>
-                <c:deprecated>Use <c:link to="#color2AxisColors" /> instead.</c:deprecated>
+                <c:deprecated>Use <c:link to="pvc.options.axes.ColorAxis#colors" /> of the <tt>color2Axis</tt> instead.</c:deprecated>
                 The discrete colors scheme to use to distinguish visual elements
                 that are colored using the <i>second</i> color axis. 
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisIndependentScale" type="boolean" default="false" category="Axis">
+        <c:property name="secondAxisIndependentScale" type="boolean" default="false" category="Axes">
             <c:documentation>
                 <c:deprecated>
                     Use

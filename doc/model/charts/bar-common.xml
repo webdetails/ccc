@@ -121,7 +121,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.BarPlotCommonExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.BarPlotCommonExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.
@@ -129,7 +129,9 @@
         </c:property>
     </c:complexType>
 
-    <c:complexType name="BarPlotCommonExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="BarPlotCommonExtensionPoints" 
+                   space="pvc.options.ext"
+                   use="expanded">
         <c:documentation>
             The extension points of the <i>bar family</i> plot types.
             
@@ -155,7 +157,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="." type="pvc.options.marks.BarExtensionPoint">
+        <c:property name="_" type="pvc.options.marks.BarExtensionPoint">
             <c:documentation>
                 The extension point of the bar mark.
                 

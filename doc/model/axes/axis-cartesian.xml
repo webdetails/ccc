@@ -191,7 +191,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CartesianAxisExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianAxisExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the panel.
@@ -199,7 +199,9 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="CartesianAxisExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="CartesianAxisExtensionPoints" 
+                   space="pvc.options.ext"
+                   use="expanded">
         <c:documentation>
             The extension points of the cartesian axis panel.
             
@@ -241,7 +243,7 @@
             that cannot be discrete-hierarchical.
         </c:documentation>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.AnyNonHierarchicalCartesianAxisExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.AnyNonHierarchicalCartesianAxisExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the panel.
@@ -251,6 +253,7 @@
     
     <c:complexType name="AnyNonHierarchicalCartesianAxisExtensionPoints"
                    space="pvc.options.ext"
+                   use="expanded"
                    base="pvc.options.ext.CartesianAxisExtensionPoints"
                    facets="pvc.options.ext.ContinuousCartesianAxisExtensionPointsFacet 
                            pvc.options.ext.NumericCartesianAxisExtensionPointsFacet

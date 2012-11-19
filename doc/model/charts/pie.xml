@@ -97,7 +97,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.PieChartExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.PieChartExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.
@@ -107,6 +107,7 @@
     
     <c:complexType name="PieChartExtensionPoints" 
                    space="pvc.options.ext"
+                   use="expanded"
                    facets="pvc.options.ext.MultiExtensionPointsFacet">
         <c:documentation>
             The extension points of the pie chart type.
@@ -304,7 +305,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.PiePlotExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.PiePlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object 
                 contains style definitions for 
@@ -313,7 +314,7 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="PiePlotExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="PiePlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points of the pie plot type.
             

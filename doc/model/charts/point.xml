@@ -88,7 +88,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.PointPlotExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.PointPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.
@@ -96,7 +96,7 @@
         </c:property>
     </c:complexType>
 
-    <c:complexType name="PointPlotExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="PointPlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points common to the <b>point</b> plot types.
             

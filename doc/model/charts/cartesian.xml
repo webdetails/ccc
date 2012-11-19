@@ -116,7 +116,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -124,7 +124,10 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="CartesianChartExtensionPoints" space="pvc.options.ext" base="pvc.options.ext.ChartExtensionPoints">
+    <c:complexType name="CartesianChartExtensionPoints" 
+                   space="pvc.options.ext" 
+                   use="expanded"
+                   base="pvc.options.ext.ChartExtensionPoints">
         <c:documentation>
             The extension points common to all cartesian chart types.
         </c:documentation>

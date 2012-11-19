@@ -19,7 +19,7 @@
             For additional information, please see <c:link to="pvc.options.axes.CartesianAxis" />.
         </c:documentation>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.AnyContinuousCartesianAxisExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.AnyContinuousCartesianAxisExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the panel.
@@ -29,6 +29,7 @@
     
     <c:complexType name="AnyContinuousCartesianAxisExtensionPoints"
                    space="pvc.options.ext"
+                   use="expanded"
                    base="pvc.options.ext.CartesianAxisExtensionPoints"
                    facets="pvc.options.ext.ContinuousCartesianAxisExtensionPointsFacet 
                            pvc.options.ext.NumericCartesianAxisExtensionPointsFacet
@@ -146,7 +147,7 @@
         </c:property>
     </c:facetType>
     
-    <c:facetType name="ContinuousCartesianAxisExtensionPointsFacet" space="pvc.options.axes">
+    <c:facetType name="ContinuousCartesianAxisExtensionPointsFacet" space="pvc.options.ext">
         <c:property name="minorTicks" type="pvc.options.marks.RuleExtensionPoint" category="Continuous > Style">
             <c:documentation>
                 The extension point of a <i>minor</i> tick rule mark (applies to continuous axes).

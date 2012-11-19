@@ -77,7 +77,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="margins" type="number string pvc.options.varia.Sides" default="0" category="Layout">
+        <c:property name="margins" type="number string pvc.options.varia.Sides" default="3" category="Layout">
             <c:documentation>
                 The margins of the <i>root</i> chart.
                 
@@ -142,7 +142,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="tooltip" type="boolean pvc.options.Tooltip" default="true" category="Interaction">
+        <c:property name="tooltip" type="pvc.options.Tooltip" category="Interaction">
             <c:documentation>
                 Indicates if tooltips are enabled 
                 and contains additional tooltip presentation options.

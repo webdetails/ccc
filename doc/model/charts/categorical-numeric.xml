@@ -38,7 +38,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CategoricalNumericChartExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.CategoricalNumericChartExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -48,6 +48,7 @@
     
     <c:complexType name="CategoricalNumericChartExtensionPoints" 
                    space="pvc.options.ext"
+                   use="expanded"
                    facets="pvc.options.ext.MultiExtensionPointsFacet">
         <c:documentation>
             The extension points of the <b>categorical</b> chart types with a <i>continuous-numeric orthogonal axis</i>.

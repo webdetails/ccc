@@ -371,8 +371,7 @@ pvc.options.charts.Chart.prototype.tipsySettings = undefined;
  * Indicates if tooltips are enabled 
  * and contains additional tooltip presentation options.
  * 
- * @type boolean|pvc.options.Tooltip
- * @default true
+ * @type pvc.options.Tooltip
  * @category Interaction
  */
 pvc.options.charts.Chart.prototype.tooltip = undefined;
@@ -440,7 +439,7 @@ pvc.options.charts.Chart.prototype.height = undefined;
  * the different supported data types.
  * 
  * @type number|string|pvc.options.varia.Sides
- * @default 0
+ * @default 3
  * @category Layout
  */
 pvc.options.charts.Chart.prototype.margins = undefined;
@@ -868,6 +867,28 @@ pvc.options.Tooltip.prototype.fade = undefined;
  */
 pvc.options.Tooltip.prototype.followMouse = undefined;
 /**
+ * A callback function that is called,
+ * to build the tooltip of a visual element.
+ * <p>
+ * If {@link #format} is 
+ * <tt>true</tt>,
+ * the resulting text is in HTML format,
+ * otherwise, it is plain text.
+ * 
+ * @returns {string}
+ * The tooltip text.
+ * 
+ * @method
+ * @this pvc.visual.Context
+ * @param {pvc.visual.Scene} scene
+ * The scene whose tooltip is to be built.
+ * <p>
+ * Use the data contained in the scene object to 
+ * build the tooltip.
+ * 
+ */
+pvc.options.Tooltip.prototype.format = function(){};
+/**
  * The preferred tooltip gravity.
  * 
  * @type pvc.options.varia.TooltipGravity
@@ -911,29 +932,6 @@ pvc.options.Tooltip.prototype.opacity = undefined;
  * @default false
  */
 pvc.options.Tooltip.prototype.useCorners = undefined;
-/**
- * A callback function that is called,
- * to build the tooltip of a visual element.
- * <p>
- * If {@link #format} is 
- * <tt>true</tt>,
- * the resulting text is in HTML format,
- * otherwise, it is plain text.
- * 
- * @returns {string}
- * The tooltip text.
- * 
- * @method
- * @this pvc.visual.Context
- * @param {pvc.visual.Scene} scene
- * The scene whose tooltip is to be built.
- * <p>
- * Use the data contained in the scene object to 
- * build the tooltip.
- * 
- * @category Interaction
- */
-pvc.options.Tooltip.prototype.format = function(){};
 /**
  * The options documentation class of a dimension type.
  * 
@@ -1668,9 +1666,8 @@ pvc.options.charts.PieChart = function(){};
  * <tt>multiChart2</tt>, ... 
  * dimensions.
  * 
- * @type number|string
- * @default true
- * @category Multi-Chart > Data Translation
+ * @type number|string|list(number|string)
+ * @category Data Translation
  */
 pvc.options.charts.PieChart.prototype.multiChartIndexes = undefined;
 /**
@@ -2771,8 +2768,7 @@ pvc.options.charts.BulletChart.prototype.tipsySettings = undefined;
  * Indicates if tooltips are enabled 
  * and contains additional tooltip presentation options.
  * 
- * @type boolean|pvc.options.Tooltip
- * @default true
+ * @type pvc.options.Tooltip
  * @category Interaction
  */
 pvc.options.charts.BulletChart.prototype.tooltip = undefined;
@@ -2840,7 +2836,7 @@ pvc.options.charts.BulletChart.prototype.height = undefined;
  * the different supported data types.
  * 
  * @type number|string|pvc.options.varia.Sides
- * @default 0
+ * @default 3
  * @category Layout
  */
 pvc.options.charts.BulletChart.prototype.margins = undefined;
@@ -3638,9 +3634,8 @@ pvc.options.charts.CategoricalNumericChart = function(){};
  * <tt>multiChart2</tt>, ... 
  * dimensions.
  * 
- * @type number|string
- * @default true
- * @category Multi-Chart > Data Translation
+ * @type number|string|list(number|string)
+ * @category Data Translation
  */
 pvc.options.charts.CategoricalNumericChart.prototype.multiChartIndexes = undefined;
 /**
@@ -4893,7 +4888,7 @@ pvc.options.ext.BarPlotCommonExtensionPoints = function(){};
  * 
  * @type pvc.options.marks.BarExtensionPoint
  */
-pvc.options.ext.BarPlotCommonExtensionPoints.prototype.. = undefined;
+pvc.options.ext.BarPlotCommonExtensionPoints.prototype._ = undefined;
 /**
  * The extension point of the value label mark.
  * 
@@ -4931,23 +4926,6 @@ pvc.options.charts.BarChart = function(){};
         
         
 /**
- * The 
- * <i>key values</i> of the series visual role, 
- * that are to be shown in the second plot.
- * <p>
- * If the series visual role has more than one dimension, 
- * the specified keys should be 
- * the result of joining the key of each dimension with a "~" character.
- * <p>
- * This option is only relevant when the property
- * {@link #plot2} has the value 
- * <tt>true</tt>.
- * 
- * @type string|list(string)
- * @category Data
- */
-pvc.options.charts.BarChart.prototype.plot2Series = undefined;
-/**
  * Activates the second plot.
  * <p>
  * The series identified in {@link #plot2Series}
@@ -4972,17 +4950,22 @@ pvc.options.charts.BarChart.prototype.plot2Series = undefined;
  */
 pvc.options.charts.BarChart.prototype.plot2 = undefined;
 /**
- * The discrete colors scheme to use to distinguish visual elements
- * that are colored using the 
- * <i>second</i> color axis. 
+ * The 
+ * <i>key values</i> of the series visual role, 
+ * that are to be shown in the second plot.
  * <p>
- * With a few exceptions, 
- * color axes map values of the "color" visual role.
+ * If the series visual role has more than one dimension, 
+ * the specified keys should be 
+ * the result of joining the key of each dimension with a "~" character.
+ * <p>
+ * This option is only relevant when the property
+ * {@link #plot2} has the value 
+ * <tt>true</tt>.
  * 
- * @type list(pvc.options.varia.ColorString)
- * @category Style
+ * @type string|list(string)
+ * @category Plots > Plot2 > Data
  */
-pvc.options.charts.BarChart.prototype.color2AxisColors = undefined;
+pvc.options.charts.BarChart.prototype.plot2Series = undefined;
 /**
  * The trend plot is activated when 
  * the 
@@ -5001,6 +4984,22 @@ pvc.options.charts.BarChart.prototype.color2AxisColors = undefined;
 pvc.options.charts.BarChart.prototype.trend = undefined;
 /**
  * 
+ * Indicates whether the secondary axis should be 
+ * shown and with an independent range.
+ * 
+ * @deprecated 
+ * Use
+ * {@link pvc.options.plots.CategoricalNumericPlot#orthoAxis}
+ * of the 
+ * <tt>plot2</tt> plot, instead, 
+ * to specify an alternate orthogonal axis.
+ * @type boolean
+ * @default false
+ * @category Axes
+ */
+pvc.options.charts.BarChart.prototype.secondAxisIndependentScale = undefined;
+/**
+ * 
  * Indicates whether the second orthogonal axis panel is shown.
  * 
  * @deprecated 
@@ -5013,22 +5012,6 @@ pvc.options.charts.BarChart.prototype.trend = undefined;
  * @category Axes
  */
 pvc.options.charts.BarChart.prototype.showSecondScale = undefined;
-/**
- * 
- * Indicates whether the secondary axis should be 
- * shown and with an independent range.
- * 
- * @deprecated 
- * Use
- * {@link pvc.options.plots.CategoricalNumericPlot#orthoAxis}
- * of the 
- * <tt>plot2</tt> plot, instead, 
- * to specify an alternate orthogonal axis.
- * @type boolean
- * @default false
- * @category Axis
- */
-pvc.options.charts.BarChart.prototype.secondAxisIndependentScale = undefined;
 /**
  * 
  * The zero-based indexes of the series, 
@@ -5066,7 +5049,8 @@ pvc.options.charts.BarChart.prototype.secondAxis = undefined;
  * that are colored using the 
  * <i>second</i> color axis. 
  * 
- * @deprecated Use {@link #color2AxisColors} instead.
+ * @deprecated Use {@link pvc.options.axes.ColorAxis#colors} of the 
+ * <tt>color2Axis</tt> instead.
  * @type list(pvc.options.varia.ColorString)
  * @category Style
  */
@@ -5357,23 +5341,6 @@ pvc.options.charts.PointChart = function(){};
         
         
 /**
- * The 
- * <i>key values</i> of the series visual role, 
- * that are to be shown in the second plot.
- * <p>
- * If the series visual role has more than one dimension, 
- * the specified keys should be 
- * the result of joining the key of each dimension with a "~" character.
- * <p>
- * This option is only relevant when the property
- * {@link #plot2} has the value 
- * <tt>true</tt>.
- * 
- * @type string|list(string)
- * @category Data
- */
-pvc.options.charts.PointChart.prototype.plot2Series = undefined;
-/**
  * Activates the second plot.
  * <p>
  * The series identified in {@link #plot2Series}
@@ -5398,17 +5365,22 @@ pvc.options.charts.PointChart.prototype.plot2Series = undefined;
  */
 pvc.options.charts.PointChart.prototype.plot2 = undefined;
 /**
- * The discrete colors scheme to use to distinguish visual elements
- * that are colored using the 
- * <i>second</i> color axis. 
+ * The 
+ * <i>key values</i> of the series visual role, 
+ * that are to be shown in the second plot.
  * <p>
- * With a few exceptions, 
- * color axes map values of the "color" visual role.
+ * If the series visual role has more than one dimension, 
+ * the specified keys should be 
+ * the result of joining the key of each dimension with a "~" character.
+ * <p>
+ * This option is only relevant when the property
+ * {@link #plot2} has the value 
+ * <tt>true</tt>.
  * 
- * @type list(pvc.options.varia.ColorString)
- * @category Style
+ * @type string|list(string)
+ * @category Plots > Plot2 > Data
  */
-pvc.options.charts.PointChart.prototype.color2AxisColors = undefined;
+pvc.options.charts.PointChart.prototype.plot2Series = undefined;
 /**
  * The trend plot is activated when 
  * the 
@@ -5984,9 +5956,8 @@ pvc.options.charts.MetricPointChart.prototype.trend = undefined;
  * <tt>multiChart2</tt>, ... 
  * dimensions.
  * 
- * @type number|string
- * @default true
- * @category Multi-Chart > Data Translation
+ * @type number|string|list(number|string)
+ * @category Data Translation
  */
 pvc.options.charts.MetricPointChart.prototype.multiChartIndexes = undefined;
 /**
@@ -8619,7 +8590,7 @@ pvc.options.axes.AnyNonHierarchicalCartesianAxis.prototype.desiredTickCount = un
  * The axis' domain rounding mode (applies to continuous-numeric axes).
  * 
  * @type pvc.options.varia.AxisDomainRoundingMode
- * @default tick
+ * @default 'tick'
  * @category Continuous-Numeric > Style
  */
 pvc.options.axes.AnyNonHierarchicalCartesianAxis.prototype.domainRoundMode = undefined;
@@ -8818,6 +8789,14 @@ pvc.options.ext.AnyNonHierarchicalCartesianAxisExtensionPoints = function(){};
         
         
         
+/**
+ * The extension point of a 
+ * <i>minor</i> tick rule mark (applies to continuous axes).
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ * @category Continuous > Style
+ */
+pvc.options.ext.AnyNonHierarchicalCartesianAxisExtensionPoints.prototype.minorTicks = undefined;
 /**
  * The extension point of the zero line rule (applies to continuous-numeric axes).
  * 
@@ -9192,7 +9171,7 @@ pvc.options.axes.AnyContinuousCartesianAxis.prototype.desiredTickCount = undefin
  * The axis' domain rounding mode (applies to continuous-numeric axes).
  * 
  * @type pvc.options.varia.AxisDomainRoundingMode
- * @default tick
+ * @default 'tick'
  * @category Continuous-Numeric > Style
  */
 pvc.options.axes.AnyContinuousCartesianAxis.prototype.domainRoundMode = undefined;
@@ -9390,6 +9369,14 @@ pvc.options.ext.AnyContinuousCartesianAxisExtensionPoints = function(){};
         
         
         
+/**
+ * The extension point of a 
+ * <i>minor</i> tick rule mark (applies to continuous axes).
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ * @category Continuous > Style
+ */
+pvc.options.ext.AnyContinuousCartesianAxisExtensionPoints.prototype.minorTicks = undefined;
 /**
  * The extension point of the zero line rule (applies to continuous-numeric axes).
  * 
@@ -9622,7 +9609,7 @@ pvc.options.axes.NumericCartesianAxis.prototype.desiredTickCount = undefined;
  * The axis' domain rounding mode (applies to continuous-numeric axes).
  * 
  * @type pvc.options.varia.AxisDomainRoundingMode
- * @default tick
+ * @default 'tick'
  * @category Continuous-Numeric > Style
  */
 pvc.options.axes.NumericCartesianAxis.prototype.domainRoundMode = undefined;
@@ -9820,6 +9807,14 @@ pvc.options.ext.NumericCartesianAxisExtensionPoints = function(){};
         
         
         
+/**
+ * The extension point of a 
+ * <i>minor</i> tick rule mark (applies to continuous axes).
+ * 
+ * @type pvc.options.marks.RuleExtensionPoint
+ * @category Continuous > Style
+ */
+pvc.options.ext.NumericCartesianAxisExtensionPoints.prototype.minorTicks = undefined;
 /**
  * The extension point of the zero line rule (applies to continuous-numeric axes).
  * 
@@ -10267,7 +10262,7 @@ pvc.options.ext.TitlePanelExtensionPoints = function(){};
  * 
  * @type pvc.options.marks.PanelExtensionPoint
  */
-pvc.options.ext.TitlePanelExtensionPoints.prototype.. = undefined;
+pvc.options.ext.TitlePanelExtensionPoints.prototype._ = undefined;
 /**
  * The extension point of the title label mark.
  * 

@@ -82,14 +82,14 @@
         titleOffset // not documented
          -->
          
-         <c:property name="extensionPoints" type="pvc.options.ext.TitlePanelExtensionPoints" category="Style">
+         <c:property name="extensionPoints" type="pvc.options.ext.TitlePanelExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points of the title panel.
             </c:documentation>
          </c:property>
     </c:complexType>
     
-    <c:complexType name="TitlePanelExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="TitlePanelExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points of the title panel.
             
@@ -116,7 +116,7 @@
             (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
         </c:documentation>
         
-        <c:property name="." type="pvc.options.marks.PanelExtensionPoint">
+        <c:property name="_" type="pvc.options.marks.PanelExtensionPoint">
             <c:documentation>
                 The extension point of the top-level panel mark.
                 

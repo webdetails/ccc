@@ -18,3 +18,4 @@ pvc-*.js
 /generatePenBundle.sh
 /publish_analyzer.bat
 /doc/kettle/output
+/doc/gen/summary/summary.html

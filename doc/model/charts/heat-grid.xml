@@ -181,7 +181,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.HeatGridPlotExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.HeatGridPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.
@@ -189,7 +189,9 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="HeatGridPlotExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="HeatGridPlotExtensionPoints" 
+                   space="pvc.options.ext"
+                   use="expanded">
         <c:documentation>
             The extension points of the <i>Heat grid</i> plot types.
             

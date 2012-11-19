@@ -7,8 +7,7 @@
     
     <c:complexType name="MarkExtensionPoint" 
                    space="pvc.options.marks"
-                   abstract="true"
-                   use="expanded">
+                   abstract="true">
         <c:documentation>
             The base class of protovis extension points.
             

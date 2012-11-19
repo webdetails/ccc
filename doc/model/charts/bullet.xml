@@ -159,7 +159,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.BulletChartExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.BulletChartExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -170,6 +170,7 @@
     
     <c:complexType name="BulletChartExtensionPoints" 
                    space="pvc.options.ext"
+                   use="expanded"
                    facets="pvc.options.ext.BasicChartExtensionPointsFacet">
         <c:documentation>
             The extension points of the <b>bullet</b> chart types.
@@ -322,7 +323,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.BulletPlotExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.BulletPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.
@@ -330,7 +331,7 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="BulletPlotExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="BulletPlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points of the bullet plot type.
             

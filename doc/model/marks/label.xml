@@ -7,7 +7,6 @@
     
     <c:complexType name="LabelExtensionPoint" 
                    space="pvc.options.marks"
-                   use="expanded" 
                    base="pvc.options.marks.MarkExtensionPoint">
          <c:documentation>
             The class of protovis Label extension points.

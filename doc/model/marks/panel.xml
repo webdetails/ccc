@@ -7,7 +7,6 @@
     
     <c:complexType name="PanelExtensionPoint" 
                    space="pvc.options.marks" 
-                   use="expanded"
                    base="pvc.options.marks.BarExtensionPoint">
          <c:documentation>
             The class of protovis Panel extension points.

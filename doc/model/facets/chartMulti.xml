@@ -52,7 +52,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="multiChartIndexes" type="number string" default="true" category="Multi-Chart > Data Translation">
+        <c:property name="multiChartIndexes" type="number string list(number string)" category="Data Translation">
             <c:documentation>
                 The indexes of the data source's <i>virtual item</i> columns
                 that are to feed the 

@@ -73,7 +73,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.WaterfallPlotExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.WaterfallPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.
@@ -83,6 +83,7 @@
 
     <c:complexType name="WaterfallPlotExtensionPoints" 
                    space="pvc.options.ext"
+                   use="expanded"
                    base="pvc.options.ext.BarPlotCommonExtensionPoints">
         <c:documentation>
             The extension points of the waterfall plot type.

@@ -135,7 +135,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.MetricPointChartExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.MetricPointChartExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -143,7 +143,8 @@
         </c:property>
     </c:complexType>
     
-    <c:complexType name="MetricPointChartExtensionPoints" 
+    <c:complexType name="MetricPointChartExtensionPoints"
+                   use="expanded" 
                    space="pvc.options.ext"
                    facets="pvc.options.ext.MultiExtensionPointsFacet">
         <c:documentation>
@@ -160,7 +161,7 @@
         </c:documentation>
     </c:complexType>
     
-    <c:complexType name="MetricPointPlotExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="MetricPointPlotExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points common to the <b>metric point</b> plot types.
             
@@ -237,7 +238,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.MetricPointPlotExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.MetricPointPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the plot.

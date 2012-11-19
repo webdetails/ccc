@@ -186,7 +186,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.ChartExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.ChartExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -197,6 +197,7 @@
     <!-- scale_ and tooltip_ are undocumented -->
     <c:complexType name="ChartExtensionPoints" 
                    space="pvc.options.ext"
+                   use="expanded"
                    facets="pvc.options.ext.BasicChartExtensionPointsFacet">
         
         <c:documentation>
@@ -277,7 +278,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="format" type="pvc.options.varia.TooltipFormatter" category="Interaction">
+        <c:property name="format" type="pvc.options.varia.TooltipFormatter">
             <c:documentation>
                 A callback function that is called,
                 to build the tooltip of a visual element.

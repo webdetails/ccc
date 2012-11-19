@@ -54,14 +54,14 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.LegendPanelExtensionPoints" category="Style">
+        <c:property name="extensionPoints" type="pvc.options.ext.LegendPanelExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points provided by the legend panel.
             </c:documentation>
         </c:property>
     </c:complexType>
     
-    <c:complexType name="LegendPanelExtensionPoints" space="pvc.options.ext">
+    <c:complexType name="LegendPanelExtensionPoints" space="pvc.options.ext" use="expanded">
         <c:documentation>
             The extension points of the legend panel.
             
