@@ -239,7 +239,7 @@ def
                     dotsVisibleOnly ? 
                     def.retFalse : 
                     (isBaseDiscrete && isStacked ? 
-                     function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
+                     function(){ return !this.scene.isNull; } :
                      function(){ return !this.scene.isNull; })
             )
             

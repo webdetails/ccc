@@ -450,6 +450,28 @@ var relational_03 = {
     }]
 };
 
+var relational_03_b = {
+        "resultset": [
+            ["London", 74],
+            ["Paris", 48],
+            ["New York", 37],
+            ["Prague", 27],
+            ["Stockholm", 22],
+            ["Sydney", 19],
+            ["Madrid", 18],
+            ["Lisbon", 41]
+        ],
+        "metadata": [{
+            "colIndex": 0,
+            "colType": "String",
+            "colName": "Categories"
+        }, {
+            "colIndex": 1,
+            "colType": "Numeric",
+            "colName": "Value"
+        }]
+    };
+
 var relational_04 = {
     "resultset": [
         ["London", "Ford", 72],

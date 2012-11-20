@@ -205,7 +205,7 @@ def
             var domain = scale.domain();
     
             // Domain crosses zero?
-            if(domain[0] * domain[1] <= 0){
+            if(domain[0] * domain[1] < -1e-12){
                 // TODO: Implement GridCrossesMargin ...
                 
                 var a = axis.orientation === 'x' ? 'left' : 'bottom';

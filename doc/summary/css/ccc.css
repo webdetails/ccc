@@ -1,25 +1,5 @@
 @charset "UTF-8";
 
-/*
-.bodycopy li {
-	float: none;
-	width: inherit;
-}
-
-#options {
-	-moz-column-count: 2;
-    -moz-column-gap: 1em;
-}
-
-#options #category {
-	margin-top: 1em;
-}
-
-.bodycopylist{
-    width: inherit;
-}
-*/
-
 /* JS highlighting of resume documentation */
 span.js-comment     { color: rgb(150, 150, 150); }
            

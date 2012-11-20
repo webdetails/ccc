@@ -126,12 +126,6 @@ var tryMe = function(e){
     }
 };
 
-pv.listenForPageLoad(function() {
-    // When everything is ready, click all tryMe buttons
-    $("button.tryMe").click();
-});
-
-
 def.scope(function(){
     
     var $e = pvc.examples = {};

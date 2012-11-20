@@ -6,7 +6,7 @@
     xmlns:fun="localfunctions"
     xmlns:xhtml="http://www.w3.org/1999/xhtml"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    exclude-result-prefixes="com fun xs xsl">
+    exclude-result-prefixes="com fun xs xsl fn xhtml">
     
     <xsl:output method="xhtml" indent="no" />
     <xsl:output method="xhtml" indent="yes" name="html" />

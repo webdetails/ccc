@@ -79,6 +79,29 @@ def
         }
     },
     
+    _bindAxes: function(hasMultiRole){
+        
+        this.base(hasMultiRole);
+        
+        // Set defaults of Offset property
+        var typeAxes = this.axesByType.base;
+        if(typeAxes){
+            typeAxes.forEach(function(axis){
+                var isDiscrete = axis.scaleType === 'discrete';
+                if(!isDiscrete){
+                    axis.option.defaults({Offset: 0.01});
+                }
+            });
+        }
+        
+        typeAxes = this.axesByType.ortho;
+        if(typeAxes){
+            typeAxes.forEach(function(axis){
+                axis.option.defaults({Offset: 0.04});
+            });
+        }
+    },
+    
     //_createPointPlot: function(){},
     
     /* @override */
@@ -126,10 +149,6 @@ def
     },
     
     defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
-        // TODO: Set this way, setting, "axisOffset: 0" has no effect...
-        orthoAxisOffset: 0.04,
-        baseAxisOffset:  0.01, // TODO: should depend on being discrete or continuous base
-        
         tooltipOffset: 15
     })
 });

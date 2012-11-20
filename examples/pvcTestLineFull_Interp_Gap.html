@@ -149,35 +149,33 @@ var baseExampleDef = {
     dataVar: 'relational_01',
     def: {
         width: 1000,
-        animate: false,
+        
         legend:  true,
         legendPosition: "right",
         legendAlign: "top",
-        selectable:  true,
-        hoverable: true,
-        axisGrid: true,
         
-        baseAxisOffset: 0,
-        orthoAxisOffset: 0,
+        animate:    false,
+        selectable: true,
+        hoverable:  true,
         
-        extensionPoints: {
-            xAxisScale_dateTickFormat:    "%Y/%m/%d",
-            xAxisScale_dateTickPrecision: 798336000/1.5 
-        },
+        axisGrid:   true,
+        axisOffset: 0,
+        
         areasVisible:  false,
         dotsVisible:   false,
         linesVisible:  false,
         valuesVisible: false,
-        timeSeries: false,
-        timeSeriesFormat: "%Y-%m-%d",
+        //timeSeries:    false,
+        //timeSeriesFormat: "%Y-%m-%d",
         
         nullInterpolationMode: 'none',
         
         /* Data format */
         crosstabMode: false,
         seriesInRows: false,
-        dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } },
         extensionPoints: {
+          baseAxisScale_dateTickFormat:    "%Y/%m/%d",
+          baseAxisScale_dateTickPrecision: 798336000/1.5
           line_interpolate: 'monotone',
           area_interpolate: 'monotone'
         }
@@ -187,7 +185,7 @@ var baseExampleDef = {
 
 var baseCategDef = def.create(baseExampleDef, {
     def: {
-        dimensions: { category: {valueType: Date, isDiscrete: true, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
+        dimensions: { category: {valueType: Date, isDiscrete: true } }
     }
 });
 

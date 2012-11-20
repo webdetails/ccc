@@ -1,9 +1,20 @@
 new pvc.BarChart({
     canvas: "cccBarExample7",
     width:  400,
-    height: 250,
-    title: "Stacked bar chart with line series",
-    stacked: true,
+    height: 400,
+    
+    title: "All-in-one Bar Chart",
+    titleFont: 'bold 14px sans-serif',
+    
+    colors: ['#e20a16', '#0b99d5'],
+    
+    stacked:    true,
+    animate:    true,
+    selectable: true,
+    hoverable:  true,
+    legend:     true,
+    axisGrid:   true,
+    orthoAxisOffset: 0.1,
     
     plot2: true,
     plot2Series: ['Paris'],
@@ -11,23 +22,16 @@ new pvc.BarChart({
     plot2ColorAxis: 2,
     plot2NullInterpolationMode: 'linear',
     
-    color2AxisColors: ['yellow'],
+    color2AxisColors: ['#395b68'],
     
-    trendType: 'linear',
-    trendOrthoAxis: 3,
+    trendType: 'moving-average',
     trendAreasVisible: true,
     
-    animate:    true,
-    clickable:  true,
-    selectable: true,
-    hoverable:  true,
-    legend:     true,
-    
-    axisGrid: true,
-    orthoAxisOffset: 0.1,
     extensionPoints: {
-        plot2Line_lineWidth: 3,
-        plot2Dot_shapeSize: 20,
+        plot2Line_lineWidth: 2,
+        plot2Dot_shapeSize:  20,
+        trendLine_interpolate: 'cardinal',
+        trendArea_interpolate: 'cardinal',
         continuousAxisTicks_strokeStyle: 'red'
     }
 })

@@ -7976,7 +7976,7 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
       var attrsBase = {
           'shape-rendering':   'crispEdges',
           'fill':              'rgb(127,127,127)',
-          'fill-opacity':      0.005, // VML requires this much to fire events
+          'fill-opacity':      0.005, // VML and FF require this much to fire events
           'stroke':            'rgb(127,127,127)',
           'stroke-opacity':    0.005, // VML idem
           'stroke-width':      5

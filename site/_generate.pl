@@ -6,7 +6,7 @@ use warnings;
 my $resDir = $ARGV[1];
 ##print STDERR "replacing tokens in " . $ARGV[0];
 ##print STDERR " with contents of " . $ARGV[1] . "\n";
-
+##print STDERR $ARGV[0];
 open(TEMPL, $ARGV[0]) or die("Template file not found");
 
 my $contents = "";

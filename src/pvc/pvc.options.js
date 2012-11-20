@@ -183,7 +183,7 @@ def.scope(function(){
                 if(info){
                     var value = opts[name];
                     if(value !== undefined){
-                        info.set(name, isDefault);
+                        info.set(value, isDefault);
                     }
                 }
             }

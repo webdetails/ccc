@@ -170,7 +170,7 @@ def
         colorValIdx: 0,
         sizeValIdx:  1,
         measuresIndexes: [2], // TODO: ???
-
+        animate:    false,
         axisOffset: 0,
         
         plotFrameVisible: false,
