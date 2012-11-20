@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>CdfPropertiesGenerator</name>
+    <name>readAtomType</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -62,14 +62,14 @@
     <clusterschemas>
     </clusterschemas>
   <created_user>-</created_user>
-  <created_date>2012&#47;11&#47;07 14:35:26.513</created_date>
+  <created_date>2012&#47;11&#47;14 16:04:58.580</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2012&#47;11&#47;07 14:35:26.513</modified_date>
+  <modified_date>2012&#47;11&#47;14 16:04:58.580</modified_date>
   </info>
   <notepads>
   </notepads>
   <order>
-  <hop> <from>Output FileName</from><to>Generate Schema</to><enabled>Y</enabled> </hop>  <hop> <from>GetProperties</from><to>Calculator</to><enabled>Y</enabled> </hop>  <hop> <from>Generate Schema</from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Calculator</from><to>Get Variables</to><enabled>Y</enabled> </hop>  <hop> <from>Get Variables</from><to>Output FileName</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>split description</from><to>rm special char</to><enabled>Y</enabled> </hop>  <hop> <from>String operations 3</from><to>split description</to><enabled>Y</enabled> </hop>  <hop> <from>rm special char</from><to>rm double space</to><enabled>Y</enabled> </hop>  <hop> <from>GetProperties</from><to>String operations 3</to><enabled>Y</enabled> </hop>  <hop> <from>rm double space</from><to>Replace in string</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Text file output 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Select values</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>GetProperties</name>
     <type>getXMLData</type>
@@ -94,8 +94,8 @@
     <rownum_field/>
     <encoding>UTF-8</encoding>
     <file>
-      <name>${Internal.Transformation.Filename.Directory}&#47;..&#47;</name>
-      <filemask>.*xml$</filemask>
+      <name>${Internal.Transformation.Filename.Directory}&#47;..&#47;model</name>
+      <filemask>.*xml?</filemask>
       <exclude_filemask/>
       <file_required>N</file_required>
       <include_subfolders>Y</include_subfolders>
@@ -103,8 +103,8 @@
     <fields>
       <field>
         <name>name</name>
-        <xpath>.&#47;@name</xpath>
-        <element_type>node</element_type>
+        <xpath>..&#47;@name</xpath>
+        <element_type>attribut</element_type>
         <result_type>valueof</result_type>
         <type>String</type>
         <format/>
@@ -118,23 +118,8 @@
       </field>
       <field>
         <name>type</name>
-        <xpath>.&#47;@type</xpath>
-        <element_type>node</element_type>
-        <result_type>valueof</result_type>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <trim_type>none</trim_type>
-        <repeat>N</repeat>
-      </field>
-      <field>
-        <name>base</name>
         <xpath>..&#47;@base</xpath>
-        <element_type>node</element_type>
+        <element_type>attribut</element_type>
         <result_type>valueof</result_type>
         <type>String</type>
         <format/>
@@ -147,9 +132,9 @@
         <repeat>N</repeat>
       </field>
       <field>
-        <name>space</name>
-        <xpath>..&#47;@space</xpath>
-        <element_type>node</element_type>
+        <name>atomName</name>
+        <xpath>@name</xpath>
+        <element_type>attribut</element_type>
         <result_type>valueof</result_type>
         <type>String</type>
         <format/>
@@ -162,7 +147,22 @@
         <repeat>N</repeat>
       </field>
       <field>
-        <name>description</name>
+        <name>atomValue</name>
+        <xpath>@value</xpath>
+        <element_type>attribut</element_type>
+        <result_type>valueof</result_type>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>atomDescription</name>
         <xpath>c:documentation</xpath>
         <element_type>node</element_type>
         <result_type>valueof</result_type>
@@ -178,12 +178,12 @@
       </field>
     </fields>
     <limit>0</limit>
-    <loopxpath>&#47;&#47;c:property</loopxpath>
+    <loopxpath>&#47;c:model&#47;c:atomType&#47;c:atom</loopxpath>
     <IsInFields>N</IsInFields>
     <IsAFile>N</IsAFile>
     <XmlField/>
     <prunePath/>
-    <shortFileFieldName>file</shortFileFieldName>
+    <shortFileFieldName/>
     <pathFieldName/>
     <hiddenFieldName/>
     <lastModificationTimeFieldName/>
@@ -193,14 +193,269 @@
     <sizeFieldName/>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>48</xloc>
-      <yloc>97</yloc>
+      <xloc>63</xloc>
+      <yloc>51</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>Generate Schema</name>
+    <name>Replace in string</name>
+    <type>ReplaceString</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>atomValue</in_stream_name>
+        <out_stream_name/>
+        <use_regex>no</use_regex>
+        <replace_string>&apos;</replace_string>
+        <replace_by_string/>
+        <replace_field_by_string/>
+        <whole_word>no</whole_word>
+        <case_sensitive>no</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>598</xloc>
+      <yloc>51</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select values</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>name</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>type</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomValue</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomDescription</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>812</xloc>
+      <yloc>51</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort rows</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>name</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>type</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>atomName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>705</xloc>
+      <yloc>51</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>String operations 3</name>
+    <type>StringOperations</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>atomDescription</in_stream_name>
+        <out_stream_name/>
+        <trim_type>both</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>none</remove_special_characters>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>170</xloc>
+      <yloc>51</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Text file output 2</name>
+    <type>TextFileOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <separator>;</separator>
+    <enclosure>&quot;</enclosure>
+    <enclosure_forced>N</enclosure_forced>
+    <enclosure_fix_disabled>N</enclosure_fix_disabled>
+    <header>Y</header>
+    <footer>N</footer>
+    <format>UNIX</format>
+    <compression>None</compression>
+    <encoding/>
+    <endedLine/>
+    <fileNameInField>N</fileNameInField>
+    <fileNameField/>
+    <create_parent_folder>Y</create_parent_folder>
+    <file>
+      <name>${Internal.Transformation.Filename.Directory}&#47;output&#47;atoms-table</name>
+      <is_command>N</is_command>
+      <servlet_output>N</servlet_output>
+      <do_not_open_new_file_init>N</do_not_open_new_file_init>
+      <extention>txt</extention>
+      <append>N</append>
+      <split>N</split>
+      <haspartno>N</haspartno>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <add_to_result_filenames>N</add_to_result_filenames>
+      <pad>N</pad>
+      <fast_dump>N</fast_dump>
+      <splitevery>0</splitevery>
+    </file>
+    <fields>
+      <field>
+        <name>name</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>type</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>atomName</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>atomValue</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>100</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>atomDescription</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>919</xloc>
+      <yloc>51</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>rm double space</name>
     <type>ScriptValueMod</type>
     <description/>
     <distribute>Y</distribute>
@@ -215,48 +470,30 @@
         <jsScript_name>Script 1</jsScript_name>
         <jsScript_script>&#47;&#47;Script here
 
+if (!atomDescription == &apos;&apos;) {
+	atomDescription = atomDescription.replace(&#47; +&#47;g, &apos; &apos;);
+	atomDescription = atomDescription.substr(0, atomDescription.indexOf(&apos;.&apos;)+1);
+}
 
-
-
-var props = &lt;DesignerProperty&gt;
-    &lt;Header&gt;
-      &lt;Name&gt;{propertyName}&lt;&#47;Name&gt;
-      &lt;Parent&gt;BaseProperty&lt;&#47;Parent&gt;
-      &lt;DefaultValue&gt;&quot;false&quot;&lt;&#47;DefaultValue&gt;
-      &lt;Description&gt;{capitalizedName}&lt;&#47;Description&gt;
-      &lt;Tooltip&gt;&lt;![CDATA[{description}]]&gt;&lt;&#47;Tooltip&gt;
-      &lt;InputType&gt;Boolean&lt;&#47;InputType&gt;
-      &lt;OutputType&gt;Boolean&lt;&#47;OutputType&gt;
-      &lt;Order&gt;87&lt;&#47;Order&gt;
-      &lt;Advanced&gt;false&lt;&#47;Advanced&gt;
-      &lt;Version&gt;1.0&lt;&#47;Version&gt;
-    &lt;&#47;Header&gt;
-  &lt;&#47;DesignerProperty&gt;
-
-
-var o = props.toXMLString(2);</jsScript_script>
-      </jsScript>      <jsScript>        <jsScript_type>1</jsScript_type>
-        <jsScript_name>Item_0</jsScript_name>
-        <jsScript_script>&#47;&#47;Script here
 
 </jsScript_script>
-      </jsScript>    </jsScripts>    <fields>      <field>        <name>o</name>
-        <rename>o</rename>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>atomDescription</name>
+        <rename>atomDescription</rename>
         <type>String</type>
         <length>-1</length>
         <precision>-1</precision>
-        <replace>N</replace>
+        <replace>Y</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>490</xloc>
-      <yloc>98</yloc>
+      <xloc>491</xloc>
+      <yloc>51</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>Output FileName</name>
-    <type>Janino</type>
+    <name>rm special char</name>
+    <type>StringOperations</type>
     <description/>
     <distribute>Y</distribute>
     <copies>1</copies>
@@ -264,126 +501,32 @@ var o = props.toXMLString(2);</jsScript_script>
            <method>none</method>
            <schema_name/>
            </partitioning>
-       <formula><field_name>propertyFileName</field_name>
-<formula_string>pwd+&quot;&#47;output&#47;properties&#47;ccc&quot;+capitalizedName+&quot;.xml&quot;</formula_string>
-<value_type>String</value_type>
-<value_length>-1</value_length>
-<value_precision>-1</value_precision>
-<replace_field/>
-</formula>
-       <formula><field_name>propertyName</field_name>
-<formula_string>&quot;ccc&quot;+capitalizedName</formula_string>
-<value_type>String</value_type>
-<value_length>-1</value_length>
-<value_precision>-1</value_precision>
-<replace_field/>
-</formula>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>368</xloc>
-      <yloc>98</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Calculator</name>
-    <type>Calculator</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-       <calculation><field_name>capitalizedName</field_name>
-<calc_type>INIT_CAP</calc_type>
-<field_a>name</field_a>
-<field_b/>
-<field_c/>
-<value_type>-</value_type>
-<value_length>-1</value_length>
-<value_precision>-1</value_precision>
-<remove>N</remove>
-<conversion_mask/>
-<decimal_symbol/>
-<grouping_symbol/>
-<currency_symbol/>
-</calculation>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>141</xloc>
-      <yloc>98</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Text file output</name>
-    <type>TextFileOutput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <separator/>
-    <enclosure/>
-    <enclosure_forced>N</enclosure_forced>
-    <enclosure_fix_disabled>N</enclosure_fix_disabled>
-    <header>N</header>
-    <footer>N</footer>
-    <format>DOS</format>
-    <compression>None</compression>
-    <encoding/>
-    <endedLine/>
-    <fileNameInField>Y</fileNameInField>
-    <fileNameField>propertyFileName</fileNameField>
-    <create_parent_folder>Y</create_parent_folder>
-    <file>
-      <name>file</name>
-      <is_command>N</is_command>
-      <servlet_output>N</servlet_output>
-      <do_not_open_new_file_init>Y</do_not_open_new_file_init>
-      <extention/>
-      <append>N</append>
-      <split>N</split>
-      <haspartno>N</haspartno>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <add_to_result_filenames>Y</add_to_result_filenames>
-      <pad>N</pad>
-      <fast_dump>Y</fast_dump>
-      <splitevery>0</splitevery>
-    </file>
     <fields>
       <field>
-        <name>o</name>
-        <type>-</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
+        <in_stream_name>atomDescription</in_stream_name>
+        <out_stream_name/>
         <trim_type>none</trim_type>
-        <length>-1</length>
-        <precision>-1</precision>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>no</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>crlf</remove_special_characters>
       </field>
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>603</xloc>
-      <yloc>99</yloc>
+      <xloc>384</xloc>
+      <yloc>51</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>Get Variables</name>
-    <type>GetVariable</type>
+    <name>split description</name>
+    <type>FieldSplitter</type>
     <description/>
     <distribute>Y</distribute>
     <copies>1</copies>
@@ -391,24 +534,26 @@ var o = props.toXMLString(2);</jsScript_script>
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <fields>
-      <field>
-        <name>pwd</name>
-        <variable>${Internal.Transformation.Filename.Directory}</variable>
+   <splitfield>atomDescription</splitfield>
+   <delimiter>
+            
+</delimiter>
+    <fields>      <field>        <name>atomDescription</name>
+        <id/>
+        <idrem>N</idrem>
         <type>String</type>
         <format/>
-        <currency/>
-        <decimal/>
         <group/>
+        <decimal/>
         <length>-1</length>
         <precision>-1</precision>
-        <trim_type>none</trim_type>
-      </field>
-    </fields>
-     <cluster_schema/>
+        <nullif/>
+        <ifnull/>
+        <trimtype>both</trimtype>
+      </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>228</xloc>
-      <yloc>98</yloc>
+      <xloc>277</xloc>
+      <yloc>51</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
