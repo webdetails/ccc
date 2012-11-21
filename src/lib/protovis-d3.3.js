@@ -7977,7 +7977,7 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
       var attrsBase = {
           'shape-rendering':   'crispEdges',
           'fill':              'rgb(127,127,127)',
-          'fill-opacity':      0.005, // VML and FF require this much to fire events
+          'fill-opacity':      0.005, // VML requires this much to fire events
           'stroke':            'rgb(127,127,127)',
           'stroke-opacity':    0.005, // VML idem
           'stroke-width':      5
@@ -11046,25 +11046,8 @@ pv.Area.prototype.defaults = new pv.Area()
 
 /** @private Sets width and height to zero if null. */
 pv.Area.prototype.buildImplied = function(s) {
-  var checkDirection = this.index === 0;
-  if(checkDirection){
-      this.isVertical = true;
-  }
-  
-  if (s.width == null) {
-      if(checkDirection){
-          checkDirection = false;
-      }
-      s.width = 0;
-  }
-  
-  if (s.height == null) {
-      if(checkDirection){
-          this.isVertical = false;
-      }
-      s.height = 0;
-  }
-  
+  if (s.height == null) s.height = 0;
+  if (s.width == null) s.width = 0;
   pv.Mark.prototype.buildImplied.call(this, s);
 };
 
