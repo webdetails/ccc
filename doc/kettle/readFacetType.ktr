@@ -69,7 +69,7 @@
   <notepads>
   </notepads>
   <order>
-  <hop> <from>Split Fields 2</from><to>String operations 2</to><enabled>Y</enabled> </hop>  <hop> <from>String operations</from><to>Split Fields 2</to><enabled>Y</enabled> </hop>  <hop> <from>String operations 2</from><to>replace double space</to><enabled>Y</enabled> </hop>  <hop> <from>replace map &amp; list</from><to>Split field to rows</to><enabled>Y</enabled> </hop>  <hop> <from>GetProperties</from><to>Calculator</to><enabled>Y</enabled> </hop>  <hop> <from>replace double space</from><to>replace map &amp; list</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Text file output 2</to><enabled>Y</enabled> </hop>  <hop> <from>Split field to rows</from><to>final type</to><enabled>Y</enabled> </hop>  <hop> <from>Calculator</from><to>String operations</to><enabled>Y</enabled> </hop>  <hop> <from>final type</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows 2</from><to>Unique rows</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>Split Fields 2</from><to>String operations 2</to><enabled>Y</enabled> </hop>  <hop> <from>String operations 2</from><to>replace double space</to><enabled>Y</enabled> </hop>  <hop> <from>replace map &amp; list</from><to>Split field to rows</to><enabled>Y</enabled> </hop>  <hop> <from>GetProperties</from><to>Calculator</to><enabled>Y</enabled> </hop>  <hop> <from>replace double space</from><to>replace map &amp; list</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Text file output 2</to><enabled>Y</enabled> </hop>  <hop> <from>Split field to rows</from><to>final type</to><enabled>Y</enabled> </hop>  <hop> <from>Calculator</from><to>String operations</to><enabled>Y</enabled> </hop>  <hop> <from>final type</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows 2</from><to>Unique rows</to><enabled>Y</enabled> </hop>  <hop> <from>String operations</from><to>Replace in string</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string</from><to>Split Fields 2</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>Calculator</name>
     <type>Calculator</type>
@@ -145,11 +145,6 @@
       <exclude_filemask/>
       <file_required>N</file_required>
       <include_subfolders>Y</include_subfolders>
-      <name/>
-      <filemask/>
-      <exclude_filemask/>
-      <file_required>N</file_required>
-      <include_subfolders>N</include_subfolders>
     </file>
     <fields>
       <field>
@@ -164,7 +159,7 @@
         <group/>
         <length>-1</length>
         <precision>-1</precision>
-        <trim_type>none</trim_type>
+        <trim_type>both</trim_type>
         <repeat>N</repeat>
       </field>
       <field>
@@ -172,14 +167,14 @@
         <xpath>@name</xpath>
         <element_type>node</element_type>
         <result_type>valueof</result_type>
-        <type>-</type>
+        <type>String</type>
         <format/>
         <currency/>
         <decimal/>
         <group/>
         <length>-1</length>
         <precision>-1</precision>
-        <trim_type>none</trim_type>
+        <trim_type>both</trim_type>
         <repeat>N</repeat>
       </field>
       <field>
@@ -187,14 +182,14 @@
         <xpath>@type</xpath>
         <element_type>node</element_type>
         <result_type>valueof</result_type>
-        <type>-</type>
+        <type>String</type>
         <format/>
         <currency/>
         <decimal/>
         <group/>
         <length>-1</length>
         <precision>-1</precision>
-        <trim_type>none</trim_type>
+        <trim_type>both</trim_type>
         <repeat>N</repeat>
       </field>
       <field>
@@ -209,7 +204,22 @@
         <group/>
         <length>-1</length>
         <precision>-1</precision>
-        <trim_type>none</trim_type>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>propertyDefault</name>
+        <xpath>@default</xpath>
+        <element_type>attribut</element_type>
+        <result_type>valueof</result_type>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
         <repeat>N</repeat>
       </field>
     </fields>
@@ -261,6 +271,10 @@
         <rename/>
         <length>-2</length>
         <precision>-2</precision>
+      </field>      <field>        <name>propertyDefault</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
       </field>      <field>        <name>typeSeparated</name>
         <rename/>
         <length>-2</length>
@@ -276,8 +290,8 @@
       </field>        <select_unspecified>N</select_unspecified>
     </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>359</xloc>
-      <yloc>64</yloc>
+      <xloc>354</xloc>
+      <yloc>135</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -321,6 +335,11 @@
         <case_sensitive>N</case_sensitive>
       </field>
       <field>
+        <name>propertyDefault</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
         <name>typeSeparated</name>
         <ascending>Y</ascending>
         <case_sensitive>N</case_sensitive>
@@ -338,8 +357,8 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>359</xloc>
-      <yloc>145</yloc>
+      <xloc>354</xloc>
+      <yloc>216</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -372,8 +391,8 @@
         <trimtype>both</trimtype>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>170</xloc>
-      <yloc>206</yloc>
+      <xloc>169</xloc>
+      <yloc>266</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -397,8 +416,8 @@
    <delimiter_is_regex>N</delimiter_is_regex>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>269</xloc>
-      <yloc>139</yloc>
+      <xloc>263</xloc>
+      <yloc>203</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -463,8 +482,8 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>170</xloc>
-      <yloc>283</yloc>
+      <xloc>169</xloc>
+      <yloc>343</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -560,6 +579,18 @@
         <precision>-1</precision>
       </field>
       <field>
+        <name>propertyDefault</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
         <name>typeSeparated</name>
         <type>String</type>
         <format/>
@@ -598,8 +629,8 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>466</xloc>
-      <yloc>211</yloc>
+      <xloc>461</xloc>
+      <yloc>282</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -626,6 +657,8 @@
         <case_insensitive>N</case_insensitive>
         </field>      <field>        <name>propertyDescription</name>
         <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>propertyDefault</name>
+        <case_insensitive>N</case_insensitive>
         </field>      <field>        <name>typeSeparated</name>
         <case_insensitive>N</case_insensitive>
         </field>      <field>        <name>typeFinal</name>
@@ -634,8 +667,8 @@
         <case_insensitive>N</case_insensitive>
         </field>      </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>359</xloc>
-      <yloc>212</yloc>
+      <xloc>354</xloc>
+      <yloc>283</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -688,8 +721,8 @@ if (coreTypes.indexOf(typeSeparated.toString()) &gt;= 0) {
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>269</xloc>
-      <yloc>63</yloc>
+      <xloc>263</xloc>
+      <yloc>135</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -725,8 +758,8 @@ if (!propertyDescription == &apos;&apos;) {
         <replace>Y</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>269</xloc>
-      <yloc>282</yloc>
+      <xloc>265</xloc>
+      <yloc>343</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -756,8 +789,38 @@ var typeAux = propertyType.replace(&#47;list\(.*\)&#47;, &apos;list&apos;).repla
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>269</xloc>
-      <yloc>211</yloc>
+      <xloc>264</xloc>
+      <yloc>268</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Replace in string</name>
+    <type>ReplaceString</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>propertyDefault</in_stream_name>
+        <out_stream_name/>
+        <use_regex>no</use_regex>
+        <replace_string>&apos;</replace_string>
+        <replace_by_string/>
+        <replace_field_by_string/>
+        <whole_word>no</whole_word>
+        <case_sensitive>no</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>169</xloc>
+      <yloc>205</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
