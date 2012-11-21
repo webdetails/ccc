@@ -264,7 +264,7 @@ def
                 labelSpacingMin:   axis.option('LabelSpacingMin'),
                 tickExponentMin:   axis.option('TickExponentMin'),
                 tickExponentMax:   axis.option('TickExponentMax'),
-                Grid:          axis.option('Grid'),
+                Grid:              axis.option('Grid'),
                 GridCrossesMargin: axis.option('GridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
                 zeroLine:          axis.option('ZeroLine'),
@@ -362,6 +362,8 @@ def
             }
         
             scale.domain(dMin, dMax);
+            scale.minLocked = extent.minLocked;
+            scale.maxLocked = extent.maxLocked;
         }
         
         return scale;
@@ -400,19 +402,26 @@ def
                 dMax = tmp;
             }
             
-            /*
-             * If both negative or both positive
-             * the scale does not contain the number 0.
-             */
             var originIsZero = axis.option('OriginIsZero');
-            if(originIsZero && (dMin * dMax > 0)){
-                if(dMin > 0){
-                    if(!extent.lockedMin){
-                        dMin = 0;
-                    }
-                } else {
-                    if(!extent.lockedMax){
-                        dMax = 0;
+            if(originIsZero){
+                if(dMin === 0){
+                    extent.minLocked = true;
+                } else if(dMax === 0){
+                    extent.maxLocked = true;
+                } else if((dMin * dMax) > 0){
+                    /* If both negative or both positive
+                     * the scale does not contain the number 0.
+                     */
+                    if(dMin > 0){
+                        if(!extent.minLocked){
+                            extent.minLocked = true;
+                            dMin = 0;
+                        }
+                    } else {
+                        if(!extent.maxLocked){
+                            extent.maxLocked = true;
+                            dMax = 0;
+                        }
                     }
                 }
             }
@@ -428,12 +437,20 @@ def
                 dMax = tmp;
             }
             
-            if (dMax - dMin <= 1e-12) {
-                dMin = dMin !== 0 ? dMin * 0.99 : originIsZero ? 0 : -0.1;
-                dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
-            } 
+            if(dMax - dMin <= 1e-12) {
+                if(!extent.minLocked){
+                    dMin = dMin !== 0 ? (dMin * 0.99) : -0.1;
+                }
+                
+                // If both are locked, ignore max lock
+                if(!extent.maxLocked || extent.minLocked){
+                    dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
+                }
+            }
             
             scale.domain(dMin, dMax);
+            scale.minLocked = extent.minLocked;
+            scale.maxLocked = extent.maxLocked;
         }
         
         return scale;
@@ -465,33 +482,34 @@ def
     _getAxesRoundingPaddings: function(){
         var axesPaddings = {};
         
-        var axes  = this.axes;
-        processAxis(axes.x);
-        processAxis(axes.secondX);
-        processAxis(axes.y);
-        processAxis(axes.secondY);
+        var axesByType = this.axesByType;
+        ['base', 'ortho'].forEach(function(type){
+            var typeAxes = axesByType[type];
+            if(typeAxes){
+                typeAxes.forEach(processAxis);
+            }
+        });
         
         return axesPaddings;
         
-        function setSide(side, pct){
+        function setSide(side, pct, locked){
             var value = axesPaddings[side];
             if(value == null || pct > value){
                 axesPaddings[side] = pct;
+                axesPaddings[side + 'Locked'] = locked;
+            } else if(locked) {
+                axesPaddings[side + 'Locked'] = locked;
             }
         }
         
         function processAxis(axis){
             if(axis){
-                // {begin: , end: }
-                var roundingPaddings = axis.getScaleRoundingPaddings();
-                if(roundingPaddings){
-                    if(axis.orientation === 'x'){
-                        setSide('left',  roundingPaddings.begin);
-                        setSide('right', roundingPaddings.end);
-                    } else {
-                        setSide('bottom', roundingPaddings.begin);
-                        setSide('top',    roundingPaddings.end);
-                    }
+                // {begin: , end: , beginLocked: , endLocked: }
+                var rp = axis.getScaleRoundingPaddings();
+                if(rp){
+                    var isX = axis.orientation === 'x';
+                    setSide(isX ? 'left'  : 'bottom', rp.begin, rp.beginLocked);
+                    setSide(isX ? 'right' : 'top'   , rp.end,   rp.endLocked);
                 }
             }
         }
@@ -571,17 +589,17 @@ def
      * @virtual
      */
     _getContinuousVisibleExtentConstrained: function(axis, min, max){
-        var lockedMin = false;
-        var lockedMax = false;
+        var minLocked = false;
+        var maxLocked = false;
         
         if(min == null) {
             min = axis.option('FixedMin');
-            lockedMin = (min != null);
+            minLocked = (min != null);
         }
         
         if(max == null) {
             max = axis.option('FixedMax');
-            lockedMax = (max != null);
+            maxLocked = (max != null);
         }
         
         if(min == null || max == null) {
@@ -599,7 +617,7 @@ def
             }
         }
         
-        return {min: min, max: max, lockedMin: lockedMin, lockedMax: lockedMax};
+        return {min: min, max: max, minLocked: minLocked, maxLocked: maxLocked};
     },
     
     /**

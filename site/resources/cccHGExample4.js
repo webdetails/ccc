@@ -5,9 +5,12 @@ new pvc.HeatGridChart({
     title:    "Interactive Heat-grid",
     colorMin: '#FEDFE1',
     colorMax: '#F11929',
-    clickable:  true,
-    selectable: true,
-    hoverable:  true,
+    
+    clickable:     true,
+    selectable:    true,
+    hoverable:     true,
+    valuesVisible: false,
+    
     clickAction: function(scene){
         alert(
             'series = "'     + scene.vars.series.value + 

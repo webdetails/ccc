@@ -157,9 +157,6 @@ var baseExampleDef = {
         hoverable: true,
         axisGrid: true,
         
-        baseAxisOffset:  0,
-        orthoAxisOffset: 0,
-        
         extensionPoints: {
             xAxisScale_dateTickFormat:    "%Y/%m/%d",
             xAxisScale_dateTickPrecision: 798336000/1.5 
@@ -430,11 +427,12 @@ pvc.examples.register(def.create(baseExampleDef, {
     className: 'LineChart',
     dataVar: 'relational_04',
     def: {
-        title:      "Line chart with second axis",
+        title:         "Line chart with second axis",
         linesVisible:  true,
         areasVisible:  true,
         dotsVisible:   false,
         plot2: true,
+        plot2Series: ['Lisbon'],
         plot2OrthoAxis: 2,
         plot2ColorAxis: 2,
         color2AxisColors: ['purple'],

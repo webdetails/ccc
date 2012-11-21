@@ -127,6 +127,8 @@ def.scope(function(){
                 if(!scale.isNull && this.scaleType !== 'discrete'){
                     // Original data domain, before nice or tick rounding
                     this.domain = scale.domain();
+                    this.domain.minLocked = !!scale.minLocked;
+                    this.domain.maxLocked = !!scale.maxLocked;
                     
                     if(this.scaleType === 'numeric'){
                         var roundMode = this.option('DomainRoundMode');
@@ -169,7 +171,7 @@ def.scope(function(){
         },
         
         setScaleRange: function(size){
-            var scale = this.scale;
+            var scale  = this.scale;
             scale.min  = 0;
             scale.max  = size;
             scale.size = size; // original size // TODO: remove this...
@@ -191,31 +193,38 @@ def.scope(function(){
         getScaleRoundingPaddings: function(){
             var roundingPaddings = this._roundingPaddings;
             if(!roundingPaddings){
-                roundingPaddings = {begin: 0, end: 0};
+                roundingPaddings = {
+                        begin: 0, 
+                        end:   0, 
+                        beginLocked: false, 
+                        endLocked:   false
+                };
                 
                 var scale = this.scale;
-                var roundMode;
-                
-                while(scale && !scale.isNull && scale.type === 'numeric' && 
-                      (roundMode = this.option('DomainRoundMode')) !== 'none'){
+                if(scale && !scale.isNull && scale.type !== 'discrete'){
+                    var originalDomain = this.domain;
                     
-                    var currDomain = scale.domain();
-                    var origDomain = this.domain || def.assert("Must be set");
+                    roundingPaddings.beginLocked = originalDomain.minLocked;
+                    roundingPaddings.endLocked   = originalDomain.maxLocked;
                     
-                    var currLength = currDomain[1] - currDomain[0];
-                    if(currLength){
-                        var dif = origDomain[0] - currDomain[0];
-                        if(dif > 0){
-                            roundingPaddings.begin = dif / currLength;
-                        }
-    
-                        dif = currDomain[1] - origDomain[1];
-                        if(dif > 0){
-                            roundingPaddings.end = dif / currLength;
+                    if(scale.type === 'numeric' && this.option('DomainRoundMode') !== 'none'){
+                        var currDomain = scale.domain();
+                        var origDomain = this.domain || def.assert("Original domain must be set");
+                        var currLength = currDomain[1] - currDomain[0];
+                        if(currLength){
+                            // begin dif
+                            var dif = origDomain[0] - currDomain[0];
+                            if(dif > 0){
+                                roundingPaddings.begin = dif / currLength;
+                            }
+                            
+                            // end dif
+                            dif = currDomain[1] - origDomain[1];
+                            if(dif > 0){
+                                roundingPaddings.end = dif / currLength;
+                            }
                         }
                     }
-                    
-                    break;
                 }
                 
                 this._roundingPaddings = roundingPaddings;

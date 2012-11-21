@@ -159,7 +159,6 @@ var baseExampleDef = {
         hoverable:  true,
         
         axisGrid:   true,
-        axisOffset: 0,
         
         areasVisible:  false,
         dotsVisible:   false,
@@ -176,8 +175,8 @@ var baseExampleDef = {
         extensionPoints: {
           baseAxisScale_dateTickFormat:    "%Y/%m/%d",
           baseAxisScale_dateTickPrecision: 798336000/1.5
-          line_interpolate: 'monotone',
-          area_interpolate: 'monotone'
+          //line_interpolate: 'monotone',
+          //area_interpolate: 'monotone'
         }
      },
      showProps: lineExamplesShowProps
@@ -308,7 +307,7 @@ pvc.examples.register(def.create(baseCategDef, {
         linesVisible: true
     }
 }));
-        
+
 pvc.examples.register(def.create(baseCategDef, {
     id: 'line09',
     className: 'StackedAreaChart',
@@ -433,6 +432,7 @@ pvc.examples.register(def.create(baseExampleDef, {
         areasVisible:  true,
         dotsVisible:   false,
         plot2: true,
+        plot2Series: ['Lisbon'],
         plot2OrthoAxis: 2,
         plot2ColorAxis: 2,
         color2AxisColors: ['purple'],

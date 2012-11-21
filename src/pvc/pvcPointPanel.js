@@ -152,13 +152,17 @@ def
             }
         }
         
+        var isLineAreaVisible = isBaseDiscrete && isStacked ? 
+                function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
+                function(){ return !this.scene.isNull; };
+                
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
                 noTooltip:   false,
                 wrapper:     wrapper
             })
             
-            .lock('visible', function(){ return !this.scene.isNull; })
+            .lock('visible', isLineAreaVisible)
             
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
@@ -235,13 +239,7 @@ def
              *       b.1.1) not null or is an intermediate null
              *  b.2) not null
              */
-            .lock('visible',
-                    dotsVisibleOnly ? 
-                    def.retFalse : 
-                    (isBaseDiscrete && isStacked ? 
-                     function(){ return !this.scene.isNull; } :
-                     function(){ return !this.scene.isNull; })
-            )
+            .lock('visible', dotsVisibleOnly ? false : isLineAreaVisible)
             
             /* Color & Line */
             .override('defaultColor', function(type){

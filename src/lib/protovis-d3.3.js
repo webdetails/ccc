@@ -6923,17 +6923,18 @@ pv.SvgScene.monotoneTangents = function(points, from, to) {
   /* Compute the slopes of the secant lines between successive points. */
   for (k = 0 ; k < L - 1 ; k++) {
     j = from + k;
-    d[k] = (points[j+1].top - points[j].top)/(points[j+1].left - points[j].left);
+    var den = points[j+1].left - points[j].left;
+    d[k] = Math.abs(den) <= 1e-12 ? 0 : (points[j+1].top - points[j].top)/den;
   }
 
   /* Initialize the tangents at every point as the average of the secants. */
   m[0] = d[0];
   dx[0] = points[from + 1].left - points[from].left;
   for (k = 1, j = from + k ; k < L - 1 ; k++, j++) {
-    m[k] = (d[k-1]+d[k])/2;
+    m[k]  = (d[k-1]+d[k])/2;
     dx[k] = (points[j+1].left - points[j-1].left)/2;
   }
-  m[k] = d[k-1];
+  m[k]  = d[k-1];
   dx[k] = (points[j].left - points[j-1].left);
 
   /* Step 3. Very important, step 3. Yep. Wouldn't miss it. */
@@ -7224,7 +7225,7 @@ pv.SvgScene.areaSegmentedSmart = function(elm, scenes) {
           var attrs = Object.create(attrsBase);
           attrs['pointer-events'] = events;
           attrs.cursor = s.cursor;
-          attrs.d = pathT + "L" + pathB[0].substr(1) + pathB[1] + "Z";
+          attrs.d = pathT.join("") + "L" + pathB[0].substr(1) + pathB[1] + "Z";
           
           elm = this.expect(elm, 'path', scenes, i, attrs);
           
@@ -7991,7 +7992,7 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
           var attrs = Object.create(attrsBase);
           attrs['pointer-events'] = events;
           attrs.cursor = s.cursor;
-          attrs.d = path;
+          attrs.d = path.join("");
           
           elm = this.expect(elm, 'path', scenes, i, attrs);
           
@@ -8307,6 +8308,8 @@ pv.SvgScene.lineJoinPaths = function(paths, from, to) {
  * when neighbour scenes are invisible. 
  */
 pv.SvgScene.lineAreaDotAlone = function(elm, scenes, i) {
+  return elm;
+  /*
   var s = scenes[i];
   var s2;
   if(i > 0){
@@ -8330,7 +8333,7 @@ pv.SvgScene.lineAreaDotAlone = function(elm, scenes, i) {
   if(!style || !style.opacity){
     style = s.fillStyle;
   }
-  var radius = (s.lineWidth / this.scale) / 2;
+  var radius = Math.max(s.lineWidth  / 2, 1.5) / this.scale;
   
   var attrs = {
     'shape-rendering': s.antialias ? null : 'crispEdges',
@@ -8349,6 +8352,7 @@ pv.SvgScene.lineAreaDotAlone = function(elm, scenes, i) {
   if(s.svg) this.setAttributes(elm, s.svg);
   
   return this.append(elm, scenes, i);
+  */
 };
 
 pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment) {
@@ -8359,12 +8363,10 @@ pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment
   }
   
   // Besides breaking paths on visible, 
-  // should they break on properties as well? 
+  // should they break on properties as well?
   var breakOnKeyChange = pv.get(keyArgs, 'breakOnKeyChange', false);
   var from = pv.get(keyArgs, 'from') || 0;
   var to   = pv.get(keyArgs, 'to', scenes.length - 1);
-  
-  var count = from - to + 1;
   
   var ki, kf;
   if(breakOnKeyChange){
@@ -8402,7 +8404,7 @@ pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment
       }
       
       var sf = scenes[f2];
-      if(!this.isSceneVisible(sf)){
+      if(!this.isSceneVisible(sf)){  
         // f + 1 exists but is NOT strictly visible
         // Connect i to f (possibly, i === f)
         // Continue with f + 2
@@ -8425,7 +8427,7 @@ pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment
         }
       }
     }
-    
+  
     elm = lineAreaSegment.call(this, elm, scenes, i, f, keyArgs);
     
     // next part
@@ -11044,8 +11046,25 @@ pv.Area.prototype.defaults = new pv.Area()
 
 /** @private Sets width and height to zero if null. */
 pv.Area.prototype.buildImplied = function(s) {
-  if (s.height == null) s.height = 0;
-  if (s.width == null) s.width = 0;
+  var checkDirection = this.index === 0;
+  if(checkDirection){
+      this.isVertical = true;
+  }
+  
+  if (s.width == null) {
+      if(checkDirection){
+          checkDirection = false;
+      }
+      s.width = 0;
+  }
+  
+  if (s.height == null) {
+      if(checkDirection){
+          this.isVertical = false;
+      }
+      s.height = 0;
+  }
+  
   pv.Mark.prototype.buildImplied.call(this, s);
 };
 

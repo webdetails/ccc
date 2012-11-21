@@ -87,15 +87,20 @@ def
         pvc.Sides.names.forEach(function(side){
             var len_a = pvc.BasePanel.orthogonalLength[side];
             
-            var clientLen = clientSize[len_a];
+            var clientLen  = clientSize[len_a];
             var paddingLen = paddings[len_a];
             
             var len = clientLen + paddingLen;
             
-            var offset   = len * (op[side] || 0);
-            var rounding = clientLen * (rp[side] || 0);
-        
-            reqPad[side] = Math.max(offset - rounding, 0);
+            // Only request offset-padding if the rp.side is not locked
+            if(!rp[side + 'Locked']){
+                var offset   = len * (op[side] || 0);
+                var rounding = clientLen * (rp[side] || 0);
+            
+                reqPad[side] = Math.max(offset - rounding, 0);
+            } else {
+                reqPad[side] = 0;
+            }
         }, this);
         
         return reqPad;
