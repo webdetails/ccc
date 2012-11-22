@@ -68,7 +68,7 @@
   <notepads>
   </notepads>
   <order>
-  <hop> <from>Sort Properties</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>filter final</from><to>filter array</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Copy rows to result</to><enabled>Y</enabled> </hop>  <hop> <from>Detect empty stream</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Count Rows</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Detect empty stream</to><enabled>Y</enabled> </hop>  <hop> <from>filter final</from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>filter array</from><to>Regex Evaluation</to><enabled>Y</enabled> </hop>  <hop> <from>Modified Java Script Value 3</from><to>Split field to rows</to><enabled>Y</enabled> </hop>  <hop> <from>Split field to rows</from><to>Modified Java Script Value 3 2</to><enabled>Y</enabled> </hop>  <hop> <from>Modified Java Script Value 3 2</from><to>Sort Base 2</to><enabled>Y</enabled> </hop>  <hop> <from>Regex Evaluation</from><to>Filter rows 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2 2</from><to>Modified Java Script Value 3</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2 2</from><to>Ignore</to><enabled>Y</enabled> </hop>  <hop> <from>Count Rows</from><to>isEmptyStreamProperties (loop condition)</to><enabled>Y</enabled> </hop>  <hop> <from>isEmptyStreamProperties (loop condition)</from><to>Write to log</to><enabled>N</enabled> </hop>  <hop> <from>filter array</from><to>remove infinite </to><enabled>Y</enabled> </hop>  <hop> <from>remove infinite </from><to>Sort Properties</to><enabled>Y</enabled> </hop>  <hop> <from>remove infinite </from><to>ignore 3</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Text file output 2</to><enabled>N</enabled> </hop>  <hop> <from>replace cols for new loop </from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join</from><to>Copy Fields from Rows</to><enabled>Y</enabled> </hop>  <hop> <from>Copy Fields from Rows</from><to>Filter rows</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>replace cols for new loop </to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>replace cols</to><enabled>Y</enabled> </hop>  <hop> <from>replace cols</from><to>rm typeClass</to><enabled>Y</enabled> </hop>  <hop> <from>rm typeClass</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Read Base</from><to>Append streams</to><enabled>Y</enabled> </hop>  <hop> <from>Read ComplexTypes</from><to>Append streams</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Base</from><to>Unique rows</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Get rows from result</from><to>filter final</to><enabled>Y</enabled> </hop>  <hop> <from>Get last results</from><to>filter final</to><enabled>N</enabled> </hop>  <hop> <from>Append streams</from><to>Sort Base</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>Sort Properties</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>filter final</from><to>filter array</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Copy rows to result</to><enabled>Y</enabled> </hop>  <hop> <from>Detect empty stream</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Count Rows</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Detect empty stream</to><enabled>Y</enabled> </hop>  <hop> <from>filter array</from><to>Regex Evaluation</to><enabled>Y</enabled> </hop>  <hop> <from>Modified Java Script Value 3</from><to>Split field to rows</to><enabled>Y</enabled> </hop>  <hop> <from>Split field to rows</from><to>Modified Java Script Value 3 2</to><enabled>Y</enabled> </hop>  <hop> <from>Modified Java Script Value 3 2</from><to>Sort Base 2</to><enabled>Y</enabled> </hop>  <hop> <from>Regex Evaluation</from><to>Filter rows 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2 2</from><to>Modified Java Script Value 3</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2 2</from><to>Ignore</to><enabled>Y</enabled> </hop>  <hop> <from>Count Rows</from><to>isEmptyStreamProperties (loop condition)</to><enabled>Y</enabled> </hop>  <hop> <from>isEmptyStreamProperties (loop condition)</from><to>Write to log</to><enabled>N</enabled> </hop>  <hop> <from>filter array</from><to>remove infinite </to><enabled>Y</enabled> </hop>  <hop> <from>remove infinite </from><to>Sort Properties</to><enabled>Y</enabled> </hop>  <hop> <from>remove infinite </from><to>ignore 3</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Text file output 2</to><enabled>N</enabled> </hop>  <hop> <from>replace cols for new loop </from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Copy Fields from Rows</from><to>Filter rows</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>replace cols for new loop </to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>replace cols</to><enabled>Y</enabled> </hop>  <hop> <from>replace cols</from><to>rm typeClass</to><enabled>Y</enabled> </hop>  <hop> <from>rm typeClass</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Read Base</from><to>Append streams</to><enabled>Y</enabled> </hop>  <hop> <from>Read ComplexTypes</from><to>Append streams</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Base</from><to>Unique rows</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Get rows from result</from><to>filter final</to><enabled>Y</enabled> </hop>  <hop> <from>Get last results</from><to>filter final</to><enabled>Y</enabled> </hop>  <hop> <from>Append streams</from><to>Sort Base</to><enabled>Y</enabled> </hop>  <hop> <from>filter final</from><to>Dummy (do nothing)</to><enabled>Y</enabled> </hop>  <hop> <from>Dummy (do nothing)</from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join</from><to>Filter rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2</from><to>Copy Fields from Rows</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2</from><to>Dummy (do nothing) 2</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>Append streams</name>
     <type>Append</type>
@@ -109,7 +109,11 @@ var appendProperty = &quot;&quot;;
 
 if (property_1 != null)
 	var appendProperty = property + property_1.charAt(0).toUpperCase() + property_1.slice(1);
-</jsScript_script>
+
+&#47;*
+if ((property_1 != null) &amp;&amp; (appendableName == true))
+	var appendProperty = property + property_1.charAt(0).toUpperCase() + property_1.slice(1);
+*&#47;</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>appendProperty</name>
         <rename>appendProperty</rename>
         <type>String</type>
@@ -118,8 +122,8 @@ if (property_1 != null)
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>503</xloc>
-      <yloc>425</yloc>
+      <xloc>553</xloc>
+      <yloc>424</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -218,8 +222,8 @@ if (property_1 != null)
     </compare>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>594</xloc>
-      <yloc>425</yloc>
+      <xloc>643</xloc>
+      <yloc>424</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -310,9 +314,9 @@ if (property_1 != null)
         <type>String</type>
         <format/>
         <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
+        <decimal/>
+        <group/>
+        <nullif/>
         <ifnull/>
         <position>-1</position>
         <length>-1</length>
@@ -325,9 +329,9 @@ if (property_1 != null)
         <type>String</type>
         <format/>
         <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
+        <decimal/>
+        <group/>
+        <nullif/>
         <ifnull/>
         <position>-1</position>
         <length>-1</length>
@@ -340,9 +344,9 @@ if (property_1 != null)
         <type>String</type>
         <format/>
         <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
+        <decimal/>
+        <group/>
+        <nullif/>
         <ifnull/>
         <position>-1</position>
         <length>-1</length>
@@ -355,9 +359,9 @@ if (property_1 != null)
         <type>String</type>
         <format/>
         <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
+        <decimal/>
+        <group/>
+        <nullif/>
         <ifnull/>
         <position>-1</position>
         <length>-1</length>
@@ -385,9 +389,9 @@ if (property_1 != null)
         <type>String</type>
         <format/>
         <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
+        <decimal/>
+        <group/>
+        <nullif/>
         <ifnull/>
         <position>-1</position>
         <length>-1</length>
@@ -400,9 +404,9 @@ if (property_1 != null)
         <type>String</type>
         <format/>
         <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
+        <decimal/>
+        <group/>
+        <nullif/>
         <ifnull/>
         <position>-1</position>
         <length>-1</length>
@@ -415,9 +419,54 @@ if (property_1 != null)
         <type>String</type>
         <format/>
         <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>appendable</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>appendableName</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>deprecated</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
         <ifnull/>
         <position>-1</position>
         <length>-1</length>
@@ -430,9 +479,9 @@ if (property_1 != null)
         <type>String</type>
         <format/>
         <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
+        <decimal/>
+        <group/>
+        <nullif/>
         <ifnull/>
         <position>-1</position>
         <length>-1</length>
@@ -443,21 +492,6 @@ if (property_1 != null)
       <field>
         <name>atomValue</name>
         <type>String</type>
-        <format/>
-        <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif>-</nullif>
-        <ifnull/>
-        <position>-1</position>
-        <length>-1</length>
-        <precision>-1</precision>
-        <trim_type>both</trim_type>
-        <repeat>N</repeat>
-      </field>
-      <field>
-        <name>process</name>
-        <type>Boolean</type>
         <format/>
         <currency/>
         <decimal/>
@@ -498,7 +532,7 @@ if (property_1 != null)
     <sizeFieldName/>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>94</xloc>
+      <xloc>121</xloc>
       <yloc>195</yloc>
       <draw>Y</draw>
       </GUI>
@@ -546,6 +580,18 @@ if (property_1 != null)
         <type>String</type>
         <length>-1</length>
         <precision>-1</precision>
+        </field>      <field>        <name>appendable</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>appendableName</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>deprecated</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
         </field>      <field>        <name>atomName</name>
         <type>String</type>
         <length>-1</length>
@@ -554,13 +600,9 @@ if (property_1 != null)
         <type>String</type>
         <length>-1</length>
         <precision>-1</precision>
-        </field>      <field>        <name>process</name>
-        <type>Boolean</type>
-        <length>-1</length>
-        <precision>-1</precision>
         </field>      </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>93</xloc>
+      <xloc>120</xloc>
       <yloc>52</yloc>
       <draw>Y</draw>
       </GUI>
@@ -871,6 +913,51 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
         <repeat>N</repeat>
       </field>
       <field>
+        <name>appendable</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>appendableName</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>deprecated</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
         <name>atomName</name>
         <type>String</type>
         <format/>
@@ -913,21 +1000,6 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
         <length>-1</length>
         <precision>-1</precision>
         <trim_type>both</trim_type>
-        <repeat>N</repeat>
-      </field>
-      <field>
-        <name>process</name>
-        <type>Boolean</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <ifnull/>
-        <position>-1</position>
-        <length>-1</length>
-        <precision>-1</precision>
-        <trim_type>right</trim_type>
         <repeat>N</repeat>
       </field>
     </fields>
@@ -1163,6 +1235,51 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
         <repeat>N</repeat>
       </field>
       <field>
+        <name>appendable</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>appendableName</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>deprecated</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
         <name>atomName</name>
         <type>String</type>
         <format/>
@@ -1195,21 +1312,6 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
       <field>
         <name>atomDescription</name>
         <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <ifnull/>
-        <position>-1</position>
-        <length>-1</length>
-        <precision>-1</precision>
-        <trim_type>both</trim_type>
-        <repeat>N</repeat>
-      </field>
-      <field>
-        <name>process</name>
-        <type>Boolean</type>
         <format/>
         <currency/>
         <decimal/>
@@ -1342,16 +1444,24 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
         <rename/>
         <length>-2</length>
         <precision>-2</precision>
+      </field>      <field>        <name>appendable</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>appendableName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>deprecated</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
       </field>      <field>        <name>atomName_1</name>
         <rename>atomName</rename>
         <length>-2</length>
         <precision>-2</precision>
       </field>      <field>        <name>atomValue_1</name>
         <rename>atomValue</rename>
-        <length>-2</length>
-        <precision>-2</precision>
-      </field>      <field>        <name>process</name>
-        <rename/>
         <length>-2</length>
         <precision>-2</precision>
       </field>        <select_unspecified>N</select_unspecified>
@@ -1432,6 +1542,21 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
         <case_sensitive>N</case_sensitive>
       </field>
       <field>
+        <name>appendable</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>appendableName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>deprecated</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
         <name>atomName</name>
         <ascending>Y</ascending>
         <case_sensitive>N</case_sensitive>
@@ -1443,11 +1568,6 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
       </field>
       <field>
         <name>atomDescription</name>
-        <ascending>Y</ascending>
-        <case_sensitive>N</case_sensitive>
-      </field>
-      <field>
-        <name>process</name>
         <ascending>Y</ascending>
         <case_sensitive>N</case_sensitive>
       </field>
@@ -1743,18 +1863,6 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
         <length>-1</length>
         <precision>-1</precision>
       </field>
-      <field>
-        <name>process</name>
-        <type>Boolean</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
@@ -1981,13 +2089,17 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
         <case_insensitive>N</case_insensitive>
         </field>      <field>        <name>abstract</name>
         <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>appendable</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>appendableName</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>deprecated</name>
+        <case_insensitive>N</case_insensitive>
         </field>      <field>        <name>atomName</name>
         <case_insensitive>N</case_insensitive>
         </field>      <field>        <name>atomValue</name>
         <case_insensitive>N</case_insensitive>
         </field>      <field>        <name>atomDescription</name>
-        <case_insensitive>N</case_insensitive>
-        </field>      <field>        <name>process</name>
         <case_insensitive>N</case_insensitive>
         </field>      </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
@@ -2061,7 +2173,7 @@ if (listTypeSeparated.lastIndexOf(&apos;.&apos;) &gt; 0)
            <method>none</method>
            <schema_name/>
            </partitioning>
-<send_true_to>Text file output</send_true_to>
+<send_true_to>Dummy (do nothing)</send_true_to>
 <send_false_to>filter array</send_false_to>
     <compare>
 <condition>
@@ -2199,7 +2311,7 @@ else
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>709</xloc>
+      <xloc>731</xloc>
       <yloc>373</yloc>
       <draw>Y</draw>
       </GUI>
@@ -2244,11 +2356,19 @@ else
         <name>propertyDefault</name>
         <replaceby>propertyDefault_1</replaceby>
         </field>
+      <field>
+        <name>appendable</name>
+        <replaceby>appendable_1</replaceby>
+        </field>
+      <field>
+        <name>appendableName</name>
+        <replaceby>appendableName_1</replaceby>
+        </field>
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>748</xloc>
-      <yloc>480</yloc>
+      <xloc>775</xloc>
+      <yloc>476</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -2273,8 +2393,72 @@ else
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>779</xloc>
+      <xloc>809</xloc>
       <yloc>372</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Dummy (do nothing)</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>503</xloc>
+      <yloc>52</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Filter rows 2</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>Copy Fields from Rows</send_true_to>
+<send_false_to>Dummy (do nothing) 2</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <leftvalue>appendable_1</leftvalue>
+ <function>=</function>
+ <rightvalue/>
+ <value><name>constant</name><type>Boolean</type><text>Y</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value> </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>464</xloc>
+      <yloc>425</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Dummy (do nothing) 2</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>461</xloc>
+      <yloc>515</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
