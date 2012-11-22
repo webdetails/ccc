@@ -69,7 +69,7 @@
   <notepads>
   </notepads>
   <order>
-  <hop> <from>Original Table Sort</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Get Abstracts</from><to>Don not care</to><enabled>Y</enabled> </hop>  <hop> <from>Expand</from><to>IsProperty?</to><enabled>Y</enabled> </hop>  <hop> <from>IsProperty?</from><to>Ignore</to><enabled>Y</enabled> </hop>  <hop> <from>Replace Prop Name</from><to>Select values 3</to><enabled>Y</enabled> </hop>  <hop> <from>Abstract = N</from><to>Replace Prop Name</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join</from><to>Abstract = N</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Rows to go again</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Group by</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Detect empty stream</to><enabled>Y</enabled> </hop>  <hop> <from>Detect empty stream</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Group by</from><to>Modified Java Script Value</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Read Base</from><to>Get Abstracts</to><enabled>N</enabled> </hop>  <hop> <from>Expand</from><to>Process Table Sort 2</to><enabled>Y</enabled> </hop>  <hop> <from>Process Table Sort 2</from><to>Unique rows</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Get rows from result</from><to>Get Abstracts</to><enabled>Y</enabled> </hop>  <hop> <from>Get Abstracts</from><to>Get Abstracts 2</to><enabled>Y</enabled> </hop>  <hop> <from>Get Abstracts 2</from><to>Expand</to><enabled>Y</enabled> </hop>  <hop> <from>Get Abstracts 2</from><to>Don not care 2</to><enabled>Y</enabled> </hop>  <hop> <from>Read Base</from><to>Get Abstracts 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Get Abstracts 2 2</from><to>Don not care 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Get Abstracts 2 2</from><to>Original Table Sort</to><enabled>Y</enabled> </hop>  <hop> <from>Group by</from><to>Write to log</to><enabled>N</enabled> </hop>  <hop> <from>IsProperty?</from><to>Text file output</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>Original Table Sort</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>is property?</from><to>Ignore</to><enabled>Y</enabled> </hop>  <hop> <from>Replace Prop Name</from><to>Select values 3</to><enabled>Y</enabled> </hop>  <hop> <from>Abstract = N</from><to>Replace Prop Name</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join</from><to>Abstract = N</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Rows to go again</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Group by</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Detect empty stream</to><enabled>Y</enabled> </hop>  <hop> <from>Detect empty stream</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Group by</from><to>Modified Java Script Value</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Process Table Sort 2</from><to>Unique rows</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude Atom Values</from><to>Don not care 2</to><enabled>Y</enabled> </hop>  <hop> <from>Read Base</from><to>Get Abstracts 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Get Abstracts 2 2</from><to>Don not care 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Get Abstracts 2 2</from><to>Original Table Sort</to><enabled>Y</enabled> </hop>  <hop> <from>Group by</from><to>Write to log</to><enabled>N</enabled> </hop>  <hop> <from>Get rows from result</from><to>Exclude Atom Values</to><enabled>Y</enabled> </hop>  <hop> <from>Read Base</from><to>Exclude Atom Values</to><enabled>N</enabled> </hop>  <hop> <from>is deprecated?</from><to>Ignore 2</to><enabled>Y</enabled> </hop>  <hop> <from>is property?</from><to>is deprecated?</to><enabled>Y</enabled> </hop>  <hop> <from>is deprecated?</from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Ignore 2</from><to>Text file output 2</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude Atom Values</from><to>copy</to><enabled>Y</enabled> </hop>  <hop> <from>copy</from><to>is property?</to><enabled>Y</enabled> </hop>  <hop> <from>copy</from><to>Process Table Sort 2</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>Abstract = N</name>
     <type>SetValueConstant</type>
@@ -90,7 +90,7 @@
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>539</xloc>
+      <xloc>512</xloc>
       <yloc>470</yloc>
       <draw>Y</draw>
       </GUI>
@@ -108,26 +108,8 @@
            </partitioning>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>903</xloc>
-      <yloc>407</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Don not care</name>
-    <type>Dummy</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>196</xloc>
-      <yloc>34</yloc>
+      <xloc>850</xloc>
+      <yloc>406</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -162,32 +144,14 @@
            </partitioning>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>185</xloc>
-      <yloc>383</yloc>
+      <xloc>184</xloc>
+      <yloc>360</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>Expand</name>
-    <type>Dummy</type>
-    <description/>
-    <distribute>N</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>420</xloc>
-      <yloc>124</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Get Abstracts</name>
+    <name>Exclude Atom Values</name>
     <type>FilterRows</type>
     <description/>
     <distribute>Y</distribute>
@@ -196,24 +160,16 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-<send_true_to>Get Abstracts 2</send_true_to>
-<send_false_to>Don not care</send_false_to>
+<send_true_to>copy</send_true_to>
+<send_false_to>Don not care 2</send_false_to>
     <compare>
 <condition>
- <negated>Y</negated>
+ <negated>N</negated>
  <conditions>
   <condition>
    <negated>N</negated>
-   <operator>AND</operator>
-   <leftvalue>base</leftvalue>
-   <function>=</function>
-   <rightvalue/>
-   <value><name>constant</name><type>String</type><text/><length>0</length><precision>-1</precision><isnull>Y</isnull><mask/></value>   </condition>
-  <condition>
-   <negated>N</negated>
-   <operator>AND</operator>
-   <leftvalue>abstract</leftvalue>
-   <function>=</function>
+   <leftvalue>atomName</leftvalue>
+   <function>IS NULL</function>
    <rightvalue/>
    <value><name>constant</name><type>Boolean</type><text>Y</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
   </conditions>
@@ -221,36 +177,8 @@
     </compare>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>195</xloc>
+      <xloc>295</xloc>
       <yloc>124</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Get Abstracts 2</name>
-    <type>FilterRows</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-<send_true_to>Expand</send_true_to>
-<send_false_to>Don not care 2</send_false_to>
-    <compare>
-<condition>
- <negated>N</negated>
- <leftvalue>atomName</leftvalue>
- <function>IS NULL</function>
- <rightvalue/>
- <value><name>constant</name><type>Boolean</type><text>Y</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value> </condition>
-    </compare>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>298</xloc>
-      <yloc>125</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -270,10 +198,15 @@
     <compare>
 <condition>
  <negated>N</negated>
- <leftvalue>atomName</leftvalue>
- <function>IS NULL</function>
- <rightvalue/>
- <value><name>constant</name><type>Boolean</type><text>Y</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value> </condition>
+ <conditions>
+  <condition>
+   <negated>N</negated>
+   <leftvalue>atomName</leftvalue>
+   <function>IS NULL</function>
+   <rightvalue/>
+   <value><name>constant</name><type>Boolean</type><text>Y</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  </conditions>
+ </condition>
     </compare>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
@@ -333,6 +266,30 @@
         <type>Boolean</type>
         <length>-1</length>
         <precision>-1</precision>
+        </field>      <field>        <name>appendable</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>appendableName</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>deprecated</name>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>atomName</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>atomValue</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        </field>      <field>        <name>atomDescription</name>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
         </field>      </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>38</xloc>
@@ -371,8 +328,8 @@
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>808</xloc>
-      <yloc>265</yloc>
+      <xloc>735</xloc>
+      <yloc>236</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -389,14 +346,14 @@
            </partitioning>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>538</xloc>
-      <yloc>248</yloc>
+      <xloc>515</xloc>
+      <yloc>238</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>IsProperty?</name>
+    <name>is property?</name>
     <type>FilterRows</type>
     <description/>
     <distribute>Y</distribute>
@@ -405,7 +362,7 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-<send_true_to>Text file output</send_true_to>
+<send_true_to>is deprecated?</send_true_to>
 <send_false_to>Ignore</send_false_to>
     <compare>
 <condition>
@@ -417,7 +374,7 @@
     </compare>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>537</xloc>
+      <xloc>515</xloc>
       <yloc>124</yloc>
       <draw>Y</draw>
       </GUI>
@@ -444,8 +401,8 @@
     </keys_2>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>421</xloc>
-      <yloc>470</yloc>
+      <xloc>411</xloc>
+      <yloc>469</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -472,8 +429,8 @@ else
 	setVariable(&quot;isEmptyStreamComplexTypes&quot;,&quot;TRUE&quot;,&quot;s&quot;);</jsScript_script>
       </jsScript>    </jsScripts>    <fields>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>923</xloc>
-      <yloc>265</yloc>
+      <xloc>850</xloc>
+      <yloc>236</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -536,8 +493,8 @@ else
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>419</xloc>
-      <yloc>200</yloc>
+      <xloc>411</xloc>
+      <yloc>239</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -741,6 +698,51 @@ else
         <repeat>N</repeat>
       </field>
       <field>
+        <name>appendable</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>appendableName</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>deprecated</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
         <name>atomName</name>
         <type>String</type>
         <format/>
@@ -813,8 +815,8 @@ else
     <sizeFieldName/>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>41</xloc>
-      <yloc>470</yloc>
+      <xloc>42</xloc>
+      <yloc>473</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -866,10 +868,18 @@ else
         <name>propertyDefault</name>
         <replaceby>propertyDefault_1</replaceby>
         </field>
+      <field>
+        <name>deprecated</name>
+        <replaceby>deprecated_1</replaceby>
+        </field>
+      <field>
+        <name>appendableName</name>
+        <replaceby>appendableName_1</replaceby>
+        </field>
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>681</xloc>
+      <xloc>623</xloc>
       <yloc>470</yloc>
       <draw>Y</draw>
       </GUI>
@@ -887,8 +897,8 @@ else
            </partitioning>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>1075</xloc>
-      <yloc>470</yloc>
+      <xloc>983</xloc>
+      <yloc>469</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -943,6 +953,18 @@ else
         <rename/>
         <length>-2</length>
         <precision>-2</precision>
+      </field>      <field>        <name>appendable</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>appendableName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>deprecated</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
       </field>      <field>        <name>atomName</name>
         <rename/>
         <length>-2</length>
@@ -958,8 +980,8 @@ else
       </field>        <select_unspecified>N</select_unspecified>
     </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>810</xloc>
-      <yloc>470</yloc>
+      <xloc>736</xloc>
+      <yloc>469</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -990,8 +1012,8 @@ else
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>809</xloc>
-      <yloc>357</yloc>
+      <xloc>735</xloc>
+      <yloc>356</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1159,6 +1181,42 @@ else
         <precision>-1</precision>
       </field>
       <field>
+        <name>appendable</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>appendableName</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>deprecated</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
         <name>atomName</name>
         <type>String</type>
         <format/>
@@ -1197,7 +1255,7 @@ else
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>693</xloc>
+      <xloc>736</xloc>
       <yloc>125</yloc>
       <draw>Y</draw>
       </GUI>
@@ -1223,8 +1281,8 @@ else
         <case_insensitive>N</case_insensitive>
         </field>      </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>422</xloc>
-      <yloc>341</yloc>
+      <xloc>412</xloc>
+      <yloc>361</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1249,8 +1307,303 @@ else
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>922</xloc>
-      <yloc>180</yloc>
+      <xloc>849</xloc>
+      <yloc>124</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Ignore 2</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>627</xloc>
+      <yloc>239</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>is deprecated?</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>Text file output</send_true_to>
+<send_false_to>Ignore 2</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <leftvalue>deprecated</leftvalue>
+ <function>=</function>
+ <rightvalue/>
+ <value><name>constant</name><type>Boolean</type><text>N</text><length>0</length><precision>-1</precision><isnull>N</isnull><mask/></value> </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>626</xloc>
+      <yloc>124</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Text file output 2</name>
+    <type>TextFileOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <separator>;</separator>
+    <enclosure>&quot;</enclosure>
+    <enclosure_forced>N</enclosure_forced>
+    <enclosure_fix_disabled>N</enclosure_fix_disabled>
+    <header>Y</header>
+    <footer>N</footer>
+    <format>DOS</format>
+    <compression>None</compression>
+    <encoding/>
+    <endedLine/>
+    <fileNameInField>N</fileNameInField>
+    <fileNameField/>
+    <create_parent_folder>N</create_parent_folder>
+    <file>
+      <name>${Internal.Transformation.Filename.Directory}&#47;output&#47;final-deprecated-process-complex</name>
+      <is_command>N</is_command>
+      <servlet_output>N</servlet_output>
+      <do_not_open_new_file_init>N</do_not_open_new_file_init>
+      <extention>txt</extention>
+      <append>Y</append>
+      <split>N</split>
+      <haspartno>N</haspartno>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <add_to_result_filenames>Y</add_to_result_filenames>
+      <pad>N</pad>
+      <fast_dump>N</fast_dump>
+      <splitevery>0</splitevery>
+    </file>
+    <fields>
+      <field>
+        <name>name</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>base</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>property</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>propertyType</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>propertyDescription</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>propertyDefault</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>typeSeparated</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>typeFinal</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>typeClass</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>abstract</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>appendable</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>deprecated</name>
+        <type>Boolean</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>atomName</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>atomValue</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>atomDescription</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>both</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>626</xloc>
+      <yloc>357</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>copy</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>412</xloc>
+      <yloc>124</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
