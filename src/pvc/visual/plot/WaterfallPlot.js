@@ -35,7 +35,7 @@ def.scope(function(){
                 resolve: pvc.options.resolvers([
                              '_resolveNormal',
                              function(optionInfo){
-                                 this.specify(this.option('ValuesVisible'));
+                                 optionInfo.specify(this.option('ValuesVisible'));
                                  return true;
                              }
                          ]),

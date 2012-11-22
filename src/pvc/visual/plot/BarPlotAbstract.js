@@ -43,7 +43,7 @@ def.scope(function(){
                              // default to v1 option
                              var barSizeMax = this.option('MaxBarSize');
                              if(barSizeMax !== undefined){
-                                 this.specify(barSizeMax);
+                                 optionInfo.specify(barSizeMax);
                                  return true;
                              }
                          },

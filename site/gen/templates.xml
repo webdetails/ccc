@@ -93,4 +93,18 @@
         <t:example title="SIZE, COLOR AND COMPOSITE AXIS" />
     </t:template>
     
+    <t:template name="waterfallExamples" exampleMask="cccWaterfallExample{0}.js">
+        <t:summary>
+            Waterfall charts are an alternative to pie charts for displaying distributions.
+            However when it's time to compare the size of categories and sub-categories, 
+            waterfall are the most convenient representation:<br />
+            while in a pie-chart you would have to compare wedges at different angles, 
+            in a waterfall chart you just compare the size of bars as all bars are parallel to one another.
+        </t:summary>
+        <t:example title="DOWN WATERFALL" />
+        <t:example title="UP WATERFALL" />
+        <t:example title="UP AND DOWN WATERFALL" />
+        
+    </t:template>
+    
 </t:templates>

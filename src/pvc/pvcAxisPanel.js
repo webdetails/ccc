@@ -357,6 +357,12 @@ def
     
     _calcMaxTextLengthThatFits: function(){
         var layoutInfo = this._layoutInfo;
+        
+        if(this.compatVersion() <= 1){
+            layoutInfo.maxTextWidth = null;
+            return;
+        }
+        
         var availableClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
         
         var efSize = Math.min(layoutInfo.axisSize, availableClientLength);

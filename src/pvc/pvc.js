@@ -82,6 +82,24 @@ var pvc = def.globalSpace('pvc', {
     
     syncTipsyLog();
     
+    /**
+     * Gets or sets the default CCC compatibility mode. 
+     * <p>
+     * Use <tt>Infinity</tt> for the <i>latest</i> version.
+     * Use <tt>1</tt> for CCC version 1.
+     * </p>
+     * 
+     * @param {number} [compatVersion] The new compatibility version.    
+     */
+    pvc.defaultCompatVersion = function(compatVersion){
+        var defaults = pvc.BaseChart.prototype.defaults;
+        if(compatVersion != null){
+            return defaults.compatVersion = compatVersion;
+        } 
+        
+        return defaults.compatVersion;
+    };
+    
     pvc.cloneMatrix = function(m){
         return m.map(function(d){
             return d.slice();

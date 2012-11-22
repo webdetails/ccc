@@ -1,7 +1,7 @@
 #!/bin/sh
 
-FILENAMED="dist/ccc/pvc-d1.0.js"
-FILENAMER="dist/ccc/pvc-r1.0.js"
+FILENAMED="dist/ccc/pvc-d2.0.js"
+FILENAMER="dist/ccc/pvc-r2.0.js"
 
 rm doc/summary/*.html;
 
