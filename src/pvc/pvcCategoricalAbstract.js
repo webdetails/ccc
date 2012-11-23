@@ -1,4 +1,3 @@
-
 /**
  * CategoricalAbstract is the base class for all categorical or timeseries
  */
@@ -608,7 +607,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         
         // DOMAIN
         var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
-            dMax = this.dataEngine.getSecondAxisMax(),
+            dMax = secondAxisOrthoFixedMax || this.dataEngine.getSecondAxisMax(),
             dMin = this.dataEngine.getSecondAxisMin();
 
         if(dMin * dMax > 0 && options.secondAxisOriginIsZero){
@@ -788,6 +787,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         secondAxisMinorTicks: true,
         secondAxisTitle: undefined,
         secondAxisTitleSize: undefined,
+        secondAxisOrthoFixedMax: null,
 
         panelSizeRatio: 0.9,
         
