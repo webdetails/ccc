@@ -607,7 +607,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         
         // DOMAIN
         var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
-            dMax = secondAxisOrthoFixedMax || this.dataEngine.getSecondAxisMax(),
+            dMax = options.secondAxisOrthoFixedMax || this.dataEngine.getSecondAxisMax(),
             dMin = this.dataEngine.getSecondAxisMin();
 
         if(dMin * dMax > 0 && options.secondAxisOriginIsZero){
