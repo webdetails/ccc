@@ -24,38 +24,38 @@ def.scope(function(){
                 value:   true
             },
             
-            WaterLineLabel: {
-                resolve: '_resolveNormal',
+            TotalLineLabel: {
+                resolve: '_resolveFull',
                 cast:    String,
                 value:   "Accumulated"
             },
             
-            WaterValuesVisible: {
-                // Values Visible?
-                resolve: pvc.options.resolvers([
-                             '_resolveNormal',
-                             function(optionInfo){
-                                 optionInfo.specify(this.option('ValuesVisible'));
-                                 return true;
-                             }
-                         ]),
+            TotalValuesVisible: { 
+                resolve: '_resolveFull',
+                data: {
+                    // Dynamic default
+                    resolveDefault: function(optionInfo){
+                        optionInfo.defaultValue(this.option('ValuesVisible'));
+                        return true;
+                    }
+                },
                 cast:    Boolean
             },
             
             Direction: { // up/down
-                resolve: '_resolveNormal',
+                resolve: '_resolveFull',
                 cast:    pvc.parseWaterDirection,
                 value:   'down'
             },
             
             AreasVisible: {
-                resolve: '_resolveNormal',
+                resolve: '_resolveFull',
                 cast:    Boolean,
                 value:   true
             },
             
             AllCategoryLabel: {
-                resolve: '_resolveNormal',
+                resolve: '_resolveFull',
                 cast:    String,
                 value:   "All"
             }

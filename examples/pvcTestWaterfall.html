@@ -193,8 +193,8 @@ in a waterfall chart you just compare the size of bars as all bars are parallel 
   <li>valuesVisible - Show or hide bar value. Default: false</li>
   <li>direction - Should the water fall? 'down', or not: 'up'. Default: 'down'</li>
   <li>allCategoryLabel - The label of the root group. Default: 'All'</li>
-  <li>waterLineLabel - The legend label of the accumulated line. Default: 'Accumulated'</li>
-  <li>waterValuesVisible - Show or hide waterfall line values. Default: valuesVisible</li>
+  <li>totalLineLabel - The legend label of the accumulated line. Default: 'Accumulated'</li>
+  <li>totalValuesVisible - Show or hide waterfall line values. Default: valuesVisible</li>
   <li>areasVisible - Show or hide the areas that enclose waterfall groups. Default: true</li>
   <li>panelSizeRatio - Ratio of the band occupied by the pane.
 Default: 0.5 (50%)</li>
@@ -247,7 +247,7 @@ for Waterfall extension points:
   <li>water_</li>
   <li>chart_</li>
   <li>waterLine_</li>
-  <li>waterLineLabel_</li>
+  <li>totalLineLabel_</li>
   <li>waterGroup_</li>
 </ul>
 Sample extension points:<br>
@@ -279,8 +279,8 @@ var wf1 = new pvc.WaterfallChart({
 
     direction: 'down',  // 'up',
     areasVisible: true,
-    waterValuesVisible: true,
-    waterLineLabel: "Accumulated",
+    totalValuesVisible: true,
+    totalLineLabel: "Accumulated",
     allCategoryLabel: "All",
     
     animate: false,
@@ -493,9 +493,9 @@ var wf5 = new pvc.WaterfallChart({
     
     direction: 'up',
     areasVisible: true,
-    waterValuesVisible: true,
+    totalValuesVisible: true,
     allCategoryLabel: "Profit",
-    //waterLineLabel: "Accumulated",
+    //totalLineLabel: "Accumulated",
     
     /* Visual Role mapping */
     visualRoles: {

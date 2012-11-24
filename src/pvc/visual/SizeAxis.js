@@ -14,10 +14,10 @@ def.scope(function(){
     .type('pvc.visual.SizeAxis', pvc.visual.Axis)
     .init(function(chart, type, index, keyArgs){
         
-        this.base(chart, type, index, keyArgs);
+        // prevent naked resolution of size axis
+        keyArgs = def.set(keyArgs, 'byNaked', false);
         
-        /* this.scaleType === 'discrete' && */
-    
+        this.base(chart, type, index, keyArgs);
     })
     .add(/** @lends pvc.visual.SizeAxis# */{
         
@@ -42,10 +42,6 @@ def.scope(function(){
             }
             
             return this;
-        },
-        
-        _resolveByNaked: function(){
-            // prevent naked resolution of size axes
         },
         
         _getOptionsDefinition: function(){

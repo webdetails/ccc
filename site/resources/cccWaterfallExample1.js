@@ -12,8 +12,8 @@ new pvc.WaterfallChart({
     direction:         'down',
     areasVisible:       true,
     valuesVisible:      true,
-    waterValuesVisible: true,
-    waterLineLabel:     "Accumulated",
+    totalValuesVisible: true,
+    totalLineLabel:     "Accumulated",
     allCategoryLabel:   "All",
     
     animate:    false,

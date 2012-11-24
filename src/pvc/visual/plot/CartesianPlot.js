@@ -58,27 +58,26 @@ def.scope(function(){
             },
             
             OrthoAxis: {
-                resolve: pvc.options.resolvers([
-                    function(optionInfo){
-                        if(this.globalIndex === 0){
-                            // plot0 must use ortho axis 0!
-                            // This also ensures that the ortho axis 0 is created...
-                            optionInfo.specify(1);
-                            return true;
-                        }
-                        
-                        // V1 compatibility
+                resolve: function(optionInfo){
+                    if(this.globalIndex === 0){
+                        // plot0 must use ortho axis 0!
+                        // This also ensures that the ortho axis 0 is created...
+                        optionInfo.specify(1);
+                        return true;
+                    }
+                    
+                    return this._resolveFull(optionInfo);
+                },
+                data: {
+                    resolveV1: function(optionInfo){
                         if(this.name === 'plot2' &&
-                           this.chart._allowV1SecondAxis &&
-                           this._chartOption('secondAxisIndependentScale')){
-                            optionInfo.specify(2);
-                            return true;
+                            this.chart._allowV1SecondAxis &&
+                            this._chartOption('secondAxisIndependentScale')){
+                             optionInfo.specify(2);
                         }
-                    },
-                    '_resolveFixed',
-                    '_resolveNormal',
-                    '_resolveDefault'
-                ]),
+                        return true;
+                    }
+                },
                 cast: function(value){
                     value = pvc.castNumber(value);
                     if(value != null){
@@ -101,10 +100,9 @@ def.scope(function(){
             },
             
             Trend: {
-                resolve: pvc.options.resolvers([
-                    '_resolveFixed',
-                    '_resolveNormal',
-                    function(optionInfo){
+                resolve: '_resolveFull',
+                data: {
+                    resolveDefault: function(optionInfo){
                         var type = this.option('TrendType');
                         if(type){
                             // Cast handles the rest
@@ -114,8 +112,8 @@ def.scope(function(){
                             return true;
                         }
                     }
-                ]),
-                cast:    castTrend
+                },
+                cast: castTrend
             },
             
             TrendType: {

@@ -291,6 +291,11 @@ def.scope(function(){
             this.isResolved = true;
         }
         
+        var data = def.get(spec, 'data');
+        if(data != null){
+            this.data = data;
+        }
+        
         // --------
         // Can be used by resolvers...
         this.alias = def.array.to(def.get(spec, 'alias'));

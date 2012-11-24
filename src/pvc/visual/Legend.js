@@ -10,13 +10,15 @@ def.scope(function(){
      */
     def
     .type('pvc.visual.Legend', pvc.visual.OptionsBase)
+    .init(function(chart, type, index, keyArgs){
+        // prevent naked resolution of legend
+        keyArgs = def.set(keyArgs, 'byNaked', false);
+        
+        this.base(chart, type, index, keyArgs);
+    })
     .add(/** @lends Legend# */{
         _getOptionsDefinition: function(){
             return legend_optionsDef;
-        },
-        
-        _resolveByNaked: function(){
-            // prevent naked resolution of legend
         }
     });
     
@@ -64,8 +66,9 @@ def.scope(function(){
         },
         
         Align: {
-            resolve: function(optionInfo){
-                if(!this._resolveNormal(optionInfo)){
+            resolve: '_resolveFull',
+            data: {
+                resolveDefault: function(optionInfo){
                     // Default value of align depends on position
                     var position = this.option('Position');
                     var align;
@@ -76,15 +79,17 @@ def.scope(function(){
                     }
                     
                     optionInfo.defaultValue(align);
+                    return true;
                 }
             },
             cast: castAlign
         },
         
         Margins:  {
-            resolve: function(optionInfo){
-                if(!this._resolveNormal(optionInfo)){
-                    
+            resolve: '_resolveFull',
+            data: {
+                resolveDefault: function(optionInfo){
+                    // Default value of align depends on position
                     // Default value of margins depends on position
                     if(this.chart.compatVersion() > 1){
                         var position = this.option('Position');
@@ -94,6 +99,8 @@ def.scope(function(){
                         
                         optionInfo.defaultValue(margins);
                     }
+                    
+                    return true;
                 }
             },
             cast: pvc.Sides.as

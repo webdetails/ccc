@@ -196,7 +196,7 @@ For more information on boxplots you can visit
   <li>stacked (true|false)</li>
   <li>panelSizeRatio - Ratio of occupied vs total size of category band. Default: 0.9 (90%)</li>
   <li>boxSizeRatio - Ratio of box size vs category band size. Default: 0.3 (30%)</li>
-  <li>maxBoxSize - Maximum size of a box in pixels.</li>
+  <li>boxSizeMax - Maximum size of a box in pixels.</li>
 </ul>
 <h4>Line properties</h4>
 <ul>
@@ -295,7 +295,7 @@ var box2 = new pvc.BoxplotChart({
     baseAxisGrid: true,
     //boxSizeRatio: 0.3,
     panelSizeRatio: 0.8,
-    maxBoxSize: 10,
+    boxSizeMax: 10,
     selectable: true,
     hoverable: true,
 
@@ -328,7 +328,7 @@ var box3 = new pvc.BoxplotChart({
     title:   "Boxplot with line chart",
     animate: false,
     baseAxisGrid: true,
-    maxBoxSize: 20,
+    boxSizeMax: 20,
     plot2: true,
     plot2LinesVisible: true,
     plot2DotsVisible: true,

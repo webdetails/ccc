@@ -36,19 +36,14 @@ def.scope(function(){
         },
         
         BarSizeMax: {
-            resolve: pvc.options.resolvers([
-                         '_resolveFixed',
-                         '_resolveNormal',
-                         function(optionInfo){
-                             // default to v1 option
-                             var barSizeMax = this.option('MaxBarSize');
-                             if(barSizeMax !== undefined){
-                                 optionInfo.specify(barSizeMax);
-                                 return true;
-                             }
-                         },
-                         '_resolveDefault'
-                     ]),
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    // default to v1 option
+                    this._specifyChartOption(optionInfo, 'maxBarSize');
+                    return true;
+                }
+            },
             cast: function(value){
                 value = pvc.castNumber(value);
                 if(value == null){
@@ -73,12 +68,6 @@ def.scope(function(){
                 return value;
             },
             value:   0
-        },
-        
-        // Deprecated
-        MaxBarSize: {
-            resolve: '_resolveFull',
-            cast:    pvc.castNumber
         },
         
         OverflowMarkersVisible: {

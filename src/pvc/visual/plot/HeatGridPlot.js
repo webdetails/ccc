@@ -45,7 +45,7 @@ def.scope(function(){
                 value:   'cross'
             },
             
-            ShowValues: { // override
+            ValuesVisible: { // override
                 value: true
             },
             

@@ -49,18 +49,14 @@ def.scope(function(){
             },
             
             BoxSizeMax: {
-                resolve: pvc.options.resolvers([
-                    '_resolveFixed',
-                    '_resolveNormal',
-                    function(optionInfo){
-                        var value = this.option('MaxBoxSize');
-                        if(value !== undefined){
-                            optionInfo.specify(value);
-                            return true;
-                        }
-                    },
-                    '_resolveDefault'
-                ]),
+                resolve: '_resolveFull',
+                data: {
+                    resolveV1: function(optionInfo){
+                        // default to v1 option
+                        this._specifyChartOption(optionInfo, 'maxBoxSize');
+                        return true;
+                    }
+                },
                 cast: function(value){
                     value = pvc.castNumber(value);
                     if(value == null){
@@ -72,12 +68,6 @@ def.scope(function(){
                     return value;
                 },
                 value: Infinity
-            },
-            
-            // Deprecated
-            MaxBoxSize: {
-                resolve: '_resolveFull',
-                cast:    pvc.castNumber
             }
         });
 });

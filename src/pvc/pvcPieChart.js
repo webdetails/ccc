@@ -45,21 +45,13 @@ def
 
         this.base();
         
-        if(contentOptions.paddings == null){
-            var paddings;
-            if(this.compatVersion() <= 1){
-                var innerGap = pvc.castNumber(this.options.innerGap);
-                if(innerGap != null){
-                    innerGap = def.between(innerGap, 0.1, 1);
-                    paddings = ((1 - innerGap) * 100 / 2).toFixed(2) + "%";
-                }
-            }
-            
-            if(paddings == null){
-                paddings = new pvc.PercentValue(0.025);
-            }
-            
-            contentOptions.paddings = paddings;
+        var isV1Compat = this.compatVersion() <= 1;
+        if(isV1Compat){
+            var innerGap = pvc.castNumber(this.options.innerGap) || 0.95;
+            innerGap = def.between(innerGap, 0.1, 1);
+            contentOptions.paddings = ((1 - innerGap) * 100 / 2).toFixed(2) + "%";
+        } else if(contentOptions.paddings == null) {
+            contentOptions.paddings = new pvc.PercentValue(0.025);
         }
         
         var piePlot = this.plots.pie;

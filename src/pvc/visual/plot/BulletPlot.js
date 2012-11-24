@@ -17,7 +17,7 @@ def
 
 pvc.visual.BulletPlot.optionsDef = def.create(
     pvc.visual.Plot.optionsDef, {
-        ShowValues: { // override
+        ValuesVisible: { // override
             value: true
         },
         

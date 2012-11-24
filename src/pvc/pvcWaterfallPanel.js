@@ -183,7 +183,7 @@ def
             .lineCap('butt')
             ;
 
-        if(this.plot.option('WaterValuesVisible')){
+        if(this.plot.option('TotalValuesVisible')){
             this.pvWaterfallLabel = new pvc.visual.Label(
                 this, 
                 this.pvWaterfallLine, 

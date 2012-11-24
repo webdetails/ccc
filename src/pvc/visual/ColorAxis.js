@@ -190,17 +190,39 @@ def.scope(function(){
         return pvc.parseAlign(position, align);
     }
     
-    function legendResolve(optionInfo){
-        if(this._resolveNormal(optionInfo)){
-            return true;
+    var legendData = {
+        resolveDefault: function(optionInfo){
+            // Naked
+            if(!this.index && 
+               this._specifyChartOption(optionInfo, def.firstLowerCase(optionInfo.name))){
+                return true;
+            }
+        }
+    };
+    
+    function getDefaultColor(optionInfo){
+        var colors;
+        if(this.scaleType === 'discrete'){
+            if(this.index === 0){
+                // Assumes default pvc scale
+                colors = pvc.createColorScheme();
+            } else { 
+                // Use colors of axes with own colors.
+                // Use a color scheme that always returns 
+                // the global color scale of the role
+                var me = this;
+                colors = function(){ // ignore domain values
+                    return me.chart._getRoleColorScale(me.role.name);
+                };
+            }
+        } else {
+            colors = ['red', 'yellow','green']
+                     .map(function(name){ return pv.Color.names[name]; });
         }
         
-        // Naked
-        if(!this.index && 
-           this._specifyChartOption(optionInfo, def.firstLowerCase(optionInfo.name))){
-            return true;
-        }
+        return colors;
     }
+    
     
     /*global axis_optionsDef:true*/
     var colorAxis_optionsDef = def.create(axis_optionsDef, {
@@ -214,48 +236,36 @@ def.scope(function(){
          * secondAxisColor (V1 compatibility)
          */
         Colors: {
-            resolve: pvc.options.resolvers([
-                '_resolveFixed',
-                '_resolveNormal',
-                function(optionInfo){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    if(this.index === 0 && 
+                       this._specifyChartOption(optionInfo, 'colors')){
+                        return true;
+                    }
+                     
+                    if(this.index === 1 &&
+                        this.chart._allowV1SecondAxis &&
+                        this._specifyChartOption(optionInfo, 'secondAxisColor')){
+                         return true;
+                    }
+                    
+                    // Compute default value
+                    optionInfo.defaultValue(getDefaultColor.call(this, optionInfo));
+                    return true;
+                },
+                resolveDefault: function(optionInfo){
                     // Handle naming exceptions
                     if(this.index === 0 && 
                        this._specifyChartOption(optionInfo, 'colors')){
                         return true;
                     }
                     
-                    if(this.index === 1 &&
-                       this.chart._allowV1SecondAxis &&
-                       this._specifyChartOption(optionInfo, 'secondAxisColor')){
-                        return true;
-                    }
-                    
                     // Compute default value
-                    
-                    var colors;
-                    if(this.scaleType === 'discrete'){
-                        if(this.index === 0){
-                            // Assumes default pvc scale
-                            colors = pvc.createColorScheme();
-                        } else { 
-                            // Use colors of axes with own colors.
-                            // Use a color scheme that always returns 
-                            // the global color scale of the role
-                            var me = this;
-                            colors = function(){ // ignore domain values
-                                return me.chart._getRoleColorScale(me.role.name);
-                            };
-                        }
-                    } else {
-                        colors = ['red', 'yellow','green']
-                                 .map(function(name){ return pv.Color.names[name]; });
-                    }
-                    
-                    optionInfo.defaultValue(colors);
+                    optionInfo.defaultValue(getDefaultColor.call(this, optionInfo));
                     return true;
-                },
-                '_resoveDefault'
-            ]),
+                }
+            },
             cast: pvc.colorScheme
         },
         
@@ -265,20 +275,18 @@ def.scope(function(){
          * pv.Color -> pv.Color
          */
         Transform: {
-            resolve: function(optionInfo){
-                if(this._resolveNormal(optionInfo)){
-                    return true;
-                }
-                
-                if(this._plotList.length === 1){
-                    var name = this._plotList[0].name;
-                    if(name === 'plot2' || name === 'trend'){
-                        optionInfo.defaultValue(pvc.brighterColorTransform);
-                        return true;
+            resolve: '_resolveFull',
+            data: {
+                resolveDefault: function(optionInfo){
+                    if(this._plotList.length === 1){
+                        var name = this._plotList[0].name;
+                        if(name === 'plot2' || name === 'trend'){
+                            optionInfo.defaultValue(pvc.brighterColorTransform);
+                            return true;
+                        }
                     }
                 }
             },
-            
             cast: def.fun.to
         },
         
@@ -289,11 +297,11 @@ def.scope(function(){
                     return true;
                 }
                 
-                if(this._specifyV1ChartOption(optionInfo, 'normPerBaseCategory')){
-                    return true;
-                }
-                
-                if(this._resolveNormal(optionInfo)){
+                return this._resolveFull(optionInfo);
+            },
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'normPerBaseCategory');
                     return true;
                 }
             },
@@ -304,12 +312,10 @@ def.scope(function(){
         // ------------
         // Continuous color scale
         ScaleType: {
-            resolve: function(optionInfo){
-                if(this._resolveFull(optionInfo)){
-                    return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'scalingType')){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'scalingType');
                     return true;
                 }
             },
@@ -331,25 +337,21 @@ def.scope(function(){
         },
         
         Domain: {
-            resolve: function(optionInfo){
-                if(this._resolveFull(optionInfo)){
-                    return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'colorRangeInterval')){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'colorRangeInterval');
                     return true;
                 }
             },
-            cast:    def.array.to
+            cast: def.array.to
         },
         
         Min: {
-            resolve: function(optionInfo){
-                if(this._resolveNormal(optionInfo)){
-                    return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'minColor')){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'minColor');
                     return true;
                 }
             },
@@ -357,12 +359,10 @@ def.scope(function(){
         },
         
         Max: {
-            resolve: function(optionInfo){
-                if(this._resolveNormal(optionInfo)){
-                    return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'maxColor')){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'maxColor');
                     return true;
                 }
             },
@@ -370,13 +370,11 @@ def.scope(function(){
         },
         
         Missing: { // Null, in lower case is reserved in JS...
-            resolve: function(optionInfo){
-                if(this._resolveNormal(optionInfo)){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'nullColor');
                     return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'nullColor')){
-                   return true;
                 }
             },
             cast: pv.color,
@@ -389,31 +387,36 @@ def.scope(function(){
          * LegendVisible 
          */
         LegendVisible: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    Boolean,
             value:   true
         },
         
         LegendClickMode: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    pvc.parseLegendClickMode,
             value:   'toggleVisible'
         },
         
         LegendDrawLine: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    Boolean,
             value:   false
         },
         
         LegendDrawMarker: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    Boolean,
             value:   true
         },
         
         LegendShape: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    pvc.parseShape
         }
     });

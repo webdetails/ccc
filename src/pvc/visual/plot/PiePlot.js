@@ -42,21 +42,19 @@ def.scope(function(){
                 value: 'outer'
             },
             
-            ShowValues: { // override
+            ValuesVisible: { // override
                 value: true
             },
             
             ValuesLabelStyle: {
-                resolve: pvc.options.resolvers([
-                    '_resolveFixed',
-                    '_resolveNormal',
-                    '_resolveDefault',
-                    function(optionInfo){
+                resolve: '_resolveFull',
+                data: {
+                    resolveDefault: function(optionInfo){
                         var isV1Compat = this.chart.compatVersion() <= 1;
                         optionInfo.defaultValue(isV1Compat ? 'inside' : 'linked');
                         return true;
                     }
-                ]),
+                },
                 cast: function(value) {
                     switch(value){
                         case 'inside':
@@ -78,16 +76,16 @@ def.scope(function(){
             // "{value} ({value.percent})"
             // "{#productId}" // Atom name
             ValuesMask: { // OVERRIDE
-                resolve: pvc.options.resolvers([
-                    '_resolveFull',
-                    function(optionInfo){
+                resolve: '_resolveFull',
+                data: {
+                    resolveDefault: function(optionInfo){
                         optionInfo.defaultValue(
-                            this.option('ValuesLabelStyle') === 'linked' ? 
-                            "{value} ({value.percent})" : 
-                            "{value}");
+                                this.option('ValuesLabelStyle') === 'linked' ? 
+                                "{value} ({value.percent})" : 
+                                "{value}");
                         return true;
                     }
-                ])
+                }
             },
             
             /* Linked Label Style

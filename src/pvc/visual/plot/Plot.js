@@ -14,24 +14,16 @@ def.scope(function(){
         var typePlots = def.getPath(chart, ['plotsByType', this.type]);
         var index = typePlots ? typePlots.length : 0;
         
+        // Elements of the first plot (of any type)
+        // can be accessed without prefix.
+        // Peek chart's plotList (globalIndex is only set afterwards in addPlot)
+        var globalIndex = chart.plotList.length;
+        keyArgs = def.set(keyArgs, 'byNaked', !globalIndex);
+        
         this.base(chart, this.type, index, keyArgs);
         
         // fills globalIndex
         chart._addPlot(this);
-        
-        // -------------
-        
-        this.option = pvc.options(this._getOptionsDefinition(), this);
-        
-        var fixed = def.get(keyArgs, 'fixed');
-        if(fixed){
-            this._fixed = fixed;
-        }
-        
-        var defaults = def.get(keyArgs, 'defaults');
-        if(defaults){
-            this._defaults = defaults;
-        }
         
         // -------------
         
@@ -40,7 +32,7 @@ def.scope(function(){
         // The plot id is always a valid prefix (type+index)
         var prefixes = this.extensionPrefixes = [this.id];
         
-        if(this.globalIndex === 0){
+        if(!this.globalIndex){
             // Elements of the first plot (of any type)
             // can be accessed without prefix
             prefixes.push('');
@@ -77,29 +69,21 @@ def.scope(function(){
         },
         
         ValuesVisible: {
-            resolve: pvc.options.resolvers([
-                 '_resolveFixed',
-                 '_resolveNormal',
-                 function(optionInfo){
-                     // V1 ?
-                     var show = this.option('ShowValues');
-                     if(show !== undefined){
-                         optionInfo.specify(show);
-                     } else {
-                         show = this.chart.compatVersion <= 1 && (this.type !== 'point');
-                         optionInfo.defaultValue(show);
-                     }
-                     
-                     return true;
-                 }
-              ]),
-            cast: Boolean
-        },
-        
-        // Deprecated
-        ShowValues: {
             resolve: '_resolveFull',
-            cast:    Boolean
+            data: {
+                resolveV1: function(optionInfo){
+                    var show = this._chartOption('showValues');
+                    if(show !== undefined){
+                        optionInfo.specify(show);
+                    } else {
+                        show = this.type !== 'point';
+                        optionInfo.defaultValue(show);
+                    }
+                    return true;
+                }
+            },
+            cast:  Boolean,
+            value: false
         },
         
         ValuesAnchor: {
@@ -145,9 +129,11 @@ def.scope(function(){
                         return true;
                     }
                 },
-                '_resolveFixed',
-                '_resolveNormal',
-                function(optionInfo){
+                '_resolveFull'
+            ]),
+            data: {
+                // Dynamic default
+                resolveDefault: function(optionInfo){
                     // Trends must have its own color scale
                     // cause otherwise each trend series
                     // would have exactly the same color as the corresponding
@@ -160,9 +146,8 @@ def.scope(function(){
                         optionInfo.defaultValue(3);
                         return true;
                     }
-                },
-                '_resolveDefault'
-            ]),
+                }
+            },
             cast:  function(value){
                 value = pvc.castNumber(value);
                 if(value != null){

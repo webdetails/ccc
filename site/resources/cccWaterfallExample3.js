@@ -12,12 +12,12 @@ new pvc.WaterfallChart({
     
     direction: 'up',
     areasVisible: true,
-    waterValuesVisible: true,
+    totalValuesVisible: true,
     allCategoryLabel: "Profit",
-    //waterLineLabel: "Accumulated",
+    //totalLineLabel: "Accumulated",
     
     /* Visual Role mapping */
-    // multiChartRole:     'territory'
+    // multiChartRole: 'territory',
     seriesRole:   'productType',
     categoryRole: 'accountType, accountSource',
     valueRole:    'value',

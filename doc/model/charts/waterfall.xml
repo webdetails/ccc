@@ -41,7 +41,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="waterLineLabel" type="string" default="'Accumulated'" category="Style">
+        <c:property name="totalLineLabel" type="string" default="'Accumulated'" category="Style">
             <c:documentation>
                 The description of the legend item of
                 the water line.
@@ -55,7 +55,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="waterValuesVisible" type="boolean" category="Style">
+        <c:property name="totalValuesVisible" type="boolean" category="Style">
             <c:documentation>
                 Indicates if value labels are shown above or below
                 the water line showing the accumulated value.

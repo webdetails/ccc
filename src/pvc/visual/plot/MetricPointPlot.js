@@ -16,23 +16,13 @@ def.scope(function(){
         }
     });
     
-    var specNormalBool = {
-            resolve: '_resolveNormal',
-            cast:    Boolean
+    function visibleData(type){
+        return {
+            resolveV1: function(optionInfo){
+                this._specifyChartOption(optionInfo, 'show' + type);
+                return true;
+            }
         };
-    
-    function visibleResolver(type){
-        return pvc.options.resolvers([
-               '_resolveFixed',
-               '_resolveNormal',
-               
-               // V1 compatibility
-               pvc.options.specify(function(){
-                   return this.option('Show' + type);
-               }),
-               
-               '_resolveDefault'
-           ]);
     }
     
     pvc.visual.MetricPointPlot.optionsDef = def.create(
@@ -54,22 +44,18 @@ def.scope(function(){
             },
             
             DotsVisible: {
-                resolve: visibleResolver('Dots'),
+                resolve: '_resolveFull',
+                data:    visibleData('Dots'),
                 cast:    Boolean,
                 value:   false
             },
             
             LinesVisible: {
-                resolve: visibleResolver('Lines'),
+                resolve: '_resolveFull',
+                data:    visibleData('Lines'),
                 cast:    Boolean,
                 value:   false
             },
-            
-            // Deprecated
-            ShowDots:  specNormalBool,
-            
-            // Deprecated
-            ShowLines: specNormalBool,
             
             ValuesAnchor: { // override
                 value: 'right'

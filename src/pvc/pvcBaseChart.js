@@ -329,10 +329,8 @@ def
             this.paddings = options.paddings;
         }
         
-        if(this._allowV1SecondAxis){
-            if(this.plot2 === undefined){
-                this.plot2 = !!options.secondAxis;
-            }
+        if(this.compatVersion() <= 1){
+            options.plot2 = this._allowV1SecondAxis && !!options.secondAxis;
         }
         
         this._processOptionsCore(options);
@@ -638,8 +636,6 @@ def
         
 //        colors: null,
 
-        plot2: false,
-        
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
                    (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");

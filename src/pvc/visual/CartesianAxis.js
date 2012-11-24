@@ -235,10 +235,68 @@ def.scope(function(){
         
         _getOptionsDefinition: function(){
             return cartAxis_optionsDef;
-        }
+        },
+        
+        _buildOptionId: function(){
+            return this.id + "Axis";
+        },
+        
+        _registerResolversNormal: function(rs, keyArgs){
+            // II - By V1 Only Logic
+            if(this.chart.compatVersion() <= 1){
+                rs.push(this._resolveByV1OnlyLogic);
+            }
+            
+            // IV - By OptionId
+            rs.push(
+               this._resolveByOptionId,
+               this._resolveByOrientedId);
+            
+            if(this.index === 1){
+                rs.push(this._resolveByV1OptionId);
+            }
+            
+            rs.push(
+               this._resolveByScaleType,
+               this._resolveByCommonId);
+            
+        },
+        
+        // xAxisOffset, yAxisOffset, x2AxisOffset
+        _resolveByOrientedId: pvc.options.specify(function(optionInfo){
+            return this._chartOption(this.orientedId + "Axis" + optionInfo.name);
+        }),
+        
+        // secondAxisOffset
+        _resolveByV1OptionId: pvc.options.specify(function(optionInfo){
+            //if(this.index === 1){
+            return this._chartOption('secondAxis' + optionInfo.name);
+            //}
+        }),
+        
+        // numericAxisLabelSpacingMin
+        _resolveByScaleType: pvc.options.specify(function(optionInfo){
+            // this.scaleType
+            // * discrete
+            // * numeric    | continuous
+            // * timeSeries | continuous
+            var st = this.scaleType;
+            if(st){
+                var name  = optionInfo.name;
+                var value = this._chartOption(st + 'Axis' + name);
+                if(value === undefined && st !== 'discrete'){
+                    value = this._chartOption('continuousAxis' + name);
+                }
+                
+                return value;
+            }
+        }),
+        
+        // axisOffset
+        _resolveByCommonId: pvc.options.specify(function(optionInfo){
+            return this._chartOption('axis' + optionInfo.name);
+        })
     });
-    
-    // TODO: refactor all this, unify with base Axis code
     
     var $VCA = pvc.visual.CartesianAxis;
 
@@ -269,102 +327,18 @@ def.scope(function(){
     };
     
     /* PRIVATE STUFF */
-    
-    /**
-     * Obtains the value of an option using a specified final name.
-     * 
-     * @name pvc.visual.CartesianAxis#_chartOption
-     * @function
-     * @param {string} name The chart option name.
-     * @private
-     * @type string
-     */
-    function chartOption(name) {
-        return this.chart.options[name];
-    }
-    
-    function axisSpecify(getAxisPropValue){
-        return axisResolve(getAxisPropValue, 'specify');
-    }
-    
-    function axisDefault(getAxisPropValue){
-        return axisResolve(getAxisPropValue, 'defaultValue');
-    }
-    
-    function axisResolve(getAxisPropValue, operation){
-        return function(optionInfo){ 
-            var value = getAxisPropValue.call(this, optionInfo.name, optionInfo);
-            if(value !== undefined){
-                optionInfo[operation || 'specify'](value);
-                return true;
-            }
-        };
-    }
-    
-    // baseAxisOffset, orthoAxisOffset, 
-    axisSpecify.byId = axisSpecify(function(name){
-        return chartOption.call(this, this.id + "Axis" + name);
-    });
-    
-    // xAxisOffset, yAxisOffset, x2AxisOffset
-    axisSpecify.byOrientedId = axisSpecify(function(name){
-        return chartOption.call(this, this.orientedId + "Axis" + name);
-    });
-    
-    // secondAxisOffset
-    axisSpecify.byV1OptionId = axisSpecify(function(name){
-        if(this.index === 1){
-            return chartOption.call(this, 'secondAxis' + name);
-        }
-    });
-    
-    // numericAxisLabelSpacingMin
-    axisSpecify.byScaleType = axisSpecify(function(name){
-        // this.scaleType
-        // * discrete
-        // * numeric    | continuous
-        // * timeSeries | continuous
-        var st = this.scaleType;
-        if(st){
-            var value = chartOption.call(this, st + 'Axis' + name);
-            if(value === undefined && st !== 'discrete'){
-                value = chartOption.call(this, 'continuousAxis' + name);
-            }
-            
-            return value;
-        }
-    });
-    
-    // axisOffset
-    axisSpecify.byCommonId = axisSpecify(function(name){
-        return chartOption.call(this, 'axis' + name);
-    });
-    
-    var resolveNormal = pvc.options.resolvers([
-       axisSpecify.byId,
-       axisSpecify.byOrientedId,
-       axisSpecify.byV1OptionId,
-       axisSpecify.byScaleType,
-       axisSpecify.byCommonId
-    ]);
-    
-    var specNormal = { resolve: resolveNormal };
-    
-    /* orthoFixedMin, orthoFixedMax */
     var fixedMinMaxSpec = {
-        resolve: pvc.options.resolvers([
-            axisSpecify.byId,
-            axisSpecify.byOrientedId,
-            axisSpecify.byV1OptionId,
-            axisSpecify(function(name){
+        resolve: '_resolveFull',
+        data: {
+            /* orthoFixedMin, orthoFixedMax */
+            resolveV1: function(optionInfo){
                 if(!this.index && this.type === 'ortho'){
                     // Bare Id (no "Axis")
-                    return chartOption.call(this, this.id + name);
+                    this._specifyChartOption(optionInfo, this.id + optionInfo.name);
                 }
-            }),
-            axisSpecify.byScaleType,
-            axisSpecify.byCommonId
-        ]),
+                return true;
+            }
+        },
         cast: pvc.castNumber
     };
     
@@ -388,25 +362,52 @@ def.scope(function(){
         return this.orientation === 'x' ? 'bottom' : 'left';
     }
     
+    var normalV1Data = {
+        resolveV1: function(optionInfo){
+            if(!this.index){
+                if(this._resolveByOrientedId(optionInfo)){
+                    return true;
+                }
+            } else if(this._resolveByV1OptionId()) { // secondAxis...
+                return true;
+            }
+            
+            this._resolveDefault(optionInfo);
+            
+            return true;
+        }
+    };
+    
+    var defaultPosition = pvc.options.defaultValue(function(optionInfo){
+        if(!this.typeIndex){
+            return this.orientation === 'x' ? 'bottom' : 'left';
+        }
+        
+        // Use the position opposite to that of the first axis 
+        // of same orientation (the same as type)
+        var firstAxis = this.chart.axesByType[this.type].first;
+        var position  = firstAxis.option('Position');
+        
+        return pvc.BasePanel.oppositeAnchor[position];
+    });
+    
     /*global axis_optionsDef:true*/
     var cartAxis_optionsDef = def.create(axis_optionsDef, {
         Visible: {
-            resolve: pvc.options.resolvers([
-                axisSpecify.byId,
-                axisSpecify.byOrientedId,
-                axisSpecify.byV1OptionId,
-                axisSpecify(function(name){ // V1 - showXScale, showYScale, showSecondScale
+            resolve: '_resolveFull',
+            data: {
+                /* showXScale, showYScale, showSecondScale */
+                resolveV1: function(optionInfo){
                     if(this.index <= 1){
                         var v1OptionId = this.index === 0 ? 
                             def.firstUpperCase(this.orientation) :
                             'Second';
                         
-                        return chartOption.call(this, 'show' + v1OptionId + 'Scale');
+                        this._specifyChartOption(optionInfo, 'show' + v1OptionId + 'Scale');
                     }
-                }),
-                axisSpecify.byScaleType,
-                axisSpecify.byCommonId
-            ]),
+                    return true;
+                }
+            },
             cast:    Boolean,
             value:   true
         },
@@ -416,18 +417,21 @@ def.scope(function(){
          * >= 2  <- false
          */
         Composite: {
-            resolve: pvc.options.resolvers([
-                axisSpecify(function(name){
-                    // Only first axis can be composite?
-                    if(this.index > 0) {
-                        return false;
-                    }
-                }),
-                resolveNormal,
-                axisSpecify(function(name){
-                    return chartOption.call(this, 'useCompositeAxis');
-                })
-            ]),
+            resolve: function(optionInfo){
+                // Only first axis can be composite?
+                if(this.index > 0) {
+                    optionInfo.specify(false);
+                    return true;
+                }
+                
+                return this._resolveFull(optionInfo);
+            },
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyChartOption(optionInfo, 'useCompositeAxis');
+                    return true;
+                }
+            },
             cast:  Boolean,
             value: false
         },
@@ -436,12 +440,13 @@ def.scope(function(){
          * secondAxisSize || xAxisSize 
          */
         Size: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
+            data:    normalV1Data,
             cast:    pvc.Size.to
         },
         
         SizeMax: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Size.to 
         },
         
@@ -449,192 +454,194 @@ def.scope(function(){
          * secondAxisPosition <- opposite(xAxisPosition) 
          */
         Position: {
-            resolve: pvc.options.resolvers([
-                resolveNormal,
-                
-                // Dynamic default value
-                axisDefault(function(name){
-                    if(!this.typeIndex){
-                        return this.orientation === 'x' ? 'bottom' : 'left';
-                    }
-                    
-                    // Use the position opposite to that of the first axis 
-                    // of same orientation (the same as type)
-                    var firstAxis = this.chart.axesByType[this.type].first;
-                    var position  = firstAxis.option('Position');
-                    
-                    return pvc.BasePanel.oppositeAnchor[position];
-                })
-            ]),
-            
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: normalV1Data.resolveV1,
+                resolveDefault: defaultPosition
+            },
             cast: castAxisPosition
         },
         
-        /* orthoFixedMin, orthoFixedMax */
         FixedMin: fixedMinMaxSpec,
         FixedMax: fixedMinMaxSpec,
         
-        /* 1 <- originIsZero
+        /* 1 <- originIsZero (v1)
          * 2 <- secondAxisOriginIsZero (v1 && bar)
          */
         OriginIsZero: {
-            resolve: pvc.options.resolvers([
-                resolveNormal,
-                axisSpecify(function(name){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
                     switch(this.index){
-                        case 0: return chartOption.call(this, 'originIsZero');
+                        case 0: 
+                            this._specifyChartOption(optionInfo, 'originIsZero');
+                            break;
                         case 1:
                             if(this.chart._allowV1SecondAxis){
-                                return chartOption.call(this, 'secondAxisOriginIsZero');
+                                this._specifyChartOption(optionInfo, 'secondAxisOriginIsZero');
                             }
                             break;
                     }
-                })
-            ]),
+                    
+                    return true;
+                } 
+            },
             cast:  Boolean,
             value: true 
         }, 
         
         DomainScope: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    castDomainScope,
-            value:  'global'
+            value:   'global'
         },
         
         /* 1 <- axisOffset, 
          * 2 <- secondAxisOffset (V1 && bar)
          */
         Offset: {
-            resolve: pvc.options.resolvers([
-                axisSpecify.byId,
-                axisSpecify.byOrientedId,
-                axisSpecify.byV1OptionId,
-                axisSpecify.byScaleType,
-                // axisOffset only applies to index 0!
-                axisSpecify(function(name){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
                     switch(this.index) {
-                        case 0: return chartOption.call(this, 'axisOffset');
+                        case 0: 
+                            this._specifyChartOption(optionInfo, 'axisOffset');
+                            break;
+                            
                         case 1:
                             if(this.chart._allowV1SecondAxis){
-                                return chartOption.call(this, 'secondAxisOffset');
+                                this._specifyChartOption(optionInfo, 'secondAxisOffset');
+                                break;
                             }
                             break;
                     }
-                })
-            ]),
+                    
+                    return true;
+                }
+            },
             cast: pvc.castNumber
         },
         
         // em
         LabelSpacingMin: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.castNumber
         },
         
         OverlappedLabelsMode: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.parseOverlappedLabelsMode,
             value:   'hide'
         },
         
         /* RULES */
-        FullGrid: { // deprecated
-            resolve: resolveNormal,
-            cast:    Boolean,
-            value:   false
-        },
-        
         Grid: {
-            resolve: pvc.options.resolvers([
-                         resolveNormal,
-                         axisSpecify(function(){
-                             return this.option('FullGrid');
-                         })
-                     ]),
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    if(!this.index){
+                        this._specifyChartOption(optionInfo, this.orientation + 'AxisFullGrid');
+                    }
+                    return true;
+                }
+            },
             cast:    Boolean,
             value:   false
         },
         
         GridCrossesMargin: { // experimental
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean,
             value:   true
         },
         
         EndLine:  { // deprecated
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean
         },
+        
         ZeroLine: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean,
             value:   true 
         },
         RuleCrossesMargin: { // experimental
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean,
             value:   true
         },
         
         /* TICKS */
         Ticks: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean
         },
         DesiredTickCount: { // secondAxisDesiredTickCount (v1 && bar)
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
+            data: normalV1Data,
             cast: pvc.castNumber
         },
         MinorTicks: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
+            data:    normalV1Data,
             cast:    Boolean,
             value:   true 
         },
         TickFormatter: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    def.fun.as
         },
         DomainRoundMode: { // secondAxisRoundDomain (bug && v1 && bar), secondAxisDomainRoundMode (v1 && bar)
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: normalV1Data.resolveV1,
+                resolveDefault: function(optionInfo){
+                    if(this.chart.compatVersion() <= 1){
+                        optionInfo.defaultValue('none');
+                        return true;
+                    }
+                }
+            },
+            
             cast:    pvc.parseDomainRoundingMode,
             value:   'tick'
         },
         TickExponentMin: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.castNumber  
         },
         TickExponentMax: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.castNumber 
         },
         
         /* TITLE */
         Title: {
-            resolve: resolveNormal,
-            cast:    String  
+            resolve: '_resolveFull',
+            cast:    String
         },
         TitleSize: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Size.to
         },
         TitleSizeMax: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Size.to
         }, 
         TitleFont: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    String 
         },
         TitleMargins:  {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Sides.as 
         },
         TitlePaddings: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Sides.as 
         },
         TitleAlign: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast: function castAlign(align){
                 var position = this.option('Position');
                 return pvc.parseAlign(position, align);
@@ -642,11 +649,17 @@ def.scope(function(){
         },
         
         Font: { // axisLabelFont (v1 && index == 0 && HeatGrid)
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    String
         },
         
-        ClickAction: specNormal,      // (v1 && index === 0) 
-        DoubleClickAction: specNormal // idem
+        ClickAction: { 
+            resolve: '_resolveFull',
+            data: normalV1Data
+        }, // (v1 && index === 0) 
+        DoubleClickAction: { 
+            resolve: '_resolveFull',
+            data: normalV1Data
+        } // idem
     });
 });

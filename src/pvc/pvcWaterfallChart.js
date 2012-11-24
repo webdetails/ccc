@@ -44,13 +44,13 @@ def
         // Might still affect scale calculation
         options.stacked = true;
         
-        // Not supported
-        options.plot2 = false;
-        
         // Doesn't work (yet?);
         options.baseAxisComposite = false;
         
         this.base(options);
+        
+        // Not supported
+        options.plot2 = false;
     },
   
     _initPlotsCore: function(){
@@ -78,7 +78,7 @@ def
         
         new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, {
             extensionPrefix: pvc.buildIndexedId('legend', 1), // legend2_ TODO
-            label: waterPlot.option('WaterLineLabel'),
+            label: waterPlot.option('TotalLineLabel'),
             color: this._waterColor
         });
         

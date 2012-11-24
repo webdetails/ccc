@@ -5254,7 +5254,7 @@ pvc.options.plots.WaterfallPlot.prototype.extensionPoints = undefined;
  * @default 'Accumulated'
  * @category Style
  */
-pvc.options.plots.WaterfallPlot.prototype.waterLineLabel = undefined;
+pvc.options.plots.WaterfallPlot.prototype.totalLineLabel = undefined;
 /**
  * Indicates if value labels are shown above or below
  * the water line showing the accumulated value.
@@ -5266,7 +5266,7 @@ pvc.options.plots.WaterfallPlot.prototype.waterLineLabel = undefined;
  * @type boolean
  * @category Style
  */
-pvc.options.plots.WaterfallPlot.prototype.waterValuesVisible = undefined;
+pvc.options.plots.WaterfallPlot.prototype.totalValuesVisible = undefined;
 /**
  * The extension points of the waterfall plot type.
  * <p>

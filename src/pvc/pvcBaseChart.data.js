@@ -248,11 +248,9 @@ pvc.BaseChart
 
         return {
             compatVersion:     this.compatVersion(),
-            plot2SeriesIndexes: (!this._allowV1SecondAxis || 
-                                !plot2 || 
-                                options.plot2Series) ? 
-                                null : 
-                                options.secondAxisIdx,
+            plot2SeriesIndexes: (plot2 && this._allowV1SecondAxis && (this.compatVersion() <= 1)) ?  
+                                 options.secondAxisIdx : 
+                                 null,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
@@ -281,10 +279,14 @@ pvc.BaseChart
     },
     
     _addPlot2SeriesDataPartCalculation: function(complexTypeProj, dataPartDimName){
+        if(this.compatVersion() <= 1){
+            return;
+        }
+        
         var options = this.options;
         var serRole = this._serRole;
         
-        var plot2Series = (this._serRole != null) && options.plot2 && options.plot2Series;
+        var plot2Series = (serRole != null) && options.plot2 && options.plot2Series;
         if(!plot2Series){
             return;
         }

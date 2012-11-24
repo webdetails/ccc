@@ -316,8 +316,7 @@ var Metrics2 = new pvc.MetricLineChart({
     dotsVisible: true,
     axisGrid: true,
     selectable:  true,
-    hoverable: true,
-    compatVersion: 1
+    hoverable: true
 });
 Metrics2.setData(testLDot2,
 {crosstabMode: true,
@@ -346,8 +345,7 @@ var Metrics3 = new pvc.MetricLineChart({
     clickAction: function(s,c,v){alert(s + " " + c + " " + v);},
     axisGrid: true,
     selectable:  true,
-    hoverable: true,
-    compatVersion: 1
+    hoverable: true
 });
 Metrics3.setData(testLDot2,
 {crosstabMode: true,
@@ -373,8 +371,7 @@ var Metrics4 = new pvc.MetricDotChart({
     valuesVisible: false,
     axisGrid: true,
     selectable:  true,
-    hoverable: true,
-    compatVersion: 1
+    hoverable: true
 
 });
 Metrics4.setData(testLDot2,
@@ -401,7 +398,7 @@ pv.listenForPageLoad(function() {
                     dotsVisible: true,
                     axisGrid: true
                 });
-                LineC.setData(testLDot , {crosstabMode: true, seriesInRows: false});
+                LineC.setData(testLDot , {crosstabMode: true});
                 LineC.render();
 
                 var LineL = new pvc.MetricLineChart({
@@ -416,12 +413,11 @@ pv.listenForPageLoad(function() {
                     originIsZero: true,
                     valuesVisible: false,
                     dotsVisible: true,
-                    axisGrid: true,
-                    compatVersion: 1
+                    axisGrid: true
                 });                
-                LineL.setData(testLDot , {crosstabMode: true, seriesInRows: false});
+                LineL.setData(testLDot , {crosstabMode: true});
                 LineL.render();
-                });  // end of script
+          });  // end of script
     </script>
 
   </body>
