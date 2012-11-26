@@ -29,6 +29,11 @@
     
     <xsl:variable name="rewriteProps">
         <prop as="colors">colorColors</prop>
+        <prop as="legendVisible">colorLegendVisible</prop>
+        <prop as="legendDrawLine">colorLegendDrawLine</prop>
+        <prop as="legendDrawMarker">colorLegendDrawMarker</prop>
+        <prop as="legendShape">colorLegendShape</prop>
+        <prop as="legendClickMode">colorLegendClickMode</prop>
     </xsl:variable>
     
     <!-- MAIN TEMPLATE - The flow Starts Here -->

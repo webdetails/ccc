@@ -64,7 +64,6 @@ function(dimension, value, label, rawValue, key) {
         this.rawValue = rawValue;
     }
     this.key = key;
-    this.globalKey = dimension.name + ":" + key;
 })
 .add( /** @lends pvc.data.Atom */{
     isVirtual: false,

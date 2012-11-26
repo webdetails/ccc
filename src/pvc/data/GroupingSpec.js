@@ -43,19 +43,27 @@ def.type('pvc.data.GroupingSpec')
     
     this.hasCompositeLevels = false;
     
+    var dimNames = []; // accumulated dimension names
+    
     this.levels = def.query(levelSpecs || undefined) // -> null query
         .where(function(levelSpec){ return levelSpec.dimensions.length > 0; })
         .select(function(levelSpec){
             ids.push(levelSpec.id);
             
+            def.array.append(dimNames, levelSpec.dimensionNames());
+            
             if(!this.hasCompositeLevels && levelSpec.dimensions.length > 1) {
                 this.hasCompositeLevels = true;
             }
             
+            levelSpec._setAccDimNames(dimNames.slice(0));
+            
             return levelSpec;
         }, this)
         .array();
-
+    
+    this._dimNames = dimNames;
+    
     // The null grouping has zero levels
     this.depth             = this.levels.length;
     this.isSingleLevel     = this.depth === 1;
@@ -91,12 +99,6 @@ def.type('pvc.data.GroupingSpec')
     },
 
     dimensionNames: function(){
-        if(!this._dimNames){
-            this._dimNames = this.dimensions()
-                                 .select(function(dimSpec){ return dimSpec.name; })
-                                 .array();
-        }
-        
         return this._dimNames;
     },
     
@@ -264,13 +266,17 @@ def.type('pvc.data.GroupingSpec')
 def.type('pvc.data.GroupingLevelSpec')
 .init(function(dimSpecs, type){
     var ids = [];
+    var dimNames = [];
     
     this.dimensions = def.query(dimSpecs)
        .select(function(dimSpec){
            ids.push(dimSpec.id);
+           dimNames.push(dimSpec.name);
            return dimSpec;
        })
        .array();
+    
+    this._dimNames = dimNames;
     
     this.dimensionsInDefOrder = this.dimensions.slice(0);
     if(type){
@@ -288,6 +294,18 @@ def.type('pvc.data.GroupingLevelSpec')
         type.sortDimensionNames(
             this.dimensionsInDefOrder,
             function(d){ return d.name; });
+    },
+    
+    _setAccDimNames: function(accDimNames){
+        this._accDimNames = accDimNames;
+    },
+    
+    accDimensionNames: function(){
+        return this._accDimNames;
+    },
+    
+    dimensionNames: function(){
+        return this._dimNames;
     },
     
     bind: function(type){
@@ -308,27 +326,25 @@ def.type('pvc.data.GroupingLevelSpec')
     },
     
     key: function(datum){
-        var keys   = [];
-        var atoms  = {};
-        var datoms = datum.atoms;
-        var dims   = this.dimensionsInDefOrder;
+        var key      = '';
+        var atoms    = {};
+        var datoms   = datum.atoms;
+        var dimNames = this._dimNames;
+        var keySep   = datum.owner.keySep;
         
         // This builds a key compatible with that of pvc.data.Complex#key
-        //  as long as only the atoms of the dimensions here used become
-        //  the only own atoms of the complex.
         for(var i = 0, D = this.depth ; i < D ; i++) {
-            var dimName = dims[i].name;
+            var dimName = dimNames[i];
             var atom = datoms[dimName];
             atoms[dimName] = atom;
-            if(atom.value != null){
-                keys.push(atom.globalKey);
+            if(!i){
+                key = atom.key;
+            } else {
+                key += keySep + atom.key;
             }
         }
         
-        return {
-            key:   keys.join(','),
-            atoms: atoms
-        };
+        return {key: key, atoms: atoms, dimNames: dimNames};
     },
 
     toString: function(){
@@ -427,49 +443,6 @@ pvc.data.GroupingSpec.parse = function(specText, type){
     return new pvc.data.GroupingSpec(levelSpecs, type);
 };
 
-/**
- * Creates a combined grouping specification.
- *
- * <p>
- * TODO:
- * If all the specified grouping specifications have the same flattening mode
- * then each of the specified is destructured into a single grouping level.
- *
- * Otherwise, a composite grouping specification is returned.
- * </p>
- * 
- * @param {pvc.data.GroupingSpec[]} groupings An enumerable of grouping specifications.
- * @param {object} [keyArgs] Keyword arguments
- * @param {boolean} [keyArgs.reverse=false] Indicates that each dimension's order should be reversed.
- * 
- * @type pvc.data.GroupingSpec
- 
-pvc.data.GroupingSpec.multiple = function(groupings, keyArgs){
-    var reverse = !!def.get(keyArgs, 'reverse', false);
-    var type = null;
-    
-    // One level per specified grouping
-    var levelSpecs = def.query(groupings)
-           .select(function(grouping){
-               var dimSpecs = grouping.dimensions().select(function(dimSpec){
-                       var asc = (dimSpec.reverse === reverse);
-                       if(!type) {
-                           type = dimSpec.type.complexType;
-                       } else if(type !== dimSpec.type.complexType) {
-                           throw def.error.operationInvalid("Multiple groupings must have the same complex type.");
-                       }
-                       
-                       return new pvc.data.GroupingDimensionSpec(dimSpec.name, !asc, dimSpec.type.complexType);
-                   });
-               
-               return new pvc.data.GroupingLevelSpec(dimSpecs, type);
-           })
-           .array();
-    
-    return type ? new pvc.data.GroupingSpec(levelSpecs, type) : null;
-};
-*/
-
 var groupSpec_matchDimSpec = /^\s*(.+?)(?:\s+(asc|desc))?\s*$/i;
 
 /**
@@ -489,7 +462,6 @@ function groupSpec_parseGroupingLevel(groupLevelText, type) {
                 order   = (match[2] || '').toLowerCase(),
                 reverse = order === 'desc';
                
-            var dimSpec = new pvc.data.GroupingDimensionSpec(name, reverse, type);
-            return dimSpec;
+            return new pvc.data.GroupingDimensionSpec(name, reverse, type);
         });
 }

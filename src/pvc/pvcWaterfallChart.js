@@ -142,7 +142,7 @@ def
             });
         }
 
-        if(!catGroup._isFlattenGroup){
+        if(!catGroup._isFlattenGroup || catGroup._isDegenerateFlattenGroup){
             var dir = this._isFalling ? -1 : 1;
 
             offset = result.offset = offset + dir * (catRange.min + catRange.max);

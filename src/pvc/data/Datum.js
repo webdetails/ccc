@@ -30,7 +30,7 @@ def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
 function(data, atomsByName, isNull){
     
-    this.base(data, atomsByName, /*atomsBase*/ null, /*wantLabel*/ false, /*calculate*/!isNull);
+    this.base(data, atomsByName, /* dimNames */ null, /*atomsBase*/ null, /*wantLabel*/ false, /*calculate*/!isNull);
     
     if(isNull) {
         this.isNull = true;

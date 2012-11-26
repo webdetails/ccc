@@ -365,7 +365,7 @@ pvc.BaseChart
         }
         
         // TODO: should, at least, call some static method of Atom to build a global key
-        var child = this._partData._childrenByKey[dataPartDimName + ':' + dataPartValues];
+        var child = this._partData._childrenByKey[/*dataPartDimName + ':' +*/ dataPartValues + ''];
         if(!child){
             // NOTE: 
             // This helps, at least, the ColorAxis.dataCells setting
@@ -375,9 +375,10 @@ pvc.BaseChart
             // so that when the trend datums are added they end up here,
             // and not in another new Data...
             child = new pvc.data.Data({
-                parent: this._partData,
-                atoms:  def.set({}, dataPartDimName, dataPartValues), 
-                datums: []
+                parent:   this._partData,
+                atoms:    def.set({}, dataPartDimName, dataPartValues), 
+                dimNames: [dataPartDimName],
+                datums:   []
                 // TODO: index
             });
         }

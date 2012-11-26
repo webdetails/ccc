@@ -1780,14 +1780,20 @@ def.type('OrderedMap')
         }
     },
     
-    add: function(key, v){
+    add: function(key, v, index){
         var map = this._map;
         var bucket = def.getOwn(map, key);
         if(!bucket){
-            this._list.push((map[key] = {
-               key:   key,
-               value: v
-            }));
+            bucket = map[key] = {
+                key:   key,
+                value: v
+            };
+            
+            if(index == null){
+                this._list.push(bucket);
+            } else {
+                def.array.insertAt(this._list, index, bucket);
+            }
         } else if(bucket.value !== v){
             bucket.value = v;
         }

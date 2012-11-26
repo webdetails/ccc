@@ -397,8 +397,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 
         if(sum == null) {
             sum = this.children()
-                    /* flattened parent groups would account for the same values more than once */
-                    .where(function(childData){ return !childData._isFlattenGroup; })
+                    /* non-degenerate flattened parent groups would account for the same values more than once */
+                    .where(function(childData){ return !childData._isFlattenGroup || childData._isDegenerateFlattenGroup; })
                     .select(function(childData){
                         return Math.abs(childData.dimensions(dimName).sum(keyArgs));
                     }, this)
@@ -1012,7 +1012,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
              while(this._dimAtomsOrQuery.next()) {
                  
                  var dimAtomOr = this._dimAtomsOrQuery.item,
-                     childData = this._data._childrenByKey[dimAtomOr.globalKey];
+                     childData = this._data._childrenByKey[dimAtomOr.key];
                  
                  // Also, advance the test of a leaf child data with no datums, to avoid backtracking
                  if(childData && (depth < H - 1 || childData._datums.length)) {

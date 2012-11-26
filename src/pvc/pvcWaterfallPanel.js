@@ -48,7 +48,8 @@ def
                 return 1;
             }
 
-            if(scene.vars.category.group._isFlattenGroup){
+            var group = scene.vars.category.group;
+            if(group._isFlattenGroup && !group._isDegenerateFlattenGroup){
                 // Groups don't update the total
                 // Groups, always go down, except the first falling...
                 return -2;

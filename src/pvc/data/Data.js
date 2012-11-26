@@ -54,6 +54,8 @@
  * @param {pvc.data.Data}   [keyArgs.parent]      The parent data.
  * @param {pvc.data.Data}   [keyArgs.linkParent]  The link parent data.
  * @param {map(string union(any pvc.data.Atom))} [keyArgs.atoms] The atoms shared by contained datums.
+ * @param {string[]} [keyArgs.dimNames] The dimension names of atoms in {@link keyArgs.atoms}.
+ * This argument must be specified whenever {@link keyArgs.atoms} is.
  * @param {pvc.data.Datum[]|def.Query} [keyArgs.datums] The contained datums array or enumerable.
  * @param {pvc.data.Data}    [keyArgs.owner] The owner data.
  * The topmost root data is its own owner.
@@ -76,6 +78,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     var owner,
         atoms,
         atomsBase,
+        dimNames,
         datums,
         index,
         parent = this.parent = keyArgs.parent || null;
@@ -87,12 +90,15 @@ def.type('pvc.data.Data', pvc.data.Complex)
         datums     = keyArgs.datums || def.fail.argumentRequired('datums');
         
         owner = parent.owner;
-        atoms = keyArgs.atoms || def.fail.argumentRequired('atoms');
+        atoms     = keyArgs.atoms   || def.fail.argumentRequired('atoms');
+        dimNames  = keyArgs.dimNames|| def.fail.argumentRequired('dimNames');
         atomsBase = parent.atoms;
     } else {
         // Root (topmost or not)
         this.root = this;
         // depth = 0
+        
+        dimNames = [];
         
         var linkParent = keyArgs.linkParent || null;
         if(linkParent){
@@ -139,16 +145,16 @@ def.type('pvc.data.Data', pvc.data.Complex)
     // because otherwise new Dimension( ... ) fails.
     this.owner = owner;
     
-    /* Need this because of null interning/uninterning and atoms chaining */
+    /* Need this because of null interning/un-interning and atoms chaining */
     this._atomsBase = atomsBase;
     
     this._dimensions = {};
     this.type.dimensionsList().forEach(this._initDimension, this);
     
     // Call base constructors
-    this.base(owner, atoms, atomsBase, /* wantLabel */ true);
+    this.base(owner, atoms, dimNames, atomsBase, /* wantLabel */ true);
     
-    pv.Dom.Node.call(this, /* nodeValue */null); // TODO: remove this when possible
+    pv.Dom.Node.call(this, /* nodeValue */null);
     delete this.nodeValue;
     this._children = this.childNodes; // pv.Dom.Node#childNodes
     
@@ -314,6 +320,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type boolean
      */
     _isFlattenGroup: false,
+    _isDegenerateFlattenGroup: false,
     
     _initDimension: function(dimType){
         this._dimensions[dimType.name] = 

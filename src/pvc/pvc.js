@@ -231,32 +231,6 @@ var pvc = def.globalSpace('pvc', {
             }
         }
     };
-    //
-    //pv.Mark.prototype.duckExtension = function(ext, tag){
-    //    // Copy properties of ext, local or inherited
-    //    // that are different from the current ones.
-    //    // Mark copied properties with tag, when specified (!==undefined),
-    //    //  or inherit the copied tag, when unspecified.
-    //    var fixedTag = (tag !== undefined);
-    //    var copied = {};
-    //    while(ext && ext !== this){
-    //        for(var extName in ext.$propertiesMap){
-    //            if(!def.hasOwn(copied, extName) && extName in this.properties){
-    //                copied[extName] = 1;
-    //                
-    //                // Defined in both marks
-    //                var extP = ext.$propertiesMap[extName];
-    //                var p = this.$propertiesMap[extName];
-    //                // tag differences do not cause copying
-    //                if(!p || (p.value !== extP.value) || (p.type !== extP.type)){
-    //                    this[extName](extP.value, fixedTag ? tag : extP.tag);
-    //                }
-    //            }
-    //        }
-    //        
-    //        ext = ext.proto;
-    //    }
-    //};
     
     pv.Mark.prototype.hasDelegateValue = function(name, tag) {
         var p = this.$propertiesMap[name];

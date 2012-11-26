@@ -113,7 +113,7 @@ def
         
         atoms[zeroAtom.dimension.name] = zeroAtom;
         
-        // Create datum with an array of the collected atoms
+        // Create datum with collected atoms
         var newDatum = new pvc.data.Datum(group.owner, atoms);
         newDatum.isVirtual = true;
         newDatum.isInterpolated = true;

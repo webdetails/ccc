@@ -162,7 +162,7 @@ def
         var valueAtom = interpolation._valDim.intern(value, /* isVirtual */ true);
         atoms[valueAtom.dimension.name] = valueAtom;
         
-        // Create datum with an array of the collected atoms
+        // Create datum with collected atoms
         var newDatum = new pvc.data.Datum(group.owner, atoms);
         
         newDatum.isVirtual = true;
