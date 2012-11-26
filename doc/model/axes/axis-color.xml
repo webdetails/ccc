@@ -158,6 +158,11 @@
             See <c:link to="pvc.options.axes.ColorAxis" />
             for additional information.
         </c:documentation>
+        
+        <c:property name="" type="">
+        </c:property>
+    
+        
     </c:complexType>
     
     <c:complexType name="DiscreteColorAxis" 
@@ -171,6 +176,10 @@
             See <c:link to="pvc.options.axes.ColorAxis" />
             for additional information.
         </c:documentation>
+
+        <c:property name="" type="">
+        </c:property>
+
     </c:complexType>
     
     <c:complexType name="HeatGridColorAxis" 
