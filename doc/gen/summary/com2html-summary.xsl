@@ -15,6 +15,8 @@
     
     <xsl:param name="helpBaseUrl"  select="''" />
     
+    <xsl:param name="outBaseUrl"  select="''" />
+    
     <xsl:variable name="minGroupSize" select="3" />
     
     <xsl:variable name="excludeProps">
@@ -40,7 +42,7 @@
 	<xsl:template match="/">
 	   
         <xsl:for-each select="$complexTypesExp[@space='pvc.options.charts' and not(@abstract='true')]">
-            <xsl:variable name="filename" select="concat('file:/C:/webdetails/pentaho/ccc/doc/summary/', replace(@name, '^(.*?)Chart$', '$1'), '.html')" />
+            <xsl:variable name="filename" select="concat($outBaseUrl, replace(@name, '^(.*?)Chart$', '$1'), '.html')" />
             <xsl:message>
                 <xsl:value-of select="$filename" />
             </xsl:message>
