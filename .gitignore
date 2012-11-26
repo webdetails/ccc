@@ -1,4 +1,5 @@
-dist/
+dist/ccc
+dist/pen
 nbproject/private/
 .DS_Store
 pvc-*.js

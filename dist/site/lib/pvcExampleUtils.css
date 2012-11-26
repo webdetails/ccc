@@ -1,0 +1,16 @@
+
+.CodeMirror {
+    text-align: left;
+    /*border: 1px solid green;*/
+}
+
+.CodeMirror pre {
+	font-size: 12px;
+    line-height: 1.5em;
+}
+
+/* Makes the editor extend to all the initial text height */
+.CodeMirror-scroll {
+	max-height: 800px;
+	min-height: 300px;
+}
