@@ -2485,16 +2485,55 @@ var xmlFileAllContent = componentXML.toXMLString(2);
         <jsScript_script>
 
 if (valuesXML != null) {
-	var componentXML = new XML(propertyXML);
+
+	&#47;&#47;var regexp = &#47;&lt;InputType&gt;String&lt;InputType\&#47;&gt;*&#47;;
+	var replacer = &lt;InputType type=&quot;valuelist&quot;&#47;&gt;;
+	
+	var propXML = new XML(propertyXML);
+
+	propXML.Header.InputType = replacer;
+	&#47;&#47;propXML.Header.appendChild(replacer);
+
 	var valXML = new XMLList(valuesXML);
-	var valsXML = (&lt;values&gt;&lt;&#47;values&gt;).appendChild(valXML);
-	componentXML.appendChild(valsXML);
-	var xmlFileContent = componentXML.toXMLString(2);
+	var valsXML = (&lt;Values&gt;&lt;&#47;Values&gt;).appendChild(valXML);
+	propXML.appendChild(valsXML);
+	var xmlFileContent = propXML.toXMLString(2);
+
 }
 else {
 	var xmlFileContent = propertyXML;
 }
+
+
+
 </jsScript_script>
+      </jsScript>      <jsScript>        <jsScript_type>-1</jsScript_type>
+        <jsScript_name>replace_Sample</jsScript_name>
+        <jsScript_script>&#47;&#47; Replaces Strings inside the given Variable.
+&#47;&#47; It is possible to make more replacements inside
+&#47;&#47; one call. The given variables must be an odd number
+&#47;&#47;
+&#47;&#47; Usage:
+&#47;&#47; replace(var, var, var);
+&#47;&#47; 1: String - The Variable with the content to replace.
+&#47;&#47; 2: String - The Value to search for.
+&#47;&#47; 3: String - The Value to replace with.
+&#47;&#47;
+&#47;&#47; replace(var, var, var, var,var,...)
+&#47;&#47; 1: String - The Variable with the content to replace.
+&#47;&#47; 2: String - The First Value to search for.
+&#47;&#47; 3: String - The First Value to replace with.
+&#47;&#47; 4: String - The Second Value to search for.
+&#47;&#47; 5: String - The Second Value to replace with.
+&#47;&#47; ...
+&#47;&#47;
+&#47;&#47; 2006-11-15
+&#47;&#47;
+var str1 = &quot;Hello World, this is a nice function&quot;;      
+var str2 = replace(str1,&quot;World&quot;, &quot;Folk&quot;);
+Alert(str2);
+var str2 = replace(str1,&quot;World&quot;, &quot;Folk&quot;, &quot;nice&quot;,&quot;beautifull&quot;);
+Alert(str2);</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>xmlFileContent</name>
         <rename>xmlFileContent</rename>
         <type>String</type>
@@ -2503,7 +2542,7 @@ else {
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>1402</xloc>
+      <xloc>1403</xloc>
       <yloc>467</yloc>
       <draw>Y</draw>
       </GUI>
@@ -3297,7 +3336,7 @@ propertyXML = propertyXML.toXMLString();
         <jsScript_name>Script 1</jsScript_name>
         <jsScript_script>&#47;&#47;Script here
 
-var vXML = &lt;value display={atomName}&gt;{atomValue}&lt;&#47;value&gt;;
+var vXML = &lt;Value display={atomName}&gt;{atomValue}&lt;&#47;Value&gt;;
 var valueXML = vXML.toXMLString(2);</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>valueXML</name>
         <rename>valueXML</rename>
