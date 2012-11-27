@@ -5,7 +5,7 @@ pvc.data.Data
      */
     getInfo: function(){
 
-        var out = ["DATASET SUMMARY", pvc.logSeparator];
+        var out = ["DATA TYPE SUMMARY", pvc.logSeparator];
         
         def.eachOwn(this.dimensions(), function(dimension, name){
             var count = dimension.count(),

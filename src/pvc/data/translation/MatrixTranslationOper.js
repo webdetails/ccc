@@ -125,7 +125,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         var out = [
             "DATA SOURCE SUMMARY",
             pvc.logSeparator,
-            "ROWS (10/" + this.I + ")"
+            "ROWS (" + Math.min(10, this.I) + "/" + this.I + ")"
         ];
         
         def
