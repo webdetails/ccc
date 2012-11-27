@@ -2,27 +2,48 @@
 
 echo "Be sure to have ran generatePvcBundle before"
 
-# delete dist directory
-#rm -rf dist/site/lib;
-rm -rf dist/site/*.html;
+# delete site dist directory
+SITE=dist/site/
+SITECHARTS=${SITE}charts/
+SITECHARTSLIB=${SITECHARTS}lib/
+SITECHARTSJSDOCS=${SITECHARTS}jsdoc/
+CODEMIRROR=${SITECHARTSLIB}codemirror/
 
-# create dist directory struture
-mkdir -p dist/site/lib/;
-mkdir -p dist/site/lib/codemirror;
+rm -rf ${SITE};
+#rm -rf ${SITECHARTS}*.html;
 
-# copy all dependencies
+# Ensure site dist directory struture
+mkdir -p ${SITE};
+mkdir -p ${SITECHARTS};
+mkdir -p ${SITECHARTSLIB};
+mkdir -p ${SITECHARTSJSDOCS};
+mkdir -p ${CODEMIRROR};
 
-cp -f dist/ccc/* dist/site/lib
-rm -rf dist/site/lib/pvc-d2.0.js
+# Copy site root image
+cp -rf --no-preserve=ownership site/root/* ${SITE};
 
-cp -f src/data/q01-01.js dist/site/lib
-cp -f src/data/bp.js dist/site/lib
-cp -f examples/lib/codemirror/codemirror.* dist/site/lib/codemirror
-cp -f examples/lib/codemirror/javascript.js dist/site/lib/codemirror
+# CCC & dependencies
+cp -f dist/ccc/* ${SITECHARTSLIB}
+rm -rf ${SITECHARTSLIB}pvc-d2.0.js # uses release version
 
-# I - generate templates 
-# Invoke XSLT
-java -jar doc/lib/saxon9he.jar -xsl:site/gen/genTemplates.xsl -s:site/gen/templates.xml outBaseUrl=site/templates/
+cp -f src/data/q01-01.js ${SITECHARTSLIB}
+cp -f src/data/bp.js     ${SITECHARTSLIB}
+cp -f examples/lib/codemirror/codemirror.*  ${CODEMIRROR}
+cp -f examples/lib/codemirror/javascript.js ${CODEMIRROR}
 
-# II - generate one output files per template
-for file in site/templates/*; do perl ./site/_generate.pl $file site/resources > dist/site/$(basename $file); done;
+# Copy JsDocs
+cp -rf dist/jsdoc/* ${SITECHARTSJSDOCS};
+
+# I - Generate Summary Resource Pages
+rm dist/summary/*.html;
+# TODO: make this relative....!!!!
+OUTBASEURL="file:/C:/webdetails/pentaho/ccc/dist/summary/"
+# -- Invoke XSLT
+java -jar doc/lib/saxon9he.jar -xsl:doc/gen/summary/com2html-summary.xsl -s:doc/model/pvc.options.xml relativePath=../../model/ helpBaseUrl=jsdoc/symbols/ outBaseUrl=${OUTBASEURL}
+
+# II - generate templates from templates.xml
+# -- Invoke XSLT
+java -jar doc/lib/saxon9he.jar -xsl:site/gen/genTemplates.xsl -s:site/gen/templates.xml outBaseUrl=site/templates/ summaryResourceBaseUrl=../../dist/summary/
+
+# III - generate one output file per template
+for file in site/templates/*; do perl ./site/_generate.pl $file site/resources > ${SITECHARTS}$(basename $file); done;

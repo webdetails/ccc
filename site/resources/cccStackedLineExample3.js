@@ -13,7 +13,10 @@ new pvc.StackedLineChart({
     legend:     true,
     selectable: true,
     hoverable:  true,
-    axisGrid:   true
+    axisGrid:   true,
+    extensionPoints: {
+        axisGrid_strokeStyle: 'lightgray'
+    }
 })
 .setData(relational_01, { crosstabMode: false })
 .render();

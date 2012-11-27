@@ -2,7 +2,7 @@
 <t:templates xmlns:t="urn:webdetails/tmp/2012" 
              xmlns="http://www.w3.org/1999/xhtml">
 
-    <t:template name="pieExamples" exampleMask="cccPieExample{0}.js">
+    <t:template name="Pie" exampleMask="cccPieExample{0}.js">
         <t:summary>
             Pie charts are useful for performing relative comparisons: 
             how do the parts make up the whole? 
@@ -13,7 +13,7 @@
         <t:example title="DONUT" />
     </t:template>
     
-    <t:template name="barExamples" exampleMask="cccBarExample{0}.js">
+    <t:template name="Bar" exampleMask="cccBarExample{0}.js">
         <t:summary>
             Bar charts are used for plotting data which has discrete values. 
             The lengths of the bars are proportional to the values that they represent.
@@ -27,7 +27,7 @@
         <t:example title="ALL IN ONE BAR" />
     </t:template>
     
-    <t:template name="boxExamples" exampleMask="cccBoxExample{0}.js">
+    <t:template name="Boxplot" exampleMask="cccBoxExample{0}.js">
         <t:summary>
             Boxplots are used to represent data distributions
             provided a five-number summary statistic.
@@ -38,7 +38,7 @@
         <t:example title="ALL IN ONE BOXPLOT" />
     </t:template>
     
-    <t:template name="dotExamples" exampleMask="cccDotExample{0}.js">
+    <t:template name="Dot" exampleMask="cccDotExample{0}.js">
         <t:summary>
             Dot charts consists of group of data points plotted on a simple scale.
             It is a good alternative to the horizontal bar chart, 
@@ -49,7 +49,7 @@
         <t:example title="TIME SERIES DOT" />
     </t:template>
     
-    <t:template name="lineExamples" exampleMask="cccLineExample{0}.js">
+    <t:template name="Line" exampleMask="cccLineExample{0}.js">
         <t:summary>
             Line charts are often used to visualize time series data.
         </t:summary>
@@ -58,7 +58,7 @@
         <t:example title="INTERPOLATED and NEGATIVES LINE" />
     </t:template>
     
-    <t:template name="stackedLineExamples" exampleMask="cccStackedLineExample{0}.js">
+    <t:template name="StackedLine" exampleMask="cccStackedLineExample{0}.js">
         <t:summary>
             Stacked line charts are line charts in which 
             lines do not overlap because they are stacked at each point.
@@ -69,7 +69,7 @@
         <t:example title="INTERPOLATED STACKED LINE" />
     </t:template>
     
-    <t:template name="stackedAreaExamples" exampleMask="cccStackedAreaExample{0}.js">
+    <t:template name="StackedArea" exampleMask="cccStackedAreaExample{0}.js">
         <t:summary>
             Stacked area charts are useful for displaying the 
             trend of contribution of values of 
@@ -81,7 +81,7 @@
         <t:example title="HUGE DATASET STACKED AREA" />
     </t:template>
     
-    <t:template name="heatGridExamples" exampleMask="cccHGExample{0}.js">
+    <t:template name="HeatGrid" exampleMask="cccHGExample{0}.js">
         <t:summary>
             A heat-grid is a colored matrix that displays a two-dimensional data-set.
             The intensity or the color of each cell depends on the value that it represents.
@@ -93,7 +93,7 @@
         <t:example title="SIZE, COLOR AND COMPOSITE AXIS" />
     </t:template>
     
-    <t:template name="waterfallExamples" exampleMask="cccWaterfallExample{0}.js">
+    <t:template name="Waterfall" exampleMask="cccWaterfallExample{0}.js">
         <t:summary>
             Waterfall charts are an alternative to pie charts for displaying distributions.
             However when it's time to compare the size of categories and sub-categories, 

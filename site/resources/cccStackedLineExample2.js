@@ -19,7 +19,8 @@ new pvc.StackedLineChart({
     
     extensionPoints: {
       line_interpolate: 'monotone',
-      area_interpolate: 'monotone'
+      area_interpolate: 'monotone',
+      axisGrid_strokeStyle: 'lightgray'
     }
 })
 .setData(relational_01, { crosstabMode: false })

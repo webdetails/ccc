@@ -9,7 +9,11 @@
     exclude-result-prefixes="com fun xs xsl fn xhtml">
     
     <xsl:output method="xhtml" indent="no" />
-    <xsl:output method="xhtml" indent="yes" name="html" />
+    
+    <!-- Unfortunately indenting creates unwanted spaces in some places of the HTML.
+         Use indenting only for debugging the stylesheet's output. 
+         -->
+    <xsl:output method="xhtml" indent="no" name="html" omit-xml-declaration="yes" />
     
     <xsl:include href="com-lib.xsl" />
     
@@ -43,20 +47,13 @@
 	   
         <xsl:for-each select="$complexTypesExp[@space='pvc.options.charts' and not(@abstract='true')]">
             <xsl:variable name="filename" select="concat($outBaseUrl, replace(@name, '^(.*?)Chart$', '$1'), '.html')" />
+            
             <xsl:message>
                 <xsl:value-of select="$filename" />
             </xsl:message>
+            
 	        <xsl:result-document href="{$filename}" format="html">
-                <link type="text/css" href="css/wd.css" rel="stylesheet" />
-		        <link type="text/css" href="css/wdexpand.css" rel="stylesheet" />
-		        <link type="text/css" href="css/ctools.css" rel="stylesheet" /> 
-		        <link type="text/css" href="css/ccc.css" rel="stylesheet" />
-		       
-		        <div id="main">
-		           <ul class="bodycopy">
-		               <xsl:apply-templates select="." />
-		           </ul>
-		        </div>
+	            <xsl:apply-templates select="." />
             </xsl:result-document>
 	    </xsl:for-each>
 	</xsl:template>
@@ -69,8 +66,10 @@
         
         <xsl:variable name="extProperties"    select="$properties[ends-with(@name, '_')]" />
         
+        <!-- 
         <h1><xsl:value-of select="fun:buildTitleFromName(@name)" /></h1>
-        
+         -->
+         
         <xsl:if test="count($nonExtProperties) > 0">
 	        <div class="bodycopytitle">
                <h29>CHART OPTIONS</h29>
@@ -179,7 +178,7 @@
         
         <span class="js-identifier"><a href="{$helpUrl}" target="comjsdocs"><xsl:value-of select="$name" /></a></span>
         <xsl:if test="@default != ''">
-            <span class="js-punctuation">: </span>
+            <span class="js-punctuation"><xsl:value-of select="$nbsp" disable-output-escaping="yes"/>: </span>
             <span class="js-{fun:getJSType(@default)}"><xsl:value-of select="@default" /></span>
         </xsl:if>
         <xsl:if test="count(typeName/node()) > 0">
@@ -198,44 +197,59 @@
         <xsl:param name="categPath" />
         
         <xsl:for-each select="$compType/com:property">
-            <!--
-                I - Output the property once 
-                    with a type constituted by all its direct non-complex types
-                    (can include lists...)
-                
-                Translate atoms     to primitive
-                Translate functions to function
-                Ignore literal complex types
-                Ignore complex types within lists
-                Ignore empty lists
-                Expand expandable complex types.
-             -->
-            <xsl:variable name="nonComplexTypes">
-                <xsl:apply-templates select="types" mode="clean-types" />
-            </xsl:variable>
-            
+        
             <!-- Is local property excluded? -->
             <xsl:if test="count($excludeLocalProps/prop[. = current()/@name]) = 0">
                 
-                <!-- some extension points have an empty...name
-                     as a way to inherit only the parent's name -->
+                <!--
+                I - Output the property once 
+                    with a type constituted by all its direct non-complex types
+	                (can include lists...)
+	                
+	                Translate atoms      to primitive
+	                Translate functions  to function
+	                Translate ext.points to primitive of **pv.Mark**
+	                
+	                Ignore literal complex types
+	                Ignore complex types within lists
+	                Ignore empty lists
+	                Expand expandable complex types.
+	             -->
+                <xsl:variable name="nonComplexTypes">
+                    <xsl:apply-templates select="types" mode="clean-types" />
+                </xsl:variable>
+            
+                <!-- Some extension points have an empty name (!) -
+                     it's a way to inherit only the parent's name.
+                     The "empty" name is marked with an "_".
+                     
+                     If there is no ascending path,
+                     the resulting name would be "",
+                     so the "_" is translated to minPath.
+                     Otherwise, 
+                     the "_" name is translated to "" -  
+                     when prefixed with path it will be ok.  
+                  -->
                 <xsl:variable name="name" 
                               select="if(@name = '_') 
                                       then (if($path = '') then $minPath else '') 
                                       else string(@name)" />
                 
-                <!-- Extension point properties get an "-" suffix -->
-                <xsl:variable name="nameEx" 
+                <!-- If the property contains an extension point type,
+                     it is renamed to contain the suffix: "_".
+                     -->
+                <xsl:variable name="nameEx"
                               select="concat(
-                                        $name, 
+                                        $name,
                                         if($nonComplexTypes/types/primitive[@isExtension='true'])
                                         then '_'
                                         else '')" />
-                              
+                
 	            <xsl:variable name="expandedName" select="fun:expandName($path, $nameEx)" />
 	            
-	            <!-- Property is excluded? -->
+	            <!-- Is expanded property excluded? -->
 	            <xsl:if test="count($excludeProps/prop[. = $expandedName]) = 0">
+	            
 	                <xsl:variable name="expandableComplexTypes"
 	                              select="fun:getExpandableComplexTypes(types)" />
 	                
@@ -310,8 +324,14 @@
             <xsl:variable name="propComplexType" 
                           select="$complexTypesExp[fun:getTypeFullName(.) = current()/@of]" />
             
-            <!-- If @use = literal, skip the complex type -->
-            <xsl:if test="$propComplexType[@use='expanded' or @use='any']">
+            <!-- If @use = literal, skip the complex type
+                 Must also skip any complexTypes of the pvc.options.marks space,
+                 so that custom extension point Marks don't get expanded. 
+                 -->
+            <xsl:if test="
+                    $propComplexType
+                    [@use='expanded' or @use='any']
+                    [@space != 'pvc.options.marks']">
                 <xsl:sequence select="$propComplexType" />
             </xsl:if>
         </xsl:for-each>
@@ -373,7 +393,11 @@
     </xsl:template>
     -->
     
-    <!-- Let extension point classes pass-through as a primitive type... -->
+    <!-- Let extension point classes pass-through as 
+         a primitive type of its corresponding "pv.Mark" subclass.
+         The primitive tag is marked with an @isExtension attribute
+         so that, later, it can be identified as an extension type.
+         -->
     <xsl:template match="complex" mode="clean-types">
         <xsl:variable name="compType" select="$complexTypesExp[fun:getTypeFullName(.) = current()/@of]" />
         <xsl:if test="$compType/@space = 'pvc.options.marks'">

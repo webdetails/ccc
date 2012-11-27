@@ -17,7 +17,8 @@ new pvc.BarChart({
     orthoAxisLabelSpacingMin: 2.5,
     extensionPoints: {
         title_fillStyle:   'rgba(0, 255, 0, 0.2)',
-        title_strokeStyle: 'green'
+        title_strokeStyle: 'green',
+        axisGrid_strokeStyle: 'lightgray'
     }
 })
 .setData(relational_01_neg, {crosstabMode: false })

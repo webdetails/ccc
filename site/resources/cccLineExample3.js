@@ -20,7 +20,8 @@ new pvc.LineChart({
     
     extensionPoints: {
       line_interpolate: 'cardinal',
-      area_interpolate: 'cardinal'
+      area_interpolate: 'cardinal',
+      axisGrid_strokeStyle: 'lightgray'
     }
 })
 .setData(relational_01_neg, { crosstabMode: false })

@@ -17,7 +17,8 @@ new pvc.BarChart({
     axisGrid:   true,
     extensionPoints: {
         title_fillStyle:   'lightblue',
-        title_strokeStyle: 'black'
+        title_strokeStyle: 'black',
+        axisGrid_strokeStyle: 'lightgray'
     }
 })
 .setData(relational_01, {crosstabMode: false})

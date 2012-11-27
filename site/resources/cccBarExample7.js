@@ -32,7 +32,8 @@ new pvc.BarChart({
         plot2Dot_shapeSize:  20,
         trendLine_interpolate: 'cardinal',
         trendArea_interpolate: 'cardinal',
-        continuousAxisTicks_strokeStyle: 'red'
+        continuousAxisTicks_strokeStyle: 'red',
+        axisGrid_strokeStyle:  'lightgray'
     }
 })
 .setData(relational_01_neg, { crosstabMode: false })

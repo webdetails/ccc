@@ -5,7 +5,10 @@ new pvc.StackedAreaChart({
     title:  "Huge Dataset Stacked Area Chart",
     legend:     true,
     timeSeries: true,
-    axisGrid:   true
+    axisGrid:   true,
+    extensionPoints: {
+        axisGrid_strokeStyle: 'lightgray'
+    }
 })  
 .setData(crosstab_01)
 .render();

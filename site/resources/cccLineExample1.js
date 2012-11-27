@@ -20,7 +20,8 @@ new pvc.LineChart({
       baseAxisScale_dateTickFormat:    "%Y/%m/%d",
       baseAxisScale_dateTickPrecision: 798336000/1.5,
       line_interpolate: 'monotone',
-      area_interpolate: 'monotone'
+      area_interpolate: 'monotone',
+      axisGrid_strokeStyle: 'lightgray'
     }
 })
 .setData(relational_01, { crosstabMode: false })

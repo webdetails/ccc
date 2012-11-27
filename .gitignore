@@ -1,5 +1,5 @@
-dist/ccc
-dist/pen
+dist
+/site/templates/
 nbproject/private/
 .DS_Store
 pvc-*.js

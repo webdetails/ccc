@@ -16,7 +16,8 @@ new pvc.StackedAreaChart({
     axisGrid:     true,
 
     extensionPoints: {
-        dot_fillStyle: "white"
+        dot_fillStyle: "white",
+        axisGrid_strokeStyle: 'lightgray'
     }
 })
 .setData(relational_01, { crosstabMode: false })
