@@ -136,7 +136,7 @@ var tryMe = (function(){
                 handler();
             });
         }
-    };
+    }
     
     tryMe.listen = function(handler){
         _listeners.push(handler);

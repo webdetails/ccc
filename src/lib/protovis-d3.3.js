@@ -380,6 +380,14 @@ pv.ancestor = function(a, e) {
   return false;
 };
 
+pv.getWindow = function(elem) {
+    return (elem != null && elem == elem.window) ?
+        elem :
+        elem.nodeType === 9 ?
+            elem.defaultView || elem.parentWindow :
+            false;
+};
+
 /**
  * @private Computes the accumulated scroll offset given an element.
  */
@@ -394,6 +402,40 @@ pv.scrollOffset = function(elem) {
     }
     
     return [left, top];
+};
+
+/* Adapted from jQuery.offset()
+ */
+pv.elementOffset = function(elem) {
+    var docElem, body, win, clientTop, clientLeft, scrollTop, scrollLeft,
+        box = { top: 0, left: 0 },
+        doc = elem && elem.ownerDocument;
+
+    if (!doc) {
+        return;
+    }
+
+    body = doc.body;
+    if(body === elem)  {
+        return; // not supported
+    }
+    
+    docElem = doc.documentElement;
+
+    if ( typeof elem.getBoundingClientRect !== "undefined" ) {
+        box = elem.getBoundingClientRect();
+    }
+    
+    win = pv.getWindow(doc);
+    
+    clientTop  = docElem.clientTop  || body.clientTop  || 0;
+    clientLeft = docElem.clientLeft || body.clientLeft || 0;
+    scrollTop  = win.pageYOffset || docElem.scrollTop;
+    scrollLeft = win.pageXOffset || docElem.scrollLeft;
+    return {
+        top:  box.top  + scrollTop  - clientTop,
+        left: box.left + scrollLeft - clientLeft
+    };
 };
 
 /**
@@ -10463,13 +10505,12 @@ pv.Mark.prototype.mouse = function() {
        * the necessary relative co-ordinates anyway (well, it seems to
        * in my code.
        */
-      if (pv.renderer() !== 'svgweb') {
-          do {
-            x -= n.offsetLeft;
-            y -= n.offsetTop;
-          } while ((n = n.offsetParent));
+      var offset = pv.elementOffset(n);
+      if(offset){
+          x -= offset.left;
+          y -= offset.top;
       }
-
+      
       /* Compute the inverse transform of all enclosing panels. */
       var t = pv.Transform.identity,
           p = this.properties.transform ? this : this.parent,
