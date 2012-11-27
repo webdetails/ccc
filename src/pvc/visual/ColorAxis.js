@@ -236,34 +236,27 @@ def.scope(function(){
          * secondAxisColor (V1 compatibility)
          */
         Colors: {
-            resolve: '_resolveFull',
+            resolve:    '_resolveFull',
+            getDefault: getDefaultColor,
             data: {
                 resolveV1: function(optionInfo){
-                    if(this.index === 0 && 
-                       this._specifyChartOption(optionInfo, 'colors')){
-                        return true;
-                    }
-                     
-                    if(this.index === 1 &&
-                        this.chart._allowV1SecondAxis &&
-                        this._specifyChartOption(optionInfo, 'secondAxisColor')){
-                         return true;
+                    if(this.scaleType === 'discrete'){
+                        if(this.index === 0){ 
+                            this._specifyChartOption(optionInfo, 'colors');
+                        } else if(this.index === 1 && this.chart._allowV1SecondAxis) {
+                            this._specifyChartOption(optionInfo, 'secondAxisColor');
+                        }
+                    } else {
+                        this._specifyChartOption(optionInfo, 'colorRange');
                     }
                     
-                    // Compute default value
-                    optionInfo.defaultValue(getDefaultColor.call(this, optionInfo));
                     return true;
                 },
-                resolveDefault: function(optionInfo){
+                resolveDefault: function(optionInfo){ // after normal resolution
                     // Handle naming exceptions
-                    if(this.index === 0 && 
-                       this._specifyChartOption(optionInfo, 'colors')){
-                        return true;
+                    if(this.index === 0){ 
+                       this._specifyChartOption(optionInfo, 'colors');
                     }
-                    
-                    // Compute default value
-                    optionInfo.defaultValue(getDefaultColor.call(this, optionInfo));
-                    return true;
                 }
             },
             cast: pvc.colorScheme
@@ -327,13 +320,6 @@ def.scope(function(){
             resolve: '_resolveFull',
             cast:    Boolean,
             value:   false
-        },
-        
-        Range: {
-            resolve: '_resolveFull',
-            cast:    def.array.to,
-            value:   ['red', 'yellow','green']
-                     .map(function(name){ return pv.Color.names[name]; })
         },
         
         Domain: {

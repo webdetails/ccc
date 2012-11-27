@@ -277,7 +277,7 @@ def.scope(function(){
         this._context = context;
         this.option = option;
         
-        this.cast = def.get(spec, 'cast');
+        this._cast = def.get(spec, 'cast');
         
         // Assumed already cast
         // May be undefined
@@ -289,6 +289,11 @@ def.scope(function(){
         this.resolveCore = def.get(spec, 'resolve');
         if(!this.resolveCore){
             this.isResolved = true;
+        }
+        
+        var getDefault = def.get(spec, 'getDefault');
+        if(getDefault){
+            this._getDefault = getDefault;
         }
         
         var data = def.get(spec, 'data');
@@ -317,14 +322,22 @@ def.scope(function(){
                 // In case of re-entry, the initial default value is obtained.
                 this.isResolved = true;
                 
-                var resolve = this.resolveCore;
-                var context = this._context;
-                if(context && def.string.is(resolve)){
-                    resolve = context[resolve];
-                }
+                var resolve = this._getFunProp('resolveCore');
                 
                 // Must call set, specify or defaultValue
-                resolve.call(context, this);
+                // Or the current default value becomes the value.
+                resolve.call(this._context, this);
+                
+                if(this.value == null){
+                    var getDefault = this._getFunProp('_getDefault');
+                    if(getDefault){
+                        var value = this.cast(getDefault.call(this._context, this));
+                        if(value != null){
+                            delete this.isSpecified;
+                            this.value = this._defaultValue = value;
+                        }
+                    }
+                }
             }
             
             return this;
@@ -353,6 +366,23 @@ def.scope(function(){
             return this._defaultValue;
         },
         
+        cast: function(value){
+            if(value != null){
+                var cast = this._getFunProp('_cast');
+                if(cast){
+                    value = cast.call(this._context, value, this);
+                }
+            }
+            return value;
+        },
+        
+        dynDefault: function(){
+            var dynDefault = this._getFunProp('_dynDefault');
+            if(dynDefault){
+                return this.cast(dynDefault.call(this._context, this));
+            }
+        },
+        
         /**
          * Sets the option's value or default value.
          * 
@@ -363,14 +393,13 @@ def.scope(function(){
          */
         set: function(value, isDefault){
             if(value != null){
-                var cast = this.cast;
-                if(cast){
-                    var context = this._context;
-                    if(context && def.string.is(cast)){
-                        cast = context[cast];
-                    }
-                    
-                    value = cast.call(context, value, this);
+                value = this.cast(value);
+            }
+            
+            if(value == null){
+                value = this.dynDefault();
+                if(value != null){
+                    isDefault = true;
                 }
             }
             
@@ -388,6 +417,17 @@ def.scope(function(){
             }
             
             return this;
+        },
+
+        _getFunProp: function(name){
+            var fun = this[name];
+            if(fun){
+                var context = this._context;
+                if(context && def.string.is(fun)){
+                    fun = context[fun];
+                }
+            }
+            return fun;
         }
     });
 });

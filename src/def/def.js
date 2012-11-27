@@ -1560,6 +1560,26 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
     
+    appendMany: function(target){
+        var a = arguments;
+        var S = a.length;
+        if(S > 1){
+            var t = target.length;
+            for(var s = 1 ; s < S ; s++){
+                var source = a[s];
+                if(source){
+                    var i = 0;
+                    var L = source.length;
+                    while(i < L){
+                        target[t++] = source[i++];
+                    }
+                }
+            }
+        }
+        
+        return target;
+    },
+    
     prepend: function(target, source, start){
         if(start == null){
             start = 0;
