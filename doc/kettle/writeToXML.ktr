@@ -155,9 +155,30 @@ Possible values for each extension (bottom)</note>
     </notepad>
     <notepad>
       <note>Merge components&#47;properties with main charts</note>
-      <xloc>279</xloc>
-      <yloc>56</yloc>
+      <xloc>292</xloc>
+      <yloc>60</yloc>
       <width>225</width>
+      <heigth>21</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+    <notepad>
+      <note>Manual Exceptions not in CCCv2 Docs</note>
+      <xloc>151</xloc>
+      <yloc>386</yloc>
+      <width>188</width>
       <heigth>21</heigth>
       <fontname>Arial</fontname>
       <fontsize>10</fontsize>
@@ -176,7 +197,7 @@ Possible values for each extension (bottom)</note>
     </notepad>
   </notepads>
   <order>
-  <hop> <from>Components&#47;Properties Table File</from><to>Sort Base File</to><enabled>Y</enabled> </hop>  <hop> <from>CDF Charts</from><to>Sort Charts</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Charts</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join</from><to>Select rows</to><enabled>Y</enabled> </hop>  <hop> <from>sort</from><to>group</to><enabled>Y</enabled> </hop>  <hop> <from>group</from><to>change type</to><enabled>Y</enabled> </hop>  <hop> <from>change type</from><to>String operations</to><enabled>Y</enabled> </hop>  <hop> <from>String operations</from><to>fiter extensions</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions</from><to>Extension Points</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions</from><to>copy results</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comps</from><to>Group by</to><enabled>Y</enabled> </hop>  <hop> <from>Group by</from><to>prop XML</to><enabled>Y</enabled> </hop>  <hop> <from>copy results</from><to>fiter extensions 2</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions 2</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions 2</from><to>Extension Points (values)</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Base File</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comp</from><to>Components</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort comp</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort comps</to><enabled>Y</enabled> </hop>  <hop> <from>prop XML</from><to>sort for group</to><enabled>Y</enabled> </hop>  <hop> <from>sort for group</from><to>group for xml</to><enabled>Y</enabled> </hop>  <hop> <from>group for xml</from><to>Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Components</from><to>sort components</to><enabled>Y</enabled> </hop>  <hop> <from>sort components</from><to>merge comps &amp; props</to><enabled>Y</enabled> </hop>  <hop> <from>Properties</from><to>sort props</to><enabled>Y</enabled> </hop>  <hop> <from>sort props</from><to>merge comps &amp; props</to><enabled>Y</enabled> </hop>  <hop> <from>merge comps &amp; props</from><to>Select comps</to><enabled>Y</enabled> </hop>  <hop> <from>Select comps</from><to>comps XML</to><enabled>Y</enabled> </hop>  <hop> <from>copy results</from><to>Select values 3</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Unique rows</to><enabled>Y</enabled> </hop>  <hop> <from>values list</from><to>Unique rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows 2</from><to>value XML</to><enabled>Y</enabled> </hop>  <hop> <from>value XML</from><to>Components 2</to><enabled>Y</enabled> </hop>  <hop> <from>Components 2</from><to>Properties 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p</from><to>values list</to><enabled>Y</enabled> </hop>  <hop> <from>Get pwd</from><to>out fileName</to><enabled>Y</enabled> </hop>  <hop> <from>Properties 2</from><to>Sort values</to><enabled>Y</enabled> </hop>  <hop> <from>Sort values</from><to>Merge Join 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>allToXML</from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join 2 2</from><to>Select values 4</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 4</from><to>allToXML</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comp 2</from><to>Components 3</to><enabled>Y</enabled> </hop>  <hop> <from>Extension Points</from><to>Replace in string</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string</from><to>Select values 5 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 5 2</from><to>Sort comp 2</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string 2</from><to>Select values 5 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comp 2 2</from><to>Components 3 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 5 2 2</from><to>Sort comp 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Extension Points (values)</from><to>Replace in string 2</to><enabled>Y</enabled> </hop>  <hop> <from>out fileName</from><to>in&#47;out type</to><enabled>Y</enabled> </hop>  <hop> <from>comps XML</from><to>group all</to><enabled>Y</enabled> </hop>  <hop> <from>group all</from><to>replace char &quot;,&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;,&quot;</from><to>Wrapper</to><enabled>Y</enabled> </hop>  <hop> <from>Wrapper</from><to>Comp XML File</to><enabled>Y</enabled> </hop>  <hop> <from>Sort properties</from><to>Merge Join 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort prop</from><to>Select p 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2 2</from><to>Group by 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2 2</from><to>Group by 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2 2</from><to>Filter rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2</from><to>Results With multiple rows (defaults os descriptions)</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2</from><to>unique results</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>Select p</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>Dummy (do nothing)</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2</from><to>Group by 2 3</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Filter rows</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Select p 2</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2 3</from><to>Get pwd</to><enabled>Y</enabled> </hop>  <hop> <from>Add sequence</from><to>toXML 3</to><enabled>Y</enabled> </hop>  <hop> <from>in&#47;out type</from><to>Sort prop</to><enabled>Y</enabled> </hop>  <hop> <from>toXML 3</from><to>Sort properties</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2</from><to>Add sequence</to><enabled>Y</enabled> </hop>  <hop> <from>Add sequence</from><to>toXML 3</to><enabled>Y</enabled> </hop>  <hop> <from>Select rows</from><to>Replace in string 3</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string 3</from><to>sort</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>Components&#47;Properties Table File</from><to>Sort Base File</to><enabled>Y</enabled> </hop>  <hop> <from>CDF Charts</from><to>Sort Charts</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Charts</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join</from><to>Select rows</to><enabled>Y</enabled> </hop>  <hop> <from>sort</from><to>group</to><enabled>Y</enabled> </hop>  <hop> <from>change type</from><to>String operations</to><enabled>Y</enabled> </hop>  <hop> <from>String operations</from><to>fiter extensions</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions</from><to>Extension Points</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions</from><to>copy results</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comps</from><to>Group by</to><enabled>Y</enabled> </hop>  <hop> <from>Group by</from><to>prop XML</to><enabled>Y</enabled> </hop>  <hop> <from>copy results</from><to>fiter extensions 2</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions 2</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions 2</from><to>Extension Points (values)</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Base File</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comp</from><to>Components</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort comp</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort comps</to><enabled>Y</enabled> </hop>  <hop> <from>prop XML</from><to>sort for group</to><enabled>Y</enabled> </hop>  <hop> <from>sort for group</from><to>group for xml</to><enabled>Y</enabled> </hop>  <hop> <from>group for xml</from><to>Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Components</from><to>sort components</to><enabled>Y</enabled> </hop>  <hop> <from>sort components</from><to>merge comps &amp; props</to><enabled>Y</enabled> </hop>  <hop> <from>Properties</from><to>sort props</to><enabled>Y</enabled> </hop>  <hop> <from>sort props</from><to>merge comps &amp; props</to><enabled>Y</enabled> </hop>  <hop> <from>merge comps &amp; props</from><to>Select comps</to><enabled>Y</enabled> </hop>  <hop> <from>Select comps</from><to>comps XML</to><enabled>Y</enabled> </hop>  <hop> <from>copy results</from><to>Select values 3</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Unique rows</to><enabled>Y</enabled> </hop>  <hop> <from>values list</from><to>Unique rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows 2</from><to>value XML</to><enabled>Y</enabled> </hop>  <hop> <from>value XML</from><to>Components 2</to><enabled>Y</enabled> </hop>  <hop> <from>Components 2</from><to>Properties 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p</from><to>values list</to><enabled>Y</enabled> </hop>  <hop> <from>Get pwd</from><to>out fileName</to><enabled>Y</enabled> </hop>  <hop> <from>Properties 2</from><to>Sort values</to><enabled>Y</enabled> </hop>  <hop> <from>Sort values</from><to>Merge Join 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>allToXML</from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join 2 2</from><to>Select values 4</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 4</from><to>allToXML</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comp 2</from><to>Components 3</to><enabled>Y</enabled> </hop>  <hop> <from>Extension Points</from><to>Replace in string</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string</from><to>Select values 5 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 5 2</from><to>Sort comp 2</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string 2</from><to>Select values 5 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comp 2 2</from><to>Components 3 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 5 2 2</from><to>Sort comp 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Extension Points (values)</from><to>Replace in string 2</to><enabled>Y</enabled> </hop>  <hop> <from>out fileName</from><to>in&#47;out type</to><enabled>Y</enabled> </hop>  <hop> <from>comps XML</from><to>group all</to><enabled>Y</enabled> </hop>  <hop> <from>group all</from><to>replace char &quot;,&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;,&quot;</from><to>Wrapper</to><enabled>Y</enabled> </hop>  <hop> <from>Wrapper</from><to>Comp XML File</to><enabled>Y</enabled> </hop>  <hop> <from>Sort properties</from><to>Merge Join 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort prop</from><to>Select p 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2 2</from><to>Group by 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2 2</from><to>Group by 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2 2</from><to>Filter rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2</from><to>unique results</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>Select p</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>Dummy (do nothing)</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2</from><to>Group by 2 3</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Filter rows</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Select p 2</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2 3</from><to>Get pwd</to><enabled>Y</enabled> </hop>  <hop> <from>Add sequence</from><to>toXML 3</to><enabled>Y</enabled> </hop>  <hop> <from>in&#47;out type</from><to>Sort prop</to><enabled>Y</enabled> </hop>  <hop> <from>toXML 3</from><to>Sort properties</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2</from><to>Add sequence</to><enabled>Y</enabled> </hop>  <hop> <from>Add sequence</from><to>toXML 3</to><enabled>Y</enabled> </hop>  <hop> <from>Select rows</from><to>Replace in string 3</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string 3</from><to>sort</to><enabled>Y</enabled> </hop>  <hop> <from>for processing?</from><to>change type</to><enabled>Y</enabled> </hop>  <hop> <from>for processing?</from><to>trash</to><enabled>Y</enabled> </hop>  <hop> <from>group</from><to>MANUAL EXCEPTIONS</to><enabled>Y</enabled> </hop>  <hop> <from>MANUAL EXCEPTIONS</from><to>for processing?</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2</from><to>Merge Join 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2 2</from><to>Merge Join 2</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join 2</from><to>Select values 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 2</from><to>Sort rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows 2</from><to>Unique rows 3</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows 3</from><to>multiple rows (defaults or descriptions)</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>Add sequence</name>
     <type>Sequence</type>
@@ -200,7 +221,7 @@ Possible values for each extension (bottom)</note>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>1184</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -259,8 +280,8 @@ Possible values for each extension (bottom)</note>
     </fields>
     <data>
       <line> <item>BulletChart</item><item>cccBulletChart</item><item>CCC Bullet Chart</item><item/> </line>
-      <line> <item>DataTreeChart</item><item>cccDataTree</item><item>CCC DataTree</item><item>em falta nos JsDocs + não funciona + ?</item> </line>
-      <line> <item>ParallelCoordinatesChart</item><item>cccParCoord</item><item>CCC Parallel Coordinates</item><item>em falta nos JsDocs + ?</item> </line>
+      <line> <item>DataTreeChart</item><item>cccDataTree</item><item>CCC DataTree</item><item>em falta nos JsDocs + não funciona + ADICIONAR À MÃO NO CCC.XML</item> </line>
+      <line> <item>ParallelCoordinatesChart</item><item>cccParCoord</item><item>CCC Parallel Coordinates</item><item>em falta nos JsDocs + ADICIONAR À MÃO NO CCC.XML</item> </line>
       <line> <item>BoxplotChart</item><item>cccBoxplotChart</item><item>CCC Boxplot Chart</item><item/> </line>
       <line> <item>HeatGridChart</item><item>cccHeatGridChart</item><item>CCC Heat Grid</item><item/> </line>
       <line> <item>BarChart</item><item>cccBarChart</item><item>CCC Bar Chart</item><item/> </line>
@@ -273,10 +294,11 @@ Possible values for each extension (bottom)</note>
       <line> <item>LineChart</item><item>cccLineChart</item><item>CCC Line Chart</item><item/> </line>
       <line> <item>StackedLineChart</item><item>cccStackedLineChart</item><item>CCC Stacked Line Chart</item><item/> </line>
       <line> <item>AreaChart</item><item>cccAreaChart</item><item>CCC Area Chart</item><item>novo no CDF</item> </line>
+      <line> <item>PieChart</item><item>cccPieChart</item><item>CCC Pie Chart</item><item/> </line>
     </data>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>67</xloc>
+      <xloc>84</xloc>
       <yloc>8</yloc>
       <draw>Y</draw>
       </GUI>
@@ -736,7 +758,7 @@ Possible values for each extension (bottom)</note>
     <sizeFieldName/>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>66</xloc>
+      <xloc>83</xloc>
       <yloc>129</yloc>
       <draw>Y</draw>
       </GUI>
@@ -834,7 +856,7 @@ Possible values for each extension (bottom)</note>
            <method>none</method>
            <schema_name/>
            </partitioning>
-<send_true_to>Results With multiple rows (defaults os descriptions)</send_true_to>
+<send_true_to>Merge Join 2</send_true_to>
 <send_false_to>unique results</send_false_to>
     <compare>
 <condition>
@@ -846,8 +868,42 @@ Possible values for each extension (bottom)</note>
     </compare>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>1048</xloc>
-      <yloc>474</yloc>
+      <xloc>980</xloc>
+      <yloc>447</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>for processing?</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>change type</send_true_to>
+<send_false_to>trash</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <conditions>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>process</leftvalue>
+   <function>=</function>
+   <rightvalue/>
+   <value><name>constant</name><type>Boolean</type><text>Y</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  </conditions>
+ </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>110</xloc>
+      <yloc>449</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -879,7 +935,7 @@ Possible values for each extension (bottom)</note>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>763</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1055,8 +1111,8 @@ Possible values for each extension (bottom)</note>
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>1048</xloc>
-      <yloc>398</yloc>
+      <xloc>978</xloc>
+      <yloc>382</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1107,7 +1163,7 @@ Possible values for each extension (bottom)</note>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>690</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1182,8 +1238,8 @@ Possible values for each extension (bottom)</note>
     </keys_2>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>224</xloc>
-      <yloc>58</yloc>
+      <xloc>239</xloc>
+      <yloc>60</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1210,7 +1266,7 @@ Possible values for each extension (bottom)</note>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>1402</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1361,26 +1417,8 @@ Possible values for each extension (bottom)</note>
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>224</xloc>
-      <yloc>204</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Results With multiple rows (defaults os descriptions)</name>
-    <type>Dummy</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>1050</xloc>
-      <yloc>550</yloc>
+      <xloc>239</xloc>
+      <yloc>190</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1493,7 +1531,7 @@ Possible values for each extension (bottom)</note>
     </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>617</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1540,7 +1578,7 @@ Possible values for each extension (bottom)</note>
     </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>1048</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1598,8 +1636,8 @@ Possible values for each extension (bottom)</note>
       </field>        <select_unspecified>N</select_unspecified>
     </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>225</xloc>
-      <yloc>132</yloc>
+      <xloc>239</xloc>
+      <yloc>125</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1740,7 +1778,7 @@ Possible values for each extension (bottom)</note>
     </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>1402</xloc>
-      <yloc>395</yloc>
+      <yloc>383</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1845,7 +1883,7 @@ Possible values for each extension (bottom)</note>
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>142</xloc>
+      <xloc>159</xloc>
       <yloc>92</yloc>
       <draw>Y</draw>
       </GUI>
@@ -1877,7 +1915,7 @@ Possible values for each extension (bottom)</note>
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>143</xloc>
+      <xloc>160</xloc>
       <yloc>32</yloc>
       <draw>Y</draw>
       </GUI>
@@ -2133,7 +2171,7 @@ Possible values for each extension (bottom)</note>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>980</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -2165,7 +2203,7 @@ Possible values for each extension (bottom)</note>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>1326</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -2296,8 +2334,8 @@ Possible values for each extension (bottom)</note>
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>224</xloc>
-      <yloc>514</yloc>
+      <xloc>239</xloc>
+      <yloc>515</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -2359,8 +2397,8 @@ Possible values for each extension (bottom)</note>
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>1496</xloc>
-      <yloc>467</yloc>
+      <xloc>1497</xloc>
+      <yloc>448</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -2486,13 +2524,10 @@ var xmlFileAllContent = componentXML.toXMLString(2);
 
 if (valuesXML != null) {
 
-	&#47;&#47;var regexp = &#47;&lt;InputType&gt;String&lt;InputType\&#47;&gt;*&#47;;
 	var replacer = &lt;InputType type=&quot;valuelist&quot;&#47;&gt;;
-	
 	var propXML = new XML(propertyXML);
 
 	propXML.Header.InputType = replacer;
-	&#47;&#47;propXML.Header.appendChild(replacer);
 
 	var valXML = new XMLList(valuesXML);
 	var valsXML = (&lt;Values&gt;&lt;&#47;Values&gt;).appendChild(valXML);
@@ -2542,8 +2577,8 @@ Alert(str2);</jsScript_script>
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>1403</xloc>
-      <yloc>467</yloc>
+      <xloc>1404</xloc>
+      <yloc>448</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -2598,8 +2633,8 @@ var show = property.match(regExp);</jsScript_script>
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>224</xloc>
-      <yloc>438</yloc>
+      <xloc>239</xloc>
+      <yloc>450</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -2635,10 +2670,12 @@ componentXML = 	&lt;DesignerComponent&gt;
     				&lt;&#47;Metadata&gt;
     				&lt;Contents&gt;
       					&lt;Model&gt;
-							&lt;Property name=&quot;width&quot;&gt;width&lt;&#47;Property&gt;
-          					&lt;Property name=&quot;height&quot; &gt;height&lt;&#47;Property&gt;
         					&lt;Definition name=&quot;chartDefinition&quot;&gt;
           						&lt;Property type=&quot;query&quot;&gt;dataSource&lt;&#47;Property&gt;
+								&lt;Property name=&quot;width&quot;&gt;width&lt;&#47;Property&gt;
+    	      					&lt;Property name=&quot;height&quot; &gt;height&lt;&#47;Property&gt;
+								&lt;Property name=&quot;extensionPoints&quot;&gt;cccExtensionPoints&lt;&#47;Property&gt;
+								&lt;Property name=&quot;colors&quot;&gt;cccColors&lt;&#47;Property&gt;
         					&lt;&#47;Definition&gt;
         					&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
         					&lt;Property type=&quot;boolean&quot;&gt;executeAtStart&lt;&#47;Property&gt;
@@ -2704,6 +2741,24 @@ var xmlFileContent = componentXML.toXMLString(2);
     </step>
 
   <step>
+    <name>trash</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>43</xloc>
+      <yloc>449</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
     <name>fiter extensions</name>
     <type>FilterRows</type>
     <description/>
@@ -2718,9 +2773,14 @@ var xmlFileContent = componentXML.toXMLString(2);
     <compare>
 <condition>
  <negated>N</negated>
- <leftvalue>show</leftvalue>
- <function>IS NULL</function>
- <rightvalue/>
+ <conditions>
+  <condition>
+   <negated>N</negated>
+   <leftvalue>show</leftvalue>
+   <function>IS NULL</function>
+   <rightvalue/>
+   </condition>
+  </conditions>
  </condition>
     </compare>
      <cluster_schema/>
@@ -2763,7 +2823,7 @@ var xmlFileContent = componentXML.toXMLString(2);
     <name>group</name>
     <type>GroupBy</type>
     <description/>
-    <distribute>Y</distribute>
+    <distribute>N</distribute>
     <copies>1</copies>
          <partitioning>
            <method>none</method>
@@ -2822,8 +2882,8 @@ var xmlFileContent = componentXML.toXMLString(2);
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>224</xloc>
-      <yloc>362</yloc>
+      <xloc>239</xloc>
+      <yloc>320</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -2956,7 +3016,7 @@ if (propertyOutputType == &apos;Number&apos;)
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>907</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -3008,7 +3068,7 @@ if (propertyOutputType == &apos;Number&apos;)
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>835</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -3141,8 +3201,8 @@ var propXML = (new XML(&lt;Property name={property}&gt;{cccProperty}&lt;&#47;Pro
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>224</xloc>
-      <yloc>286</yloc>
+      <xloc>239</xloc>
+      <yloc>255</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -3297,7 +3357,7 @@ propertyXML = propertyXML.toXMLString();
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>1254</xloc>
-      <yloc>320</yloc>
+      <yloc>319</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -3314,8 +3374,8 @@ propertyXML = propertyXML.toXMLString();
            </partitioning>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>979</xloc>
-      <yloc>476</yloc>
+      <xloc>911</xloc>
+      <yloc>446</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -3390,6 +3450,314 @@ var valueXML = vXML.toXMLString(2);</jsScript_script>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>760</xloc>
       <yloc>181</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>MANUAL EXCEPTIONS</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>&#47;&#47;Script here
+
+var process = true;
+var str = String(property);
+
+switch (str) {
+	case &quot;width&quot;:
+	case &quot;height&quot;:
+	case &quot;colorColors&quot;:
+	case &quot;trendTrend&quot;:
+	case &quot;trendNullInterpolationMode&quot;:
+  		var process = false;
+  		break;
+	case &quot;compatVersion&quot;:
+		var propertyDefault = 2;
+		break;
+	case &quot;colorLegendVisible&quot;:
+		var property = &quot;legendVisible&quot;;
+		break;
+	case &quot;colorLegendDrawLine&quot;:
+		var property = &quot;legendDrawLine&quot;;
+		break;
+	case &quot;colorLegendDrawMarker&quot;:
+		var property = &quot;legendDrawMarker&quot;;
+		break;
+	case &quot;colorLegendShape&quot;:
+		var property = &quot;legendShape&quot;;
+		break;
+	case &quot;colorLegendClickMode&quot;:
+		var property = &quot;legendClickMode&quot;;
+		break;
+}
+
+&#47;&#47; exclude keepInBounds and alignTo with any prefix
+
+if (property.match(&#47;AlignTo?&#47;)) {
+	var process = false;
+}
+
+if (property.match(&#47;keepInBounds?&#47;)) {
+	var process = false;
+}
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>process</name>
+        <rename>process</rename>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>propertyDefault</name>
+        <rename>propertyDefault</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>      <field>        <name>property</name>
+        <rename>property</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>109</xloc>
+      <yloc>320</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Merge Join 2</name>
+    <type>MergeJoin</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<join_type>INNER</join_type>
+<step1>Filter rows 2</step1>
+<step2>Select p 2 2</step2>
+    <keys_1>
+      <key>property</key>
+    </keys_1>
+    <keys_2>
+      <key>property</key>
+    </keys_2>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1047</xloc>
+      <yloc>445</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select values 2</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccProperty</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDescription_1</name>
+        <rename>description</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDefault_1</name>
+        <rename>default</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1048</xloc>
+      <yloc>513</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>multiple rows (defaults or descriptions)</name>
+    <type>ExcelOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <header>Y</header>
+    <footer>N</footer>
+    <encoding>MacRoman</encoding>
+    <append>N</append>
+    <add_to_result_filenames>Y</add_to_result_filenames>
+    <file>
+      <name>${Internal.Transformation.Filename.Directory}&#47;output&#47;duplicated</name>
+      <extention>xls</extention>
+      <do_not_open_newfile_init>N</do_not_open_newfile_init>
+      <create_parent_folder>N</create_parent_folder>
+      <split>N</split>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <sheetname>duplicated</sheetname>
+      <autosizecolums>N</autosizecolums>
+      <nullisblank>N</nullisblank>
+      <protect_sheet>N</protect_sheet>
+      <password>Encrypted </password>
+      <splitevery>0</splitevery>
+      <usetempfiles>N</usetempfiles>
+      <tempdirectory/>
+      </file>
+    <template>
+      <enabled>N</enabled>
+      <append>N</append>
+      <filename>template.xls</filename>
+    </template>
+    <fields>
+      <field>
+        <name>property</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>description</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>default</name>
+        <type>String</type>
+        <format/>
+      </field>
+    </fields>
+    <custom>
+    <header_font_name>arial</header_font_name>
+    <header_font_size>10</header_font_size>
+    <header_font_bold>N</header_font_bold>
+    <header_font_italic>N</header_font_italic>
+    <header_font_underline>no</header_font_underline>
+    <header_font_orientation>horizontal</header_font_orientation>
+    <header_font_color>black</header_font_color>
+    <header_background_color>none</header_background_color>
+    <header_row_height>255</header_row_height>
+    <header_alignment>left</header_alignment>
+    <header_image/>
+    <row_font_name>arial</row_font_name>
+    <row_font_size>10</row_font_size>
+    <row_font_color>black</row_font_color>
+    <row_background_color>none</row_background_color>
+      </custom>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1182</xloc>
+      <yloc>576</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort rows 2</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>description</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>default</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1114</xloc>
+      <yloc>513</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Unique rows 3</name>
+    <type>Unique</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <count_rows>N</count_rows>
+      <count_field/>
+      <reject_duplicate_row>N</reject_duplicate_row>
+      <error_description/>
+    <fields>      <field>        <name>property</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>cccProperty</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>description</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>default</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1183</xloc>
+      <yloc>513</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
