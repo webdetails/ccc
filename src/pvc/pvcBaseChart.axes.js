@@ -141,12 +141,12 @@ pvc.BaseChart
                     trendLabel = dataPartAtom.f;
                 }
                 
-                this.data.owner
-                .dimensions(dataPartDimName)
-                .intern({
+                this._firstTrendAtomProto = {
                     v: dataPartAtom.v,
                     f: trendLabel
-                });
+                };
+            } else {
+                delete this._firstTrendAtomProto;
             }
         }
     },

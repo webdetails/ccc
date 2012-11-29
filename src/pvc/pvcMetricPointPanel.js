@@ -53,8 +53,9 @@ def
     
     autoPaddingByDotSize: true,
     
+    // Override default mappings
     _v1DimRoleName: {
-        'series':   'series',
+        //'series':   'series',
         'category': 'x',
         'value':    'y'
     },

@@ -1354,16 +1354,27 @@ var pvc = def.globalSpace('pvc', {
     pvc.Size.names = ['width', 'height'];
     pvc.Size.namesSet = pv.dict(pvc.Size.names, def.retTrue);
     
-    pvc.Size.as = function(v){
-        if(v != null && !(v instanceof Size)){
-            v = new Size().setSize(v);
+    pvc.Size.toOrtho = function(value, anchor){
+        if(value != null){
+            // Single size (a number or a string with only one number)
+            // should be interpreted as meaning the orthogonal length.
+            var a_ol;
+            if(anchor){
+                a_ol = pvc.BasePanel.orthogonalLength[anchor];
+            }
+            
+            value = pvc.Size.to(value, {singleProp: a_ol});
+            
+            if(anchor){
+                delete value[pvc.BasePanel.oppositeLength[a_ol]];
+            }
         }
         
-        return v;
+        return value;
     };
     
     pvc.Size.to = function(v, keyArgs){
-        if(v != null){
+        if(v != null && !(v instanceof Size)){
             v = new Size().setSize(v, keyArgs);
         }
         

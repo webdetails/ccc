@@ -1038,27 +1038,36 @@ def.globalSpace = globalSpace;
 /** @private */
 function mixinRecursive(instance, mixin){
     for(var p in mixin){
-        var vMixin = mixin[p];
-        if(vMixin !== undefined){
-            var oMixin,
-                oTo = def.object.asNative(instance[p]);
+        mixinProp(instance, p, mixin[p]);
+    }
+}
 
-            if(oTo){
-                oMixin = def.object.as(vMixin);
-                if(oMixin){
-                    mixinRecursive(oTo, oMixin);
-                } else {
-                    // Overwrite oTo
-                    instance[p] = vMixin;
+function mixinProp(instance, p, vMixin, noProtectValue){
+    if(vMixin !== undefined){
+        var oMixin,
+            oTo = def.object.asNative(instance[p]);
+
+        if(oTo){
+            oMixin = def.object.as(vMixin);
+            if(oMixin){
+                if(!objectHasOwn.call(instance, p)){
+                    instance[p] = oTo = Object.create(oTo);
                 }
+            
+                mixinRecursive(oTo, oMixin);
             } else {
+                // Overwrite oTo
+                instance[p] = vMixin;
+            }
+        } else {
+            if(!noProtectValue){
                 oMixin = def.object.asNative(vMixin);
                 if(oMixin){
                     vMixin = Object.create(oMixin);
                 }
-
-                instance[p] = vMixin;
             }
+            
+            instance[p] = vMixin;
         }
     }
 }
@@ -1226,21 +1235,70 @@ def.scope(function(){
                             // 'base' property before calling the original value function
                             value = baseMethod.override(method);
                         }
+                        
+                        proto[p] = value;
+                        return;
                     }
                 }
                 
-                proto[p] = value;
+                mixinProp(proto, p, value, /*noProtectValue*/true); // Can use value directly without inheriting from it
             });
 
             return this;
         },
         
+        getStatic: function(p){
+            return getStatic(shared(this.safe), p);
+        },
+        
         addStatic: function(mixin){
-            def.copy(this, mixin);
+            var state = shared(this.safe);
+            
+            /*jshint expr:true */
+            !state.locked || def.fail(typeLocked());
+            
+            for(var p in mixin){
+                if(p !== 'prototype'){
+                    var v1 = def.getOwn(this, p);
+                    
+                    var v2 = mixin[p];
+                    var o2 = def.object.as(v2);
+                    if(o2){
+                        var v1Local = (v1 !== undefined);
+                        if(!v1Local){
+                            v1 = getStatic(state.base, p);
+                        }
+                        
+                        var o1 = def.object.asNative(v1);
+                        if(o1){
+                            if(v1Local){
+                                def.mixin(v1, v2);
+                                continue;
+                            }
+                            
+                            v2 = def.create(v1, v2); // Extend from v1 and mixin v2
+                        }
+                    } // else v2 smashes anything in this[p]
+    
+                    this[p] = v2;
+                }
+            }
+            
             return this;
         }
     };
-
+    
+    function getStatic(state, p){
+        if(state){
+            do{
+                var v = def.getOwn(state.constructor, p);
+                if(v !== undefined){
+                    return v;
+                }
+            } while((state = state.base));
+        }
+    }
+    
     // TODO: improve this code with indexOf
     function TypeName(full){
         var parts;

@@ -254,11 +254,10 @@ def
             
             var panel = new pvc.AxisPanel(this, this._gridDockPanel, axis, {
                 anchor:            axis.option('Position'),
-                axisSize:          axis.option('Size'),
-                axisSizeMax:       axis.option('SizeMax'),
+                size:              axis.option('Size'),
+                sizeMax:           axis.option('SizeMax'),
                 clickAction:       axis.option('ClickAction'),
                 doubleClickAction: axis.option('DoubleClickAction'),
-                
                 useCompositeAxis:  axis.option('Composite'),
                 font:              axis.option('Font'),
                 labelSpacingMin:   axis.option('LabelSpacingMin'),
@@ -688,7 +687,7 @@ def
         }
     },
     
-    defaults: def.create(pvc.BaseChart.prototype.defaults, {
+    defaults: {
         /* Percentage of occupied space over total space in a discrete axis band */
         panelSizeRatio: 0.9,
 
@@ -698,5 +697,5 @@ def
         
         // Show a frame around the plot area
         // plotFrameVisible: undefined
-    })
+    }
 });

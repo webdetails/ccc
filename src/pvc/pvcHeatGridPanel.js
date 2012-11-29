@@ -86,36 +86,6 @@ def
         var colorAxis = this.axes.color;
         var colorNull = colorAxis.option('Missing');
         if(colorDimName){
-            /*
-             * type
-             * colorDimension
-             * data
-             * normPerBaseCategory
-             * colorDomain
-             * colors
-             * colorNull
-             * colorMax
-             * colorMin
-             */
-//            var fillColorScaleByColKey = pvc.color.scales(def.create(false, options, {
-//                /* Override/create these options, inherit the rest */
-//                type: this.colorScaleType, 
-//                data: colRootData,
-//                colorDimension: colorDimName
-//            }));
-//            
-//            getFillColor = function(leafScene){
-//                var color;
-//                var colorValue = leafScene.vars.color.value;
-//                if(colorValue != null) {
-//                    var colAbsKey = leafScene.group.parent.absKey;
-//                    color = fillColorScaleByColKey[colAbsKey](colorValue);
-//                } else {
-//                    color = me.colorNull;
-//                }
-//                
-//                return color;
-//            };
             var fillColorScaleByColKey = colorAxis.scalesByCateg;
             if(fillColorScaleByColKey){
                 getFillColor = function(leafScene){

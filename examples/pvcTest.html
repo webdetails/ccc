@@ -191,8 +191,10 @@
     <script type="text/javascript">
 
       // enable debug
-      pvc.debug = 1;
-
+      if(!pvc.debug){
+          pvc.debug = 1;
+      }
+      
       pv.listenForPageLoad(function() {
 
         var dot1 = new pvc.DotChart({
@@ -247,7 +249,7 @@
 
           valuesVisible: true,
           valuesAnchor: "left",
-          axisOffset: 0.2
+          axisOffset: 0.1
 
         });
         dot2.setData(relational_01, {crosstabMode: false, seriesInRows: false});

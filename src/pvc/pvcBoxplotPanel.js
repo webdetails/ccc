@@ -13,9 +13,10 @@ def
     
     anchor: 'fill',
     
+    // Override default mappings
     _v1DimRoleName: {
-        'series':   'series',
-        'category': 'category',
+        //'series':   'series',
+        //'category': 'category',
         'value':    'median'
     },
     

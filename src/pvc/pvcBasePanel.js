@@ -2008,8 +2008,8 @@ def
                 if(datums) {
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
-                            if(pvc.debug >= 10) {
-                                this._log(datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type);
+                            if(pvc.debug >= 20) {
+                                this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type);
                             }
                     
                             fun.call(ctx, datum);

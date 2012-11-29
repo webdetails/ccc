@@ -374,9 +374,21 @@ pvc.BaseChart
             // So we create a dummy empty place-holder child here,
             // so that when the trend datums are added they end up here,
             // and not in another new Data...
+            var dataPartCell = {
+                v: dataPartValues
+            };
+            
+            // TODO: HACK: To make trend label fixing work in multi-chart scenarios... 
+            if(dataPartValues === 'trend'){
+                var firstTrendAtom = this._firstTrendAtomProto;
+                if(firstTrendAtom){
+                    dataPartCell.f = firstTrendAtom.f;
+                }
+            }
+            
             child = new pvc.data.Data({
                 parent:   this._partData,
-                atoms:    def.set({}, dataPartDimName, dataPartValues), 
+                atoms:    def.set({}, dataPartDimName, dataPartCell), 
                 dimNames: [dataPartDimName],
                 datums:   []
                 // TODO: index
@@ -389,6 +401,7 @@ pvc.BaseChart
     
     _generateTrends: function(){
         if(this._dataPartRole){
+            
             def
             .query(def.own(this.axes))
             .selectMany(function(axis){ return axis.dataCells; })

@@ -12,28 +12,6 @@ def
     
     var anchor = options.anchor || this.anchor;
     
-    function readSize(prop){
-        var value = options[prop];
-        if(value == null){
-            value = options['axis' + def.firstUpperCase(prop)];
-        }
-        
-        if(value != null){
-            // Single size (a number or a string with only one number)
-            // should be interpreted as meaning the orthogonal length.
-            var aol = this.anchorOrthoLength(anchor);
-            value = pvc.Size.to(value, {singleProp: aol});
-            
-            delete value[this.anchorLength(anchor)];
-        }
-        
-        return value;
-    }
-    
-    // size && sizeMax
-    options.size    = readSize.call(this, 'size');
-    options.sizeMax = readSize.call(this, 'sizeMax');
-    
     // Prevent the border from affecting the box model,
     // providing a static 0 value, independently of the actual drawn value...
     //this.borderWidth = 0;
@@ -80,7 +58,6 @@ def
     roleName: null,
     axis: null,
     anchor: "bottom",
-    axisSize: undefined,
     tickLength: 6,
     
     scale: null,

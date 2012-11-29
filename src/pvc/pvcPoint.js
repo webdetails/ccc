@@ -148,9 +148,9 @@ def
         return pointPanel;
     },
     
-    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
+    defaults: {
         tooltipOffset: 15
-    })
+    }
 });
 
 /**

@@ -130,7 +130,7 @@ def
             }));
     },
   
-    defaults: def.create(pvc.BaseChart.prototype.defaults, {
+    defaults: {
         compatVersion: 1,
       
         orientation: 'horizontal',
@@ -154,7 +154,7 @@ def
         
         crosstabMode: false,
         seriesInRows: false
-    })
+    }
 });
 
 /*

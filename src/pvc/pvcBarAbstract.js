@@ -62,6 +62,4 @@ def
         // Cached
         this._valueDim = data.dimensions(this._valueRole.firstDimensionName());
     }
-    
-    //defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {})
 });

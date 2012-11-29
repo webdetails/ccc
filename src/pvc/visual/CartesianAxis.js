@@ -391,6 +391,17 @@ def.scope(function(){
         return pvc.BasePanel.oppositeAnchor[position];
     });
     
+    function castSize(value){
+        var position = this.option('Position');
+        return pvc.Size.toOrtho(value, position);
+    }
+    
+    function castTitleSize(value){
+        var position = this.option('Position');
+        
+        return pvc.Size.to(value, {singleProp: pvc.BasePanel.orthogonalLength[position]});
+    }
+    
     /*global axis_optionsDef:true*/
     var cartAxis_optionsDef = def.create(axis_optionsDef, {
         Visible: {
@@ -442,12 +453,12 @@ def.scope(function(){
         Size: {
             resolve: '_resolveFull',
             data:    normalV1Data,
-            cast:    pvc.Size.to
+            cast:    castSize
         },
         
         SizeMax: {
             resolve: '_resolveFull',
-            cast:    pvc.Size.to 
+            cast:    castSize
         },
         
         /* xAxisPosition,
@@ -622,11 +633,11 @@ def.scope(function(){
         },
         TitleSize: {
             resolve: '_resolveFull',
-            cast:    pvc.Size.to
+            cast:    castTitleSize
         },
         TitleSizeMax: {
             resolve: '_resolveFull',
-            cast:    pvc.Size.to
+            cast:    castTitleSize
         }, 
         TitleFont: {
             resolve: '_resolveFull',

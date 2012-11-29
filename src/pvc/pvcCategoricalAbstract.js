@@ -97,6 +97,12 @@ def
             });
             
             var trendModel = trendInfo.model(options);
+            
+            // If a label has already been registered, it is preserved... (See BaseChart#_fixTrendsLabel)
+            var dataPartAtom = data.owner
+                                .dimensions(dataPartDimName)
+                                .intern(this.root._firstTrendAtomProto);
+            
             if(trendModel){
                 // At least one point...
                 // Sample the line on each x and create a datum for it
@@ -132,7 +138,7 @@ def
                         }
                         
                         atoms[yDimName] = trendY;
-                        atoms[dataPartDimName] = trendInfo.dataPartAtom;
+                        atoms[dataPartDimName] = dataPartAtom;
                         
                         var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
                         newDatum.isVirtual = true;
@@ -507,9 +513,9 @@ def
         return this;
     },
     
-    defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
+    defaults: {
      // Ortho <- value role
         // TODO: this should go somewhere else
         orthoAxisOrdinal: false // when true => ortho axis gets the series role (instead of the value role)
-    })
+    }
 });

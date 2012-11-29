@@ -356,7 +356,18 @@ pv.unlisten = function(target, type, listener){
 pv.listener = function(f) {
   return f.$listener || (f.$listener = function(e) {
       try {
+        // Fix event (adapted from jQuery)
+        if(e.pageX == null && e.clientX != null) {
+            var eventDoc = e.target.ownerDocument || document;
+            var doc  = eventDoc.documentElement;
+            var body = eventDoc.body;
+
+            e.pageX = (e.clientX * 1) + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
+            e.pageY = (e.clientY * 1) + ( doc && doc.scrollTop  || body && body.scrollTop  || 0 ) - ( doc && doc.clientTop  || body && body.clientTop  || 0 );
+        }
+        
         pv.event = e;
+        
         return f.call(this, e);
       } catch (ex) {
           // swallow top level error
@@ -386,22 +397,6 @@ pv.getWindow = function(elem) {
         elem.nodeType === 9 ?
             elem.defaultView || elem.parentWindow :
             false;
-};
-
-/**
- * @private Computes the accumulated scroll offset given an element.
- */
-pv.scrollOffset = function(elem) {
-    var left = 0, 
-        top  = 0;
-    while(elem){
-        left += elem.scrollLeft || 0;
-        top  += elem.scrollTop  || 0;
-        
-        elem = elem.parentNode;
-    }
-    
-    return [left, top];
 };
 
 /* Adapted from jQuery.offset()
@@ -10495,16 +10490,11 @@ pv.Mark.prototype.buildImplied = function(s) {
  */
 pv.Mark.prototype.mouse = function() {
     var n = this.root.canvas(),
-        scrollOffset = pv.scrollOffset(n),
         ev = pv.event,
-        x = scrollOffset[0] + ev.clientX * 1,
-        y = scrollOffset[1] + ev.clientY * 1;
+        x = ev.pageX,
+        y = ev.pageY;
     
-      /* Compute xy-coordinates relative to the panel.
-       * This is not necessary if we're using svgweb, as svgweb gives us
-       * the necessary relative co-ordinates anyway (well, it seems to
-       * in my code.
-       */
+      // Compute xy-coordinates relative to the panel.
       var offset = pv.elementOffset(n);
       if(offset){
           x -= offset.left;

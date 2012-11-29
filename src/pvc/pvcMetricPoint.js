@@ -173,8 +173,8 @@ def
         return scatterChartPanel;
     },
     
-    defaults: def.create(pvc.MetricXYAbstract.prototype.defaults, {
-        originIsZero: false,
+    defaults: {
+        axisOriginIsZero: false,
         
         tooltipOffset: 15
         
@@ -196,7 +196,7 @@ def
 //      sizeAxisRatio:    undefined,
 //      sizeAxisRatioTo:  undefined,
 //      autoPaddingByDotSize: undefined
-    })
+    }
 });
 
 /**

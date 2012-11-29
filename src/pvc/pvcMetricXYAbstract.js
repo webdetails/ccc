@@ -114,6 +114,12 @@ def
 
             var trendModel = trendInfo.model(options);
             if(trendModel){
+                
+                // If a label has already been registered, it is preserved... (See BaseChart#_fixTrendsLabel)
+                var dataPartAtom = data.owner
+                                .dimensions(dataPartDimName)
+                                .intern(this.root._firstTrendAtomProto);
+                
                 datums.forEach(function(datum, index){
                     var trendX = funX(datum);
                     if(trendX){
@@ -124,7 +130,7 @@ def
                                     Object.create(serData.atoms), // just common atoms
                                     xDimName, trendX,
                                     yDimName, trendY,
-                                    dataPartDimName, trendInfo.dataPartAtom);
+                                    dataPartDimName, dataPartAtom);
                             
                             newDatums.push(
                                 def.set(
@@ -137,7 +143,5 @@ def
                 });
             }
         }
-    },
-
-    defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {})
+    }
 });

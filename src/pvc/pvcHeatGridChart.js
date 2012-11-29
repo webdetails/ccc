@@ -166,7 +166,7 @@ def
                         Object.create(baseOptions)));
     },
     
-    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
+    defaults: {
         colorValIdx: 0,
         sizeValIdx:  1,
         measuresIndexes: [2], // TODO: ???
@@ -200,5 +200,5 @@ def
 //      colorMin: undefined, //"white",
 //      colorMax: undefined, //"darkgreen",
 //      colorNull:  "#efc5ad"  // white with a shade of orange
-    })
+    }
 });

@@ -85,7 +85,7 @@ def
         }));
     },
     
-    defaults: def.create(pvc.BaseChart.prototype.defaults, {
+    defaults: {
         compatVersion: 1,
         
      // margins around the full tree
@@ -110,7 +110,7 @@ def
         minAspectRatio: 2.0
 
         //selectParam: undefined
-    })
+    }
 });
 
 /*

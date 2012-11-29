@@ -124,12 +124,12 @@ def
         return boxPanel;
     },
     
-    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
+    defaults: {
         // plot2: false
         // legend: false,
         crosstabMode: false
         // panelSizeRatio
-    })
+    }
 })
 .addStatic({
     measureRolesNames: ['median', 'lowerQuartil', 'upperQuartil', 'minimum', 'maximum']
