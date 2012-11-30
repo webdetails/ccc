@@ -46,7 +46,7 @@
 	        <div class="bodycopydiv">
 	            <ul class="bodycopy">
 		            <li class="negrito">
-				        <xsl:copy-of select="t:summary" />
+				        <xsl:copy-of select="t:summary/node()" />
 				    </li>
 			        
 			        <li></li>

@@ -182,7 +182,7 @@ pvc.BaseChart
                     }
                     
                     sourceRoleName = roleSpec.from;
-                    if(sourceRoleName){
+                    if(sourceRoleName && (sourceRoleName !== name)){
                         var sourceRole = this._visualRoles[sourceRoleName] ||
                             def.fail.operationInvalid("Source role '{0}' is not supported by the chart type.", [sourceRoleName]);
                         

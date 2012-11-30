@@ -1641,6 +1641,15 @@ pvc.options.VisualRole = function(){};
  */
 pvc.options.VisualRole.prototype.dimensions = undefined;
 /**
+ * The name of another visual role 
+ * whose dimensions are to be used by this one.
+ * <p>
+ * This property takes precedence over {@link #dimensions}.
+ * 
+ * @type string
+ */
+pvc.options.VisualRole.prototype.from = undefined;
+/**
  * Indicates that the visual role's data 
  * should be ordered in reverse order
  * in relation to the sort orders specified in
@@ -7584,6 +7593,8 @@ pvc.options.marks.LabelExtensionPoint.prototype.textDecoration = undefined;
 pvc.options.marks.LabelExtensionPoint.prototype.textShadow = undefined;
 /**
  * The text color.
+ * <p>
+ * Note that gradients are not supported in the text style.
  * 
  * @type pvc.options.varia.ColorString
  */

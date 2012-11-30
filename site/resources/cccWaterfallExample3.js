@@ -3,6 +3,7 @@ new pvc.WaterfallChart({
     width:   500,
     height:  400,
     title:   "Balance Analysis",
+    titleMargins: '3%',
     legend:  true,
     legendPosition: 'right',
     animate:       false,
@@ -12,7 +13,6 @@ new pvc.WaterfallChart({
     
     direction: 'up',
     areasVisible: true,
-    totalValuesVisible: true,
     allCategoryLabel: "Profit",
     //totalLineLabel: "Accumulated",
     

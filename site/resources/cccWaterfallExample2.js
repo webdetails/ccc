@@ -1,18 +1,15 @@
 new pvc.WaterfallChart({
     canvas: 'cccWaterfallExample2',
     width:  800,
-    height: 500,
-    
-    title: "Sales by territory, region, market and product",
-    titleFont: 'bold 16px sans-serif',
+    height: 800,
     
     legend: true,
-    legendPosition: 'right',
+    legendPosition: 'top',
 
     direction:         'up',
     areasVisible:       true,
     valuesVisible:      true,
-    totalValuesVisible: true,
+    totalValuesVisible: false,
     totalLineLabel:     "Accumulated",
     allCategoryLabel:   "All",
     

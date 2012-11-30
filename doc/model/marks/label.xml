@@ -33,6 +33,8 @@
         <c:property name="textStyle" type="pvc.options.varia.ColorString">
             <c:documentation>
                 The text color.
+                
+                Note that gradients are not supported in the text style.
             </c:documentation>
         </c:property>
         
