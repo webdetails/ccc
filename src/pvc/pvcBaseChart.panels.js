@@ -142,7 +142,8 @@ pvc.BaseChart
      */
     _initLegendPanel: function(){
         var options = this.options;
-        if (options.legend) { // global legend(s) switch
+        // global legend(s) switch
+        if ((this.compatVersion() > 1) ? options.legend : options.showLegend) {
 
             var legend = new pvc.visual.Legend(this, 'legend', 0);
             
