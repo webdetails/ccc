@@ -367,7 +367,7 @@ def
         offset:       2,
         opacity:      0.9,
         html:         true,
-        fade:         false,
+        fade:         true,
         useCorners:   false,
         arrowVisible: true,
         followMouse:  false,

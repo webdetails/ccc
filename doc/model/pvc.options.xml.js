@@ -823,9 +823,11 @@ pvc.options.Tooltip = function(){};
  * Indicates if the tooltip shows an arrow 
  * pointing to the 
  * visual element's anchor point.
+ * <p>
+ * Most chart types use a default value of 
+ * <tt>true</tt>.
  * 
  * @type boolean
- * @default true
  */
 pvc.options.Tooltip.prototype.arrowVisible = undefined;
 /**
@@ -854,7 +856,7 @@ pvc.options.Tooltip.prototype.enabled = undefined;
  * after the corresponding delay has expired.
  * 
  * @type boolean
- * @default false
+ * @default true
  */
 pvc.options.Tooltip.prototype.fade = undefined;
 /**
@@ -870,10 +872,11 @@ pvc.options.Tooltip.prototype.followMouse = undefined;
  * A callback function that is called,
  * to build the tooltip of a visual element.
  * <p>
- * If {@link #format} is 
+ * If {@link #html} is 
  * <tt>true</tt>,
- * the resulting text is in HTML format,
- * otherwise, it is plain text.
+ * the resulting text must be valid HTML,
+ * otherwise, 
+ * it is considered plain text.
  * 
  * @returns {string}
  * The tooltip text.
@@ -890,14 +893,22 @@ pvc.options.Tooltip.prototype.followMouse = undefined;
 pvc.options.Tooltip.prototype.format = function(){};
 /**
  * The preferred tooltip gravity.
+ * <p>
+ * The default value depends on the chart type.
+ * Most use the {@link pvc.options.varia.TooltipGravity#South} gravity, 
+ * but others, like the Pie chart,
+ * calculate an adequate gravity per visual element.
+ * <p>
+ * When using the preferred gravity causes the 
+ * tooltip to be placed off the browser window,
+ * a more suitable gravity may be automatically chosen.
  * 
  * @type pvc.options.varia.TooltipGravity
- * @default 's'
  */
 pvc.options.Tooltip.prototype.gravity = undefined;
 /**
  * Indicates if the tooltip text 
- * that the function {@link #format} builds 
+ * that the format function builds 
  * is in HTML format.
  * 
  * @type boolean
@@ -925,11 +936,13 @@ pvc.options.Tooltip.prototype.offset = undefined;
  */
 pvc.options.Tooltip.prototype.opacity = undefined;
 /**
- * Indicates if the tooltip gravities should be 
+ * Indicates if the collateral tooltip gravities should be 
  * aligned with corners.
+ * <p>
+ * Most chart types use a default value of 
+ * <tt>false</tt>.
  * 
  * @type boolean
- * @default false
  */
 pvc.options.Tooltip.prototype.useCorners = undefined;
 /**
@@ -1512,6 +1525,7 @@ pvc.options.plots.Plot.prototype.valuesAnchor = undefined;
  * taken into account for layout purposes.
  * 
  * @type string
+ * @default '10px sans-serif'
  * @category Style
  */
 pvc.options.plots.Plot.prototype.valuesFont = undefined;
@@ -1978,6 +1992,14 @@ pvc.options.charts.PieChart.prototype.color = undefined;
  */
 pvc.options.charts.PieChart.prototype.innerGap = undefined;
 /**
+ * This chart type does not represent orientation. 
+ * 
+ * @type pvc.options.varia.ChartOrientation
+ * @category Layout
+ * @constant
+ */
+pvc.options.charts.PieChart.prototype.orientation = 'vertical';
+/**
  * The pie plot is the 
  * <b>main plot</b> of the pie chart,
  * which means that 
@@ -1998,7 +2020,9 @@ pvc.options.charts.PieChart.prototype.pie = undefined;
 pvc.options.charts.PieChart.prototype.extensionPoints = undefined;
 /**
  * The 
- * <tt>category</tt> visual role represents a slice of the pie.
+ * <tt>category</tt> visual role.
+ * <p>
+ * Each category value is represented by a slice of the pie.
  * <p>
  * The 
  * <tt>category</tt> visual role automatically binds to 
@@ -2022,7 +2046,10 @@ pvc.options.charts.PieChart.prototype.extensionPoints = undefined;
 pvc.options.charts.PieChart.prototype.categoryRole = undefined;
 /**
  * The 
- * <tt>color</tt> visual role controls the color of pie slices.
+ * <tt>color</tt> visual role controls the color of visual elements.
+ * <p>
+ * The fill color of each pie slice is the color of the 
+ * corresponding color role value.
  * <p>
  * The 
  * <tt>color</tt> visual role automatically binds to 
@@ -2043,7 +2070,9 @@ pvc.options.charts.PieChart.prototype.categoryRole = undefined;
 pvc.options.charts.PieChart.prototype.colorRole = undefined;
 /**
  * The 
- * <tt>value</tt> visual role controls the 
+ * <tt>value</tt> visual role represents the main measure.
+ * <p>
+ * Specifically, it controls the 
  * relative angle span of each pie slice.
  * <p>
  * The 
@@ -2117,6 +2146,14 @@ pvc.options.plots.PiePlot = function(){};
         
         
         
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.PiePlot.prototype.colorAxis = 1;
 /**
  * Increment radius of an 
  * <i>active</i> slice, 
@@ -2334,8 +2371,10 @@ pvc.options.plots.PiePlot.prototype.linkOutsetRadius = undefined;
  */
 pvc.options.plots.PiePlot.prototype.extensionPoints = undefined;
 /**
- * The alignment of a non-linked value label
+ * The alignment of a value label 
  * relative to its corresponding visual element position.
+ * <p>
+ * Specifically, this property applies to non-linked labels.
  * 
  * @type function|pvc.options.varia.WedgeAnchor
  * @default 'outer'
@@ -2343,7 +2382,7 @@ pvc.options.plots.PiePlot.prototype.extensionPoints = undefined;
  */
 pvc.options.plots.PiePlot.prototype.valuesAnchor = undefined;
 /**
- * Indicates if value labels are shown per visual element.
+ * Indicates if value labels are shown next to the visual elements.
  * 
  * @type boolean
  * @default true
@@ -2946,7 +2985,7 @@ pvc.options.charts.BulletChart.prototype.visualRoles = undefined;
 pvc.options.charts.BulletChart.prototype.axisDoubleClickAction = function(){};
 /**
  * A callback function that is called
- * when the user clicks on a bullet.
+ * when the user clicks on a visual element.
  * 
  * @returns {undefined}
  * @method
@@ -3075,8 +3114,10 @@ pvc.options.charts.BulletChart.prototype.subTitleRole = undefined;
 pvc.options.charts.BulletChart.prototype.titleRole = undefined;
 /**
  * The 
- * <tt>value</tt> visual role 
- * represents current values for a given
+ * <tt>value</tt> visual role represents the main measure.
+ * <p>
+ * Specifically, 
+ * it represents current values for a given
  * title and sub-title categories.
  * <p>
  * The values, one for each dimension bound to the 
@@ -3566,8 +3607,9 @@ pvc.options.charts.CategoricalChart = function(){};
         
 /**
  * The 
- * <tt>category</tt> visual role 
- * represents a certain 
+ * <tt>category</tt> visual role. 
+ * <p>
+ * Represents a certain 
  * <i>logical grouping</i> of the data points.
  * <p>
  * Category data may be discrete or continuous.
@@ -4093,6 +4135,19 @@ pvc.options.charts.BoxplotChart = function(){};
  */
 pvc.options.charts.BoxplotChart.prototype.baseAxis = undefined;
 /**
+ * The second color axis options.
+ * <p>
+ * By default, the second plot uses the second color axis.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.DiscreteColorAxis
+ * @category Axes
+ */
+pvc.options.charts.BoxplotChart.prototype.color2Axis = undefined;
+/**
  * Percentage of occupied space over total space 
  * in a discrete axis band.
  * <p>
@@ -4115,6 +4170,32 @@ pvc.options.charts.BoxplotChart.prototype.panelSizeRatio = undefined;
  * @category Plots
  */
 pvc.options.charts.BoxplotChart.prototype.box = undefined;
+/**
+ * Activates the second plot.
+ * <p>
+ * The second plot shows the values of the 
+ * <tt>median</tt> role,
+ * in the first orthogonal cartesian axis.
+ * <p>
+ * It is a 
+ * <i>generic</i> point plot,
+ * which means that 
+ * its properties 
+ * {@link pvc.options.plots.PointPlot#linesVisible},
+ * {@link pvc.options.plots.PointPlot#dotsVisible}, 
+ * and
+ * {@link pvc.options.plots.PointPlot#areasVisible}
+ * can be set freely.
+ * <p>
+ * By default, the second plot shows lines and dots/markers.
+ * <p>
+ * By default, the second plot uses the second color axis.
+ * 
+ * @type boolean|pvc.options.plots.BoxplotPointPlot
+ * @default false
+ * @category Plots
+ */
+pvc.options.charts.BoxplotChart.prototype.plot2 = undefined;
 /**
  * The 
  * <tt>lowerQuartil</tt> visual role 
@@ -4207,7 +4288,8 @@ pvc.options.charts.BoxplotChart.prototype.minimumRole = undefined;
  * 
  * <i>series</i> of connected data points. 
  * In this chart type, although supported, 
- * data bound to is not represented in its visual elements.
+ * data that is bound to it 
+ * is not represented in its visual elements.
  * 
  * @type string|pvc.options.VisualRole
  * @category Visual roles
@@ -4247,6 +4329,22 @@ pvc.options.plots.BoxplotPlot = function(){};
         
         
         
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.BoxplotPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.BoxplotPlot.prototype.orthoAxis = 1;
 /**
  * The box plot only shows a single series of data
  * and, as such, this property is meaningless.
@@ -4303,6 +4401,69 @@ pvc.options.plots.BoxplotPlot.prototype.extensionPoints = undefined;
  * @category Style
  */
 pvc.options.plots.BoxplotPlot.prototype.maxBoxSize = undefined;
+/**
+ * The options documentation class of the 
+ * <b>point</b> plot 
+ * used by the box plot when the second plot is active.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlot
+ */
+pvc.options.plots.BoxplotPointPlot = function(){};
+        
+        
+        
+        
+/**
+ * The point plot of the box plot 
+ * only shows a single series of data
+ * and, as such, this property is meaningless.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.BoxplotPointPlot.prototype.stacked = false;
+/**
+ * Trends are not supported by this plot type.
+ * 
+ * @type pvc.options.varia.PlotTrending
+ * @constant
+ */
+pvc.options.plots.BoxplotPointPlot.prototype.trend = null;
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @default 2
+ * @category Axes
+ */
+pvc.options.plots.BoxplotPointPlot.prototype.colorAxis = undefined;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.BoxplotPointPlot.prototype.orthoAxis = 1;
+/**
+ * Indicates if the visual elements show dots/markers
+ * in each point's position.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.BoxplotPointPlot.prototype.dotsVisible = undefined;
+/**
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.BoxplotPointPlot.prototype.linesVisible = undefined;
 /**
  * The extension points of the box plot type.
  * <p>
@@ -4459,6 +4620,14 @@ pvc.options.charts.HeatGridChart.prototype.sizeAxis = undefined;
  */
 pvc.options.charts.HeatGridChart.prototype.useCompositeAxis = undefined;
 /**
+ * The legend is not supported by this chart type chart.
+ * 
+ * @type boolean|pvc.options.panels.LegendPanel
+ * @category Panels
+ * @constant
+ */
+pvc.options.charts.HeatGridChart.prototype.legend = false;
+/**
  * The heat grid plot is the 
  * <b>main plot</b> of the heat grid chart,
  * which means that 
@@ -4471,10 +4640,12 @@ pvc.options.charts.HeatGridChart.prototype.useCompositeAxis = undefined;
 pvc.options.charts.HeatGridChart.prototype.heatGrid = undefined;
 /**
  * The 
- * <tt>category</tt> visual role 
- * of the heat grid chart organizes visual elements
- * along the discrete base axis, 
- * and is restricted to be discrete.
+ * <tt>category</tt> visual role.
+ * <p>
+ * The heat grid chart places visual elements
+ * in a discrete matrix. 
+ * The base axis organizes visual elements according to its category.
+ * The orthogonal axis organizes visual elements according to its series.
  * <p>
  * For additional information, 
  * see the base version of this property:
@@ -4486,8 +4657,7 @@ pvc.options.charts.HeatGridChart.prototype.heatGrid = undefined;
 pvc.options.charts.HeatGridChart.prototype.categoryRole = undefined;
 /**
  * The 
- * <tt>color</tt> visual role controls the color of 
- * the visual elements.
+ * <tt>color</tt> visual role controls the color of visual elements.
  * <p>
  * The 
  * <tt>color</tt> visual role automatically binds to 
@@ -4508,10 +4678,12 @@ pvc.options.charts.HeatGridChart.prototype.categoryRole = undefined;
  */
 pvc.options.charts.HeatGridChart.prototype.colorRole = undefined;
 /**
- * The 
- * <tt>series</tt> visual role 
- * of the heat grid chart organizes visual elements
- * along the discrete orthogonal axis.
+ * he series visual role represents a series of connected data points. 
+ * <p>
+ * The heat grid chart places visual elements
+ * in a discrete matrix.
+ * The base axis organizes visual elements according to its category.
+ * The orthogonal axis organizes visual elements according to its series.
  * <p>
  * For additional information, 
  * see the base version of this property:
@@ -4523,8 +4695,11 @@ pvc.options.charts.HeatGridChart.prototype.colorRole = undefined;
 pvc.options.charts.HeatGridChart.prototype.seriesRole = undefined;
 /**
  * The 
- * <tt>size</tt> visual role controls the size of 
- * the dot visual elements, when in "shapes" mode".
+ * <tt>size</tt> visual role 
+ * controls the size of visual elements.
+ * <p>
+ * Specifically, when in "shapes" mode",
+ * controls the size of the dot mark.
  * <p>
  * The 
  * <tt>size</tt> visual role automatically binds to 
@@ -4556,6 +4731,22 @@ pvc.options.plots.HeatGridPlot = function(){};
         
         
         
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.HeatGridPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.HeatGridPlot.prototype.orthoAxis = 1;
 /**
  * The extension points object contains style definitions for 
  * the marks of the plot.
@@ -4714,8 +4905,9 @@ pvc.options.charts.BarChartCommon.prototype.baseAxis = undefined;
 pvc.options.charts.BarChartCommon.prototype.panelSizeRatio = undefined;
 /**
  * The 
- * <tt>category</tt> visual role 
- * of the bar family charts is restricted to be discrete.
+ * <tt>category</tt> visual role. 
+ * <p>
+ * On the bar family charts it is restricted to be discrete.
  * <p>
  * For additional information, 
  * see the base version of this property:
@@ -4727,8 +4919,9 @@ pvc.options.charts.BarChartCommon.prototype.panelSizeRatio = undefined;
 pvc.options.charts.BarChartCommon.prototype.categoryRole = undefined;
 /**
  * The 
- * <tt>value</tt> visual role 
- * controls the height of bars.
+ * <tt>value</tt> visual role represents the main measure. 
+ * <p>
+ * Specifically, it controls the height of bars.
  * <p>
  * The 
  * <tt>value</tt> visual role automatically binds to 
@@ -4936,15 +5129,13 @@ pvc.options.charts.BarChart = function(){};
  * which means that 
  * its properties 
  * {@link pvc.options.plots.CategoricalNumericPlot#stacked},
- * {@link pvc.options.plots.PointPlot#linesVisible},
- * {@link pvc.options.plots.PointPlot#dotsVisible}, 
+ * {@link pvc.options.plots.Plot2PointPlot#linesVisible},
+ * {@link pvc.options.plots.Plot2PointPlot#dotsVisible}, 
  * and
  * {@link pvc.options.plots.PointPlot#areasVisible}
  * can be set freely.
- * <p>
- * By default, the second plot shows lines and dots/markers.
  * 
- * @type boolean|pvc.options.plots.PointPlot
+ * @type boolean|pvc.options.plots.Plot2PointPlot
  * @default false
  * @category Plots
  */
@@ -4967,6 +5158,47 @@ pvc.options.charts.BarChart.prototype.plot2 = undefined;
  */
 pvc.options.charts.BarChart.prototype.plot2Series = undefined;
 /**
+ * The second orthogonal cartesian axis panel options.
+ * <p>
+ * By default, 
+ * the second plot,
+ * and the trend plot, 
+ * use the first orthogonal axis.
+ * <p>
+ * To use a separate orthogonal axis,
+ * the property 
+ * <tt>orthoAxis</tt> of the corresponding plot 
+ * can be set to 
+ * <tt>2</tt>.
+ * <p>
+ * When the chart {@link pvc.options.charts.Chart#orientation}
+ * is 
+ * <tt>vertical</tt> the orthogonal axis is laid out vertically.
+ * <p>
+ * See {@link pvc.options.axes.CartesianAxis}
+ * to know the additional names by which a cartesian axis can be referred to.
+ * 
+ * @type pvc.options.axes.NumericCartesianAxis
+ * @category Axes
+ */
+pvc.options.charts.BarChart.prototype.ortho2Axis = undefined;
+/**
+ * The second color axis options.
+ * <p>
+ * By default, 
+ * the second plot,
+ * and the trend plot, 
+ * use the second color axis.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.DiscreteColorAxis
+ * @category Axes
+ */
+pvc.options.charts.BarChart.prototype.color2Axis = undefined;
+/**
  * The trend plot is activated when 
  * the 
  * <i>other</i> chart plots indicate that their 
@@ -4975,10 +5207,8 @@ pvc.options.charts.BarChart.prototype.plot2Series = undefined;
  * To activate trending for a plot specify 
  * its 
  * <tt>trend type</tt> option.
- * <p>
- * The trend plot shows lines, by default.
  * 
- * @type pvc.options.plots.PointPlot
+ * @type pvc.options.plots.TrendPointPlot
  * @category Plots
  */
 pvc.options.charts.BarChart.prototype.trend = undefined;
@@ -5119,6 +5349,22 @@ pvc.options.plots.BarPlot = function(){};
         
         
 /**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.BarPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.BarPlot.prototype.orthoAxis = 1;
+/**
  * Contains the plot's trending options.
  * <p>
  * Besides the property concatenation way of specifying this
@@ -5164,6 +5410,22 @@ pvc.options.plots.NormalizedBarPlot = function(){};
         
         
 /**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.NormalizedBarPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.NormalizedBarPlot.prototype.orthoAxis = 1;
+/**
  * This plot type is necessarily stacked.
  * 
  * @type boolean
@@ -5205,6 +5467,22 @@ pvc.options.plots.WaterfallPlot = function(){};
         
         
         
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.WaterfallPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.WaterfallPlot.prototype.orthoAxis = 1;
 /**
  * This plot type is necessarily stacked.
  * 
@@ -5351,15 +5629,13 @@ pvc.options.charts.PointChart = function(){};
  * which means that 
  * its properties 
  * {@link pvc.options.plots.CategoricalNumericPlot#stacked},
- * {@link pvc.options.plots.PointPlot#linesVisible},
- * {@link pvc.options.plots.PointPlot#dotsVisible}, 
+ * {@link pvc.options.plots.Plot2PointPlot#linesVisible},
+ * {@link pvc.options.plots.Plot2PointPlot#dotsVisible}, 
  * and
  * {@link pvc.options.plots.PointPlot#areasVisible}
  * can be set freely.
- * <p>
- * By default, the second plot shows lines and dots/markers.
  * 
- * @type boolean|pvc.options.plots.PointPlot
+ * @type boolean|pvc.options.plots.Plot2PointPlot
  * @default false
  * @category Plots
  */
@@ -5382,6 +5658,47 @@ pvc.options.charts.PointChart.prototype.plot2 = undefined;
  */
 pvc.options.charts.PointChart.prototype.plot2Series = undefined;
 /**
+ * The second orthogonal cartesian axis panel options.
+ * <p>
+ * By default, 
+ * the second plot,
+ * and the trend plot, 
+ * use the first orthogonal axis.
+ * <p>
+ * To use a separate orthogonal axis,
+ * the property 
+ * <tt>orthoAxis</tt> of the corresponding plot 
+ * can be set to 
+ * <tt>2</tt>.
+ * <p>
+ * When the chart {@link pvc.options.charts.Chart#orientation}
+ * is 
+ * <tt>vertical</tt> the orthogonal axis is laid out vertically.
+ * <p>
+ * See {@link pvc.options.axes.CartesianAxis}
+ * to know the additional names by which a cartesian axis can be referred to.
+ * 
+ * @type pvc.options.axes.NumericCartesianAxis
+ * @category Axes
+ */
+pvc.options.charts.PointChart.prototype.ortho2Axis = undefined;
+/**
+ * The second color axis options.
+ * <p>
+ * By default, 
+ * the second plot,
+ * and the trend plot, 
+ * use the second color axis.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.DiscreteColorAxis
+ * @category Axes
+ */
+pvc.options.charts.PointChart.prototype.color2Axis = undefined;
+/**
  * The trend plot is activated when 
  * the 
  * <i>other</i> chart plots indicate that their 
@@ -5390,10 +5707,8 @@ pvc.options.charts.PointChart.prototype.plot2Series = undefined;
  * To activate trending for a plot specify 
  * its 
  * <tt>trend type</tt> option.
- * <p>
- * The trend plot shows lines, by default.
  * 
- * @type pvc.options.plots.PointPlot
+ * @type pvc.options.plots.TrendPointPlot
  * @category Plots
  */
 pvc.options.charts.PointChart.prototype.trend = undefined;
@@ -5453,8 +5768,9 @@ pvc.options.charts.PointChart.prototype.dataPartRole = undefined;
 pvc.options.charts.PointChart.prototype.baseAxis = undefined;
 /**
  * The 
- * <tt>value</tt> visual role 
- * controls the orthogonal position of points.
+ * <tt>value</tt> visual role represents the main measure.
+ * <p>
+ * Specifically, it controls the orthogonal position of points.
  * <p>
  * The 
  * <tt>value</tt> visual role automatically binds to 
@@ -5673,6 +5989,22 @@ pvc.options.plots.LinePlot = function(){};
         
         
 /**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.LinePlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.LinePlot.prototype.orthoAxis = 1;
+/**
  * This plot type necessarily shows lines connecting
  * visual elements.
  * 
@@ -5715,6 +6047,22 @@ pvc.options.plots.StackedLinePlot = function(){};
         
         
         
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.StackedLinePlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.StackedLinePlot.prototype.orthoAxis = 1;
 /**
  * This plot type necessarily shows lines connecting
  * visual elements.
@@ -5766,6 +6114,22 @@ pvc.options.plots.DotPlot = function(){};
         
         
 /**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.DotPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.DotPlot.prototype.orthoAxis = 1;
+/**
  * This plot type necessarily shows dots/markers.
  * 
  * @type boolean
@@ -5807,6 +6171,22 @@ pvc.options.plots.StackedDotPlot = function(){};
         
         
         
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.StackedDotPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.StackedDotPlot.prototype.orthoAxis = 1;
 /**
  * This plot type necessarily shows dots/markers.
  * 
@@ -5857,6 +6237,22 @@ pvc.options.plots.AreaPlot = function(){};
         
         
 /**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.AreaPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.AreaPlot.prototype.orthoAxis = 1;
+/**
  * This plot type necessarily shows 
  * shaded areas connecting visual elements.
  * 
@@ -5900,6 +6296,22 @@ pvc.options.plots.StackedAreaPlot = function(){};
         
         
 /**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.StackedAreaPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.StackedAreaPlot.prototype.orthoAxis = 1;
+/**
  * This plot type necessarily shows 
  * shaded areas connecting visual elements.
  * 
@@ -5936,15 +6348,27 @@ pvc.options.charts.MetricPointChart = function(){};
  * To activate trending for a plot specify 
  * its 
  * <tt>trend type</tt> option.
- * <p>
- * Depending on the chart type
- * <p>
- * The trend plot shows lines, by default.
  * 
- * @type pvc.options.plots.MetricPointPlot
+ * @type pvc.options.plots.TrendMetricPointPlot
  * @category Plots
  */
 pvc.options.charts.MetricPointChart.prototype.trend = undefined;
+/**
+ * The second color axis options.
+ * <p>
+ * By default, 
+ * the second plot,
+ * and the trend plot, 
+ * use the second color axis.
+ * <p>
+ * See {@link pvc.options.axes.ColorAxis}
+ * for more information on the way that 
+ * the color axes' properties may be accessed. 
+ * 
+ * @type pvc.options.axes.DiscreteColorAxis
+ * @category Axes
+ */
+pvc.options.charts.MetricPointChart.prototype.color2Axis = undefined;
 /**
  * The indexes of the data source's 
  * <i>virtual item</i> columns
@@ -6297,8 +6721,12 @@ pvc.options.charts.MetricPointChart.prototype.sizeAxis = undefined;
 pvc.options.charts.MetricPointChart.prototype.extensionPoints = undefined;
 /**
  * The 
- * <tt>color</tt> visual role controls the color of the
- * dots and lines of the visual elements.
+ * <tt>color</tt> visual role controls the color of visual elements.
+ * <p>
+ * Specifically, 
+ * it is the color of the dots and lines of the visual elements
+ * that is changed according to the color of the corresponding 
+ * color role value.
  * <p>
  * The 
  * <tt>color</tt> visual role automatically binds to 
@@ -6323,9 +6751,11 @@ pvc.options.charts.MetricPointChart.prototype.extensionPoints = undefined;
 pvc.options.charts.MetricPointChart.prototype.colorRole = undefined;
 /**
  * The 
- * <tt>size</tt> visual role controls the size of 
- * the dots of the visual elements,
- * and, as such, it is only represented if dots are visible.
+ * <tt>size</tt> visual role 
+ * controls the size of visual elements.
+ * <p>
+ * Specifically, when dots are visible,
+ * controls the size of the dot mark.
  * <p>
  * The 
  * <tt>size</tt> visual role automatically binds to 
@@ -6626,6 +7056,22 @@ pvc.options.plots.MetricLinePlot = function(){};
         
         
 /**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.MetricLinePlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.MetricLinePlot.prototype.orthoAxis = 1;
+/**
  * This plot type necessarily shows lines connecting
  * visual elements.
  * 
@@ -6668,6 +7114,22 @@ pvc.options.plots.MetricDotPlot = function(){};
         
         
         
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.MetricDotPlot.prototype.colorAxis = 1;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.MetricDotPlot.prototype.orthoAxis = 1;
 /**
  * This plot type necessarily shows dots/markers.
  * 
@@ -7734,6 +8196,10 @@ pvc.options.axes.AnyColorAxis.prototype.scaleType = undefined;
  */
 pvc.options.axes.AnyColorAxis.prototype.useAbs = undefined;
 /**
+ * @type 
+ */
+pvc.options.axes.AnyColorAxis.prototype. = undefined;
+/**
  * The options documentation class of a discrete domain color axis.
  * <p>
  * See {@link pvc.options.axes.ColorAxis}
@@ -7810,6 +8276,10 @@ pvc.options.axes.DiscreteColorAxis.prototype.legendShape = undefined;
  * @category Discrete > Style
  */
 pvc.options.axes.DiscreteColorAxis.prototype.legendVisible = undefined;
+/**
+ * @type 
+ */
+pvc.options.axes.DiscreteColorAxis.prototype. = undefined;
 /**
  * The options documentation class of the 
  * HeatGrid numeric color axis.
@@ -8235,7 +8705,7 @@ pvc.options.axes.CartesianAxis.prototype.offset = undefined;
  */
 pvc.options.axes.CartesianAxis.prototype.position = undefined;
 /**
- * The fixed size of the panel's orthogonal dimension.
+ * The fixed size of the panel.
  * <p>
  * If a size object is specified, 
  * only the component orthogonal to the axis orientation is considered.
@@ -8248,7 +8718,7 @@ pvc.options.axes.CartesianAxis.prototype.position = undefined;
  */
 pvc.options.axes.CartesianAxis.prototype.size = undefined;
 /**
- * The maximum size of the panel's orthogonal dimension.
+ * The maximum size of the panel.
  * <p>
  * If a size object is specified, 
  * only the component orthogonal to the axis orientation is considered.
@@ -9979,21 +10449,6 @@ pvc.options.panels.DockedPanel.prototype.position = undefined;
 pvc.options.panels.DockedPanel.prototype.font = undefined;
 /**
  * The options documentation class of the legend panel.
- * <p>
- * The default 
- * {@link pvc.options.panels.DockedPanel#position}
- * is 
- * <tt>'bottom'</tt>.
- * <p>
- * The default 
- * {@link pvc.options.panels.DockedPanel#font}
- * is 
- * <tt>'10px sans-serif'</tt>.
- * <p>
- * The default
- * {@link pvc.options.panels.DockedPanel#paddings}
- * is 
- * <tt>5</tt> pixels.
  * 
  * @class
  * @extends pvc.options.panels.DockedPanel
@@ -10022,6 +10477,25 @@ pvc.options.panels.LegendPanel.prototype.itemPadding = undefined;
  */
 pvc.options.panels.LegendPanel.prototype.markerSize = undefined;
 /**
+ * The paddings of the panel.
+ * <p>
+ * See {@link pvc.options.varia.Sides} for information about 
+ * the different supported data types.
+ * 
+ * @type number|string|pvc.options.varia.Sides
+ * @default 5
+ * @category Layout
+ */
+pvc.options.panels.LegendPanel.prototype.paddings = undefined;
+/**
+ * The docking position of the panel.
+ * 
+ * @type pvc.options.varia.PanelPosition
+ * @default 'bottom'
+ * @category Layout
+ */
+pvc.options.panels.LegendPanel.prototype.position = undefined;
+/**
  * The space between the marker and the associated label, in pixel units.
  * 
  * @type number
@@ -10043,7 +10517,7 @@ pvc.options.panels.LegendPanel.prototype.extensionPoints = undefined;
  * {@link http://www.w3.org/TR/CSS2/fonts.html#font-shorthand}
  * 
  * @type string
- * @default '9px sans-serif'
+ * @default '10px sans-serif'
  * @category Style
  */
 pvc.options.panels.LegendPanel.prototype.font = undefined;
@@ -10138,11 +10612,6 @@ pvc.options.panels.ChartTitlePanel.prototype.position = undefined;
 pvc.options.panels.ChartTitlePanel.prototype.font = undefined;
 /**
  * The options documentation class of the cartesian axes title panel.
- * <p>
- * The default 
- * {@link pvc.options.panels.DockedPanel#font}
- * is 
- * <tt>'14px sans-serif'</tt>.
  * 
  * @class
  * @extends pvc.options.panels.TitlePanel
@@ -10348,6 +10817,127 @@ pvc.options.varia.PlotTrending.prototype.label = undefined;
  * @type string
  */
 pvc.options.varia.PlotTrending.prototype.type = undefined;
+/**
+ * The options documentation class of the 
+ * <b>point</b> plot 
+ * used for the second plot of categorical charts.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlot
+ */
+pvc.options.plots.Plot2PointPlot = function(){};
+        
+        
+        
+        
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @default 2
+ * @category Axes
+ */
+pvc.options.plots.Plot2PointPlot.prototype.colorAxis = undefined;
+/**
+ * Indicates if the visual elements show dots/markers
+ * in each point's position.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.Plot2PointPlot.prototype.dotsVisible = undefined;
+/**
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.Plot2PointPlot.prototype.linesVisible = undefined;
+/**
+ * The options documentation class of the 
+ * <b>point</b> plot 
+ * used for trends of categorical charts.
+ * 
+ * @class
+ * @extends pvc.options.plots.PointPlot
+ */
+pvc.options.plots.TrendPointPlot = function(){};
+        
+        
+        
+        
+/**
+ * Trends are not supported by this plot type.
+ * 
+ * @type pvc.options.varia.PlotTrending
+ * @constant
+ */
+pvc.options.plots.TrendPointPlot.prototype.trend = null;
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @default 2
+ * @category Axes
+ */
+pvc.options.plots.TrendPointPlot.prototype.colorAxis = undefined;
+/**
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.TrendPointPlot.prototype.linesVisible = undefined;
+/**
+ * The options documentation class of the 
+ * <b>metric point</b> plot 
+ * used for trends of scatter charts.
+ * 
+ * @class
+ * @extends pvc.options.plots.MetricPointPlot
+ */
+pvc.options.plots.TrendMetricPointPlot = function(){};
+        
+        
+        
+        
+/**
+ * Trends are not supported by this plot type.
+ * 
+ * @type pvc.options.varia.PlotTrending
+ * @constant
+ */
+pvc.options.plots.TrendMetricPointPlot.prototype.trend = null;
+/**
+ * The index of the color axis to use for the plot.
+ * 
+ * @type number
+ * @default 2
+ * @category Axes
+ */
+pvc.options.plots.TrendMetricPointPlot.prototype.colorAxis = undefined;
+/**
+ * The index of the orthogonal cartesian axis to use for the plot.
+ * 
+ * @type number
+ * @category Axes
+ * @constant
+ */
+pvc.options.plots.TrendMetricPointPlot.prototype.orthoAxis = 1;
+/**
+ * Indicates if the visual elements are connected
+ * with lines.
+ * 
+ * @type boolean
+ * @default true
+ * @category Style
+ */
+pvc.options.plots.TrendMetricPointPlot.prototype.linesVisible = undefined;
 /**
  * The namespace of various options-related helper types. 
  * 

@@ -13,10 +13,11 @@
             The options documentation class of the <b>Pie</b> chart.
         </c:documentation>
         
-        
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>category</tt> visual role represents a slice of the pie.
+                The <tt>category</tt> visual role.
+                
+                Each category value is represented by a slice of the pie.
                 
                 The <tt>category</tt> visual role automatically binds to 
                 every dimension whose name has the <tt>category</tt> prefix.
@@ -35,7 +36,10 @@
         
         <c:property name="colorRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>color</tt> visual role controls the color of pie slices.
+                The <tt>color</tt> visual role controls the color of visual elements.
+                
+                The fill color of each pie slice is the color of the 
+                corresponding color role value.
                 
                 The <tt>color</tt> visual role automatically binds to 
                 every dimension whose name has the <tt>color</tt> prefix
@@ -51,7 +55,9 @@
         
         <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>value</tt> visual role controls the 
+                The <tt>value</tt> visual role represents the main measure.
+                
+                Specifically, it controls the 
                 relative angle span of each pie slice.
                 
                 The <tt>value</tt> visual role automatically binds to 
@@ -61,6 +67,12 @@
                 
                 See <c:link to="pvc.options.VisualRole" />
                 for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="orientation" type="pvc.options.varia.ChartOrientation" fixed="'vertical'" category="Layout">
+            <c:documentation>
+                This chart type does not represent orientation. 
             </c:documentation>
         </c:property>
         
@@ -123,9 +135,10 @@
         </c:documentation>
     </c:complexType>
     
-    <c:complexType name="PiePlot" 
+    <c:complexType name="PiePlot"
                    space="pvc.options.plots"
                    base="pvc.options.plots.Plot"
+                   facets="pvc.options.plots.BasicMainPlotFacet"
                    use="expanded">
         <c:documentation>
             The options documentation class of the <b>Pie</b> plot.
@@ -133,14 +146,16 @@
         
         <c:property name="valuesAnchor" type="function pvc.options.varia.WedgeAnchor" default="'outer'" category="Style">
             <c:documentation>
-                The alignment of a non-linked value label
+                The alignment of a value label 
                 relative to its corresponding visual element position.
+                
+                Specifically, this property applies to non-linked labels.
             </c:documentation>
         </c:property>
         
         <c:property name="valuesVisible" type="boolean" default="true" category="Style">
             <c:documentation>
-                Indicates if value labels are shown per visual element.
+                Indicates if value labels are shown next to the visual elements.
             </c:documentation>
         </c:property>
         

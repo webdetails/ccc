@@ -30,7 +30,7 @@
     
     <xsl:function name="fun:buildTitleFromName" as="xs:string?">
         <xsl:param name="name" as="xs:string?" />
-        <xsl:value-of select="replace(fun:capitalizeWord($name), '([a-z])([A-Z])', '$1 $2')" />
+        <xsl:value-of select="replace(fun:capitalizeWord($name), '([a-z]\d*)([A-Z])', '$1 $2')" />
     </xsl:function>
     
     <xsl:function name="fun:capitalizeWord">

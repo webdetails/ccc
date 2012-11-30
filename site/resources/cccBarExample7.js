@@ -19,7 +19,6 @@ new pvc.BarChart({
     plot2: true,
     plot2Series: ['Paris'],
     plot2OrthoAxis: 2,
-    plot2ColorAxis: 2,
     plot2NullInterpolationMode: 'linear',
     
     color2AxisColors: ['#395b68'],

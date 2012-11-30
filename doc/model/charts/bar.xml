@@ -9,6 +9,8 @@
                    space="pvc.options.charts"
                    base="pvc.options.charts.BarChartCommon"
                    facets="pvc.options.charts.Plot2ChartFacet 
+                           pvc.options.charts.Ortho2ChartFacet
+                           pvc.options.charts.Color2ChartFacet
                            pvc.options.charts.CategoricalChartTrendFacet
                            pvc.options.charts.Plot2V1ChartFacet
                            pvc.options.charts.DataPartChartFacet">
@@ -28,6 +30,7 @@
     <c:complexType name="BarPlot" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.BarPlotCommon"
+                   facets="pvc.options.plots.MainPlotFacet"
                    use="expanded">
         <c:documentation>
             The options documentation class of the <b>Bar</b> plot.

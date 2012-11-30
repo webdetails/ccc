@@ -10,7 +10,7 @@
             The options documentation class of the categorical trend facet.
         </c:documentation>
         
-        <c:property name="trend" type="pvc.options.plots.PointPlot" category="Plots">
+        <c:property name="trend" type="pvc.options.plots.TrendPointPlot" category="Plots">
             <c:documentation>
                 The trend plot is activated when 
                 the <i>other</i> chart plots indicate that their 
@@ -18,8 +18,6 @@
                 
                 To activate trending for a plot specify 
                 its <tt>trend type</tt> option.
-                
-                The trend plot shows lines, by default.
             </c:documentation>
         </c:property>
         
@@ -30,7 +28,7 @@
             The options documentation class of the metric trend facet.
         </c:documentation>
         
-        <c:property name="trend" type="pvc.options.plots.MetricPointPlot" category="Plots">
+        <c:property name="trend" type="pvc.options.plots.TrendMetricPointPlot" category="Plots">
             <c:documentation>
                 The trend plot is activated when 
                 the <i>other</i> chart plots indicate that their 
@@ -38,13 +36,73 @@
                 
                 To activate trending for a plot specify 
                 its <tt>trend type</tt> option.
-                
-                Depending on the chart type
-                
-                The trend plot shows lines, by default.
             </c:documentation>
         </c:property>
         
     </c:facetType>
     
+    <c:complexType name="TrendPointPlot" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.PointPlot"
+                   use="expanded">
+        <c:documentation>
+            The options documentation class of the <b>point</b> plot 
+            used for trends of categorical charts.
+        </c:documentation>
+        
+        <c:property name="trend" type="pvc.options.varia.PlotTrending" fixed="null">
+            <c:documentation>
+                Trends are not supported by this plot type.
+            </c:documentation>
+        </c:property>
+        
+         <c:property name="linesVisible" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if the visual elements are connected
+                with lines.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="colorAxis" type="number" category="Axes" default="2">
+            <c:documentation>
+                The index of the color axis to use for the plot.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="TrendMetricPointPlot" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.MetricPointPlot"
+                   use="expanded">
+        <c:documentation>
+            The options documentation class of the <b>metric point</b> plot 
+            used for trends of scatter charts.
+        </c:documentation>
+        
+        <c:property name="trend" type="pvc.options.varia.PlotTrending" fixed="null">
+            <c:documentation>
+                Trends are not supported by this plot type.
+            </c:documentation>
+        </c:property>
+        
+         <c:property name="linesVisible" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if the visual elements are connected
+                with lines.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="colorAxis" type="number" category="Axes" default="2">
+            <c:documentation>
+                The index of the color axis to use for the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="orthoAxis" fixed="1" type="number" category="Axes">
+            <c:documentation>
+                The index of the orthogonal cartesian axis to use for the plot.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
 </c:model>

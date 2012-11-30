@@ -43,6 +43,7 @@ def
                     NullInterpolatioMode: 'none'
                 },
                 defaults: {
+                    ColorAxis:    2,
                     LinesVisible: true,
                     DotsVisible:  false
                 }

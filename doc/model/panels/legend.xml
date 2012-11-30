@@ -11,21 +11,27 @@
                    base="pvc.options.panels.DockedPanel">
         <c:documentation>
             The options documentation class of the legend panel.
-            
-            The default 
-            <c:link to="pvc.options.panels.DockedPanel#position" />
-            is <tt>'bottom'</tt>.
-            
-            The default 
-            <c:link to="pvc.options.panels.DockedPanel#font" />
-            is <tt>'10px sans-serif'</tt>.
-            
-            The default
-            <c:link to="pvc.options.panels.DockedPanel#paddings" />
-            is <tt>5</tt> pixels.
         </c:documentation>
         
-        <c:property name="font" type="string" default="'9px sans-serif'" category="Style">
+        <c:property name="position" 
+                     type="pvc.options.varia.PanelPosition"
+                     category="Layout"
+                     default="'bottom'">
+            <c:documentation>
+                The docking position of the panel.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="paddings" type="number string pvc.options.varia.Sides" default="5" category="Layout">
+            <c:documentation>
+                The paddings of the panel.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="font" type="string" default="'10px sans-serif'" category="Style">
             <c:documentation>
                 The font of the panel.
                 

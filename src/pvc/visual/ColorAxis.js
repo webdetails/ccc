@@ -271,9 +271,17 @@ def.scope(function(){
             resolve: '_resolveFull',
             data: {
                 resolveDefault: function(optionInfo){
-                    if(this._plotList.length === 1){
-                        var name = this._plotList[0].name;
-                        if(name === 'plot2' || name === 'trend'){
+                    var plotList = this._plotList;
+                    if(plotList <= 2){
+                        var onlyTrendAndPlot2 = 
+                            def
+                            .query(plotList)
+                            .all(function(plot){
+                                var name = plot.name;
+                                return (name === 'plot2' || name === 'trend');
+                            });
+                        
+                        if(onlyTrendAndPlot2){
                             optionInfo.defaultValue(pvc.brighterColorTransform);
                             return true;
                         }

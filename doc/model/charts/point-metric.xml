@@ -9,17 +9,21 @@
                    space="pvc.options.charts" 
                    base="pvc.options.charts.CartesianChart"
                    facets="pvc.options.charts.MetricChartTrendFacet
+                           pvc.options.charts.Color2ChartFacet
                            pvc.options.charts.MultiChartFacet"
                    abstract="true">
         <c:documentation>
             The common options documentation class for the <b>Metric Line/Dot family</b> charts.
         </c:documentation>
         
-        
         <c:property name="colorRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>color</tt> visual role controls the color of the
-                dots and lines of the visual elements.
+                The <tt>color</tt> visual role controls the color of visual elements.
+                
+                Specifically, 
+                it is the color of the dots and lines of the visual elements
+                that is changed according to the color of the corresponding 
+                color role value.
                 
                 The <tt>color</tt> visual role automatically binds to 
                 every discrete dimension, or a single continuous dimension, 
@@ -38,9 +42,11 @@
         
         <c:property name="sizeRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>size</tt> visual role controls the size of 
-                the dots of the visual elements,
-                and, as such, it is only represented if dots are visible.
+                The <tt>size</tt> visual role 
+                controls the size of visual elements.
+                
+                Specifically, when dots are visible,
+                controls the size of the dot mark.
                 
                 The <tt>size</tt> visual role automatically binds to 
                 every dimension whose name has the <tt>size</tt> prefix.

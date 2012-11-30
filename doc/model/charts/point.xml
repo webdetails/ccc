@@ -9,6 +9,8 @@
                    space="pvc.options.charts" 
                    base="pvc.options.charts.CategoricalNumericChart"
                    facets="pvc.options.charts.Plot2ChartFacet
+                           pvc.options.charts.Ortho2ChartFacet
+                           pvc.options.charts.Color2ChartFacet
                            pvc.options.charts.CategoricalChartTrendFacet
                            pvc.options.charts.DataPartChartFacet"
                    abstract="true">
@@ -18,8 +20,9 @@
         
         <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>value</tt> visual role 
-                controls the orthogonal position of points.
+                The <tt>value</tt> visual role represents the main measure.
+                
+                Specifically, it controls the orthogonal position of points.
                 
                 The <tt>value</tt> visual role automatically binds to 
                 a single numeric dimension whose name has the <tt>value</tt> prefix.

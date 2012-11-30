@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Be sure to have ran generatePvcBundle before"
+echo "Be sure to have ran generatePvcBundle and generateJsDocs before"
 
 # delete site dist directory
 SITE=dist/site/

@@ -38,10 +38,6 @@
                    base="pvc.options.panels.TitlePanel">
         <c:documentation>
             The options documentation class of the cartesian axes title panel.
-            
-            The default 
-            <c:link to="pvc.options.panels.DockedPanel#font" />
-            is <tt>'14px sans-serif'</tt>.
         </c:documentation>
         
         <c:property name="position" 

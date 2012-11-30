@@ -124,7 +124,7 @@
         
         <c:property name="size" type="number string pvc.options.varia.Size" category="Layout">
             <c:documentation>
-                The fixed size of the panel's orthogonal dimension.
+                The fixed size of the panel.
                 
                 If a size object is specified, 
                 only the component orthogonal to the axis orientation is considered.
@@ -136,7 +136,7 @@
         
         <c:property name="sizeMax" type="number string pvc.options.varia.Size" category="Layout">
             <c:documentation>
-                The maximum size of the panel's orthogonal dimension.
+                The maximum size of the panel.
                 
                 If a size object is specified, 
                 only the component orthogonal to the axis orientation is considered.

@@ -15,8 +15,9 @@
         
         <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>category</tt> visual role 
-                represents a certain <i>logical grouping</i> of the data points.
+                The <tt>category</tt> visual role. 
+                
+                Represents a certain <i>logical grouping</i> of the data points.
                 
                 Category data may be discrete or continuous.
                 The relevant characteristic is that 

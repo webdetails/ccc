@@ -131,23 +131,6 @@ def.scope(function(){
                 },
                 '_resolveFull'
             ]),
-            data: {
-                // Dynamic default
-                resolveDefault: function(optionInfo){
-                    // Trends must have its own color scale
-                    // cause otherwise each trend series
-                    // would have exactly the same color as the corresponding
-                    // non-trended series; the only distinction between
-                    // the two sets of points is its data part (and the values...).
-                    // Specifically the currently user color scale key 
-                    // (the value of the series or the category role)
-                    // is the same. Same value => same color.
-                    if(this.name === 'trend'){
-                        optionInfo.defaultValue(3);
-                        return true;
-                    }
-                }
-            },
             cast:  function(value){
                 value = pvc.castNumber(value);
                 if(value != null){

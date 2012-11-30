@@ -94,7 +94,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="doubleClickMaxDelay" type="number" default="300" category="Interaction">
+        <c:property name="doubleClickMaxDelay" type="number" default="300" category="Interaction" excludeIn="cde">
             <c:documentation>
                 The maximum number of milliseconds,
                 between two consecutive clicks,
@@ -221,9 +221,7 @@
         
     </c:complexType>
     
-    <c:complexType name="Tooltip" 
-                   space="pvc.options"
-                   use="any">
+    <c:complexType name="Tooltip" space="pvc.options" use="any">
         <c:documentation>
             The options documentation class of the tooltip.
         </c:documentation>
@@ -234,19 +232,28 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="gravity" type="pvc.options.varia.TooltipGravity" default="'s'">
+        <c:property name="gravity" type="pvc.options.varia.TooltipGravity">
             <c:documentation>
                 The preferred tooltip gravity.
+                
+                The default value depends on the chart type.
+                Most use the <c:link to="pvc.options.varia.TooltipGravity#South"/> gravity, 
+                but others, like the Pie chart,
+                calculate an adequate gravity per visual element.
+                
+                When using the preferred gravity causes the 
+                tooltip to be placed off the browser window,
+                a more suitable gravity may be automatically chosen.
             </c:documentation>
         </c:property>
         
-        <c:property name="delayIn" type="number" default="200">
+        <c:property name="delayIn" type="number" default="200" excludeIn="cde">
             <c:documentation>
                 The delay for the tooltip to show, in milliseconds.
             </c:documentation>
         </c:property>
         
-        <c:property name="delayOut" type="number" default="80">
+        <c:property name="delayOut" type="number" default="80" excludeIn="cde">
             <c:documentation>
                 The delay for the tooltip to hide, in milliseconds.
             </c:documentation>
@@ -273,7 +280,7 @@
         <c:property name="html" type="boolean" default="true">
             <c:documentation>
                 Indicates if the tooltip text 
-                that the function <c:link to="#format" /> builds 
+                that the format function builds 
                 is in HTML format.
             </c:documentation>
         </c:property>
@@ -283,24 +290,29 @@
                 A callback function that is called,
                 to build the tooltip of a visual element.
                 
-                If <c:link to="#format" /> is <tt>true</tt>,
-                the resulting text is in HTML format,
-                otherwise, it is plain text.
+                If <c:link to="#html" /> is <tt>true</tt>,
+                the resulting text must be valid HTML,
+                otherwise, 
+                it is considered plain text.
             </c:documentation>
         </c:property>
         
-        <c:property name="useCorners" type="boolean" default="false">
+        <c:property name="useCorners" type="boolean">
             <c:documentation>
-                Indicates if the tooltip gravities should be 
+                Indicates if the collateral tooltip gravities should be 
                 aligned with corners.
+                
+                Most chart types use a default value of <tt>false</tt>.
             </c:documentation>
         </c:property>
         
-        <c:property name="arrowVisible" type="boolean" default="true">
+        <c:property name="arrowVisible" type="boolean">
             <c:documentation>
                 Indicates if the tooltip shows an arrow 
                 pointing to the 
                 visual element's anchor point.
+                
+                Most chart types use a default value of <tt>true</tt>.
             </c:documentation>
         </c:property>
         
@@ -312,7 +324,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="fade" type="boolean" default="false">
+        <c:property name="fade" type="boolean" default="true">
             <c:documentation>
                 Indicates if the tooltip fades in and out,
                 after the corresponding delay has expired.
@@ -717,7 +729,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="valuesFont" type="string" category="Style">
+        <c:property name="valuesFont" type="string" category="Style" default="'10px sans-serif'">
             <c:documentation>
                 The font of a value label.
                 

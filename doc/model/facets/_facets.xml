@@ -12,4 +12,5 @@
     <c:include the="facets/chartBasic.xml" />
     <c:include the="facets/extMulti.xml" />
     <c:include the="facets/plotLinesAndDots.xml" />
+    <c:include the="facets/plotMain.xml" />
 </c:model>

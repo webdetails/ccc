@@ -25,6 +25,7 @@
     <c:complexType name="StackedLinePlot" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.PointPlot"
+                   facets="pvc.options.plots.MainPlotFacet"
                    use="expanded">
         <c:documentation>
             The options documentation class of the <b>stacked line</b> plot.

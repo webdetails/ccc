@@ -32,9 +32,11 @@ def
                     NullInterpolatioMode: 'none',
                     ColorRole: 'series', // one trend per series
                     SizeRole:  null,
-                    SizeAxis:  null
+                    SizeAxis:  null,
+                    OrthoAxis:    1
                 },
                 defaults: {
+                    ColorAxis:    2,
                     LinesVisible: true,
                     DotsVisible:  false
                 }

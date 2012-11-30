@@ -24,6 +24,7 @@
     <c:complexType name="MetricLinePlot" 
                    space="pvc.options.plots"
                    base="pvc.options.plots.MetricPointPlot"
+                   facets="pvc.options.plots.MainPlotFacet"
                    use="expanded">
         <c:documentation>
             The options documentation class of the <b>metric line</b> plot.

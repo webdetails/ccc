@@ -64,10 +64,11 @@ def
                 defaults: {
                     LinesVisible: true,
                     DotsVisible:  true,
-                    OrthoRole: 'median'
+                    OrthoRole:    'median',
+                    ColorAxis:    2
                 },
                 fixed: {
-                    ColorAxis: 2
+                    OrthoAxis: 1
                 }});
         }
     },

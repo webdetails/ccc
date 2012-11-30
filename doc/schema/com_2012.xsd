@@ -216,7 +216,8 @@
         <attribute name="default" type="anySimpleType" />
         <attribute name="fixed" type="anySimpleType" />
         <attribute name="category" type="string" />
-        <attribute name="expandUse" type="com:PropertyExpandUseType" default="required" /> 
+        <attribute name="expandUse" type="com:PropertyExpandUseType" default="required" />
+        <attribute name="excludeIn" type="NMTOKENS" /> 
     </complexType>
     
     <complexType name="AtomTypeType">

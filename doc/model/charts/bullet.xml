@@ -52,7 +52,7 @@
         <c:property name="clickAction" type="pvc.options.varia.BulletChartClickAction" category="Actions">
             <c:documentation>
                 A callback function that is called
-                when the user clicks on a bullet.
+                when the user clicks on a visual element.
             </c:documentation>
         </c:property>
         
@@ -91,8 +91,10 @@
         
         <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>value</tt> visual role 
-                represents current values for a given
+                The <tt>value</tt> visual role represents the main measure.
+                
+                Specifically, 
+                it represents current values for a given
                 title and sub-title categories.
                 
                 The values, one for each dimension bound to the <tt>value</tt> role,

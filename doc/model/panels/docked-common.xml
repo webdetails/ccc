@@ -44,7 +44,8 @@
         
         <c:property name="alignTo" 
                      type="number string pvc.options.varia.PanelAlignmentTarget"
-                     category="Layout">
+                     category="Layout"
+                     excludeIn="cde">
             <c:documentation>
                 The alignment side or position 
                 of the parent panel (the target)
@@ -59,7 +60,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="keepInBounds" type="boolean" default="false" category="Layout">
+        <c:property name="keepInBounds" type="boolean" default="false" category="Layout" excludeIn="cde">
             <c:documentation>
                 Indicates if the layout should try that the
                 panel be kept inside its parent,
