@@ -272,7 +272,7 @@ def.scope(function(){
             data: {
                 resolveDefault: function(optionInfo){
                     var plotList = this._plotList;
-                    if(plotList <= 2){
+                    if(plotList.length <= 2){
                         var onlyTrendAndPlot2 = 
                             def
                             .query(plotList)

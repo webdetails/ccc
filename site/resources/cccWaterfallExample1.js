@@ -37,14 +37,12 @@ new pvc.WaterfallChart({
         market:    {label: "Market"},
         product:   {label: "Product"},
         sales:     {label: "Sales", valueType: Number}
-    },
-
-    /* Data translation */
+    }
+})
+.setData(testWaterfall1, {
+    dataOptions: {categoriesCount: 3},
     readers: [
         {names: 'product, territory, region, market, sales'}
-    ],
-
-    dataOptions:  {categoriesCount: 3}
+    ]
 })
-.setData(testWaterfall1, {crosstabMode: true})
 .render();

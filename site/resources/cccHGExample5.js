@@ -22,11 +22,10 @@ new pvc.HeatGridChart({
              'lightgreen', 'darkgreen'],
     axisFont:   '14px helvetica',
     yAxisSize:   60,
-    xAxisSize:   100,
-    
-    /* Data Translation */
+    xAxisSize:   100
+})
+.setData(testHeatGridComp,{
     dataOptions: { categoriesCount :  2 },
     isMultiValued: true
 })
-.setData(testHeatGridComp)
 .render();

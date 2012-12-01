@@ -14,15 +14,11 @@ new pvc.WaterfallChart({
     direction: 'up',
     areasVisible: true,
     allCategoryLabel: "Profit",
-    //totalLineLabel: "Accumulated",
     
-    /* Visual Role mapping */
-    // multiChartRole: 'territory',
     seriesRole:   'productType',
     categoryRole: 'accountType, accountSource',
     valueRole:    'value',
     
-    /* Data definition */
     dimensions: {
        productType:   {label: "Product Type"   },
        accountType:   {label: "Account Type"   },
@@ -30,22 +26,18 @@ new pvc.WaterfallChart({
        value:         {label: "Value" }
     },
 
-    /* Data mapping */
-    readers: [
-        {names: 'productType, accountType, accountSource, value'}
-    ],
-
-    crosstabMode: true,
-    seriesInRows: false,
-    dataOptions: {categoriesCount: 2},
-    
     extensionPoints: {
         xAxisLabel_textAngle:    -Math.PI/3,
-        xAxisLabel_textAlign:    "right",
-        xAxisLabel_textBaseline: "top",
-        titleLabel_font: "16px sans-serif",
+        xAxisLabel_textAlign:    'right',
+        xAxisLabel_textBaseline: 'top',
+        titleLabel_font: '16px sans-serif',
         waterLine_lineWidth: 2
     }
 })
-.setData(testWaterfallBalance, {crosstabMode: true})
+.setData(testWaterfallBalance, {
+    dataOptions: {categoriesCount: 2},
+    readers: [
+        {names: 'productType, accountType, accountSource, value'}
+    ]
+})
 .render();
