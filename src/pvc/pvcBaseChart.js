@@ -600,7 +600,10 @@ def
         groupedLabelSep:   undefined,
 //        measuresIndexes:   undefined,
 //        dataOptions:       undefined,
-//        
+//        dataSeparator
+//        dataMeasuresInColumns
+//        dataCategoriesCount
+        
 //        timeSeries:        undefined,
 //        timeSeriesFormat:  undefined,
 

@@ -293,7 +293,37 @@
         <c:property name="isMultiValued" type="boolean" default="false" category="Data Translation">
             <c:documentation>
                 Indicates if the data source has 
-                multiple value dimensions.
+                multiple value and dimensions.
+                
+                In the cross-tab format, 
+                also indicates that multiple series columns can
+                be represented.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataCategoriesCount" type="number" default="1" category="Data Translation">
+            <c:documentation>
+                The number of category-like columns that are
+                present in a data source.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataMeasuresInColumns" type="boolean" default="false" category="Data Translation">
+            <c:documentation>
+                In the cross-tab format, 
+                indicates if, 
+                a column exists for each 
+                series value and measure dimension.
+                
+                This option is only meaningful when <c:link to="#isMultiValued"/>
+                is <tt>true</tt>.
+                 
+                When <tt>true</tt>, 
+                more than one measure can be represented in the cross-tab format,
+                for each series and category pair.
+                
+                When <tt>false</tt>, 
+                the cross-tab format can represent only one measure.
             </c:documentation>
         </c:property>
         

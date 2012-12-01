@@ -30,15 +30,6 @@ new pvc.WaterfallChart({
        value:         {label: "Value" }
     },
 
-    /* Data mapping */
-    readers: [
-        {names: 'productType, accountType, accountSource, value'}
-    ],
-
-    crosstabMode: true,
-    seriesInRows: false,
-    dataOptions: {categoriesCount: 2},
-    
     extensionPoints: {
         xAxisLabel_textAngle:    -Math.PI/3,
         xAxisLabel_textAlign:    "right",
@@ -47,5 +38,11 @@ new pvc.WaterfallChart({
         waterLine_lineWidth: 2
     }
 })
-.setData(testWaterfallBalance, {crosstabMode: true})
+.setData(testWaterfallBalance, {
+    crosstabMode: true,
+    dataCategoriesCount: 2,
+    readers: [
+        {names: 'productType, accountType, accountSource, value'}
+    ]
+})
 .render();

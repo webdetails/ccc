@@ -331,7 +331,7 @@ var wf1 = new pvc.WaterfallChart({
 
     crosstabMode: true,
     seriesInRows: false,
-    dataOptions: {categoriesCount: 3}
+    dataCategoriesCount: 3
 });
 
 wf1.setData(testWaterfall1);
@@ -518,10 +518,6 @@ var wf5 = new pvc.WaterfallChart({
         {names: 'productType, accountType, accountSource, value'}
     ],
 
-    crosstabMode: true,
-    seriesInRows: false,
-    dataOptions: {categoriesCount: 2},
-    
     extensionPoints: {
         xAxisLabel_textAngle:    -Math.PI/3,
         xAxisLabel_textAlign:    "right",
@@ -532,7 +528,7 @@ var wf5 = new pvc.WaterfallChart({
 
 wf5.setData(testWaterfallBalance, {
     crosstabMode: true,
-    seriesInRows: false
+    dataCategoriesCount: 2
 });
 
 wf5.render();
