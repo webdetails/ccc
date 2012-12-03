@@ -93,14 +93,41 @@ def
             barWidth = barSizeMax;
         }
 
-        this.barWidth  = barWidth;
+        this.barWidth     = barWidth;
         this.barStepWidth = barStepWidth;
         
-        var wrapper;
+        var wrapper; // bar and label wrapper
         if(this.compatVersion() <= 1){
+            /*
+             * V1 Data
+             * ----------
+             * Stacked:   dataSet = Series x Categ values [[]...]    (type == undef -> 0)
+             * 
+             * !Stacked:  Categ -> Series
+             *            Panel dataSet = VisibleCategoriesIndexes array
+             *            Bar, Label -->  padZeros( getVisibleValuesForCategIndex( . ) )
+             * 
+             * var visibleSerIndex = this.stacked ? mark.parent.index : index,
+             *     visibleCatIndex = this.stacked ? index : mark.parent.index;
+             */
             wrapper = function(v1f){
                 return function(scene){
-                    return v1f.call(this, scene.vars.value.rawValue);
+                    var markParent = Object.create(this.parent);
+                    var mark = Object.create(this);
+                    mark.parent = markParent;
+                    
+                    var serIndex = scene.parent.childIndex();
+                    var catIndex = scene.childIndex();
+                    
+                    if(isStacked){
+                        markParent.index = serIndex;
+                        mark.index = catIndex;
+                    } else {
+                        markParent.index = catIndex;
+                        mark.index = serIndex;
+                    }
+                    
+                    return v1f.call(mark, scene.vars.value.rawValue);
                 };
             };
         }
