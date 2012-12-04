@@ -956,7 +956,7 @@ def
         var orthoType = this.axis.type === 'base' ? 'ortho' : 'base';
         return this.chart.axes[orthoType]; // index 0
     },
-
+    
     renderOrdinalAxis: function(){
         var myself = this,
             scale = this.scale,
@@ -979,6 +979,19 @@ def
         var wrapper;
         if(this.compatVersion() <= 1){
             // For use in child marks of pvTicksPanel
+            var DataElement = function(tickVar){
+                this.value = 
+                this.absValue = tickVar.rawValue;
+                this.nodeName = '' + (this.value || '');
+                this.path = this.nodeName ? [this.nodeName] : [];
+                this.label = 
+                this.absLabel = tickVar.label;    
+            };
+            
+            DataElement.prototype.toString = function(){
+                return ''+this.value;
+            };
+            
             wrapper = function(v1f){
                 return function(tickScene){
                     // Fix index due to the introduction of 
@@ -986,7 +999,7 @@ def
                     var markWrapped = Object.create(this);
                     markWrapped.index = this.parent.index;
                     
-                    return v1f.call(markWrapped, tickScene.vars.tick.rawValue);
+                    return v1f.call(markWrapped, new DataElement(tickScene.vars.tick));
                 };
             };
         }

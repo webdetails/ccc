@@ -271,15 +271,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         var colNames;
         if(this.options.seriesInRows){
             colNames = this.metadata.map(function(d){ return d.colName; });
-            
-            // TODO: do this only later on the VITEM
-//            lines.unshift(colNames);
-//            pv.transpose(lines); // Transposes, in-place
-//            colNames = lines.shift();
-//            colNames.forEach(function(value, i){
-//                colNames[i] = {v: value}; // may be null ....
-//            });
-            
         } else if(this.options.compatVersion <= 1){
             colNames = this.metadata.map(function(d){ return {v: d.colName}; });
         } else {
