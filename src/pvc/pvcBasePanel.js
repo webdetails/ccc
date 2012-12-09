@@ -1473,7 +1473,7 @@ def
             // Fire point and unpoint events
             this.pvPanel
                 .events('all')
-                .event("mousemove", pv.Behavior.point(radius || 20));
+                .event("mousemove", pv.Behavior.point(radius || 20, {stealClick: true}));
 
             this._attachedPointEvent = true;
         }
@@ -1978,14 +1978,12 @@ def
         var useCenter = (selectionMode === 'center');
         
         pvMark.eachInstanceWithData(function(scenes, index, toScreen){
-            var instance = scenes[index]; 
-            if(instance.visible){
-                var shape = pvMark.getShape(scenes, index);
-                
-                shape = (useCenter ? shape.center() : shape).apply(toScreen);
-                
-                processShape.call(this, shape, instance);
-            }
+            
+            var shape = pvMark.getShape(scenes, index);
+            
+            shape = (useCenter ? shape.center() : shape).apply(toScreen);
+            
+            processShape.call(this, shape, scenes[index]);
         }, this);
         
         function processShape(shape, instance) {

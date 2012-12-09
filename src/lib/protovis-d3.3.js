@@ -1,4 +1,4 @@
-// a60f7b5b1b03462c264d62c3ad9f02207c145164
+// d953959e1c76d0975d8ab9f2a8d46fbfbbe1a7ce
 /**
  * @class The built-in Array class.
  * @name Array
@@ -315,13 +315,14 @@ pv.error = function(e) {
  * @param {function} the event handler callback.
  */
 pv.listen = function(target, type, listener) {
-  if (type == 'load' || type == 'onload')
-      return pv.listenForPageLoad (pv.listener(listener));
-
+  if (type === 'load' || type === 'onload'){
+      return pv.listenForPageLoad(pv.listener(listener));
+  }
+  
   listener = pv.listener(listener);
   target.addEventListener
       ? target.addEventListener(type, listener, false)
-      : target.attachEvent("on" + type, listener);
+      : target.attachEvent('on' + type, listener);
   
    return listener;
 };
@@ -341,7 +342,7 @@ pv.unlisten = function(target, type, listener){
     
     target.removeEventListener
         ? target.removeEventListener(type, listener, false)
-        : target.detachEvent("on" + type, listener);
+        : target.detachEvent('on' + type, listener);
 };
 
 /**
@@ -7466,18 +7467,19 @@ pv.SvgScene.dispatch = pv.listener(function(e) {
 
     /* Fixes for mousewheel support on Firefox & Opera. */
     switch (type) {
-      case "DOMMouseScroll": {
+      case "DOMMouseScroll":
         type = "mousewheel";
         e.wheel = -480 * e.detail;
         break;
-      }
-      case "mousewheel": {
+
+      case "mousewheel":
         e.wheel = (window.opera ? 12 : 1) * e.wheelDelta;
         break;
-      }
     }
 
-    if (pv.Mark.dispatch(type, t.scenes, t.index, e)) e.preventDefault();
+    if (pv.Mark.dispatch(type, t.scenes, t.index, e)) {
+      e.preventDefault();
+    }
   }
 });
 
@@ -11805,51 +11807,96 @@ pv.Mark.prototype.context = function(scene, index, f) {
   }
 };
 
-/** @private Execute the event listener, then re-render. */
-pv.Mark.dispatch = function(type, scene, index, event) {
-  var m = scene.mark, 
-      p = scene.parent, 
-      l = m.$handlers[type];
+pv.Mark.getEventHandler = function(type, scenes, index, event){
+  var handler = scenes.mark.$handlers[type];
+  if(handler){
+    return [handler, type, scenes, index, event];
+  }
+   
+  var parentScenes = scenes.parent;
+  if(parentScenes){
+    return this.getEventHandler(type, parentScenes, scenes.parentIndex, event);
+  }
+};
+
+/** @private Execute the event listener, then re-render the returned mark. */
+pv.Mark.dispatch = function(type, scenes, index, event) {
   
-  if(m.root.animatingCount){
-      return true;
+  var root = scenes.mark.root;
+  if(root.animatingCount){
+    return true;
   }
   
-  if (!l) {
-      return p && pv.Mark.dispatch(type, p, scene.parentIndex, event);
-  }
-  
-  m.context(scene, index, function() {
-    var stack = pv.Mark.stack.concat(event);
-    if(l instanceof Array) {
-        var ms;
-        l.forEach(function(li){
-            var mi = li.apply(m, stack);
-            if(mi && mi.render) {
-                (ms || (ms = [])).push(mi);
-            }
-        });
+  var handlerInfo;
+  var interceptors = root.$interceptors && root.$interceptors[type];
+  if(interceptors){
+    for(var i = 0, L = interceptors.length ; i < L ; i++){ 
+        handlerInfo = interceptors[i](type, event);
+        if(handlerInfo){
+            break;
+        }
         
-        if(ms) { ms.forEach(function(mi){ mi.render(); }); }
-    } else {
-        m = l.apply(m, stack);
-        if (m && m.render) {
-            m.render();
+        if(handlerInfo === false){
+            // Consider handled
+            return true;
         }
     }
-  });
+  }
   
-  return true;
+  if(!handlerInfo){
+      handlerInfo = this.getEventHandler(type, scenes, index, event);
+  }
+  
+  return handlerInfo ? this.handle.apply(this, handlerInfo) : false;
+};
+
+pv.Mark.handle = function(handler, type, scenes, index, event){
+    var m = scenes.mark;
+    
+    m.context(scenes, index, function() {
+      var stack = pv.Mark.stack.concat(event);
+      if(handler instanceof Array) {
+          var ms;
+          handler.forEach(function(hi){
+              var mi = hi.apply(m, stack);
+              if(mi && mi.render) {
+                  (ms || (ms = [])).push(mi);
+              }
+          });
+          
+          if(ms) { ms.forEach(function(mi){ mi.render(); }); }
+      } else {
+          m = handler.apply(m, stack);
+          if (m && m.render) {
+              m.render();
+          }
+      }
+    });
+    
+    return true;
 };
 
 /**
- * Iterates through all instances that
+ * Registers an event interceptor function.
+ * 
+ * @param {string} type the event type
+ * @param {function} handler the interceptor function
+ */
+pv.Mark.prototype.addEventInterceptor = function(type, handler){
+    var root = this.root;
+    if(root){
+        var interceptors = root.$interceptors || (root.$interceptors = {});
+        (interceptors[type] || (interceptors[type] = [])).push(handler);
+    }
+};
+
+/**
+ * Iterates through all visible instances that
  * this mark has rendered.
  */
 pv.Mark.prototype.eachInstance = function(fun, ctx){
     var mark    = this,
         indexes = [];
-        //breakScenes = { isBreak: true };
 
     /* Go up to the root and register our way back.
      * The root mark never "looses" its scene.
@@ -11881,21 +11928,21 @@ pv.Mark.prototype.eachInstance = function(fun, ctx){
             
             for(var index = 0 ; index < D ; index++){
                 var instance = scene[index];
-                if(level === L){
-                    fun.call(ctx, scene, index, toScreen);
-                } else if(instance.visible) {
-                    var childScene = instance.children[childIndex];
-                    if(childScene){ // Some nodes might have not been rendered???
-                        var childToScreen = toScreen
-                                .times(instance.transform)
-                                .translate(instance.left, instance.top);
-                        
-                        mapRecursive(childScene, level + 1, childToScreen);
+                if(instance.visible){
+                    if(level === L){
+                        fun.call(ctx, scene, index, toScreen);
+                    } else {
+                        var childScene = instance.children[childIndex];
+                        if(childScene){ // Some nodes might have not been rendered???
+                            var childToScreen = toScreen
+                                    .times(instance.transform)
+                                    .translate(instance.left, instance.top);
+                            
+                            mapRecursive(childScene, level + 1, childToScreen);
+                        }
                     }
                 }
             }
-        
-            //fun.call(ctx, breakScenes, index, null);
         }
     }
     
@@ -11915,7 +11962,7 @@ pv.Mark.prototype.toScreenTransform = function(){
         do {
             t = t.translate(parent.left(), parent.top())
                  .times(parent.transform());
-        } while ((parent = parent.parent));
+        } while((parent = parent.parent));
     }
     
     return t;
@@ -11930,15 +11977,6 @@ pv.Mark.prototype.on = function(state) {
 };
 
 // --------------
-
-pv.Mark.prototype.getCenterPoint = function(scenes, index){
-    var s = scenes[index];
-    return pv.vector(s.left, s.top);
-};
-
-pv.Mark.prototype.getAnchorPoints = function(scenes, index){
-    return [this.getCenterPoint(scenes, index)];
-};
 
 pv.Mark.prototype.getShape = function(scenes, index){
     var s = scenes[index];
@@ -20060,13 +20098,16 @@ pv.Behavior.drag = function() {
  * @extends pv.Behavior
  *
  * @param {number} [r] the fuzzy radius threshold in pixels
+ * @param {object} [keyArgs] optional keyword arguments
+ * @param {boolean} [keyArgs.stealClick=false] whether to steal any click event when a point element exists
  * @see <a href="http://www.tovigrossman.com/papers/chi2005bubblecursor.pdf"
  * >"The Bubble Cursor: Enhancing Target Acquisition by Dynamic Resizing of the
  * Cursor's Activation Area"</a> by T. Grossman &amp; R. Balakrishnan, CHI 2005.
  */
-pv.Behavior.point = function(r) {
+pv.Behavior.point = function(r, keyArgs) {
     var unpoint, // the current pointer target
         collapse = null, // dimensions to collapse
+        stealClick = def.get(keyArgs, 'stealClick', false),
         k = {
             x: 1, // x-dimension cost scale
             y: 1  // y-dimension cost scale
@@ -20169,7 +20210,7 @@ pv.Behavior.point = function(r) {
             result.inside   = inside;
             result.distance = r.dist2;
             result.cost     = r.cost;
-            result.scene    = scenes;
+            result.scenes    = scenes;
             result.index    = index;
             result.shape    = shape;
             
@@ -20178,7 +20219,7 @@ pv.Behavior.point = function(r) {
     }
   
 //    function logChoice(point){
-//        var pointMark = point.scene && point.scene.mark;
+//        var pointMark = point.scenes && point.scenes.mark;
 //        console.log(
 //            "POINT   choosing point mark=" + 
 //            (pointMark ? (pointMark.type + " " + point.index) : 'none') + 
@@ -20209,29 +20250,35 @@ pv.Behavior.point = function(r) {
             /* Unpoint the old target, if it's not the new target. */
             if (unpoint) {
                 if (point && 
-                    (unpoint.scene == point.scene) && 
+                    (unpoint.scenes == point.scenes) && 
                     (unpoint.index == point.index)) {
                     return;
                 }
       
-                pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
+                pv.Mark.dispatch("unpoint", unpoint.scenes, unpoint.index, e);
             }
 
             unpoint = point;
     
             /* Point the new target, if there is one. */
             if(point) {
-                pv.Mark.dispatch("point", point.scene, point.index, e);
+                pv.Mark.dispatch("point", point.scenes, point.index, e);
 
-                /* Unpoint when the mouse leaves the pointing panel. */
+                // Initialize panel
+                // Unpoint when the mouse leaves the pointing panel
                 if(!pointingPanel && this.type === 'panel') {
+                    
                     pointingPanel = this;
                     pointingPanel.event('mouseout', function(){
                         var ev = arguments[arguments.length - 1];
                         mouseout.call(pointingPanel.scene.$g, ev);
                     });
+                    
+                    if(stealClick){
+                        pointingPanel.addEventInterceptor('click', eventInterceptor);
+                    }
                 } else {
-                    pv.listen(this.root.canvas(), "mouseout", mouseout);
+                    pv.listen(this.root.canvas(), 'mouseout', mouseout);
                 }
             }
 //        } finally{
@@ -20242,11 +20289,33 @@ pv.Behavior.point = function(r) {
     /** @private */
     function mouseout(e) {
         if (unpoint && !pv.ancestor(this, e.relatedTarget)) {
-            pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
+            pv.Mark.dispatch("unpoint", unpoint.scenes, unpoint.index, e);
             unpoint = null;
         }
     }
 
+    /**
+     * Intercepts click events and redirects them 
+     * to the pointed by element, if any.
+     * 
+     * @returns {boolean|array} 
+     * <tt>false</tt> to indicate that the event is handled,
+     * otherwise, an event handler info array: [handler, type, scenes, index, ev].
+     * 
+     * @private
+     */
+    function eventInterceptor(type, ev){
+        if(unpoint){
+            var scenes  = unpoint.scenes;
+            var handler = scenes.mark.$handlers[type];
+            if(handler){
+                return [handler, type, scenes, unpoint.index, ev];
+            }
+        }
+        
+        // Let event be handled normally
+    }
+    
     /**
      * Sets or gets the collapse parameter. By default, the standard Cartesian
      * distance is computed. However, with some visualizations it is desirable to
@@ -20273,7 +20342,7 @@ pv.Behavior.point = function(r) {
         }
         return collapse;
     };
-
+    
     return mousemove;
 };
 /**
