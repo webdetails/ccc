@@ -8,7 +8,6 @@
  * 
  * This software includes code from the Protovis, http://mbostock.github.com/protovis/
  * Protovis is licensed under the BSD license.
- * 
  */
 
 // detect SVG support
@@ -27,7 +26,7 @@ pv.have_VML = (function (d,a,b) {
 })(document);
 
 // MSIE does not support indexOf on arrays
-if ( !Array.prototype.indexOf ) {
+if(!Array.prototype.indexOf) {
   Array.prototype.indexOf = function (s, from) {
     var n = this.length >>> 0,
         i = (!isFinite(from) || from < 0) ? 0 : (from > this.length) ? this.length : from;
@@ -67,27 +66,19 @@ var vml = {
   },
 
   text_shim: null,
-  _textcache: {},
+  
+  // to be set in pv.Text.measure
+  
   text_dims: function (text, font) {
+    var shim = vml.text_shim || 
+               (vml.init(), vml.text_shim);
     
-    var shim = vml.text_shim || (vml.init(), vml.text_shim);
-    
-    font = vml.processFont(font);
-    
-    var fontTextCache = vml._textcache[font] || (vml._textcache[font] = {});
-    var info = fontTextCache[text];
-    if (!info) {
-        shim.style.font = font;
-   
-        shim.innerText = text;
-        fontTextCache[text] = info = {
-            fontsize: parseInt(shim.style.fontSize, 10),
-            height:   shim.offsetHeight,
-            width:    shim.offsetWidth
-        };
-    }
-    
-    return info;
+    shim.style.font = vml.processFont(font);
+    shim.innerText  = text;
+    return {
+        height: shim.offsetHeight,
+        width:  shim.offsetWidth
+    };
   },
   
   _fontCache: {},
@@ -395,9 +386,11 @@ var vml = {
   },
 
   fill: function ( elm, attr, scenes, i ) {
+    var isNew;
     var fill = elm.getElementsByTagName( 'fill' )[0];
     if (!fill) {
       fill = elm.appendChild( vml.createElement( 'vml:fill' ) );
+      isNew = true;
     }
     
     var fillStyle = scenes[i].fillStyle;
@@ -421,9 +414,13 @@ var vml = {
                   stopsText.push(stop.offset + '% ' + vml.color(stop.color.color)); // TODO: color.opacity being ignored
               }
               
-              fill.color  = vml.color(stops[0].color.color);
-              fill.color2 = vml.color(stops[S - 1].color.color);
-              fill.colors = stopsText.join(',');
+              //fill.color  = vml.color(stops[0].color.color);
+              //fill.color2 = vml.color(stops[S - 1].color.color);
+              if(fill.colors && typeof fill.colors === 'object'){
+                fill.colors.value = stopsText.join(',');
+              } else {
+                fill.colors = stopsText.join(',');
+              }
           }
           
           if(isLinear){
@@ -526,6 +523,7 @@ var vml = {
       vml.text_shim.style.cssText = "position:absolute;left:-9999em;top:-9999em;padding:0;margin:0;line-height:1;display:inline-block;white-space:nowrap;";
       document.body.appendChild( vml.text_shim );
     }
+    
     if ( !vml.styles ) {
       vml.styles = document.getElementById('protovisvml_styles') || document.createElement("style");
       vml.styles.id = 'protovisvml_styles';
@@ -549,7 +547,8 @@ var vml = {
   //    Because Protovis always supplies the command between arguments, this isn't
   //    implemented, but it would be trivial to complete this.
   // - ARCs need solving
-   _pathcache: {},
+  _pathcache: {},
+   
   rewritePath:function ( p, deb ) {
     var x = 0, y = 0, round = vml.round;
 
@@ -709,8 +708,9 @@ var vml = {
     }
     return ( vml._pathcache[p] = (np.join('') + 'e') );
   }
-
 };
+
+pv.Text.measure = vml.text_dims;
 
 //ext access to vml functions
 pv.Vml = vml;
@@ -1128,8 +1128,8 @@ pv.listener = function(f, target) {
     try {
       pv.event = vml.fixEvent( e || window.event );
       return f.call( this, pv.event );
-    } catch (e) {
-      pv.error(e);
+    //} catch (e) {
+    //  pv.error(e);
     } finally {
       delete pv.event;
     }
@@ -1224,15 +1224,15 @@ pv.VmlScene.label = function(scenes) {
     var dy = 0;
     switch(s.textBaseline){
         case 'middle':
-            dy  = (.1 * label.fontsize); // slight middle baseline correction
+            dy  = (.1 * label.height); // slight middle baseline correction
             break;
             
         case 'top':
-            dy  = s.textMargin + .5 * label.fontsize;
+            dy  = s.textMargin + .5 * label.height;
             break;
             
         case 'bottom':
-            dy  = -(s.textMargin + .5 * label.fontsize);
+            dy  = -(s.textMargin + .5 * label.height);
             break;
     }
 

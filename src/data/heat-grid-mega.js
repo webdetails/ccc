@@ -51,7 +51,6 @@ var testHeatGridMegaOptions = {
     "colors":["#FF0000", "#FFBF3F", "#FFFF00", "#BFDF3F", "#008000"],
     "labelFontFamily":"Default",
     "lineWidth":2,
-    "legend":true,
     "axisFont":"12px sans-serif",
     "legendAlign":"middle",
     "extensionPoints":{

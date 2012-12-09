@@ -72,7 +72,7 @@ def
         var a_height = this.anchorOrthoLength(a);
         
         // 2 - Small factor to avoid cropping text on either side
-        var textWidth    = pvc.text.getTextLength(this.title, this.font) + 2;
+        var textWidth    = pv.Text.measure(this.title, this.font).width + 2;
         var clientWidth  = layoutInfo.clientSize[a_width];
         var desiredWidth = layoutInfo.desiredClientSize[a_width];
         
@@ -91,7 +91,7 @@ def
 
         // -------------
 
-        var lineHeight = pvc.text.getTextHeight("m", this.font);
+        var lineHeight = pv.Text.fontHeight(this.font);
         var realHeight = lines.length * lineHeight;
         var availableHeight = layoutInfo.clientSize[a_height];
         

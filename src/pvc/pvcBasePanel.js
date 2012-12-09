@@ -1037,6 +1037,7 @@ def
                 pvMarks.forEach(function(pvMark){ pvMark.render(); });
             } else if(!this._children) {
                 this.pvPanel.render();
+                return;
             }
             
             if(this._children){
@@ -1326,14 +1327,14 @@ def
 //            case 'line':
 //            case 'area':
 //            case 'rule':
-//                onEvent  = 'point';
-//                offEvent = 'unpoint';
-//               panel._requirePointEvent();
+               onEvent  = 'point';
+               offEvent = 'unpoint';
+               panel._requirePointEvent();
 //                break;
-
+//
 //            default:
-                onEvent = 'mouseover';
-                offEvent = 'mouseout';
+//                onEvent = 'mouseover';
+//                offEvent = 'mouseout';
 //                break;
 //        }
         
@@ -1737,30 +1738,20 @@ def
     _onSelect: function(context){
         var datums = context.scene.datums().array();
         if(datums.length){
-            datums = this._onUserSelection(datums);
-            if(datums && datums.length){
-                var chart = this.chart;
+            var chart = this.chart;
+            
+            chart._updatingSelections(function(){
                 
-                var changed;
-                if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
-                    changed = chart.data.replaceSelected(datums);
-                } else {
-                    changed = pvc.data.Data.toggleSelected(datums);
+                datums = chart._onUserSelection(datums);
+                if(datums && datums.length){
+                    if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
+                        chart.data.replaceSelected(datums);
+                    } else {
+                        pvc.data.Data.toggleSelected(datums);
+                    }
                 }
-                
-                if(changed){
-                    this._onSelectionChanged();
-                }
-            }
+            }, this);
         }
-    },
-    
-    _onUserSelection: function(datums){
-        return this.chart._onUserSelection(datums);
-    },
-    
-    _onSelectionChanged: function(){
-        this.chart.updateSelections();
     },
     
     isRubberBandSelecting: function(){
@@ -1837,7 +1828,7 @@ def
          
         var selectionEndedDate;
         rubberPvParentPanel
-            .event('mousedown', pv.Behavior.selector(false))
+            .event('mousedown', pv.Behavior.select2(false))
             .event('select', function(){
                 if(!rb){
                     if(myself.isAnimating()){
@@ -1871,14 +1862,14 @@ def
                         toScreen = rubberPvParentPanel.toScreenTransform();
                     }
                     
-                    myself.rubberBand = rb = this.selectionRect.clone().apply(toScreen);
+                    myself.rubberBand = rb = this.selectionRect.apply(toScreen);
                     
                     rb = null;
                     myself._isRubberBandSelecting = false;
                     selectBar.render(); // hide rubber band
                     
                     // Process selection
-                    myself._dispatchRubberBandSelectionTop(ev);
+                    myself._onRubberBandSelectionEnd(ev);
                     
                     selectionEndedDate = new Date();
                     
@@ -1900,109 +1891,105 @@ def
                     }
                     
                     if(data.owner.clearSelected()) {
-                        myself._onSelectionChanged();
+                        myself.chart.updateSelections();
                     }
                 });
         }
     },
     
-    _dispatchRubberBandSelectionTop: function(ev){
-        /* Only update selection, which is a global op, after all selection changes */
-        
+    _onRubberBandSelectionEnd: function(ev){
         if(pvc.debug >= 3) {
             this._log('rubberBand ' + pvc.stringify(this.rubberBand));
         }
         
-        var chart = this.chart;
-        chart._suspendSelectionUpdate();
-        try {
-            if(!ev.ctrlKey && chart.options.ctrlSelectMode){
-                chart.data.owner.clearSelected();
-            }
+        var keyArgs = {toggle: false}; // output argument
+        var datums = this._getDatumsOnRubberBand(ev, keyArgs);
+        if(datums){
+            var chart = this.chart;
             
-            chart.useTextMeasureCache(this._dispatchRubberBandSelection, this);
-            
-        } finally {
-            chart._resumeSelectionUpdate();
+            // Make sure selection changed action is called only once
+            // Checks if any datum's selected changed, at the end
+            chart._updatingSelections(function(){
+                
+                var clearBefore = !ev.ctrlKey && chart.options.ctrlSelectMode;
+                if(clearBefore){
+                    chart.data.owner.clearSelected();
+                    pvc.data.Data.setSelected(datums, true);
+                } else if(keyArgs.toggle){
+                    pvc.data.Data.toggleSelected(datums);
+                } else {
+                    pvc.data.Data.setSelected(datums, true);
+                }
+                
+            });
         }
     },
     
-    // Callback to handle end of rubber band selection
-    _dispatchRubberBandSelection: function(ev){
-        // Ask the panel for selectable marks
-        var datumsByKey = {},
-            keyArgs = {toggle: false};
-        if(this._detectDatumsUnderRubberBand(datumsByKey, this.rubberBand, keyArgs)) {
-            var selectedDatums = def.own(datumsByKey); 
-            
-            selectedDatums = this._onUserSelection(selectedDatums);
-            
-            var changed;
-            if(keyArgs.toggle){
-                pvc.data.Data.toggleSelected(selectedDatums);
-                changed = true;
-            } else {
-                changed = pvc.data.Data.setSelected(selectedDatums, true);
-            }
-            
-            if(changed) {
-                this._onSelectionChanged();
+    _getDatumsOnRubberBand: function(ev, keyArgs){
+        var datumMap = new def.Map();
+        
+        this._getDatumsOnRect(datumMap, this.rubberBand, keyArgs);
+        
+        var datums = datumMap.values();
+        if(datums.length){
+            datums = this.chart._onUserSelection(datums);
+            if(datums && !datums.length){
+                datums = null;
             }
         }
         
-        // --------------
+        return datums;
+    },
+    
+    // Callback to handle end of rubber band selection
+    _getDatumsOnRect: function(datumMap, rect, keyArgs){
+        this._getOwnDatumsOnRect(datumMap, rect, keyArgs);
         
         if(this._children) {
             this._children.forEach(function(child){
-                child.rubberBand = this.rubberBand;
-                child._dispatchRubberBandSelection(child);
+                child._getDatumsOnRect(datumMap, rect, keyArgs);
             }, this);
         }
     },
     
-    /**
-     * The default implementation obtains
-     * datums associated with the instances of 
-     * marks returned by #_getSelectableMarks.
-     * 
-     * <p>
-     * Override to provide a specific
-     * selection detection implementation.
-     * </p>
-     * 
-     * @param {object} datumsByKey The map that receives the found datums, indexed by their key. 
-     * @param {pvc.Rect} rb The rubber band to use. The default value is the panel's current rubber band.
-     * @param {object} keyArgs Keyword arguments.
-     * @param {boolean} [keyArgs.toggle=false] Returns a value that indicates to the caller that the selection should be toggled.
-     * 
-     * @returns {boolean} <tt>true</tt> if any datum was found under the rubber band.
-     * 
-     * @virtual
-     */
-    _detectDatumsUnderRubberBand: function(datumsByKey, rb, keyArgs){
+    _getOwnDatumsOnRect: function(datumMap, rect, keyArgs){
         var any = false;
+        
         if(this.isVisible){
             var pvMarks = this._getSelectableMarks();
             if(pvMarks && pvMarks.length){
                 pvMarks.forEach(function(pvMark){
-                    this._forEachMarkDatumUnderRubberBand(pvMark, function(datum){
-                        datumsByKey[datum.key] = datum;
+                    this._eachMarkDatumOnRect(pvMark, rect, function(datum){
+                        datumMap.set(datum.id, datum);
                         any = true;
-                    }, this, rb);
+                    }, this);
+                    
                 }, this);
             }
         }
         
-        return any;
+        return any; 
     },
     
-    _forEachMarkDatumUnderRubberBand: function(pvMark, fun, ctx, rb){
-        if(!rb) {
-            rb = this.rubberBand;
-        }
+    _eachMarkDatumOnRect: function(pvMark, rect, fun, ctx){
+        
+        // center, partial and total (not implemented)
+        var selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
+        var useCenter = (selectionMode === 'center');
+        
+        pvMark.eachInstanceWithData(function(scenes, index, toScreen){
+            var instance = scenes[index]; 
+            if(instance.visible){
+                var shape = pvMark.getShape(scenes, index);
+                
+                shape = (useCenter ? shape.center() : shape).apply(toScreen);
+                
+                processShape.call(this, shape, instance);
+            }
+        }, this);
         
         function processShape(shape, instance) {
-            if (shape.intersectsRect(rb)){
+            if (shape.intersectsRect(rect)){
                 var group = instance.group;
                 var datums = group ? group._datums : def.array.as(instance.datum);
                 if(datums) {
@@ -2017,35 +2004,6 @@ def
                     }, this);
                 }
             }
-        }
-        
-        // center, partial and total (not implemented)
-        var selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
-        var shapeMethod = (selectionMode === 'center') ? 'getInstanceCenterPoint' : 'getInstanceShape';
-        
-        if(pvMark.type === 'area' || pvMark.type === 'line'){
-            var instancePrev;
-            
-            pvMark.eachInstanceWithData(function(instance, toScreen){
-                if(!instance.visible || instance.isBreak || (instance.datum && instance.datum.isNull)) {
-                    // Break the line
-                    instancePrev = null;
-                } else {
-                    if(instancePrev){
-                        var shape = pvMark[shapeMethod](instancePrev, instance).apply(toScreen);
-                        processShape.call(this, shape, instancePrev);
-                    }
-    
-                    instancePrev = instance;
-                }
-            }, this);
-        } else {
-            pvMark.eachInstanceWithData(function(instance, toScreen){
-                if(!instance.isBreak && instance.visible) {
-                    var shape = pvMark[shapeMethod](instance).apply(toScreen);
-                    processShape.call(this, shape, instance);
-                }
-            }, this);
         }
     },
     

@@ -40,7 +40,6 @@ new pvc.WaterfallChart({
     }
 })
 .setData(testWaterfall1, {
-    crosstabMode: true, 
     dataCategoriesCount: 3,
     readers: [
         {names: 'product, territory, region, market, sales'}

@@ -168,9 +168,14 @@ def
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
-        return (this.wfChartPanel = new pvc.WaterfallPanel(this, parentPanel, this.plots.water, def.create(baseOptions, {
-            waterfall:  this.options.waterfall
-        })));
+    _createPlotPanels: function(parentPanel, baseOptions){
+        this.wfChartPanel = 
+            new pvc.WaterfallPanel(
+                    this, 
+                    parentPanel, 
+                    this.plots.water, 
+                    def.create(baseOptions, {
+                        waterfall:  this.options.waterfall
+                    }));
     }
 });

@@ -58,7 +58,7 @@ def
     /**
      * @override 
      */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var options = this.options;
         var plots = this.plots;
         
@@ -103,7 +103,5 @@ def
                     trendPlot,
                     Object.create(baseOptions));
         }
-        
-        return barPanel;
     }
 });

@@ -34,20 +34,19 @@ def
     
     /**
      * Toggles the selected state of the datums present in this scene
-     * and forces an interactive render of the chart by calling
-     * {@link pvc.BaseChart#updateSelections}.
+     * and updates the chart if necessary.
      */
     click: function(){
         var datums = this.datums().array();
-        
-        // Allow chart action to change the selection
-        var chart = this.chart();
-        datums = chart._onUserSelection(datums);
-        if(datums){
-            var on = def.query(datums).any(function(datum){ return datum.isSelected; });
-            if(pvc.data.Data.setSelected(datums, !on)){
-                chart.updateSelections();
-            }
+        if(datums.length){
+            var chart = this.chart();
+            chart._updatingSelections(function(){
+                datums = chart._onUserSelection(datums);
+                if(datums){
+                    var on = def.query(datums).any(function(datum){ return datum.isSelected; });
+                    pvc.data.Data.setSelected(datums, !on);
+                }
+            });
         }
     }
 });

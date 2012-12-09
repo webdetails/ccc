@@ -39,7 +39,6 @@ new pvc.WaterfallChart({
     }
 })
 .setData(testWaterfallBalance, {
-    crosstabMode: true,
     dataCategoriesCount: 2,
     readers: [
         {names: 'productType, accountType, accountSource, value'}

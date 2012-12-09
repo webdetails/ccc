@@ -386,7 +386,7 @@ def
             // Intersect the line that passes through mostOrthoDistantPoint,
             // and has the direction parallelDirection with 
             // the top side and with the bottom side of the *original* label box.
-            var corners = labelBBox.sourceCorners;
+            var corners = labelBBox.source.points();
             var botL = corners[0];
             var botR = corners[1];
             var topR = corners[2];
@@ -462,7 +462,7 @@ def
     _calcTicks: function(){
         var layoutInfo = this._layoutInfo;
         
-        layoutInfo.textHeight = pvc.text.getTextHeight("m", this.font);
+        layoutInfo.textHeight = pv.Text.fontHeight(this.font);
         layoutInfo.maxTextWidth = null;
         
         // Reset scale to original unrounded domain
@@ -484,7 +484,7 @@ def
         if(layoutInfo.maxTextWidth == null){
             layoutInfo.maxTextWidth = 
                 def.query(layoutInfo.ticksText)
-                    .select(function(text){ return pvc.text.getTextLength(text, this.font); }, this)
+                    .select(function(text){ return pv.Text.measure(text, this.font).width; }, this)
                     .max();
         }
     },
@@ -776,7 +776,7 @@ def
         var domainTextLength = this.scale.domain().map(function(tick){
                 tick = +tick.toFixed(2); // crop some decimal places...
                 var text = this.scale.tickFormat(tick);
-                return pvc.text.getTextLength(text, this.font);
+                return pv.Text.measure(text, this.font).width;
             }, this);
         
         var avgTextLength = Math.max((domainTextLength[1] + domainTextLength[0]) / 2, layoutInfo.textHeight);
@@ -792,7 +792,7 @@ def
         var maxTextWidth = 
             def.query(ticksText)
                 .select(function(text){ 
-                    return pvc.text.getTextLength(text, this.font); 
+                    return pv.Text.measure(text, this.font).width; 
                 }, this)
                 .max();
         
@@ -1134,7 +1134,7 @@ def
     
     _debugTicksPanel: function(pvTicksPanel){
         if(pvc.debug >= 16){ // one more than general debug box model
-            var corners = this._layoutInfo.labelBBox.sourceCorners;
+            var corners = this._layoutInfo.labelBBox.source.points();
             // Close the path
             if(corners.length > 1){
                 // not changing corners on purpose
@@ -1378,19 +1378,6 @@ def
         }
     },
     
-    /**
-     * Prevents the axis panel from reacting directly to rubber band selections.
-     * 
-     * The panel participates in rubber band selection through 
-     * the mediator {@link pvc.CartesianAbstractPanel}, which calls
-     * each axes' {@link #_detectDatumsUnderRubberBand} directly.
-     *   
-     * @override
-     */
-    _dispatchRubberBandSelection: function(ev){
-        /* NOOP */
-    },
-    
     /** @override */
     _getSelectableMarks: function(){
         if(this.isDiscrete && this.isVisible && this.pvLabel){
@@ -1408,7 +1395,7 @@ def
             vertDepthCutoff = 2,
             font = this.font;
         
-        var diagMargin = pvc.text.getFontSize(font) / 2;
+        var diagMargin = pv.Text.fontHeight(font) / 2;
         
         var layout = this._pvLayout = this.getLayoutSingleCluster();
 

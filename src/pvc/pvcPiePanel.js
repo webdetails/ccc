@@ -114,7 +114,7 @@ def
             var linkLabelSize    = resolvePercentWidth (this.linkLabelSize   );
             
             var textMargin = def.number.to(this._getConstantExtension('label', 'textMargin'), 3);
-            var textHeight = pvc.text.getTextHeight('m', labelFont);
+            var textHeight = pv.Text.fontHeight(labelFont);
             
             var linkHandleWidth = this.linkHandleWidth * textHeight; // em
             linkMargin += linkHandleWidth;
@@ -330,12 +330,18 @@ def
                         
                         return scene.childNodes;
                     })
+                    .override('defaultColor', function(type){
+                        if(type === 'stroke'){
+                            return 'black';
+                        }
+                        return this.base(type);
+                    })
+                    .override('defaultStrokeWidth', def.fun.constant(0.5))
                     .pvMark
                     .lock('visible')
                     .lock('top',  function(dot){ return dot.y; })
                     .lock('left', function(dot){ return dot.x; })
-                    .strokeStyle('black')
-                    .lineWidth(0.5)
+                    //.lineWidth(0.5)
                     ;
                 
                 this.pvPieLabel = new pvc.visual.Label(

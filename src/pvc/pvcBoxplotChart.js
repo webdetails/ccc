@@ -87,7 +87,7 @@ def
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var options = this.options;
         var plots   = this.plots;
             
@@ -121,8 +121,6 @@ def
             boxPanel.pvSecondLine = pointPanel.pvLine;
             boxPanel.pvSecondDot  = pointPanel.pvDot;
         }
-             
-        return boxPanel;
     },
     
     defaults: {

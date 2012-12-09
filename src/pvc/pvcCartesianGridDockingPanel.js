@@ -27,28 +27,23 @@ def
         
         this.base(layoutInfo);
 
-        var contentPanel = chart._mainContentPanel;
-        if(contentPanel) {
-            var plotFrameVisible = chart.options.plotFrameVisible;
-            if(plotFrameVisible == null){
-                if(chart.compatVersion <= 1){
-                    plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
-                } else {
-                    plotFrameVisible = true;
-                }
-            }
-            
-            if(plotFrameVisible) {
-                this.pvFrameBar = this._createFrame(layoutInfo, axes);
-            }
-            
-            if(xAxis.scaleType !== 'discrete' && xAxis.option('ZeroLine')) {
-                this.xZeroLine = this._createZeroLine(xAxis, layoutInfo);
-            }
+        var plotFrameVisible;
+        if(chart.compatVersion <= 1){
+            plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
+        } else {
+            plotFrameVisible = def.get(chart.options, 'plotFrameVisible', true);
+        }
+        
+        if(plotFrameVisible) {
+            this.pvFrameBar = this._createFrame(layoutInfo, axes);
+        }
+        
+        if(xAxis.scaleType !== 'discrete' && xAxis.option('ZeroLine')) {
+            this.xZeroLine = this._createZeroLine(xAxis, layoutInfo);
+        }
 
-            if(yAxis.scaleType !== 'discrete' && yAxis.option('ZeroLine')) {
-                this.yZeroLine = this._createZeroLine(yAxis, layoutInfo);
-            }
+        if(yAxis.scaleType !== 'discrete' && yAxis.option('ZeroLine')) {
+            this.yZeroLine = this._createZeroLine(yAxis, layoutInfo);
         }
     },
     
@@ -248,5 +243,54 @@ def
     _getOrthoAxis: function(type){
         var orthoType = type === 'base' ? 'ortho' : 'base';
         return this.chart.axes[orthoType];
+    },
+    
+    /*
+     * @override
+     */
+    _getDatumsOnRect: function(datumMap, rect, keyArgs){
+        // TODO: this is done for x and y axis only, which is ok for now,
+        // as only discrete axes use selection and
+        // multiple axis are only continuous...
+        var chart = this.chart,
+            xAxisPanel = chart.axesPanels.x,
+            yAxisPanel = chart.axesPanels.y,
+            xDatumMap,
+            yDatumMap;
+
+        //1) x axis
+        if(xAxisPanel){
+            xDatumMap = new def.Map();
+            xAxisPanel._getDatumsOnRect(xDatumMap, rect, keyArgs);
+            if(!xDatumMap.count) {
+                xDatumMap = null;
+            }
+        }
+
+        //2) y axis
+        if(yAxisPanel){
+            yDatumMap = new def.Map();
+            yAxisPanel._getOwnDatumsOnRect(yDatumMap, rect, keyArgs);
+            if(!yDatumMap.count) {
+                yDatumMap = null;
+            }
+        }
+
+        // Rubber band selects on both axes?
+        if(xDatumMap && yDatumMap) {
+            xDatumMap.intersect(yDatumMap, /* into */ datumMap);
+            
+            keyArgs.toggle = true;
+
+            // Rubber band selects over any of the axes?
+        } else if(xDatumMap) {
+            datumMap.copy(xDatumMap);
+        } else if(yDatumMap) {
+            datumMap.copy(yDatumMap);
+        } else {
+            chart.plotPanelList.forEach(function(plotPanel){
+                plotPanel._getDatumsOnRect(datumMap, rect, keyArgs);
+            }, this);
+        }
     }
 });

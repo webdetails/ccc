@@ -477,7 +477,7 @@ def
 
         // Add the line
 
-        var panel = this._mainContentPanel.pvPanel;
+        var panel = this.plotPanelList[0].pvPanel;
         var h = this.yScale.range()[1];
 
         // Detect where to place the horizontalAnchor

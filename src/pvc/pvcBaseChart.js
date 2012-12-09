@@ -500,9 +500,9 @@ def
     useTextMeasureCache: function(fun, ctx){
         var root = this.root;
         var textMeasureCache = root._textMeasureCache || 
-                               (root._textMeasureCache = pvc.text.createCache());
+                               (root._textMeasureCache = pv.Text.createCache());
         
-        return pvc.text.useCache(textMeasureCache, fun, ctx || this);
+        return pv.Text.usingCache(textMeasureCache, fun, ctx || this);
     },
     
     /**
