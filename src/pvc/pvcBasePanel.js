@@ -1384,13 +1384,13 @@ def
 //                case 'dot':
 //                case 'line':
 //                case 'area':
-//                    this._requirePointEvent();
-//                    tipsyEvent = 'point';
-//                    tipOptions.usesPoint = true;
+                    this._requirePointEvent();
+                    tipsyEvent = 'point';
+                    tipOptions.usesPoint = true;
 //                    break;
                 
 //                default:
-                    tipsyEvent = 'mouseover';
+//                    tipsyEvent = 'mouseover';
 //            }
         }
         

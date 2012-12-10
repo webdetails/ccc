@@ -145,11 +145,6 @@ def
             
             /* IV - Calculate overflow paddings */
             this._calcOverflowPaddings();
-            
-            // Release memory.
-            if(pvc.debug > 16){
-                layoutInfo.labelBBox = null;
-            } // else keep this to draw the debug paths around the labels
         }
     },
     
@@ -189,13 +184,13 @@ def
             }
         } 
         
-        layoutInfo.labelBBox = pvc.text.getLabelBBox(
-                        layoutInfo.maxTextWidth, 
+        return (layoutInfo.labelBBox = pvc.text.getLabelBBox(
+                        layoutInfo.maxTextWidth != null ? layoutInfo.maxTextWidth : layoutInfo._maxTextWidth, 
                         layoutInfo.textHeight, 
                         align, 
                         baseline, 
                         layoutInfo.textAngle, 
-                        layoutInfo.textMargin);
+                        layoutInfo.textMargin));
     },
     
     _calcAxisSizeFromLabelBBox: function(){
@@ -487,6 +482,10 @@ def
                     .select(function(text){ return pv.Text.measure(text, this.font).width; }, this)
                     .max();
         }
+        
+        // Backup value, cause the first one is cleared to prevent label trimming
+        // but the max text width is important for other uses
+        layoutInfo._maxTextWidth = layoutInfo.maxTextWidth;
     },
     
     _calcDiscreteTicks: function(){
@@ -1135,6 +1134,7 @@ def
     _debugTicksPanel: function(pvTicksPanel){
         if(pvc.debug >= 16){ // one more than general debug box model
             var corners = this._layoutInfo.labelBBox.source.points();
+            
             // Close the path
             if(corners.length > 1){
                 // not changing corners on purpose

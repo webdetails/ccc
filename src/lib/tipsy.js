@@ -501,12 +501,9 @@
             // mark     = scenes.mark;
             
             var scenes;
-            if(!tag || !(scenes = tag.scenes) || !scenes.mark){
+            if(!tag || !(scenes = tag.scenes) || !scenes.mark || (scenes.mark !== _mark)){
                 return;
             }
-            
-            /*jshint expr:true */
-            (scenes.mark === _mark) || def.assert("Should be the current target's mark.");
             
             var renderId = _mark.renderId();
             var renderIdChanged = (renderId !== _renderId);
