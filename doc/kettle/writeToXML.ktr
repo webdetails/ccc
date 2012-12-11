@@ -272,6 +272,7 @@
       <line> <item>StackedLineChart</item><item>cccStackedLineChart</item><item>CCC Stacked Line Chart</item><item/> </line>
       <line> <item>AreaChart</item><item>cccAreaChart</item><item>CCC Area Chart</item><item>novo no CDF</item> </line>
       <line> <item>PieChart</item><item>cccPieChart</item><item>CCC Pie Chart</item><item/> </line>
+      <line> <item>StackedAreaChart</item><item>cccStackedAreaChart</item><item>CCC Stacked Area Chart</item><item/> </line>
     </data>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
@@ -650,6 +651,137 @@
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>83</xloc>
       <yloc>129</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Descriptions and Default Values changed by hand</name>
+    <type>DataGrid</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>property</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>description</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>defaultValue</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>changed</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>class</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+    <data>
+      <line> <item>baseAxisSize</item><item>cccBaseAxisSize</item><item>The fixed size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
+      <line> <item>baseAxisSizeMax</item><item>cccBaseAxisSizeMax</item><item>The maximum size of the panel.</item><item/><item/><item/> </line>
+      <line> <item>baseAxisSizeMax</item><item>cccBaseAxisSizeMax</item><item>The maximum size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
+      <line> <item>baseAxisTitleFont</item><item>cccBaseAxisTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>baseAxisTitleFont</item><item>cccBaseAxisTitleFont</item><item>The font of the panel.</item><item>12px sans-serif</item><item/><item>CartesianAxisTitlePanel</item> </line>
+      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role of the bar family charts is restricted to be discrete.</item><item/><item>yes</item><item/> </line>
+      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role of the heat grid chart organizes visual elements along the discrete base axis, and is restricted to be discrete.</item><item/><item>yes</item><item/> </line>
+      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role represents a certain logical grouping of the data points.</item><item/><item>yes</item><item/> </line>
+      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role represents a slice of the pie.</item><item/><item>yes</item><item/> </line>
+      <line> <item>clickAction</item><item>cccClickAction</item><item>A callback function that is called when the user clicks on a bullet.</item><item/><item>yes</item><item/> </line>
+      <line> <item>clickAction</item><item>cccClickAction</item><item>A callback function that is called when the user clicks on a visual element.</item><item/><item/><item/> </line>
+      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of pie slices.</item><item/><item>yes</item><item/> </line>
+      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of the dots and lines of the visual elements.</item><item/><item>yes</item><item/> </line>
+      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of the visual elements.</item><item/><item>yes</item><item/> </line>
+      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of visual elements.</item><item/><item/><item/> </line>
+      <line> <item>legendFont</item><item>cccLegendFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>legendFont</item><item>cccLegendFont</item><item>The font of the panel.</item><item>10px sans-serif</item><item/><item>LegendPanel</item> </line>
+      <line> <item>orthoAxisSize</item><item>cccOrthoAxisSize</item><item>The fixed size of the panel.</item><item/><item/><item/> </line>
+      <line> <item>orthoAxisSize</item><item>cccOrthoAxisSize</item><item>The fixed size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
+      <line> <item>orthoAxisSizeMax</item><item>cccOrthoAxisSizeMax</item><item>The maximum size of the panel.</item><item/><item/><item/> </line>
+      <line> <item>orthoAxisSizeMax</item><item>cccOrthoAxisSizeMax</item><item>The maximum size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
+      <line> <item>orthoAxisTitleFont</item><item>cccOrthoAxisTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>orthoAxisTitleFont</item><item>cccOrthoAxisTitleFont</item><item>The font of the panel.</item><item>12px sans-serif</item><item/><item>CartesianAxisTitlePanel</item> </line>
+      <line> <item>plot2ValuesAnchor</item><item>cccPlot2ValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
+      <line> <item>plot2ValuesAnchor</item><item>cccPlot2ValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
+      <line> <item>seriesRole</item><item>cccSeriesRole</item><item>The series visual role of the heat grid chart organizes visual elements along the discrete orthogonal axis.</item><item/><item>yes</item><item/> </line>
+      <line> <item>seriesRole</item><item>cccSeriesRole</item><item>The series visual role represents a series of connected data points.</item><item/><item/><item/> </line>
+      <line> <item>sizeRole</item><item>cccSizeRole</item><item>The size visual role controls the size of the dot visual elements, when in shapes mode.</item><item/><item>yes</item><item/> </line>
+      <line> <item>sizeRole</item><item>cccSizeRole</item><item>The size visual role controls the size of the dots of the visual elements, and, as such, it is only represented if dots are visible.</item><item/><item>yes</item><item/> </line>
+      <line> <item>smallTitleFont</item><item>cccSmallTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>smallTitleFont</item><item>cccSmallTitleFont</item><item>The font of the panel.</item><item>14px sans-serif</item><item/><item>ChartTitlePanel</item> </line>
+      <line> <item>smallTitlePosition</item><item>cccSmallTitlePosition</item><item>The docking position of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>smallTitlePosition</item><item>cccSmallTitlePosition</item><item>The docking position of the panel.</item><item>top</item><item/><item>ChartTitlePanel</item> </line>
+      <line> <item>titleFont</item><item>cccTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>titleFont</item><item>cccTitleFont</item><item>The font of the panel.</item><item>14px sans-serif</item><item/><item>ChartTitlePanel</item> </line>
+      <line> <item>titlePosition</item><item>cccTitlePosition</item><item>The docking position of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>titlePosition</item><item>cccTitlePosition</item><item>The docking position of the panel.</item><item>top</item><item/><item>ChartTitlePanel</item> </line>
+      <line> <item>trendValuesAnchor</item><item>cccTrendValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
+      <line> <item>trendValuesAnchor</item><item>cccTrendValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
+      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the height of bars.</item><item/><item>yes</item><item/> </line>
+      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the orthogonal position of points.</item><item/><item>yes</item><item/> </line>
+      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the relative angle span of each pie slice.</item><item/><item>yes</item><item/> </line>
+      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role represents current values for a given title and sub-title categories.</item><item/><item>yes</item><item/> </line>
+      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a non-linked value label relative to its corresponding visual element position.</item><item>outer</item><item>yes</item><item>PiePlot</item> </line>
+      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
+      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>center</item><item/><item>BarPlotCommon</item> </line>
+      <line> <item>vauesAnchor</item><item>?????????</item><item/><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
+      <line> <item>valuesVisible</item><item>cccValuesVisible</item><item>Indicates if value labels are shown next to the visual elements.</item><item>false</item><item/><item>Plot (being used by subclasses)</item> </line>
+      <line> <item>valuesVisible</item><item>cccValuesVisible</item><item>Indicates if value labels are shown next to the visual elements.</item><item>true</item><item/><item>HeatGridPlot</item> </line>
+    </data>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>619</xloc>
+      <yloc>278</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -3465,137 +3597,6 @@ var valueXML = vXML.toXMLString(2);</jsScript_script>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>760</xloc>
       <yloc>32</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Descriptions and Default Values changed by hand</name>
-    <type>DataGrid</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <fields>
-      <field>
-        <name>property</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>cccProperty</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>description</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>defaultValue</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>changed</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>class</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-      </field>
-    </fields>
-    <data>
-      <line> <item>baseAxisSize</item><item>cccBaseAxisSize</item><item>The fixed size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
-      <line> <item>baseAxisSizeMax</item><item>cccBaseAxisSizeMax</item><item>The maximum size of the panel.</item><item/><item/><item/> </line>
-      <line> <item>baseAxisSizeMax</item><item>cccBaseAxisSizeMax</item><item>The maximum size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
-      <line> <item>baseAxisTitleFont</item><item>cccBaseAxisTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
-      <line> <item>baseAxisTitleFont</item><item>cccBaseAxisTitleFont</item><item>The font of the panel.</item><item>12px sans-serif</item><item/><item>CartesianAxisTitlePanel</item> </line>
-      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role of the bar family charts is restricted to be discrete.</item><item/><item>yes</item><item/> </line>
-      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role of the heat grid chart organizes visual elements along the discrete base axis, and is restricted to be discrete.</item><item/><item>yes</item><item/> </line>
-      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role represents a certain logical grouping of the data points.</item><item/><item>yes</item><item/> </line>
-      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role represents a slice of the pie.</item><item/><item>yes</item><item/> </line>
-      <line> <item>clickAction</item><item>cccClickAction</item><item>A callback function that is called when the user clicks on a bullet.</item><item/><item>yes</item><item/> </line>
-      <line> <item>clickAction</item><item>cccClickAction</item><item>A callback function that is called when the user clicks on a visual element.</item><item/><item/><item/> </line>
-      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of pie slices.</item><item/><item>yes</item><item/> </line>
-      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of the dots and lines of the visual elements.</item><item/><item>yes</item><item/> </line>
-      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of the visual elements.</item><item/><item>yes</item><item/> </line>
-      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of visual elements.</item><item/><item/><item/> </line>
-      <line> <item>legendFont</item><item>cccLegendFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
-      <line> <item>legendFont</item><item>cccLegendFont</item><item>The font of the panel.</item><item>10px sans-serif</item><item/><item>LegendPanel</item> </line>
-      <line> <item>orthoAxisSize</item><item>cccOrthoAxisSize</item><item>The fixed size of the panel.</item><item/><item/><item/> </line>
-      <line> <item>orthoAxisSize</item><item>cccOrthoAxisSize</item><item>The fixed size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
-      <line> <item>orthoAxisSizeMax</item><item>cccOrthoAxisSizeMax</item><item>The maximum size of the panel.</item><item/><item/><item/> </line>
-      <line> <item>orthoAxisSizeMax</item><item>cccOrthoAxisSizeMax</item><item>The maximum size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
-      <line> <item>orthoAxisTitleFont</item><item>cccOrthoAxisTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
-      <line> <item>orthoAxisTitleFont</item><item>cccOrthoAxisTitleFont</item><item>The font of the panel.</item><item>12px sans-serif</item><item/><item>CartesianAxisTitlePanel</item> </line>
-      <line> <item>plot2ValuesAnchor</item><item>cccPlot2ValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
-      <line> <item>plot2ValuesAnchor</item><item>cccPlot2ValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
-      <line> <item>seriesRole</item><item>cccSeriesRole</item><item>The series visual role of the heat grid chart organizes visual elements along the discrete orthogonal axis.</item><item/><item>yes</item><item/> </line>
-      <line> <item>seriesRole</item><item>cccSeriesRole</item><item>The series visual role represents a series of connected data points.</item><item/><item/><item/> </line>
-      <line> <item>sizeRole</item><item>cccSizeRole</item><item>The size visual role controls the size of the dot visual elements, when in shapes mode.</item><item/><item>yes</item><item/> </line>
-      <line> <item>sizeRole</item><item>cccSizeRole</item><item>The size visual role controls the size of the dots of the visual elements, and, as such, it is only represented if dots are visible.</item><item/><item>yes</item><item/> </line>
-      <line> <item>smallTitleFont</item><item>cccSmallTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
-      <line> <item>smallTitleFont</item><item>cccSmallTitleFont</item><item>The font of the panel.</item><item>14px sans-serif</item><item/><item>ChartTitlePanel</item> </line>
-      <line> <item>smallTitlePosition</item><item>cccSmallTitlePosition</item><item>The docking position of the panel.</item><item/><item/><item>DockedPanel</item> </line>
-      <line> <item>smallTitlePosition</item><item>cccSmallTitlePosition</item><item>The docking position of the panel.</item><item>top</item><item/><item>ChartTitlePanel</item> </line>
-      <line> <item>titleFont</item><item>cccTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
-      <line> <item>titleFont</item><item>cccTitleFont</item><item>The font of the panel.</item><item>14px sans-serif</item><item/><item>ChartTitlePanel</item> </line>
-      <line> <item>titlePosition</item><item>cccTitlePosition</item><item>The docking position of the panel.</item><item/><item/><item>DockedPanel</item> </line>
-      <line> <item>titlePosition</item><item>cccTitlePosition</item><item>The docking position of the panel.</item><item>top</item><item/><item>ChartTitlePanel</item> </line>
-      <line> <item>trendValuesAnchor</item><item>cccTrendValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
-      <line> <item>trendValuesAnchor</item><item>cccTrendValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
-      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the height of bars.</item><item/><item>yes</item><item/> </line>
-      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the orthogonal position of points.</item><item/><item>yes</item><item/> </line>
-      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the relative angle span of each pie slice.</item><item/><item>yes</item><item/> </line>
-      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role represents current values for a given title and sub-title categories.</item><item/><item>yes</item><item/> </line>
-      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a non-linked value label relative to its corresponding visual element position.</item><item>outer</item><item>yes</item><item>PiePlot</item> </line>
-      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
-      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>center</item><item/><item>BarPlotCommon</item> </line>
-      <line> <item>vauesAnchor</item><item>?????????</item><item/><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
-      <line> <item>valuesVisible</item><item>cccValuesVisible</item><item>Indicates if value labels are shown next to the visual elements.</item><item>false</item><item/><item>Plot (being used by subclasses)</item> </line>
-      <line> <item>valuesVisible</item><item>cccValuesVisible</item><item>Indicates if value labels are shown next to the visual elements.</item><item>true</item><item/><item>HeatGridPlot</item> </line>
-    </data>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>619</xloc>
-      <yloc>278</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
