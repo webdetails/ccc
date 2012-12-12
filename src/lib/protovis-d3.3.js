@@ -6385,7 +6385,11 @@ pv.SvgScene.undefined = function() {};
 pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
   var results = scenes.$g.getElementsByTagName('defs');
   if (results.length === 1) {
-    var defs = results[0];
+    var defs;
+    if (pv.renderer() !== "batik")
+        defs = results[0];
+    else
+        defs = new cgg.element(results.item(0));
     var cur = defs.firstChild;
     while (cur) {
       var next = cur.nextSibling;
@@ -6509,7 +6513,10 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
       var results = g.getElementsByTagName('defs');
       var defs;
       if(results.length) {
-        defs = results[0];
+        if (pv.renderer() !== "batik")
+            defs = results.item(0);
+        else
+            defs = new cgg.element(results.item(0));
       } else {
         defs = g.appendChild(this.create("defs"));
       }
