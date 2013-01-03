@@ -330,12 +330,17 @@ def
                         
                         return scene.childNodes;
                     })
+                    .override('defaultColor', function(type){
+                        if(type === 'stroke'){
+                            return 'black';
+                        }
+                        return this.base(type);
+                    })
+                    .override('defaultStrokeWidth', def.fun.constant(0.5))
                     .pvMark
                     .lock('visible')
                     .lock('top',  function(dot){ return dot.y; })
                     .lock('left', function(dot){ return dot.x; })
-                    .strokeStyle('black')
-                    .lineWidth(0.5)
                     ;
                 
                 this.pvPieLabel = new pvc.visual.Label(
