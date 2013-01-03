@@ -20,3 +20,4 @@ pvc-*.js
 /publish_analyzer.bat
 /doc/kettle/output
 /doc/gen/summary/summary.html
+/site/gen/templates.out.xml

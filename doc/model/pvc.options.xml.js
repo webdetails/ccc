@@ -8207,10 +8207,6 @@ pvc.options.axes.AnyColorAxis.prototype.scaleType = undefined;
  */
 pvc.options.axes.AnyColorAxis.prototype.useAbs = undefined;
 /**
- * @type 
- */
-pvc.options.axes.AnyColorAxis.prototype. = undefined;
-/**
  * The options documentation class of a discrete domain color axis.
  * <p>
  * See {@link pvc.options.axes.ColorAxis}
@@ -8287,10 +8283,6 @@ pvc.options.axes.DiscreteColorAxis.prototype.legendShape = undefined;
  * @category Discrete > Style
  */
 pvc.options.axes.DiscreteColorAxis.prototype.legendVisible = undefined;
-/**
- * @type 
- */
-pvc.options.axes.DiscreteColorAxis.prototype. = undefined;
 /**
  * The options documentation class of the 
  * HeatGrid numeric color axis.

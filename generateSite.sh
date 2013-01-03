@@ -37,10 +37,9 @@ cp -rf dist/jsdoc/* ${SITECHARTSJSDOCS};
 
 # I - Generate Summary Resource Pages
 rm dist/summary/*.html;
-# TODO: make this relative....!!!!
-OUTBASEURL="file:/C:/webdetails/pentaho/ccc/dist/summary/"
+
 # -- Invoke XSLT
-java -jar doc/lib/saxon9he.jar -xsl:doc/gen/summary/com2html-summary.xsl -s:doc/model/pvc.options.xml relativePath=../../model/ helpBaseUrl=jsdoc/symbols/ outBaseUrl=${OUTBASEURL}
+java -jar doc/lib/saxon9he.jar -xsl:doc/gen/summary/com2html-summary.xsl -s:doc/model/pvc.options.xml helpBaseUrl=jsdoc/symbols/ outBaseUrl=dist/summary/
 
 # II - generate templates from templates.xml
 # -- Invoke XSLT

@@ -93,7 +93,7 @@
 			            <!-- Only output if property not declared/overriden locally
 			                 TODO: what about facet property clashes?
 			             -->
-			            <xsl:if test="not($complexTypeDef/com:property[@name=current()/@name])">
+			            <xsl:if test="not($complexTypeDef/com:property[string(@name) != '' and @name=current()/@name])">
 				            <xsl:apply-templates select=".">
 				                <xsl:with-param name="fullTypeName" select="$fullTypeName" />
 				            </xsl:apply-templates>
@@ -103,7 +103,7 @@
 	        </xsl:for-each>
         </xsl:if>
         
-        <xsl:for-each select="com:property">
+        <xsl:for-each select="com:property[string(@name) != '']">
             <xsl:sort select="@category" />
             <xsl:sort select="@name" />
             

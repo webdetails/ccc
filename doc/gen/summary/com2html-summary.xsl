@@ -2,11 +2,13 @@
 <xsl:stylesheet version="2.0" 
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:com="urn:webdetails/com/2012"
+    xmlns:c="urn:webdetails/com/2012"
     xmlns:fn="http://www.w3.org/2005/xpath-functions"
     xmlns:fun="localfunctions"
     xmlns:xhtml="http://www.w3.org/1999/xhtml"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    exclude-result-prefixes="com fun xs xsl fn xhtml">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    exclude-result-prefixes="com fun xs xsl fn xhtml xsi c">
     
     <xsl:output method="xhtml" indent="no" />
     
@@ -15,14 +17,11 @@
          -->
     <xsl:output method="xhtml" indent="no" name="html" omit-xml-declaration="yes" />
     
-    <xsl:include href="com-lib.xsl" />
-    
-    <xsl:param name="helpBaseUrl"  select="''" />
-    
+    <!-- PARAMETERS -->
     <xsl:param name="outBaseUrl"  select="''" />
+    <xsl:param name="helpBaseUrl" select="''" />
     
-    <xsl:variable name="minGroupSize" select="3" />
-    
+    <!-- CONFIGURATION VARIABLES for some of COM-LIB features -->
     <xsl:variable name="excludeProps">
         <prop>trendTrend</prop>
         <prop>trendNullInterpolationMode</prop>
@@ -42,6 +41,11 @@
         <prop as="legendClickMode">colorLegendClickMode</prop>
     </xsl:variable>
     
+    <!-- Include COM-LIB -->
+    <xsl:include href="../com-lib.xsl" />
+    
+    <xsl:variable name="minGroupSize" select="3" />
+    
     <!-- MAIN TEMPLATE - The flow Starts Here -->
 	<xsl:template match="/">
 	   
@@ -60,7 +64,7 @@
 	
 	<!-- Process ONE complex type -->
     <xsl:template match="com:complexType">
-        <xsl:variable name="properties" select="fun:expandComplexProperties(., '', '', '')" />
+        <xsl:variable name="properties" select="fun:processSummaryProperties(.)" />
         
         <xsl:variable name="nonExtProperties" select="$properties[not(ends-with(@name, '_'))]" />
         
@@ -182,7 +186,7 @@
             <span class="js-{fun:getJSType(@default)}"><xsl:value-of select="@default" /></span>
         </xsl:if>
         <xsl:if test="count(typeName/node()) > 0">
-            <span class="js-comment">  //<xsl:value-of select="$nbsp" disable-output-escaping="yes"/><xsl:copy-of select="typeName/node()" />
+            <span class="js-comment">  //<xsl:value-of select="$nbsp" disable-output-escaping="yes"/><xsl:copy-of select="typeName/node()" copy-namespaces="no" />
 	        <!--
 	          <xsl:value-of select="replace(com:documentation, '^(.*?\.).*$', '$1', 'sm')" />
 	          -->
@@ -190,182 +194,63 @@
 	    </xsl:if>
     </xsl:template>
     
-    <xsl:function name="fun:expandComplexProperties">
-        <xsl:param name="compType" />
-        <xsl:param name="path" />
-        <xsl:param name="minPath" />
-        <xsl:param name="categPath" />
-        
-        <xsl:for-each select="$compType/com:property">
-        
-            <!-- Is local property excluded? -->
-            <xsl:if test="count($excludeLocalProps/prop[. = current()/@name]) = 0">
-                
-                <!--
-                I - Output the property once 
-                    with a type constituted by all its direct non-complex types
-	                (can include lists...)
-	                
-	                Translate atoms      to primitive
-	                Translate functions  to function
-	                Translate ext.points to primitive of **pv.Mark**
-	                
-	                Ignore literal complex types
-	                Ignore complex types within lists
-	                Ignore empty lists
-	                Expand expandable complex types.
-	             -->
-                <xsl:variable name="nonComplexTypes">
-                    <xsl:apply-templates select="types" mode="clean-types" />
-                </xsl:variable>
+    <!-- The "extensionPoints" property are excluded
+             through global configuration, 
+             so that no pvc.options.marks complex types
+             are expected at this phase.
+             As such, any 
+             -->
+             
+    <!-- Removes properties that are not shown in the summary. 
+         Builds a simplified typeName.  
+         -->
+    <xsl:function name="fun:processSummaryProperties">
+        <xsl:param name="complexType" />
+        <xsl:for-each select="$complexType/com:property">
             
-                <!-- Some extension points have an empty name (!) -
-                     it's a way to inherit only the parent's name.
-                     The "empty" name is marked with an "_".
-                     
-                     If there is no ascending path,
-                     the resulting name would be "",
-                     so the "_" is translated to minPath.
-                     Otherwise, 
-                     the "_" name is translated to "" -  
-                     when prefixed with path it will be ok.  
-                  -->
-                <xsl:variable name="name" 
-                              select="if(@name = '_') 
-                                      then (if($path = '') then $minPath else '') 
-                                      else string(@name)" />
-                
-                <!-- If the property contains an extension point type,
-                     it is renamed to contain the suffix: "_".
-                     -->
-                <xsl:variable name="nameEx"
-                              select="concat(
-                                        $name,
-                                        if($nonComplexTypes/types/primitive[@isExtension='true'])
-                                        then '_'
-                                        else '')" />
-                
-	            <xsl:variable name="expandedName" select="fun:expandName($path, $nameEx)" />
-	            
-	            <!-- Is expanded property excluded? -->
-	            <xsl:if test="count($excludeProps/prop[. = $expandedName]) = 0">
-	            
-	                <xsl:variable name="expandableComplexTypes"
-	                              select="fun:getExpandableComplexTypes(types)" />
-	                
-	                <!-- When expanding, 
-	                     skip the local category, 
-	                     unless there's no categPath above.
-	                     Limit to a maximum of 2 categories. 
-	                     -->
-	                <xsl:variable name="expandedCat"
-	                              select="fun:limitCategoryTitle(
-	                                  if (count($expandableComplexTypes) = 0)
-	                                  then fun:join(' > ', $categPath, @category)
-	                                  else (
-	                                     if ($categPath) 
-	                                     then fun:join(' > ', $categPath, fun:buildTitleFromName($name))
-	                                     else fun:join(' > ', @category,  fun:buildTitleFromName($name))))" />
-	                                    
-	                <xsl:variable name="nonComplexTypesName">
-	                    <xsl:apply-templates select="$nonComplexTypes" mode="build-type-name">
-	                        <xsl:with-param name="defaultValue" select="string(@default)"/>
-	                    </xsl:apply-templates>
-	                </xsl:variable>
-	                
-			        <xsl:if test="$nonComplexTypesName != '' or @default != ''">
-			            <com:property name="{$expandedName}" 
-			                          category="{$expandedCat}" 
-			                          originalType="{fun:getTypeFullName($compType)}" 
-			                          originalName="{@name}">
-			                <xsl:copy-of select="@*[name() != 'name' and name() != 'category']" />
-			                <xsl:copy-of select="*" />
-			                <typeName>
-			                    <xsl:copy-of select="$nonComplexTypesName" />
-			                </typeName>
-			            </com:property>
-			        </xsl:if>
-			        
-			        <!-- II - Expand direct complex types -->
-			        <xsl:if test="count($expandableComplexTypes) > 0">
-				        <xsl:variable name="childPath" 
-				                      select="if(@expandUse = 'optional') 
-				                              then $path
-				                              else $expandedName" />
-				        
-				        <xsl:variable name="childMinPath"
-                                      select="if($minPath) 
-                                              then $minPath
-                                              else $name" />
-                                              
-				        <xsl:for-each select="$expandableComplexTypes">
-			                <xsl:copy-of select="fun:expandComplexProperties(., $childPath, string($childMinPath), $expandedCat)" />
-			            </xsl:for-each>
-			        </xsl:if>
-		        </xsl:if>
-		    </xsl:if>
-        </xsl:for-each>
-                
-    </xsl:function>
-    
-    <xsl:function name="fun:limitCategoryTitle">
-        <xsl:param name="category" />
-        
-        <xsl:variable name="categories" select="subsequence(tokenize($category, '\s*>\s*'), 1, 2)" />
-        
-        <xsl:value-of select="$categories" separator=" > "/>
-    </xsl:function>
-    
-    <xsl:function name="fun:getExpandableComplexTypes">
-        <!-- Complex types that will be expanded -->
-        <xsl:param name="types" />
-
-        <xsl:for-each select="$types/complex">
-            <xsl:variable name="propComplexType" 
-                          select="$complexTypesExp[fun:getTypeFullName(.) = current()/@of]" />
+            <!-- Clean the property's "types" child element -->
+            <xsl:variable name="cleanedTypes">
+                <xsl:apply-templates select="types" mode="clean-types" />
+            </xsl:variable>
             
-            <!-- If @use = literal, skip the complex type
-                 Must also skip any complexTypes of the pvc.options.marks space,
-                 so that custom extension point Marks don't get expanded. 
-                 -->
-            <xsl:if test="
-                    $propComplexType
-                    [@use='expanded' or @use='any']
-                    [@space != 'pvc.options.marks']">
-                <xsl:sequence select="$propComplexType" />
+            <!-- Markup description of the type name -->
+            <xsl:variable name="cleanedTypeName">
+                <xsl:apply-templates select="$cleanedTypes" mode="build-type-name">
+                    <xsl:with-param name="defaultValue" select="string(@default)"/>
+                </xsl:apply-templates>
+            </xsl:variable>
+            
+            <xsl:if test="$cleanedTypeName != '' or @default != ''">
+                <xsl:copy>
+                    <xsl:copy-of select="@*" />
+                    <typeName>
+                        <xsl:copy-of select="$cleanedTypeName" />
+                    </typeName>
+                </xsl:copy>
             </xsl:if>
         </xsl:for-each>
     </xsl:function>
     
-    <xsl:function name="fun:getJSType">
-        <xsl:param name="value" />
-        <xsl:choose>
-            <xsl:when test="$value = 'true' or $value = 'false'">
-                <xsl:value-of select="'boolean'" />
-            </xsl:when>
-            <xsl:when test="matches($value, '^[0-9\.]+$')">
-                <xsl:value-of select="'number'" />
-            </xsl:when>
-            <xsl:when test="$value = 'null'">
-                <xsl:value-of select="'null'" />
-            </xsl:when>
-            <xsl:when test="$value = 'undefined'">
-                <xsl:value-of select="'undefined'" />
-            </xsl:when>
-            <!-- " or ' &#34; &#39; matches($value,'^\&quot;') or  -->
-            <xsl:when test="starts-with($value,'&quot;') or starts-with($value, $q)">
-                <xsl:value-of select="'string'" />
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="'unknown'" />
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
+    <!-- CLEAN TYPES 
     
-    
-    <!-- CLEAN TYPES -->
+      Translations
+      ===============
+      * <function of="foo" />         ~~> <primitive of="function" />
+      * <list of="gu ga"> ... </list> ~~> process each item
+      * <map of="bar guru">...</map>  ~~> **nothing**
+      
+      * <complex of="pvc.options.Marks.zzzExtensionPoints" />
+                                      ~~> <primitive of="pv.zzz" isExtension="true" />
+      * <complex ... />               ~~> **nothing**
+      
+      Passes-through
+      ===============
+      * <atom ... />
+      * <primitive ... />
+      * 
+     -->
     <xsl:template match="types" mode="clean-types">
-        <xsl:copy>
+        <xsl:copy copy-namespaces="no">
             <xsl:apply-templates select="*" mode="clean-types" />
         </xsl:copy>
     </xsl:template>
@@ -375,11 +260,11 @@
             <xsl:apply-templates select="*" mode="clean-types" />
         </xsl:variable>
         <xsl:if test="count($children/*) > 0">
-	        <xsl:copy>
-	            <xsl:copy-of select="@*" />
-	            <xsl:copy-of select="$children" />
-	        </xsl:copy>
-	    </xsl:if>
+            <xsl:copy copy-namespaces="no">
+                <xsl:copy-of select="@*" />
+                <xsl:copy-of select="$children" />
+            </xsl:copy>
+        </xsl:if>
     </xsl:template>
     
     <xsl:template match="function" mode="clean-types">
@@ -399,7 +284,7 @@
          so that, later, it can be identified as an extension type.
          -->
     <xsl:template match="complex" mode="clean-types">
-        <xsl:variable name="compType" select="$complexTypesExp[fun:getTypeFullName(.) = current()/@of]" />
+        <xsl:variable name="compType" select="$complexTypesInh[fun:getTypeFullName(.) = current()/@of]" />
         <xsl:if test="$compType/@space = 'pvc.options.marks'">
             <primitive of="pv.{replace($compType/@name, '^(.*?)ExtensionPoint$', '$1')}" isExtension="true" />
         </xsl:if>
@@ -409,9 +294,10 @@
     </xsl:template>
     
     <xsl:template match="*" mode="clean-types">
-        <xsl:copy-of select="." />
+        <xsl:copy-of select="." copy-namespaces="no" />
     </xsl:template>
-
+    
+    <!-- BUILD-TYPE-NAME -->
     
     <!-- From a types element, 
          build the type name string -->
@@ -507,5 +393,4 @@
             <item><xsl:value-of select="@of" /></item>
         </xsl:if>
     </xsl:template>
-    
 </xsl:stylesheet>
