@@ -159,6 +159,7 @@
             for additional information.
         </c:documentation>
         
+        <!-- HACK due to kettle cde job limitation -->
         <c:property name="" type="">
         </c:property>
     
@@ -177,6 +178,7 @@
             for additional information.
         </c:documentation>
 
+        <!-- HACK due to kettle cde job limitation -->
         <c:property name="" type="">
         </c:property>
 
