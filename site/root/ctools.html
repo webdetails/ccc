@@ -89,26 +89,26 @@
         <!--CCC CHART TABS-->
         <script type="text/javascript" charset="utf-8">
         $(function () { 
-            var ccc_charts_tabContainers = $('div.ccc_charts_tabs > iframe');
+            var ccc_charts_tabContainers = $('div.ccc_charts_tabs > iframe')
+                            .css({
+                                display:    'block',
+                                visibility: 'hidden'
+                            });
             
             function waitFrameLoaded($frame, handler){
-                var timeout   = 20;
-                var available = 10 * 1000 / timeout; // 10 seconds
-                once();
-                
-                function once(){
-                    available--;
-                    var win = $frame[0].contentWindow;
-                    if(win && win.pvc){ // quick dirty ccc presence test...
-                        handler(win);
-                        return;
-                    }
-                    
-                    if(available > 0){
-                        setTimeout(once, 20);
-                    } else {
-                        handler(null);
-                    }
+                var frame = $frame[0];
+                if(!frame.ctoolsLoaded){
+                    var win = window;
+                    frame.ctoolsOnLoad = function(winChild){
+                        frame.ctoolsOnLoad = null;
+                        frame.ctoolsLoaded = true;
+                        
+                        win.setTimeout(function(){
+                            handler(winChild, true);
+                        },0);
+                    };
+                } else {
+                    handler(frame.contentWindow, false);
                 }
             }
             
@@ -128,10 +128,14 @@
             
             $('div.ccc_charts_tabs ul.ccc_charts_tabNavigation a')
             .click(function () {
-                ccc_charts_tabContainers.hide();
+                ccc_charts_tabContainers.css({display: 'none'});
                 
                 var $selectedFrame = ccc_charts_tabContainers.filter(this.hash);
-                if(!$selectedFrame.attr('src')){
+                
+                $selectedFrame.css({display: 'block', visibility: 'visible', height: 0});
+                
+                var isLoaded = $selectedFrame.attr('src');
+                if(!isLoaded){
                     // ex: extract "Pie" from the hash "#ccc_charts_Pie"
                     var url = 'charts/' + 
                               this.hash.replace(/^#ccc_charts_(.+)$/, '$1') + 
@@ -142,28 +146,28 @@
                 }
                 
                 var $me = $(this);
-                waitFrameLoaded($selectedFrame, function(win){ 
+                waitFrameLoaded($selectedFrame, function(win, firstLoad){ 
                     if(win){
                         var $doc = $(win.document);
-                        $selectedFrame.height($doc.height() + 30);
+                        $selectedFrame.height($doc.height() + 10);
                         
-                        $selectedFrame.show();
+                        $('div.ccc_charts_tabs ul.ccc_charts_tabNavigation a')
+                        .removeClass('selected');
                         
-                        $('div.ccc_charts_tabs ul.ccc_charts_tabNavigation a').removeClass('selected');
                         $me.addClass('selected');
                         
-                        win.tryMe.listen(function(){
-                            // Called whenever a chart is tried.
-                            // At this time, it is possible that the height of the contained document has changed.
-                            $selectedFrame.height($doc.height() + 30);
-                        });
+                        if(firstLoad){
+                            win.tryMe.listen(function(){
+                                // Called whenever a chart is tried.
+                                // At this time, it is possible that the height of the contained document has changed.
+                                $selectedFrame.height($doc.height() + 10);
+                            });
+                        }
                     }
                 });
                 
                 return false;
-            })
-            .filter(':first')
-            .click();
+            });
         });
         </script>
         
@@ -344,7 +348,15 @@
             // toggle the component with class msg_body
             jQuery(".heading")
             .click(function(){
-                jQuery(this).next(".content").slideToggle(300);
+                var $content = jQuery(this).next(".content");
+                
+                $content.slideToggle(300)
+                        .queue(function(next){
+                            // For ccc
+                            $content.find('div.ccc_charts_tabs ul.ccc_charts_tabNavigation a').filter(':first').click();
+                            
+                            next();
+                        });
               
                 if (jQuery(this).hasClass("up")){
                     jQuery(this).removeClass("up")

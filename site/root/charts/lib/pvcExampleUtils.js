@@ -146,6 +146,17 @@ var tryMe = (function(){
 }());
 
 $(function(){
-    // When everything is ready, click all tryMe buttons
-    $("button.tryMe").click();
+ // When everything is ready, click all tryMe buttons
+    tryAllExamples();
+    
+    // Check for the existence of a parent frame
+    // and a ctoolsOnLoad property.
+    var parentFrame = window.frameElement;
+    if(parentFrame && parentFrame.ctoolsOnLoad){
+        parentFrame.ctoolsOnLoad(window);
+    }
 });
+
+function tryAllExamples(){
+    $("button.tryMe").click();
+}
