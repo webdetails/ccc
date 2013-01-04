@@ -23,13 +23,19 @@
     
     <!-- CONFIGURATION VARIABLES for some of COM-LIB features -->
     <xsl:variable name="excludeProps">
+        <prop></prop>
+        <!--
         <prop>trendTrend</prop>
         <prop>trendNullInterpolationMode</prop>
+          -->
     </xsl:variable>
     
     <xsl:variable name="excludeLocalProps">
+        <prop></prop>
+        <!-- 
         <prop>keepInBounds</prop>
         <prop>alignTo</prop>
+         -->
     </xsl:variable>
     
     <xsl:variable name="rewriteProps">
@@ -159,7 +165,7 @@
             <span class="negrito"><xsl:value-of select="$category" /></span>
             <ul class="bodycopylist">
             <xsl:for-each select="$group">
-                <xsl:sort select="@name" />
+                <xsl:sort select="@name2" case-order="lower-first" />
                 <li><xsl:apply-templates select="." /></li>
             </xsl:for-each>
             </ul>
@@ -176,11 +182,7 @@
     <xsl:template match="com:property">
         <xsl:variable name="helpUrl" select="concat($helpBaseUrl, @originalType, '.html', '#', @originalName)" />
         
-        <xsl:variable name="rewrittenName" select="$rewriteProps/prop[. = current()/@name]/@as" />
-        
-        <xsl:variable name="name" select="if ($rewrittenName) then $rewrittenName else string(@name)" />
-        
-        <span class="js-identifier"><a href="{$helpUrl}" target="comjsdocs"><xsl:value-of select="$name" /></a></span>
+        <span class="js-identifier"><a href="{$helpUrl}" target="comjsdocs"><xsl:value-of select="@name2" /></a></span>
         <xsl:if test="@default != ''">
             <span class="js-punctuation"><xsl:value-of select="$nbsp" disable-output-escaping="yes"/>: </span>
             <span class="js-{fun:getJSType(@default)}"><xsl:value-of select="@default" /></span>

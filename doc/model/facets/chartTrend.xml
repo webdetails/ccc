@@ -56,6 +56,12 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="nullInterpolationMode" type="pvc.options.varia.NullInterpolationMode" category="Data" fixed="null">
+            <c:documentation>
+                The null interpolation mode is not supported by this plot type.
+            </c:documentation>
+        </c:property>
+        
          <c:property name="linesVisible" type="boolean" default="true" category="Style">
             <c:documentation>
                 Indicates if the visual elements are connected
@@ -82,6 +88,12 @@
         <c:property name="trend" type="pvc.options.varia.PlotTrending" fixed="null">
             <c:documentation>
                 Trends are not supported by this plot type.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="nullInterpolationMode" type="pvc.options.varia.NullInterpolationMode" category="Data" fixed="null">
+            <c:documentation>
+                The null interpolation mode is not supported by this plot type.
             </c:documentation>
         </c:property>
         

@@ -307,7 +307,7 @@
                      -->
                 <xsl:variable name="hasExtPointType" 
                               select="count(types/complex[starts-with(@of, 'pvc.options.marks.')]) > 0" />
-                              
+
                 <xsl:variable name="nameEx"
                               select="concat(
                                        $name,
@@ -333,7 +333,12 @@
                                          else fun:join(' > ', @category,  fun:buildTitleFromName($name))))" />
                     
                      <xsl:if test="count($otherTypes) > 0">
+                        <xsl:variable name="rewrittenName" select="$rewriteProps/prop[. = $expandedName]/@as" />
+        
+                        <xsl:variable name="expandedName2" select="if ($rewrittenName) then $rewrittenName else $expandedName" />
+                        
                         <com:property name="{$expandedName}" 
+                                      name2="{$expandedName2}"
                                       category="{$expandedCat}" 
                                       originalType="{fun:getTypeFullName($compType)}" 
                                       originalName="{@name}">

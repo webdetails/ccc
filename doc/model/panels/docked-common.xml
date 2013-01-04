@@ -41,7 +41,7 @@
                 and <tt>'center'</tt>, otherwise.
             </c:documentation>
         </c:property>
-        
+        <!-- 
         <c:property name="alignTo" 
                      type="number string pvc.options.varia.PanelAlignmentTarget"
                      category="Layout"
@@ -67,7 +67,7 @@
                 by changing its position.
             </c:documentation>
         </c:property>
-        
+        -->
         <c:property name="margins" type="number string pvc.options.varia.Sides" default="0" category="Layout">
             <c:documentation>
                 The margins of the panel.

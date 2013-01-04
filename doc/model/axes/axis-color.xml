@@ -184,12 +184,18 @@
 
     </c:complexType>
     
+    <!-- NOTE:
+        Although this colorAxis is discrete,
+        I removed the pvc.options.axes.DiscreteColorAxisFacet
+        facet to not expose the legend properties, not supported
+        by the HG...
+        Currently, DiscreteColorAxisFacet only contains legend stuff.. but
+     -->
     <c:complexType name="HeatGridColorAxis" 
                    space="pvc.options.axes"
                    base="pvc.options.axes.ColorAxis"
                    use="expanded"
-                   facets="pvc.options.axes.DiscreteColorAxisFacet
-                           pvc.options.axes.NumericColorAxisFacet">
+                   facets="pvc.options.axes.NumericColorAxisFacet">
         <c:documentation>
             The options documentation class of the 
             HeatGrid numeric color axis.
