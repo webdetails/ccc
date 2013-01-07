@@ -1,4 +1,4 @@
-// 10b4021721cb305c4c826b3b5f542e6e368ec2eb
+// 3505b89c178e9bfb25893d875f026cfaac266173
 /**
  * @class The built-in Array class.
  * @name Array
@@ -20373,10 +20373,10 @@ pv.Behavior.point = function(r) {
       inited;
 
     // Redraw mark on mouse move - default is the same as the initial pv.Behavior.select
-    var autoRefresh = def.get(keyArgs, 'autoRefresh', true);
+    var autoRefresh = pv.get(keyArgs, 'autoRefresh', true);
     
     // Whether the datum is where the selection rect coordinates are stored
-    var datumIsRect = def.get(keyArgs, 'datumIsRect', true);
+    var datumIsRect = pv.get(keyArgs, 'datumIsRect', true);
     
     /** @private protovis mark event handler */
     function mousedown(d) {
