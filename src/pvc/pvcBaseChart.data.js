@@ -49,13 +49,26 @@ pvc.BaseChart
         }
     },
     
-    _checkNoData: function(){
+    _checkNoDataI: function(){
         // Child charts are created to consume *existing* data
         if (!this.parent) {
             
             // If we don't have data, we just need to set a "no data" message
             // and go on with life.
             if(!this.allowNoData && this.resultset.length === 0) {
+                /*global NoDataException:true */
+                throw new NoDataException();
+            }
+        }
+    },
+    
+    _checkNoDataII: function(){
+        // Child charts are created to consume *existing* data
+        if (!this.parent) {
+            
+            // If we don't have data, we just need to set a "no data" message
+            // and go on with life.
+            if(!this.allowNoData && (!this.data || !this.data.count())) {
                 /*global NoDataException:true */
                 throw new NoDataException();
             }
@@ -235,7 +248,24 @@ pvc.BaseChart
     
     _createTranslationOptions: function(dataPartDimName){
         var options = this.options;
+        
         var dataOptions = options.dataOptions || {};
+        
+        var dataSeparator = options.dataSeparator;
+        if(dataSeparator === undefined){
+            dataSeparator = dataOptions.separator;
+        }
+        
+        var dataMeasuresInColumns = options.dataMeasuresInColumns;
+        if(dataMeasuresInColumns === undefined){
+            dataMeasuresInColumns = dataOptions.measuresInColumns;
+        }
+        
+        var dataCategoriesCount = options.dataCategoriesCount;
+        if(dataCategoriesCount === undefined){
+            dataCategoriesCount = dataOptions.categoriesCount;
+        }
+        
         var plot2 = options.plot2;
         
         var valueFormat = options.valueFormat,
@@ -264,11 +294,13 @@ pvc.BaseChart
             multiChartIndexes: options.multiChartIndexes,
 
             // crosstab
-            separator:         dataOptions.separator,
-            measuresInColumns: dataOptions.measuresInColumns,
+            separator:         dataSeparator,
+            measuresInColumns: dataMeasuresInColumns,
+            categoriesCount:   dataCategoriesCount,
+            
+            // TODO: currently measuresInRows is not implemented...
             measuresIndex:     dataOptions.measuresIndex || dataOptions.measuresIdx, // measuresInRows
             measuresCount:     dataOptions.measuresCount || dataOptions.numMeasures, // measuresInRows
-            categoriesCount:   dataOptions.categoriesCount,
 
             // Timeseries *parse* format
             isCategoryTimeSeries: options.timeSeries,

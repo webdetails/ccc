@@ -6,21 +6,16 @@ new pvc.LineChart({
     
     areasVisible: true,
     dotsVisible:  true,
-    dimensions:   {
+    dimensions: {
         // Category is a Date, but discrete
         category: {valueType: Date, isDiscrete: true } 
     },
 
-    legend:  true,
-    legendPosition: 'right',
-    legendAlign:    'top',
-    
+    legend:     true,
     animate:    false,
     selectable: true,
     hoverable:  true,
     axisGrid:   true,
-    axisOffset: 0,
-    
     extensionPoints: {
       line_interpolate: 'monotone',
       area_interpolate: 'monotone',

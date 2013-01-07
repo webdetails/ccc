@@ -18,8 +18,8 @@ new pvc.BulletChart({
     bulletRanges:   [30, 80, 100],
     
     extensionPoints: {
-        'bulletMarker_shape':    'dot',
-        'bulletTitle_textStyle': 'green'
+        bulletMarker_shape:    'dot',
+        bulletTitle_textStyle: 'green'
     }
 })
 .render();

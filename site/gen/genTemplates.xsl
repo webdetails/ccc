@@ -69,7 +69,11 @@
 					            
 					            <button class="tryMe" onclick='tryMe(this)'>Try me</button>
 					        </div>
-					        <div class="chartDiv"></div>
+					        <div class="chartDiv">
+					           <xsl:if test="@style = 'wide'">
+					               <xsl:attribute name="style" select="'clear:both;float:left; width:880px;'"/>
+					           </xsl:if>
+					        </div>
 					        <div class="clear"></div>
 					    </div>
 					    

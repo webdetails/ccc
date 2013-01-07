@@ -1,3 +1,4 @@
+
 new pvc.WaterfallChart({
     canvas:  'cccWaterfallExample3',
     width:   500,
@@ -10,6 +11,7 @@ new pvc.WaterfallChart({
     selectable:    true,
     hoverable:     true,
     valuesVisible: true,
+    titleFont:     '16px sans-serif',
     
     direction: 'up',
     areasVisible: true,
@@ -17,27 +19,17 @@ new pvc.WaterfallChart({
     
     seriesRole:   'productType',
     categoryRole: 'accountType, accountSource',
-    valueRole:    'value',
-    
-    dimensions: {
-       productType:   {label: "Product Type"   },
-       accountType:   {label: "Account Type"   },
-       accountSource: {label: "Account Source" },
-       value:         {label: "Value" }
-    },
 
     extensionPoints: {
+        line_lineWidth: 2,
         xAxisLabel_textAngle:    -Math.PI/3,
         xAxisLabel_textAlign:    'right',
-        xAxisLabel_textBaseline: 'top',
-        titleLabel_font: '16px sans-serif',
-        waterLine_lineWidth: 2
+        xAxisLabel_textBaseline: 'top'
     }
 })
 .setData(testWaterfallBalance, {
-    dataOptions: {categoriesCount: 2},
     readers: [
-        {names: 'productType, accountType, accountSource, value'}
+        'productType, accountType, accountSource, value'
     ]
 })
 .render();

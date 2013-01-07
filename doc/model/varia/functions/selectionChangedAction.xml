@@ -21,5 +21,11 @@
                 An array with the resulting selected datums.
             </c:documentation>
         </c:argument>
+        <c:argument name="selectedChangedDatums" type="list(pvc.data.Datum)" required="true">
+            <c:documentation>
+                An array with the datums whose selected state has changed since
+                the last time that the action was handled.
+            </c:documentation>
+        </c:argument>
     </c:functionType>
 </c:model>

@@ -8,7 +8,7 @@ new pvc.BarChart({
     selectable: true,
     hoverable:  true,
     legend:     true,
-    orthoAxisFixedMax:   130,
+    orthoAxisFixedMax: 130,
     baseAxisTicks: true,
     extensionPoints: {
         baseAxisTicks_strokeStyle: 'gray',

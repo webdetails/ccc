@@ -465,6 +465,29 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         }
     },
 
+    _getCategoriesCount: function(){
+        var R = this.options.categoriesCount;
+        if(R != null && (!isFinite(R) || R < 0)){
+            R = null;
+        }
+        
+        if(R == null){
+            // Number of consecutive discrete columns, from left
+            R = def
+                .query(this._columnTypes)
+                .whayl(function(type){ return type === 0; }) // 0 = discrete
+                .count();
+            if(!R){
+                // Having no R causes problems 
+                // when categories are continuous
+                // (in MetricDots for example).
+                R = 1;
+            }
+        }
+        
+        return R;
+    },
+    
     _splitEncodedColGroupCell: function(colGroup){
         var values = colGroup.v;
         var labels;
@@ -663,7 +686,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         function add(dimGroupName, level, count) {
             var crossEndIndex = itemLogicalGroupIndex[dimGroupName] + count; // exclusive
             while(count > 0) {
-                var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level);
+                var dimName = pvc.buildIndexedId(dimGroupName, level);
                 if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
                     
                     // use first available slot for auto dims readers as long as within crossIndex and crossIndex + count

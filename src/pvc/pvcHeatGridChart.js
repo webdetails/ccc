@@ -155,15 +155,15 @@ def
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var heatGridPlot = this.plots.heatGrid;
         
-        return (this.heatGridChartPanel = 
+        this.heatGridChartPanel = 
                 new pvc.HeatGridPanel(
                         this, 
                         parentPanel, 
                         heatGridPlot, 
-                        Object.create(baseOptions)));
+                        Object.create(baseOptions));
     },
     
     defaults: {

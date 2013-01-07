@@ -364,10 +364,6 @@ var heatGrid5 = new pvc.HeatGridChart({
     colorNull:'blue',
     nullShape:null,
     colors:['red','yellow', 'lightgreen','darkgreen'],
-    dataOptions: {
-        categoriesCount : 2,
-        measuresInColumns: true
-    },
     ctrlSelectMode: true,
     axisFont:'14px helvetica',
     shape: 'circle',
@@ -382,11 +378,15 @@ var heatGrid5 = new pvc.HeatGridChart({
     },
     yAxisSize:60,
     xAxisSize:100,
-    isMultiValued: true,
     axisComposite: true
 });
 
-heatGrid5.setData(testHeatGridComp, {crosstabMode: true, seriesInRows: false });
+heatGrid5.setData(testHeatGridComp, {
+    crosstabMode: true, 
+    dataCategoriesCount: 2,
+    dataMeasuresInColumns: true,
+    isMultiValued: true 
+});
 heatGrid5.render();
 
 

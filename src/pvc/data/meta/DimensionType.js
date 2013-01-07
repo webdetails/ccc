@@ -175,9 +175,9 @@ def.type('pvc.data.DimensionType')
 function(complexType, name, keyArgs){
     this.complexType = complexType;
     this.name  = name;
-    this.label = def.get(keyArgs, 'label') || def.firstUpperCase(name);
+    this.label = def.get(keyArgs, 'label') || pvc.buildTitleFromName(name);
 
-    var groupAndLevel = pvc.data.DimensionType.splitDimensionGroupName(name);
+    var groupAndLevel = pvc.splitIndexedId(name);
     this.group = groupAndLevel[0];
     this.groupLevel = def.nullyTo(groupAndLevel[1], 0);
 
@@ -461,29 +461,6 @@ pvc.data.DimensionType.dimensionGroupName = function(dimName){
     return dimName.replace(/^(.*?)(\d*)$/, "$1");
 };
 
-/**
- * Splits a dimension name to its default group name and a group index.
- * 
- * @param {string} dimName The dimension name.
- * 
- * @type Array
- */
-pvc.data.DimensionType.splitDimensionGroupName = function(dimName){
-    var match = /^(.*?)(\d*)$/.exec(dimName);
-    var index = null;
-    
-    if(match[2]) {
-        index = Number(match[2]);
-        if(index <= 1) {
-            index = 1;
-        } else {
-            index--;
-        }
-    }
-    
-    return [match[1], index];
-};
-
 // TODO: Docs
 pvc.data.DimensionType.valueTypeName = function(valueType){
     if(valueType == null){
@@ -498,24 +475,6 @@ pvc.data.DimensionType.valueTypeName = function(valueType){
         case Date:    return 'Date';
         default: throw def.error.argumentInvalid('valueType', "Invalid valueType function: '{0}'.", [valueType]);
     }
-};
-
-/**
- * Computes the name of the nth level dimension 
- * of a dimension group (protected).
- * <p>
- * Generated dimension names follow the naming pattern:
- * 'value', 'value2', 'value3', 'value4', etc.,
- * where the dimension group name is 'value'.
- * </p>
- * 
- * @param {string} dimGroupName The name of the dimension group.
- * @param {number} level The 0-based level of the dimension.
- * 
- * @type string
- */
-pvc.data.DimensionType.dimensionGroupLevelName = function(baseDimName, level){
-    return baseDimName + (level >= 1 ? (level + 1) : '');
 };
 
 /**

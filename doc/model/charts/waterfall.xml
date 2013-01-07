@@ -69,7 +69,10 @@
         
         <c:property name="areasVisible" type="boolean" default="true" category="Style">
             <c:documentation>
-                Indicates if areas are shown surrounding the bars of each 
+                Indicates if shaded areas are shown in the plot.
+                
+                Specifically, 
+                indicates if areas are shown surrounding the bars of each 
                 category group.
             </c:documentation>
         </c:property>

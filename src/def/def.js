@@ -1731,9 +1731,9 @@ def.nextId = function(scope){
 // --------------------
 
 def.type('Set')
-.init(function(source){
+.init(function(source, count){
     this.source = source || {};
-    this.count  = source ? def.ownKeys(source).length : 0;
+    this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
 })
 .add({
     has: function(p){
@@ -1775,9 +1775,9 @@ def.type('Set')
 // ---------------
 
 def.type('Map')
-.init(function(source){
+.init(function(source, count){
     this.source = source || {};
-    this.count  = source ? def.ownKeys(source).length : 0;
+    this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
 })
 .add({
     has: function(p){
@@ -1817,12 +1817,77 @@ def.type('Map')
         return this;
     },
     
+    copy: function(other){
+        // Add other to this one
+        def.eachOwn(other.source, function(value, p){
+            this.set(p, value);
+        }, this);
+    },
+    
     values: function(){
         return def.own(this.source);
     },
     
     keys: function(){
         return def.ownKeys(this.source);
+    },
+    
+    clone: function(){
+        return new def.Map(def.copy(this.source), this.count);
+    },
+    
+    /**
+     * The union of the current map with the specified
+     * map minus their intersection.
+     * 
+     * (A U B) \ (A /\ B)
+     * (A \ B) U (B \ A)
+     * @param {def.Map} other The map with which to perform the operation.
+     * @type {def.Map}
+     */
+    symmetricDifference: function(other){
+        if(!this.count){
+            return other.clone();
+        }
+        if(!other.count){
+            return this.clone();
+        }
+        
+        var result = {};
+        var count  = 0;
+        
+        var as = this.source;
+        var bs = other.source;
+        
+        def.eachOwn(as, function(a, p){
+            if(!objectHasOwn.call(bs, p)){
+                result[p] = a;
+                count++;
+            }
+        });
+        
+        def.eachOwn(bs, function(b, p){
+            if(!objectHasOwn.call(as, p)){
+                result[p] = b;
+                count++;
+            }
+        });
+        
+        return new def.Map(result, count);
+    },
+    
+    intersect: function(other, result){
+        if(!result){
+            result = new def.Map();
+        }
+        
+        def.eachOwn(this.source, function(value, p){
+            if(other.has(p)) {
+                result.set(p, value);
+            }
+        });
+        
+        return result;
     }
 });
 

@@ -15,9 +15,10 @@ def
         }
     }
     
-    this.base(chart, parent, options);
-    
+    // Must be done before calling base, cause it uses _getExtension
     this._extensionPrefix = !chart.parent ? "title" : "smallTitle";
+    
+    this.base(chart, parent, options);
 })
 .add({
 

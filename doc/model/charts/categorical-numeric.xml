@@ -77,7 +77,7 @@
             <c:documentation>
                 Indicates that visual elements having 
                 identical category, but different series,
-                should be displayed on top of each other, 
+                are displayed on top of each other, 
                 along the plot's orthogonal direction, 
                 instead of side-by-side, 
                 along the base direction.

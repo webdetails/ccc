@@ -501,12 +501,9 @@
             // mark     = scenes.mark;
             
             var scenes;
-            if(!tag || !(scenes = tag.scenes) || !scenes.mark){
+            if(!tag || !(scenes = tag.scenes) || !scenes.mark || (scenes.mark !== _mark)){
                 return;
             }
-            
-            /*jshint expr:true */
-            (scenes.mark === _mark) || def.assert("Should be the current target's mark.");
             
             var renderId = _mark.renderId();
             var renderIdChanged = (renderId !== _renderId);
@@ -541,7 +538,6 @@
                 // in a way that the mouse is still kept inside it,
                 // we have to update the position of the tooltip as well.
                 
-                
                 _mark.context(scenes, tag.index, function(){
                     
                     if(!followMouse){
@@ -572,8 +568,7 @@
             
             createTipsy(mark);
             
-            /*
-             * Cleanup the tooltip span on mouseout.
+            /* Cleanup the tooltip span on mouseout.
              * This is necessary for dimensionless marks.
              *
              * Note that the tip has pointer-events disabled
@@ -582,7 +577,7 @@
              * the event target rather than the tip overlay.
              */
             if(usesPoint){
-                // Being used as a point handler
+                // Behavior is being used as a 'point' event handler
                 // Should hide the tipsy only in the unpoint event
                 mark.event('unpoint', hideTipsy);
             }
@@ -622,8 +617,9 @@
             if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Show OUT"); }
         }
         
-        // On point or mouseover
+        // On 'point' or 'mouseover' events, according to usesPoint option
         function tipsyBehavior() {
+            // The mark that the tipsy-behavior is attached to
             var mark = this;
             
             if(!isEnabled || isEnabled(tipsyBehavior, mark)){

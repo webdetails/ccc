@@ -17,6 +17,8 @@ def
     this.valuesAnchor  = plot.option('ValuesAnchor' );
     this.valuesMask    = plot.option('ValuesMask'   );
     this.valuesFont    = plot.option('ValuesFont'   );
+    
+    this.chart._addPlotPanel(this);
 })
 .add({
     anchor:  'fill',

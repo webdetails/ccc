@@ -38,6 +38,8 @@
         
         <c:property name="areasVisible" type="boolean" fixed="true">
             <c:documentation>
+                Indicates if shaded areas are shown in the plot.
+                
                 This plot type necessarily shows 
                 shaded areas connecting visual elements.
             </c:documentation>

@@ -231,8 +231,45 @@ pvc.options.charts.Chart.prototype.valueFormat = function(){};
  */
 pvc.options.charts.Chart.prototype.crosstabMode = undefined;
 /**
+ * The number of category-like columns that are
+ * present in a data source.
+ * 
+ * @type number
+ * @default 1
+ * @category Data Translation
+ */
+pvc.options.charts.Chart.prototype.dataCategoriesCount = undefined;
+/**
+ * In the cross-tab format, 
+ * indicates if, 
+ * a column exists for each 
+ * series value and measure dimension.
+ * <p>
+ * This option is only meaningful when {@link #isMultiValued}
+ * is 
+ * <tt>true</tt>.
+ * <p>
+ * When 
+ * <tt>true</tt>, 
+ * more than one measure can be represented in the cross-tab format,
+ * for each series and category pair.
+ * <p>
+ * When 
+ * <tt>false</tt>, 
+ * the cross-tab format can represent only one measure.
+ * 
+ * @type boolean
+ * @default false
+ * @category Data Translation
+ */
+pvc.options.charts.Chart.prototype.dataMeasuresInColumns = undefined;
+/**
  * Indicates if the data source has 
- * multiple value dimensions.
+ * multiple value and dimensions.
+ * <p>
+ * In the cross-tab format, 
+ * also indicates that multiple series columns can
+ * be represented.
  * 
  * @type boolean
  * @default false
@@ -377,7 +414,7 @@ pvc.options.charts.Chart.prototype.tipsySettings = undefined;
 pvc.options.charts.Chart.prototype.tooltip = undefined;
 /**
  * The margins of the 
- * <i>root</i> content panel.
+ * <i>root</i> content panel, in pixel units or as a percentage.
  * <p>
  * In a 
  * <i>small multiples</i> chart, 
@@ -397,7 +434,7 @@ pvc.options.charts.Chart.prototype.tooltip = undefined;
 pvc.options.charts.Chart.prototype.contentMargins = undefined;
 /**
  * The paddings of the 
- * <i>root</i> content panel.
+ * <i>root</i> content panel, in pixel units or as a percentage.
  * <p>
  * In a 
  * <i>small multiples</i> chart, 
@@ -532,6 +569,10 @@ pvc.options.charts.Chart.prototype.doubleClickAction = function(){};
  * @param {list(pvc.data.Datum)} selectedDatums
  * An array with the resulting selected datums.
  * 
+ * @param {list(pvc.data.Datum)} selectedChangedDatums
+ * An array with the datums whose selected state has changed since
+ * the last time that the action was handled.
+ * 
  * @category Actions
  */
 pvc.options.charts.Chart.prototype.selectionChangedAction = function(){};
@@ -621,10 +662,11 @@ pvc.options.charts.Chart.prototype.percentValueFormat = function(){};
  */
 pvc.options.charts.Chart.prototype.timeSeries = undefined;
 /**
- * The format string used by default to 
+ * The format string used to 
  * <i>parse</i>
  * dimensions of the 
- * <tt>Date</tt> value type.
+ * <tt>Date</tt> value type, 
+ * by default.
  * <p>
  * The syntax of the format string is that of 
  * 
@@ -632,7 +674,6 @@ pvc.options.charts.Chart.prototype.timeSeries = undefined;
  * <p>
  * This property changes the default of the 
  * {@link pvc.options.DimensionType#rawFormat}
- * <p>
  * property,
  * for dimensions with a 
  * <tt>Date</tt> value type.  
@@ -726,10 +767,9 @@ pvc.options.charts.Chart.prototype.selectable = undefined;
  * When a value of type 
  * <tt>boolean</tt> is specified,
  * it indicates the visibility of the legend.
- * The default is 
- * <tt>false</tt>.
  * 
  * @type boolean|pvc.options.panels.LegendPanel
+ * @default false
  * @category Panels
  */
 pvc.options.charts.Chart.prototype.legend = undefined;
@@ -869,7 +909,7 @@ pvc.options.Tooltip.prototype.fade = undefined;
  */
 pvc.options.Tooltip.prototype.followMouse = undefined;
 /**
- * A callback function that is called,
+ * A callback function that is called
  * to build the tooltip of a visual element.
  * <p>
  * If {@link #html} is 
@@ -917,7 +957,7 @@ pvc.options.Tooltip.prototype.gravity = undefined;
 pvc.options.Tooltip.prototype.html = undefined;
 /**
  * The distance of the closest tooltip edge or corner 
- * to the visual element's tooltip anchor point.
+ * to the visual element's tooltip anchor point, in pixel units.
  * <p>
  * The default value depends on the chart type. 
  * 
@@ -1799,7 +1839,7 @@ pvc.options.charts.PieChart.prototype.smallContentMargins = undefined;
 pvc.options.charts.PieChart.prototype.smallContentPaddings = undefined;
 /**
  * Fixates the height of each 
- * <i>small</i> chart.
+ * <i>small</i> chart, in pixel units or as a percentage.
  * <p>
  * A value of type 
  * <tt>number</tt>, 
@@ -1873,7 +1913,7 @@ pvc.options.charts.PieChart.prototype.smallMargins = undefined;
 pvc.options.charts.PieChart.prototype.smallPaddings = undefined;
 /**
  * Fixates the width of each 
- * <i>small</i> chart.
+ * <i>small</i> chart, in pixel units or as a percentage.
  * <p>
  * A value of type 
  * <tt>number</tt>, 
@@ -2676,8 +2716,45 @@ pvc.options.charts.BulletChart.prototype.valueFormat = function(){};
  */
 pvc.options.charts.BulletChart.prototype.crosstabMode = undefined;
 /**
+ * The number of category-like columns that are
+ * present in a data source.
+ * 
+ * @type number
+ * @default 1
+ * @category Data Translation
+ */
+pvc.options.charts.BulletChart.prototype.dataCategoriesCount = undefined;
+/**
+ * In the cross-tab format, 
+ * indicates if, 
+ * a column exists for each 
+ * series value and measure dimension.
+ * <p>
+ * This option is only meaningful when {@link #isMultiValued}
+ * is 
+ * <tt>true</tt>.
+ * <p>
+ * When 
+ * <tt>true</tt>, 
+ * more than one measure can be represented in the cross-tab format,
+ * for each series and category pair.
+ * <p>
+ * When 
+ * <tt>false</tt>, 
+ * the cross-tab format can represent only one measure.
+ * 
+ * @type boolean
+ * @default false
+ * @category Data Translation
+ */
+pvc.options.charts.BulletChart.prototype.dataMeasuresInColumns = undefined;
+/**
  * Indicates if the data source has 
- * multiple value dimensions.
+ * multiple value and dimensions.
+ * <p>
+ * In the cross-tab format, 
+ * also indicates that multiple series columns can
+ * be represented.
  * 
  * @type boolean
  * @default false
@@ -2822,7 +2899,7 @@ pvc.options.charts.BulletChart.prototype.tipsySettings = undefined;
 pvc.options.charts.BulletChart.prototype.tooltip = undefined;
 /**
  * The margins of the 
- * <i>root</i> content panel.
+ * <i>root</i> content panel, in pixel units or as a percentage.
  * <p>
  * In a 
  * <i>small multiples</i> chart, 
@@ -2842,7 +2919,7 @@ pvc.options.charts.BulletChart.prototype.tooltip = undefined;
 pvc.options.charts.BulletChart.prototype.contentMargins = undefined;
 /**
  * The paddings of the 
- * <i>root</i> content panel.
+ * <i>root</i> content panel, in pixel units or as a percentage.
  * <p>
  * In a 
  * <i>small multiples</i> chart, 
@@ -3089,7 +3166,7 @@ pvc.options.charts.BulletChart.prototype.markerRole = undefined;
 pvc.options.charts.BulletChart.prototype.rangeRole = undefined;
 /**
  * The 
- * <tt>subTitle</tt> visual role represents a 
+ * <tt>subTitle</tt> visual role represents 
  * the sub-title of each bullet.
  * <p>
  * The 
@@ -3106,7 +3183,7 @@ pvc.options.charts.BulletChart.prototype.rangeRole = undefined;
 pvc.options.charts.BulletChart.prototype.subTitleRole = undefined;
 /**
  * The 
- * <tt>title</tt> visual role represents a 
+ * <tt>title</tt> visual role represents 
  * the title of each bullet.
  * <p>
  * The 
@@ -3272,6 +3349,7 @@ pvc.options.plots.BulletPlot.prototype.ranges = undefined;
  * <tt>subTitle</tt> role is unbound.
  * 
  * @type string
+ * @default ''
  * @category Data
  */
 pvc.options.plots.BulletPlot.prototype.subtitle = undefined;
@@ -3283,7 +3361,7 @@ pvc.options.plots.BulletPlot.prototype.subtitle = undefined;
  * <tt>title</tt> role is unbound.
  * 
  * @type string
- * @default 'Bullet'
+ * @default 'Title'
  * @category Data
  */
 pvc.options.plots.BulletPlot.prototype.title = undefined;
@@ -3795,7 +3873,7 @@ pvc.options.charts.CategoricalNumericChart.prototype.smallContentMargins = undef
 pvc.options.charts.CategoricalNumericChart.prototype.smallContentPaddings = undefined;
 /**
  * Fixates the height of each 
- * <i>small</i> chart.
+ * <i>small</i> chart, in pixel units or as a percentage.
  * <p>
  * A value of type 
  * <tt>number</tt>, 
@@ -3869,7 +3947,7 @@ pvc.options.charts.CategoricalNumericChart.prototype.smallMargins = undefined;
 pvc.options.charts.CategoricalNumericChart.prototype.smallPaddings = undefined;
 /**
  * Fixates the width of each 
- * <i>small</i> chart.
+ * <i>small</i> chart, in pixel units or as a percentage.
  * <p>
  * A value of type 
  * <tt>number</tt>, 
@@ -4107,7 +4185,7 @@ pvc.options.plots.CategoricalNumericPlot.prototype.nullInterpolationMode = undef
 /**
  * Indicates that visual elements having 
  * identical category, but different series,
- * should be displayed on top of each other, 
+ * are displayed on top of each other, 
  * along the plot's orthogonal direction, 
  * instead of side-by-side, 
  * along the base direction.
@@ -4295,7 +4373,8 @@ pvc.options.charts.BoxplotChart.prototype.minimumRole = undefined;
  * The 
  * <tt>series</tt> visual role represents a 
  * 
- * <i>series</i> of connected data points. 
+ * <i>series</i> of connected data points.
+ * <p>
  * In this chart type, although supported, 
  * data that is bound to it 
  * is not represented in its visual elements.
@@ -4687,7 +4766,7 @@ pvc.options.charts.HeatGridChart.prototype.categoryRole = undefined;
  */
 pvc.options.charts.HeatGridChart.prototype.colorRole = undefined;
 /**
- * he series visual role represents a series of connected data points. 
+ * The series visual role represents a series of connected data points. 
  * <p>
  * The heat grid chart places visual elements
  * in a discrete matrix.
@@ -5509,7 +5588,10 @@ pvc.options.plots.WaterfallPlot.prototype.stacked = true;
  */
 pvc.options.plots.WaterfallPlot.prototype.allCategoryLabel = undefined;
 /**
- * Indicates if areas are shown surrounding the bars of each 
+ * Indicates if shaded areas are shown in the plot.
+ * <p>
+ * Specifically, 
+ * indicates if areas are shown surrounding the bars of each 
  * category group.
  * 
  * @type boolean
@@ -5857,7 +5939,10 @@ pvc.options.plots.PointPlot.prototype.showLines = undefined;
  */
 pvc.options.plots.PointPlot.prototype.trend = undefined;
 /**
- * Indicates if the visual elements are 
+ * Indicates if shaded areas are shown in the plot.
+ * <p>
+ * Specifically, 
+ * indicates if the visual elements are 
  * connected with shaded areas extending
  * from the visual elements to the zero line.
  * 
@@ -6262,6 +6347,8 @@ pvc.options.plots.AreaPlot.prototype.colorAxis = 1;
  */
 pvc.options.plots.AreaPlot.prototype.orthoAxis = 1;
 /**
+ * Indicates if shaded areas are shown in the plot.
+ * <p>
  * This plot type necessarily shows 
  * shaded areas connecting visual elements.
  * 
@@ -6321,6 +6408,8 @@ pvc.options.plots.StackedAreaPlot.prototype.colorAxis = 1;
  */
 pvc.options.plots.StackedAreaPlot.prototype.orthoAxis = 1;
 /**
+ * Indicates if shaded areas are shown in the plot.
+ * <p>
  * This plot type necessarily shows 
  * shaded areas connecting visual elements.
  * 
@@ -6499,7 +6588,7 @@ pvc.options.charts.MetricPointChart.prototype.smallContentMargins = undefined;
 pvc.options.charts.MetricPointChart.prototype.smallContentPaddings = undefined;
 /**
  * Fixates the height of each 
- * <i>small</i> chart.
+ * <i>small</i> chart, in pixel units or as a percentage.
  * <p>
  * A value of type 
  * <tt>number</tt>, 
@@ -6573,7 +6662,7 @@ pvc.options.charts.MetricPointChart.prototype.smallMargins = undefined;
 pvc.options.charts.MetricPointChart.prototype.smallPaddings = undefined;
 /**
  * Fixates the width of each 
- * <i>small</i> chart.
+ * <i>small</i> chart, in pixel units or as a percentage.
  * <p>
  * A value of type 
  * <tt>number</tt>, 
@@ -8299,69 +8388,6 @@ pvc.options.axes.HeatGridColorAxis = function(){};
         
         
 /**
- * What happens when the user clicks a legend item
- * (applies to discrete domain axes).
- * <p>
- * Note that when 
- * {@link pvc.options.charts.Chart#hoverable}
- * is 
- * <tt>true</tt>, 
- * the legend item marker will be hoverable.
- * <p>
- * When {@link pvc.options.charts.Chart#selectable}
- * is 
- * <tt>true</tt>, 
- * the legend item marker will be selectable,
- * whatever the value of this property is.
- * In that case, only the label part of the legend marker,
- * will respect this property.
- * 
- * @type pvc.options.varia.LegendClickMode
- * @default 'toggleVisible'
- * @category Discrete > Style
- */
-pvc.options.axes.HeatGridColorAxis.prototype.legendClickMode = undefined;
-/**
- * Forces a rule to be shown or not in the marker zone
- * (applies to discrete domain axes).
- * <p>
- * The default value depends on the chart type.
- * 
- * @type boolean
- * @category Discrete > Style
- */
-pvc.options.axes.HeatGridColorAxis.prototype.legendDrawLine = undefined;
-/**
- * Forces a shape to be shown or not in the marker zone
- * (applies to discrete domain axes).
- * <p>
- * The default value depends on the chart type.
- * 
- * @type boolean
- * @category Discrete > Style
- */
-pvc.options.axes.HeatGridColorAxis.prototype.legendDrawMarker = undefined;
-/**
- * Forces a given shape to be used in the marker zone
- * (applies to discrete domain axes).
- * <p>
- * The default value depends on the chart type.
- * 
- * @type pvc.options.varia.DotShapeType
- * @category Discrete > Style
- */
-pvc.options.axes.HeatGridColorAxis.prototype.legendShape = undefined;
-/**
- * Indicates if the legend items of this color axis
- * should be visible
- * (applies to discrete domain axes).
- * 
- * @type boolean
- * @default true
- * @category Discrete > Style
- */
-pvc.options.axes.HeatGridColorAxis.prototype.legendVisible = undefined;
-/**
  * The domain values
  * (applies to numeric domain axes).
  * 
@@ -8425,6 +8451,7 @@ pvc.options.axes.HeatGridColorAxis.prototype.useAbs = undefined;
  * by the {@link pvc.options.charts.HeatGridChart}.
  * 
  * @type boolean
+ * @default false
  * @category Numeric > Scale
  */
 pvc.options.axes.HeatGridColorAxis.prototype.normByCategory = undefined;
@@ -8887,6 +8914,7 @@ pvc.options.axes.AnyNonHierarchicalCartesianAxis.prototype.doubleClickAction = f
  * can only be specified if the axis has horizontal orientation.
  * 
  * @type pvc.options.varia.AxisDomainScope
+ * @default 'global'
  * @category Continuous > Scale
  */
 pvc.options.axes.AnyNonHierarchicalCartesianAxis.prototype.domainScope = undefined;
@@ -9468,6 +9496,7 @@ pvc.options.axes.AnyContinuousCartesianAxis = function(){};
  * can only be specified if the axis has horizontal orientation.
  * 
  * @type pvc.options.varia.AxisDomainScope
+ * @default 'global'
  * @category Continuous > Scale
  */
 pvc.options.axes.AnyContinuousCartesianAxis.prototype.domainScope = undefined;
@@ -9906,6 +9935,7 @@ pvc.options.axes.NumericCartesianAxis = function(){};
  * can only be specified if the axis has horizontal orientation.
  * 
  * @type pvc.options.varia.AxisDomainScope
+ * @default 'global'
  * @category Continuous > Scale
  */
 pvc.options.axes.NumericCartesianAxis.prototype.domainScope = undefined;
@@ -10336,7 +10366,7 @@ pvc.options.panels.Panel = function(){};
         
         
 /**
- * The fixed size of the panel.
+ * The fixed size of the panel, in pixel units or as a percentage.
  * <p>
  * See {@link pvc.options.varia.Size} for information about 
  * the different supported data types.
@@ -10346,7 +10376,7 @@ pvc.options.panels.Panel = function(){};
  */
 pvc.options.panels.Panel.prototype.size = undefined;
 /**
- * The maximum size of the panel.
+ * The maximum size of the panel, in pixel units or as a percentage.
  * <p>
  * See {@link pvc.options.varia.Size} for information about 
  * the different supported data types.
@@ -10385,32 +10415,6 @@ pvc.options.panels.DockedPanel = function(){};
  * @category Layout
  */
 pvc.options.panels.DockedPanel.prototype.align = undefined;
-/**
- * The alignment side or position 
- * of the parent panel (the target)
- * that will align with the alignment side of this panel,
- * the source.
- * <p>
- * The default value is the value of 
- * {@link pvc.options.panels.DockedPanel#align}.
- * <p>
- * See {@link pvc.options.varia.PanelAlignmentTarget}
- * for information on supported data types.
- * 
- * @type number|string|pvc.options.varia.PanelAlignmentTarget
- * @category Layout
- */
-pvc.options.panels.DockedPanel.prototype.alignTo = undefined;
-/**
- * Indicates if the layout should try that the
- * panel be kept inside its parent,
- * by changing its position.
- * 
- * @type boolean
- * @default false
- * @category Layout
- */
-pvc.options.panels.DockedPanel.prototype.keepInBounds = undefined;
 /**
  * The margins of the panel.
  * <p>
@@ -10470,7 +10474,7 @@ pvc.options.panels.LegendPanel = function(){};
  */
 pvc.options.panels.LegendPanel.prototype.itemPadding = undefined;
 /**
- * The width and height of the marker panel.
+ * The width and height of the marker panel, in pixel units.
  * <p>
  * The marker itself will be slightly smaller.
  * 
@@ -10888,6 +10892,14 @@ pvc.options.plots.TrendPointPlot.prototype.trend = null;
  */
 pvc.options.plots.TrendPointPlot.prototype.colorAxis = undefined;
 /**
+ * The null interpolation mode is not supported by this plot type.
+ * 
+ * @type pvc.options.varia.NullInterpolationMode
+ * @category Data
+ * @constant
+ */
+pvc.options.plots.TrendPointPlot.prototype.nullInterpolationMode = null;
+/**
  * Indicates if the visual elements are connected
  * with lines.
  * 
@@ -10932,6 +10944,14 @@ pvc.options.plots.TrendMetricPointPlot.prototype.colorAxis = undefined;
  * @constant
  */
 pvc.options.plots.TrendMetricPointPlot.prototype.orthoAxis = 1;
+/**
+ * The null interpolation mode is not supported by this plot type.
+ * 
+ * @type pvc.options.varia.NullInterpolationMode
+ * @category Data
+ * @constant
+ */
+pvc.options.plots.TrendMetricPointPlot.prototype.nullInterpolationMode = null;
 /**
  * Indicates if the visual elements are connected
  * with lines.

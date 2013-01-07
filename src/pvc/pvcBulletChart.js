@@ -143,7 +143,7 @@ def
 //      bulletMarkers:  null,     // Array of markers to appear
 //      bulletMeasures: null,     // Array of measures
 //      bulletRanges:   null,     // Ranges
-        bulletTitle:    "Bullet", // Title
+        bulletTitle:    "Title",  // Title
         bulletSubtitle: "",       // Subtitle
         bulletTitlePosition: "left", // Position of bullet title relative to bullet
 

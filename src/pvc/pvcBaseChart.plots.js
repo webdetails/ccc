@@ -73,6 +73,17 @@ pvc.BaseChart
                 });
             }
         }
+    },
+    
+    // Called by the pvc.PlotPnel class
+    _addPlotPanel: function(plotPanel){
+        def.lazy(this, 'plotPanels')[plotPanel.plot.id] = plotPanel;
+        def.array.lazy(this, 'plotPanelList').push(plotPanel);
+    },
+    
+    /* @abstract */
+    _createPlotPanels: function(parentPanel, baseOptions){
+        throw def.error.notImplemented();
     }
 });
 

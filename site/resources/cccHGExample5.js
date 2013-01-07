@@ -24,8 +24,8 @@ new pvc.HeatGridChart({
     yAxisSize:   150,
     xAxisSize:   100
 })
-.setData(testHeatGridComp,{
-    dataOptions: { categoriesCount :  2 },
+.setData(testHeatGridComp, {
+    dataCategoriesCount: 2,
     isMultiValued: true
 })
 .render();

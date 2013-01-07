@@ -54,7 +54,7 @@
         
         <c:property name="markerSize" type="number" default="15" category="Layout">
             <c:documentation>
-                The width and height of the marker panel.
+                The width and height of the marker panel, in pixel units.
                 
                 The marker itself will be slightly smaller.
             </c:documentation>

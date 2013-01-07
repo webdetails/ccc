@@ -35,6 +35,26 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     },
     
     /**
+     * Obtains a map containing the selected datums, indexed by id.
+     * 
+     * @type def.Map(pvc.data.Datum)
+     */
+    selectedDatumMap: function(){
+        if(!this.isOwner()){
+            
+            var datums = this
+                .datums(null, {selected: true})
+                .object({
+                    name: function(datum){ return datum.id; }
+                });
+            
+            return new def.Set(datums);
+        }
+        
+        return this._selectedDatums.clone();
+    },
+    
+    /**
      * Obtains the number of visible datums.
      * 
      * @type Number

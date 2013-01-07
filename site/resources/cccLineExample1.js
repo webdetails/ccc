@@ -1,21 +1,15 @@
 new pvc.LineChart({
     canvas: 'cccLineExample1',
     width:  400,
-    height: 200,
+    height: 250,
     title:  "Time Series Line Chart",
-    
     timeSeries: true,
-    
-    legend:  true,
-    legendPosition: 'right',
-    legendAlign:    'top',
-    
+    legend:     true,
     animate:    false,
     selectable: true,
     hoverable:  true,
     axisGrid:   true,
     axisOffset: 0,
-    
     extensionPoints: {
         baseAxisLabel_textAngle: -0.8,
         baseAxisLabel_textAlign: 'right',

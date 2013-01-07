@@ -14,7 +14,7 @@
         
         <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                he series visual role represents a series of connected data points. 
+                The series visual role represents a series of connected data points. 
                 
                 The heat grid chart places visual elements
                 in a discrete matrix.

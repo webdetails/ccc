@@ -210,10 +210,8 @@
                    {names: 'value',      indexes: 5}
                 ],
                 isMultiValued: true,
-                dataOptions: {
-                    categoriesCount :  2,
-                    measuresInColumns: true
-                }
+                dataCategoriesCount: 2,
+                dataMeasuresInColumns: true
              }
         }));
         
@@ -256,13 +254,13 @@
                 
                 /* Data definition */
                 dimensions: {
-                    year:      {label: "Year", formatter: steelWheels01.yearAndQuarterFormatter },
-                    quarter:   {label: "Quarter", formatter: steelWheels01.yearAndQuarterFormatter },
-                    territory: {label: "Territory", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
-                    country:   {label: "Country", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    year:      {formatter: steelWheels01.yearAndQuarterFormatter },
+                    quarter:   {formatter: steelWheels01.yearAndQuarterFormatter },
+                    territory: {formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    country:   {formatter: steelWheels01.territoryAndCountryAndLineFormatter },
                     line:      {label: "Product Line", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
 
-                    sales:     {label: "Sales", valueType: Number}
+                    sales:     {valueType: Number}
                 },
                     
                 /* Data mapping */
@@ -273,10 +271,8 @@
                 /* Source Data Format */
                 crosstabMode: true,
                 isMultiValued: true,
-                dataOptions: {
-                    categoriesCount :  3,
-                    measuresInColumns: true
-                }
+                dataCategoriesCount: 3,
+                dataMeasuresInColumns: true
              }
         }));
         
@@ -311,19 +307,19 @@
                 /* Visual Role mapping */
                 visualRoles: {
                     multiChart: "territory, country",
-                    //series:           "year desc, quarter desc",
-                    category:         "line",
-                    value:            "sales"
+                    //series:   "year desc, quarter desc",
+                    category:   "line",
+                    value:      "sales"
                 },
                 
                 /* Data definition */
                 dimensions: {
-                    year:      {label: "Year", formatter: steelWheels01.yearAndQuarterFormatter },
-                    quarter:   {label: "Quarter", formatter: steelWheels01.yearAndQuarterFormatter },
-                    territory: {label: "Territory", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
-                    country:   {label: "Country", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    year:      {formatter: steelWheels01.yearAndQuarterFormatter },
+                    quarter:   {formatter: steelWheels01.yearAndQuarterFormatter },
+                    territory: {formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    country:   {formatter: steelWheels01.territoryAndCountryAndLineFormatter },
                     line:      {label: "Product Line", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
-                    sales:     {label: "Sales", valueType: Number}
+                    sales:     {valueType: Number}
                 },
                     
                 /* Data mapping */
@@ -334,10 +330,8 @@
                 /* Source Data Format */
                 crosstabMode: true,
                 isMultiValued: true,
-                dataOptions: {
-                    categoriesCount :  3,
-                    measuresInColumns: true
-                }
+                dataCategoriesCount: 3,
+                dataMeasuresInColumns: true
              }
         }));
         
@@ -405,10 +399,8 @@
                 /* Source Data Format */
                 crosstabMode: true,
                 isMultiValued: true,
-                dataOptions: {
-                    categoriesCount :  2,
-                    measuresInColumns: true
-                }
+                dataCategoriesCount: 2,
+                dataMeasuresInColumns: true
              }
         }));
 
@@ -473,10 +465,8 @@
                 /* Source Data Format */
                 crosstabMode: true,
                 isMultiValued: true,
-                dataOptions: {
-                    categoriesCount:   3,
-                    measuresInColumns: true
-                }
+                dataCategoriesCount: 3,
+                dataMeasuresInColumns: true
              }
         }));
 

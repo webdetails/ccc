@@ -75,7 +75,13 @@ def.type('pvc.data.TranslationOper')
         /*jshint expr:true */
         dimReaderSpec || def.fail.argumentRequired('readerSpec');
 
-        var dimNames =  dimReaderSpec.names;
+        var dimNames;
+        if(typeof dimReaderSpec === 'string'){
+            dimNames = dimReaderSpec;
+        } else {
+            dimNames =  dimReaderSpec.names;
+        }
+        
         if(typeof dimNames === 'string'){
             dimNames = dimNames.split(/\s*\,\s*/);
         } else {
@@ -92,13 +98,15 @@ def.type('pvc.data.TranslationOper')
         var reader = dimReaderSpec.reader;
         if(!reader) {
             if(hasDims){
-                this._userCreateReaders(dimNames, indexes);
+                return  this._userCreateReaders(dimNames, indexes); // -> indexes, possibly expanded
             } // else a reader that only serves to exclude indexes
         } else {
             hasDims || def.fail.argumentRequired('reader.names', "Required argument when a reader function is specified.");
             
             this._userRead(reader, dimNames);
         }
+        
+        return indexes;
     },
 
     /**
@@ -140,7 +148,8 @@ def.type('pvc.data.TranslationOper')
 
         var multiChartIndexes = this.options.multiChartIndexes;
         if(multiChartIndexes != null) {
-            this.defReader({names: 'multiChart', indexes: multiChartIndexes });
+            this._multiChartIndexes = 
+                this.defReader({names: 'multiChart', indexes: multiChartIndexes });
         }
     },
 
@@ -156,6 +165,8 @@ def.type('pvc.data.TranslationOper')
         this._userUsedIndexes[index] = true;
         this._userUsedIndexesCount++;
         this._userItem[index] = true;
+        
+        return index;
     },
 
     _userCreateReaders: function(dimNames, indexes){
@@ -201,15 +212,17 @@ def.type('pvc.data.TranslationOper')
         if(L < N) {
             // TODO: make a single reader that reads all atoms??
             // Last is a *group* START name
-            var splitGroupName = pvc.data.DimensionType.splitDimensionGroupName(dimNames[N - 1]),
+            var splitGroupName = pvc.splitIndexedId(dimNames[N - 1]),
                 groupName = splitGroupName[0],
                 level     = def.nullyTo(splitGroupName[1], 0);
 
             for(var i = L ; i < I ; i++, level++) {
-                dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
+                dimName = pvc.buildIndexedId(groupName, level);
                 this._userRead(this._propGet(dimName, indexes[i]), dimName);
             }
         }
+        
+        return indexes;
     },
 
     _userRead: function(reader, dimNames){
@@ -452,7 +465,7 @@ def.type('pvc.data.TranslationOper')
                 
                 // Already bound dimensions count
                 while(count--){
-                    var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level++);
+                    var dimName = pvc.buildIndexedId(dimGroupName, level++);
                     if(!this.complexTypeProj.isReadOrCalc(dimName)){
                         dims.push(dimName);
                     }

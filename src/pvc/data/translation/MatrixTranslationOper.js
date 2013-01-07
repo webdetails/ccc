@@ -158,10 +158,6 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         pvc.log(out.join('\n'));
     },
     
-    _getCategoriesCount: function(){
-        return Math.max(0, def.get(this.options, 'categoriesCount', 1));
-    },
-    
     /**
      * Creates the set of second axis series keys
      * corresponding to the specified

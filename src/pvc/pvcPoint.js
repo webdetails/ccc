@@ -106,13 +106,12 @@ def
     //_createPointPlot: function(){},
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var options = this.options;
         var axes    = this.axes;
         var plots   = this.plots;
         
         var pointPlot = plots.point;
-        var pointPanel = 
             this.scatterChartPanel = 
             new pvc.PointPanel(
                 this, 
@@ -145,8 +144,6 @@ def
                     trendPlot,
                     Object.create(baseOptions));
         }
-        
-        return pointPanel;
     },
     
     defaults: {

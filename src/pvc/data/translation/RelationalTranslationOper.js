@@ -71,12 +71,6 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
     C: 0, // number of categories
     S: 0, // number of series
     
-    /** @static */
-    _isDiscreteColDef: function(colDef){
-        var colType = colDef && colDef.colType;
-        return !colType || (colType.toLowerCase() === 'string');
-    },
-    
     _processMetadata: function(){
         
         this.base();
@@ -90,7 +84,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         if(C != null && (!isFinite(C) || C < 0)){
             C = 0;
         }
-                
+
         var S;
         
         // Assuming duplicate valuesColIndexes is not valid
@@ -144,7 +138,9 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 // colIndex has already been fixed on _processMetadata
                 valuesColIndexes = def
                     .query(metadata)
-                    .where(def.negate(this._isDiscreteColDef), this)
+                    .where(function(colDef, index){
+                        return this._columnTypes[index] !== 0; // 0 = discrete
+                    }, this)
                     .select(function(colDef){ return colDef.colIndex; })
                     .take(Mmax)
                     .array()
@@ -276,7 +272,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         function add(dimGroupName, colGroupName, level, count) {
             var groupEndIndex = me._itemCrossGroupIndex[colGroupName] + count; // exclusive
             while(count > 0) {
-                var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level);
+                var dimName = pvc.buildIndexedId(dimGroupName, level);
                 if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
                     
                     // use first available slot for auto dims readers as long as within the group slots

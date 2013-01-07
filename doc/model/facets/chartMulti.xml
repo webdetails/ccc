@@ -84,7 +84,7 @@
         
         <c:property name="smallWidth" type="number string" category="Multi-Chart > Layout">
             <c:documentation>
-                Fixates the width of each <i>small</i> chart.
+                Fixates the width of each <i>small</i> chart, in pixel units or as a percentage.
                 
                 A value of type <tt>number</tt>, 
                 or of type <tt>string</tt>, but with numeric content, 
@@ -120,7 +120,7 @@
         
         <c:property name="smallHeight" type="number string" category="Multi-Chart > Layout">
             <c:documentation>
-                Fixates the height of each <i>small</i> chart.
+                Fixates the height of each <i>small</i> chart, in pixel units or as a percentage.
                 
                 A value of type <tt>number</tt>, 
                 or of type <tt>string</tt>, but with numeric content, 

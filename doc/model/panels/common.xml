@@ -14,7 +14,7 @@
         
         <c:property name="size" type="number string pvc.options.varia.Size" category="Layout">
             <c:documentation>
-                The fixed size of the panel.
+                The fixed size of the panel, in pixel units or as a percentage.
                 
                 See <c:link to="pvc.options.varia.Size" /> for information about 
                 the different supported data types.
@@ -23,7 +23,7 @@
         
         <c:property name="sizeMax" type="number string pvc.options.varia.Size" category="Layout">
             <c:documentation>
-                The maximum size of the panel.
+                The maximum size of the panel, in pixel units or as a percentage.
                 
                 See <c:link to="pvc.options.varia.Size" /> for information about 
                 the different supported data types.

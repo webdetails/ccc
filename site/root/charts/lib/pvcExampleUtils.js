@@ -48,7 +48,7 @@ var tryMe = (function(){
                         textArea._codeMirror = 
                         CodeMirror.fromTextArea(textArea, {
                             mode:          'javascript',
-                            //lineWrapping:  true,
+                            lineWrapping:  true,
                             lineNumbers:   false,
                             indentUnit:    4,
                             autofocus:     false,

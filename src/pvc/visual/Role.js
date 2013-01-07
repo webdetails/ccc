@@ -64,12 +64,11 @@
  */
 def.type('pvc.visual.Role')
 .init(function(name, keyArgs){
-    this.name = name;
-    this.label = def.get(keyArgs, 'label') || name;
+    this.name  = name;
+    this.label = def.get(keyArgs, 'label') || pvc.buildTitleFromName(name);
     this.index = def.get(keyArgs, 'index') || 0;
     
     this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
-    this.dimensionDefaults.label = this.label;
     
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;

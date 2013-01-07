@@ -15,7 +15,8 @@
         <c:property name="seriesRole" type="string pvc.options.VisualRole" fixed="null" category="Visual roles">
             <c:documentation>
                 The <tt>series</tt> visual role represents a 
-                <i>series</i> of connected data points. 
+                <i>series</i> of connected data points.
+                
                 In this chart type, although supported, 
                 data that is bound to it 
                 is not represented in its visual elements.

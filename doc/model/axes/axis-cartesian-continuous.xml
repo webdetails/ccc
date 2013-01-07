@@ -120,7 +120,7 @@
         </c:property>
         
         <!-- DomainScope -->
-        <c:property name="domainScope" type="pvc.options.varia.AxisDomainScope" category="Continuous > Scale">
+        <c:property name="domainScope" type="pvc.options.varia.AxisDomainScope" category="Continuous > Scale" default="'global'">
             <c:documentation>
                 Controls the type of scale domain coordination
                 that should be performed 

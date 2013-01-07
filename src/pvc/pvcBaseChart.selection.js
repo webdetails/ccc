@@ -1,7 +1,7 @@
 pvc.BaseChart
 .add({
     _updateSelectionSuspendCount: 0,
-    _selectionNeedsUpdate: false,
+    _lastSelectedDatums: null,
     
     /** 
      * Clears any selections and, if necessary,
@@ -18,6 +18,20 @@ pvc.BaseChart
         return this;
     },
     
+    _updatingSelections: function(method, context){
+        this._suspendSelectionUpdate();
+        
+        var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
+        //this._log("Previous Datum count=" + datums.length + 
+        //        " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
+        
+        try {
+            method.call(context || this);
+        } finally {
+            this._resumeSelectionUpdate();
+        }
+    },
+    
     _suspendSelectionUpdate: function(){
         if(this === this.root) {
             this._updateSelectionSuspendCount++;
@@ -30,18 +44,16 @@ pvc.BaseChart
         if(this === this.root) {
             if(this._updateSelectionSuspendCount > 0) {
                 if(!(--this._updateSelectionSuspendCount)) {
-                    if(this._selectionNeedsUpdate) {
                         this.updateSelections();
                     }
                 }
-            }
         } else {
-            this._resumeSelectionUpdate();
+            this.root._resumeSelectionUpdate();
         }
     },
     
     /** 
-     * Re-renders the parts of the chart that show selected marks.
+     * Re-renders the parts of the chart that show marks.
      * 
      * @type undefined
      * @virtual 
@@ -53,8 +65,12 @@ pvc.BaseChart
             }
             
             if(this._updateSelectionSuspendCount) {
-                this._selectionNeedsUpdate = true;
                 return this;
+            }
+            
+            var selectedChangedDatumMap = this._calcSelectedChangedDatums();
+            if(!selectedChangedDatumMap){
+                return;
             }
             
             pvc.removeTipsyLegends();
@@ -65,21 +81,54 @@ pvc.BaseChart
                 // Fire action
                 var action = this.options.selectionChangedAction;
                 if(action){
-                    var selections = this.data.selectedDatums();
-                    action.call(this.basePanel._getContext(), selections);
+                    var selectedDatums = this.data.selectedDatums();
+                    var selectedChangedDatums = selectedChangedDatumMap.values();
+                    action.call(
+                        this.basePanel._getContext(), 
+                        selectedDatums, 
+                        selectedChangedDatums);
                 }
                 
-                /** Rendering afterwards allows the action to change the selection in between */
-                this.basePanel.renderInteractive();
+                // Rendering afterwards allows the action to change the selection in between
+                this.useTextMeasureCache(function(){
+                    this.basePanel.renderInteractive();
+                }, this);
             } finally {
-                this._inUpdateSelections   = false;
-                this._selectionNeedsUpdate = false;
+                this._inUpdateSelections = false;
             }
         } else {
             this.root.updateSelections();
         }
         
         return this;
+    },
+    
+    _calcSelectedChangedDatums: function(){
+        // Capture currently selected datums
+        // Calculate the ones that changed.
+        var selectedChangedDatums;
+        var nowSelectedDatums  = this.data.selectedDatumMap();
+        var lastSelectedDatums = this._lastSelectedDatums;
+        if(!lastSelectedDatums){
+            if(!nowSelectedDatums.count){
+                return;
+            }
+            
+            selectedChangedDatums = nowSelectedDatums.clone();
+        } else {
+            selectedChangedDatums = lastSelectedDatums.symmetricDifference(nowSelectedDatums);
+            if(!selectedChangedDatums.count){
+                return;
+            }
+        }
+        
+        this._lastSelectedDatums = nowSelectedDatums;
+        
+        var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
+//        this._log("Now Datum count=" + datums.length + 
+//                " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
+        
+        return selectedChangedDatums;
     },
     
     _onUserSelection: function(datums){

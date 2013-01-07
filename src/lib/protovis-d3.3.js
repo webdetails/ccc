@@ -1,4 +1,4 @@
-// 
+// 10b4021721cb305c4c826b3b5f542e6e368ec2eb
 /**
  * @class The built-in Array class.
  * @name Array
@@ -192,7 +192,7 @@ pv.child = function() { return this.childIndex; };
  *
  * <pre>.fillStyle(pv.Colors.category10().by(pv.parent))</pre>
  *
- * Tthis method is equivalent to <tt>function() this.parent.index</tt>, but more
+ * This method is equivalent to <tt>function() this.parent.index</tt>, but more
  * succinct.
  *
  * @see pv.Scale
@@ -315,13 +315,14 @@ pv.error = function(e) {
  * @param {function} the event handler callback.
  */
 pv.listen = function(target, type, listener) {
-  if (type == 'load' || type == 'onload')
-      return pv.listenForPageLoad (pv.listener(listener));
+  if (type === 'load' || type === 'onload'){
+      return pv.listenForPageLoad(pv.listener(listener));
+  }
 
   listener = pv.listener(listener);
   target.addEventListener
       ? target.addEventListener(type, listener, false)
-      : target.attachEvent("on" + type, listener);
+      : target.attachEvent('on' + type, listener);
   
    return listener;
 };
@@ -341,7 +342,7 @@ pv.unlisten = function(target, type, listener){
     
     target.removeEventListener
         ? target.removeEventListener(type, listener, false)
-        : target.detachEvent("on" + type, listener);
+        : target.detachEvent('on' + type, listener);
 };
 
 /**
@@ -358,7 +359,7 @@ pv.listener = function(f) {
       try {
         // Fix event (adapted from jQuery)
         if(e.pageX == null && e.clientX != null) {
-            var eventDoc = e.target.ownerDocument || document;
+            var eventDoc = (e.target && e.target.ownerDocument) || document;
             var doc  = eventDoc.documentElement;
             var body = eventDoc.body;
 
@@ -1222,7 +1223,147 @@ pv.Format.number = function() {
 
   return format;
 };
-/**
+(function(){
+    
+    var _cache;
+    
+    pv.Text = {};
+    
+    pv.Text.createCache = function(){
+        return new FontSizeCache();
+    };
+    
+    pv.Text.usingCache = function(cache, fun, ctx){
+        if(!(cache instanceof FontSizeCache)){
+            throw new Error("Not a valid cache.");
+        }
+        
+        var prevCache = _cache;
+        
+        _cache = cache;
+        try{
+            return fun.call(ctx);
+        } finally {
+            _cache = prevCache;
+        }
+    };
+    
+    pv.Text.measure = function(text, font){
+        if(text == null){
+            text = "";
+        } else {
+            text = "" + text;
+        }
+        
+        var bbox = _cache && _cache.get(font, text);
+        if(!bbox){
+            if(!text){
+                bbox = {width: 0, height: 0};
+            } else {
+                bbox = this.measureCore(text, font);
+            }
+            
+            if(_cache){
+                _cache.put(font, text, bbox);
+            }
+        }
+        
+        return bbox;
+    };
+    
+    pv.Text.fontHeight = function(font){
+        return pv.Text.measure('M', font).height;
+    };
+    
+    // Replace with another custom implementation if necessary
+    pv.Text.measureCore = (function(){
+        
+        // SVG implementation
+        var _svgText, _svgTextFont;
+        
+        function createTextSizePlaceholder(){
+            var div =  document.createElement('div');
+            div.id = 'pvSVGText_' + new Date().getTime();
+            
+            var style = div.style;
+            style.position   = 'absolute';
+            style.visibility = 'hidden';
+            style.width      = 'auto';
+            style.height     = 'auto';
+                
+            document.body.appendChild(div);
+            
+            return div;
+        }
+        
+        return function(text, font){
+            if(!_svgText){
+                var holder  = createTextSizePlaceholder();
+                var svgElem = pv.SvgScene.create('svg');
+                svgElem.setAttribute('font-size',   '10px');
+                svgElem.setAttribute('font-family', 'sans-serif');
+                
+                _svgText = pv.SvgScene.create('text');
+                svgElem.appendChild(_svgText);
+                
+                holder.appendChild(svgElem);
+            }
+            
+            if(!font){
+                font = null;
+            }
+            
+            if(_svgTextFont !== font){
+                _svgTextFont = font;
+                pv.SvgScene.setStyle(_svgText, {'font': font});
+            }
+            
+            var textNode = _svgText.firstChild;
+            if(textNode) {
+                textNode.nodeValue = ''+text;
+            } else {
+                if (pv.renderer() === "svgweb") { 
+                    // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
+                    _svgText.appendChild(document.createTextNode(''+text, true));
+                } else {
+                    _svgText.appendChild(document.createTextNode(''+text));
+                }
+            }
+    
+            var box = _svgText.getBBox();
+            return {width: box.width, height: box.height};
+        };
+    }());
+    
+    // --------
+    
+    var FontSizeCache = function(){
+        this._fontsCache = {};
+    };
+    
+    var hasOwnProp = Object.prototype.hasOwnProperty;
+    
+    FontSizeCache.prototype._getFont = function(font){
+        font = font || '';
+        return hasOwnProp.call(this._fontsCache, font) ?
+               this._fontsCache[font] :
+               (this._fontsCache[font] = {});
+    };
+        
+    FontSizeCache.prototype.get = function(font, text){
+        text = text || '';
+        
+        var fontCache = this._getFont(font);
+        return hasOwnProp.call(fontCache, text) ?
+               fontCache[text] :
+               null;
+    };
+        
+    FontSizeCache.prototype.put = function(font, text, size){
+        return this._getFont(font)[text||''] = size;
+    };
+        
+}());/**
  * @private A private variant of Array.prototype.map that supports the index
  * property.
  */
@@ -2988,136 +3129,6 @@ pv.Flatten.prototype.array = function() {
     });
 };
 /**
- * Returns a {@link pv.Vector} for the specified <i>x</i> and <i>y</i>
- * coordinate. This is a convenience factory method, equivalent to <tt>new
- * pv.Vector(x, y)</tt>.
- *
- * @see pv.Vector
- * @param {number} x the <i>x</i> coordinate.
- * @param {number} y the <i>y</i> coordinate.
- * @returns {pv.Vector} a vector for the specified coordinates.
- */
-pv.vector = function(x, y) {
-  return new pv.Vector(x, y);
-};
-
-/**
- * Constructs a {@link pv.Vector} for the specified <i>x</i> and <i>y</i>
- * coordinate. This constructor should not be invoked directly; use
- * {@link pv.vector} instead.
- *
- * @class Represents a two-dimensional vector; a 2-tuple <i>&#x27e8;x,
- * y&#x27e9;</i>. The intent of this class is to simplify vector math. Note that
- * in performance-sensitive cases it may be more efficient to represent 2D
- * vectors as simple objects with <tt>x</tt> and <tt>y</tt> attributes, rather
- * than using instances of this class.
- *
- * @param {number} x the <i>x</i> coordinate.
- * @param {number} y the <i>y</i> coordinate.
- */
-pv.Vector = function(x, y) {
-  this.x = x;
-  this.y = y;
-};
-
-/**
- * Returns a vector perpendicular to this vector: <i>&#x27e8;-y, x&#x27e9;</i>.
- *
- * @returns {pv.Vector} a perpendicular vector.
- */
-pv.Vector.prototype.perp = function() {
-  return new pv.Vector(-this.y, this.x);
-};
-
-/**
- * Returns a vector which is the result of rotating this vector by the specified angle.
- * 
- * @returns {pv.Vector} a rotated vector.
- */
-pv.Vector.prototype.rotate = function(angle) {
-    var c = Math.cos(angle);
-    var s = Math.sin(angle);
-    
-    return new pv.Vector(c*this.x -s*this.y, s*this.x + c*this.y);
-};
-
-/**
- * Returns a normalized copy of this vector: a vector with the same direction,
- * but unit length. If this vector has zero length this method returns a copy of
- * this vector.
- *
- * @returns {pv.Vector} a unit vector.
- */
-pv.Vector.prototype.norm = function() {
-  var l = this.length();
-  return this.times(l ? (1 / l) : 1);
-};
-
-/**
- * Returns the magnitude of this vector, defined as <i>sqrt(x * x + y * y)</i>.
- *
- * @returns {number} a length.
- */
-pv.Vector.prototype.length = function() {
-  return Math.sqrt(this.x * this.x + this.y * this.y);
-};
-
-/**
- * Returns a scaled copy of this vector: <i>&#x27e8;x * k, y * k&#x27e9;</i>.
- * To perform the equivalent divide operation, use <i>1 / k</i>.
- *
- * @param {number} k the scale factor.
- * @returns {pv.Vector} a scaled vector.
- */
-pv.Vector.prototype.times = function(k) {
-  return new pv.Vector(this.x * k, this.y * k);
-};
-
-/**
- * Returns this vector plus the vector <i>v</i>: <i>&#x27e8;x + v.x, y +
- * v.y&#x27e9;</i>. If only one argument is specified, it is interpreted as the
- * vector <i>v</i>.
- *
- * @param {number} x the <i>x</i> coordinate to add.
- * @param {number} y the <i>y</i> coordinate to add.
- * @returns {pv.Vector} a new vector.
- */
-pv.Vector.prototype.plus = function(x, y) {
-  return (arguments.length == 1)
-      ? new pv.Vector(this.x + x.x, this.y + x.y)
-      : new pv.Vector(this.x + x, this.y + y);
-};
-
-/**
- * Returns this vector minus the vector <i>v</i>: <i>&#x27e8;x - v.x, y -
- * v.y&#x27e9;</i>. If only one argument is specified, it is interpreted as the
- * vector <i>v</i>.
- *
- * @param {number} x the <i>x</i> coordinate to subtract.
- * @param {number} y the <i>y</i> coordinate to subtract.
- * @returns {pv.Vector} a new vector.
- */
-pv.Vector.prototype.minus = function(x, y) {
-  return (arguments.length == 1)
-      ? new pv.Vector(this.x - x.x, this.y - x.y)
-      : new pv.Vector(this.x - x, this.y - y);
-};
-
-/**
- * Returns the dot product of this vector and the vector <i>v</i>: <i>x * v.x +
- * y * v.y</i>. If only one argument is specified, it is interpreted as the
- * vector <i>v</i>.
- *
- * @param {number} x the <i>x</i> coordinate to dot.
- * @param {number} y the <i>y</i> coordinate to dot.
- * @returns {number} a dot product.
- */
-pv.Vector.prototype.dot = function(x, y) {
-  return (arguments.length == 1)
-      ? this.x * x.x + this.y * x.y
-      : this.x * x + this.y * y;
-};
-/**
  * Returns a new identity transform.
  *
  * @class Represents a transformation matrix. The transformation matrix is
@@ -4872,6 +4883,1164 @@ pv.histogram = function(data, f) {
  * @type number
  * @name pv.histogram.Bin.prototype.y
  */
+
+(function(){
+
+    pv.Shape = function(){};
+    
+    // -----------------
+    
+    var _k0 = {x: 1, y: 1};
+    
+    pv.Shape.dist2 = function(v, w, k) {
+        k = k || _k0;
+        
+        var dx = v.x - w.x;
+        var dy = v.y - w.y;
+        var dx2 = dx*dx;
+        var dy2 = dy*dy;
+        
+        return {
+            cost:  dx2 + dy2,
+            dist2: k.x * dx2 + k.y * dy2
+        };
+    };
+    
+    // Returns an angle between 0 and and 2*pi
+    var pi    = Math.PI;
+    var pi2   = 2 * pi;
+    var atan2 = Math.atan2;
+    
+    pv.Shape.normalizeAngle = function(a){
+        a = a % pi2;
+        if(a < 0){
+            a += pi2;
+        }
+        
+        return a;
+    };
+    
+    // 0 - 2*pi
+    pv.Shape.atan2Norm = function(dy, dx){
+        // between -pi and pi
+        var a = atan2(dy, dx);
+        if(a < 0){
+            a += pi2;
+        }
+        
+        return a;
+    };
+    
+    // -----------------
+    
+    pv.Shape.prototype.hasArea = function(){
+        return true;
+    };
+    
+    // hasArea
+    // apply
+    // clone
+    // intersectsRect
+    // intersectLine (some)
+    // containsPoint
+    // points
+    // edges
+    // center
+    // distance2
+    // bbox (some)
+    
+}());
+(function(){
+    
+    var dist2 = pv.Shape.dist2;
+    var cos   = Math.cos;
+    var sin   = Math.sin;
+    var sqrt  = Math.sqrt;
+    
+    
+    /**
+     * Returns a {@link pv.Vector} for the specified <i>x</i> and <i>y</i>
+     * coordinate. This is a convenience factory method, equivalent to <tt>new
+     * pv.Vector(x, y)</tt>.
+     *
+     * @see pv.Vector
+     * @param {number} x the <i>x</i> coordinate.
+     * @param {number} y the <i>y</i> coordinate.
+     * @returns {pv.Vector} a vector for the specified coordinates.
+     */
+    pv.vector = function(x, y) {
+      return new Point(x, y);
+    };
+    
+    /**
+     * Constructs a {@link pv.Vector} for the specified <i>x</i> and <i>y</i>
+     * coordinate. This constructor should not be invoked directly; use
+     * {@link pv.vector} instead.
+     *
+     * @class Represents a two-dimensional vector; a 2-tuple <i>&#x27e8;x,
+     * y&#x27e9;</i>. The intent of this class is to simplify vector math. Note that
+     * in performance-sensitive cases it may be more efficient to represent 2D
+     * vectors as simple objects with <tt>x</tt> and <tt>y</tt> attributes, rather
+     * than using instances of this class.
+     *
+     * @param {number} x the <i>x</i> coordinate.
+     * @param {number} y the <i>y</i> coordinate.
+     */
+    pv.Vector = function(x, y) {
+      this.x = x;
+      this.y = y;
+    };
+    
+    var Point = pv.Shape.Point = pv.Vector;
+    
+    pv.Vector.prototype = pv.extend(pv.Shape);
+    
+    /**
+     * Returns a vector perpendicular to this vector: <i>&#x27e8;-y, x&#x27e9;</i>.
+     *
+     * @returns {pv.Vector} a perpendicular vector.
+     */
+    pv.Vector.prototype.perp = function() {
+      return new Point(-this.y, this.x);
+    };
+    
+    /**
+     * Returns a vector which is the result of rotating this vector by the specified angle.
+     * 
+     * @returns {pv.Vector} a rotated vector.
+     */
+    pv.Vector.prototype.rotate = function(angle) {
+        var c = cos(angle);
+        var s = sin(angle);
+        
+        return new Point(c*this.x -s*this.y, s*this.x + c*this.y);
+    };
+    
+    /**
+     * Returns a normalized copy of this vector: a vector with the same direction,
+     * but unit length. If this vector has zero length this method returns a copy of
+     * this vector.
+     *
+     * @returns {pv.Vector} a unit vector.
+     */
+    pv.Vector.prototype.norm = function() {
+      var l = this.length();
+      return this.times(l ? (1 / l) : 1);
+    };
+    
+    /**
+     * Returns the magnitude of this vector, defined as <i>sqrt(x * x + y * y)</i>.
+     *
+     * @returns {number} a length.
+     */
+    pv.Vector.prototype.length = function() {
+      return sqrt(this.x * this.x + this.y * this.y);
+    };
+    
+    /**
+     * Returns a scaled copy of this vector: <i>&#x27e8;x * k, y * k&#x27e9;</i>.
+     * To perform the equivalent divide operation, use <i>1 / k</i>.
+     *
+     * @param {number} k the scale factor.
+     * @returns {pv.Vector} a scaled vector.
+     */
+    pv.Vector.prototype.times = function(k) {
+      return new Point(this.x * k, this.y * k);
+    };
+    
+    /**
+     * Returns this vector plus the vector <i>v</i>: <i>&#x27e8;x + v.x, y +
+     * v.y&#x27e9;</i>. If only one argument is specified, it is interpreted as the
+     * vector <i>v</i>.
+     *
+     * @param {number} x the <i>x</i> coordinate to add.
+     * @param {number} y the <i>y</i> coordinate to add.
+     * @returns {pv.Vector} a new vector.
+     */
+    pv.Vector.prototype.plus = function(x, y) {
+      return (arguments.length == 1)
+          ? new Point(this.x + x.x, this.y + x.y)
+          : new Point(this.x + x, this.y + y);
+    };
+    
+    /**
+     * Returns this vector minus the vector <i>v</i>: <i>&#x27e8;x - v.x, y -
+     * v.y&#x27e9;</i>. If only one argument is specified, it is interpreted as the
+     * vector <i>v</i>.
+     *
+     * @param {number} x the <i>x</i> coordinate to subtract.
+     * @param {number} y the <i>y</i> coordinate to subtract.
+     * @returns {pv.Vector} a new vector.
+     */
+    pv.Vector.prototype.minus = function(x, y) {
+      return (arguments.length == 1)
+          ? new Point(this.x - x.x, this.y - x.y)
+          : new Point(this.x - x, this.y - y);
+    };
+    
+    /**
+     * Returns the dot product of this vector and the vector <i>v</i>: <i>x * v.x +
+     * y * v.y</i>. If only one argument is specified, it is interpreted as the
+     * vector <i>v</i>.
+     *
+     * @param {number} x the <i>x</i> coordinate to dot.
+     * @param {number} y the <i>y</i> coordinate to dot.
+     * @returns {number} a dot product.
+     */
+    pv.Vector.prototype.dot = function(x, y) {
+      return (arguments.length == 1)
+          ? this.x * x.x + this.y * x.y
+          : this.x * x + this.y * y;
+    };
+    
+    pv.Vector.prototype.hasArea = function(){
+        return false;
+    };
+    
+    pv.Vector.prototype.clone = function(){
+        return new Point(this.x, this.y);
+    };
+    
+    pv.Vector.prototype.apply = function(t){
+        return new Point(t.x + (t.k * this.x), t.y + (t.k * this.y));
+    };
+    
+    pv.Vector.prototype.intersectsRect = function(rect){
+        // Does rect contain the point
+        return (this.x >= rect.x) && (this.x <= rect.x2) &&
+               (this.y >= rect.y) && (this.y <= rect.y2);
+    };
+    
+    pv.Vector.prototype.containsPoint = function(p){
+        return (this.x === p.x) && (this.y === p.y);
+    };
+    
+    pv.Vector.prototype.points = function(){
+        return [this];
+    };
+    
+    pv.Vector.prototype.edges = function(){
+        return [];
+    };
+    
+    pv.Vector.prototype.center = function(){
+        return this;
+    };
+    
+    pv.Vector.prototype.distance2 = function(p, k){
+        return dist2(this, p, k);
+    };
+}());
+
+(function(){
+    var Point = pv.Shape.Point;
+    var dist2 = pv.Shape.dist2;
+    
+    // -----------------
+    
+    pv.Shape.Line = function(x, y, x2, y2){
+        this.x  = x  || 0;
+        this.y  = y  || 0;
+        this.x2 = x2 || 0;
+        this.y2 = y2 || 0;
+    };
+    
+    var Line = pv.Shape.Line;
+    
+    Line.prototype = pv.extend(pv.Shape);
+    
+    Line.prototype.hasArea = function(){
+        return false;
+    };
+    
+    Line.prototype.clone = function(){
+        return new Line(this.x, this.y, this.x2, this.x2);
+    };
+    
+    Line.prototype.apply = function(t){
+        var x  = t.x + (t.k * this.x );
+        var y  = t.y + (t.k * this.y );
+        var x2 = t.x + (t.k * this.x2);
+        var y2 = t.y + (t.k * this.y2);
+        return new Line(x, y, x2, y2);
+    };
+    
+    Line.prototype.points = function(){
+        return [new Point(this.x, this.y), new Point(this.x2, this.y2)];
+    };
+    
+    Line.prototype.edges = function(){
+        return [this];
+    };
+    
+    Line.prototype.center = function(){
+        return new Point((this.x + this.x2)/2, (this.y + this.y2)/2);
+    };
+    
+    Line.prototype.normal = function(at, shapeCenter){
+        // Any point (at) laying on the line has the same normal 
+        var points = this.points();
+        var norm = points[1].minus(points[0]).perp().norm();
+        
+        // If shapeCenter point is specified, 
+        // return the norm direction that 
+        // points to the outside of the shape
+        if(shapeCenter){
+            var outside = points[0].minus(shapeCenter);
+            if(outside.dot(norm) < 0){
+                // opposite directions
+                norm = norm.times(-1);
+            }
+        }
+        
+        return norm;
+    };
+    
+    Line.prototype.intersectsRect = function(rect){
+        var i, L;
+        var points = this.points();
+        L = points.length;
+        for(i = 0 ; i < L ; i++){
+            if(points[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        var edges = rect.edges();
+        L = edges.length;
+        for(i = 0 ; i < L ; i++){
+            if(this.intersectsLine(edges[i])){
+                return true;
+            }
+        }
+    
+        return false;
+    };
+    
+    Line.prototype.containsPoint = function(p){
+        var x  = this.x ;
+        var x2 = this.x2;
+        var y  = this.y ;
+        var y2 = this.y2;
+        return x <= p.x && p.x <= x2 &&
+               ((x === x2) ? 
+                (Math.min(y, y2) <= p.y && p.y <= Math.max(y, y2)) :
+                (Math.abs((y2-y)/(x2-x) * (p.x-x) + y - p.y) <= 1e-10));
+    };
+    
+    Line.prototype.intersectsLine = function(b){
+        // See: http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
+        var a = this,
+    
+            x21 = a.x2 - a.x,
+            y21 = a.y2 - a.y,
+    
+            x43 = b.x2 - b.x,
+            y43 = b.y2 - b.y,
+    
+            denom = y43 * x21 - x43 * y21;
+    
+        if(denom === 0){
+            // Parallel lines: no intersection
+            return false;
+        }
+    
+        var y13 = a.y - b.y,
+            x13 = a.x - b.x,
+            numa = (x43 * y13 - y43 * x13),
+            numb = (x21 * y13 - y21 * x13);
+    
+        if(denom === 0){
+            // Both 0  => coincident
+            // Only denom 0 => parallel, but not coincident
+            return (numa === 0) && (numb === 0);
+        }
+    
+        var ua = numa / denom;
+        if(ua < 0 || ua > 1){
+            // Intersection not within segment a
+            return false;
+        }
+    
+        var ub = numb / denom;
+        if(ub < 0 || ub > 1){
+            // Intersection not within segment b
+            return false;
+        }
+    
+        return true;
+    };
+    
+    // Adapted from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment (commenter Grumdrig)
+    // Return minimum distance (squared) between the point p and the line segment
+    // k: cost vector
+    Line.prototype.distance2 = function(p, k){
+        var v = this;
+        var w = {x: this.x2, y: this.y2};
+        
+        var l2 = dist2(v, w).dist2;
+        if (l2 <= 1e-10) {
+            // v == w case
+            return dist2(p, v, k);
+        }
+      
+        // Consider the line extending the segment, parameterized as v + t (w - v).
+        // We find projection of point p onto the line. 
+        // It falls where t = [(p-v) . (w-v)] / |w-v|^2
+        var wvx = w.x - v.x;
+        var wvy = w.y - v.y;
+        
+        var t = ((p.x - v.x) * wvx + (p.y - v.y) * wvy) / l2;
+        
+        if (t < 0) { return dist2(p, v, k); } // lies before v, so return the distance between v and p
+        
+        if (t > 1) { return dist2(p, w, k); } // lies after  w, so return the distance between w and p
+        
+        var proj = {x: v.x + t * wvx, y: v.y + t * wvy};
+        
+        return dist2(p, proj, k);
+    };
+    
+}());
+
+(function(){
+    
+    var Point = pv.Shape.Point;
+    var Line = pv.Shape.Line;
+    
+    pv.Shape.Polygon = function(points){
+        this._points = points || [];
+    };
+    
+    var Polygon = pv.Shape.Polygon;
+    
+    Polygon.prototype = pv.extend(pv.Shape);
+    
+    Polygon.prototype.points = function(){
+        return this._points;
+    };
+        
+    Polygon.prototype.clone = function(){
+        return new Polygon(this.points().slice());
+    };
+    
+    Polygon.prototype.apply = function(t){
+        var points = this.points();
+        var L = points.length;
+        var points2 = new Array(L);
+        
+        for(var i = 0 ; i < L ; i++){
+            points2[i] = points[i].apply(t);
+        }
+        
+        return new Polygon(points2);
+    };
+
+    Polygon.prototype.intersectsRect = function(rect){
+        // I - Any point is inside the rect?
+        var i, L;
+        var points = this.points();
+        
+        L = points.length;
+        for(i = 0 ; i < L ; i++){
+            if(points[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        // II - Any side intersects the rect?
+        var edges = this.edges();
+        L = edges.length;
+        for(i = 0 ; i < L ; i++){
+            if(edges[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        return false;
+    };
+    
+    Polygon.prototype.edges = function(){
+        var edges = this._edges;
+        if(!edges){
+            edges = this._edges = [];
+            
+            var points = this.points();
+            var L = points.length;
+            if(L){
+                var prevPoint  = points[0];
+                var firstPoint = prevPoint;
+                
+                var point;
+                for(var i = 1 ; i < L ; i++){
+                    point = points[i];
+                    
+                    edges.push(new Line(prevPoint.x, prevPoint.y,  point.x, point.y));
+                    
+                    prevPoint = point;
+                }
+                
+                if(L > 2){
+                    // point will have the last point
+                    edges.push(new Line(point.x, point.y,  firstPoint.x, firstPoint.y));
+                }
+            }
+        }
+    
+        return edges;
+    };
+    
+    Polygon.prototype.distance2 = function(p, k){
+        var min = {cost: Infinity, dist2: Infinity}; //dist2(p, this.center(), k);
+        
+        this.edges().forEach(function(edge){
+            var d = edge.distance2(p, k);
+            if(d.cost < min.cost){
+                min = d;
+            }
+        }, this);
+        
+        return min;
+    };
+    
+    Polygon.prototype.center = function(){
+        var points = this.points();
+        var x = 0;
+        var y = 0;
+        for(var i = 0, L = points.length ; i < L ; i++){
+            var p = points[i];
+            x += p.x;
+            y += p.y;
+        }
+        
+        return new Point(x / L, y / L);
+    };
+    
+    // Adapted from http://stackoverflow.com/questions/217578/point-in-polygon-aka-hit-test (author Mecki)
+    Polygon.prototype.containsPoint = function(p){
+        var bbox = this.bbox();
+        if(!bbox.containsPoint(p)){
+            //console.log("Polygon point out of bbox");
+            return false;
+        }
+        
+        // "e" ensures the ray starts outside the polygon
+        var e = bbox.dx * 0.01;
+        var ray = new Line(bbox.x - e, p.y, p.x, p.y);
+        
+        var intersectCount = 0;
+        var edges = this.edges();
+        edges.forEach(function(edge){
+            if(edge.intersectsLine(ray)){
+                intersectCount++;
+            }
+        });
+        
+        //console.log("Polygon intersects=" + intersectCount + "/" + edges.length);
+        
+        // Inside if odd number of intersections
+        return (intersectCount & 1) === 1;
+    };
+    
+    Polygon.prototype.bbox = function(){
+        var bbox = this._bbox;
+        if(!bbox){
+            var min, max;
+            
+            this
+            .points()
+            .forEach(function(point, index){
+                if(min == null){
+                    min = {x: point.x, y: point.y};
+                } else {
+                    if(point.x < min.x){
+                        min.x = point.x;
+                    }
+                    
+                    if(point.y < min.y){
+                        min.y = point.y;
+                    }
+                }
+                
+                if(max == null){
+                    max = {x: point.x, y: point.y};
+                } else {
+                    if(point.x > max.x){
+                        max.x = point.x;
+                    }
+                    
+                    if(point.y > max.y){
+                        max.y = point.y;
+                    }
+                }
+            });
+            
+            if(min){
+                bbox = this._bbox = new pv.Shape.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+            }
+        }
+        
+        return bbox;
+    };    
+    
+}());
+
+(function(){
+    
+    var Point = pv.Shape.Point;
+    var Line  = pv.Shape.Line;
+    
+    pv.Shape.Rect = function(x, y, dx, dy){
+        this.x  =  x || 0;
+        this.y  =  y || 0;
+        this.dx = dx || 0;
+        this.dy = dy || 0;
+        
+        // Ensure normalized
+        if(this.dx < 0){
+            this.dx = -this.dx;
+            this.x  = this.x - this.dx;
+        }
+        
+        if(this.dy < 0){
+            this.dy = -this.dy;
+            this.y = this.y - this.dy;
+        }
+        
+        this.x2  = this.x + this.dx;
+        this.y2  = this.y + this.dy;
+    };
+    
+    var Rect = pv.Shape.Rect;
+    
+    Rect.prototype = pv.extend(pv.Shape.Polygon);
+    
+    Rect.prototype.clone = function(){
+        var r2 = Object.create(Rect.prototype);
+        r2.x  = this.x;
+        r2.y  = this.y;
+        r2.dx = this.dx;
+        r2.dy = this.dy;
+        r2.x2 = this.x2;
+        r2.y2 = this.y2;
+        
+        return r2;
+    };
+    
+    Rect.prototype.apply = function(t){
+        var x  = t.x + (t.k * this.x);
+        var y  = t.y + (t.k * this.y);
+        var dx = t.k * this.dx;
+        var dy = t.k * this.dy;
+        return new Rect(x, y, dx, dy);
+    };
+    
+    Rect.prototype.containsPoint = function(p){
+        return this.x <= p.x && p.x <= this.x2 && 
+               this.y <= p.y && p.y <= this.y2;
+    };
+    
+    Rect.prototype.intersectsRect = function(rect){
+        return (this.x2 > rect.x ) &&  // Some intersection on X
+               (this.x  < rect.x2) &&
+               (this.y2 > rect.y ) &&  // Some intersection on Y
+               (this.y  < rect.y2);
+    };
+    
+    Rect.prototype.edges = function(){
+        if(!this._edges){
+            var x  = this.x,
+                y  = this.y,
+                x2 = this.x2,
+                y2 = this.y2;
+    
+            this._edges = [
+                new Line(x,  y,  x2, y),
+                new Line(x2, y,  x2, y2),
+                new Line(x2, y2, x,  y2),
+                new Line(x,  y2, x,  y)
+            ];
+        }
+    
+        return this._edges;
+    };
+    
+    Rect.prototype.center = function(){
+        return new Point(this.x + this.dx/2, this.y + this.dy/2);
+    };
+    
+    Rect.prototype.points = function(){
+        var points = this._points;
+        if(!points){
+            var x  = this.x,
+                y  = this.y,
+                x2 = this.x2,
+                y2 = this.y2;
+            
+            points = this._points = [
+                new Point(x,  y ),
+                new Point(x2, y ),
+                new Point(x2, y2),
+                new Point(x,  y2)
+            ];
+        }
+        
+        return points;
+    };
+    
+    Rect.prototype.bbox = function(){
+        return this.clone();
+    };
+    
+}());(function(){
+    var Point = pv.Shape.Point;
+    var dist2 = pv.Shape.dist2;
+    var sqrt = Math.sqrt;
+    var abs  = Math.abs;
+    var pow  = Math.pow;
+    
+    pv.Shape.Circle = function(x, y, radius){
+        this.x = x || 0;
+        this.y = y || 0;
+        this.radius = radius || 0;
+    };
+    
+    var Circle = pv.Shape.Circle;
+    
+    Circle.prototype = pv.extend(pv.Shape);
+    
+    Circle.prototype.clone = function(){
+        return new Circle(this.x, this.y, this.radius);
+    };
+    
+    Circle.prototype.apply = function(t){
+        var x  = t.x + (t.k * this.x);
+        var y  = t.y + (t.k * this.y);
+        var r  = t.k * this.radius;
+        return new Circle(x, y, r);
+    };
+    
+    // Adapted from http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
+    Circle.prototype.intersectsRect = function(rect){
+        var dx2 = rect.dx / 2,
+            dy2 = rect.dy / 2,
+            r   = this.radius;
+    
+        var circleDistX = abs(this.x - rect.x - dx2),
+            circleDistY = abs(this.y - rect.y - dy2);
+    
+        if ((circleDistX > dx2 + r) ||
+            (circleDistY > dy2 + r)) {
+            return false;
+        }
+    
+        if (circleDistX <= dx2 || circleDistY <= dy2) {
+            return true;
+        }
+        
+        var sqCornerDistance = pow(circleDistX - dx2, 2) +
+                               pow(circleDistY - dy2, 2);
+    
+        return sqCornerDistance <= r * r;
+    };
+    
+    // Adapted from http://stackoverflow.com/questions/13053061/circle-line-intersection-points (author arne.b)
+    Circle.prototype.intersectLine = function(line, isInfiniteLine) {
+        // Line: A -> B 
+        var baX = line.x2 - line.x;
+        var baY = line.y2 - line.y;
+        
+        var caX = this.x - line.x;
+        var caY = this.y - line.y;
+
+        var ba2  = baX * baX + baY * baY; // square norm of ba
+        var bBy2 = baX * caX + baY * caY; // dot product of ba and ca
+        var r    = this.radius;
+        var c    = caX * caX + caY * caY - r * r;
+
+        var pBy2 = bBy2 / ba2;
+
+        var disc = pBy2 * pBy2 - c / ba2;
+        if (disc < 0) {
+            return; // no intersection
+        }
+        
+        // if disc == 0 ... dealt with later
+        var discSqrt = sqrt(disc);
+        var t1 = pBy2 - discSqrt;
+        var t2 = pBy2 + discSqrt;
+        
+        // t1 < 0 || t1 > 1 => p1 off the segment 
+        
+        var ps = [];
+        if(isInfiniteLine || (t1 >= 0 && t1 <= 1)){
+            ps.push(new Point(line.x + baX * t1, line.y + baY * t1));
+        }
+        
+        if (disc !== 0) { // t1 != t2
+            if(isInfiniteLine || (t2 >= 0 && t2 <= 1)){
+                ps.push(new Point(line.x + baX * t2, line.y + baY * t2));
+            }
+        }
+        
+        return ps;
+    };
+    
+    Circle.prototype.points = function(){
+        return [this.center()];
+    };
+    
+    Circle.prototype.center = function(){
+        return new Point(this.x, this.y);
+    };
+    
+    Circle.prototype.normal = function(at){
+        return at.minus(this.x, this.y).norm();
+    };
+    
+    Circle.prototype.containsPoint = function(p){
+        var dx = p.x - this.x,
+            dy = p.y - this.y,
+            r  = this.radius;
+        
+        return dx * dx + dy * dy <= r * r; 
+    };
+    
+    // Distance (squared) to the border of the circle (inside or not)
+    // //or to the center of the circle, whichever is smaller
+    Circle.prototype.distance2 = function(p, k){
+        var dx = p.x - this.x,
+            dy = p.y - this.y,
+            r  = this.radius;
+        
+        //var dCenter = dist2(p, this, k);
+        
+        // The point at the Border of the circle, in the direction from c to p
+        var b = p.minus(this).norm().times(r).plus(this);
+        
+        var dBorder = dist2(p, b, k);
+        
+        return /*dCenter.cost < dBorder.cost ? dCenter : */dBorder; 
+    };
+
+}());
+(function(){
+    
+    var Point = pv.Shape.Point;
+    var dist2 = pv.Shape.dist2;
+    var normalizeAngle = pv.Shape.normalizeAngle;
+    var atan2Norm = pv.Shape.atan2Norm;
+    
+    var cos   = Math.cos;
+    var sin   = Math.sin;
+    var sqrt  = Math.sqrt;
+    
+    pv.Shape.Arc = function(x, y, radius, startAngle, angleSpan){
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        
+        this.startAngle = normalizeAngle(startAngle);
+        this.angleSpan  = normalizeAngle(angleSpan); // always positive...
+        this.endAngle   = this.startAngle + this.angleSpan; // may be > 2*pi
+    };
+    
+    var Arc = pv.Shape.Arc;
+    
+    Arc.prototype = pv.extend(pv.Shape);
+    
+    Arc.prototype.hasArea = function(){
+        return false;
+    };
+    
+    Arc.prototype.clone = function(){
+        var arc = Object.create(Arc.prototype);
+        var me = this;
+        arc.x = me.x;
+        arc.y = me.y;
+        arc.radius = me.radius;
+        arc.startAngle = me.startAngle;
+        arc.angleSpan = me.angleSpan;
+        arc.endAngle = me.endAngle;
+        return arc;
+    };
+    
+    Arc.prototype.apply = function(t){
+        var x   = t.x + (t.k * this.x);
+        var y   = t.y + (t.k * this.y);
+        var r   = t.k * this.radius;
+        return new Arc(x, y, r, this.startAngle, this.angleSpan);
+    };
+    
+    Arc.prototype.containsPoint = function(p){
+        var dx = p.x - this.x;
+        var dy = p.y - this.y;
+        var r  = sqrt(dx*dx + dy*dy);
+        
+        if(Math.abs(r - this.radius) <= 1e-10){
+            var a  = atan2Norm(dy, dx);
+            return this.startAngle <= a && a <= this.endAngle;
+        }
+        
+        return false;
+    };
+    
+    Arc.prototype.intersectsRect = function(rect) {
+        var i, L;
+        
+        // I - Any endpoint is inside the rect?
+        var points = this.points();
+        var L = points.length;
+        for(i = 0 ; i < L ; i++){
+            if(points[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        // II - Any rect edge intersects the arc?
+        var edges = rect.edges();
+        L = edges.length;
+        for(i = 0 ; i < L ; i++){
+            if(this.intersectLine(edges[i])){
+                return true;
+            }
+        }
+        
+        return false;
+    };
+    
+    var circleIntersectLine = pv.Shape.Circle.prototype.intersectLine;
+    
+    Arc.prototype.intersectLine = function(line, isInfiniteLine) {
+        var ps = circleIntersectLine.call(this, line, isInfiniteLine);
+        if(ps){
+            // Filter ps belonging to the arc
+            ps = ps.filter(function(p){ return this.containsPoint(p); }, this);
+            if(ps.length){
+                return ps;
+            }
+        }
+    };
+    
+    Arc.prototype.points = function(){
+        var x  = this.x;
+        var y  = this.y;
+        var r  = this.radius;
+        var ai = this.startAngle;
+        var af = this.endAngle;
+        
+        return [
+            new Point(x + r * cos(ai), y + r * sin(ai)),
+            new Point(x + r * cos(af), y + r * sin(af))
+        ];
+    };
+    
+    Arc.prototype.center = function(){
+        var x  = this.x;
+        var y  = this.y;
+        var r  = this.radius;
+        var am = (this.startAngle + this.endAngle) / 2;
+        
+        return new Point(x + r * cos(am), y + r * sin(am));
+    };
+    
+    Arc.prototype.normal = function(at, shapeCenter){
+        var norm = at.minus(this.x, this.y).norm();
+        
+        // If shapeCenter point is specified, 
+        // return the norm direction that 
+        // points to the outside of the shape
+        if(shapeCenter){
+            var outside = this.center().minus(shapeCenter);
+            if(outside.dot(norm) < 0){
+                // opposite directions
+                norm = norm.times(-1);
+            }
+        }
+        
+        return norm;
+    };
+    
+    // Distance (squared) to the border of the Arc (inside or not)
+    Arc.prototype.distance2 = function(p, k){
+        var dx = p.x - this.x;
+        var dy = p.y - this.y;
+        var a  = atan2Norm(dy, dx); // between 0 and 2*pi
+        
+        if(this.startAngle <= a && a <= this.endAngle){
+            // Within angle span
+            
+            // The point at the Border of the circle, in the direction from c to p
+            var b = new Point(
+                    this.x + this.radius * cos(a),
+                    this.y + this.radius * sin(a));
+            
+            return dist2(p, b, k);
+        }
+        
+        // Smallest distance to one of the two end points
+        var points = this.points();
+        var d1 = dist2(p, points[0], k);
+        var d2 = dist2(p, points[1], k);
+        return d1.cost < d2.cost ? d1 : d2;
+    };
+   
+}());
+(function(){
+    
+    var Arc   = pv.Shape.Arc;
+    var Line  = pv.Shape.Line;
+    var Point = pv.Shape.Point;
+    
+    var cos   = Math.cos;
+    var sin   = Math.sin;
+    var sqrt  = Math.sqrt;
+    var atan2Norm = pv.Shape.atan2Norm;
+    var normalizeAngle = pv.Shape.normalizeAngle;
+    
+    pv.Shape.Wedge = function(x, y, innerRadius, outerRadius, startAngle, angleSpan){
+        this.x = x;
+        this.y = y;
+        this.innerRadius = innerRadius;
+        this.outerRadius = outerRadius;
+        
+        this.startAngle = normalizeAngle(startAngle);
+        this.angleSpan  = normalizeAngle(angleSpan); // always positive...
+        this.endAngle   = this.startAngle + this.angleSpan; // may be > 2*pi
+    };
+    
+    var Wedge = pv.Shape.Wedge;
+    
+    Wedge.prototype = pv.extend(pv.Shape);
+    
+    Wedge.prototype.clone = function(){
+        return new Wedge(
+                this.x, this.y, this.innerRadius, 
+                this.outerRadius, this.startAngle, this.angleSpan);
+    };
+    
+    Wedge.prototype.apply = function(t){
+        var x   = t.x + (t.k * this.x);
+        var y   = t.y + (t.k * this.y);
+        var ir  = t.k * this.innerRadius;
+        var or  = t.k * this.outerRadius;
+        return new Wedge(x, y, ir, or, this.startAngle, this.angleSpan);
+    };
+    
+    Wedge.prototype.containsPoint = function(p){
+        var dx = p.x - this.x;
+        var dy = p.y - this.y ;
+        var r  = sqrt(dx*dx + dy*dy);
+        if(r >= this.innerRadius &&  r <= this.outerRadius){
+            var a  = atan2Norm(dy, dx); // between -pi and pi -> 0 - 2*pi
+            return this.startAngle <= a && a <= this.endAngle;
+        }
+        
+        return false;
+    };
+    
+    Wedge.prototype.intersectsRect = function(rect){
+        var i, L;
+        
+        // I - Any point is inside the rect?
+        var points = this.points();
+        
+        L = points.length;
+        for(i = 0 ; i < L ; i++){
+            if(points[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        // II - Any edge intersects the rect?
+        var edges = this.edges();
+        L = edges.length;
+        for(i = 0 ; i < L ; i++){
+            if(edges[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        return false;
+    };
+    
+    Wedge.prototype.points = function(){
+        if(!this._points){
+            this.edges();
+        }
+        
+        return this._points;
+    };
+    
+    Wedge.prototype.edges = function(){
+        var edges = this._edges;
+        if(!edges){
+            var x  = this.x;
+            var y  = this.y;
+            var ir = this.innerRadius;
+            var or = this.outerRadius;
+            var ai = this.startAngle;
+            var af = this.endAngle;
+            var aa = this.angleSpan;
+            var cai = cos(ai);
+            var sai = sin(ai);
+            var caf = cos(af);
+            var saf = sin(af);
+            
+            var pii, pfi;
+            if(ir > 0){
+                pii = new Point(x + ir * cai, y + ir * sai);
+                pfi = new Point(x + ir * caf, y + ir * saf);
+            } else {
+                pii = pfi = new Point(x, y);
+            }
+            
+            var pio = new Point(x + or * cai, y + or * sai);
+            var pfo = new Point(x + or * caf, y + or * saf);
+            
+            edges = this._edges = [];
+            
+            if(ir > 0){
+               edges.push(new Arc(x, y, ir, ai, aa));
+            }
+            
+            edges.push(
+                new Line(pii.x, pii.y, pio.x, pio.y),
+                new Arc(x, y, or, ai, aa),
+                new Line(pfi.x, pfi.y, pfo.x, pfo.y));
+            
+            var points = this._points = [pii, pio, pfo];
+            if(ir > 0){
+                points.push(pfi);
+            }
+        }
+        
+        return edges;
+    };
+    
+    // Distance (squared) to the border of the Wedge,
+    // // or to its center, whichever is smaller.
+    Wedge.prototype.distance2 = function(p, k){
+        var min = {cost: Infinity, dist2: Infinity}; //dist2(p, this.center(), k);
+        
+        this.edges().forEach(function(edge){
+            var d = edge.distance2(p, k);
+            if(d.cost < min.cost){
+                min = d;
+            }
+        });
+        
+        return min;
+    };
+    
+    Wedge.prototype.center = function(){
+        var midAngle  = (this.startAngle  + this.endAngle)/2;
+        var midRadius = (this.innerRadius + this.outerRadius)/2;
+        return new Point(
+                this.x + midRadius * cos(midAngle), 
+                this.y + midRadius * sin(midAngle));
+    };
+}());
 /**
  * Returns the {@link pv.Color} for the specified color format string. Colors
  * may have an associated opacity, or alpha channel. Color formats are specified
@@ -6214,10 +7383,21 @@ pv.SvgScene.create = function(type) {
  * @returns a new SVG element.
  */
 pv.SvgScene.expect = function(e, type, scenes, i, attributes, style) {
-  if (e) {
-    var tagName = e.tagName;
-    if (tagName === "defs") e = e.nextSibling;
-    if (tagName === "a")    e = e.firstChild;
+    var tagName;
+    if(e){
+        tagName = e.tagName;
+        if(tagName === 'defs'){
+            e = e.nextSibling; // may be null
+            if(e){
+                tagName = e.tagName;
+            }
+        } else if(tagName === 'a'){
+            e = e.firstChild;
+            // ends up replacing the "a" tag with its child
+        }
+    }
+    
+    if(e){
     if (tagName !== type) {
       var n = this.create(type);
       e.parentNode.replaceChild(n, e);
@@ -6284,7 +7464,7 @@ pv.SvgScene.setStyle = function(e, style){
 
 /** TODO */
 pv.SvgScene.append = function(e, scenes, index) {
-  e.$scene = {scenes:scenes, index:index};
+  e.$scene = {scenes: scenes, index: index};
   e = this.title(e, scenes[index]);
   if (!e.parentNode) scenes.$g.appendChild(e);
   return e.nextSibling;
@@ -6352,18 +7532,19 @@ pv.SvgScene.dispatch = pv.listener(function(e) {
 
     /* Fixes for mousewheel support on Firefox & Opera. */
     switch (type) {
-      case "DOMMouseScroll": {
+      case "DOMMouseScroll":
         type = "mousewheel";
         e.wheel = -480 * e.detail;
         break;
-      }
-      case "mousewheel": {
+
+      case "mousewheel":
         e.wheel = (window.opera ? 12 : 1) * e.wheelDelta;
         break;
       }
-    }
 
-    if (pv.Mark.dispatch(type, t.scenes, t.index, e)) e.preventDefault();
+    if (pv.Mark.dispatch(type, t.scenes, t.index, e)) {
+      e.preventDefault();
+    }
   }
 });
 
@@ -6387,9 +7568,10 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
   if (results.length === 1) {
     var defs;
     if (pv.renderer() !== "batik")
-        defs = results[0];
+      defs = results[0];
     else
-        defs = new cgg.element(results.item(0));
+       defs = new cgg.element(results.item(0));
+    
     var cur = defs.firstChild;
     while (cur) {
       var next = cur.nextSibling;
@@ -6514,11 +7696,11 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
       var defs;
       if(results.length) {
         if (pv.renderer() !== "batik")
-            defs = results.item(0);
+          defs = results.item(0);
         else
-            defs = new cgg.element(results.item(0));
+          defs = new cgg.element(results.item(0));
       } else {
-        defs = g.appendChild(this.create("defs"));
+          defs = g.appendChild(this.create("defs"));
       }
       
       var elem;
@@ -8032,11 +9214,11 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
         var s = scenes[i];
         
         var events = s.events;
-        if(events && events !== "none"){
+        if(events && events !== 'none'){
           var attrs = Object.create(attrsBase);
           attrs['pointer-events'] = events;
           attrs.cursor = s.cursor;
-          attrs.d = path.join("");
+          attrs.d = path.join('');
           
           elm = this.expect(elm, 'path', scenes, i, attrs);
           
@@ -10698,26 +11880,58 @@ pv.Mark.prototype.context = function(scene, index, f) {
   }
 };
 
-/** @private Execute the event listener, then re-render. */
-pv.Mark.dispatch = function(type, scene, index, event) {
-  var m = scene.mark, 
-      p = scene.parent, 
-      l = m.$handlers[type];
+pv.Mark.getEventHandler = function(type, scenes, index, event){
+  var handler = scenes.mark.$handlers[type];
+  if(handler){
+    return [handler, type, scenes, index, event];
+  }
+   
+  var parentScenes = scenes.parent;
+  if(parentScenes){
+    return this.getEventHandler(type, parentScenes, scenes.parentIndex, event);
+  }
+};
+
+/** @private Execute the event listener, then re-render the returned mark. */
+pv.Mark.dispatch = function(type, scenes, index, event) {
   
-  if(m.root.animatingCount){
+  var root = scenes.mark.root;
+  if(root.animatingCount){
       return true;
   }
   
-  if (!l) {
-      return p && pv.Mark.dispatch(type, p, scene.parentIndex, event);
+  var handlerInfo;
+  var interceptors = root.$interceptors && root.$interceptors[type];
+  if(interceptors){
+    for(var i = 0, L = interceptors.length ; i < L ; i++){ 
+        handlerInfo = interceptors[i](type, event);
+        if(handlerInfo){
+            break;
   }
   
-  m.context(scene, index, function() {
-    var stack = pv.Mark.stack.concat(event);
-    if(l instanceof Array) {
-        var ms;
-        l.forEach(function(li){
-            var mi = li.apply(m, stack);
+        if(handlerInfo === false){
+            // Consider handled
+            return true;
+        }
+    }
+  }
+  
+  if(!handlerInfo){
+      handlerInfo = this.getEventHandler(type, scenes, index, event);
+  }
+  
+  return handlerInfo ? this.handle.apply(this, handlerInfo) : false;
+};
+
+pv.Mark.handle = function(handler, type, scenes, index, event){
+    var m = scenes.mark;
+    
+    m.context(scenes, index, function() {
+      var stack = pv.Mark.stack.concat(event);
+      if(handler instanceof Array) {
+          var ms;
+          handler.forEach(function(hi){
+            var mi = hi.apply(m, stack);
             if(mi && mi.render) {
                 (ms || (ms = [])).push(mi);
             }
@@ -10725,7 +11939,7 @@ pv.Mark.dispatch = function(type, scene, index, event) {
         
         if(ms) { ms.forEach(function(mi){ mi.render(); }); }
     } else {
-        m = l.apply(m, stack);
+        m = handler.apply(m, stack);
         if (m && m.render) {
             m.render();
         }
@@ -10736,17 +11950,32 @@ pv.Mark.dispatch = function(type, scene, index, event) {
 };
 
 /**
- * Iterates through all instances that
+ * Registers an event interceptor function.
+ * 
+ * @param {string} type the event type
+ * @param {function} handler the interceptor function
+ * @param {boolean} [before=false] indicates that the interceptor should be applied <i>before</i> "after" interceptors
+ */
+pv.Mark.prototype.addEventInterceptor = function(type, handler, before){
+    var root = this.root;
+    if(root){
+        var interceptors = root.$interceptors || (root.$interceptors = {});
+        var list = interceptors[type] || (interceptors[type] = []);
+        if(before){
+            list.unshift(handler);
+        } else {
+            list.push(handler);
+        }
+    }
+};
+
+/**
+ * Iterates through all visible instances that
  * this mark has rendered.
  */
 pv.Mark.prototype.eachInstance = function(fun, ctx){
     var mark = this,
-        indexes = [],
-        breakInstance = {
-            isBreak: true,
-            visible: false,
-            datum: {}
-        };
+        indexes = [];
 
     /* Go up to the root and register our way back.
      * The root mark never "looses" its scene.
@@ -10766,7 +11995,9 @@ pv.Mark.prototype.eachInstance = function(fun, ctx){
     
     var L = indexes.length;
 
-    function collectRecursive(scene, level, toScreen){
+    function mapRecursive(scene, level, toScreen){
+        var D = scene.length;
+        if(D > 0){
         var isLastLevel = level === L, 
             childIndex;
         
@@ -10774,31 +12005,27 @@ pv.Mark.prototype.eachInstance = function(fun, ctx){
             childIndex = indexes[level];
         }
         
-        var D = scene.length;
-        if(D > 0){
             for(var index = 0 ; index < D ; index++){
                 var instance = scene[index];
+                if(instance.visible){
                 if(level === L){
-                    fun.call(ctx, scene[index], toScreen);
-                } else if(instance.visible) {
+                        fun.call(ctx, scene, index, toScreen);
+                    } else {
                     var childScene = instance.children[childIndex];
-                    
-                    // Some nodes might have not been rendered?
-                    if(childScene){
+                        if(childScene){ // Some nodes might have not been rendered???
                         var childToScreen = toScreen
                                                 .times(instance.transform)
                                                 .translate(instance.left, instance.top);
                         
-                        collectRecursive(childScene, level + 1, childToScreen);
+                            mapRecursive(childScene, level + 1, childToScreen);
+                        }
                     }
                 }
             }
-        
-            fun.call(ctx, breakInstance, null);
         }
     }
 
-    collectRecursive(rootScene, 0, pv.Transform.identity);
+    mapRecursive(rootScene, 0, pv.Transform.identity);
 };
 
 pv.Mark.prototype.toScreenTransform = function(){
@@ -10814,7 +12041,7 @@ pv.Mark.prototype.toScreenTransform = function(){
         do {
             t = t.translate(parent.left(), parent.top())
                  .times(parent.transform());
-        } while ((parent = parent.parent));
+        } while((parent = parent.parent));
     }
     
     return t;
@@ -10826,6 +12053,22 @@ pv.Mark.prototype.transition = function() {
 
 pv.Mark.prototype.on = function(state) {
   return this["$" + state] = new pv.Transient(this);
+};
+
+// --------------
+
+pv.Mark.prototype.getShape = function(scenes, index){
+    var s = scenes[index];
+    if(!s.visible){
+        return null;
+    }
+    
+    return s._shape || (s._shape = this.getShapeCore(scenes, index));
+};
+
+pv.Mark.prototype.getShapeCore = function(scenes, index){
+    var s = scenes[index];
+    return new pv.Shape.Rect(s.left, s.top, s.width, s.height);
 };
 /**
  * Constructs a new mark anchor with default properties.
@@ -11210,6 +12453,32 @@ pv.Area.prototype.anchor = function(name) {
         return this.scene.target[this.index].tension;
       });
 };
+
+
+pv.Area.prototype.getShapeCore = function(scenes, index){
+    var s = scenes[index];
+    var w = (s.width  || 0),
+        h = (s.height || 0),
+        x = s.left,
+        y = s.top;
+    
+    var s2 = index + 1 < scenes.length ? scenes[index + 1] : null;
+    if(!s2 || !s2.visible){
+        return new pv.Shape.Line(x, y, x + w, y + h);
+    }
+    
+    var x2 = s2.left,
+        y2 = s2.top,
+        h2 = s2.height || 0,
+        w2 = s2.width  || 0;
+    
+    return new pv.Shape.Polygon([
+        new pv.Vector(x,       y      ),
+        new pv.Vector(x2,      y2     ),
+        new pv.Vector(x2 + w2, y2 + h2),
+        new pv.Vector(x  + w,  y  + h )
+    ]);
+};
 /**
  * Constructs a new bar mark with default properties. Bars are not typically
  * constructed directly, but by adding to a panel or an existing mark via
@@ -11523,6 +12792,30 @@ pv.Dot.prototype.buildImplied = function(s) {
   }
   pv.Mark.prototype.buildImplied.call(this, s);
 };
+
+pv.Dot.prototype.getShapeCore = function(scenes, index){
+    var s = scenes[index];
+    
+    var radius = s.shapeRadius,
+        cx = s.left,
+        cy = s.top;
+
+    // TODO: square and diamond break when angle is used
+    
+    switch(s.shape){
+        case 'diamond':
+            radius *= Math.SQRT2;
+            // the following comment is for jshint
+            /* falls through */
+        case 'square':
+        case 'cross':
+            return new pv.Shape.Rect(cx - radius, cy - radius, 2*radius, 2*radius);
+    }
+    
+    // 'circle' included
+    
+    return new pv.Shape.Circle(cx, cy, radius);
+};
 /**
  * Constructs a new label mark with default properties. Labels are not typically
  * constructed directly, but by adding to a panel or an existing mark via
@@ -11678,6 +12971,73 @@ pv.Label.prototype.defaults = new pv.Label()
     .textAlign("left")
     .textBaseline("bottom")
     .textMargin(3);
+
+
+pv.Label.prototype.getShapeCore = function(scenes, index){
+    var s = scenes[index];
+    
+    var size = pv.Text.measure(s.text, s.font);
+    
+    return pv.Label.getPolygon(
+            size.width,
+            size.height,
+            s.textAlign,
+            s.textBaseline,
+            s.textAngle,
+            s.textMargin)
+            .apply(pv.Transform.identity.translate(s.left, s.top));
+};
+
+pv.Label.getPolygon = function(textWidth, textHeight, align, baseline, angle, margin){
+    // x, y are the position of the left-bottom corner
+    // of the text relative to its anchor point (at x=0,y=0)
+    // x points right, y points down
+    var x, y;
+    
+    switch (baseline) {
+        case "middle":
+            y = textHeight / 2; // estimate middle (textHeight is not em, the height of capital M)
+            break;
+          
+        case "top":
+            y = margin + textHeight;
+            break;
+      
+        case "bottom":
+            y = -margin; 
+            break;
+    }
+    
+    switch (align) {
+        case "right": 
+            x = -margin -textWidth; 
+            break;
+      
+        case "center": 
+            x = -textWidth / 2;
+            break;
+      
+        case "left": 
+            x = margin;
+            break;
+    }
+    
+    var bl = new pv.Vector(x, y);
+    var br = bl.plus(textWidth, 0);
+    var tr = br.plus(0, -textHeight);
+    var tl = bl.plus(0, -textHeight);
+    
+    // Rotate
+    
+    if(angle !== 0){
+        bl = bl.rotate(angle);
+        br = br.rotate(angle);
+        tl = tl.rotate(angle);
+        tr = tr.rotate(angle);
+    }
+    
+    return new pv.Shape.Polygon([bl, br, tr, tl]);
+};
 /**
  * Constructs a new line mark with default properties. Lines are not typically
  * constructed directly, but by adding to a panel or an existing mark via
@@ -11879,6 +13239,16 @@ pv.Line.prototype.anchor = function(name) {
         }
       });
 };
+
+pv.Line.prototype.getShapeCore = function(scenes, index){
+    var s  = scenes[index];
+    var s2 = index + 1 < scenes.length ? scenes[index + 1] : null;
+    if(s2 == null || !s2.visible){
+        return new pv.Shape.Point(s.left, s.top);
+    }
+    
+    return new pv.Shape.Line(s.left, s.top, s2.left, s2.top);
+};
 /**
  * Constructs a new rule with default properties. Rules are not typically
  * constructed directly, but by adding to a panel or an existing mark via
@@ -12026,6 +13396,14 @@ pv.Rule.prototype.buildImplied = function(s) {
 
   pv.Mark.prototype.buildImplied.call(this, s);
 };
+
+pv.Rule.prototype.getShapeCore = function(scenes, index){
+    var s = scenes[index];
+    return new pv.Shape.Line(
+        s.left,           s.top, 
+        s.left + s.width, s.top + s.height);
+};
+
 /**
  * Constructs a new, empty panel with default properties. Panels, with the
  * exception of the root panel, are not typically constructed directly; instead,
@@ -12740,6 +14118,11 @@ pv.Wedge.prototype.buildImplied = function(s) {
   if (s.angle == null) s.angle = s.endAngle - s.startAngle;
   else if (s.endAngle == null) s.endAngle = s.startAngle + s.angle;
   pv.Mark.prototype.buildImplied.call(this, s);
+};
+
+pv.Wedge.prototype.getShapeCore = function(scenes, index){
+    var s = scenes[index];
+    return new pv.Shape.Wedge(s.left, s.top, s.innerRadius, s.outerRadius, s.startAngle, s.angle);
 };
 /*
  * TERMS OF USE - EASING EQUATIONS
@@ -17519,7 +18902,7 @@ pv.Layout.Cluster.Fill.prototype.buildImplied = function(s) {
  * constructed directly; instead, they are added to an existing panel via
  * {@link pv.Mark#add}.
  *
- * @class Implemeents a hierarchical layout using the partition (or sunburst,
+ * @class Implements a hierarchical layout using the partition (or sunburst,
  * icicle) algorithm. This layout provides both node-link and space-filling
  * implementations of partition diagrams. In many ways it is similar to
  * {@link pv.Layout.Cluster}, except that leaf nodes are positioned based on
@@ -17647,8 +19030,8 @@ pv.Layout.Partition.prototype.buildImplied = function(s) {
 
   /* Recursively compute the tree depth and node size. */
   stack.unshift(null);
-  root.visitAfter(function(n, i) {
-      if (i > maxDepth) maxDepth = i;
+  root.visitAfter(function(n, depth) {
+      if (depth > maxDepth) maxDepth = depth;
       n.size = n.firstChild
           ? pv.sum(n.childNodes, function(n) { return n.size; })
           : that.$size.apply(that, (stack[0] = n, stack));
@@ -17657,26 +19040,31 @@ pv.Layout.Partition.prototype.buildImplied = function(s) {
 
   /* Order */
   switch (s.order) {
-    case "ascending": root.sort(function(a, b) { return a.size - b.size; }); break;
+    case "ascending":  root.sort(function(a, b) { return a.size - b.size; }); break;
     case "descending": root.sort(function(b, a) { return a.size - b.size; }); break;
   }
 
   /* Compute the unit breadth and depth of each node. */
-  var ds = 1 / maxDepth;
   root.minBreadth = 0;
-  root.breadth = .5;
+  root.breadth    = .5;
   root.maxBreadth = 1;
+  
   root.visitBefore(function(n) {
-    var b = n.minBreadth, s = n.maxBreadth - b;
+    var b = n.minBreadth, 
+        s = n.maxBreadth - b; // span
+      
       for (var c = n.firstChild; c; c = c.nextSibling) {
         c.minBreadth = b;
-        c.maxBreadth = b += (c.size / n.size) * s;
+        b += (c.size / n.size) * s;
+        c.maxBreadth = b;
+        
         c.breadth = (b + c.minBreadth) / 2;
       }
     });
-  root.visitAfter(function(n, i) {
-      n.minDepth = (i - 1) * ds;
-      n.maxDepth = n.depth = i * ds;
+  
+  root.visitAfter(function(n, depth) {
+      n.minDepth = (depth - 1) / maxDepth;
+      n.maxDepth = (n.depth = depth / maxDepth);
     });
 
   pv.Layout.Hierarchy.NodeLink.buildImplied.call(this, s);
@@ -18946,7 +20334,7 @@ pv.Behavior.point = function(r) {
  * allow more flexible configuration of select behavior. In some cases, such as
  * with parallel coordinates, making a selection may cause related marks to
  * change, in which case additional marks may also need to be rendered. This can
- * be accomplished by listening for the select psuedo-events:<ul>
+ * be accomplished by listening for the select pseudo-events:<ul>
  *
  * <li>selectstart (on mousedown)
  * <li>select (on mousemove)
@@ -18962,51 +20350,180 @@ pv.Behavior.point = function(r) {
  * configuration of the selection behavior.
  *
  * @extends pv.Behavior
+ * 
+ * @constructor
+ * @param {object}  [keyArgs] keyword arguments object  
+ * @param {boolean} [keyArgs.autoRefresh=true] whether to render the selection mark on mouse moves
+ * @param {boolean} [keyArgs.datumIsRect=true] whether the datum is where the selection rectangle coordinates are stored.
+ * When <tt>false</tt>, the selection rectangle is  
+ * published in a property created on the panel mark: 'selectionRect',
+ * of type {@link pv.Shape.Rect}.
+ * 
  * @see pv.Behavior.drag
  */
-pv.Behavior.select = function() {
+ pv.Behavior.select = function(keyArgs){
   var scene, // scene context
       index, // scene context
-      r, // region being selected
-      m1; // initial mouse position
+      m1,     // initial mouse position
+      mprev,  // the mouse position of the previous event (mouse down or mouse move)
+      events, // event registrations held during each selection
+      r,      // current selection rect
+      downElem,
+      cancelClick,
+      inited;
 
-  /** @private */
-  function mousedown(d, e) {
-    index = this.index;
-    scene = this.scene;
-    m1 = this.mouse();
-    r = d;
-    r.x = m1.x;
-    r.y = m1.y;
-    r.dx = r.dy = 0;
-    pv.Mark.dispatch("selectstart", scene, index, e);
-  }
+    // Redraw mark on mouse move - default is the same as the initial pv.Behavior.select
+    var autoRefresh = def.get(keyArgs, 'autoRefresh', true);
+    
+    // Whether the datum is where the selection rect coordinates are stored
+    var datumIsRect = def.get(keyArgs, 'datumIsRect', true);
+    
+    /** @private protovis mark event handler */
+    function mousedown(d) {
+      var ev = arguments[arguments.length - 1]; // last argument
+      
+      downElem = ev.target;
+      cancelClick = false;
+      index = this.index;
+      scene = this.scene;
+      m1 = this.mouse();
+      
+      // Initialize
+      if(!inited){
+          inited = true;
+          this.addEventInterceptor('click', eventInterceptor, /*before*/true);
+      }
+      
+      // Add event handlers to follow the selection.
+      // These are unregistered on mouse up.
+      if(!events){
+          var root = this.root.scene.$g;
+          events = [
+              // Attaching events to the canvas (instead of only to the document)
+              // allows canceling the bubbling of the events before they 
+              // reach the handlers of ascendant elements (of canvas).
+              [root,     'mousemove', pv.listen(root, 'mousemove', mousemove)],
+              [root,     'mouseup',   pv.listen(root, 'mouseup',   mouseup  )],
+              
+              // It is still necessary to receive events
+              // that are sourced outside the canvas
+              [document, 'mousemove', pv.listen(document, 'mousemove', mousemove)],
+              [document, 'mouseup',   pv.listen(document, 'mouseup',   mouseup  )]
+          ];
+      }
+      
+      if(datumIsRect){
+          r = d;
+          r.x = m1.x;
+          r.y = m1.y;
+          r.dx = r.dy = 0;
+      } else {
+          mprev = m1;
+          this.selectionRect = r = new pv.Shape.Rect(m1.x, m1.y, 0, 0);
+      }
 
-  /** @private */
-  function mousemove(e) {
-    if (!scene) return;
-    scene.mark.context(scene, index, function() {
-        var m2 = this.mouse();
-        r.x = Math.max(0, Math.min(m1.x, m2.x));
-        r.y = Math.max(0, Math.min(m1.y, m2.y));
-        r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
-        r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
-        this.render();
-      });
-    pv.Mark.dispatch("select", scene, index, e);
-  }
+      pv.Mark.dispatch('selectstart', scene, index, ev);
+    }
+    
+    /** @private DOM event handler */
+    function mousemove(ev) {
+        if (!scene) { return; }
+      
+        // Prevent the event from bubbling off the canvas 
+        // (if being handled by the root)
+        ev.stopPropagation();
+      
+        scene.mark.context(scene, index, function() {
+            // this === scene.mark
+            var m2 = this.mouse();
+      
+            if(datumIsRect){
+                r.x = Math.max(0, Math.min(m1.x, m2.x));
+                r.y = Math.max(0, Math.min(m1.y, m2.y));
+                r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
+                r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
+            } else {
+                if(mprev && m2.distance2(mprev).dist2 <= 2){
+                    return;
+                }
+      
+                mprev = m2;
+          
+                var x = m1.x;
+                var y = m1.y;
+                this.selectionRect = r = new pv.Shape.Rect(x, y, m2.x - x, m2.y - y);
+            }
+      
+            if(autoRefresh){
+                this.render();
+            }
+      
+            pv.Mark.dispatch('select', scene, index, ev);
+        });
+    }   
 
-  /** @private */
-  function mouseup(e) {
-    if (!scene) return;
-    pv.Mark.dispatch("selectend", scene, index, e);
-    scene = null;
-  }
+    /** @private DOM event handler */
+    function mouseup(ev) {
+        if (!scene) { return; }
+      
+        // A click event is generated whenever
+        // the element where the mouse goes down
+        // is the same element of where the mouse goes up.
+        // We will try to intercept the generated click event and swallow it,
+        // when a selection has occurred.
+        cancelClick = (downElem === ev.target) && (r.dx > 0 || r.dy > 0);
+        if(!cancelClick){
+            downElem = null;
+        }
+      
+        // Prevent the event from bubbling off the canvas 
+        // (if being handled by the root)
+        ev.stopPropagation();
+      
+        // Unregister events
+        if(events){
+            events.forEach(function(registration){
+                pv.unlisten.apply(pv, registration);
+            });
+            events = null;
+        }
+      
+        pv.Mark.dispatch('selectend', scene, index, ev);
+      
+        // Cleanup
+        if(!datumIsRect){
+            scene.mark.selectionRect = mprev = null;
+        }
+      
+        scene = index = m1 = r = null;
+    }
 
-  pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup", mouseup);
-  return mousedown;
+    /**
+     * Intercepts click events and, 
+     * if they were consequence
+     * of a mouse down and up of a selection,
+     * cancels them.
+     * 
+     * @returns {boolean|array} 
+     * <tt>false</tt> to indicate that the event is handled,
+     * otherwise, an event handler info array: [handler, type, scenes, index, ev].
+     * 
+     * @private
+     */
+    function eventInterceptor(type, ev){
+        if(cancelClick && downElem === ev.target){
+            // Event is handled
+            cancelClick = false;
+            downElem = null;
+            return false;
+        }
+        
+        // Let event be handled normally
+    }
+
+    return mousedown;
 };
+  
 /**
  * Returns a new resize behavior to be registered on mousedown events.
  *

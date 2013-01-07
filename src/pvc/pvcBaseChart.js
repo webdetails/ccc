@@ -225,7 +225,7 @@ def
          * (must be done AFTER processing options
          *  because of width, height properties and noData extension point...) 
          */
-        this._checkNoData();
+        this._checkNoDataI();
         
         /* Initialize root visual roles */
         if(!this.parent && this._createVersion === 1) {
@@ -241,6 +241,8 @@ def
         /* Initialize the data (and _bindVisualRolesPost) */
         this._initData(keyArgs);
 
+        /* When data is excluded, there may be no data after all */
+        this._checkNoDataII();
         
         var hasMultiRole = this._isRoleAssigned('multiChart');
         
@@ -500,9 +502,9 @@ def
     useTextMeasureCache: function(fun, ctx){
         var root = this.root;
         var textMeasureCache = root._textMeasureCache || 
-                               (root._textMeasureCache = pvc.text.createCache());
+                               (root._textMeasureCache = pv.Text.createCache());
         
-        return pvc.text.useCache(textMeasureCache, fun, ctx || this);
+        return pv.Text.usingCache(textMeasureCache, fun, ctx || this);
     },
     
     /**
@@ -600,7 +602,10 @@ def
         groupedLabelSep:   undefined,
 //        measuresIndexes:   undefined,
 //        dataOptions:       undefined,
-//        
+//        dataSeparator
+//        dataMeasuresInColumns
+//        dataCategoriesCount
+        
 //        timeSeries:        undefined,
 //        timeSeriesFormat:  undefined,
 

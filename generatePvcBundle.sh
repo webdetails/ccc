@@ -10,7 +10,7 @@ cp src/lib/* dist/ccc
 cp src/cdf/* dist/ccc
 mv dist/ccc/protovis-d3.3.js dist/ccc/protovis.js
 
-TODAY=$(date "+//VERSION TRUNK-%Y%m%d\n")
+TODAY=$(date "+//VERSION TRUNK-%Y%m%d")
 
 # Def lib
 echo $TODAY > $FILENAMEDEFD

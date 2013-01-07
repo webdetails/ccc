@@ -12,7 +12,6 @@ def
 })
 .add({
     _gridDockPanel: null,
-    _mainContentPanel: null,
     
     axesPanels: null, 
     
@@ -224,7 +223,7 @@ def
         
         /* Create main content panel 
          * (something derived from pvc.CartesianAbstractPanel) */
-        this._mainContentPanel = this._createMainContentPanel(this._gridDockPanel, {
+        this._createPlotPanels(this._gridDockPanel, {
             clickAction:        contentOptions.clickAction,
             doubleClickAction:  contentOptions.doubleClickAction
         });
@@ -289,11 +288,6 @@ def
         }
     },
 
-    /* @abstract */
-    _createMainContentPanel: function(parentPanel, baseOptions){
-        throw def.error.notImplemented();
-    },
-    
     /**
      * Creates a discrete scale for a given axis.
      * <p>
@@ -456,7 +450,7 @@ def
     },
     
     _onLaidOut: function(){
-        if(this._mainContentPanel){ // not the root of a multi chart
+        if(this.plotPanelList && this.plotPanelList[0]){ // not the root of a multi chart
             /* Set scale ranges, after layout */
             ['base', 'ortho'].forEach(function(type){
                 var axes = this.axesByType[type];
@@ -468,7 +462,7 @@ def
     },
     
     _setCartAxisScaleRange: function(axis){
-        var info = this._mainContentPanel._layoutInfo;
+        var info = this.plotPanelList[0]._layoutInfo;
         var size = (axis.orientation === 'x') ?
            info.clientSize.width :
            info.clientSize.height;

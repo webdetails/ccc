@@ -33,7 +33,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="canvas" type="string object" category="General">
+        <c:property name="canvas" type="string object" category="General" excludeIn="cde">
             <c:documentation>
                 The identifier of the HTML element, 
                 or the element itself,
@@ -105,7 +105,7 @@
         
         <c:property name="contentMargins" type="number string pvc.options.varia.Sides" default="0" category="Layout">
             <c:documentation>
-                The margins of the <i>root</i> content panel.
+                The margins of the <i>root</i> content panel, in pixel units or as a percentage.
                 
                 In a <i>small multiples</i> chart, 
                 the margins of the <i>content panel</i> of a <i>small</i> chart 
@@ -118,7 +118,7 @@
         
         <c:property name="contentPaddings" type="number string pvc.options.varia.Sides" default="0" category="Layout">
             <c:documentation>
-                The paddings of the <i>root</i> content panel.
+                The paddings of the <i>root</i> content panel, in pixel units or as a percentage.
                 
                 In a <i>small multiples</i> chart, 
                 the paddings of the <i>content panel</i> of a <i>small</i> chart 
@@ -293,7 +293,37 @@
         <c:property name="isMultiValued" type="boolean" default="false" category="Data Translation">
             <c:documentation>
                 Indicates if the data source has 
-                multiple value dimensions.
+                multiple value and dimensions.
+                
+                In the cross-tab format, 
+                also indicates that multiple series columns can
+                be represented.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataCategoriesCount" type="number" default="1" category="Data Translation">
+            <c:documentation>
+                The number of category-like columns that are
+                present in a data source.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataMeasuresInColumns" type="boolean" default="false" category="Data Translation">
+            <c:documentation>
+                In the cross-tab format, 
+                indicates if, 
+                a column exists for each 
+                series value and measure dimension.
+                
+                This option is only meaningful when <c:link to="#isMultiValued"/>
+                is <tt>true</tt>.
+                 
+                When <tt>true</tt>, 
+                more than one measure can be represented in the cross-tab format,
+                for each series and category pair.
+                
+                When <tt>false</tt>, 
+                the cross-tab format can represent only one measure.
             </c:documentation>
         </c:property>
         

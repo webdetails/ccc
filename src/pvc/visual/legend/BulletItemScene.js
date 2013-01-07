@@ -101,6 +101,6 @@ def
      */
     labelTextSize: function(){
         var valueVar = this.vars.value;
-        return valueVar && pvc.text.getTextSize(valueVar.label, this.vars.font);
+        return valueVar && pv.Text.measure(valueVar.label, this.vars.font);
     }
 });

@@ -4,10 +4,10 @@ new pvc.DotChart({
     height:  300,
     
     timeSeries: true,
-    timeSeriesFormat: "%Y-%m-%d",
+    timeSeriesFormat: '%Y-%m-%d',
     
     title: "A Time Series Dot Chart",
-    titlePosition: "left",
+    titlePosition: 'left',
     titleSize: {height: '100%'},
     orientation:  'vertical',
     animate:       false,

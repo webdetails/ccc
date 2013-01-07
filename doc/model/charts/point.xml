@@ -76,7 +76,10 @@
         
         <c:property name="areasVisible" type="boolean" default="false" category="Style">
             <c:documentation>
-                Indicates if the visual elements are 
+                Indicates if shaded areas are shown in the plot.
+                
+                Specifically, 
+                indicates if the visual elements are 
                 connected with shaded areas extending
                 from the visual elements to the zero line.
             </c:documentation>

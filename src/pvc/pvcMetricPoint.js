@@ -149,7 +149,7 @@ def
      /**
       * @override 
       */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         // TODO: integrate these options in the MetricPointPlot or in the SizeAxis?
         var options = this.options;
         var panelOptions = def.set(
@@ -159,7 +159,6 @@ def
             'autoPaddingByDotSize', options.autoPaddingByDotSize);
         
         var scatterPlot = this.plots.scatter;
-        var scatterChartPanel = 
             this.scatterChartPanel = // V1 property 
             new pvc.MetricPointPanel(this, parentPanel, scatterPlot, panelOptions);
 
@@ -171,8 +170,6 @@ def
                 trendPlot, 
                 Object.create(panelOptions));
         }
-        
-        return scatterChartPanel;
     },
     
     defaults: {

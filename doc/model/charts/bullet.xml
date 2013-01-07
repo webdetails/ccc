@@ -65,7 +65,7 @@
         
         <c:property name="titleRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>title</tt> visual role represents a 
+                The <tt>title</tt> visual role represents 
                 the title of each bullet.
                 
                 The <tt>title</tt> visual role automatically binds to 
@@ -78,7 +78,7 @@
         
         <c:property name="subTitleRole" type="string pvc.options.VisualRole" category="Visual roles">
             <c:documentation>
-                The <tt>subTitle</tt> visual role represents a 
+                The <tt>subTitle</tt> visual role represents 
                 the sub-title of each bullet.
                 
                 The <tt>subTitle</tt> visual role automatically binds to 
@@ -273,7 +273,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="title" type="string" default="'Bullet'" category="Data">
+        <c:property name="title" type="string" default="'Title'" category="Data">
             <c:documentation>
                 The default bullet title.
                 
@@ -282,7 +282,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="subtitle" type="string" category="Data">
+        <c:property name="subtitle" type="string" default="''" category="Data">
             <c:documentation>
                 The default bullet sub-title.
                 

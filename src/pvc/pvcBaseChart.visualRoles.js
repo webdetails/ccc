@@ -270,7 +270,14 @@ pvc.BaseChart
     },
     
     _setRoleBoundDimensionDefaults: function(role, dimName){
-        this._complexTypeProj.setDimDefaults(dimName, role.dimensionDefaults);
+        //var splitId = pvc.splitIndexedId(dimName);
+        
+        this._complexTypeProj
+            .setDimDefaults(dimName, role.dimensionDefaults)
+            ;
+//            .setDimDefaults(dimName, {
+//                label: pvc.buildIndexedId(role.label, splitId[1])
+//            });
     },
     
     _bindVisualRolesPostI: function(){
@@ -322,10 +329,6 @@ pvc.BaseChart
             def.array.lazy(boundDimTypes, dimName).push(role);
         }
         
-        function dimIsNotBoundTo(dimName){
-            return !def.hasOwn(boundDimTypes, dimName); 
-        }
-        
         function dimIsDefined(dimName){
             return complexTypeProj.hasDim(dimName);
         }
@@ -343,20 +346,13 @@ pvc.BaseChart
             role.preBind(pvc.data.GroupingSpec.parse(dimNames));
         }
         
-        function preBindRoleToGroupFreeDims(role, groupDimNames){
-            var freeGroupDimNames = 
-                def
-                .query(groupDimNames)
-                .where(dimIsNotBoundTo);
-
-            if(role.requireSingleDimension){
-                var firstFreeDimName = freeGroupDimNames.first();
-                if(firstFreeDimName){
-                    preBindRoleTo(role, firstFreeDimName);
+        function preBindRoleToGroupDims(role, groupDimNames){
+            if(groupDimNames.length){
+                if(role.requireSingleDimension){
+                    preBindRoleTo(role, groupDimNames[0]);
+                } else {
+                    preBindRoleTo(role, groupDimNames);
                 }
-            } else {
-                // May have no elements
-                preBindRoleTo(role, freeGroupDimNames.array());
             }
         }
         
@@ -386,10 +382,7 @@ pvc.BaseChart
         function autoBindUnboundRole(role){
             var name = role.name;
             
-            if(role.sourceRole && role.isPreBound()){
-                unboundSourcedRoles.push(role);
-                return;
-            }
+            // !role.isPreBound()
             
             /* Try to bind automatically, to defaultDimensionName */
             var dimName = role.defaultDimensionName;
@@ -421,16 +414,13 @@ pvc.BaseChart
                 var groupDimNames = complexTypeProj.groupDimensionsNames(defaultName);
                 if(groupDimNames){
                     // Default dimension(s) is defined
-                    preBindRoleToGroupFreeDims(role, groupDimNames);
+                    preBindRoleToGroupDims(role, groupDimNames);
                     return;
                 }
                 // Follow to auto create dimension
                 
             } else if(dimIsDefined(defaultName)){ // defaultName === dimName
-                if(dimIsNotBoundTo(defaultName)){
-                    preBindRoleTo(role, defaultName);
-      
-                }
+                preBindRoleTo(role, defaultName);
                 return;
             }
 

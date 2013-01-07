@@ -11,6 +11,7 @@
         <t:example title="SIMPLE PIE" />
         <t:example title="RICH PIE" />
         <t:example title="DONUT" />
+        <t:example title="SMALL MULTIPLE PIES" style="wide" />
     </t:template>
     
     <t:template name="Bar" exampleMask="cccBarExample{0}.js">
@@ -25,6 +26,7 @@
         <t:example title="NEGATIVE VALUES STACKED BAR" />
         <t:example title="HORIZONTAL STACKED BAR" />
         <t:example title="ALL IN ONE BAR" />
+        <t:example title="SMALL MULTIPLE BARS" style="wide" />
     </t:template>
     
     <t:template name="Boxplot" exampleMask="cccBoxExample{0}.js">
@@ -153,6 +155,7 @@
         <t:example title="DOTS AND LINES, TWO SERIES" />
         <t:example title="LINES, HORIZONTAL" />
         <t:example title="DOTS, CLICKABLE" />
+        <t:example title="SMALL MULTIPLE BUBBLES" style="wide"/>
     </t:template>
     
 </t:templates>

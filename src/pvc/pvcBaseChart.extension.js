@@ -2,23 +2,28 @@ pvc.BaseChart
 .add({
     
     _processExtensionPoints: function(){
-        var points = this.options.extensionPoints;
-        var components = {};
-        if(points){
-            for(var p in points) {
-                var id, prop;
-                var splitIndex = p.indexOf("_");
-                if(splitIndex > 0){
-                    id   = p.substring(0, splitIndex);
-                    prop = p.substr(splitIndex + 1);
-                    if(id && prop){
-                        var component = def.getOwn(components, id) ||
-                                        (components[id] = new def.OrderedMap());
-                        
-                        component.add(prop, points[p]);
+        var components;
+        if(!this.parent){
+            var points = this.options.extensionPoints;
+            components = {};
+            if(points){
+                for(var p in points) {
+                    var id, prop;
+                    var splitIndex = p.indexOf("_");
+                    if(splitIndex > 0){
+                        id   = p.substring(0, splitIndex);
+                        prop = p.substr(splitIndex + 1);
+                        if(id && prop){
+                            var component = def.getOwn(components, id) ||
+                                            (components[id] = new def.OrderedMap());
+                            
+                            component.add(prop, points[p]);
+                        }
                     }
                 }
             }
+        } else {
+            components = this.parent._components;
         }
         
         this._components = components;

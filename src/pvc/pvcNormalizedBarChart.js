@@ -42,17 +42,14 @@ def
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var barPlot = this.plots.bar;
         
-        var barPanel = 
         this.barChartPanel = 
             new pvc.NormalizedBarPanel(
                 this, 
                 parentPanel, 
                 barPlot, 
                 Object.create(baseOptions));
-        
-        return barPanel;
     }
 });

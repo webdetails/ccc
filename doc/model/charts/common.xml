@@ -27,13 +27,12 @@
         </c:property>
         
         <!-- Panels -->
-        <c:property name="legend" type="boolean pvc.options.panels.LegendPanel" category="Panels">
+        <c:property name="legend" type="boolean pvc.options.panels.LegendPanel" category="Panels" default="false">
             <c:documentation>
                 The legend panel of the root chart.
                 
                 When a value of type <tt>boolean</tt> is specified,
                 it indicates the visibility of the legend.
-                The default is <tt>false</tt>.
             </c:documentation>
         </c:property>
         
@@ -154,16 +153,16 @@
         
         <c:property name="timeSeriesFormat" type="string" default="'%Y-%m-%d'" category="Data">
             <c:documentation>
-                The format string used by default to <i>parse</i>
-                dimensions of the <tt>Date</tt> value type.
+                The format string used to <i>parse</i>
+                dimensions of the <tt>Date</tt> value type, 
+                by default.
                 
                 The syntax of the format string is that of 
                 <i>protovis</i>' date formats.
                 
                 This property changes the default of the 
                 <c:link to="pvc.options.DimensionType#rawFormat" />
-                
-                 property,
+                property,
                 for dimensions with a <tt>Date</tt> value type.  
             </c:documentation>
         </c:property>
@@ -262,7 +261,7 @@
         <c:property name="offset" type="number" default="2">
             <c:documentation>
                 The distance of the closest tooltip edge or corner 
-                to the visual element's tooltip anchor point.
+                to the visual element's tooltip anchor point, in pixel units.
                 
                 The default value depends on the chart type. 
             </c:documentation>
@@ -287,7 +286,7 @@
         
         <c:property name="format" type="pvc.options.varia.TooltipFormatter">
             <c:documentation>
-                A callback function that is called,
+                A callback function that is called
                 to build the tooltip of a visual element.
                 
                 If <c:link to="#html" /> is <tt>true</tt>,

@@ -204,7 +204,7 @@
             for additional information.
         </c:documentation>
         
-        <c:property name="normByCategory" type="boolean" category="Numeric > Scale">
+        <c:property name="normByCategory" type="boolean" category="Numeric > Scale" default="false">
             <c:documentation>
                 A separate scale is used for each category.
                 
