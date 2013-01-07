@@ -64,16 +64,19 @@
 	                    <div class="bodycopytitle"><xsl:value-of select="@title" /></div>
 	                    
 	                    <div class="chartContent">
+	                        <xsl:if test="@style = 'wide'">
+	                           <div class="chartDiv" style="clear:both;float:left; width:880px;"></div>
+	                        </xsl:if>
+	                        
 	                        <div class="chartDefs">
 					            <textarea class="chartDefsTextArea" cols="55" rows="15"><xsl:comment> @RESOURCE@ "<xsl:value-of select="$resourceName" />" </xsl:comment></textarea>
 					            
 					            <button class="tryMe" onclick='tryMe(this)'>Try me</button>
 					        </div>
-					        <div class="chartDiv">
-					           <xsl:if test="@style = 'wide'">
-					               <xsl:attribute name="style" select="'clear:both;float:left; width:880px;'"/>
-					           </xsl:if>
-					        </div>
+					        
+					        <xsl:if test="count(@style) = 0 or @style=''">
+					           <div class="chartDiv"></div>
+					        </xsl:if>
 					        <div class="clear"></div>
 					    </div>
 					    
