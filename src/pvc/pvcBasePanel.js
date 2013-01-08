@@ -1443,10 +1443,11 @@ def
                 // Capture current context
                 var context = myself._getContext(pvMark, null);
                 
-                // discard intermidiate points
-                if (context.scene.isIntermediate)
+                // discard intermediate points
+                if (context.scene.isIntermediate){
                    return null;
-            
+                }
+                
                 return buildTooltip.call(myself, context);
             };
         }
@@ -1455,9 +1456,10 @@ def
             // Capture current context
             var context = myself._getContext(pvMark, null);
             
-            // discard intermidiate points
-            if (context.scene.isIntermediate)
+            // discard intermediate points
+            if (context.scene.isIntermediate){
                 return null;
+            }
             
             context.pin();
             
