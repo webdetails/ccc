@@ -175,7 +175,7 @@ def
     defaults: {
         axisOriginIsZero: false,
         
-        tooltipOffset: 15
+        tooltipOffset: 10
         
         /* Continuous Color Role */
         // TODO:

@@ -147,7 +147,7 @@ def
     },
     
     defaults: {
-        tooltipOffset: 15
+        tooltipOffset: 10
     }
 });
 
