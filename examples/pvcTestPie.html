@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC Samples - Pie</title>
+
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+    
+    <script type="text/javascript" src="../src/data/q01-01.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+    <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
+        <script type="text/javascript" src="../src/def/def.js"></script>
+
+
+    <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../src/pvc/pvc.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.trends.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexTypeProject.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.visualRoles.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.data.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.plots.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.axes.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.panels.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.selection.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.extension.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MetricPointChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+    <!-- @SCRIPTSEND@ -->
+    
+    
+
+    
+        
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
+  <body>
+
+    <h1>
+      Pie Chart
+    </h1>
+Pie charts are useful for performing relative comparisons: how do the parts make up the whole? 
+An alternative to pie is the donut chart.
+
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Lifecycle</h4>
+<ul>
+  <li>renderCallback - executed immediatly before render is called</li>
+</ul>
+<h4>Legend properties</h4>
+<ul>
+  <li>legend (true|false)</li>
+  <li>legendPosition (right, top, bottom, left)</li>
+  <li>legendAlign (right, left, center, top, middle, bottom)</li>
+  <li>legendSize</li>
+  <li>legendDrawLine (true|false)</li>
+  <li>legendDrawMarker (true|false)</li>
+  <li>tooltipEnabled (true|false)</li>
+</ul>
+<h4>Slice properties</h4>
+<ul>
+  <li>valuesVisible - Show or hide slice value. Default: false</li>
+  <li>innerGap - The percentage of the inner area used by the
+pie. Default: 0.9 (90%)</li>
+  <li>explodedSliceIndex - Index of the slice to explode.
+Default: null</li>
+  <li>explodedSliceRadius - If one wants a pie with an exploded
+effect,&nbsp;specify a value in pixels here. If above argument is
+specified, explodes only one slice.&nbsp;Else explodes all.
+Default: 0<br>
+  </li>
+</ul>
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for&nbsp;Pie extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>
+  <li>legendArea_</li>
+  <li>legendPanel_</li>
+  <li>legendRule_</li>
+  <li>legendDot_</li>
+  <li>legendLabel_</li>
+  <li>tooltip_</li>
+  <li>slice_</li>
+  <li>sliceLabel_</li>
+  <li>chart_</li>
+</ul>
+Sample extension points:<br>
+<ul>
+  <li>base_fillStyle</li>
+  <li>titleLabel_font</li>
+  <li>sliceLabel_textAngle</li>
+</ul>
+
+<h2>Examples</h2>
+<h3>A Simple Pie </h3>
+This is the simplest pie ever. Just provide the dimensions,
+a title and the data to be rendered.<br/>
+<textarea cols="55" rows="18" id="pvcPie1Code">
+var pie = new pvc.PieChart({
+    canvas: "pvcPie1",
+    width: 450,
+    height: 350,
+    title: "Simple Pie",
+    animate: false,
+    selectable: true,
+    hoverable: true,
+    tooltipEnabled: true,
+    
+    valuesVisible: true,
+    valuesLabelStyle: 'inside',
+    valuesMask: "{category}",
+    
+    extensionPoints: {
+       titleLabel_font: "18px sans-serif",
+       slice_strokeStyle: 'white',
+       //slice_lineWidth:   0.6,
+       //base_fillStyle:  'blue' 
+    }
+});
+pie.setData($.extend(true, {},relational_03),
+    {crosstabMode: false,
+    seriesInRows: false});
+pie.render();
+
+</textarea>
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcPie1"></div>
+<h3>A Rich Pie </h3>
+Any simple pie can be enhanced by configuring the legends,
+setting colors, fonts, and more.<br/>
+<textarea cols="55" rows="22" id="pvcPie2Code">
+        var pie = new pvc.PieChart({
+          canvas: "pvcPie2",
+          width: 600,
+          height: 400,
+          animate: false,
+          title: "Sample Pie",
+          titlePosition: "left",
+          titleSize: 40,
+          legend: true,
+          legendPosition: "right",
+          legendAlign: "top",
+          legendShape: 'circle',
+          tooltipEnabled: false,
+          leafContentPaddings: '5%',
+          valuesVisible: true,
+          selectable: true,
+          hoverable: true,
+          explodedSliceIndex: 4,
+          explodedSliceRadius: 15,
+          colors: ["#8ED300","#7CB021","#568000","#3A3A3A","#969696","#F5F4F2"],
+          extensionPoints: {
+            base_fillStyle: "lightgray",
+            title_fillStyle: "lightblue",
+            titleLabel_font: "16px sans-serif",
+            legend_fillStyle: "green",
+            chart_fillStyle: "#eee"
+          }
+        });
+
+        pie.setData($.extend(true, {},relational_03),
+           {crosstabMode: false,
+            seriesInRows: false});
+        pie.render();
+</textarea>
+
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcPie2"></div>
+    
+<h3>A Donut</h3>
+
+
+A pie can be converted into a donut by simple adding an extension point:
+<ul>
+  <li>slice_innerRadius</li>
+</ul>
+<textarea cols="55" rows="23" id="pvcPie3Code">
+        var pie = new pvc.PieChart({
+          canvas: "pvcPie3",
+          width: 600,
+          height: 400,
+          title: "Sample Donut",
+          titlePosition: "bottom",
+          legend: false,
+          tooltipEnabled: true,
+          explodedSliceRadius: 15,
+          valuesVisible: true,
+          selectable: true,
+          hoverable:  true,
+          extensionPoints: {
+            //slice_innerRadius: 30,
+            slice_innerRadiusEx: '60%',
+            titleLabel_font: "18px sans-serif"
+          }
+        });
+
+        pie.setData($.extend(true, {},relational_03),
+            {crosstabMode: false,
+             seriesInRows: false});
+        pie.render();
+
+</textarea>
+
+        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+        <div id="pvcPie3"></div>
+  </body>
+</html>

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:facetType name="MultiChartFacet" space="pvc.options.charts">
+        <c:documentation>
+            The options documentation class of the multi-chart facet.
+        </c:documentation>
+        
+        <c:property name="multiChartRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>multiChart</tt> visual role
+                allows turning a chart in a <i>small multiples</i> chart
+                <c:link to="http://en.wikipedia.org/wiki/Small_multiple" />.
+                
+                Almost all main chart types support being shown
+                as a small multiples chart.
+                Currently, the exceptions are the charts: 
+                <i>Heat Grid</i>, 
+                <i>Bullet</i>, 
+                <i>Data Tree</i> and
+                <i>Parallel Coordinates</i>.
+                
+                The <tt>multiChart</tt> visual role
+                can be bound to any number of dimensions,
+                that are, or will be turned into, discrete.
+                
+                The <tt>multiChart</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>multiChart</tt> prefix.
+                
+                One <i>small</i> chart is generated per
+                unique combination of the values of the bound dimensions
+                that is present in the source data.
+                Each small chart then receives as its data
+                the partition of the source data that shares its 
+                unique combination of values.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallTitle" type="pvc.options.panels.ChartTitlePanel" category="Multi-Chart > Panels">
+            <c:documentation>
+                The title panel of the <i>small</i> chart.
+                
+                The text of the title of small charts is the 
+                compound label of the data bound to the <tt>multiChart</tt> visual role.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="multiChartIndexes" type="number string list(number string)" category="Data Translation">
+            <c:documentation>
+                The indexes of the data source's <i>virtual item</i> columns
+                that are to feed the 
+                default 
+                <tt>multiChart</tt>, 
+                <tt>multiChart2</tt>, ... 
+                dimensions.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="multiChartMax" type="number" default="Infinity" category="Multi-Chart > Layout">
+            <c:documentation>
+                The maximum number of <i>small</i> charts that should
+                be displayed.
+                
+                The first <i>small</i> charts are chosen.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="multiChartColumnsMax" type="number" default="3" category="Multi-Chart > Layout">
+            <c:documentation>
+                The maximum number of <i>small</i> charts that should
+                be displayed in a row.
+                
+                This property can receive a value of <tt>Infinity</tt>
+                to indicate that all charts should be laid out in a single row.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallWidth" type="number string" category="Multi-Chart > Layout">
+            <c:documentation>
+                Fixates the width of each <i>small</i> chart, in pixel units or as a percentage.
+                
+                A value of type <tt>number</tt>, 
+                or of type <tt>string</tt>, but with numeric content, 
+                is interpreted as being in pixel units.
+                
+                A value of type <tt>string</tt>, 
+                with numeric content that is suffixed by a "%" character,
+                is interpreted as a percentage of the initially available content width.
+                
+                This property may cause the <i>small multiples</i> chart 
+                to take up a greater width than the one specified in <c:link to="#width" />.
+                
+                When this property is unspecified,
+                a specified finite value, or a defaulted value, of the property <c:link to="#multiChartColumnsMax" /> is
+                used to determine it: 
+                by dividing the initially available content width 
+                by the maximum number of charts in a row that <i>actually</i> occur
+                (so that if there are less small charts than 
+                the maximum that can be placed in a row, 
+                these, nevertheless, take up the whole width).
+                 
+                When an infinite value is specified for 
+                <c:link to="#multiChartColumnsMax" />, 
+                the small charts are laid out in a single row, 
+                and so the width is calculated from the height <c:link to="#smallHeight" />, 
+                using the aspect ratio <c:link to="#smallAspectRatio" />.
+                The height is defaulted to the initially available content height.
+                The aspect ratio is defaulted to a value that depends on the chart type,
+                but is something around <tt>4/3</tt>.
+                The width is then calculated.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallHeight" type="number string" category="Multi-Chart > Layout">
+            <c:documentation>
+                Fixates the height of each <i>small</i> chart, in pixel units or as a percentage.
+                
+                A value of type <tt>number</tt>, 
+                or of type <tt>string</tt>, but with numeric content, 
+                is interpreted as being in pixel units.
+                
+                A value of type <tt>string</tt>, 
+                with numeric content that is suffixed by a "%" character,
+                is interpreted as a percentage of the initially available content height.
+                
+                This property may cause the <i>small multiples</i> chart 
+                to take up a greater width than the one specified in <c:link to="#height" />.
+                
+                When this property is unspecified, 
+                its value depends on the evaluation of the
+                <c:link to="#smallWidth" /> property, 
+                which may impose it a value. 
+                If after the evaluation of <c:link to="#smallWidth" /> 
+                this property remains unspecified, 
+                it is determined as follows.
+                 
+                If the layout will have a single column 
+                and the property <c:link to="#multiChartSingleColFillsHeight" />
+                is <tt>true</tt> (it is by default)
+                then the height will be the initially available content height.
+                
+                If the layout will have a single row 
+                and the property <c:link to="#multiChartSingleRowFillsHeight" />
+                is <tt>true</tt> (it is by default)
+                then the height will be the initially available content height.
+                
+                Otherwise, the property <c:link to="#smallAspectRatio" /> is 
+                used to determine the height of the small chart from its determined width.
+                
+                The aspect ratio is defaulted to a value that depends on the chart type,
+                but is something around <tt>4/3</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallAspectRatio" type="number" category="Multi-Chart > Layout">
+            <c:documentation>
+                The ratio of the width over the height of a <i>small</i> chart.
+                
+                It is used when the set of properties
+                <c:link to="#smallWidth" />,
+                <c:link to="#smallHeight" />,
+                <c:link to="#multiChartColumnsMax" />,
+                <c:link to="#multiChartSingleRowFillsHeight" /> and
+                <c:link to="#multiChartSingleColFillsHeight" />,
+                is under-specified and 
+                is not enough to determine the value of both
+                <c:link to="#smallWidth" /> and
+                <c:link to="#smallHeight" />.
+                
+                The default value of the aspect ratio depends on the chart type,
+                but is something around <tt>4/3</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="multiChartSingleRowFillsHeight" type="boolean" default="true" category="Multi-Chart > Layout">
+            <c:documentation>
+                Indicates that, 
+                when the layout results in a single row
+                and the value of <c:link to="#smallHeight" />
+                is still to be determined, 
+                it should be set to all the initially available content height,
+                instead of determining the height from the 
+                <c:link to="#smallAspectRatio" /> and the <c:link to="#smallWidth" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="multiChartSingleColFillsHeight" type="boolean" default="true" category="Multi-Chart > Layout">
+            <c:documentation>
+                Indicates that, 
+                when the layout results in a single column
+                and the value of <c:link to="#smallHeight" />
+                is still to be determined, 
+                it should be set to all the initially available content height,
+                instead of determining the height from the 
+                <c:link to="#smallAspectRatio" /> and the <c:link to="#smallWidth" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallMargins" type="number string pvc.options.varia.Sides" default="'2%'" category="Multi-Chart > Layout">
+            <c:documentation>
+                The margins of a <i>small</i> chart.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallPaddings" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart > Layout">
+            <c:documentation>
+                The paddings of a <i>small</i> chart.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallContentMargins" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart > Layout">
+            <c:documentation>
+                The margins of the <i>content panel</i> of a <i>small</i> chart. 
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallContentPaddings" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart > Layout">
+            <c:documentation>
+                The paddings of the <i>content panel</i> of a <i>small</i> chart.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+    
+</c:model>

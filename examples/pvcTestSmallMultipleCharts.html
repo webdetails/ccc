@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CCC Samples - Small Multiples Chart</title>
+
+        <meta name="svg.render.forceflash" content="true">
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+        
+        <script type="text/javascript" src="../src/data/q01-01.js"></script>
+        <script type="text/javascript" src="../src/data/steel-wheels.js"></script>
+        <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+        <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+        <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+        <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+        <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet" />
+        <script type="text/javascript" src="../src/def/def.js"></script>
+
+        
+        <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../src/pvc/pvc.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.trends.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexTypeProject.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.visualRoles.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.data.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.plots.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.axes.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.panels.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.selection.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.extension.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MetricPointChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+        <!-- @SCRIPTSEND@ -->
+    
+        <link type="text/css" rel="stylesheet" href="pvcDocUtils.css"/>
+        <script type="text/javascript" src="pvcDocUtils.js"></script>
+        <script type="text/javascript">
+        var baseExampleDef = {
+            def: {
+                width: 1000,
+                animate: false,
+                legend:  true,
+                legendPosition: "right",
+                legendAlign: "top",
+                selectable:  true,
+                hoverable: true,
+                margins: {all: 10},
+                
+                
+                ignoreNulls: false,
+                multiChartSingleRowFillsHeight: false, 
+                
+                timeSeries: false,
+                //timeSeriesFormat: "%Y-%m-%d",
+                
+                orthoAxisGrid: true,
+                
+                extensionPoints: {
+                    titleLabel_font: "bold 14px sans-serif"
+                },
+                
+                /* Data format */
+                crosstabMode: false,
+                seriesInRows: false
+             }
+        };
+        
+        pvc.examples.register(def.create(baseExampleDef, {
+            id: 'multi01',
+            className: 'BarChart',
+            dataVar:   'testHeatGridComp',
+            showProps: ['stacked'],
+            def: {
+                /* Top */
+                title:      "Multi-chart of horizontal stacked bar charts",
+                //width:  800,
+                //height: 100,
+                
+                groupedLabelSep: " & ",
+                
+                trendType: 'linear',
+                
+                /* Multi-chart */
+
+                //multiChartIndexes: 1,
+                //multiChartColumnsMax: Infinity,
+                multiChartMax: 10,
+                
+                /* Small charts */
+                orientation: 'vertical',
+                stacked:     false,
+                orthoAxisTitle: "Quantity sold",
+                baseAxisTitle:  "Country",
+                valuesVisible:  false,
+                
+                /* Data translation */
+                crosstabMode: true,
+                readers: [
+                   {names: 'series',     indexes: 2}, // Product
+                   {names: 'multiChart', indexes: 3}, // Territory
+                   {names: 'category',   indexes: 4}, // Country
+                   {names: 'value',      indexes: 5}
+                ],
+                isMultiValued: true,
+                dataCategoriesCount: 2,
+                dataMeasuresInColumns: true
+             }
+        }));
+        
+        pvc.examples.register(def.create(baseExampleDef, {
+            id: 'multi02',
+            className: 'LineChart',
+            dataVar:   'steelWheels01',
+            showProps: ['areasVisible', 'dotsVisible', 'stacked'],
+            def: {
+                /* Top */
+                title:   "Multi-chart of line charts with area",
+                //height:  100,
+                
+                /* Multi-chart */
+                //multiChartIndexes: 1,
+                //multiChartColumnsMax: Infinity,
+                multiChartMax: 8,
+                
+                nullInterpolationMode: 'linear',
+                
+                /* Small charts */
+                //orientation: 'horizontal',
+                yAxisDesiredTickCount: 4,
+                valuesVisible:  false,
+                areasVisible:   true,
+                //dotsVisible:    true,
+                extensionPoints: {
+                    xAxisLabel_textAngle:    -Math.PI/4,
+                    xAxisLabel_textAlign:    "right",
+                    xAxisLabel_textBaseline: "top"
+                },
+        
+                /* Visual Role mapping */
+                visualRoles: {
+                    multiChart: "territory, country",
+                    series:     "year desc, quarter desc",
+                    category:   "line",
+                    value:      "sales"
+                },
+                
+                /* Data definition */
+                dimensions: {
+                    year:      {formatter: steelWheels01.yearAndQuarterFormatter },
+                    quarter:   {formatter: steelWheels01.yearAndQuarterFormatter },
+                    territory: {formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    country:   {formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    line:      {label: "Product Line", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+
+                    sales:     {valueType: Number}
+                },
+                    
+                /* Data mapping */
+                readers: [
+                   {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
+                ],
+                
+                /* Source Data Format */
+                crosstabMode: true,
+                isMultiValued: true,
+                dataCategoriesCount: 3,
+                dataMeasuresInColumns: true
+             }
+        }));
+        
+        pvc.examples.register(def.create(baseExampleDef, {
+            id: 'multi03',
+            className: 'PieChart',
+            dataVar:   'steelWheels01',
+            //showProps: ['areasVisible', 'stacked'],
+            def: {
+                /* Top */
+                title:   "Multi-chart of pie charts",
+                height:  400,
+                
+                legendAlign:  "middle",
+                legendAlignTo:"page-middle",
+                //legendOffset: {x: 0, y: 0},
+                
+                /* Multi-chart */
+                //multiChartIndexes: 1,
+                //multiChartColumnsMax: Infinity,
+                multiChartMax: 9,
+                
+
+                /* Small charts */
+                valuesVisible:  true,
+                innerGap: 0.9,
+                
+                extensionPoints: {
+                    //slice_innerRadius:20,
+                },
+        
+                /* Visual Role mapping */
+                visualRoles: {
+                    multiChart: "territory, country",
+                    //series:   "year desc, quarter desc",
+                    category:   "line",
+                    value:      "sales"
+                },
+                
+                /* Data definition */
+                dimensions: {
+                    year:      {formatter: steelWheels01.yearAndQuarterFormatter },
+                    quarter:   {formatter: steelWheels01.yearAndQuarterFormatter },
+                    territory: {formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    country:   {formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    line:      {label: "Product Line", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    sales:     {valueType: Number}
+                },
+                    
+                /* Data mapping */
+                readers: [
+                    {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
+                ],
+                
+                /* Source Data Format */
+                crosstabMode: true,
+                isMultiValued: true,
+                dataCategoriesCount: 3,
+                dataMeasuresInColumns: true
+             }
+        }));
+        
+        pvc.examples.register(def.create(baseExampleDef, {
+            id: 'multi04',
+
+            className: 'MetricDotChart',
+            dataVar:   'testHeatGrid4Measures',
+
+
+            showProps: ['linesVisible', 'dotsVisible'],
+            def: {
+                /* Top */
+                title:   "Multi-chart of scatter dot charts (Qty x Sales)",
+                height:  500,
+                
+                /* Multi-chart */
+                //multiChartIndexes: 1,
+
+                //multiChartColumnsMax: Infinity,
+                multiChartMax: 9,
+                
+                //trendType: 'linear',
+                
+                /* Small charts */
+                //orientation: 'horizontal',
+                originIsZero: false,
+                
+                linesVisible:  false,
+                valuesVisible: false,
+                axisGrid: true,
+                
+                /* Visual Role mapping */
+                visualRoles: {
+                    multiChart: "territory, country",
+                    //series:  "pline",
+                    x: "quantity",
+                    y: "sales",
+                    //color: {from:'series'},
+                    color: "esales",
+                    size: "psales"
+                },
+                
+                /* Data definition */
+
+                dimensions: {
+                    territory: {label: "Territory" },
+                    country:   {label: "Country" },
+                    pclass:    {label: "Class" },
+                    pline:     {label: "Product Line" },
+                    product:   {label: "Product" },
+                    quantity:  {label: "Quantity",       valueType: Number},
+                    sales:     {label: "Sales",          valueType: Number},
+                    esales:    {label: "Expected Sales", valueType: Number},
+                    psales:    {label: "Previous Sales", valueType: Number}
+                },
+                    
+                /* Data mapping */
+                readers: [
+                   {names: ['pclass', 'pline', 'product',
+                            'territory', 'country',
+                            'quantity', 'sales', 'esales', 'psales']}
+                ],
+                
+                /* Source Data Format */
+                crosstabMode: true,
+                isMultiValued: true,
+                dataCategoriesCount: 2,
+                dataMeasuresInColumns: true
+             }
+        }));
+
+        pvc.examples.register(def.create(baseExampleDef, {
+            id: 'multi05',
+            className: 'BarChart',
+            dataVar:   'steelWheels01',
+            showProps: ['stacked'],
+            def: {
+                /* Top */
+                title:   "Multi-chart of bar charts",
+                height:  100,
+
+                /* Multi-chart */
+                //multiChartIndexes: 1,
+                //multiChartColumnsMax: Infinity,
+                multiChartMax: 9,
+                
+                //plot2: true,
+                //plot2OrthoAxis: 2,
+                
+                /* Small charts */
+                orientation: 'horizontal',
+                stacked:     true,
+                //xAxisTitle:  "Sales",
+                //yAxisTitle:  "Product Line",
+                valuesVisible:  false,
+                
+                /* Visual Role mapping */
+                visualRoles: {
+                    multiChart: "territory, country",
+                    series:     "year desc, quarter desc",
+                    category:   "line",
+                    value:      "sales"
+                },
+
+                /* Data definition */
+                dimensions: {
+                    year:      {label: "Year", formatter: steelWheels01.yearAndQuarterFormatter },
+                    quarter:   {label: "Quarter", formatter: steelWheels01.yearAndQuarterFormatter },
+                    territory: {label: "Territory", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    country:   {label: "Country", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    line:      {label: "Product Line", formatter: steelWheels01.territoryAndCountryAndLineFormatter },
+                    sales:     {label: "Sales", valueType: Number}
+                },
+
+                /* Data mapping */
+                readers: [
+                   {names: ['year', 'quarter', 'territory', 'country', 'line', 'sales']}
+                   /*,
+                   {
+                       names: 'dataPart', 
+                       reader: function(vitem, dataPartDim){
+                           if(vitem[0] === '[Time].[2005]'){
+                               return 1;
+                           }
+                           return 0;
+                       }
+                   }*/
+                ],
+
+                /* Source Data Format */
+                crosstabMode: true,
+                isMultiValued: true,
+                dataCategoriesCount: 3,
+                dataMeasuresInColumns: true
+             }
+        }));
+
+        </script>
+    </head>
+    <body>
+       <h2>Multi-chart examples</h2>
+       <div id="examples"></div>
+    </body>
+</html>

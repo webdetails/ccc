@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="WaterfallChart" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.BarChartCommon">
+        <c:documentation>
+            The options documentation class of the <b>Waterfall</b> chart.
+        </c:documentation>
+        
+        <c:property name="water" expandUse="optional" type="pvc.options.plots.WaterfallPlot" category="Plots">
+            <c:documentation>
+                The waterfall plot is the <b>main plot</b> of the waterfall chart,
+                which means that 
+                its properties may be used <i>without</i> the "water" property suffix.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="WaterfallPlot" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.BarPlotCommon"
+                   facets="pvc.options.plots.MainPlotFacet"
+                   use="expanded">
+        <c:documentation>
+            The options documentation class of the <b>Bar</b> plot.
+        </c:documentation>
+    
+        <c:property name="stacked" fixed="true" type="boolean">
+            <c:documentation>
+                This plot type is necessarily stacked.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="direction" type="pvc.options.varia.WaterDirection" default="'down'" category="Style">
+            <c:documentation>
+                The direction of the waterfall.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="totalLineLabel" type="string" default="'Accumulated'" category="Style">
+            <c:documentation>
+                The description of the legend item of
+                the water line.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="allCategoryLabel" type="string" default="'All'" category="Style">
+            <c:documentation>
+                The description of the fictitious root category 
+                that aggregates all other categories.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="totalValuesVisible" type="boolean" category="Style">
+            <c:documentation>
+                Indicates if value labels are shown above or below
+                the water line showing the accumulated value.
+                
+                The default value is 
+                the value of the property
+                <c:link to="pvc.options.plots.Plot#valuesVisible" />. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="areasVisible" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if shaded areas are shown in the plot.
+                
+                Specifically, 
+                indicates if areas are shown surrounding the bars of each 
+                category group.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.WaterfallPlotExtensionPoints" category="Style" expandUse="optional">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the plot.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+    <c:complexType name="WaterfallPlotExtensionPoints" 
+                   space="pvc.options.ext"
+                   use="expanded"
+                   base="pvc.options.ext.BarPlotCommonExtensionPoints">
+        <c:documentation>
+            The extension points of the waterfall plot type.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>plot property name (ex: <tt>water</tt>)</li>
+                <li>extension property (ex: <tt>line</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>waterLine_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            The extension points of the <i>main plot</i> of a chart
+            may be used without the plot property name prefix.
+            In the example, when the <tt>water</tt> plot is the main plot, 
+            the extension point can be written as <tt>line_strokeStyle</tt>.
+        </c:documentation>
+        
+        <c:property name="group" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the group panel mark.
+                
+                The group panel visually contains all bars that 
+                belong to the same group.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="line" type="pvc.options.marks.LineExtensionPoint">
+            <c:documentation>
+                The extension point of the top water line mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="lineLabel" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the category total label mark, 
+                that is placed near the water line.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+</c:model>

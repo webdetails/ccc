@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="AreaExtensionPoint" 
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.MarkExtensionPoint"
+                   facets="pvc.options.marks.StrokeBasicFacet
+                           pvc.options.marks.FillBasicFacet
+                           pvc.options.marks.StrokeJoinFacet
+                           pvc.options.marks.LineAreaInterpolateFacet">
+         <c:documentation>
+            The class of protovis Area extension points.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Area.html" />.
+        </c:documentation>
+        
+        <c:property name="width" type="number">
+            <c:documentation>
+                The width of the area (use for horizontal orientation).
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="height" type="number">
+            <c:documentation>
+                The height of the area (use for vertical orientation). 
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+</c:model>

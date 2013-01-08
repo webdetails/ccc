@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="DotExtensionPoint" 
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.MarkExtensionPoint"
+                   facets="pvc.options.marks.StrokeBasicFacet
+                           pvc.options.marks.FillBasicFacet">
+         <c:documentation>
+            The class of protovis Dot extension points.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Dot.html" />.
+        </c:documentation>
+        
+        <c:property name="shapeAngle" type="number" default="0">
+            <c:documentation>
+                The rotation angle, in <i>radian</i> units.
+                
+                Some shapes, 
+                like the <c:link to="pvc.options.varia.DotShapeType#Cross" />
+                are sensitive to rotation.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="shape" type="pvc.options.varia.DotShapeType">
+            <c:documentation>
+                The name of the shape that the dot assumes.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="shapeRadius" type="number">
+            <c:documentation>
+                The radius of the dot, in <i>pixel</i> units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="shapeSize" type="number">
+            <c:documentation>
+                The size of the dot, in <i>square pixel</i> units.
+                
+                The size is proportional to the area of the shape
+                and is better suited than the <c:link to="#shapeRadius" /> 
+                for representing measures.
+                
+                For the record: <tt>size = radius * radius</tt>.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+</c:model>

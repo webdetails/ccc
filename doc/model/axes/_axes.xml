@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:space name="pvc.options.axes">
+        <c:documentation>
+            The namespace of CCC axes options classes. 
+        </c:documentation>
+    </c:space>
+    
+    <c:include the="axes/axis-color.xml" />
+    <c:include the="axes/axis-size.xml"  />
+    
+    <c:include the="axes/axis-cartesian.xml" />
+    <c:include the="axes/axis-cartesian-discrete.xml" />
+    <c:include the="axes/axis-cartesian-continuous.xml" />
+    <c:include the="axes/axis-cartesian-numeric.xml" />
+</c:model>

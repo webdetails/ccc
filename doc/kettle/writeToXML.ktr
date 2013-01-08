@@ -1,0 +1,3609 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+  <info>
+    <name>writeToXML</name>
+    <description/>
+    <extended_description/>
+    <trans_version/>
+    <trans_type>Normal</trans_type>
+    <trans_status>0</trans_status>
+    <directory>&#47;</directory>
+    <parameters>
+    </parameters>
+    <log>
+<trans-log-table><connection/>
+<schema/>
+<table/>
+<size_limit_lines/>
+<interval/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STATUS</id><enabled>Y</enabled><name>STATUS</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name><subject/></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name><subject/></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name><subject/></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name><subject/></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name><subject/></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name><subject/></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>STARTDATE</id><enabled>Y</enabled><name>STARTDATE</name></field><field><id>ENDDATE</id><enabled>Y</enabled><name>ENDDATE</name></field><field><id>LOGDATE</id><enabled>Y</enabled><name>LOGDATE</name></field><field><id>DEPDATE</id><enabled>Y</enabled><name>DEPDATE</name></field><field><id>REPLAYDATE</id><enabled>Y</enabled><name>REPLAYDATE</name></field><field><id>LOG_FIELD</id><enabled>Y</enabled><name>LOG_FIELD</name></field></trans-log-table>
+<perf-log-table><connection/>
+<schema/>
+<table/>
+<interval/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>SEQ_NR</id><enabled>Y</enabled><name>SEQ_NR</name></field><field><id>LOGDATE</id><enabled>Y</enabled><name>LOGDATE</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STEPNAME</id><enabled>Y</enabled><name>STEPNAME</name></field><field><id>STEP_COPY</id><enabled>Y</enabled><name>STEP_COPY</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>INPUT_BUFFER_ROWS</id><enabled>Y</enabled><name>INPUT_BUFFER_ROWS</name></field><field><id>OUTPUT_BUFFER_ROWS</id><enabled>Y</enabled><name>OUTPUT_BUFFER_ROWS</name></field></perf-log-table>
+<channel-log-table><connection/>
+<schema/>
+<table/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>LOG_DATE</id><enabled>Y</enabled><name>LOG_DATE</name></field><field><id>LOGGING_OBJECT_TYPE</id><enabled>Y</enabled><name>LOGGING_OBJECT_TYPE</name></field><field><id>OBJECT_NAME</id><enabled>Y</enabled><name>OBJECT_NAME</name></field><field><id>OBJECT_COPY</id><enabled>Y</enabled><name>OBJECT_COPY</name></field><field><id>REPOSITORY_DIRECTORY</id><enabled>Y</enabled><name>REPOSITORY_DIRECTORY</name></field><field><id>FILENAME</id><enabled>Y</enabled><name>FILENAME</name></field><field><id>OBJECT_ID</id><enabled>Y</enabled><name>OBJECT_ID</name></field><field><id>OBJECT_REVISION</id><enabled>Y</enabled><name>OBJECT_REVISION</name></field><field><id>PARENT_CHANNEL_ID</id><enabled>Y</enabled><name>PARENT_CHANNEL_ID</name></field><field><id>ROOT_CHANNEL_ID</id><enabled>Y</enabled><name>ROOT_CHANNEL_ID</name></field></channel-log-table>
+<step-log-table><connection/>
+<schema/>
+<table/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>LOG_DATE</id><enabled>Y</enabled><name>LOG_DATE</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STEPNAME</id><enabled>Y</enabled><name>STEPNAME</name></field><field><id>STEP_COPY</id><enabled>Y</enabled><name>STEP_COPY</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>LOG_FIELD</id><enabled>N</enabled><name>LOG_FIELD</name></field></step-log-table>
+    </log>
+    <maxdate>
+      <connection/>
+      <table/>
+      <field/>
+      <offset>0.0</offset>
+      <maxdiff>0.0</maxdiff>
+    </maxdate>
+    <size_rowset>10000</size_rowset>
+    <sleep_time_empty>50</sleep_time_empty>
+    <sleep_time_full>50</sleep_time_full>
+    <unique_connections>N</unique_connections>
+    <feedback_shown>Y</feedback_shown>
+    <feedback_size>50000</feedback_size>
+    <using_thread_priorities>Y</using_thread_priorities>
+    <shared_objects_file/>
+    <capture_step_performance>N</capture_step_performance>
+    <step_performance_capturing_delay>1000</step_performance_capturing_delay>
+    <step_performance_capturing_size_limit>100</step_performance_capturing_size_limit>
+    <dependencies>
+    </dependencies>
+    <partitionschemas>
+    </partitionschemas>
+    <slaveservers>
+    </slaveservers>
+    <clusterschemas>
+    </clusterschemas>
+  <created_user>-</created_user>
+  <created_date>2012&#47;11&#47;19 11:47:59.577</created_date>
+  <modified_user>-</modified_user>
+  <modified_date>2012&#47;11&#47;19 11:47:59.577</modified_date>
+  </info>
+  <notepads>
+    <notepad>
+      <note>Process component XML File</note>
+      <xloc>438</xloc>
+      <yloc>619</yloc>
+      <width>145</width>
+      <heigth>21</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+    <notepad>
+      <note>Process properties XML Files</note>
+      <xloc>436</xloc>
+      <yloc>224</yloc>
+      <width>144</width>
+      <heigth>21</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+    <notepad>
+      <note>Results with redundant informations for properties.</note>
+      <xloc>1107</xloc>
+      <yloc>478</yloc>
+      <width>242</width>
+      <heigth>21</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+    <notepad>
+      <note>Merge components&#47;properties with main charts</note>
+      <xloc>229</xloc>
+      <yloc>13</yloc>
+      <width>225</width>
+      <heigth>21</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+    <notepad>
+      <note>Manual Exceptions not in CCCv2 Docs</note>
+      <xloc>151</xloc>
+      <yloc>386</yloc>
+      <width>188</width>
+      <heigth>21</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+  </notepads>
+  <order>
+  <hop> <from>Components&#47;Properties Table File</from><to>Sort Base File</to><enabled>Y</enabled> </hop>  <hop> <from>CDF Charts</from><to>Sort Charts</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Charts</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join</from><to>Select rows</to><enabled>Y</enabled> </hop>  <hop> <from>sort</from><to>group</to><enabled>Y</enabled> </hop>  <hop> <from>change type</from><to>String operations</to><enabled>Y</enabled> </hop>  <hop> <from>String operations</from><to>fiter extensions</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions</from><to>Extension Points</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions</from><to>copy results</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comps</from><to>Group by</to><enabled>Y</enabled> </hop>  <hop> <from>Group by</from><to>prop XML</to><enabled>Y</enabled> </hop>  <hop> <from>copy results</from><to>fiter extensions 2</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions 2</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>fiter extensions 2</from><to>Extension Points (values)</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Base File</from><to>Merge Join</to><enabled>Y</enabled> </hop>  <hop> <from>Sort comp</from><to>Components</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort comp</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort comps</to><enabled>Y</enabled> </hop>  <hop> <from>prop XML</from><to>sort for group</to><enabled>Y</enabled> </hop>  <hop> <from>sort for group</from><to>group for xml</to><enabled>Y</enabled> </hop>  <hop> <from>group for xml</from><to>Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Components</from><to>sort components</to><enabled>Y</enabled> </hop>  <hop> <from>sort components</from><to>merge comps &amp; props</to><enabled>Y</enabled> </hop>  <hop> <from>Properties</from><to>sort props</to><enabled>Y</enabled> </hop>  <hop> <from>sort props</from><to>merge comps &amp; props</to><enabled>Y</enabled> </hop>  <hop> <from>merge comps &amp; props</from><to>Select comps</to><enabled>Y</enabled> </hop>  <hop> <from>Select comps</from><to>comps XML</to><enabled>Y</enabled> </hop>  <hop> <from>copy results</from><to>Select values 3</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 3</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Unique rows</to><enabled>Y</enabled> </hop>  <hop> <from>values list</from><to>Unique rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows 2</from><to>value XML</to><enabled>Y</enabled> </hop>  <hop> <from>value XML</from><to>Components 2</to><enabled>Y</enabled> </hop>  <hop> <from>Components 2</from><to>Properties 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p</from><to>values list</to><enabled>Y</enabled> </hop>  <hop> <from>Get pwd</from><to>out fileName</to><enabled>Y</enabled> </hop>  <hop> <from>Properties 2</from><to>Sort values</to><enabled>Y</enabled> </hop>  <hop> <from>Sort values</from><to>Merge Join 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>allToXML</from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join 2 2</from><to>Select values 4</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 4</from><to>allToXML</to><enabled>Y</enabled> </hop>  <hop> <from>out fileName</from><to>in&#47;out type</to><enabled>Y</enabled> </hop>  <hop> <from>comps XML</from><to>group all</to><enabled>Y</enabled> </hop>  <hop> <from>group all</from><to>replace char &quot;,&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;,&quot;</from><to>Wrapper</to><enabled>Y</enabled> </hop>  <hop> <from>Wrapper</from><to>Comp XML File</to><enabled>Y</enabled> </hop>  <hop> <from>Sort properties</from><to>Merge Join 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort prop</from><to>Select p 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2 2</from><to>Group by 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2 2</from><to>Group by 2 2</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2 2</from><to>Filter rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2</from><to>unique results</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>Select p</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows</from><to>Dummy (do nothing)</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2</from><to>Group by 2 3</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Filter rows</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows</from><to>Select p 2</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2 3</from><to>Get pwd</to><enabled>Y</enabled> </hop>  <hop> <from>Add sequence</from><to>toXML 3</to><enabled>Y</enabled> </hop>  <hop> <from>in&#47;out type</from><to>Sort prop</to><enabled>Y</enabled> </hop>  <hop> <from>toXML 3</from><to>Sort properties</to><enabled>Y</enabled> </hop>  <hop> <from>Group by 2</from><to>Add sequence</to><enabled>Y</enabled> </hop>  <hop> <from>Add sequence</from><to>toXML 3</to><enabled>Y</enabled> </hop>  <hop> <from>Select rows</from><to>Replace in string 3</to><enabled>Y</enabled> </hop>  <hop> <from>Replace in string 3</from><to>sort</to><enabled>Y</enabled> </hop>  <hop> <from>for processing?</from><to>change type</to><enabled>Y</enabled> </hop>  <hop> <from>for processing?</from><to>trash</to><enabled>Y</enabled> </hop>  <hop> <from>group</from><to>MANUAL EXCEPTIONS</to><enabled>Y</enabled> </hop>  <hop> <from>MANUAL EXCEPTIONS</from><to>for processing?</to><enabled>Y</enabled> </hop>  <hop> <from>Filter rows 2</from><to>Merge Join 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select p 2 2</from><to>Merge Join 2</to><enabled>Y</enabled> </hop>  <hop> <from>Merge Join 2</from><to>Select values 2</to><enabled>Y</enabled> </hop>  <hop> <from>Select values 2</from><to>Sort rows 2</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows 2</from><to>Unique rows 3</to><enabled>Y</enabled> </hop>  <hop> <from>Unique rows 3</from><to>multiple rows (defaults or descriptions)</to><enabled>N</enabled> </hop>  </order>
+  <step>
+    <name>Add sequence</name>
+    <type>Sequence</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <valuename>order</valuename>
+      <use_database>N</use_database>
+      <connection/>
+      <schema/>
+      <seqname>SEQ_</seqname>
+      <use_counter>Y</use_counter>
+      <counter_name>order</counter_name>
+      <start_at>200</start_at>
+      <increment_by>1</increment_by>
+      <max_value>999999999</max_value>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1184</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>CDF Charts</name>
+    <type>DataGrid</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>JSDocsName</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>CDFName</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>Description</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>Notes</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+    <data>
+      <line> <item>BulletChart</item><item>cccBulletChart</item><item>CCC Bullet Chart</item><item/> </line>
+      <line> <item>DataTreeChart</item><item>cccDataTree</item><item>CCC DataTree</item><item>em falta nos JsDocs + não funciona + ADICIONAR À MÃO NO CCC.XML</item> </line>
+      <line> <item>ParallelCoordinatesChart</item><item>cccParCoord</item><item>CCC Parallel Coordinates</item><item>em falta nos JsDocs + ADICIONAR À MÃO NO CCC.XML</item> </line>
+      <line> <item>BoxplotChart</item><item>cccBoxplotChart</item><item>CCC Boxplot Chart</item><item/> </line>
+      <line> <item>HeatGridChart</item><item>cccHeatGridChart</item><item>CCC Heat Grid</item><item/> </line>
+      <line> <item>BarChart</item><item>cccBarChart</item><item>CCC Bar Chart</item><item/> </line>
+      <line> <item>NormalizedBarChart</item><item>cccNormalizedBarChart</item><item>CCC 100% Stacked Bar Chart</item><item/> </line>
+      <line> <item>WaterfallChart</item><item>cccWaterfallChart</item><item>CCC Waterfall Chart</item><item/> </line>
+      <line> <item>MetricLineChart</item><item>cccMetricLineChart</item><item>CCC Metric Line Chart</item><item/> </line>
+      <line> <item>MetricDotChart</item><item>cccMetricDotChart</item><item>CCC Metric Dot Chart</item><item/> </line>
+      <line> <item>DotChart</item><item>cccDotChart</item><item>CCC Dot Chart</item><item/> </line>
+      <line> <item>StackedDotChart</item><item>cccStackedDotChart</item><item>CCC Stacked Dot Chart</item><item>novo no CDF</item> </line>
+      <line> <item>LineChart</item><item>cccLineChart</item><item>CCC Line Chart</item><item/> </line>
+      <line> <item>StackedLineChart</item><item>cccStackedLineChart</item><item>CCC Stacked Line Chart</item><item/> </line>
+      <line> <item>AreaChart</item><item>cccAreaChart</item><item>CCC Area Chart</item><item>novo no CDF</item> </line>
+      <line> <item>PieChart</item><item>cccPieChart</item><item>CCC Pie Chart</item><item/> </line>
+      <line> <item>StackedAreaChart</item><item>cccStackedAreaChart</item><item>CCC Stacked Area Chart</item><item/> </line>
+    </data>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>84</xloc>
+      <yloc>8</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Comp XML File</name>
+    <type>TextFileOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <separator/>
+    <enclosure/>
+    <enclosure_forced>N</enclosure_forced>
+    <enclosure_fix_disabled>N</enclosure_fix_disabled>
+    <header>N</header>
+    <footer>N</footer>
+    <format>UNIX</format>
+    <compression>None</compression>
+    <encoding/>
+    <endedLine/>
+    <fileNameInField>N</fileNameInField>
+    <fileNameField/>
+    <create_parent_folder>Y</create_parent_folder>
+    <file>
+      <name>${Internal.Transformation.Filename.Directory}&#47;output&#47;components&#47;charts&#47;CCC</name>
+      <is_command>N</is_command>
+      <servlet_output>N</servlet_output>
+      <do_not_open_new_file_init>N</do_not_open_new_file_init>
+      <extention>xml</extention>
+      <append>N</append>
+      <split>N</split>
+      <haspartno>N</haspartno>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <add_to_result_filenames>Y</add_to_result_filenames>
+      <pad>N</pad>
+      <fast_dump>N</fast_dump>
+      <splitevery>0</splitevery>
+    </file>
+    <fields>
+      <field>
+        <name>xmlFileAllContent</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1368</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Components</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>chartName</name>
+        </field>
+        <field>
+          <name>cccChartName</name>
+        </field>
+        <field>
+          <name>description</name>
+        </field>
+      </group>
+      <fields>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>634</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Components 2</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>property</name>
+        </field>
+      </group>
+      <fields>
+        <field>
+          <aggregate>valuesXML</aggregate>
+          <subject>valueXML</subject>
+          <type>CONCAT_COMMA</type>
+          <valuefield/>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>973</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Components&#47;Properties Table File</name>
+    <type>TextFileInput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <accept_filenames>N</accept_filenames>
+    <passing_through_fields>N</passing_through_fields>
+    <accept_field/>
+    <accept_stepname/>
+    <separator>;</separator>
+    <enclosure>&quot;</enclosure>
+    <enclosure_breaks>N</enclosure_breaks>
+    <escapechar/>
+    <header>N</header>
+    <nr_headerlines>1</nr_headerlines>
+    <footer>N</footer>
+    <nr_footerlines>1</nr_footerlines>
+    <line_wrapped>N</line_wrapped>
+    <nr_wraps>1</nr_wraps>
+    <layout_paged>N</layout_paged>
+    <nr_lines_per_page>80</nr_lines_per_page>
+    <nr_lines_doc_header>0</nr_lines_doc_header>
+    <noempty>Y</noempty>
+    <include>N</include>
+    <include_field/>
+    <rownum>N</rownum>
+    <rownumByFile>N</rownumByFile>
+    <rownum_field/>
+    <format>DOS</format>
+    <encoding/>
+    <add_to_result_filenames>Y</add_to_result_filenames>
+    <file>
+      <name>${Internal.Transformation.Filename.Directory}&#47;output&#47;final-process-properties.txt</name>
+      <filemask/>
+      <exclude_filemask/>
+      <file_required>N</file_required>
+      <include_subfolders>N</include_subfolders>
+      <type>CSV</type>
+      <compression>None</compression>
+    </file>
+    <filters>
+    </filters>
+    <fields>
+      <field>
+        <name>name</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>property</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>propertyType</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>propertyDescription</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>propertyDefault</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>typeSeparated</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>typeFinal</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>typeClass</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>atomName</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>atomValue</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>-1</position>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+    </fields>
+    <limit>0</limit>
+    <error_ignored>N</error_ignored>
+    <skip_bad_files>N</skip_bad_files>
+    <file_error_field/>
+    <file_error_message_field/>
+    <error_line_skipped>N</error_line_skipped>
+    <error_count_field/>
+    <error_fields_field/>
+    <error_text_field/>
+    <bad_line_files_destination_directory/>
+    <bad_line_files_extension>warning</bad_line_files_extension>
+    <error_line_files_destination_directory/>
+    <error_line_files_extension>error</error_line_files_extension>
+    <line_number_files_destination_directory/>
+    <line_number_files_extension>line</line_number_files_extension>
+    <date_format_lenient>Y</date_format_lenient>
+    <date_format_locale>en_US</date_format_locale>
+    <shortFileFieldName/>
+    <pathFieldName/>
+    <hiddenFieldName/>
+    <lastModificationTimeFieldName/>
+    <uriNameFieldName/>
+    <rootUriNameFieldName/>
+    <extensionFieldName/>
+    <sizeFieldName/>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>83</xloc>
+      <yloc>129</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Descriptions and Default Values changed by hand</name>
+    <type>DataGrid</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>property</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>description</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>defaultValue</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>changed</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>class</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+    <data>
+      <line> <item>baseAxisSize</item><item>cccBaseAxisSize</item><item>The fixed size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
+      <line> <item>baseAxisSizeMax</item><item>cccBaseAxisSizeMax</item><item>The maximum size of the panel.</item><item/><item/><item/> </line>
+      <line> <item>baseAxisSizeMax</item><item>cccBaseAxisSizeMax</item><item>The maximum size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
+      <line> <item>baseAxisTitleFont</item><item>cccBaseAxisTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>baseAxisTitleFont</item><item>cccBaseAxisTitleFont</item><item>The font of the panel.</item><item>12px sans-serif</item><item/><item>CartesianAxisTitlePanel</item> </line>
+      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role of the bar family charts is restricted to be discrete.</item><item/><item>yes</item><item/> </line>
+      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role of the heat grid chart organizes visual elements along the discrete base axis, and is restricted to be discrete.</item><item/><item>yes</item><item/> </line>
+      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role represents a certain logical grouping of the data points.</item><item/><item>yes</item><item/> </line>
+      <line> <item>categoryRole</item><item>cccCategoryRole</item><item>The category visual role represents a slice of the pie.</item><item/><item>yes</item><item/> </line>
+      <line> <item>clickAction</item><item>cccClickAction</item><item>A callback function that is called when the user clicks on a bullet.</item><item/><item>yes</item><item/> </line>
+      <line> <item>clickAction</item><item>cccClickAction</item><item>A callback function that is called when the user clicks on a visual element.</item><item/><item/><item/> </line>
+      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of pie slices.</item><item/><item>yes</item><item/> </line>
+      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of the dots and lines of the visual elements.</item><item/><item>yes</item><item/> </line>
+      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of the visual elements.</item><item/><item>yes</item><item/> </line>
+      <line> <item>colorRole</item><item>cccColorRole</item><item>The color visual role controls the color of visual elements.</item><item/><item/><item/> </line>
+      <line> <item>legendFont</item><item>cccLegendFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>legendFont</item><item>cccLegendFont</item><item>The font of the panel.</item><item>10px sans-serif</item><item/><item>LegendPanel</item> </line>
+      <line> <item>orthoAxisSize</item><item>cccOrthoAxisSize</item><item>The fixed size of the panel.</item><item/><item/><item/> </line>
+      <line> <item>orthoAxisSize</item><item>cccOrthoAxisSize</item><item>The fixed size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
+      <line> <item>orthoAxisSizeMax</item><item>cccOrthoAxisSizeMax</item><item>The maximum size of the panel.</item><item/><item/><item/> </line>
+      <line> <item>orthoAxisSizeMax</item><item>cccOrthoAxisSizeMax</item><item>The maximum size of the panels orthogonal dimension.</item><item/><item>yes</item><item/> </line>
+      <line> <item>orthoAxisTitleFont</item><item>cccOrthoAxisTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>orthoAxisTitleFont</item><item>cccOrthoAxisTitleFont</item><item>The font of the panel.</item><item>12px sans-serif</item><item/><item>CartesianAxisTitlePanel</item> </line>
+      <line> <item>plot2ValuesAnchor</item><item>cccPlot2ValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
+      <line> <item>plot2ValuesAnchor</item><item>cccPlot2ValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
+      <line> <item>seriesRole</item><item>cccSeriesRole</item><item>The series visual role of the heat grid chart organizes visual elements along the discrete orthogonal axis.</item><item/><item>yes</item><item/> </line>
+      <line> <item>seriesRole</item><item>cccSeriesRole</item><item>The series visual role represents a series of connected data points.</item><item/><item/><item/> </line>
+      <line> <item>sizeRole</item><item>cccSizeRole</item><item>The size visual role controls the size of the dot visual elements, when in shapes mode.</item><item/><item>yes</item><item/> </line>
+      <line> <item>sizeRole</item><item>cccSizeRole</item><item>The size visual role controls the size of the dots of the visual elements, and, as such, it is only represented if dots are visible.</item><item/><item>yes</item><item/> </line>
+      <line> <item>smallTitleFont</item><item>cccSmallTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>smallTitleFont</item><item>cccSmallTitleFont</item><item>The font of the panel.</item><item>14px sans-serif</item><item/><item>ChartTitlePanel</item> </line>
+      <line> <item>smallTitlePosition</item><item>cccSmallTitlePosition</item><item>The docking position of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>smallTitlePosition</item><item>cccSmallTitlePosition</item><item>The docking position of the panel.</item><item>top</item><item/><item>ChartTitlePanel</item> </line>
+      <line> <item>titleFont</item><item>cccTitleFont</item><item>The font of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>titleFont</item><item>cccTitleFont</item><item>The font of the panel.</item><item>14px sans-serif</item><item/><item>ChartTitlePanel</item> </line>
+      <line> <item>titlePosition</item><item>cccTitlePosition</item><item>The docking position of the panel.</item><item/><item/><item>DockedPanel</item> </line>
+      <line> <item>titlePosition</item><item>cccTitlePosition</item><item>The docking position of the panel.</item><item>top</item><item/><item>ChartTitlePanel</item> </line>
+      <line> <item>trendValuesAnchor</item><item>cccTrendValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
+      <line> <item>trendValuesAnchor</item><item>cccTrendValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
+      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the height of bars.</item><item/><item>yes</item><item/> </line>
+      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the orthogonal position of points.</item><item/><item>yes</item><item/> </line>
+      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role controls the relative angle span of each pie slice.</item><item/><item>yes</item><item/> </line>
+      <line> <item>valueRole</item><item>cccValueRole</item><item>The value visual role represents current values for a given title and sub-title categories.</item><item/><item>yes</item><item/> </line>
+      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a non-linked value label relative to its corresponding visual element position.</item><item>outer</item><item>yes</item><item>PiePlot</item> </line>
+      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item/><item/><item>Plot</item> </line>
+      <line> <item>valuesAnchor</item><item>cccValuesAnchor</item><item>The alignment of a value label relative to its corresponding visual element position.</item><item>center</item><item/><item>BarPlotCommon</item> </line>
+      <line> <item>vauesAnchor</item><item>?????????</item><item/><item>right</item><item/><item>MetricPointPlot, PointPlot</item> </line>
+      <line> <item>valuesVisible</item><item>cccValuesVisible</item><item>Indicates if value labels are shown next to the visual elements.</item><item>false</item><item/><item>Plot (being used by subclasses)</item> </line>
+      <line> <item>valuesVisible</item><item>cccValuesVisible</item><item>Indicates if value labels are shown next to the visual elements.</item><item>true</item><item/><item>HeatGridPlot</item> </line>
+    </data>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>619</xloc>
+      <yloc>278</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Dummy (do nothing)</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>533</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Extension Points</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>306</xloc>
+      <yloc>599</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Extension Points (values)</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>238</xloc>
+      <yloc>755</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Filter rows</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>Select p</send_true_to>
+<send_false_to>Dummy (do nothing)</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <leftvalue>atomName</leftvalue>
+ <function>IS NOT NULL</function>
+ <rightvalue/>
+ </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>617</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Filter rows 2</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>Merge Join 2</send_true_to>
+<send_false_to>unique results</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <leftvalue>count</leftvalue>
+ <function>&gt;</function>
+ <rightvalue/>
+ <value><name>constant</name><type>Number</type><text>1.0</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask>#.#</mask></value> </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>980</xloc>
+      <yloc>308</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Get pwd</name>
+    <type>GetVariable</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>pwd</name>
+        <variable>${Internal.Transformation.Filename.Directory}</variable>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>763</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Group by</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>chartName</name>
+        </field>
+        <field>
+          <name>cccChartName</name>
+        </field>
+        <field>
+          <name>description</name>
+        </field>
+        <field>
+          <name>property</name>
+        </field>
+        <field>
+          <name>cccProperty</name>
+        </field>
+      </group>
+      <fields>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>638</xloc>
+      <yloc>842</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Group by 2</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>property</name>
+        </field>
+        <field>
+          <name>cccProperty</name>
+        </field>
+        <field>
+          <name>propertyFileName</name>
+        </field>
+        <field>
+          <name>advanced</name>
+        </field>
+      </group>
+      <fields>
+        <field>
+          <aggregate>propertyDescription</aggregate>
+          <subject>propertyDescription</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>propertyDefault</aggregate>
+          <subject>propertyDefault</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>propertyInputType</aggregate>
+          <subject>propertyInputType</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>propertyOutputType</aggregate>
+          <subject>propertyOutputType</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1117</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Group by 2 2</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>property</name>
+        </field>
+        <field>
+          <name>cccProperty</name>
+        </field>
+        <field>
+          <name>propertyFileName</name>
+        </field>
+        <field>
+          <name>advanced</name>
+        </field>
+      </group>
+      <fields>
+        <field>
+          <aggregate>propertyDescription</aggregate>
+          <subject>propertyDescription</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>propertyDefault</aggregate>
+          <subject>propertyDefault</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>propertyInputType</aggregate>
+          <subject>propertyInputType</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>propertyOutputType</aggregate>
+          <subject>propertyOutputType</subject>
+          <type>FIRST</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>count</aggregate>
+          <subject>cccProperty</subject>
+          <type>COUNT_ALL</type>
+          <valuefield/>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>980</xloc>
+      <yloc>239</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Group by 2 3</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>property</name>
+        </field>
+        <field>
+          <name>cccProperty</name>
+        </field>
+        <field>
+          <name>propertyDescription</name>
+        </field>
+        <field>
+          <name>propertyDefault</name>
+        </field>
+        <field>
+          <name>propertyOutputType</name>
+        </field>
+        <field>
+          <name>propertyInputType</name>
+        </field>
+        <field>
+          <name>typeFinal</name>
+        </field>
+        <field>
+          <name>advanced</name>
+        </field>
+      </group>
+      <fields>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>690</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>MANUAL EXCEPTIONS</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>&#47;&#47;Script here
+
+var process = true;
+var advanced = true;
+var str = String(property);
+
+switch (str) {
+	case &quot;width&quot;:
+	case &quot;height&quot;:
+	case &quot;colorColors&quot;:
+	case &quot;trendTrend&quot;:
+	case &quot;trendNullInterpolationMode&quot;:
+	case &quot;doubleClickMaxDelay&quot;:
+	case &quot;delayIn&quot;:
+	case &quot;delayOut&quot;:
+  		var process = false;
+  		break;
+	case &quot;compatVersion&quot;:
+		var propertyDefault = 2;
+		break;
+	case &quot;multiChartMax&quot;:
+		var propertyDefault = &quot;&quot;;
+		break;
+	case &quot;colorLegendVisible&quot;:
+		var property = &quot;legendVisible&quot;;
+		break;
+	case &quot;colorLegendDrawLine&quot;:
+		var property = &quot;legendDrawLine&quot;;
+		break;
+	case &quot;colorLegendDrawMarker&quot;:
+		var property = &quot;legendDrawMarker&quot;;
+		break;
+	case &quot;colorLegendShape&quot;:
+		var property = &quot;legendShape&quot;;
+		break;
+	case &quot;colorLegendClickMode&quot;:
+		var property = &quot;legendClickMode&quot;;
+		break;
+	case &quot;crosstabMode&quot;:
+		var advanced = false;
+		break;
+	case &quot;seriesInRows&quot;:
+		var advanced = false;
+		break;
+	case &quot;clickable&quot;:
+		var advanced = false;
+		break;
+	case &quot;clickAction&quot;:
+		var advanced = false;
+		break;
+	case &quot;timeSeries&quot;:
+		var advanced = false;
+		break;
+	case &quot;timeSeriesFormat&quot;:
+		var advanced = false;
+		break;
+	case &quot;title&quot;:
+		var advanced = false;
+		break;
+	case &quot;legend&quot;:
+		var advanced = false;
+		break;
+}
+
+&#47;&#47; exclude keepInBounds and alignTo with any prefix
+
+if (property.match(&#47;AlignTo?&#47;)) {
+	var process = false;
+}
+
+if (property.match(&#47;keepInBounds?&#47;)) {
+	var process = false;
+}
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>process</name>
+        <rename>process</rename>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>propertyDefault</name>
+        <rename>propertyDefault</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>      <field>        <name>property</name>
+        <rename>property</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>      <field>        <name>advanced</name>
+        <rename>advanced</rename>
+        <type>Boolean</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>109</xloc>
+      <yloc>320</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Merge Join</name>
+    <type>MergeJoin</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<join_type>INNER</join_type>
+<step1>Sort Charts</step1>
+<step2>Sort Base File</step2>
+    <keys_1>
+      <key>JSDocsName</key>
+    </keys_1>
+    <keys_2>
+      <key>name</key>
+    </keys_2>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>239</xloc>
+      <yloc>60</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Merge Join 2</name>
+    <type>MergeJoin</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<join_type>INNER</join_type>
+<step1>Filter rows 2</step1>
+<step2>Select p 2 2</step2>
+    <keys_1>
+      <key>property</key>
+    </keys_1>
+    <keys_2>
+      <key>property</key>
+    </keys_2>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1048</xloc>
+      <yloc>308</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Merge Join 2 2</name>
+    <type>MergeJoin</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<join_type>LEFT OUTER</join_type>
+<step1>Sort properties</step1>
+<step2>Sort values</step2>
+    <keys_1>
+      <key>property</key>
+    </keys_1>
+    <keys_2>
+      <key>property</key>
+    </keys_2>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1402</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Properties</name>
+    <type>ReplaceString</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>propertyXML</in_stream_name>
+        <out_stream_name/>
+        <use_regex>no</use_regex>
+        <replace_string>,</replace_string>
+        <replace_by_string>
+</replace_by_string>
+        <replace_field_by_string/>
+        <whole_word>no</whole_word>
+        <case_sensitive>no</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>934</xloc>
+      <yloc>842</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Properties 2</name>
+    <type>ReplaceString</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>valuesXML</in_stream_name>
+        <out_stream_name/>
+        <use_regex>no</use_regex>
+        <replace_string>,</replace_string>
+        <replace_by_string>
+</replace_by_string>
+        <replace_field_by_string/>
+        <whole_word>no</whole_word>
+        <case_sensitive>no</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1049</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Replace in string 3</name>
+    <type>ReplaceString</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>propertyDescription</in_stream_name>
+        <out_stream_name/>
+        <use_regex>yes</use_regex>
+        <replace_string>[&apos;&quot;]+</replace_string>
+        <replace_by_string/>
+        <replace_field_by_string/>
+        <whole_word>no</whole_word>
+        <case_sensitive>no</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>239</xloc>
+      <yloc>190</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select comps</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>chartName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccChartName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>description</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyXML</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1008</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select p</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomValue</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>690</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select p 2</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccProperty</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDescription</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDefault</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyType</name>
+        <rename>propertyOutputType</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyType</name>
+        <rename>propertyInputType</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>typeFinal</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>advanced</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>617</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select p 2 2</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccProperty</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyFileName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDescription</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDefault</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyInputType</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyOutputType</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>advanced</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1048</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select rows</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>JSDocsName</name>
+        <rename>chartName</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>CDFName</name>
+        <rename>cccChartName</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>Description</name>
+        <rename>description</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDescription</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDefault</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>typeSeparated</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>typeFinal</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomValue</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>239</xloc>
+      <yloc>125</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select values</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>chartName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccChartName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>description</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccProperty</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>496</xloc>
+      <yloc>758</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select values 2</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccProperty</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDescription_1</name>
+        <rename>description</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDefault_1</name>
+        <rename>default</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1048</xloc>
+      <yloc>384</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select values 3</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDescription</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDefault</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>type</name>
+        <rename>propertyType</rename>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>typeFinal</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>atomValue</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccProperty</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>advanced</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>393</xloc>
+      <yloc>103</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Select values 4</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>order</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>property</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>cccProperty</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyFileName</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDescription</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyDefault</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>propertyXML</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>valuesXML</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1402</xloc>
+      <yloc>234</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort Base File</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>name</name>
+        <ascending>N</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>159</xloc>
+      <yloc>92</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort Charts</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>JSDocsName</name>
+        <ascending>N</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>160</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort comp</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>chartName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccChartName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>description</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>562</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort comps</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>chartName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccChartName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>description</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>564</xloc>
+      <yloc>842</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort prop</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>pwd</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyFileName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyDescription</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyDefault</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyInputType</name>
+        <ascending>N</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>980</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort properties</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1326</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort rows</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyDescription</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyDefault</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyType</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>typeFinal</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>atomName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>atomValue</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>advanced</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>466</xloc>
+      <yloc>102</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort rows 2</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>description</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>default</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1048</xloc>
+      <yloc>460</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sort values</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1402</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>String operations</name>
+    <type>StringOperations</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>type</in_stream_name>
+        <out_stream_name/>
+        <trim_type>both</trim_type>
+        <lower_upper>none</lower_upper>
+        <padding_type>none</padding_type>
+        <pad_char/>
+        <pad_len/>
+        <init_cap>yes</init_cap>
+        <mask_xml>none</mask_xml>
+        <digits>none</digits>
+        <remove_special_characters>crlf</remove_special_characters>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>239</xloc>
+      <yloc>515</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Text file output</name>
+    <type>TextFileOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <separator/>
+    <enclosure/>
+    <enclosure_forced>N</enclosure_forced>
+    <enclosure_fix_disabled>N</enclosure_fix_disabled>
+    <header>N</header>
+    <footer>N</footer>
+    <format>UNIX</format>
+    <compression>None</compression>
+    <encoding/>
+    <endedLine/>
+    <fileNameInField>Y</fileNameInField>
+    <fileNameField>propertyFileName</fileNameField>
+    <create_parent_folder>Y</create_parent_folder>
+    <file>
+      <name>file</name>
+      <is_command>N</is_command>
+      <servlet_output>N</servlet_output>
+      <do_not_open_new_file_init>Y</do_not_open_new_file_init>
+      <extention/>
+      <append>N</append>
+      <split>N</split>
+      <haspartno>N</haspartno>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <add_to_result_filenames>Y</add_to_result_filenames>
+      <pad>N</pad>
+      <fast_dump>Y</fast_dump>
+      <splitevery>0</splitevery>
+    </file>
+    <fields>
+      <field>
+        <name>xmlFileContent</name>
+        <type>-</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1497</xloc>
+      <yloc>299</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Unique rows</name>
+    <type>Unique</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <count_rows>N</count_rows>
+      <count_field/>
+      <reject_duplicate_row>N</reject_duplicate_row>
+      <error_description/>
+    <fields>      <field>        <name>property</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>propertyDescription</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>propertyDefault</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>propertyType</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>typeFinal</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>atomName</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>atomValue</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>cccProperty</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>advanced</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>535</xloc>
+      <yloc>102</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Unique rows 2</name>
+    <type>Unique</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <count_rows>N</count_rows>
+      <count_field/>
+      <reject_duplicate_row>N</reject_duplicate_row>
+      <error_description/>
+    <fields>      <field>        <name>property</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>atomName</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>atomValue</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>832</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Unique rows 3</name>
+    <type>Unique</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <count_rows>N</count_rows>
+      <count_field/>
+      <reject_duplicate_row>N</reject_duplicate_row>
+      <error_description/>
+    <fields>      <field>        <name>property</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>cccProperty</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>description</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      <field>        <name>default</name>
+        <case_insensitive>N</case_insensitive>
+        </field>      </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1048</xloc>
+      <yloc>536</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Wrapper</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+var componentXML = new XML();
+componentXML = 	&lt;DesignerComponents&gt;
+					&lt;DesignerComponent&gt;
+    					&lt;Header&gt;
+      						&lt;Name&gt;Protovis Component&lt;&#47;Name&gt;
+      						&lt;IName&gt;protovis&lt;&#47;IName&gt;
+      						&lt;Description&gt;Protovis Chart Component&lt;&#47;Description&gt;
+      						&lt;Category&gt;CHARTS&lt;&#47;Category&gt;
+      						&lt;CatDescription&gt;Charts&lt;&#47;CatDescription&gt;
+      						&lt;Type&gt;PalleteEntry&lt;&#47;Type&gt;
+      						&lt;Version&gt;1.0&lt;&#47;Version&gt;
+    					&lt;&#47;Header&gt;
+    					&lt;Metadata&gt;
+      						&lt;meta name=&apos;cdwSupport&apos;&gt;true&lt;&#47;meta&gt;
+    					&lt;&#47;Metadata&gt;
+    					&lt;Contents&gt;
+      						&lt;Model&gt;
+        						&lt;Property name=&quot;width&quot; type=&quot;number&quot;&gt;width&lt;&#47;Property&gt;
+        						&lt;Property name=&quot;height&quot; type=&quot;number&quot;&gt;height&lt;&#47;Property&gt;
+        						&lt;Definition name=&quot;chartDefinition&quot;&gt;
+          							&lt;Property type=&quot;query&quot;&gt;dataSource&lt;&#47;Property&gt;
+        						&lt;&#47;Definition&gt;
+        						&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
+       	 						&lt;Property type=&quot;boolean&quot;&gt;executeAtStart&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;function&quot;&gt;preChange&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;function&quot;&gt;postChange&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;function&quot;&gt;postFetch&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;function&quot;&gt;customfunction&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;string&quot;&gt;htmlObject&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;function&quot;&gt;preExecution&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;function&quot;&gt;postExecution&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;number&quot;&gt;tooltip&lt;&#47;Property&gt;
+        						&lt;Property type=&quot;number&quot;&gt;listeners&lt;&#47;Property&gt;
+      						&lt;&#47;Model&gt;
+    					&lt;&#47;Contents&gt;
+  					&lt;&#47;DesignerComponent&gt;
+ 	 			&lt;&#47;DesignerComponents&gt;;
+
+var allPropertiesXML = new XMLList(xmlFileAllContent);
+componentXML.appendChild(allPropertiesXML);
+var xmlFileAllContent = componentXML.toXMLString(2);
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>xmlFileAllContent</name>
+        <rename>xmlFileAllContent</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1296</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>allToXML</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+
+if (valuesXML != null) {
+
+	var replacer = &lt;InputType type=&quot;valuelist&quot;&#47;&gt;;
+	var propXML = new XML(propertyXML);
+
+	propXML.Header.InputType = replacer;
+
+	var valXML = new XMLList(valuesXML);
+	var valsXML = (&lt;Values&gt;&lt;&#47;Values&gt;).appendChild(valXML);
+	propXML.appendChild(valsXML);
+	var xmlFileContent = propXML.toXMLString(2);
+
+}
+else {
+	var xmlFileContent = propertyXML;
+}
+
+
+
+</jsScript_script>
+      </jsScript>      <jsScript>        <jsScript_type>-1</jsScript_type>
+        <jsScript_name>replace_Sample</jsScript_name>
+        <jsScript_script>&#47;&#47; Replaces Strings inside the given Variable.
+&#47;&#47; It is possible to make more replacements inside
+&#47;&#47; one call. The given variables must be an odd number
+&#47;&#47;
+&#47;&#47; Usage:
+&#47;&#47; replace(var, var, var);
+&#47;&#47; 1: String - The Variable with the content to replace.
+&#47;&#47; 2: String - The Value to search for.
+&#47;&#47; 3: String - The Value to replace with.
+&#47;&#47;
+&#47;&#47; replace(var, var, var, var,var,...)
+&#47;&#47; 1: String - The Variable with the content to replace.
+&#47;&#47; 2: String - The First Value to search for.
+&#47;&#47; 3: String - The First Value to replace with.
+&#47;&#47; 4: String - The Second Value to search for.
+&#47;&#47; 5: String - The Second Value to replace with.
+&#47;&#47; ...
+&#47;&#47;
+&#47;&#47; 2006-11-15
+&#47;&#47;
+var str1 = &quot;Hello World, this is a nice function&quot;;      
+var str2 = replace(str1,&quot;World&quot;, &quot;Folk&quot;);
+Alert(str2);
+var str2 = replace(str1,&quot;World&quot;, &quot;Folk&quot;, &quot;nice&quot;,&quot;beautifull&quot;);
+Alert(str2);</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>xmlFileContent</name>
+        <rename>xmlFileContent</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1404</xloc>
+      <yloc>299</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>change type</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>&#47;&#47;Script here
+
+var type;
+
+if (aggregatedTypesCount &gt; 1) {
+	if (typeFinal != &apos;value&apos;)
+		type = (aggregatedTypes.split(&apos;,&apos;))[aggregatedTypesCount-1];
+	else
+		type = &apos;value&apos;;
+} else 
+	type = aggregatedTypes;
+
+var cccProperty = &apos;ccc&apos;+property.charAt(0).toUpperCase() + property.slice(1);;
+
+var regExp = new RegExp(&apos;extensionpoint&apos;, &apos;i&apos;);
+var show = property.match(regExp);</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>type</name>
+        <rename>type</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>cccProperty</name>
+        <rename>cccProperty</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>show</name>
+        <rename>show</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>240</xloc>
+      <yloc>450</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>comps XML</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+var componentXML = new XML();
+componentXML = 	&lt;DesignerComponent&gt;
+    				&lt;Header&gt;
+      					&lt;Name&gt;{description}&lt;&#47;Name&gt;
+      					&lt;IName&gt;{cccChartName}&lt;&#47;IName&gt;
+      					&lt;Description&gt;{description}&lt;&#47;Description&gt;
+      					&lt;Category&gt;CHARTS&lt;&#47;Category&gt;
+      					&lt;CatDescription&gt;Charts&lt;&#47;CatDescription&gt;
+      					&lt;Type&gt;PalleteEntry&lt;&#47;Type&gt;
+      					&lt;Version&gt;2.0&lt;&#47;Version&gt;
+    				&lt;&#47;Header&gt;
+    				&lt;Metadata&gt;
+      					&lt;meta name=&apos;cdwSupport&apos;&gt;true&lt;&#47;meta&gt;
+    				&lt;&#47;Metadata&gt;
+    				&lt;Contents&gt;
+      					&lt;Model&gt;
+        					&lt;Definition name=&quot;chartDefinition&quot;&gt;
+          						&lt;Property type=&quot;query&quot;&gt;dataSource&lt;&#47;Property&gt;
+								&lt;Property name=&quot;width&quot;&gt;width&lt;&#47;Property&gt;
+    	      					&lt;Property name=&quot;height&quot; &gt;height&lt;&#47;Property&gt;
+								&lt;Property name=&quot;extensionPoints&quot;&gt;cccExtensionPoints&lt;&#47;Property&gt;
+								&lt;Property name=&quot;colors&quot;&gt;cccColors&lt;&#47;Property&gt;
+        					&lt;&#47;Definition&gt;
+        					&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;boolean&quot;&gt;executeAtStart&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;preChange&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postChange&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postFetch&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;customfunction&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;string&quot;&gt;htmlObject&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;preExecution&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postExecution&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;number&quot;&gt;tooltip&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;number&quot;&gt;listeners&lt;&#47;Property&gt;
+     					&lt;&#47;Model&gt;
+    				&lt;&#47;Contents&gt;
+ 	 			&lt;&#47;DesignerComponent&gt;;
+
+var allPropertiesXML = new XMLList(propertyXML);
+componentXML.Contents.Model.Definition.appendChild(allPropertiesXML);
+var xmlFileContent = componentXML.toXMLString(2);
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>componentXML</name>
+        <rename>componentXML</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>allPropertiesXML</name>
+        <rename>allPropertiesXML</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>xmlFileContent</name>
+        <rename>xmlFileContent</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1080</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>copy results</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>393</xloc>
+      <yloc>515</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>fiter extensions</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>copy results</send_true_to>
+<send_false_to>Extension Points</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <conditions>
+  <condition>
+   <negated>N</negated>
+   <leftvalue>show</leftvalue>
+   <function>IS NULL</function>
+   <rightvalue/>
+   </condition>
+  </conditions>
+ </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>306</xloc>
+      <yloc>515</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>fiter extensions 2</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>Select values</send_true_to>
+<send_false_to>Extension Points (values)</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <leftvalue>typeFinal</leftvalue>
+ <function>=</function>
+ <rightvalue/>
+ <value><name>constant</name><type>String</type><text>final</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value> </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>393</xloc>
+      <yloc>755</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>for processing?</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<send_true_to>change type</send_true_to>
+<send_false_to>trash</send_false_to>
+    <compare>
+<condition>
+ <negated>N</negated>
+ <conditions>
+  <condition>
+   <negated>N</negated>
+   <operator>AND</operator>
+   <leftvalue>process</leftvalue>
+   <function>=</function>
+   <rightvalue/>
+   <value><name>constant</name><type>Boolean</type><text>Y</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
+  </conditions>
+ </condition>
+    </compare>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>110</xloc>
+      <yloc>449</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>group</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>chartName</name>
+        </field>
+        <field>
+          <name>cccChartName</name>
+        </field>
+        <field>
+          <name>description</name>
+        </field>
+        <field>
+          <name>property</name>
+        </field>
+        <field>
+          <name>propertyDescription</name>
+        </field>
+        <field>
+          <name>propertyDefault</name>
+        </field>
+        <field>
+          <name>typeFinal</name>
+        </field>
+        <field>
+          <name>atomName</name>
+        </field>
+        <field>
+          <name>atomValue</name>
+        </field>
+      </group>
+      <fields>
+        <field>
+          <aggregate>aggregatedTypes</aggregate>
+          <subject>typeSeparated</subject>
+          <type>CONCAT_COMMA</type>
+          <valuefield/>
+        </field>
+        <field>
+          <aggregate>aggregatedTypesCount</aggregate>
+          <subject>typeSeparated</subject>
+          <type>COUNT_ALL</type>
+          <valuefield/>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>239</xloc>
+      <yloc>320</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>group all</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+      </group>
+      <fields>
+        <field>
+          <aggregate>xmlFileAllContent</aggregate>
+          <subject>xmlFileContent</subject>
+          <type>CONCAT_COMMA</type>
+          <valuefield/>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1152</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>group for xml</name>
+    <type>GroupBy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <all_rows>N</all_rows>
+      <ignore_aggregate>N</ignore_aggregate>
+      <field_ignore/>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>grp</prefix>
+      <add_linenr>N</add_linenr>
+      <linenr_fieldname/>
+      <give_back_row>N</give_back_row>
+      <group>
+        <field>
+          <name>chartName</name>
+        </field>
+        <field>
+          <name>cccChartName</name>
+        </field>
+        <field>
+          <name>description</name>
+        </field>
+      </group>
+      <fields>
+        <field>
+          <aggregate>propertyXML</aggregate>
+          <subject>propXML</subject>
+          <type>CONCAT_COMMA</type>
+          <valuefield/>
+        </field>
+      </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>860</xloc>
+      <yloc>842</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>in&#47;out type</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+var propertyInputType = propertyOutputType;
+
+if (propertyOutputType == &apos;Value&apos;)
+{
+	propertyInputType = &apos;String&apos;;
+	var propertyOutputType = &apos;String&apos;;
+}
+
+if (propertyOutputType == &apos;Function&apos;)
+	propertyInputType = &apos;JavaScript&apos;;
+
+if (propertyOutputType == &apos;Number&apos;)
+	propertyInputType = &apos;Float&apos;;
+
+
+
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>propertyInputType</name>
+        <rename>propertyInputType</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>      <field>        <name>propertyOutputType</name>
+        <rename>propertyOutputType</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>907</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>merge comps &amp; props</name>
+    <type>MergeJoin</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+<join_type>INNER</join_type>
+<step1>sort components</step1>
+<step2>sort props</step2>
+    <keys_1>
+      <key>chartName</key>
+    </keys_1>
+    <keys_2>
+      <key>chartName</key>
+    </keys_2>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>934</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>multiple rows (defaults or descriptions)</name>
+    <type>ExcelOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <header>Y</header>
+    <footer>N</footer>
+    <encoding>MacRoman</encoding>
+    <append>N</append>
+    <add_to_result_filenames>Y</add_to_result_filenames>
+    <file>
+      <name>${Internal.Transformation.Filename.Directory}&#47;output&#47;duplicated</name>
+      <extention>xls</extention>
+      <do_not_open_newfile_init>N</do_not_open_newfile_init>
+      <create_parent_folder>N</create_parent_folder>
+      <split>N</split>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <sheetname>duplicated</sheetname>
+      <autosizecolums>N</autosizecolums>
+      <nullisblank>N</nullisblank>
+      <protect_sheet>N</protect_sheet>
+      <password>Encrypted </password>
+      <splitevery>0</splitevery>
+      <usetempfiles>N</usetempfiles>
+      <tempdirectory/>
+      </file>
+    <template>
+      <enabled>N</enabled>
+      <append>N</append>
+      <filename>template.xls</filename>
+    </template>
+    <fields>
+      <field>
+        <name>property</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>cccProperty</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>description</name>
+        <type>String</type>
+        <format/>
+      </field>
+      <field>
+        <name>default</name>
+        <type>String</type>
+        <format/>
+      </field>
+    </fields>
+    <custom>
+    <header_font_name>arial</header_font_name>
+    <header_font_size>10</header_font_size>
+    <header_font_bold>N</header_font_bold>
+    <header_font_italic>N</header_font_italic>
+    <header_font_underline>no</header_font_underline>
+    <header_font_orientation>horizontal</header_font_orientation>
+    <header_font_color>black</header_font_color>
+    <header_background_color>none</header_background_color>
+    <header_row_height>255</header_row_height>
+    <header_alignment>left</header_alignment>
+    <header_image/>
+    <row_font_name>arial</row_font_name>
+    <row_font_size>10</row_font_size>
+    <row_font_color>black</row_font_color>
+    <row_background_color>none</row_background_color>
+      </custom>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1191</xloc>
+      <yloc>536</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>out fileName</name>
+    <type>Janino</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+       <formula><field_name>propertyFileName</field_name>
+<formula_string>pwd+&quot;&#47;output&#47;properties&#47;&quot;+cccProperty+&quot;.xml&quot;</formula_string>
+<value_type>String</value_type>
+<value_length>-1</value_length>
+<value_precision>-1</value_precision>
+<replace_field/>
+</formula>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>835</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>prop XML</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+var propXML = (new XML(&lt;Property name={property}&gt;{cccProperty}&lt;&#47;Property&gt;)).toXMLString();
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>propXML</name>
+        <rename>propXML</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>712</xloc>
+      <yloc>842</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>replace char &quot;,&quot;</name>
+    <type>ReplaceString</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <in_stream_name>xmlFileAllContent</in_stream_name>
+        <out_stream_name/>
+        <use_regex>no</use_regex>
+        <replace_string>,</replace_string>
+        <replace_by_string>
+</replace_by_string>
+        <replace_field_by_string/>
+        <whole_word>no</whole_word>
+        <case_sensitive>no</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1224</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>sort</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>chartName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccChartName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>description</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyDescription</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>propertyDefault</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>typeFinal</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>atomName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>atomValue</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>239</xloc>
+      <yloc>255</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>sort components</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>706</xloc>
+      <yloc>673</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>sort for group</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>chartName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>cccChartName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>description</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>786</xloc>
+      <yloc>842</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>sort props</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>934</xloc>
+      <yloc>763</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>toXML 3</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+if (!propertyDefault)
+	var propertyDefault = &quot;&quot;;
+else
+	var propertyDefault = propertyDefault;
+
+var propertyXML = new XML();
+propertyXML = 	&lt;DesignerProperty&gt;
+    				&lt;Header&gt;
+        				&lt;Name&gt;{cccProperty}&lt;&#47;Name&gt;
+        				&lt;Parent&gt;BaseProperty&lt;&#47;Parent&gt;
+        				&lt;DefaultValue&gt;{propertyDefault}&lt;&#47;DefaultValue&gt;
+        				&lt;Description&gt;{property}&lt;&#47;Description&gt;
+        				&lt;Tooltip&gt;{propertyDescription}&lt;&#47;Tooltip&gt;
+        				&lt;InputType&gt;{propertyInputType}&lt;&#47;InputType&gt;
+        				&lt;OutputType&gt;{propertyOutputType}&lt;&#47;OutputType&gt;
+        				&lt;Order&gt;{order}&lt;&#47;Order&gt;
+        				&lt;Advanced&gt;{advanced}&lt;&#47;Advanced&gt;
+        				&lt;Version&gt;2.0&lt;&#47;Version&gt;
+    				&lt;&#47;Header&gt;
+				&lt;&#47;DesignerProperty&gt;;
+
+propertyXML = propertyXML.toXMLString();
+
+&#47;&#47;propertyXML = propertyXML.replace(&apos;&lt;DefaultValue&#47;&#47;&gt;&apos;, &apos;&lt;DefaultValue&gt;{propertyDefault}&lt;&#47;DefaultValue&gt;&apos;);</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>propertyDefault</name>
+        <rename>propertyDefault</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>      <field>        <name>propertyXML</name>
+        <rename>propertyXML</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>1254</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>trash</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>110</xloc>
+      <yloc>597</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>unique results</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>914</xloc>
+      <yloc>308</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>value XML</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>&#47;&#47;Script here
+
+var vXML = &lt;Value display={atomName}&gt;{atomValue}&lt;&#47;Value&gt;;
+var valueXML = vXML.toXMLString(2);</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>valueXML</name>
+        <rename>valueXML</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>903</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>values list</name>
+    <type>SortRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>out</prefix>
+      <sort_size>1000000</sort_size>
+      <free_memory/>
+      <compress>N</compress>
+      <compress_variable/>
+      <unique_rows>N</unique_rows>
+    <fields>
+      <field>
+        <name>property</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>atomName</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+      <field>
+        <name>atomValue</name>
+        <ascending>Y</ascending>
+        <case_sensitive>N</case_sensitive>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>760</xloc>
+      <yloc>32</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step_error_handling>
+  </step_error_handling>
+   <slave-step-copy-partition-distribution>
+</slave-step-copy-partition-distribution>
+   <slave_transformation>N</slave_transformation>
+</transformation>

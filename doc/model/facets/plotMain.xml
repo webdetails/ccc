@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:facetType name="BasicMainPlotFacet" space="pvc.options.plots">
+        <c:property name="colorAxis" type="number" category="Axes" fixed="1">
+            <c:documentation>
+                The index of the color axis to use for the plot.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+    
+    <c:facetType name="MainPlotFacet" space="pvc.options.plots">
+        <c:property name="orthoAxis" type="number" category="Axes" fixed="1">
+            <c:documentation>
+                The index of the orthogonal cartesian axis to use for the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="colorAxis" type="number" category="Axes" fixed="1">
+            <c:documentation>
+                The index of the color axis to use for the plot.
+            </c:documentation>
+        </c:property>
+    </c:facetType>
+</c:model>

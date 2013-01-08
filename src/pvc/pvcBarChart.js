@@ -2,63 +2,106 @@
 /**
  * BarChart is the main class for generating... bar charts (another surprise!).
  */
-pvc.BarChart = pvc.CategoricalAbstract.extend({
+def
+.type('pvc.BarChart', pvc.BarAbstract)
+.add({
 
-    barChartPanel : null,
-
-    constructor: function(options){
-
-        this.base(options);
-
-        // Apply options
-        pvc.mergeDefaults(this.options, pvc.BarChart.defaultOptions, options);
+    _allowV1SecondAxis: true, 
+    
+    _initPlotsCore: function(hasMultiRole){
+        var options = this.options;
+        
+        var barPlot = new pvc.visual.BarPlot(this);
+        var trend   = barPlot.option('Trend');
+        
+        if(options.plot2){
+            // Line Plot
+            var plot2Plot = new pvc.visual.PointPlot(this, {
+                name: 'plot2',
+                fixed: {
+                    DataPart: '1'
+                },
+                defaults: {
+                    ColorAxis:    2,
+                    LinesVisible: true,
+                    DotsVisible:  true
+                }});
+            
+            if(!trend){
+                trend = plot2Plot.option('Trend');
+            }
+        }
+        
+        if(trend){
+            // Trend Plot
+            new pvc.visual.PointPlot(this, {
+                name: 'trend',
+                fixed: {
+                    DataPart: 'trend',
+                    TrendType: 'none',
+                    ColorRole: 'series', // one trend per series
+                    NullInterpolatioMode: 'none'
+                },
+                defaults: {
+                    ColorAxis:    2,
+                    LinesVisible: true,
+                    DotsVisible:  false
+                }
+            });
+        }
     },
-
+    
+    _hasDataPartRole: function(){
+        return true;
+    },
+    
     /**
-     * Processes options after user options and default options have been merged.
-     * @override
+     * @override 
      */
-    _processOptionsCore: function(options){
-
-        options.waterfall = false;
-        options.percentageNormalized = false;
+    _createPlotPanels: function(parentPanel, baseOptions){
+        var options = this.options;
+        var plots = this.plots;
         
-        this.base(options);
-    },
+        var barPlot = plots.bar;
+        var barPanel = new pvc.BarPanel(
+                this, 
+                parentPanel, 
+                barPlot, 
+                Object.create(baseOptions));
 
-    /* @override */
-    createCategoricalPanel: function(){
-        pvc.log("Prerendering in barChart");
-
-        this.barChartPanel = new pvc.WaterfallChartPanel(this, {
-            waterfall:          false,
-            barSizeRatio:       this.options.barSizeRatio,
-            maxBarSize:         this.options.maxBarSize,
-            showValues:         this.options.showValues,
-            valuesAnchor:       this.options.valuesAnchor,
-            orientation:        this.options.orientation
-        });
+        // legacy field
+        this.barChartPanel = barPanel;
         
-        return this.barChartPanel;
-    }
-}, {
-    defaultOptions: {
-        showValues:   true,
-        barSizeRatio: 0.9,
-        maxBarSize:   2000,
-        valuesAnchor: "center"
+        var plot2Plot = plots.plot2;
+        if(plot2Plot){
+            if(pvc.debug >= 3){
+                this._log("Creating Point panel.");
+            }
+            
+            var pointPanel = new pvc.PointPanel(
+                    this, 
+                    parentPanel, 
+                    plot2Plot,
+                    Object.create(baseOptions));
+            
+            // Legacy fields
+            barPanel.pvSecondLine = pointPanel.pvLine;
+            barPanel.pvSecondDot  = pointPanel.pvDot;
+            
+            pointPanel._applyV1BarSecondExtensions = true;
+        }
+        
+        var trendPlot = plots.trend;
+        if(trendPlot){
+            if(pvc.debug >= 3){
+                this._log("Creating Trends Point panel.");
+            }
+            
+            new pvc.PointPanel(
+                    this, 
+                    parentPanel, 
+                    trendPlot,
+                    Object.create(baseOptions));
+        }
     }
 });
-
-
-/***************
- *  removed BarChartPanel  (CvK)
- *
- * Refactored the CODE:  BarChartPanel is now replaced by the
- *    WaterfallChartPanel as the Waterfallchart code is easier to extend.
- *    (in a next refactoringstep we could take the waterfall specific
- *     code out of the Waterfallchart panel out and make 
- *     restore inherence to waterfall being a special case of barChart.
- *
- ***************/
-

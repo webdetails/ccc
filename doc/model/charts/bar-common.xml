@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="BarChartCommon" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.CategoricalNumericChart" 
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class of the <b>Bar family</b> charts.
+        </c:documentation>
+        
+        <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>category</tt> visual role. 
+                
+                On the bar family charts it is restricted to be discrete.
+                
+                For additional information, 
+                see the base version of this property:
+                <c:link to="pvc.options.charts.CategoricalChart#categoryRole" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>value</tt> visual role represents the main measure. 
+                
+                Specifically, it controls the height of bars.
+                
+                The <tt>value</tt> visual role automatically binds to 
+                a single numeric dimension whose name has the <tt>value</tt> prefix.
+                
+                The <tt>value</tt> visual role is required.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+                
+        <c:property name="baseAxis" type="pvc.options.axes.FlattenedDiscreteCartesianAxis" category="Axes">
+            <c:documentation>
+                The base cartesian axis panel options.
+                
+                When the chart <c:link to="pvc.options.charts.Chart#orientation" />
+                is <tt>vertical</tt> the base axis is laid out horizontally.
+                
+                See <c:link to="pvc.options.axes.CartesianAxis" />
+                to know the additional names by which a cartesian axis can be referred to.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="panelSizeRatio" type="number" default="0.9" category="Layout">
+            <c:documentation>
+             Percentage of occupied space over total space 
+             in a discrete axis band.
+             
+             The remaining space will be of 
+             margins between bands.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="BarPlotCommon" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.CategoricalNumericPlot"
+                   abstract="true"
+                   use="expanded">
+        <c:documentation>
+            The common options documentation class of the <b>Bar family</b> plots.
+        </c:documentation>
+        
+        <c:property name="valuesAnchor" type="function pvc.options.varia.MarkAnchor" default="'center'" category="Style">
+            <c:documentation>
+                The alignment of a value label 
+                relative to its corresponding visual element position.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="barSizeRatio" type="number" default="0.9" category="Style">
+            <c:documentation>
+                The percentage of the grouped bar width 
+                versus the space between grouped bars (does not apply to stacked bars).
+                
+                A number between <tt>0.05</tt> and <tt>1</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="barSizeMax" type="number" default="2000" category="Style">
+            <c:documentation>
+                The maximum width of a bar, in pixel units.
+                
+                A number not less than <tt>1</tt>, possibly infinity.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="maxBarSize" type="number" default="2000" category="Style">
+            <c:documentation>
+                <c:deprecated>Use <c:link to="#barSizeMax" /> instead.</c:deprecated>
+                The maximum width of a bar, in pixel units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="barStackedMargin" type="number" default="0" category="Style">
+            <c:documentation>
+                The space between bars of a given stack, in pixel units 
+                (applies to stacked bars).
+                
+                A non-negative number.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="overflowMarkersVisible" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if overflow and underflow markers are shown 
+                when the bars are drawn off the plot area.
+                
+                Bars can be drawn off the plot area by use of the 
+                continuous axis properties <tt>fixedMin</tt> and <tt>fixedMax</tt>. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.BarPlotCommonExtensionPoints" category="Style" expandUse="optional">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the plot.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+
+    <c:complexType name="BarPlotCommonExtensionPoints" 
+                   space="pvc.options.ext"
+                   use="expanded">
+        <c:documentation>
+            The extension points of the <i>bar family</i> plot types.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>plot property name (ex: <tt>bar</tt>)</li>
+                <li>extension property (ex: <tt>panel</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>barPanel_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            The extension points of the <i>main plot</i> of a chart
+            may be used without the plot property name prefix.
+            In the example, when the <tt>bar</tt> plot is the main plot, 
+            the extension point can be written as <tt>panel_strokeStyle</tt>.
+        </c:documentation>
+        
+        <c:property name="panel" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the series panel of the bar plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="_" type="pvc.options.marks.BarExtensionPoint">
+            <c:documentation>
+                The extension point of the bar mark.
+                
+                This extension point can only be used by prefixing it 
+                with the property name of the plot.
+                
+                So, supposing this plot is under a property named <tt>bar</tt>,
+                and it is desired to access the <tt>strokeStyle</tt> property of the bar mark,
+                the full name of the extension property 
+                would be <tt>bar_strokeStyle</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the value label mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="underflowMarker" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the underflow marker.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="overflowMarker" type="pvc.options.marks.DotExtensionPoint">
+            <c:documentation>
+                The extension point of the overflow marker.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+</c:model>

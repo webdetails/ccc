@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC Samples - Boxplot</title>
+
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+    
+    <script type="text/javascript" src="../src/data/bp.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+    <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
+        <script type="text/javascript" src="../src/def/def.js"></script>
+
+
+    <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../src/pvc/pvc.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.trends.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexTypeProject.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.visualRoles.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.data.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.plots.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.axes.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.panels.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.selection.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.extension.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MetricPointChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+    <!-- @SCRIPTSEND@ -->
+
+    
+    
+        
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
+  <body>
+
+    <h1>
+      Boxplot Chart
+    </h1>
+The boxplot is used to represent the distribution of data using:
+<ul>
+  <li>a box to represent the region that contains 50% of the datapoints,</li>
+  <li>the whiskers to represent the regions that contains 95% of the datapoints, and</li>
+  <li>a center line (in the box) that represents the median of the dataset.</li>
+ </ul>
+For more information on boxplots you can visit 
+<a href="http://en.wikipedia.org/wiki/Box_plotBar">wikipedia</a>.
+
+
+<h2>Chart Options</h2>
+<h4>Dimensions</h4>
+<ul>
+  <li>width</li>
+  <li>height</li>
+  <li>margins -
+      css-like margins shorthand syntax (without units) or object with properties 'all', 'top', 'bottom', 'left' and/or 'right'.
+      Margins consume the chart's width and height (inside margins).
+  </li>
+</ul>
+<h4>Title properties</h4>
+<ul>
+  <li>title</li>
+  <li>titlePosition</li>
+  <li>titleSize</li>
+</ul>
+<h4>Lifecycle</h4>
+<ul>
+  <li>renderCallback - executed immediatly before render is called</li>
+</ul>
+<h4>Legend properties</h4>
+<ul>
+  <li>legend (true|false)</li>
+  <li>legendPosition (right, top, bottom, left)</li>
+  <li>legendAlign (right, left, center, top, middle, bottom)</li>
+  <li>legendSize</li>
+  <li>legendDrawLine (true|false)</li>
+  <li>legendDrawMarker (true|false)</li>
+  <li>tooltipEnabled (true|false)</li>
+</ul>
+<h4>Boxplot properties</h4>
+<ul>
+  <li>orientation (horizontal | vertical)</li>
+  <li>valuesVisible (true|false)</li>
+  <li>stacked (true|false)</li>
+  <li>panelSizeRatio - Ratio of occupied vs total size of category band. Default: 0.9 (90%)</li>
+  <li>boxSizeRatio - Ratio of box size vs category band size. Default: 0.3 (30%)</li>
+  <li>boxSizeMax - Maximum size of a box in pixels.</li>
+</ul>
+<h4>Line properties</h4>
+<ul>
+  <li>linesVisible - Show or hide lines. Default: true</li>
+  <li>dotsVisible - Show or hide dots. Default: false</li>
+  <li>areasVisible - Show or hide areas. Default: false</li>
+  <li>nullInterpolationMode (none | linear) - Interpolation mode for lines. Default: 'none'</li>
+</ul>
+<h4>Axis properties</h4>
+<ul>
+  <li>show{X,Y}Scale (true | false) - whether to show an axis. Default: true</li>
+  <li>plot2 (true | false) - whether to show the second axis. Default: false</li>
+  <li>xAxisPosition (bottom | top) - the position of the X axis. Default: bottom</li>
+  <li>yAxisPosition (left | right) - the position of the Y axis. Default: left</li>
+  <li>{x,y}AxisSize - the size of <i>free dimension</i> of an axis (X: height, Y: width). Default: 30</li>
+  <li>{x,y}AxisGrid (true | false) - show lines on all (major) ticks, except the first and the last. Default: false</li>
+  <li>{x,y}AxisEndLine (true | false) - show a line on the last (major) tick. Default: false</li>
+  <li>{x,y}AxisTitle - The axis title text. Default: null</li>
+  <li>{x,y}AxisTitleFont - The axis title font. Default: '10px sans-serif'</li>
+  <li>{x,y}AxisTitleSize - The size of the axis title.
+      The size is the width when the axis is vertical and the height when it is horizontal.
+      The title consumes space from the specified {x|y}AxisSize.
+      Default: The required by the font height plus a proportional margin.</li>
+  <li>{x,y}AxisDomainRoundMode (none | nice | tick) - rounding mode of the domain bounds of a linear scale axis. Default: none</li>
+  <li>{x,y}AxisDesiredTickCount - desired number of (major) ticks of a linear scale axis. Default: 5</li>
+  <li>{x,y}AxisMinorTicks (true|false) - show minor ticks on a linear scale axis. Default: true</li>
+</ul>
+
+
+<h2>Extension Points</h2>
+The following&nbsp;list&nbsp;serves as the basis
+for&nbsp;Boxplot extension points:
+<ul>
+  <li>base_</li>
+  <li>title_</li>
+  <li>titleLabel_</li>
+  <li>{x,y}Axis_</li>
+  <li>{x,y}AxisRule_</li>
+  <li>{x,y}AxisGrid_</li>
+  <li>{x,y}AxisScale_</li>
+  <li>{x,y}AxisTicks_</li>
+
+  <li>{x,y}AxisMinorTicks_</li>
+  <li>{x,y}AxisLabel_</li>
+  <li>{x,y}AxisTitleLabel_</li>
+  <li>tooltip_</li>
+  <li>boxPanel_</li>
+  <li>box_</li>
+  <li>boxBar_</li>
+  <li>boxRuleMedian_</li>
+  <li>boxRuleMin_</li>
+  <li>boxRuleMax_</li>
+  <li>boxRuleWhisker_</li>
+  <li>chart_</li>
+</ul>
+
+Sample extension points:<br>
+<ul>
+  <li>boxBar_fillStyle: for setting the bars fill colors.</li>
+  <li>boxBar_strokeStyle and boxBar_lineWidth: for setting the stroke color&nbsp;and thickness.</li>
+  <li>boxRuleMedian_strokeStyle and boxRuleMedian_lineWidth: for setting the stroke color&nbsp;and thickness of the median line.</li>
+  <li>titleLabel_font</li>
+  <li>yAxisRule_strokeStyle</li>
+  <li>xAxisScale_dateTickPrecision</li>
+</ul>
+
+<h2>Examples</h2>
+<h3>A simple Boxplot chart</h3>
+For drawing a boxplot chart, just provide the data and set the orientation of the boxplots.<br>  
+<textarea cols="55" rows="15" id="pvcBox1Code">
+var box1 = new pvc.BoxplotChart({
+    canvas:  "pvcBox1",
+    width:   300,
+    height:  250,
+    title:   "Simple Boxplot chart",
+    animate: false,
+    orientation: 'vertical'
+});
+
+box1.setData(boxplotData_01);
+box1.render();
+</textarea>
+    <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+    <div id="pvcBox1"></div>
+
+<h3>An horizontal and styled Boxplot chart</h3>
+Try selecting the boxes.<br>
+<textarea cols="55" rows="15" id="pvcBox2Code">
+var box2 = new pvc.BoxplotChart({
+    canvas:  "pvcBox2",
+    width:   400,
+    height:  200,
+    title:   "Horizontal and styled Boxplot chart",
+    animate: false,
+    orientation: 'horizontal',
+    baseAxisGrid: true,
+    //boxSizeRatio: 0.3,
+    panelSizeRatio: 0.8,
+    boxSizeMax: 10,
+    selectable: true,
+    hoverable: true,
+
+    //linesVisible: true,
+    //dotsVisible: true,
+    extensionPoints: {
+        boxPanel_fillStyle: 'bisque',
+        boxBar_fillStyle: 'orange',
+        boxRuleMedian_lineWidth: 3,
+        boxRuleMin_strokeStyle: 'blue',
+        boxRuleMax_strokeStyle: 'red',
+        boxRuleWhisker_strokeDasharray: '- '
+    }
+});
+
+box2.setData(boxplotData_01);
+box2.render();
+</textarea>
+    <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+    <div id="pvcBox2"></div>
+
+    
+<h3>A Boxplot with line chart</h3>
+The line shows the median role.<br>
+<textarea cols="55" rows="20" id="pvcBox3Code">
+var box3 = new pvc.BoxplotChart({
+    canvas:  "pvcBox3",
+    width:   400,
+    height:  300,
+    title:   "Boxplot with line chart",
+    animate: false,
+    baseAxisGrid: true,
+    boxSizeMax: 20,
+    plot2: true,
+    plot2LinesVisible: true,
+    plot2DotsVisible: true,
+    selectable: true,
+    hoverable: true,
+    extensionPoints: {
+        boxRuleWhisker_strokeDasharray: '- ',
+        line_shape: 'triangle'
+    }
+});
+
+box3.setData(boxplotData_01);
+box3.render();
+
+</textarea>
+    <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+    <div id="pvcBox3"></div>
+
+<h3>A Boxplot with two category dimensions</h3>
+Notice the legend values and the content of the tooltip.<br>
+<textarea cols="55" rows="20" id="pvcBox4Code">
+var box4 = new pvc.BoxplotChart({
+    canvas:  "pvcBox4",
+    width:   600,
+    height:  400,
+    title:   "Boxplot with two category dimensions",
+    
+    // Show legend
+    legend: true,
+    legendPosition:   'right',
+    
+    // Hide base axis
+    baseAxisVisible:  false,
+    axisOffset: 0.03,
+    
+    // Point color role to category role, instead of series
+    // which would color all boxes in blue
+    visualRoles: {color: {from: 'category'}},
+
+    // Show the median line
+    plot2: true,
+    plot2LinesVisible: true,
+    plot2DotsVisible:  true,
+    plot2AreasVisible: true,
+
+    // But hide its legend cause it's identical
+    // to the color1Axis...
+    color2AxisLegendVisible: false,
+    
+    selectable: true,
+    hoverable:  true,
+    
+    extensionPoints: {
+        boxRuleWhisker_strokeDasharray: '- '
+    }
+})
+.setData(boxplotData_02)
+.render();
+</textarea>
+    <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+    <div id="pvcBox4"></div>
+
+    <hr/>
+    If you have an issue or suggestions regarding the ccc BoxPlot-charts
+    please contact Cees at cde@vinzi.nl
+  </body>
+</html>

@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="PieChart" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.Chart"
+                   facets="pvc.options.charts.MultiChartFacet">
+        <c:documentation>
+            The options documentation class of the <b>Pie</b> chart.
+        </c:documentation>
+        
+        <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>category</tt> visual role.
+                
+                Each category value is represented by a slice of the pie.
+                
+                The <tt>category</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>category</tt> prefix.
+                
+                The visual role itself is optional,
+                yet, when unbound, 
+                a dimension with a "category" prefix
+                is automatically created for it,
+                and all datums will have the value <tt>null</tt>
+                in that dimension.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>color</tt> visual role controls the color of visual elements.
+                
+                The fill color of each pie slice is the color of the 
+                corresponding color role value.
+                
+                The <tt>color</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>color</tt> prefix
+                or, if none exists, 
+                the dimensions of the "category" role.
+                
+                The <tt>color</tt> visual role is discrete.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>value</tt> visual role represents the main measure.
+                
+                Specifically, it controls the 
+                relative angle span of each pie slice.
+                
+                The <tt>value</tt> visual role automatically binds to 
+                a single dimension whose name has the <tt>value</tt> prefix.
+                
+                The <tt>value</tt> visual role is required.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="orientation" type="pvc.options.varia.ChartOrientation" fixed="'vertical'" category="Layout">
+            <c:documentation>
+                This chart type does not represent orientation. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="color" type="pvc.options.axes.DiscreteColorAxis" category="Axes">
+            <c:documentation>
+                The first color axis options.
+                
+                This axis can also be accessed by the property name <tt>color</tt>.
+                
+                See <c:link to="pvc.options.axes.ColorAxis" />
+                for more information on the way that 
+                the color axes' properties may be accessed. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="pie" expandUse="optional" type="pvc.options.plots.PiePlot" category="Plots">
+            <c:documentation>
+                The pie plot is the <b>main plot</b> of the pie chart,
+                which means that 
+                its properties may be used <i>without</i> the "pie" property suffix.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="innerGap" type="number" category="Layout">
+            <c:documentation>
+                <c:deprecated>
+                    Use <c:link to="pvc.options.charts.Chart#contentPaddings" /> instead.
+                </c:deprecated>
+                The percentage size of the plot area that is 
+                occupied by the pie.
+                
+                An equivalent content paddings may be specified as: 
+                ((1 - innerGap) * 100 / 2 ) + "%";
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.PieChartExtensionPoints" category="Style" expandUse="optional">
+            <c:documentation>
+                The extension points object contains style definitions for 
+                the marks of the plot.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="PieChartExtensionPoints" 
+                   space="pvc.options.ext"
+                   use="expanded"
+                   facets="pvc.options.ext.MultiExtensionPointsFacet">
+        <c:documentation>
+            The extension points of the pie chart type.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>extension property (ex: <tt>smallBase</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>smallBase_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+        </c:documentation>
+    </c:complexType>
+    
+    <c:complexType name="PiePlot"
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.Plot"
+                   facets="pvc.options.plots.BasicMainPlotFacet"
+                   use="expanded">
+        <c:documentation>
+            The options documentation class of the <b>Pie</b> plot.
+        </c:documentation>
+        
+        <c:property name="valuesAnchor" type="function pvc.options.varia.WedgeAnchor" default="'outer'" category="Style">
+            <c:documentation>
+                The alignment of a value label 
+                relative to its corresponding visual element position.
+                
+                Specifically, this property applies to non-linked labels.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valuesVisible" type="boolean" default="true" category="Style">
+            <c:documentation>
+                Indicates if value labels are shown next to the visual elements.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="activeSliceRadius" type="number string" default="'5%'" category="Layout">
+            <c:documentation>
+                Increment radius of an <i>active</i> slice, 
+                in pixel units or as a percentage.
+                
+                When the value is a string, 
+                and if it is suffixed with "%", 
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot.
+                
+                This property is only relevant if 
+                <c:link to="pvc.options.charts.Chart#hoverable" /> is <tt>true</tt>.
+                
+                The <i>normal</i> radius is 
+                the biggest radius that can fit in the client area of the plot
+                minus the space occupied by linked labels,
+                minus the resolved active radius and 
+                minus the resolved exploded radius.
+                
+                See <c:link to="#explodedSliceRadius" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="explodedSliceRadius" type="number string" default="0" category="Layout">
+            <c:documentation>
+                Increment radius of an <i>exploded</i> slice, 
+                in pixel units or as a percentage.
+                
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot.
+                
+                The <i>normal</i> radius is 
+                the biggest radius that can fit in the client area of the plot
+                minus the space occupied by linked labels,
+                minus the resolved active radius and 
+                minus the resolved exploded radius.
+                
+                See <c:link to="#activeSliceRadius" /> and <c:link to="#explodedSliceIndex" />.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="explodedSliceIndex" type="number" default="null" category="Layout">
+            <c:documentation>
+                The index of the exploded slice,
+                or <tt>null</tt>, 
+                for all slices to be exploded.
+                
+                The exploded slice or slices 
+                are shown exploded 
+                only when <c:link to="#explodedSliceRadius" /> 
+                is greater than <tt>0</tt>.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valuesMask" type="string" category="Layout">
+            <c:documentation>
+                The values mask used to build the text of value labels.
+                
+                The mask may contain scene variable names and/or scene atom names,
+                like in the examples:
+                <ul>
+                    <li>scene variables: <tt>{category}: {value} EUR</tt>, could yield <tt>Drinks: 3.45 EUR</tt></li>
+                    <li>atom variables:  <tt>{#family} - {#product}</tt>, could yield <tt>Plains - Boeing 747</tt></li>
+                </ul> 
+                
+                The default value depends on the label style:
+                <ul>
+                    <li><tt>inside</tt> - <tt>{value}</tt></li>
+                    <li><tt>linked</tt> - <tt>{value} ({value.percent})</tt></li>
+                </ul>
+                
+                The <tt>percent</tt> variable is a 
+                sub-variable of the <tt>value</tt> scene variable.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="valuesLabelStyle" 
+                    type="pvc.options.varia.PieValuesLabelStyle" 
+                    default="'linked'" 
+                    category="Layout">
+            <c:documentation>
+                The style used to place value labels.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkInsetRadius" type="number string" default="'5%'" category="Layout > Linked Labels">
+            <c:documentation>
+                The length of the link line segment that is 
+                inset into a slice,
+                in pixel units, or as a percentage.
+             
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkOutsetRadius" type="number string" default="'2.5%'" category="Layout > Linked Labels">
+            <c:documentation>
+                The length of the link line segment that 
+                extends outwards from the slice, 
+                until it reaches the link line "elbow",
+                in pixel units, or as a percentage.
+             
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                biggest radius that can fit in the client area of the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkMargin" type="number string" default="'2.5%'" category="Layout > Linked Labels">
+            <c:documentation>
+                The width of the space 
+                that separates the label from 
+                the end of the line segment that starts in the link elbow,
+                in pixel units, or as a percentage.
+                
+                The value of this property includes 
+                the size of the link line handle.
+                
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                <i>client width</i> of the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkHandleWidth" type="number" default="0.5" category="Layout > Linked Labels">
+            <c:documentation>
+                The width of the link line handle width, in <i>em</i> units.
+                
+                The <i>handle</i> is 
+                the last segment of the link line,
+                an horizontal line segment just before the label. 
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkLabelSize" type="number string" default="'15%'" category="Layout > Linked Labels">
+            <c:documentation>
+                The width of the columns reserved, 
+                on each side of the pie,
+                for laying out the linked label marks.
+                
+                When the value is a string,
+                and if it is suffixed with "%",
+                it represents a percentage of the 
+                <i>client width</i> of the plot.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkLabelSpacingMin" type="number" default="0.5" category="Layout > Linked Labels">
+            <c:documentation>
+                The minimum vertical space between consecutive link labels, 
+                in <i>em</i> units.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="extensionPoints" type="pvc.options.ext.PiePlotExtensionPoints" category="Style" expandUse="optional">
+            <c:documentation>
+                The extension points object 
+                contains style definitions for 
+                various visual elements of the chart.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="PiePlotExtensionPoints" space="pvc.options.ext" use="expanded">
+        <c:documentation>
+            The extension points of the pie plot type.
+            
+            To use an extension point you must find its full name, by joining:
+            <ol>
+                <li>plot property name (ex: <tt>pie</tt>)</li>
+                <li>extension property (ex: <tt>slice</tt>)</li>
+                <li>the "_" character</li>
+                <li>extension sub-property (ex: <tt>strokeStyle</tt>)</li>
+            </ol>
+            and obtaining, for the examples, the camel-cased name: <tt>pieSlice_strokeStyle</tt>
+            (see <c:link to="http://en.wikipedia.org/wiki/CamelCase" />).
+            
+            The extension points of the <i>main plot</i> of a chart
+            may be used without the plot property name prefix.
+            In the example, when the <tt>pie</tt> plot is the main plot, 
+            the extension point can be written as <tt>slice_strokeStyle</tt>.
+        </c:documentation>
+        
+        <c:property name="slice" type="pvc.options.marks.PieChartWedgeExtensionPoint">
+            <c:documentation>
+                The extension point of the pie slice - the wedge mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="label" type="pvc.options.marks.LabelExtensionPoint">
+            <c:documentation>
+                The extension point of the value label mark.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="linkLine" type="pvc.options.marks.LineExtensionPoint">
+            <c:documentation>
+                The extension point of the line mark that links the 
+                pie slices and the linked labels.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+    <c:complexType name="PieChartWedgeExtensionPoint"
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.WedgeExtensionPoint"
+                   use="expanded">
+        <c:documentation>
+            The class of the Pie chart's protovis Wedge extension points.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Wedge.html" />.
+        </c:documentation>
+        
+        <c:property name="innerRadiusEx" type="number string">
+            <c:documentation>
+                The inner radius of each slice, in <i>pixel</i> units or as 
+                a percentage of the outer radius.
+                
+                This extension point is only defined in 
+                the <i>pie</i> chart's wedge mark.
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType> 
+</c:model>

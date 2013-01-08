@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:facetType name="MultiExtensionPointsFacet" space="pvc.options.ext">
+        <c:documentation>
+            The options documentation class of the multi-chart extension points facet.
+        </c:documentation>
+        
+        <c:property name="smallBase" type="pvc.options.marks.PanelExtensionPoint" category="Multi-Chart">
+            <c:documentation>
+                The extension point of the base (root) panel of the <i>small</i> charts.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="smallContent" type="pvc.options.marks.PanelExtensionPoint" category="Multi-Chart">
+            <c:documentation>
+                The extension point of the content panel of the <i>small</i> charts.
+                
+                The content panel is a child of the base panel.
+            </c:documentation>
+        </c:property>
+        
+    </c:facetType>
+    
+</c:model>

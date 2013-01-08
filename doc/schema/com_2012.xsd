@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+        targetNamespace="urn:webdetails/com/2012" 
+        xmlns:com="urn:webdetails/com/2012" 
+        elementFormDefault="qualified">
+    
+    <!-- 
+        List(number) 
+        
+        Union(string number)
+        
+        Union(string number List(number))
+        
+        List(Union(string number))
+        
+        Union(string number List(Union(string number))
+        
+        Map(string Object)
+        
+        Invalid combinations:
+          X  List(List(.))
+          X  List(Union(List(.) number))
+          X  Map(string Map(.))       ??? TODO
+          X  Map(string List(Map(.))) ???
+          
+          X  cycles...
+          
+        ......................................................
+         
+                /
+          Value | * name  (Lists and Unions may be anonymous)
+            ^   \
+            |
+            |              /
+            |....... Union | * types -> Value
+            |              \
+            |
+            |              /
+            |....... List  | * elementType -> Item
+            |              \
+            |
+            |              /
+            |....... Map   | * keyType   -> Item
+            |              | * valueType -> Item // TODO need this restriction?
+            |              \
+            |
+            +....... Item
+                       ^
+                       |
+                       |                     /
+                       |.......... ItemUnion | * types -> Item
+                       |                     \
+                       |
+                       |.......... Atom
+                       |             ^
+                       |             |
+                       |             +...... Primitive
+                       |
+                       |                   /
+                       +.......... Complex | * abstract
+                                        |  | * baseType -> Complex 
+                                        |  \
+                                        |                     /
+                                        |                     | * name
+                                        +........ >> Property | * required
+                                                              | * default
+                                                              \ 
+     -->
+     
+    <element name="model" type="com:ModelType">
+        <!-- Splitting in several files renders these undesirable 
+        
+        <key name="complexType_unique_name">
+            <selector xpath="com:complexType" />
+            <field xpath="@space" />
+            <field xpath="@name" />
+        </key>
+        
+        <key name="atomType_unique_name">
+            <selector xpath="com:atomType" />
+            <field xpath="@name" />
+        </key>
+        
+        <key name="funType_unique_name">
+            <selector xpath="com:functionType" />
+            <field xpath="@name" />
+        </key>
+        
+        <key name="space_unique_name">
+            <selector xpath="com:space" />
+            <field xpath="@name" />
+        </key>
+        
+         -->
+         
+        <unique name="model_documentation_format_key">
+           <selector xpath="." />
+           <field xpath="documentation/@format" />
+        </unique>
+        
+        <unique name="class_documentation_format_key">
+           <selector xpath="com:complexType" />
+           <field xpath="documentation/@format" />
+        </unique>
+        
+        <unique name="property_documentation_format_key">
+           <selector xpath="com:complexType/property" />
+           <field xpath="documentation/@format" />
+        </unique>
+        
+        <!-- does not work because of namespace being split in class_key 
+        <keyref name="class_keyref" refer="com:class_key">
+            <selector xpath="com:complexType" />
+            <field xpath="@base" />
+        </keyref>
+         -->
+    </element>
+    
+    <!-- Elements to be used inside c:documentation elements -->
+    <element name="link">
+        <complexType>
+            <attribute name="to" type="string" use="required" />
+        </complexType>
+    </element>
+    
+    <element name="example">
+        <complexType mixed="true">
+	        <sequence minOccurs="0" maxOccurs="unbounded">
+	            <any namespace="##any" processContents="lax" />
+	        </sequence>
+        </complexType>
+    </element>
+    
+    <element name="deprecated">
+        <complexType mixed="true">
+            <sequence minOccurs="0" maxOccurs="unbounded">
+                <any namespace="##any" processContents="lax" />
+            </sequence>
+        </complexType>
+    </element>
+    
+    <!-- Model XSD types -->
+    
+    <complexType name="ModelType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+            <choice minOccurs="0" maxOccurs="unbounded">
+                <element name="space" type="com:SpaceType" />
+	            <element name="complexType" type="com:ComplexTypeType">
+	                <key name="complex_unique_prop_name">
+                        <selector xpath="com:property" />
+                        <field xpath="@name" />
+                    </key>
+	            </element>
+	            <element name="atomType" type="com:AtomTypeType">
+	                <key name="atom_unique_name">
+			            <selector xpath="com:atom" />
+			            <field xpath="@name" />
+			        </key>
+			        <key name="atom_unique_value">
+			            <selector xpath="com:atom" />
+			            <field xpath="@value" />
+			        </key>
+	            </element>
+	            <element name="functionType" type="com:FunctionTypeType" />
+	            <element name="facetType" type="com:FacetTypeType" />
+	            <element name="include">
+			        <complexType>
+			            <attribute name="the" type="string" use="required" /> 
+			        </complexType>
+			    </element>
+	       </choice>
+       </sequence>
+    </complexType>
+    
+    <complexType name="SpaceType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+       </sequence>
+       <attribute name="name" type="com:IdType" use="required" />
+    </complexType>
+    
+    <complexType name="ComplexTypeType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+            <element name="property" type="com:PropertyType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="name" type="com:IdType" use="required" />
+        <attribute name="space" type="string" />
+        <attribute name="base" type="com:IdType" />
+        <attribute name="facets" type="com:IdTypeList" />
+        <attribute name="abstract" type="boolean" default="false" />
+        <attribute name="use" type="com:ComplexUseType" default="literal" />
+    </complexType>
+    
+    <complexType name="FacetTypeType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+            <element name="property" type="com:PropertyType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="name" type="com:IdType" use="required" />
+        <attribute name="space" type="string" />
+        <!-- 
+        <attribute name="base" type="com:IdType" />
+        <attribute name="abstract" type="boolean" default="false" />
+         -->
+    </complexType>
+    
+    <complexType name="PropertyType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="name" type="com:IdType" use="required" />
+        <attribute name="type" type="com:ValueTypeType" default="string" />
+        <attribute name="required" type="boolean" default="false" />
+        <attribute name="default" type="anySimpleType" />
+        <attribute name="fixed" type="anySimpleType" />
+        <attribute name="category" type="string" />
+        <attribute name="expandUse" type="com:PropertyExpandUseType" default="required" />
+        <attribute name="excludeIn" type="NMTOKENS" /> 
+    </complexType>
+    
+    <complexType name="AtomTypeType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+            <element name="atom" type="com:AtomType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="name" type="com:IdType" use="required" />
+        <attribute name="space" type="string" />
+        <attribute name="base" type="com:IdType" />
+    </complexType>
+    
+    <complexType name="AtomType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="name"  type="com:IdType" use="required" />
+        <attribute name="value" type="anySimpleType" use="required" />
+    </complexType>
+    
+    <complexType name="FunctionTypeType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+            <element name="argument" type="com:ArgumentType" minOccurs="0" maxOccurs="unbounded" />
+            <element name="returns"  type="com:ReturnType" minOccurs="0" maxOccurs="1" />
+        </sequence>
+        
+        <attribute name="name"  type="com:IdType" use="required" />
+        <attribute name="space" type="string" />
+    </complexType>
+    
+    <complexType name="ArgumentType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="name" type="com:IdType" use="required" />
+        <attribute name="type" type="com:ValueTypeType" use="optional" default="undefined" />
+        <attribute name="required" type="boolean" default="false" />
+        <attribute name="default" type="anySimpleType" use="optional" />
+    </complexType>
+    
+    <complexType name="ReturnType">
+        <sequence>
+            <element name="documentation" type="com:DocumentationType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="type" type="com:ValueTypeType" use="optional" default="undefined" />
+    </complexType>
+    
+    <complexType name="DocumentationType" mixed="true">
+        <sequence minOccurs="0" maxOccurs="unbounded">
+            <any namespace="##any" processContents="lax" />
+        </sequence>
+        
+        <attribute name="format" type="com:DocumentationFormatType" use="optional" />
+    </complexType>
+    
+    <simpleType name="ValueTypeType">
+        <union memberTypes="com:PrimitiveSimpleTypeType string" />
+    </simpleType>
+    
+    <simpleType name="PrimitiveSimpleTypeType">
+        <restriction base="string">
+            <enumeration value="undefined" />
+            <enumeration value="literal" />
+            <enumeration value="string" />
+            <enumeration value="number" />
+            <enumeration value="boolean" />
+            <enumeration value="object" />
+            <enumeration value="function" />
+            <enumeration value="date" />
+            <enumeration value="percentage" />
+        </restriction>
+    </simpleType>
+    
+    <simpleType name="ComplexUseType">
+        <restriction base="string">
+            <enumeration value="literal" />
+            <enumeration value="expanded" />
+            <enumeration value="any" />
+        </restriction>
+    </simpleType>
+    
+    <simpleType name="PropertyExpandUseType">
+        <restriction base="string">
+            <enumeration value="optional" />
+            <enumeration value="required" />
+        </restriction>
+    </simpleType>
+    
+    <simpleType name="IdType">
+        <restriction base="NMTOKEN" />
+    </simpleType>
+    
+    <simpleType name="IdTypeList">
+        <list itemType="com:IdType" />
+    </simpleType>
+    
+    <simpleType name="DocumentationFormatType">
+        <restriction base="string">
+           <enumeration value="markdown" />
+           <enumeration value="jsdoc" />
+           <enumeration value="com" />
+        </restriction>
+    </simpleType>
+</schema>

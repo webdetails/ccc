@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+
+    <c:complexType name="CategoricalChart" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.CartesianChart" 
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class of <b>Categorical</b> charts. 
+        </c:documentation>
+        
+        <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Visual roles">
+            <c:documentation>
+                The <tt>category</tt> visual role. 
+                
+                Represents a certain <i>logical grouping</i> of the data points.
+                
+                Category data may be discrete or continuous.
+                The relevant characteristic is that 
+                data with equal category values is grouped and 
+                summarized in some way.
+                
+                So,
+                if more that one data point exists for a given 
+                series and category values combination,
+                nevertheless, 
+                only one visual element is generated for the whole group.
+                
+                Some chart types support 
+                showing continuous category types, in a continuous scale. 
+                Others, 
+                turn continuous dimension types bound to the <tt>category</tt>
+                visual role into discrete dimension types, 
+                and then show the continuous categories in a discrete scale.
+                
+                The <tt>category</tt> visual role automatically binds to 
+                every dimension whose name has the <tt>category</tt> prefix.
+                
+                The visual role itself is optional,
+                yet, when unbound, 
+                a dimension with a "category" prefix
+                is automatically created for it,
+                and all datums will have the value <tt>null</tt>
+                in that dimension.
+                
+                See <c:link to="pvc.options.VisualRole" />
+                for more information on supported data types.
+            </c:documentation>
+        </c:property>    
+    </c:complexType>
+    
+</c:model>

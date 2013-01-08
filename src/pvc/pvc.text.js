@@ -1,181 +1,50 @@
 
-// Text measurement utility
-pvc.scope(function(){
-    
-    // --------------------------
-    // exported
-    function getTextLength(text, font){
-        switch(pv.renderer()){
-            case 'vml':
-                return getTextLenVML(text, font);
-
-            case 'batik':
-                font = splitFontCGG(font);
-
-                // NOTE: the global function 'getTextLenCGG' must be
-                // defined by the CGG loading environment
-                return getTextLenCGG(text, font.fontFamily, font.fontSize);
-
-            //case 'svg':
-        }
-
-        return getTextLenSVG(text, font);
-    }
-
-    function getTextHeight(text, font){
-        switch(pv.renderer()){
-            case 'vml':
-                return getTextHeightVML(text, font);
-
-            case 'batik':
-                font = splitFontCGG(font);
-
-                // NOTE: the global function 'getTextHeightCGG' must be
-                // defined by the CGG loading environment
-                return getTextHeightCGG(text, font.fontFamily, font.fontSize);
-
-            //case 'svg':
-        }
-
-        return getTextHeightSVG(text, font);
-    }
-
-    //TODO: if not in px?..
-    function getFontSize(font){
-        if(pv.renderer() == 'batik'){
-            var sty = document.createElementNS('http://www.w3.org/2000/svg','text').style;
-            sty.setProperty('font',font);
-            return parseInt(sty.getProperty('font-size'));
-        }
-
-        var holder = getTextSizePlaceholder();
-        holder.css('font', font);
-        return parseInt(holder.css('font-size'));
-    }
-
-    function getFitInfo(w, h, text, font, diagMargin){
-        if(text == '') {
+pvc.text = {
+    getFitInfo: function(w, h, text, font, diagMargin){
+        if(text === '') {
             return {h: true, v: true, d: true};
         }
         
-        var len = getTextLength(text, font);
+        var len = pv.Text.measure(text, font).width;
         return {
             h: len <= w,
             v: len <= h,
             d: len <= Math.sqrt(w*w + h*h) - diagMargin
         };
-    }
+    },
 
-    function trimToWidth(len, text, font, trimTerminator){
-      if(text == '') {
-          return text;
-      }
-      
-      var textLen = getTextLength(text, font);
-      if(textLen <= len){
-        return text;
-      }
-
-      if(textLen > len * 1.5){ //cutoff for using other algorithm
-        return trimToWidthBin(len,text,font,trimTerminator);
-      }
-
-      while(textLen > len){
-        text = text.slice(0,text.length -1);
-        textLen = getTextLength(text, font);
-      }
-
-      return text + trimTerminator;
-    }
+    trimToWidthB: function(len, text, font, trimTerminator, before){
+        len -= pv.Text.measure(trimTerminator, font).width;
+        
+        return pvc.text.trimToWidth(len, text, font, trimTerminator, before);
+    },
     
-    // --------------------------
-    // private
-    var $textSizePlaceholder = null,
-        $textSizePvLabel = null,
-        textSizePvLabelFont = null,
-        textSizePlaceholderId = 'cccTextSizeTest_' + new Date().getTime();
-
-    function getTextSizePlaceholder(){
-        if(!$textSizePlaceholder || $textSizePlaceholder.parent().length == 0){
-            
-            $textSizePlaceholder = $(textSizePlaceholderId);
-
-            if(!$textSizePlaceholder.length){
-                $textSizePlaceholder = $('<div>')
-                    .attr('id', textSizePlaceholderId)
-                    .css('position', 'absolute')
-                    .css('visibility', 'hidden')
-                    .css('width', 'auto')
-                    .css('height', 'auto');
-
-                $('body').append($textSizePlaceholder);
-            }
+    trimToWidth: function(len, text, font, trimTerminator, before){
+        if(text === '') {
+            return text;
         }
-
-        return $textSizePlaceholder;
-    }
-
-    function getTextSizePvLabel(text, font){
-        if(!$textSizePvLabel || textSizePvLabelFont != font){
-            var holder   = getTextSizePlaceholder();
-            var holderId = holder.attr('id');
-
-            var panel = new pv.Panel();
-            panel.canvas(holderId);
-            var lbl = panel.add(pv.Label).text(text);
-            if(font){
-                lbl.font(font);
-            }
-            panel.render();
-
-            $textSizePvLabel   = $('#' + holderId + ' text');
-            textSizePvLabelFont = font;
-        } else {
-            $textSizePvLabel.text(text);
+  
+        var textLen = pv.Text.measure(text, font).width;
+        if(textLen <= len){
+            return text;
         }
-
-        return $textSizePvLabel[0];
-    }
-
-    function splitFontCGG(font){
-        var el = document.createElementNS('http://www.w3.org/2000/svg','text');
-        var sty = el.style;
-        sty.setProperty('font',font);
-
-        var result = {};
-        result.fontFamily = sty.getProperty('font-family');
-        if(!result.fontFamily){
-            result.fontFamily = 'sans-serif';
+    
+        if(textLen > len * 1.5){ //cutoff for using other algorithm
+            return pvc.text.trimToWidthBin(len, text, font, trimTerminator, before);
         }
-        result.fontSize = sty.getProperty('font-size');
-        result.fontStyle = sty.getProperty('font-style');
+    
+        while(textLen > len){
+            text = before ? text.slice(1) : text.slice(0, text.length -1);
+            textLen = pv.Text.measure(text, font).width;
+        }
+    
+        return before ? (trimTerminator + text) : (text + trimTerminator);
+    },
+    
+    trimToWidthBin: function(len, text, font, trimTerminator, before){
 
-        return result;
-    }
-
-    function getTextLenSVG(text, font){
-        var lbl = getTextSizePvLabel(text, font);
-        var box = lbl.getBBox();
-        return box.width;
-    }
-
-    function getTextHeightSVG(text, font){
-        var lbl = getTextSizePvLabel(text, font);
-        var box = lbl.getBBox();
-        return box.height;
-    }
-
-    function getTextLenVML(text, font){
-        return pv.Vml.text_dims(text, font).width;
-    }
-
-    function getTextHeightVML(text, font){
-        return pv.Vml.text_dims(text, font).height;
-    }
-
-    function trimToWidthBin(len, text, font, trimTerminator){
-
-        var high = text.length-2,
+        var ilen = text.length,
+            high = ilen - 2,
             low = 0,
             mid,
             textLen;
@@ -183,34 +52,69 @@ pvc.scope(function(){
         while(low <= high && high > 0){
 
             mid = Math.ceil((low + high)/2);
-            textLen = getTextLength(text.slice(0, mid), font);
+            
+            var textMid = before ? text.slice(ilen - mid) : text.slice(0, mid);
+            textLen = pv.Text.measure(textMid, font).width;
             if(textLen > len){
                 high = mid - 1;
-            } else if( getTextLength(text.slice(0, mid + 1), font) < len ){
+            } else if(pv.Text.measure(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font).width < len){
                 low = mid + 1;
             } else {
-                return text.slice(0, mid) + trimTerminator;
+                return before ? (trimTerminator + textMid) : (textMid + trimTerminator);
+            }
+    }
+    
+        return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
+    },
+    
+    justify: function(text, lineWidth, font){
+        var lines = [];
+        
+        if(lineWidth < pv.Text.measure('a', font).width){
+            // Not even one letter fits...
+            return lines;
+        } 
+        
+        var words = (text || '').split(/\s+/);
+        
+        var line = "";
+        while(words.length){
+            var word = words.shift();
+            if(word){
+                var nextLine = line ? (line + " " + word) : word;
+                if(pv.Text.measure(nextLine, font).width > lineWidth){
+                    // The word by itself may overflow the line width
+                    
+                    // Start new line
+                    if(line){
+                        lines.push(line);
+                    }
+                    
+                    line = word;
+                } else {
+                    line = nextLine; 
+                }
             }
         }
-
-        return text.slice(0,high) + trimTerminator;
+        
+        if(line){
+            lines.push(line);
+        }
+        
+        return lines;
+    },
+    
+    /* Returns a label's BBox relative to its anchor point */
+    getLabelBBox: function(textWidth, textHeight, align, baseline, angle, margin){
+            
+        var polygon = pv.Label.getPolygon(textWidth, textHeight, align, baseline, angle, margin);
+        
+        var bbox             = polygon.bbox();
+        bbox.source          = polygon;
+        bbox.sourceAngle     = angle;
+        bbox.sourceAlign     = align;
+        bbox.sourceTextWidth = textWidth;
+        
+        return bbox;
     }
-
-    /*
-    //TODO: use for IE if non-svg option kept
-    doesTextSizeFit: function(length, text, font){
-        var MARGIN = 4;//TODO: hcoded
-        var holder = this.getTextSizePlaceholder();
-        holder.text(text);
-        return holder.width() - MARGIN <= length;
-    }
-    */
-
-    pvc.text = {
-        getTextLength: getTextLength,
-        getFontSize:   getFontSize,
-        getTextHeight: getTextHeight,
-        getFitInfo:    getFitInfo,
-        trimToWidth:   trimToWidth
-    };
-});
+};

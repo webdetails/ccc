@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="PanelExtensionPoint" 
+                   space="pvc.options.marks" 
+                   base="pvc.options.marks.BarExtensionPoint">
+         <c:documentation>
+            The class of protovis Panel extension points.
+            
+            See the associated protovis documentation at
+            <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Panel.html" />.
+        </c:documentation>
+        
+        <c:property name="overflow" type="string">
+            <c:documentation>
+                Specifies if child marks are clipped if 
+                they are laid outside of the panel's bounds.
+                
+                The most used values are <tt>'visible'</tt>, <tt>'hidden'</tt>.
+                See all possible values in in <c:link to="http://www.w3.org/TR/CSS2/visufx.html#overflow" />.
+                
+                See the associated protovis documentation at
+                <c:link to="http://mbostock.github.com/protovis/jsdoc/symbols/pv.Panel.html#overflow" />.
+            </c:documentation>
+        </c:property>
+        <!--
+        leaving transform out 
+         -->
+    </c:complexType>
+</c:model>

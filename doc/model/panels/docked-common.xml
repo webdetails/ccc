@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="DockedPanel" 
+                   space="pvc.options.panels" 
+                   base="pvc.options.panels.Panel"
+                   abstract="true">
+        <c:documentation>
+            The common options documentation class of CCC docked panels.
+        </c:documentation>
+        
+        <!--
+        offset // not documented
+         -->
+         
+        <c:property name="position" 
+                     type="pvc.options.varia.PanelPosition"
+                     category="Layout">
+            <c:documentation>
+                The docking position of the panel.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="align" 
+                     type="pvc.options.varia.PanelAlignmentSource"
+                     category="Layout">
+            <c:documentation>
+                The alignment side of the panel (the source)
+                that will align to a side of the parent panel (the target).
+                
+                The alignment side must be 
+                orthogonal to the docking side.
+                
+                The default value is <tt>'middle'</tt>,
+                if <c:link to="pvc.options.panels.DockedPanel#position" />
+                is an horizontal side, 
+                and <tt>'center'</tt>, otherwise.
+            </c:documentation>
+        </c:property>
+        <!-- 
+        <c:property name="alignTo" 
+                     type="number string pvc.options.varia.PanelAlignmentTarget"
+                     category="Layout"
+                     excludeIn="cde">
+            <c:documentation>
+                The alignment side or position 
+                of the parent panel (the target)
+                that will align with the alignment side of this panel,
+                the source.
+                
+                The default value is the value of 
+                <c:link to="pvc.options.panels.DockedPanel#align" />.
+                
+                See <c:link to="pvc.options.varia.PanelAlignmentTarget" />
+                for information on supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="keepInBounds" type="boolean" default="false" category="Layout" excludeIn="cde">
+            <c:documentation>
+                Indicates if the layout should try that the
+                panel be kept inside its parent,
+                by changing its position.
+            </c:documentation>
+        </c:property>
+        -->
+        <c:property name="margins" type="number string pvc.options.varia.Sides" default="0" category="Layout">
+            <c:documentation>
+                The margins of the panel.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="paddings" type="number string pvc.options.varia.Sides" default="0" category="Layout">
+            <c:documentation>
+                The paddings of the panel.
+                
+                See <c:link to="pvc.options.varia.Sides" /> for information about 
+                the different supported data types.
+            </c:documentation>
+        </c:property>
+    
+        <c:property name="font" type="string" category="Style">
+            <c:documentation>
+                The font of the panel.
+                
+                See the supported font format in 
+                <c:link to="http://www.w3.org/TR/CSS2/fonts.html#font-shorthand" />
+            </c:documentation>
+        </c:property>
+        
+    </c:complexType>
+    
+</c:model>

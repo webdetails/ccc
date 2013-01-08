@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:functionType name="DimensionsCalculation" space="pvc.options.varia">
+        <c:documentation>
+            A function that calculates dimensions' values or raw values, 
+            from a datum's non-calculated dimensions' values.
+        </c:documentation>
+        <c:argument name="this" type="null" required="true">
+            <c:documentation>
+                The global JavaScript object.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="datum" type="pvc.data.Complex" required="true">
+            <c:documentation>
+                The complex (Datum or Data) instance 
+                whose dimensions are being calculated.
+            </c:documentation>
+        </c:argument>
+        <c:argument name="outAtoms" type="object" required="true">
+            <c:documentation>
+                An object that should be filled with read raw or typed values, 
+                each placed in a property with the name
+                of the corresponding dimension.
+                
+                It is also possible that the values be the atoms themselves, 
+                a technique that can be used to achieve greater performance,
+                when a dimension only has two or three possible values. 
+            </c:documentation>
+        </c:argument>
+    </c:functionType>
+</c:model>

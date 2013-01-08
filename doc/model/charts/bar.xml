@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:complexType name="BarChart" 
+                   space="pvc.options.charts"
+                   base="pvc.options.charts.BarChartCommon"
+                   facets="pvc.options.charts.Plot2ChartFacet 
+                           pvc.options.charts.Ortho2ChartFacet
+                           pvc.options.charts.Color2ChartFacet
+                           pvc.options.charts.CategoricalChartTrendFacet
+                           pvc.options.charts.Plot2V1ChartFacet
+                           pvc.options.charts.DataPartChartFacet">
+        <c:documentation>
+            The options documentation class of the <b>Bar</b> chart.
+        </c:documentation>
+        
+        <c:property name="bar" expandUse="optional" type="pvc.options.plots.BarPlot" category="Plots">
+            <c:documentation>
+                The bar plot is the <b>main plot</b> of the bar chart,
+                which means that 
+                its properties may be used <i>without</i> the "bar" property suffix.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+    
+    <c:complexType name="BarPlot" 
+                   space="pvc.options.plots"
+                   base="pvc.options.plots.BarPlotCommon"
+                   facets="pvc.options.plots.MainPlotFacet"
+                   use="expanded">
+        <c:documentation>
+            The options documentation class of the <b>Bar</b> plot.
+        </c:documentation>
+
+        <c:property name="trend" type="pvc.options.varia.PlotTrending">
+            <c:documentation>
+                Contains the plot's trending options.
+                
+                Besides the property concatenation way of specifying this
+                property and its sub-properties, 
+                this option may also be specified as a plain JSON object.
+            </c:documentation>
+        </c:property>
+    </c:complexType>
+</c:model>

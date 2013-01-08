@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t:templates xmlns:t="urn:webdetails/tmp/2012" 
+             xmlns="http://www.w3.org/1999/xhtml">
+
+    <t:template name="Pie" exampleMask="cccPieExample{0}.js">
+        <t:summary>
+            Pie charts are useful for performing relative comparisons: 
+            how do the parts make up the whole? 
+            An alternative to pie is the donut chart.
+        </t:summary>
+        <t:example title="SIMPLE PIE" />
+        <t:example title="RICH PIE" />
+        <t:example title="DONUT" />
+        <t:example title="SMALL MULTIPLE PIES" style="wide" />
+    </t:template>
+    
+    <t:template name="Bar" exampleMask="cccBarExample{0}.js">
+        <t:summary>
+            Bar charts are used for plotting data which has discrete values. 
+            The lengths of the bars are proportional to the values that they represent.
+        </t:summary>
+        <t:example title="SIMPLE BAR" />
+        <t:example title="RICH BAR" />
+        <t:example title="NEGATIVE VALUES BAR" />
+        <t:example title="STACKED BAR" />
+        <t:example title="NEGATIVE VALUES STACKED BAR" />
+        <t:example title="HORIZONTAL STACKED BAR" />
+        <t:example title="ALL IN ONE BAR" />
+        <t:example title="SMALL MULTIPLE BARS" style="wide" />
+    </t:template>
+    
+    <t:template name="Boxplot" exampleMask="cccBoxExample{0}.js">
+        <t:summary>
+            Box plots are used to represent data distributions
+            provided a five-number summary statistic.
+        </t:summary>
+        <t:example title="MINIMAL BOXPLOT" />
+        <t:example title="HORIZONTAL BOXPLOT" />
+        <t:example title="BOXPLOT WITH MEDIAN LINE" />
+        <t:example title="ALL IN ONE BOXPLOT" />
+    </t:template>
+    
+    <t:template name="Dot" exampleMask="cccDotExample{0}.js">
+        <t:summary>
+            Dot charts consists of group of data points plotted on a simple scale.
+            It is a good alternative to the horizontal bar chart, 
+            in that it is less cluttered and redundant.
+        </t:summary>
+        <t:example title="SIMPLE DOT" />
+        <t:example title="RICH DOT" />
+        <t:example title="TIME SERIES DOT" />
+    </t:template>
+    
+    <t:template name="Line" exampleMask="cccLineExample{0}.js">
+        <t:summary>
+            Line charts are often used to visualize time series data.
+        </t:summary>
+        <t:example title="TIME SERIES LINE" />
+        <t:example title="CATEGORICAL LINE" />
+        <t:example title="INTERPOLATED and NEGATIVES LINE" />
+    </t:template>
+    
+    <t:template name="StackedLine" exampleMask="cccStackedLineExample{0}.js">
+        <t:summary>
+            Stacked line charts are line charts in which 
+            lines do not overlap because they are stacked at each point.
+            This way, what you see is the trend of the contribution of each value over time.
+        </t:summary>
+        <t:example title="TIME SERIES STACKED LINE" />
+        <t:example title="CATEGORICAL STACKED LINE" />
+        <t:example title="INTERPOLATED STACKED LINE" />
+    </t:template>
+    
+    <t:template name="StackedArea" exampleMask="cccStackedAreaExample{0}.js">
+        <t:summary>
+            Stacked area charts are useful for displaying the 
+            trend of contribution of values of 
+            two or more variables to the total 
+            over categories or time.
+        </t:summary>
+        <t:example title="SIMPLE STACKED AREA" />
+        <t:example title="TIME SERIES STACKED AREA" />
+        <!-- 
+        <t:example title="HUGE DATASET STACKED AREA" />
+         -->
+    </t:template>
+    
+    <t:template name="HeatGrid" exampleMask="cccHGExample{0}.js">
+        <t:summary>
+            A heat-grid is a colored matrix that displays a two-dimensional data-set.
+            The intensity or the color of each cell depends on the value that it represents.
+        </t:summary>
+        <t:example title="GLOBAL COLORS" />
+        <t:example title="COLORS BY COLUMN" />
+        <t:example title="HORIZONTAL COLORS BY COLUMN" />
+        <t:example title="INTERACTIVE" />
+        <t:example title="SIZE, COLOR AND COMPOSITE AXIS" />
+    </t:template>
+    
+    <t:template name="Waterfall" exampleMask="cccWaterfallExample{0}.js">
+        <t:summary>
+            Waterfall charts are an alternative to pie charts for displaying distributions.
+            However when it's time to compare the size of categories and sub-categories, 
+            waterfall are the most convenient representation:<br />
+            while in a pie-chart you would have to compare wedges at different angles, 
+            in a waterfall chart you just compare the size of bars as all bars are parallel to one another.
+        </t:summary>
+        <t:example title="DOWN WATERFALL" />
+        <t:example title="UP WATERFALL" />
+        <t:example title="UP AND DOWN WATERFALL" />
+        
+    </t:template>
+    
+    <t:template name="Bullet" exampleMask="cccBulletExample{0}.js">
+        <t:summary>
+           Bullet Charts are a replacement for so-called gauge and meter charts 
+           (think gas gauge and thermometer).<br/>
+           
+           They compare a given quantitative measure (such as profit or revenue) against 
+           qualitative ranges (e.g., poor, satisfactory, good) and 
+           related markers (e.g. the same measure a year ago), 
+           as typically found in a gauge-type chart into 
+           a much smaller space with a much higher data density.
+        </t:summary>
+        <t:example title="FIXED VALUES" />
+        <t:example title="VALUE ONLY" />
+        <t:example title="TITLE AND VALUE" />
+        <t:example title="TITLE, VALUE AND MARKER" />
+        <t:example title="TITLE, SUBTITLE, VALUE, MARKER AND RANGES" />
+    </t:template>
+    
+    <t:template name="MetricDot" exampleMask="cccMetricDotExample{0}.js">
+        <t:summary>
+           Metrics charts are similar to line graphs in that 
+           they use horizontal and vertical axes to plot data points.
+           <p> 
+           However, the base axis of metric charts is always <i>continuous</i>, 
+           instead of <i>discrete</i>, as in categorical charts.
+           They both have a continuous orthogonal axis.
+           </p>
+           <p>
+           The big difference is that categorical charts 
+           group data points by category (base) value and
+           show only one visual element per unique category value.
+           Metric charts show a distinct visual element for each data point,
+           whether their category value occurs in other data points or not.   
+           </p>
+           <p>
+           Metrics charts can show you, visually, 
+           the strength, shape or the direction of the relationship between 
+           variables, and whether there are outliers in the data.
+           </p>
+        </t:summary>
+        <t:example title="DOTS AND LINES, ONE SERIES" />
+        <t:example title="DOTS AND LINES, TWO SERIES" />
+        <t:example title="LINES, HORIZONTAL" />
+        <t:example title="DOTS, CLICKABLE" />
+        <t:example title="SMALL MULTIPLE BUBBLES" style="wide"/>
+    </t:template>
+    
+</t:templates>

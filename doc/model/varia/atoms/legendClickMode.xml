@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="LegendClickMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            Control the beahvior of the legend
+            when the user clicks a legend item.
+        </c:documentation>
+        
+        <c:atom name="None" value="'none'">
+            <c:documentation>
+                Nothing happens.
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="ToggleSelected" value="'toggleSelected'">
+            <c:documentation>
+                The corresponding datums' selected state is toggled. 
+            </c:documentation>
+        </c:atom>
+        
+        <c:atom name="ToggleVisible" value="'toggleVisible'">
+            <c:documentation>
+                The corresponding datums' visible state is toggled.
+            </c:documentation>
+        </c:atom>
+        
+    </c:atomType>
+    
+</c:model>

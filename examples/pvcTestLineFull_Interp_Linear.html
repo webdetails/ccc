@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CCC Samples - Line Chart Full</title>
+
+    <meta name="svg.render.forceflash" content="true">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+    
+    <script type="text/javascript" src="../src/data/q01-01.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+    <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
+        <script type="text/javascript" src="../src/def/def.js"></script>
+
+
+    <!-- @SCRIPTSBEG@ -->
+        <script type="text/javascript" src="../src/pvc/pvc.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.trends.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvc.options.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/_data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/DimensionType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexType.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/meta/ComplexTypeProject.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MatrixTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/CrosstabTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/RelationalTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Atom.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Complex.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ComplexView.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Datum.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Dimension.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.selected.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingSpec.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/DataOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/GroupingOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/LinearInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/ZeroInterpolationOperSeriesState.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.operations.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/Data.compat.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Role.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Scene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Var.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/PieSlice.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/Rule.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Context.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/OptionsBase.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Axis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletRootScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneSelection.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlotAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/NormalizedBarPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/WaterfallPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricXYPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/MetricPointPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/PiePlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.visualRoles.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.data.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.plots.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.axes.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.panels.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.selection.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBaseChart.extension.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBasePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMultiChartPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanelAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcLegendPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcAxisTitlePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPiePanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPieChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcNormalizedBarChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/legend/WaterfallBulletGroupScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcWaterfallChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcHeatGridChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricXYAbstract.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/MetricPointChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPointPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcMetricPoint.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBulletChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcParallelCoordinates.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcDataTree.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+    <!-- @SCRIPTSEND@ -->
+    
+    
+    <link type="text/css" rel="stylesheet" href="pvcDocUtils.css"/>
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+    <script type="text/javascript">
+
+var lineExamplesShowProps = ['stacked', 'timeSeries', 'areasVisible', 'linesVisible', 'dotsVisible', 'nullInterpolationMode'];
+var baseExampleDef = {
+    dataVar: 'relational_01',
+    def: {
+        width: 1000,
+        animate: false,
+        legend:  true,
+        legendPosition: "right",
+        legendAlign: "top",
+        selectable:  true,
+        hoverable: true,
+        axisGrid: true,
+        
+        extensionPoints: {
+            xAxisScale_dateTickFormat:    "%Y/%m/%d",
+            xAxisScale_dateTickPrecision: 798336000/1.5 
+        },
+        areasVisible:  false,
+        dotsVisible:   false,
+        linesVisible:  false,
+        valuesVisible: false,
+        timeSeries: false,
+        timeSeriesFormat: "%Y-%m-%d",
+        
+        nullInterpolationMode: 'linear', //'zero', 'linear'
+        
+        /* Data format */
+        crosstabMode: false,
+        seriesInRows: false,
+        dimensions: { category: {valueType: Date, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } },
+        extensionPoints: {
+          line_interpolate: 'cardinal',
+          area_interpolate: 'cardinal'
+        }
+     },
+     showProps: lineExamplesShowProps
+};
+
+var baseCategDef = def.create(baseExampleDef, {
+    def: {
+        dimensions: { category: {valueType: Date, isDiscrete: true, rawFormat: "%Y-%m-%d", format: "%Y/%m/%d" } }
+    }
+});
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line01',
+    className: 'LineChart',
+    def: {
+        title:      "Timeseries Line Chart",
+        linesVisible:  true,
+        timeSeries: true
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line02',
+    className: 'LineChart',
+    def: {
+        title:      "Timeseries Line Chart with Areas",
+        linesVisible:  true,
+        areasVisible:  true,
+        timeSeries: true
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line02b',
+    className: 'LineChart',
+    def: {
+        title:      "Timeseries Line Chart with Areas and Dots",
+        linesVisible:  true,
+        areasVisible:  true,
+        dotsVisible:   true,
+        timeSeries: true
+     }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line03',
+    className: 'LineChart',
+    def: {
+        title: "Categorical Line Chart",
+        linesVisible:  true
+     }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line04',
+
+    className: 'LineChart',
+    def: {
+        title:     "Categorical Line Chart with Areas",
+        linesVisible: true,
+        areasVisible: true
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+  id: 'dot01',
+  className: 'DotChart',
+  def: {
+      title:      "Timeseries Dot Chart",
+      dotsVisible:   true,
+      timeSeries: true
+   }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
+  id: 'dot02',
+  className: 'DotChart',
+  def: {
+      title: "Categorical Dot Chart",
+      dotsVisible:   true
+   }
+}));
+
+// ----------------------
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line05',
+    className: 'StackedLineChart',
+    def: {
+        title:      "Stacked Timeseries Line Chart",
+        stacked:    true,
+        timeSeries: true,
+        linesVisible:  true,
+        dotsVisible:   true
+     }
+}));
+
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line06',
+    className: 'StackedAreaChart',
+    def: {
+        title:      "Stacked Timeseries Area Chart",
+        stacked:    true,
+        areasVisible:  true,
+        timeSeries: true
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line07',
+    className: 'StackedLineChart',
+    def: {
+        title:      "Stacked Timeseries Area Chart with Lines",
+        stacked:    true,
+        linesVisible:  true,
+        areasVisible:  true,
+        timeSeries: true
+    }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line08',
+    className: 'StackedLineChart',
+    def: {
+        title: "Stacked Categorical Line Chart",
+        stacked:   true,
+        linesVisible: true
+    }
+}));
+        
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line09',
+    className: 'StackedAreaChart',
+    def: {
+        title:     "Stacked Categorical Area Chart",
+        stacked:   true,
+        areasVisible: true
+     }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line10',
+    className: 'StackedLineChart',
+    def: {
+        title:     "Stacked Categorical Area Chart with Lines",
+        stacked:   true,
+        linesVisible: true,
+        areasVisible: true
+     }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line11',
+    className: 'StackedAreaChart',
+    def: {
+        title:     "Stacked Categorical Area Chart with Lines and Dots",
+        areasVisible: true,
+        linesVisible: true,
+        dotsVisible:  true
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+  id: 'dot03',
+  className: 'DotChart',
+  def: {
+      title:      "Stacked Timeseries Dot Chart",
+      stacked:    true,
+      dotsVisible:   true,
+      timeSeries: true
+   }
+}));
+
+pvc.examples.register(def.create(baseCategDef, {
+  id: 'dot04',
+  className: 'DotChart',
+  def: {
+      title: "Stacked Categorical Dot Chart",
+      stacked:    true,
+      dotsVisible:   true
+   }
+}));
+
+// ----------------------
+
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line12',
+    className: 'LineChart',
+    dataVar: 'relational_01_neg',
+    def: {
+        title:     "Categorical Line Chart with Negative Values",
+        linesVisible: true,
+        areasVisible: true
+     }
+}));
+
+
+pvc.examples.register(def.create(baseCategDef, {
+    id: 'line13',
+    className: 'LineChart',
+    dataVar: 'relational_01_neg',
+    def: {
+        title:     "Categorical Line Chart with Negative Values",
+        linesVisible: true,
+        areasVisible: true,
+        dotsVisible:  true
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line14',
+    className: 'DotChart',
+    dataVar: 'testLDot2',
+    def: {
+        title:     "Numeric Category Dot/Line Chart with Negative Values",
+        areasVisible: false,
+        dotsVisible:  true,
+        linesVisible: true,
+        crosstabMode: true,
+        dimensions: { 
+            category: {
+                valueType: Number, rawFormat: undefined, format: undefined 
+            }
+        }
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line15',
+    className: 'DotChart',
+    dataVar: 'testLDot2',
+    def: {
+        title:     "Numeric-discrete Category Dot Chart with Negative Values",
+        crosstabMode: true,
+        dotsVisible:   true,
+        linesVisible:  false,
+        dimensions: { 
+            category: {
+                valueType: Number, rawFormat: undefined, format: undefined, isDiscrete: true
+            }
+        }
+     }
+}));
+
+pvc.examples.register(def.create(baseExampleDef, {
+    id: 'line16',
+    className: 'LineChart',
+    dataVar: 'relational_04',
+    def: {
+        title:      "Line chart with second axis",
+        linesVisible:  true,
+        areasVisible:  true,
+        dotsVisible:   false,
+        plot2: true,
+        plot2Series: ['Lisbon'],
+        plot2OrthoAxis: 2,
+        plot2ColorAxis: 2,
+        color2AxisColors: ['purple'],
+        valuesVisible: false,
+        dimensions: { category: {valueType: null, isDiscrete: true } }
+     }
+}));
+
+    </script>
+
+  </head>
+  <body>
+    <h1>
+
+      Line/Area/Dot Charts
+    </h1>
+    <div id="examples"></div>
+  </body>
+</html>
