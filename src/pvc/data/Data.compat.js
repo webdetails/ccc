@@ -97,7 +97,7 @@ pvc.data.Data
     },
 
     /**
-     * Returns an array with the visible categories.
+     * Returns an array with the visible series.
      * @deprecated
      */
     getVisibleSeries: function(){
