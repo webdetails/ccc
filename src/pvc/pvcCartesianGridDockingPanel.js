@@ -187,7 +187,7 @@ def
             .lock('top',    top)
             .lock('bottom', bottom)
             .lock('fillStyle', null)
-            .strokeStyle("#808285")
+            .strokeStyle("#666666")
             .lineWidth(1)
             .antialias(false)
             .zOrder(-8)
@@ -229,7 +229,7 @@ def
                     .lock(oend_a, oend)
                     .lock(a,      zeroPosition)
                     .override('defaultColor', function(){
-                        return pv.color("#808285");
+                        return pv.color("#666666");
                     })
                     .pvMark
                     .lineWidth(1)
