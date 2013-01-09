@@ -144,7 +144,7 @@
             The options documentation class of the <b>Pie</b> plot.
         </c:documentation>
         
-        <c:property name="valuesAnchor" type="function pvc.options.varia.WedgeAnchor" default="'outer'" category="Style">
+        <c:property name="valuesAnchor" type="pvc.options.varia.WedgeAnchor" default="'outer'" category="Style">
             <c:documentation>
                 The alignment of a value label 
                 relative to its corresponding visual element position.

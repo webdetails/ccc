@@ -221,7 +221,7 @@
             The common options documentation class of the <b>metric point</b> plots.
         </c:documentation>
         
-        <c:property name="valuesAnchor" type="function pvc.options.varia.MarkAnchor" default="'right'" category="Style">
+        <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" default="'right'" category="Style">
             <c:documentation>
                 The alignment of a value label 
                 relative to its corresponding visual element position.
