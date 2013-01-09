@@ -1,4 +1,4 @@
-// 83a4881ffe4b5c2de0f37b423ec08e858006b5cc
+// d2e723b64c27e95b70990fcd1b6e07100db6d771
 /**
  * @class The built-in Array class.
  * @name Array
@@ -10052,7 +10052,8 @@ pv.SvgScene.wedge = function(scenes) {
     e = this.append(e, scenes, i);
   }
   
-  //DEBUG BEG
+  /*
+  // DEBUG BEG
   var mark  = scenes.mark;
   for (var i = 0; i < scenes.length; i+=2) {
       var shape = mark.getShape(scenes, i);
@@ -10103,6 +10104,7 @@ pv.SvgScene.wedge = function(scenes) {
       }, this);
   }
   // DEBUG END
+  */
   return e;
 };
 /**
