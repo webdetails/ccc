@@ -30,6 +30,12 @@
             The options documentation class of the <b>line</b> plot.
         </c:documentation>
         
+        <c:property name="stacked" fixed="false" type="boolean">
+            <c:documentation>
+                This plot type is necessarily non-stacked.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="linesVisible" type="boolean" fixed="true">
             <c:documentation>
                 This plot type necessarily shows lines connecting

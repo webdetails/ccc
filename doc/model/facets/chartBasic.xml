@@ -24,7 +24,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="title" type="string pvc.options.panels.ChartTitlePanel" category="Panels">
+        <c:property name="title" type="string pvc.options.panels.ChartTitlePanel" category="Panels" level="basic">
             <c:documentation>
                 The title panel of the root chart.
                 
@@ -129,7 +129,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="clickable" type="boolean" default="false" category="Interaction">
+        <c:property name="clickable" type="boolean" default="false" category="Interaction" level="basic">
             <c:documentation>
                 Indicates if the chart is clickable by the user.
                 
@@ -179,7 +179,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Actions">
+        <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Actions" level="basic">
             <c:documentation>
                 A callback function that is called
                 when the user clicks on a visual element.
@@ -259,13 +259,13 @@
         </c:property>
         
         <!-- Data Translation -->
-        <c:property name="crosstabMode" type="boolean" default="true" category="Data Translation">
+        <c:property name="crosstabMode" type="boolean" default="true" category="Data Translation" level="basic">
             <c:documentation>
                 Indicates if the data source is in <i>crosstab</i> format.
             </c:documentation>
         </c:property>
         
-        <c:property name="seriesInRows" type="boolean" default="false" category="Data Translation">
+        <c:property name="seriesInRows" type="boolean" default="false" category="Data Translation" level="basic">
             <c:documentation>
                 Indicates if, 
                 in the data source, 
@@ -327,7 +327,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="measuresIndexes" type="number string list(number string)" default="true" category="Data Translation">
+        <c:property name="measuresIndexes" type="number string list(number string)" category="Data Translation">
             <c:documentation>
                 The indexes of the data source's <i>virtual item</i> columns
                 that are to feed the 

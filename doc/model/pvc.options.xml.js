@@ -296,7 +296,6 @@ pvc.options.charts.Chart.prototype.isMultiValued = undefined;
  * <tt>isMultiValued=true</tt>.
  * 
  * @type number|string|list(number|string)
- * @default true
  * @category Data Translation
  */
 pvc.options.charts.Chart.prototype.measuresIndexes = undefined;
@@ -1551,7 +1550,7 @@ pvc.options.plots.Plot.prototype.showValues = undefined;
  * so be sure to access this property's documentation through the 
  * concrete class' documentation.
  * 
- * @type function|pvc.options.varia.MarkAnchor|pvc.options.varia.WedgeAnchor
+ * @type pvc.options.varia.MarkAnchor|pvc.options.varia.WedgeAnchor
  * @category Style
  */
 pvc.options.plots.Plot.prototype.valuesAnchor = undefined;
@@ -2425,7 +2424,7 @@ pvc.options.plots.PiePlot.prototype.extensionPoints = undefined;
  * <p>
  * Specifically, this property applies to non-linked labels.
  * 
- * @type function|pvc.options.varia.WedgeAnchor
+ * @type pvc.options.varia.WedgeAnchor
  * @default 'outer'
  * @category Style
  */
@@ -2781,7 +2780,6 @@ pvc.options.charts.BulletChart.prototype.isMultiValued = undefined;
  * <tt>isMultiValued=true</tt>.
  * 
  * @type number|string|list(number|string)
- * @default true
  * @category Data Translation
  */
 pvc.options.charts.BulletChart.prototype.measuresIndexes = undefined;
@@ -5110,7 +5108,7 @@ pvc.options.plots.BarPlotCommon.prototype.overflowMarkersVisible = undefined;
  * The alignment of a value label 
  * relative to its corresponding visual element position.
  * 
- * @type function|pvc.options.varia.MarkAnchor
+ * @type pvc.options.varia.MarkAnchor
  * @default 'center'
  * @category Style
  */
@@ -5974,7 +5972,7 @@ pvc.options.plots.PointPlot.prototype.showAreas = undefined;
  * The alignment of a value label 
  * relative to its corresponding visual element position.
  * 
- * @type function|pvc.options.varia.MarkAnchor
+ * @type pvc.options.varia.MarkAnchor
  * @default 'right'
  * @category Style
  */
@@ -6107,6 +6105,13 @@ pvc.options.plots.LinePlot.prototype.orthoAxis = 1;
  */
 pvc.options.plots.LinePlot.prototype.linesVisible = true;
 /**
+ * This plot type is necessarily non-stacked.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.LinePlot.prototype.stacked = false;
+/**
  * The options documentation class of the 
  * <b>Stacked Line</b> chart.
  * 
@@ -6230,6 +6235,13 @@ pvc.options.plots.DotPlot.prototype.orthoAxis = 1;
  * @constant
  */
 pvc.options.plots.DotPlot.prototype.dotsVisible = true;
+/**
+ * This plot type is necessarily non-stacked.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.DotPlot.prototype.stacked = false;
 /**
  * The options documentation class of the 
  * <b>Stacked Dot</b> chart.
@@ -6356,6 +6368,13 @@ pvc.options.plots.AreaPlot.prototype.orthoAxis = 1;
  * @constant
  */
 pvc.options.plots.AreaPlot.prototype.areasVisible = true;
+/**
+ * This plot type is necessarily non-stacked.
+ * 
+ * @type boolean
+ * @constant
+ */
+pvc.options.plots.AreaPlot.prototype.stacked = false;
 /**
  * The options documentation class of the 
  * <b>Stacked Area</b> chart.
@@ -7113,7 +7132,7 @@ pvc.options.plots.MetricPointPlot.prototype.shape = undefined;
  * The alignment of a value label 
  * relative to its corresponding visual element position.
  * 
- * @type function|pvc.options.varia.MarkAnchor
+ * @type pvc.options.varia.MarkAnchor
  * @default 'right'
  * @category Style
  */
@@ -8735,7 +8754,7 @@ pvc.options.axes.CartesianAxis.prototype.offset = undefined;
  */
 pvc.options.axes.CartesianAxis.prototype.position = undefined;
 /**
- * The fixed size of the panel.
+ * The fixed size of the panel, in pixel units or as a percentage.
  * <p>
  * If a size object is specified, 
  * only the component orthogonal to the axis orientation is considered.
@@ -8748,7 +8767,7 @@ pvc.options.axes.CartesianAxis.prototype.position = undefined;
  */
 pvc.options.axes.CartesianAxis.prototype.size = undefined;
 /**
- * The maximum size of the panel.
+ * The maximum size of the panel, in pixel units or as a percentage.
  * <p>
  * If a size object is specified, 
  * only the component orthogonal to the axis orientation is considered.

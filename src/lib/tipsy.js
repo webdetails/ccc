@@ -283,8 +283,8 @@
          */
         function setFakeTipTargetBounds(bounds) {
             $fakeTipTarget.css({
-                left:   bounds.left,
-                top:    bounds.top,
+                left:   bounds.left + parseFloat($canvas.css("padding-left")),
+                top:    bounds.top  + parseFloat($canvas.css("padding-top" )),
                 width:  bounds.width,
                 height: bounds.height
             });
@@ -367,11 +367,13 @@
                     $fakeTipTarget.css({
                         borderColor: 'red',
                         borderWidth: '1px',
-                        borderStyle: 'solid'
+                        borderStyle: 'solid',
+                        zIndex:      1000
                     });
                 } else {
                     $fakeTipTarget.css({
-                        borderWidth: '0px'
+                        borderWidth: '0px',
+                        zIndex:      -10
                     });
                 }
             }

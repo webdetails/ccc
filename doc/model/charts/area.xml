@@ -31,6 +31,12 @@
             The options documentation class of the <b>area</b> plot.
         </c:documentation>
         
+        <c:property name="stacked" fixed="false" type="boolean">
+            <c:documentation>
+                This plot type is necessarily non-stacked.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="areasVisible" type="boolean" fixed="true">
             <c:documentation>
                 Indicates if shaded areas are shown in the plot.

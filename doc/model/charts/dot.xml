@@ -30,6 +30,12 @@
             The options documentation class of the <b>dot</b> plot.
         </c:documentation>
         
+        <c:property name="stacked" fixed="false" type="boolean">
+            <c:documentation>
+                This plot type is necessarily non-stacked.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="dotsVisible" type="boolean" fixed="true">
             <c:documentation>
                 This plot type necessarily shows dots/markers.

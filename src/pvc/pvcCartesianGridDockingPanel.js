@@ -28,7 +28,7 @@ def
         this.base(layoutInfo);
 
         var plotFrameVisible;
-        if(chart.compatVersion <= 1){
+        if(chart.compatVersion() <= 1){
             plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
         } else {
             plotFrameVisible = def.get(chart.options, 'plotFrameVisible', true);

@@ -218,6 +218,7 @@
         <attribute name="category" type="string" />
         <attribute name="expandUse" type="com:PropertyExpandUseType" default="required" />
         <attribute name="excludeIn" type="NMTOKENS" /> 
+        <attribute name="level" type="com:PropertyLevelType" default="advanced" />
     </complexType>
     
     <complexType name="AtomTypeType">
@@ -304,6 +305,15 @@
         <restriction base="string">
             <enumeration value="optional" />
             <enumeration value="required" />
+        </restriction>
+    </simpleType>
+    
+    <!-- A measure of difficulty or frequency of use of a property -->
+    <simpleType name="PropertyLevelType">
+        <restriction base="string">
+            <enumeration value="basic" />
+            <enumeration value="intermediate" />
+            <enumeration value="advanced" />
         </restriction>
     </simpleType>
     

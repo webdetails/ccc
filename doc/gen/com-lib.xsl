@@ -16,6 +16,7 @@
     
     <!-- ' -->
     <xsl:variable name='q'><xsl:text>&#39;</xsl:text></xsl:variable>
+    <xsl:variable name="trimAposRegexp" select="concat('^\s*', $q, '([^', $q, ']*)', $q, '\s*$')" />
     
     <!-- nbsp -->
     <xsl:variable name="nbsp"><xsl:text disable-output-escaping="yes"><![CDATA[&nbsp;]]></xsl:text></xsl:variable>
@@ -317,7 +318,7 @@
                 
                 <!-- Is expanded property excluded? -->
                 <xsl:if test="count($excludeProps/prop[. = $expandedName]) = 0">
-                
+                    
                     <!-- When expanding, 
                          skip the local category, 
                          unless there's no categPath above.
@@ -337,12 +338,22 @@
         
                         <xsl:variable name="expandedName2" select="if ($rewrittenName) then $rewrittenName else $expandedName" />
                         
+                        <xsl:variable name="defaultPropOverride"
+                                      select="$overrideDefaultsProps/prop[. = $expandedName]" />
+                        
+                        <xsl:variable name="default"
+                                      select="
+                                      if(count($defaultPropOverride) = 0)
+                                      then string(@default)
+                                      else string($defaultPropOverride/@default)" />
+                                      
                         <com:property name="{$expandedName}" 
                                       name2="{$expandedName2}"
-                                      category="{$expandedCat}" 
+                                      category="{$expandedCat}"
+                                      default="{$default}" 
                                       originalType="{fun:getTypeFullName($compType)}" 
                                       originalName="{@name}">
-                            <xsl:copy-of select="@*[name() != 'name' and name() != 'category']" />
+                            <xsl:copy-of select="@*[name() != 'name' and name() != 'category' and name() != 'default']" />
                             <xsl:copy-of select="*[local-name() != 'types']" />
                             <types>
                                 <xsl:copy-of select="$otherTypes" />
@@ -417,6 +428,19 @@
     </xsl:function>
     
     <!-- UTILITIES -->
+    
+    <!-- trim ' character -->
+    <xsl:function name="fun:trimApostrophe">
+        <xsl:param name="text" />
+        <xsl:choose>
+            <xsl:when test="string($text) != ''">
+                <xsl:value-of select="replace($text, $trimAposRegexp, '$1')" />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="''" />
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
     
     <!-- Creates a "title" suitable description given a Pascal or Camel-cased name -->
     <xsl:function name="fun:buildTitleFromName" as="xs:string?">
