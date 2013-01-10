@@ -12,7 +12,7 @@ CGG_JS=${CGG}resources/libs/
 cp -f ${CCC_JS}def.js ${CDF_JS}
 cp -f ${CCC_JS}pvc-d2.0.js ${CDF_JS}
 cp -f ${CCC_JS}tipsy.* ${CDF_JS}
-cp -f ${CCC_JS}jQuery.tipsy.js ${CDF_JS}
+cp -f ${CCC_JS}jquery.tipsy.js ${CDF_JS}
 cp -f ${CCC_JS}protovis.js ${CDF_JS}
 cp -f ${CCC_JS}protovis-msie.js ${CDF_JS}
 
