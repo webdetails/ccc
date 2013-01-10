@@ -8,3 +8,4 @@ rm -rf dist/jsdoc;
 
 JSDOCDIR="build/jsdoc_toolkit-2.4.0/"
 java -jar ${JSDOCDIR}jsrun.jar ${JSDOCDIR}app/run.js --private --verbose --recurse doc/model/ -t=${JSDOCDIR}templates/jsdoc -d=dist/jsdoc
+
