@@ -47,6 +47,12 @@
         <prop as="legendClickMode">colorLegendClickMode</prop>
     </xsl:variable>
     
+    <!-- Properties with overridden defaults, by expanded name (but before rename) -->
+    <xsl:variable name="overrideDefaultsProps">
+        <prop></prop>
+        <!--  <prop default="2">compatVersion</prop> -->
+    </xsl:variable>
+    
     <!-- Include COM-LIB -->
     <xsl:include href="../com-lib.xsl" />
     

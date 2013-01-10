@@ -36,9 +36,9 @@ def
         }
         
         // The size of the biggest cell
-        var markerDiam = this.vars.markerSize;
-        var textLeft   = markerDiam + this.vars.textMargin;
-        var itemPadding    = this.vars.itemPadding;
+        var markerDiam  = this.vars.markerSize;
+        var textLeft    = markerDiam + this.vars.textMargin;
+        var itemPadding = this.vars.itemPadding;
         
         // Names are for legend items when laid out in rows
         var a_width  = this.vars.horizontal ? 'width' : 'height';
@@ -68,10 +68,21 @@ def
             'size',     contentSize);
         
         var isV1Compat = this.compatVersion() <= 1;
-        var requestSize = def.set({},
-                // Request used width / all available width (V1)
-                a_width,  isV1Compat ? clientSize[a_width] : contentSize.width,
-                a_height, Math.min(contentSize.height, clientSize[a_height]));
+        var desiredClientSize = layoutInfo.desiredClientSize;
+        var requestSize = {};
+        var w = desiredClientSize[a_width];
+        if(!w || w < 0){
+            // Request used width / all available width (V1)
+            w = isV1Compat ? clientSize[a_width] : contentSize.width;
+        }
+        
+        var h = desiredClientSize[a_height];
+        if(!h || h < 0){
+            h = contentSize.height;
+        }
+        
+        requestSize[a_width ] = Math.min(w, clientSize[a_width]);
+        requestSize[a_height] = Math.min(h, clientSize[a_height]);
         
         return requestSize;
         
