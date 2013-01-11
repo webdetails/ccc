@@ -146,7 +146,10 @@ def
                                 value:    dotScene.vars.value.rawValue
                             };
                         
-                        return v1f.call(this, d);
+                        // Compensate for the effect of intermediate scenes on mark's index
+                        var pseudo = Object.create(this);
+                        pseudo.index = dotScene.dataIndex;
+                        return v1f.call(pseudo, d);
                     };
                 };
             }
@@ -564,6 +567,7 @@ def
                 var serCatScene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
                 
                 // -------------
+                serCatScene.dataIndex = categIndex;
                 
                 serCatScene.vars.category = 
                     new pvc.visual.ValueLabelVar(categData.value, categData.label, categData.rawValue);
@@ -794,6 +798,7 @@ def
                     datum: toScene.group ? null : toScene.datum
                 });
             
+            interScene.dataIndex = toScene.dataIndex;
             interScene.vars.category = toScene.vars.category;
             
             var interValueVar = new pvc.visual.ValueLabelVar(
