@@ -53,6 +53,7 @@ def.type('pvc.data.MetricPointChartTranslationOper')
             }
         }, this);
         
+        // Distribute free measure columns by unbound measure roles 
         var N;
         var autoDimNames = [];
         var F = freeMeaIndexes.length;
@@ -62,7 +63,10 @@ def.type('pvc.data.MetricPointChartTranslationOper')
             var R = this._meaLayoutRoles.length;
             var i = 0;
             while(i < R && autoDimNames.length < F){
-                // Each unbound role gets one of the free dimensions
+                // If the measure role is unbound and has a default dimension,
+                //  the next unused dimension of the default dimension group name
+                //  is placed in autoDimNames.
+                // If any, this dimension will be fed with the next freeMeaIndexes
                 this._getUnboundRoleDefaultDimNames(this._meaLayoutRoles[i], 1, autoDimNames);
                 i++;
             }
@@ -74,7 +78,7 @@ def.type('pvc.data.MetricPointChartTranslationOper')
             }
         }
         
-        // All discrete measures go to series dimensions
+        // All discrete columns go to series dimensions
         F = freeDisIndexes.length;
         if(F > 0){
             autoDimNames.length = 0;

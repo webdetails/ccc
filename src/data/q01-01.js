@@ -512,6 +512,32 @@ var relational_04 = {
     }]
 };
 
+var relational_05 = {
+    "resultset": [
+        ["2011-07-03", 72],
+        ["2011-07-10", 50],
+        ["2011-07-17", 20],
+        ["2011-07-24", 23],
+        ["2011-07-31", 72],
+        ["2011-08-02", 50],
+
+        ["2011-07-03", 60],
+        ["2011-07-10", 40],
+        ["2011-07-17", 15],
+        ["2011-07-24", 3 ],
+        ["2011-09-30", 30]
+    ],
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "Series"
+    }, {
+        "colIndex": 2,
+        "colType": "Numeric",
+        "colName": "Value"
+    }]
+};
+
 // {"crosstabMode": false, "seriesInRows": false}
 var relationalCountrySales = {
     "metadata": [
