@@ -578,7 +578,7 @@ def
     
     _calcDiscreteTicksHiddenCore: function(){
         var mode = this.axis.option('OverlappedLabelsMode');
-        if(mode !== 'hide' || this.compatVersion() <= 1){
+        if(mode !== 'hide'){
             return 1;
         }
         
