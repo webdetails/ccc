@@ -1,4 +1,4 @@
-// d2e723b64c27e95b70990fcd1b6e07100db6d771
+// 9ef98c36170614dde646cf2015c247dbe8d5b514
 /**
  * @class The built-in Array class.
  * @name Array
@@ -1288,9 +1288,11 @@ pv.Format.number = function() {
             var style = div.style;
             style.position   = 'absolute';
             style.visibility = 'hidden';
-            style.width      = 'auto';
-            style.height     = 'auto';
-                
+            style.width = 0;
+            style.height = 0;
+            style.left = 0;
+            style.top = 0;
+            
             document.body.appendChild(div);
             
             return div;
