@@ -120,8 +120,7 @@ def
         }
     } else if(D === 1){
         var singleAtom = atomsMap[dimNames[0]];
-        var isDiscrete = singleAtom.dimension.type.isDiscrete;
-        this.value     = isDiscrete ? singleAtom.key : singleAtom.value; // typed only when continuous
+        this.value     = singleAtom.value;    // always typed when only one
         this.rawValue  = singleAtom.rawValue; // original
         this.key       = singleAtom.key;      // string
         if(wantLabel){

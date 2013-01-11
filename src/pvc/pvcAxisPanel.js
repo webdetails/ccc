@@ -25,7 +25,7 @@ def
     
     if(this.labelSpacingMin == null){
         // The user tolerance for "missing" stuff is much smaller with discrete stuff
-        this.labelSpacingMin = this.isDiscrete ? 0.1 : 1.5; // em
+        this.labelSpacingMin = this.isDiscrete ? 0.3 : 1.5; // em
     }
     
     if(this.showTicks == null){
@@ -490,17 +490,45 @@ def
     
     _calcDiscreteTicks: function(){
         var layoutInfo = this._layoutInfo;
-        var data = this.chart.visualRoles(this.roleName)
-                        .flatten(this.chart.data, {visible: true});
-         
+        var role = this.chart.visualRoles(this.roleName);
+        var data = role.flatten(this.chart.data, {visible: true});
+        
         layoutInfo.data  = data;
         layoutInfo.ticks = data._children;
-         
-        layoutInfo.ticksText = def.query(data._children)
-                            .select(function(child){ return child.absLabel; })
-                            .array();
+        
+        // If the discrete data is of a single Date value type,
+        // we want to format the category values with an appropriate precision,
+        // instead of showing the default label.
+        var format, dimType;
+        var grouping = role.grouping;
+        if(grouping.isSingleDimension && 
+           (dimType = grouping.firstDimensionType()) &&
+           (dimType.valueType === Date)){
+            // Calculate precision from data dimension's extent 
+            var extent = data.dimensions(dimType.name).extent();
+            // At least two atoms are required
+            if(extent && extent.min !== extent.max){
+                var scale = new pv.Scale.linear(extent.min.value, extent.max.value);
+                // Force "best" tick and tick format determination 
+                scale.ticks();
+                var tickFormatter = this.axis.option('TickFormatter');
+                if(tickFormatter){
+                    scale.tickFormatter(tickFormatter);
+                }
+                
+                format = function(child){ return scale.tickFormat(child.value); };
+            }
+        }
+        
+        if(!format){
+            format = function(child){ return child.absLabel; };
+        }
+        
+        layoutInfo.ticksText = data._children.map(format);
     },
     
+    
+
     _calcTimeSeriesTicks: function(){
         this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
     },
@@ -868,21 +896,21 @@ def
                 });
             
             var layoutInfo = this._layoutInfo;
+            var ticksText = layoutInfo.ticksText;
             if (this.isDiscrete){
                 if(this.useCompositeAxis){
                     this._buildCompositeScene(rootScene);
                 } else {
-                    layoutInfo.ticks.forEach(function(tickData){
+                    layoutInfo.ticks.forEach(function(tickData, index){
                         new pvc.visual.CartesianAxisTickScene(rootScene, {
                             group:     tickData,
                             tick:      tickData.value,
                             tickRaw:   tickData.rawValue,
-                            tickLabel: tickData.absLabel
+                            tickLabel: ticksText[index]
                         });
                     });
                 }
             } else {
-                var ticksText = layoutInfo.ticksText;
                 layoutInfo.ticks.forEach(function(majorTick, index){
                     new pvc.visual.CartesianAxisTickScene(rootScene, {
                         tick:      majorTick,

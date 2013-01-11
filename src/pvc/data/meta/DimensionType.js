@@ -44,7 +44,13 @@
  * @property {string} valueTypeName A description of the value type.
  * 
  * @property {boolean} isDiscrete
- * Indicates if the values of this dimension are discrete,
+ * Indicates if the values of this dimension are 
+ * to be considered discrete,
+ * as opposed to continuous,
+ * even if the value type is continuous.
+ *
+ * @property {boolean} isDiscreteValueType
+ * Indicates if the value type of the values of this dimension are discrete,
  * as opposed to continuous.
  *
  * @property {boolean} isComparable
@@ -196,14 +202,14 @@ function(complexType, name, keyArgs){
     this.valueTypeName = valueTypeName;
     this.cast = cast;
     
+    this.isDiscreteValueType = (this.valueType !== Number && this.valueType !== Date);
     this.isDiscrete = def.get(keyArgs, 'isDiscrete');
     if(this.isDiscrete == null){
-        this.isDiscrete = (this.valueType !== Number && 
-                           this.valueType !== Date);
+        this.isDiscrete = this.isDiscreteValueType;
     } else {
         // Normalize the value
         this.isDiscrete = !!this.isDiscrete;
-        if(!this.isDiscrete && (this.valueType !== Number && this.valueType !== Date)) {
+        if(!this.isDiscrete && this.isDiscreteValueType) {
             throw def.error.argumentInvalid('isDiscrete', "The only supported continuous value types are Number and Date.");
         }
     }
