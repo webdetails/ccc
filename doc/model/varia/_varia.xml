@@ -34,6 +34,7 @@
     <c:include the="varia/atoms/text.xml" />
     <c:include the="varia/atoms/rectangleSide.xml" />
     <c:include the="varia/atoms/colorString.xml" />
+    <c:include the="varia/atoms/contentOverflow.xml" />
     
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />

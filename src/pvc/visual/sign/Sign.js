@@ -1,9 +1,8 @@
 
-def.type('pvc.visual.Sign')
+def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .init(function(panel, pvMark, keyArgs){
-    this.chart  = panel.chart;
-    this.panel  = panel;
-    this.pvMark = pvMark;
+    
+    this.base(panel, pvMark, keyArgs);
     
     this.bits = 0;
     
@@ -16,10 +15,6 @@ def.type('pvc.visual.Sign')
                                !!this.chart.visualRoles('series', {assertExists: false});
     
     /* Extend the pv mark */
-    pvMark
-        .localProperty('_scene', Object)
-        .localProperty('group',  Object);
-    
     var wrapper = def.get(keyArgs, 'wrapper');
     if(!wrapper){
         wrapper = function(f){
@@ -29,20 +24,6 @@ def.type('pvc.visual.Sign')
         };
     }
     pvMark.wrapper(wrapper);
-    
-    this.lockMark('_scene', function(scene){ return scene; })
-        /* TODO: remove these when possible and favor access through scene */
-        .lockMark('group',  function(scene){ return scene && scene.group; })
-        .lockMark('datum',  function(scene){ return scene && scene.datum; })
-        ;
-    
-    pvMark.sign = this;
-    
-    /* Intercept the protovis mark's buildInstance */
-    
-    // Avoid doing a function bind, cause buildInstance is a very hot path
-    pvMark.__buildInstance = pvMark.buildInstance;
-    pvMark.buildInstance   = this._dispatchBuildInstance;
     
     if(!def.get(keyArgs, 'freeColor', true)){
         this._bindProperty('fillStyle',   'fillColor',   'color')
@@ -57,7 +38,7 @@ def.type('pvc.visual.Sign')
     this._addInteractive(keyArgs);
 })
 .add({
- // To be called on prototype
+    // To be called on prototype
     property: function(name){
         var upperName  = def.firstUpperCase(name);
         var baseName   = 'base'        + upperName;
@@ -161,36 +142,8 @@ def.type('pvc.visual.Sign')
     
     // -------------
     
-    // Defines a local property on the underlying protovis mark
-    localProperty: function(name, type){
-        this.pvMark.localProperty(name, type);
-        return this;
-    },
-    
-    // -------------
-    
     intercept: function(name, fun){
         return this._intercept(name, fun.bind(this));
-    },
-    
-    lock: function(name, value){
-        return this.lockMark(name, this._bindWhenFun(value));
-    },
-    
-    optional: function(name, value, tag){
-        return this.optionalMark(name, this._bindWhenFun(value), tag);
-    },
-    
-    // -------------
-    
-    lockMark: function(name, value){
-        this.pvMark.lock(name, value);
-        return this;
-    },
-    
-    optionalMark: function(name, value, tag){
-        this.pvMark[name](value, tag);
-        return this;
     },
     
     // -------------
@@ -289,39 +242,6 @@ def.type('pvc.visual.Sign')
         mark.intercept(name, fun);
         
         return this;
-    },
-    
-    _lockDynamic: function(name, method){
-        return this.lockMark(name, def.methodCaller('' + method, this));
-    },
-    
-    // -------------
-    
-    delegate: function(dv, tag){
-        return this.pvMark.delegate(dv, tag);
-    },
-    
-    delegateExtension: function(dv){
-        return this.pvMark.delegate(dv, pvc.extensionTag);
-    },
-    
-    hasDelegate: function(tag){
-        return this.pvMark.hasDelegate(tag);
-    },
-    
-    // Using it is a smell...
-//    hasExtension: function(){
-//        return this.pvMark.hasDelegate(pvc.extensionTag);
-//    },
-    
-    // -------------
-    
-    _bindWhenFun: function(value){
-        if(typeof value === 'function'){
-            return value.bind(this);
-        }
-        
-        return value;
     }
 })
 .prototype
@@ -404,36 +324,6 @@ def.type('pvc.visual.Sign')
         this.bits = bits;
     },
     
-    /* SCENE MAINTENANCE */
-    _dispatchBuildInstance: function(instance){
-        // this: the mark
-        this.sign._buildInstance(this, instance);
-    },
-    
-    _buildInstance: function(mark, instance){
-        /* Reset scene/instance state */
-        this.pvInstance = instance; // pv Scene
-        
-        var scene  = instance.data;
-        this.scene = scene;
-        
-        var index = scene ? scene.childIndex() : 0;
-        this.index = index < 0 ? 0 : index;
-        
-        /* 
-         * Update the scene's render id, 
-         * which possibly invalidates per-render
-         * cached data.
-         */
-        /*global scene_renderId:true */
-        scene_renderId.call(scene, mark.renderId());
-
-        /* state per: sign & scene & render */
-        this.state = {};
-
-        mark.__buildInstance.call(mark, instance);
-    },
-
     /* COLOR */
     fillColor: function(){ 
         return this.color('fill');

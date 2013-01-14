@@ -71,6 +71,8 @@
                 minimum value of the data.
                 
                 When this property is specified, 
+                and <c:link to="pvc.options.charts.CartesianChart#leafContentOverflow" />
+                is set to <tt>auto</tt>, 
                 clipping is activated in the plot panel. 
                 Elements that are drawn beyond its area are clipped.
                 
@@ -93,6 +95,8 @@
                 maximum value of the data.
                 
                 When this property is specified, 
+                and <c:link to="pvc.options.charts.CartesianChart#leafContentOverflow" />
+                is set to <tt>auto</tt>, 
                 clipping is activated in the plot panel. 
                 Elements that are drawn beyond its area are clipped.
                 

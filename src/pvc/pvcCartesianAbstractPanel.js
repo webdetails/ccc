@@ -112,20 +112,26 @@ def
     _createCore: function() {
         // Send the panel behind the axis, title and legend, panels
         this.pvPanel.zOrder(-10);
-
-        // Overflow
-        var hideOverflow =
-            def
-            .query(['ortho', 'base'])
-            .select(function(axisType) { return this.axes[axisType]; }, this)
-            .any(function(axis){
-                return axis.option('FixedMin') != null ||
-                       axis.option('FixedMax') != null;
-            });
+        
+        var hideOverflow;
+        var contentOverflow = this.chart.options.leafContentOverflow || 'auto';
+        if(contentOverflow === 'auto'){
+            // Overflow
+            hideOverflow =
+                def
+                .query(['ortho', 'base'])
+                .select(function(axisType) { return this.axes[axisType]; }, this)
+                .any(function(axis){
+                    return axis.option('FixedMin') != null ||
+                           axis.option('FixedMax') != null;
+                });
+        } else {
+            hideOverflow = (contentOverflow === 'hidden');
+        }
         
         if (hideOverflow){
             // Padding area is used by bubbles and other vizs without problem
-            this.pvPanel.borderPanel.overflow("hidden");
+            this.pvPanel.borderPanel.overflow('hidden');
         }
     },
     

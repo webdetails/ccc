@@ -31,6 +31,7 @@ src/pvc/data/Data.compat.js
 src/pvc/visual/Role.js
 src/pvc/visual/Scene.js
 src/pvc/visual/Var.js
+src/pvc/visual/sign/BasicSign.js
 src/pvc/visual/sign/Sign.js
 src/pvc/visual/sign/Panel.js
 src/pvc/visual/sign/Label.js

@@ -116,6 +116,13 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="leafContentOverflow" type="pvc.options.varia.ContentOverflow" default="'auto'" category="Layout">
+            <c:documentation>
+                Indicates what is to be done with content that overflows
+                in leaf charts.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 

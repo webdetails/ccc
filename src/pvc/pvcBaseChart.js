@@ -559,7 +559,7 @@ def
 //      paddings: undefined,
 //      contentMargins:  undefined,
 //      contentPaddings: undefined,
-        
+//      leafContentOverflow: 'auto',
 //      multiChartMax: undefined,
 //      multiChartColumnsMax: undefined,
 //      multiChartSingleRowFillsHeight: undefined,
