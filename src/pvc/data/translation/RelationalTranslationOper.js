@@ -91,26 +91,8 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         // (v1 did not make this assumption)
         var valuesColIndexes, M;
         if(this.options.isMultiValued){
-            valuesColIndexes = this.options.measuresIndexes;
-            // The null test is required because measuresIndexes can be a number, a string...
-            if(valuesColIndexes != null){
-                // Normalize, filter indexes
-                valuesColIndexes = 
-                    def
-                    .query(valuesColIndexes)
-                    .select(function(index){ return +index; }) // to number
-                    .where(function(index){ return !isNaN(index) && index >= 0 && index < J; })
-                    .distinct()
-                    .array();
-                
-                M = valuesColIndexes.length;
-                if(!M){
-                    M = valuesColIndexes = null;
-                } else {
-                    /*jshint expr:true */ 
-                    (M <= J) || def.assert("M must be smaller than J");
-                }
-            }
+            valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, J - 1);
+            M = valuesColIndexes ? valuesColIndexes.length : 0;
         }
         
         var D; // discrete count = D = S + C

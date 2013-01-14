@@ -500,6 +500,26 @@ var pvc = def.globalSpace('pvc', {
            ;
     };
     
+    pvc.parseDistinctIndexArray = function(value, max){
+        value = def.array.as(value);
+        if(value == null){
+            return null;
+        }
+        
+        if(max == null){
+            max = Infinity;
+        }
+        
+        var a = def
+            .query(value)
+            .select(function(index){ return +index; }) // to number
+            .where(function(index){ return !isNaN(index) && index >= 0 && index <= max; })
+            .distinct()
+            .array();
+        
+        return a.length ? a : null;
+    };
+    
     pvc.parseLegendClickMode = function(clickMode){
         if(!clickMode){
             clickMode = 'none';

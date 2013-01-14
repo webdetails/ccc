@@ -318,8 +318,11 @@ pvc.BaseChart
         var options = this.options;
         var serRole = this._serRole;
         
-        var plot2Series = (serRole != null) && options.plot2 && options.plot2Series;
-        if(!plot2Series){
+        var plot2Series = (serRole != null) && 
+                          options.plot2 && 
+                          options.plot2Series && 
+                          def.array.as(options.plot2Series);
+        if(!plot2Series || !plot2Series.length){
             return;
         }
         

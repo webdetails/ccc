@@ -146,10 +146,9 @@ def.type('pvc.data.TranslationOper')
             userDimReaders.forEach(this.defReader, this);
         }
 
-        var multiChartIndexes = this.options.multiChartIndexes;
-        if(multiChartIndexes != null) {
-            this._multiChartIndexes = 
-                this.defReader({names: 'multiChart', indexes: multiChartIndexes });
+        var multiChartIndexes = pvc.parseDistinctIndexArray(this.options.multiChartIndexes);
+        if(multiChartIndexes) {
+            this._multiChartIndexes = this.defReader({names: 'multiChart', indexes: multiChartIndexes });
         }
     },
 
