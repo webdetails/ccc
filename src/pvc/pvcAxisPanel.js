@@ -25,7 +25,7 @@ def
     
     if(this.labelSpacingMin == null){
         // The user tolerance for "missing" stuff is much smaller with discrete stuff
-        this.labelSpacingMin = this.isDiscrete ? 0.3 : 1.5; // em
+        this.labelSpacingMin = this.isDiscrete ? 0.1 : 1.5; // em
     }
     
     if(this.showTicks == null){
