@@ -275,12 +275,15 @@ pvc.BaseChart
                 return v != null ? valueFormat(v) : "";
             };
         }
-
+        
+        var secondAxisIdx;
+        if(plot2 && this._allowV1SecondAxis && (this.compatVersion() <= 1)){
+            secondAxisIdx = pvc.parseDistinctIndexArray(options.secondAxisIdx) || -1;
+        }
+        
         return {
             compatVersion:     this.compatVersion(),
-            plot2SeriesIndexes: (plot2 && this._allowV1SecondAxis && (this.compatVersion() <= 1)) ?  
-                                 (options.secondAxisIdx == null ? -1 : options.secondAxisIdx) : 
-                                 null,
+            plot2SeriesIndexes: secondAxisIdx,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
