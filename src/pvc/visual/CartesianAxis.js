@@ -368,7 +368,7 @@ def.scope(function(){
                 if(this._resolveByOrientedId(optionInfo)){
                     return true;
                 }
-            } else if(this._resolveByV1OptionId()) { // secondAxis...
+            } else if(this._resolveByV1OptionId(optionInfo)) { // secondAxis...
                 return true;
             }
             
