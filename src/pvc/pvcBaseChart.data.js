@@ -279,7 +279,7 @@ pvc.BaseChart
         return {
             compatVersion:     this.compatVersion(),
             plot2SeriesIndexes: (plot2 && this._allowV1SecondAxis && (this.compatVersion() <= 1)) ?  
-                                 options.secondAxisIdx : 
+                                 (options.secondAxisIdx == null ? -1 : options.secondAxisIdx) : 
                                  null,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
