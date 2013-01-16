@@ -301,10 +301,14 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dataCategoriesCount" type="number" default="1" category="Data Translation">
+        <c:property name="dataCategoriesCount" type="number" category="Data Translation">
             <c:documentation>
                 The number of category-like columns that are
                 present in a data source.
+                
+                The default value is the number of consecutive string
+                columns, starting at the first, or <tt>1</tt>,
+                if there are none.
             </c:documentation>
         </c:property>
         

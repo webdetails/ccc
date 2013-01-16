@@ -15,10 +15,12 @@ def.scope(function(){
         }
     });
     
-    function visibleData(type){
+    function visibleData(type, dv){
         return {
             resolveV1: function(optionInfo){
-                this._specifyChartOption(optionInfo, 'show' + type);
+                if(!this._specifyChartOption(optionInfo, 'show' + type)){
+                    optionInfo.defaultValue(dv);
+                }
                 return true;
             }
         };
@@ -28,21 +30,21 @@ def.scope(function(){
         pvc.visual.CategoricalPlot.optionsDef, {
             DotsVisible: {
                 resolve: '_resolveFull',
-                data:    visibleData('Dots'),
+                data:    visibleData('Dots', true),
                 cast:    Boolean,
                 value:   false
             },
             
             LinesVisible: {
                 resolve: '_resolveFull',
-                data:    visibleData('Lines'),
+                data:    visibleData('Lines', true),
                 cast:    Boolean,
                 value:   false
             },
             
             AreasVisible: {
                 resolve: '_resolveFull',
-                data:    visibleData('Areas'),
+                data:    visibleData('Areas', false),
                 cast:    Boolean,
                 value:   false
             },
