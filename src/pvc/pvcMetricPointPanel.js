@@ -286,6 +286,7 @@ def
                 }, this);
             }
             
+            // TODO: this seams to not be working on negative x, y values
             var setSide = function(side, padding){
                 if(op){
                     padding += (op[side] || 0);
