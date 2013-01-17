@@ -388,16 +388,11 @@ def
         
         // -- LABEL --
         if(this.valuesVisible){
-            extensionIds = ['label'];
-            if(this.compatVersion() <= 1){
-                extensionIds.push('lineLabel');
-            }
-            
             this.pvLabel = new pvc.visual.Label(
                 this, 
                 this.pvDot.anchor(this.valuesAnchor), 
                 {
-                    extensionId: extensionIds,
+                    extensionId: 'label',
                     wrapper:     wrapper
                 })
                 .pvMark

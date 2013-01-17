@@ -18,10 +18,12 @@ def.scope(function(){
     function visibleData(type, dv){
         return {
             resolveV1: function(optionInfo){
-                if(!this._specifyChartOption(optionInfo, 'show' + type)){
-                    optionInfo.defaultValue(dv);
+                if(this.globalIndex === 0){
+                    if(!this._specifyChartOption(optionInfo, 'show' + type)){
+                        optionInfo.defaultValue(dv);
+                    }
+                    return true;
                 }
-                return true;
             }
         };
     }

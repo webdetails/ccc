@@ -72,14 +72,17 @@ def.scope(function(){
             resolve: '_resolveFull',
             data: {
                 resolveV1: function(optionInfo){
-                    var show = this._chartOption('showValues');
-                    if(show !== undefined){
-                        optionInfo.specify(show);
-                    } else {
-                        show = this.type !== 'point';
-                        optionInfo.defaultValue(show);
+                    if(this.globalIndex === 0){
+                        var show = this._chartOption('showValues');
+                        if(show !== undefined){
+                            optionInfo.specify(show);
+                        } else {
+                            show = this.type !== 'point';
+                            optionInfo.defaultValue(show);
+                        }
+                        
+                        return true;
                     }
-                    return true;
                 }
             },
             cast:  Boolean,
