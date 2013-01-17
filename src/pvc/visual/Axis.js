@@ -83,11 +83,11 @@ def.scope(function(){
             return !!this.role;
         },
         
-        setScale: function(scale){
+        setScale: function(scale, noWrap){
             /*jshint expr:true */
             this.role || def.fail.operationInvalid('Axis is unbound.');
             
-            this.scale = scale ? this._wrapScale(scale) : null;
+            this.scale = scale ? (noWrap ? scale : this._wrapScale(scale)) : null;
     
             return this;
         },

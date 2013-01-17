@@ -305,11 +305,19 @@ var pvc = def.globalSpace('pvc', {
     /**
      * Creates a color scheme if the specified argument is not one already.
      * 
+     * <p>
+     * A color scheme function is a factory of protovis color scales.
+     * Given the domain values, returns a protovis color scale.
+     * The arguments of the function are suitable for passing
+     * to a protovis scale's <tt>domain</tt> method.
+     * </p>
+     * 
      * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] A value convertible to a color scheme: 
      * a color string, 
      * a color object, 
      * an array of color strings or objects, 
-     * a color scale function, 
+     * a protovis color scale function,
+     * a color scale factory function (i.e. a color scheme), 
      * or null.
      * 
      * @returns {null|function} A color scheme function or null.

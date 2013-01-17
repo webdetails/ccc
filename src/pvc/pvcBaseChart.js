@@ -34,7 +34,7 @@ def
     this._constructData(options);
     this._constructVisualRoles(options);
     
-    this.options = def.mixin({}, this.defaults, options);
+    this.options = def.mixin.copy({}, this.defaults, options);
 })
 .add({
     /**

@@ -235,12 +235,12 @@ pvc.BaseChart
     _onColorAxisScaleSet: function(axis){
         switch(axis.index){
             case 0:
-                this.colors = axis.option('Colors');
+                this.colors = axis.scheme();
                 break;
             
             case 1:
                 if(this._allowV1SecondAxis){
-                    this.secondAxisColor = axis.option('Colors');
+                    this.secondAxisColor = axis.scheme();
                 }
                 break;
         }
@@ -274,7 +274,12 @@ pvc.BaseChart
                 (axisRole.name === roleName) ||
                 (axisRole.sourceRole && axisRole.sourceRole.name === roleName);
             
-            if(isRoleCompatible && (axis.index === 0 || axis.option.isSpecified('Colors'))){
+            if(isRoleCompatible &&
+               axis.scale &&
+               (axis.index === 0 || 
+               axis.option.isSpecified('Colors') || 
+               axis.option.isSpecified('Map'))){
+                
                 scale = axis.scale;
                 if(!firstScale){ firstScale = scale; }
                 

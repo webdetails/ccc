@@ -40,7 +40,7 @@ def.scope(function(){
         
         calculateScale: function(){
             /*jshint expr:true */
-            var scale;
+            var scale, noWrap;
             var dataCells = this.dataCells;
             if(dataCells){
                 var chart = this.chart;
@@ -69,7 +69,10 @@ def.scope(function(){
                     
                     // Call the transformed color scheme with the domain values
                     //  to obtain a final scale object
-                    scale = this.option('Colors').call(null, domainValues);
+                    scale = this.scheme()(domainValues);
+                    
+                    // scale is already wrapped by this axis' _wrapScale
+                    noWrap = true;
                 } else {
                     if(dataCells.length === 1){
                         // Local scope: 
@@ -110,11 +113,12 @@ def.scope(function(){
                 }
             }
             
-            this.setScale(scale);
+            this.setScale(scale, noWrap);
             
             return this;
         },
         
+        // Called from within setScale
         _wrapScale: function(scale){
             // Check if there is a color transform set
             // and if so, transform the color scheme
@@ -122,7 +126,9 @@ def.scope(function(){
             // do not apply default color transforms...
             var applyTransf;
             if(this.scaleType === 'discrete'){
-                applyTransf = this.option.isSpecified('Transform') || !this.option.isSpecified('Colors');
+                applyTransf = this.option.isSpecified('Transform') || 
+                              (!this.option.isSpecified('Colors') && 
+                               !this.option.isSpecified('Map'   ));
             } else {
                 applyTransf = true;
             }
@@ -135,6 +141,108 @@ def.scope(function(){
             }
             
             return this.base(scale);
+        },
+        
+        scheme: function(){
+            return def.lazy(this, '_scheme', this._createScheme, this);
+        },
+        
+        _createColorMapFilter: function(colorMap){
+            // Fixed Color Values (map of color.key -> first domain value of that color)
+            var fixedColors = def.uniqueIndex(colorMap, function(c){ return c.key; });
+            
+            return {
+                domain: function(k){
+                    return !def.hasOwn(colorMap, k); 
+                },
+                
+                color: function(c){
+                    return !def.hasOwn(fixedColors, c.key);
+                }
+            };
+        },
+        
+        _createScheme: function(){
+            var me = this;
+            var baseScheme = me.option('Colors');
+            
+            if(me.scaleType !== 'discrete'){
+                // TODO: this implementation doesn't support NormByCategory...
+                return function(d/*domainAsArrayOrArgs*/){
+                    // Create a fresh baseScale, from the baseColorScheme
+                    // Use baseScale directly
+                    var scale = baseScheme.apply(null, arguments);
+                    
+                    // Apply Transforms, nulls, etc, according to the axis' rules
+                    return me._wrapScale(scale);
+                };
+            }
+            
+            var colorMap = me.option('Map'); // map domain key -> pv.Color
+            if(!colorMap){
+                return function(d/*domainAsArrayOrArgs*/){
+                    // Create a fresh baseScale, from the baseColorScheme
+                    // Use baseScale directly
+                    var scale = baseScheme.apply(null, arguments);
+                    
+                    // Apply Transforms, nulls, etc, according to the axis' rules
+                    return me._wrapScale(scale);
+                };
+            } 
+
+            var filter = this._createColorMapFilter(colorMap);
+                
+            return function(d/*domainAsArrayOrArgs*/){
+                
+                // Create a fresh baseScale, from the baseColorScheme
+                var scale;
+                if(!(d instanceof Array)){
+                    d = def.array.copy(arguments);
+                }
+                
+                // Filter the domain before creating the scale
+                d = d.filter(filter.domain);
+                
+                var baseScale = baseScheme(d);
+                
+                // Removed fixed colors from the baseScale
+                var r = baseScale.range().filter(filter.color);
+                
+                baseScale.range(r);
+                
+                // Intercept so that the fixed color is tested first
+                scale = function(k){
+                    var c = def.getOwn(colorMap, k);
+                    return c || baseScale(k);
+                };
+                
+                def.copy(scale, baseScale);
+                
+                // override domain and range methods
+                var dx, rx;
+                scale.domain = function(){
+                    if (arguments.length) {
+                        throw def.operationInvalid("The scale cannot be modified.");
+                    }
+                    if(!dx){
+                        dx = def.array.append(def.ownKeys(colorMap), d);
+                    }
+                    return dx;
+                };
+                
+                scale.range = function(){
+                    if (arguments.length) {
+                        throw def.operationInvalid("The scale cannot be modified.");
+                    }
+                    if(!rx){
+                        rx = def.array.append(def.own(colorMap), d);
+                    }
+                    return rx;
+                };
+                
+                // At last, apply Transforms, nulls, etc, according to the axis' rules
+                return me._wrapScale(scale);
+            };
         },
         
         sceneScale: function(keyArgs){
@@ -188,6 +296,23 @@ def.scope(function(){
     function castAlign(align){
         var position = this.option('Position');
         return pvc.parseAlign(position, align);
+    }
+    
+    function castColorMap(colorMap){
+        var resultMap;
+        if(colorMap){
+            var any;
+            def.eachOwn(colorMap, function(v, k){
+                any = true;
+                colorMap[k] = pv.color(v);
+            });
+            
+            if(any){
+                resultMap = colorMap;
+            }
+        }
+        
+        return resultMap;
     }
     
     var legendData = {
@@ -260,6 +385,22 @@ def.scope(function(){
                 }
             },
             cast: pvc.colorScheme
+        },
+        
+        /**
+         * For ordinal color scales, a map of keys and their fixed colors.
+         * 
+         * @example
+         * <pre>
+         *  {
+         *      'Lisbon': 'red',
+         *      'London': 'blue'
+         *  }
+         * </pre>
+         */
+        Map: {
+            resolve: '_resolveFull',
+            cast:    castColorMap
         },
         
         /*
