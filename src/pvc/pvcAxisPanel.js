@@ -1145,7 +1145,7 @@ def
                 }
             })
             .intercept('visible', function(tickScene){
-                return this.pvMark.parent.hidden()  ?
+                return !this.pvMark.parent.hidden()  ?
                        this.delegateExtension(true) :
                        !!tickScene.vars.hiddenLabelText;
             })
