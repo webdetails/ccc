@@ -1063,14 +1063,10 @@ def
                     extensionId: 'ticks',
                     wrapper:  wrapper
                 })
-                .lock('data')            // Inherited    
-                // By default is visible unless the includeModulo hides it
+                .lock('data') // Inherited
                 .intercept('visible', function(){
-                    var visible = this.delegateExtension();
-                    if(visible === undefined){
-                        visible = !this.pvMark.parent.hidden();
-                    }
-                    return visible;
+                    return !this.pvMark.parent.hidden() &&
+                            this.delegateExtension(true);
                 })
                 .optional('lineWidth', 1)
                 .lock(anchorOpposite,  0) // top
@@ -1148,6 +1144,28 @@ def
                     }
                 }
             })
+            .intercept('visible', function(tickScene){
+                return this.pvMark.parent.hidden()  ?
+                       this.delegateExtension(true) :
+                       !!tickScene.vars.hiddenLabelText;
+            })
+            .intercept('text', function(tickScene){
+                var text;
+                if(this.pvMark.parent.hidden()){
+                    text = tickScene.vars.hiddenLabelText;
+                } else {
+                    // Allow late overriding (does not affect layout..)
+                    text = this.delegateExtension();
+                    if(text === undefined){
+                        text = tickScene.vars.tick.label;
+                    }
+                    if(maxTextWidth){
+                        text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
+                    }
+                }
+                
+                return text;
+             })
             .pvMark
             .zOrder(40) // above axis rule
             
@@ -1158,20 +1176,6 @@ def
             .textStyle("#666666")
             .textAlign(align)
             .textBaseline(baseline)
-            
-            .text(function(tickScene){
-                var text;
-                if(this.parent.hidden()){
-                    text = tickScene.vars.hiddenLabelText;
-                } else {
-                    text = tickScene.vars.tick.label;
-                    if(maxTextWidth){
-                        text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
-                    }
-                }
-                
-                return text;
-             })
             ;
         
         this._debugTicksPanel(pvTicksPanel);
