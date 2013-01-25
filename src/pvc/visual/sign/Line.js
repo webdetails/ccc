@@ -76,7 +76,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
      */
     interactiveColor: function(color, type){
         var scene = this.scene;
-        if(scene.anySelected() && !scene.isSelected()) {
+        if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
             
             if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                 //return color.darker(1.5);

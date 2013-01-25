@@ -248,7 +248,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .property('color')
 .constructor
 .add({
-    _bitShowsInteraction:  4,
+    _bitShowsActivity:     2,
+    _bitShowsSelection:    4,
+    _bitShowsInteraction:  4 | 2, // 6
     _bitShowsTooltip:      8,
     _bitSelectable:       16,
     _bitHoverable:        32,
@@ -256,6 +258,8 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _bitDoubleClickable: 128,
     
     showsInteraction:  function(){ return (this.bits & this._bitShowsInteraction) !== 0; },
+    showsActivity:     function(){ return (this.bits & this._bitShowsActivity   ) !== 0; },
+    showsSelection:    function(){ return (this.bits & this._bitShowsSelection  ) !== 0; },
     showsTooltip:      function(){ return (this.bits & this._bitShowsTooltip    ) !== 0; },
     isSelectable:      function(){ return (this.bits & this._bitSelectable      ) !== 0; },
     isHoverable:       function(){ return (this.bits & this._bitHoverable       ) !== 0; },
@@ -267,27 +271,28 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _addInteractive: function(keyArgs){
         var panel   = this.panel,
             pvMark  = this.pvMark,
-            options = this.chart.options;
+            chart   = this.chart,
+            options = chart.options;
         
         var bits = this.bits;
         
-        if(this.chart._tooltipEnabled && !def.get(keyArgs, 'noTooltip')){
+        if(chart._tooltipEnabled && !def.get(keyArgs, 'noTooltip')){
             bits |= this._bitShowsTooltip;
             
             this.panel._addPropTooltip(pvMark, def.get(keyArgs, 'tooltipArgs'));
         }
         
-        var selectable = false;
-        var clickable  = false;
+        var clickSelectable = false;
+        var clickable = false;
         
         if(options.selectable || options.hoverable){
             if(options.selectable && !def.get(keyArgs, 'noSelect')){
-                bits |= (this._bitShowsInteraction | this._bitSelectable);
-                selectable = true;
+                bits |= (this._bitShowsSelection | this._bitSelectable);
+                clickSelectable = chart._canSelectWithClick();
             }
             
             if(options.hoverable && !def.get(keyArgs, 'noHover')){
-                bits |= (this._bitShowsInteraction | this._bitHoverable);
+                bits |= (this._bitShowsActivity | this._bitHoverable);
                 
                 panel._addPropHoverable(pvMark);
             }
@@ -306,12 +311,30 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             }
         }
         
+        var showsActivity = def.get(keyArgs, 'showsActivity');
+        if(showsActivity != null){
+            if(showsActivity){
+                bits |=  this._bitShowsActivity;
+            } else {
+                bits &= ~this._bitShowsActivity;
+            }
+        }
+        
+        var showsSelection = def.get(keyArgs, 'showsSelection');
+        if(showsSelection != null){
+            if(showsSelection){
+                bits |=  this._bitShowsSelection;
+            } else {
+                bits &= ~this._bitShowsSelection;
+            }
+        }
+        
         if(!def.get(keyArgs, 'noClick') && panel._isClickable()){
             bits |= this._bitClickable;
             clickable = true;
         }
         
-        if(selectable || clickable){
+        if(clickSelectable || clickable){
             panel._addPropClick(pvMark);
         }
         

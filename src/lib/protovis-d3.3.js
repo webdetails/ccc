@@ -1,4 +1,4 @@
-// 9ef98c36170614dde646cf2015c247dbe8d5b514
+// 979a69172e61c25cf2281f0f68ac2314909cb804
 /**
  * @class The built-in Array class.
  * @name Array
@@ -225,11 +225,15 @@ pv.parent = function() { return this.parent.index; };
  * href="http://javascript.crockford.com/prototypal.html">prototypal
  * inheritance</a>.
  */
-pv.extend = function(f) {
-  function g() {}
-  g.prototype = f.prototype || f;
-  return new g();
-};
+pv.extend = Object.create ?
+    function(f){
+      return Object.create(f.prototype || f); 
+    } :
+    function(f) {
+      function g() {}
+      g.prototype = f.prototype || f;
+      return new g();
+    };
 
 // Is there any browser (still) supporting this syntax?
 // Commented cause this messes up with the debugger's break on exceptions.
@@ -4261,7 +4265,7 @@ pv.Scale.ordinal = function() {
     if (!(x in i)) i[x] = d.push(x) - 1;
     return r[i[x] % r.length];
   }
-
+  
   /**
    * Sets or gets the input domain. This method can be invoked several ways:
    *
@@ -4343,6 +4347,8 @@ pv.Scale.ordinal = function() {
           ? ((arguments.length > 1) ? pv.map(array, f) : array)
           : Array.prototype.slice.call(arguments);
       if (typeof r[0] == "string") r = r.map(pv.color);
+      r.min = r[0];
+      r.max = r[r.length - 1];
       return this;
     }
     return r;
@@ -4379,7 +4385,8 @@ pv.Scale.ordinal = function() {
         step = (max - min) / N;
         r = pv.range(min + step / 2, max, step);
     }
-    
+    r.min = min;
+    r.max = max;
     r.step = step;
     return this;
   };
@@ -4422,6 +4429,8 @@ pv.Scale.ordinal = function() {
     }
     r.band   = r.step * band;
     r.margin = r.step - r.band;
+    r.min = min;
+    r.max = max;
     return this;
   };
 
@@ -4480,7 +4489,8 @@ pv.Scale.ordinal = function() {
     r.step   = S;
     r.band   = B;
     r.margin = M;
-    
+    r.min = min;
+    r.max = max;
     return this;
   };
 
@@ -4505,6 +4515,8 @@ pv.Scale.ordinal = function() {
     
     r = (n == 1) ? [(min + max) / 2]
         : pv.range(min, max + step / 2, step);
+    r.min = min;
+    r.max = max;
     return this;
   };
 
@@ -4566,9 +4578,53 @@ pv.Scale.ordinal = function() {
       r.step = step;
       r.margin = step - r.band;
     }
+    r.min = min;
+    r.max = max;
     return this;
   };
-
+  
+  /**
+   * Inverts the specified value in the output range, 
+   * returning the index of the closest corresponding value in the input domain.
+   * This is frequently used to convert the mouse location (see {@link pv.Mark#mouse}) 
+   * to a value in the input domain. 
+   * 
+   * The number of input domain values is returned
+   * if the specified point is closest to the end margin of the last input domain value.
+   * 
+   * @function
+   * @name pv.Scale.quantitative.prototype.invertIndex
+   * @param {number} y a value in the output range (a pixel location).
+   * @returns {number} the index of the closest input domain value.
+   */
+  scale.invertIndex = function(y) {
+    var N = this.domain().length;
+    if(N === 0){
+        return -1;
+    }
+    
+    var r = this.range();
+    var R = r.max - r.min;
+    if(R === 0){
+        return 0;
+    }
+    
+    var S = R/N;
+    if(y >= r.max){
+        return N;
+    }
+    
+    if(y < r.min){
+        return 0;
+    }
+    
+    var i  = (y - r.min) / S;
+    var il = Math.floor(i);
+    var iu = Math.ceil(i);
+    
+    return (i - il) <= (iu - i) ? il : iu;
+  };
+  
   /**
    * Returns a view of this scale by the specified accessor function <tt>f</tt>.
    * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
@@ -5131,6 +5187,12 @@ pv.histogram = function(data, f) {
     
     pv.Vector.prototype.distance2 = function(p, k){
         return dist2(this, p, k);
+    };
+    
+    pv.Vector.prototype.rectTo = function(p2){
+        var x = this.x;
+        var y = this.y;
+        return new pv.Shape.Rect(x, y, p2.x - x, p2.y - y);
     };
 }());
 
@@ -11972,7 +12034,7 @@ pv.Mark.dispatch = function(type, scenes, index, event) {
         handlerInfo = interceptors[i](type, event);
         if(handlerInfo){
             break;
-  }
+        }
   
         if(handlerInfo === false){
             // Consider handled
@@ -20083,6 +20145,220 @@ pv.Layout.Bullet.prototype.buildImplied = function(s) {
  * @extends function
  */
 pv.Behavior = {};
+ pv.Behavior.dragBase = function(shared){
+    var events, // event registrations held during each selection
+        downElem,
+        cancelClick,
+        inited,
+        autoRender = true,
+        positionConstraint,
+        drag;
+    
+    shared.autoRender = true;
+    shared.positionConstraint = null;
+    
+    /** @private protovis mark event handler */
+    function mousedown(d) {
+        // Initialize
+        if(!inited){
+            inited = true;
+            this.addEventInterceptor('click', eventInterceptor, /*before*/true);
+        }
+        
+        // Add event handlers to follow the drag.
+        // These are unregistered on mouse up.
+        if(!events){
+            var root = this.root.scene.$g;
+            events = [
+                // Attaching events to the canvas (instead of only to the document)
+                // allows canceling the bubbling of the events before they 
+                // reach the handlers of ascendant elements (of canvas).
+                [root,     'mousemove', pv.listen(root, 'mousemove', mousemove)],
+                [root,     'mouseup',   pv.listen(root, 'mouseup',   mouseup  )],
+              
+                // It is still necessary to receive events
+                // that are sourced outside the canvas
+                [document, 'mousemove', pv.listen(document, 'mousemove', mousemove)],
+                [document, 'mouseup',   pv.listen(document, 'mouseup',   mouseup  )]
+            ];
+        }
+        
+        var ev = arguments[arguments.length - 1]; // last argument
+        downElem = ev.target;
+        cancelClick = false;
+        
+        // Prevent the event from bubbling off the canvas 
+        // (if being handled by the root)
+        ev.stopPropagation();
+        
+        // --------------
+        
+        ev = pv.extend(ev);
+        
+        var m1    = this.mouse();
+        var scene = this.scene;
+        var index = this.index;
+        
+        drag = 
+        scene[index].drag = 
+        ev.drag = {
+            phase: 'start',
+            m:     m1,    // current relevant mouse position
+            m1:    m1,    // the mouse position of the mousedown
+            m2:    null,  // the mouse position of the current/last mousemove
+            d:     d,     // the datum in mousedown
+            scene: scene, // scene context
+            index: index  // scene index
+        };
+        
+        shared.dragstart.call(this, ev);
+    }
+    
+    /** @private DOM event handler */
+    function mousemove(ev) {
+        if (!drag) { return; }
+        
+        drag.phase = 'move';
+        
+        // Prevent the event from bubbling off the canvas 
+        // (if being handled by the root)
+        ev.stopPropagation();
+        
+        ev = pv.extend(ev);
+        ev.drag = drag;
+        
+        // In the context of the mousedown scene
+        var scene = drag.scene;
+        scene.mark.context(scene, drag.index, function() {
+            // this === scene.mark
+            var mprev = drag.m2 || drag.m1;
+            
+            var m2 = this.mouse();
+            if(mprev && m2.distance2(mprev).dist2 <= 2){
+                return;
+            }
+            
+            drag.m = drag.m2 = m2;
+            
+            shared.drag.call(this, ev);
+            
+            // m2 may have changed
+        });
+    }
+
+    /** @private DOM event handler */
+    function mouseup(ev) {
+        if (!drag) { return; }
+        
+        drag.phase = 'end';
+        
+        var m2 = drag.m2;
+        
+        // A click event is generated whenever
+        // the element where the mouse goes down
+        // is the same element of where the mouse goes up.
+        // We will try to intercept the generated click event and swallow it,
+        // when some selection has occurred.
+        var isDrag = m2 && drag.m1.distance2(m2).dist2 > 0.1;
+        drag.canceled = !isDrag;
+        
+        cancelClick = isDrag && (downElem === ev.target);
+        if(!cancelClick){
+            downElem = null;
+        }
+        
+        // Prevent the event from bubbling off the canvas 
+        // (if being handled by the root)
+        ev.stopPropagation();
+        
+        ev = pv.extend(ev);
+        ev.drag = drag;
+        
+        // Unregister events
+        if(events){
+            events.forEach(function(registration){
+                pv.unlisten.apply(pv, registration);
+            });
+            events = null;
+        }
+        
+        var scene = drag.scene;
+        var index = drag.index;
+        try{
+            scene.mark.context(scene, index, function() {
+                shared.dragend.call(this, ev);
+            });
+        } finally {
+            drag = null;
+            delete scene[index].drag;
+        }
+    }
+
+    /**
+     * Intercepts click events and, 
+     * if they were consequence
+     * of a mouse down and up of a selection,
+     * cancels them.
+     * 
+     * @returns {boolean|array} 
+     * <tt>false</tt> to indicate that the event is handled,
+     * otherwise, an event handler info array: [handler, type, scenes, index, ev].
+     * 
+     * @private
+     */
+    function eventInterceptor(type, ev){
+        if(cancelClick && downElem === ev.target){
+            // Event is handled
+            cancelClick = false;
+            downElem = null;
+            return false;
+        }
+        
+        // Let event be handled normally
+    }
+    
+
+    /**
+     * Whether to automatically render the mark when appropriate.
+     * 
+     * @function
+     * @returns {pv.Behavior.dragBase | boolean} this, or the current autoRender parameter.
+     * @name pv.Behavior.dragBase.prototype.autoRender
+     * @param {string} [_] the new autoRender parameter
+     */
+    mousedown.autoRender = function(_) {
+        if (arguments.length) {
+            shared.autoRender = !!_;
+            return mousedown;
+        }
+        
+        return shared.autoRender;
+    };
+    
+    /**
+     * Gets or sets the positionConstraint parameter.
+     * 
+     * A function that given a drag object
+     * can change its property <tt>m</tt>, 
+     * containing a vector with the desired mouse position.
+     *  
+     * @function
+     * @returns {pv.Behavior.dragBase | function} this, or the current positionConstraint parameter.
+     * @name pv.Behavior.dragBase.prototype.positionConstraint
+     * @param {function} [_] the new positionConstraint parameter
+     */
+    mousedown.positionConstraint = function(_) {
+        if (arguments.length) {
+            shared.positionConstraint = _;
+            return mousedown;
+        }
+        
+        return shared.positionConstraint;
+    };
+    
+    return mousedown;
+};
+  
 /**
  * Returns a new drag behavior to be registered on mousedown events.
  *
@@ -20150,50 +20426,118 @@ pv.Behavior = {};
  * @see pv.Layout.force
  */
 pv.Behavior.drag = function() {
-  var scene, // scene context
-      index, // scene context
-      p, // particle being dragged
-      v1, // initial mouse-particle offset
-      max;
-
-  /** @private */
-  function mousedown(d, e) {
-    index = this.index;
-    scene = this.scene;
-    var m = this.mouse();
-    v1 = ((p = d).fix = pv.vector(d.x, d.y)).minus(m);
-    max = {
-      x: this.parent.width() - (d.dx || 0),
-      y: this.parent.height() - (d.dy || 0)
+    var collapse = null; // dimensions to collapse
+    var kx = 1; // x-dimension 1/0
+    var ky = 1; // y-dimension 1/0
+    
+    var v1;  // initial mouse-particle offset
+    var max;
+    
+    // Executed in context of initial mark scene
+    var shared = {
+        dragstart: function(ev){
+            var drag = ev.drag;
+            drag.type = 'drag';
+            
+            var p    = drag.d; // particle being dragged
+            var fix  = pv.vector(p.x, p.y);
+            
+            p.fix  = fix;
+            p.drag = drag;
+            
+            v1 = fix.minus(drag.m1);
+            
+            var parent = this.parent;
+            max = {
+               x: parent.width()  - (p.dx || 0),
+               y: parent.height() - (p.dy || 0)
+            };
+            
+            if(shared.autoRender){
+                this.render();
+            }
+            
+            pv.Mark.dispatch("dragstart", drag.scene, drag.index, ev);
+        },
+        
+        drag: function(ev){
+            var drag = ev.drag;
+            var m2   = drag.m2;
+            var p    = drag.d;
+            
+            drag.m = v1.plus(m2);
+            
+            var constraint = shared.positionConstraint;
+            if(constraint){
+                constraint(drag);
+            }
+            
+            var m = drag.m;
+            if(kx){
+                p.x = p.fix.x = Math.max(0, Math.min(m.x, max.x));
+            }
+            
+            if(ky){
+                p.y = p.fix.y = Math.max(0, Math.min(m.y, max.y));
+            }
+            
+            if(shared.autoRender){
+                this.render();
+            }
+            
+            pv.Mark.dispatch("drag", drag.scene, drag.index, ev);
+        },
+        
+        dragend: function(ev){
+            var drag = ev.drag;
+            var p    = drag.d;
+            
+            p.fix = null; // pv compatibility
+            v1 = null;
+             
+            if(shared.autoRender){
+                this.render();
+            }
+            
+            try {
+                pv.Mark.dispatch('dragend', drag.scene, drag.index, ev);
+            } finally {
+                delete p.drag;
+            }
+        }
     };
-    scene.mark.context(scene, index, function() { this.render(); });
-    pv.Mark.dispatch("dragstart", scene, index, e);
-  }
-
-  /** @private */
-  function mousemove(e) {
-    if (!scene) return;
-    scene.mark.context(scene, index, function() {
-        var m = this.mouse();
-        p.x = p.fix.x = Math.max(0, Math.min(v1.x + m.x, max.x));
-        p.y = p.fix.y = Math.max(0, Math.min(v1.y + m.y, max.y));
-        this.render();
-      });
-    pv.Mark.dispatch("drag", scene, index, e);
-  }
-
-  /** @private */
-  function mouseup(e) {
-    if (!scene) return;
-    p.fix = null;
-    scene.mark.context(scene, index, function() { this.render(); });
-    pv.Mark.dispatch("dragend", scene, index, e);
-    scene = null;
-  }
-
-  pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup",   mouseup);
-  return mousedown;
+    
+    var mousedown = pv.Behavior.dragBase(shared);
+    
+    /**
+     * Sets or gets the collapse parameter.
+     * By default, dragging is sensitive to both dimensions.
+     * However, with some visualizations it is desirable to
+     * consider only a single dimension, such as the <i>x</i>-dimension for an
+     * independent variable. In this case, the collapse parameter can be set to
+     * collapse the <i>y</i> dimension:
+     *
+     * <pre>    .event("mousedown", pv.Behavior.drag().collapse("y"))</pre>
+     *
+     * @function
+     * @returns {pv.Behavior.drag} this, or the current collapse parameter.
+     * @name pv.Behavior.drag.prototype.collapse
+     * @param {string} [x] the new collapse parameter
+     */
+    mousedown.collapse = function(x) {
+      if (arguments.length) {
+        collapse = String(x);
+        switch (collapse) {
+          case "y": kx = 1; ky = 0; break;
+          case "x": kx = 0; ky = 1; break;
+          default:  kx = 1; ky = 1; break;
+        }
+        return mousedown;
+      }
+      return collapse;
+    };
+    
+    return mousedown;
 };
 /**
  * Returns a new point behavior to be registered on mousemove events.
@@ -20415,180 +20759,108 @@ pv.Behavior.point = function(r) {
  * configuration of the selection behavior.
  *
  * @extends pv.Behavior
- * 
- * @constructor
- * @param {object}  [keyArgs] keyword arguments object  
- * @param {boolean} [keyArgs.autoRefresh=true] whether to render the selection mark on mouse moves
- * @param {boolean} [keyArgs.datumIsRect=true] whether the datum is where the selection rectangle coordinates are stored.
- * When <tt>false</tt>, the selection rectangle is  
- * published in a property created on the panel mark: 'selectionRect',
- * of type {@link pv.Shape.Rect}.
- * 
  * @see pv.Behavior.drag
  */
- pv.Behavior.select = function(keyArgs){
-  var scene, // scene context
-      index, // scene context
-      m1,     // initial mouse position
-      mprev,  // the mouse position of the previous event (mouse down or mouse move)
-      events, // event registrations held during each selection
-      r,      // current selection rect
-      downElem,
-      cancelClick,
-      inited;
-
-    // Redraw mark on mouse move - default is the same as the initial pv.Behavior.select
-    var autoRefresh = pv.get(keyArgs, 'autoRefresh', true);
+ pv.Behavior.select = function(){
+    var collapse = null; // dimensions to collapse
+    var kx = 1; // x-dimension 1/0
+    var ky = 1; // y-dimension 1/0
     
-    // Whether the datum is where the selection rect coordinates are stored
-    var datumIsRect = pv.get(keyArgs, 'datumIsRect', true);
-    
-    /** @private protovis mark event handler */
-    function mousedown(d) {
-      var ev = arguments[arguments.length - 1]; // last argument
-      
-      downElem = ev.target;
-      cancelClick = false;
-      index = this.index;
-      scene = this.scene;
-      m1 = this.mouse();
-      
-      // Initialize
-      if(!inited){
-          inited = true;
-          this.addEventInterceptor('click', eventInterceptor, /*before*/true);
-      }
-      
-      // Add event handlers to follow the selection.
-      // These are unregistered on mouse up.
-      if(!events){
-          var root = this.root.scene.$g;
-          events = [
-              // Attaching events to the canvas (instead of only to the document)
-              // allows canceling the bubbling of the events before they 
-              // reach the handlers of ascendant elements (of canvas).
-              [root,     'mousemove', pv.listen(root, 'mousemove', mousemove)],
-              [root,     'mouseup',   pv.listen(root, 'mouseup',   mouseup  )],
-              
-              // It is still necessary to receive events
-              // that are sourced outside the canvas
-              [document, 'mousemove', pv.listen(document, 'mousemove', mousemove)],
-              [document, 'mouseup',   pv.listen(document, 'mouseup',   mouseup  )]
-          ];
-      }
-      
-      if(datumIsRect){
-          r = d;
-          r.x = m1.x;
-          r.y = m1.y;
-          r.dx = r.dy = 0;
-      } else {
-          mprev = m1;
-          this.selectionRect = r = new pv.Shape.Rect(m1.x, m1.y, 0, 0);
-      }
-
-      pv.Mark.dispatch('selectstart', scene, index, ev);
-    }
-    
-    /** @private DOM event handler */
-    function mousemove(ev) {
-        if (!scene) { return; }
-      
-        // Prevent the event from bubbling off the canvas 
-        // (if being handled by the root)
-        ev.stopPropagation();
-      
-        scene.mark.context(scene, index, function() {
-            // this === scene.mark
-            var m2 = this.mouse();
-      
-            if(datumIsRect){
-                r.x = Math.max(0, Math.min(m1.x, m2.x));
-                r.y = Math.max(0, Math.min(m1.y, m2.y));
-                r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
-                r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
-            } else {
-                if(mprev && m2.distance2(mprev).dist2 <= 2){
-                    return;
-                }
-      
-                mprev = m2;
-          
-                var x = m1.x;
-                var y = m1.y;
-                this.selectionRect = r = new pv.Shape.Rect(x, y, m2.x - x, m2.y - y);
+    // Executed in context of initial mark scene
+    var shared = {
+        dragstart: function(ev){
+            var drag = ev.drag;
+            drag.type = 'select';
+            
+            var m1 = drag.m1;
+            var r  = drag.d;
+            r.drag = drag;
+            
+            if(kx){
+                r.x  = m1.x;
+                r.dx = 0;
             }
-      
-            if(autoRefresh){
+            
+            if(ky){
+                r.y  = m1.y;
+                r.dy = 0;
+            }
+            
+            pv.Mark.dispatch('selectstart', drag.scene, drag.index, ev);
+        },
+        
+        drag: function(ev){
+            var drag = ev.drag;
+            var m1 = drag.m1;
+            var r  = drag.d;
+            
+            var constraint = shared.positionConstraint;
+            if(constraint){
+                drag.m = drag.m.clone();
+                constraint(drag);
+            }
+            
+            var m = drag.m;
+            if(kx){
+                r.x  = Math.max(0, Math.min(m1.x, m.x));
+                r.dx = Math.min(this.width(),  Math.max(m.x, m1.x)) - r.x;
+            }
+            
+            if(ky){
+                r.y  = Math.max(0, Math.min(m1.y, m.y));
+                r.dy = Math.min(this.height(), Math.max(m.y, m1.y)) - r.y;
+            }
+            
+            if(shared.autoRender){
                 this.render();
             }
       
-            pv.Mark.dispatch('select', scene, index, ev);
-        });
-    }   
-
-    /** @private DOM event handler */
-    function mouseup(ev) {
-        if (!scene) { return; }
-      
-        // A click event is generated whenever
-        // the element where the mouse goes down
-        // is the same element of where the mouse goes up.
-        // We will try to intercept the generated click event and swallow it,
-        // when a selection has occurred.
-        cancelClick = (downElem === ev.target) && (r.dx > 0 || r.dy > 0);
-        if(!cancelClick){
-            downElem = null;
-        }
-      
-        // Prevent the event from bubbling off the canvas 
-        // (if being handled by the root)
-        ev.stopPropagation();
-      
-        // Unregister events
-        if(events){
-            events.forEach(function(registration){
-                pv.unlisten.apply(pv, registration);
-            });
-            events = null;
-        }
-      
-        pv.Mark.dispatch('selectend', scene, index, ev);
-      
-        // Cleanup
-        if(!datumIsRect){
-            scene.mark.selectionRect = mprev = null;
-        }
-      
-        scene = index = m1 = r = null;
-    }
-
-    /**
-     * Intercepts click events and, 
-     * if they were consequence
-     * of a mouse down and up of a selection,
-     * cancels them.
-     * 
-     * @returns {boolean|array} 
-     * <tt>false</tt> to indicate that the event is handled,
-     * otherwise, an event handler info array: [handler, type, scenes, index, ev].
-     * 
-     * @private
-     */
-    function eventInterceptor(type, ev){
-        if(cancelClick && downElem === ev.target){
-            // Event is handled
-            cancelClick = false;
-            downElem = null;
-            return false;
-        }
+            pv.Mark.dispatch('select', drag.scene, drag.index, ev);
+        },
         
-        // Let event be handled normally
-    }
-
+        dragend: function(ev){
+            var drag = ev.drag;
+            try {
+                pv.Mark.dispatch('selectend', drag.scene, drag.index, ev);
+            } finally {
+                var r = drag.d;
+                delete r.drag;
+            }
+        }
+    };
+    
+    var mousedown = pv.Behavior.dragBase(shared);
+    
+    /**
+     * Sets or gets the collapse parameter.
+     * By default, the selection rectangle is sensitive to both dimensions.
+     * However, with some visualizations it is desirable to
+     * consider only a single dimension, such as the <i>x</i>-dimension for an
+     * independent variable. In this case, the collapse parameter can be set to
+     * collapse the <i>y</i> dimension:
+     *
+     * <pre>    .event("mousedown", pv.Behavior.select().collapse("y"))</pre>
+     *
+     * @function
+     * @returns {pv.Behavior.select} this, or the current collapse parameter.
+     * @name pv.Behavior.select.prototype.collapse
+     * @param {string} [x] the new collapse parameter
+     */
+    mousedown.collapse = function(x) {
+      if (arguments.length) {
+        collapse = String(x);
+        switch (collapse) {
+          case "y": kx = 1; ky = 0; break;
+          case "x": kx = 0; ky = 1; break;
+          default:  kx = 1; ky = 1; break;
+        }
+        return mousedown;
+      }
+      return collapse;
+    };
+    
     return mousedown;
 };
-  
 /**
  * Returns a new resize behavior to be registered on mousedown events.
  *
@@ -20648,50 +20920,107 @@ pv.Behavior.point = function(r) {
  * @see pv.Behavior.drag
  */
 pv.Behavior.resize = function(side) {
-  var scene, // scene context
-      index, // scene context
-      r, // region being selected
-      m1; // initial mouse position
+    var max;
+    var preserveOrtho = false;
+    
+    var isLeftRight = (side === 'left' || side === 'right');
+    
+    // Executed in context of initial mark scene
+    var shared = {
+        dragstart: function(ev){
+            var drag = ev.drag;
+            drag.type = 'resize';
+            
+            var m1 = drag.m1;
+            var r  = drag.d;
+            r.drag = drag;
+            
+            // Fix the position of m1 to be the opposite side,
+            // the one whose position is fixed during resizing
+            switch(side) {
+                case "left":   m1.x = r.x + r.dx; break;
+                case "right":  m1.x = r.x;        break;
+                case "top":    m1.y = r.y + r.dy; break;
+                case "bottom": m1.y = r.y;        break;
+            }
+            
+            // Capture parent's dimensions once
+            var parent = this.parent;
+            max = {
+                x: parent.width(),
+                y: parent.height()
+            };
+            
+            pv.Mark.dispatch("resizestart", drag.scene, drag.index, ev);
+        },
+        
+        drag: function(ev){
+            var drag = ev.drag;
+            
+            var m1 = drag.m1;
+            var constraint = shared.positionConstraint;
+            if(constraint){
+                drag.m = drag.m.clone();
+                constraint(drag);
+            }
+            
+            var m  = drag.m;
+            var r  = drag.d;
+            var parent = this.parent;
+            
+            if(!preserveOrtho || isLeftRight){
+                r.x  = Math.max(0,     Math.min(m1.x, m.x));
+                r.dx = Math.min(max.x, Math.max(m.x,  m1.x)) - r.x;
+            }
+            
+            if(!preserveOrtho || !isLeftRight){
+                r.y  = Math.max(0,     Math.min(m1.y, m.y));
+                r.dy = Math.min(max.y, Math.max(m.y, m1.y)) - r.y;
+            }
+            
+            if(shared.autoRender){
+                this.render();
+            }
+            
+            pv.Mark.dispatch("resize", drag.scene, drag.index, ev);
+        },
+        
+        dragend: function(ev){
+            var drag = ev.drag;
+            
+            max = null;
+            try {
+                pv.Mark.dispatch('resizeend', drag.scene, drag.index, ev);
+            } finally {
+                var r = drag.d;
+                delete r.drag;
+            }
+        }
+    };
 
-  /** @private */
-  function mousedown(d, e) {
-    index = this.index;
-    scene = this.scene;
-    m1 = this.mouse();
-    r = d;
-    switch (side) {
-      case "left": m1.x = r.x + r.dx; break;
-      case "right": m1.x = r.x; break;
-      case "top": m1.y = r.y + r.dy; break;
-      case "bottom": m1.y = r.y; break;
-    }
-    pv.Mark.dispatch("resizestart", scene, index, e);
-  }
-
-  /** @private */
-  function mousemove(e) {
-    if (!scene) return;
-    scene.mark.context(scene, index, function() {
-        var m2 = this.mouse();
-        r.x = Math.max(0, Math.min(m1.x, m2.x));
-        r.y = Math.max(0, Math.min(m1.y, m2.y));
-        r.dx = Math.min(this.parent.width(), Math.max(m2.x, m1.x)) - r.x;
-        r.dy = Math.min(this.parent.height(), Math.max(m2.y, m1.y)) - r.y;
-        this.render();
-      });
-    pv.Mark.dispatch("resize", scene, index, e);
-  }
-
-  /** @private */
-  function mouseup(e) {
-    if (!scene) return;
-    pv.Mark.dispatch("resizeend", scene, index, e);
-    scene = null;
-  }
-
-  pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup", mouseup);
-  return mousedown;
+    var mousedown = pv.Behavior.dragBase(shared);
+    
+    /**
+     * Sets or gets the preserveOrtho.
+     * 
+     * When <tt>true</tt>
+     * doesn't update coordinates orthogonal to the behaviou's side.
+     * The default value is <tt>false</tt>.
+     *
+     * @function
+     * @returns {pv.Behavior.resize | boolean} this, or the current preserveOrtho parameter.
+     * @name pv.Behavior.resize.prototype.preserveOrtho
+     * @param {boolean} [_] the new preserveOrtho parameter
+     */
+    mousedown.preserveOrtho = function(_) {
+        if (arguments.length){
+            preserveOrtho = !!_;
+            return mousedown;
+        }
+        return preserveOrtho;
+    };
+    
+    return mousedown;
 };
 /**
  * Returns a new pan behavior to be registered on mousedown events.

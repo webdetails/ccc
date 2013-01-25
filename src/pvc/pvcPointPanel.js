@@ -158,11 +158,15 @@ def
         var isLineAreaVisible = isBaseDiscrete && isStacked ? 
                 function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
                 function(){ return !this.scene.isNull; };
-                
+        
+        var isLineAreaNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
+        
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
                 noTooltip:   false,
-                wrapper:     wrapper
+                wrapper:     wrapper,
+                noSelect:    isLineAreaNoSelect,
+                showsSelection: !isLineAreaNoSelect
             })
             
             .lock('visible', isLineAreaVisible)
@@ -226,10 +230,12 @@ def
             this, 
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
             {
-                extensionId:  extensionIds,
-                freePosition: true,
-                wrapper:      wrapper,
-                noTooltip:    false
+                extensionId:    extensionIds,
+                freePosition:   true,
+                wrapper:        wrapper,
+                noTooltip:      false,
+                noSelect:       isLineAreaNoSelect,
+                showsSelection: !isLineAreaNoSelect
             })
             /* 
              * Line.visible =
@@ -498,7 +504,6 @@ def
         var chart = this.chart;
         var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
         var valueDim = data.owner.dimensions(this.valueDimName);
-        var firstCategDim = !isBaseDiscrete ? data.owner.dimensions(this.axes.base.role.firstDimensionName()) : null;
         var isStacked = this.stacked;
         var visibleKeyArgs = {visible: true, zeroIfNone: false};
         var orthoScale = this.axes.ortho.scale;

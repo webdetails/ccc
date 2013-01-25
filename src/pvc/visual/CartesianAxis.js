@@ -295,7 +295,296 @@ def.scope(function(){
         // axisOffset
         _resolveByCommonId: pvc.options.specify(function(optionInfo){
             return this._chartOption('axis' + optionInfo.name);
-        })
+        }),
+        
+        initFocusWindow: function(){
+            var scale      = this.scale;
+            var isDiscrete = this.isDiscrete();
+            var contCast   = !isDiscrete ? this.role.firstDimensionType().cast : null;
+            var domain     = scale.domain();
+            
+            var b = this.option('FocusWindowBegin' );
+            var e = this.option('FocusWindowEnd'   );
+            var l = this.option('FocusWindowLength');
+            var a, L;
+            if(isDiscrete){
+                L = domain.length;
+                var ib, ie, ia;
+                if(b != null){
+                    var nb = +b;
+                    if(!isNaN(nb)){
+                        if(nb === Infinity){
+                            ib = L - 1;
+                            b  = domain[ib];
+                        } else if(nb === -Infinity){
+                            ib = 0;
+                            b  = domain[ib];
+                        }
+                    }
+                    
+                    if(ib == null){
+                        ib = domain.indexOf(''+b);
+                        if(ib < 0){
+                            b = null;
+                        }
+                    }
+                }
+                
+                if(e != null){
+                    var ne = +e;
+                    if(!isNaN(ne)){
+                        if(ne === Infinity){
+                            ie = L - 1;
+                            e  = domain[ie];
+                        } else if(ne === -Infinity){
+                            ie = 0;
+                            e  = domain[ie];
+                        }
+                    }
+                    
+                    if(ie == null){
+                        ie = domain.indexOf(''+e);
+                        if(ie < 0){
+                            e = null;
+                        }
+                    }
+                }
+                
+                if(l != null){
+                    l = +l;
+                    if(isNaN(l)){
+                        l = null;
+                    } else if(l < 0 && (b != null || e != null)) {
+                        // Switch b and e 
+                        a  = b;
+                        ia = ib;
+                        b = e, ib = ie, e = a, ie = ia;
+                        l = -l;
+                    }
+                    
+                    // l > L ??
+                }
+                
+                if(b != null){
+                    if(e != null){
+                        if(ib > ie){
+                            // Switch b and e
+                            a  = b;
+                            var ia = ib;
+                            b = e, ib = ie, e = a, ie = ia;
+                        }
+                        // l is ignored
+                        l = ie - ib + 1;
+                    } else {
+                        // b && !e
+                        if(l == null){
+                            // to the end of the domain?
+                            l = L - ib;
+                        }
+                        
+                        ie = ib + l - 1;
+                        if(ie > L - 1){
+                            ie = L - 1;
+                            l = ie - ib + 1;
+                        }
+                        
+                        e = domain[ie];
+                    }
+                } else {
+                    // !b
+                    if(e != null){
+                        // !b && e
+                        if(l == null){
+                            // from the beginning of the domain?
+                            l = ie;
+                            // ib = 0
+                        }
+                        
+                        ib = ie - l + 1;
+                        if(ib < 0){
+                            ib = 0;
+                            l = ie - ib + 1;
+                        }
+                        
+                        b = domain[ib];
+                    } else {
+                        // !b && !e
+                        if(l == null){
+                            l = Math.max(~~(L / 3), 1); // 1/3 of the width?
+                        }
+                        
+                        if(l > L){
+                            l = L;
+                            ib = 0;
+                            ie = L - 1;
+                        } else {
+                            // ~~ <=> Math.floor for x >= 0
+                            ia = ~~(L / 2); // window center
+                            ib = ia - ~~(l/2);
+                            ie = ib + l - 1;
+                        }
+                        
+                        b = domain[ib];
+                        e = domain[ie];
+                    }
+                }
+                
+            } else {
+                // Continuous
+                
+                if(l != null){
+                    l = +l;
+                    if(isNaN(l)){
+                        l = null;
+                    } else if(l < 0 && (b != null || e != null)) {
+                        // Switch b and e 
+                        a  = b;
+                        b = e, e = a;
+                        l = -l;
+                    }
+                    
+                    // l > L ??
+                }
+                
+                var min = domain[0];
+                var max = domain[1];
+                L  = max - min; 
+                if(b != null){
+                    // -Infinity is a placeholder for min
+                    if(b < min){
+                        b = min;
+                    }
+                    
+                    // +Infinity is a placeholder for max
+                    if(b > max){
+                        b = max;
+                    }
+                }
+                
+                if(e != null){
+                    // -Infinity is a placeholder for min
+                    if(e < min){
+                        e = min;
+                    }
+                    
+                    // +Infinity is a placeholder for max
+                    if(e > max){
+                        e = max;
+                    }
+                }
+                
+                if(b != null){
+                    if(e != null){
+                        if(b > e){
+                            // Switch b and e
+                            a  = b;
+                            b = e, e = a;
+                        }
+                        l = e - b;
+                    } else {
+                        // b && !e
+                        if(l == null){
+                            // to the end of the domain?
+                            l = max - b;
+                        }
+                        
+                        e = b + l;
+                        if(e > max){
+                            e = max;
+                            l = e - b;
+                        }
+                    }
+                } else {
+                    // !b
+                    if(e != null){
+                        // !b && e
+                        if(l == null){
+                            // from the beginning of the domain?
+                            l = e - min;
+                            // b = min
+                        }
+                        
+                        b = e - l;
+                        if(b < min){
+                            b = min;
+                            l = e - b;
+                        }
+                    } else {
+                        // !b && !e
+                        if(l == null){
+                            l = Math.max(~~(L / 3), 1); // 1/3 of the width?
+                        }
+                        
+                        if(l > L){
+                            l = L;
+                            b = min;
+                            e = max;
+                        } else {
+                            // ~~ <=> Math.floor for x >= 0
+                            a = ~~(L / 2); // window center
+                            b = a - ~~(l/2);
+                            e = b + l;
+                        }
+                    }
+                }
+                
+                b = contCast(b);
+                e = contCast(e);
+                l = contCast(l);
+            }
+            
+            var focusWin = this.focusWindow = {
+                begin:  b,
+                end:    e,
+                length: l
+            };
+
+            // INITIAL SELECTION
+            // TODO: Only the first dataCell is supported...
+            var selectDatums;
+            var chart      = this.chart;
+            var dataCell   = this.dataCell;
+            var role       = dataCell.role;
+            var partData   = chart.partData(dataCell.dataPartValue, {visible: true});
+            var domainData;
+            if(isDiscrete){
+                domainData = partData.flattenBy(role);
+                
+                var dataBegin = domainData._childrenByKey[focusWin.begin];
+                var dataEnd   = domainData._childrenByKey[focusWin.end  ];
+                if(dataBegin && dataEnd){
+                    var indexBegin = dataBegin.childIndex();
+                    var indexEnd   = dataEnd  .childIndex();
+                    selectDatums = def
+                        .range(indexBegin, indexEnd - indexBegin + 1)
+                        .select(function(index){ return domainData._children[index]; })
+                        .selectMany(function(data){ return data._datums; })
+                        .distinct(function(datum){ return datum.key; })
+                        ;
+                }
+            } else {
+                domainData = partData;
+                
+                var dimName = role.firstDimensionName();
+                selectDatums = def
+                    .query(partData._datums)
+                    .where(function(datum){
+                        var v = datum.atoms[dimName].value;
+                        return v != null && v >= focusWin.begin && v <= focusWin.end;
+                    });
+            }
+            
+            if(selectDatums){
+                selectDatums.each(function(datum){
+                    datum.setSelected(true); 
+                });
+                
+                // Fire events; don't render
+                chart.root.updateSelections({render: false});
+            }
+            
+            return focusWin;
+        }
     });
     
     var $VCA = pvc.visual.CartesianAxis;
@@ -679,6 +968,41 @@ def.scope(function(){
         DoubleClickAction: { 
             resolve: '_resolveFull',
             data: normalV1Data
-        } // idem
+        }, // idem
+        
+        // 1st Base axis
+        FocusWindowResizable: {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:   true
+        },
+        
+        // 1st Base axis
+        FocusWindowMovable:   {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:   true
+        },
+        
+        // 1st Base Continuous Axis function v -> vconstrained
+        FocusWindowConstraint: {
+            resolve: '_resolveFull',
+            cast:    def.fun.as
+        },
+        
+        // 1st Base axis
+        FocusWindowBegin: {
+            resolve: '_resolveFull'
+        },
+        
+        // 1st Base axis
+        FocusWindowEnd: {
+            resolve: '_resolveFull'
+        },
+        
+        // 1st Base axis
+        FocusWindowLength: {
+            resolve: '_resolveFull'
+        }
     });
 });

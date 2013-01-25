@@ -894,7 +894,7 @@ def
             this._createCore(this._layoutInfo);
             
             /* RubberBand */
-            if (this.isTopRoot && this.chart.options.selectable && pv.renderer() !== 'batik'){
+            if (this.isTopRoot && pv.renderer() !== 'batik' && this.chart._canSelectWithRubberband()){
                 this._initRubberBand();
             }
 
@@ -1340,16 +1340,15 @@ def
         
         pvMark
             .event(onEvent, function(scene){
-                scene.setActive(true);
-
                 if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                    scene.setActive(true);
                     panel.renderInteractive();
                 }
             })
             .event(offEvent, function(scene){
-                if(scene.clearActive()) {
-                    /* Something was active */
-                    if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                    if(scene.clearActive()) {
+                        /* Something was active */
                         panel.renderInteractive();
                     }
                 }
@@ -1669,14 +1668,12 @@ def
                 context.getV1Datum());
     },
     
-    _isClickable: function(keyArgs){
-        var options = keyArgs || this.chart.options;
-        return options.clickable && !!this.clickAction;
+    _isClickable: function(){
+        return this.chart.options.clickable && !!this.clickAction;
     },
     
-    _shouldHandleClick: function(keyArgs){
-        var options = keyArgs || this.chart.options;
-        return options.selectable || this._isClickable(options);
+    _shouldHandleClick: function(){
+        return this.chart._canSelectWithClick() || this._isClickable(options);
     },
     
     _handleClick: function(pvMark, ev){
@@ -1782,7 +1779,7 @@ def
             options  = chart.options,
             data = chart.data;
 
-        var dMin = 2; // Minimum dx or dy for a drag to be considered a rubber band selection
+        var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
         this._isRubberBandSelecting = false;
 
@@ -1815,7 +1812,6 @@ def
                 return color;
             })
             .pvMark
-            .lock('data', [new pvc.visual.Scene(null, {panel: this})])
             .lock('visible', function(){ return !!rb;  })
             .lock('left',    function(){ return rb.x;  })
             .lock('right')
@@ -1833,35 +1829,41 @@ def
         }
         
         // Require all events, wether it's painted or not
-        rubberPvParentPanel.events('all');
+        rubberPvParentPanel.lock('events', 'all');
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
          
+        var scene = new pvc.visual.Scene(null, {panel: this});
+        // Initialize x,y,dx and dy properties
+        scene.x = scene.y = scene.dx = scene.dy = 0;
+        
         var selectionEndedDate;
         rubberPvParentPanel
-            .event('mousedown', pv.Behavior.select({autoRefresh: false, datumIsRect: false}))
+            .lock('data', [scene]) 
+            .event('mousedown', pv.Behavior.select().autoRender(false))
             .event('select', function(){
                 if(!rb){
                     if(myself.isAnimating()){
                         return;
                     }
                     
-                    var rb1 = this.selectionRect;
-                    if(Math.sqrt(rb1.dx * rb1.dx + rb1.dy * rb1.dy) <= dMin){
+                    if(scene.dx * scene.dx + scene.dy * scene.dy <= dMin2){
                         return;
                     }
                     
-                    rb = rb1;
+                    rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
+                    
                     myself._isRubberBandSelecting = true;
                     
                     if(!toScreen){
                         toScreen = rubberPvParentPanel.toScreenTransform();
                     }
                     
-                    myself.rubberBand = rb.clone().apply(toScreen);
+                    myself.rubberBand = rb.apply(toScreen);
                 } else {
-                    rb = this.selectionRect;
+                    rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
+                    // not updating rubberBand ?
                 }
                 
                 selectBar.render();
@@ -1874,18 +1876,19 @@ def
                         toScreen = rubberPvParentPanel.toScreenTransform();
                     }
                     
-                    myself.rubberBand = rb = this.selectionRect.apply(toScreen);
+                    //rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
+                    var rbs = rb.apply(toScreen);
                     
                     rb = null;
                     myself._isRubberBandSelecting = false;
                     selectBar.render(); // hide rubber band
                     
                     // Process selection
-                    myself._onRubberBandSelectionEnd(ev);
-                    
-                    selectionEndedDate = new Date();
-                    
-                    myself.rubberBand = rb = null;
+                    try{
+                        myself._processRubberBand(rbs, ev, {allowAdditive: true});
+                    } finally {
+                        selectionEndedDate = new Date();
+                    }
                 }
             });
         
@@ -1909,15 +1912,27 @@ def
         }
     },
     
-    _onRubberBandSelectionEnd: function(ev){
-        if(pvc.debug >= 3) {
-            this._log('rubberBand ' + pvc.stringify(this.rubberBand));
+    _processRubberBand: function(rb, ev, keyArgs){
+        this.rubberBand = rb;
+        try{
+            this._onRubberBandSelectionEnd(ev, keyArgs);
+        } finally {
+            this.rubberBand  = null;
+        }
+    },
+    
+    _onRubberBandSelectionEnd: function(ev, keyArgs){
+        if(pvc.debug >= 10) {
+            this._log("rubberBand " + pvc.stringify(this.rubberBand));
         }
         
-        var keyArgs = {toggle: false}; // output argument
+        var keyArgs = Object.create(keyArgs || {});
+        keyArgs.toggle = false; // output argument
+        
         var datums = this._getDatumsOnRubberBand(ev, keyArgs);
         if(datums){
-        var chart = this.chart;
+            var allowAdditive = def.get(keyArgs, 'allowAdditive', true);
+            var chart = this.chart;
             
             //this._log("Selecting Datum count=" + datums.length + 
             //          " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
@@ -1925,9 +1940,10 @@ def
             // Make sure selection changed action is called only once
             // Checks if any datum's selected changed, at the end
             chart._updatingSelections(function(){
-                var clearBefore = !ev.ctrlKey && chart.options.ctrlSelectMode;
+                var clearBefore = !allowAdditive || 
+                                  (!ev.ctrlKey && chart.options.ctrlSelectMode);
                 if(clearBefore){
-                chart.data.owner.clearSelected();
+                    chart.data.owner.clearSelected();
                     pvc.data.Data.setSelected(datums, true);
                 } else if(keyArgs.toggle){
                     pvc.data.Data.toggleSelected(datums);
@@ -1977,7 +1993,9 @@ def
                     this._eachMarkDatumOnRect(pvMark, rect, function(datum){
                         datumMap.set(datum.id, datum);
                         any = true;
-                    }, this);
+                    }, 
+                    this,
+                    def.get(keyArgs, 'markSelectionMode'));
                     
                 }, this);
             }
@@ -1986,10 +2004,18 @@ def
         return any;
     },
     
-    _eachMarkDatumOnRect: function(pvMark, rect, fun, ctx){
+    _eachMarkDatumOnRect: function(pvMark, rect, fun, ctx, selectionMode){
         
+        var sign = pvMark.sign;
+        if(sign && !sign.isSelectable()){
+            return;
+        }
+                
         // center, partial and total (not implemented)
-        var selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
+        if(selectionMode == null){
+            selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
+        }
+        
         var useCenter = (selectionMode === 'center');
         
         pvMark.eachInstanceWithData(function(scenes, index, toScreen){

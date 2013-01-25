@@ -138,10 +138,15 @@ var pvc = def.globalSpace('pvc', {
                             }
                         });
                         out.push(']');
-                    } else if(t.constructor === Object){
+                    } else {
+                        var ownOnly = def.get(keyArgs, 'ownOnly', true);
+                        if(t.constructor !== Object){
+                            remLevels = 1;
+                            ownOnly = true;
+                        }
+                        
                         out.push('{');
                         var first = true;
-                        var ownOnly  = def.get(keyArgs, 'ownOnly', true);
                         for(var p in t){
                             if(!ownOnly || def.hasOwnProp.call(t, p)){
                                 if(!first){ out.push(', '); }
@@ -155,9 +160,10 @@ var pvc = def.globalSpace('pvc', {
                             }
                         }
                         out.push('}');
-                    } else {
-                        out.push(JSON.stringify("'new ...'"));
                     }
+//                    else {
+//                        out.push(JSON.stringify("'new ...'"));
+//                    }
                     return true;
                 
                 case 'number':
@@ -419,6 +425,24 @@ var pvc = def.globalSpace('pvc', {
         return function(a, b){
             return parser.parse(key(a)) - parser.parse(key(b));
         };
+    };
+    
+    pvc.time = {
+        intervals: {
+            'y':   31536e6,
+            
+            'm':   2592e6,
+            'd30': 2592e6,
+            
+            'w':   6048e5,
+            'd7':  6048e5,
+            
+            'd':   864e5,
+            'h':   36e5,
+            'M':   6e4,
+            's':   1e3,
+            'ms':  1
+        }
     };
     
     pv.Format.createParser = function(pvFormat) {

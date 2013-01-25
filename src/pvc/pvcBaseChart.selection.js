@@ -58,7 +58,7 @@ pvc.BaseChart
      * @type undefined
      * @virtual 
      */
-    updateSelections: function(){
+    updateSelections: function(keyArgs){
         if(this === this.root) {
             if(this._inUpdateSelections) {
                 return this;
@@ -90,9 +90,11 @@ pvc.BaseChart
                 }
                 
                 // Rendering afterwards allows the action to change the selection in between
-                this.useTextMeasureCache(function(){
-                    this.basePanel.renderInteractive();
-                }, this);
+                if(def.get(keyArgs, 'render', true)){
+                    this.useTextMeasureCache(function(){
+                        this.basePanel.renderInteractive();
+                    }, this);
+                }
             } finally {
                 this._inUpdateSelections = false;
             }
@@ -147,6 +149,24 @@ pvc.BaseChart
         }
         
         return this.root._onUserSelection(datums);
+    },
+    
+    _isSelectable: function(){
+        return this.options.selectable;
+    },
+    
+    _canSelectWithRubberband: function(){
+        var options = this.options;
+        return options.selectable && options.selectionMode === 'rubberband';
+    },
+    
+    _canSelectWithClick: function(){
+        return this._canSelectWithRubberband();
+    },
+    
+    _canSelectWithFocusWindow: function(){
+        var options = this.options;
+        return options.selectable && options.selectionMode === 'focuswindow';
     }
 });
 

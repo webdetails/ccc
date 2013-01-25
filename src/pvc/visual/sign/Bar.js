@@ -43,13 +43,16 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                 return null;
             }
 
-            if(scene.anySelected() && !scene.isSelected()) {
+            if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
                 if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                     return pv.Color.names.darkgray.darker().darker();
                 }
-
+                
                 return this.dimColor(color, type);
-            } else if(this.isActiveSeriesAware && scene.isActiveSeries()){
+                
+            }
+            
+            if(this.isActiveSeriesAware && scene.isActiveSeries()){
                 return color.brighter(1).alpha(0.7);
             }
 
@@ -58,13 +61,15 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                 return color.brighter(0.2).alpha(0.8);
             } 
 
-            if(scene.anySelected() && !scene.isSelected()) {
+            if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
                 if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                     return pv.Color.names.darkgray.darker(2).alpha(0.8);
                 }
-
+                
                 return this.dimColor(color, type);
-            } else if(this.isActiveSeriesAware && scene.isActiveSeries()){
+            }
+            
+            if(this.isActiveSeriesAware && scene.isActiveSeries()){
                 return color.brighter(0.2).alpha(0.8);
             }
         }

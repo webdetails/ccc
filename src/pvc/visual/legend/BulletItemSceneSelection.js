@@ -25,11 +25,11 @@ def
     },
     
     /**
-     * Returns the value of the chart option "selectable". 
+     * Returns true if the chart is selectable by clicking. 
      * @type boolean
      */
     isClickable: function(){
-        return this.chart().options.selectable;
+        return this.chart()._canSelectWithClick();
     },
     
     /**

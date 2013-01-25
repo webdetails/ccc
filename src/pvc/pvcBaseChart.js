@@ -6,8 +6,6 @@ def
 .init(function(options) {
     var parent = this.parent = def.get(options, 'parent') || null;
     
-    this._initialOptions = options;
-    
     /* DEBUG options */
     if(pvc.debug >= 3 && !parent && options){
         try {
@@ -17,8 +15,15 @@ def
         }
     }
     
+    if(parent){
+        options || def.fail.argumentRequired('options');
+    } else {
+        options = def.mixin.copy({}, this.defaults, options);
+    }
+    
+    this.options = options;
+    
     if(parent) {
-        // options != null
         this.root = parent.root;
         this.smallColIndex = options.smallColIndex;
         this.smallRowIndex = options.smallRowIndex;
@@ -28,13 +33,11 @@ def
         
         parent._addChild(this);
     } else {
-        this.root  = this;
+        this.root = this;
     }
 
     this._constructData(options);
     this._constructVisualRoles(options);
-    
-    this.options = def.mixin.copy({}, this.defaults, options);
 })
 .add({
     /**
@@ -145,12 +148,6 @@ def
      * @type number|null
      */
     multiChartPageIndex: null,
-    
-    /**
-     * The options object specified by the user,
-     * before any processing.
-     */
-    _initialOptions: null,
     
     left: 0,
     top:  0,
@@ -671,7 +668,10 @@ def
         doubleClickMaxDelay: 300, //ms
 //      
         hoverable:  false,
-        selectable: false,
+        
+        selectable:    false,
+        selectionMode: 'rubberband', // focuswindow, // single (click-only) // custom (by code only)
+        //selectionCountMax: 0, // <= 0 -> no limit
         
 //        selectionChangedAction: null,
 //        userSelectionAction: null, 

@@ -97,7 +97,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
                 case 'fill':   return color.brighter(0.2).alpha(0.8);
                 case 'stroke': return color.brighter(1.3).alpha(0.7);
             }
-        } else if(scene.anySelected() && !scene.isSelected()) {
+        } else if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
             //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
             if(type === 'fill') {
                 return this.dimColor(color, type);

@@ -76,7 +76,7 @@ def.scope(function(){
         },
         
         isDiscrete: function(){
-            return this.role && this.role.isDsiscrete();
+            return this.role && this.role.isDiscrete();
         },
         
         isBound: function(){

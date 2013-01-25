@@ -51,7 +51,7 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     interactiveColor: function(color, type){
         var scene = this.scene;
         
-        if(!scene.isActive && scene.anySelected() && scene.datum && !scene.isSelected()) {
+        if(!scene.isActive && this.showsSelection() && scene.anySelected() && scene.datum && !scene.isSelected()) {
             return this.dimColor(color, type);
         }
         

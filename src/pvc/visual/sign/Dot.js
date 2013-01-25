@@ -96,7 +96,7 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             if(type === 'stroke') {
                 return color.brighter(1);
             }
-        } else if(scene.anySelected() && !scene.isSelected()) {
+        } else if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
             
             if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                 //return color.darker(1.5);
