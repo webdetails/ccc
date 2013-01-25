@@ -16,6 +16,7 @@ def
     }
     
     if(parent){
+        /*jshint expr:true */
         options || def.fail.argumentRequired('options');
     } else {
         options = def.mixin.copy({}, this.defaults, options);

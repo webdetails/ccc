@@ -1673,7 +1673,7 @@ def
     },
     
     _shouldHandleClick: function(){
-        return this.chart._canSelectWithClick() || this._isClickable(options);
+        return this.chart._canSelectWithClick() || this._isClickable();
     },
     
     _handleClick: function(pvMark, ev){
@@ -1926,7 +1926,7 @@ def
             this._log("rubberBand " + pvc.stringify(this.rubberBand));
         }
         
-        var keyArgs = Object.create(keyArgs || {});
+        keyArgs = Object.create(keyArgs || {});
         keyArgs.toggle = false; // output argument
         
         var datums = this._getDatumsOnRubberBand(ev, keyArgs);

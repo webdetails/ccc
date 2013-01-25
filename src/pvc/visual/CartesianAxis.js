@@ -370,7 +370,7 @@ def.scope(function(){
                         if(ib > ie){
                             // Switch b and e
                             a  = b;
-                            var ia = ib;
+                            ia = ib;
                             b = e, ib = ie, e = a, ie = ia;
                         }
                         // l is ignored

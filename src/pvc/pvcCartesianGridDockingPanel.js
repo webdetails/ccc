@@ -501,7 +501,7 @@ def
             }
             
             return grip;
-        }
+        };
             
         addResizeSideGrip(a_left );
         addResizeSideGrip(a_right);
