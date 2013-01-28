@@ -1,15 +1,20 @@
 def.scope(function(){
     
     def
-    .type('pvc.visual.CartesianFocusWindow')
+    .type('pvc.visual.CartesianFocusWindow', pvc.visual.OptionsBase)
     .init(function(chart){
-        //this.base(chart, 'focusWindow', 0, {byNaked: false});
+        
+        this.base(chart, 'focusWindow', 0, {byNaked: false});
         
         // TODO: ortho
         var baseAxis = chart.axes.base;
-        this.base = new pvc.visual.CartesianFocusWindowAxis(baseAxis);
+        this.base = new pvc.visual.CartesianFocusWindowAxis(this, baseAxis);
     })
     .add(/** @lends pvc.visual.FocusWindow# */{
+        _getOptionsDefinition: function(){
+            return focusWindow_optionsDef;
+        },
+        
         _exportData: function(){
             return {
                 base: def.copyProps(this.base, pvc.visual.CartesianFocusWindow.props)
@@ -28,13 +33,30 @@ def.scope(function(){
         
         _initFromOptions: function(){
             this.base._initFromOptions();
+        },
+        
+        _onAxisChanged: function(axis){
+            // Fire event
+            var changed = this.option('Changed');
+            if(changed){
+                changed.call(this.chart.basePanel._getContext());
+            }
+        }
+    });
+    
+    var focusWindow_optionsDef = def.create(axis_optionsDef, {
+        Changed: {
+            resolve: '_resolveFull',
+            cast:    def.fun.as
         }
     });
     
     def
     .type('pvc.visual.CartesianFocusWindowAxis', pvc.visual.OptionsBase)
-    .init(function(axis){
+    .init(function(fw, axis){
+        this.window = fw;
         this.axis = axis;
+        this.isDiscrete = axis.isDiscrete();
         
         // focusWindowBase/Ortho
         this.base(
@@ -54,8 +76,8 @@ def.scope(function(){
         _initFromOptions: function(){
             var o = this.option;
             this.set({
-                begin:  o('Begin'),
-                end:    o('End'),
+                begin:  o('Begin' ),
+                end:    o('End'   ),
                 length: o('Length')
             });
         },
@@ -64,6 +86,7 @@ def.scope(function(){
             var me = this;
             
             var render = def.get(keyArgs, 'render');
+            var select = def.get(keyArgs, 'select', true);
             
             var b, e, l;
             keyArgs = me._readArgs(keyArgs);
@@ -79,7 +102,7 @@ def.scope(function(){
             
             var axis       = me.axis;
             var scale      = axis.scale;
-            var isDiscrete = axis.isDiscrete();
+            var isDiscrete = me.isDiscrete;
             var contCast   = !isDiscrete ? axis.role.firstDimensionType().cast : null;
             var domain     = scale.domain();
             
@@ -335,17 +358,17 @@ def.scope(function(){
                 }
             }
             
-            me._set(b, e, l, render);
+            me._set(b, e, l, select, render);
         },
         
-        _updatePosition: function(pbeg, pend, render){
+        _updatePosition: function(pbeg, pend, select, render){
             var me = this;
             var axis = me.axis;
             var scale = axis.scale;
             
             var b, e, l;
             
-            if(axis.isDiscrete()){
+            if(me.isDiscrete){
                 var ib = scale.invertIndex(pbeg);
                 var ie = scale.invertIndex(pend) - 1;
                 var domain = scale.domain();
@@ -359,7 +382,7 @@ def.scope(function(){
                 l = e - b;
             }
             
-            this._set(b, e, l, /*render*/ render);
+            this._set(b, e, l, select, render);
         },
         
         /*
@@ -381,7 +404,7 @@ def.scope(function(){
             var scale = axis.scale;
             var constraint;
             
-            if(axis.isDiscrete()){
+            if(me.isDiscrete){
                 // Align to category boundaries
                 var index = Math.floor(scale.invertIndex(oper.point, /* noRound */true));
                 if(index >= 0){
@@ -457,12 +480,40 @@ def.scope(function(){
             }
         },
         
-        _set: function(b, e, l, render){
+        _compare: function(a, b){
+            return this.isDiscrete ? 
+                   (('' + a) === ('' + b)) : 
+                   ((+a) === (+b));
+        },
+        
+        _set: function(b, e, l, select, render){
             var me = this;
-            me.begin  = b;
-            me.end    = e;
-            me.length = l;
-            me._updateSelection({render: render});
+            var changed = false;
+            
+            if(!me._compare(b, me.begin)){
+                me.begin = b;
+                changed  = true;
+            }
+            
+            if(!me._compare(e, me.end)){
+                me.end  = e;
+                changed = true;
+            }
+            
+            if(!me._compare(l, me.length)){
+                me.length = l;
+                changed = true;
+            }
+            
+            if(changed){
+                me.window._onAxisChanged(this);
+            }
+            
+            if(select){
+                me._updateSelection({render: render});
+            }
+            
+            return changed;
         },
         
         _readArgs: function(keyArgs){

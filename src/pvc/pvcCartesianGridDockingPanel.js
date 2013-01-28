@@ -579,17 +579,17 @@ def
             baseBgPanel.render();
             baseFgPanel.render();
             
-            if(isEnd){
-                var pbeg = scene[a_x];
-                var pend = scene[a_x] + scene[a_dx];
-                if(!isV){
-                    // from bottom, instead of top...
-                    var temp = w - pbeg;
-                    pbeg = w - pend;
-                    pend = temp;
-                }
-                focusWindow._updatePosition(pbeg, pend, /*render*/ true);
+            
+            var pbeg = scene[a_x];
+            var pend = scene[a_x] + scene[a_dx];
+            if(!isV){
+                // from bottom, instead of top...
+                var temp = w - pbeg;
+                pbeg = w - pend;
+                pend = temp;
             }
+            
+            focusWindow._updatePosition(pbeg, pend, /*select*/ isEnd, /*render*/ true);
         }
         
         // ----------------
