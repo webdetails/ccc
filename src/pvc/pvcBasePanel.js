@@ -843,12 +843,22 @@ def
                 hasPositions[this.anchorLength(side)] = true;
             }, this);
             
-            if(!hasPositions.width && margins.left > 0){
-                pvBorderPanel.left(margins.left);
+            if(!hasPositions.width){
+                if(margins.left > 0){
+                    pvBorderPanel.left(margins.left);
+                }
+                if(margins.right > 0){
+                    pvBorderPanel.right(margins.right);
+                }
             }
             
-            if(!hasPositions.height && margins.top > 0){
-                pvBorderPanel.top(margins.top);
+            if(!hasPositions.height){
+                if(margins.top > 0){
+                    pvBorderPanel.top(margins.top);
+                }
+                if(margins.bottom > 0){
+                    pvBorderPanel.bottom(margins.bottom);
+                }
             }
             
             // Check padding
@@ -880,13 +890,13 @@ def
             }
             
             var extensionId = this._getExtensionId();
-            if(extensionId != null){ // '' is allowed cause this is relative to #_getExtensionPrefix
-                // Wrap the panel that is extended with a Panel sign
-                new pvc.visual.Panel(this, null, {
-                    panel:       pvBorderPanel,
-                    extensionId: extensionId
-                });
-            }
+//            if(extensionId != null){ // '' is allowed cause this is relative to #_getExtensionPrefix
+            // Wrap the panel that is extended with a Panel sign
+            new pvc.visual.Panel(this, null, {
+                panel:       pvBorderPanel,
+                extensionId: extensionId
+            });
+//            }
             
             /* Protovis marks that are pvc Panel specific,
              * and/or create child panels.

@@ -47,6 +47,7 @@ src/pvc/visual/Axis.js
 src/pvc/visual/CartesianAxis.js
 src/pvc/visual/CartesianAxisRootScene.js
 src/pvc/visual/CartesianAxisTickScene.js
+src/pvc/visual/CartesianFocusWindow.js
 src/pvc/visual/ColorAxis.js
 src/pvc/visual/SizeAxis.js
 src/pvc/visual/Legend.js
@@ -93,6 +94,7 @@ src/pvc/pvcCartesianAbstract.js
 src/pvc/pvcGridDockingPanel.js
 src/pvc/pvcCartesianGridDockingPanel.js
 src/pvc/pvcCartesianAbstractPanel.js
+src/pvc/pvcPlotBgPanel.js
 src/pvc/pvcCategoricalAbstract.js
 src/pvc/pvcCategoricalAbstractPanel.js
 src/pvc/pvcAxisPanel.js

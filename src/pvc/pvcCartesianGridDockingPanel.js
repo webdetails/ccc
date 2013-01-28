@@ -1,6 +1,11 @@
 
 def
 .type('pvc.CartesianGridDockingPanel', pvc.GridDockingPanel)
+.init(function(chart, parent, options) {
+    this.base(chart, parent, options);
+    
+    this._plotBgPanel = new pvc.PlotBgPanel(chart, this);
+})
 .add({
     
     _getExtensionId: function(){
@@ -16,8 +21,6 @@ def
         var xAxis = axes.x;
         var yAxis = axes.y;
         
-        // Plots Bg panel, below grid lines and every plot panel
-        
         
         // Full grid lines
         if(xAxis.option('Visible') && xAxis.option('Grid')) {
@@ -30,8 +33,7 @@ def
         
         this.base(layoutInfo);
         
-        // TODO: these pv.renderer tests must be centralized. batik simply should disable selection as a whole.
-        if(pv.renderer() !== 'batik' && chart._canSelectWithFocusWindow()){
+        if(chart.focusWindow){
             this._createFocusWindow(layoutInfo);
         }
         
@@ -255,16 +257,17 @@ def
         var me = this;
         var topRoot = me.topRoot;
         var chart   = me.chart;
-        var axis    = chart.axes.base;
-        var scale   = axis.scale;
+        
+        var focusWindow = chart.focusWindow.base;
+        
+        var axis  = focusWindow.axis;
+        var scale = axis.scale;
         if(scale.isNull){
             return;
         }
         
-        var focusWindow = axis.initFocusWindow();
-        
-        var resizable  = !!axis.option('FocusWindowResizable');
-        var movable    = !!axis.option('FocusWindowMovable');
+        var resizable  = focusWindow.option('Resizable');
+        var movable    = focusWindow.option('Movable'  );
         var isDiscrete = axis.isDiscrete();
         
         var isV     = chart.isOrientationVertical();
@@ -279,11 +282,30 @@ def
         var a_y     = isV ? 'y' : 'x';
         var a_dy    = 'd' + a_y;
         
-        var margins    = layoutInfo.gridMargins;
+        var margins     = layoutInfo.gridMargins;
+        var paddings    = layoutInfo.gridPaddings;
+        
+        var space = {
+            left:   margins.left   + paddings.left,
+            right:  margins.right  + paddings.right,
+            top:    margins.top    + paddings.top,
+            bottom: margins.bottom + paddings.bottom
+        };
+        
+        space.width  = space.left + space.right;
+        space.height = space.top  + space.bottom;
+        
         var clientSize = layoutInfo.clientSize;
         
-        var w = clientSize[a_width]  - margins[a_left  ] - margins[a_right];
-        var h = clientSize[a_height] - margins[a_bottom] - margins[a_top  ];
+        var wf = clientSize[a_width ];
+        var hf = clientSize[a_height];
+        
+        // Child plot's client size
+        var w  = wf - space[a_width ];
+        var h  = hf - space[a_height];
+        
+        var padLeft  = paddings[a_left ];
+        var padRight = paddings[a_right];
         
         // -----------------
         
@@ -293,39 +315,36 @@ def
         var band     = isDiscrete ? scale.range().step : 0;
         var halfBand = band/2;
         
-        scene[a_x]  = scale(focusWindow.begin) - halfBand,
+        scene[a_x] = scale(focusWindow.begin) - halfBand,
         
         // Add band for an inclusive discrete end
         scene[a_dx] = band + (scale(focusWindow.end) - halfBand) - scene[a_x],
         
-        scene[a_y]  = 0,
-        scene[a_dy] = h;
+        resetSceneY();
+        
+        function resetSceneY(){
+            scene[a_y ] = 0 - paddings[a_top   ];
+            scene[a_dy] = h + paddings[a_top] + paddings[a_bottom];
+        }
         
         // -----------------
-        
-        var addPanel = function(zOrder, id){
-            // Parent panel of selection boxes installs a coordinate system
-            // like that of the plots.
-            // X and Y scales can be used on this.
-            return new pvc.visual.Panel(me, me.pvPanel, {
-                    extensionId: id
-                })
-                .pvMark
-                .lock('data',   [scene])
-                .lock('left',   margins.left)
-                .lock('right',  margins.right)
-                .lock('top',    margins.top)
-                .lock('bottom', margins.bottom)
-                .lock('zOrder', zOrder)
-                .antialias(false)
-                .sign
-                ;
-        };
         
         var sceneProp = function(p){
             return function(){ return scene[p]; };
         };
         
+        var boundLeft = function(){
+            var begin = scene[a_x];
+            return Math.max(0, Math.min(w, begin));
+        };
+
+        var boundWidth = function(){
+            var begin = boundLeft();
+            var end   = scene[a_x] + scene[a_dx];
+            end = Math.max(0, Math.min(w, end));
+            return end - begin;
+        };
+            
         var addSelBox = function(panel, id){
             return new pvc.visual.Bar(me, panel, {
                 extensionId:   id,
@@ -334,14 +353,15 @@ def
                 noSelect:      true,
                 noClick:       true,
                 noDoubleClick: true,
-                noTooltip:     true
+                noTooltip:     true,
+                showsInteraction: false
             })
-            .override('interactiveColor', def.identity)
+            //.override('defaultStrokeWidth', function( ){ return 0; })
             .pvMark
             .lock('data')
             .lock('visible')
-            .lock(a_left,   sceneProp(a_x ))
-            .lock(a_width,  sceneProp(a_dx))
+            .lock(a_left,  boundLeft )
+            .lock(a_width, boundWidth)
             .lock(a_top,    sceneProp(a_y ))
             .lock(a_height, sceneProp(a_dy))
             .lock(a_bottom)
@@ -350,53 +370,51 @@ def
             ;
         };
         
-        var createNoIntBarSign = function(panel, id){
-            return new pvc.visual.Bar(me, panel, {
-                extensionId:   id,
-                normalStroke:  true,
-                noHover:       true,
-                noSelect:      true,
-                noClick:       true,
-                noDoubleClick: true,
-                noTooltip:     true
-            })
-            .override('interactiveColor', def.identity)
-            ;
-        };
-        
         // BACKGROUND
-        var baseBgPanel = addPanel(-13, 'plotBg') // below grid rules
-                .pvMark
-                ;
+        var baseBgPanel = this._plotBgPanel.pvPanel.borderPanel;
+        baseBgPanel
+            .lock('data', [scene])
+            ;
         
-        if(movable && resizable){
-            baseBgPanel
+        if(movable && resizable){ // cannot activate resizable while we can't guarantee that it respects length
+            // Allow creating a new focus area.
+            // Works when "dragging" on the courtains area,
+            // (if inside the paddings area).
+            baseBgPanel.paddingPanel
                 .lock('events', 'all')
                 .lock('cursor', 'crosshair')
-                .event('mousedown', 
+                .event('mousedown',
                       pv.Behavior.select()
                           .autoRender(false)
+                          .collapse(isV ? 'y' : 'x')
+                          //.preserveLength(!resizable)
                           .positionConstraint(function(drag){
-                              //var op = drag.phase === 'end' ? 'resize-end' : 'move';
-                              return positionConstraint(drag, 'resize-end');
-                          })
-                          .collapse(isV ? 'y' : 'x'))
-                .event('selectstart', function(){
-                    // fix the scene's orthogonal props
-                    scene[a_y ] = 0;
-                    scene[a_dy] = h;
+                              var op = drag.phase ==='start' ? 
+                                      'new' : 
+                                      'resize-end';
+                              return positionConstraint(drag, op);
+                          }))
+                .event('selectstart', function(ev){
+                    // reset the scene's orthogonal props
+                    resetSceneY();
+                    
+                    // Redraw on mouse down.
+                    onDrag(ev);
                 })
                 .event('select',    onDrag)
                 .event('selectend', onDrag)
                 ;
         } else {
-            baseBgPanel
-                .events('all');
+            baseBgPanel.paddingPanel
+                .events('all')
+                ;
         }
         
-        // This panel is placed on the focus area in the BG
-        // and serves mainly to enable dragging of the focus area
-        var focusBg = addSelBox(baseBgPanel, 'focusWindowBg')
+        // This panel serves mainly to enable dragging of the focus area,
+        // and possibly, for bg coloring.
+        // The drag action is only available when there aren't visual elements
+        // in the front. This allows to keep elements interactive.
+        var focusBg = addSelBox(baseBgPanel.paddingPanel, 'focusWindowBg')
             .override('defaultColor', function(type){ 
                 return pvc.invisibleFill;
             })
@@ -410,92 +428,135 @@ def
                 .event("mousedown", 
                         pv.Behavior.drag()
                             .autoRender(false)
+                            .collapse(isV ? 'y' : 'x')
                             .positionConstraint(function(drag){
-                                return positionConstraint(drag, 'move');
+                                positionConstraint(drag, 'move');
                              }))
-                .event("drag",      onDrag)
-                .event("dragend",   onDrag)
+                .event("drag",    onDrag)
+                .event("dragend", onDrag)
                 ;
         } else {
             focusBg.events('none');
         }
         
+        // --------------------------------------
         // FOREGROUND
-        var baseFgPanel = addPanel(10) // above axis rules
-            .pvMark 
+        
+        // Coordinate system like that of the plots.
+        // X and Y scales can be used on this.
+        var baseFgPanel = new pvc.visual.Panel(me, me.pvPanel)
+            .pvMark
+            .lock('data', [scene])
+            .lock('visible')
             .lock('fillStyle', pvc.invisibleFill)
+            .lock('left',      space.left  )
+            .lock('right',     space.right )
+            .lock('top',       space.top   )
+            .lock('bottom',    space.bottom)
+            .lock('zOrder',    10) // above axis rules
+            /* Use the panel to show a steady cursor while moving/resizing,
+             * by receiving all events.
+             * The drag continues to live because it listens to the 
+             * root's mousemove/up and we're not cancelling the events.
+             * Visual elements do not receive the events because
+             * they're in a sibling panel.
+             */
             .lock('events', function(){
-                // Start capturing all events as the drag starts.
-                // This allows us to show a steady cursor.
-                // The drag lives because it listens to root's mousemove/up
-                // and we're not cancelling the events
                 var drag = scene.drag;
                 return drag && drag.phase !== 'end' ? 'all' : 'none';
             })
             .lock('cursor', function(){
                 var drag = scene.drag;
                 return drag && drag.phase !== 'end' ? 
-                        (drag.type === 'drag' ? 'move' : 
-                           (isV ? 'ew-resize' : 'ns-resize')) : null;
+                        ((drag.type === 'drag' || (drag.type === 'select' && !resizable)) ? 
+                         'move' :
+                         (isV ? 'ew-resize' : 'ns-resize')) : null;
             })
+            .antialias(false)
             ;
         
-        // LEFT and RIGHT FG COURTAIN
-        createNoIntBarSign(baseFgPanel, 'focusWindowCourtain')
+        // FG BASE CURTAIN
+        var curtainFillColor = 'rgba(20, 20, 20, 0.1)';
+        
+        new pvc.visual.Bar(me, baseFgPanel, {
+                extensionId:   'focusWindowBaseCurtain',
+                normalStroke:  true,
+                noHover:       true,
+                noSelect:      true,
+                noClick:       true,
+                noDoubleClick: true,
+                noTooltip:     true,
+                showsInteraction: false
+            })
             .override('defaultColor', function(type){
-                return type === 'stroke' ? null : 'rgba(20, 20, 20, 0.1)';
+                return type === 'stroke' ? null : curtainFillColor; 
             })
             .pvMark
             .lock('data', [scene, scene])
             .lock('visible')
-            .lock(a_left,   function(){ return !this.index ? 0          : scene[a_x] + scene[a_dx]; })
-            .lock(a_right,  function(){ return !this.index ? null       : 0;    })
-            .lock(a_width,  function(){ return !this.index ? scene[a_x] : null; })
-            .lock(a_top,    function(){ return scene[a_y ]; })
-            .lock(a_height, function(){ return scene[a_dy]; })
-            .lock(a_bottom)
-            //.fillStyle(pvc.invisibleFill) // IE must have a fill style to fire events
             .lock('events', 'none')
+            .lock(a_left,   function(){ return !this.index ? -padLeft : boundLeft() + boundWidth(); })
+            .lock(a_right,  function(){ return !this.index ? null     : -padRight; })
+            .lock(a_width,  function(){ return !this.index ?  padLeft + boundLeft() : null; })
+            .lock(a_top,    sceneProp(a_y ))
+            .lock(a_height, sceneProp(a_dy))
+            .lock(a_bottom)
             ;
         
-        // Foreground Focus Box
-        // For coloring and anchoring
+        // FG FOCUS BOX
+        // for coloring and anchoring
         var selectBoxFg = addSelBox(baseFgPanel, 'focusWindow')
             .override('defaultColor', function(type){ return null; })
             .pvMark
             .lock('events', 'none')
             ;
         
+        // FG BOUNDARY/RESIZE GRIP
         var addResizeSideGrip = function(side){
+            // TODO: reversed scale??
+            var a_begin = (side === 'left' || side === 'top') ? 'begin' : 'end';
             
-            var grip = selectBoxFg.anchor(side).add(pv.Bar)
-                .fillStyle("#999")
-                [a_top](0)
+            var opposite  = me.anchorOpposite(side);
+            var fillColor = 'linear-gradient(to ' + opposite + ', ' + curtainFillColor + ', #444 90%)';
+            var grip = new pvc.visual.Bar(me, selectBoxFg.anchor(side), {
+                    extensionId:   focusWindow.id + 'Grip' + def.firstUpperCase(a_begin),
+                    normalStroke:  true,
+                    noHover:       true,
+                    noSelect:      true,
+                    noClick:       true,
+                    noDoubleClick: true,
+                    noTooltip:     true,
+                    showsInteraction: false
+                })
+                .override('defaultColor', function(type){
+                    return type === 'stroke' ? null : fillColor;
+                })
+                .pvMark
+                .lock('data')
+                .lock('visible')
+                [a_top   ](scene[a_y ])
+                [a_height](scene[a_dy])
                 ;
             
             if(resizable){
-                // TODO: this does not take into account if the scale is reversed...
-                var isBegin = side === 'left' || side === 'top';
-                var opId = 'resize-' + (isBegin ? 'begin' : 'end');
+                var opId = 'resize-' + a_begin;
                 grip
-                    //[a_left ](function(){ return this.delegate() - 3; })
-                    [a_width](function(){ return this.instance().dragging ? 6 : 3; })
                     .lock('events', 'all')
+                    [a_width](5)
                     .cursor(isV ? 'ew-resize' : 'ns-resize')
                     .event("mousedown", 
-                            pv.Behavior.resize(side)
-                                .autoRender(false)
-                                .positionConstraint(function(drag){
-                                    positionConstraint(drag, opId);
-                                 })
-                                .preserveOrtho(true))
+                        pv.Behavior.resize(side)
+                            .autoRender(false)
+                            .positionConstraint(function(drag){
+                                positionConstraint(drag, opId);
+                             })
+                            .preserveOrtho(true))
                     .event("resize",    onDrag)
                     .event("resizeend", onDrag)
                     ;
             } else {
                 grip
                     .events('none')
-                    //[a_left ](function(){ return this.delegate() - 1; })
                     [a_width](1)
                     ;
             }
@@ -511,95 +572,98 @@ def
         function onDrag(){
             var ev = arguments[arguments.length - 1];
             var isEnd = ev.drag.phase === 'end';
-            if(!isEnd){
-                topRoot._isRubberBandSelecting = true;
-            } else {
-                topRoot._isRubberBandSelecting = false;
-            }
             
-            var rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
-            var toScreen = baseFgPanel.toScreenTransform();
-            rb = rb.apply(toScreen);
+            // Prevent tooltips and hovers
+            topRoot._isRubberBandSelecting = !isEnd;
             
             baseBgPanel.render();
             baseFgPanel.render();
             
-            // Replace selection
             if(isEnd){
-                // Update focusWindow
-                if(isDiscrete){
-                    var begIndex = scale.invertIndex(scene[a_x]);
-                    var endIndex = scale.invertIndex(scene[a_x] + scene[a_dx]) - 1;
-                    var domain = scale.domain();
-                    focusWindow.begin = domain[begIndex];
-                    focusWindow.end   = domain[endIndex];
-                    focusWindow.length= endIndex - begIndex + 1;
-                } else {
-                    var beg = scale.invert(scene[a_x]);
-                    var end = scale.invert(scene[a_x] + scene[a_dx]);
-                    focusWindow.begin = beg;
-                    focusWindow.end   = end;
-                    focusWindow.length= end - beg;
+                var pbeg = scene[a_x];
+                var pend = scene[a_x] + scene[a_dx];
+                if(!isV){
+                    // from bottom, instead of top...
+                    var temp = w - pbeg;
+                    pbeg = w - pend;
+                    pend = temp;
                 }
-                
-                topRoot._processRubberBand(rb, ev, {allowAdditive: false, markSelectionMode: 'center'});
+                focusWindow._updatePosition(pbeg, pend, /*render*/ true);
             }
         }
         
-        
         // ----------------
-        var contCast   = !isDiscrete ? axis.role.firstDimensionType().cast : null;
-        var userPositionConstraint = !isDiscrete ? axis.option('FocusWindowConstraint') : null;
         var a_p  = a_x;
         var a_dp = a_dx;
         
         function positionConstraint(drag, op){
+            // Never called on drag.phase === 'end'
             var m = drag.m;
             
             // Only constraining the base position
             var p = m[a_p];
+            var b, e, l;
+            var l0 = scene[a_dp];
             
-            if(isDiscrete){
-                // Align to category boundaries
-                var index = scale.invertIndex(p);
-                if(index >= 0){
-                    var r = scale.range();
-                    var S = (r.max - r.min) / scale.domain().length;
-                    p = index * S;
-                } //  else no domain points...
-            } else if(userPositionConstraint){
-                var v = contCast(scale.invert(p));
-                v = userPositionConstraint(v, op);
-                if(v != null){
-                    p = scale(v);
-                }
+            var target;
+            switch(op){
+                case 'new':
+                    l = 0;
+                    target = 'begin';
+                    break;
+                
+                case 'resize-begin':
+                    l = l0;
+                    target = 'begin';
+                    break;
+                    
+                case 'move':
+                    l = l0;
+                    target = 'begin';
+                    break;
+                
+                case 'resize-end': // use on Select and Resize
+                    l = p - scene[a_p];
+                    target = 'end';
+                    break;
             }
             
-            m[a_p] = p;
+            var min = drag.min[a_p];
+            var max = drag.max[a_p];
             
-            positionConstraintNoSwitchSides(m, op);
+            var oper = {
+                type:    op,
+                target:  target,
+                point:   p,
+                length:  l,  // new length
+                length0: l0, // prev length
+                min:     min,
+                max:     max,
+                minView: 0,
+                maxView: w
+            };
             
-            return m;
-        }
-        
-        // Don't let the grips switch sides
-        function positionConstraintNoSwitchSides(m, op){
-            var p = m[a_p];
+            focusWindow._constraintPosition(oper);
+            
+            // Sync
+            m[a_p] = oper.point;
+            
+            // TODO: not working on horizontal orientation???
+            // Overwrite min or max on resize
             switch(op){
                 case 'resize-begin':
-                    var pright = scene[a_p] + scene[a_dp];
-                    if(m[a_p] > pright){
-                        m[a_p] = pright;
-                    }
+                    // The maximum position is the end grip
+                    oper.max = Math.min(oper.max, scene[a_p] + scene[a_dp]);
                     break;
                     
                 case 'resize-end':
-                    var pleft = scene[a_p];
-                    if(pleft > m[a_p]){
-                        m[a_p] = pleft;
-                    }
+                    // The minimum position is the begin grip
+                    oper.min = Math.max(oper.min, scene[a_p]);
                     break;
             }
+            
+            drag.min[a_p] = oper.min;
+            drag.max[a_p] = oper.max;
         }
     },
     

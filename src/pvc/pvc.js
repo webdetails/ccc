@@ -159,6 +159,11 @@ var pvc = def.globalSpace('pvc', {
                                 }
                             }
                         }
+                        
+                        if(first){
+                            out.push('{'+ t + '}');
+                        }
+                        
                         out.push('}');
                     }
 //                    else {
@@ -442,6 +447,50 @@ var pvc = def.globalSpace('pvc', {
             'M':   6e4,
             's':   1e3,
             'ms':  1
+        },
+        
+        withoutTime: function(t){
+            return new Date(t.getFullYear(), t.getMonth(), t.getDate());
+        },
+        
+        weekday: {
+            previousOrSelf: function(t, toWd){
+                var wd  = t.getDay();
+                var difDays = wd - toWd;
+                if(difDays){
+                    // Round to the previous wanted week day
+                    var previousOffset = difDays < 0 ? (7 + difDays) : difDays;
+                    t = new Date(t - previousOffset * pvc.time.intervals.d);
+                }
+                return t;
+            },
+            
+            nextOrSelf: function(t, toWd){
+                var wd  = t.getDay();
+                var difDays = wd - toWd;
+                if(difDays){
+                    // Round to the next wanted week day
+                    var nextOffset = difDays > 0 ? (7 - difDays) : -difDays;
+                    t = new Date(t + nextOffset * pvc.time.intervals.d);
+                }
+                return t;
+            },
+            
+            closestOrSelf: function(t, toWd){
+                var wd = t.getDay(); // 0 - Sunday, ..., 6 - Friday
+                var difDays = wd - toWd;
+                if(difDays){
+                    var D = pvc.time.intervals.d;
+                    var sign = difDays > 0 ? 1 : -1;
+                    difDays = Math.abs(difDays);
+                    if(difDays >= 4){
+                        t = new Date(t.getTime() + sign * (7 - difDays) * D);
+                    } else {
+                        t = new Date(t.getTime() - sign * difDays * D);
+                    }
+                }
+                return t;
+            }
         }
     };
     

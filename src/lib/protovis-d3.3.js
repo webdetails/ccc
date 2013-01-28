@@ -1,4 +1,4 @@
-// 979a69172e61c25cf2281f0f68ac2314909cb804
+// 9bae65fee7e8bce42369b262c41e556cdd41d9b1
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3291,8 +3291,21 @@ pv.Scale.interpolator = function(start, end) {
   }
 
   /* For now, assume color. */
+  
+  // Gradients are not supported in animations
+  // Just show the first one if < 0.5 and the other if >= 0.5
+  var startGradient = (start.type && start.type !== 'solid');
+  var endGradient   = (end.type   && end  .type !== 'solid');
+  if (startGradient || endGradient) {
+      start = startGradient ? start : pv.color(start).rgb();
+      end   = endGradient   ? end   : pv.color(end  ).rgb();
+      return function(t){
+          return t < 0.5 ? start : end;
+      };
+  }
+  
   start = pv.color(start).rgb();
-  end = pv.color(end).rgb();
+  end   = pv.color(end  ).rgb();
   return function(t) {
     var a = start.a * (1 - t) + end.a * t;
     if (a < 1e-5) a = 0; // avoid scientific notation
@@ -4595,9 +4608,10 @@ pv.Scale.ordinal = function() {
    * @function
    * @name pv.Scale.quantitative.prototype.invertIndex
    * @param {number} y a value in the output range (a pixel location).
+   * @param {boolean} [noRound=false] returns an un-rounded result.
    * @returns {number} the index of the closest input domain value.
    */
-  scale.invertIndex = function(y) {
+  scale.invertIndex = function(y, noRound) {
     var N = this.domain().length;
     if(N === 0){
         return -1;
@@ -4618,11 +4632,8 @@ pv.Scale.ordinal = function() {
         return 0;
     }
     
-    var i  = (y - r.min) / S;
-    var il = Math.floor(i);
-    var iu = Math.ceil(i);
-    
-    return (i - il) <= (iu - i) ? il : iu;
+    var i = (y - r.min) / S;
+    return noRound ? i : Math.round(i);
   };
   
   /**
@@ -5187,12 +5198,6 @@ pv.histogram = function(data, f) {
     
     pv.Vector.prototype.distance2 = function(p, k){
         return dist2(this, p, k);
-    };
-    
-    pv.Vector.prototype.rectTo = function(p2){
-        var x = this.x;
-        var y = this.y;
-        return new pv.Shape.Rect(x, y, p2.x - x, p2.y - y);
     };
 }());
 
@@ -12034,7 +12039,7 @@ pv.Mark.dispatch = function(type, scenes, index, event) {
         handlerInfo = interceptors[i](type, event);
         if(handlerInfo){
             break;
-        }
+  }
   
         if(handlerInfo === false){
             // Consider handled
@@ -20156,6 +20161,9 @@ pv.Behavior = {};
     
     shared.autoRender = true;
     shared.positionConstraint = null;
+    shared.bound = function(v, a_p){
+        return Math.max(drag.min[a_p], Math.min(drag.max[a_p], v));
+    };
     
     /** @private protovis mark event handler */
     function mousedown(d) {
@@ -20212,6 +20220,12 @@ pv.Behavior = {};
         };
         
         shared.dragstart.call(this, ev);
+        
+        var m = drag.m;
+        if(m !== m1){
+            m1.x = m.x;
+            m1.y = m.y;
+        }
     }
     
     /** @private DOM event handler */
@@ -20243,6 +20257,11 @@ pv.Behavior = {};
             shared.drag.call(this, ev);
             
             // m2 may have changed
+            var m = drag.m;
+            if(m !== m2){
+                m2.x = m.x;
+                m2.y = m.y;
+            }
         });
     }
 
@@ -20431,7 +20450,6 @@ pv.Behavior.drag = function() {
     var ky = 1; // y-dimension 1/0
     
     var v1;  // initial mouse-particle offset
-    var max;
     
     // Executed in context of initial mark scene
     var shared = {
@@ -20439,8 +20457,8 @@ pv.Behavior.drag = function() {
             var drag = ev.drag;
             drag.type = 'drag';
             
-            var p    = drag.d; // particle being dragged
-            var fix  = pv.vector(p.x, p.y);
+            var p   = drag.d; // particle being dragged
+            var fix = pv.vector(p.x, p.y);
             
             p.fix  = fix;
             p.drag = drag;
@@ -20448,9 +20466,14 @@ pv.Behavior.drag = function() {
             v1 = fix.minus(drag.m1);
             
             var parent = this.parent;
-            max = {
+            drag.max = {
                x: parent.width()  - (p.dx || 0),
                y: parent.height() - (p.dy || 0)
+            };
+            
+            drag.min = {
+                x: 0,
+                y: 0
             };
             
             if(shared.autoRender){
@@ -20474,11 +20497,11 @@ pv.Behavior.drag = function() {
             
             var m = drag.m;
             if(kx){
-                p.x = p.fix.x = Math.max(0, Math.min(m.x, max.x));
+                p.x = p.fix.x = shared.bound(m.x, 'x');
             }
             
             if(ky){
-                p.y = p.fix.y = Math.max(0, Math.min(m.y, max.y));
+                p.y = p.fix.y = shared.bound(m.y, 'y');
             }
             
             if(shared.autoRender){
@@ -20765,6 +20788,7 @@ pv.Behavior.point = function(r) {
     var collapse = null; // dimensions to collapse
     var kx = 1; // x-dimension 1/0
     var ky = 1; // y-dimension 1/0
+    var preserveLength = false;
     
     // Executed in context of initial mark scene
     var shared = {
@@ -20772,18 +20796,38 @@ pv.Behavior.point = function(r) {
             var drag = ev.drag;
             drag.type = 'select';
             
-            var m1 = drag.m1;
             var r  = drag.d;
             r.drag = drag;
             
+            drag.max = {
+                x: this.width(),
+                y: this.height()
+            };
+            
+            drag.min = {
+                x: 0,
+                y: 0
+            };
+                
+            var constraint = shared.positionConstraint;
+            if(constraint){
+                drag.m = drag.m.clone();
+                constraint(drag);
+            }
+            
+            var m = drag.m;
             if(kx){
-                r.x  = m1.x;
-                r.dx = 0;
+                r.x = shared.bound(m.x, 'x');
+                if(!preserveLength){
+                    r.dx = 0;
+                }
             }
             
             if(ky){
-                r.y  = m1.y;
-                r.dy = 0;
+                r.y = shared.bound(m.y, 'y');
+                if(!preserveLength){
+                    r.dy = 0;
+                }
             }
             
             pv.Mark.dispatch('selectstart', drag.scene, drag.index, ev);
@@ -20794,6 +20838,9 @@ pv.Behavior.point = function(r) {
             var m1 = drag.m1;
             var r  = drag.d;
             
+            drag.max.x = this.width();
+            drag.max.y = this.height();
+            
             var constraint = shared.positionConstraint;
             if(constraint){
                 drag.m = drag.m.clone();
@@ -20801,14 +20848,29 @@ pv.Behavior.point = function(r) {
             }
             
             var m = drag.m;
+            
             if(kx){
-                r.x  = Math.max(0, Math.min(m1.x, m.x));
-                r.dx = Math.min(this.width(),  Math.max(m.x, m1.x)) - r.x;
+                var bx = Math.min(m1.x, m.x);
+                bx  = shared.bound(bx, 'x');
+                r.x = bx;
+                
+                if(!preserveLength){
+                    var ex = Math.max(m.x,  m1.x);
+                    ex = shared.bound(ex, 'x');
+                    r.dx = ex - bx;
+                }
             }
             
             if(ky){
-                r.y  = Math.max(0, Math.min(m1.y, m.y));
-                r.dy = Math.min(this.height(), Math.max(m.y, m1.y)) - r.y;
+                var by = Math.min(m1.y, m.y);
+                by  = shared.bound(by, 'y');
+                r.y = by;
+                
+                if(!preserveLength){
+                    var ey = Math.max(m.y,  m1.y);
+                    ey = shared.bound(ey, 'y');
+                    r.dy = ey - by;
+                }
             }
             
             if(shared.autoRender){
@@ -20857,6 +20919,14 @@ pv.Behavior.point = function(r) {
         return mousedown;
       }
       return collapse;
+    };
+    
+    mousedown.preserveLength = function(_) {
+      if (arguments.length) {
+        preserveLength = !!_;
+        return mousedown;
+      }
+       return preserveLength;
     };
     
     return mousedown;
@@ -20920,7 +20990,6 @@ pv.Behavior.point = function(r) {
  * @see pv.Behavior.drag
  */
 pv.Behavior.resize = function(side) {
-    var max;
     var preserveOrtho = false;
     
     var isLeftRight = (side === 'left' || side === 'right');
@@ -20945,10 +21014,16 @@ pv.Behavior.resize = function(side) {
             }
             
             // Capture parent's dimensions once
+            // These can be overridden to change the bounds checking behavior
             var parent = this.parent;
-            max = {
+            drag.max = {
                 x: parent.width(),
                 y: parent.height()
+            };
+            
+            drag.min = {
+                x: 0,
+                y: 0
             };
             
             pv.Mark.dispatch("resizestart", drag.scene, drag.index, ev);
@@ -20964,18 +21039,29 @@ pv.Behavior.resize = function(side) {
                 constraint(drag);
             }
             
-            var m  = drag.m;
-            var r  = drag.d;
-            var parent = this.parent;
+            var m = drag.m;
+            var r = drag.d;
             
             if(!preserveOrtho || isLeftRight){
-                r.x  = Math.max(0,     Math.min(m1.x, m.x));
-                r.dx = Math.min(max.x, Math.max(m.x,  m1.x)) - r.x;
+                var bx = Math.min(m1.x, m.x );
+                var ex = Math.max(m.x,  m1.x);
+                
+                bx = shared.bound(bx, 'x');
+                ex = shared.bound(ex, 'x');
+                
+                r.x  = bx;
+                r.dx = ex - bx;
             }
             
             if(!preserveOrtho || !isLeftRight){
-                r.y  = Math.max(0,     Math.min(m1.y, m.y));
-                r.dy = Math.min(max.y, Math.max(m.y, m1.y)) - r.y;
+                var by = Math.min(m1.y, m.y );
+                var ey = Math.max(m.y,  m1.y);
+                
+                bx = shared.bound(by, 'y');
+                ex = shared.bound(ey, 'y');
+                
+                r.y  = by;
+                r.dy = ey - by;
             }
             
             if(shared.autoRender){

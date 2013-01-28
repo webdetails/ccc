@@ -21,7 +21,7 @@ pvc.BaseChart
     _updatingSelections: function(method, context){
         this._suspendSelectionUpdate();
         
-        var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
+        //var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
         //this._log("Previous Datum count=" + datums.length + 
         //        " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
         

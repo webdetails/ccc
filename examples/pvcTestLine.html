@@ -66,6 +66,7 @@
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxisRootScene.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/CartesianAxisTickScene.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/CartesianFocusWindow.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/ColorAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/SizeAxis.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/Legend.js"></script>
@@ -109,6 +110,7 @@
         <script type="text/javascript" src="../src/pvc/pvcGridDockingPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcCartesianGridDockingPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcCartesianAbstractPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcPlotBgPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstract.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcCategoricalAbstractPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAxisPanel.js"></script>
@@ -254,35 +256,64 @@ Sample extension points:<br>
 <h3>A Simple Line chart</h3>
 The following is a line chart displaying three time series.<br>
 <textarea cols="55" rows="15" id="pvcLine1Code">
-        var line1 = new pvc.LineChart({
-          canvas: "pvcLine1",
-          width: 800,
-          height: 220,
-          animate:false,
-          title: "Simple Line chart",
-          legend: true,
-          legendPosition: "top",
-          legendAlign: "right",
-          selectable: true,
-          orientation: 'vertical',
-          areasVisible: true,
-          dotsVisible: false,
-          timeSeries: true,
-          timeSeriesFormat: "%Y-%m-%d",
-
-          valuesVisible: false,
-          yAxisPosition: "right",
-          extensionPoints: {
-            noDataMessage_text: "Example of a chart with missing data",
-            xAxisScale_dateTickFormat: "%Y/%m/%d",
-            xAxisScale_dateTickPrecision: 798336000/1.5
-                      //set in miliseconds
-          }
-        });
-        line1.setData(relational_01, 
-             {crosstabMode: false,
-              seriesInRows: false});
-        line1.render();
+var line1 = new pvc.LineChart({
+	canvas: "pvcLine1",
+	width: 1200,
+	height: 400,
+	animate:false,
+	title: "Simple Line chart",
+	legend: true,
+    nullInterpolationMode: 'linear',
+	legendPosition: "top",
+	legendAlign: "right",
+	orientation: 'vertical',
+	areasVisible: true,
+	dotsVisible: true,
+	timeSeries: true,
+	timeSeriesFormat: "%Y-%m-%d",
+	
+	axisOffset: 0.1,
+	orthoAxisOriginIsZero: false,
+	contentMargins: 10,
+	
+	selectable: true,
+	//selectionMode: 'focuswindow',
+	focusWindowBaseBegin: new Date(2011,6,3),
+	focusWindowBaseEnd:   new Date(2011,7,3),
+	
+	// Day restriction
+	_focusWindowBaseConstraint: function(oper){
+	    oper.value = pvc.time.withoutTime(oper.value);
+	},
+	
+	// Week and Weekday restriction
+	focusWindowBaseConstraint: function(oper){
+        var swd = 1; // StartWeekDay - Monday
+        
+        var t = pvc.time;
+        var twd = t.weekday;
+        
+        oper.value = twd.closestOrSelf (t.withoutTime(oper.value  ), swd);
+        oper.min   = twd.previousOrSelf(t.withoutTime(oper.minView), swd);
+        oper.max   = twd.previousOrSelf(t.withoutTime(oper.maxView), swd);
+        
+        // Always a week interval
+        oper.length = pvc.time.intervals.w;
+    },
+	selectionChangedAction: function(selected){ 
+	    var fw = this.chart.focusWindow.base;
+	    //alert("#=" + selected.length + "\n" + [fw.begin, fw.end, fw.length].join('\n'));
+	},
+    valuesVisible: false,
+    yAxisPosition: "right",
+    extensionPoints: {
+        noDataMessage_text: "Example of a chart with missing data",
+        xAxisScale_dateTickFormat: "%Y/%m/%d",
+        xAxisScale_dateTickPrecision: 798336000/1.5 //set in miliseconds
+    }
+})
+.setData(relational_01, {crosstabMode: false})
+.render();
 </textarea>
         <button class="tryMe" onclick='tryMe(this)'>Try me</button>
         <div id="pvcLine1"></div>

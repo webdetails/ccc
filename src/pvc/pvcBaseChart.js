@@ -445,38 +445,50 @@ def
      * If not pre-rendered, do it now.
      */
     render: function(bypassAnimation, recreate, reloadData){
-        this.useTextMeasureCache(function(){
-            try{
-                if (!this.isPreRendered || recreate) {
-                    this._preRender({reloadData: reloadData});
-                } else if(!this.parent && this.isPreRendered) {
-                    pvc.removeTipsyLegends();
-                }
-    
-                this.basePanel.render({
-                    bypassAnimation: bypassAnimation, 
-                    recreate: recreate
-                 });
-                
-            } catch (e) {
-                /*global NoDataException:true*/
-                if (e instanceof NoDataException) {
-                    if(pvc.debug > 1){
-                        this._log("No data found.");
+        var hasError;
+        
+        // Don't let selection change events to fire before the render is finished
+        this._suspendSelectionUpdate();
+        try{
+            this.useTextMeasureCache(function(){
+                try{
+                    if (!this.isPreRendered || recreate){
+                        this._preRender({reloadData: reloadData});
+                    } else if(!this.parent && this.isPreRendered){
+                        pvc.removeTipsyLegends();
                     }
-    
-                    this._addErrorPanelMessage("No data found", true);
-                } else {
-                    // We don't know how to handle this
-                    pvc.logError(e.message);
                     
-                    if(pvc.debug > 0){
-                        this._addErrorPanelMessage("Error: " + e.message, false);
+                    this.basePanel.render({
+                        bypassAnimation: bypassAnimation, 
+                        recreate: recreate
+                    });
+                    
+                } catch (e) {
+                    /*global NoDataException:true*/
+                    if (e instanceof NoDataException) {
+                        if(pvc.debug > 1){
+                            this._log("No data found.");
+                        }
+        
+                        this._addErrorPanelMessage("No data found", true);
+                    } else {
+                        hasError = true;
+                        
+                        // We don't know how to handle this
+                        pvc.logError(e.message);
+                        
+                        if(pvc.debug > 0){
+                            this._addErrorPanelMessage("Error: " + e.message, false);
+                        }
+                        //throw e;
                     }
-                    //throw e;
                 }
+            });
+        } finally {
+            if(!hasError){
+                this._resumeSelectionUpdate();
             }
-        });
+        }
         
         return this;
     },

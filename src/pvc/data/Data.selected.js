@@ -72,6 +72,11 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     replaceSelected: function(datums){
         /*global datum_deselect:true */
         
+        // materialize, cause we're using it twice
+        if(!def.array.is(datums)){
+            datums = datums.array();
+        }
+        
         // Clear all but the ones we'll be selecting.
         // This way we can have a correct changed flag.
         var alreadySelectedById = 

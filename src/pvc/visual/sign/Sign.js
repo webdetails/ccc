@@ -90,7 +90,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         };
         
         // defaultColor
-        methods[defName] = function(arg){ return; };
+        methods[defName]    = function(arg){ return; };
         
         // normalColor
         methods[normalName] = function(value, arg){ return value; };
@@ -275,6 +275,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             options = chart.options;
         
         var bits = this.bits;
+        bits |= this._bitShowsInteraction;
         
         if(chart._tooltipEnabled && !def.get(keyArgs, 'noTooltip')){
             bits |= this._bitShowsTooltip;
@@ -287,12 +288,12 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         if(options.selectable || options.hoverable){
             if(options.selectable && !def.get(keyArgs, 'noSelect')){
-                bits |= (this._bitShowsSelection | this._bitSelectable);
+                bits |= this._bitSelectable;
                 clickSelectable = chart._canSelectWithClick();
             }
             
             if(options.hoverable && !def.get(keyArgs, 'noHover')){
-                bits |= (this._bitShowsActivity | this._bitHoverable);
+                bits |= this._bitHoverable;
                 
                 panel._addPropHoverable(pvMark);
             }

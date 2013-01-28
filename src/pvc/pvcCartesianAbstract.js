@@ -199,6 +199,9 @@ def
     },
     
     _preRenderContent: function(contentOptions){
+        
+        this._createFocusWindow();
+        
         /* Create the grid/docking panel */
         this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel, {
             margins:  contentOptions.margins,
@@ -224,9 +227,33 @@ def
         /* Create main content panel 
          * (something derived from pvc.CartesianAbstractPanel) */
         this._createPlotPanels(this._gridDockPanel, {
-            clickAction:        contentOptions.clickAction,
-            doubleClickAction:  contentOptions.doubleClickAction
+            clickAction:       contentOptions.clickAction,
+            doubleClickAction: contentOptions.doubleClickAction
         });
+    },
+    
+    _createFocusWindow: function(){
+        if(this._canSelectWithFocusWindow()){
+            // In case we're being re-rendered,
+            // capture the axes' focuaWindow, if any.
+            // and set it as the next focusWindow.
+            var fwData;
+            var fw = this.focusWindow;
+            if(fw){
+                fwData = fw._exportData();
+            }
+            
+            fw = this.focusWindow = new pvc.visual.CartesianFocusWindow(this);
+            
+            if(fwData){
+                fw._importData(fwData);
+            }
+            
+            fw._initFromOptions();
+            
+        } else if(this.focusWindow){
+            delete this.focusWindow;
+        }
     },
     
     /**
