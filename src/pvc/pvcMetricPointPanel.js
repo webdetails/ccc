@@ -336,25 +336,12 @@ def
         // ------------------
         // DATA
         var rootScene = this._getRootScene(),
-            data      = rootScene.group,
-            // data._leafs.length is currently an approximation of datum count due to datum filtering in the scenes only...
-            isDense   = (this.width <= 0) || (data._leafs.length / this.width > 0.5); //  > 100 pts / 200 pxs 
-        
+            data      = rootScene.group;
+            
         this._finalizeScene(rootScene);
 
-        // Disable selection?
-        if(isDense && (options.selectable || options.hoverable)) {
-            options.selectable = false;
-            options.hoverable  = false;
-            if(pvc.debug >= 3) {
-                this._log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
-            }
-        }
-       
         // ---------------
         // BUILD
-        
-        // this.pvPanel.strokeStyle('red');
         
         this.pvPanel.zOrder(1); // Above axes
         
@@ -383,14 +370,18 @@ def
         }
         
         // -- LINE --
+        var isLineNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
+        
         var line = new pvc.visual.Line(this, this.pvScatterPanel, {
                 extensionId: 'line',
                 wrapper:     wrapper,
                 noTooltip:   false,
-                noHover:     true // TODO: SIGN check if not broken
+                noHover:     true,
+                noSelect:       isLineNoSelect,
+                showsSelection: !isLineNoSelect
             })
             /* Data */
-            .lock('data', function(seriesScene){ return seriesScene.childNodes; }) // TODO    
+            .lock('data', function(seriesScene){ return seriesScene.childNodes; })    
             
             .lock('visible', this.linesVisible)
             
