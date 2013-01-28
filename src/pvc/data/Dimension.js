@@ -992,9 +992,10 @@ function dim_createVirtualNullAtom(){
     // </Debug>
     
     if(!this._virtualNullAtom){
-        var label = "" + (this.type._formatter ? this.type._formatter.call(null, null, null) : "");
-        
-        this._virtualNullAtom = new pvc.data.Atom(this, null, label, null, '');
+        // The virtual null's label is always "".
+        // Don't bother the formatter with a value that
+        // does not exist in the data.
+        this._virtualNullAtom = new pvc.data.Atom(this, null, "", null, '');
 
         this.data._atomsBase[this.name] = this._virtualNullAtom; 
     }
