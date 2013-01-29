@@ -250,7 +250,7 @@ pvc.BaseChart
                                 group:           domainData,
                                 colorAxis:       colorAxis,
                                 clickMode:       locked ? 'none' : undefined,
-                                extensionPrefix: pvc.buildIndexedId('legend', legendIndex++)
+                                extensionPrefix: pvc.buildIndexedId('', legendIndex++)
                              });
                             
                             // For later binding an appropriate bullet renderer

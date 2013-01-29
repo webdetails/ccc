@@ -18,7 +18,7 @@ def
     
     this.base(rootScene, keyArgs);
     
-    this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || 'legend';
+    this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || '';
     
     var item = this.createItem({
         value:    null,

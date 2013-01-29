@@ -18,7 +18,7 @@ def
     
     this.base(rootScene, keyArgs);
     
-    this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || 'legend';
+    this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || '';
     this._renderer = def.get(keyArgs, 'renderer');
     
     this.colorAxis = def.get(keyArgs, 'colorAxis');

@@ -77,7 +77,7 @@ def
         var rootScene = legendPanel._getBulletRootScene();
         
         new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, {
-            extensionPrefix: pvc.buildIndexedId('legend', 1), // legend2_ TODO
+            extensionPrefix: pvc.buildIndexedId('', 1),
             label: waterPlot.option('TotalLineLabel'),
             color: this._waterColor
         });
