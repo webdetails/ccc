@@ -234,8 +234,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                         return def.array.create(groupSpec.count, groupSpec.name).join('');
                     })
                     .join(' ') +
-                "]",
-                pvc.logSeparator
+                "]"
             ];
 
             pvc.log(out.join("\n"));

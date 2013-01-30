@@ -140,7 +140,7 @@ pvc.BaseChart
 
         this._bindVisualRolesPostII(complexType);
         
-        if(pvc.debug >= 3){
+        if(pvc.debug >= 10){
             this._log(complexType.describe());
         }
         

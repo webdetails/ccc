@@ -40,37 +40,69 @@ var pvc = def.globalSpace('pvc', {
         level = +level;
         pvc.debug = isNaN(level) ? 0 : level;
         
+        installPvcLog();
+        
         syncTipsyLog();
         
         return pvc.debug;
     };
     
-    /**
-     *  Utility function for logging messages to the console
-     */
-    pvc.log = function(m){
-        if (pvc.debug && typeof console !== "undefined"){
-            /*global console:true*/
-            console.log("[pvChart]: " + 
-              (typeof m === 'string' ? m : pvc.stringify(m)));
-        }
-    };
+    /*global console:true*/
     
-    pvc.logError = function(e){
-        if(e && typeof e === 'object' && e.message){
-            e = e.message;
+    pvc._installLog = function(o, pto, pfrom, prompt){
+        if(!pfrom) {
+            pfrom = pto;
         }
         
-        /*global console:true*/
-        if (typeof console != "undefined"){
-            console.log("[pvChart ERROR]: " + e);
-        } else {
-            throw new Error("[pvChart ERROR]: " + e);
+        var m  = console[pfrom];
+        var fun;
+        if(m){
+            if(def.fun.is(m)){
+                fun = console[pfrom].bind(console, prompt + ": %s");
+            } else {
+                // IE? Cannot bind so will have to wrap (no line numbers...)
+                // Apply doesn't work as well...
+                fun = function(a1, a2, a3, a4){
+                    console[pfrom](prompt + ": %s", a1 || '', a2 || '', a3 || '', a4 || '');
+                };
+            }
         }
+        
+        o[pto] = fun;
     };
     
+    function installPvcLog(){
+        if (pvc.debug && typeof console !== "undefined"){
+            ['log', 'info', ['trace', 'debug'], 'error'].forEach(function(ps){
+                ps = ps instanceof Array ? ps : [ps, ps];
+                
+                pvc._installLog(pvc, ps[0],  ps[1],  '[pvChart]');
+            });
+        } else {
+            if(pvc.debug > 1){
+                pvc.debug = 1;
+            }
+            
+            ['log', 'info', 'trace'].forEach(function(p){
+                pvc[p] = def.noop;
+            });
+            
+            pvc.error = function(e){
+                if(e && typeof e === 'object' && e.message){
+                    e = e.message;
+                }
+                
+                throw new Error("[pvChart ERROR]: " + e);
+            };
+        }
+    }
+    
+    installPvcLog();
+    
+    pvc.logError = pvc.error;
+    
     // Redirect protovis error handler
-    pv.error = pvc.logError;
+    pv.error = pvc.error;
     
     function syncTipsyLog(){
         var tip = pv.Behavior.tipsy;

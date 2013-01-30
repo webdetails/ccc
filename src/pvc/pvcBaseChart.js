@@ -6,10 +6,22 @@ def
 .init(function(options) {
     var parent = this.parent = def.get(options, 'parent') || null;
     
+    this.base();
+    
+    if(pvc.debug >= 3){
+        this._info("NEW CHART\n" + pvc.logSeparator.replace(/-/g, '=') + 
+                "\n  DebugLevel: " + pvc.debug);
+    }
+    
     /* DEBUG options */
     if(pvc.debug >= 3 && !parent && options){
         try {
-            this._log("OPTIONS:\n" + pvc.logSeparator + "\n" + pvc.stringify(options, {ownOnly: false, funs: true}));
+            this._info("OPTIONS:\n", options);
+            
+            if(pvc.debug >= 5){
+                // Log also as text, for easy copy paste of options JSON
+                this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
+            }
         } catch(ex) {
             /* SWALLOW usually a circular JSON structure */
         }
@@ -447,6 +459,11 @@ def
     render: function(bypassAnimation, recreate, reloadData){
         var hasError;
         
+        /*global console:true*/
+        if(pvc.debug > 1 && console.group){
+            console.group("CCC RENDER");
+        }
+        
         // Don't let selection change events to fire before the render is finished
         this._suspendSelectionUpdate();
         try{
@@ -487,6 +504,10 @@ def
         } finally {
             if(!hasError){
                 this._resumeSelectionUpdate();
+            }
+            
+            if(pvc.debug > 1 && console.group){
+                console.groupEnd();
             }
         }
         

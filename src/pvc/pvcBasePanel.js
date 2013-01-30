@@ -8,6 +8,11 @@
 def
 .type('pvc.BasePanel', pvc.Abstract)
 .init(function(chart, parent, options) {
+    
+    this.chart = chart; // must be set before base() because of log init
+    
+    this.base();
+    
     this.axes = {};
     
     if(options){

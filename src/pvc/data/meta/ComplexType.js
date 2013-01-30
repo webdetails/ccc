@@ -103,7 +103,7 @@ function(dimTypeSpecs){
             out.push("  " + type.name + " (" + features.join(', ') + ")");
         });
         
-        out.push(pvc.logSeparator);
+        //out.push(pvc.logSeparator);
 
         return out.join("\n");
     },

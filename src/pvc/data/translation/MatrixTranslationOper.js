@@ -154,7 +154,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 ")");
         });
         
-        out.push(pvc.logSeparator);
+        //out.push(pvc.logSeparator);
         pvc.log(out.join('\n'));
     },
     

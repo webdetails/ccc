@@ -16,9 +16,11 @@ def
     // providing a static 0 value, independently of the actual drawn value...
     //this.borderWidth = 0;
     
+    this.axis = axis; // must be set before calling base, because of log id
+    
     this.base(chart, parent, options);
     
-    this.axis = axis;
+    
     this.roleName = axis.role.name;
     this.isDiscrete = axis.role.isDiscrete();
     this._extensionPrefix = axis.extensionPrefixes;

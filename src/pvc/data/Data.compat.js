@@ -5,7 +5,7 @@ pvc.data.Data
      */
     getInfo: function(){
 
-        var out = ["DATA TYPE SUMMARY", pvc.logSeparator];
+        var out = ["DATA SUMMARY", pvc.logSeparator, "  Dimension", pvc.logSeparator];
         
         def.eachOwn(this.dimensions(), function(dimension, name){
             var count = dimension.count(),
@@ -28,7 +28,7 @@ pvc.data.Data
                 (count > 10 ? "..." : ""));
         });
         
-        out.push(pvc.logSeparator);
+        //out.push(pvc.logSeparator);
 
         return out.join("\n");
     },

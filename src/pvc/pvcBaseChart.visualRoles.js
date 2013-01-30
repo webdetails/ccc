@@ -462,14 +462,12 @@ pvc.BaseChart
     },
 
     _logVisualRoles: function(){
-        var out = ["VISUAL ROLES SUMMARY", pvc.logSeparator];
+        var out = ["VISUAL ROLES MAP SUMMARY", pvc.logSeparator, "  VisualRole         <-- Dimensions", pvc.logSeparator];
         
         def.eachOwn(this._visualRoles, function(role, name){
             out.push("  " + name + def.array.create(18 - name.length, " ").join("") +
                     (role.grouping ? (" <-- " + role.grouping) : ''));
         });
-        
-        out.push(pvc.logSeparator);
 
         this._log(out.join("\n"));
     },
