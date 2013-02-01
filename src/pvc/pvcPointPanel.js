@@ -168,9 +168,11 @@ def
                 noSelect:    isLineAreaNoSelect,
                 showsSelection: !isLineAreaNoSelect
             })
-            
             .lock('visible', isLineAreaVisible)
-            
+            // If it were allowed to hide the line this way, the anchored dot would fail to evaluate
+//            .intercept('visible', function(){
+//                return isLineAreaVisible && this.delegateExtension(true);
+//            })
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
             
@@ -226,6 +228,19 @@ def
             extensionIds.push({abs: 'barSecondLine'});
         }
         
+        /* 
+         * Line.visible =
+         *  a) linesVisible
+         *     or
+         *  b) (!linesVisible and) areasVisible
+         *      and
+         *  b.1) discrete base and stacked
+         *       and
+         *       b.1.1) not null or is an intermediate null
+         *  b.2) not null
+         */
+        var isLineVisible = !dotsVisibleOnly && isLineAreaVisible;
+        
         this.pvLine = new pvc.visual.Line(
             this, 
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
@@ -237,19 +252,11 @@ def
                 noSelect:       isLineAreaNoSelect,
                 showsSelection: !isLineAreaNoSelect
             })
-            /* 
-             * Line.visible =
-             *  a) linesVisible
-             *     or
-             *  b) (!linesVisible and) areasVisible
-             *      and
-             *  b.1) discrete base and stacked
-             *       and
-             *       b.1.1) not null or is an intermediate null
-             *  b.2) not null
-             */
-            .lock('visible', dotsVisibleOnly ? false : isLineAreaVisible)
-            
+            .lock('visible', isLineVisible)
+            // If it were allowed to hide the line this way, the anchored dot would fail to evaluate  
+//            .intercept('visible', function(){
+//                return isLineVisible && this.delegateExtension(true);
+//            })
             /* Color & Line */
             .override('defaultColor', function(type){
                 var color = this.base(type);

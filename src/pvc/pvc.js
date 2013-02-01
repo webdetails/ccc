@@ -53,18 +53,23 @@ var pvc = def.globalSpace('pvc', {
         if(!pfrom) {
             pfrom = pto;
         }
-        
-        var m  = console[pfrom];
+        var c = console;
+        var m  = c[pfrom];
         var fun;
         if(m){
-            if(def.fun.is(m)){
-                fun = console[pfrom].bind(console, prompt + ": %s");
-            } else {
-                // IE? Cannot bind so will have to wrap (no line numbers...)
-                // Apply doesn't work as well...
-                fun = function(a1, a2, a3, a4){
-                    console[pfrom](prompt + ": %s", a1 || '', a2 || '', a3 || '', a4 || '');
+            var mask = prompt + ": %s";
+            if(!def.fun.is(m)){
+                // For IE these are not functions...but simply objects
+                // Bind is not available or may be a polyfill that won't work...
+                
+                var apply = Function.prototype.apply;
+                fun = function(){
+                    apply.call(m, c, def.array.append([mask], arguments));
                 };
+            } else {
+                // Calls to fun are like direct calls to m...
+                // and capture file and line numbers correctly!
+                fun = m.bind(console, mask);
             }
         }
         

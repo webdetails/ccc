@@ -1618,8 +1618,10 @@ def
                 (orientation === 'top'  ? [0, -baseDisplacement] : [0, baseDisplacement]);
 
         this.pvRule
-            .strokeStyle(null)
-            .lineWidth(0);
+            .sign
+            .override('defaultColor',       def.fun.constant(null))
+            .override('defaultStrokeWidth', def.fun.constant(0)   )
+            ;
 
         var panel = this.pvRule
             .add(pv.Panel)

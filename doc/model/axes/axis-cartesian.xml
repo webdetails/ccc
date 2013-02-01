@@ -228,6 +228,12 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="rule" type="pvc.options.marks.RuleExtensionPoint" category="Style">
+            <c:documentation>
+                The extension point of the axis rule.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
     <c:complexType name="AnyNonHierarchicalCartesianAxis"
