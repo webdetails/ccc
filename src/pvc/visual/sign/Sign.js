@@ -289,7 +289,8 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         if(options.selectable || options.hoverable){
             if(options.selectable && !def.get(keyArgs, 'noSelect')){
                 bits |= this._bitSelectable;
-                clickSelectable = chart._canSelectWithClick();
+                clickSelectable = !def.get(keyArgs, 'noClickSelect') &&
+                                  chart._canSelectWithClick();
             }
             
             if(options.hoverable && !def.get(keyArgs, 'noHover')){

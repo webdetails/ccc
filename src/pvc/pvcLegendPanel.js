@@ -39,12 +39,10 @@ def
      * @override
      */
     _createCore: function(layoutInfo) {
-      var myself = this,
-          clientSize = layoutInfo.clientSize,
+      var clientSize = layoutInfo.clientSize,
           rootScene = this._getBulletRootScene(),
           itemPadding   = rootScene.vars.itemPadding,
-          contentSize = rootScene.vars.size,
-          sceneColorProp = function(scene){ return scene.color; };
+          contentSize = rootScene.vars.size;
       
        // Names are for horizontal layout (anchor = top or bottom)
       var isHorizontal = this.isAnchorTopOrBottom();
@@ -99,7 +97,9 @@ def
       // ROW > ITEM - A pvLegendPanel instance per bullet item in a row
       this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendRowPanel, {
               extensionId: 'panel',
-              wrapper:     wrapper
+              wrapper:     wrapper,
+              noSelect:    false,
+              noClickSelect: true // just rubber-band (the click is for other behaviors)
           })
           .lockMark('data', function(row){ return row.items; }) // each row has a list of bullet item scenes
           .lock(a_right,  null)
@@ -126,7 +126,7 @@ def
                   function(itemScene){ return itemScene.vars.clientSize.width; } :
                   
                    // The biggest child width of the column
-                  function(itemScene){ return this.parent.width(); })
+                  function(/*itemScene*/){ return this.parent.width(); })
           .pvMark
           .def("hidden", "false")
           .fillStyle(function(){ // TODO: ??

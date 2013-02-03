@@ -177,7 +177,18 @@ var pvc = def.globalSpace('pvc', {
                         out.push(']');
                     } else {
                         var ownOnly = def.get(keyArgs, 'ownOnly', true);
-                        if(t.constructor !== Object){
+                        if(t === def.global){
+                            out.push('<window>');
+                            return true;
+                        }
+
+                        if(def.fun.is(t.cloneNode)){
+                            // DOM object
+                            out.push('<dom #' + (t.id || t.name || '?') + '>');
+                            return true;
+                        }
+
+                        if(remLevels > 1 && t.constructor !== Object){
                             remLevels = 1;
                             ownOnly = true;
                         }

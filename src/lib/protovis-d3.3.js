@@ -1,4 +1,4 @@
-// 9bae65fee7e8bce42369b262c41e556cdd41d9b1
+// 756a9aed812293ce02110c9ea318a99340b04df1
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3794,7 +3794,7 @@ pv.Scale.quantitative = function() {
         overflow = true;
     }
     
-    var step = Math.pow(10, exponent);
+    step = Math.pow(10, exponent);
     var mObtained = (span / step);
     
     var err = m / mObtained;
@@ -3809,8 +3809,8 @@ pv.Scale.quantitative = function() {
     // Account for floating point precision errors
     exponent = Math.floor(pv.log(step, 10) + 1e-10);
         
-    var start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step);
-    var end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
+    start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step);
+    end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
     
     usedNumberExponent = Math.max(0, -exponent);
     
@@ -5489,7 +5489,6 @@ pv.histogram = function(data, f) {
     Polygon.prototype.containsPoint = function(p){
         var bbox = this.bbox();
         if(!bbox.containsPoint(p)){
-            //console.log("Polygon point out of bbox");
             return false;
         }
         
@@ -5504,8 +5503,6 @@ pv.histogram = function(data, f) {
                 intersectCount++;
             }
         });
-        
-        //console.log("Polygon intersects=" + intersectCount + "/" + edges.length);
         
         // Inside if odd number of intersections
         return (intersectCount & 1) === 1;
@@ -20155,8 +20152,6 @@ pv.Behavior = {};
         downElem,
         cancelClick,
         inited,
-        autoRender = true,
-        positionConstraint,
         drag;
     
     shared.autoRender = true;
@@ -20201,15 +20196,12 @@ pv.Behavior = {};
         
         // --------------
         
-        ev = pv.extend(ev);
-        
         var m1    = this.mouse();
         var scene = this.scene;
         var index = this.index;
         
         drag = 
-        scene[index].drag = 
-        ev.drag = {
+        scene[index].drag = {
             phase: 'start',
             m:     m1,    // current relevant mouse position
             m1:    m1,    // the mouse position of the mousedown
@@ -20218,7 +20210,9 @@ pv.Behavior = {};
             scene: scene, // scene context
             index: index  // scene index
         };
-        
+
+        ev = wrapEvent(ev, drag);
+
         shared.dragstart.call(this, ev);
         
         var m = drag.m;
@@ -20238,8 +20232,7 @@ pv.Behavior = {};
         // (if being handled by the root)
         ev.stopPropagation();
         
-        ev = pv.extend(ev);
-        ev.drag = drag;
+        ev = wrapEvent(ev, drag);
         
         // In the context of the mousedown scene
         var scene = drag.scene;
@@ -20290,8 +20283,7 @@ pv.Behavior = {};
         // (if being handled by the root)
         ev.stopPropagation();
         
-        ev = pv.extend(ev);
-        ev.drag = drag;
+        ev = wrapEvent(ev, drag);
         
         // Unregister events
         if(events){
@@ -20311,6 +20303,32 @@ pv.Behavior = {};
             drag = null;
             delete scene[index].drag;
         }
+    }
+
+    function wrapEvent(ev, drag){
+        try{
+            ev.drag = drag;
+            return ev;
+        } catch(ex) {
+            // SWALLOW
+        }
+
+        // wrap
+        var ev2 = {};
+        for(var p in ev){
+            var v = ev[p];
+            ev2[p] = typeof v !== 'function' ? v : bindEventFun(f, ev);
+        }
+        
+        ev2._sourceEvent = ev;
+
+        return ev2;
+    }
+
+    function bindEventFun(f, ctx){
+        return function(){
+            return f.apply(ctx, arguments);
+        };
     }
 
     /**

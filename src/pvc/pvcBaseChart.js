@@ -4,7 +4,28 @@
 def
 .type('pvc.BaseChart', pvc.Abstract)
 .init(function(options) {
+    var originalOptions = options;
+    
     var parent = this.parent = def.get(options, 'parent') || null;
+    if(parent){
+        /*jshint expr:true */
+        options || def.fail.argumentRequired('options');
+    } else {
+        options = def.mixin.copy({}, this.defaults, options);
+    }
+
+    this.options = options;
+
+    if(parent) {
+        this.root = parent.root;
+        this.smallColIndex = options.smallColIndex; // required for the logId msk, setup in base
+        this.smallRowIndex = options.smallRowIndex;
+
+        this._tooltipEnabled = parent._tooltipEnabled;
+        this._tooltipOptions = parent._tooltipOptions;
+    } else {
+        this.root = this;
+    }
     
     this.base();
     
@@ -14,39 +35,16 @@ def
     }
     
     /* DEBUG options */
-    if(pvc.debug >= 3 && !parent && options){
-        try {
-            this._info("OPTIONS:\n", options);
-            
-            if(pvc.debug >= 5){
-                // Log also as text, for easy copy paste of options JSON
-                this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
-            }
-        } catch(ex) {
-            /* SWALLOW usually a circular JSON structure */
+    if(pvc.debug >= 3 && !parent && originalOptions){
+        this._info("OPTIONS:\n", originalOptions);
+        if(pvc.debug >= 5){
+            // Log also as text, for easy copy paste of options JSON
+            this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
         }
     }
     
     if(parent){
-        /*jshint expr:true */
-        options || def.fail.argumentRequired('options');
-    } else {
-        options = def.mixin.copy({}, this.defaults, options);
-    }
-    
-    this.options = options;
-    
-    if(parent) {
-        this.root = parent.root;
-        this.smallColIndex = options.smallColIndex;
-        this.smallRowIndex = options.smallRowIndex;
-        
-        this._tooltipEnabled = parent._tooltipEnabled;
-        this._tooltipOptions = parent._tooltipOptions;
-        
-        parent._addChild(this);
-    } else {
-        this.root = this;
+         parent._addChild(this);
     }
 
     this._constructData(options);

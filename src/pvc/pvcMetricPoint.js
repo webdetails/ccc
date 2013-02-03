@@ -15,10 +15,7 @@ def
     }
 })
 .add({
-    
     _initPlotsCore: function(){
-        var options = this.options;
-        
         var pointPlot = this._createPointPlot();
         
         var trend = pointPlot.option('Trend');
