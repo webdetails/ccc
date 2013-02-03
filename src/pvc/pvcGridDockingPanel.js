@@ -45,7 +45,7 @@ def
             return;
         }
 
-        var useLog = pvc.debug >= 5 && console.group;
+        var useLog = pvc.debug >= 5;
         
         // Objects we can mutate
         var margins  = new pvc.Sides(0);
@@ -73,7 +73,7 @@ def
         var emptyNewPaddings = new pvc.Sides(); // used below in place of null requestPaddings
         var isDisasterRecovery = false;
 
-        if(useLog){ console.group("CCC GRID LAYOUT clientSize = " + pvc.stringify(remSize)); }
+        if(useLog){ me._group("CCC GRID LAYOUT clientSize = " + pvc.stringify(remSize)); }
         try{
             // PHASE 0 - Initialization
             //
@@ -97,14 +97,14 @@ def
             // The orthogonal anchor coordinate is only set on the second phase.
             //
             // SIDE children may change paddings as well.
-            if(useLog){ console.group("Phase 1 - Determine MARGINS and FILL SIZE from SIDE panels"); }
+            if(useLog){ me._group("Phase 1 - Determine MARGINS and FILL SIZE from SIDE panels"); }
             try{
                 sideChildren.forEach(layoutChild1Side);
             } finally {
                 // -> remSize now contains the size of the CENTER cell and is not changed any more
                 
                 if(useLog){
-                    console.groupEnd();
+                    me._groupEnd();
                     me._log("Final FILL margins = " + pvc.stringify(margins));
                     me._log("Final FILL border size = " + pvc.stringify(remSize));
                 }
@@ -114,12 +114,12 @@ def
             // PHASE 3 - Layout FILL children
             //
             // Repeat 2 and 3 while paddings changed
-            if(useLog){ console.group("Phase 2 - Determine COMMON PADDINGS"); }
+            if(useLog){ me._group("Phase 2 - Determine COMMON PADDINGS"); }
             try{
                 doMaxTimes(9, layoutCycle);
             } finally {
                 if(useLog){
-                    console.groupEnd();
+                    me._groupEnd();
                     me._log("Final FILL clientSize = " + pvc.stringify({width: (remSize.width - paddings.width), height: (remSize.height - paddings.height)}));
                     me._log("Final COMMON paddings = " + pvc.stringify(paddings));
                 }
@@ -133,13 +133,13 @@ def
             // As such, there's no need to return anything.
             // return;
         } finally {
-            if(useLog){ console.groupEnd(); }
+            if(useLog){ me._groupEnd(); }
         }
 
         // --------
         
         function layoutCycle(remTimes, iteration){
-            if(useLog){ console.group("LayoutCycle - " + (isDisasterRecovery ? "Disaster MODE" : ("#" + (iteration + 1)))); }
+            if(useLog){ me._group("LayoutCycle " + (isDisasterRecovery ? "- Disaster MODE" : ("#" + (iteration + 1)))); }
             try{
                 var index, count;
                 var canChange = layoutInfo.canChange !== false && !isDisasterRecovery && (remTimes > 0);
@@ -150,7 +150,7 @@ def
                 index = 0;
                 count = sideChildren.length;
                 while(index < count){
-                    if(useLog){ console.group("SIDE Child i=" + index); }
+                    if(useLog){ me._group("SIDE Child #" + (index + 1)); }
                     try{
                         paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
                         if(!isDisasterRecovery && paddingsChanged){
@@ -161,7 +161,7 @@ def
                                 // of other side childs.
                                 // Translate children overflow paddings in
                                 // own paddings.
-                                if(useLog){ me._log("SIDE Child i=" + index + " changed overflow paddings"); }
+                                if(useLog){ me._log("SIDE Child #" + (index + 1) + " changed overflow paddings"); }
                                 if(!ownPaddingsChanged){
                                     ownPaddingsChanged = true;
                                     // If others change we don't do nothing.
@@ -173,10 +173,10 @@ def
 
                             if((paddingsChanged & NormalPaddingsChanged) !== 0){
                                 if(remTimes > 0){
-                                    if(useLog){ me._log("SIDE Child i=" + index + " changed normal paddings"); }
+                                    if(useLog){ me._log("SIDE Child #" + (index + 1) + " changed normal paddings"); }
                                     breakAndRepeat = true;
                                 } else if(pvc.debug >= 2){
-                                    me._warn("SIDE Child i=" + index + " changed paddings but no more iterations possible.");
+                                    me._warn("SIDE Child #" + (index + 1) + " changed paddings but no more iterations possible.");
                                 }
                             }
                             
@@ -194,7 +194,7 @@ def
                             }
                         }
                     } finally {
-                        if(useLog){ console.groupEnd(); }
+                        if(useLog){ me._groupEnd(); }
                     }
                     index++;
                 }
@@ -207,7 +207,7 @@ def
                 index = 0;
                 count = fillChildren.length;
                 while(index < count){
-                    if(useLog){ console.group("FILL Child i=" + index); }
+                    if(useLog){ me._group("FILL Child #" + (index + 1)); }
                     try{
                         paddingsChanged = layoutChildFill(fillChildren[index], canChange);
                         if(!isDisasterRecovery && paddingsChanged){
@@ -216,11 +216,11 @@ def
                             if((paddingsChanged & NormalPaddingsChanged) !== 0){
                                 if(remTimes > 0){
                                     if(pvc.debug >= 5){
-                                        me._log("FILL Child i=" + index + " increased paddings");
+                                        me._log("FILL Child #" + (index + 1) + " increased paddings");
                                     }
                                     breakAndRepeat = true; // repeat
                                 } else if(pvc.debug >= 2){
-                                    me._warn("FILL Child i=" + index + " increased paddings but no more iterations possible.");
+                                    me._warn("FILL Child #" + (index + 1) + " increased paddings but no more iterations possible.");
                                 }
                             }
 
@@ -236,7 +236,7 @@ def
                             }
                         }
                     } finally {
-                        if(useLog){ console.groupEnd(); }
+                        if(useLog){ me._groupEnd(); }
                     }
                     
                     index++;
@@ -244,7 +244,7 @@ def
 
                 return false; // stop
             } finally {
-                if(useLog){ console.groupEnd(); }
+                if(useLog){ me._groupEnd(); }
             }
         }
         
@@ -281,7 +281,7 @@ def
         }
         
         function layoutChild1Side(child, index) {
-            if(useLog){ console.group("SIDE Child " + index); }
+            if(useLog){ me._group("SIDE Child #" + (index + 1)); }
             try{
                 var paddingsChanged = 0;
 
@@ -304,7 +304,7 @@ def
 
                 return paddingsChanged;
             } finally {
-                if(useLog){ console.groupEnd(); }
+                if(useLog){ me._groupEnd(); }
             }
         }
         

@@ -478,11 +478,12 @@ def
      */
     _calcLayout: function(layoutInfo){
         var clientSize;
+        var me = this;
 
         // These are used in layoutCycle
         var margins, remSize, useLog;
 
-        if(this._children) {
+        if(me._children) {
             var aolMap = pvc.BasePanel.orthogonalLength;
             var aoMap  = pvc.BasePanel.relativeAnchor;
             var altMap = pvc.BasePanel.leftTopAnchor;
@@ -493,7 +494,7 @@ def
             var fillChildren = [];
             var sideChildren = [];
 
-            this._children.forEach(function(child) {
+            me._children.forEach(function(child) {
                 var a = child.anchor;
                 if(a){ // requires layout
                     if(a === 'fill') {
@@ -507,7 +508,7 @@ def
                 }
             });
 
-            useLog = pvc.debug >= 5 && console.group;
+            useLog = pvc.debug >= 5;
             
             // When expanded (see checkChildLayout)
             // a re-layout is performed.
@@ -517,11 +518,11 @@ def
                     referenceSize: clientSize
                 };
 
-            if(useLog){ console.group("CCC DOCK LAYOUT clientSize = " + pvc.stringify(clientSize)); }
+            if(useLog){ me._group("CCC DOCK LAYOUT clientSize = " + pvc.stringify(clientSize)); }
             try{
-                doMaxTimes(5, layoutCycle, this);
+                doMaxTimes(5, layoutCycle, me);
             } finally {
-                if(useLog){ console.groupEnd(); }
+                if(useLog){ me._groupEnd(); }
             }
         }
 
@@ -543,7 +544,7 @@ def
         }
         
         function layoutCycle(remTimes, iteration){
-            if(useLog){ console.group("LayoutCycle - #" + (iteration + 1) + " (remaining: " + remTimes + ")"); }
+            if(useLog){ me._group("LayoutCycle #" + (iteration + 1) + " (remaining: " + remTimes + ")"); }
             try{
                var canResize = (remTimes > 0);
 
@@ -558,13 +559,13 @@ def
                 var count = sideChildren.length;
                 while(index < count){
                     child = sideChildren[index];
-                    if(useLog){ console.group("SIDE Child i=" + index + " at " + child.anchor); }
+                    if(useLog){ me._group("SIDE Child #" + (index + 1) + " at " + child.anchor); }
                     try{
                         if(layoutChild.call(this, child, canResize)){
                             return true; // resized => break
                         }
                     } finally {
-                        if(useLog){ console.groupEnd(); }
+                        if(useLog){ me._groupEnd(); }
                     }
                     index++;
                 }
@@ -574,20 +575,20 @@ def
                 count = fillChildren.length;
                 while(index < count){
                     child = fillChildren[index];
-                    if(useLog){ console.group("FILL Child i=" + index); }
+                    if(useLog){ me._group("FILL Child #" + (index + 1)); }
                     try{
                         if(layoutChild.call(this, child, canResize)){
                             return true; // resized => break
                         }
                     } finally {
-                        if(useLog){ console.groupEnd(); }
+                        if(useLog){ me._groupEnd(); }
                     }
                     index++;
                 }
 
                 return false; // !resized
             } finally {
-                if(useLog){ console.groupEnd(); }
+                if(useLog){ me._groupEnd(); }
             }
         }
         
@@ -598,7 +599,7 @@ def
             childKeyArgs.canChange = canResize;
             
             doMaxTimes(3, function(remTimes, iteration){
-                if(useLog){ console.group("Attempt #" + (iteration + 1)); }
+                if(useLog){ me._group("Attempt #" + (iteration + 1)); }
                 try{
 
                     childKeyArgs.paddings  = paddings;
@@ -639,7 +640,7 @@ def
 
                     return false; // stop
                 } finally {
-                    if(useLog){ console.groupEnd(); }
+                    if(useLog){ me._groupEnd(); }
                 }
             }, this);
             
@@ -1300,8 +1301,7 @@ def
      * Initializes a new layer panel.
      * @virtual
      */
-    initLayerPanel: function(pvPanel, layer){
-    },
+    initLayerPanel: function(/*pvPanel, layer*/){},
     
     /* EVENTS & VISUALIZATION CONTEXT */
     _getV1DimName: function(v1Dim){

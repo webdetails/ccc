@@ -54,7 +54,7 @@ var pvc = def.globalSpace('pvc', {
             pfrom = pto;
         }
         var c = console;
-        var m  = c[pfrom];
+        var m  = c[pfrom] || c.log;
         var fun;
         if(m){
             var mask = prompt + ": %s";
@@ -78,7 +78,8 @@ var pvc = def.globalSpace('pvc', {
     
     function installPvcLog(){
         if (pvc.debug && typeof console !== "undefined"){
-            ['log', 'info', ['trace', 'debug'], 'error', 'warn'].forEach(function(ps){
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn', 'group', 'groupEnd']
+            .forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
                 pvc._installLog(pvc, ps[0],  ps[1],  '[pvChart]');
@@ -88,7 +89,8 @@ var pvc = def.globalSpace('pvc', {
                 pvc.debug = 1;
             }
             
-            ['log', 'info', 'trace', 'warn'].forEach(function(p){
+            ['log', 'info', 'trace', 'warn', 'group', 'groupEnd']
+            .forEach(function(p){
                 pvc[p] = def.noop;
             });
             
@@ -223,6 +225,9 @@ var pvc = def.globalSpace('pvc', {
                     return true;
                 
                 case 'number':
+                    out.push(''+(Math.round(100000 * t) / 100000)); // 6 dec places max
+                    return true;
+
                 case 'boolean': 
                     out.push(''+t);
                     return true;

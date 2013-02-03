@@ -208,7 +208,7 @@ pvc.BaseChart
                 var isNull = datum.isNull;
                 
                 if(isNull && pvc.debug >= 4){
-                    me._log("Datum excluded.");
+                    me._info("Datum excluded.");
                 }
                 
                 return !isNull;
