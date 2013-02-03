@@ -317,7 +317,7 @@ pvc.BaseChart
     },
     
     _onLaidOut: function(){
-        
+        // NOOP
     }
 });
 

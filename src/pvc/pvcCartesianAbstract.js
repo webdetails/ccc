@@ -489,12 +489,13 @@ def
     },
     
     _setCartAxisScaleRange: function(axis){
-        var info = this.plotPanelList[0]._layoutInfo;
-        var size = (axis.orientation === 'x') ?
-           info.clientSize.width :
-           info.clientSize.height;
+        var info   = this.plotPanelList[0]._layoutInfo;
+        var size   = info.clientSize;
+        var length = (axis.orientation === 'x') ?
+                     size.width :
+                     size.height;
         
-        axis.setScaleRange(size);
+        axis.setScaleRange(length);
 
         return axis.scale;
     },
@@ -525,11 +526,11 @@ def
         function processAxis(axis){
             if(axis){
                 // {begin: , end: , beginLocked: , endLocked: }
-                var rp = axis.getScaleRoundingPaddings();
-                if(rp){
+                var tickRoundPads = axis.getScaleRoundingPaddings();
+                if(tickRoundPads){
                     var isX = axis.orientation === 'x';
-                    setSide(isX ? 'left'  : 'bottom', rp.begin, rp.beginLocked);
-                    setSide(isX ? 'right' : 'top'   , rp.end,   rp.endLocked);
+                    setSide(isX ? 'left'  : 'bottom', tickRoundPads.begin, tickRoundPads.beginLocked);
+                    setSide(isX ? 'right' : 'top'   , tickRoundPads.end,   tickRoundPads.endLocked);
                 }
             }
         }

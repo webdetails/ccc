@@ -209,8 +209,6 @@ def
     },
     
     _preRenderPhase1: function(keyArgs) {
-        var options = this.options;
-        
         /* Increment pre-render version to allow for cache invalidation  */
         this._createVersion++;
         
@@ -275,7 +273,7 @@ def
         this._setAxesScales(hasMultiRole);
     },
     
-    _preRenderPhase2: function(keyArgs){
+    _preRenderPhase2: function(/*keyArgs*/){
         var hasMultiRole = this._isRoleAssigned('multiChart');
         
         /* Initialize chart panels */

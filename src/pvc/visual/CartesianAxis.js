@@ -186,7 +186,11 @@ def.scope(function(){
             } else {
                 scale.range(scale.min, scale.max);
             }
-            
+
+            if(pvc.debug > 4){
+                this.chart._log("Axis " + this.id  + " setRange: " + pvc.stringify(scale.range()));
+            }
+
             return scale;
         },
         
@@ -212,16 +216,16 @@ def.scope(function(){
                         var origDomain = this.domain || def.assert("Original domain must be set");
                         var currLength = currDomain[1] - currDomain[0];
                         if(currLength){
-                            // begin dif
-                            var dif = origDomain[0] - currDomain[0];
-                            if(dif > 0){
-                                roundingPaddings.begin = dif / currLength;
+                            // begin diff
+                            var diff = origDomain[0] - currDomain[0];
+                            if(diff > 0){
+                                roundingPaddings.begin = diff / currLength;
                             }
                             
-                            // end dif
-                            dif = currDomain[1] - origDomain[1];
-                            if(dif > 0){
-                                roundingPaddings.end = dif / currLength;
+                            // end diff
+                            diff = currDomain[1] - origDomain[1];
+                            if(diff > 0){
+                                roundingPaddings.end = diff / currLength;
                             }
                         }
                     }

@@ -1,6 +1,9 @@
 pvc.BaseChart
 .add({
     _initPlots: function(hasMultiRole){
+        
+        this.plotPanelList = null;
+        
         // reset plots
         if(!this.parent){
             this.plots = {};
@@ -17,7 +20,7 @@ pvc.BaseChart
         }
     },
     
-    _initPlotsCore: function(hasMultiRole){
+    _initPlotsCore: function(/*hasMultiRole*/){
         // NOOP
     },
 
@@ -75,14 +78,14 @@ pvc.BaseChart
         }
     },
     
-    // Called by the pvc.PlotPnel class
+    // Called by the pvc.PlotPanel class
     _addPlotPanel: function(plotPanel){
         def.lazy(this, 'plotPanels')[plotPanel.plot.id] = plotPanel;
         def.array.lazy(this, 'plotPanelList').push(plotPanel);
     },
     
     /* @abstract */
-    _createPlotPanels: function(parentPanel, baseOptions){
+    _createPlotPanels: function(/*parentPanel, baseOptions*/){
         throw def.error.notImplemented();
     }
 });

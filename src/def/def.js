@@ -2394,7 +2394,7 @@ def.type('Query')
 
 def.type('NullQuery', def.Query)
 .add({
-    _next: function(nextIndex){}
+    _next: function(/*nextIndex*/){}
 });
 
 def.type('AdhocQuery', def.Query)

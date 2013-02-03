@@ -59,7 +59,6 @@ def
      * @override 
      */
     _createPlotPanels: function(parentPanel, baseOptions){
-        var options = this.options;
         var plots = this.plots;
         
         var barPlot = plots.bar;

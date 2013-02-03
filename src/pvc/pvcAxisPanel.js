@@ -472,12 +472,12 @@ def
             case 'numeric':    this._calcNumberTicks(layoutInfo); break;
             default: throw def.error.operationInvalid("Undefined axis scale type"); 
         }
-        
+
         this.axis.setTicks(layoutInfo.ticks);
         
         var clientLength = layoutInfo.clientSize[this.anchorLength()];
         this.axis.setScaleRange(clientLength);
-        
+
         if(layoutInfo.maxTextWidth == null){
             layoutInfo.maxTextWidth = 
                 def.query(layoutInfo.ticksText)
@@ -535,7 +535,7 @@ def
         this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
     },
     
-    _calcNumberTicks: function(layoutInfo){
+    _calcNumberTicks: function(/*layoutInfo*/){
         var desiredTickCount = this.desiredTickCount;
         if(desiredTickCount == null){
             if(this.isAnchorTopOrBottom()){
@@ -563,6 +563,11 @@ def
                                     numberExponentMin: this.tickExponentMin,
                                     numberExponentMax: this.tickExponentMax
                                 });
+
+        if(pvc.debug > 4){
+            this._log("DOMAIN: " + pvc.stringify(this.scale.domain()));
+            this._log("TICKS:  " + pvc.stringify(ticksInfo.ticks));
+        }
     },
     
     _calcContinuousTicksText: function(ticksInfo){

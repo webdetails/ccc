@@ -93,7 +93,6 @@ def
         
         var myself = this;
         var chart = this.chart;
-        var options   = chart.options;
         var isStacked = this.stacked;
         var dotsVisible  = this.dotsVisible;
         var areasVisible = this.areasVisible;
@@ -177,9 +176,9 @@ def
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
             
             /* Position & size */
-            .override('x',  function(){ return this.scene.basePosition;  })
-            .override('y',  function(){ return this.scene.orthoPosition; })
-            .override('dy', function(){ return chart.animate(0, this.scene.orthoLength); })
+            .override('x',  function(){ return this.scene.basePosition;  }) // left
+            .override('y',  function(){ return this.scene.orthoPosition; }) // bottom
+            .override('dy', function(){ return chart.animate(0, this.scene.orthoLength); }) // height
             
             /* Color & Line */
             .override('color', function(type){
@@ -527,7 +526,7 @@ def
                 
                 return 0;
             });
-        var orthoZero = orthoScale(0);
+        var orthoZero = orthoScale(orthoNullValue/*0*/);
         var sceneBaseScale = this.axes.base.sceneScale({sceneVarName: 'category'});
         
         // ----------------------------------
@@ -542,7 +541,7 @@ def
                    ;
         })
         /* Create series scene */
-        .each(function(seriesData1, seriesIndex){
+        .each(function(seriesData1/*, seriesIndex*/){
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1 || data});
 
             seriesScene.vars.series = new pvc.visual.ValueLabelVar(
@@ -625,7 +624,6 @@ def
         // reversed so that "below == before" w.r.t. stacked offset calculation
         // See {@link belowSeriesScenes2} variable.
         var reversedSeriesScenes = rootScene.children().reverse().array();
-        var seriesCount = reversedSeriesScenes.length;
         
         /** 
          * Update the scene tree to include intermediate leaf-scenes,
@@ -641,7 +639,7 @@ def
         
         return rootScene;
         
-       function completeSeriesScenes(seriesScene) {
+        function completeSeriesScenes(seriesScene) {
             var seriesScenes2 = [],
                 seriesScenes = seriesScene.childNodes, 
                 fromScene,

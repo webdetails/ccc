@@ -37,7 +37,7 @@ def
             });
     },
     
-    _initPlotsCore: function(hasMultiRole){
+    _initPlotsCore: function(/*hasMultiRole*/){
         var options = this.options;
         
         var pointPlot = this._createPointPlot();
@@ -107,8 +107,6 @@ def
     
     /* @override */
     _createPlotPanels: function(parentPanel, baseOptions){
-        var options = this.options;
-        var axes    = this.axes;
         var plots   = this.plots;
         
         var pointPlot = plots.point;

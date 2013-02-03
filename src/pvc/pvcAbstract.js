@@ -13,7 +13,7 @@ def
         if (pvc.debug && typeof console !== "undefined"){
             var logId = this._getLogInstanceId();
             
-            ['log', 'info', ['trace', 'debug'], 'error'].forEach(function(ps){
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn'].forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
                 pvc._installLog(this, '_' + ps[0],  ps[1], logId);
@@ -45,7 +45,7 @@ def.scope(function(){
     var o = pvc.Abstract.prototype;
     var syncLogHook = function(){ this._syncLog(); };
     
-    ['log', 'info', 'trace', 'error'].forEach(function(p){
+    ['log', 'info', 'trace', 'error', 'warn'].forEach(function(p){
         o['_' + p] = syncLogHook;
     });
 });

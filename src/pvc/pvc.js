@@ -78,7 +78,7 @@ var pvc = def.globalSpace('pvc', {
     
     function installPvcLog(){
         if (pvc.debug && typeof console !== "undefined"){
-            ['log', 'info', ['trace', 'debug'], 'error'].forEach(function(ps){
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn'].forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
                 pvc._installLog(pvc, ps[0],  ps[1],  '[pvChart]');
@@ -88,7 +88,7 @@ var pvc = def.globalSpace('pvc', {
                 pvc.debug = 1;
             }
             
-            ['log', 'info', 'trace'].forEach(function(p){
+            ['log', 'info', 'trace', 'warn'].forEach(function(p){
                 pvc[p] = def.noop;
             });
             
@@ -198,7 +198,10 @@ var pvc = def.globalSpace('pvc', {
                         }
                         
                         if(first){
-                            out.push('{'+ t + '}');
+                            var s = '' + t;
+                            if(s !== '[object Object]'){ // not very useful
+                                out.push('{'+ s + '}');
+                            }
                         }
                         
                         out.push('}');

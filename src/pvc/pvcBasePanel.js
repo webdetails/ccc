@@ -426,8 +426,11 @@ def
                 delete layoutInfo.previous;
             }
             
-            if(pvc.debug >= 4){
-                this._log("  -> layout size={width: " + this.width + ", height: " + this.height + "}"); 
+            if(pvc.debug >= 5){
+                this._log("Size       = " + pvc.stringify(size));
+                this._log("Margins    = " + pvc.stringify(layoutInfo.margins));
+                this._log("Paddings   = " + pvc.stringify(layoutInfo.paddings));
+                this._log("ClientSize = " + pvc.stringify(layoutInfo.clientSize));
             }
             
             this._onLaidOut();
@@ -474,47 +477,54 @@ def
      * @virtual
      */
     _calcLayout: function(layoutInfo){
-        
-        if(!this._children) {
-            return;
-        }
-        
-        var aolMap = pvc.BasePanel.orthogonalLength;
-        var aoMap  = pvc.BasePanel.relativeAnchor;
-        var altMap = pvc.BasePanel.leftTopAnchor;
-        var aofMap = pvc.Offset.namesSidesToOffset;
-        
-        // Classify children
-        
-        var fillChildren = [];
-        var sideChildren = [];
-        
-        this._children.forEach(function(child) {
-            var a = child.anchor;
-            if(a){ // requires layout
-                if(a === 'fill') {
-                    fillChildren.push(child);
-                } else {
-                    /*jshint expr:true */
-                    def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
-                    
-                    sideChildren.push(child);
+        var clientSize;
+
+        // These are used in layoutCycle
+        var margins, remSize, useLog;
+
+        if(this._children) {
+            var aolMap = pvc.BasePanel.orthogonalLength;
+            var aoMap  = pvc.BasePanel.relativeAnchor;
+            var altMap = pvc.BasePanel.leftTopAnchor;
+            var aofMap = pvc.Offset.namesSidesToOffset;
+
+            // Classify children
+
+            var fillChildren = [];
+            var sideChildren = [];
+
+            this._children.forEach(function(child) {
+                var a = child.anchor;
+                if(a){ // requires layout
+                    if(a === 'fill') {
+                        fillChildren.push(child);
+                    } else {
+                        /*jshint expr:true */
+                        def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
+
+                        sideChildren.push(child);
+                    }
                 }
+            });
+
+            useLog = pvc.debug >= 5 && console.group;
+            
+            // When expanded (see checkChildLayout)
+            // a re-layout is performed.
+            clientSize = def.copyOwn(layoutInfo.clientSize);
+            var childKeyArgs = {
+                    force: true,
+                    referenceSize: clientSize
+                };
+
+            if(useLog){ console.group("CCC DOCK LAYOUT clientSize = " + pvc.stringify(clientSize)); }
+            try{
+                doMaxTimes(5, layoutCycle, this);
+            } finally {
+                if(useLog){ console.groupEnd(); }
             }
-        });
-    
-        // When expanded (see checkChildLayout)
-        // a re-layout is performed.
-        var clientSize = def.copyOwn(layoutInfo.clientSize);
-        var childKeyArgs = {
-                force: true,
-                referenceSize: clientSize
-            };
-        
-        var margins, remSize;
-        
-        doMaxTimes(5, layoutCycle, this);
-        
+        }
+
         /* Return possibly changed clientSize */
         return clientSize;
         
@@ -533,51 +543,52 @@ def
         }
         
         function layoutCycle(remTimes, iteration){
-            if(pvc.debug >= 5){
-                this._log("==== LayoutCycle #" + (iteration + 1));
+            if(useLog){ console.group("LayoutCycle - #" + (iteration + 1) + " (remaining: " + remTimes + ")"); }
+            try{
+               var canResize = (remTimes > 0);
+
+                // Reset margins and remSize
+                // ** Instances we can mutate
+                margins = new pvc.Sides(0);
+                remSize = def.copyOwn(clientSize);
+
+                // Lay out SIDE child panels
+                var child;
+                var index = 0;
+                var count = sideChildren.length;
+                while(index < count){
+                    child = sideChildren[index];
+                    if(useLog){ console.group("SIDE Child i=" + index + " at " + child.anchor); }
+                    try{
+                        if(layoutChild.call(this, child, canResize)){
+                            return true; // resized => break
+                        }
+                    } finally {
+                        if(useLog){ console.groupEnd(); }
+                    }
+                    index++;
+                }
+
+                // Lay out FILL child panels
+                index = 0;
+                count = fillChildren.length;
+                while(index < count){
+                    child = fillChildren[index];
+                    if(useLog){ console.group("FILL Child i=" + index); }
+                    try{
+                        if(layoutChild.call(this, child, canResize)){
+                            return true; // resized => break
+                        }
+                    } finally {
+                        if(useLog){ console.groupEnd(); }
+                    }
+                    index++;
+                }
+
+                return false; // !resized
+            } finally {
+                if(useLog){ console.groupEnd(); }
             }
-            
-            var canResize = (remTimes > 0);
-            
-            // Reset margins and remSize
-            // ** Instances we can mutate
-            margins = new pvc.Sides(0);
-            remSize = def.copyOwn(clientSize);
-            
-            // Lay out SIDE child panels
-            var child;
-            var index = 0;
-            var count = sideChildren.length;
-            while(index < count){
-                child = sideChildren[index];
-                if(pvc.debug >= 5){
-                    this._log("SIDE Child i=" + index + " at " + child.anchor);
-                }
-                
-                if(layoutChild.call(this, child, canResize)){
-                    return true; // resized => break
-                }
-                
-                index++;
-            }
-            
-            // Lay out FILL child panels
-            index = 0;
-            count = fillChildren.length;
-            while(index < count){
-                child = fillChildren[index];
-                if(pvc.debug >= 5){
-                    this._log("FILL Child i=" + index);
-                }
-                
-                if(layoutChild.call(this, child, canResize)){
-                    return true; // resized => break
-                }
-                
-                index++;
-            }
-            
-            return false; // !resized
         }
         
         function layoutChild(child, canResize) {
@@ -587,64 +598,81 @@ def
             childKeyArgs.canChange = canResize;
             
             doMaxTimes(3, function(remTimes, iteration){
-                if(pvc.debug >= 5){
-                    this._log("  -> Attempt #" + (iteration + 1));
-                }
-                
-                childKeyArgs.paddings = paddings;
-                childKeyArgs.canChange = remTimes > 0;
-                
-                child.layout(new pvc.Size(remSize), childKeyArgs);
-                if(child.isVisible){
-                    resized = checkChildResize.call(this, child, canResize);
-                    if(resized){
-                        return false; // stop
-                    }
-                    
-                    paddings = child._layoutInfo.requestPaddings;
-                    if(paddings){
-                        // Child wants to repeat its layout with != paddings
-                        if(remTimes > 0){
-                            paddings = new pvc.Sides(paddings);
-                            if(pvc.debug >= 5){
-                                this._log("  -> Child requested paddings change: " + pvc.stringify(paddings));
+                if(useLog){ console.group("Attempt #" + (iteration + 1)); }
+                try{
+
+                    childKeyArgs.paddings  = paddings;
+                    childKeyArgs.canChange = remTimes > 0;
+
+                    child.layout(new pvc.Size(remSize), childKeyArgs);
+                    if(child.isVisible){
+                        resized = checkChildResize.call(this, child, canResize);
+                        if(resized){
+                            return false; // stop
+                        }
+
+                        var requestPaddings = child._layoutInfo.requestPaddings;
+                        if(checkPaddingsChanged(paddings, requestPaddings)){
+                            paddings = requestPaddings;
+
+                            // Child wants to repeat its layout with != paddings
+                            if(remTimes > 0){
+                                paddings = new pvc.Sides(paddings);
+                                if(useLog){ this._log("Child requested paddings change: " + pvc.stringify(paddings)); }
+                                return true; // again
                             }
-                            return true; // again
+
+                            if(pvc.debug >= 2){
+                                this._warn("Child requests paddings change but iterations limit has been reached.");
+                            }
+                            // ignore overflow
                         }
-                        
-                        if(pvc.debug >= 2){
-                            this._log("  -> [Warning] FILL Child requests paddings change but iterations limit has been reached.");
+
+                        // --------
+
+                        positionChild.call(this, child);
+
+                        if(child.anchor !== 'fill'){
+                            updateSide.call(this, child);
                         }
-                        
-                        // ignore overflow
                     }
-                    
-                    // --------
-                    
-                    positionChild.call(this, child);
-                        
-                    if(child.anchor !== 'fill'){
-                        updateSide.call(this, child);
-                    }
+
+                    return false; // stop
+                } finally {
+                    if(useLog){ console.groupEnd(); }
                 }
-                
-                return false; // stop
             }, this);
             
             return resized;
         }
-        
+
+        function checkPaddingsChanged(paddings, newPaddings){
+            if(!newPaddings){
+                return false;
+            }
+            
+            // true if stopped, false otherwise
+            return def.query(pvc.Sides.names).each(function(side){
+                var curPad = (paddings && paddings[side]) || 0;
+                var newPad = (newPaddings && newPaddings[side]) || 0;
+                 if(Math.abs(newPad - curPad) >= 0.1){
+                     // Stop iteration
+                     return false;
+                 }
+            });
+        }
+
         function checkChildResize(child, canResize){
             var resized = false;
             var addWidth = child.width - remSize.width;
             if(addWidth > 0){
                 if(pvc.debug >= 3){
-                    this._log("  -> addWidth=" + addWidth); 
+                    this._log("Child added width = " + addWidth);
                 }
                 
                 if(!canResize){
                     if(pvc.debug >= 2){
-                        this._log("  -> [Warning] Layout iterations limit reached.");
+                        this._warn("Child wanted more width, but layout iterations limit has been reached.");
                     }
                 } else {
                     resized = true;
@@ -657,12 +685,12 @@ def
             var addHeight = child.height - remSize.height;
             if(addHeight > 0){
                 if(pvc.debug >= 3){
-                    this._log("  -> addHeight=" + addHeight); 
+                    this._log("Child added height =" + addHeight);
                 }
                 
                 if(!canResize){
                     if(pvc.debug >= 2){
-                        this._log("  -> [Warning] Layout iterations limit reached.");
+                        this._warn("Child wanted more height, but layout iterations limit has been reached.");
                     }
                 } else {
                     resized = true;
@@ -840,7 +868,23 @@ def
             pvBorderPanel
                 .width (width)
                 .height(height);
-            
+
+            if(pvc.debug >= 15){
+                // Outer Box
+                (this.isTopRoot ? this.pvRootPanel : this.parent.pvPanel)
+                    .add(this.type)
+                    .width (this.width)
+                    .height(this.height)
+                    .left  (this.position.left   != null ? this.position.left   : null)
+                    .right (this.position.right  != null ? this.position.right  : null)
+                    .top   (this.position.top    != null ? this.position.top    : null)
+                    .bottom(this.position.bottom != null ? this.position.bottom : null)
+                    .strokeStyle('orange')
+                    .lineWidth(1)
+                    .strokeDasharray('- .')
+                    ;
+            }
+
             // Set panel positions
             var hasPositions = {};
             def.eachOwn(this.position, function(v, side){
@@ -883,15 +927,15 @@ def
             this.pvPanel.borderPanel   = pvBorderPanel;
             
             if(pvc.debug >= 15){
-                this.pvPanel // inner
+                this.pvPanel // Client Box
                     .strokeStyle('lightgreen')
                     .lineWidth(1)
                     .strokeDasharray('- ');
                 
-                pvBorderPanel // outer
-                    .strokeStyle('lightblue')
+                pvBorderPanel // Border Box
+                    .strokeStyle('blue')
                     .lineWidth(1)
-                    .strokeDasharray(null); 
+                    .strokeDasharray('. ');
             }
             
             var extensionId = this._getExtensionId();
@@ -936,7 +980,7 @@ def
      * 
      * @virtual
      */
-    _createCore: function(layoutInfo){
+    _createCore: function(/*layoutInfo*/){
         if(this._children) {
             this._children.forEach(function(child){
                 child._create();

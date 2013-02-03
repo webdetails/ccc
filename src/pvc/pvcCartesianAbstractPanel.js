@@ -28,14 +28,14 @@ def
     
     // Initialize paddings from **chart** axes offsets
     // TODO: move this to the chart??
-    var paddings = {};
+    var pctPaddings = {};
     var hasAny = false;
     
     function setSide(side, pct){
-        var value = paddings[side];
+        var value = pctPaddings[side];
         if(value == null || pct > value){
             hasAny = true;
-            paddings[side] = pct;
+            pctPaddings[side] = pct;
         }
     }
     
@@ -62,7 +62,7 @@ def
     });
     
     if(hasAny){
-        this.offsetPaddings = paddings;
+        this.offsetPaddings = pctPaddings;
     }
 })
 .add({
@@ -74,36 +74,41 @@ def
     },
     
     _calcRequestPaddings: function(layoutInfo){
-        var op = this.offsetPaddings;
-        if(!op){
-            return;
-        }
+        var reqPads;
+        var offPads = this.offsetPaddings;
+        if(offPads){
+            var tickRoundPads = this.chart._getAxesRoundingPaddings();
+            var clientSize = layoutInfo.clientSize;
+            var pads       = layoutInfo.paddings;
 
-        var rp = this.chart._getAxesRoundingPaddings();
-        var clientSize = layoutInfo.clientSize;
-        var paddings   = layoutInfo.paddings;
+            pvc.Sides.names.forEach(function(side){
+                var len_a = pvc.BasePanel.orthogonalLength[side];
+
+                var clientLen  = clientSize[len_a];
+                var paddingLen = pads[len_a];
+
+                var len = clientLen + paddingLen;
+
+                // Only request offset-padding if the tickRoundPads.side is not locked
+                if(!tickRoundPads[side + 'Locked']){
+                    // Offset paddings are a percentage of the outer length
+                    // (there are no margins in this panel).
+                    var offLen = len * (offPads[side] || 0);
+
+                    // Rounding paddings are the percentage of the
+                    // client length that already actually is padding
+                    // due to domain rounding.
+                    var roundLen = clientLen * (tickRoundPads[side] || 0);
+
+                    // So, if the user wants offLen padding but the
+                    // client area already contains roundLen of padding,
+                    // request only the remaining, if any.
+                    (reqPads || (reqPads = {}))[side] = Math.max(offLen - roundLen, 0);
+                }
+            }, this);
+        }
         
-        var reqPad = {};
-        pvc.Sides.names.forEach(function(side){
-            var len_a = pvc.BasePanel.orthogonalLength[side];
-            
-            var clientLen  = clientSize[len_a];
-            var paddingLen = paddings[len_a];
-            
-            var len = clientLen + paddingLen;
-            
-            // Only request offset-padding if the rp.side is not locked
-            if(!rp[side + 'Locked']){
-                var offset   = len * (op[side] || 0);
-                var rounding = clientLen * (rp[side] || 0);
-            
-                reqPad[side] = Math.max(offset - rounding, 0);
-            } else {
-                reqPad[side] = 0;
-            }
-        }, this);
-        
-        return reqPad;
+        return reqPads;
     },
     
     /**
