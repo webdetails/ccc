@@ -126,7 +126,7 @@ def
             if(strokeStyle != null){
                 borderWidth = +this._getConstantExtension(extensionId, 'lineWidth'); 
                 if(isNaN(borderWidth) || !isFinite(borderWidth)){
-                    borderWidth = 1.5;
+                    borderWidth = null;
                 }
             }
         }
@@ -870,7 +870,7 @@ def
                 .width (width)
                 .height(height);
 
-            if(pvc.debug >= 15){
+            if(pvc.debug >= 15 && (margins.width > 0 || margins.height > 0)){
                 // Outer Box
                 (this.isTopRoot ? this.pvRootPanel : this.parent.pvPanel)
                     .add(this.type)
@@ -915,10 +915,10 @@ def
             if(paddings.width > 0 || paddings.height > 0){
                 // We create separate border (outer) and inner (padding) panels
                 this.pvPanel = pvBorderPanel.add(pv.Panel)
-                                   .width (width  - paddings.width )
-                                   .height(height - paddings.height)
-                                   .left(paddings.left)
-                                   .top (paddings.top );
+                    .width (width  - paddings.width )
+                    .height(height - paddings.height)
+                    .left(paddings.left)
+                    .top (paddings.top );
             }
             
             pvBorderPanel.borderPanel  = pvBorderPanel;
@@ -928,15 +928,19 @@ def
             this.pvPanel.borderPanel   = pvBorderPanel;
             
             if(pvc.debug >= 15){
-                this.pvPanel // Client Box
+                // Client Box
+                this.pvPanel
                     .strokeStyle('lightgreen')
                     .lineWidth(1)
                     .strokeDasharray('- ');
-                
-                pvBorderPanel // Border Box
-                    .strokeStyle('blue')
-                    .lineWidth(1)
-                    .strokeDasharray('. ');
+
+                if(this.pvPanel !== pvBorderPanel){
+                    // Border Box
+                    pvBorderPanel
+                        .strokeStyle('blue')
+                        .lineWidth(1)
+                        .strokeDasharray('. ');
+                }
             }
             
             var extensionId = this._getExtensionId();

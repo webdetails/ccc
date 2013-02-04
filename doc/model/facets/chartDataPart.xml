@@ -10,7 +10,7 @@
             The options documentation class of the data part visual role facet.
         </c:documentation>
         
-        <c:property name="dataPartRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="dataPartRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>dataPart</tt> visual role
                 allows fine grained partitioning

@@ -12,7 +12,7 @@
             The options documentation class of the <b>Heat grid</b> chart.
         </c:documentation>
         
-        <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The series visual role represents a series of connected data points. 
                 
@@ -27,7 +27,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>category</tt> visual role.
                 
@@ -42,7 +42,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>color</tt> visual role controls the color of visual elements.
             
@@ -59,7 +59,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="sizeRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="sizeRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>size</tt> visual role 
                 controls the size of visual elements.

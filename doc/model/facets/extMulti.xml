@@ -10,13 +10,13 @@
             The options documentation class of the multi-chart extension points facet.
         </c:documentation>
         
-        <c:property name="smallBase" type="pvc.options.marks.PanelExtensionPoint" category="Multi-Chart">
+        <c:property name="smallBase" type="pvc.options.marks.PanelExtensionPoint" category="Chart - Multi">
             <c:documentation>
                 The extension point of the base (root) panel of the <i>small</i> charts.
             </c:documentation>
         </c:property>
         
-        <c:property name="smallContent" type="pvc.options.marks.PanelExtensionPoint" category="Multi-Chart">
+        <c:property name="smallContent" type="pvc.options.marks.PanelExtensionPoint" category="Chart - Multi">
             <c:documentation>
                 The extension point of the content panel of the <i>small</i> charts.
                 

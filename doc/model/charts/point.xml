@@ -18,7 +18,7 @@
             The common options documentation class for the <b>Line/Dot/Area family</b> charts.
         </c:documentation>
         
-        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>value</tt> visual role represents the main measure.
                 

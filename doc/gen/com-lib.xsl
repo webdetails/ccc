@@ -318,22 +318,29 @@
                 
                 <!-- Is expanded property excluded? -->
                 <xsl:if test="count($excludeProps/prop[. = $expandedName]) = 0">
+                    <!-- Skip the local category,
+                         unless it is a root property.
+
+                         If it has no expandable types (=> terminal)
+                         then use only the base category.
+
+                         If it is named 'extensionPoints'
+                         then use only the base category.
+                          -->
+                    <xsl:variable
+                        name="baseCat"
+                        select="if($categPath)
+                                then $categPath
+                                else string(@category)" />
+
+                    <!--  or @expandUse = 'optional' -->
+                    <xsl:variable
+                        name="expCat"
+                        select="if(count($expandableComplexTypes) = 0 or $name = 'extensionPoints')
+                                then $baseCat
+                                else fun:join(' > ', $baseCat, fun:buildTitleFromName($name))" />
                     
-                    <!-- When expanding, 
-                         skip the local category, 
-                         unless there's no categPath above.
-                         Limit to a maximum of 2 categories. 
-                         -->
-                    <xsl:variable name="expandedCat"
-                                  select="fun:limitCategoryTitle(
-                                      if (count($expandableComplexTypes) = 0)
-                                      then fun:join(' > ', $categPath, @category)
-                                      else (
-                                         if ($categPath) 
-                                         then fun:join(' > ', $categPath, fun:buildTitleFromName($name))
-                                         else fun:join(' > ', @category,  fun:buildTitleFromName($name))))" />
-                    
-                     <xsl:if test="count($otherTypes) > 0">
+                    <xsl:if test="count($otherTypes) > 0">
                         <xsl:variable name="rewrittenName" select="$rewriteProps/prop[. = $expandedName]/@as" />
         
                         <xsl:variable name="expandedName2" select="if ($rewrittenName) then $rewrittenName else $expandedName" />
@@ -346,10 +353,24 @@
                                       if(count($defaultPropOverride) = 0)
                                       then string(@default)
                                       else string($defaultPropOverride/@default)" />
-                                      
+
+                        <!--
+                            1 - Send "- Multi" to the end as: (Multi)
+                            2 - Remove "Small "
+                            -->
+                        <xsl:variable
+                            name="termCat0"
+                            select="if   (contains($expCat, 'Multi'))
+                                    then replace($expCat, '^(.*?)\s*(-\s)?(Multi)\s*(.*)$', '$1 $4 (Multi)')
+                                    else $expCat" />
+
+                        <xsl:variable
+                            name="termCat"
+                            select="replace($termCat0, 'Small ', '')" />
+
                         <com:property name="{$expandedName}" 
                                       name2="{$expandedName2}"
-                                      category="{$expandedCat}"
+                                      category="{$termCat}"
                                       default="{$default}" 
                                       originalType="{fun:getTypeFullName($compType)}" 
                                       originalName="{@name}">
@@ -372,13 +393,13 @@
                                       select="if($minPath) 
                                               then $minPath
                                               else $name" />
-                                              
+
                         <xsl:for-each select="$expandableComplexTypes">
                             <!-- Get the inherited complex type element -->
                             <xsl:variable name="propComplexType" 
                                           select="$complexTypesInh[fun:getTypeFullName(.) = current()/@of]" />
                                           
-                            <xsl:copy-of select="fun:expandComplexType($propComplexType, $childPath, string($childMinPath), $expandedCat)" />
+                            <xsl:copy-of select="fun:expandComplexType($propComplexType, $childPath, string($childMinPath), $expCat)" />
                         </xsl:for-each>
                     </xsl:if>
                 </xsl:if>
@@ -417,14 +438,6 @@
                 <xsl:sequence select="." />
             </xsl:if>
         </xsl:for-each>
-    </xsl:function>
-    
-    <xsl:function name="fun:limitCategoryTitle">
-        <xsl:param name="category" />
-        
-        <xsl:variable name="categories" select="subsequence(tokenize($category, '\s*>\s*'), 1, 2)" />
-        
-        <xsl:value-of select="$categories" separator=" > "/>
     </xsl:function>
     
     <!-- UTILITIES -->

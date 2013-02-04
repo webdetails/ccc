@@ -10,7 +10,7 @@
             The options documentation class of the multi-chart facet.
         </c:documentation>
         
-        <c:property name="multiChartRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="multiChartRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>multiChart</tt> visual role
                 allows turning a chart in a <i>small multiples</i> chart
@@ -43,7 +43,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallTitle" type="pvc.options.panels.ChartTitlePanel" category="Multi-Chart > Panels">
+        <c:property name="smallTitle" type="pvc.options.panels.ChartTitlePanel" category="Panels - Multi">
             <c:documentation>
                 The title panel of the <i>small</i> chart.
                 
@@ -52,7 +52,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="multiChartIndexes" type="number string list(number string)" category="Data Translation">
+        <c:property name="multiChartIndexes" type="number string list(number string)" category="Chart > Data Source">
             <c:documentation>
                 The indexes of the data source's <i>virtual item</i> columns
                 that are to feed the 
@@ -63,7 +63,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="multiChartMax" type="number" default="Infinity" category="Multi-Chart > Layout">
+        <c:property name="multiChartMax" type="number" default="Infinity" category="Chart - Multi > Layout">
             <c:documentation>
                 The maximum number of <i>small</i> charts that should
                 be displayed.
@@ -72,7 +72,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="multiChartColumnsMax" type="number" default="3" category="Multi-Chart > Layout">
+        <c:property name="multiChartColumnsMax" type="number" default="3" category="Chart - Multi > Layout">
             <c:documentation>
                 The maximum number of <i>small</i> charts that should
                 be displayed in a row.
@@ -82,7 +82,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallWidth" type="number string" category="Multi-Chart > Layout">
+        <c:property name="smallWidth" type="number string" category="Chart - Multi > Layout">
             <c:documentation>
                 Fixates the width of each <i>small</i> chart, in pixel units or as a percentage.
                 
@@ -118,7 +118,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallHeight" type="number string" category="Multi-Chart > Layout">
+        <c:property name="smallHeight" type="number string" category="Chart - Multi > Layout">
             <c:documentation>
                 Fixates the height of each <i>small</i> chart, in pixel units or as a percentage.
                 
@@ -159,7 +159,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallAspectRatio" type="number" category="Multi-Chart > Layout">
+        <c:property name="smallAspectRatio" type="number" category="Chart - Multi > Layout">
             <c:documentation>
                 The ratio of the width over the height of a <i>small</i> chart.
                 
@@ -179,7 +179,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="multiChartSingleRowFillsHeight" type="boolean" default="true" category="Multi-Chart > Layout">
+        <c:property name="multiChartSingleRowFillsHeight" type="boolean" default="true" category="Chart - Multi > Layout">
             <c:documentation>
                 Indicates that, 
                 when the layout results in a single row
@@ -191,7 +191,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="multiChartSingleColFillsHeight" type="boolean" default="true" category="Multi-Chart > Layout">
+        <c:property name="multiChartSingleColFillsHeight" type="boolean" default="true" category="Chart - Multi > Layout">
             <c:documentation>
                 Indicates that, 
                 when the layout results in a single column
@@ -203,7 +203,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallMargins" type="number string pvc.options.varia.Sides" default="'2%'" category="Multi-Chart > Layout">
+        <c:property name="smallMargins" type="number string pvc.options.varia.Sides" default="'2%'" category="Chart - Multi > Layout">
             <c:documentation>
                 The margins of a <i>small</i> chart.
                 
@@ -212,7 +212,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallPaddings" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart > Layout">
+        <c:property name="smallPaddings" type="number string pvc.options.varia.Sides" default="0" category="Chart - Multi > Layout">
             <c:documentation>
                 The paddings of a <i>small</i> chart.
                 
@@ -221,7 +221,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallContentMargins" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart > Layout">
+        <c:property name="smallContentMargins" type="number string pvc.options.varia.Sides" default="0" category="Chart - Multi > Layout">
             <c:documentation>
                 The margins of the <i>content panel</i> of a <i>small</i> chart. 
                 
@@ -230,7 +230,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="smallContentPaddings" type="number string pvc.options.varia.Sides" default="0" category="Multi-Chart > Layout">
+        <c:property name="smallContentPaddings" type="number string pvc.options.varia.Sides" default="0" category="Chart - Multi > Layout">
             <c:documentation>
                 The paddings of the <i>content panel</i> of a <i>small</i> chart.
                 

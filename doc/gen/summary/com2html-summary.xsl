@@ -56,11 +56,10 @@
     <!-- Include COM-LIB -->
     <xsl:include href="../com-lib.xsl" />
     
-    <xsl:variable name="minGroupSize" select="3" />
+    <xsl:variable name="minGroupSize" select="0" />
     
     <!-- MAIN TEMPLATE - The flow Starts Here -->
-	<xsl:template match="/">
-	   
+    <xsl:template match="/">
         <xsl:for-each select="$complexTypesExp[@space='pvc.options.charts' and not(@abstract='true')]">
             <xsl:variable name="filename" select="concat($outBaseUrl, replace(@name, '^(.*?)Chart$', '$1'), '.html')" />
             
@@ -68,47 +67,49 @@
                 <xsl:value-of select="$filename" />
             </xsl:message>
             
-	        <xsl:result-document href="{$filename}" format="html">
-	            <xsl:apply-templates select="." />
+            <xsl:result-document href="{$filename}" format="html">
+                <xsl:apply-templates select="." />
             </xsl:result-document>
-	    </xsl:for-each>
-	</xsl:template>
-	
-	<!-- Process ONE complex type -->
+        </xsl:for-each>
+    </xsl:template>
+
+    <!-- Process ONE complex type -->
     <xsl:template match="com:complexType">
         <xsl:variable name="properties" select="fun:processSummaryProperties(.)" />
         
-        <xsl:variable name="nonExtProperties" select="$properties[not(ends-with(@name, '_'))]" />
+        <xsl:variable name="nonExtProperties" 
+                      select="fun:processPropertiesCategory($properties[not(ends-with(@name, '_'))])" />
         
-        <xsl:variable name="extProperties"    select="$properties[ends-with(@name, '_')]" />
+        <xsl:variable name="extProperties"
+                      select="fun:processPropertiesCategory($properties[ends-with(@name, '_')])" />
         
         <!-- 
         <h1><xsl:value-of select="fun:buildTitleFromName(@name)" /></h1>
          -->
          
         <xsl:if test="count($nonExtProperties) > 0">
-	        <div class="bodycopytitle">
-               <h29>CHART OPTIONS</h29>
+            <div class="bodycopytitle">
+                <h29>CHART OPTIONS</h29>
             </div>
-	        <xsl:call-template name="processComplexType">
-	            <xsl:with-param name="type" select="." />
-	            <xsl:with-param name="properties" select="$nonExtProperties" />
-	        </xsl:call-template>
-	    </xsl:if>
+            <xsl:call-template name="processComplexType">
+                <xsl:with-param name="type" select="." />
+                <xsl:with-param name="properties" select="$nonExtProperties" />
+            </xsl:call-template>
+        </xsl:if>
 	    
-	    <xsl:if test="count($extProperties) > 0">
-	        <xsl:if test="count($nonExtProperties) > 0">
-	           <div class="clear"></div>
-               <div class="vSpacer"></div>
+        <xsl:if test="count($extProperties) > 0">
+            <xsl:if test="count($nonExtProperties) > 0">
+                <div class="clear"></div>
+                <div class="vSpacer"></div>
             </xsl:if>
             
-	        <div class="bodycopytitle">
+	    <div class="bodycopytitle">
                <h29>EXTENSION POINTS</h29>
             </div>
-	        <xsl:call-template name="processComplexType">
-	            <xsl:with-param name="type" select="." />
-	            <xsl:with-param name="properties" select="$extProperties" />
-	        </xsl:call-template>
+            <xsl:call-template name="processComplexType">
+                <xsl:with-param name="type" select="." />
+                <xsl:with-param name="properties" select="$extProperties" />
+            </xsl:call-template>
         </xsl:if>
     </xsl:template>
     
@@ -122,31 +123,33 @@
              joined in a "General" category
              -->
         <xsl:variable name="groups">
-	        <xsl:for-each-group select="$properties" group-by="@category">
-	            <group key="{current-grouping-key()}" count="{count(current-group())}" />
-	        </xsl:for-each-group>
-	    </xsl:variable>
-	    
-	    <xsl:variable name="manyGroups" select="$groups/group[@count &lt; $minGroupSize]" />
-	    
-	    <xsl:variable name="propertiesManyGroup" 
-	                  select="$properties[@category = $manyGroups/@key]" />
-	    
-	    <xsl:variable name="manyGroupLabel">
-	       <xsl:for-each select="$manyGroups">
-	           <xsl:sort select="@key" />
-	           <xsl:if test="position() > 1">
-	               <xsl:value-of select="' / '" />
-	           </xsl:if>
-	           <xsl:value-of select="@key" />
-	       </xsl:for-each>
-	    </xsl:variable>
-        
-        <xsl:call-template name="processGroup">
-            <xsl:with-param name="group"    select="$propertiesManyGroup" />
-            <xsl:with-param name="category" select="$manyGroupLabel" />
-            <xsl:with-param name="position" select="1" />
-        </xsl:call-template>
+            <xsl:for-each-group select="$properties" group-by="@category">
+                <group key="{current-grouping-key()}" count="{count(current-group())}" />
+            </xsl:for-each-group>
+        </xsl:variable>
+
+        <xsl:variable name="manyGroups" select="$groups/group[@count &lt; $minGroupSize]" />
+
+        <xsl:variable name="propertiesManyGroup"
+                      select="$properties[@category = $manyGroups/@key]" />
+
+        <xsl:variable name="manyGroupLabel">
+           <xsl:for-each select="$manyGroups">
+               <xsl:sort select="@key" />
+               <xsl:if test="position() > 1">
+                   <xsl:value-of select="' / '" />
+               </xsl:if>
+               <xsl:value-of select="@key" />
+           </xsl:for-each>
+        </xsl:variable>
+
+        <xsl:if test="count($propertiesManyGroup) > 0">
+            <xsl:call-template name="processGroup">
+                <xsl:with-param name="group"    select="$propertiesManyGroup" />
+                <xsl:with-param name="category" select="$manyGroupLabel" />
+                <xsl:with-param name="position" select="1" />
+            </xsl:call-template>
+        </xsl:if>
         
         <xsl:for-each select="$groups/group[@count >= $minGroupSize]">
             <xsl:sort select="@key" />
@@ -210,7 +213,7 @@
              -->
              
     <!-- Removes properties that are not shown in the summary. 
-         Builds a simplified typeName.  
+         Builds a simplified typeName.
          -->
     <xsl:function name="fun:processSummaryProperties">
         <xsl:param name="complexType" />
@@ -238,7 +241,53 @@
             </xsl:if>
         </xsl:for-each>
     </xsl:function>
-    
+
+    <xsl:function name="fun:processPropertiesCategory">
+        <xsl:param name="properties" />
+        <xsl:for-each select="$properties">
+
+            <!-- Simplify the category
+                 If   it has no expandable types (=> terminal)
+                 and  it is not a root property
+                 and  there are at most 2 properties in the group
+                 then use only the base category without the last element.
+                 fun:butLastCategory
+            -->
+            <xsl:variable name="sameCatCount"
+                          select="count($properties[@category = current()/@category])" />
+
+            <xsl:variable name="category"
+                          select="if($sameCatCount > 2)
+                                  then string(@category)
+                                  else fun:butLastCategoryIfMoreThanOne(string(@category))" />
+
+            <xsl:copy>
+                <xsl:copy-of select="@*[local-name(.) != 'category']" />
+                <xsl:attribute name="category">
+                    <xsl:value-of select="$category" />
+                </xsl:attribute>
+                <xsl:copy-of select="*" />
+            </xsl:copy>
+        </xsl:for-each>
+    </xsl:function>
+
+    <xsl:function name="fun:butLastCategoryIfMoreThanOne">
+        <xsl:param name="category" />
+
+        <xsl:variable name="categories" select="tokenize($category, '\s*>\s*')" />
+
+        <!-- remove last if more than 1 -->
+        <xsl:choose>
+            <xsl:when test="count($categories) > 1">
+                <xsl:value-of select="subsequence($categories, 1, count($categories) - 1)" separator=" > "/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$category" />
+            </xsl:otherwise>
+        </xsl:choose>
+        
+    </xsl:function>
+
     <!-- CLEAN TYPES 
     
       Translations

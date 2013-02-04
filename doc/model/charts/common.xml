@@ -37,7 +37,7 @@
         </c:property>
         
         <!-- Interaction -->
-        <c:property name="animate" type="boolean" default="true" category="Interaction">
+        <c:property name="animate" type="boolean" default="true" category="Chart > Interaction">
             <c:documentation>
                 Indicates if a chart should show an entry animation, 
                 every time it is fully rendered.
@@ -51,7 +51,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="hoverable" type="boolean" default="false" category="Interaction">
+        <c:property name="hoverable" type="boolean" default="false" category="Chart > Interaction">
             <c:documentation>
                 Indicates if the chart's visual elements
                 are automatically highlighted 
@@ -59,7 +59,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="selectable" type="boolean" default="false" category="Interaction">
+        <c:property name="selectable" type="boolean" default="false" category="Chart > Interaction">
             <c:documentation>
                 Indicates if the chart's visual elements
                 can be selected by the user, 
@@ -68,7 +68,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="ctrlSelectMode" type="boolean" default="true" category="Interaction">
+        <c:property name="ctrlSelectMode" type="boolean" default="true" category="Chart > Interaction">
             <c:documentation>
                 When <tt>true</tt>, 
                 indicates that a selection made by the user 
@@ -87,13 +87,13 @@
         <c:property name="clearSelectionMode" 
                     type="pvc.options.varia.ChartClearSelectionMode" 
                     default="'emptySpaceClick'" 
-                    category="Interaction">
+                    category="Chart > Interaction">
             <c:documentation>
                 Controls if and how the selection can be cleared by the user.
             </c:documentation>
         </c:property>
         
-        <c:property name="doubleClickMaxDelay" type="number" default="300" category="Interaction" excludeIn="cde">
+        <c:property name="doubleClickMaxDelay" type="number" default="300" category="Chart > Interaction" excludeIn="cde">
             <c:documentation>
                 The maximum number of milliseconds,
                 between two consecutive clicks,
@@ -102,14 +102,14 @@
         </c:property>
         
         <!-- Actions -->
-        <c:property name="doubleClickAction" type="pvc.options.varia.StandardAction" category="Actions">
+        <c:property name="doubleClickAction" type="pvc.options.varia.StandardAction" category="Chart > Actions">
             <c:documentation>
                 A callback function that is called
                 when the user double-clicks on a visual element.
             </c:documentation>
         </c:property>
         
-        <c:property name="selectionChangedAction" type="pvc.options.varia.SelectionChangedAction" category="Actions">
+        <c:property name="selectionChangedAction" type="pvc.options.varia.SelectionChangedAction" category="Chart > Actions">
             <c:documentation>
                 A callback function that is called
                 when, after selection has changed,
@@ -117,7 +117,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="userSelectionAction" type="pvc.options.varia.UserSelectionAction" category="Actions">
+        <c:property name="userSelectionAction" type="pvc.options.varia.UserSelectionAction" category="Chart > Actions">
             <c:documentation>
                 A callback function that is called
                 when the user performs a selection,
@@ -128,7 +128,7 @@
         </c:property>
         
         <!-- Data -->
-        <c:property name="timeSeries" type="boolean" default="false" category="Data" level="basic">
+        <c:property name="timeSeries" type="boolean" default="false" category="Chart > Data" level="basic">
             <c:documentation>
                 Indicates that dimensions whose 
                 name is "category1", "category2", etc, 
@@ -151,7 +151,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="timeSeriesFormat" type="string" default="'%Y-%m-%d'" category="Data" level="basic">
+        <c:property name="timeSeriesFormat" type="string" default="'%Y-%m-%d'" category="Chart > Data" level="basic">
             <c:documentation>
                 The format string used to <i>parse</i>
                 dimensions of the <tt>Date</tt> value type, 
@@ -167,7 +167,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="percentValueFormat" type="pvc.options.varia.NumberFormatter" category="Data">
+        <c:property name="percentValueFormat" type="pvc.options.varia.NumberFormatter" category="Chart > Data">
             <c:documentation>
                 A function used to format non-null numeric values
                 as percentages.
@@ -185,7 +185,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.ChartExtensionPoints" category="Style" expandUse="optional">
+        <c:property name="extensionPoints" type="pvc.options.ext.ChartExtensionPoints" category="Chart" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -258,7 +258,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="offset" type="number" default="2">
+        <c:property name="offset" type="number">
             <c:documentation>
                 The distance of the closest tooltip edge or corner 
                 to the visual element's tooltip anchor point, in pixel units.

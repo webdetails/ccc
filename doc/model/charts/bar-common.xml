@@ -13,7 +13,7 @@
             The common options documentation class of the <b>Bar family</b> charts.
         </c:documentation>
         
-        <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="categoryRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>category</tt> visual role. 
                 
@@ -25,7 +25,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>value</tt> visual role represents the main measure. 
                 
@@ -53,7 +53,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="panelSizeRatio" type="number" default="0.9" category="Layout">
+        <c:property name="panelSizeRatio" type="number" default="0.9" category="Chart > Layout">
             <c:documentation>
              Percentage of occupied space over total space 
              in a discrete axis band.

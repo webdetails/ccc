@@ -17,34 +17,34 @@
     <xsl:variable name="funTypes"   select="fun:getFunctionTypes(/)" />
     <xsl:variable name="facetTypes" select="fun:getFacetTypes(/)" />
     
-	<xsl:template match="/com:model">
-	   <xsl:apply-templates select="com:space|com:complexType|com:atomType|com:include" />
-	</xsl:template>
-	
-	<xsl:template match="/com:model/com:include">
-	   <xsl:if test="string(@the) != ''">
-	       <xsl:apply-templates select="document(concat($relativePath,@the))/com:model" />
+    <xsl:template match="/com:model">
+       <xsl:apply-templates select="com:space|com:complexType|com:atomType|com:include" />
+    </xsl:template>
+
+    <xsl:template match="/com:model/com:include">
+       <xsl:if test="string(@the) != ''">
+           <xsl:apply-templates select="document(concat($relativePath,@the))/com:model" />
        </xsl:if>
     </xsl:template>
-    
-	<xsl:template match="/com:model/com:space">
+
+    <xsl:template match="/com:model/com:space">
         <!-- Generate the JS namespace constructor documentation -->
         <xsl:value-of select="concat($nl, '/**')" />
-        
+
         <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
-        
+
         <!-- Output @namespace directive -->
         <xsl:value-of select="concat($nl, ' * @namespace')" />
-        
+
         <!-- Close documentation block -->
-        <xsl:value-of select="concat($nl, ' */')" /> 
+        <xsl:value-of select="concat($nl, ' */')" />
 
         <!-- Generate the JS class constructor -->
         <xsl:value-of select="concat($nl, @name, ' = {};', $nl)" />
     </xsl:template>
-    
-	<xsl:template match="/com:model/com:complexType">
-	    <xsl:variable name="complexTypeDef" select="." />
+
+    <xsl:template match="/com:model/com:complexType">
+        <xsl:variable name="complexTypeDef" select="." />
         <xsl:variable name="fullTypeName">
             <xsl:choose>
                 <xsl:when test="@space">
@@ -61,20 +61,20 @@
         
         <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
 	    
-	    <!-- Output @class directive -->
-	    <xsl:value-of select="concat($nl, ' * @class')" />
-	    
-	    <xsl:if test="string(@base) != ''">
-	       <!-- Output @extends directive -->
-           <xsl:value-of select="concat($nl, ' * @extends ', @base)" />
-	    </xsl:if>
-	    
-	    <xsl:if test="string(@abstract) != ''">
-           <!-- Output @extends directive -->
-           <xsl:value-of select="concat($nl, ' * @abstract')" />
+        <!-- Output @class directive -->
+        <xsl:value-of select="concat($nl, ' * @class')" />
+
+        <xsl:if test="string(@base) != ''">
+            <!-- Output @extends directive -->
+            <xsl:value-of select="concat($nl, ' * @extends ', @base)" />
+        </xsl:if>
+
+        <xsl:if test="string(@abstract) != ''">
+            <!-- Output @extends directive -->
+            <xsl:value-of select="concat($nl, ' * @abstract')" />
         </xsl:if>
 	    
-	    <!-- Close documentation block -->
+	<!-- Close documentation block -->
         <xsl:value-of select="concat($nl, ' */')" /> 
 
         <!-- Generate the JS class constructor -->
@@ -84,23 +84,23 @@
         <!-- from facets -->
         <xsl:if test="string(@facets) != ''">
             <xsl:for-each select="tokenize(@facets, '\s+')">
-	            <xsl:variable name="facetTypeDef" select="$facetTypes[fun:getTypeFullName(.)=string(current())]" />
-	            <xsl:if test="$facetTypeDef">
-	               <xsl:for-each select="$facetTypeDef/com:property">
-			            <xsl:sort select="@category" />
-			            <xsl:sort select="@name" />
-			            
-			            <!-- Only output if property not declared/overriden locally
-			                 TODO: what about facet property clashes?
-			             -->
-			            <xsl:if test="not($complexTypeDef/com:property[string(@name) != '' and @name=current()/@name])">
-				            <xsl:apply-templates select=".">
-				                <xsl:with-param name="fullTypeName" select="$fullTypeName" />
-				            </xsl:apply-templates>
-			            </xsl:if>
-			        </xsl:for-each>
-	            </xsl:if>
-	        </xsl:for-each>
+                <xsl:variable name="facetTypeDef" select="$facetTypes[fun:getTypeFullName(.)=string(current())]" />
+                <xsl:if test="$facetTypeDef">
+                   <xsl:for-each select="$facetTypeDef/com:property">
+                        <xsl:sort select="@category" />
+                        <xsl:sort select="@name" />
+
+                        <!-- Only output if property not declared/overriden locally
+                             TODO: what about facet property clashes?
+                         -->
+                        <xsl:if test="not($complexTypeDef/com:property[string(@name) != '' and @name=current()/@name])">
+                            <xsl:apply-templates select=".">
+                                <xsl:with-param name="fullTypeName" select="$fullTypeName" />
+                            </xsl:apply-templates>
+                        </xsl:if>
+                    </xsl:for-each>
+                </xsl:if>
+            </xsl:for-each>
         </xsl:if>
         
         <xsl:for-each select="com:property[string(@name) != '']">
@@ -152,6 +152,7 @@
                 <xsl:value-of select="concat($nl, ' * @type ', $typeTagText)" />
             </xsl:otherwise>
         </xsl:choose>
+        
         <xsl:apply-templates select="$funTypeDef/com:returns/com:documentation" mode="process-jsdoc" />
         
         <xsl:choose>
@@ -186,7 +187,6 @@
                     </xsl:choose>
                     
                 </xsl:for-each>
-                
             </xsl:when>
             <xsl:otherwise>
                 <xsl:if test="count(@default) > 0">
@@ -230,7 +230,6 @@
         <!-- Generate the JS class constructor documentation -->
         <xsl:value-of select="concat($nl, '/**')" />
         
-        
         <xsl:apply-templates select="com:documentation" mode="process-jsdoc" />
         
         <!-- Output @class directive -->
@@ -244,12 +243,10 @@
         
         <!-- Close documentation block -->
         
-        
         <xsl:value-of select="concat($nl, ' */')" /> 
 
         <!-- Generate the JS class constructor -->
         <xsl:value-of select="concat($nl, $fullTypeName)" /> = function(){};
-        
         
         <!-- Output properties -->
         <xsl:for-each select="com:atom">
@@ -263,9 +260,7 @@
             <!-- Generate the JS property -->
             <xsl:value-of select="concat($nl, $fullTypeName, '.prototype.', @name, ' = ', @value, ';')" />
         </xsl:for-each>
-        
     </xsl:template>
-    
     
     <!-- Process Documentation Text -->
     
@@ -323,7 +318,6 @@
         </xsl:apply-templates>
         
         <xsl:value-of select="concat($nl, ' * &lt;', 'p', '&gt;')" />
-        
     </xsl:template>
     
     <xsl:template match="xhtml:pre" mode="process-jsdoc" priority="5">

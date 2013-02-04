@@ -49,21 +49,21 @@
             by using <c:link to="#readers" />. 
         </c:documentation>
         
-        <c:property name="clickAction" type="pvc.options.varia.BulletChartClickAction" category="Actions">
+        <c:property name="clickAction" type="pvc.options.varia.BulletChartClickAction" category="Chart > Actions">
             <c:documentation>
                 A callback function that is called
                 when the user clicks on a visual element.
             </c:documentation>
         </c:property>
         
-        <c:property name="axisDoubleClickAction" type="pvc.options.varia.BulletChartDoubleClickAction" category="Actions">
+        <c:property name="axisDoubleClickAction" type="pvc.options.varia.BulletChartDoubleClickAction" category="Chart > Actions">
             <c:documentation>
                 A callback function that is called
                 when the user double-clicks on a bullet's title or sub-title.
             </c:documentation>
         </c:property>
         
-        <c:property name="titleRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="titleRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>title</tt> visual role represents 
                 the title of each bullet.
@@ -76,7 +76,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="subTitleRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="subTitleRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>subTitle</tt> visual role represents 
                 the sub-title of each bullet.
@@ -89,7 +89,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="valueRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>value</tt> visual role represents the main measure.
                 
@@ -111,7 +111,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="markerRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="markerRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>marker</tt> visual role 
                 represents a set of reference or target values for a given
@@ -132,7 +132,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="rangeRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="rangeRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>range</tt> visual role 
                 represents a classification of the values of the
@@ -161,7 +161,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.BulletChartExtensionPoints" category="Style" expandUse="optional">
+        <c:property name="extensionPoints" type="pvc.options.ext.BulletChartExtensionPoints" category="Chart" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.
@@ -273,7 +273,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="title" type="string" default="'Title'" category="Data">
+        <c:property name="title" type="string" default="'Title'" category="Chart > Data">
             <c:documentation>
                 The default bullet title.
                 
@@ -282,7 +282,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="subtitle" type="string" default="''" category="Data">
+        <c:property name="subtitle" type="string" default="''" category="Chart > Data">
             <c:documentation>
                 The default bullet sub-title.
                 
@@ -291,7 +291,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="markers" type="string list(string)" category="Data">
+        <c:property name="markers" type="string list(string)" category="Chart > Data">
             <c:documentation>
                 The default bullet markers.
                 
@@ -300,7 +300,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="measures" type="string list(string)" category="Data">
+        <c:property name="measures" type="string list(string)" category="Chart > Data">
             <c:documentation>
                 The default bullet measures.
                 
@@ -309,7 +309,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="ranges" type="string list(string)" category="Data">
+        <c:property name="ranges" type="string list(string)" category="Chart > Data">
             <c:documentation>
                 The default bullet ranges.
                 

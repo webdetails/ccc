@@ -11817,6 +11817,12 @@ pv.Mark.prototype.mouse = function() {
       if(offset){
           x -= offset.left;
           y -= offset.top;
+
+          var computed = pv.getWindow(n.ownerDocument).getComputedStyle(n, null);
+          if(computed){
+              x -= parseFloat(computed.paddingLeft || 0);
+              y -= parseFloat(computed.paddingTop  || 0);
+          }
       }
       
       /* Compute the inverse transform of all enclosing panels. */

@@ -13,7 +13,7 @@
             The common options documentation class for the <b>Cartesian</b> charts.
         </c:documentation>
         
-        <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="seriesRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>series</tt> visual role represents a 
                 <i>series</i> of connected data points.
@@ -44,7 +44,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Visual roles">
+        <c:property name="colorRole" type="string pvc.options.VisualRole" category="Chart > Visual Roles">
             <c:documentation>
                 The <tt>color</tt> visual role controls the color of visual elements.
                 
@@ -104,7 +104,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="plotFrameVisible" type="boolean" default="true" category="Style">
+        <c:property name="plotFrameVisible" type="boolean" default="true" category="Chart > Style">
             <c:documentation>
                 Indicates whether the plot frame is drawn
                 in leaf charts.
@@ -116,14 +116,14 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="leafContentOverflow" type="pvc.options.varia.ContentOverflow" default="'auto'" category="Layout">
+        <c:property name="leafContentOverflow" type="pvc.options.varia.ContentOverflow" default="'auto'" category="Chart > Layout">
             <c:documentation>
                 Indicates what is to be done with content that overflows
                 in leaf charts.
             </c:documentation>
         </c:property>
         
-        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartExtensionPoints" category="Style" expandUse="optional">
+        <c:property name="extensionPoints" type="pvc.options.ext.CartesianChartExtensionPoints" category="Chart" expandUse="optional">
             <c:documentation>
                 The extension points object contains style definitions for 
                 the marks of the chart.

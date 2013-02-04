@@ -11,7 +11,7 @@
         </c:documentation>
         
         <!-- Roles -->
-        <c:property name="visualRoles" type="map(string : pvc.options.VisualRole)" category="Visual roles">
+        <c:property name="visualRoles" type="map(string : pvc.options.VisualRole)" category="Chart > Visual Roles">
             <c:documentation>
                 The chart's visual roles.
                 
@@ -33,7 +33,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="canvas" type="string object" category="General" excludeIn="cde">
+        <c:property name="canvas" type="string object" category="Chart > General" excludeIn="cde">
             <c:documentation>
                 The identifier of the HTML element, 
                 or the element itself,
@@ -48,7 +48,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="compatVersion" type="number" default="Infinity" category="General">
+        <c:property name="compatVersion" type="number" default="Infinity" category="Chart > General">
             <c:documentation>
                 The CCC version that the chart should run in.
                 
@@ -56,19 +56,19 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="width" type="number" default="400" category="Layout">
+        <c:property name="width" type="number" default="400" category="Chart > Layout">
             <c:documentation>
                 The width of the <i>root</i> chart, in pixels.
             </c:documentation>
         </c:property>
         
-        <c:property name="height" type="number" default="300" category="Layout">
+        <c:property name="height" type="number" default="300" category="Chart > Layout">
             <c:documentation>
                 The height of the <i>root</i> chart, in pixels.
             </c:documentation>
         </c:property>
         
-        <c:property name="orientation" type="pvc.options.varia.ChartOrientation" default="'vertical'" category="Layout">
+        <c:property name="orientation" type="pvc.options.varia.ChartOrientation" default="'vertical'" category="Chart > Layout">
             <c:documentation>
                 The chart orientation indicates if 
                 its main direction is vertical or horizontal.
@@ -77,7 +77,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="margins" type="number string pvc.options.varia.Sides" default="3" category="Layout">
+        <c:property name="margins" type="number string pvc.options.varia.Sides" default="3" category="Chart > Layout">
             <c:documentation>
                 The margins of the <i>root</i> chart.
                 
@@ -90,7 +90,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="paddings" type="number string pvc.options.varia.Sides" default="0" category="Layout">
+        <c:property name="paddings" type="number string pvc.options.varia.Sides" default="0" category="Chart > Layout">
             <c:documentation>
                 The paddings of the <i>root</i> chart.
                 
@@ -103,7 +103,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="contentMargins" type="number string pvc.options.varia.Sides" default="0" category="Layout">
+        <c:property name="contentMargins" type="number string pvc.options.varia.Sides" default="0" category="Chart > Layout">
             <c:documentation>
                 The margins of the <i>root</i> content panel, in pixel units or as a percentage.
                 
@@ -116,7 +116,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="contentPaddings" type="number string pvc.options.varia.Sides" default="0" category="Layout">
+        <c:property name="contentPaddings" type="number string pvc.options.varia.Sides" default="0" category="Chart > Layout">
             <c:documentation>
                 The paddings of the <i>root</i> content panel, in pixel units or as a percentage.
                 
@@ -129,7 +129,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="clickable" type="boolean" default="false" category="Interaction" level="basic">
+        <c:property name="clickable" type="boolean" default="false" category="Chart > Interaction" level="basic">
             <c:documentation>
                 Indicates if the chart is clickable by the user.
                 
@@ -142,21 +142,21 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="tooltip" type="pvc.options.Tooltip" category="Interaction">
+        <c:property name="tooltip" type="pvc.options.Tooltip" category="Chart > Interaction">
             <c:documentation>
                 Indicates if tooltips are enabled 
                 and contains additional tooltip presentation options.
             </c:documentation>
         </c:property>
         
-        <c:property name="tipsySettings" type="pvc.options.Tooltip" category="Interaction">
+        <c:property name="tipsySettings" type="pvc.options.Tooltip" category="Chart > Interaction">
             <c:documentation>
                 <c:deprecated>Use <c:link to="#tooltip" /> instead.</c:deprecated>
                 Contains additional tooltip presentation options.
             </c:documentation>
         </c:property>
         
-        <c:property name="showTooltips" type="boolean" category="Interaction">
+        <c:property name="showTooltips" type="boolean" category="Chart > Interaction">
             <c:documentation>
                 <c:deprecated>Use <c:link to="#tooltip" /> instead.</c:deprecated>
                 Indicates if tooltips are enabled 
@@ -165,7 +165,7 @@
         </c:property>
         
         <!-- Actions -->
-        <c:property name="renderCallback" type="pvc.options.varia.StandardAction" category="Actions">
+        <c:property name="renderCallback" type="pvc.options.varia.StandardAction" category="Chart > Actions">
             <c:documentation>
                 A callback function that is called
                 before the chart is rendered,
@@ -179,7 +179,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Actions" level="basic">
+        <c:property name="clickAction" type="pvc.options.varia.StandardAction" category="Chart > Actions" level="basic">
             <c:documentation>
                 A callback function that is called
                 when the user clicks on a visual element.
@@ -188,7 +188,7 @@
         
         
         <!-- Data -->
-        <c:property name="ignoreNulls" type="boolean" default="true" category="Data">
+        <c:property name="ignoreNulls" type="boolean" default="true" category="Chart > Data">
             <c:documentation>
                 Indicates if datums
                 whose value of all measure dimensions is null 
@@ -199,7 +199,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="groupedLabelSep" type="string" default="' ~ '" category="Data">
+        <c:property name="groupedLabelSep" type="string" default="' ~ '" category="Chart > Data">
             <c:documentation>
                 The separator used to join the labels of the values of 
                 a multi-dimensional visual role.
@@ -210,7 +210,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="valueFormat" type="pvc.options.varia.NumberFormatter" category="Data">
+        <c:property name="valueFormat" type="pvc.options.varia.NumberFormatter" category="Chart > Data">
             <c:documentation>
                 A function that formats the
                 non-null <i>numeric</i> values
@@ -225,7 +225,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dimensions" type="map(string : pvc.options.DimensionType)" category="Data">
+        <c:property name="dimensions" type="map(string : pvc.options.DimensionType)" category="Chart > Data">
             <c:documentation>
                 A map whose keys are 
                 the dimension type names and whose values are 
@@ -241,7 +241,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dimensionGroups" type="map(string : pvc.options.DimensionType)" category="Data">
+        <c:property name="dimensionGroups" type="map(string : pvc.options.DimensionType)" category="Chart > Data">
             <c:documentation>
                 A map whose keys are 
                 the dimension type group names and whose values are 
@@ -259,13 +259,13 @@
         </c:property>
         
         <!-- Data Translation -->
-        <c:property name="crosstabMode" type="boolean" default="true" category="Data Translation" level="basic">
+        <c:property name="crosstabMode" type="boolean" default="true" category="Chart > Data Source" level="basic">
             <c:documentation>
                 Indicates if the data source is in <i>crosstab</i> format.
             </c:documentation>
         </c:property>
         
-        <c:property name="seriesInRows" type="boolean" default="false" category="Data Translation" level="basic">
+        <c:property name="seriesInRows" type="boolean" default="false" category="Chart > Data Source" level="basic">
             <c:documentation>
                 Indicates if, 
                 in the data source, 
@@ -290,7 +290,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="isMultiValued" type="boolean" default="false" category="Data Translation">
+        <c:property name="isMultiValued" type="boolean" default="false" category="Chart > Data Source">
             <c:documentation>
                 Indicates if the data source has 
                 multiple value and dimensions.
@@ -301,7 +301,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dataCategoriesCount" type="number" category="Data Translation">
+        <c:property name="dataCategoriesCount" type="number" category="Chart > Data Source">
             <c:documentation>
                 The number of category-like columns that are
                 present in a data source.
@@ -312,7 +312,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dataMeasuresInColumns" type="boolean" default="false" category="Data Translation">
+        <c:property name="dataMeasuresInColumns" type="boolean" default="false" category="Chart > Data Source">
             <c:documentation>
                 In the cross-tab format, 
                 indicates if, 
@@ -331,7 +331,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="measuresIndexes" type="number string list(number string)" category="Data Translation">
+        <c:property name="measuresIndexes" type="number string list(number string)" category="Chart > Data Source">
             <c:documentation>
                 The indexes of the data source's <i>virtual item</i> columns
                 that are to feed the 
@@ -348,7 +348,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="readers" type="list(pvc.options.DimensionsReader)" category="Data Translation">
+        <c:property name="readers" type="list(pvc.options.DimensionsReader)" category="Chart > Data Source">
             <c:documentation>
                 An array of dimensions readers.
                  
@@ -357,7 +357,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="calculations" type="list(pvc.options.DimensionsCalculation)" category="Data">
+        <c:property name="calculations" type="list(pvc.options.DimensionsCalculation)" category="Chart > Data">
             <c:documentation>
                 An array of dimensions calculations.
                  

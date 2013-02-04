@@ -140,7 +140,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="secondAxisIdx" type="number string list(number|string)" category="Data Translation">
+        <c:property name="secondAxisIdx" type="number string list(number|string)" category="Chart > Data Source">
             <c:documentation>
                 <c:deprecated>Use <c:link to="#plot2Series"/> instead.</c:deprecated>
                 The zero-based indexes of the series, 
@@ -156,7 +156,7 @@
         </c:property>
         
         <!-- TODO: color2Axis internals -->
-        <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Style">
+        <c:property name="secondAxisColor" type="list(pvc.options.varia.ColorString)" category="Chart > Style">
             <c:documentation>
                 <c:deprecated>Use <c:link to="pvc.options.axes.ColorAxis#colors" /> of the <tt>color2Axis</tt> instead.</c:deprecated>
                 The discrete colors scheme to use to distinguish visual elements
