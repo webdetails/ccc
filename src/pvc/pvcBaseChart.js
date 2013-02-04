@@ -456,8 +456,8 @@ def
         var hasError;
         
         /*global console:true*/
-        if(pvc.debug > 1 && console.group){
-            console.group("CCC RENDER");
+        if(pvc.debug > 1){
+            pvc.group("CCC RENDER");
         }
         
         // Don't let selection change events to fire before the render is finished
@@ -502,8 +502,8 @@ def
                 this._resumeSelectionUpdate();
             }
             
-            if(pvc.debug > 1 && console.group){
-                console.groupEnd();
+            if(pvc.debug > 1){
+                pvc.groupEnd();
             }
         }
         

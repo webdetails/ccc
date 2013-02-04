@@ -257,53 +257,53 @@ Sample extension points:<br>
 The following is a line chart displaying three time series.<br>
 <textarea cols="55" rows="15" id="pvcLine1Code">
 var line1 = new pvc.LineChart({
-	canvas: "pvcLine1",
-	width: 1200,
-	height: 400,
-	animate:false,
-	title: "Simple Line chart",
-	legend: true,
+    canvas: "pvcLine1",
+    width: 1200,
+    height: 400,
+    animate:false,
+    title: "Simple Line chart",
+    legend: true,
     nullInterpolationMode: 'linear',
-	legendPosition: "top",
-	legendAlign: "right",
-	orientation: 'vertical',
-	areasVisible: true,
-	dotsVisible: true,
-	timeSeries: true,
-	timeSeriesFormat: "%Y-%m-%d",
-	
-	axisOffset: 0.1,
-	orthoAxisOriginIsZero: false,
-	contentMargins: 10,
-	
-	selectable: true,
-	//selectionMode: 'focuswindow',
-	focusWindowBaseBegin: new Date(2011,6,3),
-	focusWindowBaseEnd:   new Date(2011,7,3),
-	
-	// Day restriction
-	_focusWindowBaseConstraint: function(oper){
-	    oper.value = pvc.time.withoutTime(oper.value);
-	},
-	
-	// Week and Weekday restriction
-	focusWindowBaseConstraint: function(oper){
+    legendPosition: "top",
+    legendAlign: "right",
+    orientation: 'vertical',
+    areasVisible: true,
+    dotsVisible: true,
+    timeSeries: true,
+    timeSeriesFormat: "%Y-%m-%d",
+
+    axisOffset: 0.1,
+    orthoAxisOriginIsZero: false,
+    contentMargins: 10,
+
+    selectable: true,
+    //selectionMode: 'focuswindow',
+    focusWindowBaseBegin: new Date(2011,6,3),
+    focusWindowBaseEnd:   new Date(2011,7,3),
+
+    // Day restriction
+    _focusWindowBaseConstraint: function(oper){
+        oper.value = pvc.time.withoutTime(oper.value);
+    },
+
+    // Week and Weekday restriction
+    focusWindowBaseConstraint: function(oper){
         var swd = 1; // StartWeekDay - Monday
-        
+
         var t = pvc.time;
         var twd = t.weekday;
-        
+
         oper.value = twd.closestOrSelf (t.withoutTime(oper.value  ), swd);
         oper.min   = twd.previousOrSelf(t.withoutTime(oper.minView), swd);
         oper.max   = twd.previousOrSelf(t.withoutTime(oper.maxView), swd);
-        
+
         // Always a week interval
         oper.length = pvc.time.intervals.w;
     },
-	selectionChangedAction: function(selected){ 
-	    var fw = this.chart.focusWindow.base;
-	    //alert("#=" + selected.length + "\n" + [fw.begin, fw.end, fw.length].join('\n'));
-	},
+    _selectionChangedAction: function(selected){
+        var fw = this.chart.focusWindow.base;
+        alert("#=" + selected.length + "\n" + [fw.begin, fw.end, fw.length].join('\n'));
+    },
     valuesVisible: false,
     yAxisPosition: "right",
     extensionPoints: {
