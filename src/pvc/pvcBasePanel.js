@@ -1558,11 +1558,11 @@ def
         var scene = context.scene;
         
         // No group and no datum?
-        var group = scene.group;
-        if(!group && !scene.datum) {
+        if(!scene.datum) {
             return "";
         }
         
+        var group = scene.group;
         var isMultiDatumGroup = group && group.count() > 1;
         
         // Single null datum?
@@ -2091,20 +2091,22 @@ def
         }, this);
         
         function processShape(shape, instance, index) {
-        
             if (shape.intersectsRect(rect)){
-                var group = instance.group;
-                var datums = group ? group._datums : def.array.as(instance.datum);
-                if(datums) {
-                    datums.forEach(function(datum){
-                        if(!datum.isNull) {
-                            if(pvc.debug >= 20) {
-                                this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type + " index=" + index);
+                var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData
+                if(cccScene && cccScene.datum){
+                    var group  = cccScene.group;
+                    var datums = group ? group._datums : def.array.as(cccScene.datum);
+                    if(datums) {
+                        datums.forEach(function(datum){
+                            if(!datum.isNull) {
+                                if(pvc.debug >= 20) {
+                                    this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type + " index=" + index);
+                                }
+
+                                fun.call(ctx, datum);
                             }
-                    
-                            fun.call(ctx, datum);
-                        }
-                    }, this);
+                        }, this);
+                    }
                 }
             }
         }

@@ -39,18 +39,9 @@
         this.chart  = panel.chart;
         this.panel  = panel;
         this.pvMark = pvMark;
-        
-        /* Extend the pv mark */
-        pvMark
-            .localProperty('_scene', Object)
-            .localProperty('group',  Object);
-        
-        this.lockMark('_scene', function(scene){ return scene; })
-            /* TODO: remove these when possible and favor access through scene */
-            .lockMark('group', function(scene){ return scene && scene.group; })
-            .lockMark('datum', function(scene){ return scene && scene.datum; })
-            ;
-        
+
+        !pvMark.sign || def.assert("Mark already has an attached Sign.");
+
         pvMark.sign = this;
         
         /* Intercept the protovis mark's buildInstance */
@@ -143,26 +134,25 @@
         },
         
         _buildInstance: function(mark, instance, lateCall){
-            /* Reset scene/instance state */
-            this.pvInstance = instance; // pv Scene
             
             var scene  = instance.data;
-            this.scene = scene;
-            
             var index = scene ? scene.childIndex() : 0;
-            this.index = index < 0 ? 0 : index;
             
-            /* 
-             * Update the scene's render id, 
+            this.pvInstance = instance;
+            this.scene = scene;
+            this.index = index < 0 ? 0 : index;
+
+            /*
+             * Update the scene's render id,
              * which possibly invalidates per-render
              * cached data.
              */
             /*global scene_renderId:true */
             scene_renderId.call(scene, mark.renderId());
-    
+
             /* state per: sign & scene & render */
             this.state = {};
-            
+
             if(!lateCall){
                 mark.__buildInstance.call(mark, instance);
             }

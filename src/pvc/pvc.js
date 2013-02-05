@@ -1276,8 +1276,7 @@ var pvc = def.globalSpace('pvc', {
     /* SCENE */
     pv.Mark.prototype.eachInstanceWithData = function(fun, ctx){
         this.eachInstance(function(scenes, index, t){
-            var instance = scenes[index];
-            if(instance.datum || instance.group){
+            if(scenes.mark.sign && scenes[index].data){
                 fun.call(ctx, scenes, index, t);
             }
         });

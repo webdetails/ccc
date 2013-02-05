@@ -104,21 +104,14 @@ function visualContext_update(mark, event){
     
     var scene;
     if(mark){
-        this.sign  = mark.sign || null;
+        var sign = this.sign = mark.sign || null;
+        if(sign){
+            scene = mark.instance().data;
+        }
         
-        var instance = mark.instance();
-        scene = instance._scene;
         if(!scene){
             this.index = null;
-            
-            var group = instance.group,
-                datum = group ? null : instance.datum;
-            
-            scene = new pvc.visual.Scene(null, {
-                panel: this.panel,
-                group: group,
-                datum: datum
-            });
+            scene = new pvc.visual.Scene(null, {panel: this.panel});
         } else {
             this.index = scene.childIndex();
         }

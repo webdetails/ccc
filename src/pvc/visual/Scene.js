@@ -159,7 +159,7 @@ def.type('pvc.visual.Scene')
     },
     
     isRoot: function(){
-        return this.root === this;   
+        return this.root === this;
     },
     
     panel: function(){
