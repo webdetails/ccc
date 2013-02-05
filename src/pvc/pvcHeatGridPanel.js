@@ -42,9 +42,7 @@ def
         
         // TODO: this options treatment is highly "non-standard". Refactor to chart + panel-constructor
         
-        var chart = this.chart,
-            options = chart.options,
-            me = this;
+        var chart = this.chart;
 
         var colorDimName = this.colorDimName = chart._colorDim && chart._colorDim.name,
             sizeDimName  = this.sizeDimName  = chart._sizeDim  && chart._sizeDim.name;
@@ -70,12 +68,10 @@ def
         
         /* Column and Row datas  */
         var keyArgs = {visible: true},
-            // Two multi-dimension single-level data groupings
-            
-            colRootData = chart.data.flattenBy(chart._catRole, keyArgs),
+            // One multi-dimension single-level data grouping
             rowRootData = chart.data.flattenBy(chart._serRole, keyArgs),
             
-            // <=> One multi-dimensional, two-levels data grouping
+            // One multi-dimensional, two-levels data grouping
             data = this._getVisibleData(),
             
             rootScene = this._buildScene(data, rowRootData);
@@ -303,7 +299,6 @@ def
     createHeatMap: function(w, h, getFillColor, wrapper){
         var myself = this,
             chart = this.chart,
-            data = chart.data,
             sizeDimName  = this.sizeDimName,
             colorDimName = this.colorDimName,
             nullShapeType = this.nullShape,
@@ -334,7 +329,7 @@ def
         
         var nullDeselectedBorder = this.defaultBorder > 0 ? this.defaultBorder : this.nullBorder;
         
-       /* SHAPE TYPE & SIZE */
+        /* SHAPE TYPE & SIZE */
         var getShapeType;
         if(!sizeDimName) {
             getShapeType = def.fun.constant(shapeType);
@@ -444,7 +439,7 @@ def
                 
                 return this.base(color, type);
             })
-            .override('dimColor', function(color, type){
+            .override('dimColor', function(color/*, type*/){
                 return pvc.toGrayScale(color, 0.6);
             })
             .pvMark

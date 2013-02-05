@@ -286,7 +286,7 @@ def
                 }, this);
             }
             
-            // TODO: this seams to not be working on negative x, y values
+            // TODO: this seems to not be working on negative x, y values
             var setSide = function(side, padding){
                 if(op){
                     padding += (op[side] || 0);
@@ -326,18 +326,13 @@ def
     /**
      * @override
      */
-    _createCore: function(layoutInfo){
+    _createCore: function(/*layoutInfo*/){
         this.base();
          
-        var myself = this,
-            chart = this.chart,
-            options = chart.options;
+        var myself = this;
+        var chart  = this.chart;
+        var rootScene = this._getRootScene();
 
-        // ------------------
-        // DATA
-        var rootScene = this._getRootScene(),
-            data      = rootScene.group;
-            
         this._finalizeScene(rootScene);
 
         // ---------------

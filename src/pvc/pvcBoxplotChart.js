@@ -54,7 +54,7 @@ def
             .add(pvc.data.BoxplotChartTranslationOper);
     },
     
-    _initPlotsCore: function(hasMultiRole){
+    _initPlotsCore: function(/*hasMultiRole*/){
         new pvc.visual.BoxPlot(this);
         
         if(this.options.plot2){
@@ -88,7 +88,6 @@ def
     
     /* @override */
     _createPlotPanels: function(parentPanel, baseOptions){
-        var options = this.options;
         var plots   = this.plots;
             
         var boxPlot  = plots.box; 
@@ -116,10 +115,6 @@ def
             
             // HACK:
             pointPanel._v1DimRoleName.value = plot2Plot.option('OrthoRole');
-            
-            // Legacy fields
-            boxPanel.pvSecondLine = pointPanel.pvLine;
-            boxPanel.pvSecondDot  = pointPanel.pvDot;
         }
     },
     

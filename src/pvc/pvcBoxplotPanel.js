@@ -227,8 +227,8 @@ def
             
             // Series distinction is ignored
             // If the role is bound by the user, its data will not be visible 
-            var serVar = vars.series   = new pvc.visual.ValueLabelVar(null, "");
-            var catVar = vars.category = new pvc.visual.ValueLabelVar(categData.value, categData.label);
+            vars.series = new pvc.visual.ValueLabelVar(null, "");
+            var catVar  = vars.category = new pvc.visual.ValueLabelVar(categData.value, categData.label);
             
             def.set(catVar,
                 'group',    categData,

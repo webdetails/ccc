@@ -79,13 +79,13 @@ def.type('pvc.data.TranslationOper')
         if(typeof dimReaderSpec === 'string'){
             dimNames = dimReaderSpec;
         } else {
-            dimNames =  dimReaderSpec.names;
+            dimNames = dimReaderSpec.names;
         }
         
         if(typeof dimNames === 'string'){
             dimNames = dimNames.split(/\s*\,\s*/);
         } else {
-            dimNames =  def.array.as(dimNames);
+            dimNames = def.array.as(dimNames);
         }
         
         // Consumed/Reserved virtual item indexes
@@ -98,7 +98,7 @@ def.type('pvc.data.TranslationOper')
         var reader = dimReaderSpec.reader;
         if(!reader) {
             if(hasDims){
-                return  this._userCreateReaders(dimNames, indexes); // -> indexes, possibly expanded
+                return this._userCreateReaders(dimNames, indexes); // -> indexes, possibly expanded
             } // else a reader that only serves to exclude indexes
         } else {
             hasDims || def.fail.argumentRequired('reader.names', "Required argument when a reader function is specified.");
