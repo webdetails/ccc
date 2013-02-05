@@ -72,7 +72,7 @@ def
             rowRootData = chart.data.flattenBy(chart._serRole, keyArgs),
             
             // One multi-dimensional, two-levels data grouping
-            data = this._getVisibleData(),
+            data = this.visibleData(),
             
             rootScene = this._buildScene(data, rowRootData);
         
@@ -486,6 +486,7 @@ def
         var chart = this.chart;
         var colorRootDim = chart._colorDim;
         var sizeRootDim  = chart._sizeDim;
+        var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
         
         /**
          * Create starting scene tree
@@ -531,6 +532,7 @@ def
             var value, label;
             
             if(colorRootDim){
+                colorVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
                 if(singleDatum){
                     catVars.color = Object.create(singleDatum.atoms[colorRootDim.name]);
                 } else {

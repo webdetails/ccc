@@ -19,6 +19,7 @@ def
     var parent = this.parent;
     if(parent) {
         this._sizeRole  = parent._sizeRole;
+        this._colorRole = parent._colorRole;
     }
 })
 .add({
@@ -110,7 +111,7 @@ def
         }
     },
     
-    _initPlotsCore: function(hasMultiRole){
+    _initPlotsCore: function(/*hasMultiRole*/){
         new pvc.visual.HeatGridPlot(this);
     },
     
@@ -134,7 +135,7 @@ def
                 .lazy(sizeDataCellsByAxisIndex, plot.option('SizeAxis') - 1)
                 .push({
                     plot:          plot,
-                    role:          this.visualRoles(plot.option('SizeRole')),
+                    role:          sizeRole,
                     dataPartValue: plot.option('DataPart')
                 });
             }
@@ -172,33 +173,8 @@ def
         measuresIndexes: [2], // TODO: ???
         animate:    false,
         axisOffset: 0,
-        
         plotFrameVisible: false,
-
-        //customTooltip: undefined, // V1 & useShapes only
-        
-//      nullShape: undefined,
-//      shape: undefined,
-//      useShapes: false,
-      
-        /* Size Role */
-//      sizeAxisUseAbs: true,
-//      sizeAxisFixedMin: undefined,
-//      sizeAxisFixedMax: undefined,
-//      sizeAxisOriginIsZero: false,
-        
-        // TODO: continuous color scale...
-        
-        /* Color Role */
-//      colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
-        
         colorNormByCategory: true,
         numSD: 2   // width (only for normal distribution)
-        //colors: ['red', 'yellow','green']
-        
-//      colorDomain:  undefined,
-//      colorMin: undefined, //"white",
-//      colorMax: undefined, //"darkgreen",
-//      colorNull:  "#efc5ad"  // white with a shade of orange
     }
 });

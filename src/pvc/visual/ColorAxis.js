@@ -83,15 +83,8 @@ def.scope(function(){
 //                            .flattenBy(this.role, {visible: true})
 //                            ;
                         
-                        var visibleDomainData;
-                        if(chart._getVisibleData){ // only cartesian charts have
-                            visibleDomainData = chart.root._getVisibleData(this.dataCell.dataPartValue);
-                        } else {
-                            visibleDomainData = chart.data.owner.where(null, {visible: true});
-                        }
-                        
+                        var visibleDomainData = chart.root.visibleData(this.dataCell.dataPartValue);
                         var normByCateg = this.option('NormByCategory');
-                        
                         var scaleOptions = {
                             type:        this.option('ScaleType'),
                             colors:      this.option('Colors')().range(), // obtain the underlying colors array
@@ -101,7 +94,7 @@ def.scope(function(){
                             colorNull:   this.option('Missing'), // TODO: already handled by the axis wrapping
                             data:        visibleDomainData,
                             colorDimension: this.role.firstDimensionName(),
-                            normPerBaseCategory:normByCateg
+                            normPerBaseCategory: normByCateg
                         };
                         
                         if(normByCateg){

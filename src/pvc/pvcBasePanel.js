@@ -288,7 +288,11 @@ def
     _addSign: function(sign){
         (this._signs || (this._signs = [])).push(sign); 
     },
-    
+
+    visibleData: function(){
+        return this.chart.visibleData(this.dataPartValue);
+    },
+
     /* LAYOUT PHASE */
     
     /** 

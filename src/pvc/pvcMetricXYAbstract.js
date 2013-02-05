@@ -78,7 +78,7 @@ def
         var yDimName = yRole.firstDimensionName();
         
         // Visible part data, possibly grouped by series (if series is bound)
-        var data = this._getVisibleData(dataCell.dataPartValue);
+        var data = this.visibleData(dataCell.dataPartValue);
         
         // For each series...
         def

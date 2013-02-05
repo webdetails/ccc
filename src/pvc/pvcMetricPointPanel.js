@@ -577,7 +577,7 @@ def
     },
     
     _buildScene: function(hasColorRole, hasSizeRole){
-        var data = this._getVisibleData();
+        var data = this.visibleData();
         var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
         rootScene.hasColorRole = hasColorRole;
         rootScene.hasSizeRole  = hasSizeRole;

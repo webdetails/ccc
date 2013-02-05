@@ -358,11 +358,11 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         return this.color('stroke');
     },
 
-    defaultColor: function(type){
+    defaultColor: function(/*type*/){
         return this.defaultColorSceneScale()(this.scene);
     },
 
-    dimColor: function(color, type){
+    dimColor: function(color/*, type*/){
         return pvc.toGrayScale(color, -0.3, null, null); // ANALYZER requirements, so until there's no way to configure it...
     },
     

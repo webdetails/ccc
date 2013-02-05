@@ -23,6 +23,9 @@ pvc.BaseChart
      */
     _partData: null,
 
+
+    _visibleDataCache: null,
+    
     /**
      * The data source of the chart.
      * <p>
@@ -90,7 +93,8 @@ pvc.BaseChart
         }
 
         delete this._partData;
-        
+        delete this._visibleDataCache;
+
         if(pvc.debug >= 3){
             this._log(this.data.getInfo());
         }
@@ -435,6 +439,67 @@ pvc.BaseChart
         return child;
     },
 
+    // --------------------
+    
+    /*
+     * Obtains the chart's visible data
+     * grouped according to the charts "main grouping".
+     * 
+     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
+     * @param {object} [keyArgs=null] Optional keyword arguments object.
+     * @param {boolean} [keyArgs.ignoreNulls=true] Indicates that null datums should be ignored.
+     * 
+     * @type pvc.data.Data
+     */
+    visibleData: function(dataPartValue, keyArgs){
+        var ignoreNulls = def.get(keyArgs, 'ignoreNulls', true);
+        if(ignoreNulls && this.options.ignoreNulls){
+            // If already globally ignoring nulls, there's no need to do it explicitly anywhere
+            ignoreNulls = false;
+        }
+        
+        keyArgs = keyArgs ? Object.create(keyArgs) : {};
+        keyArgs.ignoreNulls = ignoreNulls;
+        
+        var key = ignoreNulls + '|' + dataPartValue, // relying on array.toString, when an array
+            data = def.getOwn(this._visibleDataCache, key);
+        if(!data) {
+            data = this._createVisibleData(dataPartValue, keyArgs);
+            if(data){
+                (this._visibleDataCache || (this._visibleDataCache = {}))
+                    [key] = data;
+            }
+        }
+        
+        return data;
+    },
+
+    /*
+     * Creates the chart's visible data
+     * grouped according to the charts "main grouping".
+     *
+     * <p>
+     * The default implementation groups data by series visual role.
+     * </p>
+     *
+     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
+     * 
+     * @type pvc.data.Data
+     * @protected
+     * @virtual
+     */
+    _createVisibleData: function(dataPartValue, keyArgs){
+        var partData = this.partData(dataPartValue);
+        if(!partData){
+            return null;
+        }
+        
+        var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
+        
+        return this._serRole && this._serRole.grouping ?
+               partData.flattenBy(this._serRole, {visible: true, isNull: ignoreNulls ? false : null}) :
+               partData;
+    },
     // --------------------
     
     _generateTrends: function(){

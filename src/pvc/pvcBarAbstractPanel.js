@@ -65,7 +65,7 @@ def
             isStacked = !!this.stacked,
             isVertical = this.isOrientationVertical();
         
-        var data = this._getVisibleData(), // shared "categ then series" grouped data
+        var data = this.visibleData(), // shared "categ then series" grouped data
             seriesData = chart._serRole.flatten(data),
             rootScene = this._buildScene(data, seriesData)
             ;

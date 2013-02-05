@@ -23,23 +23,12 @@ def
     yScale: null,
     xScale: null,
     
-    _visibleDataCache: null,
-    
     _getSeriesRoleSpec: function(){
         return { isRequired: true, defaultDimension: 'series*', autoCreateDimension: true, requireIsDiscrete: true };
     },
     
     _getColorRoleSpec: function(){
         return { isRequired: true, defaultDimension: 'color*', defaultSourceRole: 'series', requireIsDiscrete: true };
-    },
-
-    _initData: function(){
-        // Clear data related cache
-        if(this._visibleDataCache) {
-            delete this._visibleDataCache;
-        }
-        
-        this.base.apply(this, arguments);
     },
     
     _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
@@ -334,7 +323,7 @@ def
             dataCells.
             map(function(dataCell){ return dataCell.dataPartValue; });
         
-        var baseData = this._getVisibleData(dataPartValues, {ignoreNulls: false});
+        var baseData = this.visibleData(dataPartValues, {ignoreNulls: false});
         var data = baseData && baseData.flattenBy(axis.role);
         
         var scale = new pv.Scale.ordinal();
@@ -536,66 +525,6 @@ def
         }
     },
     
-    /*
-     * Obtains the chart's visible data
-     * grouped according to the charts "main grouping".
-     * 
-     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
-     * @param {object} [keyArgs=null] Optional keyword arguments object.
-     * @param {boolean} [keyArgs.ignoreNulls=true] Indicates that null datums should be ignored.
-     * 
-     * @type pvc.data.Data
-     */
-    _getVisibleData: function(dataPartValue, keyArgs){
-        var ignoreNulls = def.get(keyArgs, 'ignoreNulls', true);
-        if(ignoreNulls && this.options.ignoreNulls){
-            // If already globally ignoring nulls, there's no need to do it explicitly anywhere
-            ignoreNulls = false;
-        }
-        
-        keyArgs = keyArgs ? Object.create(keyArgs) : {};
-        keyArgs.ignoreNulls = ignoreNulls;
-        
-        var key = ignoreNulls + '|' + dataPartValue, // relying on array.toString, when an array
-            data = def.getOwn(this._visibleDataCache, key);
-        if(!data) {
-            data = this._createVisibleData(dataPartValue, keyArgs);
-            if(data){
-                (this._visibleDataCache || (this._visibleDataCache = {}))
-                    [key] = data;
-            }
-        }
-        
-        return data;
-    },
-
-    /*
-     * Creates the chart's visible data
-     * grouped according to the charts "main grouping".
-     *
-     * <p>
-     * The default implementation groups data by series visual role.
-     * </p>
-     *
-     * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
-     * 
-     * @type pvc.data.Data
-     * @protected
-     * @virtual
-     */
-    _createVisibleData: function(dataPartValue, keyArgs){
-        var partData = this.partData(dataPartValue);
-        if(!partData){
-            return null;
-        }
-        
-        var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
-        
-        return this._serRole && this._serRole.grouping ?
-               partData.flattenBy(this._serRole, {visible: true, isNull: ignoreNulls ? false : null}) :
-               partData;
-    },
-    
     _warnSingleContinuousValueRole: function(valueRole){
         if(!valueRole.grouping.isSingleDimension) {
             this._log("[WARNING] A linear scale can only be obtained for a single dimension role.");
@@ -694,7 +623,7 @@ def
         }
         
         var useAbs = valueAxis.scaleUsesAbs();
-        var data  = this._getVisibleData(valueDataCell.dataPartValue);
+        var data  = this.visibleData(valueDataCell.dataPartValue);
         var extent = data && data
             .dimensions(valueRole.firstDimensionName())
             .extent({ abs: useAbs });

@@ -52,13 +52,13 @@ def
         var ignoreNullsKeyArgs = {ignoreNulls: false};
                 
         // Visible data grouped by category and then series
-        var data = this._getVisibleData(dataCell.dataPartValue);
+        var data = this.visibleData(dataCell.dataPartValue);
         
         // TODO: It is usually the case, but not certain, that the base axis' 
         // dataCell(s) span "all" data parts.
         // The data that will be shown in the base scale...
         // Ideally the base scale would already be set up...
-        var allPartsData   = this._getVisibleData(null, ignoreNullsKeyArgs);
+        var allPartsData   = this.visibleData(null, ignoreNullsKeyArgs);
         var allCatDataRoot = allPartsData.flattenBy(xRole, ignoreNullsKeyArgs);
         var allCatDatas    = allCatDataRoot._children;
         
@@ -166,9 +166,9 @@ def
                 
                 // TODO: It is usually the case, but not certain, that the base axis' 
                 // dataCell(s) span "all" data parts.
-                var visibleData = this._getVisibleData(dataCell.dataPartValue);
+                var visibleData = this.visibleData(dataCell.dataPartValue);
                 if(visibleData.childCount() > 0){
-                    var allPartsData = this._getVisibleData(null, {ignoreNulls: false});
+                    var allPartsData = this.visibleData(null, {ignoreNulls: false});
                     new InterpType(
                          allPartsData,
                          visibleData, 
@@ -246,7 +246,7 @@ def
         
         var dataPartValue = valueDataCell.dataPartValue;
         var valueDimName = valueRole.firstDimensionName();
-        var data = this._getVisibleData(dataPartValue);
+        var data = this.visibleData(dataPartValue);
         var useAbs = valueAxis.scaleUsesAbs();
         
         if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked){

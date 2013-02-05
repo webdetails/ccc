@@ -138,9 +138,5 @@ def
             // Padding area is used by bubbles and other vizs without problem
             this.pvPanel.borderPanel.overflow('hidden');
         }
-    },
-    
-    _getVisibleData: function(){
-        return this.chart._getVisibleData(this.dataPartValue);
     }
 });

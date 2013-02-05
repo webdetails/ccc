@@ -224,7 +224,7 @@ def
     },
 
     _buildRuleScene: function(){
-        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: this._getVisibleData()});
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: this.visibleData()});
         var prevValue;
         
         /**
