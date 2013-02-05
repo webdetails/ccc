@@ -519,10 +519,7 @@ def
             
             var singleDatum = group && group.singleDatum();
             
-            /* If there's no group, provide, at least, a null datum */
-            var datum = group ? null : createNullDatum(serData1, catData1);
-            
-            var serCatScene = new pvc.visual.Scene(serScene, {group: group, datum: datum});
+            var serCatScene = new pvc.visual.Scene(serScene, {group: group});
             var catVars  = serCatScene.vars;
             
             catVars.category = 
@@ -533,7 +530,6 @@ def
             
             var value, label;
             
-            var chart = this.chart;
             if(colorRootDim){
                 if(singleDatum){
                     catVars.color = Object.create(singleDatum.atoms[colorRootDim.name]);
@@ -567,12 +563,6 @@ def
             }
 
             serCatScene.isNull = !group; // A virtual scene?
-        }
-        
-        function createNullDatum(serData1, catData1) {
-            // Create a null datum with col and row coordinate atoms
-            var atoms = def.copy(def.copy({}, serData1.atoms), catData1.atoms);
-            return new pvc.data.Datum(data, atoms, true);
         }
     }
 });

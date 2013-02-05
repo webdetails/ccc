@@ -1558,12 +1558,12 @@ def
         var scene = context.scene;
         
         // No group and no datum?
-        if(!scene.atoms) {
+        var group = scene.group;
+        if(!group && !scene.datum) {
             return "";
         }
         
-        var group = scene.group;
-        var isMultiDatumGroup = group && group._datums.length > 1;
+        var isMultiDatumGroup = group && group.count() > 1;
         
         // Single null datum?
         var firstDatum = scene.datum;
@@ -1572,7 +1572,7 @@ def
         }
         
         var chart = this.chart;
-        var data = chart.data;
+        var data  = chart.data;
         var visibleKeyArgs = {visible: true};
         
         var tooltip = [];

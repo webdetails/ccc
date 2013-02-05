@@ -117,7 +117,6 @@ def
                         var efCatData = catData || allCatData;
                         
                         var atoms;
-                        var proto = catData;
                         if(serData1){
                             var catSerData = catData && 
                                              catData._childrenByKey[serData1.key];

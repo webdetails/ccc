@@ -50,7 +50,7 @@ def.type('pvc.visual.Context')
     /* V1 DIMENSION ACCESSORS */
     getV1Series: function(){
         var s;
-        var series = this.scene.atoms && (s = this.scene.atoms[this.panel._getV1DimName('series')]) && s.rawValue;
+        var series = this.scene.firstAtoms && (s = this.scene.firstAtoms[this.panel._getV1DimName('series')]) && s.rawValue;
         if(series == null){
             series = 'Series';
         }
@@ -60,12 +60,12 @@ def.type('pvc.visual.Context')
     
     getV1Category: function(){
         var c;
-        return this.scene.atoms && (c = this.scene.atoms[this.panel._getV1DimName('category')]) && c.rawValue;
+        return this.scene.firstAtoms && (c = this.scene.firstAtoms[this.panel._getV1DimName('category')]) && c.rawValue;
     },
                
     getV1Value: function(){
         var v;
-        return this.scene.atoms && (v = this.scene.atoms[this.panel._getV1DimName('value')]) && v.value;
+        return this.scene.firstAtoms && (v = this.scene.firstAtoms[this.panel._getV1DimName('value')]) && v.value;
     },
     
     getV1Datum: function(){

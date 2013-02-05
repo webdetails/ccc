@@ -61,39 +61,41 @@ def
                 return;
             }
         }
-        
+
         if(isLeaf){
-            var group = scene.group;
+            // Not grouped, so there's no guarantee that
+            // there's a single color value for all the datums of the group.
+        
+            var colorVar;
             if(this.isDiscrete){
-                // Not grouped, so there's no guarantee that
-                // there's a single color value for all the datums of the group.
                 // We choose the color of the first datum of the group...
-                var firstDatum = (group ? group.firstDatum() : scene.datum);
+                var firstDatum = scene.datum;
                 if(firstDatum && !firstDatum.isNull){
                     var view = this.colorGrouping.view(firstDatum);
-                    scene.vars.color = new pvc.visual.ValueLabelVar(
+                    colorVar = new pvc.visual.ValueLabelVar(
                         view.value,
                         view.label,
                         view.rawValue);
-                } else {
-                    scene.vars.color = new pvc.visual.ValueLabelVar(null, "");
                 }
             } else {
+                var group = scene.group;
                 var singleDatum = group ? group.singleDatum() : scene.datum;
                 if(singleDatum){
-                    scene.vars.color = Object.create(singleDatum.atoms[this.rootColorDim.name]);
-                } else {
-                    var value = group ? 
-                         group
-                         .dimensions(this.rootColorDim.name)
-                         .sum({visible: true, zeroIfNone: false}) :
-                        null;
+                    if(!singleDatum.isNull){
+                        colorVar = Object.create(singleDatum.atoms[this.rootColorDim.name]);
+                    }
+                } else if(group){
+                    var value = group
+                                .dimensions(this.rootColorDim.name)
+                                .sum({visible: true, zeroIfNone: false});
                     
                     var label = this.rootColorDim.format(value);
                     
-                    scene.vars.color = new pvc.visual.ValueLabelVar(value, label, value);
+                    colorVar = new pvc.visual.ValueLabelVar(value, label, value);
                 }
             }
+
+            scene.vars.color = colorVar || new pvc.visual.ValueLabelVar(null, "");
         }
     }
 });

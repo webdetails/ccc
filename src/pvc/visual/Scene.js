@@ -92,9 +92,17 @@ def.type('pvc.visual.Scene')
     this.datum = datum || null;
     this.group = group;
 
-    var source = (datum || group);
-    this.atoms = source ? source.atoms : null;
-    
+    var parentAtoms;
+    var source = (group || datum);
+    this.atoms = source ? source.atoms :
+                 (parentAtoms = (parent && parent.atoms)) ? Object.create(parentAtoms) :
+                 {};
+
+    source = (datum || group);
+    this.firstAtoms = source ? source.atoms : 
+                      (parentAtoms = (parent && parent.firstAtoms)) ? Object.create(parentAtoms) :
+                      this.atoms;
+
     /* VARS */
     this.vars = parent ? Object.create(parent.vars) : {};
 })
@@ -111,7 +119,7 @@ def.type('pvc.visual.Scene')
                     this.group.datums() :
                     (this.datum ? def.query(this.datum) : def.query());
     },
-    
+
     /*
      * {value} -> <=> this.vars.value.label
      * {value.value} -> <=> this.vars.value.value

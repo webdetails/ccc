@@ -368,22 +368,12 @@ def
                 /* Create leaf scene */
                 var categKey = categData1.key,
                     group = data._childrenByKey[categKey]._childrenByKey[seriesKey],
-
-                    /* If there's no group, provide, at least, a null datum */
-                    datum = group ? null : createNullDatum(seriesData1, categData1),
-                    scene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
+                    scene = new pvc.visual.Scene(seriesScene, {group: group});
 
                 this._onNewSeriesCategoryScene(scene, categData1, seriesData1);
                 
                 colorVarHelper.onNewScene(scene, /* isLeaf */ true);
             }, this);
-        }
-
-        function createNullDatum(serData1, catData1) {
-            // Create a null datum with col and row coordinate atoms
-            var atoms = def.copy(def.copy({}, serData1.atoms), catData1.atoms);
-
-            return new pvc.data.Datum(data, atoms, true);
         }
     },
 

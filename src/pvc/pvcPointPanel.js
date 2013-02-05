@@ -562,15 +562,7 @@ def
                     group.dimensions(valueDim.name).sum(visibleKeyArgs) : 
                     null;
                 
-                // TODO: really needed ?
-                /* If there's no group, provide, at least, a null datum */
-                var datum = group ? 
-                    null : 
-                    createNullDatum(seriesData1 || data, categData);
-                
-                // -------------
-                
-                var serCatScene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
+                var serCatScene = new pvc.visual.Scene(seriesScene, {group: group});
                 
                 // -------------
                 serCatScene.dataIndex = categIndex;
@@ -860,16 +852,6 @@ def
                 seriesScene.removeAt(L - 1);
                 L--;
             }
-        } 
-        
-        function createNullDatum(serData1, catData1) {
-            // Create a null datum with col and row coordinate atoms
-            var atoms = serData1 && catData1 ?
-                        def.copy(def.copy({}, serData1.atoms), catData1.atoms) :
-                        (serData1 ? serData1.atoms :  catData1.atoms)
-                        ;
-            
-            return new pvc.data.Datum(data, atoms, true);
         }
     }
 });
