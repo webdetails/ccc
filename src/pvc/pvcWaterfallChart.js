@@ -30,7 +30,8 @@ def
     }
 })
 .add({
-
+    _animatable: true,
+    
     _isFalling: true,
     _ruleInfos: null,
     _waterColor: pv.color("#1f77b4").darker(),// pv.Color.names.darkslateblue,//royalblue,seagreen, //pv.color("#808285").darker(),

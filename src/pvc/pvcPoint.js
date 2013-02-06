@@ -6,6 +6,7 @@
 def
 .type('pvc.PointAbstract', pvc.CategoricalAbstract)
 .add({
+    _animatable: true,
     
     _processOptionsCore: function(options){
         // Has no meaning in this chart type

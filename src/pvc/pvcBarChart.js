@@ -5,10 +5,11 @@
 def
 .type('pvc.BarChart', pvc.BarAbstract)
 .add({
+    _animatable: true,
 
     _allowV1SecondAxis: true, 
     
-    _initPlotsCore: function(hasMultiRole){
+    _initPlotsCore: function(/*hasMultiRole*/){
         var options = this.options;
         
         var barPlot = new pvc.visual.BarPlot(this);

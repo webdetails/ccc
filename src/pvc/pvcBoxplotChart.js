@@ -14,7 +14,6 @@
 def
 .type('pvc.BoxplotChart', pvc.CategoricalAbstract)
 .add({
-
     _processOptionsCore: function(options){
         this.base.apply(this, arguments);
 
@@ -56,8 +55,9 @@ def
     
     _initPlotsCore: function(/*hasMultiRole*/){
         new pvc.visual.BoxPlot(this);
-        
+
         if(this.options.plot2){
+            this._animatable = true;
             // Line Plot
             new pvc.visual.PointPlot(this, {
                 name: 'plot2',

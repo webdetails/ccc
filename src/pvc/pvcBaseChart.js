@@ -55,7 +55,9 @@ def
      * Indicates if the chart has been disposed.
      */
     _disposed: false,
-    
+
+    _animatable: false,
+
     /**
      * The chart's parent chart.
      * 
