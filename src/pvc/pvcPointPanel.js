@@ -204,18 +204,6 @@ def
         // -- LINE --
         var dotsVisibleOnly = dotsVisible && !linesVisible && !areasVisible,
             
-            /* When not showing lines, but showing areas,
-             * we copy the area fillStyle so that
-             * the line can cover the area and not be noticed.
-             * We need this to hide the ladder 
-             * on the border of the area, 
-             * due to not using antialias.
-             * 
-             * When the scene has the active series,
-             * the line is shown "highlighted" anyway.
-             */
-            lineCopiesAreaColor = !linesVisible && areasVisible,
-            
             /* When areas are shown with no alpha (stacked), 
              * make dots darker so they get 
              * distinguished from areas. 
