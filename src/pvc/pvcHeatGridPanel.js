@@ -18,7 +18,20 @@ def
     
     this.base(chart, parent, plot, options);
     
-    this.axes.size = chart.getAxis('size', plot.option('SizeAxis') - 1); // may be undefined
+    this.axes.size = chart._getAxis('size', plot.option('SizeAxis') - 1); // may be undefined
+
+    var roles = this.visualRoles;
+
+    var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
+    roles.size = chart.visualRoles(sizeRoleName);
+    
+    var valueDimName;
+    if(roles.color.isBound()){ // assumed to always exist on this chart type
+        valueDimName = roles.color.firstDimensionName();
+    } else if(roles.size.isBound()){
+        valueDimName = roles.size.firstDimensionName();
+    }
+    this._valueDimName = valueDimName;
     
     this.useShapes = plot.option('UseShapes');
     this.shape     = plot.option('Shape');
@@ -43,15 +56,11 @@ def
         // TODO: this options treatment is highly "non-standard". Refactor to chart + panel-constructor
         
         var chart = this.chart;
-
-        var colorDimName = this.colorDimName = chart._colorDim && chart._colorDim.name,
-            sizeDimName  = this.sizeDimName  = chart._sizeDim  && chart._sizeDim.name;
-        
         var a_bottom = this.isOrientationVertical() ? "bottom" : "left";
 
         /* Use existing scales */
-        var xScale = this.axes.x.scale,
-            yScale = this.axes.y.scale;
+        var xScale = this.axes.x.scale;
+        var yScale = this.axes.y.scale;
 
         /* Determine cell dimensions. */
         var w = (xScale.max - xScale.min) / xScale.domain().length;
@@ -74,14 +83,17 @@ def
             // One multi-dimensional, two-levels data grouping
             data = this.visibleData(),
             
-            rootScene = this._buildScene(data, rowRootData);
+            rootScene = this._buildScene(data, rowRootData),
+            hasColor  = rootScene.hasColorRole,
+            hasSize   = rootScene.hasSizeRole
+            ;
         
         /* COLOR */
         
         var getFillColor;
         var colorAxis = this.axes.color;
         var colorNull = colorAxis.option('Missing');
-        if(colorDimName){
+        if(hasColor){
             var fillColorScaleByColKey = colorAxis.scalesByCateg;
             if(fillColorScaleByColKey){
                 getFillColor = function(leafScene){
@@ -186,14 +198,10 @@ def
             .pvMark
             
             .localProperty('colorValue')
-            .lock('colorValue', function(leafScene){
-                return colorDimName && leafScene.vars.color.value;
-            })
+            .lock('colorValue', function(leafScene){ return leafScene.vars.color.value; })
             
             .localProperty('sizeValue')
-            .lock('sizeValue', function(leafScene){
-                return sizeDimName && leafScene.vars.size.value;
-            })
+            .lock('sizeValue',  function(leafScene){ return leafScene.vars.size .value; })
             
             .lock(a_left,  function(){ return this.index * w; })
             .lock(a_width, w)
@@ -206,7 +214,7 @@ def
         
         
         if(this.useShapes){
-            this.shapes = this.createHeatMap(w, h, getFillColor, wrapper);
+            this.shapes = this.createHeatMap(w, h, getFillColor, wrapper, hasColor, hasSize);
         } else {
             this.shapes = pvHeatGrid
                 .sign
@@ -229,7 +237,7 @@ def
                     
                     return this.base(color, type);
                 })
-                .override('dimColor', function(color, type){
+                .override('dimColor', function(color/*, type*/){
                     return pvc.toGrayScale(color, 0.6);
                 })
                 .pvMark
@@ -238,9 +246,8 @@ def
         }
         
         // TODO: valueMask??
-        var valueDimName = this.valueDimName = colorDimName || sizeDimName;
-        
-        if(this.valuesVisible && valueDimName){
+        if(this.valuesVisible && this._valueDimName){
+            var valueDimName = this._valueDimName;
             this.pvHeatGridLabel = new pvc.visual.Label(
                 this, 
                 this.pvHeatGrid.anchor("center"), 
@@ -296,56 +303,46 @@ def
         };
     },
     
-    createHeatMap: function(w, h, getFillColor, wrapper){
-        var myself = this,
-            chart = this.chart,
-            sizeDimName  = this.sizeDimName,
-            colorDimName = this.colorDimName,
-            nullShapeType = this.nullShape,
-            shapeType = this.shape;
+    createHeatMap: function(w, h, getFillColor, wrapper, hasColor, hasSize){
+        var me = this,
+            chart = me.chart,
+            nullShapeType = me.nullShape,
+            shapeType = me.shape;
         
         /* SIZE */
-        var areaRange = this._calcDotAreaRange(w, h);
+        var areaRange = me._calcDotAreaRange(w, h);
         var maxArea = areaRange.max;
         
         var sizeScale;
-        var sizeAxis = this.axes.size;
-        if(sizeAxis && sizeAxis.isBound()){
-            sizeScale = sizeAxis
+        if(hasSize){
+            sizeScale = me.axes.size
                 .setScaleRange(areaRange)
                 .scale;
-        } else {
-            sizeDimName = null;
         }
         
         /* BORDER WIDTH & COLOR */
-        var notNullSelectedBorder = (this.selectedBorder == null || (+this.selectedBorder) === 0) ? 
-                                     this.defaultBorder : 
-                                     this.selectedBorder;
+        var notNullSelectedBorder = (me.selectedBorder == null || (+me.selectedBorder) === 0) ?
+                                     me.defaultBorder :
+                                     me.selectedBorder;
         
-        var nullSelectedBorder = (this.selectedBorder == null || (+this.selectedBorder) === 0) ? 
-                                  this.nullBorder : 
-                                  this.selectedBorder;
+        var nullSelectedBorder = (me.selectedBorder == null || (+me.selectedBorder) === 0) ?
+                                  me.nullBorder :
+                                  me.selectedBorder;
         
-        var nullDeselectedBorder = this.defaultBorder > 0 ? this.defaultBorder : this.nullBorder;
+        var nullDeselectedBorder = me.defaultBorder > 0 ? me.defaultBorder : me.nullBorder;
         
         /* SHAPE TYPE & SIZE */
-        var getShapeType;
-        if(!sizeDimName) {
+        var getShapeSize, getShapeType;
+        if(!hasSize){
             getShapeType = def.fun.constant(shapeType);
+            getShapeSize = function(){
+                /* When neither color nor size dimensions */
+                return (hasColor && !nullShapeType && this.parent.colorValue() == null) ? 0 : maxArea;
+            };
         } else {
             getShapeType = function(){
                 return this.parent.sizeValue() != null ? shapeType : nullShapeType;
             };
-        }
-        
-        var getShapeSize;
-        if(!sizeDimName){
-            getShapeSize = function(){
-                /* When neither color nor size dimensions */
-                return (colorDimName && !nullShapeType && this.parent.colorValue() == null) ? 0 : maxArea;
-            };
-        } else {
             getShapeSize = function(){
                 var sizeValue = this.parent.sizeValue();
                 return (sizeValue == null && !nullShapeType) ? 0 : sizeScale(sizeValue);
@@ -382,10 +379,10 @@ def
                         var c = pvc.data.Complex.values(group, chart._catRole.grouping.dimensionNames());
                         
                         var d = [];
-                        if(sizeDimName){
+                        if(hasSize){
                             d[options.sizeValIdx  || 0] = context.scene.vars.size.value;
                         }
-                        if(colorDimName){
+                        if(hasColor){
                             d[options.colorValIdx || 0] = context.scene.vars.color.value;
                         }
                         
@@ -394,14 +391,14 @@ def
                     function(context){
                         var s = context.scene.vars.series.rawValue;
                         var c = context.scene.vars.category.rawValue;
-                        var valueVar = context.scene.vars[colorDimName ? 'color' : 'size'];
+                        var valueVar = context.scene.vars[hasColor ? 'color' : 'size'];
                         var d = valueVar ? valueVar.value : null;
                         return customTooltip.call(options, s, c, d);
                     }
             };
         }
         
-        return new pvc.visual.Dot(this, this.pvHeatGrid, keyArgs)
+        return new pvc.visual.Dot(me, me.pvHeatGrid, keyArgs)
             .override('defaultSize', function(){
                 return getShapeSize.call(this.pvMark, this.scene);
             })
@@ -412,7 +409,7 @@ def
                 
                 return size;
             })
-            .override('baseColor', function(type){
+            .override('baseColor', function(/*type*/){
                 return getFillColor.call(this.pvMark.parent, this.scene);
             })
             .override('normalColor', function(color, type){
@@ -449,8 +446,8 @@ def
             .lock('shapeAngle') // rotation of shapes can cause them to not fit the calculated cell. Would have to improve the radius calculation code.
             
             .lineWidth(function(leafScene){
-                if(!sizeDimName || !myself._isNullShapeLineOnly() || this.parent.sizeValue() != null){
-                    return leafScene.isSelected() ? notNullSelectedBorder : myself.defaultBorder;
+                if(!hasSize || !me._isNullShapeLineOnly() || this.parent.sizeValue() != null){
+                    return leafScene.isSelected() ? notNullSelectedBorder : me.defaultBorder;
                 }
 
                 // is null
@@ -480,20 +477,20 @@ def
     },
     
     _buildScene: function(data, seriesRootData){
-        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
+        var me = this;
+        var rootScene  = new pvc.visual.Scene(null, {panel: me, group: data});
         var categDatas = data._children;
+
+        var roles = me.visualRoles;
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color);
+        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size);
+
+        rootScene.hasColorRole = colorVarHelper.isBound();
+        rootScene.hasSizeRole  = sizeVarHelper .isBound();
         
-        var chart = this.chart;
-        var colorRootDim = chart._colorDim;
-        var sizeRootDim  = chart._sizeDim;
-        var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
-        
-        /**
-         * Create starting scene tree
-         */
         seriesRootData
             .children()
-            .each(createSeriesScene, this);
+            .each(createSeriesScene);
 
         return rootScene;
 
@@ -501,70 +498,22 @@ def
             /* Create series scene */
             var serScene = new pvc.visual.Scene(rootScene, {group: serData1});
 
-            serScene.vars.series = new pvc.visual.ValueLabelVar(
-                serData1.value,
-                serData1.label,
-                serData1.rawValue);
+            serScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(serData1);
             
             categDatas.forEach(function(catData1){
-                createSeriesCategoryScene.call(this, serScene, catData1, serData1); 
-            }, this);
+                createSeriesCategoryScene.call(me, serScene, catData1, serData1); 
+            });
         }
 
         function createSeriesCategoryScene(serScene, catData1, serData1){
-            /* Create leaf scene */
-            var group = 
-                data
-                ._childrenByKey[catData1.key]
-                ._childrenByKey[serData1.key];
-            
-            var singleDatum = group && group.singleDatum();
+            var group = data._childrenByKey[catData1.key]._childrenByKey[serData1.key];
             
             var serCatScene = new pvc.visual.Scene(serScene, {group: group});
-            var catVars  = serCatScene.vars;
             
-            catVars.category = 
-                new pvc.visual.ValueLabelVar(
-                    catData1.value, 
-                    catData1.label, 
-                    catData1.rawValue);
-            
-            var value, label;
-            
-            if(colorRootDim){
-                colorVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
-                if(singleDatum){
-                    catVars.color = Object.create(singleDatum.atoms[colorRootDim.name]);
-                } else {
-                    value = group ? 
-                             group
-                             .dimensions(colorRootDim.name)
-                             .sum({visible: true, zeroIfNone: false}) :
-                            null;
-                    
-                    label = colorRootDim.format(value);
-                    
-                    catVars.color = new pvc.visual.ValueLabelVar(value, label, value);
-                }
-            }
-            
-            if(sizeRootDim){
-                if(singleDatum){
-                    catVars.size = Object.create(singleDatum.atoms[sizeRootDim.name]);
-                } else {
-                    value = group ? 
-                             group
-                             .dimensions(sizeRootDim.name)
-                             .sum({visible: true, zeroIfNone: false}) :
-                            null;
-                    
-                    label = sizeRootDim.format(value);
-                    
-                    catVars.size = new pvc.visual.ValueLabelVar(value, label, value);
-                }
-            }
+            serCatScene.vars.category = pvc.visual.ValueLabelVar.fromComplex(catData1);
 
-            serCatScene.isNull = !group; // A virtual scene?
+            colorVarHelper.onNewScene(serCatScene, /* isLeaf */true);
+            sizeVarHelper .onNewScene(serCatScene, /* isLeaf */true);
         }
     }
 });

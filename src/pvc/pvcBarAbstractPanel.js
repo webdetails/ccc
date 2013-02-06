@@ -26,11 +26,6 @@ def
     pvSecondLine: null,
     pvSecondDot: null,
     
-    _linePanel: null,
-    
-    barWidth:     null,
-    barStepWidth: null,
-    
     _creating: function(){
         // Register BULLET legend prototype marks
         var groupScene = this.defaultVisibleBulletGroupScene();
@@ -59,23 +54,24 @@ def
      */
     _createCore: function(){
         this.base();
-         
-        var chart = this.chart,
-            options = chart.options,
-            isStacked = !!this.stacked,
-            isVertical = this.isOrientationVertical();
-        
-        var data = this.visibleData(), // shared "categ then series" grouped data
-            seriesData = chart._serRole.flatten(data),
-            rootScene = this._buildScene(data, seriesData)
-            ;
-
-        var orthoScale = this.axes.ortho.scale,
+        var me = this,
+            chart = me.chart,
+            plot = me.plot,
+            isStacked = !!me.stacked,
+            isVertical = me.isOrientationVertical(),
+            data = me.visibleData(), // shared "categ then series" grouped data
+            seriesData = me.visualRoles.series.flatten(data),
+            rootScene  = me._buildScene(data, seriesData),
+            orthoAxis  = me.axes.ortho,
+            baseAxis   = me.axes.base,
+            orthoScale = orthoAxis.scale,
             orthoZero  = orthoScale(0),
-            sceneOrthoScale = this.axes.ortho.sceneScale({sceneVarName: 'value', nullToZero: false}),
-            barSizeRatio = this.plot.option('BarSizeRatio'),
-            barSizeMax   = this.plot.option('BarSizeMax'),
-            baseRange = this.axes.base.scale.range(),
+            sceneOrthoScale = orthoAxis.sceneScale({sceneVarName: 'value', nullToZero: false}),
+            sceneBaseScale  = baseAxis .sceneScale({sceneVarName: 'category'}),
+            barSizeRatio = plot.option('BarSizeRatio'),
+            barSizeMax   = plot.option('BarSizeMax'),
+            barStackedMargin = plot.option('BarStackedMargin'),
+            baseRange = baseAxis.scale.range(),
             bandWidth = baseRange.band,
             barStepWidth = baseRange.step,
             barWidth,
@@ -93,11 +89,11 @@ def
             barWidth = barSizeMax;
         }
 
-        this.barWidth     = barWidth;
-        this.barStepWidth = barStepWidth;
+        me.barWidth     = barWidth;
+        me.barStepWidth = barStepWidth;
         
         var wrapper; // bar and label wrapper
-        if(this.compatVersion() <= 1){
+        if(me.compatVersion() <= 1){
             /*
              * V1 Data
              * ----------
@@ -132,7 +128,7 @@ def
             };
         }
         
-        this.pvBarPanel = new pvc.visual.Panel(this, this.pvPanel, {
+        me.pvBarPanel = new pvc.visual.Panel(me, me.pvPanel, {
                 panelType:   pv.Layout.Band,
                 extensionId: 'panel'
             })
@@ -140,29 +136,29 @@ def
             .lockMark('values', function(seriesScene){ return seriesScene.childNodes; })
             .lockMark('orient', isVertical ? 'bottom-left' : 'left-bottom')
             .lockMark('layout', isStacked  ? 'stacked' : 'grouped')
-            .lockMark('verticalMode', this._barVerticalMode())
+            .lockMark('verticalMode', me._barVerticalMode())
             .lockMark('yZero',  orthoZero)
             .pvMark
             .band // categories
-                .x(this.axes.base.sceneScale({sceneVarName: 'category'}))
+                .x(sceneBaseScale)
                 .w(bandWidth)
-                .differentialControl(this._barDifferentialControl())
+                .differentialControl(me._barDifferentialControl())
             .item
                 // Stacked Vertical bar charts show series from
                 // top to bottom (according to the legend)
                 .order(reverseSeries ? "reverse" : null)
                 .h(function(scene){
                     /* May be negative */
-                    var h = sceneOrthoScale(scene);
-                    return h != null ? chart.animate(0, h - orthoZero) : null;
+                    var y = sceneOrthoScale(scene);
+                    return y != null ? chart.animate(0, y - orthoZero) : null;
                 })
                 .w(barWidth)
                 .horizontalRatio(barSizeRatio)
-                .verticalMargin(options.barStackedMargin || 0)
+                .verticalMargin(barStackedMargin)
             .end
             ;
         
-        this.pvBar = new pvc.visual.Bar(this, this.pvBarPanel.item, {
+        this.pvBar = new pvc.visual.Bar(me, me.pvBarPanel.item, {
                 extensionId: '', // with the prefix, it gets 'bar_'
                 freePosition: true,
                 wrapper:      wrapper
@@ -172,14 +168,14 @@ def
             .antialias(false)
             ;
 
-        if(this.plot.option('OverflowMarkersVisible')){
+        if(plot.option('OverflowMarkersVisible')){
             this._addOverflowMarkers(wrapper);
         }
         
-        if(this.valuesVisible){
-            this.pvBarLabel = new pvc.visual.Label(
-                this, 
-                this.pvBar.anchor(this.valuesAnchor || 'center'), 
+        if(me.valuesVisible){
+            me.pvBarLabel = new pvc.visual.Label(
+                me,
+                me.pvBar.anchor(me.valuesAnchor || 'center'),
                 {
                     extensionId: 'label',
                     wrapper:     wrapper
@@ -192,13 +188,9 @@ def
                     // Too small a bar to show any value?
                     return length >= 4;
                 })
-                .font(this.valuesFont) // default
+                .font(me.valuesFont) // default
                 .text(function(scene){
-                    var valueVar = options.showValuePercentage ?
-                                   scene.vars.value.percent :
-                                   scene.vars.value;
-                    
-                    return valueVar.label;
+                    return scene.format(me.valuesMask);
                 })
                 ;
         }
@@ -255,8 +247,7 @@ def
          * yet have bar's anchor as a prototype.
          */
         
-        var myself = this,
-            isVertical = this.isOrientationVertical(),
+        var isVertical = this.isOrientationVertical(),
             a_bottom = isVertical ? "bottom" : "left",
             a_top    = this.anchorOpposite(a_bottom),
             a_height = this.anchorOrthoLength(a_bottom),
@@ -281,7 +272,7 @@ def
                 noHover:       true,
                 noClick:       true,
                 noDoubleClick: true,
-                noTooltip:    true,
+                noTooltip:     true,
                 freePosition:  true,
                 extensionId:   isMin ? 'underflowMarker' : 'overflowMarker',
                 wrapper:       wrapper
@@ -343,15 +334,18 @@ def
 
     _buildScene: function(data, seriesData){
         var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
+        
         var categDatas = data._children;
-        var colorVarHelper = new pvc.visual.ColorVarHelper(this.chart, this.chart._colorRole);
+        var roles = this.visualRoles;
+        var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.value, {hasPercentSubVar: this.stacked});
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color);
         
         /**
          * Create starting scene tree
          */
         seriesData
             .children()
-            .each(createSeriesScene, this);
+            .each(createSeriesScene);
 
         return rootScene;
 
@@ -360,64 +354,23 @@ def
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1}),
                 seriesKey   = seriesData1.key;
 
-            this._onNewSeriesScene(seriesScene, seriesData1);
-            
+            seriesScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(seriesData1);
+
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
             categDatas.forEach(function(categData1){
                 /* Create leaf scene */
-                var categKey = categData1.key,
-                    group = data._childrenByKey[categKey]._childrenByKey[seriesKey],
+                var group = data._childrenByKey[categData1.key]._childrenByKey[seriesKey],
                     scene = new pvc.visual.Scene(seriesScene, {group: group});
 
-                this._onNewSeriesCategoryScene(scene, categData1, seriesData1);
-                
+                var categVar =
+                    scene.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData1);
+
+                categVar.group = categData1;
+
+                valueVarHelper.onNewScene(scene, /* isLeaf */ true);
                 colorVarHelper.onNewScene(scene, /* isLeaf */ true);
-            }, this);
+            });
         }
-    },
-
-    _onNewSeriesScene: function(seriesScene, seriesData1){
-        seriesScene.vars.series = new pvc.visual.ValueLabelVar(
-            seriesData1.value,
-            seriesData1.label,
-            seriesData1.rawValue);
-    },
-
-    _onNewSeriesCategoryScene: function(categScene, categData1, seriesData1){
-        var categVar = categScene.vars.category = new pvc.visual.ValueLabelVar(
-            categData1.value, categData1.label, categData1.rawValue);
-        
-        categVar.group = categData1;
-        
-        var chart = this.chart,
-            valueDim = categScene.group ?
-                            categScene
-                                .group
-                                .dimensions(chart._valueDim.name) :
-                            null;
-
-        var value = valueDim ? valueDim.sum({visible: true, zeroIfNone: false}) : null;
-
-        var valueVar = 
-            categScene.vars.value = new pvc.visual.ValueLabelVar(
-                                    value, 
-                                    chart._valueDim.format(value),
-                                    value);
-        
-        // TODO: Percent formatting?
-        if(chart.options.showValuePercentage) {
-            if(value == null){
-                valueVar.percent = new pvc.visual.ValueLabelVar(null, valueVar.label);
-            } else {
-                var valuePct = valueDim.percentOverParent({visible: true});
-                
-                valueVar.percent = new pvc.visual.ValueLabelVar(
-                                        valuePct,
-                                        chart.options.percentValueFormat.call(null, valuePct));
-            }
-        }
-
-        categScene.isNull = !categScene.group; // A virtual scene?
     }
 });

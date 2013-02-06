@@ -5,7 +5,8 @@
 def
 .type('pvc.PieChart', pvc.BaseChart)
 .add({
-
+    _animatable: true,
+    
     pieChartPanel: null,
 
     _getColorRoleSpec: function(){
@@ -37,7 +38,7 @@ def
             });
     },
     
-    _initPlotsCore: function(hasMultiRole){
+    _initPlotsCore: function(/*hasMultiRole*/){
         new pvc.visual.PiePlot(this);
     },
     

@@ -445,7 +445,7 @@ def
 .init(function(panel){
     var chart = panel.chart;
     var data = chart.visualRoles('category').flatten(chart.data, pvc.data.visibleKeyArgs);
-    var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
+    var colorVarHelper = new pvc.visual.RoleVarHelper(chart, chart._colorRole);
     
     this.base(null, {panel: panel, group: data});
     
@@ -468,9 +468,7 @@ def
             // Adds to parent scene...
             this.base(rootScene, {group: categData});
             
-            this.vars.category = new pvc.visual.ValueLabelVar(
-                    categData.value, 
-                    categData.label);
+            this.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData);
 
             sumAbs += Math.abs(value);
             

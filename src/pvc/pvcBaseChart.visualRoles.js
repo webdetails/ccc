@@ -19,7 +19,7 @@ pvc.BaseChart
      */
     _measureVisualRoles: null,
     
-    _constructVisualRoles: function(options) {
+    _constructVisualRoles: function(/*options*/) {
         var parent = this.parent;
         if(parent) {
             this._visualRoles = parent._visualRoles;
@@ -192,7 +192,7 @@ pvc.BaseChart
                         groupingSpec = roleSpec.dimensions;
                     }
                 } else {
-                    // Assumed to be a string
+                    // Assumed to be a string (or null, undefined)
                     groupingSpec = roleSpec;
                 }
                 

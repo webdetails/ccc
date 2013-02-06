@@ -1033,7 +1033,8 @@ def
         var options = this.chart.options;
         var pvPanel = this.pvRootPanel;
         
-        this._isAnimating = options.animate && !def.get(keyArgs, 'bypassAnimation', false) ? 1 : 0;
+        var animate = this.chart._animatable && options.animate;
+        this._isAnimating = animate && !def.get(keyArgs, 'bypassAnimation', false) ? 1 : 0;
         try {
             // When animating, renders the animation's 'start' point
             pvPanel.render();
@@ -1575,8 +1576,7 @@ def
             return "";
         }
         
-        var chart = this.chart;
-        var data  = chart.data;
+        var data = this.data;
         var visibleKeyArgs = {visible: true};
         
         var tooltip = [];
@@ -1595,7 +1595,11 @@ def
         var playingPercentMap = context.panel.stacked === false ? 
                                 null :
                                 complexType.getPlayingPercentVisualRoleDimensionMap();
-        
+
+        var percentValueFormat = playingPercentMap ?
+                               this.chart.options.percentValueFormat:
+                               null;
+
         var commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
         var commonAtomsKeys = complexType.sortDimensionNames(def.keys(commonAtoms));
         
@@ -1611,7 +1615,7 @@ def
                 pct = data.dimensions(dimName).percent(atom.value);
             }
             
-            return chart.options.percentValueFormat.call(null, pct);
+            return percentValueFormat(pct);
         }
         
         var anyCommonAtom = false;
@@ -1639,7 +1643,8 @@ def
             
             tooltip.push("<b>#</b>: " + group._datums.length + '<br/>');
             
-            complexType.sortDimensionNames(group.freeDimensionNames())
+            complexType
+            .sortDimensionNames(group.freeDimensionNames())
             .forEach(function(dimName){
                 var dim = group.dimensions(dimName);
                 if(!dim.type.isHidden){

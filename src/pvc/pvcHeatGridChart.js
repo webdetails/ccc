@@ -12,19 +12,15 @@
  */
 def
 .type('pvc.HeatGridChart', pvc.CategoricalAbstract)
-.init(function(options){
-
-    this.base(options);
-
-    var parent = this.parent;
-    if(parent) {
-        this._sizeRole  = parent._sizeRole;
-        this._colorRole = parent._colorRole;
-    }
-})
 .add({
     _allowColorPerCategory: true,
-    
+
+    // Create color axis, even if the role is unbound
+    // cause we need to check the axis options any way
+    _axisCreateIfUnbound: {
+        'color': true
+    },
+
     _processOptionsCore: function(options){
         
         this.base(options);
@@ -86,31 +82,15 @@ def
         
         this.base();
         
-        this._sizeRole = this._addVisualRole('size', {
-                isMeasure: true,
-                requireSingleDimension: true,
-                requireIsDiscrete: false,
-                valueType: Number,
-                defaultDimension: this._sizeDimName
-            });
+        this._addVisualRole('size', {
+            isMeasure: true,
+            requireSingleDimension: true,
+            requireIsDiscrete: false,
+            valueType: Number,
+            defaultDimension: this._sizeDimName
+        });
     },
 
-    _initData: function(keyArgs){
-        
-        this.base(keyArgs);
-
-        // Cached
-        var sizeGrouping = this._sizeRole.grouping;
-        if(sizeGrouping){
-            this._sizeDim = this.data.dimensions(sizeGrouping.firstDimensionName());
-        }
-
-        var colorGrouping = this._colorRole.grouping;
-        if(colorGrouping) {
-            this._colorDim = this.data.dimensions(colorGrouping.firstDimensionName());
-        }
-    },
-    
     _initPlotsCore: function(/*hasMultiRole*/){
         new pvc.visual.HeatGridPlot(this);
     },
@@ -171,7 +151,6 @@ def
         colorValIdx: 0,
         sizeValIdx:  1,
         measuresIndexes: [2], // TODO: ???
-        animate:    false,
         axisOffset: 0,
         plotFrameVisible: false,
         colorNormByCategory: true,

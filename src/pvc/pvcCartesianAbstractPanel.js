@@ -21,8 +21,8 @@ def
         }
     }
     
-    addAxis(chart.getAxis('base',  plot.option('BaseAxis' ) - 1));
-    addAxis(chart.getAxis('ortho', plot.option('OrthoAxis') - 1));
+    addAxis(chart._getAxis('base',  plot.option('BaseAxis' ) - 1));
+    addAxis(chart._getAxis('ortho', plot.option('OrthoAxis') - 1));
     
     // ----------------
     

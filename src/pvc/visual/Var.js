@@ -23,7 +23,7 @@ pvc.visual.ValueLabelVar = function(value, label, rawValue){
 };
 
 def.set(
-    pvc.visual.ValueLabelVar.prototype, 
+    pvc.visual.ValueLabelVar.prototype,
     'rawValue', undefined,
     'clone',    function(){
         return new pvc.visual.ValueLabelVar(this.value, this.label, this.rawValue);
@@ -33,46 +33,80 @@ def.set(
         return typeof label !== 'string' ? ('' + label) : label;
     });
 
+pvc.visual.ValueLabelVar.fromComplex = function(complex){
+    return complex ?
+           new pvc.visual.ValueLabelVar(complex.value, complex.label, complex.rawValue) :
+           new pvc.visual.ValueLabelVar(null, "", null)
+           ;
+};
 
 def
-.type('pvc.visual.ColorVarHelper')
-.init(function(chart, colorRole){
-    this.colorGrouping = colorRole.grouping;
+.type('pvc.visual.RoleVarHelper')
+.init(function(rootScene, role, keyArgs){
+    var g;
+    var hasPercentSubVar = def.get(keyArgs, 'hasPercentSubVar', false);
+
+    if(!def.get(keyArgs, 'forceUnbound', false)){
+        this.role = role;
+        this.sourceRoleName = role.sourceRole && role.sourceRole.name;
+
+        g = this.grouping = role.grouping;
+        if(g && !g.isDiscrete()){
+            var panel = rootScene.panel();
+            this.rootContDim = panel.data.owner.dimensions(g.firstDimensionName());
+            if(hasPercentSubVar){
+                this.percentFormatter = panel.chart.options.percentValueFormat;
+            }
+        }
+    }
     
-    var colorFirstDimName = this.colorGrouping.firstDimensionName();
-    
-    this.rootColorDim = chart.data.owner.dimensions(colorFirstDimName);
-    
-    this.isDiscrete = this.colorGrouping.isDiscrete();
-    
-    this.colorSourceRoleName = colorRole.sourceRole && colorRole.sourceRole.name;
+    if(!g){
+        // Unbound role
+        // Simply place a null variable in the root scene
+        var roleVar = rootScene.vars[role.name] = new pvc.visual.ValueLabelVar(null, "");
+        if(hasPercentSubVar){
+            roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
+        }
+    }
 })
 .add({
+    isBound: function(){
+        return !!this.grouping;
+    },
+
     onNewScene: function(scene, isLeaf){
-        if(scene.vars.color){
+        if(!this.grouping){
             return;
         }
         
-        var sourceName = this.colorSourceRoleName;
+        var roleName = this.role.name;
+        if(scene.vars[roleName]){
+            return;
+        }
+        
+        var sourceName = this.sourceRoleName;
         if(sourceName){
-            var colorSourceVar = def.getOwn(scene.vars, sourceName);
-            if(colorSourceVar){
-                scene.vars.color = colorSourceVar.clone();
+            var sourceVar = def.getOwn(scene.vars, sourceName);
+            if(sourceVar){
+                scene.vars[roleName] = sourceVar.clone();
                 return;
             }
         }
 
         if(isLeaf){
             // Not grouped, so there's no guarantee that
-            // there's a single color value for all the datums of the group.
+            // there's a single value for all the datums of the group.
         
-            var colorVar;
-            if(this.isDiscrete){
-                // We choose the color of the first datum of the group...
+            var roleVar;
+            var rootContDim = this.rootContDim;
+            if(!rootContDim){
+                // Discrete
+                
+                // We choose the value of the first datum of the group...
                 var firstDatum = scene.datum;
                 if(firstDatum && !firstDatum.isNull){
-                    var view = this.colorGrouping.view(firstDatum);
-                    colorVar = new pvc.visual.ValueLabelVar(
+                    var view = this.grouping.view(firstDatum);
+                    roleVar = new pvc.visual.ValueLabelVar(
                         view.value,
                         view.label,
                         view.rawValue);
@@ -82,20 +116,32 @@ def
                 var singleDatum = group ? group.singleDatum() : scene.datum;
                 if(singleDatum){
                     if(!singleDatum.isNull){
-                        colorVar = Object.create(singleDatum.atoms[this.rootColorDim.name]);
+                        // Simpy inherit from the atom, to save memory
+                        // The Atom is compatible with the "Var" interface
+                        roleVar = Object.create(singleDatum.atoms[rootContDim.name]);
                     }
                 } else if(group){
-                    var value = group
-                                .dimensions(this.rootColorDim.name)
-                                .sum({visible: true, zeroIfNone: false});
+                    var valueDim = group.dimensions(rootContDim.name);
+                    var value    = valueDim.sum({visible: true, zeroIfNone: false});
+                    var label    = rootContDim.format(value);
                     
-                    var label = this.rootColorDim.format(value);
-                    
-                    colorVar = new pvc.visual.ValueLabelVar(value, label, value);
+                    roleVar = new pvc.visual.ValueLabelVar(value, label, value);
+                    if(this.percentFormatter){
+                        if(value == null){
+                            roleVar.percent = new pvc.visual.ValueLabelVar(value, label);
+                        } else {
+                            var valuePct = valueDim.percentOverParent({visible: true});
+
+                            roleVar.percent = new pvc.visual.ValueLabelVar(
+                                                    valuePct,
+                                                    this.percentFormatter.call(null, valuePct));
+                        }
+                    }
                 }
             }
 
-            scene.vars.color = colorVar || new pvc.visual.ValueLabelVar(null, "");
+            scene.vars[roleName] = roleVar ||
+                                   new pvc.visual.ValueLabelVar(null, "");
         }
     }
 });

@@ -91,7 +91,7 @@ def.type('pvc.visual.Scene')
     
     this.datum = datum || null;
     this.group = group;
-
+    
     var parentAtoms;
     var source = (group || datum);
     this.atoms = source ? source.atoms :
@@ -103,12 +103,19 @@ def.type('pvc.visual.Scene')
                       (parentAtoms = (parent && parent.firstAtoms)) ? Object.create(parentAtoms) :
                       this.atoms;
 
+    if(!source){
+        // This logic can be changed (see PointPanel)
+        this.isNull = true;
+    }
+
     /* VARS */
     this.vars = parent ? Object.create(parent.vars) : {};
 })
 .add(pv.Dom.Node)
 
 .add(/** @lends pvc.visual.Scene# */{
+    isNull: false,
+
     /**
      * Obtains an enumerable of the datums present in the scene.
      *

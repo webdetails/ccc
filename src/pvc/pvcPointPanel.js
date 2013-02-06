@@ -508,7 +508,7 @@ def
         var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
         var categDatas = data._children;
         var chart = this.chart;
-        var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
+        var colorVarHelper = new pvc.visual.RoleVarHelper(chart, chart._colorRole);
         var valueDim = data.owner.dimensions(this.valueDimName);
         var isStacked = this.stacked;
         var visibleKeyArgs = {visible: true, zeroIfNone: false};
@@ -544,10 +544,7 @@ def
         .each(function(seriesData1/*, seriesIndex*/){
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1 || data});
 
-            seriesScene.vars.series = new pvc.visual.ValueLabelVar(
-                        seriesData1 ? seriesData1.value : null,
-                        seriesData1 ? seriesData1.label : "",
-                        seriesData1 ? seriesData1.rawValue : null);
+            seriesScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(seriesData1);
             
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
@@ -567,8 +564,7 @@ def
                 // -------------
                 serCatScene.dataIndex = categIndex;
                 
-                serCatScene.vars.category = 
-                    new pvc.visual.ValueLabelVar(categData.value, categData.label, categData.rawValue);
+                serCatScene.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData);
                 
                 // -------------
                 

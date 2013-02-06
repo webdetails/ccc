@@ -67,7 +67,7 @@ def.scope(function(){
                 
                 return value;
             },
-            value:   0
+            value: 0
         },
         
         OverflowMarkersVisible: {
@@ -80,10 +80,7 @@ def.scope(function(){
             value: 'center'
         }
         
-        /* TODO valuesMask...  showValuePercentage
-        ValuePercentage: {
-            value: false
-        }
+        /* TODO valuesMask...
         */
     });
 });

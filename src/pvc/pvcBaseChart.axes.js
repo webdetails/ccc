@@ -38,8 +38,17 @@ pvc.BaseChart
         'ortho': 3
     },
     
-    _axisCreationOrder: ['color', 'size', 'base', 'ortho'],
-    
+    _axisCreationOrder: [
+        'color',
+        'size',
+        'base',
+        'ortho'
+    ],
+
+    _axisCreateIfUnbound: {
+
+    },
+
     _initAxes: function(hasMultiRole){
         this.axes = {};
         this.axesList = [];
@@ -89,17 +98,22 @@ pvc.BaseChart
         this._axisCreationOrder.forEach(function(type){
             // Create **here** ?
             if((this._axisCreateWhere[type] & here) !== 0){
-                
+                var AxisClass;
                 var dataCellsByAxisIndex = dataCellsByAxisTypeThenIndex[type];
                 if(dataCellsByAxisIndex){
                     
-                    var AxisClass = this._axisClassByType[type];
+                    AxisClass = this._axisClassByType[type];
                     if(AxisClass){
                         dataCellsByAxisIndex.forEach(function(dataCells, axisIndex){
                             
                             new AxisClass(this, type, axisIndex);
                             
                         }, this);
+                    }
+                } else if(this._axisCreateIfUnbound[type]){
+                    AxisClass = this._axisClassByType[type];
+                    if(AxisClass){
+                        new AxisClass(this, type, 0);
                     }
                 }
             }
@@ -184,14 +198,14 @@ pvc.BaseChart
         return this;
     },
     
-    getAxis: function(type, index){
+    _getAxis: function(type, index){
         var typeAxes = this.axesByType[type];
-        if(typeAxes){
+        if(typeAxes && index != null && (+index >= 0)){
             return typeAxes[index];
         }
     },
     
-    _bindAxes: function(hasMultiRole){
+    _bindAxes: function(/*hasMultiRole*/){
         // Bind all axes with dataCells registered in #_dataCellsByAxisTypeThenIndex
         // and which were created **here**
         
@@ -218,7 +232,7 @@ pvc.BaseChart
             this);
     },
     
-    _setAxesScales: function(isMulti){
+    _setAxesScales: function(/*isMulti*/){
         if(!this.parent){
             var colorAxes = this.axesByType.color;
             if(colorAxes){

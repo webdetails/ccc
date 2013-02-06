@@ -209,7 +209,8 @@ def
             baseScale  = this.axes.base.scale,
             bandWidth  = baseScale.range().band,
             boxWidth   = Math.min(bandWidth * this.boxSizeRatio, this.maxBoxSize),
-            orthoScale = this.axes.ortho.scale
+            orthoScale = this.axes.ortho.scale,
+            colorVarHelper = new pvc.visual.RoleVarHelper(chart, chart._colorRole)
             ;
 
         /**
@@ -223,7 +224,6 @@ def
         function createCategScene(categData){
             var categScene = new pvc.visual.Scene(rootScene, {group: categData});
             var vars = categScene.vars;
-            var colorVarHelper = new pvc.visual.ColorVarHelper(this.chart, this.chart._colorRole);
             
             // Series distinction is ignored
             // If the role is bound by the user, its data will not be visible 

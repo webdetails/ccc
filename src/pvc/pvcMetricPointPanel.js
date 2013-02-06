@@ -21,8 +21,11 @@ def
     
     this.base(chart, parent, plot, options);
     
-    var sizeAxisIndex = plot.option('SizeAxis');
-    this.axes.size  = sizeAxisIndex != null ? chart.getAxis('size', sizeAxisIndex - 1) : null;
+    this.axes.size  = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
+
+    var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
+    this.visualRoles.size = chart.visualRoles(sizeRoleName);
+
     this.linesVisible  = plot.option('LinesVisible'); // TODO
     this.dotsVisible   = plot.option('DotsVisible' ); // TODO
     if(!this.linesVisible && !this.dotsVisible){
@@ -95,17 +98,15 @@ def
     },
     
     _getRootScene: function(){
-        var rootScene = this._rootScene;
+        var me = this;
+        var rootScene = me._rootScene;
         if(!rootScene){
-            var hasColorRole = this.chart._colorRole.isBound();
+            var roles = me.visualRoles;
+            var hasColorRole = roles.color.isBound() && !me.axes.color.scale.isNull;
+            var hasSizeRole  = roles.size .isBound() && !me.axes.size .scale.isNull;
             
-            var sizeAxis = this.axes.size;
-            var hasSizeRole = sizeAxis && sizeAxis.isBound() && !sizeAxis.scale.isNull;
-            
-            // --------------
-            
-            this._rootScene = 
-            rootScene = this._buildScene(hasColorRole, hasSizeRole);
+            me._rootScene =
+            rootScene = me._buildScene(hasColorRole, hasSizeRole);
         }
         
         return rootScene;
@@ -121,7 +122,7 @@ def
         if(rootScene.hasSizeRole){
             var areaRange = this._calcDotAreaRange(layoutInfo);
             
-            this.sizeScale = this.chart.axes.size
+            this.sizeScale = this.axes.size
                 .setScaleRange(areaRange)
                 .scale;
         }
@@ -224,8 +225,7 @@ def
         if(!this.autoPaddingByDotSize){
             requestPaddings = this._calcRequestPaddings(layoutInfo);
         } else {
-            var chart = this.chart;
-            var axes  = chart.axes;
+            var axes  = this.axes;
             var clientSize = layoutInfo.clientSize;
             var paddings   = layoutInfo.paddings;
            
@@ -245,11 +245,11 @@ def
             axes.y.setScaleRange(clientSize.height);
            
             // X and Y visual roles
-            var sceneXScale = chart.axes.base.sceneScale({sceneVarName:  'x'});
-            var sceneYScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'});
+            var sceneXScale = axes.base .sceneScale({sceneVarName: 'x'});
+            var sceneYScale = axes.ortho.sceneScale({sceneVarName: 'y'});
            
-            var xLength = chart.axes.base.scale.max;
-            var yLength = chart.axes.ortho.scale.max;
+            var xLength = axes.base .scale.max;
+            var yLength = axes.ortho.scale.max;
            
             var hasSizeRole = rootScene.hasSizeRole;
             var sizeScale = this.sizeScale;
@@ -426,7 +426,8 @@ def
         this.pvDot.rubberBandSelectionMode = 'center';
         
         // -- COLOR --
-        dot.override('defaultColor', function(type){
+        dot
+        .override('defaultColor', function(type){
             var color = this.base(type);
             
             if(color && type === 'stroke'){
@@ -443,20 +444,21 @@ def
 //          }
             
             return color;
-        });
-        
-        dot.override('interactiveColor', function(color, type){
+        })
+        .override('interactiveColor', function(color, type){
             if(type === 'stroke' && this.scene.isActive) {
                 // Don't make border brighter on active
                 return color;
             }
             
             return this.base(color, type);
-        });
+        })
+        ;
         
         // -- DOT SIZE --
         if(!rootScene.hasSizeRole){
-            dot.override('baseSize', function(){
+            dot
+            .override('baseSize', function(){
                 /* When not showing dots, 
                  * but a datum is alone and 
                  * wouldn't be visible using lines,  
@@ -474,7 +476,7 @@ def
                 return this.base();
             });
         } else {
-            var sizeAxis = chart.axes.size;
+            var sizeAxis = myself.axes.size;
             if (sizeAxis.scaleUsesAbs()) {
                 dot
                 .override('strokeColor', function () {
@@ -493,18 +495,19 @@ def
             var sizeScale  = this.sizeScale;
             
             /* Ignore any extension */
-            dot .override('baseSize', function(){
-                    return sizeScale(this.scene.vars.size.value);
-                })
-                .override('interactiveSize', function(size){
-                    if(this.scene.isActive){
-                        var radius = Math.sqrt(size) * 1.1;
-                        return radius * radius;
-                    }
-                    
-                    return size;
-                })
-                ;
+            dot
+            .override('baseSize', function(){
+                return sizeScale(this.scene.vars.size.value);
+            })
+            .override('interactiveSize', function(size){
+                if(this.scene.isActive){
+                    var radius = Math.sqrt(size) * 1.1;
+                    return radius * radius;
+                }
+
+                return size;
+            })
+            ;
             
             // Default is to hide overflow dots, 
             // for a case where the provided offset, or calculated one is not enough 
@@ -561,46 +564,38 @@ def
     },
     
     _finalizeScene: function(rootScene){
-        var chart = this.chart,
-            sceneBaseScale  = chart.axes.base.sceneScale({sceneVarName: 'x'}),
-            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'});
+        var axes = this.axes,
+            sceneBaseScale  = axes.base.sceneScale ({sceneVarName: 'x'}),
+            sceneOrthoScale = axes.ortho.sceneScale({sceneVarName: 'y'});
         
         rootScene
             .children()
             .selectMany(function(seriesScene){ return seriesScene.childNodes; })
             .each(function(leafScene){
-                leafScene.basePosition  = sceneBaseScale(leafScene);
+                leafScene.basePosition  = sceneBaseScale (leafScene);
                 leafScene.orthoPosition = sceneOrthoScale(leafScene);
-            }, this);
+            });
     
         return rootScene;
     },
     
     _buildScene: function(hasColorRole, hasSizeRole){
         var data = this.visibleData();
+        
         var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
         rootScene.hasColorRole = hasColorRole;
         rootScene.hasSizeRole  = hasSizeRole;
+
+        var roles = this.visualRoles;
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {forceUnbound: !hasColorRole});
+        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {forceUnbound: !hasSizeRole });
         
-        var chart = this.chart;
-        var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
-        var xDimType = chart._xRole.firstDimensionType();
-        var yDimType = chart._yRole.firstDimensionType();
-        
-        var getSizeRoleValue;
-        if(chart._sizeDim){
-            var sizeDimName = chart._sizeDim.name;
-            
-            getSizeRoleValue = function(scene){
-                return scene.atoms[sizeDimName].value;
-            };
-        }
-         
+        var xDim = data.owner.dimensions(roles.x.firstDimensionName());
+        var yDim = data.owner.dimensions(roles.y.firstDimensionName());
+
         // --------------
         
-        /** 
-         * Create starting scene tree 
-         */
+        /* Create starting scene tree */
         data.children()
             .each(createSeriesScene, this);
         
@@ -618,20 +613,20 @@ def
             /* Create series scene */
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesGroup});
             
-            seriesScene.vars.series = new pvc.visual.ValueLabelVar(
-                                seriesGroup.value,
-                                seriesGroup.label,
-                                seriesGroup.rawValue);
+            seriesScene.vars.series =
+                    pvc.visual.ValueLabelVar.fromComplex(seriesGroup);
             
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
-            seriesGroup.datums().each(function(datum, dataIndex){
-                var xAtom = datum.atoms[chart._xDim.name];
+            seriesGroup
+            .datums()
+            .each(function(datum, dataIndex){
+                var xAtom = datum.atoms[xDim.name];
                 if(xAtom.value == null){
                     return;
                 }
                 
-                var yAtom = datum.atoms[chart._yDim.name];
+                var yAtom = datum.atoms[yDim.name];
                 if(yAtom.value == null){
                     return;
                 }
@@ -639,17 +634,11 @@ def
                 /* Create leaf scene */
                 var scene = new pvc.visual.Scene(seriesScene, {datum: datum});
                 scene.dataIndex = dataIndex;
+                
                 scene.vars.x = Object.create(xAtom);
                 scene.vars.y = Object.create(yAtom);
                 
-                if(getSizeRoleValue){
-                    var sizeValue = getSizeRoleValue(scene);
-                    scene.vars.size = new pvc.visual.ValueLabelVar(
-                                            sizeValue,
-                                            chart._sizeDim.format(sizeValue),
-                                            sizeValue);
-                }
-                
+                sizeVarHelper .onNewScene(scene, /* isLeaf */ true);
                 colorVarHelper.onNewScene(scene, /* isLeaf */ true);
                 
                 scene.isIntermediate = false;
@@ -706,8 +695,8 @@ def
              * Calls corresponding dimension's cast to ensure we have a date object,
              * when that's the dimension value type.
              */
-            var interYValue = yDimType.cast.call(null, ((+toScene.vars.y.value) + (+fromScene.vars.y.value)) / 2);
-            var interXValue = xDimType.cast.call(null, ((+toScene.vars.x.value) + (+fromScene.vars.x.value)) / 2);
+            var interYValue = yDim.type.cast.call(null, ((+toScene.vars.y.value) + (+fromScene.vars.y.value)) / 2);
+            var interXValue = xDim.type.cast.call(null, ((+toScene.vars.x.value) + (+fromScene.vars.x.value)) / 2);
             
             //----------------
             
@@ -721,18 +710,15 @@ def
             
             interScene.vars.x = new pvc.visual.ValueLabelVar(
                                     interXValue,
-                                    chart._xDim.format(interXValue),
+                                    xDim.format(interXValue),
                                     interXValue);
             
             interScene.vars.y = new pvc.visual.ValueLabelVar(
                                     interYValue,
-                                    chart._yDim.format(interYValue),
+                                    yDim.format(interYValue),
                                     interYValue);
             
-            if(getSizeRoleValue){
-                interScene.vars.size = toScene.vars.size;
-            }
-            
+            sizeVarHelper .onNewScene(interScene, /* isLeaf */ true);
             colorVarHelper.onNewScene(interScene, /* isLeaf */ true);
             
             interScene.ownerScene = toScene;

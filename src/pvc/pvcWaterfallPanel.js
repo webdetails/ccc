@@ -87,7 +87,6 @@ def
         this.base();
 
         var chart = this.chart,
-            options = chart.options,
             isVertical = this.isOrientationVertical(),
             anchor = isVertical ? "bottom" : "left",
             ao = this.anchorOrtho(anchor),
@@ -115,7 +114,7 @@ def
                 .lock('data', waterGroupRootScene.childNodes)
                 .pvMark
                 .zOrder(-1)
-                .fillStyle(function(scene){
+                .fillStyle(function(/*scene*/){
                     return panelColors(0)/* panelColors(scene.vars.category.level - 1)*/.alpha(0.15);
                 })
                 [ao](function(scene){
@@ -125,8 +124,7 @@ def
                 [this.anchorLength(anchor)](function(scene){
                     var categVar = scene.vars.category,
                         length = Math.abs(baseScale(categVar.rightValue) -
-                                baseScale(categVar.leftValue))
-                        ;
+                                          baseScale(categVar.leftValue ));
 
                     return length + barStepWidth;
                 })
@@ -243,10 +241,8 @@ def
             var categScene = new pvc.visual.Scene(rootScene, {group: categData1});
             
             var categVar = 
-                categScene.vars.category = 
-                    new pvc.visual.ValueLabelVar(
-                                categData1.value,
-                                categData1.label);
+                categScene.vars.category =
+                pvc.visual.ValueLabelVar.fromComplex(categData1);
             
             categVar.group = categData1;
             
@@ -293,10 +289,8 @@ def
                     var categScene = new pvc.visual.Scene(rootScene, {group: catData});
 
                     var categVar = 
-                        categScene.vars.category = 
-                            new pvc.visual.ValueLabelVar(
-                                    catData.value,
-                                    catData.label);
+                        categScene.vars.category =
+                        pvc.visual.ValueLabelVar.fromComplex(catData);
                     
                     categVar.group = catData;
                     categVar.level = level;

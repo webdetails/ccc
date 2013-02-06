@@ -135,7 +135,6 @@ def
         this.base(hasMultiRole);
         
         if(!hasMultiRole || this.parent){
-            
             var sizeAxis = this.axes.size;
             if(sizeAxis && sizeAxis.isBound()){
                 this._createAxisScale(sizeAxis);
@@ -171,27 +170,7 @@ def
     
     defaults: {
         axisOriginIsZero: false,
-        
         tooltipOffset: 10
-        
-        /* Continuous Color Role */
-        // TODO:
-        //colorScaleType: "linear", // "discrete", "normal" (distribution) or "linear"
-        //colors: ['red', 'yellow','green'],
-        //colorDomain:  undefined,
-        //colorMin:  undefined, //"white",
-        //colorMax:  undefined, //"darkgreen",
-        //colorNull: "#efc5ad"   // white with a shade of orange
-         
-        /* Size Role */
-//      sizeAxisUseAbs:   true,
-//      sizeAxisFixedMin: undefined,
-//      sizeAxisFixedMax: undefined,
-//      sizeAxisOriginIsZero: false,
-
-//      sizeAxisRatio:    undefined,
-//      sizeAxisRatioTo:  undefined,
-//      autoPaddingByDotSize: undefined
     }
 });
 
@@ -207,7 +186,6 @@ def
         });
     }
 });
-
 
 /**
  * Metric Line Chart
