@@ -26,8 +26,8 @@ def
     this._extensionPrefix = axis.extensionPrefixes;
     
     if(this.labelSpacingMin == null){
-        // The user tolerance for "missing" stuff is much smaller with discrete stuff
-        this.labelSpacingMin = this.isDiscrete ? 0.1 : 1.5; // em
+        // The user tolerance for "missing" stuff is much smaller with discrete data
+        this.labelSpacingMin = this.isDiscrete ? 0.25 : 1.5; // em
     }
     
     if(this.showTicks == null){
@@ -458,8 +458,14 @@ def
     
     _calcTicks: function(){
         var layoutInfo = this._layoutInfo;
-        
-        layoutInfo.textHeight = pv.Text.fontHeight(this.font);
+
+        /**
+         * The bbox's width is usually very close to the width of the text.
+         * The bbox's height is usually about 1/3 bigger than the height of the text,
+         * because it includes space for both the descent and the ascent of the font.
+         * We'll compensate this by reducing the height of text.
+         */
+        layoutInfo.textHeight = pv.Text.fontHeight(this.font) * 2/3;
         layoutInfo.maxTextWidth = null;
         
         // Reset scale to original unrounded domain
@@ -617,7 +623,7 @@ def
         // Minimum space that the user wants separating 
         // the closest edges of the bounding boxes of two consecutive labels, 
         // measured perpendicularly to the label text direction.
-        var sMin = h * this.labelSpacingMin /* parameter in em */;
+        var sMin = h * this.labelSpacingMin; /* parameter in em */
         
         // The angle that the text makes to the x axis (clockwise,y points downwards) 
         var a = layoutInfo.textAngle;
