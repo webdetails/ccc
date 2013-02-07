@@ -126,7 +126,7 @@ def
         }
     },
     
-    _generateTrendsDataCellCore: function(dataCell, trendInfo){
+    _generateTrendsDataCellCore: function(/*dataCell, trendInfo*/){
         // abstract
         // see Metric and Categorical implementations
     },
@@ -276,13 +276,10 @@ def
                 useCompositeAxis:  axis.option('Composite'),
                 font:              axis.option('Font'),
                 labelSpacingMin:   axis.option('LabelSpacingMin'),
-                tickExponentMin:   axis.option('TickExponentMin'),
-                tickExponentMax:   axis.option('TickExponentMax'),
                 grid:              axis.option('Grid'),
                 gridCrossesMargin: axis.option('GridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
                 zeroLine:          axis.option('ZeroLine'),
-                domainRoundMode:   axis.option('DomainRoundMode'),
                 desiredTickCount:  axis.option('DesiredTickCount'),
                 showTicks:         axis.option('Ticks'),
                 showMinorTicks:    axis.option('MinorTicks')

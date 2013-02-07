@@ -236,7 +236,21 @@ def.scope(function(){
             
             return roundingPaddings;
         },
-        
+
+        calcContinuousTicks: function(desiredTickCount){
+            if(desiredTickCount == null) {
+                desiredTickCount = this.option('DesiredTickCount');
+            }
+
+            return this.scale.ticks(
+                desiredTickCount,
+                {
+                    roundInside:       this.option('DomainRoundMode') !== 'tick',
+                    numberExponentMin: this.option('TickExponentMin'),
+                    numberExponentMax: this.option('TickExponentMax')
+                });
+        },
+
         _getOptionsDefinition: function(){
             return cartAxis_optionsDef;
         },

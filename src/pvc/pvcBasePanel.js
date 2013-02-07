@@ -69,16 +69,13 @@ def
         this.topRoot   = this;
         this.isRoot    = true;
         this.isTopRoot = true;
-        this.data      = this.chart.data;
-        
     } else {
         this.parent    = parent;
         this.isTopRoot = false;
         this.isRoot    = (parent.chart !== chart);
         this.root      = this.isRoot ? this : parent.root;
         this.topRoot   = parent.topRoot;
-        this.data      = parent.data; // TODO
-
+        
         if(this.isRoot) {
             this.position.left = chart.left; 
             this.position.top  = chart.top;
@@ -87,6 +84,8 @@ def
         parent._addChild(this);
     }
     
+    this.data = (this.isRoot ? chart : parent).data;
+
     /* Root panels do not need layout */
     if(this.isRoot) {
         this.anchor  = null;

@@ -23,11 +23,11 @@ def
         
         
         // Full grid lines
-        if(xAxis.option('Visible') && xAxis.option('Grid')) {
+        if(xAxis.option('Grid')) {
             this.xGridRule = this._createGridRule(xAxis);
         }
         
-        if(yAxis.option('Visible') && yAxis.option('Grid')) {
+        if(yAxis.option('Grid')) {
             this.yGridRule = this._createGridRule(yAxis);
         }
         
@@ -65,8 +65,7 @@ def
         
         // Composite axis don't fill ticks
         var isDiscrete = axis.role.grouping.isDiscrete();
-        var axisPanel  = this.chart.axesPanels[axis.id];
-        var rootScene  = axisPanel._getRootScene();
+        var rootScene  = this._getAxisGridRootScene(axis);
         if(!rootScene){
             return;
         }
@@ -149,7 +148,45 @@ def
         
         return pvGridRule;
     },
-    
+
+    _getAxisGridRootScene: function(axis){
+        var data = this.data;
+        var isDiscrete = axis.isDiscrete();
+        if(isDiscrete){
+            data = axis.role.flatten(data, {visible: true});
+        }
+
+        var rootScene =
+            new pvc.visual.CartesianAxisRootScene(null, {
+                panel: this,
+                group: data
+            });
+            
+        if (isDiscrete){
+            data._children.forEach(function(tickData){
+                new pvc.visual.CartesianAxisTickScene(rootScene, {
+                    group:     tickData,
+                    tick:      tickData.value,
+                    tickRaw:   tickData.rawValue,
+                    tickLabel: tickData.label
+                });
+            });
+        } else {
+            // When the axis panel is visible, ticks will have been set in the axis.
+            var ticks = axis.ticks || axis.calcContinuousTicks();
+
+            ticks.forEach(function(majorTick){
+                new pvc.visual.CartesianAxisTickScene(rootScene, {
+                    tick:      majorTick,
+                    tickRaw:   majorTick,
+                    tickLabel: axis.scale.tickFormat(majorTick)
+                });
+            }, this);
+        }
+
+        return rootScene;
+    },
+
     /* zOrder
      *
      * TOP
@@ -666,12 +703,7 @@ def
             drag.max[a_p] = oper.max;
         }
     },
-    
-    _getOrthoAxis: function(type){
-        var orthoType = type === 'base' ? 'ortho' : 'base';
-        return this.chart.axes[orthoType];
-    },
-    
+
     /*
      * @override
      */
