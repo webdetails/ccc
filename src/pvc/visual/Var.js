@@ -30,7 +30,9 @@ def.set(
     },
     'toString', function(){
         var label = this.label || this.value;
-        return typeof label !== 'string' ? ('' + label) : label;
+        return label == null ? "" : 
+               (typeof label !== 'string') ? ('' + label) :
+               label;
     });
 
 pvc.visual.ValueLabelVar.fromComplex = function(complex){

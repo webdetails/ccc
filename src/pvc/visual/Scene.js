@@ -144,7 +144,7 @@ def.type('pvc.visual.Scene')
                 throw def.error.operationInvalid("Scene format mask is invalid.");
             }
             
-            var atom = this.atoms[prop[0]];
+            var atom = this.firstAtoms[prop[0]];
             if(atom){
                 if(prop.length > 1) {
                     switch(prop[1]){
@@ -162,7 +162,7 @@ def.type('pvc.visual.Scene')
         }
         
         // A scene var name
-        return def.getPath(this.vars, prop); // Scene vars' toString may end up being called
+        return def.nullyTo(def.getPath(this.vars, prop), ""); // Scene vars' toString may end up being called
     },
     
     isRoot: function(){

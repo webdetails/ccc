@@ -46,9 +46,17 @@ def.scope(function(){
             },
             
             ValuesVisible: { // override
-                value: true
+                getDefault: function(/*optionInfo*/){
+                    // Values do not work very well when UseShapes
+                    return !this.option('UseShapes');
+                },
+                value: null // clear inherited default value
             },
-            
+
+            ValuesMask: { // override, dynamic default
+                value: null
+            },
+
             OrthoRole: { // override
                 value: 'series'
             },
