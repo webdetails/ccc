@@ -42,7 +42,13 @@ def.scope(function(){
                 cast:    pvc.parseShape,
                 value:   'circle'
             },
-            
+
+            NullShape: {
+                resolve: '_resolveFull',
+                cast:    pvc.parseShape,
+                value:   'cross'
+            },
+
             DotsVisible: {
                 resolve: '_resolveFull',
                 data:    visibleData('Dots'),
@@ -59,6 +65,10 @@ def.scope(function(){
             
             ValuesAnchor: { // override
                 value: 'right'
+            },
+
+            ValuesMask: {
+                value: "{x},{y}"
             }
         });
 });

@@ -5,27 +5,30 @@ def
     var hasPercentSubVar = def.get(keyArgs, 'hasPercentSubVar', false);
 
     if(!def.get(keyArgs, 'forceUnbound', false)){
-        this.role = role;
-        this.sourceRoleName = role.sourceRole && role.sourceRole.name;
-
         g = this.grouping = role.grouping;
-        if(g && !g.isDiscrete()){
-            var panel = rootScene.panel();
-            this.rootContDim = panel.data.owner.dimensions(g.firstDimensionName());
-            if(hasPercentSubVar){
-                this.percentFormatter = panel.chart.options.percentValueFormat;
+        if(g){
+            this.role = role;
+            this.sourceRoleName = role.sourceRole && role.sourceRole.name;
+            if(!g.isDiscrete()){
+                var panel = rootScene.panel();
+                this.rootContDim = panel.data.owner.dimensions(g.firstDimensionName());
+                if(hasPercentSubVar){
+                    this.percentFormatter = panel.chart.options.percentValueFormat;
+                }
             }
         }
     }
     
     if(!g){
         // Unbound role
-        // Simply place a null variable in the root scene
+        // Place a null variable in the root scene
         var roleVar = rootScene.vars[role.name] = new pvc.visual.ValueLabelVar(null, "");
         if(hasPercentSubVar){
             roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
         }
     }
+
+    rootScene['is' + def.firstUpperCase(role.name) + 'Bound'] = !!g;
 })
 .add({
     isBound: function(){
@@ -64,19 +67,14 @@ def
                 var firstDatum = scene.datum;
                 if(firstDatum && !firstDatum.isNull){
                     var view = this.grouping.view(firstDatum);
-                    roleVar = new pvc.visual.ValueLabelVar(
-                        view.value,
-                        view.label,
-                        view.rawValue);
+                    roleVar = pvc.visual.ValueLabelVar.fromComplex(view);
                 }
             } else {
                 var group = scene.group;
                 var singleDatum = group ? group.singleDatum() : scene.datum;
                 if(singleDatum){
                     if(!singleDatum.isNull){
-                        // Simpy inherit from the atom, to save memory
-                        // The Atom is compatible with the "Var" interface
-                        roleVar = Object.create(singleDatum.atoms[rootContDim.name]);
+                        roleVar = pvc.visual.ValueLabelVar.fromAtom(singleDatum.atoms[rootContDim.name]);
                     }
                 } else if(group){
                     var valueDim = group.dimensions(rootContDim.name);

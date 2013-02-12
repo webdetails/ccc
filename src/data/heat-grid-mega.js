@@ -40,7 +40,7 @@ var testHeatGridMegaOptions = {
     "orthoAxisOrdinal":false,
     "colorScaleType":"linear",
     "numSD":2,
-    "colorNull":"#efc5ad",
+    "colorMissing":"#efc5ad",
     "useShapes":true,
     "shape":"square",
     "isMultiValued":true,

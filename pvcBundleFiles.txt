@@ -36,7 +36,9 @@ src/pvc/visual/sign/BasicSign.js
 src/pvc/visual/sign/Sign.js
 src/pvc/visual/sign/Panel.js
 src/pvc/visual/sign/Label.js
+src/pvc/visual/sign/ValueLabel.js
 src/pvc/visual/sign/Dot.js
+src/pvc/visual/sign/DotSizeColor.js
 src/pvc/visual/sign/Line.js
 src/pvc/visual/sign/Area.js
 src/pvc/visual/sign/Bar.js

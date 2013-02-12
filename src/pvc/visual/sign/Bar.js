@@ -35,7 +35,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
         var scene = this.scene;
         
         if(type === 'stroke'){
-            if(scene.isActive){
+            if(this.mayShowActive(/*noSeries*/true)){
                return color.brighter(1.3).alpha(0.7);
             }
             
@@ -43,8 +43,8 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                 return null;
             }
 
-            if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
-                if(this.isActiveSeriesAware && scene.isActiveSeries()) {
+            if(this.mayShowNotAmongSelected()) {
+                if(this.mayShowActive()) {
                     return pv.Color.names.darkgray.darker().darker();
                 }
                 
@@ -52,24 +52,24 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                 
             }
             
-            if(this.isActiveSeriesAware && scene.isActiveSeries()){
+            if(this.mayShowActive()){
                 return color.brighter(1).alpha(0.7);
             }
 
         } else if(type === 'fill'){
-            if(scene.isActive) {
+            if(this.mayShowActive(/*noSeries*/true)) {
                 return color.brighter(0.2).alpha(0.8);
             } 
 
-            if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
-                if(this.isActiveSeriesAware && scene.isActiveSeries()) {
+            if(this.mayShowNotAmongSelected()) {
+                if(this.mayShowActive()) {
                     return pv.Color.names.darkgray.darker(2).alpha(0.8);
                 }
                 
                 return this.dimColor(color, type);
             }
             
-            if(this.isActiveSeriesAware && scene.isActiveSeries()){
+            if(this.mayShowActive()){
                 return color.brighter(0.2).alpha(0.8);
             }
         }
@@ -83,7 +83,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     },
 
     interactiveStrokeWidth: function(strokeWidth){
-        if(this.scene.isActive){
+        if(this.mayShowActive(/*noSeries*/true)){
             return Math.max(1, strokeWidth) * 1.3;
         }
 

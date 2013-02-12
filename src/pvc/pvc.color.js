@@ -4,12 +4,26 @@ def.scope(function(){
     
     pvc.color = {
         scale:  colorScale,
-        scales: colorScales
+        scales: colorScales,
+        toGray: pvc.toGrayScale,
+        isGray: colorIsGray
     };
     
     // --------------------------
     // exported
     
+    function colorIsGray(color){
+        color = pv.color(color);
+        var r = color.r;
+        var g = color.g;
+        var b = color.b;
+        var avg = (r + g + b) / 3;
+        var tol = 2;
+        return Math.abs(r - avg) <= tol &&
+               Math.abs(g - avg) <= tol &&
+               Math.abs(b - avg) <= tol;
+    }
+
     /**
      * Creates color scales of a specified type for datums grouped by a category.
      * 
@@ -59,7 +73,7 @@ def.scope(function(){
      * </p>
      * @param {string|pv.color} [keyArgs.colorMin] The minimum color.
      * @param {string|pv.color} [keyArgs.colorMax] The maximum color.
-     * @param {string|pv.color} [keyArgs.colorNull] The color shown for null values.
+     * @param {string|pv.color} [keyArgs.colorMissing] The color shown for null values.
      * @param {(string|pv.color)[]} [keyArgs.colors] Array of colors.
      * <p>
      * This argument is ignored if both minimum and maximum colors are specified.
@@ -112,7 +126,7 @@ def.scope(function(){
             this.domainComparer = function(a, b){ return dimType.compare(a, b); };
         }
        
-        this.nullRangeValue = keyArgs.colorNull ? pv.color(keyArgs.colorNull) : pv.Color.transparent;
+        this.nullRangeValue = keyArgs.colorMissing ? pv.color(keyArgs.colorMissing) : pv.Color.transparent;
        
         this.domainRangeCountDif = 0;
     })

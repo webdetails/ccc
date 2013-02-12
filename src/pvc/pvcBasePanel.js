@@ -141,6 +141,8 @@ def
     
     _extensionPrefix: '',
     
+    _rubberSelectableMarks: null,
+
     /**
      * Total height of the panel in pixels.
      * Includes vertical paddings and margins.
@@ -285,7 +287,10 @@ def
     },
     
     _addSign: function(sign){
-        (this._signs || (this._signs = [])).push(sign); 
+        def.array.lazy(this, '_signs').push(sign);
+        if(sign.isRubberSelectable()){
+            def.array.lazy(this, '_rubberSelectableMarks').push(sign.pvMark);
+        }
     },
 
     visibleData: function(){
@@ -1121,7 +1126,7 @@ def
      * @virtual
      */
     _getSelectableMarks: function(){
-        return null;
+        return this._rubberSelectableMarks;
     },
     
     
@@ -1414,6 +1419,7 @@ def
             })
             .event(offEvent, function(scene){
                 if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                     // Clears THE active scene, if ANY (not necessarily = scene)
                     if(scene.clearActive()) {
                         /* Something was active */
                         panel.renderInteractive();
@@ -1426,8 +1432,12 @@ def
     
     /* TOOLTIP */ 
     _addPropTooltip: function(pvMark, keyArgs){
-        var chartTipOptions = this.chart._tooltipOptions;
+        if(pvMark.hasTooltip){
+            return;
+        }
         
+        var chartTipOptions = this.chart._tooltipOptions;
+
         var tipOptions;
         var nowTipOptions = def.get(keyArgs, 'options');
         if(nowTipOptions){
@@ -1461,11 +1471,13 @@ def
         }
         
         var isLazy = def.get(keyArgs, 'isLazy', true);
-        
-        pvMark.localProperty("tooltip"/*, Function | String*/) 
+
+        pvMark.localProperty("tooltip"/*, Function | String*/)
               .tooltip(this._createTooltipProp(pvMark, buildTooltip, isLazy))
               .title(function(){ return '';} ) // Prevent browser tooltip
               .event(tipsyEvent, pv.Behavior.tipsy(tipOptions));
+
+        pvMark.hasTooltip = true;
         
         this._ensurePropEvents(pvMark);
     },
@@ -1521,7 +1533,7 @@ def
         return function(){
             // Capture current context
             var context = myself._getContext(pvMark, null);
-            
+
             // discard intermediate points
             if (context.scene.isIntermediate){
                 return null;
@@ -2090,8 +2102,9 @@ def
         var useCenter = (selectionMode === 'center');
         
         pvMark.eachInstanceWithData(function(scenes, index, toScreen){
-            
-            var shape = pvMark.getShape(scenes, index);
+
+            // Apply size reduction to tolerate user unprecise selections
+            var shape = pvMark.getShape(scenes, index, /*inset margin each side*/0.2);
             
             shape = (useCenter ? shape.center() : shape).apply(toScreen);
             

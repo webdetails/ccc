@@ -211,6 +211,30 @@
                 The maximum width of a box plot bar, in pixel units.
             </c:documentation>
         </c:property>
+
+        <c:property name="valuesVisible" fixed="false" type="boolean" category="Style">
+            <c:documentation>
+                This plot type does not have value labels.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" fixed="null" category="Style">
+            <c:documentation>
+                This plot type does not have value labels.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="valuesFont" type="string" category="Style" fixed="null">
+            <c:documentation>
+                This plot type does not have value labels.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="valuesMask" type="string" fixed="null" category="Layout">
+            <c:documentation>
+                This plot type does not have value labels.
+            </c:documentation>
+        </c:property>
         
         <c:property name="extensionPoints" type="pvc.options.ext.BoxplotPlotExtensionPoints" category="Style" expandUse="optional">
             <c:documentation>
@@ -268,7 +292,6 @@
                 The index of the orthogonal cartesian axis to use for the plot.
             </c:documentation>
         </c:property>
-        
     </c:complexType>
     
     <c:complexType name="BoxplotPlotExtensionPoints" space="pvc.options.ext" use="expanded">

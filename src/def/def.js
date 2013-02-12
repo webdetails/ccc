@@ -518,7 +518,9 @@ var def = /** @lends def */{
             return !f.apply(this, arguments);
         };
     },
-    
+
+    sqr: function(v){ return v * v;},
+
     // Constant functions ----------------
     
     /**

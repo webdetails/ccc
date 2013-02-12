@@ -14,26 +14,26 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     this.base(panel, pvMark, keyArgs);
     
     if(!def.get(keyArgs, 'freePosition', false)){
-        var basePosProp  = panel.isOrientationVertical() ? "left" : "bottom",
-            orthoPosProp = panel.anchorOrtho(basePosProp);
-        
-        this/* Positions */
-            ._lockDynamic(orthoPosProp, 'y')
-            ._lockDynamic(basePosProp,  'x');
+        var a_left   = panel.isOrientationVertical() ? 'left' : 'bottom';
+        var a_bottom = panel.anchorOrtho(a_left);
+
+        /* Positions */
+        this._lockDynamic(a_left,   'x')
+            ._lockDynamic(a_bottom, 'y');
     }
-       
-    this/* Shape & Size */
-        ._bindProperty('shape',       'shape' )
+
+    /* Shape & Size */
+    this._bindProperty('shape',       'shape' )
         ._bindProperty('shapeRadius', 'radius')
-        ._bindProperty('shapeSize',   'size'  )
+        ._bindProperty('shapeSize',   'size'  );
         
-        /* Colors & Line */
-        .optional('strokeDasharray', undefined) // Break inheritance
-        .optional('lineWidth',       1.5)       // Idem
-        ;
+    /* Colors & Line */
+    this.optional('strokeDasharray', undefined) // Break inheritance
+        .optional('lineWidth',       1.5);      // Idem
 })
 .prototype
 .property('size')
+.property('shape')
 .constructor
 .add({
     /* Sign Spatial Coordinate System
@@ -52,25 +52,17 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     y: function(){ return 0; },
     x: function(){ return 0; },
     
-    shape: function(){ 
-        return this.delegateExtension(); 
-    },
-    
     radius: function(){
         // Store extended value, if any
-        // See #sizeCore
+        // See #baseSize
         this.state.radius = this.delegateExtension();
     },
     
     /* SIZE */
     baseSize: function(){
-        /* Radius was specified? */
+        /* Radius has precedence */
         var radius = this.state.radius;
-        if(radius != null) {
-            return radius * radius;
-        }
-      
-        return this.base();
+        return radius != null ? def.sqr(radius) : this.base();
     },
 
     defaultSize: function(){
@@ -78,11 +70,9 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     },
     
     interactiveSize: function(size){
-        if(this.scene.isActive){
-            return Math.max(size, 5) * 2.5;
-        }
-        
-        return size;
+        return this.mayShowActive(/*noSeries*/true) ?
+               (Math.max(size, 5) * 2.5) : 
+               size;
     },
     
     /* COLOR */
@@ -91,25 +81,18 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
      * @override
      */
     interactiveColor: function(color, type){
-        var scene = this.scene;
-        if(scene.isActive) {
+        if(this.mayShowActive(/*noSeries*/true)) {
             if(type === 'stroke') {
                 return color.brighter(1);
             }
-        } else if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
-            
-            if(this.isActiveSeriesAware && scene.isActiveSeries()) {
-                //return color.darker(1.5);
+        } else if(this.mayShowNotAmongSelected()) {
+            if(this.mayShowActive()) {
                 return color.alpha(0.8);
-//                switch(type){
-//                  case 'fill':   return pv.Color.names.darkgray.darker().darker();
-//                  case 'stroke': return color;
-//                }
-            } else {
-                switch(type) {
-                    case 'fill':   return this.dimColor(color, type);
-                    case 'stroke': return color.alpha(0.45);
-                }
+            }
+            
+            switch(type) {
+                case 'fill':   return this.dimColor(color, type);
+                case 'stroke': return color.alpha(0.45);
             }
         }
 

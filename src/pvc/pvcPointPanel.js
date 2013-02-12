@@ -45,8 +45,8 @@ def
             var drawRule   = !drawMarker || 
                              def.nullyTo(colorAxis.option('LegendDrawLine',   /*no default*/ true), this.linesVisible && !this.areasVisible);
             if(drawMarker || drawRule){
-                var keyArgs = {};
-                if((keyArgs.drawMarker = drawMarker)){
+                var keyArgs = {drawMarker: drawMarker, drawRule: drawRule};
+                if(drawMarker){
                     var markerShape = colorAxis.option('LegendShape', true);
                     
                     if(this.dotsVisible){
@@ -69,7 +69,7 @@ def
                     this.extend(keyArgs.markerPvProto, 'dot', {constOnly: true});
                 }
                 
-                if((keyArgs.drawRule = drawRule)){
+                if(drawRule){
                     keyArgs.rulePvProto = new pv.Line()
                            .lineWidth(1.5, pvc.extensionTag);
                     
@@ -165,13 +165,11 @@ def
                 noTooltip:   false,
                 wrapper:     wrapper,
                 noSelect:    isLineAreaNoSelect,
+                noRubberSelect: true, // Line is better for selection
                 showsSelection: !isLineAreaNoSelect
             })
             .lock('visible', isLineAreaVisible)
-            // If it were allowed to hide the line this way, the anchored dot would fail to evaluate
-//            .intercept('visible', function(){
-//                return isLineAreaVisible && this.delegateExtension(true);
-//            })
+            // TODO: If it were allowed to hide the area, the anchored line would fail to evaluate
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
             
@@ -228,6 +226,11 @@ def
          */
         var isLineVisible = !dotsVisibleOnly && isLineAreaVisible;
         
+        // When areasVisible && !linesVisible, lines are shown when active/activeSeries
+        // and hidden if not. If lines that show/hide would react to events
+        // they would steal events to the area and generate strange flicker-like effects.
+        var noLineInteraction = areasVisible && !linesVisible;
+
         this.pvLine = new pvc.visual.Line(
             this, 
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
@@ -235,16 +238,15 @@ def
                 extensionId:    extensionIds,
                 freePosition:   true,
                 wrapper:        wrapper,
-                noTooltip:      false,
-                noSelect:       isLineAreaNoSelect,
+                noTooltip:      noLineInteraction,
+                noDoubleClick:  noLineInteraction,
+                noClick:        noLineInteraction,
+                noHover:        noLineInteraction,
+                noSelect:       noLineInteraction || isLineAreaNoSelect,
                 showsSelection: !isLineAreaNoSelect
             })
+            // TODO: If it were allowed to hide the line, the anchored dot would fail to evaluate
             .lock('visible', isLineVisible)
-            // If it were allowed to hide the line this way, the anchored dot would fail to evaluate  
-//            .intercept('visible', function(){
-//                return isLineVisible && this.delegateExtension(true);
-//            })
-            /* Color & Line */
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 
@@ -253,7 +255,7 @@ def
                 }
                 return color;
             })
-            .override('normalColor', function(color, type){
+            .override('normalColor', function(color/*, type*/){
                 return linesVisible ? color : null;
             })
             .override('baseStrokeWidth', function(){
@@ -285,7 +287,6 @@ def
             })
             .pvMark
             ;
-        
            
         // -- DOT --
         var showAloneDots = !(areasVisible && isBaseDiscrete && isStacked);
@@ -296,9 +297,9 @@ def
         }
         
         this.pvDot = new pvc.visual.Dot(this, this.pvLine, {
-                extensionId: extensionIds,
+                extensionId:  extensionIds,
                 freePosition: true,
-                wrapper:     wrapper
+                wrapper:      wrapper
             })
             .intercept('visible', function(){
                 var scene = this.scene;
@@ -324,21 +325,22 @@ def
                     }
                 }
                 
+                // Normal logic
+                var color = this.base(type);
+                
                 // TODO: review interpolated style/visibility
                 if(this.scene.isInterpolated && type === 'fill'){
-                    var color = this.base(type);
                     return color && pv.color(color).brighter(0.5);
                 }
                 
-                // Follow normal logic
-                return this.base(type);
+                return color;
             })
 //            .override('interactiveColor', function(color, type){
 //              return this.scene.isInterpolated && type === 'stroke' ? 
 //                     color :
 //                     this.base(color, type);
 //            })
-            .optionalMark('lineCap', 'round')
+//            .optionalMark('lineCap', 'round')
 //            .intercept('strokeDasharray', function(){
 //                var dashArray = this.delegateExtension();
 //                if(dashArray === undefined){
@@ -372,7 +374,7 @@ def
                     if(visible && !this.scene.isActive) {
                         // Obtain the line Width of the "sibling" line
                         var lineWidth = Math.max(myself.pvLine.lineWidth(), 0.2) / 2;
-                        return lineWidth * lineWidth;
+                        return def.sqr(lineWidth);
                     }
                 }
                 
@@ -386,19 +388,9 @@ def
             .pvMark
             ;
         
-        // -- LABEL --
-        if(this.valuesVisible){
-            this.pvLabel = new pvc.visual.Label(
-                this, 
-                this.pvDot.anchor(this.valuesAnchor), 
-                {
-                    extensionId: 'label',
-                    wrapper:     wrapper
-                })
-                .pvMark
-                .font(this.valuesFont) // default
-                .text(function(scene){ return scene.vars.value.label; })
-                ;
+        var label = pvc.visual.ValueLabel.maybeCreate(this, this.pvDot, {wrapper: wrapper});
+        if(label){
+            this.pvLabel = label.pvMark;
         }
     },
 
@@ -410,22 +402,6 @@ def
         this.pvScatterPanel.render();
     },
 
-    /**
-     * Returns an array of marks whose instances are associated to a datum or group, or null.
-     * @override
-     */
-    _getSelectableMarks: function(){
-        var marks = [];
-        
-        marks.push(this.pvDot);
-        
-        if(this.linesVisible || this.areasVisible){
-            marks.push(this.pvLine);
-        }
-        
-        return marks;
-    },
-    
     /* On each series, scenes for existing categories are interleaved with intermediate scenes.
      * 
      * Protovis Dots are only shown for main (non-intermediate) scenes.

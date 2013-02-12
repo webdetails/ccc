@@ -484,14 +484,14 @@ def
                         if(pvc.debug > 1){
                             this._log("No data found.");
                         }
-        
+
                         this._addErrorPanelMessage("No data found", true);
                     } else {
                         hasError = true;
-                        
+
                         // We don't know how to handle this
                         pvc.logError(e.message);
-                        
+
                         if(pvc.debug > 0){
                             this._addErrorPanelMessage("Error: " + e.message, false);
                         }

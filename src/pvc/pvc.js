@@ -93,13 +93,20 @@ var pvc = def.globalSpace('pvc', {
             .forEach(function(p){
                 pvc[p] = def.noop;
             });
+
+            var _errorPrefix = "[pvChart ERROR]: ";
             
             pvc.error = function(e){
                 if(e && typeof e === 'object' && e.message){
                     e = e.message;
                 }
+
+                e = '' + def.nullyTo(e, '');
+                if(e.indexOf(_errorPrefix) < 0){
+                    e = _errorPrefix + e;
+                }
                 
-                throw new Error("[pvChart ERROR]: " + e);
+                throw new Error(e);
             };
         }
     }

@@ -32,8 +32,7 @@ def
         var a_bottom = this.isOrientationVertical() ? "bottom" : "left",
             a_left   = this.anchorOrtho(a_bottom),
             a_width  = this.anchorLength(a_bottom),
-            a_height = this.anchorOrthoLength(a_bottom)
-            ;
+            a_height = this.anchorOrthoLength(a_bottom);
 
         function defaultColor(type){
             var color = this.base(type);
@@ -75,7 +74,8 @@ def
                 noHover:       false,
                 noSelect:      false,
                 noClick:       false,
-                noDoubleClick: false
+                noDoubleClick: false,
+                showsInteraction: true
             }))
             .intercept('visible', function(scene){
                 return scene.vars.category.showRuleWhiskerUpper && this.delegateExtension(true);
@@ -91,7 +91,8 @@ def
                 noHover:       false,
                 noSelect:      false,
                 noClick:       false,
-                noDoubleClick: false
+                noDoubleClick: false,
+                showsInteraction: true
             }))
             .intercept('visible', function(scene){
                 return scene.vars.category.showRuleWhiskerBelow && this.delegateExtension(true);
@@ -140,7 +141,8 @@ def
                 noHover:       false,
                 noSelect:      false,
                 noClick:       false,
-                noDoubleClick: false
+                noDoubleClick: false,
+                showsInteraction: true
             }))
             .intercept('visible', function(){
                 return this.scene.vars.minimum.value != null && this.delegateExtension(true);
@@ -155,7 +157,8 @@ def
                 noHover:       false,
                 noSelect:      false,
                 noClick:       false,
-                noDoubleClick: false
+                noDoubleClick: false,
+                showsInteraction: true
             }))
             .intercept('visible', function(){
                 return this.scene.vars.maximum.value != null && this.delegateExtension(true);
@@ -170,7 +173,8 @@ def
                 noHover:       false,
                 noSelect:      false,
                 noClick:       false,
-                noDoubleClick: false
+                noDoubleClick: false,
+                showsInteraction: true
             }))
             .intercept('visible', function(){
                 return this.scene.vars.median.value != null && this.delegateExtension(true);
@@ -187,14 +191,6 @@ def
      */
     renderInteractive: function(){
         this.pvBoxPanel.render();
-    },
-
-    /**
-     * Returns an array of marks whose instances are associated to a datum or group, or null.
-     * @override
-     */
-    _getSelectableMarks: function(){
-        return [this.pvBar];
     },
 
     _buildScene: function(){

@@ -1415,7 +1415,7 @@ def
     /** @override */
     _getSelectableMarks: function(){
         if(this.isDiscrete && this.isVisible && this.pvLabel){
-            return [this.pvLabel];
+            return this.base();
         }
     },
 
@@ -1553,20 +1553,20 @@ def
                 var label = tickScene.vars.tick.label;
                 switch(this.lblDirection()){
                     case 'h':
-                        if(!fitInfo.h){//TODO: fallback option for no svg
-                            return pvc.text.trimToWidth(tickScene.dx, label, font, '..');
+                        if(!fitInfo.h){
+                            return pvc.text.trimToWidthB(tickScene.dx, label, font, '..');
                         }
                         break;
                     case 'v':
                         if(!fitInfo.v){
-                            return pvc.text.trimToWidth(tickScene.dy, label, font, '..');
+                            return pvc.text.trimToWidthB(tickScene.dy, label, font, '..');
                         }
                         break;
                     case 'd':
                        if(!fitInfo.d){
                           //var ang = Math.atan(tickScene.dy/tickScene.dx);
-                          var diagonalLength = Math.sqrt(tickScene.dy*tickScene.dy + tickScene.dx*tickScene.dx);
-                          return pvc.text.trimToWidth(diagonalLength - diagMargin, label, font, '..');
+                          var diagonalLength = Math.sqrt(def.sqr(tickScene.dy) + def.sqr(tickScene.dx));
+                          return pvc.text.trimToWidthB(diagonalLength - diagMargin, label, font, '..');
                         }
                         break;
                 }

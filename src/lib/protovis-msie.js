@@ -43,6 +43,23 @@ if (typeof Date.now !== 'function') {
   Date.now = function () { return new Date() * 1; };
 }
 
+if (!window.getComputedStyle) {
+    window.getComputedStyle = function(el, pseudo) {
+        this.el = el;
+        this.getPropertyValue = function(prop) {
+            var re = /(\-([a-z]){1})/g;
+            if (prop == 'float') prop = 'styleFloat';
+            if (re.test(prop)) {
+                prop = prop.replace(re, function () {
+                    return arguments[2].toUpperCase();
+                });
+            }
+            return el.currentStyle[prop] ? el.currentStyle[prop] : null;
+        };
+        return this;
+    };
+}
+
 var vml = {
   is64Bit: window.navigator.cpuClass === 'x64',
   
@@ -170,7 +187,7 @@ var vml = {
 
     "g": {
       rewrite: 'span',
-      attr: function ( attr, style, elm, scenes, i ) {
+      attr: function ( attr, style, elm, scenes, i) {
         var d = vml.get_dim( attr );
         elm.style.cssText = "position:absolute;zoom:1;left:"+
                         (d.translate_x + d.x)+"px;top:"+
@@ -342,7 +359,6 @@ var vml = {
     "vml:fill":     { rewrite: 'fill'     },
     "vml:textpath": { rewrite: 'textpath' },
     "vml:skew":     { rewrite: 'skew'     }
-
   },
 
   // cloning elements is a lot faster than creating them
@@ -351,7 +367,7 @@ var vml = {
     'div': document.createElement( 'div' )
   },
 
-  createElement: function ( type, reformat ) {
+  createElement: function ( type/*, reformat */) {
     var elm,
         cache = vml._elmcache,
         helper = vml.elm_defaults[ type ] || {};
@@ -548,7 +564,7 @@ var vml = {
   // - ARCs need solving
    _pathcache: {},
    
-  rewritePath:function ( p, deb ) {
+  rewritePath:function ( p/*, deb */) {
     var x = 0, y = 0, round = vml.round;
 
     if ( !p ) { return p; }
@@ -774,16 +790,18 @@ pv.VmlScene.expect = function (e, type, scenes, i, attr, style) {
     e = vml.createElement( type );
   }
   
-  if ( 'attr' in helper ) {
+  if (attr && 'attr' in helper ) {
     helper.attr( attr, style, e, scenes, i );
   }
   
-  if ( attr.cursor in vml.cursorstyles ) {
+  if (attr && (attr.cursor in vml.cursorstyles)) {
     var curs = vml.cursorstyles[attr.cursor];
     style.cursor = ( curs === 1 ) ? attr.cursor : curs;
   }
   
-  if(style) this.setStyle(e, style);
+  if(style) {
+    this.setStyle(e, style);
+  }
   
   return e;
 };
@@ -796,13 +814,13 @@ pv.VmlScene.removeSiblings = function(e) {
   }
 };
 
-pv.VmlScene.removeFillStyleDefinitions = function(scenes){
+pv.VmlScene.removeFillStyleDefinitions = function(/*scenes*/){
 };
 
-pv.VmlScene.addFillStyleDefinition = function(scenes, fill){
+pv.VmlScene.addFillStyleDefinition = function(/*scenes, fill*/){
 };
 
-pv.VmlScene.setAttributes = function(e, attributes){
+pv.VmlScene.setAttributes = function(/*e, attributes*/){
     // Not supported - exists for svg custom attributes
 };
 
@@ -922,7 +940,6 @@ pv.VmlScene.panel = function(scenes) {
 
     /* stroke */
     e = this.stroke( e, scenes, i );
-
   }
   
   if(inited){
@@ -965,6 +982,10 @@ pv.VmlScene.parseDasharray = function(s){
     }
     
     return dashArray;
+};
+
+pv.VmlScene.create = function(type){
+    return vml.createElement(type);
 };
 
 // Much of the event rewriting code is copyed and watered down
@@ -1121,45 +1142,22 @@ pv.VmlScene.parseDasharray = function(s){
 
 })();
 
-// replace the listener with something a little more elaborate
-pv.listener = function(f, target) {
-  return f.$listener || (f.$listener = function(e) {
-    try {
-      pv.event = vml.fixEvent( e || window.event );
-      return f.call( this, pv.event );
-    } catch (e) {
-      pv.error(e);
-    } finally {
-      delete pv.event;
-    }
-  });
-};
-
-pv.listen = function(target, type, listener) {
-  listener = pv.listener(listener, target);
-  if ( target === window ) {
-    target = document.documentElement;
-  }
-  
-  target.addEventListener
-      ? target.addEventListener(type, listener, false)
-      : target.attachEvent("on" + type, listener);
-      
-  return listener; 
+pv.fixEvent = function(ev){
+  return vml.fixEvent(ev || window.event);
 };
 
 pv.VmlScene.dispatch = pv.listener(function(e){
   var t = e.target.$scene;
   if (t){
     var events = e.target._events;
-    if(events === 'none' || 
+    if(events === 'none' ||
        pv.Mark.dispatch(e.type, t.scenes, t.index, e)){
       e.preventDefault();
+      e.stopPropagation();
     }
   }
 });
 
-//
 pv.VmlScene.image = function(scenes) {
   var e = scenes.$g.firstChild;
   for (var i = 0; i < scenes.length; i++) {
@@ -1196,8 +1194,7 @@ pv.VmlScene.image = function(scenes) {
 };
 
 pv.VmlScene.label = function(scenes) {
-  var e = scenes.$g.firstChild,
-      round = Math.round;
+  var e = scenes.$g.firstChild;
   for (var i = 0; i < scenes.length; i++) {
     var s = scenes[i];
 
@@ -1296,46 +1293,6 @@ pv.VmlScene.label = function(scenes) {
       'left':       left + 'px'
     });
 
-    /*
-    e = this.expect(e, "text", scenes, i, attr, {
-      "font": s.font,
-      // "text-shadow": s.textShadow,
-      "textDecoration": s.textDecoration,
-      'top': Math.round( s.top + dy ) + 'px',
-      'left': Math.round( s.left + dx ) + 'px',
-      'position': 'absolute',
-      'display': 'block',
-      'lineHeight': 1,
-      'whiteSpace': 'nowrap',
-      'zoom': 1,
-      'cursor': 'default',
-      'color': vml.color( fill.color ) || 'black'
-    });
-    e.innerText = txt;
-    */
-
-
-/*
-    // Rotation is broken in several different ways:
-    // 1. it looks REALLY ugly
-    // 2. it is incredibly slow
-    // 3. rotated text is offset completely wrong and it takes a ton of math to correct it
-    // when text is rotated we need to switch to a VML textpath solution
-    var rotation = 180 * s.textAngle / Math.PI;
-    if ( rotation ) {
-      var r = (~~rotation % 360) * vml.d2r,
-          ct = Math.cos(r),
-          st = Math.sin(r);
-      e.style.filter = ['progid:DXImageTransform.Microsoft.Chroma(color="white") progid:DXImageTransform.Microsoft.Matrix(',
-                    'M11=',  ct.toFixed( 8 ), ',',
-                    'M12=', -st.toFixed( 8 ), ',',
-                    'M21=',  st.toFixed( 8 ), ',',
-                    'M22=',  ct.toFixed( 8 ), ',sizingMethod=\'auto expand\')";'].join('');
-      e.style.backgroundColor = "white";    
-    } else {
-      e.style.filter = '';
-    }
-*/
     e = this.append(e, scenes, i);
   }
   return e;

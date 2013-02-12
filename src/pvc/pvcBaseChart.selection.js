@@ -108,6 +108,10 @@ pvc.BaseChart
     _calcSelectedChangedDatums: function(){
         // Capture currently selected datums
         // Calculate the ones that changed.
+        if(!this.data){ // NoDataException
+            return;
+        }
+        
         var selectedChangedDatums;
         var nowSelectedDatums  = this.data.selectedDatumMap();
         var lastSelectedDatums = this._lastSelectedDatums;

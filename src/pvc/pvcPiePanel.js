@@ -188,9 +188,6 @@ def
     _createCore: function(layoutInfo) {
         var myself = this;
         var chart = this.chart;
-        var options = chart.options;
-        var visibleKeyArgs = {visible: true};
-        
         var rootScene = this._buildScene();
         var center = layoutInfo.center;
         var normalRadius = layoutInfo.normalRadius;
@@ -265,24 +262,21 @@ def
             ;
         
         if(this.valuesVisible){
+            this.valuesFont = layoutInfo.labelFont;
+            
             if(this.labelStyle === 'inside'){
-                
-                this.pvPieLabel = new pvc.visual.Label(this, this.pvPie.anchor(this.valuesAnchor), {
-                        extensionId: 'label',
-                        wrapper:     wrapper
+                this.pvPieLabel = pvc.visual.ValueLabel.maybeCreate(this, this.pvPie, {
+                        wrapper: wrapper,
+                        noHover: false
                     })
                     .intercept('visible', function(scene){
-                        var angle = scene.vars.value.angle;
-                        if(angle < 0.001){
-                            return false;
-                        }
-                        
-                        return this.delegateExtension(true);
+                        return (scene.vars.value.angle >= 0.001) &&
+                               this.delegateExtension(true);
                     })
                     .pvMark
                     .text(function(scene){ return scene.vars.value.sliceLabel; })
                     .textMargin(10);
-                
+            
             } else if(this.labelStyle === 'linked') {
                 var linkLayout = layoutInfo.link;
                 
@@ -291,7 +285,7 @@ def
                 this.pvLinkPanel = this.pvPanel.add(pv.Panel)
                     .data(rootScene.childNodes)
                     .localProperty('pieSlice')
-                    .pieSlice(function(scene){
+                    .pieSlice(function(/*scene*/){
                         return myself.pvPie.scene[this.index];  
                      })
                     ;
@@ -305,8 +299,9 @@ def
                         noClick:       true,
                         noDoubleClick: true,
                         noSelect:      true,
-                        noTooltip:    true,
-                        noHover:       true 
+                        noTooltip:     true,
+                        noHover:       true,
+                        showsActivity: false
                     })
                     .lockMark('data', function(scene){
                         // Calculate the dynamic dot at the 
@@ -343,19 +338,33 @@ def
                     .lock('left', function(dot){ return dot.x; })
                     ;
                 
+                var f = false;
                 this.pvPieLabel = new pvc.visual.Label(
                     this, 
                     this.pvLinkPanel, 
                     {
                         extensionId:   'label',
-                        noClick:       false,
-                        noDoubleClick: false,
-                        noSelect:      false,
-                        noHover:       false
+                        noClick:       f,
+                        noDoubleClick: f,
+                        noSelect:      f,
+                        noHover:       f,
+                        showsInteraction: true
                     })
                     .lockMark('data', function(scene){
                         // Repeat the scene, once for each line
                         return scene.lineScenes; 
+                    })
+                    .intercept('textStyle', function(){
+                        delete this._finished;
+                        var style = this.delegate();
+                        if(style && 
+                           !this.hasOwnProperty('_finished') &&
+                           !this.mayShowActive() &&
+                           this.mayShowNotAmongSelected()){
+                            style = this.dimColor(style, 'text');
+                        }
+
+                        return style;
                     })
                     .pvMark
                     .lock('visible')
@@ -365,7 +374,6 @@ def
                     .textMargin(linkLayout.textMargin)
                     .textBaseline('bottom')
                     .text     (function(scene){ return scene.vars.link.labelLines[this.index]; })
-                    .fillStyle('red')
                     ;
                 
                 // <Debug>
@@ -417,19 +425,6 @@ def
         this.pvPanel.render();
     },
 
-    /**
-     * Returns an array of marks whose instances are associated to a datum, or null.
-     * @override
-     */
-    _getSelectableMarks: function(){
-        var marks = [this.pvPie];
-        if(this.pvPieLabel){
-            marks.push(this.pvPieLabel);
-        }
-        
-        return marks;
-    },
-    
     _buildScene: function(){
         var rootScene  = new pvc.visual.PieRootScene(this);
         
@@ -443,19 +438,19 @@ def
 def
 .type('pvc.visual.PieRootScene', pvc.visual.Scene)
 .init(function(panel){
-    var chart = panel.chart;
-    var data = chart.visualRoles('category').flatten(chart.data, pvc.data.visibleKeyArgs);
-    var colorVarHelper = new pvc.visual.RoleVarHelper(chart, chart._colorRole);
+    var data = panel.visualRoles.category.flatten(panel.data, pvc.data.visibleKeyArgs);
     
     this.base(null, {panel: panel, group: data});
+
+    var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color);
     
     // ---------------
     
     var valueRoleName = panel.valueRoleName;
-    var valueDimName  = chart.visualRoles(valueRoleName).firstDimensionName();
+    var valueDimName  = panel.visualRoles[valueRoleName].firstDimensionName();
     var valueDim      = data.dimensions(valueDimName);
     
-    var options = chart.options;
+    var options = panel.chart.options;
     var percentValueFormat = options.percentValueFormat;
     
     var rootScene = this;
@@ -641,9 +636,6 @@ def
     },
     
     _distributeLabelsEvenly: function(scenes, layoutInfo){
-        var linkLayout = layoutInfo.link;
-        var labelSpacingMin = linkLayout.labelSpacingMin;
-        
         var totalHeight = 0;
         scenes.forEach(function(categScene){
             totalHeight += categScene.vars.link.labelHeight;

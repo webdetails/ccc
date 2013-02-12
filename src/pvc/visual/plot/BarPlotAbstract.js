@@ -79,8 +79,5 @@ def.scope(function(){
         ValuesAnchor: { // override default value only
             value: 'center'
         }
-        
-        /* TODO valuesMask...
-        */
     });
 });

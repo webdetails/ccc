@@ -228,13 +228,35 @@
                 relative to its corresponding visual element position.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="valuesMask" type="string" default="'{x},{y}'" category="Layout">
+            <c:documentation>
+                The values mask used to build the text of value labels.
+
+                The mask may contain scene variable names and/or scene atom names,
+                like in the examples:
+                <ul>
+                    <li>scene variables: <tt>{category}: {value} EUR</tt>, could yield <tt>Drinks: 3.45 EUR</tt></li>
+                    <li>atom variables:  <tt>{#family} - {#product}</tt>, could yield <tt>Plains - Boeing 747</tt></li>
+                </ul>
+            </c:documentation>
+        </c:property>
+
         <c:property name="shape" type="pvc.options.varia.DotShapeType" default="'circle'" category="Style">
             <c:documentation>
                 Forces a given shape to be used in the dot mark.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="nullShape" type="pvc.options.varia.DotShapeType" default="'cross'" category="Style">
+            <c:documentation>
+                The shape to use when the value of the <i>size</i> role is <tt>null</tt>.
+
+                When the value of <c:link to="#nullShape" /> is <tt>null</tt>,
+                visual elements with null size value are not shown.
+            </c:documentation>
+        </c:property>
+
         <c:property name="trend" type="pvc.options.varia.PlotTrending">
             <c:documentation>
                 Contains the plot's trending options.

@@ -8,17 +8,19 @@ def.type('pvc.visual.Label', pvc.visual.Sign)
 })
 .add({
     _addInteractive: function(keyArgs){
+        var t = true;
         keyArgs = def.setDefaults(keyArgs,
-                        'noSelect',      true,
-                        'noHover',       true,
-                        'noTooltip',    true,
-                        'noClick',       true,
-                        'noDoubleClick', true);
+                        'noSelect',       t,
+                        'noHover',        t,
+                        'noTooltip',      t,
+                        'noClick',        t,
+                        'noDoubleClick',  t,
+                        'showsInteraction',false);
 
         this.base(keyArgs);
     },
     
-    defaultColor: function(type){
+    defaultColor: function(/*type*/){
         return pv.Color.names.black;
     }
 });

@@ -51,6 +51,10 @@
         pvMark.buildInstance   = this._dispatchBuildInstance;
     })
     .add({
+        compatVersion: function(){
+            return this.chart.compatVersion();
+        },
+
         // Defines a local property on the underlying protovis mark
         localProperty: function(name, type){
             this.pvMark.localProperty(name, type);

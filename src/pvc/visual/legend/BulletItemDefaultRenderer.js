@@ -53,8 +53,7 @@ def
                 .top  (function(){ return this.parent.height() / 2; })
                 .width(function(){ return this.parent.width();      })
                 .lineWidth(1, pvc.extensionTag) // act as if it were a user extension
-                .strokeStyle(sceneColorProp, pvc.extensionTag) // idem
-                ;
+                .strokeStyle(sceneColorProp, pvc.extensionTag); // idem
             
             if(this.rulePvProto){
                 rulePvBaseProto = this.rulePvProto.extend(rulePvBaseProto);
@@ -66,6 +65,7 @@ def
                     noHover:     this.noHover,
                     activeSeriesAware: false,// no guarantee that series exist in the scene
                     extensionId: extensionPrefix + "Rule",
+                    showsInteraction: true,
                     wrapper:     wrapper
                 })
                 .pvMark;
@@ -99,8 +99,7 @@ def
                     }
                     
                     return true;
-                }, pvc.extensionTag)
-                ;
+                }, pvc.extensionTag);
             
             if(this.markerPvProto){
                 markerPvBaseProto = this.markerPvProto.extend(markerPvBaseProto);

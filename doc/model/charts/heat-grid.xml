@@ -179,12 +179,15 @@
         <c:property name="nullShape" type="pvc.options.varia.DotShapeType" default="'cross'" category="Style">
             <c:documentation>
                 The shape to use when the value of the <i>size</i> role is <tt>null</tt>.
+
+                When the value of <c:link to="#nullShape" /> is <tt>null</tt>,
+                visual elements with null size value are not shown.
                 
                 See <c:link to="#useShapes" />.
             </c:documentation>
         </c:property>
         
-        <c:property name="valuesVisible" default="true" type="boolean" category="Style">
+        <c:property name="valuesVisible" type="boolean" category="Style">
             <c:documentation>
                 Indicates if value labels are shown next to the visual elements.
                 
@@ -192,6 +195,33 @@
                 the color role value, if bound, 
                 or, otherwise, 
                 the size role value, if bound.
+
+                By default, values are visible when <c:link to="#useShapes" /> is <tt>false</tt>
+                and not visible otherwise.
+            </c:documentation>
+        </c:property>
+
+        <c:property name="valuesMask" type="string" category="Layout">
+            <c:documentation>
+                The values mask used to build the text of value labels.
+
+                The mask may contain scene variable names and/or scene atom names,
+                like in the examples:
+                <ul>
+                    <li>scene variables: <tt>{category}: {value} EUR</tt>, could yield <tt>Drinks: 3.45 EUR</tt></li>
+                    <li>atom variables:  <tt>{#family} - {#product}</tt>, could yield <tt>Plains - Boeing 747</tt></li>
+                </ul>
+
+                The default of this property varies depending on whether
+                the <tt>size</tt> and <tt>color</tt> visual roles are bound.
+                <ol>
+                    <li>if the <tt>color</tt> visual role is bound,
+                    the default mask is <tt>'{color}'</tt>
+                    </li>
+                    <li>else, if the <tt>size</tt> visual role is bound,
+                    the default mask is <tt>'{size}'</tt></li>
+                    <li>else, no default value exists; the value label is not shown</li>
+                </ol>
             </c:documentation>
         </c:property>
         

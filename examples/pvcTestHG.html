@@ -53,7 +53,9 @@
         <script type="text/javascript" src="../src/pvc/visual/sign/Sign.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Panel.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Label.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/ValueLabel.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Dot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/sign/DotSizeColor.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Line.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Area.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/sign/Bar.js"></script>
@@ -182,7 +184,7 @@ The intensity or the color of each cell depends on the value that it represents.
   <li>colorNormByCategory - Normalize by column? true or false</li>
   <li>colorMin - Default: "white"</li>
   <li>colorMax - Default: "darkgreen"</li>
-  <li>colorNull - Default:&nbsp; "#efc5ad" (white with a shade of orange)</li>
+  <li>colorMissing - Default:&nbsp; "#efc5ad" (white with a shade of orange)</li>
 </ul>
 
 <h4>Axis properties</h4>
@@ -261,7 +263,6 @@ var heatGrid2 = new pvc.HeatGridChart({
     selectable: true,
     hoverable:  true,
     valuesVisible: true,
-    valuesAnchor: "right",
     showXScale: true,
     xAxisPosition: "bottom",
     showYScale: true,
@@ -365,8 +366,8 @@ var heatGrid5 = new pvc.HeatGridChart({
     colorNormByCategory: false,
     visualRoles: {color: 'value2', size: 'value'},
     useShapes: true,
-    colorNull:'blue',
-    nullShape:null,
+    //colorMissing: 'blue',
+    //nullShape:null,
     colors:['red','yellow', 'lightgreen','darkgreen'],
     ctrlSelectMode: true,
     axisFont:'14px helvetica',

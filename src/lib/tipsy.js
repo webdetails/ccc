@@ -201,14 +201,14 @@
                     bestScore = chooseScores(bestScore, scoreGravity(_gravities[i]));
                 }
                 
-                if(_tip.debug >= 6 && gravity !== bestScore.gravity){
+                if(_tip.debug >= 21 && gravity !== bestScore.gravity){
                     _tip.log("[TIPSY] #" + _tipsyId + " Choosing gravity '" + bestScore.gravity + "' over '" + gravity + "'");
                 }
                 
                 gravity = bestScore.gravity;
             }
             
-            if(_tip.debug >= 6){
+            if(_tip.debug >= 21){
                 _tip.log("[TIPSY] #" + _tipsyId + " Gravity '" + gravity + "'");
             }
             
@@ -363,7 +363,7 @@
         
         function updateTipDebug(){
             if($fakeTipTarget){
-                if(_tip.debug >= 16){
+                if(_tip.debug >= 22){
                     $fakeTipTarget.css({
                         borderColor: 'red',
                         borderWidth: '1px',
@@ -396,7 +396,7 @@
             
             if((!$targetElem && targetElem) || 
                ( $targetElem && $targetElem[0] !== targetElem)){
-                if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Changing target element."); }
+                if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Changing target element."); }
                 
                 if($targetElem){
                     $targetElem.unbind('mousemove', updateTipsy);
@@ -436,28 +436,28 @@
         function hideTipsy() {
             var opId = getNewOperationId();
             
-            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId); }
+            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId); }
             
             if(delayOut > 0){
                 window.setTimeout(function(){
                     if(checkCanOperate(opId)){
-                        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding opId=" + opId + " nextOperationId=" + nextOperationId); }
+                        if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding opId=" + opId + " nextOperationId=" + nextOperationId); }
                         hideTipsyCore(opId);
                     } else {
-                        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Cancelled opId=" + opId); }
+                        if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Cancelled opId=" + opId); }
                     }
                 }, delayOut);
                 
                 return;
             }
             
-            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId); }
+            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding Immediately opId=" + opId); }
             hideTipsyCore(opId);
         }
         
         function hideTipsyOther() {
             var opId = getNewOperationId();
-            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding as Other opId=" + opId); }
+            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding as Other opId=" + opId); }
             hideTipsyCore(opId);
         }
         
@@ -517,7 +517,7 @@
             
             var opId = getNewOperationId();
                     
-            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Updating opId=" + opId); }
+            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Updating opId=" + opId); }
             
             prevMouseX = ev.clientX;
             prevMouseY = ev.clientY;
@@ -548,7 +548,7 @@
                     
                     var text = getTooltipText();
                     
-                    if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Update text. Was hidden. Text: " + text); }
+                    if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Update text. Was hidden. Text: " + text); }
                     
                     $fakeTipTarget.tipsy('setTitle', text); // does not update the tooltip UI
                     
@@ -566,7 +566,7 @@
         function initBehavior(mark){
             // First time
             
-            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Creating"); }
+            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Creating"); }
             
             createTipsy(mark);
             
@@ -588,7 +588,7 @@
         function showTipsy(mark) {
             var opId = getNewOperationId();
             
-            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Show IN opId=" + opId); }
+            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Show IN opId=" + opId); }
             
             if (!$canvas) {
                 initBehavior(mark);
@@ -600,7 +600,7 @@
             
             var text = getTooltipText();
             
-            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Text: " + text); }
+            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Text: " + text); }
             
             $fakeTipTarget.tipsy('setTitle', text);
             
@@ -616,7 +616,7 @@
                 $fakeTipTarget.tipsy('update');
             }
             
-            if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Show OUT"); }
+            if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Show OUT"); }
         }
         
         // On 'point' or 'mouseover' events, according to usesPoint option

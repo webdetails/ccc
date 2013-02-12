@@ -75,8 +75,7 @@ def
             bandWidth = baseRange.band,
             barStepWidth = baseRange.step,
             barWidth,
-            reverseSeries = isVertical === isStacked // (V && S) || (!V && !S)
-            ;
+            reverseSeries = isVertical === isStacked; // (V && S) || (!V && !S)
 
         if(isStacked){
             barWidth = bandWidth;
@@ -172,27 +171,16 @@ def
             this._addOverflowMarkers(wrapper);
         }
         
-        if(me.valuesVisible){
-            me.pvBarLabel = new pvc.visual.Label(
-                me,
-                me.pvBar.anchor(me.valuesAnchor || 'center'),
-                {
-                    extensionId: 'label',
-                    wrapper:     wrapper
-                })
-                .pvMark
+        var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvBar, {wrapper: wrapper});
+        if(label){
+            me.pvBarLabel = label.pvMark
                 .visible(function() { //no space for text otherwise
                     // this === pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
                     
                     // Too small a bar to show any value?
                     return length >= 4;
-                })
-                .font(me.valuesFont) // default
-                .text(function(scene){
-                    return scene.format(me.valuesMask);
-                })
-                ;
+                });
         }
     },
     
@@ -322,14 +310,6 @@ def
      */
     renderInteractive: function(){
         this.pvPanel.render();
-    },
-
-    /**
-     * Returns an array of marks whose instances are associated to a datum, or null.
-     * @override
-     */
-    _getSelectableMarks: function(){
-        return [this.pvBar];
     },
 
     _buildScene: function(data, seriesData){

@@ -30,27 +30,19 @@ def
     this.nullShape = plot.option('NullShape');
 })
 .add({
-
-    pvHeatGrid: null,
-    pvHeatGridLabel: null,
-
     defaultBorder:  1,
     nullBorder:     2,
     selectedBorder: 2,
 
-    /**
-     * @override
-     */
+    /** @override */
     _createCore: function(){
+        var me = this;
 
-        this.base();
+        me.base();
 
-        // TODO: this options treatment is highly "non-standard". Refactor to chart + panel-constructor
+        var cellSize = me._calcCellSize();
 
-        var chart    = this.chart;
-        var cellSize = this._calcCellSize();
-
-        var a_bottom = this.isOrientationVertical() ? "bottom" : "left";
+        var a_bottom = me.isOrientationVertical() ? "bottom" : "left";
         var a_left   = pvc.BasePanel.relativeAnchor[a_bottom];
         var a_width  = pvc.BasePanel.parallelLength[a_bottom];
         var a_height = pvc.BasePanel.orthogonalLength[a_bottom];
@@ -58,18 +50,17 @@ def
         /* Column and Row datas  */
 
         // One multi-dimension single-level data grouping
-        var rowRootData = this.data.flattenBy(this.visualRoles.series, {visible: true});
+        var rowRootData = me.data.flattenBy(me.visualRoles.series, {visible: true});
 
         // One multi-dimensional, two-levels data grouping
-        var rootScene  = this._buildScene(this.visibleData(), rowRootData, cellSize);
-        var hasColor   = rootScene.hasColorRole;
-        var hasSize    = rootScene.hasSizeRole;
-        var getFillColor = this._buildGetFillColor(hasColor);
-        var wrapper    = this._buildSignsWrapper(rootScene);
-        var isV1Compat = this.compatVersion() <= 1;
+        var rootScene  = me._buildScene(me.visibleData(), rowRootData, cellSize);
+        var hasColor   = rootScene.isColorBound;
+        var hasSize    = rootScene.isSizeBound;
+        var wrapper    = me._buildSignsWrapper(rootScene);
+        var isV1Compat = me.compatVersion() <= 1;
 
         /* PV Panels */
-        var pvRowPanel = new pvc.visual.Panel(this, this.pvPanel)
+        var pvRowPanel = new pvc.visual.Panel(me, me.pvPanel)
             .pvMark
             .data(rootScene.childNodes)
             [a_bottom](function(){ return this.index * cellSize.height; })
@@ -86,7 +77,7 @@ def
             wrapper:     wrapper
         };
 
-        if(!this.useShapes){
+        if(!me.useShapes){
             // When no shapes are used,
             // clicks, double-clicks and tooltips are directly handled by
             // the cell panel
@@ -101,57 +92,28 @@ def
             });
         }
 
-        var pvHeatGrid = this.pvHeatGrid = new pvc.visual.Panel(this, pvRowPanel, keyArgs)
+        me.pvHeatGrid = new pvc.visual.Panel(me, pvRowPanel, keyArgs)
             .lock('data', function(serScene){ return serScene.childNodes; })
             .pvMark
-
             .lock(a_left,  function(){ return this.index * cellSize.width; })
             .lock(a_width, cellSize.width)
+            .antialias(false);
+            // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode, and specially in Chrome)
+            // Overflow can be important if valuesVisible=true
+            //.overflow('hidden') 
 
-            .antialias(false)
-            //.lineWidth(0)
-            ;
-            // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode)
-            //.overflow('hidden'); //overflow important if valuesVisible=true
+        me.shapes = me.useShapes ? 
+                    me._createShapesHeatMap(cellSize, wrapper, hasColor, hasSize) :
+                    me._createNoShapesHeatMap(hasColor);
 
-        if(this.useShapes){
-            this.shapes = this._createShapesHeatMap(cellSize, getFillColor, wrapper, hasColor, hasSize);
-        } else {
-            this.shapes = this._createNoShapesHeatMap(getFillColor);
+        
+        if(me.valuesVisible && !me.valuesMask){
+            me.valuesMask = me._getDefaultValuesMask(hasColor, hasSize);
         }
-
-        if(this.valuesVisible){
-            // The "value" concept is mapped to one of the color or size roles.
-            var valuesMask = this.valuesMask;
-            if(!valuesMask){
-                var valueDimName;
-                var roles = this.visualRoles;
-                if(roles.color.isBound()){ // assumed to always exist on this chart type
-                    valueDimName = roles.color.firstDimensionName();
-                } else if(roles.size.isBound()){
-                    valueDimName = roles.size.firstDimensionName();
-                }
-
-                if(valueDimName){
-                    valuesMask = "{#" + valueDimName + "}";
-                }
-            }
-            
-            if(valuesMask){
-                this.pvHeatGridLabel = new pvc.visual.Label(
-                    this,
-                    this.pvHeatGrid.anchor("center"),
-                    {
-                        extensionId: 'label',
-                        wrapper:     wrapper
-                    })
-                    .pvMark
-                    .font(this.valuesFont) // default
-                    .text(function(scene){ 
-                        return scene.format(valuesMask);
-                    })
-                    ;
-            }
+        
+        var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvHeatGrid, {wrapper: wrapper});
+        if(label){
+            me.pvHeatGridLabel = label.pvMark;
         }
     },
 
@@ -196,7 +158,7 @@ def
                 }
             });
 
-        function wrapper(v1f){
+        return function(v1f){
 
             return function(leafScene){
                 var colorValuesByCat = colorValuesBySerAndCat[leafScene.vars.series.value];
@@ -216,79 +178,23 @@ def
 
                 return v1f.call(wrapper, colorValuesByCat, cat);
             };
-        }
-
-        return wrapper;
-    },
-
-    _buildGetFillColor: function(hasColor){
-        var colorAxis = this.axes.color;
-        var colorNull = colorAxis.option('Missing');
-        if(hasColor){
-            var fillColorScaleByColKey = colorAxis.scalesByCateg;
-            if(fillColorScaleByColKey){
-                return function(leafScene){
-                    var colorValue = leafScene.vars.color.value;
-                    if(colorValue == null) {
-                        return colorNull;
-                    }
-
-                    var colAbsKey = leafScene.group.parent.absKey;
-                    return fillColorScaleByColKey[colAbsKey](colorValue);
-                };
-            }
-
-            var colorScale = colorAxis.scale;
-            return function(leafScene){
-                return colorScale(leafScene.vars.color.value);
-            };
-        }
-
-        return def.fun.constant(colorNull);
-    },
-
-    _calcDotAreaRange: function(cellSize){
-        var w = cellSize.width;
-        var h = cellSize.height;
-
-        var maxRadius = Math.min(w, h) / 2;
-
-        if(this.shape === 'diamond'){
-            // Protovis draws diamonds inscribed on
-            // a square with half-side radius*Math.SQRT2
-            // (so that diamonds just look like a rotated square)
-            // For the height of the dimanod not to exceed the cell size
-            // we compensate that factor here.
-            maxRadius /= Math.SQRT2;
-        }
-
-        // Small margin
-        maxRadius -= 2;
-
-        var maxArea  = (maxRadius * maxRadius), // apparently treats as square area even if circle, triangle is different
-            minArea  = 12,
-            areaSpan = maxArea - minArea;
-
-        if(areaSpan <= 1){
-            // Very little space
-            // Rescue Mode - show *something*
-            maxArea = Math.max(maxArea, 2);
-            minArea = 1;
-            areaSpan = maxArea - minArea;
-
-            if(pvc.debug >= 2){
-                this._warn("Using rescue mode dot area calculation due to insufficient space.");
-            }
-        }
-
-        return {
-            min:  minArea,
-            max:  maxArea,
-            span: areaSpan
         };
     },
 
-    _createNoShapesHeatMap: function(getFillColor){
+    _getDefaultValuesMask: function(hasColor, hasSize){
+        // The "value" concept is mapped to one of the color or size roles, by default.
+        var roles = this.visualRoles;
+        var roleName = hasColor ? 'color' :
+                       hasSize  ? 'size'  :
+                       null;
+        if(roleName){
+            var valueDimName = roles[roleName].firstDimensionName();
+            return "{#" + valueDimName + "}";
+        }
+    },
+
+    _createNoShapesHeatMap: function(hasColor){
+        var getBaseColor = this._buildGetBaseFillColor(hasColor);
         return this.pvHeatGrid
             .sign
             .override('defaultColor', function(type){
@@ -296,7 +202,7 @@ def
                     return null;
                 }
 
-                return getFillColor.call(this.pvMark, this.scene);
+                return getBaseColor.call(this.pvMark, this.scene);
             })
             .override('interactiveColor', function(color, type){
                 var scene = this.scene;
@@ -318,46 +224,23 @@ def
             ;
     },
 
-    _createShapesHeatMap: function(cellSize, getFillColor, wrapper, hasColor, hasSize){
-        var me = this,
-            nullShapeType = me.nullShape,
-            shapeType = me.shape;
+    _buildGetBaseFillColor: function(hasColor){
+        var colorAxis = this.axes.color;
+        if(hasColor){
+            return colorAxis.sceneScale({sceneVarName: this.visualRoles.color.name});
+        }
+
+        var colorMissing = colorAxis && colorAxis.option('Missing');
+        return def.fun.constant(colorMissing || pvc.defaultColor);
+    },
+            
+    _createShapesHeatMap: function(cellSize, wrapper, hasColor, hasSize){
+        var me = this;
 
         /* SIZE */
         var areaRange = me._calcDotAreaRange(cellSize);
-        var maxArea   = areaRange.max;
-
-        /* BORDER WIDTH & COLOR */
-        var notNullSelectedBorder = (me.selectedBorder == null || (+me.selectedBorder) === 0) ?
-                                     me.defaultBorder :
-                                     me.selectedBorder;
-
-        var nullSelectedBorder = (me.selectedBorder == null || (+me.selectedBorder) === 0) ?
-                                  me.nullBorder :
-                                  me.selectedBorder;
-
-        var nullDeselectedBorder = me.defaultBorder > 0 ? me.defaultBorder : me.nullBorder;
-
-        /* SHAPE TYPE & SIZE */
-        var getShapeSize, getShapeType;
-        if(!hasSize){
-            getShapeType = def.fun.constant(shapeType);
-            getShapeSize = function(scene){
-                /* When neither color nor size dimensions */
-                return (hasColor && !nullShapeType && scene.vars.color.value == null) ? 0 : maxArea;
-            };
-        } else {
-            var sizeScale = me.axes.size
-                .setScaleRange(areaRange)
-                .scale;
-
-            getShapeType = function(scene){
-                return scene.vars.size.value != null ? shapeType : nullShapeType;
-            };
-            getShapeSize = function(scene){
-                var sizeValue = scene.vars.size.value;
-                return (sizeValue == null && !nullShapeType) ? 0 : sizeScale(sizeValue);
-            };
+        if(hasSize){
+             me.axes.size.setScaleRange(areaRange);
         }
 
         // Dot Sign
@@ -365,67 +248,69 @@ def
             extensionId: 'dot',
             freePosition: true,
             activeSeriesAware: false,
-            noHover:      false,
+            //noHover:      false,
             wrapper:      wrapper,
-            tooltipArgs:  this._buildTooltipArgs(hasColor, hasSize)
+            tooltipArgs:  me._buildShapesTooltipArgs(hasColor, hasSize)
         };
-
-        return new pvc.visual.Dot(me, me.pvHeatGrid, keyArgs)
-            .override('defaultSize', function(){
-                return getShapeSize.call(this.pvMark, this.scene);
-            })
-            .override('interactiveSize', function(size){
-                if(this.scene.isActive){
-                    return Math.max(size, 5) * 1.5;
-                }
-
-                return size;
-            })
-            .override('baseColor', function(/*type*/){
-                return getFillColor.call(this.pvMark.parent, this.scene);
-            })
-            .override('normalColor', function(color, type){
-                if(type === 'stroke'){
-                    return color.darker();
-                }
-
-                return this.base(color, type);
-            })
-            .override('interactiveColor', function(color, type){
-                var scene = this.scene;
-
-                if(type === 'stroke'){
-                    if(scene.anySelected() && !scene.isSelected()){
-                        return color;
-                    }
-
-                    return color.darker();
-                }
-
-                if(scene.isActive){
-                    return color.alpha(0.6);
-                }
-
-                return this.base(color, type);
-            })
+        
+        var pvDot = new pvc.visual.DotSizeColor(me, me.pvHeatGrid, keyArgs)
             .override('dimColor', function(color/*, type*/){
                 return pvc.toGrayScale(color, 0.6);
             })
             .pvMark
-            .shape(getShapeType)
-            .lock('shapeAngle') // TODO - rotation of shapes can cause them to not fit the calculated cell. Would have to improve the radius calculation code.
-            .lineWidth(function(scene){
-                if(!hasSize || !me._isNullShapeLineOnly() || scene.vars.size.value != null){
-                    return scene.isSelected() ? notNullSelectedBorder : me.defaultBorder;
-                }
-
-                // is null
-                return scene.isSelected() ? nullSelectedBorder : nullDeselectedBorder;
-            })
-            ;
+            .lock('shapeAngle'); // TODO - rotation of shapes can cause them to not fit the calculated cell. Would have to improve the radius calculation code.
+            
+        if(!hasSize){
+            pvDot.sign.override('defaultSize', def.fun.constant(areaRange.max));
+        }
+        
+        return pvDot;
     },
 
-    _buildTooltipArgs: function(hasColor, hasSize){
+    _calcDotAreaRange: function(cellSize){
+        var w = cellSize.width;
+        var h = cellSize.height;
+
+        var maxRadius = Math.min(w, h) / 2;
+
+        if(this.shape === 'diamond'){
+            // Protovis draws diamonds inscribed on
+            // a square with half-side radius*Math.SQRT2
+            // (so that diamonds just look like a rotated square)
+            // For the height of the dimanod not to exceed the cell size
+            // we compensate that factor here.
+            maxRadius /= Math.SQRT2;
+        }
+
+        // Small margin
+        maxRadius -= 2;
+
+        var maxArea  = def.sqr(maxRadius), // apparently treats as square area even if circle, triangle is different
+            minArea  = 12,
+            areaSpan = maxArea - minArea;
+
+        if(areaSpan <= 1){
+            // Very little space
+            // Rescue Mode - show *something*
+            maxArea = Math.max(maxArea, 2);
+            minArea = 1;
+            areaSpan = maxArea - minArea;
+
+            if(pvc.debug >= 2){
+                this._warn("Using rescue mode dot area calculation due to insufficient space.");
+            }
+        }
+
+        //var missingArea = minArea + areaSpan * 0.2; // 20% size
+
+        return {
+            min:  minArea,
+            max:  maxArea,
+            span: areaSpan
+        };
+    },
+
+    _buildShapesTooltipArgs: function(hasColor, hasSize){
         var chart = this.chart;
 
         if(this.compatVersion <= 1 && chart._tooltipEnabled){
@@ -475,18 +360,6 @@ def
         }
     },
 
-    _isNullShapeLineOnly: function(){
-        return this.nullShape == 'cross';
-    },
-
-    /**
-     * Returns an array of marks whose instances are associated to a datum, or null.
-     * @override
-     */
-    _getSelectableMarks: function(){
-        return [this.shapes];
-    },
-
     /**
      * Renders the heat grid panel.
      * @override
@@ -495,7 +368,7 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(data, seriesRootData){
+    _buildScene: function(data, seriesRootData, cellSize){
         var me = this;
         var rootScene  = new pvc.visual.Scene(null, {panel: me, group: data});
         var categDatas = data._children;
@@ -503,9 +376,8 @@ def
         var roles = me.visualRoles;
         var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color);
         var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size);
-
-        rootScene.hasColorRole = colorVarHelper.isBound();
-        rootScene.hasSizeRole  = sizeVarHelper .isBound();
+        
+        rootScene.cellSize = cellSize;
 
         seriesRootData
             .children()

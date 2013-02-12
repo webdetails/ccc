@@ -4,16 +4,6 @@
  */
 def
 .type('pvc.MetricPointAbstract', pvc.MetricXYAbstract)
-.init(function(options){
-
-    this.base(options);
-
-    var parent = this.parent;
-    if(parent) {
-        this._colorRole = parent._colorRole;
-        this._sizeRole  = parent._sizeRole;
-    }
-})
 .add({
     _initPlotsCore: function(){
         var pointPlot = this._createPointPlot();
@@ -67,7 +57,7 @@ def
         
         this.base();
         
-        this._sizeRole = this._addVisualRole('size', {
+        this._addVisualRole('size', {
                 isMeasure: true,
                 requireSingleDimension: true,
                 requireIsDiscrete: false,
@@ -82,17 +72,6 @@ def
         return def
             .type(this.base(translOptions))
             .add(pvc.data.MetricPointChartTranslationOper);
-    },
-    
-    _initData: function(keyArgs){
-        
-        this.base(keyArgs);
-
-        // Cached
-        var sizeGrouping = this._sizeRole.grouping;
-        if(sizeGrouping){
-            this._sizeDim = this.data.dimensions(sizeGrouping.firstDimensionName());
-        }
     },
     
     _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
@@ -122,7 +101,7 @@ def
                     .lazy(sizeDataCellsByAxisIndex, plot.option('SizeAxis') - 1)
                     .push({
                         plot:          plot,
-                        role:          this.visualRoles(plot.option('SizeRole')),
+                        role:          sizeRole,
                         dataPartValue: plot.option('DataPart')
                     });
                 }

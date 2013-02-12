@@ -328,14 +328,14 @@
         
         <c:property name="missing"
                     type="pvc.options.varia.ColorString pv.Color"
-                    default="'#efc5ad'" 
+                    default="'lightgray'" 
                     category="Numeric > Scale">
             <c:documentation>
                 The color used for a null domain value
                 (applies to numeric domain axes).
                 
                 The default value is 
-                <span style="color:#efc5ad;font-weight:bold">this color</span>.
+                <span style="color:lightgray;font-weight:bold">this color</span>.
             </c:documentation>
         </c:property>
     </c:facetType>

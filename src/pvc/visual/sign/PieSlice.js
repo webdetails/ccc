@@ -90,14 +90,13 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
      * @override
      */
     interactiveColor: function(color, type){
-        var scene = this.scene;
-        if(scene.isActive) {
+        if(this.mayShowActive(/*noSeries*/true)) {
             switch(type) {
                 // Like the bar chart
                 case 'fill':   return color.brighter(0.2).alpha(0.8);
                 case 'stroke': return color.brighter(1.3).alpha(0.7);
             }
-        } else if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
+        } else if(this.mayShowNotAmongSelected()) {
             //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
             if(type === 'fill') {
                 return this.dimColor(color, type);
@@ -114,7 +113,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     },
 
     interactiveOffsetRadius: function(offsetRadius){
-        if(this.scene.isActive){
+        if(this.mayShowActive(/*noSeries*/true)){
             return offsetRadius + this._activeOffsetRadius;
         }
 

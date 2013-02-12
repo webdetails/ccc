@@ -6,16 +6,6 @@
  */
 def
 .type('pvc.MetricXYAbstract', pvc.CartesianAbstract)
-.init(function(options){
-
-    this.base(options);
-
-    var parent = this.parent;
-    if(parent) {
-        this._xRole = parent._xRole;
-        this._yRole = parent._yRole;
-    }
-})
 .add({
     _processOptionsCore: function(options){
         
@@ -34,40 +24,32 @@ def
 
         this.base();
 
-        this._xRole = this._addVisualRole('x', {
-                isMeasure: true,
-                isRequired: true,
-                requireSingleDimension: true,
-                requireIsDiscrete: false,
-                defaultDimension: 'x',
-                dimensionDefaults: {
-                    valueType: this.options.timeSeries ? Date : Number
-                }
-            });
+        this._addVisualRole('x', {
+            isMeasure:  true,
+            isRequired: true,
+            requireSingleDimension: true,
+            requireIsDiscrete: false,
+            defaultDimension: 'x',
+            dimensionDefaults: {
+                valueType: this.options.timeSeries ? Date : Number
+            }
+        });
         
-        this._yRole = this._addVisualRole('y', {
-                isMeasure: true,
-                isRequired: true,
-                requireSingleDimension: true,
-                requireIsDiscrete: false,
-                defaultDimension: 'y',
-                dimensionDefaults: {
-                    valueType: Number
-                }
-            });
+        this._addVisualRole('y', {
+            isMeasure:  true,
+            isRequired: true,
+            requireSingleDimension: true,
+            requireIsDiscrete: false,
+            defaultDimension: 'y',
+            dimensionDefaults: {
+                valueType: Number
+            }
+        });
     },
-
-    _initData: function(){
-        this.base.apply(this, arguments);
-
-        // Cached
-        this._xDim = this.data.dimensions(this._xRole.firstDimensionName());
-        this._yDim = this.data.dimensions(this._yRole.firstDimensionName());
-    },
-    
+            
     _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo){
         var serRole = this._serRole;
-        var xRole   = this._xRole;
+        var xRole   = this.visualRoles('x');
         var yRole   = dataCell.role;
         var trendOptions = dataCell.trend;
         

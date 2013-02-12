@@ -79,7 +79,20 @@
                 relative to its corresponding visual element position.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="valuesMask" type="string" default="'{value}'" category="Layout">
+            <c:documentation>
+                The values mask used to build the text of value labels.
+
+                The mask may contain scene variable names and/or scene atom names,
+                like in the examples:
+                <ul>
+                    <li>scene variables: <tt>{category}: {value} EUR</tt>, could yield <tt>Drinks: 3.45 EUR</tt></li>
+                    <li>atom variables:  <tt>{#family} - {#product}</tt>, could yield <tt>Plains - Boeing 747</tt></li>
+                </ul>
+            </c:documentation>
+        </c:property>
+
         <c:property name="barSizeRatio" type="number" default="0.9" category="Style">
             <c:documentation>
                 The percentage of the grouped bar width 

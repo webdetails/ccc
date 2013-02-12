@@ -7,7 +7,6 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     var protoMark = def.get(keyArgs, 'proto');
     if(protoMark){
         pvMark.extend(protoMark);
-        //pvMark.duckExtension(protoMark, pvc.extensionTag);
     }
     
     this.base(panel, pvMark, keyArgs);
@@ -24,12 +23,14 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
 .constructor
 .add({
     _addInteractive: function(keyArgs){
+        var t = true;
         keyArgs = def.setDefaults(keyArgs,
-                        'noHover',       true,
-                        'noSelect',      true,
-                        'noTooltip',     true,
-                        'noClick',       true,
-                        'noDoubleClick', true);
+                        'noHover',       t,
+                        'noSelect',      t,
+                        'noTooltip',     t,
+                        'noClick',       t,
+                        'noDoubleClick', t,
+                        'showsInteraction', false);
 
         this.base(keyArgs);
     },
@@ -40,7 +41,7 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     interactiveStrokeWidth: function(strokeWidth){
-        if(this.scene.isActive){
+        if(this.mayShowActive(/*noSeries*/true)){
             return Math.max(1, strokeWidth) * 2.2;
         }
 
@@ -51,7 +52,9 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     interactiveColor: function(color, type){
         var scene = this.scene;
         
-        if(!scene.isActive && this.showsSelection() && scene.anySelected() && scene.datum && !scene.isSelected()) {
+        if(scene.datum && 
+           !this.mayShowActive(/*noSeries*/true) &&
+           this.mayShowNotAmongSelected()) {
             return this.dimColor(color, type);
         }
         

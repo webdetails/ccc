@@ -20,7 +20,10 @@ def.scope(function(){
         this.base(chart, type, index, keyArgs);
     })
     .add(/** @lends pvc.visual.SizeAxis# */{
-        
+        _buildOptionId: function(){
+            return this.id + "Axis";
+        },
+
         scaleTreatsNullAs: function(){
             return 'min';
         },

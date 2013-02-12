@@ -11,9 +11,15 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         this.extensionAbsIds = def.array.to(panel._makeExtensionAbsId(extensionIds));
     }
     
-    this.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true) && 
-                               !!this.chart.visualRoles('series', {assertExists: false});
-    
+    this.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true);
+    if(this.isActiveSeriesAware){
+        // Should also check if the corresponding data has > 1 atom?
+        var seriesRole = panel.visualRoles && panel.visualRoles.series;
+        if(!seriesRole || !seriesRole.isBound()){
+            this.isActiveSeriesAware = false;
+        }
+    }
+
     /* Extend the pv mark */
     var wrapper = def.get(keyArgs, 'wrapper');
     if(!wrapper){
@@ -33,9 +39,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 })
 .postInit(function(panel, pvMark, keyArgs){
     
-    panel._addSign(this);
-    
     this._addInteractive(keyArgs);
+
+    panel._addSign(this);
 })
 .add({
     // To be called on prototype
@@ -79,7 +85,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         };
         
         // baseColor
-        methods[baseName] = function(arg){
+        methods[baseName] = function(/*arg*/){
             // Override this method if user extension
             // should not always be called.
             // It is possible to call the default method directly, if needed.
@@ -90,13 +96,13 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         };
         
         // defaultColor
-        methods[defName]    = function(arg){ return; };
+        methods[defName]    = function(/*arg*/){ return; };
         
         // normalColor
-        methods[normalName] = function(value, arg){ return value; };
+        methods[normalName] = function(value/*, arg*/){ return value; };
         
         // interactiveColor
-        methods[interName]  = function(value, arg){ return value; };
+        methods[interName]  = function(value/*, arg*/){ return value; };
         
         this.constructor.add(methods);
         
@@ -256,12 +262,18 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _bitHoverable:        32,
     _bitClickable:        64,
     _bitDoubleClickable: 128,
+    _bitClickSelectable: 256,
+    _bitRubberSelectable:512,
     
+    _bitHasEvents:        16 | 32 | 64 | 128, // 240
+
     showsInteraction:  function(){ return (this.bits & this._bitShowsInteraction) !== 0; },
     showsActivity:     function(){ return (this.bits & this._bitShowsActivity   ) !== 0; },
     showsSelection:    function(){ return (this.bits & this._bitShowsSelection  ) !== 0; },
     showsTooltip:      function(){ return (this.bits & this._bitShowsTooltip    ) !== 0; },
     isSelectable:      function(){ return (this.bits & this._bitSelectable      ) !== 0; },
+    isRubberSelectable:function(){ return (this.bits & this._bitRubberSelectable) !== 0; },
+    isClickSelectable: function(){ return (this.bits & this._bitClickSelectable ) !== 0; },
     isHoverable:       function(){ return (this.bits & this._bitHoverable       ) !== 0; },
     isClickable:       function(){ return (this.bits & this._bitClickable       ) !== 0; },
     isDoubleClickable: function(){ return (this.bits & this._bitDoubleClickable ) !== 0; },
@@ -283,7 +295,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             this.panel._addPropTooltip(pvMark, def.get(keyArgs, 'tooltipArgs'));
         }
         
-        var clickSelectable = false;
+        var clickSelectable  = false;
         var clickable = false;
         
         if(options.selectable || options.hoverable){
@@ -291,6 +303,12 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 bits |= this._bitSelectable;
                 clickSelectable = !def.get(keyArgs, 'noClickSelect') &&
                                   chart._canSelectWithClick();
+                if(clickSelectable){
+                    bits |= this._bitClickSelectable;
+                }
+                if(!def.get(keyArgs, 'noRubberSelect')){
+                    bits |= this._bitRubberSelectable;
+                }
             }
             
             if(options.hoverable && !def.get(keyArgs, 'noHover')){
@@ -345,7 +363,11 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             
             panel._addPropDoubleClick(pvMark);
         }
-        
+
+        if(!(bits & this._bitHasEvents)){
+            this.pvMark.events('none');
+        }
+
         this.bits = bits;
     },
     
@@ -362,20 +384,50 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         return this.defaultColorSceneScale()(this.scene);
     },
 
-    dimColor: function(color/*, type*/){
-        return pvc.toGrayScale(color, -0.3, null, null); // ANALYZER requirements, so until there's no way to configure it...
-    },
-    
-    _initDefaultColorSceneScale: function(){
-        var colorAxis = this.panel.axes.color;
-        return colorAxis ? 
-               colorAxis.sceneScale({nullToZero: false}) :
-               def.fun.constant(pvc.defaultColor)
-               ;
+    dimColor: function(color, type){
+        if(type === 'text'){
+            return pvc.toGrayScale(
+                color,
+                /*alpha*/-0.75, // if negative, multiplies by color.alpha
+                /*maxGrayLevel*/ null,  // null => no clipping
+                /*minGrayLevel*/ null); // idem
+        }
+
+        // ANALYZER requirements, so until there's no way to configure it...
+        return pvc.toGrayScale(
+                color,
+                /*alpha*/-0.3, // if negative, multiplies by color.alpha
+                /*maxGrayLevel*/ null,  // null => no clipping
+                /*minGrayLevel*/ null); // idem
     },
     
     defaultColorSceneScale: function(){
-        return this._defaultColorSceneScale || 
-               (this._defaultColorSceneScale = this._initDefaultColorSceneScale());
+        return def.lazy(this, '_defaultColorSceneScale', this._initDefColorScale, this);
+    },
+
+    _initDefColorScale: function(){
+        var colorAxis = this.panel.axes.color;
+        return colorAxis ?
+               colorAxis.sceneScale() :
+               def.fun.constant(pvc.defaultColor);
+    },
+
+    mayShowActive: function(noSeries){
+        if(!this.showsActivity()){
+            return false;
+        }
+        
+        var scene = this.scene;
+        return scene.isActive || 
+               (!noSeries && this.isActiveSeriesAware && scene.isActiveSeries()) ||
+               scene.isActiveDatum();
+    },
+
+    mayShowNotAmongSelected: function(){
+        return this.showsSelection() && this.scene.anySelected() && !this.scene.isSelected();
+    },
+
+    mayShowSelected: function(){
+        return this.showsSelection() && this.scene.isSelected();
     }
 });

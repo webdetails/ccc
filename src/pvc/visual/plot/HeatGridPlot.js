@@ -57,6 +57,10 @@ def.scope(function(){
                 value: null
             },
 
+            ValuesAnchor: { // override default value only
+                value: 'center'
+            },
+
             OrthoRole: { // override
                 value: 'series'
             },

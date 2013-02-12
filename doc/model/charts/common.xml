@@ -739,7 +739,22 @@
                 taken into account for layout purposes.
             </c:documentation>
         </c:property>
-        
+
+        <c:property name="valuesMask" type="string" category="Layout">
+            <c:documentation>
+                The values mask used to build the text of value labels.
+
+                The mask may contain scene variable names and/or scene atom names,
+                like in the examples:
+                <ul>
+                    <li>scene variables: <tt>{category}: {value} EUR</tt>, could yield <tt>Drinks: 3.45 EUR</tt></li>
+                    <li>atom variables:  <tt>{#family} - {#product}</tt>, could yield <tt>Plains - Boeing 747</tt></li>
+                </ul>
+
+                The default value depends on the plot type.
+            </c:documentation>
+        </c:property>
+
         <c:property name="colorAxis" type="number" category="Axes">
             <c:documentation>
                 The index of the color axis to use for the plot.

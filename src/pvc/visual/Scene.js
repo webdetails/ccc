@@ -98,15 +98,18 @@ def.type('pvc.visual.Scene')
                  (parentAtoms = (parent && parent.atoms)) ? Object.create(parentAtoms) :
                  {};
 
-    source = (datum || group);
-    this.firstAtoms = source ? source.atoms : 
-                      (parentAtoms = (parent && parent.firstAtoms)) ? Object.create(parentAtoms) :
-                      this.atoms;
-
-    if(!source){
-        // This logic can be changed (see PointPanel)
+    // Groups may have some null datums and others not null
+    // Testing groups first ensures that the only
+    // case where isNull is detected is that of a single datum scene.
+    // Note that groups do not have isNull property, only datums do.
+    if(!source || source.isNull){
         this.isNull = true;
     }
+
+    source = (datum || group);
+    this.firstAtoms = source ? source.atoms : 
+                      (parentAtoms = (parent && parent.atoms)) ? Object.create(parentAtoms) :
+                      this.atoms;
 
     /* VARS */
     this.vars = parent ? Object.create(parent.vars) : {};
@@ -162,7 +165,7 @@ def.type('pvc.visual.Scene')
         }
         
         // A scene var name
-        return def.nullyTo(def.getPath(this.vars, prop), ""); // Scene vars' toString may end up being called
+        return def.getPath(this.vars, prop); // Scene vars' toString may end up being called
     },
     
     isRoot: function(){
@@ -252,7 +255,9 @@ def.type('pvc.visual.Scene')
             rootScene_setActive.call(this.root, this.isActive ? null : this);
         }
     },
-    
+
+    // This is misleading as it clears whatever the active scene is,
+    // not necessarily the scene on which it is called.
     clearActive: function(){
         return rootScene_setActive.call(this.root, null);
     },
@@ -275,10 +280,41 @@ def.type('pvc.visual.Scene')
         if(this.isActive){
             return true;
         }
+
+        var isActiveSeries = this.renderState.isActiveSeries;
+        if(isActiveSeries == null){
+            var activeSeries;
+            isActiveSeries = (activeSeries = this.activeSeries()) != null &&
+                             (activeSeries === this.vars.series.value);
+
+            this.renderState.isActiveSeries = isActiveSeries;
+        }
+
+        return isActiveSeries;
+    },
+
+    isActiveDatum: function(){
+
+        if(this.isActive){
+            return true;
+        }
+
+        // Only testing the first datum of both because of performance
+        // so, unless they have the same group or the  order of datums is the same...
+        var isActiveDatum = this.renderState.isActiveDatum;
+        if(isActiveDatum == null){
+            var activeScene = this.active();
+            if(activeScene){
+                isActiveDatum = (this.group && activeScene.group === this.group) ||
+                                (this.datum && activeScene.datum === this.datum);
+            } else {
+                isActiveDatum = false;
+            }
+            
+            this.renderState.isActiveDatum = isActiveDatum;
+        }
         
-        var activeSeries;
-        return (activeSeries = this.activeSeries()) != null &&
-               (activeSeries === this.vars.series.value);
+        return isActiveDatum;
     },
     
     /* SELECTION */
@@ -291,8 +327,7 @@ def.type('pvc.visual.Scene')
     },
     
     _selectedData: function(){
-        return this.renderState._selectedData || 
-               (this.renderState._selectedData = this._createSelectedData());
+        return def.lazy(this.renderState, '_selectedData', this._createSelectedData, this);
     },
     
     _createSelectedData: function(){
@@ -316,10 +351,6 @@ def.type('pvc.visual.Scene')
  */
 function scene_renderId(renderId){
     if(this._renderId !== renderId){
-        if(pvc.debug >= 20){
-            pvc.log({sceneId: this.id, oldRenderId: this._renderId, newRenderId: renderId});
-        }
-        
         this._renderId   = renderId;
         this.renderState = {};
     }
@@ -347,10 +378,9 @@ function rootScene_setActive(scene){
 }
 
 function scene_setActive(isActive){
-    isActive = !!isActive; // normalize
     if(this.isActive !== isActive){
         if(!isActive){
-            delete this.isActive;
+            delete this.isActive; // Inherits isActive = false
         } else {
             this.isActive = true;
         }

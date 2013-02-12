@@ -32,8 +32,7 @@ def.scope(function(){
                 .query(dataCells)
                 .select(function(dataCell){ return dataCell.plot; })
                 .distinct(function(plot){ return plot && plot.id; })
-                .array()
-                ;
+                .array();
             
             return this;
         },
@@ -62,8 +61,7 @@ def.scope(function(){
                         })
                         .distinct(function(child){ return child.key; })
                         .select(function(child){ return def.nullyTo(child.value, ''); })
-                        .array()
-                        ;
+                        .array();
                     
                     this.domainValues = domainValues;
                     
@@ -91,7 +89,7 @@ def.scope(function(){
                             colorDomain: this.option('Domain'), 
                             colorMin:    this.option('Min'),
                             colorMax:    this.option('Max'),
-                            colorNull:   this.option('Missing'), // TODO: already handled by the axis wrapping
+                            colorMissing:this.option('Missing'), // TODO: already handled by the axis wrapping
                             data:        visibleDomainData,
                             colorDimension: this.role.firstDimensionName(),
                             normPerBaseCategory: normByCateg
@@ -161,7 +159,7 @@ def.scope(function(){
             
             if(me.scaleType !== 'discrete'){
                 // TODO: this implementation doesn't support NormByCategory...
-                return function(d/*domainAsArrayOrArgs*/){
+                return function(/*domainAsArrayOrArgs*/){
                     // Create a fresh baseScale, from the baseColorScheme
                     // Use baseScale directly
                     var scale = baseScheme.apply(null, arguments);
@@ -173,7 +171,7 @@ def.scope(function(){
             
             var colorMap = me.option('Map'); // map domain key -> pv.Color
             if(!colorMap){
-                return function(d/*domainAsArrayOrArgs*/){
+                return function(/*domainAsArrayOrArgs*/){
                     // Create a fresh baseScale, from the baseColorScheme
                     // Use baseScale directly
                     var scale = baseScheme.apply(null, arguments);
@@ -240,6 +238,21 @@ def.scope(function(){
         
         sceneScale: function(keyArgs){
             var varName = def.get(keyArgs, 'sceneVarName') || this.role.name;
+
+            var fillColorScaleByColKey = this.scalesByCateg;
+            if(fillColorScaleByColKey){
+                var colorMissing = this.option('Missing');
+                
+                return function(scene){
+                    var colorValue = scene.vars[varName].value;
+                    if(colorValue == null) {
+                        return colorMissing;
+                    }
+                    
+                    var catAbsKey = scene.group.parent.absKey;
+                    return fillColorScaleByColKey[catAbsKey](colorValue);
+                };
+            }
             
             return this.scale.by1(function(scene){
                 return scene.vars[varName].value;
@@ -318,7 +331,7 @@ def.scope(function(){
         }
     };
     
-    function getDefaultColor(optionInfo){
+    function getDefaultColor(/*optionInfo*/){
         var colors;
         if(this.scaleType === 'discrete'){
             if(this.index === 0){
@@ -505,8 +518,8 @@ def.scope(function(){
                     return true;
                 }
             },
-            cast: pv.color,
-            value: pv.color("#efc5ad")
+            cast:  pv.color,
+            value: pv.color('lightgray')
         },
         
         // ------------

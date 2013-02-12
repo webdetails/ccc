@@ -60,7 +60,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     },
 
     interactiveStrokeWidth: function(strokeWidth){
-        if(this.isActiveSeriesAware && this.scene.isActiveSeries()){
+        if(this.mayShowActive()){ // debug ?
             /* - Ensure a normal width of at least 1,
              * - Double and a half that
              */
@@ -76,10 +76,8 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
      */
     interactiveColor: function(color, type){
         var scene = this.scene;
-        if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
-            
-            if(this.isActiveSeriesAware && scene.isActiveSeries()) {
-                //return color.darker(1.5);
+        if(this.mayShowNotAmongSelected()) {
+            if(this.mayShowActive()){
                 return pv.Color.names.darkgray.darker().darker();
             }
             
