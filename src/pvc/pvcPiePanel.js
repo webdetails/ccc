@@ -442,7 +442,7 @@ def
     
     this.base(null, {panel: panel, group: data});
 
-    var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color);
+    var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color, {roleVar: 'color'});
     
     // ---------------
     

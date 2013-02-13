@@ -97,10 +97,10 @@ def.scope(function(){
             
             var by;
             
-            // Applying scaleNullRangeValue to discrete scales
-            // Caused problems in the discrete color scales
-            // where we want it to catch the first color of the color scale,
-            // in cases where there is only a null series...
+            // Applying 'scaleNullRangeValue' to discrete scales
+            // would cause problems in discrete color scales,
+            // where we want null to be matched to the first color of the color scale
+            // (typically happens when there is only a null series).
             if(scale.type !== 'discrete' ){
                 var useAbs = this.scaleUsesAbs();
                 var nullAs = this.scaleTreatsNullAs();

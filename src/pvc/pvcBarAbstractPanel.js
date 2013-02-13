@@ -317,8 +317,8 @@ def
         
         var categDatas = data._children;
         var roles = this.visualRoles;
-        var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.value, {hasPercentSubVar: this.stacked});
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color);
+        var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.value, {roleVar: 'value', hasPercentSubVar: this.stacked});
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
         
         /**
          * Create starting scene tree

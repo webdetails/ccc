@@ -472,7 +472,8 @@ def
         var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
         var categDatas = data._children;
         var chart = this.chart;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(chart, chart._colorRole);
+        var serRole = this.visualRoles.series;
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
         var valueDim = data.owner.dimensions(this.valueDimName);
         var isStacked = this.stacked;
         var visibleKeyArgs = {visible: true, zeroIfNone: false};
@@ -498,8 +499,7 @@ def
         // ----------------------------------
         def
         .scope(function(){
-            var serRole = chart._serRole;
-            return (serRole && serRole.grouping)    ?
+            return (serRole && serRole.grouping) ?
                    serRole.flatten(data).children() : // data already only contains visible data
                    def.query([null]) // null series
                    ;

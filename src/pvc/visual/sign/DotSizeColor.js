@@ -54,6 +54,7 @@ def
 .constructor
 .add({
     isColorBound: false,
+    isColorDiscrete: false,
     isSizeBound:  false,
     isSizeAbs:    false,
 
@@ -66,7 +67,7 @@ def
         return !scene.isNull && 
                ((!this.isSizeBound && !this.isColorBound) ||
                 (this.isSizeBound  && scene.vars.size.value  != null) ||
-                (this.isColorBound && scene.vars.color.value != null));
+                (this.isColorBound && (this.isColorDiscrete || scene.vars.color.value != null)));
     },
 
     _initColor: function(){
@@ -75,13 +76,17 @@ def
         var panel = this.panel;
         var colorRole = panel.visualRoles.color;
         if(colorRole){
-            var colorAxis    = panel.axes.color;
-            var colorScale   = colorAxis && colorAxis.scale;
-            var isColorBound = !!colorScale && colorRole.isBound() && !colorScale.isNull;
-            if(isColorBound){ // => colorAxis
+            this.isColorDiscrete = colorRole.isDiscrete();
+            
+            var colorAxis  = panel.axes.color;
+            var colorScale = colorAxis && colorAxis.scale;
+            
+            // Has at least one value? (possibly null, in discrete scales)
+            var isColorBound = !!colorScale && colorRole.isBound();
+            if(isColorBound) { // => colorAxis
                 this.isColorBound = true;
                 sceneColorScale = colorAxis.sceneScale({sceneVarName: colorRole.name});
-            } else if(colorScale){
+            } else if(colorScale) {
                 var r = colorScale.range();
                 if(r && r.length){
                     colorMissing = r[0];
@@ -106,11 +111,12 @@ def
         if(sizeRole){
             var sizeAxis  = panel.axes.size;
             var sizeScale = sizeAxis && sizeAxis.scale;
-            var isSizeBound = !!sizeScale && sizeRole.isBound() && !sizeScale.isNull;
+            var isSizeBound = !!sizeScale && sizeRole.isBound();
             if(isSizeBound){
                 this.isSizeBound = true;
-
-                var missingSize = sizeScale.min + (sizeScale.max - sizeScale.min) * 0.1; // 10% size
+                
+                var missingSize = sizeScale.min + (sizeScale.max - sizeScale.min) * 0.05; // 10% size
+                this.nullSizeShapeHasStrokeOnly = (nullSizeShape === 'cross');
                 
                 sceneShapeScale = function(scene){
                     return scene.vars.size.value != null ? shape : nullSizeShape;
@@ -217,7 +223,7 @@ def
     },
 
     defaultStrokeWidth: function(){
-        return (this.isSizeAbs && this.scene.vars.size.value < 0) ? 1 : 1;
+        return (this.nullSizeShapeHasStrokeOnly && this.scene.vars.size.value == null) ? 1.8 : 1;
     },
 
     interactiveStrokeWidth: function(width){

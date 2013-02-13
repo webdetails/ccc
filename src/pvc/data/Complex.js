@@ -81,12 +81,15 @@ def
         var ownerDims = owner._dimensions;
         
         var addAtom = function(dimName, value){
+            var dimension = def.getOwn(ownerDims, dimName);
             if(value != null){ // nulls are already in base proto object
-                var dimension = def.getOwn(ownerDims, dimName);
                 var atom = dimension.intern(value);
                 if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
                     atomsMap[dimName] = atom;
                 }
+            } else {
+                // But need to make sure it is interned
+                dimension.intern(null);
             }
         };
     

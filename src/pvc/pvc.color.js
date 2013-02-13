@@ -369,6 +369,9 @@ def.scope(function(){
             // Give it a bit of protovis looks
             def.copy(scale, pv.Scale.common);
             
+            scale.domain = function(){ return domain; };
+            scale.range  = function(){ return range;  };
+            
             return scale;
         }
     });

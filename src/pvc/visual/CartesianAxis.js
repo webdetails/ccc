@@ -187,10 +187,6 @@ def.scope(function(){
                 scale.range(scale.min, scale.max);
             }
 
-            if(pvc.debug > 4){
-                this.chart._log("Axis " + this.id  + " setRange: " + pvc.stringify(scale.range()));
-            }
-
             return scale;
         },
         

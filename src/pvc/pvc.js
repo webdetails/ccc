@@ -78,7 +78,7 @@ var pvc = def.globalSpace('pvc', {
     
     function installPvcLog(){
         if (pvc.debug && typeof console !== "undefined"){
-            ['log', 'info', ['trace', 'debug'], 'error', 'warn', 'group', 'groupEnd']
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd']
             .forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
@@ -308,6 +308,10 @@ var pvc = def.globalSpace('pvc', {
                type.add(exts2);
             }
         }
+    };
+    
+    pv.Color.prototype.stringify = function(out, remLevels, keyArgs){
+        return pvc.stringifyRecursive(out, this.key, remLevels, keyArgs);
     };
     
     pv.Mark.prototype.hasDelegateValue = function(name, tag) {

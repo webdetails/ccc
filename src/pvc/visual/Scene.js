@@ -118,7 +118,28 @@ def.type('pvc.visual.Scene')
 
 .add(/** @lends pvc.visual.Scene# */{
     isNull: false,
-
+    
+    /** 
+     * Obtains the group of this scene, or if inexistent
+     * the group of the parent scene, if there is one, and so on.
+     * If no data can be obtained in this way,
+     * the data of the associated panel is returned.
+     */
+    data: function(){
+        var data = this.group;
+        if(!data){
+            var scene = this;
+            while(!data && (scene = scene.parent)){
+                data = scene.group;
+            }
+            if(!data){
+                data = this.panel.data;
+            }
+        }
+        
+        return data;
+    },
+    
     /**
      * Obtains an enumerable of the datums present in the scene.
      *

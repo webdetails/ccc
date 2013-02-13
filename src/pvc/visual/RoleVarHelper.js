@@ -1,34 +1,44 @@
 def
 .type('pvc.visual.RoleVarHelper')
 .init(function(rootScene, role, keyArgs){
-    var g;
     var hasPercentSubVar = def.get(keyArgs, 'hasPercentSubVar', false);
-
-    if(!def.get(keyArgs, 'forceUnbound', false)){
-        g = this.grouping = role.grouping;
-        if(g){
-            this.role = role;
-            this.sourceRoleName = role.sourceRole && role.sourceRole.name;
-            if(!g.isDiscrete()){
-                var panel = rootScene.panel();
-                this.rootContDim = panel.data.owner.dimensions(g.firstDimensionName());
-                if(hasPercentSubVar){
-                    this.percentFormatter = panel.chart.options.percentValueFormat;
-                }
+    var roleVarName = def.get(keyArgs, 'roleVar');
+    
+    var g = this.grouping = role && role.grouping;
+    if(g){
+        this.role = role;
+        this.sourceRoleName = role.sourceRole && role.sourceRole.name;
+        var panel = rootScene.panel();
+        this.panel = panel;
+        
+        if(!g.isDiscrete()){
+            this.rootContDim = panel.data.owner.dimensions(g.firstDimensionName());
+            if(hasPercentSubVar){
+                this.percentFormatter = panel.chart.options.percentValueFormat;
             }
         }
+    }
+    
+    if(!roleVarName){
+        if(!role){
+            throw def.error.operationInvalid("Role is not defined, so the roleVar argument is required.");
+        }
+        
+        roleVarName = role.name;
     }
     
     if(!g){
         // Unbound role
         // Place a null variable in the root scene
-        var roleVar = rootScene.vars[role.name] = new pvc.visual.ValueLabelVar(null, "");
+        var roleVar = rootScene.vars[roleVarName] = new pvc.visual.ValueLabelVar(null, "");
         if(hasPercentSubVar){
             roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
         }
     }
-
-    rootScene['is' + def.firstUpperCase(role.name) + 'Bound'] = !!g;
+    
+    this.roleVarName = roleVarName;
+    
+    rootScene['is' + def.firstUpperCase(roleVarName) + 'Bound'] = !!g;
 })
 .add({
     isBound: function(){
@@ -40,8 +50,8 @@ def
             return;
         }
         
-        var roleName = this.role.name;
-        if(scene.vars[roleName]){
+        var roleVarName = this.roleVarName;
+        if(scene.vars[roleVarName]){
             return;
         }
         
@@ -49,11 +59,13 @@ def
         if(sourceName){
             var sourceVar = def.getOwn(scene.vars, sourceName);
             if(sourceVar){
-                scene.vars[roleName] = sourceVar.clone();
+                scene.vars[roleVarName] = sourceVar.clone();
                 return;
             }
         }
-
+        
+        // TODO: gotta improve this spaghetti somehow
+        
         if(isLeaf){
             // Not grouped, so there's no guarantee that
             // there's a single value for all the datums of the group.
@@ -70,34 +82,52 @@ def
                     roleVar = pvc.visual.ValueLabelVar.fromComplex(view);
                 }
             } else {
+                var valuePct, valueDim;
                 var group = scene.group;
                 var singleDatum = group ? group.singleDatum() : scene.datum;
                 if(singleDatum){
                     if(!singleDatum.isNull){
                         roleVar = pvc.visual.ValueLabelVar.fromAtom(singleDatum.atoms[rootContDim.name]);
+                        if(roleVar.value != null && this.percentFormatter){
+                            if(group){
+                                valueDim = group.dimensions(rootContDim.name);
+                                valuePct = valueDim.percentOverParent({visible: true});
+                            } else {
+                                valuePct = scene.data().dimensions(rootContDim.name).percent(roleVar.value);
+                            }
+                        }
                     }
                 } else if(group){
-                    var valueDim = group.dimensions(rootContDim.name);
-                    var value    = valueDim.sum({visible: true, zeroIfNone: false});
-                    var label    = rootContDim.format(value);
-                    
-                    roleVar = new pvc.visual.ValueLabelVar(value, label, value);
-                    if(this.percentFormatter){
-                        if(value == null){
-                            roleVar.percent = new pvc.visual.ValueLabelVar(value, label);
-                        } else {
-                            var valuePct = valueDim.percentOverParent({visible: true});
-
-                            roleVar.percent = new pvc.visual.ValueLabelVar(
-                                                    valuePct,
-                                                    this.percentFormatter.call(null, valuePct));
+                    valueDim = group.dimensions(rootContDim.name);
+                    var value = valueDim.sum({visible: true, zeroIfNone: false});
+                    if(value != null){
+                        var label = rootContDim.format(value);
+                        roleVar = new pvc.visual.ValueLabelVar(value, label, value);
+                        if(this.percentFormatter){
+                            valuePct = valueDim.percentOverParent({visible: true});
                         }
                     }
                 }
+                
+                if(roleVar && this.percentFormatter){
+                    if(roleVar.value == null){
+                        roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
+                    } else {
+                        roleVar.percent = new pvc.visual.ValueLabelVar(
+                                          valuePct,
+                                          this.percentFormatter.call(null, valuePct));
+                    }
+                }
             }
-
-            scene.vars[roleName] = roleVar ||
-                                   new pvc.visual.ValueLabelVar(null, "");
+            
+            if(!roleVar){
+                roleVar = new pvc.visual.ValueLabelVar(null, "");
+                if(this.percentFormatter){
+                    roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
+                }
+            }
+            
+            scene.vars[roleVarName] = roleVar;
         }
     }
 });

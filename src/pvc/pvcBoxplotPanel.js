@@ -206,8 +206,7 @@ def
             bandWidth  = baseScale.range().band,
             boxWidth   = Math.min(bandWidth * this.boxSizeRatio, this.maxBoxSize),
             orthoScale = this.axes.ortho.scale,
-            colorVarHelper = new pvc.visual.RoleVarHelper(chart, chart._colorRole)
-            ;
+            colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
 
         /**
          * Create starting scene tree

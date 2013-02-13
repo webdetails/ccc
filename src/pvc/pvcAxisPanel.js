@@ -269,7 +269,7 @@ def
     // than the biggest it often results in wider
     // than needed margins being reserved.
     //
-    // TODO: the halfband method for determining the overflow in
+    // TODO: the half-band method for determining the overflow in
     // discrete axes also doesn't take text-alignment into account.
     _calcOverflowPaddingsFromLabelBBox: function(){
         var overflowPaddings = null;

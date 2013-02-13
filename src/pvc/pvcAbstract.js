@@ -13,7 +13,7 @@ def
         if (pvc.debug && typeof console !== "undefined"){
             var logId = this._getLogInstanceId();
             
-            ['log', 'info', ['trace', 'debug'], 'error', 'warn', 'group', 'groupEnd'].forEach(function(ps){
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd'].forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
                 pvc._installLog(this, '_' + ps[0],  ps[1], logId);

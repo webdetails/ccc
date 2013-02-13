@@ -265,7 +265,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _bitClickSelectable: 256,
     _bitRubberSelectable:512,
     
-    _bitHasEvents:        16 | 32 | 64 | 128, // 240
+    _bitHasEvents:       8 | 16 | 32 | 64 | 128, // 248
 
     showsInteraction:  function(){ return (this.bits & this._bitShowsInteraction) !== 0; },
     showsActivity:     function(){ return (this.bits & this._bitShowsActivity   ) !== 0; },
@@ -408,7 +408,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _initDefColorScale: function(){
         var colorAxis = this.panel.axes.color;
         return colorAxis ?
-               colorAxis.sceneScale() :
+               colorAxis.sceneScale({sceneVarName: 'color'}) :
                def.fun.constant(pvc.defaultColor);
     },
 

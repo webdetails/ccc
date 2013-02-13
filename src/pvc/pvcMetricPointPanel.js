@@ -24,10 +24,10 @@ def
     this.axes.size  = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
     var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
-    this.visualRoles.size = chart.visualRoles(sizeRoleName);
-
-    this.linesVisible  = plot.option('LinesVisible'); // TODO
-    this.dotsVisible   = plot.option('DotsVisible' ); // TODO
+    this.visualRoles.size = sizeRoleName ? chart.visualRoles(sizeRoleName) : null;
+    
+    this.linesVisible = plot.option('LinesVisible'); // TODO
+    this.dotsVisible  = plot.option('DotsVisible' ); // TODO
     if(!this.linesVisible && !this.dotsVisible){
         this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
@@ -152,7 +152,7 @@ def
             // Protovis draws diamonds inscribed on
             // a square with half-side radius*Math.SQRT2
             // (so that diamonds just look like a rotated square)
-            // For the height/width of the diamondnot to exceed the cell size
+            // For the height/width of the diamond not to exceed the cell size
             // we compensate that factor here.
             radiusRange.max /= Math.SQRT2;
             radiusRange.min /= Math.SQRT2;
@@ -325,6 +325,9 @@ def
         // -- LINE --
         var isLineNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
         
+        // A discrete color role may have null values; the line is not hidden.
+        var isColorDiscrete = rootScene.isColorBound && this.visualRoles.color.isDiscrete();
+        
         var line = new pvc.visual.Line(me, me.pvScatterPanel, {
                 extensionId: 'line',
                 wrapper:     wrapper,
@@ -343,7 +346,7 @@ def
                     visible = !scene.isNull &&
                              ((!rootScene.isSizeBound && !rootScene.isColorBound) ||
                               (rootScene.isSizeBound  && scene.vars.size.value  != null) ||
-                              (rootScene.isColorBound && scene.vars.color.value != null));
+                              (rootScene.isColorBound && (isColorDiscrete || scene.vars.color.value != null)));
                 }
                 
                 return visible;
@@ -459,14 +462,12 @@ def
 
         var roles = this.visualRoles;
         var axes  = this.axes;
-        var hasColorRole = roles.color.isBound() && !axes.color.scale.isNull;
-        var hasSizeRole  = roles.size .isBound() && !axes.size .scale.isNull;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {forceUnbound: !hasColorRole});
-        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {forceUnbound: !hasSizeRole });
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
+        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size' });
         
         var xDim = data.owner.dimensions(roles.x.firstDimensionName());
         var yDim = data.owner.dimensions(roles.y.firstDimensionName());
-
+        
         // --------------
         
         data.children()

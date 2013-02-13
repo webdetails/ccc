@@ -972,6 +972,25 @@ def
 
             /* Extensions */
             this.applyExtensions();
+            
+            /* Log Axes Scales */
+            if(this.isRoot && pvc.debug > 5){
+                var out = ["SCALES SUMMARY", pvc.logSeparator];
+                
+                this.chart.axesList.forEach(function(axis){
+                    var scale = axis.scale;
+                    if(scale){
+                        var d = scale.domain && scale.domain();
+                        var r = scale.range  && scale.range ();
+                        out.push(axis.id);
+                        out.push("    domain: " + (!d ? '?' : pvc.stringify(d)));
+                        out.push("    range : " + (!r ? '?' : pvc.stringify(r)));
+                        
+                    }
+                }, this);
+                
+                this._log(out.join("\n"));
+            }
         }
     },
 
@@ -1587,7 +1606,8 @@ def
             return "";
         }
         
-        var data = this.data;
+        var data = scene.data();
+        
         var visibleKeyArgs = {visible: true};
         
         var tooltip = [];

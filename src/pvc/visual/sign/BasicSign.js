@@ -39,7 +39,8 @@
         this.chart  = panel.chart;
         this.panel  = panel;
         this.pvMark = pvMark;
-
+        
+        /*jshint expr:true*/
         !pvMark.sign || def.assert("Mark already has an attached Sign.");
 
         pvMark.sign = this;

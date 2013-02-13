@@ -52,19 +52,27 @@ def
         // One multi-dimension single-level data grouping
         var rowRootData = me.data.flattenBy(me.visualRoles.series, {visible: true});
 
-        // One multi-dimensional, two-levels data grouping
+        // One multi-dimensional, two-levels grouping (Series -> Categ)
         var rootScene  = me._buildScene(me.visibleData(), rowRootData, cellSize);
         var hasColor   = rootScene.isColorBound;
         var hasSize    = rootScene.isSizeBound;
         var wrapper    = me._buildSignsWrapper(rootScene);
         var isV1Compat = me.compatVersion() <= 1;
-
+        
+        var rowScale   = this.axes.base.scale;
+        var colScale   = this.axes.ortho.scale;
+        
+        var rowStep = rowScale.range().step;
+        var colStep = colScale.range().step;
+        var rowStep2 = rowStep/2;
+        var colStep2 = colStep/2;
+        
         /* PV Panels */
         var pvRowPanel = new pvc.visual.Panel(me, me.pvPanel)
             .pvMark
             .data(rootScene.childNodes)
-            [a_bottom](function(){ return this.index * cellSize.height; })
-            [a_height](cellSize.height);
+            [a_bottom](function(scene){ return colScale(scene.vars.series.value) - colStep2; })
+            [a_height](colStep);
 
         /* Cell panel */
         var extensionIds = ['panel'];
@@ -95,8 +103,8 @@ def
         me.pvHeatGrid = new pvc.visual.Panel(me, pvRowPanel, keyArgs)
             .lock('data', function(serScene){ return serScene.childNodes; })
             .pvMark
-            .lock(a_left,  function(){ return this.index * cellSize.width; })
-            .lock(a_width, cellSize.width)
+            .lock(a_left,  function(scene){ return rowScale(scene.vars.category.value) - rowStep2; })
+            .lock(a_width, rowStep)
             .antialias(false);
             // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode, and specially in Chrome)
             // Overflow can be important if valuesVisible=true
@@ -277,7 +285,7 @@ def
             // Protovis draws diamonds inscribed on
             // a square with half-side radius*Math.SQRT2
             // (so that diamonds just look like a rotated square)
-            // For the height of the dimanod not to exceed the cell size
+            // For the height of the diamond not to exceed the cell size
             // we compensate that factor here.
             maxRadius /= Math.SQRT2;
         }
@@ -374,8 +382,8 @@ def
         var categDatas = data._children;
 
         var roles = me.visualRoles;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color);
-        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size);
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
+        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size' });
         
         rootScene.cellSize = cellSize;
 

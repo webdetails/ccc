@@ -112,7 +112,7 @@ def.scope(function(){
         // Called from within setScale
         _wrapScale: function(scale){
             // Check if there is a color transform set
-            // and if so, transform the color scheme
+            // and if so, transform the color scheme.
             // If the user specified the colors,
             // do not apply default color transforms...
             var applyTransf;
