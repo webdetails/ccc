@@ -1,4 +1,4 @@
-// 7c7ae453d39a7ca8ba4f419820fe14b6722f21e0
+// cea1e1b345326bacb7cc119767ee770a18b92ea9
 /**
  * @class The built-in Array class.
  * @name Array
@@ -1294,60 +1294,68 @@ pv.Format.number = function() {
     pv.Text.measureCore = (function(){
         
         // SVG implementation
-        var _svgText, _svgTextFont;
+        var _svgText, _lastFont = '10px sans-serif';
         
-        function createTextSizePlaceholder(){
+        function getTextSizeElement(){
+            return _svgText || (_svgText = createTextSizeElement());
+        }
+        
+        function createTextSizeElement(){
             var div =  document.createElement('div');
             div.id = 'pvSVGText_' + new Date().getTime();
             
             var style = div.style;
             style.position   = 'absolute';
             style.visibility = 'hidden';
-            style.width = 0;
+            style.width  = 0;
             style.height = 0;
             style.left = 0;
-            style.top = 0;
+            style.top  = 0;
+            
+            var svgElem = pv.SvgScene.create('svg');
+            svgElem.setAttribute('font', _lastFont);
+            div.appendChild(svgElem);
+            
+            
+            var svgText = pv.SvgScene.create('text');
+            svgElem.appendChild(svgText);
+            
+            var textNode;
+            if (pv.renderer() === "svgweb") { 
+                // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
+                textNode = document.createTextNode('', true);
+            } else {
+                textNode = document.createTextNode('');
+            }
+            svgText.appendChild(textNode);
             
             document.body.appendChild(div);
             
-            return div;
+            return svgText;
         }
         
         return function(text, font){
-            if(!_svgText){
-                var holder  = createTextSizePlaceholder();
-                var svgElem = pv.SvgScene.create('svg');
-                svgElem.setAttribute('font-size',   '10px');
-                svgElem.setAttribute('font-family', 'sans-serif');
-                
-                _svgText = pv.SvgScene.create('text');
-                svgElem.appendChild(_svgText);
-                
-                holder.appendChild(svgElem);
+            if(!font){ font = null; }
+            
+            var svgText = getTextSizeElement();
+            if(_lastFont !== font){
+                _lastFont = font;
+                pv.SvgScene.setStyle(svgText, {'font': font});
             }
             
-            if(!font){
-                font = null;
-            }
+            svgText.firstChild.nodeValue = '' + text;
             
-            if(_svgTextFont !== font){
-                _svgTextFont = font;
-                pv.SvgScene.setStyle(_svgText, {'font': font});
-            }
-            
-            var textNode = _svgText.firstChild;
-            if(textNode) {
-                textNode.nodeValue = ''+text;
-            } else {
-                if (pv.renderer() === "svgweb") { 
-                    // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
-                    _svgText.appendChild(document.createTextNode(''+text, true));
-                } else {
-                    _svgText.appendChild(document.createTextNode(''+text));
+            var box;
+            try{
+                box = svgText.getBBox();
+            } catch(ex){
+                if(typeof console.error === 'function'){
+                    console.error("GetBBox failed: ", ex);
                 }
+                
+                throw ex;
             }
-    
-            var box = _svgText.getBBox();
+            
             return {width: box.width, height: box.height};
         };
     }());
