@@ -246,6 +246,10 @@ def
                           (orthoScale.max + paddings[a_top]),
             angle;
 
+        // 0 degrees
+        //  /\
+        // /__\
+        //
         if(!isMin){
             angle = isVertical ? Math.PI: -Math.PI/2;
         } else {

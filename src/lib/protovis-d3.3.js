@@ -1,4 +1,4 @@
-// cea1e1b345326bacb7cc119767ee770a18b92ea9
+// 42d287d76114de7699ef22a674f043a9a1184e2f
 /**
  * @class The built-in Array class.
  * @name Array
@@ -10077,7 +10077,7 @@ pv.SvgScene.panel = function(scenes) {
     this.scale *= t.k;
 
     /* children */
-    if(scenes[i].children.length){
+    if(s.children.length){
         var attrs = {
             "transform": "translate(" + x + "," + y + ")" +
                          (t.k != 1 ? " scale(" + t.k + ")" : "")
@@ -10103,7 +10103,7 @@ pv.SvgScene.panel = function(scenes) {
       scenes.$g = g = c.parentNode;
       e = c.nextSibling;
     }
-  } // for next panel instance
+  } // end for panel instance
   
   complete = true;
   return e;
