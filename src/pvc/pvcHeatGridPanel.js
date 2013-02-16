@@ -378,7 +378,7 @@ def
 
     _buildScene: function(data, seriesRootData, cellSize){
         var me = this;
-        var rootScene  = new pvc.visual.Scene(null, {panel: me, group: data});
+        var rootScene  = new pvc.visual.Scene(null, {panel: me, source: data});
         var categDatas = data._children;
 
         var roles = me.visualRoles;
@@ -395,7 +395,7 @@ def
 
         function createSeriesScene(serData1){
             /* Create series scene */
-            var serScene = new pvc.visual.Scene(rootScene, {group: serData1});
+            var serScene = new pvc.visual.Scene(rootScene, {source: serData1});
 
             serScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(serData1);
 
@@ -407,7 +407,7 @@ def
         function createSeriesCategoryScene(serScene, catData1, serData1){
             var group = data._childrenByKey[catData1.key]._childrenByKey[serData1.key];
 
-            var serCatScene = new pvc.visual.Scene(serScene, {group: group});
+            var serCatScene = new pvc.visual.Scene(serScene, {source: group});
 
             serCatScene.vars.category = pvc.visual.ValueLabelVar.fromComplex(catData1);
 

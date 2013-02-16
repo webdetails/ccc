@@ -120,8 +120,8 @@ function visualContext_update(mark, event){
         this.index = null;
         
         scene = new pvc.visual.Scene(null, {
-            panel: this.panel,
-            group: this.chart.root.data
+            panel:  this.panel,
+            source: this.chart.root.data
         });
     }
     

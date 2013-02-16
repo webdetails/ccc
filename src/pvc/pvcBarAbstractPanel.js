@@ -317,7 +317,7 @@ def
     },
 
     _buildScene: function(data, seriesData){
-        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
         
         var categDatas = data._children;
         var roles = this.visualRoles;
@@ -335,7 +335,7 @@ def
 
         function createSeriesScene(seriesData1){
             /* Create series scene */
-            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1}),
+            var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1}),
                 seriesKey   = seriesData1.key;
 
             seriesScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(seriesData1);
@@ -345,7 +345,7 @@ def
             categDatas.forEach(function(categData1){
                 /* Create leaf scene */
                 var group = data._childrenByKey[categData1.key]._childrenByKey[seriesKey],
-                    scene = new pvc.visual.Scene(seriesScene, {group: group});
+                    scene = new pvc.visual.Scene(seriesScene, {source: group});
 
                 var categVar =
                     scene.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData1);

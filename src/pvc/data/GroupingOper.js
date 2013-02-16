@@ -43,16 +43,15 @@
  */
 def.type('pvc.data.GroupingOper', pvc.data.DataOper)
 .init(function(linkParent, groupingSpecs, keyArgs){
-    /* Grouping spec may be specified as text or object */
     /*jshint expr:true */
     groupingSpecs || def.fail.argumentRequired('groupingSpecs');
 
     this.base(linkParent, keyArgs);
 
-    this._where      = def.get(keyArgs, 'where');
-    this._visible    = def.get(keyArgs, 'visible',  null);
-    this._selected   = def.get(keyArgs, 'selected', null);
-    this._isNull     = def.get(keyArgs, 'isNull',   null);
+    this._where    = def.get(keyArgs, 'where');
+    this._visible  = def.get(keyArgs, 'visible',  null);
+    this._selected = def.get(keyArgs, 'selected', null);
+    this._isNull   = def.get(keyArgs, 'isNull',   null);
     
     /* 'Where' predicate and its key */
     var hasKey = this._selected == null, // TODO: Selected state changes do not yet invalidate cache...

@@ -193,7 +193,7 @@ def
     },
     
     _buildScene: function(layoutInfo){
-        var rootScene = new pvc.visual.Scene(null, { panel: this, group: this.chart.data });
+        var rootScene = new pvc.visual.Scene(null, {panel: this, source: this.chart.data});
         var textLines = layoutInfo.lines;
         
         rootScene.vars.size  = layoutInfo.lineSize;

@@ -48,10 +48,9 @@
  * @constructor
  * @param {pvc.visual.Scene} [parent=null] The parent scene.
  * @param {object} [keyArgs] Keyword arguments.
- * @property {pvc.data.Data}  [keyArgs.group=null] The data group that's present in the scene.
- * Specify only one of the arguments <tt>group</tt> or <tt>datum</tt>.
- * @property {pvc.data.Datum} [keyArgs.datum=null] The single datum that's present in the scene.
- * Specify only one of the arguments <tt>group</tt> or <tt>datum</tt>.
+ * @property {pvc.data.Datum | pvc.data.Data | pvc.data.Datum[] | pvc.data.Data[]} 
+ *  [keyArgs.source=null]
+ *  The data source(s) that are present in the scene.
  */
 def.type('pvc.visual.Scene')
 .init(function(parent, keyArgs){
@@ -65,51 +64,75 @@ def.type('pvc.visual.Scene')
     pv.Dom.Node.call(this, /* nodeValue */null);
     
     this.parent = parent || null;
-    this.root   = this;
     if(parent){
+        this.root = parent.root;
+        
         // parent -> ((pv.Dom.Node#)this).parentNode
         // this   -> ((pv.Dom.Node#)parent).childNodes
         // ...
         var index = def.get(keyArgs, 'index', null);
         parent.insertAt(this, index);
-        this.root = parent.root;
     } else {
         /* root scene */
+        this.root = this;
+        
         this._active = null;
         this._panel = def.get(keyArgs, 'panel') || 
             def.fail.argumentRequired('panel', "Argument is required on root scene.");
     }
     
     /* DATA */
-    var group = def.get(keyArgs, 'group', null),
-        datum;
-    if(group){
-        datum = group._datums[0]; // null on empty datas (just try hiding all series with the legend)
+    var first, group, datum, datums, groups, atoms, firstAtoms;
+    var dataSource = def.array.to(def.get(keyArgs, 'source')); // array.to: nully remains nully
+    if(dataSource && dataSource.length){
+        this.source = dataSource;
+        
+        first = dataSource[0];
+        if(first instanceof pvc.data.Data){
+            // Group/groups
+            group  = first;
+            groups = dataSource;
+            
+            // There are datas with no datums.
+            // For example, try, hiding all datums (using the legend).
+            datum  = group.firstDatum() || 
+                     def
+                     .query(groups)
+                     .select(function(group){ return group.firstDatum(); })
+                     .first(def.notNully);
+            // datum may still be null!
+        } else {
+            /*jshint expr:true */
+            (first instanceof pvc.data.Datum) || def.assert("not a datum");
+            datum  = first;
+            datums = dataSource;
+        }
+        
+        atoms      = first.atoms; // firstDataSourceAtoms
+        firstAtoms = (datum && datum.atoms) || first.atoms; // firstDatumAtoms
+    } else if(parent){
+        atoms = firstAtoms = Object.create(parent.atoms);
     } else {
-        datum = def.get(keyArgs, 'datum');
+        atoms = firstAtoms = {};
     }
     
-    this.datum = datum || null;
-    this.group = group;
+    // Created empty even when there is no data
+    this.atoms = atoms;
+    this.firstAtoms = firstAtoms;
     
-    var parentAtoms;
-    var source = (group || datum);
-    this.atoms = source ? source.atoms :
-                 (parentAtoms = (parent && parent.atoms)) ? Object.create(parentAtoms) :
-                 {};
-
+    // Only set when existent, otherwise inherit from prototype
+    groups && (this.groups  = groups);
+    group  && (this.group   = group );
+    datums && (this._datums = datums);
+    datum  && (this.datum   = datum );
+    
     // Groups may have some null datums and others not null
     // Testing groups first ensures that the only
     // case where isNull is detected is that of a single datum scene.
     // Note that groups do not have isNull property, only datums do.
-    if(!source || source.isNull){
+    if(!first || first.isNull){
         this.isNull = true;
     }
-
-    source = (datum || group);
-    this.firstAtoms = source ? source.atoms : 
-                      (parentAtoms = (parent && parent.atoms)) ? Object.create(parentAtoms) :
-                      this.atoms;
 
     /* VARS */
     this.vars = parent ? Object.create(parent.vars) : {};
@@ -117,10 +140,16 @@ def.type('pvc.visual.Scene')
 .add(pv.Dom.Node)
 
 .add(/** @lends pvc.visual.Scene# */{
+    source: null,
+    groups: null,
+    group:  null,
+    _datums: null,
+    datum:  null,
+    
     isNull: false,
     
     /** 
-     * Obtains the group of this scene, or if inexistent
+     * Obtains the (first) group of this scene, or if inexistent
      * the group of the parent scene, if there is one, and so on.
      * If no data can be obtained in this way,
      * the data of the associated panel is returned.
@@ -146,9 +175,10 @@ def.type('pvc.visual.Scene')
      * @type def.Query
      */
     datums: function(){
-        return this.group ?
-                    this.group.datums() :
-                    (this.datum ? def.query(this.datum) : def.query());
+        // For efficiency, assumes datums of multiple groups are disjoint sets
+        return this.groups  ? def.query(this.groups ).selectMany(function(g){ return g.datums(); }) :
+               this._datums ? def.query(this._datums) :
+               def.query();
     },
 
     /*

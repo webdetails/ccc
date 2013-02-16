@@ -247,7 +247,7 @@ pvc.BaseChart
                                          dataPartAtom.value === 'trend';
                             
                             var groupScene = rootScene.createGroup({
-                                group:           domainData,
+                                source:          domainData,
                                 colorAxis:       colorAxis,
                                 clickMode:       locked ? 'none' : undefined,
                                 extensionPrefix: pvc.buildIndexedId('', legendIndex++)
@@ -261,7 +261,7 @@ pvc.BaseChart
                             domainData
                                 .children()
                                 .each(function(itemData){
-                                    var itemScene = groupScene.createItem({group: itemData});
+                                    var itemScene = groupScene.createItem({source: itemData});
                                     
                                     // HACK...
                                     itemScene.color = partColorScale(itemData.value);

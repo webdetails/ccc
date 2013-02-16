@@ -212,13 +212,13 @@ def
         if(!rootScene){
             /* The legend root scene contains all datums of its chart */
             rootScene = new pvc.visual.legend.BulletRootScene(null, {
-                panel: this, 
-                group: this.chart.data,
-                horizontal: this.isAnchorTopOrBottom(),
-                font:       this.font,
-                markerSize: this.markerSize,
-                textMargin: this.textMargin, 
-                itemPadding:    this.itemPadding
+                panel:       this, 
+                source:      this.chart.data,
+                horizontal:  this.isAnchorTopOrBottom(),
+                font:        this.font,
+                markerSize:  this.markerSize,
+                textMargin:  this.textMargin, 
+                itemPadding: this.itemPadding
             });
             
             this._rootScene = rootScene;

@@ -178,9 +178,8 @@ def
                     break;
                   
                 default:
-                //case "top": 
+                //case "top":
                     baseline = "bottom";
-                    //break;
             }
         } 
         
@@ -506,7 +505,7 @@ def
         var layoutInfo = this._layoutInfo;
         var role = this.axis.role;
         var data = role.flatten(this.data, {visible: true});
-
+        
         layoutInfo.data  = data;
         layoutInfo.ticks = data._children;
         
@@ -540,7 +539,6 @@ def
         
         layoutInfo.ticksText = data._children.map(format);
     },
-    
     
 
     _calcTimeSeriesTicks: function(){
@@ -601,7 +599,7 @@ def
         
         // Calculate includeModulo depending on labelSpacingMin
             
-        // scale is already setup
+        // Scale is already setup
         
         // How much are label anchors separated from each other
         // (in the axis direction)
@@ -899,8 +897,8 @@ def
             var rootScene = 
                 this._rootScene = 
                 new pvc.visual.CartesianAxisRootScene(null, {
-                    panel: this, 
-                    group: this._getRootData()
+                    panel:  this, 
+                    source: this._getRootData()
                 });
             
             var layoutInfo = this._layoutInfo;
@@ -911,7 +909,7 @@ def
                 } else {
                     layoutInfo.ticks.forEach(function(tickData, index){
                         new pvc.visual.CartesianAxisTickScene(rootScene, {
-                            group:     tickData,
+                            source:    tickData,
                             tick:      tickData.value,
                             tickRaw:   tickData.rawValue,
                             tickLabel: ticksText[index]
@@ -956,7 +954,7 @@ def
                     .children()
                     .each(function(childData){
                         var childScene = new pvc.visual.CartesianAxisTickScene(scene, {
-                            group:     childData,
+                            source:    childData,
                             tick:      childData.value,
                             tickRaw:   childData.rawValue,
                             tickLabel: childData.label

@@ -449,10 +449,20 @@ def.type('pvc.data.Data', pvc.data.Complex)
     },
     
     /**
+     * Obtains the first datum of this data, if any.
+     * @type {pvc.data.Datum} The first datum or <i>null</i>.
+     * @see #singleDatum 
+     */
+    firstDatum: function(){
+        return this._datums.length ? this._datums[0] : null;
+    },
+    
+    /**
      * Obtains the single datum of this data, 
-     * or null, when the data no datums or has more than one.
+     * or null, when the has data no datums or has more than one.
      * 
      * @type pvc.data.Datum
+     * @see #firstDatum
      */
     singleDatum: function(){
         var datums = this._datums;

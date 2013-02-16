@@ -128,6 +128,8 @@ def
             ;
         
         if(isDiscrete){
+            // TODO: now that the grid rules' scenes are independent of the
+            // axes scenes, we should not have to use the end scene twice.
             var halfStep = scale.range().step / 2;
             pvGridRule
                 .lock(tick_a, function(tickScene){
@@ -158,14 +160,14 @@ def
 
         var rootScene =
             new pvc.visual.CartesianAxisRootScene(null, {
-                panel: this,
-                group: data
+                panel:  this,
+                source: data
             });
             
         if (isDiscrete){
             data._children.forEach(function(tickData){
                 new pvc.visual.CartesianAxisTickScene(rootScene, {
-                    group:     tickData,
+                    source:    tickData,
                     tick:      tickData.value,
                     tickRaw:   tickData.rawValue,
                     tickLabel: tickData.label

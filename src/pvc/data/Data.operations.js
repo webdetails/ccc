@@ -373,14 +373,6 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     },
     
     /**
-     * Obtains the first datum of this data, if any.
-     * @type {pvc.data.Datum} The first datum or <i>null</i>. 
-     */
-    firstDatum: function(){
-        return this._datums.length ? this._datums[0] : null;
-    },
-    
-    /**
      * Sums the absolute value 
      * of the sum of a specified dimension on each child.
      *

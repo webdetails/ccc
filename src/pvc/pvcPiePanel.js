@@ -440,7 +440,7 @@ def
 .init(function(panel){
     var data = panel.visualRoles.category.flatten(panel.data, pvc.data.visibleKeyArgs);
     
-    this.base(null, {panel: panel, group: data});
+    this.base(null, {panel: panel, source: data});
 
     var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color, {roleVar: 'color'});
     
@@ -461,7 +461,7 @@ def
         .init(function(categData, value){
             
             // Adds to parent scene...
-            this.base(rootScene, {group: categData});
+            this.base(rootScene, {source: categData});
             
             this.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData);
 
@@ -751,7 +751,7 @@ def
 def
 .type('pvc.visual.PieLinkLineScene', pvc.visual.Scene)
 .init(function(catScene, x, y, index){
-    this.base(catScene, { group: catScene.group, index: index });
+    this.base(catScene, {source: catScene.group, index: index});
     
     this.x = x;
     this.y = y;

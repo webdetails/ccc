@@ -458,7 +458,7 @@ def
 
     _buildScene: function(){
         var data = this.visibleData();
-        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
+        var rootScene = new pvc.visual.Scene(null, {panel: this, source: data});
 
         var roles = this.visualRoles;
         var axes  = this.axes;
@@ -485,7 +485,7 @@ def
         
         function createSeriesScene(seriesGroup){
             /* Create series scene */
-            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesGroup});
+            var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesGroup});
             
             seriesScene.vars.series =
                     pvc.visual.ValueLabelVar.fromComplex(seriesGroup);
@@ -506,7 +506,7 @@ def
                 }
                 
                 /* Create leaf scene */
-                var scene = new pvc.visual.Scene(seriesScene, {datum: datum});
+                var scene = new pvc.visual.Scene(seriesScene, {source: datum});
                 scene.dataIndex = dataIndex;
                 
                 scene.vars.x = pvc.visual.ValueLabelVar.fromAtom(xAtom);
@@ -576,8 +576,8 @@ def
             
             var interScene = new pvc.visual.Scene(seriesScene, {
                     /* insert immediately before toScene */
-                    index: toChildIndex,
-                    datum: toScene.datum
+                    index:  toChildIndex,
+                    source: toScene.datum
                 });
             
             interScene.dataIndex = toScene.dataIndex;

@@ -267,7 +267,7 @@ def
             .select(function(catGroup){
                 var range = this._getStackedCategoryValueExtent(catGroup, valueDimName, useAbs);
                 if(range){
-                    return {range: range, group: catGroup};
+                    return {range: range, source: catGroup};
                 }
             }, this)
             .where(def.notNully)

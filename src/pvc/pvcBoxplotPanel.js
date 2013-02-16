@@ -201,7 +201,7 @@ def
             }),
             visibleKeyArgs = {visible: true, zeroIfNone: false},
             data = this.visibleData(),
-            rootScene  = new pvc.visual.Scene(null, {panel: this, group: data}),
+            rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
             baseScale  = this.axes.base.scale,
             bandWidth  = baseScale.range().band,
             boxWidth   = Math.min(bandWidth * this.boxSizeRatio, this.maxBoxSize),
@@ -217,7 +217,7 @@ def
         return rootScene;
         
         function createCategScene(categData){
-            var categScene = new pvc.visual.Scene(rootScene, {group: categData});
+            var categScene = new pvc.visual.Scene(rootScene, {source: categData});
             var vars = categScene.vars;
             
             // Series distinction is ignored

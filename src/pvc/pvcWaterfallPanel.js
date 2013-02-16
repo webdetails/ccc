@@ -222,7 +222,7 @@ def
     },
 
     _buildRuleScene: function(){
-        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: this.visibleData()});
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, source: this.visibleData()});
         var prevValue;
         
         /**
@@ -238,7 +238,7 @@ def
         function createCategScene(ruleInfo){
             var categData1 = ruleInfo.group;
             
-            var categScene = new pvc.visual.Scene(rootScene, {group: categData1});
+            var categScene = new pvc.visual.Scene(rootScene, {source: categData1});
             
             var categVar = 
                 categScene.vars.category =
@@ -271,7 +271,7 @@ def
             rootCatData = chart._catRole.select(
                             chart.partData(this.dataPartValue),
                             {visible: true}),
-            rootScene  = new pvc.visual.Scene(null, {panel: this, group: rootCatData});
+            rootScene  = new pvc.visual.Scene(null, {panel: this, source: rootCatData});
 
         if(ruleInfoByCategKey){
             createCategSceneRecursive(rootCatData, 0);
@@ -286,7 +286,7 @@ def
             if(children.length){
                 // Group node
                 if(level){
-                    var categScene = new pvc.visual.Scene(rootScene, {group: catData});
+                    var categScene = new pvc.visual.Scene(rootScene, {source: catData});
 
                     var categVar = 
                         categScene.vars.category =

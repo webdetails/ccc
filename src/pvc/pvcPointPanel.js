@@ -469,7 +469,7 @@ def
      */
 
     _buildScene: function(data, isBaseDiscrete){
-        var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
         var categDatas = data._children;
         var chart = this.chart;
         var serRole = this.visualRoles.series;
@@ -506,7 +506,7 @@ def
         })
         /* Create series scene */
         .each(function(seriesData1/*, seriesIndex*/){
-            var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1 || data});
+            var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1 || data});
 
             seriesScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(seriesData1);
             
@@ -523,7 +523,7 @@ def
                     group.dimensions(valueDim.name).sum(visibleKeyArgs) : 
                     null;
                 
-                var serCatScene = new pvc.visual.Scene(seriesScene, {group: group});
+                var serCatScene = new pvc.visual.Scene(seriesScene, {source: group});
                 
                 // -------------
                 serCatScene.dataIndex = categIndex;
@@ -750,9 +750,8 @@ def
             
             var interScene = new pvc.visual.Scene(seriesScene, {
                     /* insert immediately before toScene */
-                    index: toChildIndex,
-                    group: /*toScene.isInterpolatedMiddle ? fromScene.group: */toScene.group, 
-                    datum: toScene.group ? null : toScene.datum
+                    index:  toChildIndex,
+                    source: /*toScene.isInterpolatedMiddle ? fromScene.group: */toScene.source
                 });
             
             interScene.dataIndex = toScene.dataIndex;

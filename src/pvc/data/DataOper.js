@@ -17,6 +17,9 @@
  */
 def.type('pvc.data.DataOper')
 .init(function(linkParent, keyArgs){
+    /*jshint expr:true */
+    linkParent || def.fail.argumentRequired('linkParent');
+    
     this._linkParent = linkParent;
 }).
 add(/** @lends pvc.data.DataOper */{
