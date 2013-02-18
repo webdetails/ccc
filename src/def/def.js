@@ -557,10 +557,11 @@ var def = /** @lends def */{
             return (v instanceof Array);
         },
         
-        isLike: function(v){
+        // TODO: def.array.like.is
+        isLike: function(v) {
             return v && (v.length != null) && (typeof v !== 'string');
         },
-        
+
         // TODO: this should work as other 'as' methods...
         /**
          * Converts something to an array if it is not one already,
@@ -808,7 +809,7 @@ var def = /** @lends def */{
     /**
      * Binds a list of types with the specified values, by position.
      * <p>
-     * A null value is bound to any type.
+     * A null value is bindable to any type.
      * <p>
      * <p>
      * When a value is of a different type than the type desired at a given position
@@ -818,25 +819,25 @@ var def = /** @lends def */{
      * 
      * @returns {any[]} An array representing the binding, with the values bound to each type.
      */
-    destructuringTypeBind: function(types, values){
+    destructuringTypeBind: function(types, values) {
         var T = types.length;
         var result = new Array(T);
-        if(T && values){
+        if(T && values) {
             var V = values.length;
-            if(V){
+            if(V) {
                 var v = 0;
                 var t = 0;
-                do{
+                do {
                     var value = values[v];
                     
                     // any type matches null
-                    if(value == null || typeof value === types[t]){
+                    if(value == null || typeof value === types[t]) {
                         // bind value to type
                         result[t] = value;
                         v++;
                     }
                     t++;
-                }while(t < T && v < V);
+                } while(t < T && v < V);
             }
         }
         
@@ -857,6 +858,16 @@ var def = /** @lends def */{
         throw def.error.assertionFailed(msg, scope);
     }
 };
+
+
+var AL = def.array.like = def.copyOwn(
+    function(v){ return AL.is(v) ? v : [v]; }, {
+        
+    is: function(v) { return v && (v.length != null) && (typeof v !== 'string'); },
+    
+    as: function(v){ return AL.is(v) ? v : null; }
+});
+AL.to = AL;
 
 def.lazy = def.object.lazy;
 
@@ -2332,7 +2343,7 @@ def.type('Query')
     
     uniqueIndex: function(keyFun, ctx){
         var keyIndex = {};
-        
+
         this.each(function(item){
             var key = keyFun ? keyFun.call(ctx, item) : item;
             if(key != null && !def.hasOwn(keyIndex, key)) {

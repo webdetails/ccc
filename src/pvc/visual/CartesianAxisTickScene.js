@@ -21,4 +21,13 @@ def
             def.get(keyArgs, 'tick'),
             def.get(keyArgs, 'tickLabel'),
             def.get(keyArgs, 'tickRaw'));
+    
+    if(def.get(keyArgs, 'isHidden')) {
+        this.isHidden = true;
+    }
+})
+.add({
+    // True when the scene contains excluded data(s)
+    // due to overlappedLabelsMode:hide exclusion
+    isHidden: false
 });

@@ -114,7 +114,7 @@ def
             var linkLabelSize    = resolvePercentWidth (this.linkLabelSize   );
             
             var textMargin = def.number.to(this._getConstantExtension('label', 'textMargin'), 3);
-            var textHeight = pv.Text.fontHeight(labelFont);
+            var textHeight = pv.Text.fontHeight(labelFont) * 2/3;
             
             var linkHandleWidth = this.linkHandleWidth * textHeight; // em
             linkMargin += linkHandleWidth;

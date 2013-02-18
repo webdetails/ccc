@@ -902,22 +902,57 @@ def
                 });
             
             var layoutInfo = this._layoutInfo;
+            var ticks     = layoutInfo.ticks;
             var ticksText = layoutInfo.ticksText;
             if (this.isDiscrete){
                 if(this.useCompositeAxis){
                     this._buildCompositeScene(rootScene);
                 } else {
-                    layoutInfo.ticks.forEach(function(tickData, index){
-                        new pvc.visual.CartesianAxisTickScene(rootScene, {
-                            source:    tickData,
-                            tick:      tickData.value,
-                            tickRaw:   tickData.rawValue,
-                            tickLabel: ticksText[index]
-                        });
+                    var includeModulo   = this._tickIncludeModulo;
+                    var hiddenLabelText = this.hiddenLabelText;
+                    
+                    rootScene.vars.tickIncludeModulo = includeModulo;
+                    rootScene.vars.hiddenLabelText   = hiddenLabelText;
+                    
+                    var hiddenDatas, hiddenTexts, createHiddenScene;
+                    if(includeModulo > 2) {
+                        var keySep = rootScene.group.owner.keySep;
+                        
+                        createHiddenScene = function() {
+                            var k = hiddenDatas.map(function(d) { return d.key; }).join(keySep);
+                            var l = hiddenTexts.slice(0, 10).join(', ') + (hiddenTexts.length > 10 ? ', ...' : '');
+                            new pvc.visual.CartesianAxisTickScene(rootScene, {
+                                source:    hiddenDatas,
+                                tick:      k,
+                                tickRaw:   k,
+                                tickLabel: l,
+                                isHidden:  true
+                            });
+                            hiddenDatas = hiddenTexts = null;
+                        };
+                    }
+                    
+                    ticks.forEach(function(tickData, index){
+                        var isHidden = (index % includeModulo) !== 0;
+                        if(isHidden && includeModulo > 2) {
+                            (hiddenDatas || (hiddenDatas = [])).push(tickData);
+                            (hiddenTexts || (hiddenTexts = [])).push(ticksText[index]);
+                        } else {
+                            if(hiddenDatas) { createHiddenScene(); }
+                            new pvc.visual.CartesianAxisTickScene(rootScene, {
+                                source:    tickData,
+                                tick:      tickData.value,
+                                tickRaw:   tickData.rawValue,
+                                tickLabel: ticksText[index],
+                                isHidden:  isHidden
+                            });
+                        }
                     });
+                    
+                    if(hiddenDatas) { createHiddenScene(); }
                 }
             } else {
-                layoutInfo.ticks.forEach(function(majorTick, index){
+                ticks.forEach(function(majorTick, index){
                     new pvc.visual.CartesianAxisTickScene(rootScene, {
                         tick:      majorTick,
                         tickRaw:   majorTick,
@@ -983,17 +1018,15 @@ def
     renderOrdinalAxis: function(){
         var scale = this.scale,
             hiddenLabelText   = this.hiddenLabelText,
+            includeModulo     = this._tickIncludeModulo,
+            hiddenStep2       = includeModulo * scale.range().step / 2,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
             pvRule            = this.pvRule,
             rootScene         = this._getRootScene(),
-            includeModulo     = this._tickIncludeModulo,
             isV1Compat        = this.compatVersion() <= 1;
-        
-        rootScene.vars.tickIncludeModulo = includeModulo;
-        rootScene.vars.hiddenLabelText   = hiddenLabelText;
         
         var wrapper;
         if(isV1Compat){
@@ -1030,16 +1063,11 @@ def
                 extensionId: 'ticksPanel'
             })
             .lock('data', rootScene.childNodes)
-            // This non-extendable property stores
-            //  if the tick would be hidden by
-            //  virtue of the includeModulo effect.
-            .localProperty('hidden')
-            .lockMark('hidden', function(){ // for use by
-                return (this.index % includeModulo) !== 0;
-            })
             .lock(anchorOpposite, 0) // top (of the axis panel)
             .lockMark(anchorOrtho, function(tickScene){
-                return scale(tickScene.vars.tick.value);
+                return tickScene.isHidden ?
+                       scale(tickScene.previousSibling.vars.tick.value) + hiddenStep2 :
+                       scale(tickScene.vars.tick.value);
             })
             .lock('strokeDasharray', null)
             .lock('strokeStyle', null)
@@ -1056,8 +1084,7 @@ def
                 })
                 .lock('data') // Inherited
                 .intercept('visible', function(){
-                    return !this.pvMark.parent.hidden() &&
-                            this.delegateExtension(true);
+                    return !this.scene.isHidden && this.delegateExtension(true);
                 })
                 .optional('lineWidth', 1)
                 .lock(anchorOpposite,  0) // top
@@ -1136,20 +1163,21 @@ def
                 }
             })
             .intercept('visible', function(tickScene){
-                return !this.pvMark.parent.hidden()  ?
+                return !tickScene.isHidden  ?
                        this.delegateExtension(true) :
                        !!tickScene.vars.hiddenLabelText;
             })
             .intercept('text', function(tickScene){
+                // Allow late overriding (does not affect layout..)
                 var text;
-                if(this.pvMark.parent.hidden()){
-                    text = tickScene.vars.hiddenLabelText;
+                if(tickScene.isHidden){
+                    text = hiddenLabelText;
                 } else {
-                    // Allow late overriding (does not affect layout..)
                     text = this.delegateExtension();
                     if(text === undefined){
                         text = tickScene.vars.tick.label;
                     }
+                    
                     if(maxTextWidth){
                         text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
                     }
@@ -1193,10 +1221,7 @@ def
                     .strokeStyle(null)
                     .lineWidth(0)
                  .add(pv.Line)
-                    .visible(function(){
-                        var gp = this.parent.parent;
-                        return !gp.hidden || !gp.hidden(); 
-                     })
+                    .visible(function(tickScene){ return !tickScene.isHidden; })
                     .data(corners)
                     .left(function(p){ return p.x; })
                     .top (function(p){ return p.y; })

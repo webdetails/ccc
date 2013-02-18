@@ -2135,19 +2135,15 @@ def
             if (shape.intersectsRect(rect)){
                 var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData
                 if(cccScene && cccScene.datum){
-                    var group  = cccScene.group;
-                    var datums = group ? group._datums : def.array.as(cccScene.datum);
-                    if(datums) {
-                        datums.forEach(function(datum){
-                            if(!datum.isNull) {
-                                if(pvc.debug >= 20) {
-                                    this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type + " index=" + index);
-                                }
-
-                                fun.call(ctx, datum);
+                    cccScene.datums().each(function(datum){
+                        if(!datum.isNull) {
+                            if(pvc.debug >= 20) {
+                                this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type + " index=" + index);
                             }
-                        }, this);
-                    }
+
+                            fun.call(ctx, datum);
+                        }
+                    }, this);
                 }
             }
         }

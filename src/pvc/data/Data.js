@@ -172,7 +172,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
         }
         
         if(parent.absKey){
-            this.absKey = def.string.join(",", parent.absKey, this.key);
+            this.absKey = def.string.join(',', parent.absKey, this.key); // TODO: comma??
         } else {
             this.absKey = this.key;
         }
