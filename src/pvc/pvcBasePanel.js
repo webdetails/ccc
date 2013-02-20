@@ -1818,7 +1818,7 @@ def
                 this._onClick(context);
             }
             
-            if((sign  && sign.isSelectable()) || 
+            if((sign  && sign.isClickSelectable()) || 
                (!sign && this.chart.options.selectable && context.scene.datum)){
                 this._onSelect(context);
             }
