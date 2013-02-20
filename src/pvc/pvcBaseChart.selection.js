@@ -155,6 +155,10 @@ pvc.BaseChart
         return this.root._onUserSelection(datums);
     },
     
+    _isInteractive: function(){
+        return this.options.interactive;
+    },
+    
     _isSelectable: function(){
         return this.options.selectable;
     },

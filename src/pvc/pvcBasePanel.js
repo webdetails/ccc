@@ -966,7 +966,7 @@ def
             this._createCore(this._layoutInfo);
             
             /* RubberBand */
-            if (this.isTopRoot && pv.renderer() !== 'batik' && this.chart._canSelectWithRubberband()){
+            if (this.isTopRoot) {
                 this._initRubberBand();
             }
 
@@ -1877,19 +1877,50 @@ def
      * @virtual
      */
     _initRubberBand: function(){
+        if(!this.chart._isInteractive()) {
+            return;
+        }
+        
         var myself = this,
-            chart = this.chart,
+            chart = myself.chart,
             options  = chart.options,
-            data = chart.data;
-
+            clickClearsSelection = options.clearSelectionMode === 'emptySpaceClick',
+            useRubberband = this.chart._canSelectWithRubberband();
+        
+        if(!useRubberband && !clickClearsSelection){
+            return;
+        }
+        
+        var data = chart.data,
+            rubberPvParentPanel = myself.pvRootPanel || myself.pvPanel.paddingPanel;
+        
+        // IE must have a fill style to fire events
+        if(!myself._getExtensionAbs('base', 'fillStyle')){
+            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        }
+        
+        // Require all events, wether it's painted or not
+        rubberPvParentPanel.lock('events', 'all');
+        
+        if(!useRubberband) {
+            if(clickClearsSelection) {
+                // Install clearSelectionMode click
+                rubberPvParentPanel
+                    .event("click", function() {
+                        if(data.owner.clearSelected()) {
+                            chart.updateSelections();
+                        }
+                    });
+            }
+            return;
+        }
+        
         var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
         this._isRubberBandSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvRootPanel || this.pvPanel.paddingPanel,
-            toScreen,
-            rb;
+        var toScreen, rb;
         
         var selectBar = 
             this.selectBar = 
@@ -1902,18 +1933,14 @@ def
                 noDoubleClick: true,
                 noTooltip:    true
             })
-            .override('defaultStrokeWidth', function(){
-                return 1.5;
-            })
+            .override('defaultStrokeWidth', function(){ return 1.5; })
             .override('defaultColor', function(type){
                 return type === 'stroke' ? 
                        '#86fe00' :                 /* 'rgb(255,127,0)' */ 
                        'rgba(203, 239, 163, 0.6)'  /* 'rgba(255, 127, 0, 0.15)' */
                        ;
             })
-            .override('interactiveColor', function(color){
-                return color;
-            })
+            .override('interactiveColor', function(color){ return color; })
             .pvMark
             .lock('visible', function(){ return !!rb;  })
             .lock('left',    function(){ return rb.x;  })
@@ -1925,14 +1952,6 @@ def
             .lock('cursor')
             .lock('events', 'none')
             ;
-        
-        // IE must have a fill style to fire events
-        if(!this._getExtensionAbs('base', 'fillStyle')){
-            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
-        }
-        
-        // Require all events, wether it's painted or not
-        rubberPvParentPanel.lock('events', 'all');
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
@@ -1995,7 +2014,7 @@ def
                 }
             });
         
-        if(options.clearSelectionMode === 'emptySpaceClick'){
+        if(clickClearsSelection){
             rubberPvParentPanel
                 .event("click", function() {
                     // It happens sometimes that the click is fired 
@@ -2009,7 +2028,7 @@ def
                     }
                     
                     if(data.owner.clearSelected()) {
-                        myself.chart.updateSelections();
+                        chart.updateSelections();
                     }
                 });
         }

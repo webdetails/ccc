@@ -109,9 +109,10 @@ def
                     proto:        markerPvBaseProto,
                     freePosition: true,
                     activeSeriesAware: false, // no guarantee that series exist in the scene
-                    noTooltip:   true,
+                    noTooltip:    true,
                     noSelect:     this.noSelect,
                     noHover:      this.noHover,
+                    noClick:      true,
                     extensionId:  extensionPrefix + "Dot",
                     wrapper:      wrapper
                 })

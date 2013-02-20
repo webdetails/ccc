@@ -99,6 +99,7 @@ def
               extensionId: 'panel',
               wrapper:     wrapper,
               noSelect:    false,
+              noClick:     false,
               noClickSelect: true // just rubber-band (the click is for other behaviors)
           })
           .lockMark('data', function(row){ return row.items; }) // each row has a list of bullet item scenes
@@ -134,6 +135,7 @@ def
                      "rgba(200,200,200,1)" : 
                      "rgba(200,200,200,0.0001)";
           })
+          // See also the _isClickable override, below
           .cursor(function(itemScene){
               return itemScene.isClickable() ? "pointer" : null;
           })
@@ -193,6 +195,12 @@ def
           ;
     },
 
+    // Doesn't matter if the chart's clickable is false.
+    // Legend allows click based on legendClickMode
+    _isClickable: function(){
+        return true;
+    },
+    
     _getExtensionId: function(){
         return 'area'; 
     },

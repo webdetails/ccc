@@ -22,9 +22,9 @@ def
     this._renderer = def.get(keyArgs, 'renderer');
     
     this.colorAxis = def.get(keyArgs, 'colorAxis');
-    this.clickMode = def.get(keyArgs, 'clickMode');
     
-    if(this.colorAxis && !this.clickMode){
+    this.clickMode = def.get(keyArgs, 'clickMode');
+    if(!this.clickMode && this.colorAxis){
         this.clickMode = this.colorAxis.option('LegendClickMode');
     }
 })

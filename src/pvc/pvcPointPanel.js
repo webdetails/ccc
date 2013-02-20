@@ -28,6 +28,8 @@ def
         this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
     }
+     
+    this.visualRoles.value = chart.visualRoles(plot.option('OrthoRole'));
 })
 .add({
     pvLine: null,
@@ -99,10 +101,6 @@ def
         var linesVisible = this.linesVisible;
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
-        this.valueRole     = chart.visualRoles(this.plot.option('OrthoRole'));
-        this.valueRoleName = this.valueRole.name;
-        this.valueDimName  = this.valueRole.firstDimensionName();
-        
         // ------------------
         // DATA
         var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
@@ -473,10 +471,13 @@ def
         var categDatas = data._children;
         var chart = this.chart;
         var serRole = this.visualRoles.series;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
-        var valueDim = data.owner.dimensions(this.valueDimName);
+        var valueRole = this.visualRoles.value;
         var isStacked = this.stacked;
-        var visibleKeyArgs = {visible: true, zeroIfNone: false};
+        var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, valueRole, {roleVar: 'value', hasPercentSubVar: isStacked});
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
+        var valueDimName  = valueRole.firstDimensionName();
+        var valueDim = data.owner.dimensions(valueDimName);
+        
         var orthoScale = this.axes.ortho.scale;
         var orthoNullValue = def.scope(function(){
                 // If the data does not cross the origin, 
@@ -519,29 +520,25 @@ def
                     group = group._childrenByKey[seriesData1.key];
                 }
                 
-                var value = group ?
-                    group.dimensions(valueDim.name).sum(visibleKeyArgs) : 
-                    null;
-                
                 var serCatScene = new pvc.visual.Scene(seriesScene, {source: group});
                 
                 // -------------
+                
                 serCatScene.dataIndex = categIndex;
                 
                 serCatScene.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData);
                 
                 // -------------
+
+                valueVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
+
+                var valueVar = serCatScene.vars.value;
+                var value    = valueVar.value;
                 
-                var valueVar = new pvc.visual.ValueLabelVar(
-                                    value,
-                                    valueDim.format(value),
-                                    value);
-                
-                /* accumulated value, for stacked */
-                // NOTE: the null value can only happen if interpolation is 'none'
+                // accumulated value, for stacked
                 valueVar.accValue = value != null ? value : orthoNullValue;
                 
-                serCatScene.vars.value = valueVar;
+                // -------------
                 
                 colorVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
                 
@@ -716,7 +713,7 @@ def
                 if(belowScene && isBaseDiscrete) {
                     var belowValueVar = belowScene.vars.value;
                     interAccValue = belowValueVar.accValue;
-                    interValue = belowValueVar[this.valueRoleName];
+                    interValue = belowValueVar[valueRole.name];
                 } else {
                     interValue = interAccValue = orthoNullValue;
                 }

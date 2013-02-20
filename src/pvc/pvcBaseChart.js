@@ -362,8 +362,21 @@ def
     _processOptionsCore: function(options){
         // Disable animation if environment doesn't support it
         if(!this.parent){
-            if (!$.support.svg || pv.renderer() === 'batik') {
-                options.animate = false;
+            var interactive = options.interactive;
+            if(interactive == null){
+                interactive = options.interactive = (pv.renderer() !== 'batik');
+            }
+            
+            if(!interactive){
+                options.animated = 
+                options.tooltipEnabled = 
+                options.selectable = 
+                options.hoverable =
+                options.clickable = false;
+            } else {
+                if (!$.support.svg) {
+                    options.animate = false;
+                }
             }
             
             this._processTooltipOptions(options);
@@ -692,6 +705,8 @@ def
                 return pvFormat.format(d * 100) + "%";
             };
         }),
+        
+        //interactive: true,
         
         // Content/Plot area clicking
         clickable:  false,
