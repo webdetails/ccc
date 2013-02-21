@@ -23,9 +23,9 @@ def
     
     pvLegendPanel: null,
     
-    textMargin: 6,    // The space *between* the marker and the text, in pixels.
-    itemPadding:    2.5,  // Half the space *between* legend items, in pixels.
-    markerSize: 15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
+    textMargin:  6,    // The space *between* the marker and the text, in pixels.
+    itemPadding: 2.5,  // Half the space *between* legend items, in pixels.
+    markerSize:  15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
     font:  '10px sans-serif',
 
     /**
@@ -193,6 +193,46 @@ def
           .font(function(itemScene){ return itemScene.vars.font; }) // TODO: lock?
           .textDecoration(function(itemScene){ return itemScene.isOn() ? "" : "line-through"; })
           ;
+      
+      if(pvc.debug >= 16){
+          var font = this.font;
+          var textHeight = pv.Text.fontHeight(font) * 2/3;
+          
+          pvLegendMarkerPanel.anchor("right")
+       // Single-point panel (w=h=0)
+          .add(pv.Panel)
+              [this.anchorLength()](0)
+              [this.anchorOrthoLength()](0)
+              .fillStyle(null)
+              .strokeStyle(null)
+              .lineWidth(0)
+           .add(pv.Line)
+              .data(function(scene){
+                  
+                  var labelBBox = pvc.text.getLabelBBox(
+                          pv.Text.measure(scene.vars.value.label, font).width, 
+                          textHeight,  // shared stuff
+                          'left', 
+                          'middle', 
+                          0, 
+                          2);  
+                  var corners = labelBBox.source.points();
+                  
+                  // Close the path
+                  if(corners.length > 1){
+                      // not changing corners on purpose
+                      corners = corners.concat(corners[0]);
+                  }
+                  
+                  return corners;
+              })
+              .left(function(p){ return p.x; })
+              .top (function(p){ return p.y; })
+              .strokeStyle('red')
+              .lineWidth(0.5)
+              .strokeDasharray('-')
+              ;
+      }
     },
 
     // Doesn't matter if the chart's clickable is false.
