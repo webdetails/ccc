@@ -671,11 +671,13 @@ var pvc = def.globalSpace('pvc', {
     pvc.parseLegendClickMode = function(clickMode){
         if(!clickMode){
             clickMode = 'none';
+        } else {
+            clickMode = (''+clickMode).toLowerCase();
         }
         
         switch(clickMode){
-            case 'toggleSelected':
-            case 'toggleVisible':
+            case 'toggleselected':
+            case 'togglevisible':
             case 'none':
                 break;
                 
@@ -693,6 +695,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseShape = function(shape){
         if(shape){
+            shape = (''+shape).toLowerCase();
             switch(shape){
                 case 'square':
                 case 'circle':
@@ -716,6 +719,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseContinuousColorScaleType = function(scaleType){
         if(scaleType){
+            scaleType = (''+scaleType).toLowerCase();
             switch(scaleType){
                 case 'linear':
                 case 'normal':
@@ -737,6 +741,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseDomainScope = function(scope, orientation){
         if(scope){
+            scope = (''+scope).toLowerCase();
             switch(scope){
                 case 'cell':
                 case 'global':
@@ -776,6 +781,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseDomainRoundingMode = function(mode){
         if(mode){
+            mode = (''+mode).toLowerCase();
             switch(mode){
                 case 'none':
                 case 'nice':
@@ -797,9 +803,11 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseOverlappedLabelsMode = function(mode){
         if(mode){
+            mode = (''+mode).toLowerCase();
             switch(mode){
                 case 'leave':
                 case 'hide':
+                case 'rotatethenhide':
                     break;
                 
                 default:
@@ -828,6 +836,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseWaterDirection = function(value) {
         if(value){
+            value = (''+value).toLowerCase();
             switch(value){
                 case 'up':
                 case 'down':
@@ -842,6 +851,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseTrendType = function(value) {
         if(value){
+            value = (''+value).toLowerCase();
             if(value === 'none'){
                 return value;
             }
@@ -858,6 +868,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseNullInterpolationMode = function(value) {
         if(value){
+            value = (''+value).toLowerCase();
             switch(value){
                 case 'none':
                 case 'linear':
@@ -872,6 +883,7 @@ var pvc = def.globalSpace('pvc', {
     };
     
     pvc.parseAlign = function(side, align){
+        if(align){ align = (''+align).toLowerCase(); }
         var align2, isInvalid;
         if(side === 'left' || side === 'right'){
             align2 = align && pvc.BasePanel.verticalAlign[align];
@@ -897,6 +909,7 @@ var pvc = def.globalSpace('pvc', {
     // suitable for protovis.anchor(..) of all but the Wedge mark... 
     pvc.parseAnchor = function(anchor){
         if(anchor){
+            anchor = (''+anchor).toLowerCase();
             switch(anchor){
                 case 'top':
                 case 'left':
@@ -914,6 +927,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseAnchorWedge = function(anchor){
         if(anchor){
+            anchor = (''+anchor).toLowerCase();
             switch(anchor){
                 case 'outer':
                 case 'inner':
@@ -973,19 +987,21 @@ var pvc = def.globalSpace('pvc', {
     pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.retTrue);
     
     pvc.parsePosition = function(side, defaultSide){
-        if(side && !def.hasOwn(pvc.Sides.namesSet, side)){
-            if(!defaultSide){
-                defaultSide = 'left';
-            }
+        if(side){ 
+            side = (''+side).toLowerCase();
             
-            if(pvc.debug >= 2){
-                pvc.log(def.format("Invalid position value '{0}. Assuming '{1}'.", [side, defaultSide]));
+            if(!def.hasOwn(pvc.Sides.namesSet, side)){
+                var newSide = defaultSide || 'left';
+                
+                if(pvc.debug >= 2){
+                    pvc.log(def.format("Invalid position value '{0}. Assuming '{1}'.", [side, newSide]));
+                }
+                
+                side = newSide;
             }
-            
-            side = defaultSide;
         }
         
-        return side;
+        return side || defaultSide || 'left';
     };
     
     pvc.Sides.as = function(v){

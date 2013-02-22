@@ -242,7 +242,7 @@ pvc.BaseChart
                             }
                             
                             var dataPartAtom;
-                            var locked = colorAxis.option('LegendClickMode') === 'toggleVisible' && 
+                            var locked = colorAxis.option('LegendClickMode') === 'togglevisible' && 
                                          (dataPartAtom = domainData.atoms[dataPartDimName]) && 
                                          dataPartAtom.value === 'trend';
                             

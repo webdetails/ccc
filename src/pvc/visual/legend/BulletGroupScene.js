@@ -65,11 +65,11 @@ def
             // Mixin behavior depending on click mode
             var clickMode = this.clickMode;
             switch(clickMode){
-                case 'toggleSelected':
+                case 'toggleselected':
                     ItemType.add(pvc.visual.legend.BulletItemSceneSelection);
                     break;
                 
-                case 'toggleVisible':
+                case 'togglevisible':
                     ItemType.add(pvc.visual.legend.BulletItemSceneVisibility);
                     break;
             }

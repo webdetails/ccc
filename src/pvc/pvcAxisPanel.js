@@ -153,7 +153,10 @@ def
     },
 
     _readTextProperties: function(layoutInfo){
-        layoutInfo.textAngle  = def.number.as(this._getExtension('label', 'textAngle'),  0);
+        var textAngle = this._getExtension('label', 'textAngle');
+        layoutInfo.isTextAngleFixed = (textAngle != null);
+        
+        layoutInfo.textAngle  = def.number.as(textAngle, 0);
         layoutInfo.textMargin = def.number.as(this._getExtension('label', 'textMargin'), 3);
         
         var align = this._getExtension('label', 'textAlign');
@@ -193,7 +196,7 @@ def
 
         // --------------
         
-        var axisSize = this.tickLength + length; 
+        var axisSize = this.tickLength + length;
         
         // Add equal margin on both sides?
         var angle = maxLabelBBox.sourceAngle;
@@ -613,14 +616,14 @@ def
     
     _calcDiscreteTicksIncludeModulo: function(){
         var mode = this.axis.option('OverlappedLabelsMode');
-        if(mode !== 'hide'){
+        if(mode !== 'hide' && mode !== 'rotatethenhide'){
             return 1;
         }
         
-        var layoutInfo = this._layoutInfo;
-        var ticks = layoutInfo.ticks;
+        var li = this._layoutInfo;
+        var ticks = li.ticks;
         var tickCount = ticks.length;
-        if(tickCount <= 1) {
+        if(tickCount <= 2) {
             return 1;
         }
         
@@ -631,8 +634,9 @@ def
         // How much are label anchors separated from each other
         // (in the axis direction)
         var b = this.scale.range().step; // don't use .band, cause it does not include margins...
-        var h = layoutInfo.textHeight;
-        var w = layoutInfo.maxTextWidth;  // Should use the average value?
+        
+        var h = li.textHeight;
+        var w = li.maxTextWidth;  // Should use the average value?
         
         if(!(w > 0 && h > 0 && b > 0)){
             return 1;
@@ -644,52 +648,69 @@ def
         var sMin = h * this.labelSpacingMin; /* parameter in em */
         
         // The angle that the text makes to the x axis (clockwise,y points downwards) 
-        var a = layoutInfo.textAngle;
+        var a = li.textAngle;
         
-        var isTopOrBottom = this.isAnchorTopOrBottom();
-        var sinOrCos =  isTopOrBottom ? 'sin' : 'cos';
-        var cosOrSin = !isTopOrBottom ? 'sin' : 'cos';
+        // * Effective distance between anchors,
+        //   that results from showing only 
+        //   one in every 'tickIncludeModulo' (tim) ticks.
+        // 
+        //   bEf = (b * tim)
+        //
+        // * The space that separates the closest edges, 
+        //   that are parallel to the text direction,
+        //   of the bounding boxes of 
+        //   two consecutive (not skipped) labels: 
+        // 
+        //   sBase  = (b * timh) * |sinOrCos(a)| - h;
+        //
+        // * The same, for the edges orthogonal to the text direction:
+        //
+        //   sOrtho = (b * timw) * |cosOrSin(a)| - w;
+        // 
+        // * At least one of the distances, sBase or sOrtho must be 
+        //   greater than or equal to sMin:
+        //
+        //   NoOverlap If (sBase >= sMin) Or (sOrtho >= sMin)
+        //
+        // * Resolve each of the inequations in function of tim (timh/timw)
+        //
+
+        var isH = this.isAnchorTopOrBottom();
+        var sinOrCos = Math.abs( Math[isH ? 'sin' : 'cos'](a) );
+        var cosOrSin = Math.abs( Math[isH ? 'cos' : 'sin'](a) );
         
-        var tickIncludeModulo = 1;
-        do{
-            // Effective distance between anchors,
-            // that results from showing only 
-            // one in every 'tickIncludeModulo' ticks.
-            var bEf = tickIncludeModulo * b;
-            
-            // The space that separates the closest edges, 
-            // that are parallel to the text direction,
-            // of the bounding boxes of 
-            // two consecutive (not skipped) labels. 
-            var sBase  = bEf * Math.abs(Math[sinOrCos](a)) - h;
-            
-            // The same, for the edges orthogonal to the text direction
-            var sOrtho = bEf * Math.abs(Math[cosOrSin](a)) - w;
-            
-            // At least one of this distances must respect sMin
-            if(sBase >= sMin || sOrtho >= sMin){
-                break;
-            }
-            
-            // Hide one more tick
-            tickIncludeModulo++;
-            
-            // Are there still at least two ticks left?
-        } while(Math.ceil(tickCount / tickIncludeModulo) > 1);
-        
-        if(tickIncludeModulo > 1 && pvc.debug >= 3){
-            this._info("Showing only one in every " + tickIncludeModulo + " tick labels");
+        var timh = sinOrCos < 1e-8 ? Infinity : Math.ceil((sMin + h) / (b * sinOrCos));
+        var timw = cosOrSin < 1e-8 ? Infinity : Math.ceil((sMin + w) / (b * cosOrSin));
+        var tim  = Math.min(timh, timw);
+        if(!isFinite(tim) || tim < 1 || Math.ceil(tickCount / tim) < 2) {
+            tim = 1;
         }
         
-        return tickIncludeModulo;
+        if(tim > 1 && pvc.debug >= 3) {
+            this._info("Showing only one in every " + tim + " tick labels");
+        }
+        
+        return tim;
     },
     
-    // --------------
+    /* # For textAngles we're only interested in the [0, pi/2] range.
+         Taking the absolute value of the following two expressions, guarantees:
+         * asin from [0, 1] --> [0, pi/2]
+         * acos from [0, 1] --> [pi/2, 0]
+    
+       # textAngle will assume values from [-pi/2, 0] (<=> [vertical, horizontal])
+    
+         var sinOrCos = Math.abs((sMin + h) / bEf);
+         var cosOrSin = Math.abs((sMin + w) / bEf);
+    
+         var aBase  = Math.asin(sinOrCosVal);
+         var aOrtho = Math.acos(cosOrSinVal);
+    */
     
     _calcNumberVDesiredTickCount: function(){
-        var layoutInfo = this._layoutInfo;
-        var lineHeight = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
-        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        var li = this._layoutInfo;
+        var lineHeight   = li.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
+        var clientLength = li.clientSize[this.anchorLength()];
         
         return Math.max(1, ~~(clientLength / lineHeight));
     },

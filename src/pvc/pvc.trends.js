@@ -9,6 +9,8 @@ def.space('pvc.trends', function(trends){
             trendSpec || def.fail.argumentRequired('trendSpec');
             def.object.is(trendSpec) || def.fail.argumentInvalid('trendSpec', "Must be a trend specification object.");
             
+            type = (''+type).toLowerCase();
+            
             if(pvc.debug >= 2 && def.hasOwn(_trends, type)){
                 pvc.log(def.format("[WARNING] A trend type with the name '{0}' is already defined.", [type]));
             }

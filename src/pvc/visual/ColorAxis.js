@@ -538,7 +538,7 @@ def.scope(function(){
             resolve: '_resolveFull',
             data:    legendData,
             cast:    pvc.parseLegendClickMode,
-            value:   'toggleVisible'
+            value:   'togglevisible'
         },
         
         LegendDrawLine: {

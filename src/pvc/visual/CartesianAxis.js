@@ -556,7 +556,7 @@ def.scope(function(){
         OverlappedLabelsMode: {
             resolve: '_resolveFull',
             cast:    pvc.parseOverlappedLabelsMode,
-            value:   'hide'
+            value:   'rotatethenhide'
         },
         
         /* RULES */
