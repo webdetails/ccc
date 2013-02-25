@@ -41,10 +41,10 @@ def
         }
     }
     
-    if(options.tickLength === undefined){
+    if(options.tickLength === undefined) {
         // height or width
         var tickLength = +this._getConstantExtension('ticks', this.anchorOrthoLength(anchor)); 
-        if(!isNaN(tickLength) && isFinite(tickLength)){
+        if(!isNaN(tickLength) && isFinite(tickLength)) {
             this.tickLength = tickLength;
         }
     }
@@ -106,7 +106,11 @@ def
             this._calcLayoutCore(layoutInfo);
         }
         
-        return this.createAnchoredSize(layoutInfo.axisSize, layoutInfo.clientSize);
+        //return this.createAnchoredSize(layoutInfo.axisSize, layoutInfo.clientSize);
+        if (this.isAnchorTopOrBottom()) {
+            return new pvc.Size(layoutInfo.clientSize.width, layoutInfo.axisSize);
+        } 
+        return new pvc.Size(layoutInfo.axisSize, layoutInfo.clientSize.height);
     },
     
     _calcLayoutCore: function(layoutInfo){
@@ -129,7 +133,7 @@ def
             this._calcTicks();
             
             if(this.scale.type === 'discrete'){
-                this._tickIncludeModulo = this._calcDiscreteTicksIncludeModulo();
+                this._resolveDiscreteTicksLabelOverlapping();
             }
             
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
@@ -157,7 +161,7 @@ def
         layoutInfo.isTextAngleFixed = (textAngle != null);
         
         layoutInfo.textAngle  = def.number.as(textAngle, 0);
-        layoutInfo.textMargin = def.number.as(this._getExtension('label', 'textMargin'), 3);
+        layoutInfo.textMargin = def.number.as(this._getExtension('label', 'textMargin'), 3); // same default as protovis'
         
         var align = this._getExtension('label', 'textAlign');
         if(typeof align !== 'string'){
@@ -196,17 +200,19 @@ def
 
         // --------------
         
-        var axisSize = this.tickLength + length;
+        var requiredAxisSize = this.tickLength + length;
         
-        // Add equal margin on both sides?
-        var angle = maxLabelBBox.sourceAngle;
-        if(!(angle === 0 && this.isAnchorTopOrBottom())){
-            // Text height already has some free space in that case
-            // so no need to add more.
-            axisSize += this.tickLength;
-        }
+//        // Add equal margin on both sides?
+//        var angle = maxLabelBBox.sourceAngle;
+//        if(!(angle === 0 && this.isAnchorTopOrBottom())){
+//            // Text height already has some free space in that case
+//            // so no need to add more.
+//            requiredAxisSize += this.tickLength;
+//        }
         
-        layoutInfo.requiredAxisSize = axisSize;
+        pvc.log("Required Axis Size: ", requiredAxisSize);
+        
+        layoutInfo.requiredAxisSize = requiredAxisSize;
     },
     
     _getLabelBBoxQuadrantLength: function(labelBBox, quadrantSide){
@@ -320,17 +326,17 @@ def
     _calcMaxTextLengthThatFits: function(){
         var layoutInfo = this._layoutInfo;
         
-        if(this.compatVersion() <= 1){
+        //if(this.compatVersion() <= 1){
             layoutInfo.maxTextWidth = null;
             return;
-        }
+        //}
         
         var availableClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
         
         var efSize = Math.min(layoutInfo.axisSize, availableClientLength);
         if(efSize >= (layoutInfo.requiredAxisSize - this.tickLength)){ // let overflow by at most tickLength
-            // Labels fit
-            // Clear to avoid any unnecessary trimming
+            // Labels fit.
+            // Clear to avoid trimming.
             layoutInfo.maxTextWidth = null;
         } else {
             // Text may not fit. 
@@ -338,31 +344,32 @@ def
             var maxLabelBBox = layoutInfo.maxLabelBBox;
             
             // Now move backwards, to the max text width...
-            var maxOrthoLength = efSize - 2 * this.tickLength;
+            // Ortho is orthogonal to axis direction.
+            var maxSize = efSize - /* 2 * */ this.tickLength;
             
-            // A point at the maximum orthogonal distance from the anchor
+            // A point at the maximum orthogonal distance from the anchor.
             // Points in the outwards orthogonal direction.
             var mostOrthoDistantPoint;
             var parallelDirection;
             switch(this.anchor){
                 case 'left':
                     parallelDirection = pv.vector(0, 1);
-                    mostOrthoDistantPoint = pv.vector(-maxOrthoLength, 0);
+                    mostOrthoDistantPoint = pv.vector(-maxSize, 0);
                     break;
                 
                 case 'right':
                     parallelDirection = pv.vector(0, 1);
-                    mostOrthoDistantPoint = pv.vector(maxOrthoLength, 0);
+                    mostOrthoDistantPoint = pv.vector(maxSize, 0);
                     break;
                     
                 case 'top':
                     parallelDirection = pv.vector(1, 0);
-                    mostOrthoDistantPoint = pv.vector(0, -maxOrthoLength);
+                    mostOrthoDistantPoint = pv.vector(0, -maxSize);
                     break;
                 
                 case 'bottom':
                     parallelDirection = pv.vector(1, 0);
-                    mostOrthoDistantPoint = pv.vector(0, maxOrthoLength);
+                    mostOrthoDistantPoint = pv.vector(0, maxSize);
                     break;
             }
             
@@ -437,7 +444,7 @@ def
             layoutInfo.maxTextWidth = maxTextWidth;
             
             if(pvc.debug >= 3){
-                this._log("Trimming labels' text at length " + maxTextWidth.toFixed(2) + "px maxOrthoLength=" + maxOrthoLength.toFixed(2) + "px");
+                this._log("Trimming labels' text at length " + maxTextWidth.toFixed(2) + "px maxSize=" + maxSize.toFixed(2) + "px");
             }
         }
     },
@@ -693,19 +700,244 @@ def
         return tim;
     },
     
-    /* # For textAngles we're only interested in the [0, pi/2] range.
-         Taking the absolute value of the following two expressions, guarantees:
-         * asin from [0, 1] --> [0, pi/2]
-         * acos from [0, 1] --> [pi/2, 0]
-    
-       # textAngle will assume values from [-pi/2, 0] (<=> [vertical, horizontal])
-    
-         var sinOrCos = Math.abs((sMin + h) / bEf);
-         var cosOrSin = Math.abs((sMin + w) / bEf);
-    
-         var aBase  = Math.asin(sinOrCosVal);
-         var aOrtho = Math.acos(cosOrSinVal);
-    */
+    _resolveDiscreteTicksLabelOverlapping: function(){
+        /* ALGORITHM - Applies different strategies, in turn, to solve 
+           the operlapped labels problem:
+           
+           * textAngle = ?
+           * tickIncludeModulo = ?
+           
+           0 - Assume tickIncludeModulo = 1 and textAngle = 0.
+           
+           1 - Determine the smallest *textAngle*, between 0 and pi/2,
+               such that consecutive (non-hidden) labels don't overlap
+               (<=> respect the configured minimum distance and current tickIncludeModulo).
+               
+               Note that, for convenience, 
+               calculations are made for determining a positive text angle.
+               In the end, the symmetric of the determined value is used instead.
+               
+               (Horizontally laid out labels, textAngle = 0, are more readable, 
+                and thus preferable, than when vertically laid out, 
+                textAngle = pi/2.)
+               
+               1.a)
+               If an angle exists such that labels don't overlap anymore,
+               accept it and stop.
+               
+               1.b)
+               If comming from 3) an angle exists for sure.
+               In the worst case it is pi/2. Stop. 
+           
+           2 - Angle = pi/2. Labels still overlap.
+               Determine the smallest *tickIncludeModulo* such that 
+               consecutive non-hidden labels don't overlap.
+               
+               2.a)
+               If that value causes the number of ticks to be less than 2,
+               then use that value minus one. 
+               Overlapping will always occur, so just stop here.
+               
+           3 - Now that labels don't overlap, possibly more than 
+               the minimum specified distance exists between labels, 
+               so that there's space for reducing the textAngle.
+               
+               Go to 1) and stop afterwards: don't continue to 2) and 3).
+               
+        */
+        
+        this._tickIncludeModulo  = 1;
+        
+        var canRotate = false;
+        var mode = this.axis.option('OverlappedLabelsMode');
+        switch(mode) {
+            case 'hide': break;
+            case 'rotatethenhide': canRotate = true; break;
+            
+            default:
+                // Let them lay in the wild
+                return;
+        }
+        
+        // ---------------
+        
+        // How much are label anchors separated from each other, along the axis.
+        // Scale is already setup.
+        // Uses .step instead of .band, cause the later doesn't include margins.
+        var b = this.scale.range().step;
+        
+        // Text BOX dimensions
+        var li = this._layoutInfo;
+        var h  = li.textHeight;
+        var w  = li.maxTextWidth;
+        
+        // Is there a problem to solve?
+        if(!(w > 0 && h > 0 && b > 0)){
+            return;
+        }
+        
+        // The distance, _b_, above which there's no possible overlapping,
+        // **for any angle**.
+        // When the label has its diagonal aligned with and over the axis rule,
+        // two consecutive labels' corners touch.
+        var bTh = Math.sqrt(def.sqr(w) + def.sqr(h));
+        
+        /*           w
+               <------------->
+           ^   +-------------+   Text Direction at textAngle (base-line direction)
+         h |   |     A       |   ------------------------>
+           v   +-------------+~~~+  ^  
+                             |###|  |sBase  (space between base edges of consecutive labels)
+                             |###|  v
+                             +~~~+-------------+
+                                 |      B      |
+                                 +-------------+
+                             <-->
+                            sOrtho
+          (space between ortho edges of consecutive labels)
+          
+         */
+        
+        var isH = this.isAnchorTopOrBottom();
+        
+        // Minimum space that the user wants separating the labels.
+        var sMin  = h * this.labelSpacingMin;
+        var sMinH = sMin; // Between baselines
+        
+        // Horizontal distance between labels' text is easily taken
+        // to the distance between words a the same label.
+        // Vertically, it is much easier to differentiate different lines.
+        // So the minimum horizontal space between labels has the length
+        // a white space character, and sMin is the additional required spacing.
+        var spaceW = pv.Text.measure('x', this.font).width;
+        var sMinW  = spaceW + sMin; // Between sides (orthogonal to baseline)
+        
+        // Add the minimum distance to bTh
+        bTh += Math.sqrt(def.sqr(sMinH) + def.sqr(sMinW));
+        
+        var C   = li.ticks.length; // Tick count
+        var tim = 1;               // tickIncludeModulo (if 1: all, if 2: show 1 every 2, if 3: show 1 every 3, ...)
+        var a   = canRotate ? 0 : Math.abs(li.textAngle);
+        var sinOrCos, cosOrSin;
+        
+        var lastPhase = false;     // Is it the 2nd round at 1) ?
+        
+        var logState = pvc.debug > 1 && function(){
+            this._log("textAngle & TIM", {
+                axis: this.axis.id, 
+                tim: tim, 
+                C: C, 
+                a: pv.degrees(a), 
+                w: w,
+                h: h,
+                spaceW: spaceW,
+                spacingMin: this.labelSpacingMin,
+                sMinH: sMinH, 
+                sMinW: sMinW, 
+                bTh: bTh, 
+                bEf: (b*tim),
+                Cvis: Math.ceil(C / tim)
+            });
+        }.bind(this);
+        
+        while(true) {
+            if(logState) { logState(); }
+            
+            // 2.a) At least one tick on either end of the axis.
+            // Visible tick count, considering tim
+            var Cvis = Math.ceil(C / tim);
+            if(Cvis <= 2) {
+                // Backtrack one tim, if possible (on first time tim is 1)
+                if(tim > 1){ tim--; }
+                break;
+            }
+            
+            // Effective distance between the anchors of 
+            // (non-hidden) consecutive labels.
+            var bEf = b * tim;
+            
+            // 1) Determine the smallest angle with no overlap, if any.
+            if(canRotate) {
+                 /* EXPLAINED
+                 
+                   sBase  = bEf * |sinOrCos(a)| - h;
+                   sOrtho = bEf * |cosOrSin(a)| - w;
+                 
+                 * Non-overlapping requires that 
+                   at least one of the distances, 
+                   _sBase_ or _sOrtho_ must be 
+                   greater than or equal to _sMin_.
+                  
+                   (sBase  >= sMin)
+                   Or 
+                   (sOrtho >= sMin)
+
+                   Resolve each of the inequations in function of _a_.
+                  
+                 * As we're only interested in textAngles in the [0, pi/2] range,
+                   by taking the absolute value of the two below expressions,
+                   asin and acos will have the restricted ranges:
+                   
+                   asin from [0, 1] --> [0, pi/2]   increasing
+                   acos from [0, 1] --> [pi/2, 0]   decreasing
+                */
+                if(bEf > bTh) {
+                    // There's no overlapping, whatever the angle
+                    a = 0;
+                    break;
+                }
+                
+                // If any is > 1, then it is not a solution
+                sinOrCos = Math.abs((sMinH + h) / bEf);
+                cosOrSin = Math.abs((sMinW + w) / bEf);
+                
+                var s = isH ? sinOrCos : cosOrSin;
+                var c = isH ? cosOrSin : sinOrCos;
+                
+                var a_min = s <= 1 ? Math.asin(s) : 0;
+                //var a_max = c <= 1 ? Math.acos(s) : Math.PI/2;
+                a = a_min;
+//                if(c <= 1) {
+//                    a = Math.min(a, Math.acos(c)); 
+//                }
+                
+                // 1.b) Coming from 3) ?
+                if(lastPhase) { break; }
+            }
+            
+            // 2) Calculate smallest _tim_ with no overlap, at current angle, _a_.
+            sinOrCos = Math.abs( Math[isH ? 'sin' : 'cos'](a) );
+            cosOrSin = Math.abs( Math[isH ? 'cos' : 'sin'](a) );
+            
+            var timH = sinOrCos < 1e-8 ? Infinity : Math.ceil((sMinH + h) / (b * sinOrCos));
+            var timW = cosOrSin < 1e-8 ? Infinity : Math.ceil((sMinW + w) / (b * cosOrSin));
+            var tim2  = Math.min(timH, timW);
+            if(tim2 === tim){
+                // No change, so there's no need to evaluate the angle again.
+                break;
+            }
+            
+            tim = tim2;
+            
+            if(!isFinite(tim) || tim < 1) {
+                // 2.a) ?
+                tim = 1;
+                break;
+            }
+            
+            // Go to 1 again
+            lastPhase = true;
+        }
+        
+        if(logState) { logState(); }
+        
+        if(tim > 1 && pvc.debug >= 3) {
+            this._info("Showing only one in every " + tim + " tick labels, with Angle=" + (180*a/Math.PI).toFixed(1));
+        }
+        
+        li.textAngle = -a;
+        this._tickIncludeModulo = tim;
+    },
     
     _calcNumberVDesiredTickCount: function(){
         var li = this._layoutInfo;
@@ -1218,8 +1450,11 @@ def
             .font(font)
             .textStyle("#666666")
             .textAlign(layoutInfo.textAlign)
-            .textBaseline(layoutInfo.textBaseline)
-            ;
+            .textBaseline(layoutInfo.textBaseline);
+        
+        if(this.axis.option('OverlappedLabelsMode') === 'rotatethenhide') {
+            this.pvLabel.lock('textAngle', layoutInfo.textAngle);
+        }
         
         this._debugTicksPanel(pvTicksPanel);
     },

@@ -48,7 +48,12 @@ def
         var useLog = pvc.debug >= 5;
         
         // Objects we can mutate
+        
+        // These are not this panel's margins, but the current offsets where children are placed
         var margins  = new pvc.Sides(0);
+        
+        // Real paddings
+        var overflowPaddings = new pvc.Sides(layoutInfo.paddings);
         var paddings = new pvc.Sides(0);
         var remSize = def.copyOwn(layoutInfo.clientSize);
         var aolMap = pvc.BasePanel.orthogonalLength;
@@ -62,6 +67,7 @@ def
         
         var fillChildren = [];
         var sideChildren = [];
+        var sideChildrenInfo = [];
         
         // loop detection
         var paddingHistory = {}; 
@@ -69,7 +75,8 @@ def
         var LoopDetected = 1;
         var NormalPaddingsChanged = 2;
         var OverflowPaddingsChanged = 4;
-
+        var FillSizeChanged = 8;
+        
         var emptyNewPaddings = new pvc.Sides(); // used below in place of null requestPaddings
         var isDisasterRecovery = false;
 
@@ -99,7 +106,29 @@ def
             // SIDE children may change paddings as well.
             if(useLog){ me._group("Phase 1 - Determine MARGINS and FILL SIZE from SIDE panels"); }
             try{
-                sideChildren.forEach(layoutChild1Side);
+                sideChildren.forEach(function(child, index) {
+                    changes |= layoutChild1Side(child, index);
+                });
+                
+                // Reset margins
+                margins = new pvc.Sides(0);
+                margins = new pvc.Sides(0);
+                
+                // Round 2
+                var changes = 0;
+                overflowPaddings = new pvc.Sides(layoutInfo.paddings);
+                sideChildren.forEach(function(child, index) {
+                    changes |= layoutChild1Side(child, index);
+                });
+                
+                // It's OK to change anything in this phase.
+                // Yet, we want to handle overflow paddings
+                // immediately, because these require
+                // re-layout of the whole panel; the sooner, the better.
+                if((changes & OverflowPaddingsChanged) !== 0){
+                    layoutInfo.requestPaddings = overflowPaddings;
+                    return; // repeat
+                }
             } finally {
                 // -> remSize now contains the size of the CENTER cell and is not changed any more
                 
@@ -120,14 +149,14 @@ def
             } finally {
                 if(useLog){
                     me._groupEnd();
-                    me._log("Final FILL clientSize = " + pvc.stringify({width: (remSize.width - paddings.width), height: (remSize.height - paddings.height)}));
+                    me._log("Final FILL clientSize = " + pvc.stringify({width: (remSize.width - paddings.left - paddings.right), height: (remSize.height - paddings.top - paddings.bottom)}));
                     me._log("Final COMMON paddings = " + pvc.stringify(paddings));
                 }
             }
 
             layoutInfo.gridMargins  = new pvc.Sides(margins );
             layoutInfo.gridPaddings = new pvc.Sides(paddings);
-            layoutInfo.gridSize     = new pvc.Size(remSize  );
+            layoutInfo.gridSize     = new pvc.Size (remSize );
 
             // All available client space is consumed.
             // As such, there's no need to return anything.
@@ -138,40 +167,40 @@ def
 
         // --------
         
-        function layoutCycle(remTimes, iteration){
+        function layoutCycle(remTimes, iteration) {
             if(useLog){ me._group("LayoutCycle " + (isDisasterRecovery ? "- Disaster MODE" : ("#" + (iteration + 1)))); }
             try{
                 var index, count;
-                var canChange = layoutInfo.canChange !== false && !isDisasterRecovery && (remTimes > 0);
-                var paddingsChanged;
+                var canChange = !isDisasterRecovery && (remTimes > 0); // layoutInfo.canChange !== false && 
+                var changes;
                 var ownPaddingsChanged = false;
                 var breakAndRepeat;
 
                 index = 0;
                 count = sideChildren.length;
-                while(index < count){
+                while(index < count) {
                     if(useLog){ me._group("SIDE Child #" + (index + 1)); }
                     try{
-                        paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
-                        if(!isDisasterRecovery && paddingsChanged){
+                        changes = layoutChild2Side(sideChildren[index], index, canChange);
+                        if(!isDisasterRecovery && changes) {
                             breakAndRepeat = false;
-                            if((paddingsChanged & OverflowPaddingsChanged) !== 0){
+                            if((changes & OverflowPaddingsChanged) !== 0){
                                 // Don't stop right away cause there might be
                                 // other overflow paddings requests,
                                 // of other side childs.
                                 // Translate children overflow paddings in
                                 // own paddings.
                                 if(useLog){ me._log("SIDE Child #" + (index + 1) + " changed overflow paddings"); }
-                                if(!ownPaddingsChanged){
+                                if(!ownPaddingsChanged) {
                                     ownPaddingsChanged = true;
                                     // If others change we don't do nothing.
                                     // The previous assignment remains.
                                     // It's layoutInfo.paddings that is changed, internally.
-                                    layoutInfo.requestPaddings = layoutInfo.paddings;
+                                    layoutInfo.requestPaddings = overflowPaddings;
                                 }
                             }
 
-                            if((paddingsChanged & NormalPaddingsChanged) !== 0){
+                            if((changes & NormalPaddingsChanged) !== 0){
                                 if(remTimes > 0){
                                     if(useLog){ me._log("SIDE Child #" + (index + 1) + " changed normal paddings"); }
                                     breakAndRepeat = true;
@@ -180,7 +209,7 @@ def
                                 }
                             }
                             
-                            if((paddingsChanged & LoopDetected) !== 0){
+                            if((changes & LoopDetected) !== 0){
                                 // Oh no...
                                 isDisasterRecovery = true;
                                 
@@ -209,11 +238,11 @@ def
                 while(index < count){
                     if(useLog){ me._group("FILL Child #" + (index + 1)); }
                     try{
-                        paddingsChanged = layoutChildFill(fillChildren[index], canChange);
-                        if(!isDisasterRecovery && paddingsChanged){
+                        changes = layoutChildFill(fillChildren[index], canChange);
+                        if(!isDisasterRecovery && changes){
                             breakAndRepeat = false;
 
-                            if((paddingsChanged & NormalPaddingsChanged) !== 0){
+                            if((changes & NormalPaddingsChanged) !== 0){
                                 if(remTimes > 0){
                                     if(pvc.debug >= 5){
                                         me._log("FILL Child #" + (index + 1) + " increased paddings");
@@ -224,7 +253,7 @@ def
                                 }
                             }
 
-                            if((paddingsChanged & LoopDetected) !== 0){
+                            if((changes & LoopDetected) !== 0){
                                 // Oh no...
                                 isDisasterRecovery = true;
                                 layoutCycle(0);
@@ -276,6 +305,7 @@ def
                     def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                     
                     sideChildren.push(child);
+                    sideChildrenInfo.push({width: 0, height: 0});
                 }
             }
         }
@@ -283,83 +313,100 @@ def
         function layoutChild1Side(child, index) {
             if(useLog){ me._group("SIDE Child #" + (index + 1)); }
             try{
-                var paddingsChanged = 0;
+                var changes = 0;
 
                 var a = child.anchor;
-
+                var aol  = aolMap[a];
+                
+                // current aolength, already accounted in remSize
+                var olen = sideChildrenInfo[index][aol];
+                
                 childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
 
-                child.layout(new pvc.Size(remSize), childKeyArgs);
+                if(olen){ // reverse effect of previous updateSide
+                    remSize[aol] += olen;
+                    //margins[a]   -= olen; (margins were reset, so need to do this)
+                    sideChildrenInfo[index][aol] = 0;
+                }
+                
+                var childSize = new pvc.Size(remSize);
+                me._log("=> Available Child Size=" + pvc.stringify(childSize));
+                
+                child.layout(childSize, childKeyArgs);
 
                 if(child.isVisible){
-
-                    paddingsChanged |= checkAnchorPaddingsChanged(a, paddings, child);
+                    changes |= checkPaddingsChanged(a, paddings, child, /*canChange*/ true) | // <<-- NOTE BITwise OR
+                               checkOverflowPaddingsChanged(a, overflowPaddings, child, /*canChange*/ true);
 
                     // Only set the *anchor* position
                     // The other orthogonal position is dependent on the size of the other non-fill children
-                    positionChildNormal(a, child);
+                    positionChildAnchor(a, child);
 
-                    updateSide(a, child);
+                    updateSide(a, child, index, /*isSideChild*/true);
                 }
 
-                return paddingsChanged;
+                return changes;
             } finally {
                 if(useLog){ me._groupEnd(); }
             }
         }
         
         function layoutChildFill(child, canChange) {
-            var paddingsChanged = 0;
+            var changes = 0;
             
             var a = child.anchor; // 'fill'
             
             childKeyArgs.paddings  = filterAnchorPaddings(a, paddings);
             childKeyArgs.canChange = canChange;
             
-            child.layout(new pvc.Size(remSize), childKeyArgs);
+            var childSize = new pvc.Size(remSize);
+            me._log("=> Available Child Size=" + pvc.stringify(childSize));
+            child.layout(childSize, childKeyArgs);
             
             if(child.isVisible){
-                paddingsChanged |= checkAnchorPaddingsChanged(a, paddings, child, canChange);
+                changes |= checkPaddingsChanged(a, paddings, child, canChange);
                 
-                positionChildNormal(a, child);
-                positionChildOrtho (child, a);
+                positionChildAnchor(a, child);
+                positionChildAnchorOrtho (child, a);
             }
             
-            return paddingsChanged;
+            return changes;
         }
         
-        function layoutChild2Side(child, canChange) {
-            var paddingsChanged = 0;
+        function layoutChild2Side(child, index, canChange) {
+            var changed = 0;
             if(child.isVisible){
-                var a = child.anchor;
-                var al  = alMap[a];
-                var aol = aolMap[a];
-                var length  = remSize[al];
-                var olength = child[aol];
-                
+                var a          = child.anchor;
+                var al         = alMap[a];
+                var aol        = aolMap[a];
+                var length     = remSize[al];
+                var olength    = child[aol];
                 var childSize2 = new pvc.Size(def.set({}, al, length, aol, olength));
                 
-                childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
+                childKeyArgs.paddings  = filterAnchorPaddings(a, paddings);
                 childKeyArgs.canChange = canChange;
+                
+                me._log("=> Available Child Size=" + pvc.stringify(childSize2));
                 
                 child.layout(childSize2, childKeyArgs);
                 
                 if(child.isVisible){
-                    paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange) |   // <-- NOTE BITwise OR
-                                      checkOverflowPaddingsChanged(a, layoutInfo.paddings, child, canChange);
+                    changed = checkSideChildResized(a, child, index, canChange) | // <-- NOTE BITwise OR
+                              checkPaddingsChanged (a, paddings, child, canChange) |
+                              checkOverflowPaddingsChanged(a, overflowPaddings, child, canChange);
                     
-                    if(!paddingsChanged){
-                        positionChildOrtho(child, child.align);
-                    }
+                    //if(!changed){
+                    positionChildAnchorOrtho(child, child.align);
+                    //}
                 }
             }
             
-            return paddingsChanged;
+            return changed;
         }
         
-        function positionChildNormal(side, child) {
+        function positionChildAnchor(side, child) {
             var sidePos;
-            if(side === 'fill'){
+            if(side === 'fill') {
                 side = 'left';
                 sidePos = margins.left + remSize.width / 2 - (child.width / 2);
             } else {
@@ -370,15 +417,19 @@ def
         }
         
         // Decreases available size and increases margins
-        function updateSide(side, child) {
+        function updateSide(side, child, index, isSideChild) {
             var sideol = aolMap[side],
                 olen   = child[sideol];
+            
+            if(isSideChild){
+                sideChildrenInfo[index][sideol] = olen;
+            }
             
             margins[side]   += olen;
             remSize[sideol] -= olen;
         }
         
-        function positionChildOrtho(child, align) {
+        function positionChildAnchorOrtho(child, align) {
             var sideo;
             if(align === 'fill'){
                 align = 'middle';
@@ -417,8 +468,35 @@ def
             
             return filtered;
         }
-
-        function checkAnchorPaddingsChanged(a, paddings, child, canChange){
+        
+        function checkSideChildResized(a, child, index, canChange) {
+            var changed = 0;
+            
+            var aol  = aolMap[a];
+            var olen = child[aol];
+            var addOLen = olen - sideChildrenInfo[index][aol];
+            if(Math.abs(addOLen) > 0) {
+                if(pvc.debug >= 3) {
+                    me._log("Child changed " + aol + " by " + addOLen);
+                }
+                
+                if(!canChange) {
+                    if(pvc.debug >= 2) {
+                        me._warn("Child wanted more/less " + aol + ", but layout iterations limit has been reached.");
+                    }
+                } else {
+                    changed = FillSizeChanged;
+                    
+                    margins[a  ] += addOLen;
+                    remSize[aol] -= addOLen;
+                    sideChildrenInfo[index][aol] = olen;
+                }
+            }
+            
+            return changed;
+        }
+        
+        function checkPaddingsChanged(a, paddings, child, canChange){
             var newPaddings = child._layoutInfo.requestPaddings;
 
             var changed = 0;
@@ -497,7 +575,7 @@ def
                     var minChange = Math.max(1, Math.abs(0.05 * value));
 
                     // STABILITY & SPEED requirement
-                    if(increase >= minChange){
+                    if(increase >= minChange) { // Only when positive is more space needed
                         if(!canChange){
                             if(pvc.debug >= 2){
                                 me._warn("CANNOT change overflow padding but child wanted to: " + side + "=" + newValue);
