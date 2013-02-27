@@ -694,6 +694,25 @@ def.scope(function(){
         DoubleClickAction: { 
             resolve: '_resolveFull',
             data: normalV1Data
-        } // idem
+        }, // idem
+        
+        /* TOOLTIP */
+        TooltipEnabled: {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:  true
+        },
+        
+        TooltipFormat: {
+            resolve: '_resolveFull',
+            cast:   def.fun.as,
+            value:  null
+        },
+        
+        TooltipAutoContent: {
+            resolve: '_resolveFull',
+            cast:   pvc.parseTooltipAutoContent,
+            value:  'value'
+        }
     });
 });

@@ -693,6 +693,30 @@ var pvc = def.globalSpace('pvc', {
         return clickMode;
     };
     
+    pvc.parseTooltipAutoContent = function(value, dv){
+        if(value){
+            value = (''+value).toLowerCase();
+        }
+        
+        switch(value){
+            case 'value':
+            case 'summary':
+            case 'none':
+                break;
+            
+            default:
+                dv = dv || 'summary';
+                if(value && pvc.debug >= 2){
+                    pvc.log("[Warning] Invalid 'tooltipAutoContent' option value: '" + value + "'. Assuming '" + dv + "'.");
+                }
+            
+                value = dv;
+                break;
+        }
+        
+        return value;
+    };
+    
     pvc.parseShape = function(shape){
         if(shape){
             shape = (''+shape).toLowerCase();

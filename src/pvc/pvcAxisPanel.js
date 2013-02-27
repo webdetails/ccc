@@ -1175,16 +1175,7 @@ def
                 noSelect:      false,
                 noTooltip:    false,
                 noHover:       false, // TODO: to work, scenes would need a common root
-                wrapper:       wrapper,
-                tooltipArgs:   {
-                    // TODO: should be an option whether a data tooltip is desired
-                    buildTooltip: function(context){ return context.scene.vars.tick.label; },
-                    isLazy: false,
-                    
-                    options: {
-                        gravity: this._calcTipsyGravity()
-                    }
-                }
+                wrapper:       wrapper
             })
             .intercept('visible', function(tickScene){
                 return !tickScene.isHidden  ?
@@ -1222,6 +1213,31 @@ def
             ;
         
         this._debugTicksPanel(pvTicksPanel);
+    },
+    
+    /** @override */
+    _getTooltipBuilder: function(tipOptions){
+        if(this.axis.option('TooltipEnabled')) {
+            
+            tipOptions.gravity = this._calcTipsyGravity();
+            
+            var tooltipFormat = this.axis.option('TooltipFormat');
+            if(tooltipFormat) {
+                return function(context){
+                    return tooltipFormat.call(context, context.scene);
+                };
+            }
+            
+            var autoContent = this.axis.option('TooltipAutoContent');
+            if(autoContent === 'summary') {
+                return this._buildDataTooltip;
+            }
+            
+            if(autoContent === 'value') {
+                tipOptions.isLazy = false;
+                return function(context){ return context.scene.vars.tick.label; };
+            }
+        }
     },
     
     _debugTicksPanel: function(pvTicksPanel){
@@ -1545,22 +1561,15 @@ def
         
         // draw labels and make them fit
         this.pvLabel = new pvc.visual.Label(this, layout.label, {
-                extensionId: 'label',
+                extensionId:  'label',
                 noClick:       false,
                 noDoubleClick: false,
                 noSelect:      false,
-                noTooltip:    false,
+                noTooltip:     false,
                 noHover:       false, // TODO: to work, scenes would need a common root
                 wrapper:       wrapper,
                 tooltipArgs:   {
-                    // TODO: should be an option whether a data tooltip is desired
-                    isLazy: false,
-                    buildTooltip: function(context){ return context.scene.vars.tick.label; },
-                    
-                    options: {
-                        gravity: this._calcTipsyGravity(),
-                        offset:  diagMargin * 2
-                    }
+                    options: {offset: diagMargin * 2}
                 }
             })
             .pvMark

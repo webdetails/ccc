@@ -1454,18 +1454,14 @@ def
         if(pvMark.hasTooltip){
             return;
         }
-        
-        var chartTipOptions = this.chart._tooltipOptions;
 
-        var tipOptions;
-        var nowTipOptions = def.get(keyArgs, 'options');
-        if(nowTipOptions){
-            tipOptions = def.create(chartTipOptions, nowTipOptions);
-        } else {
-            tipOptions = Object.create(chartTipOptions);
-        }
+        var tipOptions = def.create(
+                            this.chart._tooltipOptions, 
+                            def.get(keyArgs, 'options'));
         
-        var buildTooltip = def.get(keyArgs, 'buildTooltip') ||
+        tipOptions.isLazy = def.get(keyArgs, 'isLazy', true);
+        
+        var buildTooltip = def.get(keyArgs, 'buildTooltip') || 
                            this._getTooltipBuilder(tipOptions);
         if(!buildTooltip){
             return;
@@ -1488,11 +1484,9 @@ def
                     tipsyEvent = 'mouseover';
 //            }
         }
-        
-        var isLazy = def.get(keyArgs, 'isLazy', true);
 
         pvMark.localProperty("tooltip"/*, Function | String*/)
-              .tooltip(this._createTooltipProp(pvMark, buildTooltip, isLazy))
+              .tooltip(this._createTooltipProp(pvMark, buildTooltip, tipOptions.isLazy))
               .title(function(){ return '';} ) // Prevent browser tooltip
               .event(tipsyEvent, pv.Behavior.tipsy(tipOptions));
 
