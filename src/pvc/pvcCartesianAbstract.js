@@ -224,7 +224,7 @@ def
     _createFocusWindow: function(){
         if(this._canSelectWithFocusWindow()){
             // In case we're being re-rendered,
-            // capture the axes' focuaWindow, if any.
+            // capture the axes' focusWindow, if any.
             // and set it as the next focusWindow.
             var fwData;
             var fw = this.focusWindow;
@@ -636,76 +636,80 @@ def
     },
     
     markEventDefaults: {
-        strokeStyle: "#5BCBF5",  /* Line Color */
-        lineWidth: "0.5",  /* Line Width */
-        textStyle: "#5BCBF5", /* Text Color */
-        verticalOffset: 10, /* Distance between vertical anchor and label */
-        verticalAnchor: "bottom", /* Vertical anchor: top or bottom */
-        horizontalAnchor: "right", /* Horizontal anchor: left or right */
-        forceHorizontalAnchor: false, /* Horizontal anchor position will be respected if true */
-        horizontalAnchorSwapLimit: 80 /* Horizontal anchor will switch if less than this space available */
+        strokeStyle: "#5BCBF5",        /* Line Color */
+        lineWidth: "0.5",              /* Line Width */
+        textStyle: "#5BCBF5",          /* Text Color */
+        verticalOffset: 10,            /* Distance between vertical anchor and label */
+        verticalAnchor: "bottom",      /* Vertical anchor: top or bottom */
+        horizontalAnchor: "right",     /* Horizontal anchor: left or right */
+        forceHorizontalAnchor: false,  /* Horizontal anchor position will be respected if true */
+        horizontalAnchorSwapLimit: 80, /** @deprecated  Horizontal anchor will switch if less than this space available */
+        font: '10px sans-serif'
     },
     
     // TODO: chart orientation?
-    markEvent: function(dateString, label, options){
-
-        var baseScale = this.axes.base.scale;
+    markEvent: function(sourceValue, label, options){
+        var me = this;
+        var baseAxis  = me.axes.base;
+        var orthoAxis = me.axes.ortho;
+        var baseRole  = baseAxis.role;
+        var baseScale = baseAxis.scale;
+        var baseDim   = me.data.owner.dimensions(baseRole.grouping.firstDimensionName());
+        var baseDimType = baseDim.type;
         
-        if(baseScale.type !== 'timeSeries'){
-            this._log("Attempting to mark an event on a non timeSeries chart");
-            return this;
+        if(baseAxis.isDiscrete()) {
+            me._warn("Can only mark events in charts with a continuous base scale.");
+            return me;
         }
 
-        var o = $.extend({}, this.markEventDefaults, options);
+        var o = $.extend({}, me.markEventDefaults, options);
         
-        // TODO: format this using dimension formatter...
-        
-        // Are we outside the allowed scale?
-        var d = pv.Format.date(this.options.timeSeriesFormat).parse(dateString);
-        var dpos = baseScale(d),
-            range = baseScale.range();
-        
-        if( dpos < range[0] || dpos > range[1]){
-            this._log("Event outside the allowed range, returning");
+        var pseudoAtom = baseDim.read(sourceValue, label);
+        var basePos    = baseScale(pseudoAtom.value);
+        var baseRange  = baseScale.range();
+        var baseEndPos = baseRange[1];
+        if(basePos < baseRange[0] || basePos > baseEndPos) {
+            this._warn("Cannot mark event because it is outside the base scale's domain.");
             return this;
         }
+        
+        // Chart's main plot
+        var pvPanel = this.plotPanelList[0].pvPanel;
+        
+        var h = orthoAxis.scale.range()[1];
 
-        // Add the line
-
-        var panel = this.plotPanelList[0].pvPanel;
-        var h = this.yScale.range()[1];
-
-        // Detect where to place the horizontalAnchor
-        //var anchor = o.horizontalAnchor;
-        if( !o.forceHorizontalAnchor ){
-            var availableSize = o.horizontalAnchor == "right"? range[1]- dpos : dpos;
+        // Detect where to place the label
+        var ha = o.horizontalAnchor;
+        if(!o.forceHorizontalAnchor) {
+            var alignRight    = ha === "right";
+            var availableSize = alignRight ? (baseEndPos - basePos) : basePos;
             
-            // TODO: Replace this availableSize condition with a check for the text size
-            if (availableSize < o.horizontalAnchorSwapLimit ){
-                o.horizontalAnchor = o.horizontalAnchor == "right" ? "left" : "right";
+            var labelSize = pv.Text.measure(pseudoAtom.label, o.font).width;
+            if (availableSize < labelSize) {
+                ha = alignRight ? "left" : "right";
             }
         }
-
-        var line = panel.add(pv.Line)
-            .data([0,h])
-            .strokeStyle(o.strokeStyle)
-            .lineWidth(o.lineWidth)
-            .bottom(function(d){
-                return d;
-            })
-            .left(dpos);
-
-        //var pvLabel = 
-        line.anchor(o.horizontalAnchor)
-            .top(o.verticalAnchor == "top" ? o.verticalOffset : (h - o.verticalOffset))
-            .add(pv.Label)
-            .text(label)
-            .textStyle(o.textStyle)
-            .visible(function(){
-                return !this.index;
-            });
         
-        return this;
+        var topPos = o.verticalAnchor === "top" ? o.verticalOffset : (h - o.verticalOffset);
+        
+        // Shouldn't this be a pv.Rule?
+        var line = pvPanel.add(pv.Line)
+            .data([0, h])
+            .bottom(def.identity) // from 0 to h
+            .left  (basePos)
+            .lineWidth  (o.lineWidth)
+            .strokeStyle(o.strokeStyle);
+
+        line.anchor(ha)
+            .visible(function(){ return !this.index; })
+            .top(topPos)
+            .add(pv.Label)
+            .font(o.font)
+            .text(pseudoAtom.label)
+            .textStyle(o.textStyle)
+            ;
+        
+        return me;
     },
     
     defaults: {

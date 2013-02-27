@@ -762,6 +762,75 @@ def.type('pvc.data.Dimension')
                    isVirtual);
     },
     
+    read: function(sourceValue, label){
+        // - NULL -
+        if(sourceValue == null || sourceValue === '') {
+            return null;
+        }
+        
+        var value;
+        var type = this.type;
+        
+        // Is google table style cell {v: , f: } ?
+        if(typeof sourceValue === 'object' && ('v' in sourceValue)){
+            // Get info and get rid of the cell
+            label = sourceValue.f;
+            sourceValue = sourceValue.v;
+        }
+        
+        // - CONVERT - 
+        var converter = type._converter;
+        value = converter ? converter(sourceValue) : sourceValue;
+        if(value == null || value === '') {
+            return null;
+        }
+        
+        // - CAST -
+        // Any cast function?
+        var cast = type.cast;
+        if(cast) {
+            value = cast(value);
+            if(value == null || value === ''){
+                // Null after all (normally a cast failure)
+                return null;
+            }
+        }
+        
+        // - KEY -
+        var keyFun = type._key;
+        var key = '' + (keyFun ? keyFun(value) : value);
+        
+        // - ATOM -
+        var atom = this._atomsByKey[key];
+        if(atom){
+            return {
+                rawValue: sourceValue,
+                key:      key,
+                value:    atom.value,
+                label:    '' + (label == null ? atom.label : label)
+            };
+        }
+        
+        // - LABEL -
+        if(label == null){
+            var formatter = type._formatter;
+            if(formatter){
+                label = formatter(value, sourceValue);
+            } else {
+                label = value;
+            }
+        }
+
+        label = "" + label; // J.I.C.
+        
+        return {
+            rawValue: sourceValue,
+            key:      key,
+            value:    value,
+            label:    label
+        };
+    },
+    
     /**
      * Disposes the dimension and all its children.
      */
