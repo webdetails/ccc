@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>CCC Samples - Heat grid</title>
+  <head>
+    <title>CCC Samples - Treemap</title>
 
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script type="text/javascript" src="../src/cdf/jquery.js"></script>
-        
-        <script type="text/javascript" src="../src/data/heat-grid-mega.js"></script>
-        <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
-        <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
-        <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
-        <script type="text/javascript" src="../src/lib/tipsy.js"></script>
-        <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
-        <script type="text/javascript" src="../src/def/def.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../src/cdf/jquery.js"></script>
+    
+    <script type="text/javascript" src="../src/lib/protovis-d3.3.js"></script>
+    <script type="text/javascript" src="../src/lib/protovis-msie.js"></script>
+    <script type="text/javascript" src="../src/lib/jquery.tipsy.js"></script>
+    <script type="text/javascript" src="../src/lib/tipsy.js"></script>
+    <link type="text/css" href="../src/lib/tipsy.css" rel="stylesheet"/>
+    
+    <script type="text/javascript" src="../src/data/flare.js"></script>
+    <script type="text/javascript" src="../src/data/q01-01.js"></script>
+    
+    <script type="text/javascript" src="../src/def/def.js"></script>
 
-
-        <!-- @SCRIPTSBEG@ -->
+    <!-- @SCRIPTSBEG@ -->
         <script type="text/javascript" src="../src/pvc/pvc.js"></script>
         <script type="text/javascript" src="../src/pvc/pvc.text.js"></script>
         <script type="text/javascript" src="../src/pvc/pvc.color.js"></script>
@@ -147,27 +149,37 @@
         <script type="text/javascript" src="../src/pvc/data/translation/TreemapChartTranslationOper.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTreemapPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcTreemapChart.js"></script>
-        <!-- @SCRIPTSEND@ -->
+    <!-- @SCRIPTSEND@ -->
 
-        
-        
-
-        <script type="text/javascript" src="pvcDocUtils.js"></script>
-    </head>
+    <script type="text/javascript" src="pvcDocUtils.js"></script>
+  </head>
   <body>
 
-    <h1>
-      Heat grid Chart with "Mega" data set
-    </h1>
+    <h1>Treemap Chart</h1>
 
-<textarea cols="70" rows="7" id="pvcHGMegaCode">
-var heatGridMega = new pvc.HeatGridChart(testHeatGridMegaOptions);
-heatGridMega.setData(testHeatGridMega, testHeatGridMegaDataOptions);
-heatGridMega.render();
+<h2>Examples</h2>
+<h3>A treemap chart</h3>
+<br>
+<textarea cols="55" rows="15" id="pvcTreemap1Code">
+var treemap1 = new pvc.TreemapChart({
+    canvas:  "pvcTreemap1",
+    width:   800,
+    height:  400,
+    title:   "Treemap chart",
+    animate: false,
+    legend: true,
+    layoutMode: 'slice-and-dice',
+    //orientation: 'horizontal',
+    selectable: true,
+    hoverable: true,
+    tooltipEnabled: true,
+    extensionPoints: {}
+});
+
+treemap1.setData(testTreemap1, {crosstabMode: false});
+treemap1.render();
 </textarea>
-        <button class="tryMe" onclick='tryMe(this)'>Try me</button>
-        <br/>
-        <div id="pvcHGMega"></div>
+    <button class="tryMe" onclick='tryMe(this)'>Try me</button>
+    <div id="pvcTreemap1"></div>
   </body>
 </html>
-

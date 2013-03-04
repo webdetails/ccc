@@ -362,26 +362,22 @@ add(/** @lends pvc.data.GroupingOper */{
                     // so that when flattened, they have a unique key 
                     def.copy(child.atoms, levelParentNode.atoms);
                     
-                    // The key is the absKey, trimmed of keySep at the end
+                    // The **key** is the **absKey**, trimmed of keySep at the end
                     if(levelParentNode.dimNames.length){
-//                        child.key = levelParentNode.key + 
-//                                    datum.owner.keySep + 
-//                                    key;
-                        
                         var keySep = datum.owner.keySep;
+                        var K = keySep.length;
                         
-                        child.absKey = 
+                        var trimKey = 
+                            child.absKey = 
                             levelParentNode.absKey + 
                             keySep + 
                             key;
                         
-                        var K = keySep.length;
-                        var trimKey = child.absKey;
                         while(trimKey.lastIndexOf(keySep) === trimKey.length - K){
                             trimKey = trimKey.substr(0, trimKey.length - K);
                         }
                         
-                        child.key = trimKey;
+                        child.key = trimKey;                        
                     } else {
                         child.absKey = key;
                     }

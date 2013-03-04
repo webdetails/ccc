@@ -403,11 +403,11 @@ def
         var tipOptions = options.tooltip;
         var tipEnabled = options.tooltipEnabled;
         if(tipEnabled == null){
-            if(tipOptions){
+            if(tipOptions) {
                 tipEnabled = tipOptions.enabled;
             }
             
-            if(tipEnabled == null){
+            if(tipEnabled == null) {
                 if(isV1Compat){
                     tipEnabled = options.showTooltips;
                 }

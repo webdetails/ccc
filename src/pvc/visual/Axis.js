@@ -75,15 +75,15 @@ def.scope(function(){
             return this;
         },
         
-        isDiscrete: function(){
+        isDiscrete: function() {
             return this.role && this.role.isDiscrete();
         },
         
-        isBound: function(){
+        isBound: function() {
             return !!this.role;
         },
         
-        setScale: function(scale, noWrap){
+        setScale: function(scale, noWrap) {
             /*jshint expr:true */
             this.role || def.fail.operationInvalid('Axis is unbound.');
             
@@ -92,7 +92,7 @@ def.scope(function(){
             return this;
         },
         
-        _wrapScale: function(scale){
+        _wrapScale: function(scale) {
             scale.type = this.scaleType;
             
             var by;
@@ -105,15 +105,17 @@ def.scope(function(){
                 var useAbs = this.scaleUsesAbs();
                 var nullAs = this.scaleTreatsNullAs();
                 if(nullAs && nullAs !== 'null'){
-                    var nullValue = nullAs === 'min' ? scale.domain()[0] : 0;
-                    
+                    var nullIsMin = nullAs === 'min';
+                    // Below, the min valow is evaluated each time on purpose,
+                    // because otherwise we would have to rewrap when the domain changes.
+                    // It does change, for example, on MultiChart scale coordination.
                     if(useAbs){
                         by = function(v){
-                            return scale(v == null ? nullValue : (v < 0 ? -v : v));
+                            return scale(v == null ? (nullIsMin ? scale.domain()[0] : 0) : (v < 0 ? -v : v));
                         };
                     } else {
                         by = function(v){
-                            return scale(v == null ? nullValue : v);
+                            return scale(v == null ? (nullIsMin ? scale.domain()[0] : 0) : v);
                         };
                     }
                 } else {
@@ -150,7 +152,8 @@ def.scope(function(){
         sceneScale: function(keyArgs){
             var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,
                 grouping = this.role.grouping;
-    
+            
+            // TODO: isn't this redundant with the code in _wrapScale??
             if(grouping.isSingleDimension && grouping.firstDimensionValueType() === Number){
                 var scale = this.scale,
                     nullToZero = def.get(keyArgs, 'nullToZero', true);

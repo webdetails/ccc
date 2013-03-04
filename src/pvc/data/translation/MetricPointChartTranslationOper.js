@@ -80,7 +80,7 @@ def.type('pvc.data.MetricPointChartTranslationOper')
         
         // All discrete columns go to series dimensions
         F = freeDisIndexes.length;
-        if(F > 0){
+        if(F > 0) {
             autoDimNames.length = 0;
             this._getUnboundRoleDefaultDimNames('series', F, autoDimNames);
             

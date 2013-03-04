@@ -1169,31 +1169,32 @@ def
             this,
             pvTicksPanel,
             {
-                extensionId: 'label',
+                extensionId:  'label',
+                showsInteraction: true,
                 noClick:       false,
                 noDoubleClick: false,
                 noSelect:      false,
-                noTooltip:    false,
+                noTooltip:     false,
                 noHover:       false, // TODO: to work, scenes would need a common root
                 wrapper:       wrapper
             })
-            .intercept('visible', function(tickScene){
+            .intercept('visible', function(tickScene) {
                 return !tickScene.isHidden  ?
                        this.delegateExtension(true) :
                        !!tickScene.vars.hiddenLabelText;
             })
-            .intercept('text', function(tickScene){
+            .intercept('text', function(tickScene) {
                 // Allow late overriding (does not affect layout..)
                 var text;
-                if(tickScene.isHidden){
+                if(tickScene.isHidden) {
                     text = hiddenLabelText;
                 } else {
                     text = this.delegateExtension();
-                    if(text === undefined){
+                    if(text === undefined) {
                         text = tickScene.vars.tick.label;
                     }
                     
-                    if(maxTextWidth){
+                    if(maxTextWidth && (!this.showsInteraction() || !this.scene.isActive)) {
                         text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
                     }
                 }
@@ -1405,21 +1406,22 @@ def
         
         var label = this.pvLabel = new pvc.visual.Label(this, pvTicksPanel, {
                 extensionId: 'label',
+                noHover: false,
+                showsInteraction: true,
                 wrapper: wrapper
             })
             .lock('data') // inherited
-            .pvMark
-
-            .lock(anchorOpposite, this.tickLength)
-            .lock(anchorOrtho,    0)
-            .zOrder(40) // above axis rule
-            .text(function(tickScene){
+            .intercept('text', function(tickScene) {
                 var text = tickScene.vars.tick.label;
-                if(maxTextWidth){
+                if(maxTextWidth && (!this.showsInteraction() || !this.scene.isActive)) {
                     text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', false);
                 }
                 return text;
              })
+            .pvMark
+            .lock(anchorOpposite, this.tickLength)
+            .lock(anchorOrtho,    0)
+            .zOrder(40) // above axis rule
             .font(this.font)
             .textStyle("#666666")
             //.textMargin(0.5) // Just enough for some labels not to be cut (vertical)
@@ -1567,13 +1569,14 @@ def
                 noSelect:      false,
                 noTooltip:     false,
                 noHover:       false, // TODO: to work, scenes would need a common root
+                showsInteraction: true,
                 wrapper:       wrapper,
                 tooltipArgs:   {
                     options: {offset: diagMargin * 2}
                 }
             })
             .pvMark
-            .def('lblDirection','h')
+            .def('lblDirection', 'h')
             .textAngle(function(tickScene){
                 if(tickScene.depth >= vertDepthCutoff && tickScene.depth < diagDepthCutoff){
                     this.lblDirection('v');
@@ -1612,26 +1615,29 @@ def
             .font(font)
             .textStyle("#666666")
             .text(function(tickScene){
-                var fitInfo = this.fitInfo();
                 var label = tickScene.vars.tick.label;
-                switch(this.lblDirection()){
-                    case 'h':
-                        if(!fitInfo.h){
-                            return pvc.text.trimToWidthB(tickScene.dx, label, font, '..');
-                        }
-                        break;
-                    case 'v':
-                        if(!fitInfo.v){
-                            return pvc.text.trimToWidthB(tickScene.dy, label, font, '..');
-                        }
-                        break;
-                    case 'd':
-                       if(!fitInfo.d){
-                          //var ang = Math.atan(tickScene.dy/tickScene.dx);
-                          var diagonalLength = Math.sqrt(def.sqr(tickScene.dy) + def.sqr(tickScene.dx));
-                          return pvc.text.trimToWidthB(diagonalLength - diagMargin, label, font, '..');
-                        }
-                        break;
+                var sign = this.sign;
+                if(!sign.scene.isActive || !sign.showsInteraction()){
+                    var fitInfo = this.fitInfo();
+                    switch(this.lblDirection()){
+                        case 'h':
+                            if(!fitInfo.h){
+                                return pvc.text.trimToWidthB(tickScene.dx, label, font, '..');
+                            }
+                            break;
+                        case 'v':
+                            if(!fitInfo.v){
+                                return pvc.text.trimToWidthB(tickScene.dy, label, font, '..');
+                            }
+                            break;
+                        case 'd':
+                           if(!fitInfo.d){
+                              //var ang = Math.atan(tickScene.dy/tickScene.dx);
+                              var diagonalLength = Math.sqrt(def.sqr(tickScene.dy) + def.sqr(tickScene.dx));
+                              return pvc.text.trimToWidthB(diagonalLength - diagMargin, label, font, '..');
+                            }
+                            break;
+                    }
                 }
                 
                 return label;

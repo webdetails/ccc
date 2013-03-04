@@ -247,7 +247,7 @@ pvc.BaseChart
         .each (function(role){
             var sourceRole = this._visualRoles[role.defaultSourceRoleName];
             if(sourceRole){
-                role.setSourceRole(sourceRole);
+                role.setSourceRole(sourceRole, /*isDefault*/true);
                 sourcedRoles.push(role);
             }
         }, this)
@@ -380,9 +380,12 @@ pvc.BaseChart
         }
         
         function autoBindUnboundRole(role){
-            var name = role.name;
-            
             // !role.isPreBound()
+            
+            if(role.sourceRole && !role.isDefaultSourceRole){
+                unboundSourcedRoles.push(role);
+                return;
+            }
             
             /* Try to bind automatically, to defaultDimensionName */
             var dimName = role.defaultDimensionName;

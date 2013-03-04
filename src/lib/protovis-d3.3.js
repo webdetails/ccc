@@ -1,4 +1,4 @@
-// 8ef5fb05c583f3d8c688a2821d003cf056e53be7
+// 23da30b1cb17b0a5a2317ce8aebb7b5d61c32a9d
 /**
  * @class The built-in Array class.
  * @name Array
@@ -2537,7 +2537,7 @@ pv.Dom.Node.prototype.visitAfter = function(f) {
  */
 pv.Dom.Node.prototype.sort = function(f) {
   if (this.firstChild) {
-    delete p._firstDirtyChildIndex;
+    delete this._firstDirtyChildIndex;
     
     this.childNodes.sort(f);
     
@@ -2570,6 +2570,8 @@ pv.Dom.Node.prototype.sort = function(f) {
 pv.Dom.Node.prototype.reverse = function() {
   var childNodes = [];
   this.visitAfter(function(n) {
+      delete this._firstDirtyChildIndex;
+      
       while (n.lastChild) childNodes.push(n.removeChild(n.lastChild));
       for (var c; c = childNodes.pop();) n.insertBefore(c, n.firstChild);
     });
@@ -17782,7 +17784,7 @@ pv.Layout.Treemap.prototype = pv.extend(pv.Layout.Hierarchy)
     .property("order", String);
 
 /**
- * Default propertiess for treemap layouts. The default mode is "squarify" and
+ * Default properties for treemap layouts. The default mode is "squarify" and
  * the default order is "ascending".
  *
  * @type pv.Layout.Treemap
@@ -17802,7 +17804,7 @@ pv.Layout.Treemap.prototype.defaults = new pv.Layout.Treemap()
  */
 
 /**
- * The left inset between parent add child in pixels. Defaults to 0.
+ * The left inset between parent and child in pixels. Defaults to 0.
  *
  * @type number
  * @name pv.Layout.Treemap.prototype.paddingLeft
@@ -17810,7 +17812,7 @@ pv.Layout.Treemap.prototype.defaults = new pv.Layout.Treemap()
  */
 
 /**
- * The right inset between parent add child in pixels. Defaults to 0.
+ * The right inset between parent and child in pixels. Defaults to 0.
  *
  * @type number
  * @name pv.Layout.Treemap.prototype.paddingRight
@@ -17901,7 +17903,7 @@ pv.Layout.Treemap.prototype.size = function(f) {
 
 /** @private */
 pv.Layout.Treemap.prototype.buildImplied = function(s) {
-  if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
+  pv.Layout.Hierarchy.prototype.buildImplied.call(this, s);
 
   var that = this,
       nodes = s.nodes,
@@ -17963,10 +17965,15 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
 
     /* Assume squarify by default. */
     if (mode != "squarify") {
-      slice(n.childNodes, n.size,
-          mode == "slice" ? true
-          : mode == "dice" ? false
-          : i & 1, x, y, w, h);
+      slice(
+        n.childNodes, 
+        n.size,
+        mode == "slice" ? true : 
+        mode == "dice"  ? false : i & 1, 
+        x, 
+        y, 
+        w, 
+        h);
       return;
     }
 
@@ -17975,10 +17982,10 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
         l = Math.min(w, h),
         k = w * h / n.size;
 
-    /* Abort if the size is nonpositive. */
+    /* Abort if the size is non-positive. */
     if (n.size <= 0) return;
 
-    /* Scale the sizes to fill the current subregion. */
+    /* Scale the sizes to fill the current sub-region. */
     n.visitBefore(function(n) { n.size *= k; });
 
     /** @private Position the specified nodes along one dimension. */
@@ -18029,15 +18036,18 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
 
   /* Recursively compute the node depth and size. */
   stack.unshift(null);
-  root.visitAfter(function(n, i) {
-      n.depth = i;
-      n.x = n.y = n.dx = n.dy = 0;
-      n.size = n.firstChild
-          ? pv.sum(n.childNodes, function(n) { return n.size; })
-          : that.$size.apply(that, (stack[0] = n, stack));
-    });
-  stack.shift();
-
+  try{
+      root.visitAfter(function(n, i) {
+          n.depth = i;
+          n.x = n.y = n.dx = n.dy = 0;
+          n.size = n.firstChild
+              ? pv.sum(n.childNodes, function(n) { return n.size; })
+              : that.$size.apply(that, (stack[0] = n, stack));
+        });
+  } finally { 
+      stack.shift();
+  }
+  
   /* Sort. */
   switch (s.order) {
     case "ascending": {

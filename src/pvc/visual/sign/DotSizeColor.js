@@ -71,6 +71,8 @@ def
     },
 
     _initColor: function(){
+        // TODO: can't most of this be incorporated in the sizeAxis code
+        // or in Sign#_initDefColorScale ??
         var colorMissing;
         var sceneColorScale;
         var panel = this.panel;
@@ -85,7 +87,7 @@ def
             var isColorBound = !!colorScale && colorRole.isBound();
             if(isColorBound) { // => colorAxis
                 this.isColorBound = true;
-                sceneColorScale = colorAxis.sceneScale({sceneVarName: colorRole.name});
+                sceneColorScale = colorAxis.sceneScale({sceneVarName: 'color'});
             } else if(colorScale) {
                 var r = colorScale.range();
                 if(r && r.length){

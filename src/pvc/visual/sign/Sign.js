@@ -70,7 +70,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                     return value;
                 }
                 
-                if(this.showsInteraction() && this.scene.anyInteraction()) {
+                if(this.showsInteraction() && this.anyInteraction()) {
                     // interactiveColor
                     value = this[interName](value, arg);
                 } else {
@@ -107,6 +107,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         this.constructor.add(methods);
         
         return this;
+    },
+    
+    anyInteraction: function(){
+        return this.scene.anyInteraction();
     },
     
     // Call this function with a final property value
@@ -280,7 +284,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     
     extensionAbsIds: null,
     
-    _addInteractive: function(keyArgs){
+    _addInteractive: function(keyArgs) {
         var panel   = this.panel,
             pvMark  = this.pvMark,
             chart   = this.chart,
@@ -380,11 +384,11 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         return this.color('stroke');
     },
 
-    defaultColor: function(/*type*/){
+    defaultColor: function(/*type*/) {
         return this.defaultColorSceneScale()(this.scene);
     },
 
-    dimColor: function(color, type){
+    dimColor: function(color, type) {
         if(type === 'text'){
             return pvc.toGrayScale(
                 color,
@@ -401,18 +405,18 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 /*minGrayLevel*/ null); // idem
     },
     
-    defaultColorSceneScale: function(){
+    defaultColorSceneScale: function() {
         return def.lazy(this, '_defaultColorSceneScale', this._initDefColorScale, this);
     },
 
-    _initDefColorScale: function(){
+    _initDefColorScale: function() {
         var colorAxis = this.panel.axes.color;
         return colorAxis ?
                colorAxis.sceneScale({sceneVarName: 'color'}) :
                def.fun.constant(pvc.defaultColor);
     },
 
-    mayShowActive: function(noSeries){
+    mayShowActive: function(noSeries) {
         if(!this.showsActivity()){
             return false;
         }
@@ -423,11 +427,11 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                scene.isActiveDatum();
     },
 
-    mayShowNotAmongSelected: function(){
+    mayShowNotAmongSelected: function() {
         return this.showsSelection() && this.scene.anySelected() && !this.scene.isSelected();
     },
 
-    mayShowSelected: function(){
+    mayShowSelected: function() {
         return this.showsSelection() && this.scene.isSelected();
     }
 });

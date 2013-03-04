@@ -351,8 +351,7 @@ pvc.BaseChart
                 }
                 
                 if(dataPartDim){
-                    var seriesKey = pvc.data.Complex.values(datum, dimNames).join(',');
-                    
+                    var seriesKey = pvc.data.Complex.compositeKey(datum, dimNames);
                     atoms[dataPartDimName] = 
                         def.hasOwnProp.call(plot2SeriesSet, seriesKey) ?
                            (part2Atom || (part2Atom = dataPartDim.intern("1"))) :
@@ -493,6 +492,8 @@ pvc.BaseChart
         if(!partData){
             return null;
         }
+        
+        // TODO: isn't this buggy? When no series role, all datums are returned, visible or not 
         
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
         

@@ -638,10 +638,10 @@ def.type('pvc.data.Dimension')
             return 0;
         }
         
-        // if value != 0 => sum != 0, but JIC, we test for not 0...
+        // if no parent, we're the root and so we're 100%
         var parentData = this.data.parent;
         if(!parentData) {
-            return 0;
+            return 1;
         }
 
         // The following would not work because, in each group,

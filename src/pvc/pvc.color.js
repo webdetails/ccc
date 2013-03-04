@@ -186,7 +186,7 @@ def.scope(function(){
        
         _getRange: function(){
             var keyArgs = this.keyArgs,
-                range = keyArgs.colors || ['red', 'yellow','green'];
+                range = keyArgs.colors || ['red', 'yellow', 'green'];
        
             if(keyArgs.colorMin != null && keyArgs.colorMax != null){
                

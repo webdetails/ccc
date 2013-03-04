@@ -317,17 +317,17 @@ def.type('pvc.visual.Scene')
         return !!this.root._active;
     },
     
-    active: function(){
+    active: function() {
         return this.root._active;
     },
     
-    activeSeries: function(){
+    activeSeries: function() {
         var active = this.active();
         var seriesVar;
         return active && (seriesVar = active.vars.series) && seriesVar.value;
     },
     
-    isActiveSeries: function(){
+    isActiveSeries: function() {
         if(this.isActive){
             return true;
         }
@@ -344,18 +344,18 @@ def.type('pvc.visual.Scene')
         return isActiveSeries;
     },
 
-    isActiveDatum: function(){
+    isActiveDatum: function() {
 
-        if(this.isActive){
+        if(this.isActive) {
             return true;
         }
 
         // Only testing the first datum of both because of performance
         // so, unless they have the same group or the  order of datums is the same...
         var isActiveDatum = this.renderState.isActiveDatum;
-        if(isActiveDatum == null){
+        if(isActiveDatum == null) {
             var activeScene = this.active();
-            if(activeScene){
+            if(activeScene) {
                 isActiveDatum = (this.group && activeScene.group === this.group) ||
                                 (this.datum && activeScene.datum === this.datum);
             } else {
@@ -366,6 +366,30 @@ def.type('pvc.visual.Scene')
         }
         
         return isActiveDatum;
+    },
+    
+    isActiveDescendantOrSelf: function(){
+        if(this.isActive){ return true; }
+        
+        var state = this.renderState;
+        var isActiveDescOrSelf = state.isActiveDescOrSelf;
+        if(isActiveDescOrSelf == null) {
+            isActiveDescOrSelf = 
+               state.isActiveDescOrSelf =
+               this._calcIsActiveDescOrSelf();
+        }
+        
+        return isActiveDescOrSelf;
+    },
+    
+    _calcIsActiveDescOrSelf: function(){
+        var scene = this.active();
+        if(scene) {
+            while((scene = scene.parent)) {
+                if(scene === this) { return true; }
+            }
+        }
+        return false;
     },
     
     /* SELECTION */

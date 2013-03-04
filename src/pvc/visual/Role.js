@@ -149,6 +149,7 @@ def.type('pvc.visual.Role')
     isReversed: false,
     label: null,
     sourceRole: null,
+    isDefaultSourceRole: false,
     
     /** 
      * Obtains the first dimension type that is bound to the role.
@@ -182,8 +183,9 @@ def.type('pvc.visual.Role')
         return g && g.isDiscrete();
     },
     
-    setSourceRole: function(sourceRole){
+    setSourceRole: function(sourceRole, isDefault){
         this.sourceRole = sourceRole;
+        this.isDefaultSourceRole = !!isDefault;
     },
     
     setIsReversed: function(isReversed){

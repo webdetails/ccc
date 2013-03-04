@@ -80,7 +80,7 @@ def
         
         /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
          * because it is needed to read axis options in the root chart.
-         * Also binding occurs to be able to know its scale type. 
+         * ??Also binding occurs to be able to know its scale type.?? 
          * Yet, their scales are not setup at the root level.
          */
         

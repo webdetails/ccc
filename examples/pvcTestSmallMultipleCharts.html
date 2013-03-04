@@ -81,6 +81,7 @@
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemSceneVisibility.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemRenderer.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/legend/BulletItemDefaultRenderer.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/DataCell.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/Plot.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/CartesianPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/CategoricalPlot.js"></script>
@@ -95,6 +96,8 @@
         <script type="text/javascript" src="../src/pvc/visual/plot/HeatGridPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/BoxPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/visual/plot/BulletPlot.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/dataCell/TreemapColorDataCell.js"></script>
+        <script type="text/javascript" src="../src/pvc/visual/plot/TreemapPlot.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcAbstract.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBaseChart.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBaseChart.visualRoles.js"></script>
@@ -144,6 +147,9 @@
         <script type="text/javascript" src="../src/pvc/data/translation/BoxplotChartTranslationOper.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBoxplotPanel.js"></script>
         <script type="text/javascript" src="../src/pvc/pvcBoxplotChart.js"></script>
+        <script type="text/javascript" src="../src/pvc/data/translation/TreemapChartTranslationOper.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTreemapPanel.js"></script>
+        <script type="text/javascript" src="../src/pvc/pvcTreemapChart.js"></script>
         <!-- @SCRIPTSEND@ -->
     
         <link type="text/css" rel="stylesheet" href="pvcDocUtils.css"/>
@@ -364,7 +370,8 @@
                 originIsZero: false,
                 
                 linesVisible:  false,
-                valuesVisible: false,
+                //valuesVisible:  true,
+                //valuesMask: "{#pline} {#esales}",
                 axisGrid: true,
                 
                 /* Visual Role mapping */

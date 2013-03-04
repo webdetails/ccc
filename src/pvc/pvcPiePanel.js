@@ -37,7 +37,7 @@
  * }
  */
 def
-.type('pvc.PieChartPanel', pvc.PlotPanel)
+.type('pvc.PiePanel', pvc.PlotPanel)
 .init(function(chart, parent, plot, options){
     
     // Before base, just to bring to attention that ValuesMask depends on it
@@ -187,7 +187,7 @@ def
      */
     _createCore: function(layoutInfo) {
         var myself = this;
-        var chart = this.chart;
+        var chart = myself.chart;
         var rootScene = this._buildScene();
         var center = layoutInfo.center;
         var normalRadius = layoutInfo.normalRadius;
@@ -273,8 +273,10 @@ def
                         return (scene.vars.value.angle >= 0.001) &&
                                this.delegateExtension(true);
                     })
+                    .override('defaultText', function(){
+                        return this.scene.vars.value.sliceLabel; 
+                    })
                     .pvMark
-                    .text(function(scene){ return scene.vars.value.sliceLabel; })
                     .textMargin(10);
             
             } else if(this.labelStyle === 'linked') {
@@ -405,8 +407,8 @@ def
     },
     
     _getExtensionId: function(){
-        // chart is deprecated
-        // content coincides, visually in this chart type
+        // 'chart' is deprecated
+        // 'content' coincides, visually, with 'plot', in this chart type
         // - actually it shares the same panel...
         
         var extensionIds = [{abs: 'content'}];

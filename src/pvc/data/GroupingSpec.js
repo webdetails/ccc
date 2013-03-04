@@ -333,6 +333,7 @@ def.type('pvc.data.GroupingLevelSpec')
         var keySep   = datum.owner.keySep;
         
         // This builds a key compatible with that of pvc.data.Complex#key
+        // See also pvc.data.Complex.compositeKey
         for(var i = 0, D = this.depth ; i < D ; i++) {
             var dimName = dimNames[i];
             var atom = datoms[dimName];

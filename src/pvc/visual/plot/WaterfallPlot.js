@@ -11,6 +11,7 @@ def.scope(function(){
     .type('pvc.visual.WaterfallPlot', pvc.visual.BarPlotAbstract)
     .add({
         type: 'water',
+        
         _getOptionsDefinition: function(){
             return pvc.visual.WaterfallPlot.optionsDef;
         }

@@ -39,8 +39,12 @@ def
     this.roleVarName = roleVarName;
     
     rootScene['is' + def.firstUpperCase(roleVarName) + 'Bound'] = !!g;
+    
+    if(def.get(keyArgs, 'allowNestedVars')){ this.allowNestedVars = true; }
 })
 .add({
+    allowNestedVars: false,
+    
     isBound: function(){
         return !!this.grouping;
     },
@@ -51,7 +55,9 @@ def
         }
         
         var roleVarName = this.roleVarName;
-        if(scene.vars[roleVarName]){
+        if(this.allowNestedVars ? 
+            def.hasOwnProp.call(scene.vars, roleVarName) : 
+            scene.vars[roleVarName]){
             return;
         }
         

@@ -1037,21 +1037,66 @@ var testWaterfall1 = {
     }],
     "resultset": [
         ["USA",    'Kansas',     null,         100,  600],
+        
         ["USA",    'New York',   'Fair',       500,  600],
         ["USA",    'New York',   'Restaurant', 200,  100],
         ["USA",    'New York',   'House',      100,  200],
+        
         ["USA",    'Idaho',      'Farm',       200,  100],
-        ["USA",    'Idaho',      'Fair',       500,  600],
+        ["USA",    'Idaho',      'Fairy',      500,  600],
         ["USA",    'Idaho',      'House',      400,  100],
         ["USA",    'Idaho',      'Grocery',    200,  300],
+        
         ["Europe", null,         null,         400,  300],
+        
         ["RoW",    "Japan",      null,         100,   75],
         ["RoW",    "China",      null,         100,   25],
         ["RoW",    "S. America", null,          50,   80],
-        ["RoW",    "MEA",        null,          25,   80],
+        ["RoW",    "India",      null,          25,   80],
         ["RoW",    "Mexico",     null,          25,   40]
     ]
 };
+
+var testTreemap1 = {
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "Territory"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Region"
+    }, {
+        "colIndex": 2,
+        "colType": "String",
+        "colName": "Market"
+    }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "Product A"
+    }],
+    "resultset": [
+        ["USA",    'Kansas',     null,         100],
+        
+        ["USA",    'New York',   'Fair',       500],
+        ["USA",    'New York',   'Restaurant', 200],
+        ["USA",    'New York',   'House',      100],
+        
+        ["USA",    'Idaho',      'Farm',       200],
+        ["USA",    'Idaho',      'Fairy',      500],
+        ["USA",    'Idaho',      'House',      400],
+        ["USA",    'Idaho',      'Grocery',    200],
+        
+        ["Europe", null,         null,         400],
+        
+        ["RoW",    "Japan",      null,         100],
+        ["RoW",    "China",      null,         100],
+        ["RoW",    "S. America", null,          50],
+        ["RoW",    "India",      null,          25],
+        ["RoW",    "Mexico",     null,          25]
+    ]
+};
+
 
 var testWaterfall1Neg = {
     "metadata": [{

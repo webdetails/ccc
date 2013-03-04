@@ -18,19 +18,9 @@ def.type('pvc.data.ComplexView', pvc.data.Complex)
     this.source = source;
     
     this.viewDimNames = viewDimNames;
-    
-    /* Collect desired source atoms */
-    var sourceAtoms = source.atoms,
-        ownSourceAtoms = [];
-
-    viewDimNames.forEach(function(dimName){
-        if(def.hasOwnProp.call(sourceAtoms, dimName)){
-            ownSourceAtoms[dimName] = sourceAtoms[dimName];
-        }
-    });
 
     // Call base constructor
-    this.base(source, ownSourceAtoms, viewDimNames, source.owner.atoms, /* wantLabel */ true);
+    this.base(source, source.atoms, viewDimNames, source.owner.atoms, /* wantLabel */ true);
 })
 .add({
     values: function(){

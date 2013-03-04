@@ -174,7 +174,7 @@ def
         var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvBar, {wrapper: wrapper});
         if(label){
             me.pvBarLabel = label.pvMark
-                .visible(function() { //no space for text otherwise
+                .visible(function() { // no space for text otherwise
                     // this === pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
                     

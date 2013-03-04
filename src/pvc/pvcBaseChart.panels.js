@@ -60,9 +60,11 @@ pvc.BaseChart
         this._initBasePanel  ();
         this._initTitlePanel ();
         
+        // null on small charts or when not enabled
         var legendPanel = this._initLegendPanel();
         
-        if(!this.parent && hasMultiRole) {
+        // Is multi-chart root?
+        if(hasMultiRole && !this.parent) {
             this._initMultiChartPanel();
             
             if(legendPanel){
@@ -143,7 +145,7 @@ pvc.BaseChart
     _initLegendPanel: function(){
         var options = this.options;
         // global legend(s) switch
-        if (options.legend) {
+        if (options.legend) { // legend is disabled on small charts...
 
             var legend = new pvc.visual.Legend(this, 'legend', 0);
             
@@ -196,6 +198,8 @@ pvc.BaseChart
         
         // BIG HACK: force legend to be rendered after the small charts, 
         // to allow them to register legend renderers.
+        // Currently is: Title -> Legend -> MultiChart
+        // Changes to: MultiChart -> Title -> Legend
         basePanel._children.unshift(basePanel._children.pop());
     },
     
@@ -227,22 +231,26 @@ pvc.BaseChart
         
         // ------------
 
-        function processAxis(colorAxis){
-            if(colorAxis.option('LegendVisible')){
+        function processAxis(colorAxis) {
+            if(colorAxis.option('LegendVisible')) {
                 var dataCells = colorAxis && colorAxis.dataCells;
-                if(dataCells){
+                if(dataCells) {
+                    var isToggleVisible = colorAxis.option('LegendClickMode') === 'togglevisible';
+                    
                     dataCells
-                    .forEach(function(dataCell){
-                        if(dataCell.role.isDiscrete()){
-                            var domainData = dataCell.data;
+                    .forEach(function(dataCell) {
+                        if(dataCell.role.isDiscrete()) {
+                            var domainData = dataCell.domainData();
                             
                             if(!rootScene){
                                 dataPartDimName = this._getDataPartDimName();
                                 rootScene = legendPanel._getBulletRootScene();
                             }
                             
+                            // Trend series cannot be set to invisible.
+                            // They are created each time that visible changes... 
                             var dataPartAtom;
-                            var locked = colorAxis.option('LegendClickMode') === 'togglevisible' && 
+                            var locked = isToggleVisible && 
                                          (dataPartAtom = domainData.atoms[dataPartDimName]) && 
                                          dataPartAtom.value === 'trend';
                             
@@ -258,14 +266,13 @@ pvc.BaseChart
                             
                             var partColorScale = colorAxis.scale;
                             
-                            domainData
-                                .children()
-                                .each(function(itemData){
-                                    var itemScene = groupScene.createItem({source: itemData});
-                                    
-                                    // HACK...
-                                    itemScene.color = partColorScale(itemData.value);
-                                });
+                            dataCell.domainItemDatas().each(function(itemData) {
+                                var itemScene = groupScene.createItem({source: itemData});
+                                
+                                // TODO: HACK...
+                                itemScene.color = 
+                                    partColorScale(dataCell.domainItemDataValue(itemData));
+                            });
                         }
                     }, this);
                 }
