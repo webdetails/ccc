@@ -2,7 +2,7 @@
 def
 .type('pvc.TreemapChart', pvc.BaseChart)
 .add({
-    _animatable: true,
+    _animatable: false,
 
     _getColorRoleSpec: function(){
         return { 
@@ -11,15 +11,6 @@ def
             defaultDimension: 'color*'
             /*, requireIsDiscrete: true*/ 
         };
-    },
-    
-
-    _processOptionsCore: function(options){
-        
-        this.base(options);
-        
-        // NOT YET supported...
-        //options.legend = false;
     },
     
     _initVisualRoles: function(){
@@ -64,7 +55,12 @@ def
     },
     
     _initPlotsCore: function(/*hasMultiRole*/){
-        new pvc.visual.TreemapPlot(this);
+        var treemapPlot = new pvc.visual.TreemapPlot(this);
+        
+        if(this.options.legend == null) {
+            // Only show the legend by default if color mode is by-parent
+            this.options.legend = treemapPlot.option('ColorMode') === 'by-parent';
+        }
     },
     
     _preRenderContent: function(contentOptions) {
@@ -85,5 +81,9 @@ def
         return this
             .visualRoles('category')
             .select(visibleData, {visible: true, isNull: ignoreNulls ? false : null});
+    },
+    
+    defaults: {
+        legend: null  // dynamic default, when nully
     }
 });

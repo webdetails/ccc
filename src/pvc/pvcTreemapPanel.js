@@ -53,7 +53,10 @@ def
             .height(function(n) { return n.dy - lw;  });
         
         var colorScaleDirect = this.axes.color.sceneScale({sceneVarName: 'color'});
-        var colorScaleLeaf   = colorScaleDirect.by(function(s){ return s.parent; });
+        var colorScaleLeaf   = colorScaleDirect;
+        if(this.plot.option('ColorMode') === 'by-parent'){
+            colorScaleLeaf = colorScaleLeaf.by(function(s){ return s.parent; });
+        }
         
         // ------------------
         

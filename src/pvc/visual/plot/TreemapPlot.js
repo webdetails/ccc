@@ -77,6 +77,12 @@ def.scope(function(){
                 resolve: '_resolveFull',
                 cast:  String, // TODO: parse
                 value: 'squarify' //'slice-and-dice'
+            },
+            
+            ColorMode: {
+                resolve: '_resolveFull',
+                cast: String, // TODO: parse
+                value: 'by-parent'
             }
         });
 });

@@ -2361,6 +2361,10 @@ def.type('Query')
     select: function(fun, ctx){
         return new def.SelectQuery(this, fun, ctx);
     },
+    
+    prop: function(p){
+        return new def.SelectQuery(this, function(item) { if(item) { return item[p]; }});
+    },
 
     selectMany: function(fun, ctx){
         return new def.SelectManyQuery(this, fun, ctx);
