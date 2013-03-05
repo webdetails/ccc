@@ -6,7 +6,7 @@ CGG=../cgg/
 CCC_JS=dist/ccc/
 
 CDF_JS=${CDF}bi-platform-v2-plugin/cdf/js/lib/CCC/
-CGG_JS=${CGG}resources/libs/
+CGG_JS=${CGG}cgg-core/src/pt/webdetails/cgg/resources/
 
 # CDF
 cp -f ${CCC_JS}def.js ${CDF_JS}def-2.0.js
