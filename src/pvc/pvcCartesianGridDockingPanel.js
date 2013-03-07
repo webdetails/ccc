@@ -613,7 +613,7 @@ def
             var isEnd = ev.drag.phase === 'end';
             
             // Prevent tooltips and hovers
-            topRoot._isRubberBandSelecting = !isEnd;
+            topRoot._selectingByRubberband = !isEnd;
             
             baseBgPanel.render();
             baseFgPanel.render();

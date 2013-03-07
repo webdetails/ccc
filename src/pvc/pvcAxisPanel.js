@@ -647,6 +647,16 @@ def
         // measured perpendicularly to the label text direction.
         var sMin = h * this.labelSpacingMin; /* parameter in em */
         
+        var sMinH = sMin; // Between baselines
+        
+        // Horizontal distance between labels' text is easily taken
+        // to the distance between words a the same label.
+        // Vertically, it is much easier to differentiate different lines.
+        // So the minimum horizontal space between labels has the length
+        // a white space character, and sMin is the additional required spacing.
+        var spaceW = pv.Text.measure('x', this.font).width;
+        var sMinW  = spaceW + sMin; // Between sides (orthogonal to baseline)
+        
         // The angle that the text makes to the x axis (clockwise,y points downwards) 
         var a = li.textAngle;
         
@@ -679,8 +689,8 @@ def
         var sinOrCos = Math.abs( Math[isH ? 'sin' : 'cos'](a) );
         var cosOrSin = Math.abs( Math[isH ? 'cos' : 'sin'](a) );
         
-        var timh = sinOrCos < 1e-8 ? Infinity : Math.ceil((sMin + h) / (b * sinOrCos));
-        var timw = cosOrSin < 1e-8 ? Infinity : Math.ceil((sMin + w) / (b * cosOrSin));
+        var timh = sinOrCos < 1e-8 ? Infinity : Math.ceil((sMinH + h) / (b * sinOrCos));
+        var timw = cosOrSin < 1e-8 ? Infinity : Math.ceil((sMinW + w) / (b * cosOrSin));
         var tim  = Math.min(timh, timw);
         if(!isFinite(tim) || tim < 1 || Math.ceil(tickCount / tim) < 2) {
             tim = 1;
@@ -835,12 +845,12 @@ def
             desiredTickCount += dir;
         } while(true);
         
-        if(ticksInfo){
+        if(ticksInfo) {
             layoutInfo.ticks = ticksInfo.ticks;
             layoutInfo.ticksText = ticksInfo.ticksText;
             layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
             
-            if(pvc.debug >= 5){
+            if(pvc.debug >= 5) {
                 this._log("calculateNumberHTicks RESULT error=" + (ticksInfo.excessLength >= 0 ? "+" : "-") + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
             }
         }
@@ -886,9 +896,7 @@ def
     },
     
     _createCore: function() {
-        if(this.scale.isNull){
-            return;
-        }
+        if(this.scale.isNull) { return; }
         
         // Range
         var clientSize = this._layoutInfo.clientSize;
@@ -1217,31 +1225,31 @@ def
     },
     
     /** @override */
-    _getTooltipBuilder: function(tipOptions){
+    _getTooltipFormatter: function(tipOptions) {
         if(this.axis.option('TooltipEnabled')) {
             
             tipOptions.gravity = this._calcTipsyGravity();
             
             var tooltipFormat = this.axis.option('TooltipFormat');
             if(tooltipFormat) {
-                return function(context){
+                return function(context) {
                     return tooltipFormat.call(context, context.scene);
                 };
             }
             
             var autoContent = this.axis.option('TooltipAutoContent');
             if(autoContent === 'summary') {
-                return this._buildDataTooltip;
+                return this._summaryTooltipFormatter;
             }
             
             if(autoContent === 'value') {
                 tipOptions.isLazy = false;
-                return function(context){ return context.scene.vars.tick.label; };
+                return function(context) { return context.scene.vars.tick.label; };
             }
         }
     },
     
-    _debugTicksPanel: function(pvTicksPanel){
+    _debugTicksPanel: function(pvTicksPanel) {
         if(pvc.debug >= 16){ // one more than general debug box model
             var font = this.font;
             var li = this._layoutInfo;

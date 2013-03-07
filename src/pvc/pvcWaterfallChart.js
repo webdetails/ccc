@@ -62,7 +62,7 @@ def
         this._isFalling = waterPlot.option('Direction') === 'down';
         
         this._catRole.setFlatteningMode(this._isFalling ? 'tree-pre' : 'tree-post');
-        this._catRole.setFlattenRootLabel(waterPlot.option('AllCategoryLabel'));
+        this._catRole.setRootLabel(waterPlot.option('AllCategoryLabel'));
     },
     
     _initLegendScenes: function(legendPanel){
@@ -70,7 +70,7 @@ def
         var waterPlot = this.plots.water;
         
         var extAbsId = pvc.makeExtensionAbsId('line', waterPlot.extensionPrefixes);
-        var strokeStyle = this._getConstantExtension(extAbsId, "strokeStyle");
+        var strokeStyle = this._getConstantExtension(extAbsId, 'strokeStyle');
         if(strokeStyle){
             this._waterColor = pv.color(strokeStyle);
         }

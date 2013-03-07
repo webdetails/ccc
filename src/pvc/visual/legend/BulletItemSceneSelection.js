@@ -28,15 +28,13 @@ def
      * Returns true if the chart is selectable by clicking. 
      * @type boolean
      */
-    isClickable: function(){
-        return this.chart()._canSelectWithClick();
-    },
+    executable: function() { return this.chart().selectableByClick(); },
     
     /**
      * Toggles the selected state of the datums present in this scene
      * and updates the chart if necessary.
      */
-    click: function(){
+    execute: function(){
         var datums = this.datums().array();
         if(datums.length){
             var chart = this.chart();

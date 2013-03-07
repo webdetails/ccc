@@ -185,7 +185,7 @@ def
     
     ensureLabel: function(){
         var label = this.label;
-        if(label != null){ // TODO: don't think this is being used...
+        if(label == null){
             label = "";
             var labelSep = this.owner.labelSep;
             def.eachOwn(this.atoms, function(atom){

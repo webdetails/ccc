@@ -1,26 +1,24 @@
 
 def.type('pvc.visual.Label', pvc.visual.Sign)
-.init(function(panel, protoMark, keyArgs){
+.init(function(panel, protoMark, keyArgs) {
 
     var pvMark = protoMark.add(pv.Label);
 
     this.base(panel, pvMark, keyArgs);
 })
 .add({
-    _addInteractive: function(keyArgs){
+    _addInteractive: function(keyArgs) {
         var t = true;
         keyArgs = def.setDefaults(keyArgs,
-                        'noSelect',       t,
-                        'noHover',        t,
-                        'noTooltip',      t,
-                        'noClick',        t,
-                        'noDoubleClick',  t,
-                        'showsInteraction',false);
+                        'noSelect',         t,
+                        'noHover',          t,
+                        'noTooltip',        t,
+                        'noClick',          t,
+                        'noDoubleClick',    t,
+                        'showsInteraction', false);
 
         this.base(keyArgs);
     },
     
-    defaultColor: function(/*type*/){
-        return pv.Color.names.black;
-    }
+    defaultColor: def.fun.constant(pv.Color.names.black)
 });

@@ -35,11 +35,11 @@ def.scope(function(){
             this.base._initFromOptions();
         },
         
-        _onAxisChanged: function(axis){
+        _onAxisChanged: function(axis) {
             // Fire event
             var changed = this.option('Changed');
-            if(changed){
-                changed.call(this.chart.basePanel._getContext());
+            if(changed) {
+                changed.call(this.chart.basePanel.context());
             }
         }
     });

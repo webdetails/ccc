@@ -76,7 +76,7 @@ def
 
         /* Cell panel */
         var extensionIds = ['panel'];
-        if(isV1Compat){
+        if(isV1Compat) {
             extensionIds.push(''); // let access as "heatGrid_"
         }
 
@@ -144,9 +144,7 @@ def
     },
 
     _buildSignsWrapper: function(rootScene){
-        if(this.compatVersion() > 1){
-            return null;
-        }
+        if(this.compatVersion() > 1){ return null; }
 
         var colorValuesBySerAndCat =
             def
@@ -321,7 +319,7 @@ def
     _buildShapesTooltipArgs: function(hasColor, hasSize){
         var chart = this.chart;
 
-        if(this.compatVersion <= 1 && chart._tooltipEnabled){
+        if(this.compatVersion() <= 1 && this.showsTooltip()){
             var options = chart.options;
             var customTooltip = options.customTooltip;
             if(!customTooltip){

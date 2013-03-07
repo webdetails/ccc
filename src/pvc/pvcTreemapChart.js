@@ -61,6 +61,10 @@ def
             // Only show the legend by default if color mode is by-parent
             this.options.legend = treemapPlot.option('ColorMode') === 'by-parent';
         }
+        
+        var rootCategoryLabel = treemapPlot.option('RootCategoryLabel');
+        this.visualRoles('category').setRootLabel(rootCategoryLabel);
+        this.visualRoles('color'   ).setRootLabel(rootCategoryLabel);
     },
     
     _preRenderContent: function(contentOptions) {

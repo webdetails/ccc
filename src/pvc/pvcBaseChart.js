@@ -3,6 +3,7 @@
  */
 def
 .type('pvc.BaseChart', pvc.Abstract)
+.add(pvc.visual.Interactive)
 .init(function(options) {
     var originalOptions = options;
     
@@ -18,11 +19,8 @@ def
 
     if(parent) {
         this.root = parent.root;
-        this.smallColIndex = options.smallColIndex; // required for the logId msk, setup in base
-        this.smallRowIndex = options.smallRowIndex;
-
-        this._tooltipEnabled = parent._tooltipEnabled;
-        this._tooltipOptions = parent._tooltipOptions;
+        this.smallColIndex   = options.smallColIndex; // required for the logId msk, setup in base
+        this.smallRowIndex   = options.smallRowIndex;
     } else {
         this.root = this;
     }
@@ -43,9 +41,7 @@ def
         }
     }
     
-    if(parent){
-         parent._addChild(this);
-    }
+    if(parent) { parent._addChild(this); }
 
     this._constructData(options);
     this._constructVisualRoles(options);
@@ -173,11 +169,9 @@ def
     _allowV1SecondAxis: false, 
         
     //------------------
-    compatVersion: function(options){
-        return (options || this.options).compatVersion;
-    },
+    compatVersion: function(options) { return (options || this.options).compatVersion; },
     
-    _createLogInstanceId: function(){
+    _createLogInstanceId: function() {
         return "" + 
             this.constructor + this._createLogChildSuffix();
     },
@@ -313,9 +307,9 @@ def
         }
     },
     
-    _setProp: function(p, keyArgs){
+    _setProp: function(p, keyArgs) {
         var v = keyArgs[p];
-        if(v != null){
+        if(v != null) {
             this[p] = v;
             return true;
         }
@@ -329,17 +323,16 @@ def
      * performs validations and
      * options values implications.
      */
-    _processOptions: function(){
-        
+    _processOptions: function() {
         var options = this.options;
-        if(!this.parent){
+        if(!this.parent) {
             this.width    = options.width; 
             this.height   = options.height;
             this.margins  = options.margins;
             this.paddings = options.paddings;
         }
         
-        if(this.compatVersion() <= 1){
+        if(this.compatVersion() <= 1) {
             options.plot2 = this._allowV1SecondAxis && !!options.secondAxis;
         }
         
@@ -359,27 +352,48 @@ def
      * its successive application should yield the same results.
      * @virtual
      */
-    _processOptionsCore: function(options){
-        // Disable animation if environment doesn't support it
-        if(!this.parent){
+    _processOptionsCore: function(options) {
+        if(!this.parent) {
             var interactive = options.interactive;
-            if(interactive == null){
-                interactive = options.interactive = (pv.renderer() !== 'batik');
-            }
+            if(interactive == null) { interactive = (pv.renderer() !== 'batik'); }
             
-            if(!interactive){
-                options.animated = 
-                options.tooltipEnabled = 
-                options.selectable = 
-                options.hoverable =
-                options.clickable = false;
+            var ibits;
+            if(!interactive) {
+                ibits = 0;
             } else {
-                if (!$.support.svg) {
-                    options.animate = false;
+                var I = pvc.visual.Interactive;
+                
+                ibits = I.Interactive | I.ShowsInteraction;
+                
+                if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
+                if(options.animate && $.support.svg) { ibits |= I.Animatable; }
+                
+                if(options.selectable) {
+                    ibits |= I.Selectable;
+                    
+                    switch(pvc.parseSelectionMode(options.selectionMode)) {
+                        case 'rubberband':
+                            ibits |= (I.SelectableByRubberband | I.SelectableByClick); 
+                            break;
+                            
+                        case 'focuswindow':
+                            ibits |= I.SelectableByFocusWindow; 
+                            break;
+                    }
                 }
+                
+                if(pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
+                    ibits |= I.Unselectable;
+                }
+                
+                if(options.hoverable) { ibits |= I.Hoverable; }
+                if(options.clickable) { ibits |= (I.Clickable | I.DoubleClickable); }
             }
             
-            this._processTooltipOptions(options);
+            this._ibits = ibits;
+        } else {
+            this._ibits = this.parent._ibits;
+            this._tooltipOptions = this.parent._tooltipOptions;
         }
     },
     
@@ -397,41 +411,32 @@ def
         format:       undefined
     },
     
-    _processTooltipOptions: function(options){
+    _processTooltipOptions: function(options) {
         var isV1Compat = this.compatVersion() <= 1;
-        
         var tipOptions = options.tooltip;
         var tipEnabled = options.tooltipEnabled;
-        if(tipEnabled == null){
-            if(tipOptions) {
-                tipEnabled = tipOptions.enabled;
-            }
+        if(tipEnabled == null) {
+            if(tipOptions) { tipEnabled = tipOptions.enabled; }
             
             if(tipEnabled == null) {
-                if(isV1Compat){
-                    tipEnabled = options.showTooltips;
-                }
+                if(isV1Compat) { tipEnabled = options.showTooltips; }
                 
-                if(tipEnabled == null){
-                    tipEnabled = true;
+                if(tipEnabled == null) { 
+                    tipEnabled = true; 
                 }
             }
         }
         
-        if(tipEnabled){
-            if(!tipOptions){
-                tipOptions = {};
-            }
+        if(tipEnabled) {
+            if(!tipOptions) { tipOptions = {}; }
             
-            if(isV1Compat){
-                this._importV1TooltipOptions(tipOptions, options);
-            }
+            if(isV1Compat) { this._importV1TooltipOptions(tipOptions, options); }
             
-            def.eachOwn(this._tooltipDefaults, function(dv, p){
+            def.eachOwn(this._tooltipDefaults, function(dv, p) {
                 var value = options['tooltip' + def.firstUpperCase(p)];
-                if(value !== undefined){
+                if(value !== undefined) {
                     tipOptions[p] = value;
-                } else if(tipOptions[p] === undefined){
+                } else if(tipOptions[p] === undefined) {
                     tipOptions[p] = dv;
                 }
             });
@@ -439,25 +444,24 @@ def
             tipOptions = {};
         }
         
-        this._tooltipEnabled = tipEnabled;
         this._tooltipOptions = tipOptions;
+        
+        return tipEnabled;
     },
     
-    _importV1TooltipOptions: function(tipOptions, options){
+    _importV1TooltipOptions: function(tipOptions, options) {
         var v1TipOptions = options.tipsySettings;
-        if(v1TipOptions){
-            this.extend(v1TipOptions, "tooltip");
+        if(v1TipOptions) {
+            this.extend(v1TipOptions, 'tooltip');
             
-            for(var p in v1TipOptions){
-                if(tipOptions[p] === undefined){
+            for(var p in v1TipOptions) {
+                if(tipOptions[p] === undefined) {
                     tipOptions[p] = v1TipOptions[p];
                 }
             }
             
             // Force V1 html default
-            if(tipOptions.html == null){
-                tipOptions.html = false;
-            }
+            if(tipOptions.html == null) { tipOptions.html = false; }
         }
     },
     
@@ -467,22 +471,20 @@ def
      * Render the visualization.
      * If not pre-rendered, do it now.
      */
-    render: function(bypassAnimation, recreate, reloadData){
+    render: function(bypassAnimation, recreate, reloadData) {
         var hasError;
         
         /*global console:true*/
-        if(pvc.debug > 1){
-            pvc.group("CCC RENDER");
-        }
+        if(pvc.debug > 1) { pvc.group("CCC RENDER"); }
         
         // Don't let selection change events to fire before the render is finished
         this._suspendSelectionUpdate();
-        try{
-            this.useTextMeasureCache(function(){
-                try{
-                    if (!this.isPreRendered || recreate){
+        try {
+            this.useTextMeasureCache(function() {
+                try {
+                    if (!this.isPreRendered || recreate) {
                         this._preRender({reloadData: reloadData});
-                    } else if(!this.parent && this.isPreRendered){
+                    } else if(!this.parent && this.isPreRendered) {
                         pvc.removeTipsyLegends();
                     }
                     
@@ -494,9 +496,7 @@ def
                 } catch (e) {
                     /*global NoDataException:true*/
                     if (e instanceof NoDataException) {
-                        if(pvc.debug > 1){
-                            this._log("No data found.");
-                        }
+                        if(pvc.debug > 1){ this._log("No data found."); }
 
                         this._addErrorPanelMessage("No data found", true);
                     } else {
@@ -513,19 +513,15 @@ def
                 }
             });
         } finally {
-            if(!hasError){
-                this._resumeSelectionUpdate();
-            }
+            if(!hasError){ this._resumeSelectionUpdate(); }
             
-            if(pvc.debug > 1){
-                pvc.groupEnd();
-            }
+            if(pvc.debug > 1) { pvc.groupEnd(); }
         }
         
         return this;
     },
 
-    _addErrorPanelMessage: function(text, isNoData){
+    _addErrorPanelMessage: function(text, isNoData) {
         var options = this.options,
             pvPanel = new pv.Panel()
                         .canvas(options.canvas)
@@ -534,14 +530,12 @@ def
             pvMsg = pvPanel.anchor("center").add(pv.Label)
                         .text(text);
 
-        if(isNoData){
-            this.extend(pvMsg, "noDataMessage");
-        }
+        if(isNoData) { this.extend(pvMsg, "noDataMessage"); }
         
         pvPanel.render();
     },
     
-    useTextMeasureCache: function(fun, ctx){
+    useTextMeasureCache: function(fun, ctx) {
         var root = this.root;
         var textMeasureCache = root._textMeasureCache || 
                                (root._textMeasureCache = pv.Text.createCache());
@@ -552,9 +546,7 @@ def
     /**
      * Animation
      */
-    animate: function(start, end) {
-        return this.basePanel.animate(start, end);
-    },
+    animate: function(start, end) { return this.basePanel.animate(start, end); },
     
     /**
      * Indicates if the chart is currently 
@@ -567,9 +559,7 @@ def
      * 
      * @type boolean
      */
-    isAnimatingStart: function() {
-        return this.basePanel.isAnimatingStart();
-    },
+    animatingStart: function() { return this.basePanel.animatingStart(); },
     
     isOrientationVertical: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.vertical;
@@ -585,7 +575,7 @@ def
     dispose: function(){
         if(!this._disposed){
             
-            // TODO: 
+            // TODO: implement chart dispose
             
             this._disposed = true;
         }

@@ -144,7 +144,7 @@ def.type('pvc.visual.Role')
     defaultDimensionName:  null,
     grouping: null,
     flatteningMode: 'singleLevel',
-    flattenRootLabel: '',
+    rootLabel: '',
     autoCreateDimension: false,
     isReversed: false,
     label: null,
@@ -196,19 +196,20 @@ def.type('pvc.visual.Role')
         }
     },
     
-    setFlatteningMode: function(flatteningMode){
-        if(!flatteningMode || flatteningMode === 'singleLevel'){ // default value
+    setFlatteningMode: function(flatteningMode) {
+        if(!flatteningMode || flatteningMode === 'singleLevel') { // default value
             delete this.flatteningMode;
         } else {
             this.flatteningMode = flatteningMode;
         }
     },
 
-    setFlattenRootLabel: function(flattenRootLabel){
-        if(!flattenRootLabel){ // default value
-            delete this.flattenRootLabel;
-        } else {
-            this.flattenRootLabel = flattenRootLabel;
+    setRootLabel: function(rootLabel) {
+        if(rootLabel !== this.rootLabel) {
+            if(!rootLabel) { delete this.rootLabel;      } // default value shows through 
+            else           { this.rootLabel = rootLabel; }
+            
+            if(this.grouping) { this._updateBind(this.grouping); }
         }
     },
 
@@ -222,35 +223,25 @@ def.type('pvc.visual.Role')
      * 
      * @type pvc.data.Data
      */
-    flatten: function(data, keyArgs){
-        if(this.grouping){
-            return data.flattenBy(this, keyArgs);
-        }
-    },
+    flatten: function(data, keyArgs) { if(this.grouping) { return data.flattenBy(this, keyArgs); } },
 
-    flattenedGrouping: function(keyArgs){
+    flattenedGrouping: function(keyArgs) {
         var grouping = this.grouping;
-        if(grouping){
-            keyArgs = def.setDefaults(keyArgs,
-                'flatteningMode', this.flatteningMode,
-                'flattenRootLabel', this.flattenRootLabel);
+        if(grouping) {
+            keyArgs = def.setDefaults(keyArgs, 'flatteningMode', this.flatteningMode);
 
             return grouping.ensure(keyArgs);
         }
     },
 
-    select: function(data, keyArgs){
+    select: function(data, keyArgs) {
         var grouping = this.grouping;
-        if(grouping){
-            return data.groupBy(grouping.ensure(keyArgs), keyArgs);
-        }
+        if(grouping) { return data.groupBy(grouping.ensure(keyArgs), keyArgs); }
     },
 
-    view: function(complex){
+    view: function(complex) {
         var grouping = this.grouping;
-        if(grouping){
-            return grouping.view(complex);
-        }
+        if(grouping){ return grouping.view(complex); }
     },
 
     /**
@@ -258,23 +249,17 @@ def.type('pvc.visual.Role')
      * 
      * @param {pvc.data.GroupingSpec} groupingSpec The grouping specification of the visual role.
      */
-    preBind: function(groupingSpec){
+    preBind: function(groupingSpec) {
         this.__grouping = groupingSpec;
 
         return this;
     },
 
-    isPreBound: function(){
-        return !!this.__grouping;
-    },
+    isPreBound: function() { return !!this.__grouping; },
     
-    preBoundGrouping: function(){
-        return this.__grouping;
-    },
+    preBoundGrouping: function() { return this.__grouping; },
     
-    isBound: function(){
-        return !!this.grouping;
-    },
+    isBound: function() { return !!this.grouping; },
     
     /**
      * Finalizes a binding initiated with {@link #preBind}.
@@ -283,9 +268,9 @@ def.type('pvc.visual.Role')
      * to bind the pre-bound grouping and then validate the
      * grouping and role binding.
      */
-    postBind: function(type){
+    postBind: function(type) {
         var grouping = this.__grouping;
-        if(grouping){
+        if(grouping) {
             delete this.__grouping;
 
             grouping.bind(type);
@@ -301,9 +286,18 @@ def.type('pvc.visual.Role')
      * 
      * @param {pvc.data.GroupingSpec} groupingSpec The grouping specification of the visual role.
      */
-    bind: function(groupingSpec){
+    bind: function(groupingSpec) {
+        
+        groupingSpec = this._validateBind(groupingSpec);
+        
+        this._updateBind(groupingSpec);
+
+        return this;
+    },
+    
+    _validateBind: function(groupingSpec) {
         if(groupingSpec) {
-            if(groupingSpec.isNull()){
+            if(groupingSpec.isNull()) {
                 groupingSpec = null;
            } else {
                 /* Validate grouping spec according to role */
@@ -316,7 +310,7 @@ def.type('pvc.visual.Role')
 
                 var valueType = this.valueType;
                 var requireIsDiscrete = this.requireIsDiscrete;
-                groupingSpec.dimensions().each(function(dimSpec){
+                groupingSpec.dimensions().each(function(dimSpec) {
                     var dimType = dimSpec.type;
                     if(valueType && dimType.valueType !== valueType) {
                         throw def.error.operationInvalid(
@@ -327,7 +321,7 @@ def.type('pvc.visual.Role')
                     if(requireIsDiscrete != null &&
                        dimType.isDiscrete !== requireIsDiscrete) {
                         
-                        if(requireIsDiscrete){
+                        if(requireIsDiscrete) {
                             // A continuous dimension can be "coerced" to behave as discrete
                             dimType._toDiscrete();
                         } else {
@@ -340,12 +334,14 @@ def.type('pvc.visual.Role')
             }
         }
         
-        // ----------
-        
+        return groupingSpec;
+    },
+
+    _updateBind: function(groupingSpec) {
         if(this.grouping) {
             // unregister from current dimension types
-            this.grouping.dimensions().each(function(dimSpec){
-                if(dimSpec.type){
+            this.grouping.dimensions().each(function(dimSpec) {
+                if(dimSpec.type) {
                     /*global dimType_removeVisualRole:true */
                     dimType_removeVisualRole.call(dimSpec.type, this);
                 }
@@ -355,18 +351,16 @@ def.type('pvc.visual.Role')
         this.grouping = groupingSpec;
         
         if(this.grouping) {
-            
-            if(this.isReversed){
-                this.grouping = this.grouping.reversed();
-            }
+            this.grouping = this.grouping.ensure({
+                reverse:   this.isReversed, 
+                rootLabel: this.rootLabel
+            });
             
             // register in current dimension types
-            this.grouping.dimensions().each(function(dimSpec){
+            this.grouping.dimensions().each(function(dimSpec) {
                 /*global dimType_addVisualRole:true */
                 dimType_addVisualRole.call(dimSpec.type, this);  
             }, this);
         }
-
-        return this;
     }
 });

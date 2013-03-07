@@ -1089,6 +1089,9 @@ var testTreemap1 = {
         
         ["Europe", null,         null,         400],
         
+        ["Moon",   "Big Valey",  "North Hole", 300],
+        ["Moon",   "Big Valey",  "South Hole", 100],
+        
         ["RoW",    "Japan",      null,         100],
         ["RoW",    "China",      null,         100],
         ["RoW",    "S. America", null,          50],

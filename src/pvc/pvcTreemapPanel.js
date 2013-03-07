@@ -16,14 +16,14 @@ def
         var me = this;
         var cs = layoutInfo.clientSize;
         var rootScene = me._buildScene();
+        if(!rootScene) { return; } // Everything hidden
         
-        var lw  = def.number.to(this._getConstantExtension('leaf', 'lineWidth'), 1);
+        var lw0 = def.number.to(this._getConstantExtension('leaf', 'lineWidth'), 1);
+        var lw  = lw0;
         var lw2 = lw/2;
         
         var sizeProp = me.visualRoles.size.isBound() ?
-            me.axes.size.scale.by(function(s){ 
-                return s.vars.size.value; 
-            }) :
+            me.axes.size.sceneScale({sceneVarName: 'size'}) :
             0;
                 
         var panel = this.pvTreemapPanel = new pvc.visual.Panel(me, me.pvPanel, {
@@ -54,20 +54,22 @@ def
         
         var colorScaleDirect = this.axes.color.sceneScale({sceneVarName: 'color'});
         var colorScaleLeaf   = colorScaleDirect;
-        if(this.plot.option('ColorMode') === 'by-parent'){
+        if(this.plot.option('ColorMode') === 'by-parent') {
             colorScaleLeaf = colorScaleLeaf.by(function(s){ return s.parent; });
         }
         
         // ------------------
         
-        new pvc.visual.Bar(me, panel.leaf, { extensionId: 'leaf' })
+        var pvLeafMark = new pvc.visual.Bar(me, panel.leaf, {extensionId: 'leaf'})
             .lockMark('visible')
-            .override('defaultStrokeWidth', function() { return 2*lw; })
-            .override('defaultColor', function(type){ 
-                return colorScaleLeaf(this.scene); 
-            })
+            .override('defaultColor', function(type) { return colorScaleLeaf(this.scene); })
+            .override('defaultStrokeWidth', function() { return lw0; })
             .pvMark
             .antialias(false)
+            .lineCap('round') // only used by strokeDashArray
+            .strokeDasharray(function(scene) {
+                return scene.vars.size.value < 0 ? 'dash' : null; // Keep this in sync with the style in pvc.sign.DotSizeColor
+            })
             ;
        
         new pvc.visual.Bar(me, panel.node, {
@@ -86,34 +88,49 @@ def
             return this.scene.anyInteraction() ||
                    this.scene.isActiveDescendantOrSelf(); // special kind of interaction
         })
-        .override('defaultStrokeWidth', function() { return 2 * lw; })
+        .override('defaultStrokeWidth', function() { return 1.5 * lw; })
         .override('interactiveStrokeWidth', function(w){
             if(this.showsActivity() && 
-               this.scene.isActiveDescendantOrSelf()){
+               this.scene.isActiveDescendantOrSelf()) {
                w = Math.max(1, w) * 1.5;
             }
             return w;
         })
-        .override('defaultColor',     function(type){ return colorScaleDirect(this.scene); })
-        .override('normalColor',      function(/*color, type*/) { return null; })
+        .override('defaultColor',     function(type) { return colorScaleDirect(this.scene); })
+        .override('normalColor',      def.fun.constant(null))
         .override('interactiveColor', function(color, type) {
-            if(type === 'stroke' && 
-               this.showsActivity() && 
-               this.scene.isActiveDescendantOrSelf()){
-                return pv.color(color).brighter(1.3).alpha(0.7);
+            if(type === 'stroke') {
+                if(this.showsActivity()) {
+                    if(this.scene.isActiveDescendantOrSelf()) {
+                        return pv.color(color).brighter(1.3).alpha(0.7);
+                    }
+                    
+                    if(this.scene.anyActive()) { return null; }
+               }
+                
+               if(this.showsSelection() && this.scene.isSelectedDescendantOrSelf()) {
+                   return pv.color(color).brighter(1.3).alpha(0.7);
+               }
             }
             return null;
         });
         
         var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {noAnchor: true});
-        if(label){
+        if(label) {
             var valuesFont = this.valuesFont;
-            label.override('trimText', function(text) {
+            label
+            .override('trimText', function(text) {
                 // Vertical/Horizontal orientation?
                 var side = this.pvMark.textAngle() ? 'dy' : 'dx';
                 // Add a small margin (2 px)
                 var maxWidth = this.scene[side] - 2;
                 return pvc.text.trimToWidthB(maxWidth, text, valuesFont, "..");
+            })
+            .override('calcBackgroundColor', function(/*type*/) {
+                // Corresponding scene on pvLeafMark sibling mark (rendered before)
+                var pvSiblingScenes = pvLeafMark.scene;
+                var pvLeafScene     = pvSiblingScenes[this.pvMark.index];
+                return pvLeafScene.fillStyle;
             });
         }
     },
@@ -131,10 +148,13 @@ def
     },
     
     _buildScene: function() {
-        var roles = this.visualRoles;
-        
         // Hierarchical data, by categ1 (level1) , categ2 (level2), categ3 (level3),...
         var data = this.visibleData();
+
+        // Everything hidden?
+        if(!data.childCount()) { return null; }
+        
+        var roles = this.visualRoles;
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: data});
         var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size',  allowNestedVars: true, hasPercentSubVar: true});
         //var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color', allowNestedVars: true});

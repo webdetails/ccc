@@ -73,9 +73,7 @@ pvc.BaseChart
         } else {
             var options = this.options;
             
-            if(legendPanel){
-                this._initLegendScenes(legendPanel);
-            }
+            if(legendPanel) { this._initLegendScenes(legendPanel); }
             
             this._preRenderContent({
                 margins:           hasMultiRole ? options.smallContentMargins  : options.contentMargins,
@@ -142,7 +140,7 @@ pvc.BaseChart
      * Creates and initializes the legend panel,
      * if the legend is active.
      */
-    _initLegendPanel: function(){
+    _initLegendPanel: function() {
         var options = this.options;
         // global legend(s) switch
         if (options.legend) { // legend is disabled on small charts...
@@ -175,14 +173,14 @@ pvc.BaseChart
         }
     },
     
-    _getLegendBulletRootScene: function(){
+    _getLegendBulletRootScene: function() {
         return this.legendPanel && this.legendPanel._getBulletRootScene();
     },
     
     /**
      * Creates and initializes the multi-chart panel.
      */
-    _initMultiChartPanel: function(){
+    _initMultiChartPanel: function() {
         var basePanel = this.basePanel;
         var options = this.options;
         
@@ -203,7 +201,7 @@ pvc.BaseChart
         basePanel._children.unshift(basePanel._children.pop());
     },
     
-    _coordinateSmallChartsLayout: function(scopesByType){
+    _coordinateSmallChartsLayout: function(scopesByType) {
         // NOOP
     },
     
@@ -218,16 +216,14 @@ pvc.BaseChart
      * Legend groups are registered with the id prefix "part"
      * followed by the corresponding part value.
      */
-    _initLegendScenes: function(legendPanel){
+    _initLegendScenes: function(legendPanel) {
         
         var rootScene, dataPartDimName;
         var legendIndex = 0; // always start from 0
         
         // For all color axes...
         var colorAxes = this.axesByType.color;
-        if(colorAxes){
-            colorAxes.forEach(processAxis, this);
-        }
+        if(colorAxes){ colorAxes.forEach(processAxis, this); }
         
         // ------------
 

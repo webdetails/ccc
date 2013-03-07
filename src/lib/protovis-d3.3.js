@@ -1,4 +1,4 @@
-// 23da30b1cb17b0a5a2317ce8aebb7b5d61c32a9d
+// 616881d98808d4fdcf8aa45f7a3fae39bb75dce8
 /**
  * @class The built-in Array class.
  * @name Array
@@ -6304,6 +6304,53 @@ pv.Color.prototype.darker = function(k) {
 };
 
 /**
+ * Blends a color with transparency with a given mate color.
+ * Returns an RGB color.
+ * 
+ * @param {pv.Color} [mate='white'] the mate color. Defaults to 'white'. 
+ */
+pv.Color.prototype.alphaBlend = function(mate) {
+  var rgb = this.rgb();
+  var a = rgb.a;
+  if(a === 1){ return this; }
+    
+  if(!mate){ mate = pv.Color.names.white; } else { mate = pv.color(mate); }
+  
+  mate = mate.rgb();
+  
+  var z = (1 - a);
+  return pv.rgb(
+          z * rgb.r + a * mate.r, 
+          z * rgb.g + a * mate.g,
+          z * rgb.b + a * mate.b,
+          1);
+};
+  
+/**
+ * Returns the decimal number corresponding to the rgb hexadecimal representation.
+ * 
+ * If a mate color is provided it is used for blending the alpha channel of this color, if any.
+ * 
+ * @param {pv.Color} [mate='white'] the mate color. Defaults to 'white'.
+ */
+pv.Color.prototype.rgbDecimal = function(mate) {
+  var rgb = this.alphaBlend(mate);
+  return rgb.r << 16 | rgb.g << 8 | rgb.b;
+};
+
+/**
+ * Determines if a color is in the "dark" category.
+ * If this is a background color, you may then choose a color for text
+ * that is in the "bright" category.
+ * 
+ * Adapted from {@link http://us2.php.net/manual/en/function.hexdec.php#74092}.
+ */
+pv.Color.prototype.isDark = function() {
+  // TODO: How should alpha be accounted for?
+  return this.rgbDecimal() < 0xffffff/2;
+};
+
+/**
  * Constructs a new RGB color with the specified channel values.
  *
  * @param {number} r the red channel, an integer in [0,255].
@@ -6498,6 +6545,14 @@ pv.Color.Rgb.prototype.hsl = function(){
 };
 
 /**
+ * Constructs a new RGB color which is the complementary color of this color.
+ */
+pv.Color.Rgb.prototype.complementary = function() {
+  return this.hsl().complementary().rgb();
+};
+
+
+/**
  * Constructs a new HSL color with the specified values.
  *
  * @param {number} h the hue, an integer in [0, 360].
@@ -6602,6 +6657,13 @@ pv.Color.Hsl.prototype.alpha = function(a) {
   return pv.hsl(this.h, this.s, this.l, a);
 };
 
+/**
+ * Constructs a new HSL color which is the complementary color of this color.
+ */
+pv.Color.Hsl.prototype.complementary = function() {
+  return pv.hsl((this.h + 180) % 360, 1 - this.s, 1 - this.l, this.a);
+};
+  
 /**
  * Returns the RGB color equivalent to this HSL color.
  *
@@ -7254,6 +7316,18 @@ pv.Colors.category19 = function() {
         return color;
     };
     
+    FillStyle.prototype.alphaBlend = function(mate) {
+        return this.rgb().alphaBlend(mate);
+    };
+      
+    FillStyle.prototype.rgbDecimal = function(mate) {
+        return this.rgb().rgbDecimal(mate);
+    };
+
+    FillStyle.prototype.isDark = function() {
+        return this.rgb().isDark();
+    };
+    
     /**
      * Constructs a solid fill style. This constructor should not be invoked
      * directly; use {@link pv.fillStyle} instead.
@@ -7288,6 +7362,10 @@ pv.Colors.category19 = function() {
 
     Solid.prototype.darker = function(k){
         return new Solid(this.rgb().darker(k));
+    };
+    
+    Solid.prototype.complementary = function() {
+        return new Solid(this.rgb().complementary());
     };
     
     pv.FillStyle.transparent = new Solid(pv.Color.transparent);
@@ -7342,6 +7420,18 @@ pv.Colors.category19 = function() {
         }));
     };
     
+    Gradient.prototype.complementary = function(){
+        return this._clone(this.stops.map(function(stop){
+            return {offset: stop.offset, color: stop.color.complementary()};
+        }));
+    };
+    
+    Gradient.prototype.alphaBlend = function(mate) {
+        return this._clone(this.stops.map(function(stop){
+            return {offset: stop.offset, color: stop.color.alphaBlend(mate)};
+        }));
+    };
+        
     // ----------------
     
     var LinearGradient = pv.FillStyle.LinearGradient = function(angle, stops) {

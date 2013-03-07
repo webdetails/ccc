@@ -15,18 +15,22 @@ def
         if(this.plot.option('ColorMode') === 'by-parent') {
             return candidates
                 .where(function(itemData) {
-                    // The root or a parent that has...
-                    return !itemData.parent ||
-                           // ... at least one non-degenerate child (value != null)
-                           // 
-                           // The hoverable effect needs colors assigned to parents,
-                           // in the middle of the hierarchy,
-                           // whose color possibly does not show in normal mode,
-                           // cause they have no leaf child (or degenerate child)
-                           (itemData.value != null && 
-                            itemData.children().any(function(child){
-                               return child.value != null;
-                            }));
+                    // The hoverable effect needs colors assigned to parents,
+                    // in the middle of the hierarchy,
+                    // whose color possibly does not show in normal mode,
+                    // cause they have no leaf child (or degenerate child)
+                    
+                    // the root or a non-degenerate child
+                    return (!itemData.parent || itemData.value != null) &&
+                        
+                        // has at least one 
+                        itemData
+                        .children()
+                        .any(function(child) {
+                            // non-degenerate leaf-child
+                            return child.value != null && 
+                                   child.children().prop('value').all(def.nully);
+                        });
                  });
         }
         

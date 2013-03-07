@@ -1,40 +1,39 @@
 
 (function(){
 
-    pv.Mark.prototype.getSign = function(){
-        return this.sign || createBasic(this);
-    };
-    
-    pv.Mark.prototype.getScene = function(){
-        return this.getSign().scene;
-    };
-    
-    function createBasic(pvMark){
-        var as = getAncestorSign(pvMark) || 
-                 def.assert("There must exist an ancestor sign");
+    function createBasic(pvMark) {
+        var as = getAncestorSign(pvMark) || def.assert("There must exist an ancestor sign");
         var bs = new pvc.visual.BasicSign(as.panel, pvMark);
-        var i;
         var s = pvMark.scene;
-        if(s && (i = pvMark.index) != null && i >= 0){
+        var i, pvInstance;
+        if(s && (i = pvMark.index) != null && i >= 0 && (pvInstance = s[i])) {
             // Mark is already rendering; build the current instance
-            bs._buildInstance(pvMark, s[i], /*lateCall*/ true);
+            bs._inContext(
+                    /*f*/function(){ this.__buildInstance(pvInstance); }, 
+                    /*x*/pvMark,
+                    /*scene*/pvInstance.data,
+                    pvInstance,
+                    /*lateCall*/true);
         }
         return bs;
     }
     
     // Obtains the first sign accessible from the argument mark.
-    function getAncestorSign(pvMark){
+    function getAncestorSign(pvMark) {
         var sign;
-        do{
-            pvMark = pvMark.parent;
-        } while(pvMark && !(sign = pvMark.sign) && (!pvMark.proto || !(sign = pvMark.proto.sign)));
-        
+        do   { pvMark = pvMark.parent; } 
+        while(pvMark && !(sign = pvMark.sign) && (!pvMark.proto || !(sign = pvMark.proto.sign)));
         return sign;
     }
     
+    pv.Mark.prototype.getSign    = function() { return this.sign || createBasic(this); };
+    pv.Mark.prototype.getScene   = function() { return this.getSign().scene;     };
+    pv.Mark.prototype.getContext = function() { return this.getSign().context(); };
+    
     // Used to wrap a mark, dynamically, 
     // with minimal impact and functionality.
-    def.type('pvc.visual.BasicSign')
+    def
+    .type('pvc.visual.BasicSign')
     .init(function(panel, pvMark){
         this.chart  = panel.chart;
         this.panel  = panel;
@@ -45,16 +44,13 @@
 
         pvMark.sign = this;
         
-        /* Intercept the protovis mark's buildInstance */
-        
+        // Intercept the protovis mark's buildInstance
         // Avoid doing a function bind, cause buildInstance is a very hot path
         pvMark.__buildInstance = pvMark.buildInstance;
         pvMark.buildInstance   = this._dispatchBuildInstance;
     })
     .add({
-        compatVersion: function(){
-            return this.chart.compatVersion();
-        },
+        compatVersion: function(){ return this.chart.compatVersion(); },
 
         // Defines a local property on the underlying protovis mark
         localProperty: function(name, type){
@@ -84,17 +80,11 @@
         
         // --------------
         
-        delegate: function(dv, tag){
-            return this.pvMark.delegate(dv, tag);
-        },
+        delegate: function(dv, tag){ return this.pvMark.delegate(dv, tag); },
         
-        delegateExtension: function(dv){
-            return this.pvMark.delegate(dv, pvc.extensionTag);
-        },
+        delegateExtension: function(dv){ return this.pvMark.delegate(dv, pvc.extensionTag); },
         
-        hasDelegate: function(tag){
-            return this.pvMark.hasDelegate(tag);
-        },
+        hasDelegate: function(tag){ return this.pvMark.hasDelegate(tag); },
         
         // Using it is a smell...
     //    hasExtension: function(){
@@ -103,47 +93,58 @@
         
         // -------------
         
-        _bindWhenFun: function(value){
-            if(typeof value === 'function'){
-                /* return value.bind(this); */
-                return function(){
-                    var sign = this.getSign();
-                    return value.apply(sign, arguments);
-                };
+        _bindWhenFun: function(value) {
+            if(def.fun.is(value)) {
+                return function() { return value.apply(this.getSign(), arguments); };
             }
             
             return value;
         },
         
-        _lockDynamic: function(name, method){
+        _lockDynamic: function(name, method) {
             /* def.methodCaller('' + method, this) */
             var me = this;
-            return this.lockMark(
-                        name,
-                        function(){
-                            var sign = this.getSign();
-                            var m = sign[method] ||
-                                    me  [method] ||
-                                    def.assert("No method with name '" + method + "' is defined");
-                            
-                            return m.apply(sign, arguments);
-                        });
+            return me.lockMark(
+                name,
+                function() {
+                    var sign = this.getSign();
+                    var m = sign[method] ||
+                            me  [method] ||
+                            def.assert("No method with name '" + method + "' is defined");
+                    
+                    return m.apply(sign, arguments);
+                });
         },
         
         // --------------
         
         /* SCENE MAINTENANCE */
-        _dispatchBuildInstance: function(instance){
-            // this: the mark
-            this.sign._buildInstance(this, instance);
+        // this: the mark
+        _dispatchBuildInstance: function(pvInstance) {
+            this.sign._inContext(
+                    /*f*/function() { this.__buildInstance(pvInstance); }, 
+                    /*x*/this, 
+                    /*scene*/pvInstance.data,
+                    pvInstance,
+                    /*lateCall*/false);
         },
         
-        _buildInstance: function(mark, instance, lateCall){
+        _inContext: function(f, x, scene, pvInstance, lateCall) {
+            var pvMark = this.pvMark;
+            if(!pvInstance) { pvInstance = pvMark.scene[pvMark.index]; }
+            if(!scene     ) { scene = pvInstance.data; }
             
-            var scene  = instance.data;
             var index = scene ? scene.childIndex() : 0;
             
-            this.pvInstance = instance;
+            var oldScene, oldIndex, oldState;
+            var oldPvInstance = this.pvInstance;
+            if(oldPvInstance) {
+                oldScene = this.scene;
+                oldIndex = this.index;
+                oldState = this.state;
+            }
+            
+            this.pvInstance = pvInstance;
             this.scene = scene;
             this.index = index < 0 ? 0 : index;
 
@@ -153,14 +154,32 @@
              * cached data.
              */
             /*global scene_renderId:true */
-            scene_renderId.call(scene, mark.renderId());
-
+            scene_renderId.call(scene, pvMark.renderId());
+            
             /* state per: sign & scene & render */
             this.state = {};
-
-            if(!lateCall){
-                mark.__buildInstance.call(mark, instance);
+            if(!lateCall) {
+                try {
+                    f.call(x, pvInstance);
+                } finally {
+                    this.state = oldState;
+                    this.pvInstance = oldPvInstance;
+                    this.scene = oldScene;
+                    this.index = oldIndex;
+                }
+            } // otherwise... old stuff gets stale... but there's no big problem
+        },
+        
+        /* CONTEXT */
+        context: function(createNew) {
+            var state;
+            if(createNew || !(state = this.state)) { 
+               return this._createContext();
             }
-        }
+            
+            return def.lazy(state, 'context', this._createContext, this); 
+        },
+        
+        _createContext: function() { return new pvc.visual.Context(this.panel, this.pvMark); }
     });
 }());

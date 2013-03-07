@@ -177,9 +177,7 @@ pvc.BaseChart
                 // * {dimensions: "product", isReversed:true, from: "series" }
                 var groupingSpec, sourceRoleName;
                 if(def.object.is(roleSpec)){
-                    if(def.nullyTo(roleSpec.isReversed, false)){
-                        visualRole.setIsReversed(true);
-                    }
+                    if(def.nullyTo(roleSpec.isReversed, false)) { visualRole.setIsReversed(true); }
                     
                     sourceRoleName = roleSpec.from;
                     if(sourceRoleName && (sourceRoleName !== name)){

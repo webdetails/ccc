@@ -323,7 +323,7 @@ def
             ;
         
         // -- LINE --
-        var isLineNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
+        var isLineNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
         
         // A discrete color role may have null values; the line is not hidden.
         var isColorDiscrete = rootScene.isColorBound && this.visualRoles.color.isDiscrete();

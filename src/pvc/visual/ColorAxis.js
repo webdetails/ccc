@@ -182,8 +182,8 @@ def.scope(function(){
                 };
             }
             
-            return this.scale.by1(function(scene){
-                return scene.vars[varName].value;
+            return this.scale.by1(function(scene) {
+                return scene && scene.vars[varName].value;
             });
         },
         

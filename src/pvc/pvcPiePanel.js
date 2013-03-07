@@ -49,7 +49,7 @@ def
     this.explodedSliceIndex   = plot.option('ExplodedSliceIndex' );
     this.activeOffsetRadius   = plot.option('ActiveSliceRadius'  );
     this.labelStyle           = labelStyle;
-    if(labelStyle === 'linked'){
+    if(labelStyle === 'linked') {
         this.linkInsetRadius     = plot.option('LinkInsetRadius'    );
         this.linkOutsetRadius    = plot.option('LinkOutsetRadius'   );
         this.linkMargin          = plot.option('LinkMargin'         );
@@ -161,7 +161,7 @@ def
         var explodedOffsetRadius = resolvePercentRadius(this.explodedOffsetRadius);
         
         var activeOffsetRadius = 0;
-        if(this.chart.options.hoverable){
+        if(this.hoverable()) {
             activeOffsetRadius = resolvePercentRadius(this.activeOffsetRadius);
         }
         
@@ -264,18 +264,14 @@ def
         if(this.valuesVisible){
             this.valuesFont = layoutInfo.labelFont;
             
-            if(this.labelStyle === 'inside'){
+            if(this.labelStyle === 'inside') {
                 this.pvPieLabel = pvc.visual.ValueLabel.maybeCreate(this, this.pvPie, {
-                        wrapper: wrapper,
-                        noHover: false
+                        wrapper: wrapper
                     })
-                    .intercept('visible', function(scene){
-                        return (scene.vars.value.angle >= 0.001) &&
-                               this.delegateExtension(true);
+                    .intercept('visible', function(scene) {
+                        return (scene.vars.value.angle >= 0.001) && this.delegateExtension(true);
                     })
-                    .override('defaultText', function(){
-                        return this.scene.vars.value.sliceLabel; 
-                    })
+                    .override('defaultText', function() { return this.scene.vars.value.sliceLabel; })
                     .pvMark
                     .textMargin(10);
             

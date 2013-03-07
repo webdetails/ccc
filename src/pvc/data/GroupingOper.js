@@ -139,19 +139,17 @@ add(/** @lends pvc.data.GroupingOper */{
         return rootNode.datums;
     },
 
-    _group: function(datumsQuery){
+    _group: function(datumsQuery) {
 
         // Create the root node
         var rootNode = {
             isRoot: true,
             treeHeight: def
                 .query(this._groupSpecs)
-                .select(function(spec){
+                .select(function(spec) {
                     var levelCount = spec.levels.length;
-                    if(!levelCount) { 
-                        return 0; 
-                    }
-                    return !!spec.flatteningMode ? 1 : levelCount;
+                    if(!levelCount) { return 0; }
+                    return (spec.flatteningMode !== 'singleLevel') ? 1 : levelCount;
                 })
                 .reduce(def.add, 0),
                 
@@ -161,9 +159,7 @@ add(/** @lends pvc.data.GroupingOper */{
             // isFlattenGroup // on parents of a flattened group spec
         };
 
-        if(rootNode.treeHeight > 0){
-            this._groupSpecRecursive(rootNode, datumsQuery, 0);
-        }
+        if(rootNode.treeHeight > 0) { this._groupSpecRecursive(rootNode, datumsQuery, 0); }
         
         return rootNode;
     },
@@ -172,13 +168,13 @@ add(/** @lends pvc.data.GroupingOper */{
         var groupSpec     = this._groupSpecs[specIndex];
         var levelSpecs    = groupSpec.levels;
         var L             = levelSpecs.length;
-        var doFlatten     = !!groupSpec.flatteningMode;
+        var doFlatten     = (groupSpec.flatteningMode !== 'singleLevel');
         var nextSpecIndex = specIndex + 1;
         var isLastSpec    = (nextSpecIndex >= this._groupSpecs.length);
         var isPostOrder   = doFlatten && (groupSpec.flatteningMode === 'tree-post');
         var specGroupParent;
         
-        if(doFlatten){
+        if(doFlatten) {
             specParentNode.children = [];
             specParentNode.childrenByKey = {}; // Don't create children with equal keys
             
@@ -189,36 +185,37 @@ add(/** @lends pvc.data.GroupingOper */{
                 absKey:   '', 
                 atoms:    {},
                 datums:   [],
-                label:    groupSpec.flattenRootLabel,
+                label:    groupSpec.rootLabel,
                 dimNames: []
             };
 
-            if(!isPostOrder){
+            if(!isPostOrder) {
                 specParentNode.children.push(specGroupParent);
                 specParentNode.childrenByKey[''] = specGroupParent;
             }
         } else {
+            if(specParentNode.isRoot) {
+                specParentNode.label = groupSpec.rootLabel;
+            }
+            
             specGroupParent = specParentNode;
         }
 
         /* Group datums */
         groupLevelRecursive.call(this, specGroupParent, specDatumsQuery, 0);
 
-        if(doFlatten){
-
-            if(isPostOrder){
-                specParentNode.children.push(specGroupParent);
-            }
+        if(doFlatten) {
+            if(isPostOrder) { specParentNode.children.push(specGroupParent); }
 
             // Add datums of specGroupParent to specParentNode.
             specParentNode.datums = specGroupParent.datums;
         }
         
-        function groupLevelRecursive(levelParentNode, levelDatums, levelIndex){
+        function groupLevelRecursive(levelParentNode, levelDatums, levelIndex) {
             
             var levelSpec = levelSpecs[levelIndex];
             
-            if(!doFlatten){
+            if(!doFlatten) {
                 levelParentNode.children = [];
                 levelParentNode.groupSpec = groupSpec;
                 levelParentNode.groupLevelSpec = levelSpec;
@@ -237,7 +234,7 @@ add(/** @lends pvc.data.GroupingOper */{
                     levelParentNode.datums;
             
             childNodes
-            .forEach(function(child){
+            .forEach(function(child) {
                 /* On all but the last level,
                  * the datums of *child* are set to the 
                  * union of datums of its own children.
@@ -245,12 +242,10 @@ add(/** @lends pvc.data.GroupingOper */{
                  * by the end of the following recursive call.
                  */
                 var childDatums = child.datums; // backup original datums
-                if(!(isLastSpec && isLastSpecLevel)){
-                    child.datums = [];
-                }
+                if(!(isLastSpec && isLastSpecLevel)) { child.datums = []; }
                 
                 var specParentChildIndex;
-                if(!doFlatten){
+                if(!doFlatten) {
                     levelParentNode.children.push(child);
                 } else {
                     // Add children at a "hidden" property
@@ -258,7 +253,7 @@ add(/** @lends pvc.data.GroupingOper */{
                     // below, can be done.
                     def.array.lazy(levelParentNode, '_children').push(child);
                     
-                    if(def.hasOwn(specParentNode.childrenByKey, child.key)){
+                    if(def.hasOwn(specParentNode.childrenByKey, child.key)) {
                         // Duplicate key.
                         // Don't add as child of specParentNode.
                         // 
@@ -268,7 +263,7 @@ add(/** @lends pvc.data.GroupingOper */{
                     }
                     
                     specParentChildIndex = specParentNode.children.length;
-                    if(!isPostOrder){
+                    if(!isPostOrder) {
                         specParentNode.children.push(child);
                         specParentNode.childrenByKey[child.key] = child;
 
@@ -276,7 +271,7 @@ add(/** @lends pvc.data.GroupingOper */{
                     }
                 }
                 
-                if(!isLastSpecLevel){
+                if(!isLastSpecLevel) {
                     groupLevelRecursive.call(this, child, childDatums, levelIndex + 1);
                 } else if(!isLastSpec) {
                     this._groupSpecRecursive(child, childDatums, nextSpecIndex);
@@ -285,8 +280,8 @@ add(/** @lends pvc.data.GroupingOper */{
                 // Datums already added to 'child'.
                 def.array.append(levelParentDatums, child.datums);
 
-                if(doFlatten && isPostOrder){
-                    if(def.hasOwn(specParentNode.childrenByKey, child.key)){
+                if(doFlatten && isPostOrder) {
+                    if(def.hasOwn(specParentNode.childrenByKey, child.key)) {
                         /*jshint expr:true*/
                         child.isFlattenGroup || def.assert("Must be a parent for duplicate keys to exist.");
                         
@@ -303,7 +298,7 @@ add(/** @lends pvc.data.GroupingOper */{
                         // would be both in *child* and in child.child.
                         // This would mess up the scales and waterfall control code,
                         // not knowing whether to ignore the flatten group or not.
-                        if(child._children.length === 1){
+                        if(child._children.length === 1) {
                             specParentNode.children.splice(
                                     specParentChildIndex, 
                                     specParentNode.children.length - specParentChildIndex);
@@ -332,7 +327,7 @@ add(/** @lends pvc.data.GroupingOper */{
         }
     },
     
-    _groupDatums: function(levelSpec, levelParentNode, levelDatums, doFlatten){
+    _groupDatums: function(levelSpec, levelParentNode, levelDatums, doFlatten) {
         // The first datum of each group is inserted here in order,
         // according to the level's comparer.
         var firstDatums = [];
@@ -345,25 +340,25 @@ add(/** @lends pvc.data.GroupingOper */{
         // Group levelDatums By the levelSpec#key(.)
         def
         .query(levelDatums)
-        .each(function(datum){
+        .each(function(datum) {
             /*  newChild = { key: '', atoms: {}, dimNames: [] } */
             var newChild = levelSpec.key(datum);
             var key      = newChild.key;
             var child    = childNodes.get(key);
-            if(child){
+            if(child) {
                 child.datums.push(datum);
             } else {
                 // First datum with key -> new child
                 child = newChild;
                 child.datums   = [datum];
                 
-                if(doFlatten){
+                if(doFlatten) {
                     // child.atoms must contain (locally) those of the levelParentNode,
                     // so that when flattened, they have a unique key 
                     def.copy(child.atoms, levelParentNode.atoms);
                     
                     // The **key** is the **absKey**, trimmed of keySep at the end
-                    if(levelParentNode.dimNames.length){
+                    if(levelParentNode.dimNames.length) {
                         var keySep = datum.owner.keySep;
                         var K = keySep.length;
                         
@@ -373,7 +368,7 @@ add(/** @lends pvc.data.GroupingOper */{
                             keySep + 
                             key;
                         
-                        while(trimKey.lastIndexOf(keySep) === trimKey.length - K){
+                        while(trimKey.lastIndexOf(keySep) === trimKey.length - K) {
                             trimKey = trimKey.substr(0, trimKey.length - K);
                         }
                         
@@ -394,11 +389,11 @@ add(/** @lends pvc.data.GroupingOper */{
         return childNodes;
     },
     
-    _generateData: function(node, parentNode, parentData, rootData){
+    _generateData: function(node, parentNode, parentData, rootData) {
         var data, isNew;
-        if(node.isRoot){
+        if(node.isRoot) {
             // Root node
-            if(rootData){
+            if(rootData) {
                 data = rootData;
                 /*global data_addDatumsLocal:true*/
                 data_addDatumsLocal.call(data, node.datums);
@@ -414,9 +409,9 @@ add(/** @lends pvc.data.GroupingOper */{
                 data._groupOper = this;
             }
         } else {
-            if(rootData){
+            if(rootData) {
                 data = def.get(parentData._childrenByKey, node.key);
-                if(data){
+                if(data) {
                     // Add the datums to the data, and its atoms to its dimensions
                     // Should also update linkedChildren (not children).
                     /*global data_addDatumsSimple:true*/
@@ -424,10 +419,10 @@ add(/** @lends pvc.data.GroupingOper */{
                 }
             }
             
-            if(!data){
+            if(!data) {
                 isNew = true;
                 var index, siblings;
-                if(rootData && (siblings = parentData._children)){
+                if(rootData && (siblings = parentData._children)) {
                     // Insert the new sibling in correct order
                     // node.datums[0] is representative of the new Data's position
                     index = ~def.array.binarySearch(siblings, node.datums[0], parentNode.groupLevelSpec.comparer);
@@ -443,29 +438,31 @@ add(/** @lends pvc.data.GroupingOper */{
             }
         }
 
-        if(isNew && node.isFlattenGroup){
-            data._isFlattenGroup = true;
-            data._isDegenerateFlattenGroup = !!node.isDegenerateFlattenGroup;
+        if(isNew) {
+            if(node.isFlattenGroup) {
+                data._isFlattenGroup = true;
+                data._isDegenerateFlattenGroup = !!node.isDegenerateFlattenGroup;
+            }
             
             var label = node.label;
-            if(label){
+            if(label) {
                 data.label    += label;
                 data.absLabel += label;
             }
         }
 
         var childNodes = node.children;
-        if(childNodes && childNodes.length){
-            if(isNew){
+        if(childNodes && childNodes.length) {
+            if(isNew) {
                 data._groupSpec      = node.groupSpec;
                 data._groupLevelSpec = node.groupLevelSpec;
             }
             
-            childNodes.forEach(function(childNode){
+            childNodes.forEach(function(childNode) {
                 this._generateData(childNode, node, data, rootData);
             }, this);
 
-        } else if(isNew && !node.isRoot){
+        } else if(isNew && !node.isRoot) {
             // A leaf node
             var leafs = data.root._leafs;
             data.leafIndex = leafs.length;

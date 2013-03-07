@@ -204,7 +204,7 @@ def
     },
     
     _createFocusWindow: function(){
-        if(this._canSelectWithFocusWindow()){
+        if(this.selectableByFocusWindow()){
             // In case we're being re-rendered,
             // capture the axes' focusWindow, if any.
             // and set it as the next focusWindow.

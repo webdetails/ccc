@@ -7,6 +7,7 @@
  */
 def
 .type('pvc.BasePanel', pvc.Abstract)
+.add(pvc.visual.Interactive)
 .init(function(chart, parent, options) {
     
     this.chart = chart; // must be set before base() because of log init
@@ -29,9 +30,7 @@ def
     }
     
     // TODO: Danger...
-    $.extend(this, options);
-    
-    this.chart = chart;
+    $.extend(this, options); // clickAction and doubleClickAction are set here
 
     if(!this.axes.color){
         this.axes.color = chart.axes.color;
@@ -48,7 +47,7 @@ def
     
     var margins = options && options.margins;
     if(!parent && margins === undefined){
-        // FIXME: Give a default margin on the root panel
+        // TODO: FIXME: Give a default margin on the root panel
         //  because otherwise borders of panels may be clipped..
         // Even now that the box model supports borders,
         // the "plot" panel still gets drawn outside
@@ -69,12 +68,15 @@ def
         this.topRoot   = this;
         this.isRoot    = true;
         this.isTopRoot = true;
+        this._ibits    = chart._ibits;
+        
     } else {
         this.parent    = parent;
         this.isTopRoot = false;
         this.isRoot    = (parent.chart !== chart);
         this.root      = this.isRoot ? this : parent.root;
         this.topRoot   = parent.topRoot;
+        this._ibits    = parent._ibits;
         
         if(this.isRoot) {
             this.position.left = chart.left; 
@@ -132,6 +134,14 @@ def
         
         this.borderWidth = borderWidth == null ? 0 : 1.5;
     }
+    
+    // Parent panel may not have a clickAction, 
+    // and so, inheriting its clickable and doubleClickable doesn't work.
+    var I = pvc.visual.Interactive;
+    var ibits = this._ibits;
+    ibits = def.bit.set(ibits, I.Clickable,       (chart._ibits & I.Clickable      ) && !!this.clickAction      );
+    ibits = def.bit.set(ibits, I.DoubleClickable, (chart._ibits & I.DoubleClickable) && !!this.doubleClickAction);
+    this._ibits = ibits;
 })
 .add({
     chart: null,
@@ -210,18 +220,13 @@ def
      * </ul>
      * 
      * @see #animate
-     * @see #isAnimatingStart
+     * @see #animatingStart
      * 
      * @type number
      */
-    _isAnimating: 0,
+    _animating: 0,
     
-    _isRubberBandSelecting: false,
-    
-    /**
-     * Shared state between {@link _handleClick} and {@link #_handleDoubleClick}.
-     */
-    _ignoreClicks: 0,
+    _selectingByRubberband: false,
     
     /**
      * Indicates the name of the role that should be used whenever a V1 dimension value is required.
@@ -288,7 +293,7 @@ def
     
     _addSign: function(sign){
         def.array.lazy(this, '_signs').push(sign);
-        if(sign.isRubberSelectable()){
+        if(sign.selectableByRubberband()){
             def.array.lazy(this, '_rubberSelectableMarks').push(sign.pvMark);
         }
     },
@@ -308,22 +313,22 @@ def
      * On root panels this argument is not specified,
      * and the panels' current {@link #width} and {@link #height} are used as default. 
      * </p>
-     * @param {object}  [keyArgs] Keyword arguments.
-     * @param {boolean} [keyArgs.force=false] Indicates that the layout should be
+     * @param {object}  [ka] Keyword arguments.
+     * @param {boolean} [ka.force=false] Indicates that the layout should be
      * performed even if it has already been done.
-     * @param {pvc.Size} [keyArgs.referenceSize] The size that should be used for 
+     * @param {pvc.Size} [ka.referenceSize] The size that should be used for 
      * percentage size calculation. 
      * This will typically be the <i>client</i> size of the parent.
-     * @param {pvc.Sides} [keyArgs.paddings] The paddings that should be used for 
+     * @param {pvc.Sides} [ka.paddings] The paddings that should be used for 
      * the layout. Default to the panel's paddings {@link #paddings}.
-     * @param {pvc.Sides} [keyArgs.margins] The margins that should be used for 
+     * @param {pvc.Sides} [ka.margins] The margins that should be used for 
      * the layout. Default to the panel's margins {@link #margins}.
-     * @param {boolean} [keyArgs.canChange=true] Whether this is a last time layout. 
+     * @param {boolean} [ka.canChange=true] Whether this is a last time layout. 
      */
-    layout: function(availableSize, keyArgs){
-        if(!this._layoutInfo || def.get(keyArgs, 'force', false)) {
+    layout: function(availableSize, ka){
+        if(!this._layoutInfo || def.get(ka, 'force', false)) {
             
-            var referenceSize = def.get(keyArgs, 'referenceSize');
+            var referenceSize = def.get(ka, 'referenceSize');
             if(!referenceSize && availableSize){
                 referenceSize = def.copyOwn(availableSize);
             }
@@ -357,8 +362,8 @@ def
             }
             
             var halfBorder   = this.borderWidth / 2;
-            var realMargins  = (def.get(keyArgs, 'margins' ) || this.margins ).resolve(referenceSize);
-            var realPaddings = (def.get(keyArgs, 'paddings') || this.paddings).resolve(referenceSize);
+            var realMargins  = (def.get(ka, 'margins' ) || this.margins ).resolve(referenceSize);
+            var realPaddings = (def.get(ka, 'paddings') || this.paddings).resolve(referenceSize);
             
             var margins  = pvc.Sides.inflate(realMargins,  halfBorder);
             var paddings = pvc.Sides.inflate(realPaddings, halfBorder);
@@ -381,7 +386,7 @@ def
             }
             
             var prevLayoutInfo = this._layoutInfo || null;
-            var canChange = def.get(keyArgs, 'canChange', true);
+            var canChange = def.get(ka, 'canChange', true);
             
             var layoutInfo = 
                 this._layoutInfo = {
@@ -1035,17 +1040,17 @@ def
      * independently of the panel on which the method is called.
      * </p>
      * 
-     * @param {object} [keyArgs] Keyword arguments.
-     * @param {boolean} [keyArgs.bypassAnimation=false] Indicates that animation should not be performed.
-     * @param {boolean} [keyArgs.recreate=false] Indicates that the panel and its descendants should be recreated.
+     * @param {object} [ka] Keyword arguments.
+     * @param {boolean} [ka.bypassAnimation=false] Indicates that animation should not be performed.
+     * @param {boolean} [ka.recreate=false] Indicates that the panel and its descendants should be recreated.
      */
-    render: function(keyArgs){
+    render: function(ka){
         
         if(!this.isTopRoot) {
-            return this.topRoot.render(keyArgs);
+            return this.topRoot.render(ka);
         }
         
-        this._create(def.get(keyArgs, 'recreate', false));
+        this._create(def.get(ka, 'recreate', false));
         
         if(!this.isVisible){
             return;
@@ -1057,14 +1062,14 @@ def
         var pvPanel = this.pvRootPanel;
         
         var animate = this.chart._animatable && options.animate;
-        this._isAnimating = animate && !def.get(keyArgs, 'bypassAnimation', false) ? 1 : 0;
+        this._animating = animate && !def.get(ka, 'bypassAnimation', false) ? 1 : 0;
         try {
             // When animating, renders the animation's 'start' point
             pvPanel.render();
             
             // Transition to the animation's 'end' point
-            if (this._isAnimating) {
-                this._isAnimating = 2;
+            if (this._animating) {
+                this._animating = 2;
                 
                 var me = this;
                 pvPanel
@@ -1072,14 +1077,14 @@ def
                     .duration(2000)
                     .ease("cubic-in-out")
                     .start(function(){
-                        me._isAnimating = 0;
+                        me._animating = 0;
                         me._onRenderEnd(true);
                     });
             } else {
                 this._onRenderEnd(false);
             }
         } finally {
-            this._isAnimating = 0;
+            this._animating = 0;
         }
     },
     
@@ -1089,7 +1094,7 @@ def
             if(this.compatVersion() <= 1){
                 renderCallback.call(this.chart);
             } else {
-                var context = this._getContext();
+                var context = this.context();
                 renderCallback.call(context, context.scene);
             }
         }
@@ -1152,7 +1157,7 @@ def
     /* ANIMATION */
     
     animate: function(start, end) {
-        return (this.topRoot._isAnimating === 1) ? start : end;
+        return (this.topRoot._animating === 1) ? start : end;
     },
     
     /**
@@ -1166,8 +1171,8 @@ def
      * 
      * @type boolean
      */
-    isAnimatingStart: function() {
-        return (this.topRoot._isAnimating === 1);
+    animatingStart: function() {
+        return (this.topRoot._animating === 1);
     },
     
     /**
@@ -1176,9 +1181,7 @@ def
      * 
      * @type boolean
      */
-    isAnimating: function() {
-        return (this.topRoot._isAnimating > 0);
-    },
+    animating: function() { return (this.topRoot._animating > 0); },
     
     /* SIZE & POSITION */
     setPosition: function(position){
@@ -1222,16 +1225,16 @@ def
      * Extends a protovis mark with extension points 
      * having a given panel-relative component id.
      */
-    extend: function(mark, id, keyArgs) {
-        this.chart.extend(mark, this._makeExtensionAbsId(id), keyArgs);
+    extend: function(mark, id, ka) {
+        this.chart.extend(mark, this._makeExtensionAbsId(id), ka);
     },
     
     /**
      * Extends a protovis mark with extension points 
      * having a given absolute component id.
      */
-    extendAbs: function(mark, absId, keyArgs) {
-        this.chart.extend(mark, absId, keyArgs);
+    extendAbs: function(mark, absId, ka) {
+        this.chart.extend(mark, absId, ka);
     },
     
     _extendSceneType: function(typeKey, type, names){
@@ -1282,9 +1285,7 @@ def
      */
     getPvPanel: function(layer) {
         var mainPvPanel = this.pvPanel;
-        if(!layer){
-            return mainPvPanel;
-        }
+        if(!layer) { return mainPvPanel; }
 
         if(!this.parent){
             throw def.error.operationInvalid("Layers are not possible in a root panel.");
@@ -1296,13 +1297,13 @@ def
         }
 
         var pvPanel = null;
-        if(!this._layers){
+        if(!this._layers) {
             this._layers = {};
         } else {
             pvPanel = this._layers[layer];
         }
 
-        if(!pvPanel){
+        if(!pvPanel) {
             var pvParentPanel = this.parent.pvPanel;
             
             pvPanel = pvParentPanel.borderPanel.add(this.type)
@@ -1310,7 +1311,7 @@ def
             
             var pvBorderPanel = pvPanel;
 
-            if(mainPvPanel !== mainPvPanel.borderPanel){
+            if(mainPvPanel !== mainPvPanel.borderPanel) {
                 pvPanel = pvBorderPanel.add(pv.Panel)
                                        .extend(mainPvPanel);
             }
@@ -1333,7 +1334,7 @@ def
      * Initializes a new layer panel.
      * @virtual
      */
-    initLayerPanel: function(/*pvPanel, layer*/){},
+    initLayerPanel: function(/*pvPanel, layer*/) {},
     
     /* EVENTS & VISUALIZATION CONTEXT */
     _getV1DimName: function(v1Dim){
@@ -1348,28 +1349,10 @@ def
         return dimName;
     },
     
-    _getV1Datum: function(scene){
-        return scene.datum;
-    },
+    _getV1Datum: function(scene){ return scene.datum; },
     
     /**
-     * Creates the visualization context of the panel.
-     * <p>
-     * Override to use a specific visualization context class. 
-     * </p>
-     * 
-     * @param {pv.Mark} mark The protovis mark being rendered or targeted by an event.
-     * @param {object} [event] An event object.
-     * @type pvc.visual.Context
-     * @virtual
-     */
-    _createContext: function(mark, ev){
-        return new pvc.visual.Context(this, mark, ev);
-    },
-    
-    /**
-     * Obtains the visualization context of the panel,
-     * prepared for a specified mark and event.
+     * Obtains the visualization context of the panel.
      *  
      * Creates a new context when necessary.
      * 
@@ -1377,142 +1360,40 @@ def
      * Override to perform specific updates. 
      * </p>
      * 
-     * @param {pv.Mark} mark The protovis mark being rendered or targeted by an event.
-     * @param {object} [event] An event object.
      * @type pvc.visual.Context
      * @virtual
      */
-    _getContext: function(mark, ev){
+    context: function() {
         var context = this._context;
-        if(!context || context.isPinned){
-            this._context = this._createContext(mark, ev);
+        if(!context || context.isPinned) {
+            context = this._context = new pvc.visual.Context(this);
         } else {
             /*global visualContext_update:true */
-            visualContext_update.call(context, mark, ev);
+            visualContext_update.call(context);
         }
         
-        return this._context;
-    },
-    
-    _isTooltipEnabled: function(){
-        return !this.isRubberBandSelecting() && !this.isAnimating();
-    },
-    
-    _ensurePropEvents: function(pvMark){
-        // labels and other marks don't receive events by default
-        var events = pvMark.propertyValue('events', /*inherit*/ true);
-        if(!events || events === 'none'){
-            pvMark.events('all');
-        }
-    },
-    
-    /* HOVERABLE */
-    _addPropHoverable: function(pvMark){
-        var panel  = this;
-        
-        var onEvent;
-        var offEvent;
-//        switch(pvMark.type) {
-//            default:
-//            case 'dot':
-//            case 'line':
-//            case 'area':
-//            case 'rule':
-//                onEvent  = 'point';
-//                offEvent = 'unpoint';
-//               panel._requirePointEvent();
-//                break;
-
-//            default:
-                onEvent = 'mouseover';
-                offEvent = 'mouseout';
-//                break;
-//        }
-        
-        pvMark
-            .event(onEvent, function(scene){
-                if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
-                    scene.setActive(true);
-                    panel.renderInteractive();
-                }
-            })
-            .event(offEvent, function(scene){
-                if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
-                     // Clears THE active scene, if ANY (not necessarily = scene)
-                    if(scene.clearActive()) {
-                        /* Something was active */
-                        panel.renderInteractive();
-                    }
-                }
-            });
-        
-        this._ensurePropEvents(pvMark);
+        return context;
     },
     
     /* TOOLTIP */ 
-    _addPropTooltip: function(pvMark, keyArgs){
-        if(pvMark.hasTooltip){
-            return;
-        }
-
-        var tipOptions = def.create(
-                            this.chart._tooltipOptions, 
-                            def.get(keyArgs, 'options'));
-        
-        tipOptions.isLazy = def.get(keyArgs, 'isLazy', true);
-        
-        var buildTooltip = def.get(keyArgs, 'buildTooltip') || 
-                           this._getTooltipBuilder(tipOptions);
-        if(!buildTooltip){
-            return;
-        }
-        
-        tipOptions.isEnabled = this._isTooltipEnabled.bind(this);
-        
-        var tipsyEvent = def.get(keyArgs, 'tipsyEvent');
-        if(!tipsyEvent) {
-//          switch(pvMark.type) {
-//                case 'dot':
-//                case 'line':
-//                case 'area':
-//                    this._requirePointEvent();
-//                    tipsyEvent = 'point';
-//                    tipOptions.usesPoint = true;
-//                    break;
-                
-//                default:
-                    tipsyEvent = 'mouseover';
-//            }
-        }
-
-        pvMark.localProperty("tooltip"/*, Function | String*/)
-              .tooltip(this._createTooltipProp(pvMark, buildTooltip, tipOptions.isLazy))
-              .title(function(){ return '';} ) // Prevent browser tooltip
-              .event(tipsyEvent, pv.Behavior.tipsy(tipOptions));
-
-        pvMark.hasTooltip = true;
-        
-        this._ensurePropEvents(pvMark);
+    _isTooltipEnabled: function(){
+        return !this.selectingByRubberband() && !this.animating();
     },
     
-    _getTooltipBuilder: function(tipOptions){
-        var options = this.chart.options;
+    // Axis panel overrides this
+    _getTooltipFormatter: function(tipOptions) {
         var isV1Compat = this.compatVersion() <= 1;
         
         var tooltipFormat = tipOptions.format;
         if(!tooltipFormat) {
-            if(!isV1Compat){
-                return this._buildDataTooltip;
-            }
+            if(!isV1Compat){ return this._summaryTooltipFormatter.bind(this); }
             
-            tooltipFormat = options.v1StyleTooltipFormat;
-            if(!tooltipFormat){
-                return;
-            }
+            tooltipFormat = this.chart.options.v1StyleTooltipFormat;
+            if(!tooltipFormat) { return; }
         }
         
-        if(isV1Compat){
-            return function(context){
+        if(isV1Compat) {
+            return function(context) {
                 return tooltipFormat.call(
                         context.panel, 
                         context.getV1Series(),
@@ -1522,88 +1403,24 @@ def
             };
         }
         
-        return function(context){
-            return tooltipFormat.call(context, context.scene);
-        };
+        return function(context) { return tooltipFormat.call(context, context.scene); };
     },
-    
-    _createTooltipProp: function(pvMark, buildTooltip, isLazy){
-        var myself = this;
-        if(!isLazy){
-            return function(){
-                // Capture current context
-                var context = myself._getContext(pvMark, null);
-                
-                // discard intermediate points
-                if (context.scene.isIntermediate){
-                   return null;
-                }
-                
-                return buildTooltip.call(myself, context);
-            };
-        }
-        
-        return function(){
-            // Capture current context
-            var context = myself._getContext(pvMark, null);
-
-            // discard intermediate points
-            if (context.scene.isIntermediate){
-                return null;
-            }
-            
-            context.pin();
-            
-            var tooltip;
-            return function() {
-                if(tooltip == null) {
-                    tooltip = buildTooltip.call(myself, context);
-                    context = null; // release pinned context;
-                } 
-                
-                return tooltip; 
-            };
-        };
-    },
-    
-    _requirePointEvent: function(radius){
-        if(!this.isTopRoot) {
-            return this.topRoot._requirePointEvent(radius);
-        }
-
-        if(!this._attachedPointEvent){
-
-            // Fire point and unpoint events
-            this.pvPanel
-                .events('all')
-                .event("mousemove", pv.Behavior.point(radius || 20));
-
-            this._attachedPointEvent = true;
-        }
-    },
-    
-    _buildDataTooltip: function(context){
-
+  
+    _summaryTooltipFormatter: function(context) {
         var scene = context.scene;
         
         // No group and no datum?
-        if(!scene.datum) {
-            return "";
-        }
+        if(!scene.datum) { return ""; }
         
         var group = scene.group;
         var isMultiDatumGroup = group && group.count() > 1;
         
         // Single null datum?
         var firstDatum = scene.datum;
-        if(!isMultiDatumGroup && (!firstDatum || firstDatum.isNull)) {
-            return "";
-        }
+        if(!isMultiDatumGroup && (!firstDatum || firstDatum.isNull)) { return ""; }
         
         var data = scene.data();
-        
         var visibleKeyArgs = {visible: true};
-        
         var tooltip = [];
         
         if(firstDatum.isInterpolated){
@@ -1659,12 +1476,10 @@ def
                     addDim(def.html.escape(atom.dimension.type.label), valueLabel);
                 }
             }
-        }, this);
+        });
         
         if(isMultiDatumGroup) {
-            if(anyCommonAtom){
-                tooltip.push('<hr />');
-            }
+            if(anyCommonAtom){ tooltip.push('<hr />'); }
             
             tooltip.push("<b>#</b>: " + group._datums.length + '<br/>');
             
@@ -1685,7 +1500,9 @@ def
                         
                         dimLabel = "&sum; " + dimLabel;
                     } else {
-                        valueLabel = dim.atoms(visibleKeyArgs).map(function(atom){ return atom.label || "- "; }).join(", ");
+                        valueLabel = dim
+                            .atoms(visibleKeyArgs)
+                            .map(function(atom){ return atom.label || "- "; }).join(", ");
                     }
                     
                     addDim(dimLabel, valueLabel);
@@ -1696,58 +1513,38 @@ def
         return '<div style="text-align: left;">' + tooltip.join('\n') + '</div>';
     },
     
+//  _requirePointEvent: function(radius) {
+//      if(!this.isTopRoot) { return this.topRoot._requirePointEvent(radius); }
+//
+//      if(!this._attachedPointEvent) {
+//          // Fire point and unpoint events
+//          this.pvPanel
+//              .events('all')
+//              .event('mousemove', pv.Behavior.point(radius || 20));
+//
+//          this._attachedPointEvent = true;
+//      }
+//  },
+  
     /* CLICK & DOUBLE-CLICK */
-    _addPropClick: function(pvMark){
-        var myself = this;
-        
-        function onClick(){
-            var ev = arguments[arguments.length - 1];
-            return myself._handleClick(this, ev);
-        }
-        
-        pvMark.cursor("pointer")
-              .event("click", onClick);
-        
-        this._ensurePropEvents(pvMark);
-    },
-
-    _addPropDoubleClick: function(pvMark){
-        var myself = this;
-        
-        function onDoubleClick(){
-            var ev = arguments[arguments.length - 1];
-            return myself._handleDoubleClick(this, ev);
-        }
-        
-        pvMark.cursor("pointer")
-              .event("dblclick", onDoubleClick);
-        
-        this._ensurePropEvents(pvMark);
-    },
-    
-    _isDoubleClickable: function(keyArgs){
-        var options = keyArgs || this.chart.options;
-        return options.clickable && !!this.doubleClickAction;
-    },
-    
-    _handleDoubleClick: function(pvMark, ev){
-        if(!this._isDoubleClickable()){
-            return;
-        }
-        
-        this._ignoreClicks = 2;
-        
-        var sign = pvMark.sign;
-        if(!sign || sign.isDoubleClickable()){
-            var context = this._getContext(pvMark, ev);
-            this._onDoubleClick(context);
+    // Default implementation dispatches to panel's clickAction
+    // Overriden by Legend Panel
+    _onClick: function(context) {
+        var handler = this.clickAction;
+        if(handler) {
+            if(this.compatVersion() <= 1) {
+                this._onV1Click(context, handler);
+            } else {
+                handler.call(context, context.scene);
+            }
         }
     },
     
-    _onDoubleClick: function(context){
+    // Default implementation dispatches to panel's doubleClickAction
+    _onDoubleClick: function(context) {
         var handler = this.doubleClickAction;
-        if(handler){
-            if(this.compatVersion() <= 1){
+        if(handler) {
+            if(this.compatVersion() <= 1) {
                 this._onV1DoubleClick(context, handler);
             } else {
                 handler.call(context, context.scene);
@@ -1755,7 +1552,8 @@ def
         }
     },
     
-    _onV1DoubleClick: function(context, handler){
+    // Overriden by Axis Panel
+    _onV1Click: function(context, handler) {
         handler.call(context.pvMark, 
                 /* V1 ARGS */
                 context.getV1Series(),
@@ -1765,72 +1563,8 @@ def
                 context.getV1Datum());
     },
     
-    _isClickable: function(){
-        return this.chart.options.clickable && !!this.clickAction;
-    },
-    
-    _shouldHandleClick: function(){
-        return this.chart._canSelectWithClick() || this._isClickable();
-    },
-    
-    _handleClick: function(pvMark, ev){
-        if(!this._shouldHandleClick()){
-            return;
-        }
-
-        var options = this.chart.options,
-            context;
-        
-        if(!this.doubleClickAction){
-            // Use shared context
-            context = this._getContext(pvMark, ev);
-            this._handleClickCore(context);
-        } else {
-            // Delay click evaluation so that
-            // it may be canceled if double click meanwhile
-            // fires.
-            var myself = this;
-            
-            // Capture current context
-            context = this._createContext(pvMark, ev);
-            /*global window:true*/
-            window.setTimeout(
-                function(){
-                    myself._handleClickCore.call(myself, context);
-                },
-                options.doubleClickMaxDelay || 300);
-
-        }
-    },
-
-    _handleClickCore: function(context){
-        if(this._ignoreClicks) {
-            this._ignoreClicks--;
-        } else {
-            var sign = context.sign;
-            if(!sign || sign.isClickable()){
-                this._onClick(context);
-            }
-            
-            if((sign  && sign.isClickSelectable()) || 
-               (!sign && this.chart.options.selectable && context.scene.datum)){
-                this._onSelect(context);
-            }
-        }
-    },
-    
-    _onClick: function(context){
-        var handler = this.clickAction;
-        if(handler){
-            if(this.compatVersion() <= 1){
-                this._onV1Click(context, handler);
-            } else {
-                handler.call(context, context.scene);
-            }
-        }
-    },
-    
-    _onV1Click: function(context, handler){
+    // Overriden by Axis Panel
+    _onV1DoubleClick: function(context, handler) {
         handler.call(context.pvMark, 
                 /* V1 ARGS */
                 context.getV1Series(),
@@ -1841,28 +1575,7 @@ def
     },
     
     /* SELECTION & RUBBER-BAND */
-    _onSelect: function(context){
-        var datums = context.scene.datums().array();
-        if(datums.length){
-            var chart = this.chart;
-                
-            chart._updatingSelections(function(){
-                
-                datums = chart._onUserSelection(datums);
-                if(datums && datums.length){
-                    if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
-                        chart.data.replaceSelected(datums);
-                    } else {
-                        pvc.data.Data.toggleSelected(datums);
-                    }
-                }
-            }, this);
-        }
-    },
-    
-    isRubberBandSelecting: function(){
-        return this.topRoot._isRubberBandSelecting;
-    },
+    selectingByRubberband: function() { return this.topRoot._selectingByRubberband; },
     
     /**
      * Add rubber-band functionality to panel.
@@ -1870,40 +1583,36 @@ def
      * 
      * @virtual
      */
-    _initRubberBand: function(){
-        if(!this.chart._isInteractive()) {
-            return;
-        }
+    _initRubberBand: function() {
+        var me = this,
+            chart = me.chart;
         
-        var myself = this,
-            chart = myself.chart,
-            options  = chart.options,
+        if(!chart.interactive()) { return; }
+        
+        var options = chart.options,
             clickClearsSelection = options.clearSelectionMode === 'emptySpaceClick',
-            useRubberband = this.chart._canSelectWithRubberband();
+            useRubberband = this.chart.selectableByRubberband();
         
-        if(!useRubberband && !clickClearsSelection){
-            return;
-        }
+        if(!useRubberband && !clickClearsSelection) { return; }
         
         var data = chart.data,
-            rubberPvParentPanel = myself.pvRootPanel || myself.pvPanel.paddingPanel;
+            pvParentPanel = me.pvRootPanel || me.pvPanel.paddingPanel;
         
         // IE must have a fill style to fire events
-        if(!myself._getExtensionAbs('base', 'fillStyle')){
-            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        if(!me._getExtensionAbs('base', 'fillStyle')) {
+            pvParentPanel.fillStyle(pvc.invisibleFill);
         }
         
         // Require all events, wether it's painted or not
-        rubberPvParentPanel.lock('events', 'all');
+        pvParentPanel.lock('events', 'all');
         
         if(!useRubberband) {
             if(clickClearsSelection) {
                 // Install clearSelectionMode click
-                rubberPvParentPanel
+                pvParentPanel
                     .event("click", function() {
-                        if(data.owner.clearSelected()) {
-                            chart.updateSelections();
-                        }
+                        /*jshint expr:true */
+                        data.owner.clearSelected() && chart.updateSelections();
                     });
             }
             return;
@@ -1911,38 +1620,38 @@ def
         
         var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
-        this._isRubberBandSelecting = false;
+        this._selectingByRubberband = false;
 
         // Rubber band
         var toScreen, rb;
         
         var selectBar = 
             this.selectBar = 
-            new pvc.visual.Bar(this, rubberPvParentPanel, {
+            new pvc.visual.Bar(this, pvParentPanel, {
                 extensionId:   'rubberBand',
                 normalStroke:  true,
                 noHover:       true,
                 noSelect:      true,
                 noClick:       true,
                 noDoubleClick: true,
-                noTooltip:    true
+                noTooltip:     true
             })
-            .override('defaultStrokeWidth', function(){ return 1.5; })
-            .override('defaultColor', function(type){
+            .override('defaultStrokeWidth', def.fun.constant(1.5))
+            .override('defaultColor', function(type) {
                 return type === 'stroke' ? 
                        '#86fe00' :                 /* 'rgb(255,127,0)' */ 
                        'rgba(203, 239, 163, 0.6)'  /* 'rgba(255, 127, 0, 0.15)' */
                        ;
             })
-            .override('interactiveColor', function(color){ return color; })
+            .override('interactiveColor', function(color) { return color; })
             .pvMark
-            .lock('visible', function(){ return !!rb;  })
-            .lock('left',    function(){ return rb.x;  })
+            .lock('visible', function() { return !!rb;  })
+            .lock('left',    function() { return rb.x;  })
             .lock('right')
-            .lock('top',     function(){ return rb.y;  })
+            .lock('top',     function() { return rb.y;  })
             .lock('bottom')
-            .lock('width',   function(){ return rb.dx; })
-            .lock('height',  function(){ return rb.dy; })
+            .lock('width',   function() { return rb.dx; })
+            .lock('height',  function() { return rb.dy; })
             .lock('cursor')
             .lock('events', 'none')
             ;
@@ -1955,28 +1664,21 @@ def
         scene.x = scene.y = scene.dx = scene.dy = 0;
         
         var selectionEndedDate;
-        rubberPvParentPanel
+        pvParentPanel
             .lock('data', [scene]) 
             .event('mousedown', pv.Behavior.select().autoRender(false))
-            .event('select', function(){
-                if(!rb){
-                    if(myself.isAnimating()){
-                        return;
-                    }
-                    
-                    if(scene.dx * scene.dx + scene.dy * scene.dy <= dMin2){
-                        return;
-                    }
+            .event('select', function() {
+                if(!rb) {
+                    if(me.animating()) { return; }
+                    if(scene.dx * scene.dx + scene.dy * scene.dy <= dMin2) { return; }
                     
                     rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
                     
-                    myself._isRubberBandSelecting = true;
+                    me._selectingByRubberband = true;
                     
-                    if(!toScreen){
-                        toScreen = rubberPvParentPanel.toScreenTransform();
-                    }
+                    if(!toScreen) { toScreen = pvParentPanel.toScreenTransform(); }
                     
-                    myself.rubberBand = rb.apply(toScreen);
+                    me.rubberBand = rb.apply(toScreen);
                 } else {
                     rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
                     // not updating rubberBand ?
@@ -1984,239 +1686,139 @@ def
                 
                 selectBar.render();
             })
-            .event('selectend', function(){
-                if(rb){
+            .event('selectend', function() {
+                if(rb) {
                     var ev = arguments[arguments.length - 1];
                     
-                    if(!toScreen){
-                        toScreen = rubberPvParentPanel.toScreenTransform();
-                    }
+                    if(!toScreen) { toScreen = pvParentPanel.toScreenTransform(); }
                     
-                    //rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
                     var rbs = rb.apply(toScreen);
                     
                     rb = null;
-                    myself._isRubberBandSelecting = false;
+                    me._selectingByRubberband = false;
                     selectBar.render(); // hide rubber band
                     
                     // Process selection
-                    try{
-                        myself._processRubberBand(rbs, ev, {allowAdditive: true});
-                    } finally {
-                        selectionEndedDate = new Date();
-                    }
+                    try     { me._processRubberBand(rbs, ev, {allowAdditive: true}); } 
+                    finally { selectionEndedDate = new Date(); }
                 }
             });
         
-        if(clickClearsSelection){
-            rubberPvParentPanel
+        if(clickClearsSelection) {
+            pvParentPanel
                 .event("click", function() {
                     // It happens sometimes that the click is fired 
-                    //  after mouse up, ending up clearing a just made selection.
-                    if(selectionEndedDate){
+                    // after mouse up, ending up clearing a just made selection.
+                    if(selectionEndedDate) {
                         var timeSpan = new Date() - selectionEndedDate;
-                        if(timeSpan < 300){
+                        if(timeSpan < 300) {
                             selectionEndedDate = null;
                             return;
                         }
                     }
                     
-                    if(data.owner.clearSelected()) {
-                        chart.updateSelections();
-                    }
+                    if(data.owner.clearSelected()) { chart.updateSelections(); }
                 });
         }
     },
     
-    _processRubberBand: function(rb, ev, keyArgs){
+    _processRubberBand: function(rb, ev, ka) {
         this.rubberBand = rb;
-        try{
-            this._onRubberBandSelectionEnd(ev, keyArgs);
-        } finally {
-            this.rubberBand  = null;
-        }
+        try     { this._onRubberBandSelectionEnd(ev, ka); } 
+        finally { this.rubberBand  = null; }
     },
     
-    _onRubberBandSelectionEnd: function(ev, keyArgs){
-        if(pvc.debug >= 10) {
-            this._log("rubberBand " + pvc.stringify(this.rubberBand));
-        }
+    _onRubberBandSelectionEnd: function(ev, ka) {
+        if(pvc.debug >= 20) { this._log("rubberBand " + pvc.stringify(this.rubberBand)); }
         
-        keyArgs = Object.create(keyArgs || {});
-        keyArgs.toggle = false; // output argument
+        ka = Object.create(ka || {});
+        ka.toggle = false; // output argument
         
-        var datums = this._getDatumsOnRubberBand(ev, keyArgs);
-        if(datums){
-            var allowAdditive = def.get(keyArgs, 'allowAdditive', true);
+        var datums = this._getDatumsOnRubberBand(ev, ka);
+        if(datums) {
+            var allowAdditive = def.get(ka, 'allowAdditive', true);
             var chart = this.chart;
-            
-            //this._log("Selecting Datum count=" + datums.length + 
-            //          " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
             
             // Make sure selection changed action is called only once
             // Checks if any datum's selected changed, at the end
-            chart._updatingSelections(function(){
+            chart._updatingSelections(function() {
                 var clearBefore = !allowAdditive || 
                                   (!ev.ctrlKey && chart.options.ctrlSelectMode);
-                if(clearBefore){
+                if(clearBefore) {
                     chart.data.owner.clearSelected();
                     pvc.data.Data.setSelected(datums, true);
-                } else if(keyArgs.toggle){
+                } else if(ka.toggle) {
                     pvc.data.Data.toggleSelected(datums);
                 } else {
                     pvc.data.Data.setSelected(datums, true);
-            }
+                }
             });
-            
-            //this._log("End rubber band selection");
         }
     },
     
-    _getDatumsOnRubberBand: function(ev, keyArgs){
+    _getDatumsOnRubberBand: function(ev, ka) {
         var datumMap = new def.Map();
         
-        this._getDatumsOnRect(datumMap, this.rubberBand, keyArgs);
+        this._getDatumsOnRect(datumMap, this.rubberBand, ka);
             
         var datums = datumMap.values();
-        if(datums.length){
+        if(datums.length) {
             datums = this.chart._onUserSelection(datums);
-            if(datums && !datums.length){
-                datums = null;
-            }
+            if(datums && !datums.length) { datums = null; }
         }
         
         return datums;
     },
     
     // Callback to handle end of rubber band selection
-    _getDatumsOnRect: function(datumMap, rect, keyArgs){
-        this._getOwnDatumsOnRect(datumMap, rect, keyArgs);
+    _getDatumsOnRect: function(datumMap, rect, ka) {
+        this._getOwnDatumsOnRect(datumMap, rect, ka);
         
-        if(this._children) {
-            this._children.forEach(function(child){
-                child._getDatumsOnRect(datumMap, rect, keyArgs);
-            }, this);
+        var cs = this._children;
+        if(cs) {
+            cs.forEach(function(c) { c._getDatumsOnRect(datumMap, rect, ka); });
         }
     },
     
-    _getOwnDatumsOnRect: function(datumMap, rect, keyArgs){
-        var any = false;
+    _getOwnDatumsOnRect: function(datumMap, rect, ka) {
+        var me = this;
+        if(!me.isVisible) { return false; }
         
-        if(this.isVisible){
-            var pvMarks = this._getSelectableMarks();
-            if(pvMarks && pvMarks.length){
-                pvMarks.forEach(function(pvMark){
-                    this._eachMarkDatumOnRect(pvMark, rect, function(datum){
-                        datumMap.set(datum.id, datum);
-                        any = true;
-                    }, 
-                    this,
-                    def.get(keyArgs, 'markSelectionMode'));
-                    
-                }, this);
+        var pvMarks = me._getSelectableMarks();
+        if(!pvMarks || !pvMarks.length) { return false; }
+        
+        var inCount = datumMap.count;
+        
+        var selectionMode = def.get(ka, 'markSelectionMode');
+        var processDatum = function(datum) {
+            if(!datum.isNull) { datumMap.set(datum.id, datum); }
+        };
+        var processScene = function(scene) {
+            if(scene.selectableByRubberband()) {
+                scene.datums().each(processDatum);
             }
-        }
+        };
+        var processMark = function(pvMark) {
+            pvMark.eachSceneWithDataOnRect(rect, processScene, null, selectionMode);
+        };
         
-        return any;
-    },
-    
-    _eachMarkDatumOnRect: function(pvMark, rect, fun, ctx, selectionMode){
+        pvMarks.forEach(processMark);
         
-        var sign = pvMark.sign;
-        if(sign && !sign.isSelectable()){
-            return;
-        }
-                
-        // center, partial and total (not implemented)
-        if(selectionMode == null){
-            selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
-        }
-        
-        var useCenter = (selectionMode === 'center');
-        
-        pvMark.eachInstanceWithData(function(scenes, index, toScreen){
-
-            // Apply size reduction to tolerate user unprecise selections
-            var shape = pvMark.getShape(scenes, index, /*inset margin each side*/0.2);
-            
-            shape = (useCenter ? shape.center() : shape).apply(toScreen);
-            
-            processShape.call(this, shape, scenes[index], index);
-        }, this);
-        
-        function processShape(shape, instance, index) {
-            if (shape.intersectsRect(rect)){
-                var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData
-                if(cccScene && cccScene.datum){
-                    cccScene.datums().each(function(datum){
-                        if(!datum.isNull) {
-                            if(pvc.debug >= 20) {
-                                this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type + " index=" + index);
-                            }
-
-                            fun.call(ctx, datum);
-                        }
-                    }, this);
-                }
-            }
-        }
+        return inCount < datumMap.count; // any locally added?
     },
     
     /* ANCHORS & ORIENTATION */
     
     /**
-     * Returns true if the anchor is one of the values 'top' or
-     * 'bottom'.
+     * Returns true if the anchor is one of the values 'top' or 'bottom'.
      */
     isAnchorTopOrBottom: function(anchor) {
-        if (!anchor) {
-            anchor = this.anchor;
-        }
+        if (!anchor) { anchor = this.anchor; }
         return anchor === "top" || anchor === "bottom";
     },
 
-    anchorOrtho: function(anchor) {
-        if (!anchor) {
-            anchor = this.anchor;
-        }
-        return pvc.BasePanel.relativeAnchor[anchor];
-    },
-
-    anchorOrthoMirror: function(anchor) {
-        if (!anchor) {
-            anchor = this.anchor;
-        }
-        return pvc.BasePanel.relativeAnchorMirror[anchor];
-    },
-
-    anchorOpposite: function(anchor) {
-        if (!anchor) {
-            anchor = this.anchor;
-        }
-        return pvc.BasePanel.oppositeAnchor[anchor];
-    },
-
-    anchorLength: function(anchor) {
-        if (!anchor) {
-            anchor = this.anchor;
-        }
-        return pvc.BasePanel.parallelLength[anchor];
-    },
-
-    anchorOrthoLength: function(anchor) {
-        if (!anchor) {
-            anchor = this.anchor;
-        }
-        return pvc.BasePanel.orthogonalLength[anchor];
-    },
-
-    isOrientationVertical: function(orientation) {
-        return this.chart.isOrientationVertical(orientation);
-    },
-
-    isOrientationHorizontal: function(orientation) {
-        return this.chart.isOrientationHorizontal(orientation);
-    }
+    isOrientationVertical:   function(o) { return this.chart.isOrientationVertical  (o); },
+    isOrientationHorizontal: function(o) { return this.chart.isOrientationHorizontal(o); }
 })
 .addStatic({
     // Determine what is the associated method to
@@ -2301,4 +1903,25 @@ def
         width:  "height",
         height: "width"
     }
+});
+
+def.scope(function(){
+    // Create Anchor methods
+    
+    var BasePanel = pvc.BasePanel;
+    var methods = {};
+    var anchorDicts = {
+        anchorOrtho:       'relativeAnchor',
+        anchorOrthoMirror: 'relativeAnchorMirror',
+        anchorOpposite:    'oppositeAnchor',
+        anchorLength:      'parallelLength',
+        anchorOrthoLength: 'orthogonalLength'
+    };
+    
+    def.eachOwn(anchorDicts, function(d, am){
+        var dict = BasePanel[d];
+        methods[am] = function(a) { return dict[a || this.anchor]; };
+    });
+    
+    BasePanel.add(methods);
 });

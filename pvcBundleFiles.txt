@@ -29,10 +29,14 @@ src/pvc/data/ZeroInterpolationOperSeriesState.js
 src/pvc/data/Data.operations.js
 src/pvc/data/Data.compat.js
 
-src/pvc/visual/Role.js
+src/pvc/visual/Interactive.js
 src/pvc/visual/Scene.js
 src/pvc/visual/Var.js
+src/pvc/visual/Context.js
+
+src/pvc/visual/Role.js
 src/pvc/visual/RoleVarHelper.js
+
 src/pvc/visual/sign/BasicSign.js
 src/pvc/visual/sign/Sign.js
 src/pvc/visual/sign/Panel.js
@@ -45,7 +49,7 @@ src/pvc/visual/sign/Area.js
 src/pvc/visual/sign/Bar.js
 src/pvc/visual/sign/PieSlice.js
 src/pvc/visual/sign/Rule.js
-src/pvc/visual/Context.js
+
 src/pvc/visual/OptionsBase.js
 src/pvc/visual/Axis.js
 src/pvc/visual/CartesianAxis.js

@@ -33,10 +33,10 @@ def
      */
     _processOptionsCore: function(options){
         
-        this.base(options);
-        
         options.legend     = false;
         options.selectable = false; // not supported yet
+        
+        this.base(options);
     },
     
     /**
@@ -125,9 +125,7 @@ def
             this, 
             this.basePanel, 
             bulletPlot, 
-            def.create(contentOptions, {
-                tooltipEnabled:  this._tooltipEnabled
-            }));
+            contentOptions);
     },
   
     defaults: {
@@ -188,9 +186,9 @@ def
      * @override
      */
     _createCore: function(layoutInfo) {
-        var chart  = this.chart,
+        var chart   = this.chart,
             options = chart.options,
-            data = this.buildData();
+            data    = this.buildData();
     
         var anchor = options.orientation=="horizontal"?"left":"bottom";
         var size, angle, align, titleLeftOffset, titleTopOffset, ruleAnchor, leftPos, topPos, titleSpace;
@@ -295,7 +293,7 @@ def
             .measures(function(d){ return d.measures; })
             .markers (function(d){ return d.markers;  });
     
-        if (options.clickable && this.clickAction){
+        if (chart.clickable() && this.clickAction){
             var me = this;
       
             this.pvBullet
@@ -322,12 +320,9 @@ def
                 return d.formattedMarkers[this.index];
             });
 
-        if(this.tooltipEnabled){
+        if(this.showsTooltip()) {
             // Extend default
             // TODO: how to deal with different measures in tooltips depending on mark
-      
-            //      this._addPropTooltip(this.pvBulletMeasure);
-            //      this._addPropTooltip(this.pvBulletMarker);
             var myself = this;
             this.pvBulletMeasure
                 .localProperty('tooltip')
@@ -386,7 +381,7 @@ def
     
                     } : null;
     
-        if (options.clickable && doubleClickAction) {
+        if (chart.doubleClickable() && doubleClickAction) {
             this.pvBulletTitle
                 .cursor("pointer")
                 .events('all')  //labels don't have events by default

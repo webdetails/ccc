@@ -28,12 +28,11 @@ def
      * on the first series.
      * @virtual
      */
-    _barDifferentialControl: function(){
+    _barDifferentialControl: function() {
         var isFalling = this.chart._isFalling;
-
         /*
          * From protovis help:
-         *
+         * 
          * Band differential control pseudo-property.
          *  2 - Drawn starting at previous band offset. Multiply values by  1. Don't update offset.
          *  1 - Drawn starting at previous band offset. Multiply values by  1. Update offset.
@@ -41,15 +40,15 @@ def
          * -1 - Drawn starting at previous band offset. Multiply values by -1. Update offset.
          * -2 - Drawn starting at previous band offset. Multiply values by -1. Don't update offset.
          */
-        return function(scene){
-            if(isFalling && !this.index){
+        return function(scene) {
+            if(isFalling && !this.index) {
                 // First falling bar is the main total
                 // Must be accounted up and update the total
                 return 1;
             }
 
             var group = scene.vars.category.group;
-            if(group._isFlattenGroup && !group._isDegenerateFlattenGroup){
+            if(group._isFlattenGroup && !group._isDegenerateFlattenGroup) {
                 // Groups don't update the total
                 // Groups, always go down, except the first falling...
                 return -2;
@@ -59,18 +58,15 @@ def
         };
     },
     
-    _creating: function(){
+    _creating: function() {
         // Register BULLET legend prototype marks
         var rootScene = this._getLegendBulletRootScene();
-        if(rootScene){
+        if(rootScene) {
             var waterfallGroupScene = rootScene.firstChild;
-            
             if(waterfallGroupScene && !waterfallGroupScene.hasRenderer()){
                 var keyArgs = {
                         drawRule:      true,
                         drawMarker:    false,
-                        noSelect:      true,
-                        noHover:       true,
                         rulePvProto:   new pv.Mark()
                     };
                 

@@ -83,6 +83,12 @@ def.scope(function(){
                 resolve: '_resolveFull',
                 cast: String, // TODO: parse
                 value: 'by-parent'
+            },
+            
+            RootCategoryLabel: {
+                resolve: '_resolveFull',
+                cast: String,
+                value: 'Root'
             }
         });
 });

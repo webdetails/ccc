@@ -156,7 +156,7 @@ def
                 function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
                 function(){ return !this.scene.isNull; };
         
-        var isLineAreaNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
+        var isLineAreaNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
         
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
