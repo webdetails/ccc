@@ -149,7 +149,7 @@ add(/** @lends pvc.data.GroupingOper */{
                 .select(function(spec) {
                     var levelCount = spec.levels.length;
                     if(!levelCount) { return 0; }
-                    return (spec.flatteningMode !== 'singleLevel') ? 1 : levelCount;
+                    return !!spec.flatteningMode ? 1 : levelCount;
                 })
                 .reduce(def.add, 0),
                 
@@ -164,14 +164,14 @@ add(/** @lends pvc.data.GroupingOper */{
         return rootNode;
     },
     
-    _groupSpecRecursive: function(specParentNode, specDatumsQuery, specIndex){
+    _groupSpecRecursive: function(specParentNode, specDatumsQuery, specIndex) {
         var groupSpec     = this._groupSpecs[specIndex];
         var levelSpecs    = groupSpec.levels;
         var L             = levelSpecs.length;
-        var doFlatten     = (groupSpec.flatteningMode !== 'singleLevel');
+        var doFlatten     = !!groupSpec.flatteningMode;
         var nextSpecIndex = specIndex + 1;
         var isLastSpec    = (nextSpecIndex >= this._groupSpecs.length);
-        var isPostOrder   = doFlatten && (groupSpec.flatteningMode === 'tree-post');
+        var isPostOrder   = doFlatten && (groupSpec.flatteningMode === pvc.data.FlatteningMode.DfsPost);
         var specGroupParent;
         
         if(doFlatten) {

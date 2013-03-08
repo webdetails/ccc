@@ -61,7 +61,9 @@ def
         
         this._isFalling = waterPlot.option('Direction') === 'down';
         
-        this._catRole.setFlatteningMode(this._isFalling ? 'tree-pre' : 'tree-post');
+        var travProp = this._isFalling ? 'FlattenDfsPre' : 'FlattenDfsPost';
+        this._catRole.setTraversalMode(pvc.visual.TraversalMode[travProp]);
+        
         this._catRole.setRootLabel(waterPlot.option('AllCategoryLabel'));
     },
     

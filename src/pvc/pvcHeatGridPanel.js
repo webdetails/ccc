@@ -50,7 +50,7 @@ def
         /* Column and Row datas  */
 
         // One multi-dimension single-level data grouping
-        var rowRootData = me.data.flattenBy(me.visualRoles.series, {visible: true});
+        var rowRootData = me.visualRoles.series.flatten(me.data, {visible: true});
 
         // One multi-dimensional, two-levels grouping (Series -> Categ)
         var rootScene  = me._buildScene(me.visibleData(), rowRootData, cellSize);

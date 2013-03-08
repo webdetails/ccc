@@ -1,4 +1,13 @@
 
+def
+.space('pvc.visual')
+.TraversalMode = def.makeEnum([
+    'Tree',
+    'FlattenedSingleLevel', // Flattened grouping to a single grouping level
+    'FlattenDfsPre',        // Same grouping levels and dimensions, but all nodes are output 
+    'FlattenDfsPost'        // Idem, but in Dfs-Post order
+]);
+
 /**
  * Initializes a visual role.
  * 
@@ -58,11 +67,11 @@
  * Indicates if a dimension with the default name (the first level of, when a group name),
  * should be created when the role is required and it has not been read by a translator.
  *
- * @param {string} [keyArgs.flatteningMode='singleLevel'] Indicates if the role presents
- * the leaf data nodes or all the nodes in the tree, in pre or post order.
- * Possible values are <tt>'singleLevel'</tt>, <tt>'tree-pre'</tt> and <tt>'tree-post'</tt>.
+ * @param {pvc.visual.TraversalMode} [keyArgs.traversalMode=pvc.visual.TraversalMode.FlattenedSingleLevel] 
+ * Indicates the type of data nodes traversal that the role performs.
  */
-def.type('pvc.visual.Role')
+def
+.type('pvc.visual.Role')
 .init(function(name, keyArgs){
     this.name  = name;
     this.label = def.get(keyArgs, 'label') || pvc.buildTitleFromName(name);
@@ -128,9 +137,9 @@ def.type('pvc.visual.Role')
         this.dimensionDefaults.isDiscrete = this.requireIsDiscrete;
     }
 
-    var flatteningMode = def.get(keyArgs, 'flatteningMode');
-    if(flatteningMode && flatteningMode != this.flatteningMode) {
-        this.flatteningMode = flatteningMode;
+    var traversalMode = def.get(keyArgs, 'traversalMode');
+    if(traversalMode != null && traversalMode !== this.traversalMode) {
+        this.traversalMode = traversalMode;
     }
 })
 .add(/** @lends pvc.visual.Role# */{
@@ -143,7 +152,7 @@ def.type('pvc.visual.Role')
     defaultSourceRoleName: null,
     defaultDimensionName:  null,
     grouping: null,
-    flatteningMode: 'singleLevel',
+    traversalMode: pvc.visual.TraversalMode.FlattenedSingleLevel,
     rootLabel: '',
     autoCreateDimension: false,
     isReversed: false,
@@ -155,7 +164,7 @@ def.type('pvc.visual.Role')
      * Obtains the first dimension type that is bound to the role.
      * @type pvc.data.DimensionType
      */
-    firstDimensionType: function(){
+    firstDimensionType: function() {
         var g = this.grouping;
         return g && g.firstDimensionType();
     },
@@ -164,7 +173,7 @@ def.type('pvc.visual.Role')
      * Obtains the name of the first dimension type that is bound to the role.
      * @type string 
      */
-    firstDimensionName: function(){
+    firstDimensionName: function() {
         var g = this.grouping;
         return g && g.firstDimensionName();
     },
@@ -173,34 +182,37 @@ def.type('pvc.visual.Role')
      * Obtains the value type of the first dimension type that is bound to the role.
      * @type function
      */
-    firstDimensionValueType: function(){
+    firstDimensionValueType: function() {
         var g = this.grouping;
         return g && g.firstDimensionValueType();
     },
 
-    isDiscrete: function(){
+    isDiscrete: function() {
         var g = this.grouping;
         return g && g.isDiscrete();
     },
     
-    setSourceRole: function(sourceRole, isDefault){
+    setSourceRole: function(sourceRole, isDefault) {
         this.sourceRole = sourceRole;
         this.isDefaultSourceRole = !!isDefault;
     },
     
-    setIsReversed: function(isReversed){
-        if(!isReversed){ // default value
-            delete this.isReversed;
-        } else {
-            this.isReversed = true;
-        }
+    setIsReversed: function(isReversed) {
+        if(!isReversed) { delete this.isReversed; } 
+        else            { this.isReversed = true; }
     },
     
-    setFlatteningMode: function(flatteningMode) {
-        if(!flatteningMode || flatteningMode === 'singleLevel') { // default value
-            delete this.flatteningMode;
-        } else {
-            this.flatteningMode = flatteningMode;
+    setTraversalMode: function(travMode) {
+        var T = pvc.visual.TraversalMode;
+        
+        travMode = def.nullyTo(travMode, T.FlattenedSingleLevel);
+        
+        if(travMode !== this.traversalMode) {
+            if(travMode === T.FlattenedSingleLevel) { // default value
+                delete this.traversalMode;
+            } else {
+                this.traversalMode = travMode;
+            }
         }
     },
 
@@ -223,20 +235,47 @@ def.type('pvc.visual.Role')
      * 
      * @type pvc.data.Data
      */
-    flatten: function(data, keyArgs) { if(this.grouping) { return data.flattenBy(this, keyArgs); } },
+    flatten: function(data, keyArgs) {
+        var grouping = this.flattenedGrouping(keyArgs) || def.fail.operationInvalid("Role is unbound.");
+            
+        return data.groupBy(grouping, keyArgs);
+    },
 
     flattenedGrouping: function(keyArgs) {
         var grouping = this.grouping;
         if(grouping) {
-            keyArgs = def.setDefaults(keyArgs, 'flatteningMode', this.flatteningMode);
+            if(!keyArgs){ keyArgs = {}; }
+            var flatMode = keyArgs.flatteningMode;
+            if(flatMode == null) {
+                flatMode = keyArgs.flatteningMode = this._flatteningMode();
+            }
+            
+            if(keyArgs.isSingleLevel == null && !flatMode) {
+                keyArgs.isSingleLevel = true;
+            }
+            
+            if(keyArgs.flatteningMode == null) { keyArgs.flatteningMode = this._flatteningMode(); }
 
             return grouping.ensure(keyArgs);
         }
     },
 
+    _flatteningMode: function() {
+        var T = pvc.visual.TraversalMode;
+        var F = pvc.data.FlatteningMode;
+        switch(this.traversalMode) {
+            case T.FlattenDfsPre:  return F.DfsPre;
+            case T.FlattenDfsPost: return F.DfsPost;
+        }
+        return T.None;
+    },
+    
     select: function(data, keyArgs) {
         var grouping = this.grouping;
-        if(grouping) { return data.groupBy(grouping.ensure(keyArgs), keyArgs); }
+        if(grouping) {
+            def.setUDefaults(keyArgs, 'flatteningMode', pvc.data.FlatteningMode.None);
+            return data.groupBy(grouping.ensure(keyArgs), keyArgs); 
+        }
     },
 
     view: function(complex) {
@@ -364,3 +403,4 @@ def.type('pvc.visual.Role')
         }
     }
 });
+

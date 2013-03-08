@@ -1,4 +1,15 @@
 
+def
+.space('pvc.data')
+.FlatteningMode =
+    def.set(
+        def.makeEnum([
+            'DfsPre', // Same grouping levels and dimensions, but all nodes are output at level 1 
+            'DfsPost' // Idem, but in Dfs-Post order
+        ]),
+        // Add None with value 0
+        'None', 0);
+
 /**
  * Initializes a grouping specification.
  * 
@@ -23,17 +34,15 @@
  * @property {pvc.data.ComplexType} type The complex type against which dimension names were resolved.
  * @property {pvc.data.GroupingLevelSpec} levels An array of level specifications.
  * @property {pvc.data.DimensionType} firstDimension The first dimension type, if any.
- * @property {string} flatteningMode Indicates if the grouping is
- * flattened using pre or post order depth-first search.
- * Possible values are <tt>null</tt>, <tt>'tree-pre'</tt> and <tt>'tree-post'</tt>.
+ * @property {pvc.data.FlatteningMode} flatteningMode The flattening mode.
  * @property {string} rootLabel The label of the resulting root node.
  *
  * @constructor
  * @param {def.Query} levelSpecs An enumerable of {@link pvc.data.GroupingLevelSpec}.
  * @param {pvc.data.ComplexType} [type] A complex type.
  * @param {object} [ka] Keyword arguments.
- * @param {string} [ka.flatteningMode=null] The flattening mode.
- * @param {string} [ka.rootLabel=''] The label of the root node of a flattening operation.
+ * @param {pvc.data.FlatteningMode} [ka.flatteningMode=pvc.data.FlatteningMode.None] The flattening mode.
+ * @param {string} [ka.rootLabel=''] The label of the root node.
  */
 def.type('pvc.data.GroupingSpec')
 .init(function(levelSpecs, type, ka){
@@ -70,21 +79,20 @@ def.type('pvc.data.GroupingSpec')
     this.isSingleDimension = this.isSingleLevel && !this.hasCompositeLevels;
     this.firstDimension    = this.depth > 0 ? this.levels[0].dimensions[0] : null;
     
-    this.flatteningMode   = def.get(ka, 'flatteningMode' ) || 'singleLevel';
-    this.rootLabel        = def.get(ka, 'rootLabel') || '';
+    this.rootLabel = def.get(ka, 'rootLabel') || "";
+    this.flatteningMode = def.get(ka, 'flatteningMode') || pvc.data.FlatteningMode.None;
     
     this._cacheKey = this._calcCacheKey();
     this.id = this._cacheKey + "##" + ids.join('||');
 })
 .add(/** @lends pvc.data.GroupingSpec# */{
-    rootLabel: "",
     
     _calcCacheKey: function(ka) {
-        var flatteningMode = def.get(ka, 'flatteningMode') || this.flatteningMode;
-        var reverse        = def.get(ka, 'reverse'       ) || 'false';
-        var rootLabel      = def.get(ka, 'rootLabel'     ) || this.rootLabel;
-        
-        return flatteningMode + '#' + reverse + '#' + rootLabel;
+        return [def.get(ka, 'flatteningMode') || this.flatteningMode,
+                def.get(ka, 'reverse'       ) || 'false',
+                def.get(ka, 'isSingleLevel' ) || this.isSingleLevel,
+                def.get(ka, 'rootLabel'     ) || this.rootLabel]
+               .join('#');
     },
 
     /**
@@ -93,19 +101,14 @@ def.type('pvc.data.GroupingSpec')
      */
     bind: function(type){
         this.type = type || def.fail.argumentRequired('type');
-        this.levels.forEach(function(levelSpec){
-            levelSpec.bind(type);
-        });
+        this.levels.forEach(function(levelSpec) { levelSpec.bind(type); });
     },
 
     /**
      * Obtains an enumerable of the contained dimension specifications.
      * @type def.Query
      */
-    dimensions: function() {
-        return def.query(this.levels)
-                  .selectMany(function(level){ return level.dimensions; });
-    },
+    dimensions: function() { return def.query(this.levels).prop('dimensions').selectMany(); },
 
     dimensionNames: function() { return this._dimNames; },
     
@@ -158,7 +161,10 @@ def.type('pvc.data.GroupingSpec')
      * Obtains a version of this grouping specification
      * that conforms to the specified arguments.
      *
-     * @param {string}  [ka.flatteningMode] The desired flatenning mode.
+     * @param {string}  [ka.flatteningMode] The desired flattening mode.
+     * @param {boolean} [ka.isSingleLevel=false] Indicates that the grouping should have only a single level.
+     * If that is not the case, all grouping levels are collapsed into a single level containing all dimensions.
+     * 
      * @param {boolean} [ka.reverse=false] Indicates that each dimension's order should be reversed.
      * @param {string}  [ka.rootLabel] The label of the resulting root node.
      * 
@@ -179,22 +185,20 @@ def.type('pvc.data.GroupingSpec')
     },
     
     _ensure: function(ka) {
-        var g = this;
-        var flatteningMode = def.get(ka, 'flatteningMode') || this.flatteningMode;
-        var flattenChange = flatteningMode !== this.flatteningMode;
-        if(flattenChange && flatteningMode === 'singleLevel') {
-            return g._singleLevelGrouping(ka); // supports reverse and rootLabel 
-        }
-
-        if (def.get(ka, 'reverse')) {
-            g = g._reverse(ka); // supports rootLabel only
-            if(!flattenChange) { return g; }
+        var me = this;
+        
+        if(def.get(ka, 'isSingleLevel') && !me.isSingleLevel) { return me._singleLevelGrouping(ka); }
+        if(def.get(ka, 'reverse')) { return me._reverse(ka); }
+        
+        var flatteningMode = def.get(ka, 'flatteningMode') || me.flatteningMode;
+        if(flatteningMode !== me.flatteningMode) {
+            return new pvc.data.GroupingSpec(me.levels, me.type, { // Share Levels
+                flatteningMode: flatteningMode,
+                rootLabel:      def.get(ka, 'rootLabel') || me.rootLabel
+            });
         }
         
-        return new pvc.data.GroupingSpec(g.levels, g.type, { // Share Levels
-            flatteningMode: flatteningMode,
-            rootLabel:      def.get(ka, 'rootLabel') || this.rootLabel
-        });
+        return me;
     },
     
     /**
@@ -246,8 +250,8 @@ def.type('pvc.data.GroupingSpec')
             });
 
         return new pvc.data.GroupingSpec(levelSpecs, this.type, {
-            flatteningMode: this.flatteningMode,
-            rootLabel: def.get(ka, 'rootLabel') || this.rootLabel
+            flatteningMode: def.get(ka, 'flatteningMode') || this.flatteningMode,
+            rootLabel:      def.get(ka, 'rootLabel'     ) || this.rootLabel
         });
     },
 

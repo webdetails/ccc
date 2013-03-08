@@ -292,7 +292,7 @@ pvc.BaseChart
             map(function(dataCell){ return dataCell.dataPartValue; });
         
         var baseData = this.visibleData(dataPartValues, {ignoreNulls: false});
-        var data = baseData && baseData.flattenBy(axis.role);
+        var data = baseData && axis.role.flatten(baseData);
         
         var scale = new pv.Scale.ordinal();
         if(!data || !data.count()){

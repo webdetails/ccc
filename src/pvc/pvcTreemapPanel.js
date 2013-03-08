@@ -186,7 +186,7 @@ def
             // with an empty key.
             // 
             // The two keys cannot currently be made compatible because
-            // it seems that the waterfall's tree-pre/post flattening
+            // it seems that the waterfall's DfsPre/DfsPost flattening
             // needs the distinction between the key of the ancestor,
             // and the key of the unexistent leaf under it...
             //
@@ -196,13 +196,11 @@ def
             scene.vars.category = pvc.visual.ValueLabelVar.fromComplex(group);
             
             // All nodes are considered leafs, for what the var helpers are concerned
-            sizeVarHelper .onNewScene(scene, /* isLeaf */ true);
+            sizeVarHelper.onNewScene(scene, /* isLeaf */ true);
             //colorVarHelper.onNewScene(scene, /* isLeaf */ true);
             
             if(!colorGrouping){
-                if(!scene.parent){
-                    scene.vars.color = new pvc.visual.ValueLabelVar(null, "");
-                }
+                if(!scene.parent) { scene.vars.color = new pvc.visual.ValueLabelVar(null, ""); }
             } else {
                 scene.vars.color = new pvc.visual.ValueLabelVar(
                         group.absKey,

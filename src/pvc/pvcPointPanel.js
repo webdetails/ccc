@@ -501,9 +501,8 @@ def
         def
         .scope(function(){
             return (serRole && serRole.grouping) ?
-                   serRole.flatten(data).children() : // data already only contains visible data
-                   def.query([null]) // null series
-                   ;
+                    serRole.flatten(data).children() : // data already only contains visible data
+                    def.query([null]); // null series
         })
         /* Create series scene */
         .each(function(seriesData1/*, seriesIndex*/){

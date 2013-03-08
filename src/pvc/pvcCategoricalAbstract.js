@@ -56,14 +56,14 @@ def
         // The data that will be shown in the base scale...
         // Ideally the base scale would already be set up...
         var allPartsData   = this.visibleData(null, ignoreNullsKeyArgs);
-        var allCatDataRoot = allPartsData.flattenBy(xRole, ignoreNullsKeyArgs);
+        var allCatDataRoot = xRole.flatten(allPartsData, ignoreNullsKeyArgs);
         var allCatDatas    = allCatDataRoot._children;
         
         // For each series...
         def
         .scope(function(){
             return (serRole && serRole.isBound())   ?
-                   data.flattenBy(serRole).children() : // data already only contains visible data
+                   serRole.flatten(data).children() : // data already only contains visible data
                    def.query([null]) // null series
                    ;
         })

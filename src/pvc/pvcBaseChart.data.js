@@ -386,7 +386,7 @@ pvc.BaseChart
             }
             
             // Visible and not
-            this._partData = this.data.flattenBy(this._dataPartRole);
+            this._partData = this._dataPartRole.flatten(this.data);
         }
         
         if(!dataPartValues || !this._dataPartRole || !this._dataPartRole.grouping){
@@ -498,7 +498,7 @@ pvc.BaseChart
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
         
         return this._serRole && this._serRole.grouping ?
-               partData.flattenBy(this._serRole, {visible: true, isNull: ignoreNulls ? false : null}) :
+               this._serRole.flatten(partData, {visible: true, isNull: ignoreNulls ? false : null}) :
                partData;
     },
     // --------------------

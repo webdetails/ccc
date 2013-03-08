@@ -77,9 +77,7 @@ def
     
     _createVisibleData: function(dataPartValue, keyArgs){
         var visibleData = this.base(dataPartValue, keyArgs);
-        if(!visibleData){
-            return null;
-        }
+        if(!visibleData) { return null; }
         
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
         return this

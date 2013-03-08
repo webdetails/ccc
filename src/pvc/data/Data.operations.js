@@ -167,7 +167,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      *
      * @returns {pvc.data.Data} The resulting root data.
      */
-    groupBy: function(groupingSpecText, keyArgs){
+    groupBy: function(groupingSpecText, keyArgs) {
         var groupOper = new pvc.data.GroupingOper(this, groupingSpecText, keyArgs),
             cacheKey  = groupOper.key,
             groupByCache,
@@ -197,13 +197,6 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         return data;
     },
 
-    flattenBy: function(role, keyArgs){
-        var grouping = role.flattenedGrouping(keyArgs) || 
-                       def.fail.operationInvalid("Role is unbound.");
-        
-        return this.groupBy(grouping, keyArgs);
-    },
-    
     /**
      * Creates a linked data with the result of filtering
      * the datums of this data.

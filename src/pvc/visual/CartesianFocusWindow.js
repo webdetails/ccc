@@ -556,7 +556,7 @@ def.scope(function(){
             var partData   = chart.partData(dataCell.dataPartValue, {visible: true});
             var domainData;
             if(isDiscrete){
-                domainData = partData.flattenBy(role);
+                domainData = role.flatten(partData);
                 
                 var dataBegin = domainData._childrenByKey[me.begin];
                 var dataEnd   = domainData._childrenByKey[me.end  ];

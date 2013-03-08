@@ -54,9 +54,7 @@ def
         var role = this.role;
         if(role && role.isBound()) {
             var partData = this.plot.chart.partData(this.dataPartValue);
-            if(partData){
-                return partData.flattenBy(role);
-            }
+            if(partData) { return role.flatten(partData); }
         }
         
         return null;

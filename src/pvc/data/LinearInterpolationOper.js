@@ -5,11 +5,11 @@ def
     
     this._data = data;
     
-    var allCatDataRoot = allPartsData.flattenBy(catRole, {ignoreNulls: false});
+    var allCatDataRoot = catRole.flatten(allPartsData, {ignoreNulls: false});
     var allCatDatas    = allCatDataRoot._children;
     
     var serDatas1 = this._serDatas1 = serRole.isBound() ?
-                        data.flattenBy(serRole).children().array() :
+                        serRole.flatten(data).children().array() :
                         [null]; // null series
     
     this._isCatDiscrete = catRole.grouping.isDiscrete();
