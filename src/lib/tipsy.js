@@ -11,8 +11,11 @@
          * and this is reused across all its mark instances.
          */
         
-        if(!opts) { opts = {}; } 
-        else      { opts = Object.create(opts); }
+        if(!opts) {
+            opts = {};
+        } else {
+            opts = Object.create(opts);
+        }
         
         /**
          * Trigger must be manual because the mouse entering/leaving
@@ -41,8 +44,7 @@
             prevMouseX,
             prevMouseY,
             _renderId,
-            _mark, _scene, _index, 
-            _tooltipMark, _tooltipScene, _tooltipIndex, 
+            _mark,
             delayOut = opts.delayOut,
             id,
             usesPoint = opts.usesPoint,
@@ -390,71 +392,35 @@
             };
         }
         
-        function setTarget(targetElem, mark) {
+        function setTarget(targetElem, mark){
             
-            var tooltipMark;
-            
-            // TODO: add a more clever concept like that of "tooltipMark" to protovis
-            
-//            if(mark) { 
-//                tooltipMark = ((mark.type === 'label') && mark.target) || mark;
-//                
-//                if(_mark &&  _mark !== mark) {
-//                    // Are we switching between 
-//                }
-//            }
-            
-//            if(_mark && mark && _mark !== mark) {
-//                var newTarget;
-//                if(mark.type === 'label') {
-//                    // Didn't change mark after all?
-//                    if((newTarget = mark.target) && (newTarget === _mark)) {
-//                        // Maybe just changed the scene?
-//                        if(_mark.scene !== _scene || _mark.index !== _index) {
-//                            _scene = _mark.scene;
-//                            _index = _mark.index;
-//                        }
-//                        
-//                        // Anyway, must update positions?
-//                    }
-//                } else if(_mark.type === 'label') {
-//                    
-//                }
-//            }
-            
-            // If tooltipMark and tooltipScene and tooltipIndex are the same
-            // then we might only be changing between label and anchor.target and vice versa.
-            
-            // We change events to the new $targetElem anyway 
             if((!$targetElem && targetElem) || 
-               ( $targetElem && $targetElem[0] !== targetElem)) {
-                if(_tip.debug >= 20) { _tip.log("[TIPSY] #" + _tipsyId + " Changing target element."); }
+               ( $targetElem && $targetElem[0] !== targetElem)){
+                if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Changing target element."); }
                 
-                if($targetElem) {
+                if($targetElem){
                     $targetElem.unbind('mousemove', updateTipsy);
                     
-                    if(!usesPoint) { $targetElem.unbind('mouseleave', hideTipsy); }
+                    if(!usesPoint) {
+                        $targetElem.unbind('mouseleave', hideTipsy);
+                    }
                 }
                 
                 // ---------
                 
-                if(targetElem) {
-                    $targetElem = $(targetElem);
-                    _mark  = mark;
-                    _scene = mark.scene;
-                    _index = mark.index;
-                } else {
-                    $targetElem = _mark = _scene = _index = null;
-                }
+                $targetElem = targetElem ? $(targetElem) : null;
+                _mark = targetElem  ? mark : null;
                 
                 prevMouseX = prevMouseY = _renderId = null;
                 
                 // ---------
                 
-                if($targetElem) {
+                if($targetElem){
                     $targetElem.mousemove(updateTipsy);
                     
-                    if(!usesPoint) { $targetElem.mouseleave(hideTipsy); }
+                    if(!usesPoint) {
+                        $targetElem.mouseleave(hideTipsy);
+                    }
                 }
             }
         }
@@ -499,7 +465,9 @@
             // Release real target
             setTarget(null, null);
           
-            if ($fakeTipTarget) { $fakeTipTarget.tipsy("leave"); }
+            if ($fakeTipTarget) {
+                $fakeTipTarget.tipsy("leave");
+            }
         }
         
         function hideOtherTipsies(){
@@ -514,7 +482,9 @@
         }
         
         function updateTipsy(ev){
-            if(!$fakeTipTarget) { return; }
+            if(!$fakeTipTarget) {
+                return;
+            }
             
             /* Don't know why: 
              * the mouseover event is triggered at a fixed interval
@@ -533,7 +503,7 @@
             // mark     = scenes.mark;
             
             var scenes;
-            if(!tag || !(scenes = tag.scenes) || !scenes.mark || (scenes.mark !== _mark)) {
+            if(!tag || !(scenes = tag.scenes) || !scenes.mark || (scenes.mark !== _mark)){
                 return;
             }
             
@@ -541,7 +511,9 @@
             var renderIdChanged = (renderId !== _renderId);
             var followMouse = opts.followMouse;
             
-            if(!followMouse && !renderIdChanged) { return; }
+            if(!followMouse && !renderIdChanged){
+                return;
+            }
             
             var opId = getNewOperationId();
                     
@@ -553,9 +525,11 @@
             // -------------
             
             var bounds;
-            if(followMouse) { bounds = getMouseBounds(ev); }
+            if(followMouse){
+                bounds = getMouseBounds(ev);
+            }
             
-            if(renderIdChanged) {
+            if(renderIdChanged){
                 // => update bounds, text and gravity
                 
                 _renderId = renderId;
@@ -566,9 +540,11 @@
                 // in a way that the mouse is still kept inside it,
                 // we have to update the position of the tooltip as well.
                 
-                _mark.context(scenes, tag.index, function() {
+                _mark.context(scenes, tag.index, function(){
                     
-                    if(!followMouse) { bounds = getInstanceBounds(); }
+                    if(!followMouse){
+                        bounds = getInstanceBounds();
+                    }
                     
                     var text = getTooltipText();
                     
@@ -614,7 +590,9 @@
             
             if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Show IN opId=" + opId); }
             
-            if (!$canvas) { initBehavior(mark); }
+            if (!$canvas) {
+                initBehavior(mark);
+            }
             
             var isHidden = !$targetElem;
             
@@ -632,7 +610,11 @@
             
             hideOtherTipsies();
             
-            $fakeTipTarget.tipsy(isHidden ? 'enter' : 'update');
+            if(isHidden){
+                $fakeTipTarget.tipsy('enter');
+            } else {
+                $fakeTipTarget.tipsy('update');
+            }
             
             if(_tip.debug >= 20){ _tip.log("[TIPSY] #" + _tipsyId + " Show OUT"); }
         }
