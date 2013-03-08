@@ -191,10 +191,11 @@ def.type('pvc.data.GroupingSpec')
         if(def.get(ka, 'reverse')) { return me._reverse(ka); }
         
         var flatteningMode = def.get(ka, 'flatteningMode') || me.flatteningMode;
-        if(flatteningMode !== me.flatteningMode) {
+        var rootLabel      = def.get(ka, 'rootLabel') || me.rootLabel;
+        if(flatteningMode !== me.flatteningMode || rootLabel !== me.rootLabel) {
             return new pvc.data.GroupingSpec(me.levels, me.type, { // Share Levels
                 flatteningMode: flatteningMode,
-                rootLabel:      def.get(ka, 'rootLabel') || me.rootLabel
+                rootLabel:      rootLabel
             });
         }
         

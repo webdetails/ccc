@@ -75,14 +75,14 @@ def.scope(function(){
             // Treemap specifc
             LayoutMode: {
                 resolve: '_resolveFull',
-                cast:  String, // TODO: parse
-                value: 'squarify' //'slice-and-dice'
+                cast:  pvc.parseTreemapLayoutMode,
+                value: 'squarify'
             },
             
             ColorMode: {
                 resolve: '_resolveFull',
-                cast: String, // TODO: parse
-                value: 'by-parent'
+                cast: pvc.parseTreemapColorMode,
+                value: 'byparent'
             },
             
             RootCategoryLabel: {

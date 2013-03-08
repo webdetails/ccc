@@ -651,6 +651,7 @@ var pvc = def.globalSpace('pvc', {
     pvc.makeEnumParser = function(enumName, keys, defaultKey) {
         var keySet = {};
         keys.forEach(function(k){ if(k) { keySet[k.toLowerCase()] = k; }});
+        if(defaultKey) { defaultKey = defaultKey.toLowerCase(); }
         
         return function(k, dk) {
             if(k) { k = (''+k).toLowerCase(); }
@@ -702,6 +703,12 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseShape = 
         pvc.makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);
+    
+    pvc.parseTreemapColorMode = 
+        pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
+    
+    pvc.parseTreemapLayoutMode = 
+        pvc.makeEnumParser('layoutMode', ['squarify', 'slice-and-dice', 'slice', 'dice'], 'squarify');
     
     pvc.parseContinuousColorScaleType = function(scaleType){
         if(scaleType){

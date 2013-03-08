@@ -54,7 +54,7 @@ def
         
         var colorScaleDirect = this.axes.color.sceneScale({sceneVarName: 'color'});
         var colorScaleLeaf   = colorScaleDirect;
-        if(this.plot.option('ColorMode') === 'by-parent') {
+        if(this.plot.option('ColorMode') === 'byparent') {
             colorScaleLeaf = colorScaleLeaf.by(function(s){ return s.parent; });
         }
         

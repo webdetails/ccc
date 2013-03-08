@@ -12,7 +12,7 @@ def
         var domainData = this.domainData();
         var candidates = def.query((domainData || undefined) && domainData.nodes());
         
-        if(this.plot.option('ColorMode') === 'by-parent') {
+        if(this.plot.option('ColorMode') === 'byparent') {
             return candidates
                 .where(function(itemData) {
                     // The hoverable effect needs colors assigned to parents,
