@@ -127,6 +127,12 @@ def.scope(function(){
             value:   "{value}"
         },
         
+        ValuesOptimizeLegibility: {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:   false
+        },
+        
         DataPart: {
             resolve: '_resolveFixed',
             cast: String,

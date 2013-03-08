@@ -16,8 +16,6 @@ def
 
     this.base(panel, protoMark, keyArgs);
 
-    this.ensureReadable = def.get(keyArgs, 'ensureReadable', true);
-    
     this._bindProperty('text', 'text');
     
     this.pvMark.font(panel.valuesFont);
@@ -77,18 +75,22 @@ def
     
     calcBackgroundColor: def.fun.constant(pv.Color.names.white), // TODO: ??
     
-    ensureReadableColor: function(color, type) {
-        var bgColor = this.backgroundColor();
-        return bgColor.isDark() ? color.complementary().alpha(0.9) : color;
+    optimizeLegibilityColor: function(color, type) {
+        if(this.panel.valuesOptimizeLegibility) {
+            var bgColor = this.backgroundColor();
+            return bgColor.isDark() ? color.complementary().alpha(0.9) : color;
+        }
+        
+        return color;
     },
     
-    normalColor: function(color, type) { return this.ensureReadableColor(color, type); },
+    normalColor: function(color, type) { return this.optimizeLegibilityColor(color, type); },
     
     interactiveColor: function(color, type) {
         if(!this.mayShowActive() && this.mayShowNotAmongSelected()) {
             return this.dimColor(color, type);
         }
         
-        return this.ensureReadableColor(color, type);
+        return this.optimizeLegibilityColor(color, type);
     }
 });

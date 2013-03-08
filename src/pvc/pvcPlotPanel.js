@@ -17,6 +17,7 @@ def
     this.valuesAnchor  = plot.option('ValuesAnchor' );
     this.valuesMask    = plot.option('ValuesMask'   );
     this.valuesFont    = plot.option('ValuesFont'   );
+    this.valuesOptimizeLegibility = plot.option('ValuesOptimizeLegibility');
     
     var roles = this.visualRoles = Object.create(chart._visualRoles);
     

@@ -63,13 +63,17 @@ def.scope(function(){
                 value: 'center'
             },
             
-            ValuesVisible: { // override
+            ValuesVisible: { // OVERRIDE
                 value: true
             },
 
             ValuesMask: { // OVERRIDE
                 resolve: '_resolveFull',
                 value:   "{category}"
+            },
+            
+            ValuesOptimizeLegibility: { // OVERRIDE
+                value: false
             },
             
             // Treemap specifc
