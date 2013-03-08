@@ -1058,15 +1058,14 @@ def
         }
     },
     
-    _getRootData: function(){
+    _getRootData: function() {
         var chart = this.chart;
         var data  = chart.data;
         
-        if (this.isDiscrete && this.useCompositeAxis){
+        if (this.isDiscrete && this.useCompositeAxis) {
             var orientation = this.anchor;
-            var reverse     = orientation == 'bottom' || orientation == 'left';
-            data  = chart.visualRoles(this.roleName)
-                         .select(data, {visible: true, reverse: reverse});
+            var reverse  = orientation == 'bottom' || orientation == 'left';
+            data = chart.visualRoles[this.roleName].select(data, {visible: true, reverse: reverse});
         }
         
         return data;

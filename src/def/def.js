@@ -2372,55 +2372,37 @@ def.type('Query')
     // Query -> Query
     
     // deferred map
-    select: function(fun, ctx){
-        return new def.SelectQuery(this, fun, ctx);
-    },
+    select: function(fun, ctx) { return new def.SelectQuery(this, fun, ctx); },
     
-    prop: function(p){
+    prop: function(p) {
         return new def.SelectQuery(this, function(item) { if(item) { return item[p]; }});
     },
 
-    selectMany: function(fun, ctx){
-        return new def.SelectManyQuery(this, fun, ctx);
-    },
+    selectMany: function(fun, ctx) { return new def.SelectManyQuery(this, fun, ctx); },
     
-    union: function(/*others*/){
+    union: function(/*others*/) {
         var queries = def.array.append([this], arguments);
         return new def.SelectManyQuery(new def.ArrayLikeQuery(queries));
     },
 
     // deferred filter
-    where: function(fun, ctx){
-        return new def.WhereQuery(this, fun, ctx);
-    },
+    where: function(fun, ctx) { return new def.WhereQuery(this, fun, ctx); },
 
-    distinct: function(fun, ctx){
-        return new def.DistinctQuery(this, fun, ctx);
-    },
+    distinct: function(fun, ctx) { return new def.DistinctQuery(this, fun, ctx); },
 
-    skip: function(n){
-        return new def.SkipQuery(this, n);
-    },
+    skip: function(n) { return new def.SkipQuery(this, n); },
     
-    take: function(n){
-        if(n <= 0){
-            return new def.NullQuery();
-        }
+    take: function(n) {
+        if(n <= 0) { return new def.NullQuery(); }
         
-        if(!isFinite(n)){
-            return this; // all
-        }
+        if(!isFinite(n)) { return this; } // all
         
         return new def.TakeQuery(this, n);
     },
     
-    whayl: function(pred, ctx){
-        return new def.WhileQuery(this, pred, ctx);
-    },
+    whayl: function(pred, ctx) { return new def.WhileQuery(this, pred, ctx); },
     
-    reverse: function(){
-        return new def.ReverseQuery(this);
-    }
+    reverse: function() { return new def.ReverseQuery(this); }
 });
 
 def.type('NullQuery', def.Query)

@@ -427,19 +427,19 @@ def
             chart = this.chart,
             options = chart.options,
             
-            titleRole = chart.visualRoles('title'),
+            titleRole = chart.visualRoles.title,
             titleGrouping = titleRole.grouping,
             
-            subTitleRole = chart.visualRoles('subTitle'),
+            subTitleRole = chart.subTitle,
             subTitleGrouping = subTitleRole.grouping,
             
-            valueRole = chart.visualRoles('value'),
+            valueRole = chart.visualRoles.value,
             valueGrouping = valueRole.grouping,
             
-            markerRole = chart.visualRoles('marker'),
+            markerRole = chart.visualRoles.marker,
             markerGrouping = markerRole.grouping,
             
-            rangeRole = chart.visualRoles('range'),
+            rangeRole = chart.visualRoles.range,
             rangeGrouping = rangeRole.grouping;
         
         var defaultData = {

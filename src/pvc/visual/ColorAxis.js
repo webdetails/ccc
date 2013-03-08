@@ -259,24 +259,29 @@ def.scope(function(){
         }
     };
     
-    function getDefaultColor(/*optionInfo*/){
+    var _defContColors;
+    
+    function getDefaultColors(/*optionInfo*/) {
         var colors;
-        if(this.scaleType === 'discrete'){
-            if(this.index === 0){
+        var scaleType = this.scaleType;
+        if(!scaleType) {
+            // Axis is unbound
+            colors = pvc.createColorScheme();
+        } else if(scaleType === 'discrete') {
+            if(this.index === 0) {
                 // Assumes default pvc scale
                 colors = pvc.createColorScheme();
             } else { 
                 // Use colors of axes with own colors.
                 // Use a color scheme that always returns 
                 // the global color scale of the role
+                // The following fun ignores passed domain values.
                 var me = this;
-                colors = function(){ // ignore domain values
-                    return me.chart._getRoleColorScale(me.role.name);
-                };
+                colors = function() { return me.chart._getRoleColorScale(me.role.name); };
             }
         } else {
-            colors = ['red', 'yellow','green']
-                     .map(function(name){ return pv.Color.names[name]; });
+            if(!_defContColors) { _defContColors = ['red', 'yellow','green'].map(pv.color); }
+            colors = _defContColors.slice();
         }
         
         return colors;
@@ -296,7 +301,7 @@ def.scope(function(){
          */
         Colors: {
             resolve:    '_resolveFull',
-            getDefault: getDefaultColor,
+            getDefault: getDefaultColors,
             data: {
                 resolveV1: function(optionInfo){
                     if(this.scaleType === 'discrete'){
@@ -450,11 +455,17 @@ def.scope(function(){
             value: pv.color('lightgray')
         },
         
+        Unbound: { // Color to use when color role is unbound (only applies to optional color roles) 
+            resolve: '_resolveFull',
+            getDefault: function(optionInfo) {
+                var scheme = this.option('Colors');
+                return scheme().range()[0] || pvc.defaultColor; // J.I.C.?
+            },
+            cast:  pv.color
+        },
+        
         // ------------
         
-        /* 
-         * LegendVisible 
-         */
         LegendVisible: {
             resolve: '_resolveFull',
             data:    legendData,

@@ -7,7 +7,7 @@ def
     
     this.axes.size = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
-    this.visualRoles.size = chart.visualRoles(plot.option('SizeRole'));
+    this.visualRoles.size = chart.visualRole(plot.option('SizeRole'));
     
     this.layoutMode = plot.option('LayoutMode');
 })

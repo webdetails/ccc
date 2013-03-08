@@ -5,7 +5,8 @@ def
     
     this.base.apply(this, arguments);
     
-    this._valueProp = this.role.grouping.isSingleDimension ? 'value' : 'absKey';
+    var g = this.role.grouping;
+    this._valueProp = (!g || g.isSingleDimension) ? 'value' : 'absKey';
 })
 .add({
     domainItemDatas: function() {
@@ -50,9 +51,7 @@ def
         });
     },
     
-    domainItemDataValue: function(itemData) { 
-        return def.nullyTo(itemData[this._valueProp], '');
-    },
+    domainItemDataValue: function(itemData) { return def.nullyTo(itemData[this._valueProp], ''); },
     
     _resolveDomainData: function() {
         var role = this.role;

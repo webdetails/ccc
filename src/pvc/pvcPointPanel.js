@@ -29,7 +29,7 @@ def
         plot.option.specify({'LinesVisible': true});
     }
      
-    this.visualRoles.value = chart.visualRoles(plot.option('OrthoRole'));
+    this.visualRoles.value = chart.visualRole(plot.option('OrthoRole'));
 })
 .add({
     pvLine: null,

@@ -18,7 +18,7 @@ def
     this.plot = plot;
     this.axisType = axisType;
     this.axisIndex = axisIndex;
-    this.role = plot.chart.visualRoles(roleName, {assertExists: false});
+    this.role = plot.chart.visualRoles[roleName];
     this.dataPartValue = dataPartValue;
 })
 .add({

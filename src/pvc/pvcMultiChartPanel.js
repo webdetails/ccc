@@ -17,7 +17,7 @@ def
             multiChartMax = Infinity;
         }
         
-        var multiChartRole = chart.visualRoles('multiChart');
+        var multiChartRole = chart.visualRoles.multiChart;
         var data = multiChartRole.flatten(chart.data, {visible: true});
         var leafCount = data._children.length;
         var count = Math.min(leafCount, multiChartMax);

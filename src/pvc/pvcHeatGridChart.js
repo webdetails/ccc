@@ -102,7 +102,7 @@ def
         /* Configure Base Axis Data Cell */
         if(plot.type === 'heatGrid' && plot.option('UseShapes')){
             
-            var sizeRole = this.visualRoles(plot.option('SizeRole'));
+            var sizeRole = this.visualRole(plot.option('SizeRole'));
             if(sizeRole.isBound()){
                 
                 var sizeDataCellsByAxisIndex = 

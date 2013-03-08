@@ -24,7 +24,7 @@ def
     this.axes.size  = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
     var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
-    this.visualRoles.size = sizeRoleName ? chart.visualRoles(sizeRoleName) : null;
+    this.visualRoles.size = sizeRoleName ? chart.visualRole(sizeRoleName) : null;
     
     this.linesVisible = plot.option('LinesVisible'); // TODO
     this.dotsVisible  = plot.option('DotsVisible' ); // TODO

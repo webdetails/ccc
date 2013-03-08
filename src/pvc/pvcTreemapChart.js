@@ -4,16 +4,16 @@ def
 .add({
     _animatable: false,
 
-    _getColorRoleSpec: function(){
+    _getColorRoleSpec: function() {
         return { 
             isRequired: true, 
             defaultSourceRole: 'category', 
-            defaultDimension: 'color*'
-            /*, requireIsDiscrete: true*/ 
+            defaultDimension:  'color*'
+            /*, requireIsDiscrete: true*/
         };
     },
     
-    _initVisualRoles: function(){
+    _initVisualRoles: function() {
         
         this.base();
         
@@ -34,17 +34,15 @@ def
             });
     },
     
-    _getTranslationClass: function(translOptions){
-        return def
-            .type(this.base(translOptions))
-            .add(pvc.data.TreemapChartTranslationOper);
+    _getTranslationClass: function(translOptions) {
+        return def.type(this.base(translOptions)).add(pvc.data.TreemapChartTranslationOper);
     },
     
     _setAxesScales: function(hasMultiRole) {
         
         this.base(hasMultiRole);
         
-        if(!hasMultiRole || this.parent){
+        if(!hasMultiRole || this.parent) {
             var sizeAxis = this.axes.size;
             if(sizeAxis && sizeAxis.isBound()) {
                 this._createAxisScale(sizeAxis);
@@ -54,7 +52,7 @@ def
         }
     },
     
-    _initPlotsCore: function(/*hasMultiRole*/){
+    _initPlotsCore: function(/*hasMultiRole*/) {
         var treemapPlot = new pvc.visual.TreemapPlot(this);
         
         if(this.options.legend == null) {
@@ -63,8 +61,8 @@ def
         }
         
         var rootCategoryLabel = treemapPlot.option('RootCategoryLabel');
-        this.visualRoles('category').setRootLabel(rootCategoryLabel);
-        this.visualRoles('color'   ).setRootLabel(rootCategoryLabel);
+        this.visualRoles.category.setRootLabel(rootCategoryLabel);
+        this.visualRoles.color   .setRootLabel(rootCategoryLabel);
     },
     
     _preRenderContent: function(contentOptions) {
@@ -75,13 +73,12 @@ def
         new pvc.TreemapPanel(this, this.basePanel, treemapPlot, contentOptions);
     },
     
-    _createVisibleData: function(dataPartValue, keyArgs){
+    _createVisibleData: function(dataPartValue, keyArgs) {
         var visibleData = this.base(dataPartValue, keyArgs);
         if(!visibleData) { return null; }
         
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
-        return this
-            .visualRoles('category')
+        return this.visualRoles.category
             .select(visibleData, {visible: true, isNull: ignoreNulls ? false : null});
     },
     

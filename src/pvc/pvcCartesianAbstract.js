@@ -53,7 +53,7 @@ def
             .lazy(baseDataCellsByAxisIndex, plot.option('BaseAxis') - 1)
             .push({
                 plot:          plot,
-                role:          this.visualRoles(plot.option('BaseRole')),
+                role:          this.visualRole(plot.option('BaseRole')),
                 dataPartValue: plot.option('DataPart')
             });
         }
@@ -87,7 +87,7 @@ def
             
             orthoRoleNames.forEach(function(orthoRoleName){
                 var dataCell = Object.create(dataCellBase);
-                dataCell.role = this.visualRoles(orthoRoleName);
+                dataCell.role = this.visualRole(orthoRoleName);
                 orthoDataCells.push(dataCell);
             }, this)
             ;

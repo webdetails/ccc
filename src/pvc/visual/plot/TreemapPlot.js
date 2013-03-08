@@ -73,7 +73,7 @@ def.scope(function(){
             },
             
             ValuesOptimizeLegibility: { // OVERRIDE
-                value: false
+                value: true
             },
             
             // Treemap specifc

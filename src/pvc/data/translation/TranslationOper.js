@@ -444,7 +444,7 @@ def.type('pvc.data.TranslationOper')
     },
     
     _getUnboundRoleDefaultDimNames: function(roleName, count, dims, level){
-        var role = this.chart.visualRoles(roleName, {assertExists: false});
+        var role = this.chart.visualRoles[roleName];
         if(role && !role.isPreBound()){
             var dimGroupName = role.defaultDimensionName;
             if(dimGroupName){

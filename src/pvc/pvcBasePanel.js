@@ -1341,7 +1341,7 @@ def
         var dimNames = this._v1DimName || (this._v1DimNameCache = {});
         var dimName  = dimNames[v1Dim];
         if(dimName == null) {
-            var role = this.chart.visualRoles(this._v1DimRoleName[v1Dim], {assertExists: false});
+            var role = this.chart.visualRoles[this._v1DimRoleName[v1Dim]];
             dimName = role ? role.firstDimensionName() : '';
             dimNames[v1Dim] = dimName;
         }

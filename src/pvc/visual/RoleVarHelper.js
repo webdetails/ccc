@@ -5,42 +5,38 @@ def
     var roleVarName = def.get(keyArgs, 'roleVar');
     
     var g = this.grouping = role && role.grouping;
-    if(g){
+    if(g) {
         this.role = role;
         this.sourceRoleName = role.sourceRole && role.sourceRole.name;
         var panel = rootScene.panel();
         this.panel = panel;
         
-        if(!g.isDiscrete()){
+        if(!g.isDiscrete()) {
             this.rootContDim = panel.data.owner.dimensions(g.firstDimensionName());
-            if(hasPercentSubVar){
-                this.percentFormatter = panel.chart.options.percentValueFormat;
-            }
+            if(hasPercentSubVar) { this.percentFormatter = panel.chart.options.percentValueFormat; }
         }
     }
     
-    if(!roleVarName){
-        if(!role){
+    if(!roleVarName) {
+        if(!role) {
             throw def.error.operationInvalid("Role is not defined, so the roleVar argument is required.");
         }
         
         roleVarName = role.name;
     }
     
-    if(!g){
+    if(!g) {
         // Unbound role
         // Place a null variable in the root scene
         var roleVar = rootScene.vars[roleVarName] = new pvc.visual.ValueLabelVar(null, "");
-        if(hasPercentSubVar){
-            roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
-        }
+        if(hasPercentSubVar) { roleVar.percent = new pvc.visual.ValueLabelVar(null, ""); }
     }
     
     this.roleVarName = roleVarName;
     
     rootScene['is' + def.firstUpperCase(roleVarName) + 'Bound'] = !!g;
     
-    if(def.get(keyArgs, 'allowNestedVars')){ this.allowNestedVars = true; }
+    if(def.get(keyArgs, 'allowNestedVars')) { this.allowNestedVars = true; }
 })
 .add({
     allowNestedVars: false,

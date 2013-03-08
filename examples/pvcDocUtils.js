@@ -122,7 +122,7 @@ var tryMe = function(e){
         
     } catch(ex) {
         /*global alert:true */
-        alert("Try me error: " + ex);
+        alert("Try Me error\n" + (ex.message || ex));
     }
 };
 

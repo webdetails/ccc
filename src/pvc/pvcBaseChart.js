@@ -246,7 +246,7 @@ def
         /* When data is excluded, there may be no data after all */
         this._checkNoDataII();
         
-        var hasMultiRole = this._isRoleAssigned('multiChart');
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
         
         /* Initialize plots */
         this._initPlots(hasMultiRole);
@@ -268,7 +268,7 @@ def
     },
     
     _preRenderPhase2: function(/*keyArgs*/){
-        var hasMultiRole = this._isRoleAssigned('multiChart');
+        var hasMultiRole = this.visualRoles.multiChart.isBound();
         
         /* Initialize chart panels */
         this._initChartPanels(hasMultiRole);

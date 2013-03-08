@@ -1,18 +1,16 @@
 
 def
 .type('pvc.visual.ValueLabel', pvc.visual.Label)
-.init(function(panel, anchorMark, keyArgs){
+.init(function(panel, anchorMark, keyArgs) {
     
     var protoMark;
-    if(!def.get(keyArgs, 'noAnchor', false)){
+    if(!def.get(keyArgs, 'noAnchor', false)) {
         protoMark = anchorMark.anchor(panel.valuesAnchor);
     } else {
         protoMark = anchorMark;
     }
     
-    if(keyArgs && keyArgs.extensionId == null){
-        keyArgs.extensionId = 'label';
-    }
+    if(keyArgs && keyArgs.extensionId == null) { keyArgs.extensionId = 'label'; }
 
     this.base(panel, protoMark, keyArgs);
 
@@ -27,7 +25,7 @@ def
 .property('textStyle')
 .constructor
 .addStatic({
-    maybeCreate: function(panel, anchorMark, keyArgs){
+    maybeCreate: function(panel, anchorMark, keyArgs) {
         return panel.valuesVisible && panel.valuesMask ?
                new pvc.visual.ValueLabel(panel, anchorMark, keyArgs) :
                null;
@@ -36,7 +34,7 @@ def
     isNeeded: function(panel) { return panel.valuesVisible && panel.valuesMask; }
 })
 .add({
-    _addInteractive: function(keyArgs){
+    _addInteractive: function(keyArgs) {
         // TODO: Until the problem of tooltips being stolen
         // from the target element, its better to not process events.
         keyArgs = def.setDefaults(keyArgs,
@@ -54,10 +52,8 @@ def
     
     normalText: function(text) { return this.trimText(text); },
     
-    interactiveText: function(text){ 
-        return this.showsActivity() && this.scene.isActive ? 
-               text : 
-               this.trimText(text); 
+    interactiveText: function(text) {
+        return this.showsActivity() && this.scene.isActive ? text : this.trimText(text); 
     },
     
     trimText: function(text) { return text; },

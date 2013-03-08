@@ -23,7 +23,7 @@ def
     var roles = this.visualRoles;
 
     var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
-    roles.size = chart.visualRoles(sizeRoleName);
+    roles.size = chart.visualRole(sizeRoleName);
 
     this.useShapes = plot.option('UseShapes');
     this.shape     = plot.option('Shape');
@@ -230,24 +230,19 @@ def
             ;
     },
 
-    _buildGetBaseFillColor: function(hasColor){
+    _buildGetBaseFillColor: function(hasColor) {
         var colorAxis = this.axes.color;
-        if(hasColor){
-            return colorAxis.sceneScale({sceneVarName: this.visualRoles.color.name});
-        }
-
-        var colorMissing = colorAxis && colorAxis.option('Missing');
-        return def.fun.constant(colorMissing || pvc.defaultColor);
+        return hasColor ? 
+                colorAxis.sceneScale({sceneVarName: this.visualRoles.color.name}) :
+                def.fun.constant(colorAxis.option('Unbound'));
     },
             
-    _createShapesHeatMap: function(cellSize, wrapper, hasColor, hasSize){
+    _createShapesHeatMap: function(cellSize, wrapper, hasColor, hasSize) {
         var me = this;
 
         /* SIZE */
         var areaRange = me._calcDotAreaRange(cellSize);
-        if(hasSize){
-             me.axes.size.setScaleRange(areaRange);
-        }
+        if(hasSize) { me.axes.size.setScaleRange(areaRange); }
 
         // Dot Sign
         var keyArgs = {
@@ -260,9 +255,7 @@ def
         };
         
         var pvDot = new pvc.visual.DotSizeColor(me, me.pvHeatGrid, keyArgs)
-            .override('dimColor', function(color/*, type*/){
-                return pvc.toGrayScale(color, 0.6);
-            })
+            .override('dimColor', function(color/*, type*/) { return pvc.toGrayScale(color, 0.6); })
             .pvMark
             .lock('shapeAngle'); // TODO - rotation of shapes can cause them to not fit the calculated cell. Would have to improve the radius calculation code.
             

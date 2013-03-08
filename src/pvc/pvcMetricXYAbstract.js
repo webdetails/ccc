@@ -49,7 +49,7 @@ def
             
     _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo){
         var serRole = this._serRole;
-        var xRole   = this.visualRoles('x');
+        var xRole   = this.visualRoles.x;
         var yRole   = dataCell.role;
         var trendOptions = dataCell.trend;
         

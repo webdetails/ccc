@@ -89,7 +89,7 @@ def
             
             var sizeRoleName = plot.option('SizeRole');
             if(sizeRoleName){
-                var sizeRole = this.visualRoles(sizeRoleName);
+                var sizeRole = this.visualRole(sizeRoleName);
                 if(sizeRole.isBound()){
                     var sizeDataCellsByAxisIndex = 
                         def
