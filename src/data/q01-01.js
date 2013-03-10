@@ -1100,6 +1100,43 @@ var testTreemap1 = {
     ]
 };
 
+var testTreemapAllNull = {
+    "metadata": [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "Territory"
+    }, {
+        "colIndex": 1,
+        "colType": "String",
+        "colName": "Region"
+    }, {
+        "colIndex": 2,
+        "colType": "String",
+        "colName": "Market"
+    }, {
+        "colIndex": 3,
+        "colType": "Numeric",
+        "colName": "Product A"
+    }],
+    "resultset": [
+        ["USA",    'Kansas',     null,         null],
+        ["USA",    'New York',   'Fair',       null],
+        ["USA",    'New York',   'Restaurant', null],
+        ["USA",    'New York',   'House',      null],
+        ["USA",    'Idaho',      'Farm',       null],
+        ["USA",    'Idaho',      'Fairy',      null],
+        ["USA",    'Idaho',      'House',      null],
+        ["USA",    'Idaho',      'Grocery',    null],
+        ["Europe", null,         null,         null],
+        ["Moon",   "Big Valey",  "North Hole", null],
+        ["Moon",   "Big Valey",  "South Hole", null],
+        ["RoW",    "Japan",      null,         null],
+        ["RoW",    "China",      null,         null],
+        ["RoW",    "S. America", null,         null],
+        ["RoW",    "India",      null,         null],
+        ["RoW",    "Mexico",     null,         null]
+    ]
+};
 
 var testWaterfall1Neg = {
     "metadata": [{

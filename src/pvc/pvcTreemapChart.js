@@ -38,6 +38,11 @@ def
         return def.type(this.base(translOptions)).add(pvc.data.TreemapChartTranslationOper);
     },
     
+    // Consider all datums to be not-null.
+    // All measures are optional...
+    // @override
+    _getIsNullDatum: def.fun.constant(),
+    
     _setAxesScales: function(hasMultiRole) {
         
         this.base(hasMultiRole);
@@ -73,13 +78,11 @@ def
         new pvc.TreemapPanel(this, this.basePanel, treemapPlot, contentOptions);
     },
     
-    _createVisibleData: function(dataPartValue, keyArgs) {
-        var visibleData = this.base(dataPartValue, keyArgs);
-        if(!visibleData) { return null; }
+    _createVisibleData: function(dataPartValue, ka) {
+        var visibleData = this.base(dataPartValue, ka);
         
-        var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
-        return this.visualRoles.category
-            .select(visibleData, {visible: true, isNull: ignoreNulls ? false : null});
+        // There are no null datums in this chart type (see #_getIsNullDatum) 
+        return visibleData ? this.visualRoles.category.select(visibleData, {visible: true}) : null;
     },
     
     defaults: {
