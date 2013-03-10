@@ -195,12 +195,15 @@ def
 
     _buildScene: function(){
         var chart = this.chart,
-            measureRolesDimNames = def.query(chart.measureVisualRoles()).object({
-                name:  function(role){ return role.name; },
-                value: function(role){ return role.firstDimensionName(); }
-            }),
+            measureRolesDimNames = 
+                def
+                .query(chart.measureVisualRoles())
+                .object({
+                    name:  function(role) { return role.name; },
+                    value: function(role) { return role.firstDimensionName(); }
+                }),
             visibleKeyArgs = {visible: true, zeroIfNone: false},
-            data = this.visibleData(),
+            data       = this.visibleData(), // [ignoreNulls=true]
             rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
             baseScale  = this.axes.base.scale,
             bandWidth  = baseScale.range().band,

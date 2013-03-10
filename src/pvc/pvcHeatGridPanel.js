@@ -53,7 +53,7 @@ def
         var rowRootData = me.visualRoles.series.flatten(me.data, {visible: true});
 
         // One multi-dimensional, two-levels grouping (Series -> Categ)
-        var rootScene  = me._buildScene(me.visibleData(), rowRootData, cellSize);
+        var rootScene  = me._buildScene(me.visibleData({ignoreNulls: false}), rowRootData, cellSize);
         var hasColor   = rootScene.isColorBound;
         var hasSize    = rootScene.isSizeBound;
         var wrapper    = me._buildSignsWrapper(rootScene);

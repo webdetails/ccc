@@ -1,22 +1,21 @@
 pvc.data.Data.add(/** @lends pvc.data.Data# */{
     /**
-     * Obtains the number of selected datums.
+     * Obtains the number of not-null selected datums.
      * <p>
      * This method is only optimized when called on an owner data.
      * </p>
      * 
      * @type Number
      */
-    selectedCount: function(){
-        if(!this.isOwner()){
-            return this.datums(null, {selected: true}).count();
-        }
+    selectedCount: function() {
+        // NOTE: isNull: false is not required here, because null datums cannot be selected
+        if(!this.isOwner()) { return this.datums(null, {selected: true}).count(); }
         
-        return this._selectedDatums.count;
+        return this._selectedNotNullDatums.count;
     },
     
     /**
-     * Obtains the selected datums, in an unspecified order.
+     * Obtains the not-null selected datums, in an unspecified order.
      * <p>
      * If the datums should be sorted, 
      * they can be sorted by their {@link pvc.data.Datum#id}.
@@ -26,42 +25,35 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * </p>
      * @type pvc.data.Datum[]
      */
-    selectedDatums: function(){
-        if(!this.isOwner()){
-            return this.datums(null, {selected: true}).array();
-        }
+    selectedDatums: function() {
+        // NOTE: isNull: false is not required here, because null datums cannot be selected
+        if(!this.isOwner()) { return this.datums(null, {selected: true}).array(); }
         
-        return this._selectedDatums.values();
+        return this._selectedNotNullDatums.values();
     },
     
     /**
-     * Obtains a map containing the selected datums, indexed by id.
+     * Obtains a map containing the not-null selected datums, indexed by id.
      * 
      * @type def.Map(pvc.data.Datum)
      */
-    selectedDatumMap: function(){
-        if(!this.isOwner()){
-            
-            var datums = this
-                .datums(null, {selected: true})
-                .object({
-                    name: function(datum){ return datum.id; }
-                });
+    selectedDatumMap: function() {
+        if(!this.isOwner()) {
+            // NOTE: isNull: false is not required here, because null datums cannot be selected
+            var datums = 
+                this.datums(null, {selected: true}).object({name: def.propGet('id')});
             
             return new def.Set(datums);
         }
         
-        return this._selectedDatums.clone();
+        return this._selectedNotNullDatums.clone();
     },
     
     /**
-     * Obtains the number of visible datums.
-     * 
+     * Obtains the number of not-null visible datums.
      * @type Number
      */
-    visibleCount: function(){
-        return this._visibleDatums.count;
-    },
+    visibleCount: function() { return this._visibleNotNullDatums.count; },
     
     /**
      * Replaces currently selected datums with the specified datums.
@@ -69,23 +61,21 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {pvc.data.Datum[]|def.query<pvc.data.Datum>} [datums] The new datums to be selected.
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise. 
      */
-    replaceSelected: function(datums){
+    replaceSelected: function(datums) {
         /*global datum_deselect:true */
         
-        // materialize, cause we're using it twice
-        if(!def.array.is(datums)){
-            datums = datums.array();
-        }
+        // Materialize, cause we're using it twice
+        if(!def.array.is(datums)) { datums = datums.array(); }
         
         // Clear all but the ones we'll be selecting.
         // This way we can have a correct changed flag.
         var alreadySelectedById = 
             def
             .query(datums)
-            .where(function(datum){ return datum.isSelected; })
-            .object({ name: function(datum){ return datum.id; } });
+            .where(def.propGet('isSelected'))
+            .object({name: def.propGet('id')});
         
-        var changed = this.owner.clearSelected(function(datum){
+        var changed = this.owner.clearSelected(function(datum) {
                 return !def.hasOwn(alreadySelectedById, datum.id); 
             });
         
@@ -100,36 +90,27 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {pvc.data.Datum} [funFilter] Allows excluding atoms from the clear operation.
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise. 
      */
-    clearSelected: function(funFilter){
+    clearSelected: function(funFilter) {
         /*global datum_deselect:true */
         
-        if(this.owner !== this){
-             return this.owner.clearSelected(funFilter);
-        }
+        if(this.owner !== this) { return this.owner.clearSelected(funFilter); }
         
-        if(!this._selectedDatums.count) {
-            return false;
-        }
+        if(!this._selectedNotNullDatums.count) { return false; }
         
         var changed;
-        if(funFilter){
+        if(funFilter) {
             changed = false;
-            this._selectedDatums
-                .values()
-                .filter(funFilter)
-                .forEach(function(datum){
+            this._selectedNotNullDatums.values().filter(funFilter).forEach(function(datum) {
                     changed = true;
                     datum_deselect.call(datum);
-                    this._selectedDatums.rem(datum.id);
+                    this._selectedNotNullDatums.rem(datum.id);
                 }, this);
         } else {
             changed = true;
-            this._selectedDatums.values().forEach(function(datum){
-                /*global datum_deselect:true */
-                datum_deselect.call(datum);
-            });
+            /*global datum_deselect:true */
+            this._selectedNotNullDatums.values().forEach(function(datum) { datum_deselect.call(datum); });
     
-            this._selectedDatums.clear();
+            this._selectedNotNullDatums.clear();
         }
         
         return changed;
@@ -147,17 +128,14 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @type undefined
  * @internal
  */
-function data_onDatumSelectedChanged(datum, selected){
+function data_onDatumSelectedChanged(datum, selected) {
     // <Debug>
     /*jshint expr:true */
     !datum.isNull || def.assert("Null datums do not notify selected changes");
     // </Debug>
     
-    if(selected){
-        this._selectedDatums.set(datum.id, datum);
-    } else {
-        this._selectedDatums.rem(datum.id);
-    }
+    if(selected) { this._selectedNotNullDatums.set(datum.id, datum); } 
+    else         { this._selectedNotNullDatums.rem(datum.id);        }
 
     this._sumAbsCache = null;
 }
@@ -181,27 +159,24 @@ function data_onDatumVisibleChanged(datum, visible){
         !datum.isNull || def.assert("Null datums do not notify visible changes");
         // </Debug>
         
-        if(visible){
-            this._visibleDatums.set(datum.id, datum);
-        } else {
-            this._visibleDatums.rem(datum.id);
-        }
+        if(visible) { this._visibleNotNullDatums.set(datum.id, datum); } 
+        else        { this._visibleNotNullDatums.rem(datum.id);        }
         
         this._sumAbsCache = null;
 
         // Notify dimensions
-        def.eachOwn(this._dimensions, function(dimension){
-            /*global dim_onDatumVisibleChanged:true */
+        /*global dim_onDatumVisibleChanged:true */
+        def.eachOwn(this._dimensions, function(dimension) {
             dim_onDatumVisibleChanged.call(dimension, datum, visible);
         });
         
         // Notify child and link child datas
-        this._children.forEach(function(data){
+        this._children.forEach(function(data) {
             data_onDatumVisibleChanged.call(data, datum, visible);
         });
         
         if(this._linkChildren) {
-            this._linkChildren.forEach(function(data){
+            this._linkChildren.forEach(function(data) {
                 data_onDatumVisibleChanged.call(data, datum, visible);
             });
         }
@@ -218,19 +193,13 @@ function data_onDatumVisibleChanged(datum, visible){
  * @returns {boolean} true if at least one datum changed its selected state.
  * @static
  */
-pvc.data.Data.setSelected = function(datums, selected){
-    var anyChanged = false;
-
-    if(datums){
-        def.query(datums).each(function(datum){
-            if(datum.setSelected(selected)){
-                // data_onDatumSelectedChanged has already been called
-                anyChanged = true;
-            }
-        });
+pvc.data.Data.setSelected = function(datums, selected) {
+    var anyChanged = 0;
+    if(datums) {
+     // data_onDatumSelectedChanged is called
+        def.query(datums).each(function(datum) { anyChanged |= datum.setSelected(selected); });
     }
-
-    return anyChanged;
+    return !!anyChanged;
 };
 
 /**
@@ -243,19 +212,17 @@ pvc.data.Data.setSelected = function(datums, selected){
  * @returns {boolean} true if at least one datum changed its selected state.
  * @static
  */
-pvc.data.Data.toggleSelected = function(datums){
-    if(!def.array.isLike(datums)){
-        datums = def.query(datums).array();
-    }
+pvc.data.Data.toggleSelected = function(datums) {
+    if(!def.array.isLike(datums)) { datums = def.query(datums).array(); }
     
-    // Ensure null datums don't affect the result
-    var allSelected = def.query(datums).all(function(datum){ return datum.isNull || datum.isSelected; });
+    // Null datums are always unselected.
+    // Their existence would impede allSelected ever being true.
+    var allSelected = def.query(datums).all(function(datum) { return datum.isNull || datum.isSelected; });
     return this.setSelected(datums, !allSelected);
 };
 
 /**
- * Sets the visible state of the given datums
- * to the state 'visible'.
+ * Sets the visible state of the given datums to the value of argument 'visible'.
  * 
  * @param {def.Query} datums An enumerable of {@link pvc.data.Datum} to set.
  * @param {boolean} visible The desired visible state.
@@ -264,18 +231,12 @@ pvc.data.Data.toggleSelected = function(datums){
  * @static
  */
 pvc.data.Data.setVisible = function(datums, visible){
-    var anyChanged = false;
-
-    if(datums){
-        def.query(datums).each(function(datum){
-            if(datum.setVisible(visible)){
-                // data_onDatumVisibleChanged has already been called
-                anyChanged = true;
-            }
-        });
+    var anyChanged = 0;
+    if(datums) {
+        // data_onDatumVisibleChanged is called
+        def.query(datums).each(function(datum) { anyChanged |= datum.setVisible(visible); });
     }
-
-    return anyChanged;
+    return !!anyChanged;
 };
 
 /**
@@ -288,12 +249,10 @@ pvc.data.Data.setVisible = function(datums, visible){
  * @returns {boolean} true if at least one datum changed its visible state.
  * @static
  */
-pvc.data.Data.toggleVisible = function(datums){
-    if(!def.array.isLike(datums)){
-        datums = def.query(datums).array();
-    }
+pvc.data.Data.toggleVisible = function(datums) {
+    if(!def.array.isLike(datums)) { datums = def.query(datums).array(); }
     
-    // Ensure null datums don't affect the result (null datums are always visible)
-    var allVisible = def.query(datums).all(function(datum){ return datum.isVisible; });
+    // Null datums are always visible. So they don't affect the result.
+    var allVisible = def.query(datums).all(def.propGet('isVisible'));
     return pvc.data.Data.setVisible(datums, !allVisible);
 };

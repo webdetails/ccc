@@ -59,7 +59,7 @@ def
             plot = me.plot,
             isStacked = !!me.stacked,
             isVertical = me.isOrientationVertical(),
-            data = me.visibleData(), // shared "categ then series" grouped data
+            data       = me.visibleData({ignoreNulls: false}), // shared "categ then series" grouped data
             seriesData = me.visualRoles.series.flatten(data),
             rootScene  = me._buildScene(data, seriesData),
             orthoAxis  = me.axes.ortho,

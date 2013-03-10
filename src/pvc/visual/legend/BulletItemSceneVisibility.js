@@ -15,6 +15,8 @@ def
      * @type boolean
      */
     isOn: function() {
+        // If null datums were included, as they're always visible,
+        // the existence of a single null datum would result in always being true.
         return this.datums().any(function(datum) { return !datum.isNull && datum.isVisible; });
     },
     

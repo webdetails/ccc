@@ -1,22 +1,19 @@
 def
 .type('pvc.data.LinearInterpolationOperSeriesState')
-.init(function(interpolation, serIndex){
+.init(function(interpolation, serIndex) {
     this.interpolation = interpolation;
     this.index = serIndex;
     
     this._lastNonNull(null);
 })
 .add({
-    visit: function(catSeriesInfo){
-        if(catSeriesInfo.isNull){
-            this._interpolate(catSeriesInfo);
-        } else {
-            this._lastNonNull(catSeriesInfo);
-        }
+    visit: function(catSeriesInfo) {
+        if(catSeriesInfo.isNull) { this._interpolate(catSeriesInfo); } 
+        else                     { this._lastNonNull(catSeriesInfo); }
     },
     
-    _lastNonNull: function(catSerInfo){
-        if(arguments.length){
+    _lastNonNull: function(catSerInfo) {
+        if(arguments.length) {
             this.__lastNonNull = catSerInfo; // Last non-null
             this.__nextNonNull = undefined;
         }
@@ -24,11 +21,9 @@ def
         return this.__lastNonNull;
     },
 
-    _nextNonNull: function(){
-        return this.__nextNonNull;
-    },
+    _nextNonNull: function() { return this.__nextNonNull; },
     
-    _initInterpData: function(){
+    _initInterpData: function() {
         // When a null category is found, 
         // and it is the first category, or it is right after a non-null category,
         // the prop. __nextNonNull will have the value undefined 
@@ -48,9 +43,7 @@ def
         // surrounded by non-null dots.
         
         // The start of a new segment?
-        if(this.__nextNonNull !== undefined){
-            return;
-        }
+        if(this.__nextNonNull !== undefined) { return; }
         
         // Will be null if the series starts 
         //  with null categories:
@@ -65,12 +58,12 @@ def
                .nextUnprocessedNonNullCategOfSeries(this.index) || 
            null;
                                 
-        if(next && last){
+        if(next && last) {
             var fromValue  = last.value;
             var toValue    = next.value;
             var deltaValue = toValue - fromValue;
             
-            if(this.interpolation._isCatDiscrete){
+            if(this.interpolation._isCatDiscrete) {
                 var stepCount = next.catInfo.index - last.catInfo.index;
                 /*jshint expr:true */
                 (stepCount >= 2) || def.assert("Must have at least one interpolation point.");
@@ -97,31 +90,28 @@ def
         }
     },
     
-    _interpolate: function(catSerInfo){
+    _interpolate: function(catSerInfo) {
+        
         this._initInterpData();
         
         var next = this.__nextNonNull;
         var last = this.__lastNonNull;
         var one  = next || last;
-        if(!one){
-            return;
-        }
+        if(!one) { return; }
         
-        var value, group/*, isInterpolatedMiddle*/;
+        var value, group;
         var interpolation = this.interpolation;
         var catInfo = catSerInfo.catInfo;
         
-        if(next && last){
-            if(interpolation._isCatDiscrete){
+        if(next && last) {
+            if(interpolation._isCatDiscrete) {
                 var groupIndex = (catInfo.index - last.catInfo.index);
                 value = last.value + this._stepValue * groupIndex;
                 
-                if(this._isOdd){
+                if(this._isOdd) {
                     group = groupIndex < this._middleIndex ? last.group : next.group;
-                    //isInterpolatedMiddle = groupIndex === this._middleIndex;
                 } else {
                     group = groupIndex <= this._middleIndex ? last.group : next.group;
-                    //isInterpolatedMiddle = false;
                 }
                 
             } else {
@@ -134,9 +124,7 @@ def
             }
         } else {
             // Only "stretch" ends on stacked visualization
-            if(!interpolation._stretchEnds) {
-                return;
-            }
+            if(!interpolation._stretchEnds) { return; }
             
             value = one.value;
             group = one.group;
@@ -149,15 +137,8 @@ def
         var atoms = Object.create(group._datums[0].atoms);
         
         // Category atoms
-        //if(interpolation._isCatDiscrete || !catInfo.isInterpolated){
         def.copyOwn(atoms, catInfo.data.atoms);
-//        } else {
-//            // cat is a new category value
-//            var catAtom = catInfo.atom;
-//            
-//            atoms[catAtom.dimension.name] = catAtom;
-//        }
-        
+
         // Value atom
         var valueAtom = interpolation._valDim.intern(value, /* isVirtual */ true);
         atoms[valueAtom.dimension.name] = valueAtom;
@@ -168,8 +149,6 @@ def
         newDatum.isVirtual = true;
         newDatum.isInterpolated = true;
         newDatum.interpolation = 'linear';
-        
-        //newDatum.isInterpolatedMiddle = isInterpolatedMiddle;
         
         interpolation._newDatums.push(newDatum);
     }

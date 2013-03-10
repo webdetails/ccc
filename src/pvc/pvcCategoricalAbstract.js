@@ -3,7 +3,7 @@
  */
 def
 .type('pvc.CategoricalAbstract', pvc.CartesianAbstract)
-.init(function(options){
+.init(function(options) {
     
     this.base(options);
 
@@ -21,7 +21,7 @@ def
         this._catRole = this._addVisualRole('category', this._getCategoryRoleSpec());
     },
     
-    _getCategoryRoleSpec: function(){
+    _getCategoryRoleSpec: function() {
         return {
             isRequired: true, 
             defaultDimension: 'category*', 
@@ -29,7 +29,7 @@ def
         };
     },
     
-    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo){
+    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo) {
         var serRole = this._serRole;
         var xRole   = this._catRole;
         var yRole   = dataCell.role;
@@ -41,15 +41,13 @@ def
         var yDimName = yRole.firstDimensionName();
         var xDimName;
         var isXDiscrete = xRole.isDiscrete();
-        if(!isXDiscrete){
-            xDimName = xRole.firstDimensionName();
-        }
+        if(!isXDiscrete) { xDimName = xRole.firstDimensionName(); }
         
-        var sumKeyArgs = { zeroIfNone: false };
+        var sumKeyArgs = {zeroIfNone: false};
         var ignoreNullsKeyArgs = {ignoreNulls: false};
                 
         // Visible data grouped by category and then series
-        var data = this.visibleData(dataCell.dataPartValue);
+        var data = this.visibleData(dataCell.dataPartValue); // [ignoreNulls=true]
         
         // TODO: It is usually the case, but not certain, that the base axis' 
         // dataCell(s) span "all" data parts.
@@ -61,7 +59,7 @@ def
         
         // For each series...
         def
-        .scope(function(){
+        .scope(function() {
             return (serRole && serRole.isBound())   ?
                    serRole.flatten(data).children() : // data already only contains visible data
                    def.query([null]) // null series
@@ -69,16 +67,14 @@ def
         })
         .each(genSeriesTrend, this);
           
-        function genSeriesTrend(serData1){
+        function genSeriesTrend(serData1) {
             var funX = isXDiscrete ? 
                        null : // means: "use *index* as X value"
-                       function(allCatData){
-                           return allCatData.atoms[xDimName].value;
-                       };
+                       function(allCatData) { return allCatData.atoms[xDimName].value; };
 
-            var funY = function(allCatData){
+            var funY = function(allCatData) {
                 var group = data._childrenByKey[allCatData.key];
-                if(group && serData1){
+                if(group && serData1) {
                     group = group._childrenByKey[serData1.key];
                 }
                 
@@ -99,26 +95,26 @@ def
                                 .dimensions(dataPartDimName)
                                 .intern(this.root._firstTrendAtomProto);
             
-            if(trendModel){
+            if(trendModel) {
                 // At least one point...
                 // Sample the line on each x and create a datum for it
                 // on the 'trend' data part
-                allCatDatas.forEach(function(allCatData, index){
+                allCatDatas.forEach(function(allCatData, index) {
                     var trendX = isXDiscrete ? 
                                  index :
                                  allCatData.atoms[xDimName].value;
                     
                     var trendY = trendModel.sample(trendX, funY(allCatData), index);
-                    if(trendY != null){
+                    if(trendY != null) {
                         var catData   = data._childrenByKey[allCatData.key];
                         var efCatData = catData || allCatData;
                         
                         var atoms;
-                        if(serData1){
+                        if(serData1) {
                             var catSerData = catData && 
                                              catData._childrenByKey[serData1.key];
                             
-                            if(catSerData){
+                            if(catSerData) {
                                 atoms = Object.create(catSerData._datums[0].atoms);
                             } else {
                                 // Missing data point
@@ -135,12 +131,12 @@ def
                         atoms[yDimName] = trendY;
                         atoms[dataPartDimName] = dataPartAtom;
                         
-                        var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
-                        newDatum.isVirtual = true;
-                        newDatum.isTrend   = true;
-                        newDatum.trendType = trendInfo.type;
-                        
-                        newDatums.push(newDatum);
+                        newDatums.push(
+                            def.set(
+                                new pvc.data.Datum(efCatData.owner, atoms),
+                                'isVirtual', true,
+                                'isTrend',   true,
+                                'trendType', trendInfo.type));
                     }
                 }, this);
             }
@@ -163,7 +159,7 @@ def
                 
                 // TODO: It is usually the case, but not certain, that the base axis' 
                 // dataCell(s) span "all" data parts.
-                var visibleData = this.visibleData(dataCell.dataPartValue);
+                var visibleData = this.visibleData(dataCell.dataPartValue);// [ignoreNulls=true]
                 if(visibleData.childCount() > 0){
                     var allPartsData = this.visibleData(null, {ignoreNulls: false});
                     new InterpType(
@@ -223,7 +219,7 @@ def
      *
      * @override
      */
-    _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell){
+    _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell) {
         var valueRole = valueDataCell.role;
         
         switch(valueRole.name) {
@@ -243,7 +239,7 @@ def
         
         var dataPartValue = valueDataCell.dataPartValue;
         var valueDimName = valueRole.firstDimensionName();
-        var data = this.visibleData(dataPartValue);
+        var data = this.visibleData(dataPartValue); // [ignoreNulls=true]
         var useAbs = valueAxis.scaleUsesAbs();
         
         if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked) {
@@ -350,7 +346,7 @@ def
             
             var size;
             var panel = childChart.titlePanel;
-            if(panel){
+            if(panel) {
                 if(!titleOrthoLen) { titleOrthoLen = panel.anchorOrthoLength(); }
                 
                 size = panel[titleOrthoLen];
@@ -410,7 +406,7 @@ def
                 axisPanel.size = axisPanel.size.clone().set(ol, sizes.axis);
 
                 var titlePanel = axisPanel.titlePanel;
-                if(titlePanel){
+                if(titlePanel) {
                     titlePanel.size = titlePanel.size.clone().set(ol, sizes.title);
                 }
             });

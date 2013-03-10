@@ -457,7 +457,7 @@ def
     },
 
     _buildScene: function(){
-        var data = this.visibleData();
+        var data = this.visibleData({ignoreNulls: false});
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: data});
 
         var roles = this.visualRoles;

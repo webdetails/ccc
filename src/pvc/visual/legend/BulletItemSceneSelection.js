@@ -10,18 +10,12 @@ def
 .add(/** @lends pvc.visual.legend.BulletItemSceneSelection# */{
     /**
      * Returns <c>true</c> if there are no selected datums in the owner data, 
-     * or if at least one non-null datum of the scene's {@link #datums} is selected.
+     * or if at least one datum of the scene's {@link #datums} is selected.
      * @type boolean
      */
-    isOn: function(){
-        var owner = (this.group || this.datum).owner;
-        return !owner.selectedCount() || 
-               this.datums().any(function(datum){
-                   return !datum.isNull && datum.isSelected; 
-               });
-        
-        // Cannot use #isSelected() cause it includes null datums.
-        //return this.isSelected();
+    isOn: function() {
+        var source = (this.group || this.datum);
+        return !source.owner.selectedCount() || this.isSelected();
     },
     
     /**
@@ -34,13 +28,13 @@ def
      * Toggles the selected state of the datums present in this scene
      * and updates the chart if necessary.
      */
-    execute: function(){
+    execute: function() {
         var datums = this.datums().array();
-        if(datums.length){
+        if(datums.length) {
             var chart = this.chart();
-            chart._updatingSelections(function(){
+            chart._updatingSelections(function() {
                 datums = chart._onUserSelection(datums);
-                if(datums){
+                if(datums) {
                     var on = def.query(datums).any(function(datum){ return datum.isSelected; });
                     pvc.data.Data.setSelected(datums, !on);
                 }

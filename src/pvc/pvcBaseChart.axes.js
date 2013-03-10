@@ -208,24 +208,16 @@ pvc.BaseChart
     _bindAxes: function(/*hasMultiRole*/){
         // Bind all axes with dataCells registered in #_dataCellsByAxisTypeThenIndex
         // and which were created **here**
-        
         var here = this._axisCreateHere;
         
-        def
-        .eachOwn(
+        def.eachOwn(
             this._dataCellsByAxisTypeThenIndex, 
-            function(dataCellsByAxisIndex, type){
-                // Created **here** ?
-                if((this._axisCreateWhere[type] & here) !== 0){
-                    
-                    dataCellsByAxisIndex.forEach(function(dataCells, index){
-                        
-                        var axisId = pvc.buildIndexedId(type, index);
-                        var axis = this.axes[axisId];
-                        if(!axis.isBound()){
-                            axis.bind(dataCells);
-                        }
-                        
+            function(dataCellsByAxisIndex, type) {
+                // Should create **here** ?
+                if((this._axisCreateWhere[type] & here)) {
+                    dataCellsByAxisIndex.forEach(function(dataCells, index) {
+                        var axis = this.axes[pvc.buildIndexedId(type, index)];
+                        if(!axis.isBound()) { axis.bind(dataCells); }
                     }, this);
                 }
             }, 
@@ -515,7 +507,7 @@ pvc.BaseChart
         }
         
         var useAbs = valueAxis.scaleUsesAbs();
-        var data  = this.visibleData(valueDataCell.dataPartValue);
+        var data  = this.visibleData(valueDataCell.dataPartValue); // [ignoreNulls=true]
         var extent = data && data
             .dimensions(valueRole.firstDimensionName())
             .extent({ abs: useAbs });
@@ -575,7 +567,7 @@ pvc.BaseChart
             // -> Visible only
             this._warnSingleContinuousValueRole(axis.role);
             
-            var visibleDomainData = this.root.visibleData(axis.dataCell.dataPartValue);
+            var visibleDomainData = this.root.visibleData(axis.dataCell.dataPartValue); // [ignoreNulls=true]
             var normByCateg = axis.option('NormByCategory');
             var scaleOptions = {
                 type:        axis.option('ScaleType'),

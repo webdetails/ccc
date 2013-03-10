@@ -90,7 +90,7 @@ def
     /**
      * @override
      */
-    _createCore: function(){
+    _createCore: function() {
         this.base();
         
         var myself = this;
@@ -104,7 +104,7 @@ def
         // ------------------
         // DATA
         var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
-        var data = this.visibleData(); // shared "categ then series" grouped data
+        var data = this.visibleData({ignoreNulls: false}); // shared "categ then series" grouped data
         var rootScene = this._buildScene(data, isBaseDiscrete);
        
         // ---------------

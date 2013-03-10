@@ -149,7 +149,7 @@ def
     
     _buildScene: function() {
         // Hierarchical data, by categ1 (level1) , categ2 (level2), categ3 (level3),...
-        var data = this.visibleData();
+        var data = this.visibleData({ignoreNulls: false});
 
         // Everything hidden?
         if(!data.childCount()) { return null; }

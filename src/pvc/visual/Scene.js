@@ -53,7 +53,7 @@
  *  The data source(s) that are present in the scene.
  */
 def.type('pvc.visual.Scene')
-.init(function(parent, keyArgs){
+.init(function(parent, keyArgs) {
     if(pvc.debug >= 4) { this.id = def.nextId('scene'); }
     
     this._renderId   = 0;
@@ -82,11 +82,11 @@ def.type('pvc.visual.Scene')
     /* DATA */
     var first, group, datum, datums, groups, atoms, firstAtoms;
     var dataSource = def.array.to(def.get(keyArgs, 'source')); // array.to: nully remains nully
-    if(dataSource && dataSource.length){
+    if(dataSource && dataSource.length) {
         this.source = dataSource;
         
         first = dataSource[0];
-        if(first instanceof pvc.data.Data){
+        if(first instanceof pvc.data.Data) {
             // Group/groups
             group  = first;
             groups = dataSource;
@@ -96,7 +96,7 @@ def.type('pvc.visual.Scene')
             datum  = group.firstDatum() || 
                      def
                      .query(groups)
-                     .select(function(group){ return group.firstDatum(); })
+                     .select(function(g) { return g.firstDatum(); })
                      .first(def.notNully);
             // datum may still be null!
         } else {
@@ -108,7 +108,7 @@ def.type('pvc.visual.Scene')
         
         atoms      = first.atoms; // firstDataSourceAtoms
         firstAtoms = (datum && datum.atoms) || first.atoms; // firstDatumAtoms
-    } else if(parent){
+    } else if(parent) {
         atoms = firstAtoms = Object.create(parent.atoms);
     } else {
         atoms = firstAtoms = {};
@@ -128,9 +128,7 @@ def.type('pvc.visual.Scene')
     // Testing groups first ensures that the only
     // case where isNull is detected is that of a single datum scene.
     // Note that groups do not have isNull property, only datums do.
-    if(!first || first.isNull){
-        this.isNull = true;
-    }
+    if(!first || first.isNull) { this.isNull = true; }
 
     /* VARS */
     this.vars = parent ? Object.create(parent.vars) : {};
@@ -152,18 +150,13 @@ def.type('pvc.visual.Scene')
      * If no data can be obtained in this way,
      * the data of the associated panel is returned.
      */
-    data: function(){
+    data: function() {
         var data = this.group;
-        if(!data){
+        if(!data) {
             var scene = this;
-            while(!data && (scene = scene.parent)){
-                data = scene.group;
-            }
-            if(!data){
-                data = this.panel.data;
-            }
+            while(!data && (scene = scene.parent)) { data = scene.group; }
+            if(!data) { data = this.panel.data; }
         }
-        
         return data;
     },
     
@@ -172,7 +165,7 @@ def.type('pvc.visual.Scene')
      *
      * @type def.Query
      */
-    datums: function(){
+    datums: function() {
         // For efficiency, assumes datums of multiple groups are disjoint sets
         return this.groups  ? def.query(this.groups ).selectMany(function(g){ return g.datums(); }) :
                this._datums ? def.query(this._datums) :
@@ -184,22 +177,18 @@ def.type('pvc.visual.Scene')
      * {value.value} -> <=> this.vars.value.value
      * {#sales} -> <=> this.atoms.sales.label
      */
-    format: function(mask){
-        return def.format(mask, this._formatScope, this);
-    },
+    format: function(mask) { return def.format(mask, this._formatScope, this); },
     
-    _formatScope: function(prop){
-        if(prop.charAt(0) === '#'){
+    _formatScope: function(prop) {
+        if(prop.charAt(0) === '#') {
             // An atom name
             prop = prop.substr(1).split('.');
-            if(prop.length > 2){
-                throw def.error.operationInvalid("Scene format mask is invalid.");
-            }
+            if(prop.length > 2) { throw def.error.operationInvalid("Scene format mask is invalid."); }
             
             var atom = this.firstAtoms[prop[0]];
-            if(atom){
+            if(atom) {
                 if(prop.length > 1) {
-                    switch(prop[1]){
+                    switch(prop[1]) {
                         case 'value': return atom.value;
                         case 'label': break;
                         default:      throw def.error.operationInvalid("Scene format mask is invalid.");
@@ -217,9 +206,9 @@ def.type('pvc.visual.Scene')
         return def.getPath(this.vars, prop); // Scene vars' toString may end up being called
     },
     
-    isRoot: function(){ return this.root === this; },
-    panel:  function(){ return this.root._panel; },
-    chart:  function(){ return this.root._panel.chart; },
+    isRoot: function() { return this.root === this; },
+    panel:  function() { return this.root._panel; },
+    chart:  function() { return this.root._panel.chart; },
     compatVersion: function() { return this.root._panel.compatVersion(); },
     
     /**
@@ -227,19 +216,12 @@ def.type('pvc.visual.Scene')
      * 
      * @type def.Query
      */
-    children: function(){
-        if(!this.childNodes) {
-            return def.query();
-        }
-        
-        return def.query(this.childNodes);
-    },
+    children: function() { return this.childNodes ? def.query(this.childNodes) : def.query(); },
     
     leafs: function() {
+        
         function getFirstLeafFrom(leaf) {
-            // Find first leaf from current
             while(leaf.childNodes.length) { leaf = leaf.childNodes[0]; }
-            
             return leaf;
         }
         
@@ -292,7 +274,7 @@ def.type('pvc.visual.Scene')
     // not necessarily the scene on which it is called.
     clearActive: function() { return rootScene_setActive.call(this.root, null); },
     
-    anyActive:   function() { return !!this.root._active; },
+    anyActive: function() { return !!this.root._active; },
     
     active: function() { return this.root._active; },
     
@@ -338,18 +320,33 @@ def.type('pvc.visual.Scene')
         return isActiveDatum;
     },
     
-    isActiveDescendantOrSelf: function(){
-        if(this.isActive){ return true; }
+    isActiveDescendantOrSelf: function() {
+        if(this.isActive) { return true; }
         
         return def.lazy(this.renderState, 'isActiveDescOrSelf',  this._calcIsActiveDescOrSelf, this);
     },
     
-    _calcIsActiveDescOrSelf: function(){
+    _calcIsActiveDescOrSelf: function() {
         var scene = this.active();
         if(scene) {
             while((scene = scene.parent)) { if(scene === this) { return true; } }
         }
         return false;
+    },
+    
+    /* VISIBILITY */
+    isVisible:  function() { return this._visibleData().is;  },
+    anyVisible: function() { return this._visibleData().any; },
+    
+    _visibleData: function() {
+        return def.lazy(this.renderState, '_visibleData', this._createVisibleData, this);
+    },
+    
+    _createVisibleData: function() {
+        var any = this.chart().data.owner.visibleCount() > 0,
+            isSelected = any && this.datums().any(def.propGet('isVisible'));
+        
+        return {any: any, is: isSelected};
     },
     
     /* SELECTION */
@@ -360,11 +357,9 @@ def.type('pvc.visual.Scene')
         return def.lazy(this.renderState, '_selectedData', this._createSelectedData, this);
     },
     
-    _createSelectedData: function(){
-        var any = this.panel().chart.data.owner.selectedCount() > 0,
-            isSelected = any && 
-                         this.datums()
-                             .any(function(datum){ return datum.isSelected; });
+    _createSelectedData: function() {
+        var any = this.chart().data.owner.selectedCount() > 0,
+            isSelected = any && this.datums().any(def.propGet('isSelected'));
         
         return {any: any, is: isSelected};
     },
@@ -387,7 +382,6 @@ def.type('pvc.visual.Scene')
             });
         }
     },
-    
     
     isSelectedDescendantOrSelf: function() {
         if(this.isSelected()) { return true; }

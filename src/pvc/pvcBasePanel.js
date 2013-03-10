@@ -257,19 +257,18 @@ def
                this.constructor + this.chart._createLogChildSuffix();
     },
     
-    defaultVisibleBulletGroupScene: function(){
+    defaultVisibleBulletGroupScene: function() {
         // Return legendBulletGroupScene, 
         // from the first data cell of same dataPartValue and 
         // having one legendBulletGroupScene.
         var colorAxis = this.axes.color;
-        if(colorAxis && colorAxis.option('LegendVisible')){
+        if(colorAxis && colorAxis.option('LegendVisible')) {
             var dataPartValue = this.dataPartValue;
             return def
-                .query(colorAxis.dataCells)
-                .where(function(dataCell){ return dataCell.dataPartValue === dataPartValue; })
-                .select(function(dataCell){ return dataCell.legendBulletGroupScene; })
-                .first(def.truthy)
-                ;
+                .query (colorAxis.dataCells)
+                .where (function(dataCell) { return dataCell.dataPartValue === dataPartValue; })
+                .select(function(dataCell) { return dataCell.legendBulletGroupScene; })
+                .first (def.truthy);
         }
         
         return null;
@@ -298,9 +297,7 @@ def
         }
     },
 
-    visibleData: function(){
-        return this.chart.visibleData(this.dataPartValue);
-    },
+    visibleData: function(ka) { return this.chart.visibleData(this.dataPartValue, ka); },
 
     /* LAYOUT PHASE */
     

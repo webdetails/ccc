@@ -22,32 +22,24 @@ def
     this.dataPartValue = dataPartValue;
 })
 .add({
-    isBound: function() {
-        return this.role && this.role.isBound();
-    },
+    isBound: function() { return this.role && this.role.isBound(); },
     
-    domainData: function() {
-        return def.lazy(this, '_domainData', this._resolveDomainData, this);
-    },
+    domainData: function() { return def.lazy(this, '_domainData', this._resolveDomainData, this); },
     
     // TODO: should this logic be specified in the role itself?
     // Not cached, because sometimes domainData items may not be available,
     // due to trends and multi-charts...
-    domainItemDatas: function(){
+    domainItemDatas: function() {
         var domainData = this.domainData();
         return def.query((domainData || undefined) && domainData.children());
     },
     
     // TODO: should this logic be specified in the role itself?
     // The item value function
-    domainItemDataValue: function(itemData) { 
-        return def.nullyTo(itemData.value, '');
-    },
+    domainItemDataValue: function(itemData) {  return def.nullyTo(itemData.value, ''); },
     
-    domainItemValues: function(){
-        return this.domainItemDatas()
-            .select(this.domainItemDataValue, this)
-            .distinct();
+    domainItemValues: function() {
+        return this.domainItemDatas().select(this.domainItemDataValue, this).distinct();
     },
     
     _resolveDomainData: function() {
