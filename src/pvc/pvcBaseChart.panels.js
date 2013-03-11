@@ -214,9 +214,11 @@ pvc.BaseChart
         .query(colorAxes)
         .where(function(axis) { return axis.option('LegendVisible'); })
         .each (function(axis) {
-            axis.dataCells.forEach(function(dataCell) {
-                if(dataCell.role.isDiscrete()) { createLegendGroup(dataCell, axis); }
-            });
+            if(axis.dataCells) {
+                axis.dataCells.forEach(function(dataCell) {
+                    if(dataCell.role.isDiscrete()) { createLegendGroup(dataCell, axis); }
+                });
+            }
         });
         
         function createLegendGroup(dataCell, colorAxis) {

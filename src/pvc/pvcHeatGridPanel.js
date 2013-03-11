@@ -233,7 +233,7 @@ def
     _buildGetBaseFillColor: function(hasColor) {
         var colorAxis = this.axes.color;
         return hasColor ? 
-                colorAxis.sceneScale({sceneVarName: this.visualRoles.color.name}) :
+                colorAxis.sceneScale({sceneVarName: 'color'}) :
                 def.fun.constant(colorAxis.option('Unbound'));
     },
             

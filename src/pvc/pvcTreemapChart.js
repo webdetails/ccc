@@ -4,9 +4,14 @@ def
 .add({
     _animatable: false,
 
+    // Create color axis, even if the role is unbound
+    // cause we need to check the axis options any way
+    _axisCreateIfUnbound: {
+        'color': true
+    },
+    
     _getColorRoleSpec: function() {
         return { 
-            isRequired: true, 
             defaultSourceRole: 'category', 
             defaultDimension:  'color*'
             /*, requireIsDiscrete: true*/

@@ -18,15 +18,15 @@ def
         var rootScene = me._buildScene();
         if(!rootScene) { return; } // Everything hidden
         
-        var lw0 = def.number.to(this._getConstantExtension('leaf', 'lineWidth'), 1);
+        var lw0 = def.number.to(me._getConstantExtension('leaf', 'lineWidth'), 1);
         var lw  = lw0;
         var lw2 = lw/2;
         
         var sizeProp = me.visualRoles.size.isBound() ?
-            me.axes.size.sceneScale({sceneVarName: 'size'}) :
-            0;
+                       me.axes.size.sceneScale({sceneVarName: 'size'}) :
+                       100;
                 
-        var panel = this.pvTreemapPanel = new pvc.visual.Panel(me, me.pvPanel, {
+        var panel = me.pvTreemapPanel = new pvc.visual.Panel(me, me.pvPanel, {
                 panelType:   pv.Layout.Treemap,
                 extensionId: 'panel'
             })
@@ -39,7 +39,7 @@ def
             .lock('width',   cs.width  - lw)
             .lock('height',  cs.height - lw)
             .lock('size',    sizeProp)
-            .lock('mode',    this.layoutMode)
+            .lock('mode',    me.layoutMode)
             .lock('order',   null) // TODO: option
             .lock('round',   false)
             ;
@@ -52,10 +52,17 @@ def
             .width (function(n) { return n.dx - lw;  })
             .height(function(n) { return n.dy - lw;  });
         
-        var colorScaleDirect = this.axes.color.sceneScale({sceneVarName: 'color'});
-        var colorScaleLeaf   = colorScaleDirect;
-        if(this.plot.option('ColorMode') === 'byparent') {
-            colorScaleLeaf = colorScaleLeaf.by(function(s){ return s.parent; });
+        // ------------------
+        
+        var colorAxis = me.axes.color;
+        var colorScaleDirect, colorScaleLeaf;
+        if(me.visualRoles.color.isBound()) {
+            colorScaleLeaf = colorScaleDirect = colorAxis.sceneScale({sceneVarName: 'color'});
+            if(me.plot.option('ColorMode') === 'byparent') {
+                colorScaleLeaf = colorScaleLeaf.by(def.propGet('parent'));
+            }
+        } else {
+            colorScaleLeaf = colorScaleDirect = def.fun.constant(colorAxis.option('Unbound'));
         }
         
         // ------------------
@@ -79,17 +86,17 @@ def
             noClick:  true,
             noDoubleClick:  true
         })
-        .intercept('visible', function(scene){
+        .intercept('visible', function(scene) {
             return !!scene.parent && 
                    !!scene.firstChild &&
                    this.delegateExtension(true); 
          })
-        .override('anyInteraction', function(){
+        .override('anyInteraction', function() {
             return this.scene.anyInteraction() ||
                    this.scene.isActiveDescendantOrSelf(); // special kind of interaction
         })
         .override('defaultStrokeWidth', function() { return 1.5 * lw; })
-        .override('interactiveStrokeWidth', function(w){
+        .override('interactiveStrokeWidth', function(w) {
             if(this.showsActivity() && 
                this.scene.isActiveDescendantOrSelf()) {
                w = Math.max(1, w) * 1.5;
