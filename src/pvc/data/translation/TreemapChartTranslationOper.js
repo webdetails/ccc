@@ -24,23 +24,27 @@ def.type('pvc.data.TreemapChartTranslationOper')
     /**
      * @override
      */
-    _configureTypeCore: function(){
+    _configureTypeCore: function() {
         var autoDimNames = [];
         
-        var V = this.virtualItemSize();
-        var C = V - this.M;
+        // VItem Indexes of continuous columns not yet being read
+        var freeMeaIndexes = [];
         
-        this._getUnboundRoleDefaultDimNames('category', C, autoDimNames);
+        // Idem, but for discrete columns
+        var freeDisIndexes = [];
         
-        ['size', 'color']
-        .slice(0, this.M)
-        .forEach(function(roleName){
-            this._getUnboundRoleDefaultDimNames(roleName, 1, autoDimNames);
-        }, this);
-
-        autoDimNames.slice(0, this.freeVirtualItemSize());
-        if(autoDimNames.length){
-            this.defReader({names: autoDimNames});
+        this.collectFreeDiscreteAndConstinuousIndexes(freeDisIndexes, freeMeaIndexes);
+        
+        var D = freeDisIndexes.length;
+        var M = freeMeaIndexes.length;
+        
+        if(D) { this._getUnboundRoleDefaultDimNames('category', D, autoDimNames); }
+        if(M) {
+            def.query(['size', 'color']).take(M).each(function(roleName) {
+                this._getUnboundRoleDefaultDimNames(roleName, 1, autoDimNames);
+            }, this);
         }
+        
+        if(autoDimNames.length) { this.defReader({names: autoDimNames}); }
     }
 });

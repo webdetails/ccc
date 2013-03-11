@@ -26,19 +26,25 @@ def.type('pvc.data.BoxplotChartTranslationOper')
      */
     _configureTypeCore: function(){
         var autoDimNames = [];
+       
+        // VItem Indexes of continuous columns not yet being read
+        var freeMeaIndexes = [];
         
-        var V = this.virtualItemSize();
-        var C = V - this.M;
+        // Idem, but for discrete columns
+        var freeDisIndexes = [];
         
-        this._getUnboundRoleDefaultDimNames('category', C, autoDimNames);
+        this.collectFreeDiscreteAndConstinuousIndexes(freeDisIndexes, freeMeaIndexes);
         
-        pvc.BoxplotChart.measureRolesNames.forEach(function(roleName){
+        this._getUnboundRoleDefaultDimNames('category', freeDisIndexes.length, autoDimNames);
+        
+        // Try to bind as much measure roles as there are free measures
+        def
+        .query(pvc.BoxplotChart.measureRolesNames)
+        .take (freeMeaIndexes.length) // first free measures
+        .each(function(roleName) {
             this._getUnboundRoleDefaultDimNames(roleName, 1, autoDimNames);
         }, this);
 
-        autoDimNames.slice(0, this.freeVirtualItemSize());
-        if(autoDimNames.length){
-            this.defReader({names: autoDimNames});
-        }
+        if(autoDimNames.length) { this.defReader({names: autoDimNames}); }
     }
 });
