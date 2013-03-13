@@ -373,8 +373,7 @@
     
     <c:complexType name="PieChartWedgeExtensionPoint"
                    space="pvc.options.marks" 
-                   base="pvc.options.marks.WedgeExtensionPoint"
-                   use="expanded">
+                   base="pvc.options.marks.WedgeExtensionPoint">
         <c:documentation>
             The class of the Pie chart's protovis Wedge extension points.
             

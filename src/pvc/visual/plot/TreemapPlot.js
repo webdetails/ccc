@@ -58,7 +58,7 @@ def.scope(function(){
                 value:   1
             },
             
-            ValuesAnchor: {
+            ValuesAnchor: { // NOT USED
                 cast:  pvc.parseAnchor,
                 value: 'center'
             },
@@ -92,7 +92,7 @@ def.scope(function(){
             RootCategoryLabel: {
                 resolve: '_resolveFull',
                 cast: String,
-                value: 'Root'
+                value: "All"
             }
         });
 });

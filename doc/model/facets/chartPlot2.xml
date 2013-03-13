@@ -72,6 +72,13 @@
                 The index of the color axis to use for the plot.
             </c:documentation>
         </c:property>
+        
+        <c:property name="valuesAnchor" type="pvc.options.varia.MarkAnchor" default="" category="Style">
+            <c:documentation>
+                The alignment of a value label 
+                relative to its corresponding visual element position.
+            </c:documentation>
+        </c:property>
     </c:complexType>
     
     <c:facetType name="Ortho2ChartFacet" space="pvc.options.charts">

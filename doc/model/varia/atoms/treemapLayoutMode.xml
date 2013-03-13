@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="TreemapLayoutMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            The rectangle layout algorithm used by a treemap plot.
+        </c:documentation>
+        
+        <c:atom name="Squarify" value="'squarify'" />
+        <c:atom name="Slice-and-Dice" value="'slice-and-dice'" />
+        <c:atom name="Slice" value="'slice'" />
+        <c:atom name="Dice"  value="'dice'" />
+    </c:atomType>
+</c:model>

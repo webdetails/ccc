@@ -155,7 +155,34 @@
         <t:example title="DOTS AND LINES, TWO SERIES" />
         <t:example title="LINES, HORIZONTAL" />
         <t:example title="DOTS, CLICKABLE" />
-        <t:example title="SMALL MULTIPLE BUBBLES" style="wide"/>
+        <t:example title="SMALL MULTIPLE BUBBLES" style="wide" />
     </t:template>
     
+    <t:template name="Treemap" exampleMask="cccTreemapExample{0}.js">
+        <t:summary>
+           Treemap charts display hierarchical data using nested rectangles.
+           They excel in revealing the location of valuable areas buried in a deep hierarchy.  
+            
+           <p>
+           The root data node is represented by the root rectangle, 
+           which occupies the whole plot area.
+           </p>
+           <p>
+           The area of a leaf node is proportional to 
+           the percentage of the <i>size</i> dimension over its sibling nodes.
+           The area of a non-leaf node is the sum of the areas of its child nodes.
+           If no <i>size</i> dimension is specified, 
+           then all sibling-leaf nodes will have identical areas.
+           </p>
+           <p>
+           Rectangles are usually colored so that siblings have the same color.
+           This way, it is easy to identify sibling nodes and compare their relative sizes.
+           In this way, the colors that are shown are the colors of leaf nodes' parents.
+           </p>
+        </t:summary>
+        <t:example title="SINGLE-LEVEL" />
+        <t:example title="THREE-LEVELS"  />
+        <t:example title="SLICE-AND-DICE LAYOUT - SELF-COLORED"  />
+        <t:example title="FLARE LIBRARY MODULES" style="wide" />
+    </t:template>
 </t:templates>

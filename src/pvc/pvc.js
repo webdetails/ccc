@@ -648,16 +648,15 @@ var pvc = def.globalSpace('pvc', {
            ;
     };
     
-    pvc.makeEnumParser = function(enumName, keys, defaultKey) {
+    pvc.makeEnumParser = function(enumName, keys, dk) {
         var keySet = {};
         keys.forEach(function(k){ if(k) { keySet[k.toLowerCase()] = k; }});
-        if(defaultKey) { defaultKey = defaultKey.toLowerCase(); }
+        if(dk) { dk = dk.toLowerCase(); }
         
-        return function(k, dk) {
+        return function(k) {
             if(k) { k = (''+k).toLowerCase(); }
             
             if(!def.hasOwn(keySet, k)) {
-                dk = dk || defaultKey;
                 if(k && pvc.debug >= 2) {
                     pvc.log("[Warning] Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
                 }
@@ -710,10 +709,10 @@ var pvc = def.globalSpace('pvc', {
     pvc.parseTreemapLayoutMode = 
         pvc.makeEnumParser('layoutMode', ['squarify', 'slice-and-dice', 'slice', 'dice'], 'squarify');
     
-    pvc.parseContinuousColorScaleType = function(scaleType){
-        if(scaleType){
+    pvc.parseContinuousColorScaleType = function(scaleType) {
+        if(scaleType) {
             scaleType = (''+scaleType).toLowerCase();
-            switch(scaleType){
+            switch(scaleType) {
                 case 'linear':
                 case 'normal':
                 case 'discrete':

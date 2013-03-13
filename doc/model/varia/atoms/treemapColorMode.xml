@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c:model 
+    xmlns:c="urn:webdetails/com/2012" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:webdetails/com/2012 ../../../schema/com_2012.xsd"
+    xmlns="http://www.w3.org/1999/xhtml">
+    
+    <c:atomType name="TreemapColorMode" space="pvc.options.varia" base="string">
+        <c:documentation>
+            Indicates if the color is assigned to parent nodes or to leaf nodes.
+        </c:documentation>
+        
+        <c:atom name="By-Parent" value="'byParent'">
+            <c:documentation>
+                Colors are reserved for nodes that have leaf children. Leaf children show the color of their parent.
+            </c:documentation>
+        </c:atom>
+        <c:atom name="By-Self" value="'bySelf'">
+            <c:documentation>
+                Colors are reserved for leaf-nodes.
+            </c:documentation>
+        </c:atom>
+    </c:atomType>
+</c:model>

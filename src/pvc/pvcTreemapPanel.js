@@ -40,9 +40,8 @@ def
             .lock('height',  cs.height - lw)
             .lock('size',    sizeProp)
             .lock('mode',    me.layoutMode)
-            .lock('order',   null) // TODO: option
-            .lock('round',   false)
-            ;
+            .lock('order',   null) // TODO: option for this?
+            .lock('round',   false);
         
         // Node prototype
         // Reserve space for interaction borders
@@ -76,8 +75,7 @@ def
             .lineCap('round') // only used by strokeDashArray
             .strokeDasharray(function(scene) {
                 return scene.vars.size.value < 0 ? 'dash' : null; // Keep this in sync with the style in pvc.sign.DotSizeColor
-            })
-            ;
+            });
        
         new pvc.visual.Bar(me, panel.node, {
             extensionId: 'ascendant',
@@ -109,18 +107,20 @@ def
             if(type === 'stroke') {
                 if(this.showsActivity()) {
                     if(this.scene.isActiveDescendantOrSelf()) {
-                        return pv.color(color).brighter(1.3).alpha(0.7);
+                        return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
                     }
                     
                     if(this.scene.anyActive()) { return null; }
                }
                 
                if(this.showsSelection() && this.scene.isSelectedDescendantOrSelf()) {
-                   return pv.color(color).brighter(1.3).alpha(0.7);
+                   return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
                }
             }
             return null;
-        });
+        })
+        .pvMark
+        .antialias(false);
         
         var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {noAnchor: true});
         if(label) {

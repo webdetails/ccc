@@ -1057,7 +1057,7 @@ var testWaterfall1 = {
     ]
 };
 
-var testTreemap1 = {
+var testTreemapThreeLevel = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
@@ -1136,6 +1136,23 @@ var testTreemapAllNull = {
         ["RoW",    "India",      null,         null],
         ["RoW",    "Mexico",     null,         null]
     ]
+};
+
+var testTreemapSingleLevel = {
+   metadata: [{
+        "colIndex": 0,
+        "colType": "String",
+        "colName": "Territory"
+    }, {
+        "colIndex": 1,
+        "colType": "Numeric",
+        "colName": "Sales"
+    }], 
+  resultset: 
+      [[{v: "[Markets].[APAC]",  f: "APAC" }, {v: 1281705.89, f: "11,878.00"}],
+       [{v: "[Markets].[EMEA]",  f: "EMEA" }, {v: 5008224.32, f: "48,578.00"}],
+       [{v: "[Markets].[Japan]", f: "Japan"}, {v: 503957.58,  f: "3,923.00" }],
+       [{v: "[Markets].[NA]",    f: "NA"   }, {v: 3852061.39, f: "36,952.00"}]]
 };
 
 var testWaterfall1Neg = {
@@ -1338,8 +1355,74 @@ var steelWheels02 = {
         [{v:"[Customers].[Australian Collectables, Ltd]", f:"Australian Collectables, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Ships]", f:"Ships"},{v:32,f:"32"},{v:3070.4,f:"3.070"}],
         [{v:"[Customers].[Australian Collectables, Ltd]", f:"Australian Collectables, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:491,f:"491"},{v:43435.9,f:"43.436"}],
         [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:451,f:"451"},{v:50697.09,f:"50.697"}],
-        [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:490,f:"490"},{v:53818.659999999996,f:"53.819"}],[{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Planes]", f:"Planes"},{v:419,f:"419"},{v:39878.759999999995,f:"39.879"}],[{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:166,f:"166"},{v:18388.78,f:"18.389"}],[{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:400,f:"400"},{v:38212.119999999995,f:"38.212"}],[{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:117,f:"117"},{v:16973.760000000002,f:"16.974"}],[{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:121,f:"121"},{v:14492.09,f:"14.492"}],[{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Planes]", f:"Planes"},{v:88,f:"88"},{v:7237.9400000000005,f:"7.238"}],[{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trains]", f:"Trains"},{v:33,f:"33"},{v:1681.35,f:"1.681"}],[{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:91,f:"91"},{v:11297.54,f:"11.298"}],[{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:95,f:"95"},{v:7786.4400000000005,f:"7.786"}],[{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:87,f:"87"},{v:14380.7,f:"14.381"}],[{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:164,f:"164"},{v:19292.859999999997,f:"19.293"}],[{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:386,f:"386"},{v:31160.76,f:"31.161"}],[{v:"[Customers].[Auto Canal+ Petit]", f:"Auto Canal+ Petit"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:368,f:"368"},{v:41773.090000000004,f:"41.773"}],[{v:"[Customers].[Auto Canal+ Petit]", f:"Auto Canal+ Petit"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:633,f:"633"},{v:51397.57,f:"51.398"}],[{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:120,f:"120"},{v:9175.86,f:"9.176"}],[{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:63,f:"63"},{v:6206.27,f:"6.206"}],[{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:104,f:"104"},{v:11097.13,f:"11.097"}],[{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:267,f:"267"},{v:28912.769999999997,f:"28.913"}],[{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:212,f:"212"},{v:21244.339999999997,f:"21.244"}],[{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:72,f:"72"},{v:11310.36,f:"11.310"}],[{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:308,f:"308"},{v:37075.64,f:"37.076"}],[{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:223,f:"223"},{v:18056.079999999998,f:"18.056"}],[{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Planes]", f:"Planes"},{v:245,f:"245"},{v:23001.26,f:"23.001"}],[{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:55,f:"55"},{v:5501,f:"5.501"}],[{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:101,f:"101"},{v:6491.66,f:"6.492"}],[{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:466,f:"466"},{v:55505.91999999999,f:"55.506"}],[{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:89,f:"89"},{v:5043.42,f:"5.043"}],[{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:81,f:"81"},{v:10178,f:"10.178"}],[{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:175,f:"175"},{v:14444.25,f:"14.444"}],[{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:35,f:"35"},{v:3987.2,f:"3.987"}],[{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:36,f:"36"},{v:2315.88,f:"2.316"}],[{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:31,f:"31"},{v:2826.27,f:"2.826"}],[{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:91,f:"91"},{v:15330.7,f:"15.331"}],[{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:245,f:"245"},{v:21688.100000000002,f:"21.688"}],[{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:29,f:"29"},{v:3070.52,f:"3.071"}],[{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:103,f:"103"},{v:9552.73,f:"9.553"}],[{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:29,f:"29"},{v:6463.23,f:"6.463"}],[{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:52,f:"52"},{v:3199.92,f:"3.200"}],[{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:40,f:"40"},{v:3838,f:"3.838"}],[{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:32,f:"32"},{v:3360,f:"3.360"}],[{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:204,f:"204"},{v:19302.47,f:"19.302"}],[{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:175,f:"175"},{v:27160.93,f:"27.161"}],[{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:351,f:"351"},{v:32493.22,f:"32.493"}],[{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:177,f:"177"},{v:15584.77,f:"15.585"}],[{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:96,f:"96"},{v:13499.5,f:"13.500"}],[{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:98,f:"98"},{v:11087.390000000001,f:"11.087"}],[{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:65,f:"65"},{v:5910.48,f:"5.910"}],[{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:132,f:"132"},{v:13805.98,f:"13.806"}],[{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:277,f:"277"},{v:23203.620000000003,f:"23.204"}],[{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:219,f:"219"},{v:27950.57,f:"27.951"}],[{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:174,f:"174"},{v:14057.47,f:"14.057"}],[{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trains]", f:"Trains"},{v:21,f:"21"},{v:2296.77,f:"2.297"}],[{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:73,f:"73"},{v:8567.689999999999,f:"8.568"}],[{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:233,f:"233"},{v:24922.699999999997,f:"24.923"}],[{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:202,f:"202"},{v:31688.82,f:"31.689"}],[{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:58,f:"58"},{v:4953.200000000001,f:"4.953"}],[{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Planes]", f:"Planes"},{v:115,f:"115"},{v:11784.36,f:"11.784"}],[{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:50,f:"50"},{v:3112.6,f:"3.113"}],[{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:37,f:"37"},{v:3983.05,f:"3.983"}],[{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:28,f:"28"},{v:2234.4,f:"2.234"}],[{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:286,f:"286"},{v:31869.82,f:"31.870"}],[{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:240,f:"240"},{v:20128.19,f:"20.128"}],[{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:247,f:"247"},{v:21575.89,f:"21.576"}],[{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:181,f:"181"},{v:13915.32,f:"13.915"}],[{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:382,f:"382"},{v:39507.31999999999,f:"39.507"}],[{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:113,f:"113"},{v:11202.400000000001,f:"11.202"}],[{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:24,f:"24"},{v:2172.48,f:"2.172"}],
-        // ...
+        [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:490,f:"490"},{v:53818.659999999996,f:"53.819"}],
+        [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Planes]", f:"Planes"},{v:419,f:"419"},{v:39878.759999999995,f:"39.879"}],
+        [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:166,f:"166"},{v:18388.78,f:"18.389"}],
+        [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:400,f:"400"},{v:38212.119999999995,f:"38.212"}],
+        [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:117,f:"117"},{v:16973.760000000002,f:"16.974"}],
+        [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:121,f:"121"},{v:14492.09,f:"14.492"}],
+        [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Planes]", f:"Planes"},{v:88,f:"88"},{v:7237.9400000000005,f:"7.238"}],
+        [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trains]", f:"Trains"},{v:33,f:"33"},{v:1681.35,f:"1.681"}],
+        [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:91,f:"91"},{v:11297.54,f:"11.298"}],
+        [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:95,f:"95"},{v:7786.4400000000005,f:"7.786"}],
+        [{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:87,f:"87"},{v:14380.7,f:"14.381"}],
+        [{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:164,f:"164"},{v:19292.859999999997,f:"19.293"}],
+        [{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:386,f:"386"},{v:31160.76,f:"31.161"}],
+        [{v:"[Customers].[Auto Canal+ Petit]", f:"Auto Canal+ Petit"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:368,f:"368"},{v:41773.090000000004,f:"41.773"}],
+        [{v:"[Customers].[Auto Canal+ Petit]", f:"Auto Canal+ Petit"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:633,f:"633"},{v:51397.57,f:"51.398"}],
+        [{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:120,f:"120"},{v:9175.86,f:"9.176"}],
+        [{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:63,f:"63"},{v:6206.27,f:"6.206"}],
+        [{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:104,f:"104"},{v:11097.13,f:"11.097"}],
+        [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:267,f:"267"},{v:28912.769999999997,f:"28.913"}],
+        [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:212,f:"212"},{v:21244.339999999997,f:"21.244"}],
+        [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:72,f:"72"},{v:11310.36,f:"11.310"}],
+        [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:308,f:"308"},{v:37075.64,f:"37.076"}],
+        [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:223,f:"223"},{v:18056.079999999998,f:"18.056"}],
+        [{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Planes]", f:"Planes"},{v:245,f:"245"},{v:23001.26,f:"23.001"}],
+        [{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:55,f:"55"},{v:5501,f:"5.501"}],
+        [{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:101,f:"101"},{v:6491.66,f:"6.492"}],
+        [{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:466,f:"466"},{v:55505.91999999999,f:"55.506"}],
+        [{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:89,f:"89"},{v:5043.42,f:"5.043"}],
+        [{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:81,f:"81"},{v:10178,f:"10.178"}],
+        [{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:175,f:"175"},{v:14444.25,f:"14.444"}],
+        [{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:35,f:"35"},{v:3987.2,f:"3.987"}],
+        [{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:36,f:"36"},{v:2315.88,f:"2.316"}],
+        [{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:31,f:"31"},{v:2826.27,f:"2.826"}],
+        [{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:91,f:"91"},{v:15330.7,f:"15.331"}],
+        [{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:245,f:"245"},{v:21688.100000000002,f:"21.688"}],
+        [{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:29,f:"29"},{v:3070.52,f:"3.071"}],
+        [{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:103,f:"103"},{v:9552.73,f:"9.553"}],
+        [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:29,f:"29"},{v:6463.23,f:"6.463"}],
+        [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:52,f:"52"},{v:3199.92,f:"3.200"}],
+        [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:40,f:"40"},{v:3838,f:"3.838"}],
+        [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:32,f:"32"},{v:3360,f:"3.360"}],
+        [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:204,f:"204"},{v:19302.47,f:"19.302"}],
+        [{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:175,f:"175"},{v:27160.93,f:"27.161"}],
+        [{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:351,f:"351"},{v:32493.22,f:"32.493"}],
+        [{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:177,f:"177"},{v:15584.77,f:"15.585"}],
+        [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:96,f:"96"},{v:13499.5,f:"13.500"}],
+        [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:98,f:"98"},{v:11087.390000000001,f:"11.087"}],
+        [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:65,f:"65"},{v:5910.48,f:"5.910"}],
+        [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:132,f:"132"},{v:13805.98,f:"13.806"}],
+        [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:277,f:"277"},{v:23203.620000000003,f:"23.204"}],
+        [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:219,f:"219"},{v:27950.57,f:"27.951"}],
+        [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:174,f:"174"},{v:14057.47,f:"14.057"}],
+        [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trains]", f:"Trains"},{v:21,f:"21"},{v:2296.77,f:"2.297"}],
+        [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:73,f:"73"},{v:8567.689999999999,f:"8.568"}],
+        [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:233,f:"233"},{v:24922.699999999997,f:"24.923"}],
+        [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:202,f:"202"},{v:31688.82,f:"31.689"}],
+        [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:58,f:"58"},{v:4953.200000000001,f:"4.953"}],
+        [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Planes]", f:"Planes"},{v:115,f:"115"},{v:11784.36,f:"11.784"}],
+        [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:50,f:"50"},{v:3112.6,f:"3.113"}],
+        [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:37,f:"37"},{v:3983.05,f:"3.983"}],
+        [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:28,f:"28"},{v:2234.4,f:"2.234"}],
+        [{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:286,f:"286"},{v:31869.82,f:"31.870"}],
+        [{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:240,f:"240"},{v:20128.19,f:"20.128"}],
+        [{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:247,f:"247"},{v:21575.89,f:"21.576"}],
+        [{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:181,f:"181"},{v:13915.32,f:"13.915"}],
+        [{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:382,f:"382"},{v:39507.31999999999,f:"39.507"}],
+        [{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:113,f:"113"},{v:11202.400000000001,f:"11.202"}],
+        [{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:24,f:"24"},{v:2172.48,f:"2.172"}],
         [{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:276,f:"276"},{v:28695.78,f:"28.696"}],
         [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:323,f:"323"},{v:44387.06,f:"44.387"}],
         [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:369,f:"369"},{v:37444.270000000004,f:"37.444"}],
@@ -1357,3 +1440,458 @@ var steelWheels02 = {
         }
     }
 };
+
+var steelWheels03 = {
+        "metadata":[
+            {"colIndex":0, "colName":"[Customers].[Customer]", "colLabel":"Customer",  "colType":"STRING" },
+            {"colIndex":1, "colName":"[Markets].[Territory]",  "colLabel":"Territory", "colType":"STRING" },
+            {"colIndex":2, "colName":"[Product].[Line]",       "colLabel":"Line",      "colType":"STRING" },
+            {"colIndex":3, "colName":"[Measures].[Quantity]",  "colLabel":"Quantity",  "colType":"NUMERIC"}
+         ],
+         
+         "resultset":[
+            [{v:"[Customers].[AV Stores, Co.]", f:"AV Stores, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:628,f:"628"}],
+            [{v:"[Customers].[AV Stores, Co.]", f:"AV Stores, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:257,f:"257"}],
+            [{v:"[Customers].[AV Stores, Co.]", f:"AV Stores, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:120,f:"120"}],
+            [{v:"[Customers].[AV Stores, Co.]", f:"AV Stores, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:773,f:"773"}],
+            [{v:"[Customers].[Alpha Cognac]", f:"Alpha Cognac"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:126,f:"126"}],
+            [{v:"[Customers].[Alpha Cognac]", f:"Alpha Cognac"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Planes]", f:"Planes"},{v:218,f:"218"}],
+            [{v:"[Customers].[Alpha Cognac]", f:"Alpha Cognac"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:247,f:"247"}],
+            [{v:"[Customers].[Alpha Cognac]", f:"Alpha Cognac"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:96,f:"96"}],
+            [{v:"[Customers].[Amica Models & Co.]", f:"Amica Models & Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:149,f:"149"}],
+            [{v:"[Customers].[Amica Models & Co.]", f:"Amica Models & Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:82,f:"82"}],
+            [{v:"[Customers].[Amica Models & Co.]", f:"Amica Models & Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:22,f:"22"}],
+            [{v:"[Customers].[Amica Models & Co.]", f:"Amica Models & Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:24,f:"24"}],
+            [{v:"[Customers].[Amica Models & Co.]", f:"Amica Models & Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:566,f:"566"}],
+            [{v:"[Customers].[Anna's Decorations, Ltd]", f:"Anna's Decorations, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:744,f:"744"}],
+            [{v:"[Customers].[Anna's Decorations, Ltd]", f:"Anna's Decorations, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:219,f:"219"}],
+            [{v:"[Customers].[Anna's Decorations, Ltd]", f:"Anna's Decorations, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:286,f:"286"}],
+            [{v:"[Customers].[Anna's Decorations, Ltd]", f:"Anna's Decorations, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:220,f:"220"}],
+            [{v:"[Customers].[Atelier graphique]", f:"Atelier graphique"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:156,f:"156"}],
+            [{v:"[Customers].[Atelier graphique]", f:"Atelier graphique"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:71,f:"71"}],
+            [{v:"[Customers].[Atelier graphique]", f:"Atelier graphique"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:43,f:"43"}],
+            [{v:"[Customers].[Australian Collectables, Ltd]", f:"Australian Collectables, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:119,f:"119"}],
+            [{v:"[Customers].[Australian Collectables, Ltd]", f:"Australian Collectables, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Planes]", f:"Planes"},{v:63,f:"63"}],
+            [{v:"[Customers].[Australian Collectables, Ltd]", f:"Australian Collectables, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Ships]", f:"Ships"},{v:32,f:"32"}],
+            [{v:"[Customers].[Australian Collectables, Ltd]", f:"Australian Collectables, Ltd"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:491,f:"491"}],
+            [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:451,f:"451"}],
+            [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:490,f:"490"}],
+            [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Planes]", f:"Planes"},{v:419,f:"419"},{v:39878.759999999995,f:"39.879"}],
+            [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:166,f:"166"}],
+            [{v:"[Customers].[Australian Collectors, Co.]", f:"Australian Collectors, Co."},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:400,f:"400"}],
+            [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:117,f:"117"}],
+            [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:121,f:"121"}],
+            [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Planes]", f:"Planes"},{v:88,f:"88"}],
+            [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trains]", f:"Trains"},{v:33,f:"33"}],
+            [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:91,f:"91"}],
+            [{v:"[Customers].[Australian Gift Network, Co]", f:"Australian Gift Network, Co"},{v:"[Markets].[APAC]", f:"APAC"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:95,f:"95"}],
+            [{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:87,f:"87"}],
+            [{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:164,f:"164"}],
+            [{v:"[Customers].[Auto Assoc. & Cie.]", f:"Auto Assoc. & Cie."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:386,f:"386"}],
+            [{v:"[Customers].[Auto Canal+ Petit]", f:"Auto Canal+ Petit"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:368,f:"368"}],
+            [{v:"[Customers].[Auto Canal+ Petit]", f:"Auto Canal+ Petit"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:633,f:"633"}],
+            [{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:120,f:"120"}],
+            [{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:63,f:"63"}],
+            [{v:"[Customers].[Auto-Moto Classics Inc.]", f:"Auto-Moto Classics Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:104,f:"104"}],
+            [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:267,f:"267"}],
+            [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:212,f:"212"}],
+            [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:72,f:"72"}],
+            [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:308,f:"308"}],
+            [{v:"[Customers].[Baane Mini Imports]", f:"Baane Mini Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:223,f:"223"}],
+            [{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Planes]", f:"Planes"},{v:245,f:"245"}],
+            [{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:55,f:"55"}],
+            [{v:"[Customers].[Bavarian Collectables Imports, Co.]", f:"Bavarian Collectables Imports, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:101,f:"101"}],
+            [{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:466,f:"466"}],
+            [{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:89,f:"89"}],
+            [{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:81,f:"81"}],
+            [{v:"[Customers].[Blauer See Auto, Co.]", f:"Blauer See Auto, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:175,f:"175"}],
+            [{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:35,f:"35"}],
+            [{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:36,f:"36"}],
+            [{v:"[Customers].[Boards & Toys Co.]", f:"Boards & Toys Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:31,f:"31"}],
+            [{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:91,f:"91"}],
+            [{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Ships]", f:"Ships"},{v:245,f:"245"}],
+            [{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:29,f:"29"}],
+            [{v:"[Customers].[CAF Imports]", f:"CAF Imports"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:103,f:"103"}],
+            [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:29,f:"29"}],
+            [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:52,f:"52"}],
+            [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:40,f:"40"}],
+            [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:32,f:"32"}],
+            [{v:"[Customers].[Cambridge Collectables Co.]", f:"Cambridge Collectables Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:204,f:"204"}],
+            [{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:175,f:"175"}],
+            [{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:351,f:"351"}],
+            [{v:"[Customers].[Canadian Gift Exchange Network]", f:"Canadian Gift Exchange Network"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:177,f:"177"}],
+            [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:96,f:"96"}],
+            [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:98,f:"98"}],
+            [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:65,f:"65"}],
+            [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:132,f:"132"}],
+            [{v:"[Customers].[Classic Gift Ideas, Inc]", f:"Classic Gift Ideas, Inc"},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:277,f:"277"}],
+            [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:219,f:"219"}],
+            [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:174,f:"174"}],
+            [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trains]", f:"Trains"},{v:21,f:"21"}],
+            [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:73,f:"73"}],
+            [{v:"[Customers].[Classic Legends Inc.]", f:"Classic Legends Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:233,f:"233"}],
+            [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:202,f:"202"}],
+            [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:58,f:"58"}],
+            [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Planes]", f:"Planes"},{v:115,f:"115"}],
+            [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trains]", f:"Trains"},{v:50,f:"50"}],
+            [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:37,f:"37"}],
+            [{v:"[Customers].[Clover Collections, Co.]", f:"Clover Collections, Co."},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:28,f:"28"}],
+            [{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:286,f:"286"}],
+            [{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:240,f:"240"}],
+            [{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:247,f:"247"}],
+            [{v:"[Customers].[Collectable Mini Designs Co.]", f:"Collectable Mini Designs Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:181,f:"181"}],
+            [{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:382,f:"382"}],
+            [{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Planes]", f:"Planes"},{v:113,f:"113"}],
+            [{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:24,f:"24"}],
+            [{v:"[Customers].[Collectables For Less Inc.]", f:"Collectables For Less Inc."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:276,f:"276"}],
+            [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:323,f:"323"}],
+            [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Motorcycles]", f:"Motorcycles"},{v:369,f:"369"}],
+            [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Ships]", f:"Ships"},{v:77,f:"77"}],
+            [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Trucks and Buses]", f:"Trucks and Buses"},{v:103,f:"103"}],
+            [{v:"[Customers].[Corporate Gift Ideas Co.]", f:"Corporate Gift Ideas Co."},{v:"[Markets].[NA]", f:"NA"},{v:"[Product].[Vintage Cars]", f:"Vintage Cars"},{v:575,f:"575"}],
+            [{v:"[Customers].[Corrida Auto Replicas, Ltd]", f:"Corrida Auto Replicas, Ltd"},{v:"[Markets].[EMEA]", f:"EMEA"},{v:"[Product].[Classic Cars]", f:"Classic Cars"},{v:232,f:"232"}]
+        ],
+        
+        options: {}
+    };
+
+
+var flare = {
+    analytics: {
+      cluster: {
+        AgglomerativeCluster: 3938,
+        CommunityStructure: 3812,
+        HierarchicalCluster: 6714,
+        MergeEdge: 743
+      },
+      graph: {
+        BetweennessCentrality: 3534,
+        LinkDistance: 5731,
+        MaxFlowMinCut: 7840,
+        ShortestPaths: 5914,
+        SpanningTree: 3416
+      },
+      optimization: {
+        AspectRatioBanker: 7074
+      }
+    },
+    animate: {
+      Easing: 17010,
+      FunctionSequence: 5842,
+      interpolate: {
+        ArrayInterpolator: 1983,
+        ColorInterpolator: 2047,
+        DateInterpolator: 1375,
+        Interpolator: 8746,
+        MatrixInterpolator: 2202,
+        NumberInterpolator: 1382,
+        ObjectInterpolator: 1629,
+        PointInterpolator: 1675,
+        RectangleInterpolator: 2042
+      },
+      ISchedulable: 1041,
+      Parallel: 5176,
+      Pause: 449,
+      Scheduler: 5593,
+      Sequence: 5534,
+      Transition: 9201,
+      Transitioner: 19975,
+      TransitionEvent: 1116,
+      Tween: 6006
+    },
+    data: {
+      converters: {
+        Converters: 721,
+        DelimitedTextConverter: 4294,
+        GraphMLConverter: 9800,
+        IDataConverter: 1314,
+        JSONConverter: 2220
+      },
+      DataField: 1759,
+      DataSchema: 2165,
+      DataSet: 586,
+      DataSource: 3331,
+      DataTable: 772,
+      DataUtil: 3322
+    },
+    display: {
+      DirtySprite: 8833,
+      LineSprite: 1732,
+      RectSprite: 3623,
+      TextSprite: 10066
+    },
+    flex: {
+      FlareVis: 4116
+    },
+    physics: {
+      DragForce: 1082,
+      GravityForce: 1336,
+      IForce: 319,
+      NBodyForce: 10498,
+      Particle: 2822,
+      Simulation: 9983,
+      Spring: 2213,
+      SpringForce: 1681
+    },
+    query: {
+      AggregateExpression: 1616,
+      And: 1027,
+      Arithmetic: 3891,
+      Average: 891,
+      BinaryExpression: 2893,
+      Comparison: 5103,
+      CompositeExpression: 3677,
+      Count: 781,
+      DateUtil: 4141,
+      Distinct: 933,
+      Expression: 5130,
+      ExpressionIterator: 3617,
+      Fn: 3240,
+      If: 2732,
+      IsA: 2039,
+      Literal: 1214,
+      Match: 3748,
+      Maximum: 843,
+      methods: {
+        add: 593,
+        and: 330,
+        average: 287,
+        count: 277,
+        distinct: 292,
+        div: 595,
+        eq: 594,
+        fn: 460,
+        gt: 603,
+        gte: 625,
+        iff: 748,
+        isa: 461,
+        lt: 597,
+        lte: 619,
+        max: 283,
+        min: 283,
+        mod: 591,
+        mul: 603,
+        neq: 599,
+        not: 386,
+        or: 323,
+        orderby: 307,
+        range: 772,
+        select: 296,
+        stddev: 363,
+        sub: 600,
+        sum: 280,
+        update: 307,
+        variance: 335,
+        where: 299,
+        xor: 354,
+        _: 264
+      },
+      Minimum: 843,
+      Not: 1554,
+      Or: 970,
+      Query: 13896,
+      Range: 1594,
+      StringUtil: 4130,
+      Sum: 791,
+      Variable: 1124,
+      Variance: 1876,
+      Xor: 1101
+    },
+    scale: {
+      IScaleMap: 2105,
+      LinearScale: 1316,
+      LogScale: 3151,
+      OrdinalScale: 3770,
+      QuantileScale: 2435,
+      QuantitativeScale: 4839,
+      RootScale: 1756,
+      Scale: 4268,
+      ScaleType: 1821,
+      TimeScale: 5833
+    },
+    util: {
+      Arrays: 8258,
+      Colors: 10001,
+      Dates: 8217,
+      Displays: 12555,
+      Filter: 2324,
+      Geometry: 10993,
+      heap: {
+        FibonacciHeap: 9354,
+        HeapNode: 1233
+      },
+      IEvaluable: 335,
+      IPredicate: 383,
+      IValueProxy: 874,
+      math: {
+        DenseMatrix: 3165,
+        IMatrix: 2815,
+        SparseMatrix: 3366
+      },
+      Maths: 17705,
+      Orientation: 1486,
+      palette: {
+        ColorPalette: 6367,
+        Palette: 1229,
+        ShapePalette: 2059,
+        SizePalette: 2291
+      },
+      Property: 5559,
+      Shapes: 19118,
+      Sort: 6887,
+      Stats: 6557,
+      Strings: 22026
+    },
+    vis: {
+      axis: {
+        Axes: 1302,
+        Axis: 24593,
+        AxisGridLine: 652,
+        AxisLabel: 636,
+        CartesianAxes: 6703
+      },
+      controls: {
+        AnchorControl: 2138,
+        ClickControl: 3824,
+        Control: 1353,
+        ControlList: 4665,
+        DragControl: 2649,
+        ExpandControl: 2832,
+        HoverControl: 4896,
+        IControl: 763,
+        PanZoomControl: 5222,
+        SelectionControl: 7862,
+        TooltipControl: 8435
+      },
+      data: {
+        Data: 20544,
+        DataList: 19788,
+        DataSprite: 10349,
+        EdgeSprite: 3301,
+        NodeSprite: 19382,
+        render: {
+          ArrowType: 698,
+          EdgeRenderer: 5569,
+          IRenderer: 353,
+          ShapeRenderer: 2247
+        },
+        ScaleBinding: 11275,
+        Tree: 7147,
+        TreeBuilder: 9930
+      },
+      events: {
+        DataEvent: 2313,
+        SelectionEvent: 1880,
+        TooltipEvent: 1701,
+        VisualizationEvent: 1117
+      },
+      legend: {
+        Legend: 20859,
+        LegendItem: 4614,
+        LegendRange: 10530
+      },
+      operator: {
+        distortion: {
+          BifocalDistortion: 4461,
+          Distortion: 6314,
+          FisheyeDistortion: 3444
+        },
+        encoder: {
+          ColorEncoder: 3179,
+          Encoder: 4060,
+          PropertyEncoder: 4138,
+          ShapeEncoder: 1690,
+          SizeEncoder: 1830
+        },
+        filter: {
+          FisheyeTreeFilter: 5219,
+          GraphDistanceFilter: 3165,
+          VisibilityFilter: 3509
+        },
+        IOperator: 1286,
+        label: {
+          Labeler: 9956,
+          RadialLabeler: 3899,
+          StackedAreaLabeler: 3202
+        },
+        layout: {
+          AxisLayout: 6725,
+          BundledEdgeRouter: 3727,
+          CircleLayout: 9317,
+          CirclePackingLayout: 12003,
+          DendrogramLayout: 4853,
+          ForceDirectedLayout: 8411,
+          IcicleTreeLayout: 4864,
+          IndentedTreeLayout: 3174,
+          Layout: 7881,
+          NodeLinkTreeLayout: 12870,
+          PieLayout: 2728,
+          RadialTreeLayout: 12348,
+          RandomLayout: 870,
+          StackedAreaLayout: 9121,
+          TreeMapLayout: 9191
+        },
+        Operator: 2490,
+        OperatorList: 5248,
+        OperatorSequence: 4190,
+        OperatorSwitch: 2581,
+        SortOperator: 2023
+      },
+      Visualization: 16540
+    }
+  };
+
+
+  function buildDataset(tree) {
+      
+          // Determine number of categories
+      var maxDepth = maxDepthRecursive(tree, 0);
+    
+      function maxDepthRecursive(node, level) {
+          var maxDepth = level;
+          
+          if(typeof node !== 'number') {
+              var childLevel = level + 1;
+              for(var p in node) {
+                  maxDepth = Math.max(maxDepth, maxDepthRecursive(node[p], childLevel));
+              }
+          }
+          
+          return maxDepth;
+      }
+      
+      
+      // Create metadata
+      var colCount = maxDepth + 1;
+      var metadata = new Array(colCount);
+      for(var i = 0 ; i < maxDepth ; i++) {
+          metadata[i] = {colIndex: i, colName: "Category" + i, colType: "STRING"};
+      }
+      metadata[maxDepth] = {colIndex: maxDepth, colName: "Value", colType: "NUMERIC"};
+      
+      // Read resultset
+      var resultset = [];
+      
+      readRowsRecursive(colCount, [], resultset, tree);
+      
+      // Create resultset
+      function readRowsRecursive(colCount, row, rows, node) {
+          if(typeof node === 'object') {
+              for(var p in node) {
+                  row.push(p);
+                  readRowsRecursive(colCount, row, rows, node[p]);
+                  row.pop();
+              }
+          } else {
+              var remainingLevels = (colCount - row.length - 1);
+              row = row.slice();
+              while(remainingLevels--) { row.push(null); }
+              row.push(node); // value
+                  
+                  rows.push(row);
+          }
+      }
+          
+      return { metadata: metadata, resultset: resultset };
+  }
+  
