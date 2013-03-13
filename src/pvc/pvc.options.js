@@ -1,6 +1,6 @@
 
 // Options management utility
-def.scope(function(){
+def.scope(function() {
     /**
      * Creates an options manager given an options specification object,
      * and, optionally, a corresponding context object.
@@ -51,19 +51,19 @@ def.scope(function(){
      * 
      * @type function
      */
-    function options(specs, context){
+    function options(specs, context) {
         /*jshint expr:true */
         specs || def.fail.argumentRequired('specs');
         
         var _infos = {};
         
-        def.each(specs, function(spec, name){
+        def.each(specs, function(spec, name) {
             var info = new OptionInfo(name, option, context, spec);
             _infos[info.name] = info;
         });
         
         /** @private */
-        function resolve(name){
+        function resolve(name) {
             var info = def.getOwn(_infos, name) || 
                        def.fail.operationInvalid("Undefined option '{0}'", [name]);
             
@@ -85,7 +85,7 @@ def.scope(function(){
          * 
          *  @type any
          */
-        function option(name, noDefault){
+        function option(name, noDefault) {
             var info = resolve(name);
             return noDefault && !info.isSpecified ? undefined : info.value;
         }
@@ -97,9 +97,7 @@ def.scope(function(){
          * @param {string} name The name of the option.
          * @type boolean
          */
-        function isSpecified(name){
-            return resolve(name).isSpecified;
-        }
+        function isSpecified(name) { return resolve(name).isSpecified; }
         
         /**
          * Obtains the value of an option given its name,
@@ -115,9 +113,7 @@ def.scope(function(){
          * 
          * @type any
          */
-        function specified(name){
-            return option(name, /*noDefault*/ true);
-        }
+        function specified(name) { return option(name, /*noDefault*/ true); }
         
         /**
          * Indicates if an option with the given name is defined.
@@ -126,9 +122,7 @@ def.scope(function(){
          * @param {string} name The name of the option.
          * @type boolean
          */
-        function isDefined(name){
-            return def.hasOwn(_infos, name);
-        }
+        function isDefined(name) { return def.hasOwn(_infos, name); }
         
         /**
          * Specifies options' values given an object
@@ -147,9 +141,7 @@ def.scope(function(){
          * @param {object} [opts] An object with option values
          * @returns {function} The options manager. 
          */
-        function specify(opts){
-            return set(opts, false);
-        }
+        function specify(opts) { return set(opts, false); }
         
         /**
          * Sets options' default values.
@@ -159,9 +151,7 @@ def.scope(function(){
          * @returns {function} The options manager.
          * @see #specify
          */
-        function defaults(opts){
-            return set(opts, true);
-        }
+        function defaults(opts) { return set(opts, true); }
         
         /**
          * Obtains the default value of an option, given its name.
@@ -172,19 +162,15 @@ def.scope(function(){
          * @function
          * @param {string} name The name of the option.
          */
-        function getDefaultValue(name){
-            return resolve(name)._defaultValue;
-        }
+        function getDefaultValue(name) { return resolve(name)._defaultValue; }
         
         /** @private */
-        function set(opts, isDefault){
-            for(var name in opts){
+        function set(opts, isDefault) {
+            for(var name in opts) {
                 var info = def.getOwn(_infos, name);
-                if(info){
+                if(info) {
                     var value = opts[name];
-                    if(value !== undefined){
-                        info.set(value, isDefault);
-                    }
+                    if(value !== undefined) { info.set(value, isDefault); }
                 }
             }
             
@@ -212,43 +198,39 @@ def.scope(function(){
     // that combines a list of resolvers. 
     // The resolve stops when the first resolver returns the value <c>true</c>,
     // returning <c>true</c> as well.
-    function resolvers(list){
-        return function(optionInfo){
-            for(var i = 0, L = list.length ; i < L ; i++){
+    function resolvers(list) {
+        return function(optionInfo) {
+            for(var i = 0, L = list.length ; i < L ; i++) {
                 var m = list[i];
                 
-                if(def.string.is(m)){
-                    m = this[m];
-                } 
+                if(def.string.is(m)) { m = this[m]; } 
                 
-                if(m.call(this, optionInfo) === true){
-                    return true;
-                }
+                if(m.call(this, optionInfo) === true) { return true; }
             }
         };
     }
     
-    function constantResolver(value, op){
-        return function(optionInfo){
+    function constantResolver(value, op) {
+        return function(optionInfo) {
             optionInfo.specify(value);
             return true;
         };
     }
     
-    function specifyResolver(fun, op){
-        return function(optionInfo){
+    function specifyResolver(fun, op) {
+        return function(optionInfo) {
             var value = fun.call(this, optionInfo);
-            if(value !== undefined){
+            if(value !== undefined) {
                 optionInfo.specify(value);
                 return true;
             }
         };
     }
     
-    function defaultResolver(fun){
-        return function(optionInfo){
+    function defaultResolver(fun) {
+        return function(optionInfo) {
             var value = fun.call(this, optionInfo);
-            if(value !== undefined){
+            if(value !== undefined) {
                 optionInfo.defaultValue(value);
                 return true;
             }
@@ -267,13 +249,15 @@ def.scope(function(){
     // ------------
     
     /**
-     * @name pvc.options.Info
-     * @class An option in an options manager. 
+     * @name pvc.options.OptionInfo
+     * @class An option in an options manager.
+     * @private
      */
-    var OptionInfo = def.type()
+    var OptionInfo = 
+    def
+    .type() // Anonymous type
     .init(function(name, option, context, spec){
         this.name = name;
-        
         this._context = context;
         this.option = option;
         
@@ -282,33 +266,26 @@ def.scope(function(){
         // Assumed already cast
         // May be undefined
         var value = def.get(spec, 'value');
-        if(value !== undefined){
-            this._defaultValue = this.value = value;
-        }
+        if(value !== undefined) { this._defaultValue = this.value = value; }
         
-        this.resolveCore = def.get(spec, 'resolve');
-        if(!this.resolveCore){
-            this.isResolved = true;
-        }
-        
-        var getDefault = def.get(spec, 'getDefault');
-        if(getDefault){
-            this._getDefault = getDefault;
-        }
+        var resolve = def.get(spec, 'resolve'); // function or string
+        if(resolve) { this._resolve = resolve; } 
+        else        { this.isResolved = true; }
+
+        var getDefault = def.get(spec, 'getDefault'); // function or string
+        if(getDefault) { this._getDefault = getDefault; }
         
         var data = def.get(spec, 'data');
-        if(data != null){
-            this.data = data;
-        }
+        if(data != null) { this.data = data; }
         
         // --------
         // Can be used by resolvers...
         this.alias = def.array.to(def.get(spec, 'alias'));
     })
-    .add( /** @lends pvc.options.Info#  */{
+    .add( /** @lends pvc.options.OptionInfo#  */{
         isSpecified: false,
-        isResolved: false,
-        value: undefined,
+        isResolved:  false,
+        value:   undefined,
         
         /** @private */
         _defaultValue: undefined,
@@ -317,25 +294,21 @@ def.scope(function(){
          * Resolves an option if it is not yet resolved.
          * @type pvc.options.Info
          */
-        resolve: function(){
-            if(!this.isResolved){
+        resolve: function() {
+            if(!this.isResolved) {
                 // In case of re-entry, the initial default value is obtained.
                 this.isResolved = true;
                 
-                var resolve = this._getFunProp('resolveCore');
+                // Must call 'set', 'specify' or 'defaultValue'
+                // Otherwise, the current default value becomes _the_ value.
+                this._getFunProp('_resolve').call(this._context, this);
                 
-                // Must call set, specify or defaultValue
-                // Or the current default value becomes the value.
-                resolve.call(this._context, this);
-                
-                if(this.value == null){
-                    var getDefault = this._getFunProp('_getDefault');
-                    if(getDefault){
-                        var value = this.cast(getDefault.call(this._context, this));
-                        if(value != null){
-                            delete this.isSpecified;
-                            this.value = this._defaultValue = value;
-                        }
+                // Handle the case where none of the above referred methods is called.
+                if(this.value == null) {
+                    var value = this._dynDefault();
+                    if(value != null) {
+                        delete this.isSpecified;
+                        this.value = this._defaultValue = value;
                     }
                 }
             }
@@ -349,38 +322,25 @@ def.scope(function(){
          * @param {any} value the option value.
          * @type pvc.options.Info
          */
-        specify: function(value){
-            return this.set(value, false);
-        },
+        specify: function(value) { return this.set(value, false); },
         
         /**
          * Gets, and optionally sets, the default value.
          * @param {any} [value=undefined] the option default value.
          * @type any
          */
-        defaultValue: function(defaultValue){
-            if(defaultValue !== undefined){
-                this.set(defaultValue, true);
-            }
+        defaultValue: function(defaultValue) {
+            if(defaultValue !== undefined) { this.set(defaultValue, true); }
             
             return this._defaultValue;
         },
         
-        cast: function(value){
-            if(value != null){
+        cast: function(value) {
+            if(value != null) {
                 var cast = this._getFunProp('_cast');
-                if(cast){
-                    value = cast.call(this._context, value, this);
-                }
+                if(cast) { value = cast.call(this._context, value, this); }
             }
             return value;
-        },
-        
-        dynDefault: function(){
-            var dynDefault = this._getFunProp('_dynDefault');
-            if(dynDefault){
-                return this.cast(dynDefault.call(this._context, this));
-            }
         },
         
         /**
@@ -391,41 +351,40 @@ def.scope(function(){
          * 
          * @type pvc.options.Info
          */
-        set: function(value, isDefault){
-            if(value != null){
-                value = this.cast(value);
+        set: function(value, isDefault) {
+            if(value != null) { value = this.cast(value); }
+            
+            if(value == null) {
+                value = this._dynDefault();
+                if(value != null) { isDefault = true; }
             }
             
-            if(value == null){
-                value = this.dynDefault();
-                if(value != null){
-                    isDefault = true;
-                }
-            }
-            
-            if(!isDefault){
+            if(!isDefault) {
                 this.isSpecified = true;
                 this.isResolved  = true;
                 this.value = value;
             } else {
+                delete this.isSpecified; // J.I.C. 'defaultValue' is called after a 'specify'
+                
                 this._defaultValue = value;
                 
                 // Don't touch an already specified value
-                if(!this.isSpecified){
-                    this.value = value;
-                }
+                if(!this.isSpecified) { this.value = value; }
             }
             
             return this;
         },
+        
+        _dynDefault: function() {
+            var get = this._getFunProp('_getDefault');
+            return get && this.cast(get.call(this._context, this));
+        },
 
-        _getFunProp: function(name){
+        _getFunProp: function(name) {
             var fun = this[name];
-            if(fun){
+            if(fun) {
                 var context = this._context;
-                if(context && def.string.is(fun)){
-                    fun = context[fun];
-                }
+                if(context && def.string.is(fun)) { fun = context[fun]; }
             }
             return fun;
         }

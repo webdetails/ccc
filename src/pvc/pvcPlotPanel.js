@@ -17,11 +17,12 @@ def
     this.valuesAnchor  = plot.option('ValuesAnchor' );
     this.valuesMask    = plot.option('ValuesMask'   );
     this.valuesFont    = plot.option('ValuesFont'   );
+    this.valuesOptimizeLegibility = plot.option('ValuesOptimizeLegibility');
     
-    var roles = this.visualRoles = Object.create(chart._visualRoles);
+    var roles = this.visualRoles = Object.create(chart.visualRoles);
     
     var colorRoleName = plot.option('ColorRole');
-    roles.color = colorRoleName ? chart.visualRoles(colorRoleName) : null;
+    roles.color = colorRoleName ? chart.visualRole(colorRoleName) : null;
     
     this.chart._addPlotPanel(this);
 })

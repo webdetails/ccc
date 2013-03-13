@@ -35,11 +35,11 @@ def.scope(function(){
             this.base._initFromOptions();
         },
         
-        _onAxisChanged: function(axis){
+        _onAxisChanged: function(axis) {
             // Fire event
             var changed = this.option('Changed');
-            if(changed){
-                changed.call(this.chart.basePanel._getContext());
+            if(changed) {
+                changed.call(this.chart.basePanel.context());
             }
         }
     });
@@ -556,7 +556,7 @@ def.scope(function(){
             var partData   = chart.partData(dataCell.dataPartValue, {visible: true});
             var domainData;
             if(isDiscrete){
-                domainData = partData.flattenBy(role);
+                domainData = role.flatten(partData);
                 
                 var dataBegin = domainData._childrenByKey[me.begin];
                 var dataEnd   = domainData._childrenByKey[me.end  ];

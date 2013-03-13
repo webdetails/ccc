@@ -14,12 +14,16 @@ def.scope(function(){
      * @param {any} label The label of the variable.
      * @param {any} [rawValue] The raw value of the variable.
      */
-    var ValueLabelVar = pvc.visual.ValueLabelVar = function(value, label, rawValue){
+    var ValueLabelVar = pvc.visual.ValueLabelVar = function(value, label, rawValue, absLabel){
         this.value = value;
         this.label = label;
-
+        
         if(rawValue !== undefined){
             this.rawValue = rawValue;
+        }
+        
+        if(absLabel !== undefined) { // Only Data have absLabel not undefined
+            this.absLabel = absLabel; 
         }
     };
 
@@ -38,7 +42,7 @@ def.scope(function(){
 
     ValueLabelVar.fromComplex = function(complex){
         return complex ?
-               new pvc.visual.ValueLabelVar(complex.value, complex.label, complex.rawValue) :
+               new pvc.visual.ValueLabelVar(complex.value, complex.label, complex.rawValue, complex.absLabel) :
                new pvc.visual.ValueLabelVar(null, "", null)
                ;
     };

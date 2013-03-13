@@ -53,10 +53,8 @@
  *  The data source(s) that are present in the scene.
  */
 def.type('pvc.visual.Scene')
-.init(function(parent, keyArgs){
-    if(pvc.debug >= 4){
-        this.id = def.nextId('scene');
-    }
+.init(function(parent, keyArgs) {
+    if(pvc.debug >= 4) { this.id = def.nextId('scene'); }
     
     this._renderId   = 0;
     this.renderState = {};
@@ -64,7 +62,7 @@ def.type('pvc.visual.Scene')
     pv.Dom.Node.call(this, /* nodeValue */null);
     
     this.parent = parent || null;
-    if(parent){
+    if(parent) {
         this.root = parent.root;
         
         // parent -> ((pv.Dom.Node#)this).parentNode
@@ -84,11 +82,11 @@ def.type('pvc.visual.Scene')
     /* DATA */
     var first, group, datum, datums, groups, atoms, firstAtoms;
     var dataSource = def.array.to(def.get(keyArgs, 'source')); // array.to: nully remains nully
-    if(dataSource && dataSource.length){
+    if(dataSource && dataSource.length) {
         this.source = dataSource;
         
         first = dataSource[0];
-        if(first instanceof pvc.data.Data){
+        if(first instanceof pvc.data.Data) {
             // Group/groups
             group  = first;
             groups = dataSource;
@@ -98,7 +96,7 @@ def.type('pvc.visual.Scene')
             datum  = group.firstDatum() || 
                      def
                      .query(groups)
-                     .select(function(group){ return group.firstDatum(); })
+                     .select(function(g) { return g.firstDatum(); })
                      .first(def.notNully);
             // datum may still be null!
         } else {
@@ -110,7 +108,7 @@ def.type('pvc.visual.Scene')
         
         atoms      = first.atoms; // firstDataSourceAtoms
         firstAtoms = (datum && datum.atoms) || first.atoms; // firstDatumAtoms
-    } else if(parent){
+    } else if(parent) {
         atoms = firstAtoms = Object.create(parent.atoms);
     } else {
         atoms = firstAtoms = {};
@@ -130,15 +128,13 @@ def.type('pvc.visual.Scene')
     // Testing groups first ensures that the only
     // case where isNull is detected is that of a single datum scene.
     // Note that groups do not have isNull property, only datums do.
-    if(!first || first.isNull){
-        this.isNull = true;
-    }
+    if(!first || first.isNull) { this.isNull = true; }
 
     /* VARS */
     this.vars = parent ? Object.create(parent.vars) : {};
 })
 .add(pv.Dom.Node)
-
+.add(pvc.visual.Interactive)
 .add(/** @lends pvc.visual.Scene# */{
     source: null,
     groups: null,
@@ -154,18 +150,13 @@ def.type('pvc.visual.Scene')
      * If no data can be obtained in this way,
      * the data of the associated panel is returned.
      */
-    data: function(){
+    data: function() {
         var data = this.group;
-        if(!data){
+        if(!data) {
             var scene = this;
-            while(!data && (scene = scene.parent)){
-                data = scene.group;
-            }
-            if(!data){
-                data = this.panel.data;
-            }
+            while(!data && (scene = scene.parent)) { data = scene.group; }
+            if(!data) { data = this.panel.data; }
         }
-        
         return data;
     },
     
@@ -174,7 +165,7 @@ def.type('pvc.visual.Scene')
      *
      * @type def.Query
      */
-    datums: function(){
+    datums: function() {
         // For efficiency, assumes datums of multiple groups are disjoint sets
         return this.groups  ? def.query(this.groups ).selectMany(function(g){ return g.datums(); }) :
                this._datums ? def.query(this._datums) :
@@ -186,22 +177,18 @@ def.type('pvc.visual.Scene')
      * {value.value} -> <=> this.vars.value.value
      * {#sales} -> <=> this.atoms.sales.label
      */
-    format: function(mask){
-        return def.format(mask, this._formatScope, this);
-    },
+    format: function(mask) { return def.format(mask, this._formatScope, this); },
     
-    _formatScope: function(prop){
-        if(prop.charAt(0) === '#'){
+    _formatScope: function(prop) {
+        if(prop.charAt(0) === '#') {
             // An atom name
             prop = prop.substr(1).split('.');
-            if(prop.length > 2){
-                throw def.error.operationInvalid("Scene format mask is invalid.");
-            }
+            if(prop.length > 2) { throw def.error.operationInvalid("Scene format mask is invalid."); }
             
             var atom = this.firstAtoms[prop[0]];
-            if(atom){
+            if(atom) {
                 if(prop.length > 1) {
-                    switch(prop[1]){
+                    switch(prop[1]) {
                         case 'value': return atom.value;
                         case 'label': break;
                         default:      throw def.error.operationInvalid("Scene format mask is invalid.");
@@ -219,53 +206,31 @@ def.type('pvc.visual.Scene')
         return def.getPath(this.vars, prop); // Scene vars' toString may end up being called
     },
     
-    isRoot: function(){
-        return this.root === this;
-    },
-    
-    panel: function(){
-        return this.root._panel;
-    },
-    
-    chart: function(){
-        return this.root._panel.chart;
-    },
-    
-    compatVersion: function(){
-        return this.root._panel.compatVersion();
-    },
+    isRoot: function() { return this.root === this; },
+    panel:  function() { return this.root._panel; },
+    chart:  function() { return this.root._panel.chart; },
+    compatVersion: function() { return this.root._panel.compatVersion(); },
     
     /**
      * Obtains an enumerable of the child scenes.
      * 
      * @type def.Query
      */
-    children: function(){
-        if(!this.childNodes) {
-            return def.query();
-        }
-        
-        return def.query(this.childNodes);
-    },
+    children: function() { return this.childNodes ? def.query(this.childNodes) : def.query(); },
     
-    leafs: function(){
-        function getFirstLeafFrom(leaf){
-            // Find first leaf from current
-            while(leaf.childNodes.length){
-                leaf = leaf.childNodes[0];
-            }
-            
+    leafs: function() {
+        
+        function getFirstLeafFrom(leaf) {
+            while(leaf.childNodes.length) { leaf = leaf.childNodes[0]; }
             return leaf;
         }
         
         var root = this;
-        return def.query(function(nextIndex){
-            if(!nextIndex){
+        return def.query(function(nextIndex) {
+            if(!nextIndex) {
                 // Initialize
                 var item = getFirstLeafFrom(root);
-                if(item === root){
-                    return 0;
-                }
+                if(item === root) { return 0; }
                 
                 this.item = item;
                 return 1; // has next
@@ -273,15 +238,15 @@ def.type('pvc.visual.Scene')
             
             // Has a next sibling?
             var next = this.item.nextSibling;
-            if(next){
+            if(next) {
                 this.item = next;
                 return 1; // has next
             }
             
             // Go to closest ancestor that has a sibling
             var current = this.item;
-            while((current !== root) && (current = current.parentNode)){
-                if((next = current.nextSibling)){
+            while((current !== root) && (current = current.parentNode)) {
+                if((next = current.nextSibling)) {
                     // Take the first leaf from there
                     this.item = getFirstLeafFrom(next);
                     return 1;
@@ -293,47 +258,37 @@ def.type('pvc.visual.Scene')
     },
     
     /* INTERACTION */
-    anyInteraction: function(){
-        return (!!this.root._active || this.anySelected());
-    },
+    anyInteraction: function() { return (!!this.root._active || this.anySelected()); },
 
     /* ACTIVITY */
     isActive: false,
     
-    setActive: function(isActive){
+    setActive: function(isActive) {
         isActive = !!isActive; // normalize
-        if(this.isActive !== isActive){
+        if(this.isActive !== isActive) {
             rootScene_setActive.call(this.root, this.isActive ? null : this);
         }
     },
 
     // This is misleading as it clears whatever the active scene is,
     // not necessarily the scene on which it is called.
-    clearActive: function(){
-        return rootScene_setActive.call(this.root, null);
-    },
+    clearActive: function() { return rootScene_setActive.call(this.root, null); },
     
-    anyActive: function(){
-        return !!this.root._active;
-    },
+    anyActive: function() { return !!this.root._active; },
     
-    active: function(){
-        return this.root._active;
-    },
+    active: function() { return this.root._active; },
     
-    activeSeries: function(){
+    activeSeries: function() {
         var active = this.active();
         var seriesVar;
         return active && (seriesVar = active.vars.series) && seriesVar.value;
     },
     
-    isActiveSeries: function(){
-        if(this.isActive){
-            return true;
-        }
+    isActiveSeries: function() {
+        if(this.isActive) { return true; }
 
         var isActiveSeries = this.renderState.isActiveSeries;
-        if(isActiveSeries == null){
+        if(isActiveSeries == null) {
             var activeSeries;
             isActiveSeries = (activeSeries = this.activeSeries()) != null &&
                              (activeSeries === this.vars.series.value);
@@ -344,18 +299,15 @@ def.type('pvc.visual.Scene')
         return isActiveSeries;
     },
 
-    isActiveDatum: function(){
-
-        if(this.isActive){
-            return true;
-        }
+    isActiveDatum: function() {
+        if(this.isActive) { return true; }
 
         // Only testing the first datum of both because of performance
         // so, unless they have the same group or the  order of datums is the same...
         var isActiveDatum = this.renderState.isActiveDatum;
-        if(isActiveDatum == null){
+        if(isActiveDatum == null) {
             var activeScene = this.active();
-            if(activeScene){
+            if(activeScene) {
                 isActiveDatum = (this.group && activeScene.group === this.group) ||
                                 (this.datum && activeScene.datum === this.datum);
             } else {
@@ -368,29 +320,92 @@ def.type('pvc.visual.Scene')
         return isActiveDatum;
     },
     
+    isActiveDescendantOrSelf: function() {
+        if(this.isActive) { return true; }
+        
+        return def.lazy(this.renderState, 'isActiveDescOrSelf',  this._calcIsActiveDescOrSelf, this);
+    },
+    
+    _calcIsActiveDescOrSelf: function() {
+        var scene = this.active();
+        if(scene) {
+            while((scene = scene.parent)) { if(scene === this) { return true; } }
+        }
+        return false;
+    },
+    
+    /* VISIBILITY */
+    isVisible:  function() { return this._visibleData().is;  },
+    anyVisible: function() { return this._visibleData().any; },
+    
+    _visibleData: function() {
+        return def.lazy(this.renderState, '_visibleData', this._createVisibleData, this);
+    },
+    
+    _createVisibleData: function() {
+        var any = this.chart().data.owner.visibleCount() > 0,
+            isSelected = any && this.datums().any(def.propGet('isVisible'));
+        
+        return {any: any, is: isSelected};
+    },
+    
     /* SELECTION */
-    isSelected: function(){
-        return this._selectedData().is;
-    },
+    isSelected:  function() { return this._selectedData().is;  },
+    anySelected: function() { return this._selectedData().any; },
     
-    anySelected: function(){
-        return this._selectedData().any;
-    },
-    
-    _selectedData: function(){
+    _selectedData: function() {
         return def.lazy(this.renderState, '_selectedData', this._createSelectedData, this);
     },
     
-    _createSelectedData: function(){
-        var any = this.panel().chart.data.owner.selectedCount() > 0,
-            isSelected = any && 
-                         this.datums()
-                             .any(function(datum){ return datum.isSelected; });
+    _createSelectedData: function() {
+        var any = this.chart().data.owner.selectedCount() > 0,
+            isSelected = any && this.datums().any(def.propGet('isSelected'));
         
-        return {
-            any: any,
-            is:  isSelected
-        };
+        return {any: any, is: isSelected};
+    },
+    
+    /* ACTIONS - Update UI */
+    select: function(ka) {
+        var me = this;
+        var datums = me.datums().array();
+        if(datums.length) {
+            var chart = me.chart();
+            chart._updatingSelections(function() {
+                datums = chart._onUserSelection(datums);
+                if(datums && datums.length) {
+                    if(chart.options.ctrlSelectMode && def.get(ka, 'replace', true)) {
+                        chart.data.replaceSelected(datums);
+                    } else {
+                        pvc.data.Data.toggleSelected(datums);
+                    }
+                }
+            });
+        }
+    },
+    
+    isSelectedDescendantOrSelf: function() {
+        if(this.isSelected()) { return true; }
+        
+        return def.lazy(this.renderState, 'isSelectedDescOrSelf',  this._calcIsSelectedDescOrSelf, this);
+    },
+    
+    _calcIsSelectedDescOrSelf: function() {
+        var child = this.firstChild;
+        if(child) {
+            do {
+              if(child.isSelectedDescendantOrSelf()) { return true; }
+            } while((child = child.nextSibling));
+        }
+        return false;
+    },
+    
+    // -------
+    
+    toggleVisible: function() {
+        if(pvc.data.Data.toggleVisible(this.datums())) {
+            // Re-render chart
+            this.chart().render(true, true, false);
+        }
     }
 });
 
@@ -400,40 +415,34 @@ def.type('pvc.visual.Scene')
  * 
  *  @param {number} renderId The current render id.
  */
-function scene_renderId(renderId){
-    if(this._renderId !== renderId){
+function scene_renderId(renderId) {
+    if(this._renderId !== renderId) {
         this._renderId   = renderId;
         this.renderState = {};
     }
 }
 
-function rootScene_setActive(scene){
+function rootScene_setActive(scene) {
     var ownerScene;
-    if(scene && (ownerScene = scene.ownerScene)){
-        scene = ownerScene;
-    }
+    if(scene && (ownerScene = scene.ownerScene)) { scene = ownerScene; }
     
-    if(this._active !== scene){
-        if(this._active){
-            scene_setActive.call(this._active, false);
-        }
+    if(this._active !== scene) {
+        if(this._active) { scene_setActive.call(this._active, false); }
         
         this._active = scene || null;
         
-        if(this._active){
-            scene_setActive.call(this._active, true);
-        }
+        if(this._active) { scene_setActive.call(this._active, true); }
+        
         return true;
     }
+    
     return false;
 }
 
-function scene_setActive(isActive){
-    if(this.isActive !== isActive){
-        if(!isActive){
-            delete this.isActive; // Inherits isActive = false
-        } else {
-            this.isActive = true;
-        }
+function scene_setActive(isActive) {
+    if(this.isActive !== isActive) {
+        // Inherits isActive = false
+        if(!isActive) { delete this.isActive; } 
+        else          { this.isActive = true; }
     }
 }

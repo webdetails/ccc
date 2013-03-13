@@ -48,7 +48,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="compatVersion" type="number" default="Infinity" category="Chart > General">
+        <c:property name="compatVersion" type="number" default="Infinity" category="Chart > General" level="basic">
             <c:documentation>
                 The CCC version that the chart should run in.
                 

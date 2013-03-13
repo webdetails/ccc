@@ -173,9 +173,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      * @type number
      * @override
      */
-    virtualItemSize: function(){
-        return this.R + this.C + this.M;
-    },
+    virtualItemSize: function() { return this.R + this.C + this.M; },
     
     /**
      * Performs the translation operation (override).

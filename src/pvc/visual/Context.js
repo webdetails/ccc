@@ -33,43 +33,75 @@ def.type('pvc.visual.Context')
 .add(/** @lends pvc.visual.Context */{
     isPinned: false,
     
-    pin: function(){
+    pin: function() {
         this.isPinned = true;
         return this;
     },
     
-    finished: function(v){
-        /*jshint sub:true */
-        return this.sign.finished(v);
-    },
+    compatVersion: function() { return this.panel.compatVersion(); },
     
-    delegate: function(dv){
-        return this.sign.delegate(dv);
-    },
+    finished: function(v ) { return this.sign.finished(v ); },
+    delegate: function(dv) { return this.sign.delegate(dv); },
     
     /* V1 DIMENSION ACCESSORS */
-    getV1Series: function(){
+    getV1Series: function() {
         var s;
-        var series = this.scene.firstAtoms && (s = this.scene.firstAtoms[this.panel._getV1DimName('series')]) && s.rawValue;
-        if(series == null){
-            series = 'Series';
-        }
-        
-        return series;
+        return def.nullyTo(
+                this.scene.firstAtoms && (s = this.scene.firstAtoms[this.panel._getV1DimName('series')]) && s.rawValue,
+                'Series');
     },
     
-    getV1Category: function(){
+    getV1Category: function() {
         var c;
         return this.scene.firstAtoms && (c = this.scene.firstAtoms[this.panel._getV1DimName('category')]) && c.rawValue;
     },
                
-    getV1Value: function(){
+    getV1Value: function() {
         var v;
         return this.scene.firstAtoms && (v = this.scene.firstAtoms[this.panel._getV1DimName('value')]) && v.value;
     },
     
-    getV1Datum: function(){
-        return this.panel._getV1Datum(this.scene);
+    getV1Datum: function() { return this.panel._getV1Datum(this.scene); },
+    
+    select:        function(ka) { return this.scene.select(ka); },
+    toggleVisible: function(  ) { return this.scene.toggleVisible(); },
+    
+    /* EVENT HANDLERS */
+    click: function() {
+        var me = this;
+        if(me.clickable()) {  me.panel._onClick(me); }
+        
+        if(me.selectableByClick()) {
+            var ev = me.event;
+            me.select({replace: !ev || !ev.ctrlKey});
+        }
+    },
+    
+    doubleClick: function() { if(this.doubleClickable()) { this.panel._onDoubleClick(this); } },
+    
+    /* Interactive Stuff */
+    clickable: function() {
+        var me = this;
+        return (me.sign ? me.sign.clickable() : me.panel.clickable()) &&
+               (!me.scene || me.scene.clickable());
+    },
+    
+    selectableByClick: function() {
+        var me = this;
+        return (me.sign ? me.sign.selectableByClick() : me.panel.selectableByClick()) &&
+               (!me.scene || me.scene.selectableByClick());
+    },
+    
+    doubleClickable: function() {
+        var me = this;
+        return (me.sign ? me.sign.doubleClickable() : me.panel.doubleClickable()) &&
+               (!me.scene || me.scene.doubleClickable());
+    },
+    
+    hoverable: function() {
+        var me = this;
+        return (me.sign ? me.sign.hoverable() : me.panel.hoverable()) &&
+               (!me.scene || me.scene.hoverable());
     }
 });
 
@@ -90,26 +122,24 @@ if(Object.defineProperty){
  * 
  * @name pvc.visual.Context#_update
  * @function
- * @param {pv.Mark} mark The protovis mark being rendered or targeted by an event.
- * @param {object} [event] An event object.
+ * @param {pv.Mark} [pvMark] The protovis mark being rendered or targeted by an event.
+ * @param {object} [ev] An event object.
  * @type undefined
  * @private
  * @virtual
  * @internal
  */
-function visualContext_update(mark, event){
+function visualContext_update(pvMark, ev){
 
-    this.event  = event || null;
-    this.pvMark = mark;
+    this.event  = ev || pv.event;
+    this.pvMark = pvMark;
     
     var scene;
-    if(mark){
-        var sign = this.sign = mark.sign || null;
-        if(sign){
-            scene = mark.instance().data;
-        }
+    if(pvMark) {
+        var sign = this.sign = pvMark.sign || null;
+        if(sign) { scene = pvMark.instance().data; }
         
-        if(!scene){
+        if(!scene) {
             this.index = null;
             scene = new pvc.visual.Scene(null, {panel: this.panel});
         } else {

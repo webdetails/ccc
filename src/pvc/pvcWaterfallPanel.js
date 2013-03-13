@@ -28,12 +28,11 @@ def
      * on the first series.
      * @virtual
      */
-    _barDifferentialControl: function(){
+    _barDifferentialControl: function() {
         var isFalling = this.chart._isFalling;
-
         /*
          * From protovis help:
-         *
+         * 
          * Band differential control pseudo-property.
          *  2 - Drawn starting at previous band offset. Multiply values by  1. Don't update offset.
          *  1 - Drawn starting at previous band offset. Multiply values by  1. Update offset.
@@ -41,15 +40,15 @@ def
          * -1 - Drawn starting at previous band offset. Multiply values by -1. Update offset.
          * -2 - Drawn starting at previous band offset. Multiply values by -1. Don't update offset.
          */
-        return function(scene){
-            if(isFalling && !this.index){
+        return function(scene) {
+            if(isFalling && !this.index) {
                 // First falling bar is the main total
                 // Must be accounted up and update the total
                 return 1;
             }
 
             var group = scene.vars.category.group;
-            if(group._isFlattenGroup && !group._isDegenerateFlattenGroup){
+            if(group._isFlattenGroup && !group._isDegenerateFlattenGroup) {
                 // Groups don't update the total
                 // Groups, always go down, except the first falling...
                 return -2;
@@ -59,18 +58,15 @@ def
         };
     },
     
-    _creating: function(){
+    _creating: function() {
         // Register BULLET legend prototype marks
         var rootScene = this._getLegendBulletRootScene();
-        if(rootScene){
+        if(rootScene) {
             var waterfallGroupScene = rootScene.firstChild;
-            
             if(waterfallGroupScene && !waterfallGroupScene.hasRenderer()){
                 var keyArgs = {
                         drawRule:      true,
                         drawMarker:    false,
-                        noSelect:      true,
-                        noHover:       true,
                         rulePvProto:   new pv.Mark()
                     };
                 
@@ -222,20 +218,17 @@ def
     },
 
     _buildRuleScene: function(){
-        var rootScene  = new pvc.visual.Scene(null, {panel: this, source: this.visibleData()});
+        var rootScene  = new pvc.visual.Scene(null, {panel: this, source: this.visibleData({ignoreNulls: false})});
         var prevValue;
         
         /**
          * Create starting scene tree
          */
-        if(this.chart._ruleInfos){
-            this.chart._ruleInfos
-                .forEach(createCategScene, this);
-        }
+        if(this.chart._ruleInfos) { this.chart._ruleInfos.forEach(createCategScene, this); }
         
         return rootScene;
 
-        function createCategScene(ruleInfo){
+        function createCategScene(ruleInfo) {
             var categData1 = ruleInfo.group;
             
             var categScene = new pvc.visual.Scene(rootScene, {source: categData1});
@@ -259,33 +252,30 @@ def
         }
     },
 
-    _buildWaterGroupScene: function(){
+    _buildWaterGroupScene: function() {
         var chart = this.chart,
             ruleInfos = this.chart._ruleInfos,
-            ruleInfoByCategKey = ruleInfos && def.query(ruleInfos)
-                                  .object({
-                                      name:  function(ruleInfo){ return ruleInfo.group.absKey; },
-                                      value: function(ruleInfo){ return ruleInfo; }
-                                  }),
+            ruleInfoByCategKey = ruleInfos && 
+                def
+                .query(ruleInfos)
+                .object({name:  function(ruleInfo) { return ruleInfo.group.absKey; }}),
             isFalling = chart._isFalling,
             rootCatData = chart._catRole.select(
                             chart.partData(this.dataPartValue),
                             {visible: true}),
             rootScene  = new pvc.visual.Scene(null, {panel: this, source: rootCatData});
 
-        if(ruleInfoByCategKey){
-            createCategSceneRecursive(rootCatData, 0);
-        }
+        if(ruleInfoByCategKey) { createCategSceneRecursive(rootCatData, 0); }
         
         return rootScene;
 
-        function createCategSceneRecursive(catData, level){
+        function createCategSceneRecursive(catData, level) {
             var children = catData.children()
-                                  .where(function(child){ return child.key !== ""; })
+                                  .where(function(child) { return child.key !== ""; })
                                   .array();
-            if(children.length){
+            if(children.length) {
                 // Group node
-                if(level){
+                if(level) {
                     var categScene = new pvc.visual.Scene(rootScene, {source: catData});
 
                     var categVar = 
@@ -299,16 +289,14 @@ def
                     var ruleInfo = ruleInfoByCategKey[catData.absKey];
                     var offset = ruleInfo.offset,
                         range = ruleInfo.range,
-                        height = -range.min + range.max
-                        ;
+                        height = -range.min + range.max;
 
-                    if(isFalling){
+                    if(isFalling) {
                         var lastChild = lastLeaf(catData);
                         var lastRuleInfo = ruleInfoByCategKey[lastChild.absKey];
                         categVar.leftValue  = ruleInfo.group.value;
                         categVar.rightValue = lastRuleInfo.group.value;
                         valueVar.bottomValue = offset - range.max;
-
                     } else {
                         var firstChild = firstLeaf(catData);
                         var firstRuleInfo = ruleInfoByCategKey[firstChild.absKey];
@@ -320,18 +308,16 @@ def
                     valueVar.heightValue = height;
                 }
 
-                children.forEach(function(child){
-                    createCategSceneRecursive(child, level + 1);
-                });
+                children.forEach(function(child) { createCategSceneRecursive(child, level + 1); });
             }
         }
 
-        function firstLeaf(data){
+        function firstLeaf(data) {
             var firstChild = data._children && data._children[0];
             return firstChild ? firstLeaf(firstChild) : data;
         }
 
-        function lastLeaf(data){
+        function lastLeaf(data) {
             var lastChild = data._children && data._children[data._children.length - 1];
             return lastChild ? lastLeaf(lastChild) : data;
         }

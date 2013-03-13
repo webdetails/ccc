@@ -116,5 +116,12 @@
             </c:documentation>
         </c:property>
         
+        <!--  TODO: confirm this assumption -->
+        <c:property name="nullShape" fixed="null" type="pvc.options.varia.DotShapeType" category="Style">
+            <c:documentation>
+                The trend does not contain null size values.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
 </c:model>

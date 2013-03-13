@@ -24,55 +24,45 @@
  * However the datums atoms will inherit from the atoms of the specified data.
  * This is essentially to facilitate the creation of null datums.
  * @param {map(string any)} [atomsByName] A map of atoms or raw values by dimension name.
- * @param {boolean} [isNull=false] Indicates if the datum is a null datum.
  */
 def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
-function(data, atomsByName, isNull){
-    
-    this.base(data, atomsByName, /* dimNames */ null, /*atomsBase*/ null, /*wantLabel*/ false, /*calculate*/!isNull);
-    
-    if(isNull) {
-        this.isNull = true;
-    } // otherwise inherit prototype default value
+function(data, atomsByName) {
+    this.base(
+        data, 
+        atomsByName, 
+        /*dimNames */ null, 
+        /*atomsBase*/ null, 
+        /*wantLabel*/ false, 
+        /*calculate*/ true);
 })
 .add(/** @lends pvc.data.Datum# */{
     
     isSelected: false,
     isVisible:  true,
-    isNull:     false,
-    
-    isVirtual:  false, // like isNull, but is actually in a Data
-    
+    isNull:     false, // Indicates that all dimensions that are bound to a measure role are null.
+    isVirtual:  false, // A datum that did not come in the original data (interpolated, trend)
     isTrend:    false,
     trendType:  null,
-    
     isInterpolated: false,
-    //isInterpolatedMiddle: false,
-    interpolation: null,
+    interpolation: null, // type of interpolation
     
     /**
      * Sets the selected state of the datum to a specified value.
-     * 
      * @param {boolean} [select=true] The desired selected state.
-     * 
      * @returns {boolean} true if the selected state changed, false otherwise.
      */
-    setSelected: function(select){
+    setSelected: function(select) {
         // Null datums are always not selected
-        if(this.isNull){ return false; }
+        if(this.isNull) { return false; }
         
         // Normalize 'select'
         select = (select == null) || !!select;
 
         var changed = this.isSelected !== select;
-        if(changed){
-            if(!select){
-                delete this.isSelected;
-            } else {
-                this.isSelected = true;
-            }
-            
+        if(changed) {
+            if(!select) { delete this.isSelected; }
+            else        { this.isSelected = true; }
             
             /*global data_onDatumSelectedChanged:true */
             data_onDatumSelectedChanged.call(this.owner, this, select);
@@ -86,9 +76,7 @@ function(data, atomsByName, isNull){
      * 
      * @type {undefined}
      */
-    toggleSelected: function(){
-        return this.setSelected(!this.isSelected);
-    },
+    toggleSelected: function() { return this.setSelected(!this.isSelected); },
     
     /**
      * Sets the visible state of the datum to a specified value.
@@ -97,20 +85,19 @@ function(data, atomsByName, isNull){
      * 
      * @returns {boolean} true if the visible state changed, false otherwise.
      */
-    setVisible: function(visible){
+    setVisible: function(visible) {
         // Null datums are always visible
-        if(this.isNull){ return false; }
+        if(this.isNull) { return false; }
         
         // Normalize 'visible'
         visible = (visible == null) || !!visible;
 
         var changed = this.isVisible !== visible;
-        if(changed){
+        if(changed) {
             this.isVisible = visible;
-            //if(!this.isNull){
-                /*global data_onDatumVisibleChanged:true */
-                data_onDatumVisibleChanged.call(this.owner, this, visible);
-            //}
+            
+            /*global data_onDatumVisibleChanged:true */
+            data_onDatumVisibleChanged.call(this.owner, this, visible);
         }
 
         return changed;
@@ -121,9 +108,7 @@ function(data, atomsByName, isNull){
      * 
      * @type {undefined}
      */
-    toggleVisible: function(){
-        return this.setVisible(!this.isVisible);
-    }
+    toggleVisible: function() { return this.setVisible(!this.isVisible); }
 });
 
 /**
@@ -135,6 +120,4 @@ function(data, atomsByName, isNull){
  * 
  * @see pvc.data.Data#clearSelected
  */
-function datum_deselect(){
-    delete this.isSelected;
-}
+function datum_deselect() { delete this.isSelected; }

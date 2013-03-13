@@ -24,7 +24,7 @@ def
     this.axes.size  = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
     var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
-    this.visualRoles.size = sizeRoleName ? chart.visualRoles(sizeRoleName) : null;
+    this.visualRoles.size = sizeRoleName ? chart.visualRole(sizeRoleName) : null;
     
     this.linesVisible = plot.option('LinesVisible'); // TODO
     this.dotsVisible  = plot.option('DotsVisible' ); // TODO
@@ -323,7 +323,7 @@ def
             ;
         
         // -- LINE --
-        var isLineNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
+        var isLineNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
         
         // A discrete color role may have null values; the line is not hidden.
         var isColorDiscrete = rootScene.isColorBound && this.visualRoles.color.isDiscrete();
@@ -457,7 +457,7 @@ def
     },
 
     _buildScene: function(){
-        var data = this.visibleData();
+        var data = this.visibleData({ignoreNulls: false});
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: data});
 
         var roles = this.visualRoles;

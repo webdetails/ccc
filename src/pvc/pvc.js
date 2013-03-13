@@ -648,6 +648,26 @@ var pvc = def.globalSpace('pvc', {
            ;
     };
     
+    pvc.makeEnumParser = function(enumName, keys, dk) {
+        var keySet = {};
+        keys.forEach(function(k){ if(k) { keySet[k.toLowerCase()] = k; }});
+        if(dk) { dk = dk.toLowerCase(); }
+        
+        return function(k) {
+            if(k) { k = (''+k).toLowerCase(); }
+            
+            if(!def.hasOwn(keySet, k)) {
+                if(k && pvc.debug >= 2) {
+                    pvc.log("[Warning] Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
+                }
+            
+                k = dk;
+            }
+            
+            return k;
+        };
+    };
+    
     pvc.parseDistinctIndexArray = function(value, max){
         value = def.array.as(value);
         if(value == null){
@@ -668,83 +688,31 @@ var pvc = def.globalSpace('pvc', {
         return a.length ? a : null;
     };
     
-    pvc.parseLegendClickMode = function(clickMode){
-        if(!clickMode){
-            clickMode = 'none';
-        } else {
-            clickMode = (''+clickMode).toLowerCase();
-        }
-        
-        switch(clickMode){
-            case 'toggleselected':
-            case 'togglevisible':
-            case 'none':
-                break;
-                
-            default:
-                if(pvc.debug >= 2){
-                    pvc.log("[Warning] Invalid 'legendClickMode' option value: '" + clickMode + "'. Assuming 'none'.");
-                }
-            
-                clickMode = 'none';
-                break;
-        }
-        
-        return clickMode;
-    };
+    pvc.parseLegendClickMode = 
+        pvc.makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');
     
-    pvc.parseTooltipAutoContent = function(value, dv){
-        if(value){
-            value = (''+value).toLowerCase();
-        }
-        
-        switch(value){
-            case 'value':
-            case 'summary':
-            case 'none':
-                break;
-            
-            default:
-                dv = dv || 'summary';
-                if(value && pvc.debug >= 2){
-                    pvc.log("[Warning] Invalid 'tooltipAutoContent' option value: '" + value + "'. Assuming '" + dv + "'.");
-                }
-            
-                value = dv;
-                break;
-        }
-        
-        return value;
-    };
+    pvc.parseTooltipAutoContent = 
+        pvc.makeEnumParser('tooltipAutoContent', ['summary', 'value', 'none'], 'summary');
     
-    pvc.parseShape = function(shape){
-        if(shape){
-            shape = (''+shape).toLowerCase();
-            switch(shape){
-                case 'square':
-                case 'circle':
-                case 'diamond':
-                case 'triangle':
-                case 'cross':
-                case 'bar':
-                    break;
-                default:
-                    if(pvc.debug >= 2){
-                        pvc.log("[Warning] Invalid 'shape' option value: '" + shape + "'.");
-                    }
-                
-                    shape = null;
-                    break;
-            }
-        }
-        
-        return shape;
-    };
+    pvc.parseSelectionMode =
+        pvc.makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');
+   
+    pvc.parseClearSelectionMode =
+        pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
     
-    pvc.parseContinuousColorScaleType = function(scaleType){
-        if(scaleType){
+    pvc.parseShape = 
+        pvc.makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);
+    
+    pvc.parseTreemapColorMode = 
+        pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
+    
+    pvc.parseTreemapLayoutMode = 
+        pvc.makeEnumParser('layoutMode', ['squarify', 'slice-and-dice', 'slice', 'dice'], 'squarify');
+    
+    pvc.parseContinuousColorScaleType = function(scaleType) {
+        if(scaleType) {
             scaleType = (''+scaleType).toLowerCase();
-            switch(scaleType){
+            switch(scaleType) {
                 case 'linear':
                 case 'normal':
                 case 'discrete':
@@ -1287,6 +1255,15 @@ var pvc = def.globalSpace('pvc', {
         return this._locked && this._locked[prop];
     };
     
+    pv.Mark.prototype.ensureEvents = function(defEvs) {
+        // labels and other marks don't receive events by default
+        var events = this.propertyValue('events', /*inherit*/ true);
+        if(!events || events === 'none') {
+            this.events(defEvs || 'all');
+        }
+        return this;
+    };
+    
     /* ANCHORS */
     /**
      * name = left | right | top | bottom
@@ -1325,12 +1302,74 @@ var pvc = def.globalSpace('pvc', {
     };
     
     /* SCENE */
-    pv.Mark.prototype.eachInstanceWithData = function(fun, ctx){
-        this.eachInstance(function(scenes, index, t){
-            if(scenes.mark.sign && scenes[index].data){
+    pv.Mark.prototype.eachInstanceWithData = function(fun, ctx) {
+        this.eachInstance(function(scenes, index, t) {
+            if(scenes.mark.sign && scenes[index].data) {
                 fun.call(ctx, scenes, index, t);
             }
         });
+    };
+    
+    pv.Mark.prototype.eachSceneWithDataOnRect = function(rect, fun, ctx, selectionMode) {
+        var me   = this;
+        var sign = me.sign;
+        if(sign && !sign.selectable()) { return; } // TODO: shouldn't it be selectableByRubberband?
+                
+        // center, partial and total (not implemented)
+        if(selectionMode == null) {
+            selectionMode = me.rubberBandSelectionMode || 'partial';
+        }
+        
+        var useCenter = (selectionMode === 'center');
+        
+        me.eachInstanceWithData(function(scenes, index, toScreen) {
+            // Apply size reduction to tolerate user unprecise selections
+            var shape = me.getShape(scenes, index, /*inset margin each side*/0.15);
+            
+            shape = (useCenter ? shape.center() : shape).apply(toScreen);
+            
+            processShape(shape, scenes[index], index);
+        });
+        
+        function processShape(shape, instance, index) {
+            if (shape.intersectsRect(rect)) {
+                var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData)
+                if(cccScene && cccScene.datum) { fun.call(ctx, cccScene); }
+            }
+        }
+    };
+    
+    pv.Mark.prototype.eachDatumOnRect = function(rect, fun, ctx, selectionMode) {
+        var me   = this;
+        var sign = me.sign;
+        if(sign && !sign.selectable()) { return; }
+                
+        // center, partial and total (not implemented)
+        if(selectionMode == null) {
+            selectionMode = me.rubberBandSelectionMode || 'partial';
+        }
+        
+        var useCenter = (selectionMode === 'center');
+        
+        me.eachInstanceWithData(function(scenes, index, toScreen) {
+            // Apply size reduction to tolerate user unprecise selections
+            var shape = me.getShape(scenes, index, /*inset margin each side*/0.15);
+            
+            shape = (useCenter ? shape.center() : shape).apply(toScreen);
+            
+            processShape(shape, scenes[index], index);
+        });
+        
+        function processShape(shape, instance, index) {
+            if (shape.intersectsRect(rect)) {
+                var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData)
+                if(cccScene && cccScene.datum) {
+                    cccScene
+                        .datums()
+                        .each(function(datum) { if(!datum.isNull) { fun.call(ctx, datum); } });
+                }
+            }
+        }
     };
     
     /* BOUNDS */

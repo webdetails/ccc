@@ -73,7 +73,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /*jshint expr:true*/
     keyArgs || def.fail.argumentRequired('keyArgs');
     
-    this._visibleDatums = new def.Map();
+    this._visibleNotNullDatums = new def.Map();
     
     var owner,
         atoms,
@@ -82,7 +82,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
         datums,
         index,
         parent = this.parent = keyArgs.parent || null;
-    if(parent){
+    if(parent) {
         // Not a root
         this.root  = parent.root;
         this.depth = parent.depth + 1;
@@ -132,7 +132,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             this.type = keyArgs.type || def.fail.argumentRequired('type');
             
             // Only owner datas cache selected datums
-            this._selectedDatums = new def.Map();
+            this._selectedNotNullDatums = new def.Map();
         }
     }
     
@@ -172,7 +172,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
         }
         
         if(parent.absKey){
-            this.absKey = def.string.join(',', parent.absKey, this.key); // TODO: comma??
+            this.absKey = def.string.join(owner.keySep, parent.absKey, this.key);
         } else {
             this.absKey = this.key;
         }
@@ -232,16 +232,16 @@ def.type('pvc.data.Data', pvc.data.Complex)
     _childrenByKey: null,
     
     /**
-     * A map of visible datums indexed by id.
+     * A map of non-null visible datums indexed by id.
      * @type def.Map
      */
-    _visibleDatums: null,
+    _visibleNotNullDatums: null,
     
     /**
-     * A map of selected datums indexed by id.
+     * A map of non-null selected datums indexed by id.
      * @type def.Map
      */
-    _selectedDatums: null, 
+    _selectedNotNullDatums: null, 
     
     /**
      * Cache of link child data by grouping operation key.
@@ -392,70 +392,41 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * 
      * @type boolean
      */
-    isOwner: function(){
-        return this.owner === this;
-    },
+    isOwner: function() { return this.owner === this; },
     
     /**
      * Obtains an enumerable of the child data instances of this data.
      * 
      * @type pvc.data.Data | def.Query
      */
-    children: function(){
-        if(!this._children) {
-            return def.query();
-        }
-
-//        @param {object} [keyArgs] Keyword arguments. 
-//        @param {string} [keyArgs.key=null} The key of the desired child.
-//        @param {string} [keyArgs.assertExists=true} Indicates that a missing child should be signaled as an error.
-//        var key = def.get(keyArgs, 'key');
-//        if(key != null) {
-//            var child = def.getOwn(this._childrenByKey, key);
-//            if(!child && def.get(keyArgs, 'assertExists', true)) {
-//               throw def.error.argumentInvalid("Undefined child data with key '{0}'.", [key]); 
-//            }
-//            
-//            return child;
-//        }
-        
-        return def.query(this._children);
-    },
+    children: function() { return this._children ? def.query(this._children) : def.query(); },
 
     /**
      * Obtains the number of children.
      *
      * @type number
      */
-    childCount: function(){
-        return this._children ? this._children.length : 0;
-    },
+    childCount: function() { return this._children ? this._children.length : 0; },
 
     /**
      * Obtains an enumerable of the leaf data instances of this data.
      * 
      * @type def.Query 
      */
-    leafs: function(){
-        return def.query(this._leafs);
-    },
+    leafs: function() { return def.query(this._leafs); },
     
     /**
      * Obtains the number of contained datums.
      * @type number
      */
-    count: function(){
-        return this._datums.length;
-    },
+    count: function() { return this._datums.length; },
     
     /**
      * Obtains the first datum of this data, if any.
      * @type {pvc.data.Datum} The first datum or <i>null</i>.
      * @see #singleDatum 
      */
-    firstDatum: function(){
-        return this._datums.length ? this._datums[0] : null;
-    },
+    firstDatum: function() { return this._datums.length ? this._datums[0] : null; },
     
     /**
      * Obtains the single datum of this data, 
@@ -464,7 +435,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type pvc.data.Datum
      * @see #firstDatum
      */
-    singleDatum: function(){
+    singleDatum: function() {
         var datums = this._datums;
         return datums.length === 1 ? datums[0] : null;
     },
@@ -473,17 +444,17 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * Disposes the child datas, the link child datas and the dimensions.
      * @type undefined
      */
-    dispose: function(){
-        if(!this._disposed){
+    dispose: function() {
+        if(!this._disposed) {
             data_disposeChildLists.call(this);
-            if(this._selectedDatums) { this._selectedDatums.clear(); }
-            this._visibleDatums.clear();
+            if(this._selectedNotNullDatums) { this._selectedNotNullDatums.clear(); }
+            this._visibleNotNullDatums.clear();
             
             def.eachOwn(this._dimensions, function(dimension){ dimension.dispose(); });
             
             //  myself
             
-            if(this.parent){
+            if(this.parent) {
                 this.parent.removeChild(this);
                 this.parent = null;
             }
@@ -501,7 +472,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * Disposes the child datas and the link child datas.
      * @type undefined
      */
-    disposeChildren: function(){
+    disposeChildren: function() {
         /*global data_disposeChildLists:true */
         data_disposeChildLists.call(this);
     }
@@ -517,13 +488,13 @@ def.type('pvc.data.Data', pvc.data.Complex)
  * @type undefined
  * @private
  */
-function data_addChild(child, index){
+function data_addChild(child, index) {
     // this   -> ((pv.Dom.Node#)child).parentNode
     // child  -> ((pv.Dom.Node#)this).childNodes
     // ...
     this.insertAt(child, index);
     
-    (this._childrenByKey || (this._childrenByKey = {}))[child.key] = child;
+    def.lazy(this, '_childrenByKey')[child.key] = child;
 }
 
 /**
@@ -536,7 +507,7 @@ function data_addChild(child, index){
  * @type undefined
  * @private
  */
-function data_addLinkChild(linkChild, index){
+function data_addLinkChild(linkChild, index) {
     /*global data_addColChild:true */
     data_addColChild(this, '_linkChildren', linkChild, 'linkParent', index);
 }
@@ -550,7 +521,7 @@ function data_addLinkChild(linkChild, index){
  * @type undefined
  * @private
  */
-function data_removeLinkChild(linkChild){
+function data_removeLinkChild(linkChild) {
     /*global data_removeColChild:true */
     data_removeColChild(this, '_linkChildren', linkChild, 'linkParent');
 }
@@ -580,7 +551,7 @@ function data_disposeChildLists() {
  *  
  * @private
  */
-function data_assertIsOwner(){
+function data_assertIsOwner() {
     /*jshint expr:true */
     this.isOwner() || def.fail("Can only be called on the owner data.");
 }

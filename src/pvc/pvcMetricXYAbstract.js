@@ -7,7 +7,7 @@
 def
 .type('pvc.MetricXYAbstract', pvc.CartesianAbstract)
 .add({
-    _processOptionsCore: function(options){
+    _processOptionsCore: function(options) {
         
         this.base(options);
         
@@ -20,7 +20,7 @@ def
      * Initializes each chart's specific roles.
      * @override
      */
-    _initVisualRoles: function(){
+    _initVisualRoles: function() {
 
         this.base();
 
@@ -41,15 +41,13 @@ def
             requireSingleDimension: true,
             requireIsDiscrete: false,
             defaultDimension: 'y',
-            dimensionDefaults: {
-                valueType: Number
-            }
+            dimensionDefaults: {valueType: Number}
         });
     },
             
-    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo){
+    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo) {
         var serRole = this._serRole;
-        var xRole   = this.visualRoles('x');
+        var xRole   = this.visualRoles.x;
         var yRole   = dataCell.role;
         var trendOptions = dataCell.trend;
         
@@ -60,53 +58,34 @@ def
         var yDimName = yRole.firstDimensionName();
         
         // Visible part data, possibly grouped by series (if series is bound)
-        var data = this.visibleData(dataCell.dataPartValue);
+        var data = this.visibleData(dataCell.dataPartValue); // [ignoreNulls=true]
         
         // For each series...
+        // Or data already only contains visible data
+        // Or null series
         def
-        .scope(function(){
-            return serRole.isBound()   ?
-                   data.children() : // data already only contains visible data
-                   def.query([data]) // null series
-                   ;
-        })
-        .each(genSeriesTrend, this)
-        ;
+        .scope(function() { return serRole.isBound() ? data.children() : def.query([data]); })
+        .each(genSeriesTrend, this);
         
-        function genSeriesTrend(serData){
-            var funX = function(datum){
-                    return datum.atoms[xDimName].value;
-                };
-            
-            var funY = function(datum){
-                    return datum.atoms[yDimName].value;
-                };
-            
-            var datums = 
-                serData
-                .datums()
-                .sort(null, /* by */funX)
-                .array();
-            
-            var options = def.create(trendOptions, {
-                    rows: def.query(datums),
-                    x: funX,
-                    y: funY
-                });
+        function genSeriesTrend(serData) {
+            var funX    = function(datum) { return datum.atoms[xDimName].value; };
+            var funY    = function(datum) { return datum.atoms[yDimName].value; };
+            var datums  = serData.datums().sort(null, /* by */funX).array();
+            var options = def.create(trendOptions, {rows: def.query(datums), x: funX, y: funY});
 
             var trendModel = trendInfo.model(options);
-            if(trendModel){
-                
+            if(trendModel) {
                 // If a label has already been registered, it is preserved... (See BaseChart#_fixTrendsLabel)
-                var dataPartAtom = data.owner
-                                .dimensions(dataPartDimName)
-                                .intern(this.root._firstTrendAtomProto);
+                var dataPartAtom = 
+                    data.owner
+                        .dimensions(dataPartDimName)
+                        .intern(this.root._firstTrendAtomProto);
                 
-                datums.forEach(function(datum, index){
+                datums.forEach(function(datum, index) {
                     var trendX = funX(datum);
-                    if(trendX){
+                    if(trendX) {
                         var trendY = trendModel.sample(trendX, funY(datum), index);
-                        if(trendY != null){
+                        if(trendY != null) {
                             var atoms = 
                                 def.set(
                                     Object.create(serData.atoms), // just common atoms

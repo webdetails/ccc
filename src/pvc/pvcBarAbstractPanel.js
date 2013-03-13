@@ -59,7 +59,7 @@ def
             plot = me.plot,
             isStacked = !!me.stacked,
             isVertical = me.isOrientationVertical(),
-            data = me.visibleData(), // shared "categ then series" grouped data
+            data       = me.visibleData({ignoreNulls: false}), // shared "categ then series" grouped data
             seriesData = me.visualRoles.series.flatten(data),
             rootScene  = me._buildScene(data, seriesData),
             orthoAxis  = me.axes.ortho,
@@ -174,7 +174,7 @@ def
         var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvBar, {wrapper: wrapper});
         if(label){
             me.pvBarLabel = label.pvMark
-                .visible(function() { //no space for text otherwise
+                .visible(function() { // no space for text otherwise
                     // this === pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
                     

@@ -31,27 +31,13 @@ def.type('pvc.data.MetricPointChartTranslationOper')
     _meaLayoutRoles: ['x', 'y', 'color', 'size'],
     
     configureType: function(){
-        var itemTypes = this._itemTypes;
-        
-        var V = itemTypes.length;
-        
         // VItem Indexes of continuous columns not yet being read
         var freeMeaIndexes = [];
         
         // Idem, but for discrete columns
         var freeDisIndexes = [];
         
-        def
-        .range(0, V)
-        .each(function(j){
-            if(!this._userUsedIndexes[j]){
-                if(itemTypes[j] === 1){
-                    freeMeaIndexes.push(j);
-                } else {
-                    freeDisIndexes.push(j);
-                }
-            }
-        }, this);
+        this.collectFreeDiscreteAndConstinuousIndexes(freeDisIndexes, freeMeaIndexes);
         
         // Distribute free measure columns by unbound measure roles 
         var N;
@@ -80,7 +66,7 @@ def.type('pvc.data.MetricPointChartTranslationOper')
         
         // All discrete columns go to series dimensions
         F = freeDisIndexes.length;
-        if(F > 0){
+        if(F > 0) {
             autoDimNames.length = 0;
             this._getUnboundRoleDefaultDimNames('series', F, autoDimNames);
             

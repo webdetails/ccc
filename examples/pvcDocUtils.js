@@ -74,7 +74,7 @@ var tryMe = function(e){
                     var $codeBox   = $textArea.parent().find('.CodeMirror');
                     
                     var maxWidth  = 0.95 * $e.parent().next().width();
-                    var maxHeight = 0.95 * ($scrollBox.length ? $scrollBox : $e.parent().next()).height();
+                    var maxHeight = Math.max(500, 0.95 * ($scrollBox.length ? $scrollBox : $e.parent().next()).height());
                     
                     $codeBox.css({
                         'max-width': $e.parent().width() + 'px'
@@ -122,7 +122,7 @@ var tryMe = function(e){
         
     } catch(ex) {
         /*global alert:true */
-        alert("Try me error: " + ex);
+        alert("Try Me error\n" + (ex.message || ex));
     }
 };
 

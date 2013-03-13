@@ -53,7 +53,7 @@ def
             .lazy(baseDataCellsByAxisIndex, plot.option('BaseAxis') - 1)
             .push({
                 plot:          plot,
-                role:          this.visualRoles(plot.option('BaseRole')),
+                role:          this.visualRole(plot.option('BaseRole')),
                 dataPartValue: plot.option('DataPart')
             });
         }
@@ -87,7 +87,7 @@ def
             
             orthoRoleNames.forEach(function(orthoRoleName){
                 var dataCell = Object.create(dataCellBase);
-                dataCell.role = this.visualRoles(orthoRoleName);
+                dataCell.role = this.visualRole(orthoRoleName);
                 orthoDataCells.push(dataCell);
             }, this)
             ;
@@ -149,20 +149,14 @@ def
      * Creates a scale for a given axis, with domain applied, but no range yet,
      * assigns it to the axis and assigns the scale to special v1 chart instance fields.
      * 
-     * @param {pvc.visual.CartesianAxis} axis The axis.
+     * @param {pvc.visual.Axis} axis The axis.
      * @type pv.Scale
      */
     _createAxisScale: function(axis){
+        var scale = this.base(axis);
+        
         var isOrtho = axis.type === 'ortho';
         var isCart  = isOrtho || axis.type === 'base';
-        
-        var scale = this._createScaleByAxis(axis);
-        if(scale.isNull && pvc.debug >= 3){
-            this._log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
-        }
-        
-        scale = axis.setScale(scale).scale;
-        
         if(isCart){
             /* V1 fields xScale, yScale, secondScale */
             if(isOrtho && axis.index === 1) {
@@ -173,18 +167,6 @@ def
         }
         
         return scale;
-    },
-    
-    /**
-     * Creates a scale for a given axis.
-     * 
-     * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @type pv.Scale
-     */
-    _createScaleByAxis: function(axis){
-        var createScale = this['_create' + def.firstUpperCase(axis.scaleType) + 'ScaleByAxis'];
-        
-        return createScale.call(this, axis);
     },
     
     _preRenderContent: function(contentOptions){
@@ -222,7 +204,7 @@ def
     },
     
     _createFocusWindow: function(){
-        if(this._canSelectWithFocusWindow()){
+        if(this.selectableByFocusWindow()){
             // In case we're being re-rendered,
             // capture the axes' focusWindow, if any.
             // and set it as the next focusWindow.
@@ -300,167 +282,6 @@ def
             return panel;
         }
     },
-
-    /**
-     * Creates a discrete scale for a given axis.
-     * <p>
-     * Uses the chart's <tt>panelSizeRatio</tt> to calculate the band.
-     * </p>
-     * 
-     * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @virtual
-     * @type pv.Scale
-     */
-    _createDiscreteScaleByAxis: function(axis){
-        /* DOMAIN */
-
-        // With composite axis, only 'singleLevel' flattening works well
-        var dataPartValues = 
-            axis.
-            dataCells.
-            map(function(dataCell){ return dataCell.dataPartValue; });
-        
-        var baseData = this.visibleData(dataPartValues, {ignoreNulls: false});
-        var data = baseData && baseData.flattenBy(axis.role);
-        
-        var scale = new pv.Scale.ordinal();
-        if(!data || !data.count()){
-            scale.isNull = true;
-        } else {
-            var values = data.children()
-                             .select(function(child){ return def.nullyTo(child.value, ""); })
-                             .array();
-            
-            scale.domain(values);
-        }
-        
-        return scale;
-    },
-    
-    /**
-     * Creates a continuous time-series scale for a given axis.
-     * 
-     * <p>
-     * Uses the axis' option <tt>Offset</tt> to calculate excess domain margins at each end of the scale.
-     * </p>
-     * <p>
-     * Also takes into account the specified axis' options 
-     * <tt>DomainRoundMode</tt> and <tt>DesiredTickCount</tt>.
-     * </p>
-     * 
-     * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @virtual
-     * @type pv.Scale
-     */
-    _createTimeSeriesScaleByAxis: function(axis){
-        /* DOMAIN */
-        var extent = this._getContinuousVisibleExtent(axis); // null when no data...
-        
-        var scale = new pv.Scale.linear();
-        if(!extent){
-            scale.isNull = true;
-        } else {
-            var dMin = extent.min;
-            var dMax = extent.max;
-
-            if((dMax - dMin) === 0) {
-                dMax = new Date(dMax.getTime() + 3600000); // 1 h
-            }
-        
-            scale.domain(dMin, dMax);
-            scale.minLocked = extent.minLocked;
-            scale.maxLocked = extent.maxLocked;
-        }
-        
-        return scale;
-    },
-
-    /**
-     * Creates a continuous numeric scale for a given axis.
-     *
-     * <p>
-     * Uses the axis' option <tt>Offset</tt> to calculate excess domain margins at each end of the scale.
-     * </p>
-     * <p>
-     * Also takes into account the specified axis' options
-     * <tt>DomainRoundMode</tt> and <tt>DesiredTickCount</tt>.
-     * </p>
-     *
-     * @param {pvc.visual.CartesianAxis} axis The axis.
-     * @virtual
-     * @type pv.Scale
-     */
-    _createNumericScaleByAxis: function(axis){
-        /* DOMAIN */
-        var extent = this._getContinuousVisibleExtentConstrained(axis);
-        
-        var scale = new pv.Scale.linear();
-        if(!extent){
-            scale.isNull = true;
-        } else {
-            var tmp;
-            var dMin = extent.min;
-            var dMax = extent.max;
-            
-            if(dMin > dMax){
-                tmp = dMin;
-                dMin = dMax;
-                dMax = tmp;
-            }
-            
-            var originIsZero = axis.option('OriginIsZero');
-            if(originIsZero){
-                if(dMin === 0){
-                    extent.minLocked = true;
-                } else if(dMax === 0){
-                    extent.maxLocked = true;
-                } else if((dMin * dMax) > 0){
-                    /* If both negative or both positive
-                     * the scale does not contain the number 0.
-                     */
-                    if(dMin > 0){
-                        if(!extent.minLocked){
-                            extent.minLocked = true;
-                            dMin = 0;
-                        }
-                    } else {
-                        if(!extent.maxLocked){
-                            extent.maxLocked = true;
-                            dMax = 0;
-                        }
-                    }
-                }
-            }
-    
-            /*
-             * If the bounds (still) are the same, things break,
-             * so we add a wee bit of variation.
-             * Ignoring locks.
-             */
-            if(dMin > dMax){
-                tmp = dMin;
-                dMin = dMax;
-                dMax = tmp;
-            }
-            
-            if(dMax - dMin <= 1e-12) {
-                if(!extent.minLocked){
-                    dMin = dMin !== 0 ? (dMin * 0.99) : -0.1;
-                }
-                
-                // If both are locked, ignore max lock
-                if(!extent.maxLocked || extent.minLocked){
-                    dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
-                }
-            }
-            
-            scale.domain(dMin, dMax);
-            scale.minLocked = extent.minLocked;
-            scale.maxLocked = extent.maxLocked;
-        }
-        
-        return scale;
-    },
     
     _onLaidOut: function(){
         if(this.plotPanelList && this.plotPanelList[0]){ // not the root of a multi chart
@@ -522,119 +343,6 @@ def
         }
     },
     
-    _warnSingleContinuousValueRole: function(valueRole){
-        if(!valueRole.grouping.isSingleDimension) {
-            this._log("[WARNING] A linear scale can only be obtained for a single dimension role.");
-        }
-        
-        if(valueRole.grouping.isDiscrete()) {
-            this._log("[WARNING] The single dimension of role '{0}' should be continuous.", [valueRole.name]);
-        }
-    },
-    
-    /**
-     * @virtual
-     */
-    _getContinuousVisibleExtentConstrained: function(axis, min, max){
-        var minLocked = false;
-        var maxLocked = false;
-        
-        if(min == null) {
-            min = axis.option('FixedMin');
-            minLocked = (min != null);
-        }
-        
-        if(max == null) {
-            max = axis.option('FixedMax');
-            maxLocked = (max != null);
-        }
-        
-        if(min == null || max == null) {
-            var baseExtent = this._getContinuousVisibleExtent(axis); // null when no data
-            if(!baseExtent){
-                return null;
-            }
-            
-            if(min == null){
-                min = baseExtent.min;
-            }
-            
-            if(max == null){
-                max = baseExtent.max;
-            }
-        }
-        
-        return {min: min, max: max, minLocked: minLocked, maxLocked: maxLocked};
-    },
-    
-    /**
-     * Gets the extent of the values of the specified axis' roles
-     * over all datums of the visible data.
-     * 
-     * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
-     * @type object
-     *
-     * @protected
-     * @virtual
-     */
-    _getContinuousVisibleExtent: function(valueAxis){
-        
-        var dataCells = valueAxis.dataCells;
-        if(dataCells.length === 1){
-            // Most common case is faster
-            return this._getContinuousVisibleCellExtent(valueAxis, dataCells[0]);
-        }
-        
-        // This implementation takes the union of 
-        // the extents of each data cell.
-        // Even when a data cell has multiple data parts, 
-        // it is evaluated as a whole.
-        
-        return def
-            .query(dataCells)
-            .select(function(dataCell){
-                return this._getContinuousVisibleCellExtent(valueAxis, dataCell);
-            }, this)
-            .reduce(pvc.unionExtents, null);
-    },
-
-    /**
-     * Gets the extent of the values of the specified role
-     * over all datums of the visible data.
-     *
-     * @param {pvc.visual.CartesianAxis} valueAxis The value axis.
-     * @param {pvc.visual.Role} valueDataCell The data cell.
-     * @type object
-     *
-     * @protected
-     * @virtual
-     */
-    _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell){
-        var valueRole = valueDataCell.role;
-        
-        this._warnSingleContinuousValueRole(valueRole);
-
-        if(valueRole.name === 'series') {
-            /* not supported/implemented? */
-            throw def.error.notImplemented();
-        }
-        
-        var useAbs = valueAxis.scaleUsesAbs();
-        var data  = this.visibleData(valueDataCell.dataPartValue);
-        var extent = data && data
-            .dimensions(valueRole.firstDimensionName())
-            .extent({ abs: useAbs });
-        
-        if(extent){
-            var minValue = extent.min.value;
-            var maxValue = extent.max.value;
-            return {
-                min: (useAbs ? Math.abs(minValue) : minValue), 
-                max: (useAbs ? Math.abs(maxValue) : maxValue) 
-            };
-        }
-    },
-    
     markEventDefaults: {
         strokeStyle: "#5BCBF5",        /* Line Color */
         lineWidth: "0.5",              /* Line Width */
@@ -647,7 +355,9 @@ def
         font: '10px sans-serif'
     },
     
-    // TODO: chart orientation?
+    // TODO: chart orientation 
+    // TODO: horizontal lines 
+    // TODO: discrete scales
     markEvent: function(sourceValue, label, options){
         var me = this;
         var baseAxis  = me.axes.base;

@@ -37,17 +37,11 @@ def.scope(function(){
         
         // should null values be converted to zero or to the minimum value in what scale is concerned?
         // 'null', 'zero', 'min', 'value'
-        scaleTreatsNullAs: function(){
-            return 'null';
-        },
+        scaleTreatsNullAs: function() { return 'null'; },
         
-        scaleNullRangeValue: function(){
-            return null;
-        },
+        scaleNullRangeValue: function() { return null; },
         
-        scaleUsesAbs: function(){
-            return false;
-        },
+        scaleUsesAbs: function() { return false; },
         
         /**
          * Binds the axis to a set of data cells.
@@ -60,30 +54,27 @@ def.scope(function(){
          * @param {object|object[]} dataCells The associated data cells.
          * @type pvc.visual.Axis
          */
-        bind: function(dataCells){
+        bind: function(dataCells) {
             /*jshint expr:true */
+            var me = this;
             dataCells || def.fail.argumentRequired('dataCells');
-            !this.dataCells || def.fail.operationInvalid('Axis is already bound.');
+            !me.dataCells || def.fail.operationInvalid('Axis is already bound.');
             
-            this.dataCells = def.array.to(dataCells);
-            this.dataCell  = this.dataCells[0];
-            this.role = this.dataCell && this.dataCell.role;
-            this.scaleType = groupingScaleType(this.role.grouping);
+            me.dataCells = def.array.to(dataCells);
+            me.dataCell  = me.dataCells[0];
+            me.role      = me.dataCell && me.dataCell.role;
+            me.scaleType = groupingScaleType(me.role.grouping);
             
-            this._checkRoleCompatibility();
+            me._checkRoleCompatibility();
             
             return this;
         },
         
-        isDiscrete: function(){
-            return this.role && this.role.isDiscrete();
-        },
+        isDiscrete: function() { return this.role && this.role.isDiscrete(); },
         
-        isBound: function(){
-            return !!this.role;
-        },
+        isBound: function() { return !!this.role; },
         
-        setScale: function(scale, noWrap){
+        setScale: function(scale, noWrap) {
             /*jshint expr:true */
             this.role || def.fail.operationInvalid('Axis is unbound.');
             
@@ -92,7 +83,7 @@ def.scope(function(){
             return this;
         },
         
-        _wrapScale: function(scale){
+        _wrapScale: function(scale) {
             scale.type = this.scaleType;
             
             var by;
@@ -101,36 +92,38 @@ def.scope(function(){
             // would cause problems in discrete color scales,
             // where we want null to be matched to the first color of the color scale
             // (typically happens when there is only a null series).
-            if(scale.type !== 'discrete' ){
+            if(scale.type !== 'discrete') {
                 var useAbs = this.scaleUsesAbs();
                 var nullAs = this.scaleTreatsNullAs();
-                if(nullAs && nullAs !== 'null'){
-                    var nullValue = nullAs === 'min' ? scale.domain()[0] : 0;
-                    
-                    if(useAbs){
-                        by = function(v){
-                            return scale(v == null ? nullValue : (v < 0 ? -v : v));
+                if(nullAs && nullAs !== 'null') {
+                    var nullIsMin = nullAs === 'min';
+                    // Below, the min valow is evaluated each time on purpose,
+                    // because otherwise we would have to rewrap when the domain changes.
+                    // It does change, for example, on MultiChart scale coordination.
+                    if(useAbs) {
+                        by = function(v) {
+                            return scale(v == null ? (nullIsMin ? scale.domain()[0] : 0) : (v < 0 ? -v : v));
                         };
                     } else {
-                        by = function(v){
-                            return scale(v == null ? nullValue : v);
+                        by = function(v) {
+                            return scale(v == null ? (nullIsMin ? scale.domain()[0] : 0) : v);
                         };
                     }
                 } else {
                     var nullRangeValue = this.scaleNullRangeValue();
-                    if(useAbs){
-                        by = function(v){
+                    if(useAbs) {
+                        by = function(v) { 
                             return v == null ? nullRangeValue : scale(v < 0 ? -v : v);
                         };
                     } else {
-                        by = function(v){
+                        by = function(v) {
                             return v == null ? nullRangeValue : scale(v);
                         };
                     }
                 }
             } else {
                 // ensure null -> ""
-                by = function(v){
+                by = function(v) {
                     return scale(v == null ? '' : v);
                 };
             }
@@ -147,20 +140,19 @@ def.scope(function(){
          * @param {boolean} [keyArgs.nullToZero=true] Indicates that null values should be converted to zero before applying the scale.
          * @type function
          */
-        sceneScale: function(keyArgs){
+        sceneScale: function(keyArgs) {
             var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,
                 grouping = this.role.grouping;
-    
-            if(grouping.isSingleDimension && grouping.firstDimensionValueType() === Number){
+            
+            // TODO: isn't this redundant with the code in _wrapScale??
+            if(grouping.isSingleDimension && grouping.firstDimensionValueType() === Number) {
                 var scale = this.scale,
                     nullToZero = def.get(keyArgs, 'nullToZero', true);
                 
                 var by = function(scene){
                     var value = scene.vars[varName].value;
-                    if(value == null){
-                        if(!nullToZero){
-                            return value;
-                        }
+                    if(value == null) {
+                        if(!nullToZero) { return value; }
                         value = 0;
                     }
                     return scale(value);
@@ -170,29 +162,29 @@ def.scope(function(){
                 return by;
             }
     
-            return this.scale.by1(function(scene){
+            return this.scale.by1(function(scene) {
                 return scene.vars[varName].value;
             });
         },
         
-        _checkRoleCompatibility: function(){
+        _checkRoleCompatibility: function() {
             var L = this.dataCells.length;
-            if(L > 1){
-                var grouping = this.role.grouping, 
-                    i;
-                if(this.scaleType === 'discrete'){
-                    for(i = 1; i < L ; i++){
-                        if(grouping.id !== this.dataCells[i].role.grouping.id){
+            if(L > 1) {
+                var grouping = this.role.grouping; 
+                var i;
+                if(this.scaleType === 'discrete') {
+                    for(i = 1; i < L ; i++) {
+                        if(grouping.id !== this.dataCells[i].role.grouping.id) {
                             throw def.error.operationInvalid("Discrete roles on the same axis must have equal groupings.");
                         }
                     }
                 } else {
-                    if(!grouping.firstDimensionType().isComparable){
+                    if(!grouping.firstDimensionType().isComparable) {
                         throw def.error.operationInvalid("Continuous roles on the same axis must have 'comparable' groupings.");
                     }
     
-                    for(i = 1; i < L ; i++){
-                        if(this.scaleType !== groupingScaleType(this.dataCells[i].role.grouping)){
+                    for(i = 1; i < L ; i++) {
+                        if(this.scaleType !== groupingScaleType(this.dataCells[i].role.grouping)) {
                             throw def.error.operationInvalid("Continuous roles on the same axis must have scales of the same type.");
                         }
                     }
@@ -200,12 +192,10 @@ def.scope(function(){
             }
         },
         
-        _getOptionsDefinition: function(){
-            return axis_optionsDef;
-        }
+        _getOptionsDefinition: function() { return axis_optionsDef; }
     });
     
-    function groupingScaleType(grouping){
+    function groupingScaleType(grouping) {
         return grouping.isDiscrete() ?
                     'discrete' :
                     (grouping.firstDimensionValueType() === Date ?

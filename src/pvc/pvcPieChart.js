@@ -56,7 +56,7 @@ def
         }
         
         var piePlot = this.plots.pie;
-        this.pieChartPanel = new pvc.PieChartPanel(this, this.basePanel, piePlot, def.create(contentOptions, {
+        this.pieChartPanel = new pvc.PiePanel(this, this.basePanel, piePlot, def.create(contentOptions, {
             scenes: def.getPath(this.options, 'pie.scenes')
         }));
     }

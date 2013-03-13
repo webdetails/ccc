@@ -28,10 +28,15 @@ src/pvc/data/ZeroInterpolationOper.js
 src/pvc/data/ZeroInterpolationOperSeriesState.js
 src/pvc/data/Data.operations.js
 src/pvc/data/Data.compat.js
-src/pvc/visual/Role.js
+
+src/pvc/visual/Interactive.js
 src/pvc/visual/Scene.js
 src/pvc/visual/Var.js
+src/pvc/visual/Context.js
+
+src/pvc/visual/Role.js
 src/pvc/visual/RoleVarHelper.js
+
 src/pvc/visual/sign/BasicSign.js
 src/pvc/visual/sign/Sign.js
 src/pvc/visual/sign/Panel.js
@@ -44,7 +49,7 @@ src/pvc/visual/sign/Area.js
 src/pvc/visual/sign/Bar.js
 src/pvc/visual/sign/PieSlice.js
 src/pvc/visual/sign/Rule.js
-src/pvc/visual/Context.js
+
 src/pvc/visual/OptionsBase.js
 src/pvc/visual/Axis.js
 src/pvc/visual/CartesianAxis.js
@@ -61,7 +66,10 @@ src/pvc/visual/legend/BulletItemSceneSelection.js
 src/pvc/visual/legend/BulletItemSceneVisibility.js
 src/pvc/visual/legend/BulletItemRenderer.js
 src/pvc/visual/legend/BulletItemDefaultRenderer.js
+
+src/pvc/visual/dataCell/DataCell.js
 src/pvc/visual/plot/Plot.js
+
 src/pvc/visual/plot/CartesianPlot.js
 src/pvc/visual/plot/CategoricalPlot.js
 src/pvc/visual/plot/BarPlotAbstract.js
@@ -75,6 +83,9 @@ src/pvc/visual/plot/PiePlot.js
 src/pvc/visual/plot/HeatGridPlot.js
 src/pvc/visual/plot/BoxPlot.js
 src/pvc/visual/plot/BulletPlot.js
+
+src/pvc/visual/dataCell/TreemapColorDataCell.js
+src/pvc/visual/plot/TreemapPlot.js
 
 src/pvc/pvcAbstract.js
 
@@ -131,3 +142,7 @@ src/pvc/pvcDataTree.js
 src/pvc/data/translation/BoxplotChartTranslationOper.js
 src/pvc/pvcBoxplotPanel.js
 src/pvc/pvcBoxplotChart.js
+
+src/pvc/data/translation/TreemapChartTranslationOper.js
+src/pvc/pvcTreemapPanel.js
+src/pvc/pvcTreemapChart.js

@@ -178,7 +178,7 @@ var def = /** @lends def */{
         
         return o;
     },
-        
+    
     /** 
      * Creates a property getter function,
      * for a specified property name.
@@ -189,7 +189,7 @@ var def = /** @lends def */{
      * if the property would be accessed on null or undefined.
      * @type function
      */
-    propGet: function(p, dv){
+    propGet: function(p, dv) {
         p = '' + p;
         
         /**
@@ -213,9 +213,7 @@ var def = /** @lends def */{
          * 
          * @private
          */
-        return function(o){ 
-            return o != null ? o[p] : dv;
-        };
+        return function(o) { return o ? o[p] : dv; };
     },
     
     // TODO: propSet ?
@@ -468,6 +466,11 @@ var def = /** @lends def */{
         return scopeFun.call(ctx);
     },
     
+    // Bit -------------
+    bit: {
+        set: function(bits, set, on){ return (on || on == null) ? (bits | set) : (bits & ~set); }
+    },
+    
     // Special functions ----------------
     
     /**
@@ -486,21 +489,15 @@ var def = /** @lends def */{
         //return (a < b) ? -1 : ((a > b) ? 1 : 0);
     },
     
-    compareReverse: function(a, b){
+    compareReverse: function(a, b) {
         return (a === b) ? 0 : ((a > b) ? -1 : 1);
     },
     
-    methodCaller: function(p, context){
-        if(context){
-            return function(){
-                return context[p].apply(context, arguments); 
-            };
-        }
+    methodCaller: function(p, x) {
+        if(x) { return function() { return x[p].apply(x, arguments); }; }
         
         /* floating method */
-        return function(){
-            return this[p].apply(this, arguments); 
-        };
+        return function() { return this[p].apply(this, arguments); };
     },
     
     /**
@@ -734,7 +731,7 @@ var def = /** @lends def */{
     // -----------------
     
     /* Ensures the first letter is upper case */
-    firstUpperCase: function(s){
+    firstUpperCase: function(s) {
         if(s) {
             var c  = s.charAt(0),
                 cU = c.toUpperCase();
@@ -745,7 +742,7 @@ var def = /** @lends def */{
         return s;
     },
     
-    firstLowerCase: function(s){
+    firstLowerCase: function(s) {
         if(s) {
             var c  = s.charAt(0),
                 cL = c.toLowerCase();
@@ -1154,23 +1151,21 @@ function createRecursive(instance){
 }
     
 // Creates an object whose prototype is the specified object.
-def.create = function(/* [deep, ] baseProto, mixin1, mixin2, ...*/){
+def.create = function(/*[deep,] baseProto, mixin1, mixin2, ...*/){
     var mixins = arraySlice.call(arguments),
         deep = true,
         baseProto = mixins.shift();
 
-    if(typeof(baseProto) === 'boolean'){
+    if(typeof(baseProto) === 'boolean') {
         deep = baseProto;
         baseProto = mixins.shift();
     }
 
     var instance = baseProto ? Object.create(baseProto) : {};
-    if(deep){
-        createRecursive(instance);
-    }
+    if(deep) { createRecursive(instance); }
 
     // NOTE:
-    if(mixins.length > 0){
+    if(mixins.length > 0) {
         mixins.unshift(instance);
         def.mixin.apply(def, mixins);
     }
@@ -1439,8 +1434,7 @@ def.scope(function(){
     
     // -----------------
     
-    function rootType(){
-    }
+    function rootType(){ }
     
     var rootProto = rootType.prototype;
     // Unfortunately, creates an enumerable property in every instance
@@ -1642,6 +1636,16 @@ def.scope(function(){
     def.type   = type;
     def.method = method;
 });
+
+def.makeEnum = function(a) {
+    var i = 1;
+    var e = {};
+    a.forEach(function(p) {
+        e[p] = i;
+        i = i << 1;
+    });
+    return e;
+};
 
 // ----------------------
 
@@ -2358,51 +2362,37 @@ def.type('Query')
     // Query -> Query
     
     // deferred map
-    select: function(fun, ctx){
-        return new def.SelectQuery(this, fun, ctx);
+    select: function(fun, ctx) { return new def.SelectQuery(this, fun, ctx); },
+    
+    prop: function(p) {
+        return new def.SelectQuery(this, function(item) { if(item) { return item[p]; }});
     },
 
-    selectMany: function(fun, ctx){
-        return new def.SelectManyQuery(this, fun, ctx);
-    },
+    selectMany: function(fun, ctx) { return new def.SelectManyQuery(this, fun, ctx); },
     
-    union: function(/*others*/){
+    union: function(/*others*/) {
         var queries = def.array.append([this], arguments);
         return new def.SelectManyQuery(new def.ArrayLikeQuery(queries));
     },
 
     // deferred filter
-    where: function(fun, ctx){
-        return new def.WhereQuery(this, fun, ctx);
-    },
+    where: function(fun, ctx) { return new def.WhereQuery(this, fun, ctx); },
 
-    distinct: function(fun, ctx){
-        return new def.DistinctQuery(this, fun, ctx);
-    },
+    distinct: function(fun, ctx) { return new def.DistinctQuery(this, fun, ctx); },
 
-    skip: function(n){
-        return new def.SkipQuery(this, n);
-    },
+    skip: function(n) { return new def.SkipQuery(this, n); },
     
-    take: function(n){
-        if(n <= 0){
-            return new def.NullQuery();
-        }
+    take: function(n) {
+        if(n <= 0) { return new def.NullQuery(); }
         
-        if(!isFinite(n)){
-            return this; // all
-        }
+        if(!isFinite(n)) { return this; } // all
         
         return new def.TakeQuery(this, n);
     },
     
-    whayl: function(pred, ctx){
-        return new def.WhileQuery(this, pred, ctx);
-    },
+    whayl: function(pred, ctx) { return new def.WhileQuery(this, pred, ctx); },
     
-    reverse: function(){
-        return new def.ReverseQuery(this);
-    }
+    reverse: function() { return new def.ReverseQuery(this); }
 });
 
 def.type('NullQuery', def.Query)
@@ -2553,7 +2543,7 @@ def.type('SelectQuery', def.Query)
 });
 
 def.type('SelectManyQuery', def.Query)
-.init(function(source, selectMany, ctx){
+.init(function(source, selectMany, ctx) {
     this.base();
     this._selectMany = selectMany;
     this._ctx    = ctx;
@@ -2561,11 +2551,11 @@ def.type('SelectManyQuery', def.Query)
     this._manySource = null;
 })
 .add({
-    _next: function(nextIndex){
-        while(true){
+    _next: function(nextIndex) {
+        while(true) {
             // Consume all of existing manySource
-            if(this._manySource){
-                if(this._manySource.next()){
+            if(this._manySource) {
+                if(this._manySource.next()) {
                     this.item = this._manySource.item;
                     return 1;
                 }
@@ -2573,19 +2563,17 @@ def.type('SelectManyQuery', def.Query)
                 this._manySource = null;
             }
 
-            if(!query_nextMany.call(this)){
-                break;
-            }
+            if(!query_nextMany.call(this)) { break; }
         }
     }
 });
 
-function query_nextMany(){
-    while(this._source.next()){
+function query_nextMany() {
+    while(this._source.next()) {
         var manySource = this._selectMany ?
                             this._selectMany.call(this._ctx, this._source.item, this._source.index) :
                             this._source.item;
-        if(manySource != null){
+        if(manySource != null) {
             this._manySource = def.query(manySource);
             return 1;
         }
@@ -2693,25 +2681,14 @@ def.type('ReverseQuery', def.Query)
 
 // -------------------
 
-def.query = function(q){
-    if(q === undefined) {
-        return new def.NullQuery();
-    }
-    
-    if(q instanceof def.Query){
-        return q;
-    }
-    
-    if(def.fun.is(q)){
-        return new def.AdhocQuery(q);
-    }
-
+def.query = function(q) {
+    if(q === undefined)        { return new def.NullQuery(); }
+    if(q instanceof def.Query) { return q; }
+    if(def.fun.is(q))          { return new def.AdhocQuery(q); }
     return new def.ArrayLikeQuery(q);
 };
 
-def.range = function(start, count, step){
-    return new def.RangeQuery(start, count, step);
-};
+def.range = function(start, count, step) { return new def.RangeQuery(start, count, step); };
 
 // Reset namespace to global, instead of 'def'
 currentNamespace = def.global;

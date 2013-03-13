@@ -14,7 +14,7 @@
  */
 def
 .type('pvc.visual.legend.BulletGroupScene', pvc.visual.Scene)
-.init(function(rootScene, keyArgs){
+.init(function(rootScene, keyArgs) {
     
     this.base(rootScene, keyArgs);
     
@@ -24,24 +24,22 @@ def
     this.colorAxis = def.get(keyArgs, 'colorAxis');
     
     this.clickMode = def.get(keyArgs, 'clickMode');
-    if(!this.clickMode && this.colorAxis){
+    if(!this.clickMode && this.colorAxis) {
         this.clickMode = this.colorAxis.option('LegendClickMode');
     }
 })
 .add(/** @lends pvc.visual.legend.BulletGroupScene# */{
-    hasRenderer: function(){
-        return this._renderer;
-    },
+    hasRenderer: function() { return !!this._renderer; },
     
-    renderer: function(renderer){
-        if(renderer != null){
+    renderer: function(renderer) {
+        if(renderer != null) {
             this._renderer = renderer;
         } else {
             renderer = this._renderer;
-            if(!renderer){
+            if(!renderer) {
                 var keyArgs;
                 var colorAxis = this.colorAxis;
-                if(colorAxis){
+                if(colorAxis) {
                     keyArgs = {
                         drawRule:    colorAxis.option('LegendDrawLine'  ),
                         drawMarker:  colorAxis.option('LegendDrawMarker'),
@@ -57,14 +55,14 @@ def
         return renderer;
     },
     
-    itemSceneType: function(){
+    itemSceneType: function() {
         var ItemType = this._itemSceneType;
-        if(!ItemType){
+        if(!ItemType) {
             ItemType = def.type(pvc.visual.legend.BulletItemScene);
             
             // Mixin behavior depending on click mode
             var clickMode = this.clickMode;
-            switch(clickMode){
+            switch(clickMode) {
                 case 'toggleselected':
                     ItemType.add(pvc.visual.legend.BulletItemSceneSelection);
                     break;
@@ -75,7 +73,7 @@ def
             }
             
             // Apply legend item scene extensions
-            this.panel()._extendSceneType('item', ItemType, ['isOn', 'isClickable', 'click']);
+            this.panel()._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute']);
             
             this._itemSceneType = ItemType;
         }
@@ -83,7 +81,7 @@ def
         return ItemType;
     },
     
-    createItem: function(keyArgs){
+    createItem: function(keyArgs) {
         var ItemType = this.itemSceneType();
         return new ItemType(this, keyArgs);
     }

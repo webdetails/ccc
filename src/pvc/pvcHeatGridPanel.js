@@ -23,7 +23,7 @@ def
     var roles = this.visualRoles;
 
     var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
-    roles.size = chart.visualRoles(sizeRoleName);
+    roles.size = chart.visualRole(sizeRoleName);
 
     this.useShapes = plot.option('UseShapes');
     this.shape     = plot.option('Shape');
@@ -50,10 +50,10 @@ def
         /* Column and Row datas  */
 
         // One multi-dimension single-level data grouping
-        var rowRootData = me.data.flattenBy(me.visualRoles.series, {visible: true});
+        var rowRootData = me.visualRoles.series.flatten(me.data, {visible: true});
 
         // One multi-dimensional, two-levels grouping (Series -> Categ)
-        var rootScene  = me._buildScene(me.visibleData(), rowRootData, cellSize);
+        var rootScene  = me._buildScene(me.visibleData({ignoreNulls: false}), rowRootData, cellSize);
         var hasColor   = rootScene.isColorBound;
         var hasSize    = rootScene.isSizeBound;
         var wrapper    = me._buildSignsWrapper(rootScene);
@@ -76,7 +76,7 @@ def
 
         /* Cell panel */
         var extensionIds = ['panel'];
-        if(isV1Compat){
+        if(isV1Compat) {
             extensionIds.push(''); // let access as "heatGrid_"
         }
 
@@ -144,9 +144,7 @@ def
     },
 
     _buildSignsWrapper: function(rootScene){
-        if(this.compatVersion() > 1){
-            return null;
-        }
+        if(this.compatVersion() > 1){ return null; }
 
         var colorValuesBySerAndCat =
             def
@@ -232,24 +230,19 @@ def
             ;
     },
 
-    _buildGetBaseFillColor: function(hasColor){
+    _buildGetBaseFillColor: function(hasColor) {
         var colorAxis = this.axes.color;
-        if(hasColor){
-            return colorAxis.sceneScale({sceneVarName: this.visualRoles.color.name});
-        }
-
-        var colorMissing = colorAxis && colorAxis.option('Missing');
-        return def.fun.constant(colorMissing || pvc.defaultColor);
+        return hasColor ? 
+                colorAxis.sceneScale({sceneVarName: 'color'}) :
+                def.fun.constant(colorAxis.option('Unbound'));
     },
             
-    _createShapesHeatMap: function(cellSize, wrapper, hasColor, hasSize){
+    _createShapesHeatMap: function(cellSize, wrapper, hasColor, hasSize) {
         var me = this;
 
         /* SIZE */
         var areaRange = me._calcDotAreaRange(cellSize);
-        if(hasSize){
-             me.axes.size.setScaleRange(areaRange);
-        }
+        if(hasSize) { me.axes.size.setScaleRange(areaRange); }
 
         // Dot Sign
         var keyArgs = {
@@ -262,9 +255,7 @@ def
         };
         
         var pvDot = new pvc.visual.DotSizeColor(me, me.pvHeatGrid, keyArgs)
-            .override('dimColor', function(color/*, type*/){
-                return pvc.toGrayScale(color, 0.6);
-            })
+            .override('dimColor', function(color/*, type*/) { return pvc.toGrayScale(color, 0.6); })
             .pvMark
             .lock('shapeAngle'); // TODO - rotation of shapes can cause them to not fit the calculated cell. Would have to improve the radius calculation code.
             
@@ -321,7 +312,7 @@ def
     _buildShapesTooltipArgs: function(hasColor, hasSize){
         var chart = this.chart;
 
-        if(this.compatVersion <= 1 && chart._tooltipEnabled){
+        if(this.compatVersion() <= 1 && this.showsTooltip()){
             var options = chart.options;
             var customTooltip = options.customTooltip;
             if(!customTooltip){

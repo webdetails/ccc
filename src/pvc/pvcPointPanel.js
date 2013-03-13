@@ -29,7 +29,7 @@ def
         plot.option.specify({'LinesVisible': true});
     }
      
-    this.visualRoles.value = chart.visualRoles(plot.option('OrthoRole'));
+    this.visualRoles.value = chart.visualRole(plot.option('OrthoRole'));
 })
 .add({
     pvLine: null,
@@ -90,7 +90,7 @@ def
     /**
      * @override
      */
-    _createCore: function(){
+    _createCore: function() {
         this.base();
         
         var myself = this;
@@ -104,7 +104,7 @@ def
         // ------------------
         // DATA
         var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
-        var data = this.visibleData(); // shared "categ then series" grouped data
+        var data = this.visibleData({ignoreNulls: false}); // shared "categ then series" grouped data
         var rootScene = this._buildScene(data, isBaseDiscrete);
        
         // ---------------
@@ -156,7 +156,7 @@ def
                 function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
                 function(){ return !this.scene.isNull; };
         
-        var isLineAreaNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
+        var isLineAreaNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
         
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
@@ -501,9 +501,8 @@ def
         def
         .scope(function(){
             return (serRole && serRole.grouping) ?
-                   serRole.flatten(data).children() : // data already only contains visible data
-                   def.query([null]) // null series
-                   ;
+                    serRole.flatten(data).children() : // data already only contains visible data
+                    def.query([null]); // null series
         })
         /* Create series scene */
         .each(function(seriesData1/*, seriesIndex*/){

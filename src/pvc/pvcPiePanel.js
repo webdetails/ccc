@@ -37,7 +37,7 @@
  * }
  */
 def
-.type('pvc.PieChartPanel', pvc.PlotPanel)
+.type('pvc.PiePanel', pvc.PlotPanel)
 .init(function(chart, parent, plot, options){
     
     // Before base, just to bring to attention that ValuesMask depends on it
@@ -49,7 +49,7 @@ def
     this.explodedSliceIndex   = plot.option('ExplodedSliceIndex' );
     this.activeOffsetRadius   = plot.option('ActiveSliceRadius'  );
     this.labelStyle           = labelStyle;
-    if(labelStyle === 'linked'){
+    if(labelStyle === 'linked') {
         this.linkInsetRadius     = plot.option('LinkInsetRadius'    );
         this.linkOutsetRadius    = plot.option('LinkOutsetRadius'   );
         this.linkMargin          = plot.option('LinkMargin'         );
@@ -161,7 +161,7 @@ def
         var explodedOffsetRadius = resolvePercentRadius(this.explodedOffsetRadius);
         
         var activeOffsetRadius = 0;
-        if(this.chart.options.hoverable){
+        if(this.hoverable()) {
             activeOffsetRadius = resolvePercentRadius(this.activeOffsetRadius);
         }
         
@@ -187,7 +187,7 @@ def
      */
     _createCore: function(layoutInfo) {
         var myself = this;
-        var chart = this.chart;
+        var chart = myself.chart;
         var rootScene = this._buildScene();
         var center = layoutInfo.center;
         var normalRadius = layoutInfo.normalRadius;
@@ -264,17 +264,15 @@ def
         if(this.valuesVisible){
             this.valuesFont = layoutInfo.labelFont;
             
-            if(this.labelStyle === 'inside'){
+            if(this.labelStyle === 'inside') {
                 this.pvPieLabel = pvc.visual.ValueLabel.maybeCreate(this, this.pvPie, {
-                        wrapper: wrapper,
-                        noHover: false
+                        wrapper: wrapper
                     })
-                    .intercept('visible', function(scene){
-                        return (scene.vars.value.angle >= 0.001) &&
-                               this.delegateExtension(true);
+                    .intercept('visible', function(scene) {
+                        return (scene.vars.value.angle >= 0.001) && this.delegateExtension(true);
                     })
+                    .override('defaultText', function() { return this.scene.vars.value.sliceLabel; })
                     .pvMark
-                    .text(function(scene){ return scene.vars.value.sliceLabel; })
                     .textMargin(10);
             
             } else if(this.labelStyle === 'linked') {
@@ -405,8 +403,8 @@ def
     },
     
     _getExtensionId: function(){
-        // chart is deprecated
-        // content coincides, visually in this chart type
+        // 'chart' is deprecated
+        // 'content' coincides, visually, with 'plot', in this chart type
         // - actually it shares the same panel...
         
         var extensionIds = [{abs: 'content'}];

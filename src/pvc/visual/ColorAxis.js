@@ -37,78 +37,6 @@ def.scope(function(){
             return this;
         },
         
-        calculateScale: function(){
-            /*jshint expr:true */
-            var scale, noWrap;
-            var dataCells = this.dataCells;
-            if(dataCells){
-                var chart = this.chart;
-                if(this.scaleType === 'discrete'){
-                    var domainValues = 
-                        def
-                        .query(dataCells)
-                        .selectMany(function(dataCell){
-                            var role = dataCell.role;
-                            if(role && role.isBound()){
-                                // Visible and not visible!
-                                var partData = chart.partData(dataCell.dataPartValue);
-                                var domainData = partData && partData.flattenBy(role);
-                                
-                                dataCell.data = domainData;
-                                
-                                return domainData && domainData.children();
-                            }
-                        })
-                        .distinct(function(child){ return child.key; })
-                        .select(function(child){ return def.nullyTo(child.value, ''); })
-                        .array();
-                    
-                    this.domainValues = domainValues;
-                    
-                    // Call the transformed color scheme with the domain values
-                    //  to obtain a final scale object
-                    scale = this.scheme()(domainValues);
-                    
-                    // scale is already wrapped by this axis' _wrapScale
-                    noWrap = true;
-                } else {
-                    if(dataCells.length === 1){
-                        // Local scope: 
-                        // Visible only!
-//                        var visibleDomainData = 
-//                            chart
-//                            .partData(this.dataCell.dataPartValue)
-//                            .flattenBy(this.role, {visible: true})
-//                            ;
-                        
-                        var visibleDomainData = chart.root.visibleData(this.dataCell.dataPartValue);
-                        var normByCateg = this.option('NormByCategory');
-                        var scaleOptions = {
-                            type:        this.option('ScaleType'),
-                            colors:      this.option('Colors')().range(), // obtain the underlying colors array
-                            colorDomain: this.option('Domain'), 
-                            colorMin:    this.option('Min'),
-                            colorMax:    this.option('Max'),
-                            colorMissing:this.option('Missing'), // TODO: already handled by the axis wrapping
-                            data:        visibleDomainData,
-                            colorDimension: this.role.firstDimensionName(),
-                            normPerBaseCategory: normByCateg
-                        };
-                        
-                        if(normByCateg){
-                            this.scalesByCateg = pvc.color.scales(scaleOptions);
-                        } else {
-                            scale = pvc.color.scale(scaleOptions);
-                        }
-                    }
-                }
-            }
-            
-            this.setScale(scale, noWrap);
-            
-            return this;
-        },
-        
         // Called from within setScale
         _wrapScale: function(scale){
             // Check if there is a color transform set
@@ -116,7 +44,7 @@ def.scope(function(){
             // If the user specified the colors,
             // do not apply default color transforms...
             var applyTransf;
-            if(this.scaleType === 'discrete'){
+            if(this.scaleType === 'discrete') {
                 applyTransf = this.option.isSpecified('Transform') || 
                               (!this.option.isSpecified('Colors') && 
                                !this.option.isSpecified('Map'   ));
@@ -196,7 +124,7 @@ def.scope(function(){
                 
                 var baseScale = baseScheme(d);
                 
-                // Removed fixed colors from the baseScale
+                // Remove fixed colors from the baseScale
                 var r = baseScale.range().filter(filter.color);
                 
                 baseScale.range(r);
@@ -254,8 +182,8 @@ def.scope(function(){
                 };
             }
             
-            return this.scale.by1(function(scene){
-                return scene.vars[varName].value;
+            return this.scale.by1(function(scene) {
+                return scene && scene.vars[varName].value;
             });
         },
         
@@ -331,24 +259,29 @@ def.scope(function(){
         }
     };
     
-    function getDefaultColor(/*optionInfo*/){
+    var _defContColors;
+    
+    function getDefaultColors(/*optionInfo*/) {
         var colors;
-        if(this.scaleType === 'discrete'){
-            if(this.index === 0){
+        var scaleType = this.scaleType;
+        if(!scaleType) {
+            // Axis is unbound
+            colors = pvc.createColorScheme();
+        } else if(scaleType === 'discrete') {
+            if(this.index === 0) {
                 // Assumes default pvc scale
                 colors = pvc.createColorScheme();
             } else { 
                 // Use colors of axes with own colors.
                 // Use a color scheme that always returns 
                 // the global color scale of the role
+                // The following fun ignores passed domain values.
                 var me = this;
-                colors = function(){ // ignore domain values
-                    return me.chart._getRoleColorScale(me.role.name);
-                };
+                colors = function() { return me.chart._getRoleColorScale(me.role.name); };
             }
         } else {
-            colors = ['red', 'yellow','green']
-                     .map(function(name){ return pv.Color.names[name]; });
+            if(!_defContColors) { _defContColors = ['red', 'yellow','green'].map(pv.color); }
+            colors = _defContColors.slice();
         }
         
         return colors;
@@ -368,7 +301,7 @@ def.scope(function(){
          */
         Colors: {
             resolve:    '_resolveFull',
-            getDefault: getDefaultColor,
+            getDefault: getDefaultColors,
             data: {
                 resolveV1: function(optionInfo){
                     if(this.scaleType === 'discrete'){
@@ -522,11 +455,17 @@ def.scope(function(){
             value: pv.color('lightgray')
         },
         
+        Unbound: { // Color to use when color role is unbound (only applies to optional color roles) 
+            resolve: '_resolveFull',
+            getDefault: function(optionInfo) {
+                var scheme = this.option('Colors');
+                return scheme().range()[0] || pvc.defaultColor; // J.I.C.?
+            },
+            cast:  pv.color
+        },
+        
         // ------------
         
-        /* 
-         * LegendVisible 
-         */
         LegendVisible: {
             resolve: '_resolveFull',
             data:    legendData,

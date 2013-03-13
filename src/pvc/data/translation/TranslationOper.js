@@ -56,14 +56,26 @@ def.type('pvc.data.TranslationOper')
      * @type number
      * @virtual
      */
-    virtualItemSize: function(){
-        return this.metadata.length;
-    },
+    virtualItemSize:     function() { return this.metadata.length; },
+    
+    freeVirtualItemSize: function() { return this.virtualItemSize() - this._userUsedIndexesCount; },
 
-    freeVirtualItemSize: function(){
-        return this.virtualItemSize() - this._userUsedIndexesCount;
+    collectFreeDiscreteAndConstinuousIndexes: function(freeDisIndexes, freeMeaIndexes) {
+        var itemTypes = this._itemTypes;
+        
+        def
+        .range(0, itemTypes.length)
+        .each(function(j) {
+            if(!this._userUsedIndexes[j]) {
+                if(itemTypes[j] === 1) {
+                    if(freeMeaIndexes) { freeMeaIndexes.push(j); }
+                } else {
+                    if(freeDisIndexes) { freeDisIndexes.push(j); }
+                }
+            }
+        }, this);
     },
-
+    
     /**
      * Defines a dimension reader.
      *
@@ -443,31 +455,21 @@ def.type('pvc.data.TranslationOper')
         return index < L ? index : -1;
     },
     
-    _getUnboundRoleDefaultDimNames: function(roleName, count, dims, level){
-        var role = this.chart.visualRoles(roleName, {assertExists: false});
-        if(role && !role.isPreBound()){
+    _getUnboundRoleDefaultDimNames: function(roleName, count, dims, level) {
+        var role = this.chart.visualRoles[roleName];
+        if(role && !role.isPreBound()) {
             var dimGroupName = role.defaultDimensionName;
-            if(dimGroupName){
+            if(dimGroupName) {
                 dimGroupName = dimGroupName.match(/^(.*?)(\*)?$/)[1];
                 
-                if(!dims){
-                    dims = [];
-                }
-                
-                if(level == null){
-                    level = 0;
-                }
-                
-                if(count == null) {
-                    count = 1;
-                }
+                if(!dims        ) { dims = []; }
+                if(level == null) { level = 0; }
+                if(count == null) { count = 1; }
                 
                 // Already bound dimensions count
-                while(count--){
+                while(count--) {
                     var dimName = pvc.buildIndexedId(dimGroupName, level++);
-                    if(!this.complexTypeProj.isReadOrCalc(dimName)){
-                        dims.push(dimName);
-                    }
+                    if(!this.complexTypeProj.isReadOrCalc(dimName)) { dims.push(dimName); }
                 }
                 
                 return dims.length ? dims : null;

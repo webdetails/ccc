@@ -13,42 +13,53 @@
  */
 def
 .type('pvc.visual.legend.BulletItemScene', pvc.visual.Scene)
-.init(function(bulletGroup, keyArgs){
+.init(function(bulletGroup, keyArgs) {
     
-    this.base(bulletGroup, keyArgs);
+    this.base.apply(this, arguments);
+    
+    if(!this.executable()) {
+        // Don't allow default click action
+        var I = pvc.visual.Interactive;
+        this._ibits = I.Interactive | 
+                      I.ShowsInteraction | 
+                      I.Hoverable | I.SelectableAny;
+    }
     
     var value, rawValue, label;
-    if(keyArgs){
+    if(keyArgs) {
         value    = keyArgs.value;
         rawValue = keyArgs.rawValue;
         label    = keyArgs.label;
     }
     
-    if(value === undefined){
+    if(value === undefined) {
         var source = this.group || this.datum;
         if(source){
             value    = source.value;
             rawValue = source.rawValue;
-            label    = source.ensureLabel();
-            
-            // This is to catch trend lines...
-            // Standard data source data parts are numbers, 
-            // so this shows the non-standard data part label
-            // after the item's label:
-            // 'Lisbon (Linear trend)'  
-            var dataPartDim = this.chart()._getDataPartDimName();
-            if(dataPartDim){
-                var dataPartAtom = source.atoms[dataPartDim];
-                if(isNaN(+dataPartAtom.value)){
-                    label += " (" + dataPartAtom.label + ")";
-                }
-            }
+            label    = source.ensureLabel() + this._getTrendLineSuffix(source);
         }
     }
     
     this.vars.value = new pvc.visual.ValueLabelVar(value || null, label || "", rawValue);
 })
 .add(/** @lends pvc.visual.legend.BulletItemScene# */{
+    _getTrendLineSuffix: function(source) {
+        // TODO: This is to catch trend lines...
+        // Standard data source data parts are numbers, 
+        // so this shows the non-standard data part label
+        // after the item's label:
+        // 'Lisbon (Linear trend)'  
+        var dataPartDim = this.chart()._getDataPartDimName();
+        if(dataPartDim) {
+            var dataPartAtom = source.atoms[dataPartDim];
+            if(isNaN(+dataPartAtom.value)) {
+                return " (" + dataPartAtom.label + ")";
+            }
+        }
+        return "";
+    },
+    
     /**
      * Called during legend render (full or interactive) 
      * to determine if the item is in the "on" state.
@@ -62,35 +73,22 @@ def
      * 
      * @type boolean
      */
-    isOn:  function(){
-        return true;
-    },
+    isOn:  def.fun.constant(true),
     
     /**
-     * Called during legend render (full or interactive) 
-     * to determine if the item can be clicked.
-     * <p>
-     * A clickable item shows a hand mouse cursor when the mouse is over it.
-     * </p>
-     * <p>
-     * The default implementation returns <c>false</c>.
-     * </p>
-     * 
+     * Returns true if the item may be executed. 
+     * May be called during construction.
      * @type boolean
      */
-    isClickable: function(){
-        return false;
-    },
+    executable: def.fun.constant(false),
     
     /**
-     * Called when the user clicks the legend item.
+     * Called when the user executes the legend item.
      * <p>
      * The default implementation does nothing.
      * </p>
      */
-    click: function(){
-        // NOOP
-    },
+    execute: def.fun.constant(),
     
     /**
      * Measures the item label's text and returns an object
@@ -99,7 +97,7 @@ def
      * 
      * @type object
      */
-    labelTextSize: function(){
+    labelTextSize: function() {
         var valueVar = this.vars.value;
         return valueVar && pv.Text.measure(valueVar.label, this.vars.font);
     }

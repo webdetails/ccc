@@ -154,9 +154,7 @@ def
     _getAxisGridRootScene: function(axis){
         var data = this.data;
         var isDiscrete = axis.isDiscrete();
-        if(isDiscrete){
-            data = axis.role.flatten(data, {visible: true});
-        }
+        if(isDiscrete) { data = axis.role.flatten(data, {visible: true}); }
 
         var rootScene =
             new pvc.visual.CartesianAxisRootScene(null, {
@@ -613,7 +611,7 @@ def
             var isEnd = ev.drag.phase === 'end';
             
             // Prevent tooltips and hovers
-            topRoot._isRubberBandSelecting = !isEnd;
+            topRoot._selectingByRubberband = !isEnd;
             
             baseBgPanel.render();
             baseFgPanel.render();

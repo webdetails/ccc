@@ -54,7 +54,26 @@ def.scope(function(){
             if(!this.globalIndex){
                 return this._chartOption(def.firstLowerCase(optionInfo.name));
             }
-        })
+        }),
+        
+        collectDataCells: function(dataCells) {
+            var dataCell = this._getColorDataCell();
+            if(dataCell) {
+                dataCells.push(dataCell);
+            }
+        },
+        
+        _getColorDataCell: function(){
+            var colorRoleName = this.option('ColorRole');
+            if(colorRoleName) {
+                return new pvc.visual.DataCell(
+                        this,
+                        /*axisType*/ 'color',
+                        this.option('ColorAxis') - 1, 
+                        colorRoleName, 
+                        this.option('DataPart'));
+            }
+        }
     });
     
     pvc.visual.Plot.optionsDef = {
@@ -106,6 +125,12 @@ def.scope(function(){
             resolve: '_resolveFull',
             cast:    String,
             value:   "{value}"
+        },
+        
+        ValuesOptimizeLegibility: {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:   false
         },
         
         DataPart: {

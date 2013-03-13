@@ -42,7 +42,7 @@ def
             defaultDimension: 'value'
         });
 
-        this._valueRole = this.visualRoles('value');
+        this._valueRole = this.visualRoles.value;
     },
     
     _getCategoryRoleSpec: function(){

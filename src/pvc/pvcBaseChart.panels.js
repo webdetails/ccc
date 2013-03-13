@@ -55,31 +55,27 @@ pvc.BaseChart
      */
     _multiChartPanel: null,
     
-    _initChartPanels: function(hasMultiRole){
-        /* Initialize chart panels */
-        this._initBasePanel  ();
-        this._initTitlePanel ();
+    _initChartPanels: function(hasMultiRole) {
+        this._initBasePanel ();
+        this._initTitlePanel();
         
+        var isMultichartRoot = hasMultiRole && !this.parent;
+        
+        // null on small charts or when not enabled
         var legendPanel = this._initLegendPanel();
         
-        if(!this.parent && hasMultiRole) {
-            this._initMultiChartPanel();
-            
-            if(legendPanel){
-                this._initLegendScenes(legendPanel);
-            }
-        } else {
-            var options = this.options;
-            
-            if(legendPanel){
-                this._initLegendScenes(legendPanel);
-            }
-            
+        // Is multi-chart root?
+        if(isMultichartRoot) { this._initMultiChartPanel(); }
+        
+        if(legendPanel) { this._initLegendScenes(legendPanel); }
+        
+        if(!isMultichartRoot) {
+            var o = this.options;
             this._preRenderContent({
-                margins:           hasMultiRole ? options.smallContentMargins  : options.contentMargins,
-                paddings:          hasMultiRole ? options.smallContentPaddings : options.contentPaddings,
-                clickAction:       options.clickAction,
-                doubleClickAction: options.doubleClickAction
+                margins:           hasMultiRole ? o.smallContentMargins  : o.contentMargins,
+                paddings:          hasMultiRole ? o.smallContentPaddings : o.contentPaddings,
+                clickAction:       o.clickAction,
+                doubleClickAction: o.doubleClickAction
             });
         }
     },
@@ -91,21 +87,17 @@ pvc.BaseChart
      * @param {object} contentOptions Object with content specific options. Can be modified.
      * @param {pvc.Sides} [contentOptions.margins] The margins for the content panels. 
      * @param {pvc.Sides} [contentOptions.paddings] The paddings for the content panels.
-     * 
      * @virtual
      */
-    _preRenderContent: function(contentOptions){
-        /* NOOP */
-    },
+    _preRenderContent: function(/*contentOptions*/) { /* NOOP */ },
     
     /**
      * Creates and initializes the base panel.
      */
     _initBasePanel: function() {
-        var options = this.options;
-        var basePanelParent = this.parent && this.parent._multiChartPanel;
+        var p = this.parent;
         
-        this.basePanel = new pvc.BasePanel(this, basePanelParent, {
+        this.basePanel = new pvc.BasePanel(this, p && p._multiChartPanel, {
             margins:  this.margins,
             paddings: this.paddings,
             size:     {width: this.width, height: this.height}
@@ -116,22 +108,24 @@ pvc.BaseChart
      * Creates and initializes the title panel,
      * if the title is specified.
      */
-    _initTitlePanel: function(){
-        var options = this.options;
-        if (!def.empty(options.title)) {
-            var isRoot = !this.parent;
-            this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
-                title:        options.title,
-                font:         options.titleFont,
-                anchor:       options.titlePosition,
-                align:        options.titleAlign,
-                alignTo:      options.titleAlignTo,
-                offset:       options.titleOffset,
-                keepInBounds: options.titleKeepInBounds,
-                margins:      options.titleMargins,
-                paddings:     options.titlePaddings,
-                titleSize:    options.titleSize,
-                titleSizeMax: options.titleSizeMax
+    _initTitlePanel: function() {
+        var me = this;
+        var o = me.options;
+        var title = o.title;
+        if (!def.empty(title)) { // V1 depends on being able to pass "   " spaces... 
+            var isRoot = !me.parent;
+            this.titlePanel = new pvc.TitlePanel(me, me.basePanel, {
+                title:        title,
+                font:         o.titleFont,
+                anchor:       o.titlePosition,
+                align:        o.titleAlign,
+                alignTo:      o.titleAlignTo,
+                offset:       o.titleOffset,
+                keepInBounds: o.titleKeepInBounds,
+                margins:      o.titleMargins,
+                paddings:     o.titlePaddings,
+                titleSize:    o.titleSize,
+                titleSizeMax: o.titleSizeMax
             });
         }
     },
@@ -140,47 +134,43 @@ pvc.BaseChart
      * Creates and initializes the legend panel,
      * if the legend is active.
      */
-    _initLegendPanel: function(){
-        var options = this.options;
+    _initLegendPanel: function() {
+        var o = this.options;
         // global legend(s) switch
-        if (options.legend) {
-
+        if (o.legend) { // legend is disabled on small charts...
             var legend = new pvc.visual.Legend(this, 'legend', 0);
             
-            // TODO: pass all these options to Legend class
-            
-            this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
+            // TODO: pass all these options to LegendPanel class
+            return this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
                 anchor:       legend.option('Position'),
                 align:        legend.option('Align'),
-                alignTo:      options.legendAlignTo,
-                offset:       options.legendOffset,
-                keepInBounds: options.legendKeepInBounds,
+                alignTo:      o.legendAlignTo,
+                offset:       o.legendOffset,
+                keepInBounds: o.legendKeepInBounds,
                 size:         legend.option('Size'),
                 sizeMax:      legend.option('SizeMax'),
                 margins:      legend.option('Margins'),
                 paddings:     legend.option('Paddings'),
                 font:         legend.option('Font'),
-                scenes:       def.getPath(options, 'legend.scenes'),
+                scenes:       def.getPath(o, 'legend.scenes'),
                 
                 // Bullet legend
-                textMargin:   options.legendTextMargin,
-                itemPadding:  options.legendItemPadding,
-                markerSize:   options.legendMarkerSize
+                textMargin:   o.legendTextMargin,
+                itemPadding:  o.legendItemPadding,
+                markerSize:   o.legendMarkerSize
                 //shape:        options.legendShape // TODO: <- doesn't this come from the various color axes?
             });
-            
-            return this.legendPanel;
         }
     },
     
-    _getLegendBulletRootScene: function(){
+    _getLegendBulletRootScene: function() {
         return this.legendPanel && this.legendPanel._getBulletRootScene();
     },
     
     /**
      * Creates and initializes the multi-chart panel.
      */
-    _initMultiChartPanel: function(){
+    _initMultiChartPanel: function() {
         var basePanel = this.basePanel;
         var options = this.options;
         
@@ -196,80 +186,79 @@ pvc.BaseChart
         
         // BIG HACK: force legend to be rendered after the small charts, 
         // to allow them to register legend renderers.
+        // Currently is: Title -> Legend -> MultiChart
+        // Changes to: MultiChart -> Title -> Legend
         basePanel._children.unshift(basePanel._children.pop());
     },
     
-    _coordinateSmallChartsLayout: function(scopesByType){
-        // NOOP
-    },
+    _coordinateSmallChartsLayout: function(/*scopesByType*/) {},
     
     /**
      * Creates the legend group scenes of a chart.
      *
      * The default implementation creates
-     * one legend group per data part value
-     * and with one legend item per 
-     * value of the "color" visual role.
-     *
-     * Legend groups are registered with the id prefix "part"
-     * followed by the corresponding part value.
+     * one legend group per each data cell of each color axis.
+     * 
+     * One legend item per domain data value of each data cell.
      */
-    _initLegendScenes: function(legendPanel){
-        
-        var rootScene, dataPartDimName;
-        var legendIndex = 0; // always start from 0
-        
+    _initLegendScenes: function(legendPanel) {
         // For all color axes...
         var colorAxes = this.axesByType.color;
-        if(colorAxes){
-            colorAxes.forEach(processAxis, this);
-        }
+        if(!colorAxes) { return; }
         
-        // ------------
-
-        function processAxis(colorAxis){
-            if(colorAxis.option('LegendVisible')){
-                var dataCells = colorAxis && colorAxis.dataCells;
-                if(dataCells){
-                    dataCells
-                    .forEach(function(dataCell){
-                        if(dataCell.role.isDiscrete()){
-                            var domainData = dataCell.data;
-                            
-                            if(!rootScene){
-                                dataPartDimName = this._getDataPartDimName();
-                                rootScene = legendPanel._getBulletRootScene();
-                            }
-                            
-                            var dataPartAtom;
-                            var locked = colorAxis.option('LegendClickMode') === 'togglevisible' && 
-                                         (dataPartAtom = domainData.atoms[dataPartDimName]) && 
-                                         dataPartAtom.value === 'trend';
-                            
-                            var groupScene = rootScene.createGroup({
-                                source:          domainData,
-                                colorAxis:       colorAxis,
-                                clickMode:       locked ? 'none' : undefined,
-                                extensionPrefix: pvc.buildIndexedId('', legendIndex++)
-                             });
-                            
-                            // For later binding an appropriate bullet renderer
-                            dataCell.legendBulletGroupScene = groupScene;
-                            
-                            var partColorScale = colorAxis.scale;
-                            
-                            domainData
-                                .children()
-                                .each(function(itemData){
-                                    var itemScene = groupScene.createItem({source: itemData});
-                                    
-                                    // HACK...
-                                    itemScene.color = partColorScale(itemData.value);
-                                });
-                        }
-                    }, this);
+        var rootScene;
+        var legendIndex = 0; // always start from 0 (whatever the color axis index)
+        var dataPartDimName = this._getDataPartDimName();
+        
+        def
+        .query(colorAxes)
+        .where(function(axis) { return axis.option('LegendVisible'); })
+        .each (function(axis) {
+            if(axis.dataCells) {
+                axis.dataCells.forEach(function(dataCell) {
+                    if(dataCell.role.isDiscrete()) { createLegendGroup(dataCell, axis); }
+                });
+            }
+        });
+        
+        function createLegendGroup(dataCell, colorAxis) {
+            var isToggleVisible = colorAxis.option('LegendClickMode') === 'togglevisible';
+            
+            var domainData = dataCell.domainData();
+            
+            if(!rootScene) { rootScene = legendPanel._getBulletRootScene(); }
+            
+            // Trend series cannot be set to invisible.
+            // They are created each time that visible changes.
+            // So trend legend groups are created locked (clicMode = 'none')
+            var clickMode;
+            if(isToggleVisible) {
+                var dataPartAtom = domainData.atoms[dataPartDimName];
+                if(dataPartAtom && dataPartAtom.value === 'trend') {
+                    clickMode = 'none';
                 }
             }
+            
+            var groupScene = rootScene.createGroup({
+                source:          domainData,
+                colorAxis:       colorAxis,
+                clickMode:       clickMode,
+                extensionPrefix: pvc.buildIndexedId('', legendIndex++)
+             });
+            
+            // For later binding an appropriate bullet renderer
+            dataCell.legendBulletGroupScene = groupScene;
+            
+            // Create on item scene per domain item data
+            dataCell
+            .domainItemDatas()
+            .each(function(itemData) { 
+                var itemScene  = groupScene.createItem({source: itemData});
+                var colorValue = dataCell.domainItemDataValue(itemData);
+                
+                // TODO: HACK...
+                itemScene.color = colorAxis.scale(colorValue);
+            });
         }
     }
 });

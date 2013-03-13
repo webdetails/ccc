@@ -1,4 +1,4 @@
-// 8ef5fb05c583f3d8c688a2821d003cf056e53be7
+// 616881d98808d4fdcf8aa45f7a3fae39bb75dce8
 /**
  * @class The built-in Array class.
  * @name Array
@@ -2537,7 +2537,7 @@ pv.Dom.Node.prototype.visitAfter = function(f) {
  */
 pv.Dom.Node.prototype.sort = function(f) {
   if (this.firstChild) {
-    delete p._firstDirtyChildIndex;
+    delete this._firstDirtyChildIndex;
     
     this.childNodes.sort(f);
     
@@ -2570,6 +2570,8 @@ pv.Dom.Node.prototype.sort = function(f) {
 pv.Dom.Node.prototype.reverse = function() {
   var childNodes = [];
   this.visitAfter(function(n) {
+      delete this._firstDirtyChildIndex;
+      
       while (n.lastChild) childNodes.push(n.removeChild(n.lastChild));
       for (var c; c = childNodes.pop();) n.insertBefore(c, n.firstChild);
     });
@@ -6302,6 +6304,53 @@ pv.Color.prototype.darker = function(k) {
 };
 
 /**
+ * Blends a color with transparency with a given mate color.
+ * Returns an RGB color.
+ * 
+ * @param {pv.Color} [mate='white'] the mate color. Defaults to 'white'. 
+ */
+pv.Color.prototype.alphaBlend = function(mate) {
+  var rgb = this.rgb();
+  var a = rgb.a;
+  if(a === 1){ return this; }
+    
+  if(!mate){ mate = pv.Color.names.white; } else { mate = pv.color(mate); }
+  
+  mate = mate.rgb();
+  
+  var z = (1 - a);
+  return pv.rgb(
+          z * rgb.r + a * mate.r, 
+          z * rgb.g + a * mate.g,
+          z * rgb.b + a * mate.b,
+          1);
+};
+  
+/**
+ * Returns the decimal number corresponding to the rgb hexadecimal representation.
+ * 
+ * If a mate color is provided it is used for blending the alpha channel of this color, if any.
+ * 
+ * @param {pv.Color} [mate='white'] the mate color. Defaults to 'white'.
+ */
+pv.Color.prototype.rgbDecimal = function(mate) {
+  var rgb = this.alphaBlend(mate);
+  return rgb.r << 16 | rgb.g << 8 | rgb.b;
+};
+
+/**
+ * Determines if a color is in the "dark" category.
+ * If this is a background color, you may then choose a color for text
+ * that is in the "bright" category.
+ * 
+ * Adapted from {@link http://us2.php.net/manual/en/function.hexdec.php#74092}.
+ */
+pv.Color.prototype.isDark = function() {
+  // TODO: How should alpha be accounted for?
+  return this.rgbDecimal() < 0xffffff/2;
+};
+
+/**
  * Constructs a new RGB color with the specified channel values.
  *
  * @param {number} r the red channel, an integer in [0,255].
@@ -6496,6 +6545,14 @@ pv.Color.Rgb.prototype.hsl = function(){
 };
 
 /**
+ * Constructs a new RGB color which is the complementary color of this color.
+ */
+pv.Color.Rgb.prototype.complementary = function() {
+  return this.hsl().complementary().rgb();
+};
+
+
+/**
  * Constructs a new HSL color with the specified values.
  *
  * @param {number} h the hue, an integer in [0, 360].
@@ -6600,6 +6657,13 @@ pv.Color.Hsl.prototype.alpha = function(a) {
   return pv.hsl(this.h, this.s, this.l, a);
 };
 
+/**
+ * Constructs a new HSL color which is the complementary color of this color.
+ */
+pv.Color.Hsl.prototype.complementary = function() {
+  return pv.hsl((this.h + 180) % 360, 1 - this.s, 1 - this.l, this.a);
+};
+  
 /**
  * Returns the RGB color equivalent to this HSL color.
  *
@@ -7252,6 +7316,18 @@ pv.Colors.category19 = function() {
         return color;
     };
     
+    FillStyle.prototype.alphaBlend = function(mate) {
+        return this.rgb().alphaBlend(mate);
+    };
+      
+    FillStyle.prototype.rgbDecimal = function(mate) {
+        return this.rgb().rgbDecimal(mate);
+    };
+
+    FillStyle.prototype.isDark = function() {
+        return this.rgb().isDark();
+    };
+    
     /**
      * Constructs a solid fill style. This constructor should not be invoked
      * directly; use {@link pv.fillStyle} instead.
@@ -7286,6 +7362,10 @@ pv.Colors.category19 = function() {
 
     Solid.prototype.darker = function(k){
         return new Solid(this.rgb().darker(k));
+    };
+    
+    Solid.prototype.complementary = function() {
+        return new Solid(this.rgb().complementary());
     };
     
     pv.FillStyle.transparent = new Solid(pv.Color.transparent);
@@ -7340,6 +7420,18 @@ pv.Colors.category19 = function() {
         }));
     };
     
+    Gradient.prototype.complementary = function(){
+        return this._clone(this.stops.map(function(stop){
+            return {offset: stop.offset, color: stop.color.complementary()};
+        }));
+    };
+    
+    Gradient.prototype.alphaBlend = function(mate) {
+        return this._clone(this.stops.map(function(stop){
+            return {offset: stop.offset, color: stop.color.alphaBlend(mate)};
+        }));
+    };
+        
     // ----------------
     
     var LinearGradient = pv.FillStyle.LinearGradient = function(angle, stops) {
@@ -17782,7 +17874,7 @@ pv.Layout.Treemap.prototype = pv.extend(pv.Layout.Hierarchy)
     .property("order", String);
 
 /**
- * Default propertiess for treemap layouts. The default mode is "squarify" and
+ * Default properties for treemap layouts. The default mode is "squarify" and
  * the default order is "ascending".
  *
  * @type pv.Layout.Treemap
@@ -17802,7 +17894,7 @@ pv.Layout.Treemap.prototype.defaults = new pv.Layout.Treemap()
  */
 
 /**
- * The left inset between parent add child in pixels. Defaults to 0.
+ * The left inset between parent and child in pixels. Defaults to 0.
  *
  * @type number
  * @name pv.Layout.Treemap.prototype.paddingLeft
@@ -17810,7 +17902,7 @@ pv.Layout.Treemap.prototype.defaults = new pv.Layout.Treemap()
  */
 
 /**
- * The right inset between parent add child in pixels. Defaults to 0.
+ * The right inset between parent and child in pixels. Defaults to 0.
  *
  * @type number
  * @name pv.Layout.Treemap.prototype.paddingRight
@@ -17901,7 +17993,7 @@ pv.Layout.Treemap.prototype.size = function(f) {
 
 /** @private */
 pv.Layout.Treemap.prototype.buildImplied = function(s) {
-  if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
+  pv.Layout.Hierarchy.prototype.buildImplied.call(this, s);
 
   var that = this,
       nodes = s.nodes,
@@ -17963,10 +18055,15 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
 
     /* Assume squarify by default. */
     if (mode != "squarify") {
-      slice(n.childNodes, n.size,
-          mode == "slice" ? true
-          : mode == "dice" ? false
-          : i & 1, x, y, w, h);
+      slice(
+        n.childNodes, 
+        n.size,
+        mode == "slice" ? true : 
+        mode == "dice"  ? false : i & 1, 
+        x, 
+        y, 
+        w, 
+        h);
       return;
     }
 
@@ -17975,10 +18072,10 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
         l = Math.min(w, h),
         k = w * h / n.size;
 
-    /* Abort if the size is nonpositive. */
+    /* Abort if the size is non-positive. */
     if (n.size <= 0) return;
 
-    /* Scale the sizes to fill the current subregion. */
+    /* Scale the sizes to fill the current sub-region. */
     n.visitBefore(function(n) { n.size *= k; });
 
     /** @private Position the specified nodes along one dimension. */
@@ -18029,15 +18126,18 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
 
   /* Recursively compute the node depth and size. */
   stack.unshift(null);
-  root.visitAfter(function(n, i) {
-      n.depth = i;
-      n.x = n.y = n.dx = n.dy = 0;
-      n.size = n.firstChild
-          ? pv.sum(n.childNodes, function(n) { return n.size; })
-          : that.$size.apply(that, (stack[0] = n, stack));
-    });
-  stack.shift();
-
+  try{
+      root.visitAfter(function(n, i) {
+          n.depth = i;
+          n.x = n.y = n.dx = n.dy = 0;
+          n.size = n.firstChild
+              ? pv.sum(n.childNodes, function(n) { return n.size; })
+              : that.$size.apply(that, (stack[0] = n, stack));
+        });
+  } finally { 
+      stack.shift();
+  }
+  
   /* Sort. */
   switch (s.order) {
     case "ascending": {

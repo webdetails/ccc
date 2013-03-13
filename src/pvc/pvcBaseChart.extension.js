@@ -1,19 +1,18 @@
 pvc.BaseChart
 .add({
-    
-    _processExtensionPoints: function(){
+    _processExtensionPoints: function() {
         var components;
-        if(!this.parent){
+        if(!this.parent) {
             var points = this.options.extensionPoints;
             components = {};
-            if(points){
+            if(points) {
                 for(var p in points) {
                     var id, prop;
                     var splitIndex = p.indexOf("_");
-                    if(splitIndex > 0){
+                    if(splitIndex > 0) {
                         id   = p.substring(0, splitIndex);
                         prop = p.substr(splitIndex + 1);
-                        if(id && prop){
+                        if(id && prop) {
                             var component = def.getOwn(components, id) ||
                                             (components[id] = new def.OrderedMap());
                             

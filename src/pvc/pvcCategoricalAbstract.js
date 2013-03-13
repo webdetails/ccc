@@ -3,28 +3,25 @@
  */
 def
 .type('pvc.CategoricalAbstract', pvc.CartesianAbstract)
-.init(function(options){
+.init(function(options) {
     
     this.base(options);
 
     var parent = this.parent;
-    if(parent) {
-        this._catRole = parent._catRole;
-    }
+    if(parent) { this._catRole = parent._catRole; }
 })
 .add({
     /**
      * Initializes each chart's specific roles.
      * @override
      */
-    _initVisualRoles: function(){
-        
+    _initVisualRoles: function() {
         this.base();
       
         this._catRole = this._addVisualRole('category', this._getCategoryRoleSpec());
     },
     
-    _getCategoryRoleSpec: function(){
+    _getCategoryRoleSpec: function() {
         return {
             isRequired: true, 
             defaultDimension: 'category*', 
@@ -32,7 +29,7 @@ def
         };
     },
     
-    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo){
+    _generateTrendsDataCellCore: function(newDatums, dataCell, trendInfo) {
         var serRole = this._serRole;
         var xRole   = this._catRole;
         var yRole   = dataCell.role;
@@ -44,44 +41,40 @@ def
         var yDimName = yRole.firstDimensionName();
         var xDimName;
         var isXDiscrete = xRole.isDiscrete();
-        if(!isXDiscrete){
-            xDimName = xRole.firstDimensionName();
-        }
+        if(!isXDiscrete) { xDimName = xRole.firstDimensionName(); }
         
-        var sumKeyArgs = { zeroIfNone: false };
+        var sumKeyArgs = {zeroIfNone: false};
         var ignoreNullsKeyArgs = {ignoreNulls: false};
                 
         // Visible data grouped by category and then series
-        var data = this.visibleData(dataCell.dataPartValue);
+        var data = this.visibleData(dataCell.dataPartValue); // [ignoreNulls=true]
         
         // TODO: It is usually the case, but not certain, that the base axis' 
         // dataCell(s) span "all" data parts.
         // The data that will be shown in the base scale...
         // Ideally the base scale would already be set up...
         var allPartsData   = this.visibleData(null, ignoreNullsKeyArgs);
-        var allCatDataRoot = allPartsData.flattenBy(xRole, ignoreNullsKeyArgs);
+        var allCatDataRoot = xRole.flatten(allPartsData, ignoreNullsKeyArgs);
         var allCatDatas    = allCatDataRoot._children;
         
         // For each series...
         def
-        .scope(function(){
+        .scope(function() {
             return (serRole && serRole.isBound())   ?
-                   data.flattenBy(serRole).children() : // data already only contains visible data
+                   serRole.flatten(data).children() : // data already only contains visible data
                    def.query([null]) // null series
                    ;
         })
         .each(genSeriesTrend, this);
           
-        function genSeriesTrend(serData1){
+        function genSeriesTrend(serData1) {
             var funX = isXDiscrete ? 
                        null : // means: "use *index* as X value"
-                       function(allCatData){
-                           return allCatData.atoms[xDimName].value;
-                       };
+                       function(allCatData) { return allCatData.atoms[xDimName].value; };
 
-            var funY = function(allCatData){
+            var funY = function(allCatData) {
                 var group = data._childrenByKey[allCatData.key];
-                if(group && serData1){
+                if(group && serData1) {
                     group = group._childrenByKey[serData1.key];
                 }
                 
@@ -102,26 +95,26 @@ def
                                 .dimensions(dataPartDimName)
                                 .intern(this.root._firstTrendAtomProto);
             
-            if(trendModel){
+            if(trendModel) {
                 // At least one point...
                 // Sample the line on each x and create a datum for it
                 // on the 'trend' data part
-                allCatDatas.forEach(function(allCatData, index){
+                allCatDatas.forEach(function(allCatData, index) {
                     var trendX = isXDiscrete ? 
                                  index :
                                  allCatData.atoms[xDimName].value;
                     
                     var trendY = trendModel.sample(trendX, funY(allCatData), index);
-                    if(trendY != null){
+                    if(trendY != null) {
                         var catData   = data._childrenByKey[allCatData.key];
                         var efCatData = catData || allCatData;
                         
                         var atoms;
-                        if(serData1){
+                        if(serData1) {
                             var catSerData = catData && 
                                              catData._childrenByKey[serData1.key];
                             
-                            if(catSerData){
+                            if(catSerData) {
                                 atoms = Object.create(catSerData._datums[0].atoms);
                             } else {
                                 // Missing data point
@@ -138,12 +131,12 @@ def
                         atoms[yDimName] = trendY;
                         atoms[dataPartDimName] = dataPartAtom;
                         
-                        var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
-                        newDatum.isVirtual = true;
-                        newDatum.isTrend   = true;
-                        newDatum.trendType = trendInfo.type;
-                        
-                        newDatums.push(newDatum);
+                        newDatums.push(
+                            def.set(
+                                new pvc.data.Datum(efCatData.owner, atoms),
+                                'isVirtual', true,
+                                'isTrend',   true,
+                                'trendType', trendInfo.type));
                     }
                 }, this);
             }
@@ -166,7 +159,7 @@ def
                 
                 // TODO: It is usually the case, but not certain, that the base axis' 
                 // dataCell(s) span "all" data parts.
-                var visibleData = this.visibleData(dataCell.dataPartValue);
+                var visibleData = this.visibleData(dataCell.dataPartValue);// [ignoreNulls=true]
                 if(visibleData.childCount() > 0){
                     var allPartsData = this.visibleData(null, {ignoreNulls: false});
                     new InterpType(
@@ -185,7 +178,7 @@ def
     /**
      * @override
      */
-    _createVisibleData: function(dataPartValue, keyArgs){
+    _createVisibleData: function(dataPartValue, keyArgs) {
         var serGrouping = this._serRole && this._serRole.flattenedGrouping();
         var catGrouping = this._catRole.flattenedGrouping();
         var partData    = this.partData(dataPartValue);
@@ -193,12 +186,12 @@ def
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
         
         // Allow for more caching when isNull is null
-        var groupKeyArgs = { visible: true, isNull: ignoreNulls ? false : null};
+        var groupKeyArgs = {visible: true, isNull: ignoreNulls ? false : null};
         
         return serGrouping ?
-               // <=> One multi-dimensional, two-levels data grouping
-               partData.groupBy([catGrouping, serGrouping], groupKeyArgs) :
-               partData.groupBy(catGrouping, groupKeyArgs);
+           // <=> One multi-dimensional, two-levels data grouping
+           partData.groupBy([catGrouping, serGrouping], groupKeyArgs) :
+           partData.groupBy(catGrouping, groupKeyArgs);
     },
     
     /**
@@ -226,10 +219,10 @@ def
      *
      * @override
      */
-    _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell){
+    _getContinuousVisibleCellExtent: function(valueAxis, valueDataCell) {
         var valueRole = valueDataCell.role;
         
-        switch(valueRole.name){
+        switch(valueRole.name) {
             case 'series':// (series throws in base)
             case 'category':
                 /* Special case.
@@ -246,12 +239,12 @@ def
         
         var dataPartValue = valueDataCell.dataPartValue;
         var valueDimName = valueRole.firstDimensionName();
-        var data = this.visibleData(dataPartValue);
+        var data = this.visibleData(dataPartValue); // [ignoreNulls=true]
         var useAbs = valueAxis.scaleUsesAbs();
         
-        if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked){
+        if(valueAxis.type !== 'ortho' || !valueDataCell.isStacked) {
             return data.leafs()
-                       .select(function(serGroup){
+                       .select(function(serGroup) {
                            var value = serGroup.dimensions(valueDimName).sum();
                            return useAbs && value < 0 ? -value : value;
                         })
@@ -264,16 +257,14 @@ def
          */
         return data.children()
             /* Obtain the value extent of each category */
-            .select(function(catGroup){
+            .select(function(catGroup) {
                 var range = this._getStackedCategoryValueExtent(catGroup, valueDimName, useAbs);
-                if(range){
-                    return {range: range, group: catGroup};
-                }
+                if(range) { return {range: range, group: catGroup}; }
             }, this)
             .where(def.notNully)
 
             /* Combine the value extents of all categories */
-            .reduce(function(result, rangeInfo){
+            .reduce(function(result, rangeInfo) {
                 return this._reduceStackedCategoryValueExtent(
                             result,
                             rangeInfo.range,
@@ -294,32 +285,27 @@ def
      * summing negative and positive values.
      * Supports {@link #_getContinuousVisibleExtent}.
      */
-    _getStackedCategoryValueExtent: function(catGroup, valueDimName, useAbs){
+    _getStackedCategoryValueExtent: function(catGroup, valueDimName, useAbs) {
         var posSum = null,
             negSum = null;
 
         catGroup
             .children()
             /* Sum all datum's values on the same leaf */
-            .select(function(serGroup){
+            .select(function(serGroup) {
                 var value = serGroup.dimensions(valueDimName).sum();
                 return useAbs && value < 0 ? -value : value;
             })
             /* Add to positive or negative totals */
-            .each(function(value){
+            .each(function(value) {
                 // Note: +null === 0
-                if(value != null){
-                    if(value >= 0){
-                        posSum += value;
-                    } else {
-                        negSum += value;
-                    }
+                if(value != null) {
+                    if(value >= 0) { posSum += value; } 
+                    else           { negSum += value; }
                 }
             });
 
-        if(posSum == null && negSum == null){
-            return null;
-        }
+        if(posSum == null && negSum == null){ return null; }
 
         return {max: posSum || 0, min: negSum || 0};
     },
@@ -331,11 +317,11 @@ def
      *
      * Supports {@link #_getContinuousVisibleExtent}.
      */
-    _reduceStackedCategoryValueExtent: function(result, catRange, catGroup){
+    _reduceStackedCategoryValueExtent: function(result, catRange, catGroup) {
         return pvc.unionExtents(result, catRange);
     },
     
-    _coordinateSmallChartsLayout: function(scopesByType){
+    _coordinateSmallChartsLayout: function(scopesByType) {
         // TODO: optimize the case were 
         // the title panels have a fixed size and
         // the x and y FixedMin and FixedMax are all specified...
@@ -354,34 +340,28 @@ def
         var sizesMaxByAxisId = {}; // {id:  {axis: axisSizeMax, title: titleSizeMax} }
         
         // Calculate maximum sizes
-        this.children.forEach(function(childChart){
+        this.children.forEach(function(childChart) {
             
             childChart.basePanel.layout();
             
             var size;
             var panel = childChart.titlePanel;
-            if(panel){
-                if(!titleOrthoLen){
-                    titleOrthoLen = panel.anchorOrthoLength();
-                }
+            if(panel) {
+                if(!titleOrthoLen) { titleOrthoLen = panel.anchorOrthoLength(); }
                 
                 size = panel[titleOrthoLen];
-                if(size > titleSizeMax){
-                    titleSizeMax = size;
-                }
+                if(size > titleSizeMax) { titleSizeMax = size; }
             }
             
             // ------
             
             var axesPanels = childChart.axesPanels;
-            if(!axisIds){
+            if(!axisIds) {
                 axisIds = 
                     def
                     .query(def.ownKeys(axesPanels))
-                    .where(function(alias){ 
-                        return alias === axesPanels[alias].axis.id; 
-                    })
-                    .select(function(id){
+                    .where(function(alias) { return alias === axesPanels[alias].axis.id; })
+                    .select(function(id) {
                         // side effect
                         sizesMaxByAxisId[id] = {axis: 0, title: 0};
                         return id;
@@ -389,18 +369,16 @@ def
                     .array();
             }
             
-            axisIds.forEach(function(id){
+            axisIds.forEach(function(id) {
                 var axisPanel = axesPanels[id];
                 var sizes = sizesMaxByAxisId[id];
                 
                 var ol = axisPanel.axis.orientation === 'x' ? 'height' : 'width';
                 size = axisPanel[ol];
-                if(size > sizes.axis){
-                    sizes.axis = size;
-                }
+                if(size > sizes.axis) { sizes.axis = size; }
                 
                 var titlePanel = axisPanel.titlePanel;
-                if(titlePanel){
+                if(titlePanel) {
                     size = titlePanel[ol];
                     if(size > sizes.title){
                         sizes.title = size;
@@ -410,9 +388,9 @@ def
         }, this);
         
         // Apply the maximum sizes to the corresponding panels
-        this.children.forEach(function(childChart){
+        this.children.forEach(function(childChart) {
             
-            if(titleSizeMax > 0){
+            if(titleSizeMax > 0) {
                 var panel  = childChart.titlePanel;
                 panel.size = panel.size.clone().set(titleOrthoLen, titleSizeMax);
             }
@@ -420,7 +398,7 @@ def
             // ------
             
             var axesPanels = childChart.axesPanels;
-            axisIds.forEach(function(id){
+            axisIds.forEach(function(id) {
                 var axisPanel = axesPanels[id];
                 var sizes = sizesMaxByAxisId[id];
                 
@@ -428,7 +406,7 @@ def
                 axisPanel.size = axisPanel.size.clone().set(ol, sizes.axis);
 
                 var titlePanel = axisPanel.titlePanel;
-                if(titlePanel){
+                if(titlePanel) {
                     titlePanel.size = titlePanel.size.clone().set(ol, sizes.title);
                 }
             });

@@ -10,43 +10,28 @@ pvc.BaseChart
      * @type undefined
      * @virtual 
      */
-    clearSelections: function(){
-        if(this.data.owner.clearSelected()) {
-            this.updateSelections();
-        }
-        
+    clearSelections: function() {
+        if(this.data.owner.clearSelected()) { this.updateSelections(); }
         return this;
     },
     
-    _updatingSelections: function(method, context){
+    _updatingSelections: function(method, context) {
         this._suspendSelectionUpdate();
         
-        //var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
-        //this._log("Previous Datum count=" + datums.length + 
-        //        " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
-        
-        try {
-            method.call(context || this);
-        } finally {
-            this._resumeSelectionUpdate();
-        }
+        try     { method.call(context || this);  } 
+        finally { this._resumeSelectionUpdate(); }
     },
     
-    _suspendSelectionUpdate: function(){
-        if(this === this.root) {
-            this._updateSelectionSuspendCount++;
-        } else {
-            this.root._suspendSelectionUpdate();
-        }
+    _suspendSelectionUpdate: function() {
+        if(this === this.root) { this._updateSelectionSuspendCount++; } 
+        else                   { this.root._suspendSelectionUpdate(); }
     },
     
-    _resumeSelectionUpdate: function(){
+    _resumeSelectionUpdate: function() {
         if(this === this.root) {
             if(this._updateSelectionSuspendCount > 0) {
-                if(!(--this._updateSelectionSuspendCount)) {
-                        this.updateSelections();
-                    }
-                }
+                if(!(--this._updateSelectionSuspendCount)) { this.updateSelections(); }
+            }
         } else {
             this.root._resumeSelectionUpdate();
         }
@@ -58,20 +43,12 @@ pvc.BaseChart
      * @type undefined
      * @virtual 
      */
-    updateSelections: function(keyArgs){
+    updateSelections: function(keyArgs) {
         if(this === this.root) {
-            if(this._inUpdateSelections) {
-                return this;
-            }
-            
-            if(this._updateSelectionSuspendCount) {
-                return this;
-            }
+            if(this._inUpdateSelections || this._updateSelectionSuspendCount) { return this; }
             
             var selectedChangedDatumMap = this._calcSelectedChangedDatums();
-            if(!selectedChangedDatumMap){
-                return;
-            }
+            if(!selectedChangedDatumMap) { return this; }
             
             pvc.removeTipsyLegends();
             
@@ -80,20 +57,18 @@ pvc.BaseChart
             try {
                 // Fire action
                 var action = this.options.selectionChangedAction;
-                if(action){
+                if(action) {
                     var selectedDatums = this.data.selectedDatums();
                     var selectedChangedDatums = selectedChangedDatumMap.values();
                     action.call(
-                        this.basePanel._getContext(), 
+                        this.basePanel.context(), 
                         selectedDatums, 
                         selectedChangedDatums);
                 }
                 
                 // Rendering afterwards allows the action to change the selection in between
-                if(def.get(keyArgs, 'render', true)){
-                    this.useTextMeasureCache(function(){
-                        this.basePanel.renderInteractive();
-                    }, this);
+                if(def.get(keyArgs, 'render', true)) {
+                    this.useTextMeasureCache(function() { this.basePanel.renderInteractive(); }, this);
                 }
             } finally {
                 this._inUpdateSelections = false;
@@ -105,76 +80,43 @@ pvc.BaseChart
         return this;
     },
     
-    _calcSelectedChangedDatums: function(){
+    _calcSelectedChangedDatums: function() {
         // Capture currently selected datums
         // Calculate the ones that changed.
-        if(!this.data){ // NoDataException
-            return;
-        }
+        
+        // Caused by NoDataException ?
+        if(!this.data) { return; }
         
         var selectedChangedDatums;
         var nowSelectedDatums  = this.data.selectedDatumMap();
         var lastSelectedDatums = this._lastSelectedDatums;
-        if(!lastSelectedDatums){
-            if(!nowSelectedDatums.count){
-                return;
-            }
+        if(!lastSelectedDatums) {
+            if(!nowSelectedDatums.count) { return; }
             
             selectedChangedDatums = nowSelectedDatums.clone();
         } else {
             selectedChangedDatums = lastSelectedDatums.symmetricDifference(nowSelectedDatums);
-            if(!selectedChangedDatums.count){
-                return;
-            }
+            
+            if(!selectedChangedDatums.count) { return; }
         }
         
         this._lastSelectedDatums = nowSelectedDatums;
-        
-        var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
-//        this._log("Now Datum count=" + datums.length + 
-//                " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
-        
+
         return selectedChangedDatums;
     },
     
-    _onUserSelection: function(datums){
-        if(!datums || !datums.length){
-            return datums;
-        }
+    _onUserSelection: function(datums) {
+        if(!datums || !datums.length) { return datums; }
         
         if(this === this.root) {
             // Fire action
             var action = this.options.userSelectionAction;
-            if(action){
-                return action.call(null, datums) || datums;
-            }
-            
-            return datums;
+            return action ? 
+                   (action.call(null, datums) || datums) :
+                   datums;
         }
         
         return this.root._onUserSelection(datums);
-    },
-    
-    _isInteractive: function(){
-        return this.options.interactive;
-    },
-    
-    _isSelectable: function(){
-        return this.options.selectable;
-    },
-    
-    _canSelectWithRubberband: function(){
-        var options = this.options;
-        return options.selectable && options.selectionMode === 'rubberband';
-    },
-    
-    _canSelectWithClick: function(){
-        return this._canSelectWithRubberband();
-    },
-    
-    _canSelectWithFocusWindow: function(){
-        var options = this.options;
-        return options.selectable && options.selectionMode === 'focuswindow';
     }
 });
 

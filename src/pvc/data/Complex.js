@@ -168,11 +168,16 @@ def
     
     /**
      * The separator used between labels of dimensions of a complex.
-     * Generally, it is the owner's labelSep that is used.
+     * Generally, it is the owner data's labelSep that is used.
      */
     labelSep: " ~ ",
     
-    keySep: ',',
+    /**
+     * The separator used between keys of dimensions of a complex,
+     * to form a composite key or an absolute key.
+     * Generally, it is the owner data's keySep that is used.
+     */
+    keySep: '~',
     
     label: null,
     
@@ -180,7 +185,7 @@ def
     
     ensureLabel: function(){
         var label = this.label;
-        if(label != null){ // TODO: don't think this is being used...
+        if(label == null){
             label = "";
             var labelSep = this.owner.labelSep;
             def.eachOwn(this.atoms, function(atom){
@@ -221,14 +226,17 @@ def
 
 pvc.data.Complex.values = function(complex, dimNames){
     var atoms = complex.atoms;
-    return dimNames.map(function(dimName){
-        return atoms[dimName].value;
-    });
+    return dimNames.map(function(dimName){ return atoms[dimName].value; });
+};
+
+pvc.data.Complex.compositeKey = function(complex, dimNames){
+    var atoms = complex.atoms;
+    return dimNames
+        .map(function(dimName){ return atoms[dimName].key; })
+        .join(complex.owner.keySep);
 };
 
 pvc.data.Complex.labels = function(complex, dimNames){
     var atoms = complex.atoms;
-    return dimNames.map(function(dimName){
-        return atoms[dimName].label;
-    });
+    return dimNames.map(function(dimName){ return atoms[dimName].label; });
 };

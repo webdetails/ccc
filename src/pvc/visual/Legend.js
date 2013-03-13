@@ -17,13 +17,11 @@ def.scope(function(){
         this.base(chart, type, index, keyArgs);
     })
     .add(/** @lends Legend# */{
-        _getOptionsDefinition: function(){
-            return legend_optionsDef;
-        }
+        _getOptionsDefinition: function() { return legend_optionsDef; }
     });
     
     /* PRIVATE STUFF */
-    function castSize(size){
+    function castSize(size) {
         // Single size or sizeMax (a number or a string)
         // should be interpreted as meaning the orthogonal length.
         
@@ -38,7 +36,7 @@ def.scope(function(){
         return size;
     }
     
-    function castAlign(align){
+    function castAlign(align) {
         var position = this.option('Position');
         return pvc.parseAlign(position, align);
     }

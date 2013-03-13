@@ -1,40 +1,33 @@
 
 def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .init(function(panel, pvMark, keyArgs){
+    var me = this;
     
-    this.base(panel, pvMark, keyArgs);
+    me.base(panel, pvMark, keyArgs);
     
-    this.bits = 0;
+    me._ibits = panel._ibits;
     
     var extensionIds = def.get(keyArgs, 'extensionId');
     if(extensionIds != null){ // empty string is a valid extension id.
-        this.extensionAbsIds = def.array.to(panel._makeExtensionAbsId(extensionIds));
+        me.extensionAbsIds = def.array.to(panel._makeExtensionAbsId(extensionIds));
     }
     
-    this.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true);
-    if(this.isActiveSeriesAware){
+    me.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true);
+    if(me.isActiveSeriesAware) {
         // Should also check if the corresponding data has > 1 atom?
-        var seriesRole = panel.visualRoles && panel.visualRoles.series;
-        if(!seriesRole || !seriesRole.isBound()){
-            this.isActiveSeriesAware = false;
+        var roles = panel.visualRoles;
+        var seriesRole = roles && roles.series;
+        if(!seriesRole || !seriesRole.isBound()) {
+            me.isActiveSeriesAware = false;
         }
     }
 
     /* Extend the pv mark */
-    var wrapper = def.get(keyArgs, 'wrapper');
-    if(!wrapper){
-        wrapper = function(f){
-            return function(scene){
-                return f.call(panel._getContext(pvMark), scene);
-            };
-        };
-    }
-    pvMark.wrapper(wrapper);
+    pvMark.wrapper(def.get(keyArgs, 'wrapper') || me.createDefaultWrapper());
     
-    if(!def.get(keyArgs, 'freeColor', true)){
-        this._bindProperty('fillStyle',   'fillColor',   'color')
-            ._bindProperty('strokeStyle', 'strokeColor', 'color')
-            ;
+    if(!def.get(keyArgs, 'freeColor', true)) {
+        me._bindProperty('fillStyle',   'fillColor',   'color')
+          ._bindProperty('strokeStyle', 'strokeColor', 'color');
     }
 })
 .postInit(function(panel, pvMark, keyArgs){
@@ -44,6 +37,16 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     panel._addSign(this);
 })
 .add({
+    // NOTE: called during init
+    createDefaultWrapper: function() {
+        // The default wrapper passes the context as JS-context
+        // and scene as first argument
+        var me = this;
+        return function(f) {
+            return function(scene) { return f.call(me.context(), scene); };
+        };
+    },
+    
     // To be called on prototype
     property: function(name){
         var upperName  = def.firstUpperCase(name);
@@ -70,7 +73,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                     return value;
                 }
                 
-                if(this.showsInteraction() && this.scene.anyInteraction()) {
+                if(this.showsInteraction() && this.anyInteraction()) {
                     // interactiveColor
                     value = this[interName](value, arg);
                 } else {
@@ -109,9 +112,11 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         return this;
     },
     
+    anyInteraction: function() { return this.scene.anyInteraction(); },
+    
     // Call this function with a final property value
     // to ensure that it will not be processed anymore
-    finished: function(value){
+    finished: function(value) {
         this._finished = true;
         return value;
     },
@@ -148,9 +153,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     
     // -------------
     
-    intercept: function(name, fun){
-        return this._intercept(name, fun.bind(this));
-    },
+    intercept: function(name, fun) { return this._intercept(name, fun.bind(this)); },
     
     // -------------
     
@@ -211,7 +214,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         // via "helper property methods" that ?fix? the argument.
         // In these cases, 'strokeColor' is the "prop", while
         // "color" is the "realProp".
-        function mainMethodCaller(){
+        function mainMethodCaller() {
             return me[prop]();
         }
         
@@ -253,138 +256,62 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .prototype
 .property('color')
 .constructor
+.add(pvc.visual.Interactive)
 .add({
-    _bitShowsActivity:     2,
-    _bitShowsSelection:    4,
-    _bitShowsInteraction:  4 | 2, // 6
-    _bitShowsTooltip:      8,
-    _bitSelectable:       16,
-    _bitHoverable:        32,
-    _bitClickable:        64,
-    _bitDoubleClickable: 128,
-    _bitClickSelectable: 256,
-    _bitRubberSelectable:512,
-    
-    _bitHasEvents:       8 | 16 | 32 | 64 | 128, // 248
-
-    showsInteraction:  function(){ return (this.bits & this._bitShowsInteraction) !== 0; },
-    showsActivity:     function(){ return (this.bits & this._bitShowsActivity   ) !== 0; },
-    showsSelection:    function(){ return (this.bits & this._bitShowsSelection  ) !== 0; },
-    showsTooltip:      function(){ return (this.bits & this._bitShowsTooltip    ) !== 0; },
-    isSelectable:      function(){ return (this.bits & this._bitSelectable      ) !== 0; },
-    isRubberSelectable:function(){ return (this.bits & this._bitRubberSelectable) !== 0; },
-    isClickSelectable: function(){ return (this.bits & this._bitClickSelectable ) !== 0; },
-    isHoverable:       function(){ return (this.bits & this._bitHoverable       ) !== 0; },
-    isClickable:       function(){ return (this.bits & this._bitClickable       ) !== 0; },
-    isDoubleClickable: function(){ return (this.bits & this._bitDoubleClickable ) !== 0; },
-    
     extensionAbsIds: null,
     
-    _addInteractive: function(keyArgs){
-        var panel   = this.panel,
-            pvMark  = this.pvMark,
-            chart   = this.chart,
-            options = chart.options;
+    _addInteractive: function(ka) {
+        var me  = this,
+            get = def.get;
         
-        var bits = this.bits;
-        bits |= this._bitShowsInteraction;
-        
-        if(chart._tooltipEnabled && !def.get(keyArgs, 'noTooltip')){
-            bits |= this._bitShowsTooltip;
+        if(me.interactive()) {
+            var bits = me._ibits,
+                I    = pvc.visual.Interactive;
             
-            this.panel._addPropTooltip(pvMark, def.get(keyArgs, 'tooltipArgs'));
-        }
-        
-        var clickSelectable  = false;
-        var clickable = false;
-        
-        if(options.selectable || options.hoverable){
-            if(options.selectable && !def.get(keyArgs, 'noSelect')){
-                bits |= this._bitSelectable;
-                clickSelectable = !def.get(keyArgs, 'noClickSelect') &&
-                                  chart._canSelectWithClick();
-                if(clickSelectable){
-                    bits |= this._bitClickSelectable;
-                }
-                if(!def.get(keyArgs, 'noRubberSelect')){
-                    bits |= this._bitRubberSelectable;
-                }
+            if(get(ka, 'noTooltip'    )) { bits &= ~I.ShowsTooltip;    }
+            if(get(ka, 'noHover'      )) { bits &= ~I.Hoverable;       }
+            if(get(ka, 'noClick'      )) { bits &= ~I.Clickable;       }
+            if(get(ka, 'noDoubleClick')) { bits &= ~I.DoubleClickable; }
+            if(get(ka, 'noSelect'     )) { bits &= ~I.SelectableAny;   } 
+            else if(this.selectable()) {
+                if(get(ka, 'noClickSelect' )) { bits &= ~I.SelectableByClick;      }
+                if(get(ka, 'noRubberSelect')) { bits &= ~I.SelectableByRubberband; }
             }
             
-            if(options.hoverable && !def.get(keyArgs, 'noHover')){
-                bits |= this._bitHoverable;
+            // By default interaction is SHOWN if the sign
+            // is sensitive to interactive events.
+            if(me.showsInteraction()) {
+                if(get(ka, 'showsInteraction') === false) { bits &= ~I.ShowsInteraction; }
                 
-                panel._addPropHoverable(pvMark);
+                if(me.showsActivity()) {
+                    if(get(ka, 'showsActivity') === false) { bits &= ~I.ShowsActivity; }
+                }
+                
+                if(me.showsSelection()) {
+                    if(get(ka, 'showsSelection') === false) { bits &= ~I.ShowsSelection; }
+                }
             }
-        }
-        
-        // By default interaction is SHOWN if the sign
-        // is sensitive to interactive events.
-        
-        // This must be after the previous options, that affect bits with _bitShowsInteraction
-        var showsInteraction = def.get(keyArgs, 'showsInteraction');
-        if(showsInteraction != null){
-            if(showsInteraction){
-                bits |=  this._bitShowsInteraction;
-            } else {
-                bits &= ~this._bitShowsInteraction;
-            }
-        }
-        
-        var showsActivity = def.get(keyArgs, 'showsActivity');
-        if(showsActivity != null){
-            if(showsActivity){
-                bits |=  this._bitShowsActivity;
-            } else {
-                bits &= ~this._bitShowsActivity;
-            }
-        }
-        
-        var showsSelection = def.get(keyArgs, 'showsSelection');
-        if(showsSelection != null){
-            if(showsSelection){
-                bits |=  this._bitShowsSelection;
-            } else {
-                bits &= ~this._bitShowsSelection;
-            }
-        }
-        
-        if(!def.get(keyArgs, 'noClick') && panel._isClickable()){
-            bits |= this._bitClickable;
-            clickable = true;
-        }
-        
-        if(clickSelectable || clickable){
-            panel._addPropClick(pvMark);
-        }
-        
-        if(!def.get(keyArgs, 'noDoubleClick') && panel._isDoubleClickable()){
-            bits |= this._bitDoubleClickable;
             
-            panel._addPropDoubleClick(pvMark);
+            me._ibits = bits;
         }
-
-        if(!(bits & this._bitHasEvents)){
-            this.pvMark.events('none');
+        
+        if(!me.handlesEvents()) { 
+            me.pvMark.events('none'); 
+        } else {
+            if(me.showsTooltip()     ) { me._addPropTooltip(get(ka, 'tooltipArgs')); }
+            if(me.hoverable()        ) { me._addPropHoverable();   }
+            if(me.handlesClickEvent()) { me._addPropClick();       }
+            if(me.doubleClickable()  ) { me._addPropDoubleClick(); }
         }
-
-        this.bits = bits;
     },
     
     /* COLOR */
-    fillColor: function(){ 
-        return this.color('fill');
-    },
-    
-    strokeColor: function(){ 
-        return this.color('stroke');
-    },
+    fillColor:   function() { return this.color('fill'  ); },
+    strokeColor: function() { return this.color('stroke'); },
 
-    defaultColor: function(/*type*/){
-        return this.defaultColorSceneScale()(this.scene);
-    },
+    defaultColor: function(/*type*/) { return this.defaultColorSceneScale()(this.scene); },
 
-    dimColor: function(color, type){
+    dimColor: function(color, type) {
         if(type === 'text'){
             return pvc.toGrayScale(
                 color,
@@ -401,21 +328,19 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 /*minGrayLevel*/ null); // idem
     },
     
-    defaultColorSceneScale: function(){
+    defaultColorSceneScale: function() {
         return def.lazy(this, '_defaultColorSceneScale', this._initDefColorScale, this);
     },
 
-    _initDefColorScale: function(){
+    _initDefColorScale: function() {
         var colorAxis = this.panel.axes.color;
         return colorAxis ?
                colorAxis.sceneScale({sceneVarName: 'color'}) :
                def.fun.constant(pvc.defaultColor);
     },
 
-    mayShowActive: function(noSeries){
-        if(!this.showsActivity()){
-            return false;
-        }
+    mayShowActive: function(noSeries) {
+        if(!this.showsActivity() ){ return false; }
         
         var scene = this.scene;
         return scene.isActive || 
@@ -423,11 +348,236 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                scene.isActiveDatum();
     },
 
-    mayShowNotAmongSelected: function(){
+    mayShowNotAmongSelected: function() {
         return this.showsSelection() && this.scene.anySelected() && !this.scene.isSelected();
     },
 
-    mayShowSelected: function(){
+    mayShowSelected: function() {
         return this.showsSelection() && this.scene.isSelected();
-    }
+    },
+    
+    /* TOOLTIP */
+    _addPropTooltip: function(ka) {
+        if(this.pvMark.hasTooltip) { return; }
+
+        var tipOptions = def.create(
+                            this.chart._tooltipOptions, 
+                            def.get(ka, 'options'));
+        
+        tipOptions.isLazy = def.get(ka, 'isLazy', true);
+        
+        var tooltipFormatter = def.get(ka, 'buildTooltip') || 
+                           this._getTooltipFormatter(tipOptions);
+        if(!tooltipFormatter) { return; }
+        
+        tipOptions.isEnabled = this._isTooltipEnabled.bind(this);
+        
+        var tipsyEvent = def.get(ka, 'tipsyEvent');
+        if(!tipsyEvent) {
+//          switch(pvMark.type) {
+//                case 'dot':
+//                case 'line':
+//                case 'area':
+//                    this._requirePointEvent();
+//                    tipsyEvent = 'point';
+//                    tipOptions.usesPoint = true;
+//                    break;
+                
+//                default:
+                    tipsyEvent = 'mouseover';
+//            }
+        }
+
+        this.pvMark
+            .localProperty('tooltip'/*, Function | String*/)
+            .tooltip(this._createTooltipProp(tooltipFormatter, tipOptions.isLazy))
+            .title(def.fun.constant('')) // Prevent browser tooltip
+            .ensureEvents()
+            .event(tipsyEvent, pv.Behavior.tipsy(tipOptions))
+            .hasTooltip = true;
+    },
+    
+    _getTooltipFormatter: function(tipOptions) { return this.panel._getTooltipFormatter(tipOptions); },
+    
+    // Dynamic result version
+    _isTooltipEnabled: function() { return this.panel._isTooltipEnabled(); },
+    
+    _createTooltipProp: function(tooltipFormatter, isLazy) {
+        var me = this;
+        
+        var formatTooltip;
+        if(!isLazy) {
+            formatTooltip = function() {
+                var context = me.context();
+                return tooltipFormatter(context); 
+            };
+        } else {
+            formatTooltip = function() {
+                // Capture current context
+                var context = me.context(/*createNew*/true);
+                var tooltip;
+                
+                // Function that formats the tooltip only on first use
+                return function() {
+                    if(context) {
+                        tooltip = tooltipFormatter(context);
+                        context = null; // release context;
+                    } 
+                    
+                    return tooltip;
+                };
+            };
+        }
+        
+        return function() {
+            var scene = me.scene;
+            if(scene && !scene.isIntermediate && scene.showsTooltip()) {
+                return formatTooltip();
+            }
+        };
+    },
+    
+    /* HOVERABLE */
+    _addPropHoverable: function() {
+        var panel  = this.panel;
+        
+        var onEvent;
+        var offEvent;
+//        switch(pvMark.type) {
+//            default:
+//            case 'dot':
+//            case 'line':
+//            case 'area':
+//            case 'rule':
+//                onEvent  = 'point';
+//                offEvent = 'unpoint';
+//               panel._requirePointEvent();
+//                break;
+
+//            default:
+                onEvent = 'mouseover';
+                offEvent = 'mouseout';
+//                break;
+//        }
+        
+        this.pvMark
+            .ensureEvents()
+            .event(onEvent, function(scene) {
+                if(scene.hoverable() && !panel.selectingByRubberband() && !panel.animating()) {
+                    scene.setActive(true);
+                    panel.renderInteractive();
+                }
+            })
+            .event(offEvent, function(scene) {
+                if(scene.hoverable() && !panel.selectingByRubberband() && !panel.animating()) {
+                     // Clears THE active scene, if ANY (not necessarily = scene)
+                    if(scene.clearActive()) { panel.renderInteractive(); }
+                }
+            });
+    },
+    
+    /* CLICK & DOUBLE-CLICK */
+    /**
+     * Shared state between {@link _handleClick} and {@link #_handleDoubleClick}.
+     */
+    _ignoreClicks: 0,
+    
+    _propCursorClick: function(s) {
+        var ibits = (this._ibits & s._ibits);
+        var I = pvc.visual.Interactive;
+        return (ibits & I.HandlesClickEvent) || (ibits & I.DoubleClickable) ? 
+               'pointer' : 
+               null;
+    },
+    
+    _addPropClick: function() {
+        var me = this;
+        me.pvMark
+            .cursor(me._propCursorClick.bind(me))
+            .ensureEvents()
+            .event('click', me._handleClick.bind(me));
+    },
+    
+    _addPropDoubleClick: function() {
+        var me = this;
+        me.pvMark
+            .cursor(me._propCursorClick.bind(me))
+            .ensureEvents()
+            .event('dblclick', me._handleDoubleClick.bind(me));
+    },
+    
+    _handleClick: function() {
+        /*global window:true*/
+        
+        // Not yet in context...
+        var me = this;
+        var pvMark = me.pvMark;
+        var pvInstance = pvMark.instance();
+        var scene = pvInstance.data;
+        
+        var wait  = me.doubleClickable() && scene.doubleClickable();
+        if(!wait) {
+            if(me._ignoreClicks) { me._ignoreClicks--;    }
+            else                 { me._handleClickCore(); }
+        } else {
+            var pvScene = pvMark.scene;
+            var pvIndex = pvMark.index;
+            var pvEvent = pv.event;
+            
+            // Delay click evaluation so that
+            // it may be canceled if a double-click meanwhile fires.
+            // When timeout finished, reestablish protovis context.
+            window.setTimeout(function() {
+                if(me._ignoreClicks) { me._ignoreClicks--; }
+                else {
+                    try {
+                        pv.event = pvEvent;
+                        pvMark.context(pvScene, pvIndex, function() { me._handleClickCore(); });
+                    } catch (ex) {
+                        pv.error(ex); 
+                    } finally {
+                        delete pv.event; 
+                    }
+                }
+             },
+             me.chart.options.doubleClickMaxDelay || 300);
+        }
+    },
+    
+    _handleClickCore: function() {
+        var me = this;
+        var pvInstance = me.pvMark.instance();
+        
+        // Setup the sign context
+        me._inContext(
+            /*f*/function() { me._onClick(me.context()); }, 
+            /*x*/me, 
+            /*scene*/pvInstance.data,
+            pvInstance,
+            /*lateCall*/false);
+    },
+
+    _handleDoubleClick: function() {
+        // The following must be tested before delegating to context
+        // because we might not need to ignore the clicks.
+        // Assumes that: this.doubleClickable()
+        var me = this;
+        var pvInstance = me.pvMark.instance();
+        var scene = pvInstance.data;
+        if(scene.doubleClickable()) {
+            // TODO: explain why 2 ignores
+            me._ignoreClicks = 2;
+            
+         // Setup the sign context
+            me._inContext(
+                /*f*/function() { me._onDoubleClick(me.context()); }, 
+                /*x*/me, 
+                /*scene*/pvInstance.data,
+                pvInstance,
+                /*lateCall*/false);
+        }
+    },
+    
+    _onClick:       function(context) { context.click();       },
+    _onDoubleClick: function(context) { context.doubleClick(); }
 });

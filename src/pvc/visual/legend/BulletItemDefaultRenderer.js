@@ -18,18 +18,14 @@
  */
 def
 .type('pvc.visual.legend.BulletItemDefaultRenderer', pvc.visual.legend.BulletItemRenderer)
-.init(function(keyArgs){
-    this.noSelect = def.get(keyArgs, 'noSelect', false);
-    this.noHover  = def.get(keyArgs, 'noHover',  false);
-    
+.init(function(keyArgs) {
     this.drawRule = def.get(keyArgs, 'drawRule', false);
-    if(this.drawRule){
-        this.rulePvProto = def.get(keyArgs, 'rulePvProto');
-    }
+    
+    if(this.drawRule) { this.rulePvProto = def.get(keyArgs, 'rulePvProto'); }
     
     this.drawMarker = !this.drawRule || def.get(keyArgs, 'drawMarker', true);
-    if(this.drawMarker){
-        this.markerShape = def.get(keyArgs, 'markerShape', 'square');
+    if(this.drawMarker) {
+        this.markerShape   = def.get(keyArgs, 'markerShape', 'square');
         this.markerPvProto = def.get(keyArgs, 'markerPvProto');
     }
 })
@@ -43,30 +39,27 @@ def
     create: function(legendPanel, pvBulletPanel, extensionPrefix, wrapper){
         var renderInfo = {};
         var drawRule = this.drawRule;
-        var sceneColorProp = function(scene){ 
-            return scene.color; 
-        };
+        var sceneColorProp = function(scene) { return scene.color; };
         
-        if(drawRule){
+        if(drawRule) {
             var rulePvBaseProto = new pv.Mark()
                 .left (0)
-                .top  (function(){ return this.parent.height() / 2; })
-                .width(function(){ return this.parent.width();      })
+                .top  (function() { return this.parent.height() / 2; })
+                .width(function() { return this.parent.width();      })
                 .lineWidth(1, pvc.extensionTag) // act as if it were a user extension
                 .strokeStyle(sceneColorProp, pvc.extensionTag); // idem
             
-            if(this.rulePvProto){
-                rulePvBaseProto = this.rulePvProto.extend(rulePvBaseProto);
-            }
+            var rp = this.rulePvProto;
+            if(rp) { rulePvBaseProto = rp.extend(rulePvBaseProto); }
             
             renderInfo.pvRule = new pvc.visual.Rule(legendPanel, pvBulletPanel, {
                     proto: rulePvBaseProto,
-                    noSelect:    this.noSelect,
-                    noHover:     this.noHover,
+                    noSelect: false,
+                    noHover:  false,
                     activeSeriesAware: false,// no guarantee that series exist in the scene
                     extensionId: extensionPrefix + "Rule",
                     showsInteraction: true,
-                    wrapper:     wrapper
+                    wrapper: wrapper
                 })
                 .pvMark;
         }
@@ -74,47 +67,36 @@ def
         if(this.drawMarker){
             var markerPvBaseProto = new pv.Mark()
                 // Center the marker in the panel
-                .left(function(){ 
-                    return this.parent.width () / 2; 
-                })
-                .top (function(){ 
-                    return this.parent.height() / 2; 
-                })
+                .left(function() { return this.parent.width () / 2; })
+                .top (function() { return this.parent.height() / 2; })
                 // If order of properties is changed, by extension, 
                 // dependent properties will not work...
-                .shapeSize(function(){ return this.parent.width(); }, pvc.extensionTag) // width <= height
+                .shapeSize(function() { return this.parent.width(); }, pvc.extensionTag) // width <= height
                 .lineWidth(2, pvc.extensionTag)
                 .fillStyle(sceneColorProp, pvc.extensionTag)
                 .strokeStyle(sceneColorProp, pvc.extensionTag)
                 .shape(this.markerShape, pvc.extensionTag)
                 .angle(drawRule ? 0 : Math.PI/2, pvc.extensionTag) // So that 'bar' gets drawn vertically
-                .antialias( function(){
+                .antialias(function() {
                     var cos = Math.abs(Math.cos(this.angle()));
-                    if(cos !== 0 && cos !== 1){
-                        switch(this.shape()){
-                            case 'square':
-                            case 'bar':
-                                return false;
-                        }
+                    if(cos !== 0 && cos !== 1) {
+                        switch(this.shape()) { case 'square': case 'bar': return false; }
                     }
                     
                     return true;
                 }, pvc.extensionTag);
             
-            if(this.markerPvProto){
-                markerPvBaseProto = this.markerPvProto.extend(markerPvBaseProto);
-            }
+            var mp = this.markerPvProto;
+            if(mp) { markerPvBaseProto = mp.extend(markerPvBaseProto); }
             
             renderInfo.pvDot = new pvc.visual.Dot(legendPanel, pvBulletPanel, {
-                    proto:        markerPvBaseProto,
-                    freePosition: true,
+                    proto:         markerPvBaseProto,
+                    freePosition:  true,
                     activeSeriesAware: false, // no guarantee that series exist in the scene
-                    noTooltip:    true,
-                    noSelect:     this.noSelect,
-                    noHover:      this.noHover,
-                    noClick:      true,
-                    extensionId:  extensionPrefix + "Dot",
-                    wrapper:      wrapper
+                    noTooltip:     true,
+                    noClick:       true, //otherwise the legend panel handles it and triggers the default action (visibility change)
+                    extensionId:   extensionPrefix + "Dot",
+                    wrapper:       wrapper
                 })
                 .pvMark;
         }

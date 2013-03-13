@@ -57,24 +57,22 @@ pvc.BaseChart
     
     _collectPlotAxesDataCells: function(plot, dataCellsByAxisTypeThenIndex){
         /* Configure Color Axis Data Cell */
-        var colorRoleName = plot.option('ColorRole');
-        if(colorRoleName){
-            var colorRole = this.visualRoles(colorRoleName);
-            if(colorRole.isBound()){
-                var colorDataCellsByAxisIndex = 
-                    def
-                    .array
-                    .lazy(dataCellsByAxisTypeThenIndex, 'color');
-                    
-                def
-                .array
-                .lazy(colorDataCellsByAxisIndex, plot.option('ColorAxis') - 1)
-                .push({
-                    plot: plot,
-                    role: colorRole,
-                    dataPartValue: plot.option('DataPart')
-                });
-            }
+        var dataCells = [];
+        
+        plot.collectDataCells(dataCells);
+        
+        if(dataCells.length){
+            def
+            .query(dataCells)
+            .where(function(dataCell) { return dataCell.isBound(); })
+            .each (function(dataCell) {
+                /* Index DataCell in dataCellsByAxisTypeThenIndex */
+                var dataCellsByAxisIndex = 
+                    def.array.lazy(dataCellsByAxisTypeThenIndex, dataCell.axisType);
+                
+                def.array.lazy(dataCellsByAxisIndex, dataCell.axisIndex)
+                    .push(dataCell);
+            });
         }
     },
     

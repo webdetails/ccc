@@ -34,7 +34,7 @@ def
     
     _isFalling: true,
     _ruleInfos: null,
-    _waterColor: pv.color("#1f77b4").darker(),// pv.Color.names.darkslateblue,//royalblue,seagreen, //pv.color("#808285").darker(),
+    _waterColor: pv.color("#1f77b4").darker(),
 
     /**
      * Processes options after user options and default options have been merged.
@@ -61,8 +61,10 @@ def
         
         this._isFalling = waterPlot.option('Direction') === 'down';
         
-        this._catRole.setFlatteningMode(this._isFalling ? 'tree-pre' : 'tree-post');
-        this._catRole.setFlattenRootLabel(this.plots.water.option('AllCategoryLabel'));
+        var travProp = this._isFalling ? 'FlattenDfsPre' : 'FlattenDfsPost';
+        this._catRole.setTraversalMode(pvc.visual.TraversalMode[travProp]);
+        
+        this._catRole.setRootLabel(waterPlot.option('AllCategoryLabel'));
     },
     
     _initLegendScenes: function(legendPanel){
@@ -70,7 +72,7 @@ def
         var waterPlot = this.plots.water;
         
         var extAbsId = pvc.makeExtensionAbsId('line', waterPlot.extensionPrefixes);
-        var strokeStyle = this._getConstantExtension(extAbsId, "strokeStyle");
+        var strokeStyle = this._getConstantExtension(extAbsId, 'strokeStyle');
         if(strokeStyle){
             this._waterColor = pv.color(strokeStyle);
         }
