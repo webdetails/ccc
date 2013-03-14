@@ -225,7 +225,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dimensions" type="map(string : pvc.options.DimensionType)" category="Chart > Data">
+        <c:property name="dimensions" type="map(string : pvc.options.DimensionType)" category="Chart > Data" excludeIn="cde">
             <c:documentation>
                 A map whose keys are 
                 the dimension type names and whose values are 
@@ -241,7 +241,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="dimensionGroups" type="map(string : pvc.options.DimensionType)" category="Chart > Data">
+        <c:property name="dimensionGroups" type="map(string : pvc.options.DimensionType)" category="Chart > Data" excludeIn="cde">
             <c:documentation>
                 A map whose keys are 
                 the dimension type group names and whose values are 
@@ -348,7 +348,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="readers" type="list(pvc.options.DimensionsReader)" category="Chart > Data Source">
+        <c:property name="readers" type="list(pvc.options.DimensionsReader)" category="Chart > Data Source" excludeIn="cde">
             <c:documentation>
                 An array of dimensions readers.
                  
@@ -357,7 +357,7 @@
             </c:documentation>
         </c:property>
         
-        <c:property name="calculations" type="list(pvc.options.DimensionsCalculation)" category="Chart > Data">
+        <c:property name="calculations" type="list(pvc.options.DimensionsCalculation)" category="Chart > Data" excludeIn="cde">
             <c:documentation>
                 An array of dimensions calculations.
                  

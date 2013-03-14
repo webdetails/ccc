@@ -1,0 +1,3 @@
+PropertyNamePattern;PropertyNameReplace
+colorColors;colors
+colorLegend(.+);legend$1

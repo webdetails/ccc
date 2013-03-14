@@ -69,7 +69,7 @@
   <notepads>
   </notepads>
   <order>
-  <hop> <from>Get rows from result</from><to>Select Concrete Chart Types</to><enabled>Y</enabled> </hop>  <hop> <from>Select Concrete Chart Types</from><to>Property Path and Name</to><enabled>Y</enabled> </hop>  <hop> <from>Property Path and Name</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Copy rows to result</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>Get rows from result</from><to>Select Concrete Chart Types</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Sort rows</to><enabled>Y</enabled> </hop>  <hop> <from>Sort rows</from><to>Copy rows to result</to><enabled>Y</enabled> </hop>  <hop> <from>Property Path and Name</from><to>Rewrite Property Name</to><enabled>Y</enabled> </hop>  <hop> <from>Rewrite Property Name</from><to>Override Property Default</to><enabled>Y</enabled> </hop>  <hop> <from>Override Property Default</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Select Concrete Chart Types</from><to>Create &quot;defaultValue&quot; field</to><enabled>Y</enabled> </hop>  <hop> <from>Create &quot;defaultValue&quot; field</from><to>Property Path and Name</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>Copy rows to result</name>
     <type>RowsToResult</type>
@@ -82,8 +82,8 @@
            </partitioning>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>60</xloc>
-      <yloc>200</yloc>
+      <xloc>40</xloc>
+      <yloc>300</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -238,15 +238,10 @@ if(path==&apos;&apos;) {
 
 var isExtensionPoint = originalPath.indexOf(&apos;extensionPoints&apos;)&gt;= 0;
 var prettyName = this.prettyName(path);
-if(isExtensionPoint){
+if(isExtensionPoint) {
     prettyName += &quot;_&quot;;
 }
-
-if(prettyName === &apos;colorColors&apos;){
-    prettyName = &apos;colors&apos;;
-} else if(prettyName.indexOf(&apos;colorLegend&apos;) === 0) {
-    prettyName = &apos;legend&apos; + prettyName.substr(&apos;colorLegend&apos;.length);
-}</jsScript_script>
+</jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>prettyName</name>
         <rename>prettyName</rename>
         <type>String</type>
@@ -267,7 +262,7 @@ if(prettyName === &apos;colorColors&apos;){
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>420</xloc>
+      <xloc>680</xloc>
       <yloc>40</yloc>
       <draw>Y</draw>
       </GUI>
@@ -367,8 +362,8 @@ if(prettyName === &apos;colorColors&apos;){
         <rename/>
         <length>-2</length>
         <precision>-2</precision>
-      </field>      <field>        <name>default</name>
-        <rename/>
+      </field>      <field>        <name>defaultValue</name>
+        <rename>default</rename>
         <length>-2</length>
         <precision>-2</precision>
       </field>      <field>        <name>fixed</name>
@@ -406,8 +401,8 @@ if(prettyName === &apos;colorColors&apos;){
       </field>        <select_unspecified>N</select_unspecified>
     </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>420</xloc>
-      <yloc>200</yloc>
+      <xloc>440</xloc>
+      <yloc>300</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -444,7 +439,160 @@ if(prettyName === &apos;colorColors&apos;){
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>240</xloc>
-      <yloc>200</yloc>
+      <yloc>300</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Rewrite Property Name</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Row</jsScript_name>
+        <jsScript_script>&#47;&#47;Script here
+
+if(nameReplaceRules) {
+    var text = prettyName+&apos;&apos;;
+    for(var i = 0, L = nameReplaceRules.length ; i &lt; L ; i++) {
+        var rule = nameReplaceRules[i];
+        if(rule.pattern.test(text)) {
+            prettyName = text.replace(rule.pattern, rule.replacement);
+            break;
+        }
+    }
+    
+}
+</jsScript_script>
+      </jsScript>      <jsScript>        <jsScript_type>1</jsScript_type>
+        <jsScript_name>Item_0</jsScript_name>
+        <jsScript_script>var nameReplaceRules;
+
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;configPropertyNameRewrite.csv&quot;;
+
+&#47;&#47; file:&#47;&#47;&#47;C:&#47;webdetails&#47;pentaho&#47;ccc&#47;doc&#47;kettle&#47;rewritePropertyNames.csv
+&#47;&#47; C:\webdetails\pentaho\ccc\doc\kettle
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    data.split(&#47;[\r\n]+&#47;).forEach(function(line, i){
+	    if(i &gt; 0) { &#47;&#47; first line is header
+    	    var patternAndReplace = line.split(&quot;;&quot;);
+        	if(!nameReplaceRules){ nameReplaceRules = []; }
+	    	nameReplaceRules.push({pattern: new RegExp(&quot;^&quot; + patternAndReplace[0] + &quot;$&quot;), replacement: patternAndReplace[1]});
+        }
+    });
+} catch(ex) {
+   &#47;&#47; Swallow
+   nameReplaceRules = null;
+}
+&#47;&#47;}
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>prettyName</name>
+        <rename>prettyName</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>680</xloc>
+      <yloc>160</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Override Property Default</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Row</jsScript_name>
+        <jsScript_script>
+if(propDefaultsMap) {
+    var propName = prettyName+&apos;&apos;;
+    if(propDefaultsMap.hasOwnProperty(propName)) {
+	    var defaultValue = propDefaultsMap[propName];
+    }
+}
+</jsScript_script>
+      </jsScript>      <jsScript>        <jsScript_type>1</jsScript_type>
+        <jsScript_name>Startup</jsScript_name>
+        <jsScript_script>var propDefaultsMap;
+
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;configPropertyDefaultOverride.csv&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    data.split(&#47;[\r\n]+&#47;).forEach(function(line, i){
+	    if(i &gt; 0) { &#47;&#47; first line is header
+    	    var propAndDefault = line.split(&quot;;&quot;);
+        	if(!propDefaultsMap){ propDefaultsMap = {}; }
+	    	propDefaultsMap[propAndDefault[0]] = propAndDefault[1];
+        }
+    });
+} catch(ex) {
+   &#47;&#47; Swallow
+   propDefaultsMap = null;
+}
+&#47;&#47;}
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>defaultValue</name>
+        <rename>defaultValue</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>Y</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>680</xloc>
+      <yloc>300</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Create &quot;defaultValue&quot; field</name>
+    <type>Formula</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+       <formula><field_name>defaultValue</field_name>
+<formula_string>[default]</formula_string>
+<value_type>String</value_type>
+<value_length>-1</value_length>
+<value_precision>-1</value_precision>
+<replace_field/>
+</formula>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>440</xloc>
+      <yloc>40</yloc>
       <draw>Y</draw>
       </GUI>
     </step>

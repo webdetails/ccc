@@ -68,9 +68,30 @@
   <notepads>
     <notepad>
       <note>PROPERTIES.XML.FILES</note>
-      <xloc>700</xloc>
-      <yloc>0</yloc>
+      <xloc>720</xloc>
+      <yloc>300</yloc>
       <width>164</width>
+      <heigth>25</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+    <notepad>
+      <note>COMPONENTS XML FILE</note>
+      <xloc>220</xloc>
+      <yloc>400</yloc>
+      <width>165</width>
       <heigth>25</heigth>
       <fontname>Arial</fontname>
       <fontsize>10</fontsize>
@@ -89,7 +110,7 @@
     </notepad>
   </notepads>
   <order>
-  <hop> <from>Get rows from result</from><to>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</to><enabled>Y</enabled> </hop>  <hop> <from>Sort on Grouping Key - prettyName</from><to>Group Properties By &quot;prettyName&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude fields</from><to>Sort on Grouping Key - prettyName</to><enabled>Y</enabled> </hop>  <hop> <from>Get job directory</from><to>Calulate &quot;cdePropertyFileName&quot; </to><enabled>Y</enabled> </hop>  <hop> <from>Massage Unique Properties</from><to>Get job directory</to><enabled>Y</enabled> </hop>  <hop> <from>Calulate &quot;cdePropertyFileName&quot; </from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</from><to>Exclude fields</to><enabled>Y</enabled> </hop>  <hop> <from>Get rows from result</from><to>Microsoft Excel Output</to><enabled>Y</enabled> </hop>  <hop> <from>Group Properties By &quot;prettyName&quot;</from><to>Add CDE Property order</to><enabled>Y</enabled> </hop>  <hop> <from>Add CDE Property order</from><to>Massage Unique Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude fields</from><to>Sort Types And Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Types And Properties</from><to>Create Property Xml</to><enabled>Y</enabled> </hop>  <hop> <from>Create Property Xml</from><to>Group by OwnerType</to><enabled>Y</enabled> </hop>  <hop> <from>Create Component Xml</from><to>Join All Component Definitions</to><enabled>Y</enabled> </hop>  <hop> <from>Wrapper</from><to>Comp XML File</to><enabled>Y</enabled> </hop>  <hop> <from>Join All Component Definitions</from><to>Microsoft Excel Output 2</to><enabled>Y</enabled> </hop>  <hop> <from>Group by OwnerType</from><to>replace char &quot;|&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>Join All Component Definitions</from><to>replace char &quot;|&quot; 2</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;|&quot; 2</from><to>Wrapper</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;|&quot;</from><to>Create Component Xml</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>Get rows from result</from><to>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</to><enabled>Y</enabled> </hop>  <hop> <from>Sort on Grouping Key - prettyName</from><to>Group Properties By &quot;prettyName&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude fields</from><to>Sort on Grouping Key - prettyName</to><enabled>Y</enabled> </hop>  <hop> <from>Get job directory</from><to>Calulate &quot;cdePropertyFileName&quot; </to><enabled>Y</enabled> </hop>  <hop> <from>Massage Unique Properties</from><to>Get job directory</to><enabled>Y</enabled> </hop>  <hop> <from>Calulate &quot;cdePropertyFileName&quot; </from><to>Text file output</to><enabled>Y</enabled> </hop>  <hop> <from>Ignore Deprecated, Fixed, Ext. Points, NotCDE, ...</from><to>Exclude fields</to><enabled>Y</enabled> </hop>  <hop> <from>Get rows from result</from><to>Microsoft Excel Output</to><enabled>N</enabled> </hop>  <hop> <from>Group Properties By &quot;prettyName&quot;</from><to>Add CDE Property order</to><enabled>Y</enabled> </hop>  <hop> <from>Add CDE Property order</from><to>Massage Unique Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Exclude fields</from><to>Sort Types And Properties</to><enabled>Y</enabled> </hop>  <hop> <from>Sort Types And Properties</from><to>Create Property Xml</to><enabled>Y</enabled> </hop>  <hop> <from>Create Property Xml</from><to>Group by OwnerType</to><enabled>Y</enabled> </hop>  <hop> <from>Create Components Xml</from><to>Comp XML File</to><enabled>Y</enabled> </hop>  <hop> <from>Group by OwnerType</from><to>replace char &quot;|&quot;</to><enabled>Y</enabled> </hop>  <hop> <from>Join All Components Definitions</from><to>replace char &quot;|&quot; 2</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;|&quot; 2</from><to>Create Components Xml</to><enabled>Y</enabled> </hop>  <hop> <from>Create Component Xml</from><to>Join All Components Definitions</to><enabled>Y</enabled> </hop>  <hop> <from>replace char &quot;|&quot;</from><to>Calculate Chart Title</to><enabled>Y</enabled> </hop>  <hop> <from>Calculate Chart Title</from><to>Create Component Xml</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>Add CDE Property order</name>
     <type>Sequence</type>
@@ -112,7 +133,7 @@
       <max_value>999999999</max_value>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>860</xloc>
+      <xloc>960</xloc>
       <yloc>280</yloc>
       <draw>Y</draw>
       </GUI>
@@ -137,8 +158,8 @@
 </formula>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>860</xloc>
-      <yloc>540</yloc>
+      <xloc>720</xloc>
+      <yloc>500</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -200,8 +221,79 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>520</xloc>
-      <yloc>840</yloc>
+      <xloc>380</xloc>
+      <yloc>300</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Create Component Xml</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+var componentXml = &lt;DesignerComponent&gt;
+    				&lt;Header&gt;
+      					&lt;Name&gt;{ownerTypeDescription}&lt;&#47;Name&gt;
+      					&lt;IName&gt;{cdeTypeName}&lt;&#47;IName&gt;
+      					&lt;Description&gt;{ownerTypeDescription}&lt;&#47;Description&gt;
+      					&lt;Category&gt;CHARTS&lt;&#47;Category&gt;
+      					&lt;CatDescription&gt;Charts&lt;&#47;CatDescription&gt;
+      					&lt;Type&gt;PalleteEntry&lt;&#47;Type&gt;
+      					&lt;Version&gt;2.0&lt;&#47;Version&gt;
+    				&lt;&#47;Header&gt;
+    				&lt;Metadata&gt;
+      					&lt;meta name=&apos;cdwSupport&apos;&gt;true&lt;&#47;meta&gt;
+    				&lt;&#47;Metadata&gt;
+    				&lt;Contents&gt;
+      					&lt;Model&gt;
+        					&lt;Definition name=&quot;chartDefinition&quot;&gt;
+          						&lt;Property type=&quot;query&quot;&gt;dataSource&lt;&#47;Property&gt;
+								&lt;Property name=&quot;width&quot;&gt;width&lt;&#47;Property&gt;
+    	      					&lt;Property name=&quot;height&quot; &gt;height&lt;&#47;Property&gt;
+								&lt;Property name=&quot;extensionPoints&quot;&gt;cccExtensionPoints&lt;&#47;Property&gt;
+								&lt;Property name=&quot;colors&quot;&gt;cccColors&lt;&#47;Property&gt;
+                                &lt;Property name=&quot;title&quot;&gt;title&lt;&#47;Property&gt;
+        					&lt;&#47;Definition&gt;
+        					&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;boolean&quot;&gt;executeAtStart&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;preChange&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postChange&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postFetch&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;customfunction&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;string&quot;&gt;htmlObject&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;preExecution&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;function&quot;&gt;postExecution&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;number&quot;&gt;tooltip&lt;&#47;Property&gt;
+        					&lt;Property type=&quot;number&quot;&gt;listeners&lt;&#47;Property&gt;
+     					&lt;&#47;Model&gt;
+    				&lt;&#47;Contents&gt;
+ 	 			&lt;&#47;DesignerComponent&gt;;
+
+var allPropertiesXml = new XMLList(propertiesXml);
+componentXml.Contents.Model.Definition.appendChild(allPropertiesXml);
+componentXml = componentXml.toXMLString(2);
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>componentXml</name>
+        <rename>componentXml</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>80</xloc>
+      <yloc>520</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -234,7 +326,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&l
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>520</xloc>
-      <yloc>240</yloc>
+      <yloc>300</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -288,8 +380,8 @@ var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&l
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>860</xloc>
-      <yloc>460</yloc>
+      <xloc>960</xloc>
+      <yloc>500</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -467,7 +559,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&l
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>860</xloc>
+      <xloc>960</xloc>
       <yloc>180</yloc>
       <draw>Y</draw>
       </GUI>
@@ -513,7 +605,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&l
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>520</xloc>
-      <yloc>320</yloc>
+      <yloc>420</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -571,20 +663,6 @@ var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&l
   <condition>
    <negated>N</negated>
    <operator>AND</operator>
-   <leftvalue>name</leftvalue>
-   <function>&lt;&gt;</function>
-   <rightvalue/>
-   <value><name>constant</name><type>String</type><text>readers</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
-  <condition>
-   <negated>N</negated>
-   <operator>AND</operator>
-   <leftvalue>name</leftvalue>
-   <function>&lt;&gt;</function>
-   <rightvalue/>
-   <value><name>constant</name><type>String</type><text>calculations</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value>   </condition>
-  <condition>
-   <negated>N</negated>
-   <operator>AND</operator>
    <leftvalue>prettyName</leftvalue>
    <function>&lt;&gt;</function>
    <rightvalue/>
@@ -622,7 +700,7 @@ var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&l
     </step>
 
   <step>
-    <name>Join All Component Definitions</name>
+    <name>Join All Components Definitions</name>
     <type>GroupBy</type>
     <description/>
     <distribute>N</distribute>
@@ -651,8 +729,8 @@ var propertyXml = (new XML(&lt;Property name={prettyName}&gt;{cdePropertyName}&l
       </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>520</xloc>
-      <yloc>560</yloc>
+      <xloc>80</xloc>
+      <yloc>420</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -697,11 +775,11 @@ if(simpleValues != &apos;&apos;) {
     valuesAndLabels = null;
 }
 
-switch(prettyName +&apos;&apos;) {
-case &apos;compatVersion&apos;: var defaultValue = 2;      break;
-case &apos;legend&apos;:        var defaultValue = &apos;true&apos;; break;
-case &apos;bulletRanges&apos;:  var defaultValue = &apos;&quot;[30,60,90]&quot;&apos;; break;
-default:
+&#47;&#47;switch(prettyName +&apos;&apos;) {
+&#47;&#47;case &apos;compatVersion&apos;: var defaultValue = 2;      break;
+&#47;&#47;case &apos;legend&apos;:        var defaultValue = &apos;true&apos;; break;
+&#47;&#47;case &apos;bulletRanges&apos;:  var defaultValue = &apos;&quot;[30,60,90]&quot;&apos;; break;
+&#47;&#47;default:
 
 &#47;&#47; If there is more than one default...remove it altogether
 var defaults = (defaultValue+&apos;&apos;).split(&quot;|&quot;);
@@ -727,7 +805,7 @@ if(defaults.length &gt; 0){
         var defaultValue = defaults[0];
     }
 }
-}
+&#47;&#47;}
 
 &#47;&#47; propertyOutputType
 var propertyOutputType = simpleType.charAt(0).toUpperCase() + simpleType.substr(1);
@@ -818,7 +896,7 @@ cdePropertyXml = cdePropertyXml.toXMLString();</jsScript_script>
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>860</xloc>
+      <xloc>960</xloc>
       <yloc>380</yloc>
       <draw>Y</draw>
       </GUI>
@@ -891,154 +969,6 @@ cdePropertyXml = cdePropertyXml.toXMLString();</jsScript_script>
     </step>
 
   <step>
-    <name>Microsoft Excel Output 2</name>
-    <type>ExcelOutput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <header>Y</header>
-    <footer>N</footer>
-    <encoding/>
-    <append>N</append>
-    <add_to_result_filenames>Y</add_to_result_filenames>
-    <file>
-      <name>C:\webdetails\pentaho\ccc\doc\kettle\output\results4</name>
-      <extention>xls</extention>
-      <do_not_open_newfile_init>Y</do_not_open_newfile_init>
-      <create_parent_folder>Y</create_parent_folder>
-      <split>N</split>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <sheetname>Sheet1</sheetname>
-      <autosizecolums>N</autosizecolums>
-      <nullisblank>N</nullisblank>
-      <protect_sheet>N</protect_sheet>
-      <password>Encrypted </password>
-      <splitevery>0</splitevery>
-      <usetempfiles>N</usetempfiles>
-      <tempdirectory/>
-      </file>
-    <template>
-      <enabled>N</enabled>
-      <append>N</append>
-      <filename>template.xls</filename>
-    </template>
-    <fields>
-    </fields>
-    <custom>
-    <header_font_name>arial</header_font_name>
-    <header_font_size>10</header_font_size>
-    <header_font_bold>N</header_font_bold>
-    <header_font_italic>N</header_font_italic>
-    <header_font_underline>no</header_font_underline>
-    <header_font_orientation>horizontal</header_font_orientation>
-    <header_font_color>black</header_font_color>
-    <header_background_color>none</header_background_color>
-    <header_row_height>255</header_row_height>
-    <header_alignment>left</header_alignment>
-    <header_image/>
-    <row_font_name>arial</row_font_name>
-    <row_font_size>10</row_font_size>
-    <row_font_color>black</row_font_color>
-    <row_background_color>none</row_background_color>
-      </custom>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>360</xloc>
-      <yloc>560</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Create Component Xml</name>
-    <type>ScriptValueMod</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <compatible>N</compatible>
-    <optimizationLevel>9</optimizationLevel>
-    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
-        <jsScript_name>Script 1</jsScript_name>
-        <jsScript_script>&#47;&#47;Script here
-var ownerTypeName = ownerTypeName.charAt(0).toUpperCase() + ownerTypeName.substr(1);
-
-var description;
-switch(ownerTypeName){
-    case &quot;HeatGridChart&quot;:      description = &quot;CCC Heat Grid&quot;; break;
-    case &quot;NormalizedBarChart&quot;: description = &quot;CCC 100% Stacked Bar Chart&quot;; break;
-    default: description = &quot;CCC &quot; + ownerTypeName.replace(&#47;([a-z])([A-Z])&#47;g, &quot;$1 $2&quot;); break;
-}
-
-var cdeChartName = &quot;ccc&quot; + ownerTypeName;
-
-var componentXml = &lt;DesignerComponent&gt;
-    				&lt;Header&gt;
-      					&lt;Name&gt;{description}&lt;&#47;Name&gt;
-      					&lt;IName&gt;{cdeChartName}&lt;&#47;IName&gt;
-      					&lt;Description&gt;{description}&lt;&#47;Description&gt;
-      					&lt;Category&gt;CHARTS&lt;&#47;Category&gt;
-      					&lt;CatDescription&gt;Charts&lt;&#47;CatDescription&gt;
-      					&lt;Type&gt;PalleteEntry&lt;&#47;Type&gt;
-      					&lt;Version&gt;2.0&lt;&#47;Version&gt;
-    				&lt;&#47;Header&gt;
-    				&lt;Metadata&gt;
-      					&lt;meta name=&apos;cdwSupport&apos;&gt;true&lt;&#47;meta&gt;
-    				&lt;&#47;Metadata&gt;
-    				&lt;Contents&gt;
-      					&lt;Model&gt;
-        					&lt;Definition name=&quot;chartDefinition&quot;&gt;
-          						&lt;Property type=&quot;query&quot;&gt;dataSource&lt;&#47;Property&gt;
-								&lt;Property name=&quot;width&quot;&gt;width&lt;&#47;Property&gt;
-    	      					&lt;Property name=&quot;height&quot; &gt;height&lt;&#47;Property&gt;
-								&lt;Property name=&quot;extensionPoints&quot;&gt;cccExtensionPoints&lt;&#47;Property&gt;
-								&lt;Property name=&quot;colors&quot;&gt;cccColors&lt;&#47;Property&gt;
-                                &lt;Property name=&quot;title&quot;&gt;title&lt;&#47;Property&gt;
-        					&lt;&#47;Definition&gt;
-        					&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;boolean&quot;&gt;executeAtStart&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;function&quot;&gt;preChange&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;function&quot;&gt;postChange&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;function&quot;&gt;postFetch&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;function&quot;&gt;customfunction&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;string&quot;&gt;htmlObject&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;function&quot;&gt;preExecution&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;function&quot;&gt;postExecution&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;number&quot;&gt;tooltip&lt;&#47;Property&gt;
-        					&lt;Property type=&quot;number&quot;&gt;listeners&lt;&#47;Property&gt;
-     					&lt;&#47;Model&gt;
-    				&lt;&#47;Contents&gt;
- 	 			&lt;&#47;DesignerComponent&gt;;
-
-var allPropertiesXml = new XMLList(propertiesXml);
-componentXml.Contents.Model.Definition.appendChild(allPropertiesXml);
-componentXml = componentXml.toXMLString(2);
-</jsScript_script>
-      </jsScript>    </jsScripts>    <fields>      <field>        <name>componentXml</name>
-        <rename>componentXml</rename>
-        <type>String</type>
-        <length>-1</length>
-        <precision>-1</precision>
-        <replace>N</replace>
-      </field>    </fields>     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>520</xloc>
-      <yloc>480</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
     <name>Sort Types And Properties</name>
     <type>SortRows</type>
     <description/>
@@ -1070,7 +1000,7 @@ componentXml = componentXml.toXMLString(2);
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>520</xloc>
-      <yloc>140</yloc>
+      <yloc>180</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1101,7 +1031,7 @@ componentXml = componentXml.toXMLString(2);
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>860</xloc>
+      <xloc>960</xloc>
       <yloc>60</yloc>
       <draw>Y</draw>
       </GUI>
@@ -1164,14 +1094,14 @@ componentXml = componentXml.toXMLString(2);
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>860</xloc>
-      <yloc>620</yloc>
+      <xloc>720</xloc>
+      <yloc>380</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>Wrapper</name>
+    <name>Create Components Xml</name>
     <type>ScriptValueMod</type>
     <description/>
     <distribute>N</distribute>
@@ -1185,45 +1115,27 @@ componentXml = componentXml.toXMLString(2);
     <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
         <jsScript_name>Script 1</jsScript_name>
         <jsScript_script>
-var _componentsXml = &lt;DesignerComponents&gt;
-					&lt;DesignerComponent&gt;
-    					&lt;Header&gt;
-      						&lt;Name&gt;Protovis Component&lt;&#47;Name&gt;
-      						&lt;IName&gt;protovis&lt;&#47;IName&gt;
-      						&lt;Description&gt;Protovis Chart Component&lt;&#47;Description&gt;
-      						&lt;Category&gt;CHARTS&lt;&#47;Category&gt;
-      						&lt;CatDescription&gt;Charts&lt;&#47;CatDescription&gt;
-      						&lt;Type&gt;PalleteEntry&lt;&#47;Type&gt;
-      						&lt;Version&gt;1.0&lt;&#47;Version&gt;
-    					&lt;&#47;Header&gt;
-    					&lt;Metadata&gt;
-      						&lt;meta name=&apos;cdwSupport&apos;&gt;true&lt;&#47;meta&gt;
-    					&lt;&#47;Metadata&gt;
-    					&lt;Contents&gt;
-      						&lt;Model&gt;
-        						&lt;Property name=&quot;width&quot; type=&quot;number&quot;&gt;width&lt;&#47;Property&gt;
-        						&lt;Property name=&quot;height&quot; type=&quot;number&quot;&gt;height&lt;&#47;Property&gt;
-        						&lt;Definition name=&quot;chartDefinition&quot;&gt;
-          							&lt;Property type=&quot;query&quot;&gt;dataSource&lt;&#47;Property&gt;
-        						&lt;&#47;Definition&gt;
-        						&lt;Property name=&quot;parameters&quot;&gt;xActionArrayParameter&lt;&#47;Property&gt;
-       	 						&lt;Property type=&quot;boolean&quot;&gt;executeAtStart&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;function&quot;&gt;preChange&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;function&quot;&gt;postChange&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;function&quot;&gt;postFetch&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;function&quot;&gt;customfunction&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;string&quot;&gt;htmlObject&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;function&quot;&gt;preExecution&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;function&quot;&gt;postExecution&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;number&quot;&gt;tooltip&lt;&#47;Property&gt;
-        						&lt;Property type=&quot;number&quot;&gt;listeners&lt;&#47;Property&gt;
-      						&lt;&#47;Model&gt;
-    					&lt;&#47;Contents&gt;
-  					&lt;&#47;DesignerComponent&gt;
- 	 			&lt;&#47;DesignerComponents&gt;;
+var _componentsXml = &lt;DesignerComponents&gt;&lt;&#47;DesignerComponents&gt;;
 
-var listXml = new XMLList(componentsListXml+&apos;&apos;);
-_componentsXml.appendChild(listXml);
+&#47;&#47; Read static components&apos; definition
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;componentProtovisChart.xml&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    if(data){
+        _componentsXml.appendChild(new XML(data));
+    }
+} catch(ex) {
+   &#47;&#47; Swallow
+}
+&#47;&#47;}
+
+&#47;&#47; Add CCC components
+_componentsXml.appendChild(new XMLList(componentsListXml+&apos;&apos;));
+
 componentsXml = _componentsXml.toXMLString(2);
 </jsScript_script>
       </jsScript>    </jsScripts>    <fields>      <field>        <name>componentsXml</name>
@@ -1234,8 +1146,8 @@ componentsXml = _componentsXml.toXMLString(2);
         <replace>N</replace>
       </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>520</xloc>
-      <yloc>740</yloc>
+      <xloc>220</xloc>
+      <yloc>300</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1265,7 +1177,7 @@ componentsXml = _componentsXml.toXMLString(2);
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>520</xloc>
-      <yloc>400</yloc>
+      <yloc>520</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -1294,8 +1206,81 @@ componentsXml = _componentsXml.toXMLString(2);
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>520</xloc>
-      <yloc>640</yloc>
+      <xloc>80</xloc>
+      <yloc>300</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Calculate Chart Title</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Row</jsScript_name>
+        <jsScript_script>var chartTypeName = ownerTypeName+&apos;&apos;;
+var ownerTypeName = ownerTypeName.charAt(0).toUpperCase() + ownerTypeName.substr(1);
+var cdeTypeName   = &quot;ccc&quot; + ownerTypeName;
+
+var ownerTypeDescription = &apos;&apos;;
+if(customChartTitleMap) {
+    if(customChartTitleMap.hasOwnProperty(chartTypeName)) {
+	    ownerTypeDescription = customChartTitleMap[chartTypeName];
+    }
+}
+
+if(ownerTypeDescription==&apos;&apos;) {
+	ownerTypeDescription = &quot;CCC &quot; + ownerTypeName.replace(&#47;([a-z])([A-Z])&#47;g, &quot;$1 $2&quot;);
+}
+</jsScript_script>
+      </jsScript>      <jsScript>        <jsScript_type>1</jsScript_type>
+        <jsScript_name>Startup</jsScript_name>
+        <jsScript_script>var customChartTitleMap;
+
+var filePath = getVariable(&quot;Internal.Job.Filename.Directory&quot;, &quot;&quot;) + &quot;&#47;configCustomChartDescription.csv&quot;;
+
+&#47;&#47; Don&apos;t know why, but fileExists does not always work, even though loadFileContent does...
+&#47;&#47; So try catch is the only safe way...
+&#47;&#47;if(fileExists(filePath)) {
+try{
+    var data = loadFileContent(filePath);
+    data.split(&#47;[\r\n]+&#47;).forEach(function(line, i){
+	    if(i &gt; 0) { &#47;&#47; first line is header
+    	    var nameAndTitle = line.split(&quot;;&quot;);
+        	if(!customChartTitleMap){ customChartTitleMap = {}; }
+	    	customChartTitleMap[nameAndTitle[0]] = nameAndTitle[1];
+        }
+    });
+} catch(ex) {
+   &#47;&#47; Swallow
+   customChartTitleMap = null;
+}
+&#47;&#47;}
+</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>ownerTypeDescription</name>
+        <rename>ownerTypeDescription</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>cdeTypeName</name>
+        <rename>cdeTypeName</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>300</xloc>
+      <yloc>520</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
