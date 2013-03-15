@@ -430,7 +430,7 @@ def
             titleRole = chart.visualRoles.title,
             titleGrouping = titleRole.grouping,
             
-            subTitleRole = chart.subTitle,
+            subTitleRole = chart.visualRoles.subTitle,
             subTitleGrouping = subTitleRole.grouping,
             
             valueRole = chart.visualRoles.value,
