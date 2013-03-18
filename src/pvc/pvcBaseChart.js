@@ -347,15 +347,18 @@ def
      * Processes options after user options and default options have been merged.
      * Override to apply restrictions, perform validation or
      * options values implications.
-     * When overriden, the base implementation should be called.
+     * When overridden, the base implementation should be called.
      * The implementation must be idempotent -
      * its successive application should yield the same results.
      * @virtual
      */
     _processOptionsCore: function(options) {
         if(!this.parent) {
-            var interactive = options.interactive;
-            if(interactive == null) { interactive = (pv.renderer() !== 'batik'); }
+            var interactive = (pv.renderer() !== 'batik');
+            if(interactive) {
+                interactive = options.interactive;
+                if(interactive == null) { interactive = true; }
+            }
             
             var ibits;
             if(!interactive) {
