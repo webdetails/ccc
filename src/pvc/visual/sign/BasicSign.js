@@ -1,5 +1,5 @@
 
-(function(){
+(function() {
 
     function createBasic(pvMark) {
         var as = getAncestorSign(pvMark) || def.assert("There must exist an ancestor sign");
@@ -7,14 +7,10 @@
         var s = pvMark.scene;
         var i, pvInstance;
         if(s && (i = pvMark.index) != null && i >= 0 && (pvInstance = s[i])) {
-            // Mark is already rendering; build the current instance
-            bs._inContext(
-                    /*f*/function(){ this.__buildInstance(pvInstance); }, 
-                    /*x*/pvMark,
-                    /*scene*/pvInstance.data,
-                    pvInstance,
-                    /*lateCall*/true);
+            // Mark is already rendering; set the current instance in context
+            bs._inContext(/*scene*/pvInstance.data, pvInstance);
         }
+        
         return bs;
     }
     
@@ -34,7 +30,7 @@
     // with minimal impact and functionality.
     def
     .type('pvc.visual.BasicSign')
-    .init(function(panel, pvMark){
+    .init(function(panel, pvMark) {
         this.chart  = panel.chart;
         this.panel  = panel;
         this.pvMark = pvMark;
@@ -46,45 +42,46 @@
         
         // Intercept the protovis mark's buildInstance
         // Avoid doing a function bind, cause buildInstance is a very hot path
+        
         pvMark.__buildInstance = pvMark.buildInstance;
         pvMark.buildInstance   = this._dispatchBuildInstance;
     })
     .add({
-        compatVersion: function(){ return this.chart.compatVersion(); },
+        compatVersion: function() { return this.chart.compatVersion(); },
 
         // Defines a local property on the underlying protovis mark
-        localProperty: function(name, type){
+        localProperty: function(name, type) {
             this.pvMark.localProperty(name, type);
             return this;
         },
         
-        lock: function(name, value){
-            return this.lockMark(name, this._bindWhenFun(value));
+        lock: function(pvName, value) {
+            return this.lockMark(pvName, this._bindWhenFun(value, pvName));
         },
         
-        optional: function(name, value, tag){
-            return this.optionalMark(name, this._bindWhenFun(value), tag);
+        optional: function(pvName, value, tag) {
+            return this.optionalMark(pvName, this._bindWhenFun(value, pvName), tag);
         },
         
         // -------------
         
-        lockMark: function(name, value){
+        lockMark: function(name, value) {
             this.pvMark.lock(name, value);
             return this;
         },
         
-        optionalMark: function(name, value, tag){
+        optionalMark: function(name, value, tag) {
             this.pvMark[name](value, tag);
             return this;
         },
         
         // --------------
         
-        delegate: function(dv, tag){ return this.pvMark.delegate(dv, tag); },
+        delegate: function(dv, tag) { return this.pvMark.delegate(dv, tag); },
         
-        delegateExtension: function(dv){ return this.pvMark.delegate(dv, pvc.extensionTag); },
+        delegateExtension: function(dv) { return this.pvMark.delegate(dv, pvc.extensionTag); },
         
-        hasDelegate: function(tag){ return this.pvMark.hasDelegate(tag); },
+        hasDelegate: function(tag) { return this.pvMark.hasDelegate(tag); },
         
         // Using it is a smell...
     //    hasExtension: function(){
@@ -93,43 +90,85 @@
         
         // -------------
         
-        _bindWhenFun: function(value) {
+        _createPropInterceptor: function(pvName, fun) {
+            var me = this;
+            var isDataProp = pvName === 'data';
+            
+            return function() {
+                // Was function inherited by a pv.Mark without a sign?
+                var sign = this.sign;
+                if(!sign || sign !== me) {
+                    return me._getPvSceneProp(pvName, /*defaultIndex*/this.index);
+                }
+                
+                // Data prop is evaluated while this.index = -1, and the parent mark's stack
+                if(!isDataProp) {
+                    // Is sign _inContext or Is a stale context?
+                    var pvInstance = this.scene[this.index];
+                    if(!sign.scene || sign.scene !== pvInstance.data) {
+                        // This situation happens when animating, because buildInstance is not called.
+                        me._inContext(/*scene*/pvInstance.data, pvInstance);
+                    }
+                }
+                
+                return fun.apply(me, arguments);
+            };
+        },
+        
+        _getPvSceneProp: function(prop, defaultIndex) {
+            // Property method was inherited via pv proto(s)
+            var pvMark   = this.pvMark;
+            var pvScenes = pvMark.scene;
+            if(pvScenes) {
+                // Have a scenes object, but which index should be used?
+                var index = pvMark.hasOwnProperty('index') ? 
+                    pvMark.index : 
+                    Math.min(defaultIndex, pvScenes.length - 1);
+                
+               if(index != null) { return pvScenes[index][prop]; }
+            }
+            
+            throw def.error.operationInvalid("Cannot evaluate inherited property.");
+        },
+        
+        // -------------
+        
+        _bindWhenFun: function(value, pvName) {
             if(def.fun.is(value)) {
-                return function() { return value.apply(this.getSign(), arguments); };
+                var me = this;
+                return me._createPropInterceptor(pvName, function() {
+                    return value.apply(me, arguments);
+                });
             }
             
             return value;
         },
         
-        _lockDynamic: function(name, method) {
+        _lockDynamic: function(pvName, method) {
             /* def.methodCaller('' + method, this) */
             var me = this;
             return me.lockMark(
-                name,
-                function() {
-                    var sign = this.getSign();
-                    var m = sign[method] ||
-                            me  [method] ||
-                            def.assert("No method with name '" + method + "' is defined");
-                    
-                    return m.apply(sign, arguments);
-                });
+                pvName,
+                me._createPropInterceptor(pvName, function() {
+                    return me[method].apply(me, arguments);
+                }));
         },
-        
-        // --------------
         
         /* SCENE MAINTENANCE */
         // this: the mark
         _dispatchBuildInstance: function(pvInstance) {
+            function callBuildInstanceInContext() {
+                this.__buildInstance(pvInstance); 
+            }
+            
             this.sign._inContext(
-                    /*f*/function() { this.__buildInstance(pvInstance); }, 
-                    /*x*/this, 
                     /*scene*/pvInstance.data,
                     pvInstance,
-                    /*lateCall*/false);
+                    /*f*/callBuildInstanceInContext, 
+                    /*x*/this);
         },
         
-        _inContext: function(f, x, scene, pvInstance, lateCall) {
+        _inContext: function(scene, pvInstance, f, x) {
             var pvMark = this.pvMark;
             if(!pvInstance) { pvInstance = pvMark.scene[pvMark.index]; }
             if(!scene     ) { scene = pvInstance.data; }
@@ -158,9 +197,9 @@
             
             /* state per: sign & scene & render */
             this.state = {};
-            if(!lateCall) {
+            if(f) {
                 try {
-                    f.call(x, pvInstance);
+                    return f.call(x, pvInstance);
                 } finally {
                     this.state = oldState;
                     this.pvInstance = oldPvInstance;

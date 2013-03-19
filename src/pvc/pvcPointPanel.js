@@ -153,8 +153,8 @@ def
         }
         
         var isLineAreaVisible = isBaseDiscrete && isStacked ? 
-                function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
-                function(){ return !this.scene.isNull; };
+                function(scene){ return !scene.isNull || scene.isIntermediate; } :
+                function(scene){ return !scene.isNull; };
         
         var isLineAreaNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
         
@@ -166,10 +166,11 @@ def
                 noRubberSelect: true, // Line is better for selection
                 showsSelection: !isLineAreaNoSelect
             })
-            .lock('visible', isLineAreaVisible)
-            // TODO: If it were allowed to hide the area, the anchored line would fail to evaluate
             /* Data */
-            .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
+            .lockMark('data',   function(seriesScene) { return seriesScene.childNodes; }) // TODO
+            
+            // TODO: If it were allowed to hide the area, the anchored line would fail to evaluate
+            .lockMark('visible', isLineAreaVisible)
             
             /* Position & size */
             .override('x',  function(){ return this.scene.basePosition;  }) // left
@@ -207,7 +208,7 @@ def
             darkerLineAndDotColor = isStacked && areasVisible;
          
         var extensionIds = ['line'];
-        if(this._applyV1BarSecondExtensions){
+        if(this._applyV1BarSecondExtensions) {
             extensionIds.push({abs: 'barSecondLine'});
         }
         
@@ -244,7 +245,7 @@ def
                 showsSelection: !isLineAreaNoSelect
             })
             // TODO: If it were allowed to hide the line, the anchored dot would fail to evaluate
-            .lock('visible', isLineVisible)
+            .lockMark('visible', isLineVisible)
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 

@@ -48,7 +48,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
     
     // To be called on prototype
-    property: function(name){
+    property: function(name) {
         var upperName  = def.firstUpperCase(name);
         var baseName   = 'base'        + upperName;
         var defName    = 'default'     + upperName;
@@ -57,30 +57,28 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         var methods = {};
         
-        // color
-        methods[name] = function(arg){
+        // ex: color
+        methods[name] = function(arg) {
             delete this._finished;
             
             var value;
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
-            try{
+            try {
+                // ex: baseColor
                 value = this[baseName](arg);
-                if(value == null){ // undefined included
-                    return null;
-                }
                 
-                if(this.hasOwnProperty('_finished')){
-                    return value;
-                }
+                if(value == null) { return null; }  // undefined included
+                
+                if(this.hasOwnProperty('_finished')) { return value; }
                 
                 if(this.showsInteraction() && this.anyInteraction()) {
-                    // interactiveColor
+                    // ex: interactiveColor
                     value = this[interName](value, arg);
                 } else {
-                    // normalColor
+                    // ex: normalColor
                     value = this[normalName](value, arg);
                 }
-            } finally{
+            } finally {
                 delete this._arg;
             }
             
@@ -88,24 +86,21 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         };
         
         // baseColor
-        methods[baseName] = function(/*arg*/){
-            // Override this method if user extension
-            // should not always be called.
-            // It is possible to call the default method directly, if needed.
-            
-            // defName is installed as a user extension and 
-            // is called if the user hasn't extended...
-            return this.delegateExtension();
-        };
+        //   Override this method if user extension
+        //   should not always be called.
+        //   It is possible to call the default method directly, if needed.
+        //   defName is installed as a user extension and 
+        //   is called if the user hasn't extended...
+        methods[baseName]   = function(/*arg*/) { return this.delegateExtension(); };
         
         // defaultColor
-        methods[defName]    = function(/*arg*/){ return; };
+        methods[defName]    = function(/*arg*/) { return; };
         
         // normalColor
-        methods[normalName] = function(value/*, arg*/){ return value; };
+        methods[normalName] = function(value/*, arg*/) { return value; };
         
         // interactiveColor
-        methods[interName]  = function(value/*, arg*/){ return value; };
+        methods[interName]  = function(value/*, arg*/) { return value; };
         
         this.constructor.add(methods);
         
@@ -136,13 +131,13 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
      * will have access to the user extension by 
      * calling {@link pv.Mark#delegate}.
      */
-    applyExtensions: function(){
-        if(!this._extended){
+    applyExtensions: function() {
+        if(!this._extended) {
             this._extended = true;
             
             var extensionAbsIds = this.extensionAbsIds;
-            if(extensionAbsIds){
-                extensionAbsIds.forEach(function(extensionAbsId){
+            if(extensionAbsIds) {
+                extensionAbsIds.forEach(function(extensionAbsId) {
                     this.panel.extendAbs(this.pvMark, extensionAbsId);
                 }, this);
             }
@@ -153,11 +148,15 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     
     // -------------
     
-    intercept: function(name, fun) { return this._intercept(name, fun.bind(this)); },
+    intercept: function(pvName, fun) {
+        var interceptor = this._createPropInterceptor(pvName, fun);
+        
+        return this._intercept(pvName, interceptor); 
+    }, 
     
     // -------------
     
-    lockDimensions: function(){
+    lockDimensions: function() {
         this.pvMark
             .lock('left')
             .lock('right')
@@ -172,15 +171,13 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     // -------------
     _extensionKeyArgs: {tag: pvc.extensionTag},
     
-    _bindProperty: function(pvName, prop, realProp){
+    _bindProperty: function(pvName, prop, realProp) {
         var me = this;
         
-        if(!realProp){
-            realProp = prop;
-        }
+        if(!realProp) { realProp = prop; }
         
         var defaultPropName = "default" + def.firstUpperCase(realProp);
-        if(def.fun.is(this[defaultPropName])){
+        if(def.fun.is(me[defaultPropName])) {
             // Intercept with default method first, before extensions,
             // so that extensions, when ?existent?, can delegate to the default.
             
@@ -194,15 +191,12 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             // so that it is chosen when 
             // the user hasn't specified an extension point.
 
-            if(!this.pvMark.hasDelegateValue(pvName, pvc.extensionTag)){
-                var defaultMethodCaller = function(){
+            if(!me.pvMark.hasDelegateValue(pvName, pvc.extensionTag)) {
+                var defaultPropMethod = function() {
                     return me[defaultPropName](me._arg);
                 };
                 
-                this.pvMark.intercept(
-                        pvName, 
-                        defaultMethodCaller, 
-                        this._extensionKeyArgs);
+                me.pvMark.intercept(pvName, defaultPropMethod, me._extensionKeyArgs);
             }
         }
         
@@ -212,13 +206,15 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         // The "arg" argument can only be specified explicitly,
         // like in strokeColor -> color and fillColor -> color,
         // via "helper property methods" that ?fix? the argument.
-        // In these cases, 'strokeColor' is the "prop", while
-        // "color" is the "realProp".
-        function mainMethodCaller() {
-            return me[prop]();
-        }
+        // In these cases, 
+        // 'strokeColor' is the "prop", 
+        // 'color' is the "realProp" and
+        // 'strokeStyle' is the pvName.
+        var mainPropMethod = this._createPropInterceptor(
+                pvName, 
+                function() { return me[prop](); });
         
-        return this._intercept(pvName, mainMethodCaller);
+        return me._intercept(pvName, mainPropMethod);
     },
     
     _intercept: function(name, fun){
@@ -550,11 +546,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         // Setup the sign context
         me._inContext(
-            /*f*/function() { me._onClick(me.context()); }, 
-            /*x*/me, 
             /*scene*/pvInstance.data,
             pvInstance,
-            /*lateCall*/false);
+            /*f*/function() { me._onClick(me.context()); }, 
+            /*x*/me);
     },
 
     _handleDoubleClick: function() {
@@ -570,11 +565,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             
          // Setup the sign context
             me._inContext(
-                /*f*/function() { me._onDoubleClick(me.context()); }, 
-                /*x*/me, 
                 /*scene*/pvInstance.data,
                 pvInstance,
-                /*lateCall*/false);
+                /*f*/function() { me._onDoubleClick(me.context()); }, 
+                /*x*/me);
         }
     },
     

@@ -335,7 +335,7 @@ def
                 noSelect:       isLineNoSelect,
                 showsSelection: !isLineNoSelect
             })
-            .lock('data', function(seriesScene){ return seriesScene.childNodes; })
+            .lockMark('data', function(seriesScene){ return seriesScene.childNodes; })
             .intercept('visible', function(scene){
                 if(!me.linesVisible){
                     return false;
@@ -364,7 +364,7 @@ def
             })
             .override('x',  function(){ return this.scene.basePosition;  })
             .override('y',  function(){ return this.scene.orthoPosition; })
-            .override('color', function(type){
+            .override('color', function(type) {
                 /* 
                  * Handle dotsVisible
                  * -----------------
@@ -413,9 +413,7 @@ def
         
         if(pvc.visual.ValueLabel.isNeeded(me)){
             var extensionIds = ['label'];
-            if(isV1Compat){
-                extensionIds.push('lineLabel');
-            }
+            if(isV1Compat) { extensionIds.push('lineLabel'); }
         
             var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvDot, {
                 extensionId: extensionIds,
@@ -428,13 +426,11 @@ def
         }
     },
 
-    _buildSignsWrapper: function(){
-        if(this.compatVersion() > 1){
-            return null;
-        }
+    _buildSignsWrapper: function() {
+        if(this.compatVersion() > 1) { return null; }
 
-        return function(v1f){
-            return function(scene){
+        return function(v1f) {
+            return function(scene) {
                 var d = {
                         category: scene.vars.x.rawValue,
                         value:    scene.vars.y.rawValue
