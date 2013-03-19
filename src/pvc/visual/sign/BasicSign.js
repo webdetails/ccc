@@ -171,9 +171,9 @@
         _inContext: function(scene, pvInstance, f, x) {
             var pvMark = this.pvMark;
             if(!pvInstance) { pvInstance = pvMark.scene[pvMark.index]; }
-            if(!scene     ) { scene = pvInstance.data; }
+            if(!scene     ) { scene = pvInstance.data || def.assert("A scene is required!"); }
             
-            var index = scene ? scene.childIndex() : 0;
+            var index = scene.childIndex();
             
             var oldScene, oldIndex, oldState;
             var oldPvInstance = this.pvInstance;

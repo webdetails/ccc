@@ -1,4 +1,4 @@
-// 616881d98808d4fdcf8aa45f7a3fae39bb75dce8
+// aaa68d3505a60decde7f0ecea0143357456a6654
 /**
  * @class The built-in Array class.
  * @name Array
@@ -10807,13 +10807,8 @@ pv.Mark.prototype.propertyValue = function(name, inherit) {
 /** @private */
 pv.Mark.prototype.propertyValueRecursive = function(name) {
     var p = this.$propertiesMap[name];
-    if(p){
-        return p.value;
-    }
-    
-    if(this.proto){
-        return this.proto.propertyValueRecursive(name);
-    }
+    if(p         ) { return p.value; }
+    if(this.proto) { return this.proto.propertyValueRecursive(name); }
     //return undefined;
 };
 
@@ -11072,6 +11067,7 @@ pv.Mark.prototype._zOrder = 0;
  * @type pv.Mark
  */
 pv.Mark.prototype.defaults = new pv.Mark()
+    // If the root panel has no data, this default function receives d === undefined -> [undefined]
     .data(function(d) { return [d]; })
     .visible(true)
     .antialias(true)
@@ -11116,7 +11112,7 @@ pv.Mark.prototype.add = function(type) {
  *
  * <p>WARNING We plan on changing this feature in a future release to define
  * standard properties, as opposed to <i>fixed</i> properties that behave
- * idiosincratically within event handlers. Furthermore, we recommend storing
+ * idiosyncratically within event handlers. Furthermore, we recommend storing
  * state in an external data structure, rather than tying it to the
  * visualization specification as with defs.
  *
@@ -11138,23 +11134,18 @@ pv.Mark.prototype.def = function(name, v) {
  * @type number
  */
 pv.Mark.prototype.zOrder = function(zOrder){
-    if(!arguments.length){
-        return this._zOrder;
-    }
+    if(!arguments.length) { return this._zOrder; }
     
     zOrder = (+zOrder) || 0; // NaN -> 0
     
-    if(this._zOrder !== zOrder){
+    if(this._zOrder !== zOrder) {
+        var p = this.parent;
         
-        if(this._zOrder !== 0 && this.parent){
-            this.parent.zOrderChildCount--;
-        }
+        if(p && this._zOrder !== 0) { p.zOrderChildCount--; }
         
         this._zOrder = zOrder;
         
-        if(this._zOrder !== 0 && this.parent){
-            this.parent.zOrderChildCount++;
-        }
+        if(p && this._zOrder !== 0) { p.zOrderChildCount++; }
     }
     
     return this;
@@ -11388,9 +11379,7 @@ pv.Mark.prototype.renderCore = function() {
 
     /* Record the path to this mark. */
     var indexes = []; // [root excluded], ..., this.parent.childIndex, this.childIndex
-    for (var mark = this; mark.parent; mark = mark.parent) {
-      indexes.unshift(mark.childIndex);
-    }
+    for (var mark = this; mark.parent; mark = mark.parent) { indexes.unshift(mark.childIndex); }
 
     var L = indexes.length;
 
@@ -11398,50 +11387,52 @@ pv.Mark.prototype.renderCore = function() {
      * Starts with mark = root with the call:
      *   render(this.root, 0, 1);
      *
-     * when in the context of the first ascendant of 'this'
-     * that has an index set.
+     * when in the context of the first ascendant of 'this' that has an index set.
      * The stack will already be filled up to the context scene/index.
      */
     function render(mark, depth, scale) {
-      mark.scale = scale;
-      if (depth < L) {
-        var addStack = (depth >= stack.length);
-        if(addStack){
-            stack.unshift(null);
-        }
-        try{
-            if (mark.hasOwnProperty("index")) {
-              renderCurrentInstance(mark, depth, scale, addStack);
-            } else {
-              // Traverse every branch that leads to
-              // instances of the outer "this" mark.
-              for (var i = 0, n = mark.scene.length; i < n; i++) {
-                mark.index = i;
-                renderCurrentInstance(mark, depth, scale, addStack);
-              }
-              delete mark.index;
+        mark.scale = scale;
+        if (depth < L) {
+            // At least one more child index to traverse, for getting to the initial mark
+            
+            // If addStack, then we've reached a level not covered by #context.
+            // TODO: Can't think of a situation in which addStack and index is an own property.  
+            var addStack = (depth >= stack.length);
+            if(addStack) { stack.unshift(null); }
+            try {
+                if (mark.hasOwnProperty("index")) {
+                    // Render only instances of the outer "this" mark
+                    // that are found along along this branch.
+                    renderCurrentInstance(mark, depth, scale, addStack);
+                } else {
+                    // Traverse every branch that leads to
+                    // instances of the outer "this" mark.
+                    for (var i = 0, n = mark.scene.length; i < n; i++) {
+                        mark.index = i;
+                        renderCurrentInstance(mark, depth, scale, addStack);
+                    }
+                    delete mark.index;
+                }
+            } finally {
+                if(addStack) { stack.shift(); }
             }
-        } finally {
-            if(addStack){
-                stack.shift();
-            }
-        }
-      } else {
-        // Got to a "scenes" node, of mark = outer "this".
-        // Build and UpdateAll
-        mark.build();
+        } else {
+            // Got to a "scenes" node of mark = outer "this".
+            // Build and UpdateAll
+            mark.build();
 
-        /*
-         * In the update phase, the scene is rendered by creating and updating
-         * elements and attributes in the SVG image. No properties are evaluated
-         * during the update phase; instead the values computed previously in the
-         * build phase are simply translated into SVG. The update phase is
-         * decoupled (see pv.Scene) to allow different rendering engines.
-         */
-        pv.Scene.scale = scale;
-        pv.Scene.updateAll(mark.scene);
-      }
-      delete mark.scale;
+            /*
+             * In the update phase, the scene is rendered by creating and updating
+             * elements and attributes in the SVG image. No properties are evaluated
+             * during the update phase; instead the values computed previously in the
+             * build phase are simply translated into SVG. The update phase is
+             * decoupled (see pv.Scene) to allow different rendering engines.
+             */
+            pv.Scene.scale = scale;
+            pv.Scene.updateAll(mark.scene);
+        }
+      
+        delete mark.scale;
     }
 
     /**
@@ -11456,53 +11447,45 @@ pv.Mark.prototype.renderCore = function() {
      * any preceding children, so as to allow property chaining. This is
      * consistent with first-pass rendering.
      */
-    function renderCurrentInstance(mark, depth, scale, addStack) {
-      var s = mark.scene[mark.index], i;
-      if (s.visible) {
-        var markChildren = mark.children;
-        var instChildren = s.children;
-
-        var childIndex = indexes[depth];
-        var child = markChildren[childIndex];
-
-        /* If current child's scene is not set
-         * include it in the set/unset loops below.
-         */
-        if(!child.scene){
-            childIndex++;
+    function renderCurrentInstance(mark, depth, scale, fillStack) {
+        var s = mark.scene[mark.index], i;
+        if (s.visible) {
+            var childMarks  = mark.children;
+            var childScenez = s.children;
+            var childIndex  = indexes[depth];
+            var childMark   = childMarks[childIndex];
+    
+            /* If current child's scene is not set, include it in the loops below. */
+            if(!childMark.scene) { childIndex++; }
+    
+            /* Set preceding (and possibly self) child marks' scenes. */
+            for (i = 0; i < childIndex; i++) { childMarks[i].scene = childScenez[i]; }
+    
+            if(fillStack) { stack[0] = s.data; }
+    
+            render(childMark, depth + 1, scale * s.transform.k);
+    
+            /* Clear preceding (and possibly self) child mark's scenes. 
+             * It's cheaper to set to null than to delete. */
+            for (i = 0; i < childIndex; i++) { childMarks[i].scene = undefined; }
         }
-
-        /* Set preceding (and self?) child marks' scenes. */
-        for (i = 0; i < childIndex; i++) {
-          markChildren[i].scene = instChildren[i];
-        }
-
-        if(addStack){
-            stack[0] = s.data;
-        }
-
-        render(child, depth + 1, scale * s.transform.k);
-
-        /* Clear preceding (and self?) child mark's scenes. */
-        for (i = 0; i < childIndex; i++) {
-          // Cheaper to set to null than to delete
-          markChildren[i].scene = undefined;
-        }
-      }
     }
 
     /* Bind this mark's property definitions. */
     this.bind();
 
     /* The render context is the first ancestor with an explicit index. */
-    while (parent && !parent.hasOwnProperty("index")) parent = parent.parent;
+    while (parent && !parent.hasOwnProperty("index")) { parent = parent.parent; }
 
     /* Recursively render all instances of this mark. */
     this.context(
         parent ? parent.scene : undefined,
         parent ? parent.index : -1,
         function() {
-            // Stack contains datas' until parent.scene, parent.index
+            // pv.Mark.stack contains the data until parent.scene, parent.index
+            // parent and all its ascendants have scene, index and scale set.
+            // Direct children of parent have scene and scale set.
+            
             render(this.root, 0, 1);
         });
 };
@@ -11510,6 +11493,8 @@ pv.Mark.prototype.renderCore = function() {
 /**
  * @private In the bind phase, inherited property definitions are cached so they
  * do not need to be queried during build.
+ * 
+ * NOTE: pv.Panel#bind binds locally and then calls #bind on all of its children.
  */
 pv.Mark.prototype.bind = function() {
   var seen = {},
@@ -11728,6 +11713,7 @@ pv.Mark.prototype.updateNet = function(pDependent, netIndex){
 pv.Mark.prototype.build = function() {
   var scene = this.scene, stack = pv.Mark.stack;
   if (!scene) {
+    // Create _scenes_
     scene = this.scene = [];
     scene.mark = this;
     scene.type = this.type;
@@ -11756,9 +11742,11 @@ pv.Mark.prototype.build = function() {
     }
   }
 
-  /* Evaluate special data property. */
-  var data = this.binds.data;
-  data = data.type & 1 ? data.value.apply(this, stack) : data.value;
+  /* Evaluate special data property.
+   * With the stack of the parent!!
+   * this.index is -1
+   */
+  var data = this.evalProperty(this.binds.data);
 
   /* Create, update and delete scene nodes. */
   var markProto = pv.Mark.prototype;
@@ -11769,12 +11757,13 @@ pv.Mark.prototype.build = function() {
       for (var i = 0 ; i < L ; i++) {
         markProto.index = this.index = i;
         
-        var s = scene[i] || (scene[i] = {});
+        // Create scene instance
+        var instance = scene[i] || (scene[i] = {});
         
         /* Fill special data property and update the stack. */
-        s.data = stack[0] = data[i];
+        instance.data = stack[0] = data[i];
         
-        this.buildInstance(s);
+        this.buildInstance(instance);
       }
   } finally {
       markProto.index = -1;
@@ -11838,19 +11827,19 @@ pv.Mark.prototype.delegate = function(dv, tag){
     return dv;
 };
 
-pv.Mark.prototype.hasDelegate = function(tag){
+pv.Mark.prototype.hasDelegate = function(tag) {
     var protoProp = pv.propertyProto;
     return !!protoProp && (!tag || protoProp.tag === tag);
 };
 
-pv.Mark.prototype.evalProperty = function(p){
-    switch(p.type){
+pv.Mark.prototype.evalProperty = function(p) {
+    switch(p.type) {
         /* 2 most common first */
         case 3:
             var oldProtoProp = pv.propertyProto;
-            try{
+            try {
                 pv.propertyProto = p.proto;
-                return p.value.apply(this,  pv.Mark.stack);
+                return p.value.apply(this, pv.Mark.stack);
             } finally {
                 pv.propertyProto = oldProtoProp;
             }
@@ -12197,7 +12186,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
         mark = that,
         ancestors = []; // that, that.parent, ..., root
 
-    /* Set ancestors' scene and index; populate data stack. */
+    /* Set scene and index in ancestors and self; populate data stack. */
     do {
       ancestors.push(mark);
       stack.push(scene[index].data);
@@ -12230,10 +12219,10 @@ pv.Mark.prototype.context = function(scene, index, f) {
       var thatInst = that.scene[that.index];
       k *= thatInst.transform.k;
       
-      var instChildren = thatInst.children;
+      var childScenez = thatInst.children;
       for (var i = 0 ; i < n; i++) {
         mark = children[i];
-        mark.scene = instChildren[i];
+        mark.scene = childScenez[i];
         mark.scale = k;
       }
     }
@@ -14012,11 +14001,11 @@ pv.Panel.prototype.anchor = function(name) {
  * it is always possible to change this behavior by calling {@link Mark#extend}
  * explicitly.
  *
- * @param {function} type the type of the new mark to add.
+ * @param {function} Type the type of the new mark to add.
  * @returns {pv.Mark} the new mark.
  */
-pv.Panel.prototype.add = function(type) {
-  var child = new type();
+pv.Panel.prototype.add = function(Type) {
+  var child = new Type();
   child.parent = this;
   child.root = this.root;
   child.childIndex = this.children.length;

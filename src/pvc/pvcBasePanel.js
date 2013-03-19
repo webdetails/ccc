@@ -812,11 +812,11 @@ def
         }
     },
     
-    invalidateLayout: function(){
+    invalidateLayout: function() {
         this._layoutInfo = null;
         
         if(this._children) {
-            this._children.forEach(function(child){
+            this._children.forEach(function(child) {
                 child.invalidateLayout();
             });
         }
@@ -839,13 +839,9 @@ def
             /* Layout */
             this.layout();
             
-            if(!this.isVisible){
-                return;
-            }
+            if(!this.isVisible) { return; }
             
-            if(this.isRoot){
-                this._creating();
-            }
+            if(this.isRoot) { this._creating(); }
             
             var margins  = this._layoutInfo.margins;
             var paddings = this._layoutInfo.paddings;
@@ -855,7 +851,11 @@ def
                 this.pvRootPanel = 
                 this.pvPanel = new pv.Panel().canvas(this.chart.options.canvas);
                 
-                if(margins.width > 0 || margins.height > 0){
+                // Ensure there's always a scene, right from the root mark
+                var scene = new pvc.visual.Scene(null, {panel: this});
+                this.pvRootPanel.lock('data', [scene]);
+                
+                if(margins.width > 0 || margins.height > 0) {
                     this.pvPanel
                         .width (this.width )
                         .height(this.height);
@@ -880,7 +880,7 @@ def
                 .width (width)
                 .height(height);
 
-            if(pvc.debug >= 15 && (margins.width > 0 || margins.height > 0)){
+            if(pvc.debug >= 15 && (margins.width > 0 || margins.height > 0)) {
                 // Outer Box
                 (this.isTopRoot ? this.pvRootPanel : this.parent.pvPanel)
                     .add(this.type)
@@ -1655,16 +1655,20 @@ def
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
-         
-        var scene = new pvc.visual.Scene(null, {panel: this});
-        // Initialize x,y,dx and dy properties
-        scene.x = scene.y = scene.dx = scene.dy = 0;
-        
         var selectionEndedDate;
         pvParentPanel
-            .lock('data', [scene]) 
+            .intercept('data', function() {
+                var scenes = this.delegate();
+                if(scenes) {
+                    scenes.forEach(function(scene) {
+                        // Initialize x,y,dx and dy properties
+                        if(scene.x == null) { scene.x = scene.y = scene.dx = scene.dy = 0; }
+                    });
+                }
+                return scenes;
+            })
             .event('mousedown', pv.Behavior.select().autoRender(false))
-            .event('select', function() {
+            .event('select', function(scene) {
                 if(!rb) {
                     if(me.animating()) { return; }
                     if(scene.dx * scene.dx + scene.dy * scene.dy <= dMin2) { return; }
