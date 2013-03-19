@@ -1383,7 +1383,7 @@ def
         
         var tooltipFormat = tipOptions.format;
         if(!tooltipFormat) {
-            if(!isV1Compat){ return this._summaryTooltipFormatter.bind(this); }
+            if(!isV1Compat){ return this._summaryTooltipFormatter; }
             
             tooltipFormat = this.chart.options.v1StyleTooltipFormat;
             if(!tooltipFormat) { return; }
@@ -1436,8 +1436,8 @@ def
                                 complexType.getPlayingPercentVisualRoleDimensionMap();
 
         var percentValueFormat = playingPercentMap ?
-                               this.chart.options.percentValueFormat:
-                               null;
+                                 context.chart.options.percentValueFormat:
+                                 null;
 
         var commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
         var commonAtomsKeys = complexType.sortDimensionNames(def.keys(commonAtoms));

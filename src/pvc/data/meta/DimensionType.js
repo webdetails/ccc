@@ -557,7 +557,7 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
 function dimType_addVisualRole(visualRole) {
     this.playedVisualRoles.set(visualRole.name, visualRole);
     /*global compType_dimensionRolesChanged:true */
-    compType_dimensionRolesChanged.call(this.type, this);
+    compType_dimensionRolesChanged.call(this.complexType, this);
 }
 
 /**
@@ -572,5 +572,5 @@ function dimType_addVisualRole(visualRole) {
  */
 function dimType_removeVisualRole(visualRole) {
     this.playedVisualRoles.rem(visualRole.name);
-    compType_dimensionRolesChanged.call(this.type, this);
+    compType_dimensionRolesChanged.call(this.complexType, this);
 }
