@@ -43,6 +43,7 @@ def
     
     if(options.tickLength === undefined){
         // height or width
+        // TODO: Document the use of width/height for finding the tick length.
         var tickLength = +this._getConstantExtension('ticks', this.anchorOrthoLength(anchor)); 
         if(!isNaN(tickLength) && isFinite(tickLength)){
             this.tickLength = tickLength;

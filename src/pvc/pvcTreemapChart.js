@@ -57,6 +57,8 @@ def
             if(sizeAxis && sizeAxis.isBound()) {
                 this._createAxisScale(sizeAxis);
                 
+                // This range has been determined by experimentation.
+                // Some ranges result in strange proportions.
                 sizeAxis.setScaleRange({min: 100, max: 1000});
             }
         }

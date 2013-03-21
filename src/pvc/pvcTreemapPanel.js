@@ -23,7 +23,11 @@ def
         var lw2 = lw/2;
         
         var sizeProp = me.visualRoles.size.isBound() ?
-                       me.axes.size.sceneScale({sceneVarName: 'size'}) :
+                       // Does not use sceneScale on purpose because of the 'nullToZero'
+                       // code not calling the base scale when null.
+                       // The base scale already handles the null case, 
+                       // translating it to the minimum value.
+                       me.axes.size.scale.by1(function(scene) { return scene.vars.size.value; }) :
                        100;
                 
         var panel = me.pvTreemapPanel = new pvc.visual.Panel(me, me.pvPanel, {
