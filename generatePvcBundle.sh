@@ -18,7 +18,8 @@ echo "" >> $FILENAMEDEFD
 echo $TODAY >> $FILENAMEDEFD
 echo "" >> $FILENAMEDEFD
 cat build/def.begin.js >> $FILENAMEDEFD
-cat src/def/def.js >> $FILENAMEDEFD
+# 2 - call perl on each to remove license comments starting on first line
+cat src/def/def.js | perl -0777 -pe 's/^\/\*.*?\*\///igs' >> $FILENAMEDEFD
 cat build/def.end.js >> $FILENAMEDEFD
 
 cat build/license.js > $FILENAMED
