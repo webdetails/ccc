@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pv_Mark:true, pvc_ValueLabelVar:true */
 
 /**
  * Bar Abstract Panel.
@@ -38,7 +43,7 @@ def
                     drawMarker:    true,
                     markerShape:   colorAxis.option('LegendShape'),
                     drawRule:      drawLine,
-                    markerPvProto: new pv.Mark()
+                    markerPvProto: new pv_Mark()
                 };
                 
                 this.extend(keyArgs.markerPvProto, '', {constOnly: true}); // '' => bar itself
@@ -338,7 +343,7 @@ def
             var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1}),
                 seriesKey   = seriesData1.key;
 
-            seriesScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(seriesData1);
+            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(seriesData1);
 
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
@@ -348,7 +353,7 @@ def
                     scene = new pvc.visual.Scene(seriesScene, {source: group});
 
                 var categVar =
-                    scene.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData1);
+                    scene.vars.category = pvc_ValueLabelVar.fromComplex(categData1);
 
                 categVar.group = categData1;
 

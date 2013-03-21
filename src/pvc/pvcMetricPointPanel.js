@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_Sides:true, pvc_ValueLabelVar:true */
 
 /*
  * Metric Line/Dot panel.
@@ -34,7 +39,7 @@ def
     }
 
     if(!this.offsetPaddings){
-        this.offsetPaddings = new pvc.Sides(0.01);
+        this.offsetPaddings = new pvc_Sides(0.01);
     }
 })
 .add({
@@ -190,7 +195,7 @@ def
         // If we were not to take axes rounding padding effect
         // into account, it could be as simple as:
         // var offsetRadius = radiusRange.max + 6;
-        // requestPaddings = new pvc.Sides(offsetRadius);
+        // requestPaddings = new pvc_Sides(offsetRadius);
        
         var requestPaddings;
        
@@ -252,7 +257,7 @@ def
             var op;
             if(this.offsetPaddings){
                 op = {};
-                pvc.Sides.names.forEach(function(side){
+                pvc_Sides.names.forEach(function(side){
                     var len_a = pvc.BasePanel.orthogonalLength[side];
                     op[side] = (this.offsetPaddings[side] || 0) * (clientSize[len_a] + paddings[len_a]);
                 }, this);
@@ -484,7 +489,7 @@ def
             var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesGroup});
             
             seriesScene.vars.series =
-                    pvc.visual.ValueLabelVar.fromComplex(seriesGroup);
+                    pvc_ValueLabelVar.fromComplex(seriesGroup);
             
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
@@ -505,8 +510,8 @@ def
                 var scene = new pvc.visual.Scene(seriesScene, {source: datum});
                 scene.dataIndex = dataIndex;
                 
-                scene.vars.x = pvc.visual.ValueLabelVar.fromAtom(xAtom);
-                scene.vars.y = pvc.visual.ValueLabelVar.fromAtom(yAtom);
+                scene.vars.x = pvc_ValueLabelVar.fromAtom(xAtom);
+                scene.vars.y = pvc_ValueLabelVar.fromAtom(yAtom);
                 
                 sizeVarHelper .onNewScene(scene, /* isLeaf */ true);
                 colorVarHelper.onNewScene(scene, /* isLeaf */ true);
@@ -578,12 +583,12 @@ def
             
             interScene.dataIndex = toScene.dataIndex;
             
-            interScene.vars.x = new pvc.visual.ValueLabelVar(
+            interScene.vars.x = new pvc_ValueLabelVar(
                                     interXValue,
                                     xDim.format(interXValue),
                                     interXValue);
             
-            interScene.vars.y = new pvc.visual.ValueLabelVar(
+            interScene.vars.y = new pvc_ValueLabelVar(
                                     interYValue,
                                     yDim.format(interYValue),
                                     interYValue);

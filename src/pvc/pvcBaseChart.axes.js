@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_CartesianAxis:true, pvc_colorScale:true, pvc_colorScales:true */
+
 pvc.BaseChart
 .add({
     /**
@@ -26,8 +32,8 @@ pvc.BaseChart
     _axisClassByType: {
         'color': pvc.visual.ColorAxis,
         'size':  pvc.visual.SizeAxis,
-        'base':  pvc.visual.CartesianAxis,
-        'ortho': pvc.visual.CartesianAxis
+        'base':  pvc_CartesianAxis,
+        'ortho': pvc_CartesianAxis
     },
     
     // 1 = root, 2 = leaf, 1|2=3 = everywhere
@@ -582,10 +588,10 @@ pvc.BaseChart
             };
             
             if(!normByCateg){
-                return [pvc.color.scale(scaleOptions)];
+                return [pvc_colorScale(scaleOptions)];
             }
             
-            axis.scalesByCateg = pvc.color.scales(scaleOptions);
+            axis.scalesByCateg = pvc_colorScales(scaleOptions);
             // no single scale...
         }
         

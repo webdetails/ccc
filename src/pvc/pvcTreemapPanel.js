@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_ValueLabelVar:true */
 
 def
 .type('pvc.TreemapPanel', pvc.PlotPanel)
@@ -204,16 +209,16 @@ def
             // 
             
             // TODO: Should be the abs key (no trailing empty keys)
-            scene.vars.category = pvc.visual.ValueLabelVar.fromComplex(group);
+            scene.vars.category = pvc_ValueLabelVar.fromComplex(group);
             
             // All nodes are considered leafs, for what the var helpers are concerned
             sizeVarHelper.onNewScene(scene, /* isLeaf */ true);
             //colorVarHelper.onNewScene(scene, /* isLeaf */ true);
             
             if(!colorGrouping){
-                if(!scene.parent) { scene.vars.color = new pvc.visual.ValueLabelVar(null, ""); }
+                if(!scene.parent) { scene.vars.color = new pvc_ValueLabelVar(null, ""); }
             } else {
-                scene.vars.color = new pvc.visual.ValueLabelVar(
+                scene.vars.color = new pvc_ValueLabelVar(
                         group.absKey,
                         group.absLabel);
             }

@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_ValueLabelVar:true*/
 
 /**
  * Initializes an axis tick scene.
@@ -13,11 +18,11 @@
  */
 def
 .type('pvc.visual.CartesianAxisTickScene', pvc.visual.Scene)
-.init(function(parent, keyArgs){
+.init(function(parent, keyArgs) {
     
     this.base(parent, keyArgs);
     
-    this.vars.tick = new pvc.visual.ValueLabelVar(
+    this.vars.tick = new pvc_ValueLabelVar(
             def.get(keyArgs, 'tick'),
             def.get(keyArgs, 'tickLabel'),
             def.get(keyArgs, 'tickRaw'));

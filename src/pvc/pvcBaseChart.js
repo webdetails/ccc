@@ -1,6 +1,8 @@
-/**
- * The main chart component
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_Sides:true, pvc_Size:true */
 def
 .type('pvc.BaseChart', pvc.Abstract)
 .add(pvc.visual.Interactive)
@@ -293,16 +295,16 @@ def
             
             if(this._setProp('width', keyArgs) | this._setProp('height', keyArgs)){
                 if(basePanel){
-                    basePanel.size = new pvc.Size (this.width, this.height);
+                    basePanel.size = new pvc_Size (this.width, this.height);
                 }
             }
             
             if(this._setProp('margins', keyArgs) && basePanel){
-                basePanel.margins = new pvc.Sides(this.margins);
+                basePanel.margins = new pvc_Sides(this.margins);
             }
             
             if(this._setProp('paddings', keyArgs) && basePanel){
-                basePanel.paddings = new pvc.Sides(this.paddings);
+                basePanel.paddings = new pvc_Sides(this.paddings);
             }
         }
     },
@@ -563,6 +565,11 @@ def
      * @type boolean
      */
     animatingStart: function() { return this.basePanel.animatingStart(); },
+    
+    /* @override Interactive */
+    animatable: function() {
+        return this._animatable && this.base();
+    },
     
     isOrientationVertical: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.vertical;

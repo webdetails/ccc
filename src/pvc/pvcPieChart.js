@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_PercentValue:true */
 
 /**
  * PieChart is the main class for generating... pie charts (surprise!).
@@ -52,7 +57,7 @@ def
             innerGap = def.between(innerGap, 0.1, 1);
             contentOptions.paddings = ((1 - innerGap) * 100 / 2).toFixed(2) + "%";
         } else if(contentOptions.paddings == null) {
-            contentOptions.paddings = new pvc.PercentValue(0.025);
+            contentOptions.paddings = new pvc_PercentValue(0.025);
         }
         
         var piePlot = this.plots.pie;

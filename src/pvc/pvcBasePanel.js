@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_Sides:true, pvc_Size:true, pvc_PercentValue:true, pvc_Offset:true */
 
 /**
  * Base panel. 
@@ -57,10 +62,10 @@ def
         margins = 3;
     }
     
-    this.margins  = new pvc.Sides(margins);
-    this.paddings = new pvc.Sides(options && options.paddings);
-    this.size     = new pvc.Size (options && options.size    );
-    this.sizeMax  = new pvc.Size (options && options.sizeMax );
+    this.margins  = new pvc_Sides(margins);
+    this.paddings = new pvc_Sides(options && options.paddings);
+    this.size     = new pvc_Size (options && options.size    );
+    this.sizeMax  = new pvc_Size (options && options.sizeMax );
     
     if(!parent) {
         this.parent    = null;
@@ -105,7 +110,7 @@ def
         if(alignTo != null && alignTo !== '' && (side === 'left' || side === 'right')){
             if(alignTo !== 'page-middle'){
                 if(!isNaN(+alignTo.charAt(0))){
-                    alignTo = pvc.PercentValue.parse(alignTo); // percent or number
+                    alignTo = pvc_PercentValue.parse(alignTo); // percent or number
                 } else {
                     alignTo = pvc.parseAlign(side, alignTo);
                 }
@@ -116,7 +121,7 @@ def
         
         this.alignTo = alignTo;
         
-        this.offset = new pvc.Offset(this.offset);
+        this.offset = new pvc_Offset(this.offset);
     }
     
     if(this.borderWidth == null){
@@ -362,13 +367,13 @@ def
             var realMargins  = (def.get(ka, 'margins' ) || this.margins ).resolve(referenceSize);
             var realPaddings = (def.get(ka, 'paddings') || this.paddings).resolve(referenceSize);
             
-            var margins  = pvc.Sides.inflate(realMargins,  halfBorder);
-            var paddings = pvc.Sides.inflate(realPaddings, halfBorder);
+            var margins  = pvc_Sides.inflate(realMargins,  halfBorder);
+            var paddings = pvc_Sides.inflate(realPaddings, halfBorder);
             
             var spaceWidth  = margins.width  + paddings.width;
             var spaceHeight = margins.height + paddings.height;
             
-            var availableClientSize = new pvc.Size(
+            var availableClientSize = new pvc_Size(
                     Math.max(availableSize.width  - spaceWidth,  0),
                     Math.max(availableSize.height - spaceHeight, 0)
                 );
@@ -497,7 +502,7 @@ def
             var aolMap = pvc.BasePanel.orthogonalLength;
             var aoMap  = pvc.BasePanel.relativeAnchor;
             var altMap = pvc.BasePanel.leftTopAnchor;
-            var aofMap = pvc.Offset.namesSidesToOffset;
+            var aofMap = pvc_Offset.namesSidesToOffset;
 
             // Classify children
 
@@ -560,7 +565,7 @@ def
 
                 // Reset margins and remSize
                 // ** Instances we can mutate
-                margins = new pvc.Sides(0);
+                margins = new pvc_Sides(0);
                 remSize = def.copyOwn(clientSize);
 
                 // Lay out SIDE child panels
@@ -615,7 +620,7 @@ def
                     childKeyArgs.paddings  = paddings;
                     childKeyArgs.canChange = remTimes > 0;
 
-                    child.layout(new pvc.Size(remSize), childKeyArgs);
+                    child.layout(new pvc_Size(remSize), childKeyArgs);
                     if(child.isVisible){
                         resized = checkChildResize.call(this, child, canResize);
                         if(resized){
@@ -628,7 +633,7 @@ def
 
                             // Child wants to repeat its layout with != paddings
                             if(remTimes > 0){
-                                paddings = new pvc.Sides(paddings);
+                                paddings = new pvc_Sides(paddings);
                                 if(useLog){ this._log("Child requested paddings change: " + pvc.stringify(paddings)); }
                                 return true; // again
                             }
@@ -663,7 +668,7 @@ def
             }
             
             // true if stopped, false otherwise
-            return def.query(pvc.Sides.names).each(function(side){
+            return def.query(pvc_Sides.names).each(function(side){
                 var curPad = (paddings && paddings[side]) || 0;
                 var newPad = (newPaddings && newPaddings[side]) || 0;
                  if(Math.abs(newPad - curPad) >= 0.1){
@@ -1058,7 +1063,7 @@ def
         var options = this.chart.options;
         var pvPanel = this.pvRootPanel;
         
-        var animate = this.chart._animatable && options.animate;
+        var animate = this.chart.animatable();
         this._animating = animate && !def.get(ka, 'bypassAnimation', false) ? 1 : 0;
         try {
             // When animating, renders the animation's 'start' point
@@ -1183,7 +1188,7 @@ def
     /* SIZE & POSITION */
     setPosition: function(position){
         for(var side in position){
-            if(def.hasOwn(pvc.Sides.namesSet, side)){
+            if(def.hasOwn(pvc_Sides.namesSet, side)){
                 var s = position[side]; 
                 if(s === null) {
                     delete this.position[side];
@@ -1199,9 +1204,9 @@ def
     
     createAnchoredSize: function(anchorLength, size){
         if (this.isAnchorTopOrBottom()) {
-            return new pvc.Size(size.width, Math.min(size.height, anchorLength));
+            return new pvc_Size(size.width, Math.min(size.height, anchorLength));
         } 
-        return new pvc.Size(Math.min(size.width, anchorLength), size.height);
+        return new pvc_Size(Math.min(size.width, anchorLength), size.height);
     },
     
     /* EXTENSION */
@@ -1906,7 +1911,7 @@ def
     }
 });
 
-def.scope(function(){
+def.scope(function() {
     // Create Anchor methods
     
     var BasePanel = pvc.BasePanel;
@@ -1919,7 +1924,7 @@ def.scope(function(){
         anchorOrthoLength: 'orthogonalLength'
     };
     
-    def.eachOwn(anchorDicts, function(d, am){
+    def.eachOwn(anchorDicts, function(d, am) {
         var dict = BasePanel[d];
         methods[am] = function(a) { return dict[a || this.anchor]; };
     });

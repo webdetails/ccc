@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_Size:true, pvc_PercentValue:true, pvc_ValueLabelVar:true */
 
 /*
  * Pie chart panel. Generates a pie chart. 
@@ -36,6 +41,7 @@
  *     }
  * }
  */
+
 def
 .type('pvc.PiePanel', pvc.PlotPanel)
 .init(function(chart, parent, plot, options){
@@ -84,17 +90,17 @@ def
         var clientWidth  = clientSize.width;
         var clientRadius = Math.min(clientWidth, clientSize.height) / 2;
         if(!clientRadius){
-            return new pvc.Size(0,0);
+            return new pvc_Size(0,0);
         }
         
         var center = pv.vector(clientSize.width / 2, clientSize.height / 2);
         
         function resolvePercentRadius(radius){
-            return def.between(pvc.PercentValue.resolve(radius, clientRadius), 0, clientRadius);
+            return def.between(pvc_PercentValue.resolve(radius, clientRadius), 0, clientRadius);
         }
         
         function resolvePercentWidth(width){
-            return def.between(pvc.PercentValue.resolve(width, clientWidth), 0, clientWidth);
+            return def.between(pvc_PercentValue.resolve(width, clientWidth), 0, clientWidth);
         }
         
         // ---------------------
@@ -169,7 +175,7 @@ def
         
         var normalPieRadius = maxPieRadius - effectOffsetRadius;
         if(normalPieRadius < 0){
-            return new pvc.Size(0,0);
+            return new pvc_Size(0,0);
         }
         
         // ---------------------
@@ -240,7 +246,7 @@ def
             
             .lock('outerRadius', function(){ return chart.animate(0, normalRadius); })
             
-            .localProperty('innerRadiusEx', pvc.PercentValue.parse)
+            .localProperty('innerRadiusEx', pvc_PercentValue.parse)
             
             // In case the inner radius is specified, we better animate it as well
             .intercept('innerRadius', function(scene){
@@ -248,7 +254,7 @@ def
                 if(innerRadius == null){
                     var innerRadiusPct = this.pvMark.innerRadiusEx();
                     if(innerRadiusPct != null){
-                        innerRadius = pvc.PercentValue.resolve(
+                        innerRadius = pvc_PercentValue.resolve(
                                     innerRadiusPct, 
                                     this.pvMark.outerRadius()) || 0;
                     } else {
@@ -461,11 +467,11 @@ def
             // Adds to parent scene...
             this.base(rootScene, {source: categData});
             
-            this.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData);
+            this.vars.category = pvc_ValueLabelVar.fromComplex(categData);
 
             sumAbs += Math.abs(value);
             
-            this.vars.value = new pvc.visual.ValueLabelVar(
+            this.vars.value = new pvc_ValueLabelVar(
                             value,
                             formatValue(value, categData));
             
@@ -493,7 +499,7 @@ def
                         .range(0, 2 * Math.PI)
                         .by1(Math.abs);
     
-    this.vars.sumAbs = new pvc.visual.ValueLabelVar(sumAbs, formatValue(sumAbs));
+    this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
     
     this.childNodes.forEach(function(categScene){
         completeBuildCategScene.call(categScene);
@@ -524,7 +530,7 @@ def
         // Create percent sub-var of the value var
         var percent = Math.abs(valueVar.value) / sumAbs;
         
-        valueVar.percent = new pvc.visual.ValueLabelVar(
+        valueVar.percent = new pvc_ValueLabelVar(
                 percent,
                 percentValueFormat(percent));
         

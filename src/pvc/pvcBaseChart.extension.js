@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pv_Mark:true */
+
 pvc.BaseChart
 .add({
     _processExtensionPoints: function() {
@@ -59,7 +65,7 @@ pvc.BaseChart
                 var constOnly  = def.get(keyArgs, 'constOnly', false); 
                 var wrap       = mark.wrap;
                 var keyArgs2   = {tag: pvc.extensionTag};
-                var isRealMark = mark instanceof pv.Mark;
+                var isRealMark = mark instanceof pv_Mark;
                 
                 component.forEach(function(v, m){
                     // Not everything that is passed to 'mark' argument

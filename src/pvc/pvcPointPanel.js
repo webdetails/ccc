@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pv_Mark:true, pvc_ValueLabelVar:true */
+
 /*
  * Point panel.
  * Class that draws all line/dot/area combinations.
@@ -60,7 +66,7 @@ def
                                 .lineWidth(1.5, pvc.extensionTag) // act as if it were a user extension
                                 .shapeSize(12,  pvc.extensionTag); // idem
                     } else {
-                        keyArgs.markerPvProto = new pv.Mark();
+                        keyArgs.markerPvProto = new pv_Mark();
                     }
                     
                     keyArgs.markerShape = markerShape;
@@ -509,7 +515,7 @@ def
         .each(function(seriesData1/*, seriesIndex*/){
             var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1 || data});
 
-            seriesScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(seriesData1);
+            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(seriesData1);
             
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
@@ -526,7 +532,7 @@ def
                 
                 serCatScene.dataIndex = categIndex;
                 
-                serCatScene.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData);
+                serCatScene.vars.category = pvc_ValueLabelVar.fromComplex(categData);
                 
                 // -------------
 
@@ -754,7 +760,7 @@ def
             interScene.dataIndex = toScene.dataIndex;
             interScene.vars.category = toScene.vars.category;
             
-            var interValueVar = new pvc.visual.ValueLabelVar(
+            var interValueVar = new pvc_ValueLabelVar(
                                     interValue,
                                     valueDim.format(interValue),
                                     interValue);

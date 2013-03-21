@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pv_Mark:true */
 
 /**
  * Initializes a default legend bullet renderer.
@@ -42,7 +47,7 @@ def
         var sceneColorProp = function(scene) { return scene.color; };
         
         if(drawRule) {
-            var rulePvBaseProto = new pv.Mark()
+            var rulePvBaseProto = new pv_Mark()
                 .left (0)
                 .top  (function() { return this.parent.height() / 2; })
                 .width(function() { return this.parent.width();      })
@@ -65,7 +70,7 @@ def
         }
         
         if(this.drawMarker){
-            var markerPvBaseProto = new pv.Mark()
+            var markerPvBaseProto = new pv_Mark()
                 // Center the marker in the panel
                 .left(function() { return this.parent.width () / 2; })
                 .top (function() { return this.parent.height() / 2; })

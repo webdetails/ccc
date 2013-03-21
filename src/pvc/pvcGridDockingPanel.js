@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_Sides:true, pvc_Size:true */
 
 def
 .type('pvc.GridDockingPanel', pvc.BasePanel)
@@ -48,8 +53,8 @@ def
         var useLog = pvc.debug >= 5;
         
         // Objects we can mutate
-        var margins  = new pvc.Sides(0);
-        var paddings = new pvc.Sides(0);
+        var margins  = new pvc_Sides(0);
+        var paddings = new pvc_Sides(0);
         var remSize = def.copyOwn(layoutInfo.clientSize);
         var aolMap = pvc.BasePanel.orthogonalLength;
         var aoMap  = pvc.BasePanel.relativeAnchor;
@@ -70,7 +75,7 @@ def
         var NormalPaddingsChanged = 2;
         var OverflowPaddingsChanged = 4;
 
-        var emptyNewPaddings = new pvc.Sides(); // used below in place of null requestPaddings
+        var emptyNewPaddings = new pvc_Sides(); // used below in place of null requestPaddings
         var isDisasterRecovery = false;
 
         if(useLog){ me._group("CCC GRID LAYOUT clientSize = " + pvc.stringify(remSize)); }
@@ -125,9 +130,9 @@ def
                 }
             }
 
-            layoutInfo.gridMargins  = new pvc.Sides(margins );
-            layoutInfo.gridPaddings = new pvc.Sides(paddings);
-            layoutInfo.gridSize     = new pvc.Size(remSize  );
+            layoutInfo.gridMargins  = new pvc_Sides(margins );
+            layoutInfo.gridPaddings = new pvc_Sides(paddings);
+            layoutInfo.gridSize     = new pvc_Size(remSize  );
 
             // All available client space is consumed.
             // As such, there's no need to return anything.
@@ -270,7 +275,7 @@ def
                     var childPaddings = child.paddings.resolve(childKeyArgs.referenceSize);
                     
                     // After the op. it's not a pvc.Side anymore, just an object with same named properties.
-                    paddings = pvc.Sides.resolvedMax(paddings, childPaddings);
+                    paddings = pvc_Sides.resolvedMax(paddings, childPaddings);
                 } else {
                     /*jshint expr:true */
                     def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
@@ -289,7 +294,7 @@ def
 
                 childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
 
-                child.layout(new pvc.Size(remSize), childKeyArgs);
+                child.layout(new pvc_Size(remSize), childKeyArgs);
 
                 if(child.isVisible){
 
@@ -316,7 +321,7 @@ def
             childKeyArgs.paddings  = filterAnchorPaddings(a, paddings);
             childKeyArgs.canChange = canChange;
             
-            child.layout(new pvc.Size(remSize), childKeyArgs);
+            child.layout(new pvc_Size(remSize), childKeyArgs);
             
             if(child.isVisible){
                 paddingsChanged |= checkAnchorPaddingsChanged(a, paddings, child, canChange);
@@ -337,7 +342,7 @@ def
                 var length  = remSize[al];
                 var olength = child[aol];
                 
-                var childSize2 = new pvc.Size(def.set({}, al, length, aol, olength));
+                var childSize2 = new pvc_Size(def.set({}, al, length, aol, olength));
                 
                 childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
                 childKeyArgs.canChange = canChange;
@@ -409,7 +414,7 @@ def
         }
         
         function filterAnchorPaddings(a, paddings){
-            var filtered = new pvc.Sides();
+            var filtered = new pvc_Sides();
             
             getAnchorPaddingsNames(a).forEach(function(side){
                 filtered.set(side, paddings[side]);
@@ -455,7 +460,7 @@ def
                 });
 
                 if(changed){
-                    var paddingKey = pvc.Sides
+                    var paddingKey = pvc_Sides
                                         .names
                                         .map(function(side){ return (paddings[side] || 0).toFixed(0); })
                                         .join('|');
@@ -525,10 +530,10 @@ def
         function getAnchorPaddingsNames(a){
             switch(a){
                 case 'left':
-                case 'right':  return pvc.Sides.vnames;
+                case 'right':  return pvc_Sides.vnames;
                 case 'top':
-                case 'bottom': return pvc.Sides.hnames;
-                case 'fill':   return pvc.Sides.names;
+                case 'bottom': return pvc_Sides.hnames;
+                case 'fill':   return pvc_Sides.names;
             }
         }
     }

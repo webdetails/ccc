@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_Sides:true */
 
 def
 .type('pvc.CartesianAbstractPanel', pvc.PlotPanel)
@@ -81,7 +86,7 @@ def
             var clientSize = layoutInfo.clientSize;
             var pads       = layoutInfo.paddings;
 
-            pvc.Sides.names.forEach(function(side){
+            pvc_Sides.names.forEach(function(side){
                 var len_a = pvc.BasePanel.orthogonalLength[side];
 
                 var clientLen  = clientSize[len_a];

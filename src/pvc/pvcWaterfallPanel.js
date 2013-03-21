@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pv_Mark:true, pvc_ValueLabelVar:true */
 
 /**
  * Waterfall chart panel.
@@ -67,7 +72,7 @@ def
                 var keyArgs = {
                         drawRule:      true,
                         drawMarker:    false,
-                        rulePvProto:   new pv.Mark()
+                        rulePvProto:   new pv_Mark()
                     };
                 
                 this.extend(keyArgs.rulePvProto, 'line', {constOnly: true});
@@ -235,13 +240,13 @@ def
             
             var categVar = 
                 categScene.vars.category =
-                pvc.visual.ValueLabelVar.fromComplex(categData1);
+                pvc_ValueLabelVar.fromComplex(categData1);
             
             categVar.group = categData1;
             
             var value = ruleInfo.offset;
             
-            categScene.vars.value = new pvc.visual.ValueLabelVar(
+            categScene.vars.value = new pvc_ValueLabelVar(
                                 value,
                                 this.chart._valueDim.format(value));
             
@@ -280,7 +285,7 @@ def
 
                     var categVar = 
                         categScene.vars.category =
-                        pvc.visual.ValueLabelVar.fromComplex(catData);
+                        pvc_ValueLabelVar.fromComplex(catData);
                     
                     categVar.group = catData;
                     categVar.level = level;

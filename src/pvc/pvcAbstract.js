@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 def
 .type('pvc.Abstract')
 .init(function(){
@@ -15,8 +19,8 @@ def
             
             ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd'].forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
-                
-                pvc._installLog(this, '_' + ps[0],  ps[1], logId);
+                /*global pvc_installLog:true */
+                pvc_installLog(this, '_' + ps[0],  ps[1], logId);
             }, this);
         }
     },

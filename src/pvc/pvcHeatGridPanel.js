@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_ValueLabelVar:true */
 
 /*
  * HeatGrid chart panel. Generates a heatGrid chart. Specific options are:
@@ -388,7 +393,7 @@ def
             /* Create series scene */
             var serScene = new pvc.visual.Scene(rootScene, {source: serData1});
 
-            serScene.vars.series = pvc.visual.ValueLabelVar.fromComplex(serData1);
+            serScene.vars.series = pvc_ValueLabelVar.fromComplex(serData1);
 
             categDatas.forEach(function(catData1){
                 createSeriesCategoryScene.call(me, serScene, catData1, serData1);
@@ -400,7 +405,7 @@ def
 
             var serCatScene = new pvc.visual.Scene(serScene, {source: group});
 
-            serCatScene.vars.category = pvc.visual.ValueLabelVar.fromComplex(catData1);
+            serCatScene.vars.category = pvc_ValueLabelVar.fromComplex(catData1);
 
             colorVarHelper.onNewScene(serCatScene, /* isLeaf */true);
             sizeVarHelper .onNewScene(serCatScene, /* isLeaf */true);

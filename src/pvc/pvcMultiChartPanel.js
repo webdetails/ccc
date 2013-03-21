@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_Sides:true, pvc_PercentValue:true */
 
 def
 .type('pvc.MultiChartPanel', pvc.BasePanel)
@@ -349,14 +354,14 @@ def
         var initialClientWidth  = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
         var initialClientHeight = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
         
-        var smallWidth  = pvc.PercentValue.parse(options.smallWidth);
+        var smallWidth  = pvc_PercentValue.parse(options.smallWidth);
         if(smallWidth != null){
-            smallWidth = pvc.PercentValue.resolve(smallWidth, initialClientWidth);
+            smallWidth = pvc_PercentValue.resolve(smallWidth, initialClientWidth);
         }
         
-        var smallHeight = pvc.PercentValue.parse(options.smallHeight);
+        var smallHeight = pvc_PercentValue.parse(options.smallHeight);
         if(smallHeight != null){
-            smallHeight = pvc.PercentValue.resolve(smallHeight, initialClientHeight);
+            smallHeight = pvc_PercentValue.resolve(smallHeight, initialClientHeight);
         }
         
         var ar = +options.smallAspectRatio; // + is to number
@@ -486,12 +491,12 @@ def
         
         var smallMargins = options.smallMargins;
         if(smallMargins == null){
-            smallMargins = new pvc.Sides(new pvc.PercentValue(0.02));
+            smallMargins = new pvc_Sides(new pvc_PercentValue(0.02));
         } else {
-            smallMargins = new pvc.Sides(smallMargins);
+            smallMargins = new pvc_Sides(smallMargins);
         }
         
-        var smallPaddings = new pvc.Sides(options.smallPaddings);
+        var smallPaddings = new pvc_Sides(options.smallPaddings);
         
         chart.children.forEach(function(childChart){
             childChart._setSmallLayout({

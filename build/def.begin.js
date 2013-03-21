@@ -1,1 +1,1 @@
-var def = (function(){
+var def = (function() {

@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_Size:true */
+
 def
 .type('pvc.TitlePanelAbstract', pvc.BasePanel)
 .init(function(chart, parent, options) {
@@ -14,7 +20,7 @@ def
         if (size != null) {
             // Single size (a number or a string with only one number)
             // should be interpreted as meaning the orthogonal length.
-            options.size = new pvc.Size().setSize(size, {
+            options.size = new pvc_Size().setSize(size, {
                 singleProp: this.anchorOrthoLength(anchor)
             });
         }
@@ -26,7 +32,7 @@ def
         if (sizeMax != null) {
             // Single size (a number or a string with only one number)
             // should be interpreted as meaning the orthogonal length.
-            options.sizeMax = new pvc.Size().setSize(sizeMax, {
+            options.sizeMax = new pvc_Size().setSize(sizeMax, {
                 singleProp: this.anchorOrthoLength(anchor)
             });
         }
@@ -62,7 +68,7 @@ def
      */
     _calcLayout: function(layoutInfo) {
             
-        var requestSize = new pvc.Size();
+        var requestSize = new pvc_Size();
 
         // TODO: take textAngle, textMargin and textBaseline into account
 

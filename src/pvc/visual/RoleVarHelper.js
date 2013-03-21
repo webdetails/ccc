@@ -1,3 +1,9 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_ValueLabelVar:true */
+
 def
 .type('pvc.visual.RoleVarHelper')
 .init(function(rootScene, role, keyArgs){
@@ -28,8 +34,8 @@ def
     if(!g) {
         // Unbound role
         // Place a null variable in the root scene
-        var roleVar = rootScene.vars[roleVarName] = new pvc.visual.ValueLabelVar(null, "");
-        if(hasPercentSubVar) { roleVar.percent = new pvc.visual.ValueLabelVar(null, ""); }
+        var roleVar = rootScene.vars[roleVarName] = new pvc_ValueLabelVar(null, "");
+        if(hasPercentSubVar) { roleVar.percent = new pvc_ValueLabelVar(null, ""); }
     }
     
     this.roleVarName = roleVarName;
@@ -81,7 +87,7 @@ def
                 var firstDatum = scene.datum;
                 if(firstDatum && !firstDatum.isNull){
                     var view = this.grouping.view(firstDatum);
-                    roleVar = pvc.visual.ValueLabelVar.fromComplex(view);
+                    roleVar = pvc_ValueLabelVar.fromComplex(view);
                 }
             } else {
                 var valuePct, valueDim;
@@ -89,7 +95,7 @@ def
                 var singleDatum = group ? group.singleDatum() : scene.datum;
                 if(singleDatum){
                     if(!singleDatum.isNull){
-                        roleVar = pvc.visual.ValueLabelVar.fromAtom(singleDatum.atoms[rootContDim.name]);
+                        roleVar = pvc_ValueLabelVar.fromAtom(singleDatum.atoms[rootContDim.name]);
                         if(roleVar.value != null && this.percentFormatter){
                             if(group){
                                 valueDim = group.dimensions(rootContDim.name);
@@ -104,7 +110,7 @@ def
                     var value = valueDim.sum({visible: true, zeroIfNone: false});
                     if(value != null){
                         var label = rootContDim.format(value);
-                        roleVar = new pvc.visual.ValueLabelVar(value, label, value);
+                        roleVar = new pvc_ValueLabelVar(value, label, value);
                         if(this.percentFormatter){
                             valuePct = valueDim.percentOverParent({visible: true});
                         }
@@ -113,9 +119,9 @@ def
                 
                 if(roleVar && this.percentFormatter){
                     if(roleVar.value == null){
-                        roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
+                        roleVar.percent = new pvc_ValueLabelVar(null, "");
                     } else {
-                        roleVar.percent = new pvc.visual.ValueLabelVar(
+                        roleVar.percent = new pvc_ValueLabelVar(
                                           valuePct,
                                           this.percentFormatter.call(null, valuePct));
                     }
@@ -123,9 +129,9 @@ def
             }
             
             if(!roleVar){
-                roleVar = new pvc.visual.ValueLabelVar(null, "");
+                roleVar = new pvc_ValueLabelVar(null, "");
                 if(this.percentFormatter){
-                    roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
+                    roleVar.percent = new pvc_ValueLabelVar(null, "");
                 }
             }
             

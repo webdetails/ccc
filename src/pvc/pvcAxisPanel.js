@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_ValueLabelVar:true */
 
 /**
  * AxisPanel panel.
@@ -1028,7 +1033,7 @@ def
         var isV1Compat = this.compatVersion() <= 1;
          
         // Need this for code below not to throw when drawing the root
-        rootScene.vars.tick = new pvc.visual.ValueLabelVar('', "");
+        rootScene.vars.tick = new pvc_ValueLabelVar('', "");
         
         recursive(rootScene);
         

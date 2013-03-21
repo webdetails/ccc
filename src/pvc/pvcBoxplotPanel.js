@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*global pvc_ValueLabelVar:true */
 
 def
 .type('pvc.BoxplotPanel', pvc.CategoricalAbstractPanel)
@@ -225,8 +230,8 @@ def
             
             // Series distinction is ignored
             // If the role is bound by the user, its data will not be visible 
-            vars.series = new pvc.visual.ValueLabelVar(null, "");
-            var catVar  = vars.category = new pvc.visual.ValueLabelVar(categData.value, categData.label);
+            vars.series = new pvc_ValueLabelVar(null, "");
+            var catVar  = vars.category = new pvc_ValueLabelVar(categData.value, categData.label);
             
             def.set(catVar,
                 'group',    categData,
@@ -243,10 +248,10 @@ def
                     var dim = categData.dimensions(dimName),
                         value = dim.sum(visibleKeyArgs);
                     
-                    svar = new pvc.visual.ValueLabelVar(value, dim.format(value));
+                    svar = new pvc_ValueLabelVar(value, dim.format(value));
                     svar.position = orthoScale(value);
                 } else {
-                    svar = new pvc.visual.ValueLabelVar(null, "");
+                    svar = new pvc_ValueLabelVar(null, "");
                     svar.position = null;
                 }
 

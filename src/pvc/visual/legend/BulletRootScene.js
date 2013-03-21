@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
  * Initializes a legend bullet root scene.
@@ -11,6 +14,7 @@
  * @param {object} [keyArgs] Keyword arguments.
  * See {@link pvc.visual.Scene} for supported keyword arguments.
  */
+/*global pvc_Sides:true, pvc_Size:true */
 def
 .type('pvc.visual.legend.BulletRootScene', pvc.visual.Scene)
 .init(function(parent, keyArgs){
@@ -18,21 +22,21 @@ def
     this.base(parent, keyArgs);
     
     var markerDiam = def.get(keyArgs, 'markerSize', 15);
-    var itemPadding    = new pvc.Sides(def.get(keyArgs, 'itemPadding', 5))
-                        .resolve(markerDiam, markerDiam);
+    var itemPadding = new pvc_Sides(def.get(keyArgs, 'itemPadding', 5))
+                          .resolve(markerDiam, markerDiam);
     def.set(this.vars,
-        'horizontal', def.get(keyArgs, 'horizontal', false),
-        'font',       def.get(keyArgs, 'font'),
-        'markerSize', markerDiam, // Diameter of bullet/marker zone
-        'textMargin', def.get(keyArgs, 'textMargin', 6),  // Space between marker and text 
-        'itemPadding',    itemPadding);
+        'horizontal',  def.get(keyArgs, 'horizontal', false),
+        'font',        def.get(keyArgs, 'font'),
+        'markerSize',  markerDiam, // Diameter of bullet/marker zone
+        'textMargin',  def.get(keyArgs, 'textMargin', 6),  // Space between marker and text 
+        'itemPadding', itemPadding);
 })
 .add(/** @lends pvc.visual.legend.BulletRootScene# */{
     layout: function(layoutInfo){
         // Any size available?
         var clientSize = layoutInfo.clientSize;
         if(!(clientSize.width > 0 && clientSize.height > 0)){
-            return new pvc.Size(0,0);
+            return new pvc_Size(0,0);
         }
         
         var desiredClientSize = layoutInfo.desiredClientSize;
@@ -62,7 +66,7 @@ def
         // If there's no pending row to commit, there are no rows...
         // No items or just items with no text -> hide
         if(!row){
-            return new pvc.Size(0,0);
+            return new pvc_Size(0,0);
         }
         
         commitRow(/* isLast */ true);

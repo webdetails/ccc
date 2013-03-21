@@ -1,4 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*global pvc_colorIsGray:true */
 def
 .type('pvc.visual.DotSizeColor', pvc.visual.Dot)
 .init(function(panel, parentMark, keyArgs) {
@@ -167,7 +171,7 @@ def
                 }
             }
 
-            if(isSelected && pvc.color.isGray(color)) {
+            if(isSelected && pvc_colorIsGray(color)) {
                 if(type === 'stroke') { color = color.darker(3); }
 
                 return color.darker(2);
