@@ -663,6 +663,14 @@ var def = /** @lends def */{
             }
         
             return args.join(sep);
+        },
+        
+        padRight: function(s, n, p) {
+            if(!s) { s = ''; }
+            if(p == null) { p = ' '; }
+            
+            var k = ~~((n - s.length) / p.length);
+            return k > 0 ? (s + new Array(k + 1).join(p)) : s;
         }
     },
     

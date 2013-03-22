@@ -47,6 +47,8 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         
         this._processMetadata();
         
+        if(pvc.debug >= 3) { this.logVItem(); }
+        
         this.base();
     },
     
@@ -152,13 +154,57 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 "  [" + j + "] " + 
                 "'" + col.colName + "' (" +
                 "type: "      + col.colType + ", " + 
-                "inspected: " + (colTypes[j] ? 'continuous' : 'discrete') +
+                "inspected: " + (colTypes[j] ? 'number' : 'string') +
                  (col.colLabel ? (", label: '" + col.colLabel + "'") : "")  + 
                 ")");
         });
         
-        //out.push(pvc.logSeparator);
+        out.push("");
+        
         pvc.log(out.join('\n'));
+    },
+    
+    logVItem: def.method({isAbstract: true}),
+    
+    _logVItem: function(translType, kindList, kindScope) {
+        pvc.log(translType + " data source translator");
+                
+        var out = ["VIRTUAL ITEM ARRAY", pvc.logSeparator];
+        
+        // Headers
+        out.push("Index | Kind | Type", 
+                 "------+------+--------");
+        var index = 0;
+        kindList.forEach(function(kind) {
+            for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
+                var type = this._columnTypes[index];
+                out.push(
+                    " " + index + "    | " + 
+                          kind  + "    | " +
+                    (type ? 'number' : 'string'));
+                index++;
+            }
+        }, this);
+        
+        out.push("");
+        
+        /*
+        var kinds   = [];
+        var indexes = [];
+        kindList
+            .forEach(function(kind) {
+                for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
+                    indexes.push(indexes.length);
+                    kinds  .push(kind);
+                }
+            });
+        
+        out.push("\tcount:   " + pvc.stringify(kindScope));
+        out.push("\tkind:    [" + kinds  .join(" ") + "]");
+        out.push("\tindexes: [" + indexes.join(" ") + "]");
+        */
+        
+        pvc.log(out.join("\n"));
     },
     
     /**

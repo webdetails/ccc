@@ -454,16 +454,10 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             'category': this._itemLogicalGroup.series,
             'value':    this.C + this.R
         };
-        
-        // ----------------
-
-        if(pvc.debug >= 3){
-            pvc.log("Crosstab translator " + pvc.stringify({
-                R: this.R,
-                C: this.C,
-                M: this.M
-            }));
-        }
+    },
+    
+    logVItem: function() {
+        this._logVItem("Crosstab", ['R', 'C', 'M'], {R: this.R, C: this.C, M: this.M});
     },
 
     _getCategoriesCount: function(){

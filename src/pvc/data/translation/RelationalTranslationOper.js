@@ -227,21 +227,10 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         };
         
         this._itemPerm = itemPerm;
-        
-        if(pvc.debug >= 3){
-            var out = [
-                "RELATIONAL TRANSLATOR MAPPING",
-                pvc.logSeparator,
-                "[" + 
-                    colGroupSpecs.map(function(groupSpec){
-                        return def.array.create(groupSpec.count, groupSpec.name).join('');
-                    })
-                    .join(' ') +
-                "]"
-            ];
-
-            pvc.log(out.join("\n"));
-        }
+    },
+    
+    logVItem: function() {
+        this._logVItem("Relational", ['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
     },
     
     /** 

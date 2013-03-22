@@ -418,13 +418,20 @@ pvc.BaseChart
     },
 
     _logVisualRoles: function() {
-        var out = ["VISUAL ROLES MAP SUMMARY", pvc.logSeparator, "  VisualRole         <-- Dimensions", pvc.logSeparator];
+        var names  = def.ownKeys(this.visualRoles);
+        var maxLen = Math.max(10, def.query(names).select(function(s){ return s.length; }).max());
+        var header = def.string.padRight("VisualRole", maxLen) + " < Dimension(s)";
+        var out = [
+            "VISUAL ROLES MAP SUMMARY", 
+            pvc.logSeparator, 
+            header, 
+            def.string.padRight('', maxLen + 1, '-') + '+--------------'
+        ];
         
         def.eachOwn(this.visualRoles, function(role, name) {
-            out.push("  " + name + def.array.create(18 - name.length, " ").join("") +
-                    (role.grouping ? (" <-- " + role.grouping) : ''));
+            out.push(def.string.padRight(name, maxLen) + ' | ' + (role.grouping || '-'));
         });
-
+        out.push("");
         this._log(out.join("\n"));
     },
     
