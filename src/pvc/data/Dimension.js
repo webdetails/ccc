@@ -709,14 +709,18 @@ def.type('pvc.data.Dimension')
         var type = this.type;
         
         // Is google table style cell {v: , f: } ?
-        if(typeof sourceValue === 'object' && ('v' in sourceValue)){
+        if(typeof sourceValue === 'object' && ('v' in sourceValue)) {
             // Get info and get rid of the cell
             label = sourceValue.f;
             sourceValue = sourceValue.v;
+            if(sourceValue == null || sourceValue === '') {
+                // Null
+                return this._nullAtom || dim_createNullAtom.call(this);
+            }
         }
         
         // - CONVERT - 
-        if(!isVirtual){
+        if(!isVirtual) {
             var converter = type._converter;
             value = converter ? converter(sourceValue) : sourceValue;
             if(value == null || value === '') {
@@ -732,7 +736,7 @@ def.type('pvc.data.Dimension')
         var cast = type.cast;
         if(cast) {
             value = cast(value);
-            if(value == null || value === ''){
+            if(value == null || value === '') {
                 // Null after all (normally a cast failure)
                 return this._nullAtom || dim_createNullAtom.call(this);
             }
