@@ -3,17 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 def.type('pvc.visual.Line', pvc.visual.Sign)
-.init(function(panel, protoMark, keyArgs){
+.init(function(panel, protoMark, keyArgs) {
     
     var pvMark = protoMark.add(pv.Line);
     
     this.base(panel, pvMark, keyArgs);
     
     this.lock('segmented', 'smart') // fixed
-        .lock('antialias', true)
-        ;
+        .lock('antialias', true);
 
-    if(!def.get(keyArgs, 'freePosition', false)){
+    if(!def.get(keyArgs, 'freePosition', false)) {
         var basePosProp  = panel.isOrientationVertical() ? "left" : "bottom",
             orthoPosProp = panel.anchorOrtho(basePosProp);
 
@@ -24,8 +23,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
 
     this/* Colors & Line */
         ._bindProperty('strokeStyle', 'strokeColor', 'color')
-        ._bindProperty('lineWidth',   'strokeWidth')
-        ;
+        ._bindProperty('lineWidth',   'strokeWidth');
 
     // Segmented lines use fill color instead of stroke...so this doesn't work.
     //this.pvMark.lineCap('square');
@@ -34,9 +32,8 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
 .property('strokeWidth')
 .constructor
 .add({
-    _addInteractive: function(keyArgs){
-        keyArgs = def.setDefaults(keyArgs, 
-                        'noTooltip',  true);
+    _addInteractive: function(keyArgs) {
+        keyArgs = def.setDefaults(keyArgs, 'noTooltip',  true);
         
         this.base(keyArgs);
     },
@@ -54,39 +51,27 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
      *  |
      *  o-----> x
      */
-    y: function(){ return 0; },
-    x: function(){ return 0; },
+    y: def.fun.constant(0),
+    x: def.fun.constant(0),
 
     /* STROKE WIDTH */
-    defaultStrokeWidth: function(){
-        return 1.5;
-    },
+    defaultStrokeWidth: def.fun.constant(1.5),
 
-    interactiveStrokeWidth: function(strokeWidth){
-        if(this.mayShowActive()){ // debug ?
-            /* - Ensure a normal width of at least 1,
-             * - Double and a half that
-             */
-            return Math.max(1, strokeWidth) * 2.5;
-        }
-
-        return strokeWidth;
+    interactiveStrokeWidth: function(strokeWidth) {
+        return this.mayShowActive() ? 
+               Math.max(1, strokeWidth) * 2.5 :
+               strokeWidth;
     },
     
     /* STROKE COLOR */
     /**
      * @override
      */
-    interactiveColor: function(color, type){
-        var scene = this.scene;
+    interactiveColor: function(color, type) {
         if(this.mayShowNotAmongSelected()) {
-            if(this.mayShowActive()){
-                return pv.Color.names.darkgray.darker().darker();
-            }
-            
-            if(type === 'stroke'){
-                return this.dimColor(color, type);
-            }
+            return this.mayShowActive() ? 
+                   pv.Color.names.darkgray.darker().darker() : 
+                   this.dimColor(color, type);
         }
 
         return this.base(color, type);

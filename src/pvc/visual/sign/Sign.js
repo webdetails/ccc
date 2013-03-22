@@ -348,11 +348,15 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
 
     mayShowNotAmongSelected: function() {
-        return this.showsSelection() && this.scene.anySelected() && !this.scene.isSelected();
+        return this.mayShowAnySelected() && !this.scene.isSelected();
     },
 
     mayShowSelected: function() {
         return this.showsSelection() && this.scene.isSelected();
+    },
+    
+    mayShowAnySelected: function() {
+        return this.showsSelection() && this.scene.anySelected();
     },
     
     /* TOOLTIP */
