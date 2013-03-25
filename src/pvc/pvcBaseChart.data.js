@@ -99,7 +99,10 @@ pvc.BaseChart
         var translOptions   = this._createTranslationOptions(dataPartDimName);
         var translation     = this._createTranslation(translOptions);
         
-        if(pvc.debug >= 3) { translation.logSource(); }
+        if(pvc.debug >= 3) {
+            this._log(translation.logSource());
+            this._log(translation.logTranslatorType());
+        }
         
         if(!data) {
             // Now the translation can also configure the type
@@ -110,6 +113,10 @@ pvc.BaseChart
             if(dataPartDimName && !complexTypeProj.isReadOrCalc(dataPartDimName)) {
                 this._addDefaultDataPartCalculation(dataPartDimName);
             }
+        }
+        
+        if(pvc.debug >= 3) {
+            this._log(translation.logVItem());
         }
         
         // ----------
@@ -237,6 +244,9 @@ pvc.BaseChart
         var dataCategoriesCount = options.dataCategoriesCount;
         if(dataCategoriesCount === undefined) { dataCategoriesCount = dataOptions.categoriesCount; }
         
+        var dataIgnoreMetadataLabels = options.dataIgnoreMetadataLabels;
+        if(dataIgnoreMetadataLabels === undefined) { dataIgnoreMetadataLabels = dataOptions.ignoreMetadataLabels; }
+        
         var plot2 = options.plot2;
         
         var valueFormat = options.valueFormat,
@@ -260,7 +270,7 @@ pvc.BaseChart
             dimensionGroups:   options.dimensionGroups,
             dimensions:        options.dimensions,
             readers:           options.readers,
-
+            
             measuresIndexes:   options.measuresIndexes, // relational multi-valued
 
             multiChartIndexes: options.multiChartIndexes,
@@ -278,7 +288,8 @@ pvc.BaseChart
             isCategoryTimeSeries: options.timeSeries,
 
             timeSeriesFormat:     options.timeSeriesFormat,
-            valueNumberFormatter: valueFormatter
+            valueNumberFormatter: valueFormatter,
+            ignoreMetadataLabels:  dataIgnoreMetadataLabels
         };
     },
     

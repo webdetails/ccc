@@ -41,20 +41,20 @@
 def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
 .add(/** @lends pvc.data.MatrixTranslationOper# */{
     
-    _initType: function(){
+    _initType: function() {
         this.J = this.metadata.length;
         this.I = this.source.length;
         
         this._processMetadata();
-        
-        if(pvc.debug >= 3) { this.logVItem(); }
         
         this.base();
     },
     
     _knownContinuousColTypes: {'numeric': 1, 'number': 1, 'integer': 1},
     
-    _processMetadata: function(){
+    _processMetadata: function() {
+        // Confirm metadata column types.
+        
         // Get the indexes of columns which are 
         // not stated as continuous (numeric..)
         // In these, 
@@ -66,17 +66,16 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
             def
             .query(this.metadata)
             // Fix indexes of colDefs
-            .select(function(colDef, colIndex){
+            .select(function(colDef, colIndex) {
                 // Ensure colIndex is trustable
                 colDef.colIndex = colIndex;
                 return colDef; 
              })
-            .where(function(colDef){
+            .where(function(colDef) {
                 var colType = colDef.colType;
-                return !colType ||
-                       knownContinColTypes[colType.toLowerCase()] !== 1;
+                return !colType || knownContinColTypes[colType.toLowerCase()] !== 1;
             })
-            .select(function(colDef){ return colDef.colIndex; })
+            .select(function(colDef) { return colDef.colIndex; })
             .array();
         
         // 1 - continuous (number, date)
@@ -91,13 +90,13 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         // Number of columns remaining to confirm data type
         var J = columns.length;
         
-        for(var i = 0 ; i < I && J > 0 ; i++){
+        for(var i = 0 ; i < I && J > 0 ; i++) {
             var row = source[i];
             var m = 0;
-            while(m < J){
+            while(m < J) {
                 var j = columns[m];
                 var value = row[j];
-                if(value != null){
+                if(value != null) {
                     columnTypes[j] = this._getSourceValueType(value);
                     
                     columns.splice(m, 1);
@@ -110,23 +109,29 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         
         this._columnTypes = columnTypes;
     },
-
+    
+    _buildItemInfoFromMetadata: function(index) {
+        var meta = this.metadata[index];
+        return {
+            type:  this._columnTypes[index],
+            name:  meta.colName,
+            label: meta.colLabel
+        };
+    },
+    
     // 1 - continuous (number, date)
     // 0 - discrete   (anything else)
     /** @static */
-    _getSourceValueType: function(value){
-        switch(typeof value){
+    _getSourceValueType: function(value) {
+        switch(typeof value) {
             case 'number': return 1;
-            case 'object':
-                if(value instanceof Date){
-                    return 1;
-                }
+            case 'object': if(value instanceof Date) { return 1; }
         }
         
         return 0; // discrete
     },
     
-    logSource: function(){
+    logSource: function() {
         var out = [
             "DATA SOURCE SUMMARY",
             pvc.logSeparator,
@@ -136,20 +141,18 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         def
         .query(this.source)
         .take(10)
-        .each(function(row, index){
+        .each(function(row, index) {
             out.push("  [" + index + "] " + pvc.stringify(row));
         });
         
-        if(this.I > 10){
-            out.push('  ...');
-        }
+        if(this.I > 10) { out.push('  ...'); }
         
         out.push("COLS (" + this.J + ")");
         
         var colTypes = this._columnTypes;
         this
         .metadata
-        .forEach(function(col, j){
+        .forEach(function(col, j) {
             out.push(
                 "  [" + j + "] " + 
                 "'" + col.colName + "' (" +
@@ -161,50 +164,54 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         
         out.push("");
         
-        pvc.log(out.join('\n'));
+        return out.join('\n');
     },
     
-    logVItem: def.method({isAbstract: true}),
-    
-    _logVItem: function(translType, kindList, kindScope) {
-        pvc.log(translType + " data source translator");
-                
+    _logVItem: function(kindList, kindScope) {
         var out = ["VIRTUAL ITEM ARRAY", pvc.logSeparator];
+        var maxName  = 4;// length of column header
+        var maxLabel = 5;// idem
+        var maxDim   = 9;// idem
+        this._itemInfos.forEach(function(info, index) {
+            maxName  = Math.max(maxName , (info.name  ||'').length);
+            maxLabel = Math.max(maxLabel, (info.label ||'').length);
+            var dimName = this._userIndexesToSingleDim[index];
+            if(dimName) { maxDim = Math.max(maxDim, dimName.length); }
+        }, this);
+        
+        // TODO: would be better off with a generic ASCII table layout code...
         
         // Headers
-        out.push("Index | Kind | Type", 
-                 "------+------+--------");
+        out.push("Index | Kind | Type   | " + 
+                 def.string.padRight("Name",  maxName ) + " | " + 
+                 def.string.padRight("Label", maxLabel) + " > " + 
+                 "Dimension",
+                 
+                 "------+------+--------+-" + 
+                 def.string.padRight("", maxName,  "-") + "-+-" +
+                 def.string.padRight("", maxLabel, "-") + "-+-" +
+                 def.string.padRight("", maxDim,   "-") + "-");
+
         var index = 0;
         kindList.forEach(function(kind) {
             for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
-                var type = this._columnTypes[index];
+                var info = this._itemInfos[index];
+                var dimName = this._userIndexesToSingleDim[index];
+                if(dimName === undefined) { dimName = ''; }
                 out.push(
                     " " + index + "    | " + 
                           kind  + "    | " +
-                    (type ? 'number' : 'string'));
+                          (info.type ? 'number' : 'string') + " | " +
+                          def.string.padRight(info.name  || '', maxName ) + " | " +
+                          def.string.padRight(info.label || '', maxLabel) + " | " +
+                          dimName);
                 index++;
             }
         }, this);
         
         out.push("");
         
-        /*
-        var kinds   = [];
-        var indexes = [];
-        kindList
-            .forEach(function(kind) {
-                for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
-                    indexes.push(indexes.length);
-                    kinds  .push(kind);
-                }
-            });
-        
-        out.push("\tcount:   " + pvc.stringify(kindScope));
-        out.push("\tkind:    [" + kinds  .join(" ") + "]");
-        out.push("\tindexes: [" + indexes.join(" ") + "]");
-        */
-        
-        pvc.log(out.join("\n"));
+        return out.join("\n");
     },
     
     /**
@@ -223,30 +230,28 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
      * @private
      * @protected
      */
-    _createPlot2SeriesKeySet: function(plot2SeriesIndexes, seriesKeys){
+    _createPlot2SeriesKeySet: function(plot2SeriesIndexes, seriesKeys) {
         var plot2SeriesKeySet = null,
             seriesCount = seriesKeys.length;
-        def.query(plot2SeriesIndexes).each(function(indexText){
+        def.query(plot2SeriesIndexes).each(function(indexText) {
             // Validate
             var seriesIndex = +indexText; // + -> convert to number
-            if(isNaN(seriesIndex)){
+            if(isNaN(seriesIndex)) {
                 throw def.error.argumentInvalid('plot2SeriesIndexes', "Element is not a number '{0}'.", [indexText]);
             }
 
-            if(seriesIndex < 0){
-                if(seriesIndex <= -seriesCount){
+            if(seriesIndex < 0) {
+                if(seriesIndex <= -seriesCount) {
                     throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
                 }
 
                 seriesIndex = seriesCount + seriesIndex;
-            } else if(seriesIndex >= seriesCount){
+            } else if(seriesIndex >= seriesCount) {
                 throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
             }
 
             // Set
-            if(!plot2SeriesKeySet){
-                plot2SeriesKeySet = {};
-            }
+            if(!plot2SeriesKeySet) { plot2SeriesKeySet = {}; }
             
             plot2SeriesKeySet[seriesKeys[seriesIndex]] = true;
         });
@@ -276,20 +281,17 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 plot2SeriesKeySet = calcAxis2SeriesKeySet();
                 dataPartDimension = me.data.dimensions(dataPartDimName);
 
-                if(pvc.debug >=3 && plot2SeriesKeySet){
-                    pvc.log("Second axis series values: " +
-                        pvc.stringify(def.keys(plot2SeriesKeySet)));
+                if(pvc.debug >=3 && plot2SeriesKeySet) {
+                    pvc.log("Second axis series values: " + pvc.stringify(def.keys(plot2SeriesKeySet)));
                 }
             }
 
             var partAtom;
             seriesReader(item, outAtomsSeries);
             var series = outAtomsSeries.series;
-            if(series != null && series.v != null){
-                series = series.v;
-            }
+            if(series != null && series.v != null) { series = series.v; }
             
-            if(def.hasOwn(plot2SeriesKeySet, series)){
+            if(def.hasOwn(plot2SeriesKeySet, series)) {
                 partAtom = part2Atom || (part2Atom = dataPartDimension.intern("1"));
             } else {
                 partAtom = part1Atom || (part1Atom = dataPartDimension.intern("0"));

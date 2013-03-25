@@ -647,7 +647,8 @@ def
 //        dataSeparator
 //        dataMeasuresInColumns
 //        dataCategoriesCount
-        
+//        dataIgnoreMetadataLabels: false
+
 //        timeSeries:        undefined,
 //        timeSeriesFormat:  undefined,
 

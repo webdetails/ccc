@@ -54,15 +54,15 @@ var constant_02 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
-        "colName": "Value"
+        "colName": "Sales"
     }]
 };
 
@@ -86,15 +86,15 @@ var constant_03 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
-        "colName": "Value"
+        "colName": "Sales"
     }]
 };
 
@@ -214,15 +214,15 @@ var relational_01a = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
-        "colName": "Value"
+        "colName": "Quantity"
     }]
 };
 
@@ -264,15 +264,15 @@ var relational_01b = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
-        "colName": "Value"
+        "colName": "Quantity"
     }]
 };
 
@@ -317,15 +317,15 @@ var relational_01_neg = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
-        "colName": "Value"
+        "colName": "Profit"
     }]
 };
 
@@ -365,15 +365,15 @@ var relational_01_all_neg = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
-        "colName": "Value"
+        "colName": "Profit"
     }]
 };
 
@@ -394,15 +394,15 @@ var relational_012 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
-        "colName": "Value"
+        "colName": "Quantity"
     }]
 };
 
@@ -424,11 +424,11 @@ var relational_013 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
@@ -463,7 +463,7 @@ var relational_02 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "Numeric",
@@ -493,7 +493,7 @@ var relational_03 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "Numeric",
@@ -515,7 +515,7 @@ var relational_03_b = {
         "metadata": [{
             "colIndex": 0,
             "colType": "String",
-            "colName": "Categories"
+            "colName": "City"
         }, {
             "colIndex": 1,
             "colType": "Numeric",
@@ -551,15 +551,15 @@ var relational_04 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "City"
     }, {
         "colIndex": 1,
         "colType": "String",
-        "colName": "Categories"
+        "colName": "Brand"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
-        "colName": "Value"
+        "colName": "Sales"
     }]
 };
 
@@ -581,7 +581,7 @@ var relational_05 = {
     "metadata": [{
         "colIndex": 0,
         "colType": "String",
-        "colName": "Series"
+        "colName": "Date"
     }, {
         "colIndex": 2,
         "colType": "Numeric",
@@ -1076,7 +1076,7 @@ var testTreemapThreeLevel = {
     }, {
         "colIndex": 3,
         "colType": "Numeric",
-        "colName": "Product A"
+        "colName": "Sales"
     }],
     "resultset": [
         ["USA",    'Kansas',     null,         100],
@@ -1119,7 +1119,7 @@ var testTreemapAllNull = {
     }, {
         "colIndex": 3,
         "colType": "Numeric",
-        "colName": "Product A"
+        "colName": "Sales"
     }],
     "resultset": [
         ["USA",    'Kansas',     null,         null],

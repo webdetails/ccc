@@ -51,6 +51,15 @@ def.type('pvc.data.TranslationOper')
     logSource: def.method({isAbstract: true}),
 
     /**
+     * Logs the structure of the virtual item array.
+     */
+    logVItem: def.method({isAbstract: true}),
+    
+    _translType: "Unknown",
+    
+    logTranslatorType: function() { return this._translType + " data source translator"; },
+    
+    /**
      * Obtains the number of fields of the virtual item.
      * <p>
      * The default implementation returns the length of the metadata.
@@ -63,22 +72,6 @@ def.type('pvc.data.TranslationOper')
     
     freeVirtualItemSize: function() { return this.virtualItemSize() - this._userUsedIndexesCount; },
 
-    collectFreeDiscreteAndConstinuousIndexes: function(freeDisIndexes, freeMeaIndexes) {
-        var itemTypes = this._itemTypes;
-        
-        def
-        .range(0, itemTypes.length)
-        .each(function(j) {
-            if(!this._userUsedIndexes[j]) {
-                if(itemTypes[j] === 1) {
-                    if(freeMeaIndexes) { freeMeaIndexes.push(j); }
-                } else {
-                    if(freeDisIndexes) { freeDisIndexes.push(j); }
-                }
-            }
-        }, this);
-    },
-    
     /**
      * Defines a dimension reader.
      *
@@ -91,30 +84,26 @@ def.type('pvc.data.TranslationOper')
         dimReaderSpec || def.fail.argumentRequired('readerSpec');
 
         var dimNames;
-        if(typeof dimReaderSpec === 'string'){
-            dimNames = dimReaderSpec;
-        } else {
-            dimNames = dimReaderSpec.names;
-        }
+        if(def.string.is(dimReaderSpec)) { dimNames = dimReaderSpec;       }
+        else                             { dimNames = dimReaderSpec.names; }
         
-        if(typeof dimNames === 'string'){
-            dimNames = dimNames.split(/\s*\,\s*/);
-        } else {
-            dimNames = def.array.as(dimNames);
-        }
+        if(def.string.is(dimNames)) { dimNames = dimNames.split(/\s*\,\s*/); } 
+        else                        { dimNames = def.array.as(dimNames);     }
         
         // Consumed/Reserved virtual item indexes
         var indexes = def.array.as(dimReaderSpec.indexes);
-        if(indexes) {
-            indexes.forEach(this._userUseIndex, this);
-        }
+        if(indexes) { indexes.forEach(this._userUseIndex, this); }
         
         var hasDims = !!(dimNames && dimNames.length);
         var reader = dimReaderSpec.reader;
         if(!reader) {
-            if(hasDims){
-                return this._userCreateReaders(dimNames, indexes); // -> indexes, possibly expanded
-            } // else a reader that only serves to exclude indexes
+            // -> indexes, possibly expanded
+            if(hasDims) { return this._userCreateReaders(dimNames, indexes); }
+            // else a reader that only serves to exclude indexes
+            if(indexes) {
+                // Mark index as being excluded
+                indexes.forEach(function(index) { this._userIndexesToSingleDim[index] = null; }, this);
+            }
         } else {
             hasDims || def.fail.argumentRequired('reader.names', "Required argument when a reader function is specified.");
             
@@ -138,14 +127,12 @@ def.type('pvc.data.TranslationOper')
      * @type undefined
      * @virtual
      */
-    configureType: function(){
-        this._configureTypeCore();
-    },
+    configureType: function() { this._configureTypeCore(); },
     
     /** @abstract */
     _configureTypeCore: def.method({isAbstract: true}),
     
-    _initType: function(){
+    _initType: function() {
         this._userDimsReaders = [];
         this._userDimsReadersByDim = {};
         
@@ -154,28 +141,30 @@ def.type('pvc.data.TranslationOper')
         this._userUsedIndexes = {};
         this._userUsedIndexesCount = 0;
         
+        // Indexes reserved for a single dimension or (null)
+        this._userIndexesToSingleDim = [];
+        
         // -------------
         
         var userDimReaders = this.options.readers;
-        if(userDimReaders) {
-            userDimReaders.forEach(this.defReader, this);
-        }
+        if(userDimReaders) { userDimReaders.forEach(this.defReader, this); }
 
         var multiChartIndexes = pvc.parseDistinctIndexArray(this.options.multiChartIndexes);
         if(multiChartIndexes) {
-            this._multiChartIndexes = this.defReader({names: 'multiChart', indexes: multiChartIndexes });
+            this._multiChartIndexes = 
+                this.defReader({names: 'multiChart', indexes: multiChartIndexes });
         }
     },
 
-    _userUseIndex: function(index){
+    _userUseIndex: function(index) {
         index = +index; // to number
 
-        /*jshint expr:true */
-        (index >= 0) || def.fail.argumentInvalid('index', "Invalid reader index: '{0}'.", [index]);
+        if(index < 0) { throw def.error.argumentInvalid('index', "Invalid reader index: '{0}'.", [index]); }
 
-        !def.hasOwn(this._userUsedIndexes, index) ||
-            def.fail.argumentInvalid('index', "Virtual item index '{0}' is already assigned.", [index]);
-
+        if(def.hasOwn(this._userUsedIndexes, index)) {
+            throw def.error.argumentInvalid('index', "Virtual item index '{0}' is already assigned.", [index]);
+        }
+        
         this._userUsedIndexes[index] = true;
         this._userUsedIndexesCount++;
         this._userItem[index] = true;
@@ -183,14 +172,12 @@ def.type('pvc.data.TranslationOper')
         return index;
     },
 
-    _userCreateReaders: function(dimNames, indexes){
-        if(!indexes){
+    _userCreateReaders: function(dimNames, indexes) {
+        if(!indexes) {
             indexes = [];
         } else {
             // Convert indexes to number
-            indexes.forEach(function(index, j){
-                indexes[j] = +index;
-            });
+            indexes.forEach(function(index, j) { indexes[j] = +index; });
         }
 
         // Distribute indexes to names, from left to right
@@ -204,22 +191,24 @@ def.type('pvc.data.TranslationOper')
         if(N > I) {
             // Pad indexes
             var nextIndex = I > 0 ? (indexes[I - 1] + 1) : 0;
-            do{
+            do {
                 nextIndex = this._nextAvailableItemIndex(nextIndex);
                 indexes[I] = nextIndex;
                 this._userUseIndex(nextIndex);
-
                 I++;
-            }while(N > I);
+            } while(N > I);
         }
 
         // If they match, it's one-one name <-- index
         var L = (I === N) ? N : (N - 1);
-
+        var index;
         // The first N-1 names get the first N-1 indexes
         for(var n = 0 ; n < L ; n++) {
             dimName = dimNames[n];
-            this._userRead(this._propGet(dimName, indexes[n]), dimName);
+            index = indexes[n];
+            this._userIndexesToSingleDim[index] = dimName;
+            
+            this._userRead(this._propGet(dimName, index), dimName);
         }
 
         // The last name is the dimension group name that gets all remaining indexes
@@ -232,21 +221,21 @@ def.type('pvc.data.TranslationOper')
 
             for(var i = L ; i < I ; i++, level++) {
                 dimName = pvc.buildIndexedId(groupName, level);
-                this._userRead(this._propGet(dimName, indexes[i]), dimName);
+                index = indexes[i];
+                this._userIndexesToSingleDim[index] = dimName;
+                this._userRead(this._propGet(dimName, index), dimName);
             }
         }
         
         return indexes;
     },
 
-    _userRead: function(reader, dimNames){
+    _userRead: function(reader, dimNames) {
         /*jshint expr:true */
         def.fun.is(reader) || def.fail.argumentInvalid('reader', "Reader must be a function.");
         
-        if(def.array.is(dimNames)){
-            dimNames.forEach(function(name){
-                this._readDim(name, reader);
-            }, this);
+        if(def.array.is(dimNames)) {
+            dimNames.forEach(function(name) { this._readDim(name, reader); }, this);
         } else {
             this._readDim(dimNames, reader);
         }
@@ -254,8 +243,23 @@ def.type('pvc.data.TranslationOper')
         this._userDimsReaders.push(reader);
     },
 
-    _readDim: function(name, reader){
-        this.complexTypeProj.readDim(name);
+    _readDim: function(name, reader) {
+        var info, spec;
+        var index = this._userIndexesToSingleDim.indexOf(name);
+        if(index >= 0) {
+            info = this._itemInfos[index];
+            if(info) {
+                spec = {}; 
+                if(!this.options.ignoreMetadataLabels) {
+                    spec.label = info.label || info.name; 
+                }
+                
+                if(info.type != null) {
+                    spec.valueType = info.type === 0 ? /*Any*/null : Number;
+                }
+            }
+        }
+        this.complexTypeProj.readDim(name, spec);
         this._userDimsReadersByDim[name] = reader;
     },
     
@@ -276,7 +280,7 @@ def.type('pvc.data.TranslationOper')
      * 
      * @returns {def.Query} An enumerable of {@link pvc.data.Atom[]}
      */
-    execute: function(data){
+    execute: function(data) {
         this.data = data;
         
         return this._executeCore();
@@ -298,13 +302,11 @@ def.type('pvc.data.TranslationOper')
      * @returns {def.Query} An enumerable of {@link pvc.data.Atom[]}
      * @virtual
      */
-    _executeCore: function(){
+    _executeCore: function() {
         var dimsReaders = this._getDimensionsReaders();
         
         return def.query(this._getItems())
-                  .select(function(item){
-                      return this._readItem(item, dimsReaders);
-                  }, this);
+                  .select(function(item) { return this._readItem(item, dimsReaders); }, this);
     },
     
     /**
@@ -317,9 +319,7 @@ def.type('pvc.data.TranslationOper')
      * 
      * @type def.Query
      */
-    _getItems: function(){
-        return this.source;
-    },
+    _getItems: function() { return this.source; },
     
     /**
      * Obtains the dimensions readers array (virtual).
@@ -341,9 +341,7 @@ def.type('pvc.data.TranslationOper')
      * @type function[]
      * @virtual
      */
-    _getDimensionsReaders: function(){
-        return this._userDimsReaders;
-    },
+    _getDimensionsReaders: function() { return this._userDimsReaders; },
     
     /**
      * Applies all the specified dimensions reader functions to an item 
@@ -365,6 +363,8 @@ def.type('pvc.data.TranslationOper')
                 this._logItemCount++;
             } else {
                 pvc.log('...');
+                
+                // Stop logging vitems
                 logItem = this._logItems = false;
             }
         }
@@ -380,10 +380,11 @@ def.type('pvc.data.TranslationOper')
         }
         
         if(logItem) {
+            // Log read names/values
             var atoms = {};
-            for(var dimName in valuesByDimName){
+            for(var dimName in valuesByDimName) {
                 var atom = valuesByDimName[dimName];
-                if(def.object.is(atom)){
+                if(def.object.is(atom)) {
                     atom = ('v' in atom) ? atom.v : ('value' in atom) ? atom.value : '...';
                 }
                 
@@ -409,51 +410,17 @@ def.type('pvc.data.TranslationOper')
      */
     _propGet: function(dimName, prop) {
         
-        function propGet(item, atoms){
-            atoms[dimName] = item[prop];
-        }
+        function propGet(item, atoms) { atoms[dimName] = item[prop]; }
         
         return propGet;
     },
-    
-    /**
-     * Given a dimension name and a raw value of that dimension,
-     * creates a dimensions reader that returns the corresponding atom,
-     * regardless of the source item supplied to it (protected).
-     * 
-     * @param {string} dimName The name of the dimension on which to intern <i>constRawValue</i>.
-     * @param {string} constRawValue The raw value.
-     * 
-     * @param {object} [keyArgs] Keyword arguments. 
-     * @param {boolean} [keyArgs.ensureDim=true] Creates a dimension with the specified name, with default options, if one does not yet exist.
-     * 
-     * @type function
-     */
-    _constGet: function(dimName, constRawValue, keyArgs) {
-        var me = this,
-            constAtom;
-        
-        function constGet(item, atoms) {
-            atoms[dimName] = 
-                    constAtom || 
-                    (constAtom = me.data.dimensions(dimName).intern(constRawValue));
-        }
 
-        return constGet;
-    },
-    
     // TODO: docs
-    _nextAvailableItemIndex: function(index, L){
-        if(index == null) {
-            index = 0;
-        }
-        if(L == null){
-            L = Infinity;
-        }
+    _nextAvailableItemIndex: function(index, L) {
+        if(index == null) { index = 0;    }
+        if(L     == null) { L = Infinity; }
 
-        while(index < L && def.hasOwn(this._userItem, index)) {
-            index++;
-        }
+        while(index < L && def.hasOwn(this._userItem, index)) { index++; }
         
         return index < L ? index : -1;
     },
@@ -478,5 +445,14 @@ def.type('pvc.data.TranslationOper')
                 return dims.length ? dims : null;
             }
         }
+    },
+    
+    collectFreeDiscreteAndConstinuousIndexes: function(freeDisIndexes, freeMeaIndexes) {
+        this._itemInfos.forEach(function(info, index) {
+            if(!this._userUsedIndexes[index]) {
+                var indexes = info.type === 1 ? freeMeaIndexes : freeDisIndexes;
+                if(indexes) { indexes.push(index); }
+            }
+        }, this);
     }
 });

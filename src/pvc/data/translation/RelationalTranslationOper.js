@@ -68,13 +68,16 @@
  * It is also possible to specify a single index instead of an array.
  * </p>
  */
-def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
+def
+.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
 .add(/** @lends pvc.data.RelationalTranslationOper# */{
     M: 0, // number of measures
     C: 0, // number of categories
     S: 0, // number of series
     
-    _processMetadata: function(){
+    _translType: "Relational",
+    
+    _processMetadata: function() {
         
         this.base();
     
@@ -84,23 +87,21 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         
         // Split between series and categories
         var C = this.options.categoriesCount;
-        if(C != null && (!isFinite(C) || C < 0)){
-            C = 0;
-        }
+        if(C != null && (!isFinite(C) || C < 0)) { C = 0; }
 
         var S;
         
         // Assuming duplicate valuesColIndexes is not valid
         // (v1 did not make this assumption)
         var valuesColIndexes, M;
-        if(this.options.isMultiValued){
+        if(this.options.isMultiValued) {
             valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, J - 1);
             M = valuesColIndexes ? valuesColIndexes.length : 0;
         }
         
         var D; // discrete count = D = S + C
-        if(M == null){
-            if(J > 0 && J <= 3 && (C == null || C === 1) && S == null){
+        if(M == null) {
+            if(J > 0 && J <= 3 && (C == null || C === 1) && S == null) {
                 // V1 Stability requirement
                 // Measure columns with all values = null,
                 // would be detected as type string,
@@ -111,22 +112,21 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 S = J >= 3 ? 1 : 0;
                 D = C + S;
                 
-            } else if(C != null &&  C >= J){
+            } else if(C != null &&  C >= J) {
                 D = J;
                 C = J;
                 S = 0;
                 M = 0;
             } else {
-                // finite C wins over M, and by last S
+                // specified C wins over M, and by last S
                 var Mmax = C != null ? (J - C) : Infinity; // >= 1
                 
                 // colIndex has already been fixed on _processMetadata
+                // 0 = discrete
                 valuesColIndexes = def
                     .query(metadata)
-                    .where(function(colDef, index){
-                        return this._columnTypes[index] !== 0; // 0 = discrete
-                    }, this)
-                    .select(function(colDef){ return colDef.colIndex; })
+                    .where(function(colDef, index) { return this._columnTypes[index] !== 0; }, this)
+                    .select(function(colDef) { return colDef.colIndex; })
                     .take(Mmax)
                     .array()
                     ;
@@ -135,20 +135,21 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
-        if(D == null){
+        if(D == null) {
             // M wins over C
             D = J - M;
-            if(D === 0){
+            if(D === 0) {
                 S = C = 0;
-            } else if(C != null){
-                if(C > D){
+            } else if(C != null) {
+                if(C > D) {
                     C = D;
                     S = 0;
                 } else {
                     S = D - C;
                 }
             } else {
-                // Distribute between categories and series
+                // "Distribute" between categories and series
+                // Categories have precedence.
                 S = D > 1 ? 1 : 0;
                 C = D - S;
             }
@@ -156,30 +157,20 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         
         var seriesInRows = this.options.seriesInRows;
         var colGroupSpecs = [];
-        if(D){
-            if(S && !seriesInRows){
-                colGroupSpecs.push({name: 'S', count: S});
-            }
-            
-            if(C){
-                colGroupSpecs.push({name: 'C', count: C});
-            }
-            
-            if(S && seriesInRows){
-                colGroupSpecs.push({name: 'S', count: S});
-            }
+        if(D) {
+            if(S && !seriesInRows) { colGroupSpecs.push({name: 'S', count: S}); }
+            if(C                 ) { colGroupSpecs.push({name: 'C', count: C}); }
+            if(S &&  seriesInRows) { colGroupSpecs.push({name: 'S', count: S}); }
         }
         
-        if(M){
-            colGroupSpecs.push({name: 'M', count: M});
-        }
+        if(M) { colGroupSpecs.push({name: 'M', count: M}); }
         
         var availableInputIndexes = def.range(0, J).array();
         
         // If valuesColIndexes != null, these are reserved for values
-        if(valuesColIndexes){
+        if(valuesColIndexes) {
             // Remove these indexes from available indexes
-            valuesColIndexes.forEach(function(inputIndex){
+            valuesColIndexes.forEach(function(inputIndex) {
                 availableInputIndexes.splice(inputIndex, 1);
             });
         }
@@ -187,19 +178,16 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         // Set the fields with actual number of columns of each group
         // Assign the input indexes of each group (Layout)
         var specsByName = {};
-        colGroupSpecs.forEach(function(groupSpec){
+        colGroupSpecs.forEach(function(groupSpec) {
             var count = groupSpec.count;
             var name  = groupSpec.name;
             
             // Index group by name
             specsByName[name] = groupSpec;
             
-            if(valuesColIndexes && name === 'M'){
-                groupSpec.indexes = valuesColIndexes;
-            } else {
-                groupSpec.indexes = availableInputIndexes.splice(0, count);
-            }
-        }, this);
+            if(valuesColIndexes && name === 'M') { groupSpec.indexes = valuesColIndexes; } 
+            else                                 { groupSpec.indexes = availableInputIndexes.splice(0, count); }
+        });
         
         this.M = M;
         this.S = S;
@@ -209,28 +197,21 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         // that transforms the input into the virtual item "normal form":
         // S* C* M*
         var itemPerm = [];
-        ['S', 'C', 'M'].forEach(function(name){
+        ['S', 'C', 'M'].forEach(function(name) {
             var groupSpec = specsByName[name];
-            if(groupSpec){
-                def.array.append(itemPerm, groupSpec.indexes);
-            }
+            if(groupSpec) { def.array.append(itemPerm, groupSpec.indexes); }
         });
         
-        var colTypes = this._columnTypes;
-        this._itemTypes = itemPerm.map(function(index){ return colTypes[index]; });
+        this._itemInfos = itemPerm.map(this._buildItemInfoFromMetadata, this);
         
         // The start indexes of each column group
-        this._itemCrossGroupIndex = {
-            S: 0,
-            C: this.S, 
-            M: this.S + this.C
-        };
+        this._itemCrossGroupIndex = {S: 0, C: this.S, M: this.S + this.C};
         
         this._itemPerm = itemPerm;
     },
     
     logVItem: function() {
-        this._logVItem("Relational", ['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
+        return this._logVItem(['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
     },
     
     /** 
@@ -265,26 +246,16 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
-        if(this.S > 0){
-            add('series', 'S', 0, this.S);
-        }
-        
-        if(this.C > 0){
-            add('category', 'C', 0, this.C);
-        }
-        
-        if(this.M > 0) {
-            add('value', 'M', 0, this.M);
-        }
+        if(this.S > 0) { add('series',   'S', 0, this.S); }
+        if(this.C > 0) { add('category', 'C', 0, this.C); }
+        if(this.M > 0) { add('value',    'M', 0, this.M); }
 
-        if(dimsReaders) {
-            dimsReaders.forEach(this.defReader, this);
-        }
+        if(dimsReaders) { dimsReaders.forEach(this.defReader, this); }
         
         // ----
         // The null test is required because plot2SeriesIndexes can be a number, a string...
         var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
-        if(plot2SeriesIndexes != null){
+        if(plot2SeriesIndexes != null) {
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 var dataPartDimName = this.options.dataPartDimName;
@@ -294,15 +265,13 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
     },
     
     // Permutes the input rows
-    _executeCore: function(){
+    _executeCore: function() {
         var dimsReaders = this._getDimensionsReaders();
         var permIndexes = this._itemPerm;
         
         return def.query(this._getItems())
-                  .select(function(item){
-                      
+                  .select(function(item) {
                       item = pv.permute(item, permIndexes);
-                      
                       return this._readItem(item, dimsReaders);
                   }, this);
     }
