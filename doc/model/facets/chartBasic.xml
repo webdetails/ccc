@@ -206,7 +206,9 @@
                 
                 For example, if a visual role, 
                 has the dimensions "Territory" and "ProductType",
-                a compound value could be shown as "EMEA ~ Classic Cars". 
+                a compound value could be shown as "EMEA ~ Classic Cars".
+                
+                See also <c:link to="#dataSeparator" />. 
             </c:documentation>
         </c:property>
         
@@ -319,8 +321,7 @@
                 a column exists for each 
                 series value and measure dimension.
                 
-                This option is only meaningful when <c:link to="#isMultiValued"/>
-                is <tt>true</tt>.
+                This option is only meaningful when <c:link to="#isMultiValued"/> is <tt>true</tt>.
                  
                 When <tt>true</tt>, 
                 more than one measure can be represented in the cross-tab format,
@@ -328,6 +329,17 @@
                 
                 When <tt>false</tt>, 
                 the cross-tab format can represent only one measure.
+            </c:documentation>
+        </c:property>
+        
+        <c:property name="dataSeparator" type="string" default="'~'" category="Chart > Data Source">
+            <c:documentation>
+                The separator character 
+                with which multiple values in a cross-tab format data source were joined, 
+                and also, 
+                used to build composite keys for multiple level groupings.
+                
+                See also <c:link to="#groupedLabelSep" />.
             </c:documentation>
         </c:property>
         

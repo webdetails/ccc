@@ -38,12 +38,11 @@ pvc.logSeparator = "------------------------------------------";
 
 var pvc_arraySlice = Array.prototype.slice;
 
-pvc.setDebug = function(level){
+pvc.setDebug = function(level) {
     level = +level;
     pvc.debug = isNaN(level) ? 0 : level;
     
     pvc_syncLog();
-    
     pvc_syncTipsyLog();
     
     return pvc.debug;
@@ -52,38 +51,35 @@ pvc.setDebug = function(level){
 /*global console:true*/
 
 function pvc_syncLog() {
-    if (pvc.debug && typeof console !== "undefined"){
+    if (pvc.debug && typeof console !== "undefined") {
         ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd']
-        .forEach(function(ps){
+        .forEach(function(ps) {
             ps = ps instanceof Array ? ps : [ps, ps];
             
             pvc_installLog(pvc, ps[0],  ps[1],  '[pvChart]');
         });
     } else {
-        if(pvc.debug > 1){
-            pvc.debug = 1;
-        }
+        if(pvc.debug > 1) { pvc.debug = 1; }
         
         ['log', 'info', 'trace', 'warn', 'group', 'groupEnd']
-        .forEach(function(p){
-            pvc[p] = def.noop;
-        });
+        .forEach(function(p) { pvc[p] = def.noop; });
 
         var _errorPrefix = "[pvChart ERROR]: ";
         
-        pvc.error = function(e){
-            if(e && typeof e === 'object' && e.message){
-                e = e.message;
-            }
+        pvc.error = function(e) {
+            if(e && typeof e === 'object' && e.message) { e = e.message; }
 
             e = '' + def.nullyTo(e, '');
-            if(e.indexOf(_errorPrefix) < 0){
-                e = _errorPrefix + e;
-            }
+            if(e.indexOf(_errorPrefix) < 0) { e = _errorPrefix + e; }
             
             throw new Error(e);
         };
     }
+    
+    pvc.logError = pvc.error;
+    
+    // Redirect protovis error handler
+    pv.error = pvc.error;
 }
 
 function pvc_syncTipsyLog() {
@@ -97,7 +93,7 @@ function pvc_syncTipsyLog() {
 function pvc_installLog(o, pto, pfrom, prompt) {
     if(!pfrom) { pfrom = pto; }
     var c = console;
-    var m  = c[pfrom] || c.log;
+    var m = c[pfrom] || c.log;
     var fun;
     if(m) {
         var mask = prompt + ": %s";
@@ -112,21 +108,14 @@ function pvc_installLog(o, pto, pfrom, prompt) {
         } else {
             // Calls to fun are like direct calls to m...
             // and capture file and line numbers correctly!
-            fun = m.bind(console, mask);
+            fun = m.bind(c, mask);
         }
     }
     
     o[pto] = fun;
 }
 
-pvc_syncLog();
-
-pvc.logError = pvc.error;
-
-// Redirect protovis error handler
-pv.error = pvc.error;
-
-pvc_syncTipsyLog();
+pvc.setDebug(pvc.debug);
 
 /**
  * Gets or sets the default CCC compatibility mode. 

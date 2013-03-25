@@ -37,6 +37,36 @@
         </c:property>
         
         <!-- Interaction -->
+        <c:property name="interactive" type="boolean" category="Chart > Interaction">
+            <c:documentation>
+                Indicates if a chart interaction is enabled.
+                
+                Chart interaction is any of the following kinds of interaction:
+                animation, 
+                on-hover highlighting, 
+                tooltips, 
+                selection, 
+                clicking and double-clicking.
+                
+                When <tt>false</tt>, all kinds of interaction are disabled.
+                The options controlling specific interaction types are ignored:
+                <c:link to="#animate" />,
+                <c:link to="#hoverable" />,
+                <c:link to="pvc.options.Tooltip#enabled" />,
+                <c:link to="#selectable" />,
+                <c:link to="clearSelectionMode" /> and
+                <c:link to="#clickable" />.
+                
+                When <tt>true</tt> all kinds of interaction may be enabled, 
+                that being controlled by its own control option.
+                
+                When printing, with CGG, <c:link to="#interactive" /> is always <tt>false</tt>,
+                independently of the specified value.
+                
+                When not printing, the default value of this option is <tt>true</tt>.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="animate" type="boolean" default="true" category="Chart > Interaction">
             <c:documentation>
                 Indicates if a chart should show an entry animation, 
@@ -48,6 +78,8 @@
                 through its <tt>render</tt> method,
                 it is possible to control whether the entry animation 
                 is performed or not.
+                
+                This option is only taken into account when <c:link to="#interactive" /> is <tt>true</tt>.
             </c:documentation>
         </c:property>
         
@@ -56,6 +88,8 @@
                 Indicates if the chart's visual elements
                 are automatically highlighted 
                 when the user hovers over them with the mouse.
+                
+                This option is only taken into account when <c:link to="#interactive" /> is <tt>true</tt>.
             </c:documentation>
         </c:property>
         
@@ -65,6 +99,8 @@
                 can be selected by the user, 
                 by clicking on them 
                 or using the rubber-band.
+                
+                This option is only taken into account when <c:link to="#interactive" /> is <tt>true</tt>.
             </c:documentation>
         </c:property>
         
@@ -90,6 +126,13 @@
                     category="Chart > Interaction">
             <c:documentation>
                 Controls if and how the selection can be cleared by the user.
+                
+                This option applies even if <c:link to="#selectable" /> is <tt>false</tt>.
+                This supports scenarios where 
+                a custom selection implementation controls what can get selected,
+                but in which clearing selection is decided by the user, in the default way. 
+                
+                This option is only taken into account when <c:link to="#interactive" /> is <tt>true</tt>.
             </c:documentation>
         </c:property>
         

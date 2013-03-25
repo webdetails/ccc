@@ -143,13 +143,28 @@
             <c:documentation>
                 The extension point of the plot frame of the charts.
                 
-                The plot frame covers the plot panel but stays
+                The plot frame covers the plot panel(s) but stays
                 aligned with and below the axes' rules.
                 
                 The root of a small multiples chart does not have a plot frame.
             </c:documentation>
         </c:property>
-
+        
+        <c:property name="plotBg" type="pvc.options.marks.PanelExtensionPoint">
+            <c:documentation>
+                The extension point of the <i>plot area background</i> of cartesian charts.
+                
+                The plot background is placed below the plot panel(s) 
+                and below the axis grid-lines.
+                
+                This extension point is intended, primarily, to be able to change the 
+                background color below multiple plots, 
+                without hiding the axes grid-lines.  
+                
+                The root of a small multiples chart does not have a <i>plot area background</i>.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
 </c:model>

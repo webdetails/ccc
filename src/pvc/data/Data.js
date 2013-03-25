@@ -128,9 +128,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
             //atoms = null
             atomsBase = {};
             
-            if(keyArgs.labelSep){
-                this.labelSep = keyArgs.labelSep;
-            }
+            if(keyArgs.labelSep) { this.labelSep = keyArgs.labelSep; }
+            if(keyArgs.keySep  ) { this.keySep   = keyArgs.keySep;   }
             
             this.type = keyArgs.type || def.fail.argumentRequired('type');
             

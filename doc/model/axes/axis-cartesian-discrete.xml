@@ -60,8 +60,10 @@
                 or a flattened form, when <tt>false</tt>
                 (applies to discrete axes).
                 
-                Flattened axes, present multi-dimensional roles
-                by joining the multiple values with a separator character.
+                Flattened axes, 
+                present multi-dimensional roles by joining the 
+                multiple values' labels with the separator character: 
+                <c:link to="pvc.options.charts.Chart#groupedLabelSep" />.
             </c:documentation>
         </c:property>
         

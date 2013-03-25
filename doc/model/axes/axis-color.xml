@@ -55,8 +55,7 @@
             When in a <i>small multiples</i> chart, 
             colors are shared among <i>small</i> charts.
             
-            With a few exceptions, 
-            color axes map values of the "color" visual role.
+            Color axes map values of the "color" visual role.
                 
             For more information on options
             that are specific to only certain color axis types,
@@ -220,7 +219,48 @@
             The options documentation class of the discrete color axes facet.
         </c:documentation>
         
-         <c:property name="legendVisible" type="boolean" default="true" category="Discrete > Style">
+        <c:property name="map" type="map(string : pvc.options.varia.ColorString pv.Color)" category="Discrete > Scale">
+            <c:documentation>
+                Allows reserving colors to certain color scale keys.
+                
+                Color scale keys are the values of the color role.
+                By default, the color role is bound to the dimensions of the series role.
+                Color scale keys that are not mapped, 
+                receive colors taken from <c:link to="#colors" />.
+                Colors in <c:link to="#colors" /> that are also present in the color map are ignored.
+                   
+                <c:example>
+                Assuming the color role is bound to the grouping <tt>"territory, country"</tt>,
+                the following map would reserve the colors <i>red</i> and <i>green</i> to 
+                Canada and Portugal, respectively:
+                <pre>
+                    chartOptions.colorMap = {
+                        "NA~Canada":     "red",
+                        "EMEA~Portugal": "green"
+                    };
+                </pre>
+                
+                (assumes default )
+                </c:example> 
+            </c:documentation>
+        </c:property>
+        <!-- 
+        Default value is the <i>protovis</i>
+                <tt>category10</tt> color scheme:
+                <ol style="font-weight:bold">
+                    <li style="color:#1f77b4">value</li> 
+                    <li style="color:#ff7f0e">value</li>
+                    <li style="color:#2ca02c">value</li>
+                    <li style="color:#d62728">value</li>
+                    <li style="color:#9467bd">value</li>
+                    <li style="color:#8c564b">value</li>
+                    <li style="color:#e377c2">value</li>
+                    <li style="color:#7f7f7f">value</li>
+                    <li style="color:#bcbd22">value</li>
+                    <li style="color:#17becf">value</li>
+                </ol>
+              -->   
+        <c:property name="legendVisible" type="boolean" default="true" category="Discrete > Style">
             <c:documentation>
                 Indicates if the legend items of this color axis
                 should be visible

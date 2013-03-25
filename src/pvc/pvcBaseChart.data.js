@@ -150,7 +150,8 @@ pvc.BaseChart
                 this.dataEngine = // V1 property
                 this.data = new pvc.data.Data({
                     type:     complexType,
-                    labelSep: options.groupedLabelSep
+                    labelSep: options.groupedLabelSep,
+                    keySep:   translOptions.separator
                 });
         } // else TODO: assert complexType has not changed...
         
@@ -237,6 +238,7 @@ pvc.BaseChart
         
         var dataSeparator = options.dataSeparator;
         if(dataSeparator === undefined) { dataSeparator = dataOptions.separator; }
+        if(!dataSeparator) { dataSeparator = '~'; }
         
         var dataMeasuresInColumns = options.dataMeasuresInColumns;
         if(dataMeasuresInColumns === undefined) { dataMeasuresInColumns = dataOptions.measuresInColumns; }
