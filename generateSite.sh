@@ -27,8 +27,8 @@ cp -f dist/ccc/* ${SITECHARTSLIB}
 rm -rf ${SITECHARTSLIB}pvc-d2.0.js # uses release version
 rm -rf ${SITECHARTSLIB}protovis-r3.3.js # uses debug version
 
-cp -f src/data/q01-01.js ${SITECHARTSLIB}
-cp -f src/data/bp.js     ${SITECHARTSLIB}
+cp -f examples/data/q01-01.js ${SITECHARTSLIB}
+cp -f examples/data/bp.js     ${SITECHARTSLIB}
 cp -f examples/lib/codemirror/codemirror.*  ${CODEMIRROR}
 cp -f examples/lib/codemirror/javascript.js ${CODEMIRROR}
 

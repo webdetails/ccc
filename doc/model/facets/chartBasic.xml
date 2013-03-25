@@ -331,6 +331,21 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="dataIgnoreMetadataLabels" type="boolean" default="false" category="Chart > Data Source">
+            <c:documentation>
+                Indicates if the data source translation should not use 
+                the column labels provided in the data source's metadata
+                as defaults for the labels of dimensions that are directly bound to those columns.
+                
+                The capability to use the data source's provided metadata labels
+                is most useful in the relation format, i.e., when <c:link to="#crosstabMode" /> is <tt>false</tt>.
+                The crosstab format does not provide metadata information for the series/columns data. 
+                Also, only when both <c:link to="#isMultiValued" /> and 
+                <c:link to="#dataMeasuresInColumns" /> are <tt>true</tt>, 
+                is there label information for the measures metadata.
+            </c:documentation>
+        </c:property>
+        
         <c:property name="measuresIndexes" type="number string list(number string)" category="Chart > Data Source">
             <c:documentation>
                 The indexes of the data source's <i>virtual item</i> columns
