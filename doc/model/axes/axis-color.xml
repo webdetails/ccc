@@ -142,6 +142,24 @@
             </c:documentation>
         </c:property>
         
+        <c:property name="unbound" type="pvc.options.varia.ColorString pv.Color" category="Scale">
+            <c:documentation>
+                The color to use when an optional color role is unbound.
+                
+                When a color role is optional and was not specified, 
+                but color is still required to show visual elements,
+                this property allows specifying the color with which 
+                all visual elements' color attributes will be based on.
+                  
+                The default value is the first color in <c:link to="#colors" />.
+                
+                Contrast this option with 
+                <c:link to="pvc.options.axes.AnyColorAxis#missing" />
+                and 
+                <c:link to="pvc.options.axes.HeatGridColorAxis#missing" />.
+            </c:documentation>
+        </c:property>
+        
     </c:complexType>
     
     <c:complexType name="AnyColorAxis" 
@@ -158,11 +176,6 @@
             for additional information.
         </c:documentation>
         
-        <!-- HACK due to kettle cde job limitation -->
-        <c:property name="" type="">
-        </c:property>
-    
-        
     </c:complexType>
     
     <c:complexType name="DiscreteColorAxis" 
@@ -176,10 +189,6 @@
             See <c:link to="pvc.options.axes.ColorAxis" />
             for additional information.
         </c:documentation>
-
-        <!-- HACK due to kettle cde job limitation -->
-        <c:property name="" type="">
-        </c:property>
 
     </c:complexType>
     
@@ -240,7 +249,7 @@
                     };
                 </pre>
                 
-                (assumes default )
+                Assumes that the default <c:link to="pvc.options.charts.Chart#dataSeparator" /> is used.
                 </c:example> 
             </c:documentation>
         </c:property>

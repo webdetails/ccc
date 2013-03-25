@@ -671,7 +671,7 @@ pvc.parseLegendClickMode =
     pvc.makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');
 
 pvc.parseTooltipAutoContent = 
-    pvc.makeEnumParser('tooltipAutoContent', ['summary', 'value', 'none'], 'summary');
+    pvc.makeEnumParser('tooltipAutoContent', ['summary', 'value'], 'value');
 
 pvc.parseSelectionMode =
     pvc.makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');

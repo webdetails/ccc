@@ -37,6 +37,7 @@
     <c:include the="varia/atoms/contentOverflow.xml" />
     <c:include the="varia/atoms/treemapLayoutMode.xml" />
     <c:include the="varia/atoms/treemapColorMode.xml" />
+    <c:include the="varia/atoms/tooltipAutoContent.xml" />
     
     <!-- FUNCTIONS -->
     <c:include the="varia/functions/colorTransform.xml" />
