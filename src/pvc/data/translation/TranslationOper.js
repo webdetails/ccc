@@ -248,17 +248,16 @@ def.type('pvc.data.TranslationOper')
         var index = this._userIndexesToSingleDim.indexOf(name);
         if(index >= 0) {
             info = this._itemInfos[index];
-            if(info) {
-                spec = {}; 
-                if(!this.options.ignoreMetadataLabels) {
-                    spec.label = info.label || info.name; 
-                }
-                
-                if(info.type != null) {
-                    spec.valueType = info.type === 0 ? /*Any*/null : Number;
-                }
+            if(info && !this.options.ignoreMetadataLabels) {
+                var label = info.label || info.name;
+                if(label) { spec = {label: label}; }
             }
+            // Not using the type information because it conflicts
+            // with defaults specified in other places.
+            // (like with the MetricXYAbstract x role valueType being a Date when timeSeries=true)
+            //if(info.type != null) { spec.valueType = info.type === 0 ? /*Any*/null : Number; }
         }
+        
         this.complexTypeProj.readDim(name, spec);
         this._userDimsReadersByDim[name] = reader;
     },
